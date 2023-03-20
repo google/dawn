@@ -288,6 +288,8 @@ EntryPointMetadata::Override::Type FromTintOverrideType(tint::inspector::Overrid
             return EntryPointMetadata::Override::Type::Boolean;
         case tint::inspector::Override::Type::kFloat32:
             return EntryPointMetadata::Override::Type::Float32;
+        case tint::inspector::Override::Type::kFloat16:
+            return EntryPointMetadata::Override::Type::Float16;
         case tint::inspector::Override::Type::kInt32:
             return EntryPointMetadata::Override::Type::Int32;
         case tint::inspector::Override::Type::kUint32:

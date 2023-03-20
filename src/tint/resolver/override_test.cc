@@ -66,10 +66,12 @@ TEST_F(ResolverOverrideTest, WithoutId) {
 }
 
 TEST_F(ResolverOverrideTest, WithAndWithoutIds) {
+    Enable(builtin::Extension::kF16);
+
     auto* a = Override("a", ty.f32(), Expr(1_f));
-    auto* b = Override("b", ty.f32(), Expr(1_f));
-    auto* c = Override("c", ty.f32(), Expr(1_f), Id(2_u));
-    auto* d = Override("d", ty.f32(), Expr(1_f), Id(4_u));
+    auto* b = Override("b", ty.f16(), Expr(1_h));
+    auto* c = Override("c", ty.i32(), Expr(1_i), Id(2_u));
+    auto* d = Override("d", ty.u32(), Expr(1_u), Id(4_u));
     auto* e = Override("e", ty.f32(), Expr(1_f));
     auto* f = Override("f", ty.f32(), Expr(1_f), Id(1_u));
 
@@ -100,16 +102,6 @@ TEST_F(ResolverOverrideTest, IdTooLarge) {
     EXPECT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(), "12:34 error: @id value must be between 0 and 65535");
-}
-
-TEST_F(ResolverOverrideTest, F16_TemporallyBan) {
-    Enable(builtin::Extension::kF16);
-
-    Override(Source{{12, 34}}, "a", ty.f16(), Expr(1_h), Id(1_u));
-
-    EXPECT_FALSE(r()->Resolve());
-
-    EXPECT_EQ(r()->error(), "12:34 error: 'override' of type f16 is not implemented yet");
 }
 
 TEST_F(ResolverOverrideTest, TransitiveReferences_DirectUse) {

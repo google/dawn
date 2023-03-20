@@ -221,7 +221,7 @@ struct EntryPointMetadata {
 
         // Match tint::inspector::Override::Type
         // Bool is defined as a macro on linux X11 and cannot compile
-        enum class Type { Boolean, Float32, Uint32, Int32 } type;
+        enum class Type { Boolean, Float32, Uint32, Int32, Float16 } type;
 
         // If the constant doesn't not have an initializer in the shader
         // Then it is required for the pipeline stage to have a constant record to initialize a

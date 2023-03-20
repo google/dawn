@@ -505,6 +505,8 @@ std::string OverrideTypeToString(tint::inspector::Override::Type type) {
             return "bool";
         case tint::inspector::Override::Type::kFloat32:
             return "f32";
+        case tint::inspector::Override::Type::kFloat16:
+            return "f16";
         case tint::inspector::Override::Type::kUint32:
             return "u32";
         case tint::inspector::Override::Type::kInt32:

@@ -25,6 +25,14 @@
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/ShaderModule.h"
 
+namespace {
+bool IsDoubleValueRepresentableAsF16(double value) {
+    constexpr double kLowestF16 = -65504.0;
+    constexpr double kMaxF16 = 65504.0;
+    return kLowestF16 <= value && value <= kMaxF16;
+}
+}  // namespace
+
 namespace dawn::native {
 MaybeError ValidateProgrammableStage(DeviceBase* device,
                                      const ShaderModuleBase* module,
@@ -79,6 +87,12 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
                                 "Pipeline overridable constant \"%s\" with value (%f) is not "
                                 "representable in type (%s)",
                                 constants[i].key, constants[i].value, "f32");
+                break;
+            case EntryPointMetadata::Override::Type::Float16:
+                DAWN_INVALID_IF(!IsDoubleValueRepresentableAsF16(constants[i].value),
+                                "Pipeline overridable constant \"%s\" with value (%f) is not "
+                                "representable in type (%s)",
+                                constants[i].key, constants[i].value, "f16");
                 break;
             case EntryPointMetadata::Override::Type::Int32:
                 DAWN_INVALID_IF(!IsDoubleValueRepresentable<int32_t>(constants[i].value),

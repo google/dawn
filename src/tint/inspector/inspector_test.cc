@@ -908,18 +908,23 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeViaAlias) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
+    Enable(builtin::Extension::kF16);
+
     Override("bool_var", ty.bool_());
     Override("float_var", ty.f32());
     Override("u32_var", ty.u32());
     Override("i32_var", ty.i32());
+    Override("f16_var", ty.f16());
 
     MakePlainGlobalReferenceBodyFunction("bool_func", "bool_var", ty.bool_(), utils::Empty);
     MakePlainGlobalReferenceBodyFunction("float_func", "float_var", ty.f32(), utils::Empty);
     MakePlainGlobalReferenceBodyFunction("u32_func", "u32_var", ty.u32(), utils::Empty);
     MakePlainGlobalReferenceBodyFunction("i32_func", "i32_var", ty.i32(), utils::Empty);
+    MakePlainGlobalReferenceBodyFunction("f16_func", "f16_var", ty.f16(), utils::Empty);
 
     MakeCallerBodyFunction(
-        "ep_func", utils::Vector{std::string("bool_func"), "float_func", "u32_func", "i32_func"},
+        "ep_func",
+        utils::Vector{std::string("bool_func"), "float_func", "u32_func", "i32_func", "f16_func"},
         utils::Vector{
             Stage(ast::PipelineStage::kCompute),
             WorkgroupSize(1_i),
@@ -930,7 +935,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    ASSERT_EQ(4u, result[0].overrides.size());
+    ASSERT_EQ(5u, result[0].overrides.size());
     EXPECT_EQ("bool_var", result[0].overrides[0].name);
     EXPECT_EQ(inspector::Override::Type::kBool, result[0].overrides[0].type);
     EXPECT_EQ("float_var", result[0].overrides[1].name);
@@ -939,6 +944,8 @@ TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
     EXPECT_EQ(inspector::Override::Type::kUint32, result[0].overrides[2].type);
     EXPECT_EQ("i32_var", result[0].overrides[3].name);
     EXPECT_EQ(inspector::Override::Type::kInt32, result[0].overrides[3].type);
+    EXPECT_EQ("f16_var", result[0].overrides[4].name);
+    EXPECT_EQ(inspector::Override::Type::kFloat16, result[0].overrides[4].type);
 }
 
 TEST_F(InspectorGetEntryPointTest, OverrideInitialized) {
@@ -1572,7 +1579,7 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
     EXPECT_EQ(100, result[OverrideId{6000}].AsI32());
 }
 
-TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
+TEST_F(InspectorGetOverrideDefaultValuesTest, F32) {
     Override("a", ty.f32(), Id(1_a));
     Override("b", ty.f32(), Expr(0_f), Id(20_a));
     Override("c", ty.f32(), Expr(-10_f), Id(300_a));
@@ -1589,6 +1596,46 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
     EXPECT_TRUE(result[OverrideId{1}].IsNull());
 
     ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
+    EXPECT_TRUE(result[OverrideId{20}].IsFloat());
+    EXPECT_FLOAT_EQ(0.0f, result[OverrideId{20}].AsFloat());
+
+    ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
+    EXPECT_TRUE(result[OverrideId{300}].IsFloat());
+    EXPECT_FLOAT_EQ(-10.0f, result[OverrideId{300}].AsFloat());
+
+    ASSERT_TRUE(result.find(OverrideId{4000}) != result.end());
+    EXPECT_TRUE(result[OverrideId{4000}].IsFloat());
+    EXPECT_FLOAT_EQ(15.0f, result[OverrideId{4000}].AsFloat());
+
+    ASSERT_TRUE(result.find(OverrideId{5000}) != result.end());
+    EXPECT_TRUE(result[OverrideId{5000}].IsFloat());
+    EXPECT_FLOAT_EQ(42.0f, result[OverrideId{5000}].AsFloat());
+
+    ASSERT_TRUE(result.find(OverrideId{6000}) != result.end());
+    EXPECT_TRUE(result[OverrideId{6000}].IsFloat());
+    EXPECT_FLOAT_EQ(150.0f, result[OverrideId{6000}].AsFloat());
+}
+
+TEST_F(InspectorGetOverrideDefaultValuesTest, F16) {
+    Enable(builtin::Extension::kF16);
+
+    Override("a", ty.f16(), Id(1_a));
+    Override("b", ty.f16(), Expr(0_h), Id(20_a));
+    Override("c", ty.f16(), Expr(-10_h), Id(300_a));
+    Override("d", Expr(15_h), Id(4000_a));
+    Override("3", Expr(42.0_h), Id(5000_a));
+    Override("e", ty.f16(), Mul(15_h, 10_a), Id(6000_a));
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetOverrideDefaultValues();
+    ASSERT_EQ(6u, result.size());
+
+    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
+    EXPECT_TRUE(result[OverrideId{1}].IsNull());
+
+    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
+    // Default value of f16 override is also stored as float scalar.
     EXPECT_TRUE(result[OverrideId{20}].IsFloat());
     EXPECT_FLOAT_EQ(0.0f, result[OverrideId{20}].AsFloat());
 

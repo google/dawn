@@ -84,15 +84,16 @@ fn main() -> @builtin(position) vec4<f32> {
 
 TEST_F(SubstituteOverrideTest, ImplicitId) {
     auto* src = R"(
+enable f16;
+
 override i_width: i32;
 override i_height = 1i;
 
 override f_width: f32;
 override f_height = 1.f;
 
-// TODO(crbug.com/tint/1473)
-// override h_width: f16;
-// override h_height = 1.h;
+override h_width: f16;
+override h_height = 1.h;
 
 override b_width: bool;
 override b_height = true;
@@ -106,6 +107,8 @@ fn main() -> @builtin(position) vec4<f32> {
 )";
 
     auto* expect = R"(
+enable f16;
+
 const i_width : i32 = 42i;
 
 const i_height = 11i;
@@ -113,6 +116,10 @@ const i_height = 11i;
 const f_width : f32 = 22.299999237060546875f;
 
 const f_height = 12.3999996185302734375f;
+
+const h_width : f16 = 9.3984375h;
+
+const h_height = 3.3984375h;
 
 const b_width : bool = true;
 
@@ -131,10 +138,10 @@ fn main() -> @builtin(position) vec4<f32> {
     cfg.map.insert({OverrideId{1}, 11.0});
     cfg.map.insert({OverrideId{2}, 22.3});
     cfg.map.insert({OverrideId{3}, 12.4});
-    // cfg.map.insert({OverrideId{4}, 9.4});
-    // cfg.map.insert({OverrideId{5}, 3.4});
-    cfg.map.insert({OverrideId{4}, 1.0});
-    cfg.map.insert({OverrideId{5}, 0.0});
+    cfg.map.insert({OverrideId{4}, 9.4});
+    cfg.map.insert({OverrideId{5}, 3.4});
+    cfg.map.insert({OverrideId{6}, 1.0});
+    cfg.map.insert({OverrideId{7}, 0.0});
 
     DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
@@ -153,9 +160,8 @@ enable f16;
 @id(1) override f_width: f32;
 @id(9) override f_height = 1.f;
 
-// TODO(crbug.com/tint/1473)
-// @id(2) override h_width: f16;
-// @id(8) override h_height = 1.h;
+@id(2) override h_width: f16;
+@id(8) override h_height = 1.h;
 
 @id(3) override b_width: bool;
 @id(7) override b_height = true;
@@ -178,6 +184,10 @@ const i_height = 11i;
 const f_width : f32 = 22.299999237060546875f;
 
 const f_height = 12.3999996185302734375f;
+
+const h_width : f16 = 9.3984375h;
+
+const h_height = 3.3984375h;
 
 const b_width : bool = true;
 

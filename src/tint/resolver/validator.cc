@@ -788,11 +788,6 @@ bool Validator::Override(
         return false;
     }
 
-    if (storage_ty->Is<type::F16>()) {
-        AddError("'override' of type f16 is not implemented yet", decl->source);
-        return false;
-    }
-
     return true;
 }
 

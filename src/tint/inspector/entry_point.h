@@ -92,6 +92,7 @@ struct Override {
         kFloat32,
         kUint32,
         kInt32,
+        kFloat16,
     };
 
     /// Type of the scalar

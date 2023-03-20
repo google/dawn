@@ -204,7 +204,11 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             if (type->is_bool_scalar_or_vector()) {
                 override.type = Override::Type::kBool;
             } else if (type->is_float_scalar()) {
-                override.type = Override::Type::kFloat32;
+                if (type->Is<type::F16>()) {
+                    override.type = Override::Type::kFloat16;
+                } else {
+                    override.type = Override::Type::kFloat32;
+                }
             } else if (type->is_signed_integer_scalar()) {
                 override.type = Override::Type::kInt32;
             } else if (type->is_unsigned_integer_scalar()) {
@@ -270,6 +274,10 @@ std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
                     [&](const type::I32*) { return Scalar(value->ValueAs<i32>()); },
                     [&](const type::U32*) { return Scalar(value->ValueAs<u32>()); },
                     [&](const type::F32*) { return Scalar(value->ValueAs<f32>()); },
+                    [&](const type::F16*) {
+                        // Default value of f16 override is also stored as float scalar.
+                        return Scalar(static_cast<float>(value->ValueAs<f16>()));
+                    },
                     [&](const type::Bool*) { return Scalar(value->ValueAs<bool>()); });
                 continue;
             }
