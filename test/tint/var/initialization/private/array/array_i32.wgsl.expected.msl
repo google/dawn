@@ -14,11 +14,16 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  tint_array<tint_array<int, 3>, 2> zero;
+  tint_array<tint_array<int, 3>, 2> init;
+};
+
 kernel void tint_symbol() {
-  thread tint_array<tint_array<int, 3>, 2> tint_symbol_1 = {};
-  thread tint_array<tint_array<int, 3>, 2> tint_symbol_2 = tint_array<tint_array<int, 3>, 2>{tint_array<int, 3>{1, 2, 3}, tint_array<int, 3>{4, 5, 6}};
-  tint_array<tint_array<int, 3>, 2> v0 = tint_symbol_1;
-  tint_array<tint_array<int, 3>, 2> v1 = tint_symbol_2;
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.init = tint_array<tint_array<int, 3>, 2>{tint_array<int, 3>{1, 2, 3}, tint_array<int, 3>{4, 5, 6}};
+  tint_array<tint_array<int, 3>, 2> v0 = tint_private_vars.zero;
+  tint_array<tint_array<int, 3>, 2> v1 = tint_private_vars.init;
   return;
 }
 

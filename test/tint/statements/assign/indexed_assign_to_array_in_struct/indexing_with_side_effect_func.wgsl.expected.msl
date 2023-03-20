@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  uint nextIndex;
+};
+
 struct Uniforms {
   /* 0x0000 */ uint i;
   /* 0x0004 */ uint j;
@@ -31,17 +35,17 @@ struct OuterS {
   tint_array<S1, 8> a1;
 };
 
-uint getNextIndex() {
-  thread uint tint_symbol_2 = 0u;
-  tint_symbol_2 = (tint_symbol_2 + 1u);
-  return tint_symbol_2;
+uint getNextIndex(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).nextIndex = ((*(tint_private_vars)).nextIndex + 1u);
+  return (*(tint_private_vars)).nextIndex;
 }
 
-kernel void tint_symbol(const constant Uniforms* tint_symbol_3 [[buffer(0)]]) {
+kernel void tint_symbol(const constant Uniforms* tint_symbol_2 [[buffer(0)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
   InnerS v = {};
   OuterS s = {};
-  uint const tint_symbol_1 = getNextIndex();
-  s.a1[tint_symbol_1].a2[(*(tint_symbol_3)).j] = v;
+  uint const tint_symbol_1 = getNextIndex(&(tint_private_vars));
+  s.a1[tint_symbol_1].a2[(*(tint_symbol_2)).j] = v;
   return;
 }
 

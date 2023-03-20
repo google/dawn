@@ -14,6 +14,12 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  float4 sk_FragColor;
+  bool sk_Clockwise;
+  float4 vcolor_S0;
+};
+
 struct tint_packed_vec3_f32_array_element {
   /* 0x0000 */ packed_float3 elements;
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
@@ -96,7 +102,7 @@ bool test_int_S1_c0_b(const constant UniformBuffer_tint_packed_vec3* const tint_
   return x_66;
 }
 
-void main_1(thread float4* const tint_symbol_6, const constant UniformBuffer_tint_packed_vec3* const tint_symbol_7, thread float4* const tint_symbol_8) {
+void main_1(thread tint_private_vars_struct* const tint_private_vars, const constant UniformBuffer_tint_packed_vec3* const tint_symbol_6) {
   float4 outputColor_S0 = 0.0f;
   float4 output_S1 = 0.0f;
   float x_8_unknown = 0.0f;
@@ -111,9 +117,9 @@ void main_1(thread float4* const tint_symbol_6, const constant UniformBuffer_tin
   bool x_111 = false;
   bool x_114 = false;
   bool x_115 = false;
-  float4 const x_72 = *(tint_symbol_6);
+  float4 const x_72 = (*(tint_private_vars)).vcolor_S0;
   outputColor_S0 = x_72;
-  float const x_77 = (*(tint_symbol_7)).unknownInput_S1_c0;
+  float const x_77 = (*(tint_symbol_6)).unknownInput_S1_c0;
   x_8_unknown = x_77;
   x_9_ok = true;
   x_87 = false;
@@ -154,19 +160,19 @@ void main_1(thread float4* const tint_symbol_6, const constant UniformBuffer_tin
   x_9_ok = x_111;
   x_115 = false;
   if (x_111) {
-    x_114 = test_int_S1_c0_b(tint_symbol_7);
+    x_114 = test_int_S1_c0_b(tint_symbol_6);
     x_115 = x_114;
   }
   if (x_115) {
-    float4 const x_122 = (*(tint_symbol_7)).ucolorGreen_S1_c0;
+    float4 const x_122 = (*(tint_symbol_6)).ucolorGreen_S1_c0;
     x_116 = x_122;
   } else {
-    float4 const x_124 = (*(tint_symbol_7)).ucolorRed_S1_c0;
+    float4 const x_124 = (*(tint_symbol_6)).ucolorRed_S1_c0;
     x_116 = x_124;
   }
   float4 const x_125 = x_116;
   output_S1 = x_125;
-  *(tint_symbol_8) = x_125;
+  (*(tint_private_vars)).sk_FragColor = x_125;
   return;
 }
 
@@ -182,19 +188,17 @@ struct tint_symbol_3 {
   float4 sk_FragColor_1 [[color(0)]];
 };
 
-main_out tint_symbol_inner(bool sk_Clockwise_param, float4 vcolor_S0_param, thread float4* const tint_symbol_10, const constant UniformBuffer_tint_packed_vec3* const tint_symbol_11, thread float4* const tint_symbol_12) {
-  thread bool tint_symbol_9 = false;
-  tint_symbol_9 = sk_Clockwise_param;
-  *(tint_symbol_10) = vcolor_S0_param;
-  main_1(tint_symbol_10, tint_symbol_11, tint_symbol_12);
-  main_out const tint_symbol_4 = {.sk_FragColor_1=*(tint_symbol_12)};
+main_out tint_symbol_inner(bool sk_Clockwise_param, float4 vcolor_S0_param, thread tint_private_vars_struct* const tint_private_vars, const constant UniformBuffer_tint_packed_vec3* const tint_symbol_7) {
+  (*(tint_private_vars)).sk_Clockwise = sk_Clockwise_param;
+  (*(tint_private_vars)).vcolor_S0 = vcolor_S0_param;
+  main_1(tint_private_vars, tint_symbol_7);
+  main_out const tint_symbol_4 = {.sk_FragColor_1=(*(tint_private_vars)).sk_FragColor};
   return tint_symbol_4;
 }
 
-fragment tint_symbol_3 tint_symbol(const constant UniformBuffer_tint_packed_vec3* tint_symbol_14 [[buffer(0)]], bool sk_Clockwise_param [[front_facing]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread float4 tint_symbol_13 = 0.0f;
-  thread float4 tint_symbol_15 = 0.0f;
-  main_out const inner_result = tint_symbol_inner(sk_Clockwise_param, tint_symbol_1.vcolor_S0_param, &(tint_symbol_13), tint_symbol_14, &(tint_symbol_15));
+fragment tint_symbol_3 tint_symbol(const constant UniformBuffer_tint_packed_vec3* tint_symbol_8 [[buffer(0)]], bool sk_Clockwise_param [[front_facing]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  main_out const inner_result = tint_symbol_inner(sk_Clockwise_param, tint_symbol_1.vcolor_S0_param, &(tint_private_vars), tint_symbol_8);
   tint_symbol_3 wrapper_result = {};
   wrapper_result.sk_FragColor_1 = inner_result.sk_FragColor_1;
   return wrapper_result;

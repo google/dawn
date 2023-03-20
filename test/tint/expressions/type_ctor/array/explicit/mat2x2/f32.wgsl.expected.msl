@@ -14,8 +14,11 @@ struct tint_array {
     T elements[N];
 };
 
-void f() {
-  thread tint_array<float2x2, 2> tint_symbol = tint_array<float2x2, 2>{float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f)), float2x2(float2(5.0f, 6.0f), float2(7.0f, 8.0f))};
-  tint_array<float2x2, 2> v = tint_symbol;
+struct tint_private_vars_struct {
+  tint_array<float2x2, 2> arr;
+};
+
+void f(thread tint_private_vars_struct* const tint_private_vars) {
+  tint_array<float2x2, 2> v = (*(tint_private_vars)).arr;
 }
 

@@ -527,7 +527,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_1 = 0.0f;\n"));
+    EXPECT_THAT(gen.result(), HasSubstr(R"(thread tint_private_vars_struct tint_private_vars = {};
+    float const tint_symbol = tint_private_vars.a;
+    return;
+)"));
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {

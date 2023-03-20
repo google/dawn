@@ -14,6 +14,16 @@ struct tint_array {
     T elements[N];
 };
 
+struct S {
+  int before;
+  float4x3 m;
+  int after;
+};
+
+struct tint_private_vars_struct {
+  tint_array<S, 4> p;
+};
+
 struct tint_packed_vec3_f32_array_element {
   /* 0x0000 */ packed_float3 elements;
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
@@ -36,12 +46,6 @@ float4x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_ele
   return result;
 }
 
-struct S {
-  int before;
-  float4x3 m;
-  int after;
-};
-
 S tint_unpack_vec3_in_composite_1(S_tint_packed_vec3 in) {
   S result = {};
   result.before = in.before;
@@ -58,12 +62,12 @@ tint_array<S, 4> tint_unpack_vec3_in_composite_2(tint_array<S_tint_packed_vec3, 
   return result;
 }
 
-kernel void f(const constant tint_array<S_tint_packed_vec3, 4>* tint_symbol_1 [[buffer(0)]]) {
-  thread tint_array<S, 4> tint_symbol = {};
-  tint_symbol = tint_unpack_vec3_in_composite_2(*(tint_symbol_1));
-  tint_symbol[1] = tint_unpack_vec3_in_composite_1((*(tint_symbol_1))[2]);
-  tint_symbol[3].m = tint_unpack_vec3_in_composite((*(tint_symbol_1))[2].m);
-  tint_symbol[1].m[0] = float3((*(tint_symbol_1))[0].m[1].elements).zxy;
+kernel void f(const constant tint_array<S_tint_packed_vec3, 4>* tint_symbol [[buffer(0)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.p = tint_unpack_vec3_in_composite_2(*(tint_symbol));
+  tint_private_vars.p[1] = tint_unpack_vec3_in_composite_1((*(tint_symbol))[2]);
+  tint_private_vars.p[3].m = tint_unpack_vec3_in_composite((*(tint_symbol))[2].m);
+  tint_private_vars.p[1].m[0] = float3((*(tint_symbol))[0].m[1].elements).zxy;
   return;
 }
 

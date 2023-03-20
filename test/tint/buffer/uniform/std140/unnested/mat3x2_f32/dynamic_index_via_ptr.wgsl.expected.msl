@@ -1,17 +1,22 @@
 #include <metal_stdlib>
 
 using namespace metal;
-int i() {
-  thread int tint_symbol_1 = 0;
-  tint_symbol_1 = as_type<int>((as_type<uint>(tint_symbol_1) + as_type<uint>(1)));
-  return tint_symbol_1;
+struct tint_private_vars_struct {
+  int counter;
+};
+
+int i(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).counter = as_type<int>((as_type<uint>((*(tint_private_vars)).counter) + as_type<uint>(1)));
+  return (*(tint_private_vars)).counter;
 }
 
-kernel void f(const constant float3x2* tint_symbol_2 [[buffer(0)]]) {
-  int const tint_symbol = i();
+kernel void f(const constant float3x2* tint_symbol_1 [[buffer(0)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.counter = 0;
+  int const tint_symbol = i(&(tint_private_vars));
   int const p_m_i_save = tint_symbol;
-  float3x2 const l_m = *(tint_symbol_2);
-  float2 const l_m_i = (*(tint_symbol_2))[p_m_i_save];
+  float3x2 const l_m = *(tint_symbol_1);
+  float2 const l_m_i = (*(tint_symbol_1))[p_m_i_save];
   return;
 }
 

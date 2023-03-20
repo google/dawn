@@ -1,8 +1,11 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void f() {
-  thread int tint_symbol = 1;
-  half const v = half(tint_symbol);
+struct tint_private_vars_struct {
+  int u;
+};
+
+void f(thread tint_private_vars_struct* const tint_private_vars) {
+  half const v = half((*(tint_private_vars)).u);
 }
 

@@ -1,3 +1,7 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct tint_private_vars_struct {
+  float3x3 m;
+};
+

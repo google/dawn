@@ -14,12 +14,16 @@ struct tint_array {
     T elements[N];
 };
 
-struct UBO {
-  /* 0x0000 */ int dynamic_idx;
-};
-
 struct S {
   tint_array<int, 64> data;
+};
+
+struct tint_private_vars_struct {
+  S s;
+};
+
+struct UBO {
+  /* 0x0000 */ int dynamic_idx;
 };
 
 struct Result {
@@ -30,10 +34,10 @@ void x(thread S* const p, const constant UBO* const tint_symbol) {
   (*(p)).data[(*(tint_symbol)).dynamic_idx] = 1;
 }
 
-kernel void f(const constant UBO* tint_symbol_2 [[buffer(0)]], device Result* tint_symbol_3 [[buffer(1)]]) {
-  thread S tint_symbol_1 = {};
-  x(&(tint_symbol_1), tint_symbol_2);
-  (*(tint_symbol_3)).out = tint_symbol_1.data[3];
+kernel void f(const constant UBO* tint_symbol_1 [[buffer(0)]], device Result* tint_symbol_2 [[buffer(1)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  x(&(tint_private_vars.s), tint_symbol_1);
+  (*(tint_symbol_2)).out = tint_private_vars.s.data[3];
   return;
 }
 

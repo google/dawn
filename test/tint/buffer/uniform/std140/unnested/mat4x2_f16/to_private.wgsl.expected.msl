@@ -1,12 +1,16 @@
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void f(const constant half4x2* tint_symbol_1 [[buffer(0)]]) {
-  thread half4x2 tint_symbol = half4x2(0.0h);
-  tint_symbol = *(tint_symbol_1);
-  tint_symbol[1] = (*(tint_symbol_1))[0];
-  tint_symbol[1] = (*(tint_symbol_1))[0].yx;
-  tint_symbol[0][1] = (*(tint_symbol_1))[1][0];
+struct tint_private_vars_struct {
+  half4x2 p;
+};
+
+kernel void f(const constant half4x2* tint_symbol [[buffer(0)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.p = *(tint_symbol);
+  tint_private_vars.p[1] = (*(tint_symbol))[0];
+  tint_private_vars.p[1] = (*(tint_symbol))[0].yx;
+  tint_private_vars.p[0][1] = (*(tint_symbol))[1][0];
   return;
 }
 

@@ -33,7 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::ModuleScopeVarToEntryPointParam);
 namespace tint::transform {
 namespace {
 
-using WorkgroupParameterMemberList = utils::Vector<const ast::StructMember*, 8>;
+using StructMemberList = utils::Vector<const ast::StructMember*, 8>;
 
 // The name of the struct member for arrays that are wrapped in structures.
 const char* kWrappedArrayMemberName = "arr";
@@ -114,7 +114,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                                      const sem::Variable* var,
                                      Symbol new_var_symbol,
                                      std::function<Symbol()> workgroup_param,
-                                     WorkgroupParameterMemberList& workgroup_parameter_members,
+                                     StructMemberList& workgroup_parameter_members,
                                      bool& is_pointer,
                                      bool& is_wrapped) {
         auto* ty = var->Type()->UnwrapRef();
@@ -188,21 +188,14 @@ struct ModuleScopeVarToEntryPointParam::State {
                         member_ptr);
                     ctx.InsertFront(func->body->statements, ctx.dst->Decl(local_var));
                     is_pointer = true;
-
-                    break;
+                } else {
+                    auto* disable_validation =
+                        ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace);
+                    auto* initializer = ctx.Clone(var->Declaration()->initializer);
+                    auto* local_var = ctx.dst->Var(new_var_symbol, store_type(), sc, initializer,
+                                                   utils::Vector{disable_validation});
+                    ctx.InsertFront(func->body->statements, ctx.dst->Decl(local_var));
                 }
-                [[fallthrough]];
-            }
-            case builtin::AddressSpace::kPrivate: {
-                // Variables in the Private and Workgroup address spaces are redeclared at function
-                // scope. Disable address space validation on this variable.
-                auto* disable_validation =
-                    ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace);
-                auto* initializer = ctx.Clone(var->Declaration()->initializer);
-                auto* local_var = ctx.dst->Var(new_var_symbol, store_type(), sc, initializer,
-                                               utils::Vector{disable_validation});
-                ctx.InsertFront(func->body->statements, ctx.dst->Decl(local_var));
-
                 break;
             }
             case builtin::AddressSpace::kPushConstant: {
@@ -234,6 +227,8 @@ struct ModuleScopeVarToEntryPointParam::State {
         auto sc = var->AddressSpace();
         switch (sc) {
             case builtin::AddressSpace::kPrivate:
+                // Private variables are passed all together in a struct.
+                return;
             case builtin::AddressSpace::kStorage:
             case builtin::AddressSpace::kUniform:
             case builtin::AddressSpace::kHandle:
@@ -275,12 +270,12 @@ struct ModuleScopeVarToEntryPointParam::State {
     /// @param var the variable to replace
     /// @param new_var the symbol to use for replacement
     /// @param is_pointer true if `new_var` is a pointer to the new variable
-    /// @param is_wrapped true if `new_var` is an array wrapped in a structure
+    /// @param member_name if valid, the name of the struct member that holds this variable
     void ReplaceUsesInFunction(const ast::Function* func,
                                const sem::Variable* var,
                                Symbol new_var,
                                bool is_pointer,
-                               bool is_wrapped) {
+                               Symbol member_name) {
         for (auto* user : var->Users()) {
             if (user->Stmt()->Function()->Declaration() == func) {
                 const ast::Expression* expr = ctx.dst->Expr(new_var);
@@ -288,16 +283,16 @@ struct ModuleScopeVarToEntryPointParam::State {
                     // If this identifier is used by an address-of operator, just remove the
                     // address-of instead of adding a deref, since we already have a pointer.
                     auto* ident = user->Declaration()->As<ast::IdentifierExpression>();
-                    if (ident_to_address_of_.count(ident)) {
+                    if (ident_to_address_of_.count(ident) && !member_name.IsValid()) {
                         ctx.Replace(ident_to_address_of_[ident], expr);
                         continue;
                     }
 
                     expr = ctx.dst->Deref(expr);
                 }
-                if (is_wrapped) {
-                    // Get the member from the wrapper structure.
-                    expr = ctx.dst->MemberAccessor(expr, kWrappedArrayMemberName);
+                if (member_name.IsValid()) {
+                    // Get the member from the containing structure.
+                    expr = ctx.dst->MemberAccessor(expr, member_name);
                 }
                 ctx.Replace(user->Declaration(), expr);
             }
@@ -312,8 +307,34 @@ struct ModuleScopeVarToEntryPointParam::State {
 
         utils::Vector<const ast::Function*, 8> functions_to_process;
 
+        // Collect private variables into a single structure.
+        StructMemberList private_struct_members;
+        utils::Vector<std::function<const ast::AssignmentStatement*()>, 4> private_initializers;
+        std::unordered_set<const ast::Function*> uses_privates;
+
         // Build a list of functions that transitively reference any module-scope variables.
         for (auto* decl : ctx.src->Sem().Module()->DependencyOrderedDeclarations()) {
+            if (auto* var = decl->As<ast::Var>()) {
+                auto* sem_var = ctx.src->Sem().Get(var);
+                if (sem_var->AddressSpace() == builtin::AddressSpace::kPrivate) {
+                    // Create a member in the private variable struct.
+                    auto* ty = sem_var->Type()->UnwrapRef();
+                    auto name = ctx.Clone(var->name->symbol);
+                    private_struct_members.Push(ctx.dst->Member(name, CreateASTTypeFor(ctx, ty)));
+                    CloneStructTypes(ty);
+
+                    // Create a statement to assign the initializer if present.
+                    if (var->initializer) {
+                        private_initializers.Push([&, name, var]() {
+                            return ctx.dst->Assign(
+                                ctx.dst->MemberAccessor(PrivateStructVariableName(), name),
+                                ctx.Clone(var->initializer));
+                        });
+                    }
+                }
+                continue;
+            }
+
             auto* func_ast = decl->As<ast::Function>();
             if (!func_ast) {
                 continue;
@@ -324,8 +345,10 @@ struct ModuleScopeVarToEntryPointParam::State {
             bool needs_processing = false;
             for (auto* var : func_sem->TransitivelyReferencedGlobals()) {
                 if (var->AddressSpace() != builtin::AddressSpace::kUndefined) {
+                    if (var->AddressSpace() == builtin::AddressSpace::kPrivate) {
+                        uses_privates.insert(func_ast);
+                    }
                     needs_processing = true;
-                    break;
                 }
             }
             if (needs_processing) {
@@ -337,6 +360,14 @@ struct ModuleScopeVarToEntryPointParam::State {
                         call->Declaration());
                 }
             }
+        }
+
+        if (!private_struct_members.IsEmpty()) {
+            // Create the private variable struct.
+            ctx.dst->Structure(PrivateStructName(), std::move(private_struct_members));
+            // Passing a pointer to a private variable will now involve passing a pointer to the
+            // member of a structure, so enable the extension that allows this.
+            ctx.dst->Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
         }
 
         // Build a list of `&ident` expressions. We'll use this later to avoid generating
@@ -370,7 +401,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             // We aggregate all workgroup variables into a struct to avoid hitting MSL's limit for
             // threadgroup memory arguments.
             Symbol workgroup_parameter_symbol;
-            WorkgroupParameterMemberList workgroup_parameter_members;
+            StructMemberList workgroup_parameter_members;
             auto workgroup_param = [&]() {
                 if (!workgroup_parameter_symbol.IsValid()) {
                     workgroup_parameter_symbol = ctx.dst->Sym();
@@ -378,12 +409,43 @@ struct ModuleScopeVarToEntryPointParam::State {
                 return workgroup_parameter_symbol;
             };
 
+            // If this function references any private variables, it needs to take the private
+            // variable struct as a parameter (or declare it, if it is an entry point function).
+            if (uses_privates.count(func_ast)) {
+                if (is_entry_point) {
+                    // Create a local declaration for the private variable struct.
+                    auto* var = ctx.dst->Var(
+                        PrivateStructVariableName(), ctx.dst->ty(PrivateStructName()),
+                        builtin::AddressSpace::kPrivate,
+                        utils::Vector{
+                            ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace),
+                        });
+                    ctx.InsertFront(func_ast->body->statements, ctx.dst->Decl(var));
+
+                    // Initialize the members of that struct with the original initializers.
+                    for (auto init : private_initializers) {
+                        ctx.InsertFront(func_ast->body->statements, init());
+                    }
+                } else {
+                    // Create a parameter that is a pointer to the private variable struct.
+                    auto ptr = ctx.dst->ty.pointer(ctx.dst->ty(PrivateStructName()),
+                                                   builtin::AddressSpace::kPrivate);
+                    auto* param = ctx.dst->Param(PrivateStructVariableName(), ptr);
+                    ctx.InsertBack(func_ast->params, param);
+                }
+            }
+
             // Process and redeclare all variables referenced by the function.
             for (auto* var : func_sem->TransitivelyReferencedGlobals()) {
                 if (var->AddressSpace() == builtin::AddressSpace::kUndefined) {
                     continue;
                 }
-                if (local_private_vars_.count(var)) {
+                if (var->AddressSpace() == builtin::AddressSpace::kPrivate) {
+                    // Private variable are collected into a single struct that is passed by
+                    // pointer (handled above), so we just need to replace the uses here.
+                    ReplaceUsesInFunction(func_ast, var, PrivateStructVariableName(),
+                                          /* is_pointer */ !is_entry_point,
+                                          ctx.Clone(var->Declaration()->name->symbol));
                     continue;
                 }
 
@@ -396,49 +458,25 @@ struct ModuleScopeVarToEntryPointParam::State {
                 // Track whether the new variable was wrapped in a struct or not.
                 bool is_wrapped = false;
 
-                // Check if this is a private variable that is only referenced by this function.
-                bool local_private = false;
-                if (var->AddressSpace() == builtin::AddressSpace::kPrivate) {
-                    local_private = true;
-                    for (auto* user : var->Users()) {
-                        auto* stmt = user->Stmt();
-                        if (!stmt || stmt->Function() != func_sem) {
-                            local_private = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (local_private) {
-                    // Redeclare the variable at function scope.
-                    auto* disable_validation =
-                        ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace);
-                    auto* initializer = ctx.Clone(var->Declaration()->initializer);
-                    auto* local_var = ctx.dst->Var(new_var_symbol,
-                                                   CreateASTTypeFor(ctx, var->Type()->UnwrapRef()),
-                                                   builtin::AddressSpace::kPrivate, initializer,
-                                                   utils::Vector{disable_validation});
-                    ctx.InsertFront(func_ast->body->statements, ctx.dst->Decl(local_var));
-                    local_private_vars_.insert(var);
+                // Process the variable to redeclare it as a parameter or local variable.
+                if (is_entry_point) {
+                    ProcessVariableInEntryPoint(func_ast, var, new_var_symbol, workgroup_param,
+                                                workgroup_parameter_members, is_pointer,
+                                                is_wrapped);
                 } else {
-                    // Process the variable to redeclare it as a parameter or local variable.
-                    if (is_entry_point) {
-                        ProcessVariableInEntryPoint(func_ast, var, new_var_symbol, workgroup_param,
-                                                    workgroup_parameter_members, is_pointer,
-                                                    is_wrapped);
-                    } else {
-                        ProcessVariableInUserFunction(func_ast, var, new_var_symbol, is_pointer);
-                        if (var->AddressSpace() == builtin::AddressSpace::kWorkgroup) {
-                            needs_pointer_aliasing = true;
-                        }
+                    ProcessVariableInUserFunction(func_ast, var, new_var_symbol, is_pointer);
+                    if (var->AddressSpace() == builtin::AddressSpace::kWorkgroup) {
+                        needs_pointer_aliasing = true;
                     }
-
-                    // Record the replacement symbol.
-                    var_to_newvar[var] = {new_var_symbol, is_pointer, is_wrapped};
                 }
+
+                // Record the replacement symbol.
+                var_to_newvar[var] = {new_var_symbol, is_pointer, is_wrapped};
 
                 // Replace all uses of the module-scope variable.
-                ReplaceUsesInFunction(func_ast, var, new_var_symbol, is_pointer, is_wrapped);
+                ReplaceUsesInFunction(
+                    func_ast, var, new_var_symbol, is_pointer,
+                    is_wrapped ? ctx.dst->Sym(kWrappedArrayMemberName) : Symbol());
             }
 
             // Allow pointer aliasing if needed.
@@ -467,6 +505,15 @@ struct ModuleScopeVarToEntryPointParam::State {
             for (auto* call : calls_to_replace[func_ast]) {
                 auto* call_sem = ctx.src->Sem().Get(call)->Unwrap()->As<sem::Call>();
                 auto* target_sem = call_sem->Target()->As<sem::Function>();
+
+                // Pass the private variable struct pointer if needed.
+                if (uses_privates.count(target_sem->Declaration())) {
+                    const ast::Expression* arg = ctx.dst->Expr(PrivateStructVariableName());
+                    if (is_entry_point) {
+                        arg = ctx.dst->AddressOf(arg);
+                    }
+                    ctx.InsertBack(call->args, arg);
+                }
 
                 // Add new arguments for any variables that are needed by the callee.
                 // For entry points, pass non-handle types as pointers.
@@ -509,16 +556,35 @@ struct ModuleScopeVarToEntryPointParam::State {
         }
     }
 
+    /// @returns the name of the structure that contains all of the module-scope private variables
+    Symbol PrivateStructName() {
+        if (!private_struct_name.IsValid()) {
+            private_struct_name = ctx.dst->Symbols().New("tint_private_vars_struct");
+        }
+        return private_struct_name;
+    }
+
+    /// @returns the name of the variable that contains all of the module-scope private variables
+    Symbol PrivateStructVariableName() {
+        if (!private_struct_variable_name.IsValid()) {
+            private_struct_variable_name = ctx.dst->Symbols().New("tint_private_vars");
+        }
+        return private_struct_variable_name;
+    }
+
   private:
     // The structures that have already been cloned by this transform.
     std::unordered_set<const sem::Struct*> cloned_structs_;
 
-    // Set of a private variables that are local to a single function.
-    std::unordered_set<const sem::Variable*> local_private_vars_;
-
     // Map from identifier expression to the address-of expression that uses it.
     std::unordered_map<const ast::IdentifierExpression*, const ast::UnaryOpExpression*>
         ident_to_address_of_;
+
+    // The name of the structure that contains all the module-scope private variables.
+    Symbol private_struct_name;
+
+    // The name of the structure variable that contains all the module-scope private variables.
+    Symbol private_struct_variable_name;
 };
 
 ModuleScopeVarToEntryPointParam::ModuleScopeVarToEntryPointParam() = default;

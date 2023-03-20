@@ -18,29 +18,33 @@ struct S {
   float a;
 };
 
+struct tint_private_vars_struct {
+  bool bool_var;
+  int i32_var;
+  uint u32_var;
+  float f32_var;
+  int2 v2i32_var;
+  uint3 v3u32_var;
+  float4 v4f32_var;
+  float2x3 m2x3_var;
+  tint_array<float, 4> arr_var;
+  S struct_var;
+};
+
 kernel void tint_symbol() {
-  thread bool tint_symbol_3 = false;
-  thread int tint_symbol_4 = 0;
-  thread uint tint_symbol_5 = 0u;
-  thread float tint_symbol_6 = 0.0f;
-  thread int2 tint_symbol_7 = 0;
-  thread uint3 tint_symbol_8 = 0u;
-  thread float4 tint_symbol_9 = 0.0f;
-  thread float2x3 tint_symbol_10 = float2x3(0.0f);
-  thread tint_array<float, 4> tint_symbol_11 = {};
-  thread S tint_symbol_12 = {};
-  tint_symbol_3 = false;
-  tint_symbol_4 = 0;
-  tint_symbol_5 = 0u;
-  tint_symbol_6 = 0.0f;
-  tint_symbol_7 = int2(0);
-  tint_symbol_8 = uint3(0u);
-  tint_symbol_9 = float4(0.0f);
-  tint_symbol_10 = float2x3(float3(0.0f), float3(0.0f));
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.bool_var = false;
+  tint_private_vars.i32_var = 0;
+  tint_private_vars.u32_var = 0u;
+  tint_private_vars.f32_var = 0.0f;
+  tint_private_vars.v2i32_var = int2(0);
+  tint_private_vars.v3u32_var = uint3(0u);
+  tint_private_vars.v4f32_var = float4(0.0f);
+  tint_private_vars.m2x3_var = float2x3(float3(0.0f), float3(0.0f));
   tint_array<float, 4> const tint_symbol_1 = tint_array<float, 4>{};
-  tint_symbol_11 = tint_symbol_1;
+  tint_private_vars.arr_var = tint_symbol_1;
   S const tint_symbol_2 = S{};
-  tint_symbol_12 = tint_symbol_2;
+  tint_private_vars.struct_var = tint_symbol_2;
   return;
 }
 

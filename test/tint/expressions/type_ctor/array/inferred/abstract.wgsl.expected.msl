@@ -14,8 +14,11 @@ struct tint_array {
     T elements[N];
 };
 
-void f() {
-  thread tint_array<int, 2> tint_symbol = tint_array<int, 2>{1, 2};
-  tint_array<int, 2> v = tint_symbol;
+struct tint_private_vars_struct {
+  tint_array<int, 2> arr;
+};
+
+void f(thread tint_private_vars_struct* const tint_private_vars) {
+  tint_array<int, 2> v = (*(tint_private_vars)).arr;
 }
 

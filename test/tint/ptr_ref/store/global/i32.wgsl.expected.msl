@@ -1,10 +1,14 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct tint_private_vars_struct {
+  int I;
+};
+
 kernel void tint_symbol() {
-  thread int tint_symbol_1 = 0;
-  tint_symbol_1 = 123;
-  tint_symbol_1 = 123;
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.I = 123;
+  tint_private_vars.I = 123;
   return;
 }
 

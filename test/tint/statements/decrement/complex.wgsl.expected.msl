@@ -14,61 +14,65 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  uint v;
+};
+
 struct S {
   /* 0x0000 */ tint_array<int4, 4> a;
 };
 
-int idx1(thread uint* const tint_symbol_10) {
-  *(tint_symbol_10) = (*(tint_symbol_10) - 1u);
+int idx1(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).v = ((*(tint_private_vars)).v - 1u);
   return 1;
 }
 
-int idx2(thread uint* const tint_symbol_11) {
-  *(tint_symbol_11) = (*(tint_symbol_11) - 1u);
+int idx2(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).v = ((*(tint_private_vars)).v - 1u);
   return 2;
 }
 
-int idx3(thread uint* const tint_symbol_12) {
-  *(tint_symbol_12) = (*(tint_symbol_12) - 1u);
+int idx3(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).v = ((*(tint_private_vars)).v - 1u);
   return 3;
 }
 
-int idx4(thread uint* const tint_symbol_13) {
-  *(tint_symbol_13) = (*(tint_symbol_13) - 1u);
+int idx4(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).v = ((*(tint_private_vars)).v - 1u);
   return 4;
 }
 
-int idx5(thread uint* const tint_symbol_14) {
-  *(tint_symbol_14) = (*(tint_symbol_14) - 1u);
+int idx5(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).v = ((*(tint_private_vars)).v - 1u);
   return 0;
 }
 
-int idx6(thread uint* const tint_symbol_15) {
-  *(tint_symbol_15) = (*(tint_symbol_15) - 1u);
+int idx6(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).v = ((*(tint_private_vars)).v - 1u);
   return 2;
 }
 
-void tint_symbol_1(thread uint* const tint_symbol_16, device tint_array<S, 1>* const tint_symbol_17) {
+void tint_symbol_1(thread tint_private_vars_struct* const tint_private_vars, device tint_array<S, 1>* const tint_symbol_10) {
   {
-    int const tint_symbol_6 = idx1(tint_symbol_16);
-    int const tint_symbol_7 = idx2(tint_symbol_16);
+    int const tint_symbol_6 = idx1(tint_private_vars);
+    int const tint_symbol_7 = idx2(tint_private_vars);
     int const tint_symbol_2_save = tint_symbol_6;
     int const tint_symbol_2_save_1 = tint_symbol_7;
-    int const tint_symbol_3 = idx3(tint_symbol_16);
-    (*(tint_symbol_17))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3] = as_type<int>((as_type<uint>((*(tint_symbol_17))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3]) - as_type<uint>(1)));
+    int const tint_symbol_3 = idx3(tint_private_vars);
+    (*(tint_symbol_10))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3] = as_type<int>((as_type<uint>((*(tint_symbol_10))[tint_symbol_2_save].a[tint_symbol_2_save_1][tint_symbol_3]) - as_type<uint>(1)));
     while (true) {
-      if (!((*(tint_symbol_16) < 10u))) {
+      if (!(((*(tint_private_vars)).v < 10u))) {
         break;
       }
       {
       }
       {
-        int const tint_symbol_8 = idx4(tint_symbol_16);
-        int const tint_symbol_9 = idx5(tint_symbol_16);
+        int const tint_symbol_8 = idx4(tint_private_vars);
+        int const tint_symbol_9 = idx5(tint_private_vars);
         int const tint_symbol_4_save = tint_symbol_8;
         int const tint_symbol_4_save_1 = tint_symbol_9;
-        int const tint_symbol_5 = idx6(tint_symbol_16);
-        (*(tint_symbol_17))[tint_symbol_4_save].a[tint_symbol_4_save_1][tint_symbol_5] = as_type<int>((as_type<uint>((*(tint_symbol_17))[tint_symbol_4_save].a[tint_symbol_4_save_1][tint_symbol_5]) - as_type<uint>(1)));
+        int const tint_symbol_5 = idx6(tint_private_vars);
+        (*(tint_symbol_10))[tint_symbol_4_save].a[tint_symbol_4_save_1][tint_symbol_5] = as_type<int>((as_type<uint>((*(tint_symbol_10))[tint_symbol_4_save].a[tint_symbol_4_save_1][tint_symbol_5]) - as_type<uint>(1)));
       }
     }
   }

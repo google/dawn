@@ -14,6 +14,14 @@ struct tint_array {
     T elements[N];
 };
 
+struct S {
+  tint_array<uint, 3> data;
+};
+
+struct tint_private_vars_struct {
+  S s;
+};
+
 struct Constants {
   /* 0x0000 */ uint zero;
 };
@@ -22,13 +30,9 @@ struct Result {
   uint value;
 };
 
-struct S {
-  tint_array<uint, 3> data;
-};
-
-kernel void tint_symbol(const constant Constants* tint_symbol_2 [[buffer(0)]]) {
-  thread S tint_symbol_1 = {};
-  tint_symbol_1.data[(*(tint_symbol_2)).zero] = 0u;
+kernel void tint_symbol(const constant Constants* tint_symbol_1 [[buffer(0)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.s.data[(*(tint_symbol_1)).zero] = 0u;
   return;
 }
 

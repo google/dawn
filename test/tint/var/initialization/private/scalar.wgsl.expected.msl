@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct tint_private_vars_struct {
+  int v;
+};
+
 kernel void tint_symbol() {
   return;
 }

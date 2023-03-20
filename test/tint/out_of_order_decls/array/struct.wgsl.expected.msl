@@ -18,10 +18,14 @@ struct S {
   int m;
 };
 
+struct tint_private_vars_struct {
+  tint_array<S, 4> A;
+};
+
 fragment void f() {
-  thread tint_array<S, 4> tint_symbol_1 = {};
+  thread tint_private_vars_struct tint_private_vars = {};
   S const tint_symbol = S{.m=1};
-  tint_symbol_1[0] = tint_symbol;
+  tint_private_vars.A[0] = tint_symbol;
   return;
 }
 

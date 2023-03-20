@@ -1089,9 +1089,13 @@ template<typename T>
 T tint_dot3(vec<T,3> a, vec<T,3> b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
 }
+struct tint_private_vars_struct {
+  int3 v;
+};
+
 kernel void test_function() {
-  thread int3 tint_symbol = 0;
-  int r = tint_dot3(tint_symbol, tint_symbol);
+  thread tint_private_vars_struct tint_private_vars = {};
+  int r = tint_dot3(tint_private_vars.v, tint_private_vars.v);
   return;
 }
 

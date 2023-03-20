@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  tint_array<int4, 4> src_private;
+};
+
 struct S {
   /* 0x0000 */ tint_array<int4, 4> arr;
 };
@@ -32,8 +36,7 @@ S ret_struct_arr() {
   return tint_symbol_2;
 }
 
-void foo(tint_array<int4, 4> src_param, device S* const tint_symbol_4, threadgroup tint_array<int4, 4>* const tint_symbol_6, const constant S* const tint_symbol_7, device S* const tint_symbol_8, device S_nested* const tint_symbol_9) {
-  thread tint_array<int4, 4> tint_symbol_5 = {};
+void foo(tint_array<int4, 4> src_param, thread tint_private_vars_struct* const tint_private_vars, device S* const tint_symbol_4, threadgroup tint_array<int4, 4>* const tint_symbol_5, const constant S* const tint_symbol_6, device S* const tint_symbol_7, device S_nested* const tint_symbol_8) {
   tint_array<int4, 4> src_function = {};
   tint_array<int4, 4> const tint_symbol_3 = tint_array<int4, 4>{int4(1), int4(2), int4(3), int4(3)};
   (*(tint_symbol_4)).arr = tint_symbol_3;
@@ -42,13 +45,13 @@ void foo(tint_array<int4, 4> src_param, device S* const tint_symbol_4, threadgro
   tint_array<int4, 4> const src_let = tint_array<int4, 4>{};
   (*(tint_symbol_4)).arr = src_let;
   (*(tint_symbol_4)).arr = src_function;
-  (*(tint_symbol_4)).arr = tint_symbol_5;
-  (*(tint_symbol_4)).arr = *(tint_symbol_6);
+  (*(tint_symbol_4)).arr = (*(tint_private_vars)).src_private;
+  (*(tint_symbol_4)).arr = *(tint_symbol_5);
   S const tint_symbol = ret_struct_arr();
   (*(tint_symbol_4)).arr = tint_symbol.arr;
+  (*(tint_symbol_4)).arr = (*(tint_symbol_6)).arr;
   (*(tint_symbol_4)).arr = (*(tint_symbol_7)).arr;
-  (*(tint_symbol_4)).arr = (*(tint_symbol_8)).arr;
   tint_array<tint_array<tint_array<int, 2>, 3>, 4> src_nested = {};
-  (*(tint_symbol_9)).arr = src_nested;
+  (*(tint_symbol_8)).arr = src_nested;
 }
 

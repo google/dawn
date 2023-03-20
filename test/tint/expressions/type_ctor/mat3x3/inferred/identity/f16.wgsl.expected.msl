@@ -1,9 +1,12 @@
 #include <metal_stdlib>
 
 using namespace metal;
-half3x3 f() {
-  thread half3x3 tint_symbol = half3x3(half3(0.0h, 1.0h, 2.0h), half3(3.0h, 4.0h, 5.0h), half3(6.0h, 7.0h, 8.0h));
-  half3x3 const m_1 = half3x3(tint_symbol);
+struct tint_private_vars_struct {
+  half3x3 m;
+};
+
+half3x3 f(thread tint_private_vars_struct* const tint_private_vars) {
+  half3x3 const m_1 = half3x3((*(tint_private_vars)).m);
   return m_1;
 }
 

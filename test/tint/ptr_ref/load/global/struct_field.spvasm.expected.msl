@@ -5,16 +5,20 @@ struct S {
   int i;
 };
 
-void main_1() {
-  thread S tint_symbol_1 = {};
+struct tint_private_vars_struct {
+  S V;
+};
+
+void main_1(thread tint_private_vars_struct* const tint_private_vars) {
   int i = 0;
-  int const x_15 = tint_symbol_1.i;
+  int const x_15 = (*(tint_private_vars)).V.i;
   i = x_15;
   return;
 }
 
 kernel void tint_symbol() {
-  main_1();
+  thread tint_private_vars_struct tint_private_vars = {};
+  main_1(&(tint_private_vars));
   return;
 }
 

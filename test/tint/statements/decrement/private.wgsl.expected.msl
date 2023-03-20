@@ -1,8 +1,11 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void tint_symbol() {
-  thread int tint_symbol_1 = 0;
-  tint_symbol_1 = as_type<int>((as_type<uint>(tint_symbol_1) - as_type<uint>(1)));
+struct tint_private_vars_struct {
+  int i;
+};
+
+void tint_symbol(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).i = as_type<int>((as_type<uint>((*(tint_private_vars)).i) - as_type<uint>(1)));
 }
 

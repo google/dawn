@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  int counter;
+};
+
 struct tint_packed_vec3_f16_array_element {
   /* 0x0000 */ packed_half3 elements;
   /* 0x0006 */ tint_array<int8_t, 2> tint_pad;
@@ -72,27 +76,28 @@ tint_array<Outer, 4> tint_unpack_vec3_in_composite_4(tint_array<Outer_tint_packe
   return result;
 }
 
-int i() {
-  thread int tint_symbol_4 = 0;
-  tint_symbol_4 = as_type<int>((as_type<uint>(tint_symbol_4) + as_type<uint>(1)));
-  return tint_symbol_4;
+int i(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).counter = as_type<int>((as_type<uint>((*(tint_private_vars)).counter) + as_type<uint>(1)));
+  return (*(tint_private_vars)).counter;
 }
 
-kernel void f(const constant tint_array<Outer_tint_packed_vec3, 4>* tint_symbol_5 [[buffer(0)]]) {
-  int const tint_symbol = i();
+kernel void f(const constant tint_array<Outer_tint_packed_vec3, 4>* tint_symbol_4 [[buffer(0)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.counter = 0;
+  int const tint_symbol = i(&(tint_private_vars));
   int const p_a_i_save = tint_symbol;
-  int const tint_symbol_1 = i();
+  int const tint_symbol_1 = i(&(tint_private_vars));
   int const p_a_i_a_i_save = tint_symbol_1;
-  int const tint_symbol_2 = i();
+  int const tint_symbol_2 = i(&(tint_private_vars));
   int const p_a_i_a_i_m_i_save = tint_symbol_2;
-  tint_array<Outer, 4> const l_a = tint_unpack_vec3_in_composite_4(*(tint_symbol_5));
-  Outer const l_a_i = tint_unpack_vec3_in_composite_3((*(tint_symbol_5))[p_a_i_save]);
-  tint_array<Inner, 4> const l_a_i_a = tint_unpack_vec3_in_composite_2((*(tint_symbol_5))[p_a_i_save].a);
-  Inner const l_a_i_a_i = tint_unpack_vec3_in_composite_1((*(tint_symbol_5))[p_a_i_save].a[p_a_i_a_i_save]);
-  half3x3 const l_a_i_a_i_m = tint_unpack_vec3_in_composite((*(tint_symbol_5))[p_a_i_save].a[p_a_i_a_i_save].m);
-  half3 const l_a_i_a_i_m_i = half3((*(tint_symbol_5))[p_a_i_save].a[p_a_i_a_i_save].m[p_a_i_a_i_m_i_save].elements);
-  int const tint_symbol_3 = i();
-  half const l_a_i_a_i_m_i_i = (*(tint_symbol_5))[p_a_i_save].a[p_a_i_a_i_save].m[p_a_i_a_i_m_i_save].elements[tint_symbol_3];
+  tint_array<Outer, 4> const l_a = tint_unpack_vec3_in_composite_4(*(tint_symbol_4));
+  Outer const l_a_i = tint_unpack_vec3_in_composite_3((*(tint_symbol_4))[p_a_i_save]);
+  tint_array<Inner, 4> const l_a_i_a = tint_unpack_vec3_in_composite_2((*(tint_symbol_4))[p_a_i_save].a);
+  Inner const l_a_i_a_i = tint_unpack_vec3_in_composite_1((*(tint_symbol_4))[p_a_i_save].a[p_a_i_a_i_save]);
+  half3x3 const l_a_i_a_i_m = tint_unpack_vec3_in_composite((*(tint_symbol_4))[p_a_i_save].a[p_a_i_a_i_save].m);
+  half3 const l_a_i_a_i_m_i = half3((*(tint_symbol_4))[p_a_i_save].a[p_a_i_a_i_save].m[p_a_i_a_i_m_i_save].elements);
+  int const tint_symbol_3 = i(&(tint_private_vars));
+  half const l_a_i_a_i_m_i_i = (*(tint_symbol_4))[p_a_i_save].a[p_a_i_a_i_save].m[p_a_i_a_i_m_i_save].elements[tint_symbol_3];
   return;
 }
 

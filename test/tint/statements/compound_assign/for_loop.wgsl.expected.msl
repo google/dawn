@@ -14,42 +14,46 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  uint i;
+};
+
 struct S {
   int a;
   float4 b;
   float2x2 c;
 };
 
-int idx1(thread uint* const tint_symbol_5) {
-  *(tint_symbol_5) = (*(tint_symbol_5) + 1u);
+int idx1(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).i = ((*(tint_private_vars)).i + 1u);
   return 1;
 }
 
-int idx2(thread uint* const tint_symbol_6) {
-  *(tint_symbol_6) = (*(tint_symbol_6) + 2u);
+int idx2(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).i = ((*(tint_private_vars)).i + 2u);
   return 1;
 }
 
-int idx3(thread uint* const tint_symbol_7) {
-  *(tint_symbol_7) = (*(tint_symbol_7) + 3u);
+int idx3(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).i = ((*(tint_private_vars)).i + 3u);
   return 1;
 }
 
-void foo(thread uint* const tint_symbol_8) {
+void foo(thread tint_private_vars_struct* const tint_private_vars) {
   tint_array<float, 4> a = tint_array<float, 4>{};
   {
-    int const tint_symbol_2 = idx1(tint_symbol_8);
+    int const tint_symbol_2 = idx1(tint_private_vars);
     int const tint_symbol_save = tint_symbol_2;
     a[tint_symbol_save] = (a[tint_symbol_save] * 2.0f);
     while (true) {
-      int const tint_symbol_3 = idx2(tint_symbol_8);
+      int const tint_symbol_3 = idx2(tint_private_vars);
       if (!((a[tint_symbol_3] < 10.0f))) {
         break;
       }
       {
       }
       {
-        int const tint_symbol_4 = idx3(tint_symbol_8);
+        int const tint_symbol_4 = idx3(tint_private_vars);
         int const tint_symbol_1_save = tint_symbol_4;
         a[tint_symbol_1_save] = (a[tint_symbol_1_save] + 1.0f);
       }

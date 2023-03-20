@@ -1,10 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void f() {
-  thread int tint_symbol = 1;
-  thread int tint_symbol_1 = 2;
-  int b = tint_symbol;
-  int b__ = tint_symbol_1;
+struct tint_private_vars_struct {
+  int a;
+  int a__;
+};
+
+void f(thread tint_private_vars_struct* const tint_private_vars) {
+  int b = (*(tint_private_vars)).a;
+  int b__ = (*(tint_private_vars)).a__;
 }
 

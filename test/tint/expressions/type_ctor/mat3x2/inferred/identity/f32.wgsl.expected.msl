@@ -1,9 +1,12 @@
 #include <metal_stdlib>
 
 using namespace metal;
-float3x2 f() {
-  thread float3x2 tint_symbol = float3x2(float2(0.0f, 1.0f), float2(2.0f, 3.0f), float2(4.0f, 5.0f));
-  float3x2 const m_1 = float3x2(tint_symbol);
+struct tint_private_vars_struct {
+  float3x2 m;
+};
+
+float3x2 f(thread tint_private_vars_struct* const tint_private_vars) {
+  float3x2 const m_1 = float3x2((*(tint_private_vars)).m);
   return m_1;
 }
 

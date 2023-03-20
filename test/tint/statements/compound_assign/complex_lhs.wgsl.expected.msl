@@ -14,25 +14,29 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  int counter;
+};
+
 struct S {
   tint_array<int4, 4> a;
 };
 
-int foo(thread int* const tint_symbol_4) {
-  *(tint_symbol_4) = as_type<int>((as_type<uint>(*(tint_symbol_4)) + as_type<uint>(1)));
-  return *(tint_symbol_4);
+int foo(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).counter = as_type<int>((as_type<uint>((*(tint_private_vars)).counter) + as_type<uint>(1)));
+  return (*(tint_private_vars)).counter;
 }
 
-int bar(thread int* const tint_symbol_5) {
-  *(tint_symbol_5) = as_type<int>((as_type<uint>(*(tint_symbol_5)) + as_type<uint>(2)));
-  return *(tint_symbol_5);
+int bar(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).counter = as_type<int>((as_type<uint>((*(tint_private_vars)).counter) + as_type<uint>(2)));
+  return (*(tint_private_vars)).counter;
 }
 
-void tint_symbol(thread int* const tint_symbol_6) {
+void tint_symbol(thread tint_private_vars_struct* const tint_private_vars) {
   S x = S{};
-  int const tint_symbol_3 = foo(tint_symbol_6);
+  int const tint_symbol_3 = foo(tint_private_vars);
   int const tint_symbol_1_save = tint_symbol_3;
-  int const tint_symbol_2 = bar(tint_symbol_6);
+  int const tint_symbol_2 = bar(tint_private_vars);
   x.a[tint_symbol_1_save][tint_symbol_2] = as_type<int>((as_type<uint>(x.a[tint_symbol_1_save][tint_symbol_2]) + as_type<uint>(5)));
 }
 

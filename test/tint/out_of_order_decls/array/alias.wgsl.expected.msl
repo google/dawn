@@ -14,9 +14,13 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  tint_array<int, 4> A;
+};
+
 fragment void f() {
-  thread tint_array<int, 4> tint_symbol = {};
-  tint_symbol[0] = 1;
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.A[0] = 1;
   return;
 }
 

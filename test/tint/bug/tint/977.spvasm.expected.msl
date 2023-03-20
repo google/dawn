@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  uint3 gl_GlobalInvocationID;
+};
+
 struct ResultMatrix {
   /* 0x0000 */ tint_array<float, 1> numbers;
 };
@@ -53,30 +57,30 @@ float binaryOperation_f1_f1_(thread float* const a, thread float* const b) {
   return x_41;
 }
 
-void main_1(thread uint3* const tint_symbol_2, device ResultMatrix* const tint_symbol_3) {
+void main_1(thread tint_private_vars_struct* const tint_private_vars, device ResultMatrix* const tint_symbol_2) {
   int index = 0;
   int a_1 = 0;
   float param = 0.0f;
   float param_1 = 0.0f;
-  uint const x_54 = (*(tint_symbol_2))[0];
+  uint const x_54 = (*(tint_private_vars)).gl_GlobalInvocationID[0];
   index = as_type<int>(x_54);
   a_1 = -10;
   int const x_63 = index;
   param = -4.0f;
   param_1 = -3.0f;
   float const x_68 = binaryOperation_f1_f1_(&(param), &(param_1));
-  (*(tint_symbol_3)).numbers[x_63] = x_68;
+  (*(tint_symbol_2)).numbers[x_63] = x_68;
   return;
 }
 
-void tint_symbol_1_inner(uint3 gl_GlobalInvocationID_param, thread uint3* const tint_symbol_4, device ResultMatrix* const tint_symbol_5) {
-  *(tint_symbol_4) = gl_GlobalInvocationID_param;
-  main_1(tint_symbol_4, tint_symbol_5);
+void tint_symbol_1_inner(uint3 gl_GlobalInvocationID_param, thread tint_private_vars_struct* const tint_private_vars, device ResultMatrix* const tint_symbol_3) {
+  (*(tint_private_vars)).gl_GlobalInvocationID = gl_GlobalInvocationID_param;
+  main_1(tint_private_vars, tint_symbol_3);
 }
 
-kernel void tint_symbol_1(device ResultMatrix* tint_symbol_7 [[buffer(0)]], uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]]) {
-  thread uint3 tint_symbol_6 = 0u;
-  tint_symbol_1_inner(gl_GlobalInvocationID_param, &(tint_symbol_6), tint_symbol_7);
+kernel void tint_symbol_1(device ResultMatrix* tint_symbol_4 [[buffer(0)]], uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_symbol_1_inner(gl_GlobalInvocationID_param, &(tint_private_vars), tint_symbol_4);
   return;
 }
 

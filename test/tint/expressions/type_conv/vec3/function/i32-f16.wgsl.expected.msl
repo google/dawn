@@ -1,14 +1,17 @@
 #include <metal_stdlib>
 
 using namespace metal;
-int3 m() {
-  thread int tint_symbol_1 = 0;
-  tint_symbol_1 = 1;
-  return int3(tint_symbol_1);
+struct tint_private_vars_struct {
+  int t;
+};
+
+int3 m(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).t = 1;
+  return int3((*(tint_private_vars)).t);
 }
 
-void f() {
-  int3 const tint_symbol = m();
+void f(thread tint_private_vars_struct* const tint_private_vars) {
+  int3 const tint_symbol = m(tint_private_vars);
   half3 v = half3(tint_symbol);
 }
 

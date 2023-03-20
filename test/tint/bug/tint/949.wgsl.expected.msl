@@ -14,6 +14,17 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  float u_Float;
+  float3 u_Color;
+  float2 vMainuv;
+  float4 v_output1;
+  bool gl_FrontFacing;
+  float2 v_uv;
+  float4 v_output2;
+  float4 glFragColor;
+};
+
 struct LeftOver_tint_packed_vec3 {
   /* 0x0000 */ float4x4 u_World;
   /* 0x0040 */ float4x4 u_ViewProjection;
@@ -196,9 +207,7 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(thread float
   return x_245;
 }
 
-void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, sampler tint_symbol_9, const constant LeftOver_tint_packed_vec3* const tint_symbol_10, thread float4* const tint_symbol_11, thread bool* const tint_symbol_12, thread float2* const tint_symbol_13, thread float4* const tint_symbol_14, texture2d<float, access::sample> tint_symbol_15, sampler tint_symbol_16, const constant Light0_tint_packed_vec3* const tint_symbol_17, thread float4* const tint_symbol_18) {
-  thread float tint_symbol_5 = 0.0f;
-  thread float3 tint_symbol_6 = 0.0f;
+void main_1(thread tint_private_vars_struct* const tint_private_vars, texture2d<float, access::sample> tint_symbol_5, sampler tint_symbol_6, const constant LeftOver_tint_packed_vec3* const tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, sampler tint_symbol_9, const constant Light0_tint_packed_vec3* const tint_symbol_10) {
   float4 tempTextureRead = 0.0f;
   float3 rgb = 0.0f;
   float3 output5 = 0.0f;
@@ -252,39 +261,39 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   float3 diffuseOutput = 0.0f;
   float3 specularOutput = 0.0f;
   float3 output3 = 0.0f;
-  tint_symbol_5 = 100.0f;
-  tint_symbol_6 = float3(0.5f);
-  float2 const x_261 = *(tint_symbol_7);
-  float4 const x_262 = tint_symbol_8.sample(tint_symbol_9, x_261);
+  (*(tint_private_vars)).u_Float = 100.0f;
+  (*(tint_private_vars)).u_Color = float3(0.5f);
+  float2 const x_261 = (*(tint_private_vars)).vMainuv;
+  float4 const x_262 = tint_symbol_5.sample(tint_symbol_6, x_261);
   tempTextureRead = x_262;
   float4 const x_264 = tempTextureRead;
-  float const x_273 = (*(tint_symbol_10)).textureInfoName;
+  float const x_273 = (*(tint_symbol_7)).textureInfoName;
   rgb = (float3(x_264[0], x_264[1], x_264[2]) * x_273);
-  float3 const x_279 = float3((*(tint_symbol_10)).u_cameraPosition);
-  float4 const x_282 = *(tint_symbol_11);
+  float3 const x_279 = float3((*(tint_symbol_7)).u_cameraPosition);
+  float4 const x_282 = (*(tint_private_vars)).v_output1;
   output5 = normalize((x_279 - float3(x_282[0], x_282[1], x_282[2])));
   output4 = float4(0.0f);
   uvOffset = float2(0.0f);
-  float const x_292 = (*(tint_symbol_10)).u_bumpStrength;
+  float const x_292 = (*(tint_symbol_7)).u_bumpStrength;
   normalScale = (1.0f / x_292);
-  bool const x_298 = *(tint_symbol_12);
+  bool const x_298 = (*(tint_private_vars)).gl_FrontFacing;
   if (x_298) {
-    float2 const x_303 = *(tint_symbol_13);
+    float2 const x_303 = (*(tint_private_vars)).v_uv;
     x_299 = x_303;
   } else {
-    float2 const x_305 = *(tint_symbol_13);
+    float2 const x_305 = (*(tint_private_vars)).v_uv;
     x_299 = -(x_305);
   }
   float2 const x_307 = x_299;
   TBNUV = x_307;
-  float4 const x_310 = *(tint_symbol_14);
+  float4 const x_310 = (*(tint_private_vars)).v_output2;
   float const x_312 = normalScale;
   param_3 = (float3(x_310[0], x_310[1], x_310[2]) * x_312);
-  float4 const x_317 = *(tint_symbol_11);
+  float4 const x_317 = (*(tint_private_vars)).v_output1;
   param_4 = float3(x_317[0], x_317[1], x_317[2]);
   float2 const x_320 = TBNUV;
   param_5 = x_320;
-  float2 const x_324 = (*(tint_symbol_10)).tangentSpaceParameter0;
+  float2 const x_324 = (*(tint_symbol_7)).tangentSpaceParameter0;
   param_6 = x_324;
   float3x3 const x_325 = cotangent_frame_vf3_vf3_vf2_vf2_(&(param_3), &(param_4), &(param_5), &(param_6));
   TBN = x_325;
@@ -298,7 +307,7 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   float3x3 const x_337 = invTBN;
   float3 const x_338 = output5;
   parallaxLimit = (length(float2(x_334[0], x_334[1])) / ((x_337 * -(x_338)))[2]);
-  float const x_345 = (*(tint_symbol_10)).u_parallaxScale;
+  float const x_345 = (*(tint_symbol_7)).u_parallaxScale;
   float const x_346 = parallaxLimit;
   parallaxLimit = (x_346 * x_345);
   float3x3 const x_349 = invTBN;
@@ -311,7 +320,7 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   float3x3 const x_361 = invTBN;
   float3 const x_362 = output5;
   float3x3 const x_365 = invTBN;
-  float4 const x_366 = *(tint_symbol_14);
+  float4 const x_366 = (*(tint_private_vars)).v_output2;
   numSamples = (15.0f + (dot((x_361 * -(x_362)), (x_365 * float3(x_366[0], x_366[1], x_366[2]))) * -11.0f));
   float const x_374 = numSamples;
   stepSize = (1.0f / x_374);
@@ -327,7 +336,7 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
     } else {
       break;
     }
-    float2 const x_394 = *(tint_symbol_13);
+    float2 const x_394 = (*(tint_private_vars)).v_uv;
     float2 const x_395 = vCurrOffset;
     float4 const x_397 = float4(0.0f);
     currSampledHeight = x_397[3];
@@ -373,10 +382,10 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   parallaxOcclusion_0 = x_444;
   float2 const x_445 = parallaxOcclusion_0;
   uvOffset = x_445;
-  float2 const x_449 = *(tint_symbol_13);
+  float2 const x_449 = (*(tint_private_vars)).v_uv;
   float2 const x_450 = uvOffset;
-  float4 const x_452 = tint_symbol_8.sample(tint_symbol_9, (x_449 + x_450));
-  float const x_454 = (*(tint_symbol_10)).u_bumpStrength;
+  float4 const x_452 = tint_symbol_5.sample(tint_symbol_6, (x_449 + x_450));
+  float const x_454 = (*(tint_symbol_7)).u_bumpStrength;
   float3x3 const x_457 = TBN;
   param_8 = x_457;
   param_9 = float3(x_452[0], x_452[1], x_452[2]);
@@ -384,19 +393,19 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   float3 const x_461 = perturbNormal_mf33_vf3_f1_(&(param_8), &(param_9), &(param_10));
   float4 const x_462 = output4;
   output4 = float4(x_461[0], x_461[1], x_461[2], x_462[3]);
-  float2 const x_465 = *(tint_symbol_13);
+  float2 const x_465 = (*(tint_private_vars)).v_uv;
   float2 const x_466 = uvOffset;
   output6 = (x_465 + x_466);
   float2 const x_474 = output6;
-  float4 const x_475 = tint_symbol_15.sample(tint_symbol_16, x_474);
+  float4 const x_475 = tint_symbol_8.sample(tint_symbol_9, x_474);
   tempTextureRead1 = x_475;
   float4 const x_477 = tempTextureRead1;
   rgb1 = float3(x_477[0], x_477[1], x_477[2]);
-  float3 const x_481 = float3((*(tint_symbol_10)).u_cameraPosition);
-  float4 const x_482 = *(tint_symbol_11);
+  float3 const x_481 = float3((*(tint_symbol_7)).u_cameraPosition);
+  float4 const x_482 = (*(tint_private_vars)).v_output1;
   viewDirectionW_1 = normalize((x_481 - float3(x_482[0], x_482[1], x_482[2])));
   shadow = 1.0f;
-  float const x_488 = tint_symbol_5;
+  float const x_488 = (*(tint_private_vars)).u_Float;
   glossiness_1 = (1.0f * x_488);
   diffuseBase = float3(0.0f);
   specularBase = float3(0.0f);
@@ -406,13 +415,13 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   param_11 = x_501;
   float3 const x_503 = normalW;
   param_12 = x_503;
-  float4 const x_507 = (*(tint_symbol_17)).vLightData;
+  float4 const x_507 = (*(tint_symbol_10)).vLightData;
   param_13 = x_507;
-  float4 const x_510 = (*(tint_symbol_17)).vLightDiffuse;
+  float4 const x_510 = (*(tint_symbol_10)).vLightDiffuse;
   param_14 = float3(x_510[0], x_510[1], x_510[2]);
-  float4 const x_514 = (*(tint_symbol_17)).vLightSpecular;
+  float4 const x_514 = (*(tint_symbol_10)).vLightSpecular;
   param_15 = float3(x_514[0], x_514[1], x_514[2]);
-  float3 const x_518 = float3((*(tint_symbol_17)).vLightGround);
+  float3 const x_518 = float3((*(tint_symbol_10)).vLightGround);
   param_16 = x_518;
   float const x_520 = glossiness_1;
   param_17 = x_520;
@@ -431,13 +440,13 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   float3 const x_536 = rgb1;
   diffuseOutput = (x_535 * x_536);
   float3 const x_539 = specularBase;
-  float3 const x_540 = tint_symbol_6;
+  float3 const x_540 = (*(tint_private_vars)).u_Color;
   specularOutput = (x_539 * x_540);
   float3 const x_543 = diffuseOutput;
   float3 const x_544 = specularOutput;
   output3 = (x_543 + x_544);
   float3 const x_548 = output3;
-  *(tint_symbol_18) = float4(x_548[0], x_548[1], x_548[2], 1.0f);
+  (*(tint_private_vars)).glFragColor = float4(x_548[0], x_548[1], x_548[2], 1.0f);
   return;
 }
 
@@ -456,25 +465,20 @@ struct tint_symbol_3 {
   float4 glFragColor_1 [[color(0)]];
 };
 
-main_out tint_symbol_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontFacing_param, float2 v_uv_param, float4 v_output2_param, thread float2* const tint_symbol_19, thread float4* const tint_symbol_20, thread bool* const tint_symbol_21, thread float2* const tint_symbol_22, thread float4* const tint_symbol_23, texture2d<float, access::sample> tint_symbol_24, sampler tint_symbol_25, const constant LeftOver_tint_packed_vec3* const tint_symbol_26, texture2d<float, access::sample> tint_symbol_27, sampler tint_symbol_28, const constant Light0_tint_packed_vec3* const tint_symbol_29, thread float4* const tint_symbol_30) {
-  *(tint_symbol_19) = vMainuv_param;
-  *(tint_symbol_20) = v_output1_param;
-  *(tint_symbol_21) = gl_FrontFacing_param;
-  *(tint_symbol_22) = v_uv_param;
-  *(tint_symbol_23) = v_output2_param;
-  main_1(tint_symbol_19, tint_symbol_24, tint_symbol_25, tint_symbol_26, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23, tint_symbol_27, tint_symbol_28, tint_symbol_29, tint_symbol_30);
-  main_out const tint_symbol_4 = {.glFragColor_1=*(tint_symbol_30)};
+main_out tint_symbol_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontFacing_param, float2 v_uv_param, float4 v_output2_param, thread tint_private_vars_struct* const tint_private_vars, texture2d<float, access::sample> tint_symbol_11, sampler tint_symbol_12, const constant LeftOver_tint_packed_vec3* const tint_symbol_13, texture2d<float, access::sample> tint_symbol_14, sampler tint_symbol_15, const constant Light0_tint_packed_vec3* const tint_symbol_16) {
+  (*(tint_private_vars)).vMainuv = vMainuv_param;
+  (*(tint_private_vars)).v_output1 = v_output1_param;
+  (*(tint_private_vars)).gl_FrontFacing = gl_FrontFacing_param;
+  (*(tint_private_vars)).v_uv = v_uv_param;
+  (*(tint_private_vars)).v_output2 = v_output2_param;
+  main_1(tint_private_vars, tint_symbol_11, tint_symbol_12, tint_symbol_13, tint_symbol_14, tint_symbol_15, tint_symbol_16);
+  main_out const tint_symbol_4 = {.glFragColor_1=(*(tint_private_vars)).glFragColor};
   return tint_symbol_4;
 }
 
-fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_36 [[texture(0)]], sampler tint_symbol_37 [[sampler(0)]], const constant LeftOver_tint_packed_vec3* tint_symbol_38 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_39 [[texture(1)]], sampler tint_symbol_40 [[sampler(1)]], const constant Light0_tint_packed_vec3* tint_symbol_41 [[buffer(1)]], bool gl_FrontFacing_param [[front_facing]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread float2 tint_symbol_31 = 0.0f;
-  thread float4 tint_symbol_32 = 0.0f;
-  thread bool tint_symbol_33 = false;
-  thread float2 tint_symbol_34 = 0.0f;
-  thread float4 tint_symbol_35 = 0.0f;
-  thread float4 tint_symbol_42 = 0.0f;
-  main_out const inner_result = tint_symbol_inner(tint_symbol_1.vMainuv_param, tint_symbol_1.v_output1_param, gl_FrontFacing_param, tint_symbol_1.v_uv_param, tint_symbol_1.v_output2_param, &(tint_symbol_31), &(tint_symbol_32), &(tint_symbol_33), &(tint_symbol_34), &(tint_symbol_35), tint_symbol_36, tint_symbol_37, tint_symbol_38, tint_symbol_39, tint_symbol_40, tint_symbol_41, &(tint_symbol_42));
+fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_17 [[texture(0)]], sampler tint_symbol_18 [[sampler(0)]], const constant LeftOver_tint_packed_vec3* tint_symbol_19 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_20 [[texture(1)]], sampler tint_symbol_21 [[sampler(1)]], const constant Light0_tint_packed_vec3* tint_symbol_22 [[buffer(1)]], bool gl_FrontFacing_param [[front_facing]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  main_out const inner_result = tint_symbol_inner(tint_symbol_1.vMainuv_param, tint_symbol_1.v_output1_param, gl_FrontFacing_param, tint_symbol_1.v_uv_param, tint_symbol_1.v_output2_param, &(tint_private_vars), tint_symbol_17, tint_symbol_18, tint_symbol_19, tint_symbol_20, tint_symbol_21, tint_symbol_22);
   tint_symbol_3 wrapper_result = {};
   wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
   return wrapper_result;

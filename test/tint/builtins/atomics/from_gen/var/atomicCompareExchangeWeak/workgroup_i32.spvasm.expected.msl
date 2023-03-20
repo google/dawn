@@ -12,6 +12,10 @@ atomic_compare_exchange_resulti32 atomicCompareExchangeWeak_1(threadgroup atomic
   return {old_value, exchanged};
 }
 
+struct tint_private_vars_struct {
+  uint local_invocation_index_1;
+};
+
 struct x__atomic_compare_exchange_resulti32 {
   int old_value;
   bool exchanged;
@@ -40,25 +44,25 @@ void compute_main_inner(uint local_invocation_index_2, threadgroup atomic_int* c
   return;
 }
 
-void compute_main_1(thread uint* const tint_symbol_4, threadgroup atomic_int* const tint_symbol_5) {
-  uint const x_41 = *(tint_symbol_4);
-  compute_main_inner(x_41, tint_symbol_5);
+void compute_main_1(thread tint_private_vars_struct* const tint_private_vars, threadgroup atomic_int* const tint_symbol_4) {
+  uint const x_41 = (*(tint_private_vars)).local_invocation_index_1;
+  compute_main_inner(x_41, tint_symbol_4);
   return;
 }
 
-void compute_main_inner_1(uint local_invocation_index_1_param, threadgroup atomic_int* const tint_symbol_6, thread uint* const tint_symbol_7) {
+void compute_main_inner_1(uint local_invocation_index_1_param, thread tint_private_vars_struct* const tint_private_vars, threadgroup atomic_int* const tint_symbol_5) {
   {
-    atomic_store_explicit(tint_symbol_6, 0, memory_order_relaxed);
+    atomic_store_explicit(tint_symbol_5, 0, memory_order_relaxed);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  *(tint_symbol_7) = local_invocation_index_1_param;
-  compute_main_1(tint_symbol_7, tint_symbol_6);
+  (*(tint_private_vars)).local_invocation_index_1 = local_invocation_index_1_param;
+  compute_main_1(tint_private_vars, tint_symbol_5);
 }
 
 kernel void compute_main(uint local_invocation_index_1_param [[thread_index_in_threadgroup]]) {
-  threadgroup atomic_int tint_symbol_8;
-  thread uint tint_symbol_9 = 0u;
-  compute_main_inner_1(local_invocation_index_1_param, &(tint_symbol_8), &(tint_symbol_9));
+  thread tint_private_vars_struct tint_private_vars = {};
+  threadgroup atomic_int tint_symbol_6;
+  compute_main_inner_1(local_invocation_index_1_param, &(tint_private_vars), &(tint_symbol_6));
   return;
 }
 

@@ -18,13 +18,17 @@ struct str {
   tint_array<int, 4> arr;
 };
 
+struct tint_private_vars_struct {
+  str P;
+};
+
 tint_array<int, 4> func(thread tint_array<int, 4>* const pointer) {
   return *(pointer);
 }
 
 kernel void tint_symbol() {
-  thread str tint_symbol_1 = {};
-  tint_array<int, 4> const r = func(&(tint_symbol_1.arr));
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_array<int, 4> const r = func(&(tint_private_vars.P.arr));
   return;
 }
 

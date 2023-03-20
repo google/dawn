@@ -6,6 +6,10 @@ struct S {
   float b;
 };
 
+struct tint_private_vars_struct {
+  S v;
+};
+
 kernel void tint_symbol() {
   return;
 }

@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  bool tint_discarded;
+};
+
 struct Uniforms {
   /* 0x0000 */ float2 u_scale;
   /* 0x0008 */ float2 u_offset;
@@ -58,21 +62,22 @@ struct tint_symbol_3 {
   float4 value [[color(0)]];
 };
 
-float4 fs_main_inner(float2 texcoord, thread bool* const tint_symbol_6) {
+float4 fs_main_inner(float2 texcoord, thread tint_private_vars_struct* const tint_private_vars) {
   float2 clampedTexcoord = clamp(texcoord, float2(0.0f), float2(1.0f));
   if (!(all((clampedTexcoord == texcoord)))) {
-    *(tint_symbol_6) = true;
+    (*(tint_private_vars)).tint_discarded = true;
   }
   float4 srcColor = float4(0.0f);
   return srcColor;
 }
 
 fragment tint_symbol_3 fs_main(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread bool tint_symbol_7 = false;
-  float4 const inner_result_1 = fs_main_inner(tint_symbol_1.texcoord, &(tint_symbol_7));
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.tint_discarded = false;
+  float4 const inner_result_1 = fs_main_inner(tint_symbol_1.texcoord, &(tint_private_vars));
   tint_symbol_3 wrapper_result_1 = {};
   wrapper_result_1.value = inner_result_1;
-  if (tint_symbol_7) {
+  if (tint_private_vars.tint_discarded) {
     discard_fragment();
   }
   return wrapper_result_1;

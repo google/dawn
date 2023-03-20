@@ -5,13 +5,17 @@ struct str {
   int i;
 };
 
+struct tint_private_vars_struct {
+  str P;
+};
+
 void func(thread int* const pointer) {
   *(pointer) = 42;
 }
 
 kernel void tint_symbol() {
-  thread str tint_symbol_1 = {};
-  func(&(tint_symbol_1.i));
+  thread tint_private_vars_struct tint_private_vars = {};
+  func(&(tint_private_vars.P.i));
   return;
 }
 

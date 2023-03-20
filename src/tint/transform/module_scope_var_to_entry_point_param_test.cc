@@ -49,11 +49,17 @@ fn main() {
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  p : f32,
+}
+
 @compute @workgroup_size(1)
 fn main() {
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
   @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol : f32;
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol_1 : f32;
-  tint_symbol = tint_symbol_1;
+  tint_symbol = tint_private_vars.p;
 }
 )";
 
@@ -74,11 +80,17 @@ var<private> p : f32;
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  p : f32,
+}
+
 @compute @workgroup_size(1)
 fn main() {
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
   @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol : f32;
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol_1 : f32;
-  tint_symbol = tint_symbol_1;
+  tint_symbol = tint_private_vars.p;
 }
 )";
 
@@ -118,32 +130,38 @@ fn main() {
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  p : f32,
+}
+
 fn no_uses() {
 }
 
-fn zoo(@internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<private, f32>) {
-  *(tint_symbol) = (*(tint_symbol) * 2.0);
+fn zoo(tint_private_vars : ptr<private, tint_private_vars_struct>) {
+  (*(tint_private_vars)).p = ((*(tint_private_vars)).p * 2.0);
 }
 
 @internal(disable_validation__ignore_pointer_aliasing)
-fn bar(a : f32, b : f32, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<private, f32>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_2 : ptr<workgroup, f32>) {
-  *(tint_symbol_1) = a;
-  *(tint_symbol_2) = b;
-  zoo(tint_symbol_1);
+fn bar(a : f32, b : f32, tint_private_vars : ptr<private, tint_private_vars_struct>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<workgroup, f32>) {
+  (*(tint_private_vars)).p = a;
+  *(tint_symbol) = b;
+  zoo(tint_private_vars);
 }
 
 @internal(disable_validation__ignore_pointer_aliasing)
-fn foo(a : f32, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_3 : ptr<private, f32>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_4 : ptr<workgroup, f32>) {
+fn foo(a : f32, tint_private_vars : ptr<private, tint_private_vars_struct>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
-  bar(a, b, tint_symbol_3, tint_symbol_4);
+  bar(a, b, tint_private_vars, tint_symbol_1);
   no_uses();
 }
 
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol_5 : f32;
-  @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol_6 : f32;
-  foo(1.0, &(tint_symbol_5), &(tint_symbol_6));
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
+  @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol_2 : f32;
+  foo(1.0, &(tint_private_vars), &(tint_symbol_2));
 }
 )";
 
@@ -183,17 +201,23 @@ var<workgroup> w : f32;
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  p : f32,
+}
+
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol_5 : f32;
-  @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol_6 : f32;
-  foo(1.0, &(tint_symbol_5), &(tint_symbol_6));
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
+  @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol_2 : f32;
+  foo(1.0, &(tint_private_vars), &(tint_symbol_2));
 }
 
 @internal(disable_validation__ignore_pointer_aliasing)
-fn foo(a : f32, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_3 : ptr<private, f32>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_4 : ptr<workgroup, f32>) {
+fn foo(a : f32, tint_private_vars : ptr<private, tint_private_vars_struct>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
-  bar(a, b, tint_symbol_3, tint_symbol_4);
+  bar(a, b, tint_private_vars, tint_symbol_1);
   no_uses();
 }
 
@@ -201,14 +225,14 @@ fn no_uses() {
 }
 
 @internal(disable_validation__ignore_pointer_aliasing)
-fn bar(a : f32, b : f32, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<private, f32>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_2 : ptr<workgroup, f32>) {
-  *(tint_symbol_1) = a;
-  *(tint_symbol_2) = b;
-  zoo(tint_symbol_1);
+fn bar(a : f32, b : f32, tint_private_vars : ptr<private, tint_private_vars_struct>, @internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<workgroup, f32>) {
+  (*(tint_private_vars)).p = a;
+  *(tint_symbol) = b;
+  zoo(tint_private_vars);
 }
 
-fn zoo(@internal(disable_validation__ignore_address_space) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<private, f32>) {
-  *(tint_symbol) = (*(tint_symbol) * 2.0);
+fn zoo(tint_private_vars : ptr<private, tint_private_vars_struct>) {
+  (*(tint_private_vars)).p = ((*(tint_private_vars)).p * 2.0);
 }
 )";
 
@@ -229,11 +253,19 @@ fn main() {
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  a : f32,
+  b : f32,
+}
+
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol : f32 = 1.0;
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol_1 : f32 = f32();
-  let x : f32 = (tint_symbol + tint_symbol_1);
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
+  tint_private_vars.a = 1.0;
+  tint_private_vars.b = f32();
+  let x : f32 = (tint_private_vars.a + tint_private_vars.b);
 }
 )";
 
@@ -254,11 +286,19 @@ var<private> a : f32 = 1.0;
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  a : f32,
+  b : f32,
+}
+
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol : f32 = 1.0;
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol_1 : f32 = f32();
-  let x : f32 = (tint_symbol + tint_symbol_1);
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
+  tint_private_vars.a = 1.0;
+  tint_private_vars.b = f32();
+  let x : f32 = (tint_private_vars.a + tint_private_vars.b);
 }
 )";
 
@@ -282,12 +322,18 @@ fn main() {
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  p : f32,
+}
+
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol : f32;
-  @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol_1 : f32;
-  let p_ptr : ptr<private, f32> = &(tint_symbol);
-  let w_ptr : ptr<workgroup, f32> = &(tint_symbol_1);
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
+  @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol : f32;
+  let p_ptr : ptr<private, f32> = &(tint_private_vars.p);
+  let w_ptr : ptr<workgroup, f32> = &(tint_symbol);
   let x : f32 = (*(p_ptr) + *(w_ptr));
   *(p_ptr) = x;
 }
@@ -313,12 +359,18 @@ var<private> p : f32;
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  p : f32,
+}
+
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol : f32;
-  @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol_1 : f32;
-  let p_ptr : ptr<private, f32> = &(tint_symbol);
-  let w_ptr : ptr<workgroup, f32> = &(tint_symbol_1);
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
+  @internal(disable_validation__ignore_address_space) var<workgroup> tint_symbol : f32;
+  let p_ptr : ptr<private, f32> = &(tint_private_vars.p);
+  let w_ptr : ptr<workgroup, f32> = &(tint_symbol);
   let x : f32 = (*(p_ptr) + *(w_ptr));
   *(p_ptr) = x;
 }
@@ -1151,6 +1203,7 @@ struct S {
 
 var<private> p : f32;
 var<workgroup> w : f32;
+var<private> p_with_init : f32 = 42;
 
 @group(0) @binding(0)
 var<uniform> ub : S;
@@ -1166,6 +1219,13 @@ fn main() {
 )";
 
     auto* expect = R"(
+enable chromium_experimental_full_ptr_parameters;
+
+struct tint_private_vars_struct {
+  p : f32,
+  p_with_init : f32,
+}
+
 struct S {
   a : f32,
 }
@@ -1180,16 +1240,22 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-// Test that a private variable that is only referenced by a single user-defined function is
-// promoted to a function scope variable, rather than passed as a parameter.
-TEST_F(ModuleScopeVarToEntryPointParamTest, PromotePrivateToFunctionScope) {
+TEST_F(ModuleScopeVarToEntryPointParamTest, MultiplePrivateVariables) {
     auto* src = R"(
-var<private> p : f32;
+struct S {
+  a : f32,
+  b : f32,
+  c : f32,
+}
 
-fn foo(a : f32) -> f32 {
-  let x = p;
-  p = x * a;
-  return p;
+var<private> a : f32;
+var<private> b : f32 = 42;
+var<private> c : S = S(1, 2, 3);
+var<private> d : S;
+var<private> unused : f32;
+
+fn foo(x : f32) -> f32 {
+  return (a + b + c.a + d.c) * x;
 }
 
 @compute @workgroup_size(1)
@@ -1199,16 +1265,32 @@ fn main() {
 )";
 
     auto* expect = R"(
-fn foo(a : f32) -> f32 {
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol : f32;
-  let x = tint_symbol;
-  tint_symbol = (x * a);
-  return tint_symbol;
+enable chromium_experimental_full_ptr_parameters;
+
+struct S {
+  a : f32,
+  b : f32,
+  c : f32,
+}
+
+struct tint_private_vars_struct {
+  a : f32,
+  b : f32,
+  c : S,
+  d : S,
+  unused : f32,
+}
+
+fn foo(x : f32, tint_private_vars : ptr<private, tint_private_vars_struct>) -> f32 {
+  return (((((*(tint_private_vars)).a + (*(tint_private_vars)).b) + (*(tint_private_vars)).c.a) + (*(tint_private_vars)).d.c) * x);
 }
 
 @compute @workgroup_size(1)
 fn main() {
-  _ = foo(1.0);
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
+  tint_private_vars.b = 42;
+  tint_private_vars.c = S(1, 2, 3);
+  _ = foo(1.0, &(tint_private_vars));
 }
 )";
 
@@ -1217,36 +1299,59 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-// Test that a private variable that is only referenced by a single user-defined function is
-// promoted to a function scope variable, rather than passed as a parameter.
-TEST_F(ModuleScopeVarToEntryPointParamTest, PromotePrivateToFunctionScope_OutOfOrder) {
+TEST_F(ModuleScopeVarToEntryPointParamTest, MultiplePrivateVariables_OutOfOrder) {
     auto* src = R"(
-var<private> p : f32;
+var<private> a : f32;
+var<private> c : S = S(1, 2, 3);
+var<private> unused : f32;
 
 @compute @workgroup_size(1)
 fn main() {
   _ = foo(1.0);
 }
 
-fn foo(a : f32) -> f32 {
-  let x = p;
-  p = x * a;
-  return p;
+fn foo(x : f32) -> f32 {
+  return (a + b + c.a + d.c) * x;
 }
 
+var<private> b : f32 = 42;
+
+struct S {
+  a : f32,
+  b : f32,
+  c : f32,
+}
+
+var<private> d : S;
 )";
 
     auto* expect = R"(
-@compute @workgroup_size(1)
-fn main() {
-  _ = foo(1.0);
+enable chromium_experimental_full_ptr_parameters;
+
+struct S {
+  a : f32,
+  b : f32,
+  c : f32,
 }
 
-fn foo(a : f32) -> f32 {
-  @internal(disable_validation__ignore_address_space) var<private> tint_symbol : f32;
-  let x = tint_symbol;
-  tint_symbol = (x * a);
-  return tint_symbol;
+struct tint_private_vars_struct {
+  a : f32,
+  c : S,
+  unused : f32,
+  b : f32,
+  d : S,
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  @internal(disable_validation__ignore_address_space) var<private> tint_private_vars : tint_private_vars_struct;
+  tint_private_vars.c = S(1, 2, 3);
+  tint_private_vars.b = 42;
+  _ = foo(1.0, &(tint_private_vars));
+}
+
+fn foo(x : f32, tint_private_vars : ptr<private, tint_private_vars_struct>) -> f32 {
+  return (((((*(tint_private_vars)).a + (*(tint_private_vars)).b) + (*(tint_private_vars)).c.a) + (*(tint_private_vars)).d.c) * x);
 }
 )";
 

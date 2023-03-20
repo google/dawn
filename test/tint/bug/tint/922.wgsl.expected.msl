@@ -14,6 +14,17 @@ struct tint_array {
     T elements[N];
 };
 
+struct tint_private_vars_struct {
+  float3 a_Position1;
+  float2 a_UV1;
+  float4 a_Color1;
+  float3 a_Normal1;
+  float a_PosMtxIdx1;
+  float4 v_Color;
+  float2 v_TexCoord;
+  float4 gl_Position;
+};
+
 int tint_ftoi(float v) {
   return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v < 2147483520.0f));
 }
@@ -227,48 +238,48 @@ Mat4x3_ x_Mat4x3_1(Mat4x4_ m20) {
   return x_e12;
 }
 
-void main1(thread float* const tint_symbol_5, const constant ub_PacketParams* const tint_symbol_6, thread float3* const tint_symbol_7, const constant ub_SceneParams* const tint_symbol_8, thread float4* const tint_symbol_9, thread float4* const tint_symbol_10, thread float4* const tint_symbol_11, const constant ub_MaterialParams* const tint_symbol_12, thread float3* const tint_symbol_13, thread float2* const tint_symbol_14, thread float2* const tint_symbol_15) {
+void main1(thread tint_private_vars_struct* const tint_private_vars, const constant ub_PacketParams* const tint_symbol_5, const constant ub_SceneParams* const tint_symbol_6, const constant ub_MaterialParams* const tint_symbol_7) {
   Mat4x3_ t_PosMtx = {};
   float2 t_TexSpaceCoord = 0.0f;
-  float const x_e15 = *(tint_symbol_5);
-  Mat4x3_ const x_e18 = (*(tint_symbol_6)).u_PosMtx[tint_ftoi(x_e15)];
+  float const x_e15 = (*(tint_private_vars)).a_PosMtxIdx1;
+  Mat4x3_ const x_e18 = (*(tint_symbol_5)).u_PosMtx[tint_ftoi(x_e15)];
   t_PosMtx = x_e18;
   Mat4x3_ const x_e23 = t_PosMtx;
   Mat4x4_ const x_e24 = x_Mat4x4_1(x_e23);
-  float3 const x_e25 = *(tint_symbol_7);
+  float3 const x_e25 = (*(tint_private_vars)).a_Position1;
   Mat4x3_ const x_e29 = t_PosMtx;
   Mat4x4_ const x_e30 = x_Mat4x4_1(x_e29);
-  float3 const x_e31 = *(tint_symbol_7);
+  float3 const x_e31 = (*(tint_private_vars)).a_Position1;
   float4 const x_e34 = Mul(x_e30, float4(x_e31, 1.0f));
-  Mat4x4_ const x_e35 = (*(tint_symbol_8)).u_Projection;
+  Mat4x4_ const x_e35 = (*(tint_symbol_6)).u_Projection;
   Mat4x3_ const x_e37 = t_PosMtx;
   Mat4x4_ const x_e38 = x_Mat4x4_1(x_e37);
-  float3 const x_e39 = *(tint_symbol_7);
+  float3 const x_e39 = (*(tint_private_vars)).a_Position1;
   Mat4x3_ const x_e43 = t_PosMtx;
   Mat4x4_ const x_e44 = x_Mat4x4_1(x_e43);
-  float3 const x_e45 = *(tint_symbol_7);
+  float3 const x_e45 = (*(tint_private_vars)).a_Position1;
   float4 const x_e48 = Mul(x_e44, float4(x_e45, 1.0f));
   float4 const x_e49 = Mul(x_e35, x_e48);
-  *(tint_symbol_9) = x_e49;
-  float4 const x_e50 = *(tint_symbol_10);
-  *(tint_symbol_11) = x_e50;
-  float4 const x_e52 = (*(tint_symbol_12)).u_Misc0_;
+  (*(tint_private_vars)).gl_Position = x_e49;
+  float4 const x_e50 = (*(tint_private_vars)).a_Color1;
+  (*(tint_private_vars)).v_Color = x_e50;
+  float4 const x_e52 = (*(tint_symbol_7)).u_Misc0_;
   if ((x_e52[0] == 2.0f)) {
     {
-      float3 const x_e59 = *(tint_symbol_13);
-      Mat4x2_ const x_e64 = (*(tint_symbol_12)).u_TexMtx[0];
-      float3 const x_e65 = *(tint_symbol_13);
+      float3 const x_e59 = (*(tint_private_vars)).a_Normal1;
+      Mat4x2_ const x_e64 = (*(tint_symbol_7)).u_TexMtx[0];
+      float3 const x_e65 = (*(tint_private_vars)).a_Normal1;
       float2 const x_e68 = Mul2(x_e64, float4(x_e65, 1.0f));
-      *(tint_symbol_14) = x_e68.xy;
+      (*(tint_private_vars)).v_TexCoord = x_e68.xy;
       return;
     }
   } else {
     {
-      float2 const x_e73 = *(tint_symbol_15);
-      Mat4x2_ const x_e79 = (*(tint_symbol_12)).u_TexMtx[0];
-      float2 const x_e80 = *(tint_symbol_15);
+      float2 const x_e73 = (*(tint_private_vars)).a_UV1;
+      Mat4x2_ const x_e79 = (*(tint_symbol_7)).u_TexMtx[0];
+      float2 const x_e80 = (*(tint_private_vars)).a_UV1;
       float2 const x_e84 = Mul2(x_e79, float4(x_e80, 1.0f, 1.0f));
-      *(tint_symbol_14) = x_e84.xy;
+      (*(tint_private_vars)).v_TexCoord = x_e84.xy;
       return;
     }
   }
@@ -288,30 +299,23 @@ struct tint_symbol_3 {
   float4 member [[position]];
 };
 
-VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a_Normal, float a_PosMtxIdx, thread float3* const tint_symbol_16, thread float2* const tint_symbol_17, thread float4* const tint_symbol_18, thread float3* const tint_symbol_19, thread float* const tint_symbol_20, const constant ub_PacketParams* const tint_symbol_21, const constant ub_SceneParams* const tint_symbol_22, thread float4* const tint_symbol_23, thread float4* const tint_symbol_24, const constant ub_MaterialParams* const tint_symbol_25, thread float2* const tint_symbol_26) {
-  *(tint_symbol_16) = a_Position;
-  *(tint_symbol_17) = a_UV;
-  *(tint_symbol_18) = a_Color;
-  *(tint_symbol_19) = a_Normal;
-  *(tint_symbol_20) = a_PosMtxIdx;
-  main1(tint_symbol_20, tint_symbol_21, tint_symbol_16, tint_symbol_22, tint_symbol_23, tint_symbol_18, tint_symbol_24, tint_symbol_25, tint_symbol_19, tint_symbol_26, tint_symbol_17);
-  float4 const x_e11 = *(tint_symbol_24);
-  float2 const x_e13 = *(tint_symbol_26);
-  float4 const x_e15 = *(tint_symbol_23);
+VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a_Normal, float a_PosMtxIdx, thread tint_private_vars_struct* const tint_private_vars, const constant ub_PacketParams* const tint_symbol_8, const constant ub_SceneParams* const tint_symbol_9, const constant ub_MaterialParams* const tint_symbol_10) {
+  (*(tint_private_vars)).a_Position1 = a_Position;
+  (*(tint_private_vars)).a_UV1 = a_UV;
+  (*(tint_private_vars)).a_Color1 = a_Color;
+  (*(tint_private_vars)).a_Normal1 = a_Normal;
+  (*(tint_private_vars)).a_PosMtxIdx1 = a_PosMtxIdx;
+  main1(tint_private_vars, tint_symbol_8, tint_symbol_9, tint_symbol_10);
+  float4 const x_e11 = (*(tint_private_vars)).v_Color;
+  float2 const x_e13 = (*(tint_private_vars)).v_TexCoord;
+  float4 const x_e15 = (*(tint_private_vars)).gl_Position;
   VertexOutput const tint_symbol_4 = {.v_Color=x_e11, .v_TexCoord=x_e13, .member=x_e15};
   return tint_symbol_4;
 }
 
-vertex tint_symbol_3 tint_symbol(const constant ub_PacketParams* tint_symbol_32 [[buffer(0)]], const constant ub_SceneParams* tint_symbol_33 [[buffer(1)]], const constant ub_MaterialParams* tint_symbol_36 [[buffer(2)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread float3 tint_symbol_27 = 0.0f;
-  thread float2 tint_symbol_28 = 0.0f;
-  thread float4 tint_symbol_29 = 0.0f;
-  thread float3 tint_symbol_30 = 0.0f;
-  thread float tint_symbol_31 = 0.0f;
-  thread float4 tint_symbol_34 = 0.0f;
-  thread float4 tint_symbol_35 = 0.0f;
-  thread float2 tint_symbol_37 = 0.0f;
-  VertexOutput const inner_result = tint_symbol_inner(tint_symbol_1.a_Position, tint_symbol_1.a_UV, tint_symbol_1.a_Color, tint_symbol_1.a_Normal, tint_symbol_1.a_PosMtxIdx, &(tint_symbol_27), &(tint_symbol_28), &(tint_symbol_29), &(tint_symbol_30), &(tint_symbol_31), tint_symbol_32, tint_symbol_33, &(tint_symbol_34), &(tint_symbol_35), tint_symbol_36, &(tint_symbol_37));
+vertex tint_symbol_3 tint_symbol(const constant ub_PacketParams* tint_symbol_11 [[buffer(0)]], const constant ub_SceneParams* tint_symbol_12 [[buffer(1)]], const constant ub_MaterialParams* tint_symbol_13 [[buffer(2)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  VertexOutput const inner_result = tint_symbol_inner(tint_symbol_1.a_Position, tint_symbol_1.a_UV, tint_symbol_1.a_Color, tint_symbol_1.a_Normal, tint_symbol_1.a_PosMtxIdx, &(tint_private_vars), tint_symbol_11, tint_symbol_12, tint_symbol_13);
   tint_symbol_3 wrapper_result = {};
   wrapper_result.v_Color = inner_result.v_Color;
   wrapper_result.v_TexCoord = inner_result.v_TexCoord;
