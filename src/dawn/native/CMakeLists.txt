@@ -259,6 +259,7 @@ if (DAWN_ENABLE_D3D12)
         "d3d/BackendD3D.h"
         "d3d/BlobD3D.cpp"
         "d3d/BlobD3D.h"
+        "d3d/D3DCompilationRequest.h"
         "d3d/D3DError.cpp"
         "d3d/D3DError.h"
         "d3d/DeviceD3D.cpp"

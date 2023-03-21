@@ -14,8 +14,6 @@
 
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
 
-#include <d3dcompiler.h>
-
 #include <map>
 #include <sstream>
 #include <string>
@@ -29,10 +27,10 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/WindowsUtils.h"
 #include "dawn/native/CacheKey.h"
-#include "dawn/native/CacheRequest.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/d3d/BlobD3D.h"
+#include "dawn/native/d3d/D3DCompilationRequest.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/AdapterD3D12.h"
 #include "dawn/native/d3d12/BackendD3D12.h"
@@ -48,81 +46,9 @@
 
 #include "tint/tint.h"
 
-namespace dawn::native::stream {
-
-// Define no-op serializations for pD3DCompile, IDxcLibrary, and IDxcCompiler.
-// These are output-only interfaces used to generate bytecode.
-template <>
-void Stream<IDxcLibrary*>::Write(Sink*, IDxcLibrary* const&) {}
-template <>
-void Stream<IDxcCompiler*>::Write(Sink*, IDxcCompiler* const&) {}
-template <>
-void Stream<pD3DCompile>::Write(Sink*, pD3DCompile const&) {}
-
-}  // namespace dawn::native::stream
-
 namespace dawn::native::d3d12 {
 
 namespace {
-
-enum class Compiler { FXC, DXC };
-
-#define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                                 \
-    X(const tint::Program*, inputProgram)                                                   \
-    X(std::string_view, entryPointName)                                                     \
-    X(SingleShaderStage, stage)                                                             \
-    X(uint32_t, shaderModel)                                                                \
-    X(uint32_t, compileFlags)                                                               \
-    X(Compiler, compiler)                                                                   \
-    X(uint64_t, compilerVersion)                                                            \
-    X(std::wstring_view, dxcShaderProfile)                                                  \
-    X(std::string_view, fxcShaderProfile)                                                   \
-    X(pD3DCompile, d3dCompile)                                                              \
-    X(IDxcLibrary*, dxcLibrary)                                                             \
-    X(IDxcCompiler*, dxcCompiler)                                                           \
-    X(uint32_t, firstIndexOffsetShaderRegister)                                             \
-    X(uint32_t, firstIndexOffsetRegisterSpace)                                              \
-    X(bool, usesNumWorkgroups)                                                              \
-    X(uint32_t, numWorkgroupsShaderRegister)                                                \
-    X(uint32_t, numWorkgroupsRegisterSpace)                                                 \
-    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                         \
-    X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                  \
-    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                \
-    X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(std::bitset<kMaxInterStageShaderVariables>, interstageLocations)                      \
-    X(LimitsForCompilationRequest, limits)                                                  \
-    X(bool, disableSymbolRenaming)                                                          \
-    X(bool, isRobustnessEnabled)                                                            \
-    X(bool, disableWorkgroupInit)                                                           \
-    X(bool, polyfillReflectVec2F32)                                                         \
-    X(bool, dumpShaders)
-
-#define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \
-    X(bool, hasShaderF16Feature)                    \
-    X(uint32_t, compileFlags)                       \
-    X(Compiler, compiler)                           \
-    X(uint64_t, compilerVersion)                    \
-    X(std::wstring_view, dxcShaderProfile)          \
-    X(std::string_view, fxcShaderProfile)           \
-    X(pD3DCompile, d3dCompile)                      \
-    X(IDxcLibrary*, dxcLibrary)                     \
-    X(IDxcCompiler*, dxcCompiler)
-
-DAWN_SERIALIZABLE(struct, HlslCompilationRequest, HLSL_COMPILATION_REQUEST_MEMBERS){};
-#undef HLSL_COMPILATION_REQUEST_MEMBERS
-
-DAWN_SERIALIZABLE(struct,
-                  D3DBytecodeCompilationRequest,
-                  D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS){};
-#undef D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS
-
-#define D3D_COMPILATION_REQUEST_MEMBERS(X)     \
-    X(HlslCompilationRequest, hlsl)            \
-    X(D3DBytecodeCompilationRequest, bytecode) \
-    X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
-
-DAWN_MAKE_CACHE_REQUEST(D3DCompilationRequest, D3D_COMPILATION_REQUEST_MEMBERS);
-#undef D3D_COMPILATION_REQUEST_MEMBERS
 
 std::vector<const wchar_t*> GetDXCArguments(uint32_t compileFlags, bool enable16BitTypes) {
     std::vector<const wchar_t*> arguments;
@@ -176,7 +102,7 @@ std::vector<const wchar_t*> GetDXCArguments(uint32_t compileFlags, bool enable16
     return arguments;
 }
 
-ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const D3DBytecodeCompilationRequest& r,
+ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilationRequest& r,
                                                  const std::string& entryPointName,
                                                  const std::string& hlslSource) {
     ComPtr<IDxcBlobEncoding> sourceBlob;
@@ -273,7 +199,7 @@ std::string CompileFlagsToStringFXC(uint32_t compileFlags) {
     return result;
 }
 
-ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const D3DBytecodeCompilationRequest& r,
+ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilationRequest& r,
                                                  const std::string& entryPointName,
                                                  const std::string& hlslSource) {
     ComPtr<ID3DBlob> compiledShader;
@@ -288,7 +214,7 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const D3DBytecodeCompilationReq
 }
 
 ResultOrError<std::string> TranslateToHLSL(
-    HlslCompilationRequest r,
+    d3d::HlslCompilationRequest r,
     CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*> tracePlatform,
     std::string* remappedEntryPointName,
     bool* usesVertexOrInstanceIndex) {
@@ -395,7 +321,7 @@ ResultOrError<std::string> TranslateToHLSL(
     return std::move(result.hlsl);
 }
 
-ResultOrError<CompiledShader> CompileShader(D3DCompilationRequest r) {
+ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     CompiledShader compiledShader;
     // Compile the source shader to HLSL.
     std::string remappedEntryPoint;
@@ -404,7 +330,7 @@ ResultOrError<CompiledShader> CompileShader(D3DCompilationRequest r) {
                                     &compiledShader.usesVertexOrInstanceIndex));
 
     switch (r.bytecode.compiler) {
-        case Compiler::DXC: {
+        case d3d::Compiler::DXC: {
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderDXC");
             ComPtr<IDxcBlob> compiledDXCShader;
             DAWN_TRY_ASSIGN(compiledDXCShader, CompileShaderDXC(r.bytecode, remappedEntryPoint,
@@ -412,7 +338,7 @@ ResultOrError<CompiledShader> CompileShader(D3DCompilationRequest r) {
             compiledShader.shaderBlob = CreateBlob(std::move(compiledDXCShader));
             break;
         }
-        case Compiler::FXC: {
+        case d3d::Compiler::FXC: {
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderFXC");
             ComPtr<ID3DBlob> compiledFXCShader;
             DAWN_TRY_ASSIGN(compiledFXCShader, CompileShaderFXC(r.bytecode, remappedEntryPoint,
@@ -465,7 +391,7 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
     ScopedTintICEHandler scopedICEHandler(device);
     const EntryPointMetadata& entryPoint = GetEntryPoint(programmableStage.entryPoint);
 
-    D3DCompilationRequest req = {};
+    d3d::D3DCompilationRequest req = {};
     req.tracePlatform = UnsafeUnkeyedValue(device->GetPlatform());
     req.hlsl.shaderModel = device->GetDeviceInfo().shaderModel;
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
@@ -488,13 +414,13 @@ ResultOrError<CompiledShader> ShaderModule::Compile(
         d3d::DxcVersionInfo dxcVersionInfo =
             ToBackend(device->GetAdapter())->GetBackend()->GetDxcVersion();
 
-        req.bytecode.compiler = Compiler::DXC;
+        req.bytecode.compiler = d3d::Compiler::DXC;
         req.bytecode.dxcLibrary = device->GetDxcLibrary().Get();
         req.bytecode.dxcCompiler = device->GetDxcCompiler().Get();
         req.bytecode.compilerVersion = dxcVersionInfo.DxcCompilerVersion;
         req.bytecode.dxcShaderProfile = device->GetDeviceInfo().shaderProfiles[stage];
     } else {
-        req.bytecode.compiler = Compiler::FXC;
+        req.bytecode.compiler = d3d::Compiler::FXC;
         req.bytecode.d3dCompile = device->GetFunctions()->d3dCompile;
         req.bytecode.compilerVersion = D3D_COMPILER_VERSION;
         switch (stage) {
