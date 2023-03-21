@@ -513,7 +513,6 @@ crbug.com/1421045 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_chec
 
 ################################################################################
 # GPUDeviceLostReason test needs to be updated for spec change
-# KEEP
 ################################################################################
 crbug.com/1424883 webgpu:api,operation,adapter,requestDevice:invalid: [ Failure ]
 
