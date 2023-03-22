@@ -374,6 +374,87 @@ TEST_P(OcclusionQueryTests, ResolveWithoutWritten) {
     EXPECT_BUFFER_U64_RANGE_EQ(&kZero, destination, 0, 1);
 }
 
+// Test setting an occlusion query to non-zero, then rewriting it without drawing, resolves to 0.
+TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
+    // TODO(crbug.com/dawn/1707): The second query does not reset it to 0.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsApple());
+    constexpr uint32_t kQueryCount = 1;
+
+    wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
+    wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+    // Set all bits in buffer to check 0 is correctly written if there is no sample passed the
+    // occlusion testing
+    queue.WriteBuffer(destination, 0, &kSentinelValue, sizeof(kSentinelValue));
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+    renderPass.renderPassInfo.occlusionQuerySet = querySet;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Do an occlusion query with a draw call
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.BeginOcclusionQuery(0);
+    pass.Draw(3);
+    pass.EndOcclusionQuery();
+    pass.End();
+
+    // Do another occlusion query with no draw calls, rewriting the same index.
+    wgpu::RenderPassEncoder rewritePass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    rewritePass.BeginOcclusionQuery(0);
+    rewritePass.EndOcclusionQuery();
+    rewritePass.End();
+
+    encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER(destination, 0, sizeof(uint64_t),
+                  new OcclusionExpectation(OcclusionExpectation::Result::Zero));
+}
+
+// Test setting an occlusion query to non-zero, then rewriting it without drawing, resolves to 0.
+// Do the two queries+resolves in separate submits.
+TEST_P(OcclusionQueryTests, RewriteNoDrawToZeroSeparateSubmit) {
+    // TODO(crbug.com/dawn/1707): The second query does not reset it to 0.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsApple());
+    constexpr uint32_t kQueryCount = 1;
+
+    wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
+    wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+    // Set all bits in buffer to check 0 is correctly written if there is no sample passed the
+    // occlusion testing
+    queue.WriteBuffer(destination, 0, &kSentinelValue, sizeof(kSentinelValue));
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+    renderPass.renderPassInfo.occlusionQuerySet = querySet;
+
+    // Do an occlusion query with a draw call
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.BeginOcclusionQuery(0);
+    pass.Draw(3);
+    pass.EndOcclusionQuery();
+    pass.End();
+    encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Do another occlusion query with no draw calls, rewriting the same index.
+    encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder rewritePass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    rewritePass.BeginOcclusionQuery(0);
+    rewritePass.EndOcclusionQuery();
+    rewritePass.End();
+    encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+    commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER(destination, 0, sizeof(uint64_t),
+                  new OcclusionExpectation(OcclusionExpectation::Result::Zero));
+}
+
 // Test resolving occlusion query to the destination buffer with offset
 TEST_P(OcclusionQueryTests, ResolveToBufferWithOffset) {
     constexpr uint32_t kQueryCount = 2;
