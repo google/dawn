@@ -43,4 +43,9 @@ std::string List::str() const {
     return Formatter{style}.format(*this);
 }
 
+std::ostream& operator<<(std::ostream& out, const List& list) {
+    out << list.str();
+    return out;
+}
+
 }  // namespace tint::diag

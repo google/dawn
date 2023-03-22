@@ -16,6 +16,7 @@
 #define SRC_TINT_DIAGNOSTIC_DIAGNOSTIC_H_
 
 #include <memory>
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -231,6 +232,10 @@ class List {
     size_t error_count() const { return error_count_; }
     /// @returns the number of entries in the list.
     size_t count() const { return entries_.size(); }
+    /// @returns true if the diagnostics list is empty
+    bool empty() const { return entries_.empty(); }
+    /// @returns the number of entrise in the diagnostics list
+    size_t size() const { return entries_.size(); }
     /// @returns the first diagnostic in the list.
     iterator begin() const { return entries_.begin(); }
     /// @returns the last diagnostic in the list.
@@ -243,6 +248,12 @@ class List {
     std::vector<Diagnostic> entries_;
     size_t error_count_ = 0;
 };
+
+/// Write the diagnostic list to the given stream
+/// @param out the output stream
+/// @param list the list to emit
+/// @returns the output stream
+std::ostream& operator<<(std::ostream& out, const List& list);
 
 }  // namespace tint::diag
 

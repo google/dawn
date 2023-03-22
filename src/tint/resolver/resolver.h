@@ -88,6 +88,9 @@ class Resolver {
     /// @returns error messages from the resolver
     std::string error() const { return diagnostics_.str(); }
 
+    /// @returns the list of diagnostics raised by the generator.
+    const diag::List& Diagnostics() const { return diagnostics_; }
+
     /// @returns true if the resolver was successful
     bool Resolve();
 

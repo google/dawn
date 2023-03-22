@@ -18,7 +18,7 @@
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/sem/value_constructor.h"
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -36,7 +36,8 @@ TEST_F(AppendVectorTest, Vec2i32_i32) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -76,7 +77,8 @@ TEST_F(AppendVectorTest, Vec2i32_u32) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -123,7 +125,8 @@ TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -171,7 +174,8 @@ TEST_F(AppendVectorTest, Vec2i32_f32) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -216,7 +220,8 @@ TEST_F(AppendVectorTest, Vec3i32_i32) {
     WrapInFunction(vec_123, scalar_4);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_123, scalar_4);
 
@@ -258,7 +263,8 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -296,7 +302,8 @@ TEST_F(AppendVectorTest, Vec2i32_i32Var) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -336,7 +343,8 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32Var) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -373,7 +381,8 @@ TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -414,7 +423,8 @@ TEST_F(AppendVectorTest, Vec2boolVar_boolVar) {
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec_12, scalar_3);
 
@@ -449,7 +459,8 @@ TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
     WrapInFunction(vec000, scalar);
 
     resolver::Resolver resolver(this);
-    ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+    EXPECT_TRUE(resolver.Resolve());
+    ASSERT_THAT(resolver.Diagnostics(), testing::IsEmpty());
 
     auto* append = AppendVector(this, vec000, scalar);
 
