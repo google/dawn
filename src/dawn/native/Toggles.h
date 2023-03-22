@@ -93,6 +93,7 @@ enum class Toggle {
     D3D12ReplaceAddWithMinusWhenDstFactorIsZeroAndSrcFactorIsDstAlpha,
     AllowDeprecatedAPIs,
     D3D12PolyfillReflectVec2F32,
+    VulkanClearGen12TextureWithCCSAmbiguateOnCreation,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

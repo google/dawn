@@ -392,6 +392,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Polyfill the reflect builtin for vec2<f32> for D3D12. This toggle is enabled by default on "
       "D3D12 backends using FXC on Intel GPUs due to a driver issue on Intel D3D12 driver.",
       "https://crbug.com/tint/1798", ToggleStage::Device}},
+    {Toggle::VulkanClearGen12TextureWithCCSAmbiguateOnCreation,
+     {"vulkan_clear_gen12_texture_with_ccs_ambiguate_on_creation",
+      "Clears some R8-like textures to full 0 bits as soon as they are created. This Toggle is "
+      "enabled on Intel Gen12 GPUs due to a mesa driver issue.",
+      "https://crbug.com/chromium/1361662", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

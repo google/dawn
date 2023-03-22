@@ -745,6 +745,26 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
                                    mMemoryAllocation.GetOffset()),
         "BindImageMemory"));
 
+    // crbug.com/1361662
+    // This works around an Intel Gen12 mesa bug due to CCS ambiguates stomping on each other.
+    // https://gitlab.freedesktop.org/mesa/mesa/-/issues/7301#note_1826367
+    if (device->IsToggleEnabled(Toggle::VulkanClearGen12TextureWithCCSAmbiguateOnCreation)) {
+        auto format = GetFormat().format;
+        bool textureIsBuggy =
+            format == wgpu::TextureFormat::R8Unorm || format == wgpu::TextureFormat::R8Snorm ||
+            format == wgpu::TextureFormat::R8Uint || format == wgpu::TextureFormat::R8Sint ||
+            // These are flaky.
+            format == wgpu::TextureFormat::RG16Sint || format == wgpu::TextureFormat::RGBA16Sint ||
+            format == wgpu::TextureFormat::RGBA32Float;
+        textureIsBuggy &= GetNumMipLevels() > 1;
+        textureIsBuggy &= GetDimension() == wgpu::TextureDimension::e2D;
+        textureIsBuggy &= IsPowerOfTwo(GetWidth()) && IsPowerOfTwo(GetHeight());
+        if (textureIsBuggy) {
+            DAWN_TRY(ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(),
+                                  GetAllSubresources(), TextureBase::ClearValue::Zero));
+        }
+    }
+
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         DAWN_TRY(ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(),
                               GetAllSubresources(), TextureBase::ClearValue::NonZero));

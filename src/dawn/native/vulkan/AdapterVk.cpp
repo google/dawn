@@ -420,10 +420,17 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
         // dawn:1688: Intel Mesa driver has a bug about reusing the VkDeviceMemory that was
         // previously bound to a 2D VkImage. To work around that bug we have to disable the resource
         // sub-allocation for 2D textures with CopyDst or RenderAttachment usage.
-        const gpu_info::DriverVersion kDriverVersion = {21, 3, 6, 0};
-        if (gpu_info::CompareIntelMesaDriverVersion(GetDriverVersion(), kDriverVersion) >= 0) {
+        const gpu_info::DriverVersion kBuggyDriverVersion = {21, 3, 6, 0};
+        if (gpu_info::CompareIntelMesaDriverVersion(GetDriverVersion(), kBuggyDriverVersion) >= 0) {
             deviceToggles->Default(
                 Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment, true);
+        }
+
+        // chromium:1361662: Mesa driver has a bug clearing R8 mip-leveled textures on Intel Gen12
+        // GPUs. Work around it by clearing the whole texture as soon as they are created.
+        const gpu_info::DriverVersion kFixedDriverVersion = {23, 1, 0, 0};
+        if (gpu_info::CompareIntelMesaDriverVersion(GetDriverVersion(), kFixedDriverVersion) < 0) {
+            deviceToggles->Default(Toggle::VulkanClearGen12TextureWithCCSAmbiguateOnCreation, true);
         }
     }
 
