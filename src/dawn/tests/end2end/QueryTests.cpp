@@ -366,8 +366,6 @@ TEST_P(OcclusionQueryTests, ResolveWithoutWritten) {
 
 // Test setting an occlusion query to non-zero, then rewriting it without drawing, resolves to 0.
 TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
-    // TODO(crbug.com/dawn/1707): The second query does not reset it to 0.
-    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsApple());
     constexpr uint32_t kQueryCount = 1;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -406,8 +404,6 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
 // Test setting an occlusion query to non-zero, then rewriting it without drawing, resolves to 0.
 // Do the two queries+resolves in separate submits.
 TEST_P(OcclusionQueryTests, RewriteNoDrawToZeroSeparateSubmit) {
-    // TODO(crbug.com/dawn/1707): The second query does not reset it to 0.
-    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsApple());
     constexpr uint32_t kQueryCount = 1;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -439,6 +435,66 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZeroSeparateSubmit) {
     rewritePass.End();
     encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
     commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER(destination, 0, sizeof(uint64_t),
+                  new OcclusionExpectation(OcclusionExpectation::Result::Zero));
+}
+
+// Test that resetting an occlusion query to zero works when a draw is done where all primitives
+// fail the depth test.
+TEST_P(OcclusionQueryTests, RewriteToZeroWithDraw) {
+    constexpr uint32_t kQueryCount = 1;
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+
+    // Enable depth and stencil tests and set comparison tests to never pass.
+    wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil(kDepthStencilFormat);
+    depthStencil->depthCompare = wgpu::CompareFunction::Never;
+    depthStencil->stencilFront.compare = wgpu::CompareFunction::Never;
+    depthStencil->stencilBack.compare = wgpu::CompareFunction::Never;
+
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::Texture renderTarget = CreateRenderTexture(kColorFormat);
+    wgpu::TextureView renderTargetView = renderTarget.CreateView();
+
+    wgpu::Texture depthTexture = CreateRenderTexture(kDepthStencilFormat);
+    wgpu::TextureView depthTextureView = depthTexture.CreateView();
+
+    wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
+    wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+    // Set all bits in buffer to check 0 is correctly written if there is no sample passed the
+    // occlusion testing
+    queue.WriteBuffer(destination, 0, &kSentinelValue, sizeof(kSentinelValue));
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+        renderPass.renderPassInfo.occlusionQuerySet = querySet;
+
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.BeginOcclusionQuery(0);
+        pass.Draw(3);
+        pass.EndOcclusionQuery();
+        pass.End();
+    }
+    {
+        utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthTextureView);
+        renderPass.occlusionQuerySet = querySet;
+
+        wgpu::RenderPassEncoder rewritePass = encoder.BeginRenderPass(&renderPass);
+        rewritePass.SetPipeline(renderPipeline);
+        rewritePass.BeginOcclusionQuery(0);
+        rewritePass.Draw(3);
+        rewritePass.EndOcclusionQuery();
+        rewritePass.End();
+    }
+    encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_BUFFER(destination, 0, sizeof(uint64_t),
@@ -1227,7 +1283,11 @@ TEST_P(TimestampQueryInsidePassesTests, FromComputePass) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(OcclusionQueryTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(OcclusionQueryTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      MetalBackend({"metal_fill_empty_occlusion_queries_with_zero"}),
+                      VulkanBackend());
 DAWN_INSTANTIATE_TEST(PipelineStatisticsQueryTests,
                       D3D12Backend(),
                       MetalBackend(),

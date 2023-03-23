@@ -812,12 +812,25 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 Device* device = ToBackend(GetDevice());
                 NSRef<MTLRenderPassDescriptor> descriptor = CreateMTLRenderPassDescriptor(
                     device, cmd, device->UseCounterSamplingAtStageBoundary());
+
+                EmptyOcclusionQueries emptyOcclusionQueries;
                 DAWN_TRY(EncodeMetalRenderPass(
                     device, commandContext, descriptor.Get(), cmd->width, cmd->height,
-                    [this](id<MTLRenderCommandEncoder> encoder, BeginRenderPassCmd* cmd)
-                        -> MaybeError { return this->EncodeRenderPass(encoder, cmd); },
+                    [&](id<MTLRenderCommandEncoder> encoder,
+                        BeginRenderPassCmd* cmd) -> MaybeError {
+                        return this->EncodeRenderPass(
+                            encoder, cmd,
+                            device->IsToggleEnabled(Toggle::MetalFillEmptyOcclusionQueriesWithZero)
+                                ? &emptyOcclusionQueries
+                                : nullptr);
+                    },
                     cmd));
-
+                for (const auto& [querySet, queryIndex] : emptyOcclusionQueries) {
+                    [commandContext->EnsureBlit()
+                        fillBuffer:querySet->GetVisibilityBuffer()
+                             range:NSMakeRange(queryIndex * sizeof(uint64_t), sizeof(uint64_t))
+                             value:0u];
+                }
                 nextRenderPassNumber++;
                 break;
             }
@@ -1347,13 +1360,16 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
 }
 
 MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
-                                           BeginRenderPassCmd* renderPassCmd) {
+                                           BeginRenderPassCmd* renderPassCmd,
+                                           EmptyOcclusionQueries* emptyOcclusionQueries) {
     bool enableVertexPulling = GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling);
     RenderPipeline* lastPipeline = nullptr;
     id<MTLBuffer> indexBuffer = nullptr;
     uint32_t indexBufferBaseOffset = 0;
     MTLIndexType indexBufferType;
     uint64_t indexFormatSize = 0;
+
+    bool didDrawInCurrentOcclusionQuery = false;
 
     StorageBufferLengthTracker storageBufferLengths = {};
     VertexBufferTracker vertexBuffers(&storageBufferLengths);
@@ -1390,12 +1406,14 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                                     vertexStart:draw->firstVertex
                                     vertexCount:draw->vertexCount
                                   instanceCount:draw->instanceCount];
+                        didDrawInCurrentOcclusionQuery = true;
                     } else {
                         [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
                                     vertexStart:draw->firstVertex
                                     vertexCount:draw->vertexCount
                                   instanceCount:draw->instanceCount
                                    baseInstance:draw->firstInstance];
+                        didDrawInCurrentOcclusionQuery = true;
                     }
                 }
                 break;
@@ -1420,6 +1438,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                                      indexBufferOffset:indexBufferBaseOffset +
                                                        draw->firstIndex * indexFormatSize
                                          instanceCount:draw->instanceCount];
+                        didDrawInCurrentOcclusionQuery = true;
                     } else {
                         [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
                                             indexCount:draw->indexCount
@@ -1430,6 +1449,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                                          instanceCount:draw->instanceCount
                                             baseVertex:draw->baseVertex
                                           baseInstance:draw->firstInstance];
+                        didDrawInCurrentOcclusionQuery = true;
                     }
                 }
                 break;
@@ -1448,6 +1468,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                 [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
                           indirectBuffer:indirectBuffer
                     indirectBufferOffset:draw->indirectOffset];
+                didDrawInCurrentOcclusionQuery = true;
                 break;
             }
 
@@ -1469,6 +1490,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                              indexBufferOffset:indexBufferBaseOffset
                                 indirectBuffer:indirectBuffer
                           indirectBufferOffset:draw->indirectOffset];
+                didDrawInCurrentOcclusionQuery = true;
                 break;
             }
 
@@ -1649,6 +1671,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
 
                 [encoder setVisibilityResultMode:MTLVisibilityResultModeBoolean
                                           offset:cmd->queryIndex * sizeof(uint64_t)];
+                didDrawInCurrentOcclusionQuery = false;
                 break;
             }
 
@@ -1657,6 +1680,20 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
 
                 [encoder setVisibilityResultMode:MTLVisibilityResultModeDisabled
                                           offset:cmd->queryIndex * sizeof(uint64_t)];
+                if (emptyOcclusionQueries) {
+                    // Empty occlusion queries aren't filled to zero on Apple GPUs.
+                    // Keep track of them so we can clear them if necessary.
+                    auto key = std::make_pair(ToBackend(renderPassCmd->occlusionQuerySet.Get()),
+                                              cmd->queryIndex);
+                    if (!didDrawInCurrentOcclusionQuery) {
+                        emptyOcclusionQueries->insert(std::move(key));
+                    } else {
+                        auto it = emptyOcclusionQueries->find(std::move(key));
+                        if (it != emptyOcclusionQueries->end()) {
+                            emptyOcclusionQueries->erase(it);
+                        }
+                    }
+                }
                 break;
             }
 

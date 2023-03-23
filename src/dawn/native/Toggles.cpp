@@ -358,6 +358,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "subresource are completely initialized, and StoreOp::Discard is always translated as a "
       "Store.",
       "https://crbug.com/dawn/838", ToggleStage::Device}},
+    {Toggle::MetalFillEmptyOcclusionQueriesWithZero,
+     {"metal_fill_empty_occlusion_queries_with_zero",
+      "Apple GPUs leave stale results in the visibility result buffer instead of writing zero if "
+      "an occlusion query is empty. Workaround this by explicitly filling it with zero if there "
+      "are no draw calls.",
+      "https://crbug.com/dawn/1707", ToggleStage::Device}},
     {Toggle::UseBlitForBufferToDepthTextureCopy,
      {"use_blit_for_buffer_to_depth_texture_copy",
       "Use a blit instead of a copy command to copy buffer data to the depth aspect of a "

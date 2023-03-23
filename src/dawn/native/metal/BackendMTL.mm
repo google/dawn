@@ -404,6 +404,10 @@ class Adapter : public AdapterBase {
                                    true);
         }
 
+        if (gpu_info::IsApple(vendorId)) {
+            deviceToggles->Default(Toggle::MetalFillEmptyOcclusionQueriesWithZero, true);
+        }
+
         // Local testing shows the workaround is needed on AMD Radeon HD 8870M (gcn-1) MacOS 12.1;
         // not on AMD Radeon Pro 555 (gcn-4) MacOS 13.1.
         // Conservatively enable the workaround on AMD unless the system is MacOS 13.1+
