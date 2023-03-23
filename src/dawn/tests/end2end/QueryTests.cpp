@@ -293,11 +293,6 @@ TEST_P(OcclusionQueryTests, Rewrite) {
 // Test resolving occlusion query correctly if the queries are written sparsely, which also tests
 // the query resetting at the start of render passes on Vulkan backend.
 TEST_P(OcclusionQueryTests, ResolveSparseQueries) {
-    // TODO(hao.x.li@intel.com): Investigate why it's failed on D3D12 on Nvidia when running with
-    // the previous occlusion tests. Expect resolve to 0 for these unwritten queries but the
-    // occlusion result of the previous tests is got.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
-
     constexpr uint32_t kQueryCount = 7;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -353,11 +348,6 @@ TEST_P(OcclusionQueryTests, ResolveSparseQueries) {
 
 // Test resolving occlusion query to 0 if all queries are not written
 TEST_P(OcclusionQueryTests, ResolveWithoutWritten) {
-    // TODO(hao.x.li@intel.com): Investigate why it's failed on D3D12 on Nvidia when running with
-    // the previous occlusion tests. Expect resolve to 0 but the occlusion result of the previous
-    // tests is got.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
-
     constexpr uint32_t kQueryCount = 1;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
