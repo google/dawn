@@ -566,6 +566,76 @@ def compute_wire_params(api_params, wire_json):
 
     return wire_params
 
+############################################################
+# DAWN LPM FUZZ STUFF
+############################################################
+
+
+def compute_lpm_params(api_and_wire_params, lpm_json):
+    # Start with all commands in dawn.json and dawn_wire.json
+    lpm_params = api_and_wire_params.copy()
+
+    # Commands that are built through generation
+    proto_generated_commands = []
+
+    # All commands, including hand written commands that we can't generate
+    # through codegen
+    proto_all_commands = []
+
+    # Remove blocklisted commands from protobuf generation params
+    blocklisted_cmds_proto = lpm_json.get('blocklisted_cmds')
+    custom_cmds_proto = lpm_json.get('custom_cmds')
+    for command in lpm_params['cmd_records']['command']:
+        blocklisted = command.name.get() in blocklisted_cmds_proto
+        custom = command.name.get() in custom_cmds_proto
+
+        if not blocklisted and not custom:
+            proto_generated_commands.append(command)
+        proto_all_commands.append(command)
+
+    lpm_params['cmd_records'] = {
+        'proto_generated_commands': proto_generated_commands,
+        'proto_all_commands': proto_all_commands,
+    }
+
+    return lpm_params
+
+
+def as_protobufTypeLPM(member):
+    assert 'type' in member.json_data
+
+    if member.type.name.native:
+        typ = member.json_data['type']
+        cpp_to_protobuf_type = {
+            "bool": "bool",
+            "float": "float",
+            "double": "double",
+            "int8_t": "int32",
+            "int16_t": "int32",
+            "int32_t": "int32",
+            "int64_t": "int64",
+            "uint8_t": "uint32",
+            "uint16_t": "uint32",
+            "uint32_t": "uint32",
+            "uint64_t": "uint64",
+        }
+
+        assert typ in cpp_to_protobuf_type
+
+        return cpp_to_protobuf_type[typ]
+
+    return member.type.name.CamelCase()
+
+
+def as_protobufNameLPM(*names):
+    # `descriptor` is a reserved keyword in lpm
+    if (names[0].concatcase() == "descriptor"):
+        return "desc"
+    return as_varName(*names)
+
+
+def unreachable_code():
+    assert False
 
 #############################################################
 # Generator
@@ -1039,11 +1109,17 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_dawn_wire = parse_json(loaded_json,
                                           enabled_tags=['dawn', 'deprecated'],
                                           disabled_tags=['native'])
-            additional_params = compute_wire_params(params_dawn_wire,
-                                                    wire_json)
+            api_and_wire_params = compute_wire_params(params_dawn_wire,
+                                                      wire_json)
+
+            fuzzer_params = compute_lpm_params(api_and_wire_params, lpm_json)
 
             lpm_params = [
-                RENDER_PARAMS_BASE, params_dawn_wire, {}, additional_params
+                RENDER_PARAMS_BASE, params_dawn_wire, {
+                    'as_protobufTypeLPM': as_protobufTypeLPM,
+                    'as_protobufNameLPM': as_protobufNameLPM,
+                    'unreachable': unreachable_code
+                }, api_and_wire_params, fuzzer_params
             ]
 
             renders.append(
@@ -1055,11 +1131,11 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_dawn_wire = parse_json(loaded_json,
                                           enabled_tags=['dawn', 'deprecated'],
                                           disabled_tags=['native'])
-            additional_params = compute_wire_params(params_dawn_wire,
-                                                    wire_json)
+            api_and_wire_params = compute_wire_params(params_dawn_wire,
+                                                      wire_json)
 
             lpm_params = [
-                RENDER_PARAMS_BASE, params_dawn_wire, {}, additional_params
+                RENDER_PARAMS_BASE, params_dawn_wire, {}, api_and_wire_params
             ]
 
             renders.append(
@@ -1072,6 +1148,12 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender(
                     'dawn/fuzzers/lpmfuzz/DawnLPMSerializer.h',
                     'src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.h',
+                    lpm_params))
+
+            renders.append(
+                FileRender(
+                    'dawn/fuzzers/lpmfuzz/DawnLPMConstants.h',
+                    'src/dawn/fuzzers/lpmfuzz/DawnLPMConstants_autogen.h',
                     lpm_params))
 
         return renders

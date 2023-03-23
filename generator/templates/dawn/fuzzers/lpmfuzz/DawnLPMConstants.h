@@ -12,4 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define INSTANCE_OBJECT_ID 1
+namespace DawnLPMFuzzer {
+
+static constexpr int kInstanceObjectId = 1;
+
+} // namespace DawnLPMFuzzer

@@ -15,13 +15,134 @@
 syntax = "proto2";
 package fuzzing;
 
-{% for command in cmd_records["command"] %}
-    message {{command.name.CamelCase()}} {}
+
+{% for type in by_category["enum"] %}
+    enum {{as_cppType(type.name)}} {
+        {% for value in type.values %}
+            {{ as_cppType(type.name) }}{{as_cppEnum(value.name)}} = {{ value.value }};
+        {% endfor %}
+    };
 {% endfor %}
+
+
+{% for type in by_category["bitmask"] %}
+    enum {{as_cppType(type.name)}} {
+        {% for value in type.values %}
+            {{ as_cppType(type.name) }}{{as_cppEnum(value.name)}} = {{ value.value }};
+        {% endfor %}
+    };
+{% endfor %}
+
+
+{% macro lift_string_proto_member(member, count) -%}
+    required string {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+    {% set count.value = count.value + 1 %}
+{%- endmacro %}
+
+{% macro lift_float_array_proto_member(member, count) -%}
+    repeated float {{ as_varName(member.name) }} = {{ count.value }};
+    {% set count.value = count.value + 1 %}
+{%- endmacro %}
+
+
+{% macro lift_varlength_proto_member(member, count) -%}
+    {% if member.type in by_category["object"] %}
+        repeated uint32 {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% elif member.type.name.get() == "object id" %}
+        repeated uint32 {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% elif member.type.name.get() == "uint8_t" %}
+        // Skip over byte arrays in protobuf, handled by DawnSerializer
+    {% else %}
+        repeated {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% endif %}
+{%- endmacro %}
+
+
+{% macro lift_dawn_member_pass_by_value(record, name, member, count) %}
+    {% if member.type in by_category["structure"] %}
+        required {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% elif member.type in by_category["bitmask"] %}
+        repeated {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% elif member.type in by_category["enum"] %}
+        required {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% elif member.type in by_category["object"] %}
+        required uint32 {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% elif member.type.name.get() == "ObjectId" %}
+        required uint32 {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% elif member.type.name.get() == "ObjectHandle" %}
+        // Skips object handles while lifting dawn.json to protobuf because
+        // ObjectHandles are created and managed in DawnLPMSerializer. Passing
+        // arbitrary ObjectHandles from the fuzzer's bytestream isn't the
+        // strategy for this fuzzer.
+    {% else %}
+        required {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% endif %}
+{% endmacro %}
+
+{% macro lift_dawn_member_pass_by_pointer(record, name, member, count) %}
+    {% if member.type in by_category["structure"] and member.length == "constant" and member.constant_length == 1 %}
+        required {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        {% set count.value = count.value + 1 %}
+    {% elif member.type.name.get() == "char" and member.length == 'strlen' %}
+        {{ lift_string_proto_member(member, count) }}
+    {% elif member.type.name.get() == "float" %}
+        {{ lift_float_array_proto_member(member, count) }}
+    {% elif member.type.name.get() == "uint8_t" %}
+        // Skip over byte arrays in protobuf, handled by DawnLPMSerializer
+        // with a hardcoded bytes and length.
+    {% elif member.length != 'constant' %}
+        {{ lift_varlength_proto_member(member, count) }}
+    {% else %}
+        // There shouldn't be any other pass-by-pointer types in
+        // dawn*.json, if any are added we would like to know at compile time
+        {{ unreachable_code }}
+    {% endif %}
+{% endmacro %}
+
+{% macro lift_proto_members_helper(record, name, members) %}
+    {% set count = namespace(value=1) %}
+    {% for member in members %}
+        {% if member.skip_serialize == True %}
+            //  {{ member.name.camelCase()}}.skip_serialize
+        {% elif member.annotation == 'value' %}
+            {{ lift_dawn_member_pass_by_value(record, name, member, count) }}
+        {% elif member.annotation == 'const*' %}
+            {{ lift_dawn_member_pass_by_pointer(record, name, member, count) }}
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+
+{% for structure in by_category["structure"] %}
+    message {{structure.name.CamelCase()}} {
+        {{ lift_proto_members_helper(structure, structure.name, structure.members) }}
+    }
+{% endfor %}
+
+
+{% for command in cmd_records["proto_all_commands"] %}
+    {% if command not in cmd_records["proto_generated_commands"] %}
+        message {{command.name.CamelCase()}} {}
+    {% else %}
+        message {{command.name.CamelCase()}} {
+            {{ lift_proto_members_helper(command, command.name, command.members) }}
+        }
+    {% endif %}
+{% endfor %}
+
 
 message Command {
     oneof command {
-        {% for command in cmd_records["command"] %}
+        {% for command in cmd_records["proto_all_commands"] %}
             {{command.name.CamelCase()}} {{command.name.camelCase()}} = {{ loop.index }};
         {% endfor %}
     }

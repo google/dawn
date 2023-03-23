@@ -122,6 +122,7 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader) {
     outputs = [
       "src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.cpp",
       "src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.h",
+      "src/dawn/fuzzers/lpmfuzz/DawnLPMConstants_autogen.h",
     ]
   }
 

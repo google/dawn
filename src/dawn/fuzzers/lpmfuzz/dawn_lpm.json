@@ -15,5 +15,18 @@
         "limitations under the License."
     ],
 
-    "_doc": "See docs/dawn/codegen.md"
+    "_doc": "See docs/dawn/codegen.md",
+
+    "custom_cmds": [],
+
+    "blocklisted_cmds": [
+        "surface descriptor from windows core window",
+        "surface descriptor from windows swap chain panel",
+        "surface descriptor from canvas html selector",
+        "device create render pipeline",
+        "device create render pipeline async",
+        "device create shader module",
+        "destroy object"
+    ]
+
 }
