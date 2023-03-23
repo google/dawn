@@ -14,6 +14,7 @@
 
 #include "src/tint/fuzzers/tint_common_fuzzer.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <fstream>
@@ -21,6 +22,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -31,6 +33,9 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/diagnostic/formatter.h"
 #include "src/tint/program.h"
+#include "src/tint/sem/binding_point.h"
+#include "src/tint/sem/variable.h"
+#include "src/tint/type/external_texture.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/writer/flatten_bindings.h"
 
@@ -253,6 +258,49 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
             if (!validate_program(out)) {
                 return 0;
             }
+        }
+    }
+
+    // For the generates which use MultiPlanar, make sure the configuration options are provided so
+    // that the transformer will execute.
+    if (output_ == OutputFormat::kMSL || output_ == OutputFormat::kHLSL) {
+        // Gather external texture binding information
+        // Collect next valid binding number per group
+        std::unordered_map<uint32_t, uint32_t> group_to_next_binding_number;
+        std::vector<sem::BindingPoint> ext_tex_bps;
+        for (auto* var : program.AST().GlobalVariables()) {
+            if (auto* sem_var = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
+                auto bp = sem_var->BindingPoint();
+                auto& n = group_to_next_binding_number[bp.group];
+                n = std::max(n, bp.binding + 1);
+
+                if (sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
+                    ext_tex_bps.emplace_back(bp);
+                }
+            }
+        }
+
+        writer::ExternalTextureOptions::BindingsMap new_bindings_map;
+        for (auto bp : ext_tex_bps) {
+            uint32_t g = bp.group;
+            uint32_t& next_num = group_to_next_binding_number[g];
+            auto new_bps =
+                writer::ExternalTextureOptions::BindingPoints{{g, next_num++}, {g, next_num++}};
+
+            new_bindings_map[bp] = new_bps;
+        }
+
+        switch (output_) {
+            case OutputFormat::kMSL: {
+                options_msl_.external_texture_options.bindings_map = new_bindings_map;
+                break;
+            }
+            case OutputFormat::kHLSL: {
+                options_hlsl_.external_texture_options.bindings_map = new_bindings_map;
+                break;
+            }
+            default:
+                break;
         }
     }
 
