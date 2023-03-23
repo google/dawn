@@ -380,7 +380,7 @@ MaybeError RenderPipeline::Initialize() {
     shaders[SingleShaderStage::Vertex] = &descriptorD3D12.VS;
     shaders[SingleShaderStage::Fragment] = &descriptorD3D12.PS;
 
-    PerStage<CompiledShader> compiledShader;
+    PerStage<d3d::CompiledShader> compiledShader;
 
     std::bitset<kMaxInterStageShaderVariables>* usedInterstageVariables = nullptr;
     dawn::native::EntryPointMetadata fragmentEntryPoint;
@@ -397,7 +397,8 @@ MaybeError RenderPipeline::Initialize() {
                         ToBackend(programmableStage.module)
                             ->Compile(programmableStage, stage, ToBackend(GetLayout()),
                                       compileFlags, usedInterstageVariables));
-        *shaders[stage] = compiledShader[stage].GetD3D12ShaderBytecode();
+        *shaders[stage] = {compiledShader[stage].shaderBlob.Data(),
+                           compiledShader[stage].shaderBlob.Size()};
     }
 
     mUsesVertexOrInstanceIndex =

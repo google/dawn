@@ -267,6 +267,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d/Forward.h"
         "d3d/PlatformFunctions.cpp"
         "d3d/PlatformFunctions.h"
+        "d3d/ShaderUtils.cpp"
+        "d3d/ShaderUtils.h"
         "d3d/UtilsD3D.cpp"
         "d3d/UtilsD3D.h"
         "d3d/d3d_platform.h"

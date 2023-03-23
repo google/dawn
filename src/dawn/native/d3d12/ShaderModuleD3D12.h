@@ -20,6 +20,7 @@
 #include "dawn/native/Blob.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/ShaderModule.h"
+#include "dawn/native/d3d/ShaderUtils.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native {
@@ -31,20 +32,6 @@ namespace dawn::native::d3d12 {
 class Device;
 class PipelineLayout;
 
-#define COMPILED_SHADER_MEMBERS(X) \
-    X(Blob, shaderBlob)            \
-    X(std::string, hlslSource)     \
-    X(bool, usesVertexOrInstanceIndex)
-
-// `CompiledShader` holds a ref to one of the various representations of shader blobs and
-// information used to emulate vertex/instance index starts. It also holds the `hlslSource` for the
-// shader compilation, which is only transiently available during Compile, and cleared before it
-// returns. It is not written to or loaded from the cache unless Toggle dump_shaders is true.
-DAWN_SERIALIZABLE(struct, CompiledShader, COMPILED_SHADER_MEMBERS) {
-    D3D12_SHADER_BYTECODE GetD3D12ShaderBytecode() const;
-};
-#undef COMPILED_SHADER_MEMBERS
-
 class ShaderModule final : public ShaderModuleBase {
   public:
     static ResultOrError<Ref<ShaderModule>> Create(Device* device,
@@ -52,7 +39,7 @@ class ShaderModule final : public ShaderModuleBase {
                                                    ShaderModuleParseResult* parseResult,
                                                    OwnedCompilationMessages* compilationMessages);
 
-    ResultOrError<CompiledShader> Compile(
+    ResultOrError<d3d::CompiledShader> Compile(
         const ProgrammableStage& programmableStage,
         SingleShaderStage stage,
         const PipelineLayout* layout,

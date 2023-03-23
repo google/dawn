@@ -57,10 +57,10 @@ MaybeError ComputePipeline::Initialize() {
     d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature();
 
     // TODO(dawn:549): Compile shader everytime before we implement compiled shader cache
-    CompiledShader compiledShader;
+    d3d::CompiledShader compiledShader;
     DAWN_TRY_ASSIGN(compiledShader, module->Compile(computeStage, SingleShaderStage::Compute,
                                                     ToBackend(GetLayout()), compileFlags));
-    d3dDesc.CS = compiledShader.GetD3D12ShaderBytecode();
+    d3dDesc.CS = {compiledShader.shaderBlob.Data(), compiledShader.shaderBlob.Size()};
 
     StreamIn(&mCacheKey, d3dDesc, ToBackend(GetLayout())->GetRootSignatureBlob());
 
