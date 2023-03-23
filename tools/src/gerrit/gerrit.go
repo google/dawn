@@ -282,7 +282,7 @@ func (g *Gerrit) SetReadyForReview(changeID, message string) error {
 func (g *Gerrit) maybeWrapError(err error) error {
 	if err != nil && !g.authenticated {
 		return fmt.Errorf(`query failed, possibly because of authentication.
-See https://dawn-review.googlesource.com/new-password for obtaining a username
+See https://dawn.googlesource.com/new-password for obtaining a username
 and password which can be provided with --gerrit-user and --gerrit-pass.
 Note: This tool will scan ~/.gitcookies for credentials.
 %w`, err)
