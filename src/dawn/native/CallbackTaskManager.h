@@ -20,6 +20,7 @@
 #include <mutex>
 #include <vector>
 
+#include "dawn/common/RefCounted.h"
 #include "dawn/common/TypeTraits.h"
 
 namespace dawn::native {
@@ -47,10 +48,10 @@ struct CallbackTask {
     State mState = State::Normal;
 };
 
-class CallbackTaskManager {
+class CallbackTaskManager : public RefCounted {
   public:
     CallbackTaskManager();
-    ~CallbackTaskManager();
+    ~CallbackTaskManager() override;
 
     void AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask);
     void AddCallbackTask(std::function<void()> callback);
@@ -63,9 +64,11 @@ class CallbackTaskManager {
     bool IsEmpty();
     void HandleDeviceLoss();
     void HandleShutDown();
-    std::vector<std::unique_ptr<CallbackTask>> AcquireCallbackTasks();
+    void Flush();
 
   private:
+    std::vector<std::unique_ptr<CallbackTask>> AcquireCallbackTasks();
+
     std::mutex mCallbackTaskQueueMutex;
     std::vector<std::unique_ptr<CallbackTask>> mCallbackTaskQueue;
 };

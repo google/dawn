@@ -20,6 +20,7 @@
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
+#include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ErrorData.h"
@@ -171,6 +172,8 @@ MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
         mRuntimeSearchPaths.push_back(std::move(*p));
     }
     mRuntimeSearchPaths.push_back("");
+
+    mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
 
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
@@ -533,11 +536,17 @@ bool InstanceBase::APIProcessEvents() {
         hasMoreEvents = device->APITick() || hasMoreEvents;
     }
 
-    return hasMoreEvents;
+    mCallbackTaskManager->Flush();
+
+    return hasMoreEvents || !mCallbackTaskManager->IsEmpty();
 }
 
 const std::vector<std::string>& InstanceBase::GetRuntimeSearchPaths() const {
     return mRuntimeSearchPaths;
+}
+
+const Ref<CallbackTaskManager>& InstanceBase::GetCallbackTaskManager() const {
+    return mCallbackTaskManager;
 }
 
 void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error) {

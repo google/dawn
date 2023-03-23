@@ -216,11 +216,6 @@ DeviceBase::~DeviceBase() {
     // We need to explicitly release the Queue before we complete the destructor so that the
     // Queue does not get destroyed after the Device.
     mQueue = nullptr;
-    // mAdapter is not set for mock test devices.
-    // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
-    if (mAdapter != nullptr) {
-        mAdapter->GetInstance()->RemoveDevice(this);
-    }
 }
 
 MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
@@ -253,7 +248,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     mCaches = std::make_unique<DeviceBase::Caches>();
     mErrorScopeStack = std::make_unique<ErrorScopeStack>();
     mDynamicUploader = std::make_unique<DynamicUploader>(this);
-    mCallbackTaskManager = std::make_unique<CallbackTaskManager>();
+    mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
 
@@ -311,7 +306,9 @@ void DeviceBase::WillDropLastExternalRef() {
     Destroy();
 
     // Flush last remaining callback tasks.
-    FlushCallbackTaskQueue();
+    do {
+        mCallbackTaskManager->Flush();
+    } while (!mCallbackTaskManager->IsEmpty());
 
     // Drop te device's reference to the queue. Because the application dropped the last external
     // references, they can no longer get the queue from APIGetQueue().
@@ -328,6 +325,16 @@ void DeviceBase::WillDropLastExternalRef() {
         dawn::WarningLog() << "Device lost after last external device reference dropped.\n"
                            << message;
     };
+
+    // mAdapter is not set for mock test devices.
+    // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
+    if (mAdapter != nullptr) {
+        mAdapter->GetInstance()->RemoveDevice(this);
+
+        // Once last external ref dropped, all callbacks should be forwarded to Instance's callback
+        // queue instead.
+        mCallbackTaskManager = mAdapter->GetInstance()->GetCallbackTaskManager();
+    }
 }
 
 void DeviceBase::DestroyObjects() {
@@ -566,7 +573,7 @@ void DeviceBase::APISetLoggingCallback(wgpu::LoggingCallback callback, void* use
     if (IsLost()) {
         return;
     }
-    FlushCallbackTaskQueue();
+    mCallbackTaskManager->Flush();
     mLoggingCallback = callback;
     mLoggingUserdata = userdata;
 }
@@ -580,7 +587,7 @@ void DeviceBase::APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, voi
     if (IsLost()) {
         return;
     }
-    FlushCallbackTaskQueue();
+    mCallbackTaskManager->Flush();
     mUncapturedErrorCallback = callback;
     mUncapturedErrorUserdata = userdata;
 }
@@ -594,7 +601,7 @@ void DeviceBase::APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, voi
     if (IsLost()) {
         return;
     }
-    FlushCallbackTaskQueue();
+    mCallbackTaskManager->Flush();
     mDeviceLostCallback = callback;
     mDeviceLostUserdata = userdata;
 }
@@ -1261,13 +1268,13 @@ bool DeviceBase::APITick() {
     // to avoid deleting |this| in the middle of this function call.
     Ref<DeviceBase> self(this);
     if (ConsumedError(Tick())) {
-        FlushCallbackTaskQueue();
+        mCallbackTaskManager->Flush();
         return false;
     }
 
     // We have to check callback tasks in every APITick because it is not related to any global
     // serials.
-    FlushCallbackTaskQueue();
+    mCallbackTaskManager->Flush();
 
     // We don't throw an error when device is lost. This allows pending callbacks to be
     // executed even after the Device is lost/destroyed.
@@ -1806,19 +1813,6 @@ void DeviceBase::ForceSetToggleForTesting(Toggle toggle, bool isEnabled) {
     mToggles.ForceSet(toggle, isEnabled);
 }
 
-void DeviceBase::FlushCallbackTaskQueue() {
-    if (!mCallbackTaskManager->IsEmpty()) {
-        // If a user calls Queue::Submit inside the callback, then the device will be ticked,
-        // which in turns ticks the tracker, causing reentrance and dead lock here. To prevent
-        // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
-        // update mCallbackTaskManager, then call all the callbacks.
-        auto callbackTasks = mCallbackTaskManager->AcquireCallbackTasks();
-        for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
-            callbackTask->Execute();
-        }
-    }
-}
-
 const CombinedLimits& DeviceBase::GetLimits() const {
     return mLimits;
 }
@@ -1828,7 +1822,7 @@ AsyncTaskManager* DeviceBase::GetAsyncTaskManager() const {
 }
 
 CallbackTaskManager* DeviceBase::GetCallbackTaskManager() const {
-    return mCallbackTaskManager.get();
+    return mCallbackTaskManager.Get();
 }
 
 dawn::platform::WorkerTaskPool* DeviceBase::GetWorkerTaskPool() const {

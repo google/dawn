@@ -102,4 +102,17 @@ void CallbackTaskManager::HandleShutDown() {
     }
 }
 
+void CallbackTaskManager::Flush() {
+    if (!IsEmpty()) {
+        // If a user calls Queue::Submit inside the callback, then the device will be ticked,
+        // which in turns ticks the tracker, causing reentrance and dead lock here. To prevent
+        // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
+        // update mCallbackTaskManager, then call all the callbacks.
+        auto callbackTasks = AcquireCallbackTasks();
+        for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
+            callbackTask->Execute();
+        }
+    }
+}
+
 }  // namespace dawn::native

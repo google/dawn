@@ -39,6 +39,7 @@ class Platform;
 
 namespace dawn::native {
 
+class CallbackTaskManager;
 class DeviceBase;
 class Surface;
 class XlibXcbFunctions;
@@ -111,6 +112,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
 
     const std::vector<std::string>& GetRuntimeSearchPaths() const;
 
+    const Ref<CallbackTaskManager>& GetCallbackTaskManager() const;
+
     // Get backend-independent libraries that need to be loaded dynamically.
     const XlibXcbFunctions* GetOrCreateXlibXcbFunctions();
 
@@ -164,6 +167,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
 #if defined(DAWN_USE_X11)
     std::unique_ptr<XlibXcbFunctions> mXlibXcbFunctions;
 #endif  // defined(DAWN_USE_X11)
+
+    Ref<CallbackTaskManager> mCallbackTaskManager;
 
     std::set<DeviceBase*> mDevicesList;
     mutable std::mutex mDevicesListMutex;

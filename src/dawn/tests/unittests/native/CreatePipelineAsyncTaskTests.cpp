@@ -14,6 +14,11 @@
 
 #include <gtest/gtest.h>
 
+#include <chrono>
+#include <memory>
+#include <thread>
+#include <utility>
+
 #include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "mocks/ComputePipelineMock.h"
@@ -147,6 +152,39 @@ TEST_F(CreatePipelineAsyncTaskTests, InitializationInternalErrorInCreateComputeP
     device.Tick();
 
     EXPECT_CALL(*computePipelineMock.Get(), DestroyImpl).Times(1);
+}
+
+// Test that a long async task's execution won't extend to after the device is dropped.
+// Device dropping should wait for that task to finish.
+TEST_F(CreatePipelineAsyncTaskTests, LongAsyncTaskFinishesBeforeDeviceIsDropped) {
+    wgpu::RenderPipelineDescriptor desc = {};
+    desc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
+    desc.vertex.entryPoint = "main";
+    Ref<RenderPipelineMock> renderPipelineMock =
+        RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
+
+    // Simulate that Initialize() would take a long time to finish.
+    ON_CALL(*renderPipelineMock.Get(), Initialize).WillByDefault([]() -> MaybeError {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        return {};
+    });
+
+    bool done = false;
+    auto asyncTask = std::make_unique<CreateRenderPipelineAsyncTask>(
+        renderPipelineMock,
+        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
+           const char* message, void* userdata) {
+            wgpu::RenderPipeline::Acquire(returnPipeline);
+
+            *static_cast<bool*>(userdata) = true;
+        },
+        &done);
+
+    CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
+
+    device = nullptr;
+    // Dropping the device should force the async task to finish.
+    EXPECT_TRUE(done);
 }
 
 }  // namespace

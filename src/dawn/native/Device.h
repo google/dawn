@@ -482,7 +482,6 @@ class DeviceBase : public RefCountedWithExternalCount {
     virtual void SetLabelImpl();
 
     virtual MaybeError TickImpl() = 0;
-    void FlushCallbackTaskQueue();
 
     ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 
@@ -594,7 +593,7 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
 
-    std::unique_ptr<CallbackTaskManager> mCallbackTaskManager;
+    Ref<CallbackTaskManager> mCallbackTaskManager;
     std::unique_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
     std::string mLabel;
     CacheKey mDeviceCacheKey;
