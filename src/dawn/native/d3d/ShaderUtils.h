@@ -24,6 +24,8 @@
 
 namespace dawn::native::d3d {
 
+class Device;
+
 #define COMPILED_SHADER_MEMBERS(X) \
     X(Blob, shaderBlob)            \
     X(std::string, hlslSource)     \
@@ -37,6 +39,10 @@ DAWN_SERIALIZABLE(struct, CompiledShader, COMPILED_SHADER_MEMBERS){};
 #undef COMPILED_SHADER_MEMBERS
 
 ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r);
+
+void DumpCompiledShader(Device* device,
+                        const CompiledShader& compiledShader,
+                        uint32_t compileFlags);
 
 }  // namespace dawn::native::d3d
 

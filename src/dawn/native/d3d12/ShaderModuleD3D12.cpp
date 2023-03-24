@@ -38,71 +38,6 @@
 
 namespace dawn::native::d3d12 {
 
-namespace {
-std::string CompileFlagsToStringFXC(uint32_t compileFlags) {
-    struct Flag {
-        uint32_t value;
-        const char* name;
-    };
-    constexpr Flag flags[] = {
-    // Populated from d3dcompiler.h
-#define F(f) Flag{f, #f}
-        F(D3DCOMPILE_DEBUG),
-        F(D3DCOMPILE_SKIP_VALIDATION),
-        F(D3DCOMPILE_SKIP_OPTIMIZATION),
-        F(D3DCOMPILE_PACK_MATRIX_ROW_MAJOR),
-        F(D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR),
-        F(D3DCOMPILE_PARTIAL_PRECISION),
-        F(D3DCOMPILE_FORCE_VS_SOFTWARE_NO_OPT),
-        F(D3DCOMPILE_FORCE_PS_SOFTWARE_NO_OPT),
-        F(D3DCOMPILE_NO_PRESHADER),
-        F(D3DCOMPILE_AVOID_FLOW_CONTROL),
-        F(D3DCOMPILE_PREFER_FLOW_CONTROL),
-        F(D3DCOMPILE_ENABLE_STRICTNESS),
-        F(D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY),
-        F(D3DCOMPILE_IEEE_STRICTNESS),
-        F(D3DCOMPILE_RESERVED16),
-        F(D3DCOMPILE_RESERVED17),
-        F(D3DCOMPILE_WARNINGS_ARE_ERRORS),
-        F(D3DCOMPILE_RESOURCES_MAY_ALIAS),
-        F(D3DCOMPILE_ENABLE_UNBOUNDED_DESCRIPTOR_TABLES),
-        F(D3DCOMPILE_ALL_RESOURCES_BOUND),
-        F(D3DCOMPILE_DEBUG_NAME_FOR_SOURCE),
-        F(D3DCOMPILE_DEBUG_NAME_FOR_BINARY),
-#undef F
-    };
-
-    std::string result;
-    for (const Flag& f : flags) {
-        if ((compileFlags & f.value) != 0) {
-            result += f.name + std::string("\n");
-        }
-    }
-
-    // Optimization level must be handled separately as two bits are used, and the values
-    // don't map neatly to 0-3.
-    constexpr uint32_t d3dCompileFlagsBits = D3DCOMPILE_OPTIMIZATION_LEVEL2;
-    switch (compileFlags & d3dCompileFlagsBits) {
-        case D3DCOMPILE_OPTIMIZATION_LEVEL0:
-            result += "D3DCOMPILE_OPTIMIZATION_LEVEL0";
-            break;
-        case D3DCOMPILE_OPTIMIZATION_LEVEL1:
-            result += "D3DCOMPILE_OPTIMIZATION_LEVEL1";
-            break;
-        case D3DCOMPILE_OPTIMIZATION_LEVEL2:
-            result += "D3DCOMPILE_OPTIMIZATION_LEVEL2";
-            break;
-        case D3DCOMPILE_OPTIMIZATION_LEVEL3:
-            result += "D3DCOMPILE_OPTIMIZATION_LEVEL3";
-            break;
-    }
-    result += std::string("\n");
-
-    return result;
-}
-
-}  // anonymous namespace
-
 // static
 ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
     Device* device,
@@ -276,44 +211,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                          d3d::CompileShader);
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
-        std::ostringstream dumpedMsg;
-        dumpedMsg << "/* Dumped generated HLSL */" << std::endl
-                  << compiledShader->hlslSource << std::endl;
-
-        if (device->IsToggleEnabled(Toggle::UseDXC)) {
-            dumpedMsg << "/* Dumped disassembled DXIL */" << std::endl;
-            const Blob& shaderBlob = compiledShader->shaderBlob;
-            ComPtr<IDxcBlobEncoding> dxcBlob;
-            ComPtr<IDxcBlobEncoding> disassembly;
-            if (FAILED(device->GetDxcLibrary()->CreateBlobWithEncodingFromPinned(
-                    shaderBlob.Data(), shaderBlob.Size(), 0, &dxcBlob)) ||
-                FAILED(device->GetDxcCompiler()->Disassemble(dxcBlob.Get(), &disassembly))) {
-                dumpedMsg << "DXC disassemble failed" << std::endl;
-            } else {
-                dumpedMsg << std::string_view(
-                    static_cast<const char*>(disassembly->GetBufferPointer()),
-                    disassembly->GetBufferSize());
-            }
-        } else {
-            dumpedMsg << "/* FXC compile flags */ " << std::endl
-                      << CompileFlagsToStringFXC(compileFlags) << std::endl;
-            dumpedMsg << "/* Dumped disassembled DXBC */" << std::endl;
-            ComPtr<ID3DBlob> disassembly;
-            const Blob& shaderBlob = compiledShader->shaderBlob;
-            UINT flags =
-                // Some literals are printed as floats with precision(6) which is not enough
-                // precision for values very close to 0, so always print literals as hex values.
-                D3D_DISASM_PRINT_HEX_LITERALS;
-            if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(),
-                                                              flags, nullptr, &disassembly))) {
-                dumpedMsg << "D3D disassemble failed" << std::endl;
-            } else {
-                dumpedMsg << std::string_view(
-                    static_cast<const char*>(disassembly->GetBufferPointer()),
-                    disassembly->GetBufferSize());
-            }
-        }
-        device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        d3d::DumpCompiledShader(device, *compiledShader, compileFlags);
     }
 
     device->GetBlobCache()->EnsureStored(compiledShader);
