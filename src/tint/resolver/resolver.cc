@@ -3048,35 +3048,47 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     }
 
     if (auto access = resolved->Access(); access != builtin::Access::kUndefined) {
-        return builder_->create<sem::BuiltinEnumExpression<builtin::Access>>(
-            expr, current_statement_, access);
+        return CheckNotTemplated("access", ident)
+                   ? builder_->create<sem::BuiltinEnumExpression<builtin::Access>>(
+                         expr, current_statement_, access)
+                   : nullptr;
     }
 
     if (auto addr = resolved->AddressSpace(); addr != builtin::AddressSpace::kUndefined) {
-        return builder_->create<sem::BuiltinEnumExpression<builtin::AddressSpace>>(
-            expr, current_statement_, addr);
+        return CheckNotTemplated("address space", ident)
+                   ? builder_->create<sem::BuiltinEnumExpression<builtin::AddressSpace>>(
+                         expr, current_statement_, addr)
+                   : nullptr;
     }
 
     if (auto builtin = resolved->BuiltinValue(); builtin != builtin::BuiltinValue::kUndefined) {
-        return builder_->create<sem::BuiltinEnumExpression<builtin::BuiltinValue>>(
-            expr, current_statement_, builtin);
+        return CheckNotTemplated("builtin value", ident)
+                   ? builder_->create<sem::BuiltinEnumExpression<builtin::BuiltinValue>>(
+                         expr, current_statement_, builtin)
+                   : nullptr;
     }
 
     if (auto i_smpl = resolved->InterpolationSampling();
         i_smpl != builtin::InterpolationSampling::kUndefined) {
-        return builder_->create<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
-            expr, current_statement_, i_smpl);
+        return CheckNotTemplated("interpolation sampling", ident)
+                   ? builder_->create<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
+                         expr, current_statement_, i_smpl)
+                   : nullptr;
     }
 
     if (auto i_type = resolved->InterpolationType();
         i_type != builtin::InterpolationType::kUndefined) {
-        return builder_->create<sem::BuiltinEnumExpression<builtin::InterpolationType>>(
-            expr, current_statement_, i_type);
+        return CheckNotTemplated("interpolation type", ident)
+                   ? builder_->create<sem::BuiltinEnumExpression<builtin::InterpolationType>>(
+                         expr, current_statement_, i_type)
+                   : nullptr;
     }
 
     if (auto fmt = resolved->TexelFormat(); fmt != builtin::TexelFormat::kUndefined) {
-        return builder_->create<sem::BuiltinEnumExpression<builtin::TexelFormat>>(
-            expr, current_statement_, fmt);
+        return CheckNotTemplated("texel format", ident)
+                   ? builder_->create<sem::BuiltinEnumExpression<builtin::TexelFormat>>(
+                         expr, current_statement_, fmt)
+                   : nullptr;
     }
 
     if (auto* unresolved = resolved->Unresolved()) {

@@ -907,6 +907,7 @@ if(TINT_BUILD_TESTS)
     resolver/atomics_validation_test.cc
     resolver/attribute_validation_test.cc
     resolver/bitcast_validation_test.cc
+    resolver/builtin_enum_test.cc
     resolver/builtin_test.cc
     resolver/builtin_validation_test.cc
     resolver/builtins_validation_test.cc
