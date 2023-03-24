@@ -539,6 +539,9 @@ inline std::optional<AInt> CheckedDiv(AInt a, AInt b) {
 /// @returns a / b, or an empty optional if the resulting value overflowed the float value
 template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedDiv(FloatingPointT a, FloatingPointT b) {
+    if (b == FloatingPointT{0.0} || b == FloatingPointT{-0.0}) {
+        return {};
+    }
     auto result = FloatingPointT{a.value / b.value};
     if (!std::isfinite(result.value)) {
         return {};
@@ -576,6 +579,9 @@ inline std::optional<AInt> CheckedMod(AInt a, AInt b) {
 /// float value
 template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedMod(FloatingPointT a, FloatingPointT b) {
+    if (b == FloatingPointT{0.0} || b == FloatingPointT{-0.0}) {
+        return {};
+    }
     auto result = FloatingPointT{detail::Mod(a.value, b.value)};
     if (!std::isfinite(result.value)) {
         return {};
