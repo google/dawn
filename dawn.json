@@ -79,6 +79,11 @@
         "category": "object",
         "methods": [
             {
+                "name": "get instance",
+                "tags": ["dawn"],
+                "returns": "instance"
+            },
+            {
                 "name": "get limits",
                 "returns": "bool",
                 "args": [

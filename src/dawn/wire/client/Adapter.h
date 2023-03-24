@@ -51,6 +51,7 @@ class Adapter final : public ObjectBase {
                                  const WGPUFeatureName* features);
 
     // Unimplementable. Only availale in dawn_native.
+    WGPUInstance GetInstance() const;
     WGPUDevice CreateDevice(const WGPUDeviceDescriptor*);
 
   private:

@@ -43,6 +43,7 @@ class AdapterBase : public RefCounted {
     MaybeError Initialize();
 
     // WebGPU API
+    InstanceBase* APIGetInstance() const;
     bool APIGetLimits(SupportedLimits* limits) const;
     void APIGetProperties(AdapterProperties* properties) const;
     bool APIHasFeature(wgpu::FeatureName feature) const;
@@ -56,6 +57,9 @@ class AdapterBase : public RefCounted {
     uint32_t GetDeviceId() const;
     const gpu_info::DriverVersion& GetDriverVersion() const;
     wgpu::BackendType GetBackendType() const;
+
+    // This method differs from APIGetInstance() in that it won't increase the ref count of the
+    // instance.
     InstanceBase* GetInstance() const;
 
     void ResetInternalDeviceForTesting();

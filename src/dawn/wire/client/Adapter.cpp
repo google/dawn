@@ -127,6 +127,11 @@ bool Adapter::OnRequestDeviceCallback(uint64_t requestSerial,
     return true;
 }
 
+WGPUInstance Adapter::GetInstance() const {
+    dawn::ErrorLog() << "adapter.GetInstance not supported with dawn_wire.";
+    return nullptr;
+}
+
 WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor*) {
     dawn::ErrorLog() << "adapter.CreateDevice not supported with dawn_wire.";
     return nullptr;

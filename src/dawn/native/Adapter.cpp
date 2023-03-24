@@ -83,6 +83,13 @@ MaybeError AdapterBase::Initialize() {
     return {};
 }
 
+InstanceBase* AdapterBase::APIGetInstance() const {
+    auto instance = GetInstance();
+    ASSERT(instance != nullptr);
+    instance->Reference();
+    return instance;
+}
+
 bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
     return GetLimits(limits);
 }
