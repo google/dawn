@@ -694,18 +694,27 @@ MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
     DAWN_TRY(device->ValidateObject(source->externalTexture));
     DAWN_TRY(source->externalTexture->ValidateCanUseInSubmitNow());
 
-    const Extent2D& sourceVisibleSize = source->externalTexture->GetVisibleSize();
+    Extent2D sourceSize;
+
+    // TODO(crbug.com/dawn/1694): Remove this workaround that use visible rect
+    // if natural size it not set after chromium side changes ready.
+    if (source->naturalSize.width == 0) {
+        sourceSize = source->externalTexture->GetVisibleSize();
+    } else {
+        sourceSize.width = source->naturalSize.width;
+        sourceSize.height = source->naturalSize.height;
+    }
 
     // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
     // overflows.
     DAWN_INVALID_IF(
         static_cast<uint64_t>(source->origin.x) + static_cast<uint64_t>(copySize->width) >
-                static_cast<uint64_t>(sourceVisibleSize.width) ||
+                static_cast<uint64_t>(sourceSize.width) ||
             static_cast<uint64_t>(source->origin.y) + static_cast<uint64_t>(copySize->height) >
-                static_cast<uint64_t>(sourceVisibleSize.height) ||
+                static_cast<uint64_t>(sourceSize.height) ||
             static_cast<uint64_t>(source->origin.z) > 0,
-        "Texture copy range (origin: %s, copySize: %s) touches outside of %s visible size (%s).",
-        &source->origin, copySize, source->externalTexture, &sourceVisibleSize);
+        "Texture copy range (origin: %s, copySize: %s) touches outside of %s source size (%s).",
+        &source->origin, copySize, source->externalTexture, &sourceSize);
     DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).", source->origin.z);
     DAWN_INVALID_IF(
         options->internalUsage && !device->HasFeature(Feature::DawnInternalUsages),
@@ -731,8 +740,14 @@ MaybeError DoCopyExternalTextureForBrowser(DeviceBase* device,
                                            const CopyTextureForBrowserOptions* options) {
     TextureInfo info;
     info.origin = source->origin;
-    const Extent2D& visibleSize = source->externalTexture->GetVisibleSize();
-    info.size = {visibleSize.width, visibleSize.height, 1};
+    info.size = {source->naturalSize.width, source->naturalSize.height, 1};
+
+    // TODO(crbug.com/dawn/1694): Remove this workaround that use visible rect
+    // if natural size it not set after chromium side changes ready.
+    if (info.size.width == 0) {
+        const Extent2D& visibleSize = source->externalTexture->GetVisibleSize();
+        info.size = {visibleSize.width, visibleSize.height, 1};
+    }
 
     RenderPipelineBase* pipeline;
     DAWN_TRY_ASSIGN(pipeline, GetOrCreateCopyExternalTextureForBrowserPipeline(

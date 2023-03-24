@@ -1508,7 +1508,8 @@
         "tags": ["dawn"],
         "members": [
             {"name": "external texture", "type": "external texture"},
-            {"name": "origin", "type": "origin 3D"}
+            {"name": "origin", "type": "origin 3D"},
+            {"name": "natural size", "type": "extent 2D"}
         ]
     },
     "index format": {
