@@ -281,6 +281,14 @@ class GeneratorImpl : public TextGenerator {
     bool EmitQuantizeToF16Call(utils::StringStream& out,
                                const ast::CallExpression* expr,
                                const sem::Builtin* builtin);
+    /// Handles generating a call to the `trunc()` intrinsic
+    /// @param out the output of the expression stream
+    /// @param expr the call expression
+    /// @param builtin the semantic information for the builtin
+    /// @returns true if the call expression is emitted
+    bool EmitTruncCall(utils::StringStream& out,
+                       const ast::CallExpression* expr,
+                       const sem::Builtin* builtin);
     /// Handles generating a call to DP4a builtins (dot4I8Packed and dot4U8Packed)
     /// @param out the output of the expression stream
     /// @param expr the call expression

@@ -1,5 +1,9 @@
+float tint_trunc(float param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
 float tint_float_mod(float lhs, float rhs) {
-  return (lhs - (trunc((lhs / rhs)) * rhs));
+  return (lhs - (tint_trunc((lhs / rhs)) * rhs));
 }
 
 [numthreads(1, 1, 1)]

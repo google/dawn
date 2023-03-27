@@ -997,6 +997,9 @@ bool GeneratorImpl::EmitBuiltinCall(utils::StringStream& out,
     if (type == builtin::Function::kQuantizeToF16) {
         return EmitQuantizeToF16Call(out, expr, builtin);
     }
+    if (type == builtin::Function::kTrunc) {
+        return EmitTruncCall(out, expr, builtin);
+    }
     if (builtin->IsDataPacking()) {
         return EmitDataPackingCall(out, expr, builtin);
     }
@@ -2116,6 +2119,20 @@ bool GeneratorImpl::EmitQuantizeToF16Call(utils::StringStream& out,
     return true;
 }
 
+bool GeneratorImpl::EmitTruncCall(utils::StringStream& out,
+                                  const ast::CallExpression* expr,
+                                  const sem::Builtin* builtin) {
+    // HLSL's trunc is broken for very large/small float values.
+    // See crbug.com/tint/1883
+    return CallBuiltinHelper(  //
+        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
+            // value < 0 ? ceil(value) : floor(value)
+            line(b) << "return " << params[0] << " < 0 ? ceil(" << params[0] << ") : floor("
+                    << params[0] << ");";
+            return true;
+        });
+}
+
 bool GeneratorImpl::EmitDataPackingCall(utils::StringStream& out,
                                         const ast::CallExpression* expr,
                                         const sem::Builtin* builtin) {
@@ -2704,7 +2721,6 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         case builtin::Function::kTan:
         case builtin::Function::kTanh:
         case builtin::Function::kTranspose:
-        case builtin::Function::kTrunc:
             return builtin->str();
         case builtin::Function::kCountOneBits:  // uint
             return "countbits";

@@ -97,7 +97,6 @@ const ast::CallExpression* GenerateCall(builtin::Function builtin,
         case builtin::Function::kSqrt:
         case builtin::Function::kTan:
         case builtin::Function::kTanh:
-        case builtin::Function::kTrunc:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2");
             } else {
@@ -309,8 +308,6 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinData{builtin::Function::kTan, CallParamType::kF16, "tan"},
                     BuiltinData{builtin::Function::kTanh, CallParamType::kF32, "tanh"},
                     BuiltinData{builtin::Function::kTanh, CallParamType::kF16, "tanh"},
-                    BuiltinData{builtin::Function::kTrunc, CallParamType::kF32, "trunc"},
-                    BuiltinData{builtin::Function::kTrunc, CallParamType::kF16, "trunc"},
                     /* Integer built-in */
                     BuiltinData{builtin::Function::kAbs, CallParamType::kU32, "abs"},
                     BuiltinData{builtin::Function::kClamp, CallParamType::kU32, "clamp"},
@@ -1084,6 +1081,94 @@ TEST_F(HlslGeneratorImplTest_Builtin, Sign_Vector_f16) {
 void test_function() {
   vector<float16_t, 3> val = vector<float16_t, 3>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
   const vector<float16_t, 3> tint_symbol = vector<float16_t, 3>(sign(val));
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Trunc_Scalar_f32) {
+    auto* val = Var("val", ty.f32());
+    auto* call = Call("trunc", val);
+    WrapInFunction(val, call);
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(float tint_trunc(float param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  float val = 0.0f;
+  const float tint_symbol = tint_trunc(val);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Trunc_Vector_f32) {
+    auto* val = Var("val", ty.vec3<f32>());
+    auto* call = Call("trunc", val);
+    WrapInFunction(val, call);
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(float3 tint_trunc(float3 param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  float3 val = float3(0.0f, 0.0f, 0.0f);
+  const float3 tint_symbol = tint_trunc(val);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Trunc_Scalar_f16) {
+    Enable(builtin::Extension::kF16);
+
+    auto* val = Var("val", ty.f16());
+    auto* call = Call("trunc", val);
+    WrapInFunction(val, call);
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(float16_t tint_trunc(float16_t param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  float16_t val = float16_t(0.0h);
+  const float16_t tint_symbol = tint_trunc(val);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Trunc_Vector_f16) {
+    Enable(builtin::Extension::kF16);
+
+    auto* val = Var("val", ty.vec3<f16>());
+    auto* call = Call("trunc", val);
+    WrapInFunction(val, call);
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(vector<float16_t, 3> tint_trunc(vector<float16_t, 3> param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  vector<float16_t, 3> val = vector<float16_t, 3>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
+  const vector<float16_t, 3> tint_symbol = tint_trunc(val);
   return;
 }
 )");

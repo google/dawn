@@ -1,5 +1,9 @@
+vector<float16_t, 3> tint_trunc(vector<float16_t, 3> param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
 vector<float16_t, 3> tint_float_mod(vector<float16_t, 3> lhs, vector<float16_t, 3> rhs) {
-  return (lhs - (trunc((lhs / rhs)) * rhs));
+  return (lhs - (tint_trunc((lhs / rhs)) * rhs));
 }
 
 [numthreads(1, 1, 1)]

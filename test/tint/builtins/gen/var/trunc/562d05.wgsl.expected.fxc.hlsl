@@ -1,8 +1,12 @@
+float3 tint_trunc(float3 param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void trunc_562d05() {
   float3 arg_0 = (1.5f).xxx;
-  float3 res = trunc(arg_0);
+  float3 res = tint_trunc(arg_0);
   prevent_dce.Store3(0u, asuint(res));
 }
 

@@ -1,8 +1,12 @@
+vector<float16_t, 2> tint_trunc(vector<float16_t, 2> param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void trunc_a56109() {
   vector<float16_t, 2> arg_0 = (float16_t(1.5h)).xx;
-  vector<float16_t, 2> res = trunc(arg_0);
+  vector<float16_t, 2> res = tint_trunc(arg_0);
   prevent_dce.Store<vector<float16_t, 2> >(0u, res);
 }
 

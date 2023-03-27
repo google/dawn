@@ -1,8 +1,12 @@
+float4 tint_trunc(float4 param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void trunc_e183aa() {
   float4 arg_0 = (1.5f).xxxx;
-  float4 res = trunc(arg_0);
+  float4 res = tint_trunc(arg_0);
   prevent_dce.Store4(0u, asuint(res));
 }
 

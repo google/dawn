@@ -66,8 +66,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                                          HlslImportData{"sinh", "sinh"},
                                          HlslImportData{"sqrt", "sqrt"},
                                          HlslImportData{"tan", "tan"},
-                                         HlslImportData{"tanh", "tanh"},
-                                         HlslImportData{"trunc", "trunc"}));
+                                         HlslImportData{"tanh", "tanh"}));
 
 using HlslImportData_SingleIntParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
@@ -125,8 +124,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                                          HlslImportData{"sinh", "sinh"},
                                          HlslImportData{"sqrt", "sqrt"},
                                          HlslImportData{"tan", "tan"},
-                                         HlslImportData{"tanh", "tanh"},
-                                         HlslImportData{"trunc", "trunc"}));
+                                         HlslImportData{"tanh", "tanh"}));
 
 using HlslImportData_DualParam_ScalarTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParam_ScalarTest, Float) {
