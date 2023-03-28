@@ -488,62 +488,6 @@ crbug.com/dawn/1677 webgpu:api,validation,resource_usages,texture,in_pass_encode
 crbug.com/dawn/1677 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,depth_stencil_attachment_and_bind_group:* [ Failure ]
 
 ################################################################################
-# frexp failures on Linux Intel
-################################################################################
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_r" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_fract:inputSource="uniform" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="storage_r" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_fract:inputSource="uniform" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="storage_r" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec3_fract:inputSource="uniform" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="storage_r" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="storage_rw" [ Failure ]
-crbug.com/tint/1877 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec4_fract:inputSource="uniform" [ Failure ]
-
-################################################################################
-# min,max,clamp failures on denorm inputs
-################################################################################
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_r";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_r";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_r";vectorize=4 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_rw";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_rw";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_rw";vectorize=4 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=4 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="storage_r";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="storage_r";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="storage_r";vectorize=4 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="storage_rw";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="storage_rw";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="storage_rw";vectorize=4 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="uniform";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="uniform";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="uniform";vectorize=4 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="storage_r";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="storage_r";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="storage_r";vectorize=4 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="storage_rw";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="storage_rw";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="storage_rw";vectorize=4 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="uniform";vectorize=2 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="uniform";vectorize=3 [ Failure ]
-crbug.com/tint/1878 [ ventura ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="uniform";vectorize=4 [ Failure ]
-
-################################################################################
 # Device lost on AMD/MacOS with const eval
 ################################################################################
 crbug.com/tint/1879 [ ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:inputSource="const";vectorize="_undef_" [ Failure ]
