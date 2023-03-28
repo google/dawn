@@ -19,8 +19,8 @@
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
-#include "dawn/native/vulkan/external_semaphore/ServiceImplementation.h"
-#include "dawn/native/vulkan/external_semaphore/ServiceImplementationZirconHandle.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationZirconHandle.h"
 
 namespace dawn::native::vulkan::external_semaphore {
 

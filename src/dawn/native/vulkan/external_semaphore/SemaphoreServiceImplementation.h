@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SERVICEIMPLEMENTATION_H_
-#define SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SERVICEIMPLEMENTATION_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICEIMPLEMENTATION_H_
+#define SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICEIMPLEMENTATION_H_
 
 #include "dawn/native/Error.h"
 #include "dawn/native/vulkan/ExternalHandle.h"
@@ -53,4 +53,4 @@ class ServiceImplementation {
 
 }  // namespace dawn::native::vulkan::external_semaphore
 
-#endif  // SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SERVICEIMPLEMENTATION_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICEIMPLEMENTATION_H_

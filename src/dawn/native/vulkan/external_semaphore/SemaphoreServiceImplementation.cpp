@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/vulkan/external_semaphore/ServiceImplementation.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
 
 namespace dawn::native::vulkan::external_semaphore {
 

@@ -19,8 +19,8 @@
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
-#include "dawn/native/vulkan/external_semaphore/ServiceImplementation.h"
-#include "dawn/native/vulkan/external_semaphore/ServiceImplementationFD.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationFD.h"
 
 static constexpr VkExternalSemaphoreHandleTypeFlagBits kHandleType =
 #if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)

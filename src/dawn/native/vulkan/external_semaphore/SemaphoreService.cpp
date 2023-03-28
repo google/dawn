@@ -15,15 +15,15 @@
 #include "dawn/native/vulkan/external_semaphore/SemaphoreService.h"
 #include "dawn/native/vulkan/VulkanFunctions.h"
 #include "dawn/native/vulkan/VulkanInfo.h"
-#include "dawn/native/vulkan/external_semaphore/ServiceImplementation.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
 
 #if DAWN_PLATFORM_IS(FUCHSIA)
-#include "dawn/native/vulkan/external_semaphore/ServiceImplementationZirconHandle.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationZirconHandle.h"
 #endif  // DAWN_PLATFORM_IS(FUCHSIA)
 
 // Android, ChromeOS and Linux
 #if DAWN_PLATFORM_IS(LINUX)
-#include "dawn/native/vulkan/external_semaphore/ServiceImplementationFD.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationFD.h"
 #endif  // DAWN_PLATFORM_IS(LINUX)
 
 namespace dawn::native::vulkan::external_semaphore {
