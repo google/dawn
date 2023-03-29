@@ -480,14 +480,6 @@ crbug.com/1421045 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_chec
 crbug.com/1424883 webgpu:api,operation,adapter,requestDevice:invalid: [ Failure ]
 
 ################################################################################
-# Failures due to deprecated API usage in the CTS
-################################################################################
-crbug.com/dawn/1677 webgpu:api,validation,resource_usages,texture,in_pass_encoder:bindings_in_bundle:type0="multisampled-texture";type1="multisampled-texture" [ Failure ]
-crbug.com/dawn/1677 webgpu:api,validation,resource_usages,texture,in_pass_encoder:bindings_in_bundle:type0="multisampled-texture";type1="render-target" [ Failure ]
-crbug.com/dawn/1677 webgpu:api,validation,resource_usages,texture,in_pass_encoder:bindings_in_bundle:type0="render-target";type1="multisampled-texture" [ Failure ]
-crbug.com/dawn/1677 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,depth_stencil_attachment_and_bind_group:* [ Failure ]
-
-################################################################################
 # Device lost on AMD/MacOS with const eval
 ################################################################################
 crbug.com/tint/1879 [ ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:inputSource="const";vectorize="_undef_" [ Failure ]
@@ -650,8 +642,6 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ubuntu ] webgpu:api,validation,error_scope:si
 crbug.com/dawn/0000 [ intel-0x9bc5 ubuntu ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ubuntu ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,gpu_external_texture_expiration:device_destroyed_before_importing_video_frame:* [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,* [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pass,render_pass_descriptor:depth_stencil_attachment,loadOp_storeOp_match_depthReadOnly_stencilReadOnly:* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="offscreen";contextType="bitmaprenderer" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="onscreen";contextType="bitmaprenderer" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,texture,bgra8unorm_storage:configure_storage_usage_on_canvas_context_with_bgra8unorm_storage:* [ Failure ]
