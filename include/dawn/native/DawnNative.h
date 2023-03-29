@@ -187,8 +187,6 @@ class DAWN_NATIVE_EXPORT Instance {
 
     uint64_t GetDeviceCountForTesting() const;
 
-    bool ProcessEvents();
-
     // Returns the underlying WGPUInstance object.
     WGPUInstance Get() const;
 
@@ -224,6 +222,8 @@ DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(
 DAWN_NATIVE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();
 
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
+
+DAWN_NATIVE_EXPORT bool InstanceProcessEvents(WGPUInstance instance);
 
 // ErrorInjector functions used for testing only. Defined in dawn_native/ErrorInjector.cpp
 DAWN_NATIVE_EXPORT void EnableErrorInjector();

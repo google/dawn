@@ -251,10 +251,6 @@ uint64_t Instance::GetDeviceCountForTesting() const {
     return mImpl->GetDeviceCountForTesting();
 }
 
-bool Instance::ProcessEvents() {
-    return mImpl->APIProcessEvents();
-}
-
 WGPUInstance Instance::Get() const {
     return ToAPI(mImpl);
 }
@@ -296,6 +292,10 @@ std::vector<const char*> GetProcMapNamesForTesting() {
 
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device) {
     return FromAPI(device)->APITick();
+}
+
+DAWN_NATIVE_EXPORT bool InstanceProcessEvents(WGPUInstance instance) {
+    return FromAPI(instance)->APIProcessEvents();
 }
 
 // ExternalImageDescriptor
