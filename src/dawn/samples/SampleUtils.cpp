@@ -18,6 +18,7 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "GLFW/glfw3.h"
@@ -55,8 +56,16 @@ void PrintDeviceError(WGPUErrorType errorType, const char* message, void*) {
     dawn::ErrorLog() << errorTypeName << " error: " << message;
 }
 
+void DeviceLostCallback(WGPUDeviceLostReason reason, const char* message, void*) {
+    dawn::ErrorLog() << "Device lost: " << message;
+}
+
 void PrintGLFWError(int code, const char* message) {
     dawn::ErrorLog() << "GLFW error: " << code << " - " << message;
+}
+
+void DeviceLogCallback(WGPULoggingType type, const char* message, void*) {
+    dawn::ErrorLog() << "Device log: " << message;
 }
 
 enum class CmdBufType {
@@ -69,6 +78,8 @@ enum class CmdBufType {
 // their respective platforms, and Vulkan is preferred to OpenGL
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
 static wgpu::BackendType backendType = wgpu::BackendType::D3D12;
+#elif defined(DAWN_ENABLE_BACKEND_D3D11)
+static wgpu::BackendType backendType = wgpu::BackendType::D3D11;
 #elif defined(DAWN_ENABLE_BACKEND_METAL)
 static wgpu::BackendType backendType = wgpu::BackendType::Metal;
 #elif defined(DAWN_ENABLE_BACKEND_VULKAN)
@@ -81,6 +92,9 @@ static wgpu::BackendType backendType = wgpu::BackendType::OpenGL;
 #error
 #endif
 
+static std::vector<std::string> enableToggles;
+static std::vector<std::string> disableToggles;
+
 static CmdBufType cmdBufType = CmdBufType::Terrible;
 static std::unique_ptr<dawn::native::Instance> instance;
 static wgpu::SwapChain swapChain;
@@ -91,6 +105,9 @@ static dawn::wire::WireServer* wireServer = nullptr;
 static dawn::wire::WireClient* wireClient = nullptr;
 static utils::TerribleCommandBuffer* c2sBuf = nullptr;
 static utils::TerribleCommandBuffer* s2cBuf = nullptr;
+
+static constexpr uint32_t kWidth = 640;
+static constexpr uint32_t kHeight = 480;
 
 wgpu::Device CreateCppDawnDevice() {
     ScopedEnvironmentVar angleDefaultPlatform;
@@ -106,7 +123,7 @@ wgpu::Device CreateCppDawnDevice() {
     // Create the test window with no client API.
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
-    window = glfwCreateWindow(640, 480, "Dawn window", nullptr, nullptr);
+    window = glfwCreateWindow(kWidth, kHeight, "Dawn window", nullptr, nullptr);
     if (!window) {
         return wgpu::Device();
     }
@@ -128,7 +145,27 @@ wgpu::Device CreateCppDawnDevice() {
         backendAdapter = *adapterIt;
     }
 
-    WGPUDevice backendDevice = backendAdapter.CreateDevice();
+    std::vector<const char*> enableToggleNames;
+    std::vector<const char*> disabledToggleNames;
+    for (const std::string& toggle : enableToggles) {
+        enableToggleNames.push_back(toggle.c_str());
+    }
+
+    for (const std::string& toggle : disableToggles) {
+        disabledToggleNames.push_back(toggle.c_str());
+    }
+    WGPUDawnTogglesDescriptor toggles;
+    toggles.chain.sType = WGPUSType_DawnTogglesDescriptor;
+    toggles.chain.next = nullptr;
+    toggles.enabledToggles = enableToggleNames.data();
+    toggles.enabledTogglesCount = static_cast<uint32_t>(enableToggleNames.size());
+    toggles.disabledToggles = disabledToggleNames.data();
+    toggles.disabledTogglesCount = static_cast<uint32_t>(disabledToggleNames.size());
+
+    WGPUDeviceDescriptor deviceDesc = {};
+    deviceDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&toggles);
+
+    WGPUDevice backendDevice = backendAdapter.CreateDevice(&deviceDesc);
     DawnProcTable backendProcs = dawn::native::GetProcs();
 
     // Create the swapchain
@@ -137,11 +174,11 @@ wgpu::Device CreateCppDawnDevice() {
     surfaceDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(surfaceChainedDesc.get());
     WGPUSurface surface = backendProcs.instanceCreateSurface(instance->Get(), &surfaceDesc);
 
-    WGPUSwapChainDescriptor swapChainDesc;
+    WGPUSwapChainDescriptor swapChainDesc = {};
     swapChainDesc.usage = WGPUTextureUsage_RenderAttachment;
     swapChainDesc.format = static_cast<WGPUTextureFormat>(GetPreferredSwapChainTextureFormat());
-    swapChainDesc.width = 640;
-    swapChainDesc.height = 480;
+    swapChainDesc.width = kWidth;
+    swapChainDesc.height = kHeight;
     swapChainDesc.presentMode = WGPUPresentMode_Mailbox;
     swapChainDesc.implementation = 0;
     WGPUSwapChain backendSwapChain =
@@ -191,6 +228,8 @@ wgpu::Device CreateCppDawnDevice() {
 
     dawnProcSetProcs(&procs);
     procs.deviceSetUncapturedErrorCallback(cDevice, PrintDeviceError, nullptr);
+    procs.deviceSetDeviceLostCallback(cDevice, DeviceLostCallback, nullptr);
+    procs.deviceSetLoggingCallback(cDevice, DeviceLogCallback, nullptr);
     return wgpu::Device::Acquire(cDevice);
 }
 
@@ -206,8 +245,8 @@ wgpu::SwapChain GetSwapChain() {
 wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device) {
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
-    descriptor.size.width = 640;
-    descriptor.size.height = 480;
+    descriptor.size.width = kWidth;
+    descriptor.size.height = kHeight;
     descriptor.size.depthOrArrayLayers = 1;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
@@ -219,29 +258,71 @@ wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device) {
 
 bool InitSample(int argc, const char** argv) {
     for (int i = 1; i < argc; i++) {
-        if (std::string("-b") == argv[i] || std::string("--backend") == argv[i]) {
-            i++;
-            if (i < argc && std::string("d3d12") == argv[i]) {
+        std::string_view arg(argv[i]);
+        std::string_view opt, value;
+
+        static constexpr struct Option {
+            const char* shortOpt;
+            const char* longOpt;
+            bool hasValue;
+        } options[] = {
+            {"-b", "--backend=", true},       {"-c", "--cmd-buf=", true},
+            {"-e", "--enable-toggle=", true}, {"-d", "--disable-toggle=", true},
+            {"-h", "--help", false},
+        };
+
+        for (const Option& option : options) {
+            if (!option.hasValue) {
+                if (arg == option.shortOpt || arg == option.longOpt) {
+                    opt = option.shortOpt;
+                    break;
+                }
+                continue;
+            }
+
+            if (arg == option.shortOpt) {
+                opt = option.shortOpt;
+                if (++i < argc) {
+                    value = argv[i];
+                }
+                break;
+            }
+
+            if (arg.rfind(option.longOpt, 0) == 0) {
+                opt = option.shortOpt;
+                if (option.hasValue) {
+                    value = arg.substr(strlen(option.longOpt));
+                }
+                break;
+            }
+        }
+
+        if (opt == "-b") {
+            if (value == "d3d11") {
+                backendType = wgpu::BackendType::D3D11;
+                continue;
+            }
+            if (value == "d3d12") {
                 backendType = wgpu::BackendType::D3D12;
                 continue;
             }
-            if (i < argc && std::string("metal") == argv[i]) {
+            if (value == "metal") {
                 backendType = wgpu::BackendType::Metal;
                 continue;
             }
-            if (i < argc && std::string("null") == argv[i]) {
+            if (value == "null") {
                 backendType = wgpu::BackendType::Null;
                 continue;
             }
-            if (i < argc && std::string("opengl") == argv[i]) {
+            if (value == "opengl") {
                 backendType = wgpu::BackendType::OpenGL;
                 continue;
             }
-            if (i < argc && std::string("opengles") == argv[i]) {
+            if (value == "opengles") {
                 backendType = wgpu::BackendType::OpenGLES;
                 continue;
             }
-            if (i < argc && std::string("vulkan") == argv[i]) {
+            if (value == "vulkan") {
                 backendType = wgpu::BackendType::Vulkan;
                 continue;
             }
@@ -250,23 +331,35 @@ bool InitSample(int argc, const char** argv) {
                     "vulkan)\n");
             return false;
         }
-        if (std::string("-c") == argv[i] || std::string("--command-buffer") == argv[i]) {
-            i++;
-            if (i < argc && std::string("none") == argv[i]) {
+
+        if (opt == "-c") {
+            if (value == "none") {
                 cmdBufType = CmdBufType::None;
                 continue;
             }
-            if (i < argc && std::string("terrible") == argv[i]) {
+            if (value == "terrible") {
                 cmdBufType = CmdBufType::Terrible;
                 continue;
             }
             fprintf(stderr, "--command-buffer expects a command buffer name (none, terrible)\n");
             return false;
         }
-        if (std::string("-h") == argv[i] || std::string("--help") == argv[i]) {
-            printf("Usage: %s [-b BACKEND] [-c COMMAND_BUFFER]\n", argv[0]);
+
+        if (opt == "-e") {
+            enableToggles.push_back(std::string(value));
+            continue;
+        }
+
+        if (opt == "-d") {
+            disableToggles.push_back(std::string(value));
+            continue;
+        }
+
+        if (opt == "-h") {
+            printf("Usage: %s [-b BACKEND] [-c COMMAND_BUFFER] [-e TOGGLE] [-d TOGGLE]\n", argv[0]);
             printf("  BACKEND is one of: d3d12, metal, null, opengl, opengles, vulkan\n");
             printf("  COMMAND_BUFFER is one of: none, terrible\n");
+            printf("  TOGGLE is device toggle name to enable or disable\n");
             return false;
         }
     }
