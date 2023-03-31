@@ -3,6 +3,6 @@ void unused_entry_point() {
   return;
 }
 
-ByteAddressBuffer v : register(t0, space0);
+ByteAddressBuffer v : register(t0);
 
-ByteAddressBuffer b : register(t1, space0);
+ByteAddressBuffer b : register(t1);

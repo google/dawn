@@ -1,8 +1,8 @@
-cbuffer cbuffer_ubo : register(b0, space0) {
+cbuffer cbuffer_ubo : register(b0) {
   uint4 ubo[5];
 };
 
-RWByteAddressBuffer result : register(u2, space0);
+RWByteAddressBuffer result : register(u2);
 
 [numthreads(1, 1, 1)]
 void f() {

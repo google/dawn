@@ -1,4 +1,4 @@
-RWByteAddressBuffer S : register(u0, space0);
+RWByteAddressBuffer S : register(u0);
 
 void S_store(uint offset, int value[4]) {
   int array_1[4] = value;

@@ -1,7 +1,7 @@
-ByteAddressBuffer firstMatrix : register(t0, space0);
-ByteAddressBuffer secondMatrix : register(t1, space0);
-RWByteAddressBuffer resultMatrix : register(u2, space0);
-cbuffer cbuffer_uniforms : register(b3, space0) {
+ByteAddressBuffer firstMatrix : register(t0);
+ByteAddressBuffer secondMatrix : register(t1);
+RWByteAddressBuffer resultMatrix : register(u2);
+cbuffer cbuffer_uniforms : register(b3) {
   uint4 uniforms[2];
 };
 

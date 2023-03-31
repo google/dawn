@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-cbuffer cbuffer_m : register(b0, space0) {
+cbuffer cbuffer_m : register(b0) {
   uint4 m[1];
 };
 static int counter = 0;

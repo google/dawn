@@ -4,7 +4,7 @@ cbuffer cbuffer_constants : register(b0, space1) {
 
 RWByteAddressBuffer result : register(u1, space1);
 
-RWByteAddressBuffer s : register(u0, space0);
+RWByteAddressBuffer s : register(u0);
 
 int satomicLoad(uint offset) {
   int value = 0;

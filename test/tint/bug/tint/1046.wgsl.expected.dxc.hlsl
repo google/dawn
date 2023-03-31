@@ -1,9 +1,9 @@
-cbuffer cbuffer_uniforms : register(b0, space0) {
+cbuffer cbuffer_uniforms : register(b0) {
   uint4 uniforms[10];
 };
-ByteAddressBuffer pointLights : register(t1, space0);
-SamplerState mySampler : register(s2, space0);
-Texture2D<float4> myTexture : register(t3, space0);
+ByteAddressBuffer pointLights : register(t1);
+SamplerState mySampler : register(s2);
+Texture2D<float4> myTexture : register(t3);
 
 struct FragmentInput {
   float4 position;

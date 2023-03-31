@@ -5,7 +5,7 @@ void unused_entry_point() {
   return;
 }
 
-RWByteAddressBuffer U : register(u0, space0);
+RWByteAddressBuffer U : register(u0);
 
 void f() {
   U.Store<vector<float16_t, 3> >(0u, vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h)));

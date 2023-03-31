@@ -1,5 +1,5 @@
-Texture2D<uint4> Src : register(t0, space0);
-RWTexture2D<uint4> Dst : register(u1, space0);
+Texture2D<uint4> Src : register(t0);
+RWTexture2D<uint4> Dst : register(u1);
 
 void main_1() {
   uint4 srcValue = uint4(0u, 0u, 0u, 0u);

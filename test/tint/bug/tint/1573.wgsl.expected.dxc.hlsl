@@ -1,4 +1,4 @@
-RWByteAddressBuffer a : register(u0, space0);
+RWByteAddressBuffer a : register(u0);
 
 struct atomic_compare_exchange_weak_ret_type {
   uint old_value;

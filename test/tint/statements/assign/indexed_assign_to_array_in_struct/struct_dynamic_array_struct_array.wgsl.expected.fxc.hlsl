@@ -5,7 +5,7 @@ struct InnerS {
 cbuffer cbuffer_uniforms : register(b4, space1) {
   uint4 uniforms[1];
 };
-RWByteAddressBuffer s : register(u0, space0);
+RWByteAddressBuffer s : register(u0);
 
 void s_store(uint offset, InnerS value) {
   s.Store((offset + 0u), asuint(value.v));

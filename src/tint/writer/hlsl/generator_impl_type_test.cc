@@ -191,7 +191,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), "RWByteAddressBuffer g : register(u0, space0);\n");
+    EXPECT_EQ(gen.result(), "RWByteAddressBuffer g : register(u0);\n");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {

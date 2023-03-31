@@ -1,9 +1,9 @@
-cbuffer cbuffer_constants : register(b0, space0) {
+cbuffer cbuffer_constants : register(b0) {
   uint4 constants[1];
 };
-Texture2DArray<float4> myTexture : register(t1, space0);
+Texture2DArray<float4> myTexture : register(t1);
 
-RWByteAddressBuffer result : register(u3, space0);
+RWByteAddressBuffer result : register(u3);
 
 struct tint_symbol_1 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;

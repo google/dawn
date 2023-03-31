@@ -1,4 +1,4 @@
-ByteAddressBuffer input : register(t0, space0);
+ByteAddressBuffer input : register(t0);
 
 struct tint_symbol_1 {
   uint3 id : SV_DispatchThreadID;

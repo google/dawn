@@ -16,7 +16,7 @@ void fixed_size_array() {
   const int x = arr[idx];
 }
 
-ByteAddressBuffer rarr : register(t0, space0);
+ByteAddressBuffer rarr : register(t0);
 
 void runtime_size_array() {
   const int idx = -1;

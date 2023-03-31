@@ -1,4 +1,4 @@
-cbuffer cbuffer_u : register(b0, space0) {
+cbuffer cbuffer_u : register(b0) {
   uint4 u[16];
 };
 static float4x4 p[4] = (float4x4[4])0;

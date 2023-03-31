@@ -1,4 +1,4 @@
-ByteAddressBuffer sb_ro : register(t1, space0);
+ByteAddressBuffer sb_ro : register(t1);
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void arrayLength_8421b9() {

@@ -1,4 +1,4 @@
-cbuffer cbuffer_u : register(b0, space0) {
+cbuffer cbuffer_u : register(b0) {
   uint4 u[4];
 };
 static matrix<float16_t, 2, 3> p[4] = (matrix<float16_t, 2, 3>[4])0;

@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-cbuffer cbuffer_u : register(b0, space0) {
+cbuffer cbuffer_u : register(b0) {
   uint4 u[2];
 };
 static matrix<float16_t, 4, 4> p = matrix<float16_t, 4, 4>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));

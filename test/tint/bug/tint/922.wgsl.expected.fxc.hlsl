@@ -23,13 +23,13 @@ struct VertexOutput {
   float4 member;
 };
 
-cbuffer cbuffer_global : register(b0, space0) {
+cbuffer cbuffer_global : register(b0) {
   uint4 global[4];
 };
-cbuffer cbuffer_global1 : register(b1, space0) {
+cbuffer cbuffer_global1 : register(b1) {
   uint4 global1[3];
 };
-cbuffer cbuffer_global2 : register(b2, space0) {
+cbuffer cbuffer_global2 : register(b2) {
   uint4 global2[96];
 };
 static float3 a_Position1 = float3(0.0f, 0.0f, 0.0f);

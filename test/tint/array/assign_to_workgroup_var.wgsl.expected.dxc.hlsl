@@ -9,10 +9,10 @@ struct S {
 
 static int4 src_private[4] = (int4[4])0;
 groupshared int4 src_workgroup[4];
-cbuffer cbuffer_src_uniform : register(b0, space0) {
+cbuffer cbuffer_src_uniform : register(b0) {
   uint4 src_uniform[4];
 };
-RWByteAddressBuffer src_storage : register(u1, space0);
+RWByteAddressBuffer src_storage : register(u1);
 groupshared int4 tint_symbol[4];
 groupshared int dst_nested[4][3][2];
 

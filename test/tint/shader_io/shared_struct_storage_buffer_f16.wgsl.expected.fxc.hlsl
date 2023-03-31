@@ -8,7 +8,7 @@ struct S {
   vector<float16_t, 3> y;
 };
 
-RWByteAddressBuffer output : register(u0, space0);
+RWByteAddressBuffer output : register(u0);
 
 struct tint_symbol_1 {
   float f : TEXCOORD0;

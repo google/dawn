@@ -4,10 +4,10 @@ int tint_clamp(int e, int low, int high) {
   return min(max(e, low), high);
 }
 
-cbuffer cbuffer_x_7 : register(b0, space0) {
+cbuffer cbuffer_x_7 : register(b0) {
   uint4 x_7[1];
 };
-cbuffer cbuffer_x_10 : register(b1, space0) {
+cbuffer cbuffer_x_10 : register(b1) {
   uint4 x_10[4];
 };
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);

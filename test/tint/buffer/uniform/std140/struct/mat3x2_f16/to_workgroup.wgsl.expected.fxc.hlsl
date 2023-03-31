@@ -6,7 +6,7 @@ struct S {
   int after;
 };
 
-cbuffer cbuffer_u : register(b0, space0) {
+cbuffer cbuffer_u : register(b0) {
   uint4 u[32];
 };
 groupshared S w[4];

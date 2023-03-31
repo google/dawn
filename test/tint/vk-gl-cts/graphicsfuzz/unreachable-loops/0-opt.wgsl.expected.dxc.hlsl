@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
-cbuffer cbuffer_x_5 : register(b0, space0) {
+cbuffer cbuffer_x_5 : register(b0) {
   uint4 x_5[1];
 };
 

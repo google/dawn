@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
-cbuffer cbuffer_x_7 : register(b0, space0) {
+cbuffer cbuffer_x_7 : register(b0) {
   uint4 x_7[1];
 };
 static int map[256] = (int[256])0;

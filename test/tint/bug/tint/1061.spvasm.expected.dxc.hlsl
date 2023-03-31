@@ -1,4 +1,4 @@
-cbuffer cbuffer_x_7 : register(b0, space0) {
+cbuffer cbuffer_x_7 : register(b0) {
   uint4 x_7[1];
 };
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

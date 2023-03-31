@@ -1,5 +1,5 @@
-ByteAddressBuffer tint_symbol : register(t0, space0);
-RWByteAddressBuffer tint_symbol_1 : register(u1, space0);
+ByteAddressBuffer tint_symbol : register(t0);
+RWByteAddressBuffer tint_symbol_1 : register(u1);
 
 void tint_symbol_1_store(uint offset, float2x4 value) {
   tint_symbol_1.Store4((offset + 0u), asuint(value[0u]));

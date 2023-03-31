@@ -1,4 +1,4 @@
-ByteAddressBuffer tint_symbol : register(t0, space0);
+ByteAddressBuffer tint_symbol : register(t0);
 
 struct tint_symbol_8 {
   uint tint_symbol_2 : SV_GroupIndex;

@@ -6,8 +6,8 @@ struct atomic_compare_exchange_resulti32 {
   int old_value;
   bool exchanged;
 };
-RWByteAddressBuffer a_u32 : register(u0, space0);
-RWByteAddressBuffer a_i32 : register(u1, space0);
+RWByteAddressBuffer a_u32 : register(u0);
+RWByteAddressBuffer a_i32 : register(u1);
 groupshared uint b_u32;
 groupshared int b_i32;
 

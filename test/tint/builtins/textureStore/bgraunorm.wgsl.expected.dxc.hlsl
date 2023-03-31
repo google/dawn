@@ -1,4 +1,4 @@
-RWTexture2D<float4> tex : register(u0, space0);
+RWTexture2D<float4> tex : register(u0);
 
 struct tint_symbol {
   float4 value : SV_Position;

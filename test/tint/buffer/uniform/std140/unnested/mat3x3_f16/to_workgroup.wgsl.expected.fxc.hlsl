@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-cbuffer cbuffer_u : register(b0, space0) {
+cbuffer cbuffer_u : register(b0) {
   uint4 u[2];
 };
 groupshared matrix<float16_t, 3, 3> w;

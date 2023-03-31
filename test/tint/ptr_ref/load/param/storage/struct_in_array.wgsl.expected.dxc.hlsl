@@ -2,7 +2,7 @@ struct str {
   int i;
 };
 
-ByteAddressBuffer S : register(t0, space0);
+ByteAddressBuffer S : register(t0);
 
 str S_load(uint offset) {
   const str tint_symbol = {asint(S.Load((offset + 0u)))};

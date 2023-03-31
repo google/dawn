@@ -7,8 +7,8 @@ struct S {
   Inner inner;
 };
 
-ByteAddressBuffer tint_symbol : register(t0, space0);
-RWByteAddressBuffer tint_symbol_1 : register(u1, space0);
+ByteAddressBuffer tint_symbol : register(t0);
+RWByteAddressBuffer tint_symbol_1 : register(u1);
 
 float2x4 tint_symbol_load_4(uint offset) {
   return float2x4(asfloat(tint_symbol.Load4((offset + 0u))), asfloat(tint_symbol.Load4((offset + 16u))));

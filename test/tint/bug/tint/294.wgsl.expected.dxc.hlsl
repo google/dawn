@@ -3,4 +3,4 @@ void unused_entry_point() {
   return;
 }
 
-ByteAddressBuffer lights : register(t1, space0);
+ByteAddressBuffer lights : register(t1);

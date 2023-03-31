@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-RWByteAddressBuffer sb : register(u0, space0);
+RWByteAddressBuffer sb : register(u0);
 
 struct tint_symbol_1 {
   uint idx : SV_GroupIndex;

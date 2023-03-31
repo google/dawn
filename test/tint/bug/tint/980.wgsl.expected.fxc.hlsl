@@ -8,7 +8,7 @@ float3 Bad(uint index, float3 rd) {
   return normalize(normal);
 }
 
-RWByteAddressBuffer io : register(u0, space0);
+RWByteAddressBuffer io : register(u0);
 
 struct tint_symbol_1 {
   uint idx : SV_GroupIndex;

@@ -3,7 +3,7 @@ void unused_entry_point() {
   return;
 }
 
-ByteAddressBuffer G : register(t0, space0);
+ByteAddressBuffer G : register(t0);
 
 void n() {
 }

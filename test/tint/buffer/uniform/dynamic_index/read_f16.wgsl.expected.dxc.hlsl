@@ -1,4 +1,4 @@
-cbuffer cbuffer_ub : register(b0, space0) {
+cbuffer cbuffer_ub : register(b0) {
   uint4 ub[400];
 };
 

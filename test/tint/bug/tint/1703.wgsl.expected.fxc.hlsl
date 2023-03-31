@@ -4,11 +4,11 @@ void unused_entry_point() {
 }
 
 static float4 my_global = float4(0.0f, 0.0f, 0.0f, 0.0f);
-cbuffer cbuffer_my_uniform : register(b0, space0) {
+cbuffer cbuffer_my_uniform : register(b0) {
   uint4 my_uniform[1];
 };
-Texture2D<float4> my_texture : register(t1, space0);
-SamplerState my_sampler : register(s2, space0);
+Texture2D<float4> my_texture : register(t1);
+SamplerState my_sampler : register(s2);
 
 void foo_member_initialize() {
   bool2 vb2 = bool2(false, false);

@@ -1,10 +1,10 @@
 SKIP: FAILED
 
 static int x_GLF_global_loop_count = 0;
-cbuffer cbuffer_x_7 : register(b0, space0) {
+cbuffer cbuffer_x_7 : register(b0) {
   uint4 x_7[3];
 };
-cbuffer cbuffer_x_10 : register(b1, space0) {
+cbuffer cbuffer_x_10 : register(b1) {
   uint4 x_10[4];
 };
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

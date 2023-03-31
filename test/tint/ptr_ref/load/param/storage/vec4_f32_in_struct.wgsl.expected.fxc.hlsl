@@ -1,4 +1,4 @@
-ByteAddressBuffer S : register(t0, space0);
+ByteAddressBuffer S : register(t0);
 
 float4 func_S_i() {
   return asfloat(S.Load4(0u));

@@ -1,4 +1,4 @@
-cbuffer cbuffer_tint_symbol_3 : register(b0, space0) {
+cbuffer cbuffer_tint_symbol_3 : register(b0) {
   uint4 tint_symbol_3[1];
 };
 

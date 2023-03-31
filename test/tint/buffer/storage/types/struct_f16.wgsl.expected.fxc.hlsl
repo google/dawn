@@ -9,8 +9,8 @@ struct S {
   Inner inner;
 };
 
-ByteAddressBuffer tint_symbol : register(t0, space0);
-RWByteAddressBuffer tint_symbol_1 : register(u1, space0);
+ByteAddressBuffer tint_symbol : register(t0);
+RWByteAddressBuffer tint_symbol_1 : register(u1);
 
 matrix<float16_t, 2, 4> tint_symbol_load_4(uint offset) {
   return matrix<float16_t, 2, 4>(tint_symbol.Load<vector<float16_t, 4> >((offset + 0u)), tint_symbol.Load<vector<float16_t, 4> >((offset + 8u)));

@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-cbuffer cbuffer_data : register(b0, space0) {
+cbuffer cbuffer_data : register(b0) {
   uint4 data[2];
 };
 

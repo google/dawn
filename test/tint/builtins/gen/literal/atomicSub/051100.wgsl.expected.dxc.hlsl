@@ -1,4 +1,4 @@
-RWByteAddressBuffer sb_rw : register(u0, space0);
+RWByteAddressBuffer sb_rw : register(u0);
 
 int sb_rwatomicSub(uint offset, int value) {
   int original_value = 0;

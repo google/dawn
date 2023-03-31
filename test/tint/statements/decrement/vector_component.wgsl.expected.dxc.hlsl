@@ -3,7 +3,7 @@ void unused_entry_point() {
   return;
 }
 
-RWByteAddressBuffer a : register(u0, space0);
+RWByteAddressBuffer a : register(u0);
 
 void main() {
   const int tint_symbol_1 = 1;

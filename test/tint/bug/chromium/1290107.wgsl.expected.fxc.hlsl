@@ -1,4 +1,4 @@
-ByteAddressBuffer arr : register(t0, space0);
+ByteAddressBuffer arr : register(t0);
 
 [numthreads(1, 1, 1)]
 void main() {

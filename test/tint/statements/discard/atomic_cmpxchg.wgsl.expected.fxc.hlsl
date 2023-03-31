@@ -5,7 +5,7 @@ struct tint_symbol_2 {
   bool exchanged;
 };
 
-RWByteAddressBuffer a : register(u0, space0);
+RWByteAddressBuffer a : register(u0);
 
 struct tint_symbol {
   int value : SV_Target0;

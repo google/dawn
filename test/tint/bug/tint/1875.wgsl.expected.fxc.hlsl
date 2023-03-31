@@ -1,5 +1,5 @@
 static uint count = 0u;
-RWByteAddressBuffer outputs : register(u1, space0);
+RWByteAddressBuffer outputs : register(u1);
 
 void push_output(uint value) {
   outputs.Store((4u * count), asuint(value));

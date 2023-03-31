@@ -9,12 +9,12 @@ struct S {
 
 static int4 src_private[4] = (int4[4])0;
 groupshared int4 src_workgroup[4];
-cbuffer cbuffer_src_uniform : register(b0, space0) {
+cbuffer cbuffer_src_uniform : register(b0) {
   uint4 src_uniform[4];
 };
-RWByteAddressBuffer src_storage : register(u1, space0);
-RWByteAddressBuffer tint_symbol : register(u2, space0);
-RWByteAddressBuffer dst_nested : register(u3, space0);
+RWByteAddressBuffer src_storage : register(u1);
+RWByteAddressBuffer tint_symbol : register(u2);
+RWByteAddressBuffer dst_nested : register(u3);
 
 typedef int4 ret_arr_ret[4];
 ret_arr_ret ret_arr() {

@@ -3,7 +3,7 @@ void unused_entry_point() {
   return;
 }
 
-Texture1D<int4> arg_0 : register(t0, space0);
+Texture1D<int4> arg_0 : register(t0);
 
 void d() {
   const float l = 0.14112000167369842529f;

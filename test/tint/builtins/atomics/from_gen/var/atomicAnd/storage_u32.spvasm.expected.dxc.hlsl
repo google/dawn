@@ -1,4 +1,4 @@
-RWByteAddressBuffer sb_rw : register(u0, space0);
+RWByteAddressBuffer sb_rw : register(u0);
 
 uint sb_rwatomicAnd(uint offset, uint value) {
   uint original_value = 0;

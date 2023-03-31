@@ -2,13 +2,13 @@ static bool tint_discarded = false;
 
 static float fClipDistance3 = 0.0f;
 static float fClipDistance4 = 0.0f;
-cbuffer cbuffer_x_29 : register(b0, space0) {
+cbuffer cbuffer_x_29 : register(b0) {
   uint4 x_29[1];
 };
-cbuffer cbuffer_x_49 : register(b1, space0) {
+cbuffer cbuffer_x_49 : register(b1) {
   uint4 x_49[3];
 };
-cbuffer cbuffer_x_137 : register(b2, space0) {
+cbuffer cbuffer_x_137 : register(b2) {
   uint4 x_137[1];
 };
 static float4 glFragColor = float4(0.0f, 0.0f, 0.0f, 0.0f);

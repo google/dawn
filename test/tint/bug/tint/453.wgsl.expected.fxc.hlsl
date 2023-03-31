@@ -1,5 +1,5 @@
-Texture2D<uint4> Src : register(t0, space0);
-RWTexture2D<uint4> Dst : register(u1, space0);
+Texture2D<uint4> Src : register(t0);
+RWTexture2D<uint4> Dst : register(u1);
 
 [numthreads(1, 1, 1)]
 void main() {

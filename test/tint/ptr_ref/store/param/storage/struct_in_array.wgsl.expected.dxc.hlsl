@@ -2,7 +2,7 @@ struct str {
   int i;
 };
 
-RWByteAddressBuffer S : register(u0, space0);
+RWByteAddressBuffer S : register(u0);
 
 void S_store(uint offset, str value) {
   S.Store((offset + 0u), asuint(value.i));

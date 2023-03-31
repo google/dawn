@@ -1,4 +1,4 @@
-RWByteAddressBuffer lightsBuffer : register(u0, space0);
+RWByteAddressBuffer lightsBuffer : register(u0);
 
 RWByteAddressBuffer tileLightId : register(u0, space1);
 

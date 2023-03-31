@@ -4,7 +4,7 @@ struct S {
   float4 v;
 };
 
-RWByteAddressBuffer output : register(u0, space0);
+RWByteAddressBuffer output : register(u0);
 
 struct tint_symbol_1 {
   float f : TEXCOORD0;

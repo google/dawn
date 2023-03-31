@@ -1,4 +1,4 @@
-ByteAddressBuffer sspp962805860buildInformation : register(t2, space0);
+ByteAddressBuffer sspp962805860buildInformation : register(t2);
 
 typedef int sspp962805860buildInformation_load_ret[6];
 sspp962805860buildInformation_load_ret sspp962805860buildInformation_load(uint offset) {

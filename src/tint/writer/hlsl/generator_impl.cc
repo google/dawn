@@ -148,8 +148,14 @@ struct RegisterAndSpace {
 };
 
 utils::StringStream& operator<<(utils::StringStream& s, const RegisterAndSpace& rs) {
-    s << " : register(" << rs.reg << rs.binding_point.binding << ", space" << rs.binding_point.group
-      << ")";
+    s << " : register(" << rs.reg << rs.binding_point.binding;
+    // Omit the space if it's 0, as it's the default.
+    // SM 5.0 doesn't support spaces, so we don't emit them if group is 0 for better compatibility.
+    if (rs.binding_point.group == 0) {
+        s << ")";
+    } else {
+        s << ", space" << rs.binding_point.group << ")";
+    }
     return s;
 }
 
@@ -3123,7 +3129,15 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
 
     if (register_space) {
         auto bp = sem->As<sem::GlobalVariable>()->BindingPoint();
-        out << " : register(" << register_space << bp.binding << ", space" << bp.group << ")";
+        out << " : register(" << register_space << bp.binding;
+        // Omit the space if it's 0, as it's the default.
+        // SM 5.0 doesn't support spaces, so we don't emit them if group is 0 for better
+        // compatibility.
+        if (bp.group == 0) {
+            out << ")";
+        } else {
+            out << ", space" << bp.group << ")";
+        }
     }
 
     out << ";";

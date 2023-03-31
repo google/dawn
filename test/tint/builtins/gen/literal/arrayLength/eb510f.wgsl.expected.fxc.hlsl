@@ -1,4 +1,4 @@
-RWByteAddressBuffer sb_rw : register(u0, space0);
+RWByteAddressBuffer sb_rw : register(u0);
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void arrayLength_eb510f() {

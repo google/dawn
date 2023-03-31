@@ -1,4 +1,4 @@
-ByteAddressBuffer S : register(t0, space0);
+ByteAddressBuffer S : register(t0);
 
 float4 func_S_X(uint pointer[1]) {
   return asfloat(S.Load4((16u * pointer[0])));

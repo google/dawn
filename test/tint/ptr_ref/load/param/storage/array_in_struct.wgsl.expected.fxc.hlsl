@@ -1,4 +1,4 @@
-ByteAddressBuffer S : register(t0, space0);
+ByteAddressBuffer S : register(t0);
 
 typedef int S_load_ret[4];
 S_load_ret S_load(uint offset) {

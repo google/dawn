@@ -5,7 +5,7 @@ struct S {
   Inner inner;
 };
 
-cbuffer cbuffer_u : register(b0, space0) {
+cbuffer cbuffer_u : register(b0) {
   uint4 u[1];
 };
 

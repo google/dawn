@@ -2,7 +2,7 @@ struct strided_arr {
   float2 el;
 };
 
-RWByteAddressBuffer ssbo : register(u0, space0);
+RWByteAddressBuffer ssbo : register(u0);
 
 float2x2 arr_to_mat2x2_stride_16(strided_arr arr[2]) {
   return float2x2(arr[0u].el, arr[1u].el);

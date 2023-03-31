@@ -1,8 +1,8 @@
 static uint3 gl_GlobalInvocationID = uint3(0u, 0u, 0u);
-RWByteAddressBuffer resultMatrix : register(u2, space0);
-ByteAddressBuffer firstMatrix : register(t0, space0);
-ByteAddressBuffer secondMatrix : register(t1, space0);
-cbuffer cbuffer_x_46 : register(b3, space0) {
+RWByteAddressBuffer resultMatrix : register(u2);
+ByteAddressBuffer firstMatrix : register(t0);
+ByteAddressBuffer secondMatrix : register(t1);
+cbuffer cbuffer_x_46 : register(b3) {
   uint4 x_46[1];
 };
 

@@ -3,7 +3,7 @@ struct Inner {
   float scalar_f32;
 };
 
-ByteAddressBuffer sb : register(t0, space0);
+ByteAddressBuffer sb : register(t0);
 
 float2x2 sb_load_12(uint offset) {
   return float2x2(asfloat(sb.Load2((offset + 0u))), asfloat(sb.Load2((offset + 8u))));

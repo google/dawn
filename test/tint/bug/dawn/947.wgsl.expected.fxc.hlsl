@@ -1,6 +1,6 @@
 static bool tint_discarded = false;
 
-cbuffer cbuffer_uniforms : register(b0, space0) {
+cbuffer cbuffer_uniforms : register(b0) {
   uint4 uniforms[1];
 };
 
@@ -37,8 +37,8 @@ tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
   return wrapper_result;
 }
 
-SamplerState mySampler : register(s1, space0);
-Texture2D<float4> myTexture : register(t2, space0);
+SamplerState mySampler : register(s1);
+Texture2D<float4> myTexture : register(t2);
 
 struct tint_symbol_4 {
   float2 texcoord : TEXCOORD0;

@@ -1,5 +1,5 @@
-ByteAddressBuffer tint_symbol : register(t0, space0);
-RWByteAddressBuffer tint_symbol_1 : register(u1, space0);
+ByteAddressBuffer tint_symbol : register(t0);
+RWByteAddressBuffer tint_symbol_1 : register(u1);
 
 void tint_symbol_1_store(uint offset, float16_t value[4]) {
   float16_t array_1[4] = value;

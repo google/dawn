@@ -3,7 +3,7 @@ void unused_entry_point() {
   return;
 }
 
-RWByteAddressBuffer v : register(u0, space0);
+RWByteAddressBuffer v : register(u0);
 static uint i = 0u;
 
 int idx1() {

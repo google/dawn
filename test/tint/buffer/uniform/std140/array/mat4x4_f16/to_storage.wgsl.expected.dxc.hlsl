@@ -1,7 +1,7 @@
-cbuffer cbuffer_u : register(b0, space0) {
+cbuffer cbuffer_u : register(b0) {
   uint4 u[8];
 };
-RWByteAddressBuffer s : register(u1, space0);
+RWByteAddressBuffer s : register(u1);
 
 void s_store_1(uint offset, matrix<float16_t, 4, 4> value) {
   s.Store<vector<float16_t, 4> >((offset + 0u), value[0u]);

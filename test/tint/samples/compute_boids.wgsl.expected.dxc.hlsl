@@ -35,11 +35,11 @@ tint_symbol_3 frag_main() {
   return wrapper_result_1;
 }
 
-cbuffer cbuffer_params : register(b0, space0) {
+cbuffer cbuffer_params : register(b0) {
   uint4 params[2];
 };
-RWByteAddressBuffer particlesA : register(u1, space0);
-RWByteAddressBuffer particlesB : register(u2, space0);
+RWByteAddressBuffer particlesA : register(u1);
+RWByteAddressBuffer particlesB : register(u2);
 
 struct tint_symbol_5 {
   uint3 gl_GlobalInvocationID : SV_DispatchThreadID;

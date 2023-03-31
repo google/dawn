@@ -1,5 +1,5 @@
-Texture2D tex : register(t0, space0);
-RWByteAddressBuffer result : register(u1, space0);
+Texture2D tex : register(t0);
+RWByteAddressBuffer result : register(u1);
 
 struct tint_symbol_1 {
   uint3 GlobalInvocationId : SV_DispatchThreadID;

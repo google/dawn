@@ -10,8 +10,8 @@ diagnostic_filtering/if_statement_attribute.wgsl:7:7 note: user-defined input 'x
   if (x > 0) {
       ^
 
-Texture2D<float4> t : register(t1, space0);
-SamplerState s : register(s2, space0);
+Texture2D<float4> t : register(t1);
+SamplerState s : register(s2);
 
 struct tint_symbol_1 {
   float x : TEXCOORD0;

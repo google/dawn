@@ -1,4 +1,4 @@
-ByteAddressBuffer b0 : register(t0, space0);
+ByteAddressBuffer b0 : register(t0);
 ByteAddressBuffer b1 : register(t0, space1);
 ByteAddressBuffer b2 : register(t0, space2);
 ByteAddressBuffer b3 : register(t0, space3);
@@ -30,7 +30,7 @@ cbuffer cbuffer_b14 : register(b1, space14) {
 cbuffer cbuffer_b15 : register(b1, space15) {
   uint4 b15[1];
 };
-Texture2D<float4> t0 : register(t1, space0);
+Texture2D<float4> t0 : register(t1);
 Texture2D<float4> t1 : register(t1, space1);
 Texture2D<float4> t2 : register(t1, space2);
 Texture2D<float4> t3 : register(t1, space3);
@@ -46,7 +46,7 @@ Texture2D t12 : register(t200, space12);
 Texture2D t13 : register(t200, space13);
 Texture2D t14 : register(t200, space14);
 Texture2D t15 : register(t200, space15);
-SamplerState s0 : register(s200, space0);
+SamplerState s0 : register(s200);
 SamplerState s1 : register(s200, space1);
 SamplerState s2 : register(s200, space2);
 SamplerState s3 : register(s200, space3);

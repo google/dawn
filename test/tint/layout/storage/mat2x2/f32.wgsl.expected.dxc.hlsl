@@ -1,4 +1,4 @@
-RWByteAddressBuffer ssbo : register(u0, space0);
+RWByteAddressBuffer ssbo : register(u0);
 
 float2x2 ssbo_load(uint offset) {
   return float2x2(asfloat(ssbo.Load2((offset + 0u))), asfloat(ssbo.Load2((offset + 8u))));

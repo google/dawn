@@ -1,7 +1,7 @@
-cbuffer cbuffer_i : register(b0, space0) {
+cbuffer cbuffer_i : register(b0) {
   uint4 i[1];
 };
-RWByteAddressBuffer j : register(u1, space0);
+RWByteAddressBuffer j : register(u1);
 
 [numthreads(1, 1, 1)]
 void main() {

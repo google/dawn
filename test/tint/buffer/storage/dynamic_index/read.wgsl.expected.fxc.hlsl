@@ -1,4 +1,4 @@
-ByteAddressBuffer sb : register(t0, space0);
+ByteAddressBuffer sb : register(t0);
 
 struct tint_symbol_1 {
   uint idx : SV_GroupIndex;

@@ -3,7 +3,7 @@ struct Inner {
   float scalar_f32;
 };
 
-RWByteAddressBuffer sb : register(u0, space0);
+RWByteAddressBuffer sb : register(u0);
 
 void sb_store_12(uint offset, float2x2 value) {
   sb.Store2((offset + 0u), asuint(value[0u]));

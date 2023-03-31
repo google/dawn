@@ -864,7 +864,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(RWByteAddressBuffer data : register(u0, space0);
+    EXPECT_EQ(gen.result(), R"(RWByteAddressBuffer data : register(u0);
 
 [numthreads(1, 1, 1)]
 void a() {

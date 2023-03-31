@@ -4,9 +4,9 @@ int tint_ftoi(float v) {
   return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
 }
 
-Texture2D<float4> t : register(t0, space0);
-SamplerState s : register(s1, space0);
-RWByteAddressBuffer a : register(u2, space0);
+Texture2D<float4> t : register(t0);
+SamplerState s : register(s1);
+RWByteAddressBuffer a : register(u2);
 
 struct tint_symbol_2 {
   float tint_symbol : TEXCOORD0;

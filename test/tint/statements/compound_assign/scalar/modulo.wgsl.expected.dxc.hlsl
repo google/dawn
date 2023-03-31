@@ -3,7 +3,7 @@ void unused_entry_point() {
   return;
 }
 
-RWByteAddressBuffer v : register(u0, space0);
+RWByteAddressBuffer v : register(u0);
 
 int tint_mod(int lhs, int rhs) {
   const int rhs_or_one = (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs);

@@ -22,12 +22,12 @@ struct ExternalTextureParams {
   float3x2 coordTransformationMatrix;
 };
 
-Texture2D<float4> ext_tex_plane_1 : register(t2, space0);
-cbuffer cbuffer_ext_tex_params : register(b3, space0) {
+Texture2D<float4> ext_tex_plane_1 : register(t2);
+cbuffer cbuffer_ext_tex_params : register(b3) {
   uint4 ext_tex_params[13];
 };
-Texture2D<float4> t : register(t0, space0);
-RWTexture2D<float4> outImage : register(u1, space0);
+Texture2D<float4> t : register(t0);
+RWTexture2D<float4> outImage : register(u1);
 
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
   const bool3 cond = (abs(v) < float3((params.D).xxx));

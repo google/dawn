@@ -1,4 +1,4 @@
-RWByteAddressBuffer buf : register(u1, space0);
+RWByteAddressBuffer buf : register(u1);
 
 int g() {
   return 0;

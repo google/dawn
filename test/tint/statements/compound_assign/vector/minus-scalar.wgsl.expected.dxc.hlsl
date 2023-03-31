@@ -3,7 +3,7 @@ void unused_entry_point() {
   return;
 }
 
-RWByteAddressBuffer v : register(u0, space0);
+RWByteAddressBuffer v : register(u0);
 
 void foo() {
   v.Store4(0u, asuint((asfloat(v.Load4(0u)) - 2.0f)));

@@ -17,7 +17,7 @@ void set_scalar_float4x3(inout float4x3 mat, int col, int row, float val) {
   }
 }
 
-cbuffer cbuffer_x_9 : register(b0, space0) {
+cbuffer cbuffer_x_9 : register(b0) {
   uint4 x_9[1];
 };
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

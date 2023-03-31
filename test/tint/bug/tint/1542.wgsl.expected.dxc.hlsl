@@ -1,4 +1,4 @@
-cbuffer cbuffer_u_input : register(b0, space0) {
+cbuffer cbuffer_u_input : register(b0) {
   uint4 u_input[1];
 };
 

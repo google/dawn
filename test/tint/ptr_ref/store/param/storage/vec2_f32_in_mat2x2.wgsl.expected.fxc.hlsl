@@ -1,4 +1,4 @@
-RWByteAddressBuffer S : register(u0, space0);
+RWByteAddressBuffer S : register(u0);
 
 void func_S_X(uint pointer[1]) {
   S.Store2((8u * pointer[0]), asuint((0.0f).xx));

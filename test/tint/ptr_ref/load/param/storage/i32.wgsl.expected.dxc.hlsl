@@ -1,4 +1,4 @@
-ByteAddressBuffer S : register(t0, space0);
+ByteAddressBuffer S : register(t0);
 
 int func_S() {
   return asint(S.Load(0u));

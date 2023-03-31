@@ -3,7 +3,7 @@ void unused_entry_point() {
   return;
 }
 
-RWByteAddressBuffer U : register(u0, space0);
+RWByteAddressBuffer U : register(u0);
 
 void f() {
   U.Store3(0u, asuint(int3(1, 2, 3)));

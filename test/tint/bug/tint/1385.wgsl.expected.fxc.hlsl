@@ -1,4 +1,4 @@
-ByteAddressBuffer data : register(t1, space0);
+ByteAddressBuffer data : register(t1);
 
 int foo() {
   return asint(data.Load(0u));

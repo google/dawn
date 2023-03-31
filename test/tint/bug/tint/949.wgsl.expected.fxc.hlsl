@@ -17,7 +17,7 @@ static float2 v_uv = float2(0.0f, 0.0f);
 static float4 v_output2 = float4(0.0f, 0.0f, 0.0f, 0.0f);
 Texture2D<float4> TextureSampler1Texture : register(t3, space2);
 SamplerState TextureSampler1Sampler : register(s2, space2);
-cbuffer cbuffer_light0 : register(b5, space0) {
+cbuffer cbuffer_light0 : register(b5) {
   uint4 light0[6];
 };
 static float4 glFragColor = float4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -5,7 +5,7 @@ struct strided_arr_1 {
   strided_arr el[3][2];
 };
 
-RWByteAddressBuffer s : register(u0, space0);
+RWByteAddressBuffer s : register(u0);
 
 strided_arr s_load_4(uint offset) {
   const strided_arr tint_symbol = {asfloat(s.Load((offset + 0u)))};

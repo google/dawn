@@ -4,10 +4,10 @@ struct S {
   int after;
 };
 
-cbuffer cbuffer_u : register(b0, space0) {
+cbuffer cbuffer_u : register(b0) {
   uint4 u[32];
 };
-RWByteAddressBuffer s : register(u1, space0);
+RWByteAddressBuffer s : register(u1);
 
 void s_store_3(uint offset, float3x2 value) {
   s.Store2((offset + 0u), asuint(value[0u]));

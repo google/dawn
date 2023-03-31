@@ -5,7 +5,7 @@ void unused_entry_point() {
   return;
 }
 
-cbuffer cbuffer_U : register(b0, space0) {
+cbuffer cbuffer_U : register(b0) {
   uint4 U[1];
 };
 

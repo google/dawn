@@ -1,4 +1,4 @@
-cbuffer cbuffer_uniforms : register(b0, space0) {
+cbuffer cbuffer_uniforms : register(b0) {
   uint4 uniforms[4];
 };
 

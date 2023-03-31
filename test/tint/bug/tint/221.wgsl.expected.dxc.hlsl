@@ -1,4 +1,4 @@
-RWByteAddressBuffer b : register(u0, space0);
+RWByteAddressBuffer b : register(u0);
 
 uint tint_mod(uint lhs, uint rhs) {
   return (lhs % ((rhs == 0u) ? 1u : rhs));
