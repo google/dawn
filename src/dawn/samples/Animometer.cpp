@@ -21,6 +21,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/SystemUtils.h"
+#include "dawn/utils/Timer.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 wgpu::Device device;
@@ -145,13 +146,12 @@ void init() {
     bindGroup = utils::MakeBindGroup(device, bgl, {{0, ubo, 0, sizeof(ShaderData)}});
 }
 
+int frameCount = 0;
 void frame() {
     wgpu::TextureView backbufferView = swapchain.GetCurrentTextureView();
 
-    static int f = 0;
-    f++;
     for (auto& data : shaderData) {
-        data.time = f / 60.0f;
+        data.time = frameCount / 60.0f;
     }
     queue.WriteBuffer(ubo, 0, shaderData.data(), kNumTriangles * sizeof(ShaderData));
 
@@ -174,7 +174,6 @@ void frame() {
     queue.Submit(1, &commands);
     swapchain.Present();
     DoFlush();
-    fprintf(stderr, "frame %i\n", f);
 }
 
 int main(int argc, const char* argv[]) {
@@ -183,9 +182,14 @@ int main(int argc, const char* argv[]) {
     }
     init();
 
+    utils::Timer* timer = utils::CreateTimer();
+    timer->Start();
     while (!ShouldQuit()) {
         utils::ScopedAutoreleasePool pool;
+        frameCount++;
         frame();
-        utils::USleep(16000);
+        if (frameCount % 60 == 0) {
+            printf("FPS: %lf\n", static_cast<double>(frameCount) / timer->GetElapsedTime());
+        }
     }
 }
