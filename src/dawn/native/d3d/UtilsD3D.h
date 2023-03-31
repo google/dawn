@@ -28,6 +28,10 @@ bool IsTypeless(DXGI_FORMAT format);
 
 uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion);
 
+DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format);
+
+DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format);
+
 }  // namespace dawn::native::d3d
 
 #endif  // SRC_DAWN_NATIVE_D3D_UTILSD3D_H_

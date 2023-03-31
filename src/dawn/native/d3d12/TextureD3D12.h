@@ -35,7 +35,6 @@ class CommandRecordingContext;
 class Device;
 class D3D11on12ResourceCacheEntry;
 
-DXGI_FORMAT D3D12TextureFormat(wgpu::TextureFormat format);
 MaybeError ValidateD3D12TextureCanBeWrapped(ID3D12Resource* d3d12Resource,
                                             const TextureDescriptor* descriptor);
 MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor);

@@ -584,7 +584,7 @@ std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(
     const Format* format = GetInternalFormat(textureDescriptor->format).AcquireSuccess();
     if (format->IsMultiPlanar()) {
         if (ConsumedError(ValidateD3D12VideoTextureCanBeShared(
-                this, D3D12TextureFormat(textureDescriptor->format)))) {
+                this, d3d::DXGITextureFormat(textureDescriptor->format)))) {
             return nullptr;
         }
     }

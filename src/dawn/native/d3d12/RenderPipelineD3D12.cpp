@@ -431,7 +431,7 @@ MaybeError RenderPipeline::Initialize() {
     descriptorD3D12.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
     if (HasDepthStencilAttachment()) {
-        descriptorD3D12.DSVFormat = D3D12TextureFormat(GetDepthStencilFormat());
+        descriptorD3D12.DSVFormat = d3d::DXGITextureFormat(GetDepthStencilFormat());
     }
 
     static_assert(kMaxColorAttachments == 8);
@@ -443,7 +443,7 @@ MaybeError RenderPipeline::Initialize() {
         GetHighestBitIndexPlusOne(GetColorAttachmentsMask());
     for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
         descriptorD3D12.RTVFormats[static_cast<uint8_t>(i)] =
-            D3D12TextureFormat(GetColorAttachmentFormat(i));
+            d3d::DXGITextureFormat(GetColorAttachmentFormat(i));
         descriptorD3D12.BlendState.RenderTarget[static_cast<uint8_t>(i)] =
             ComputeColorDesc(device, GetColorTargetState(i));
     }

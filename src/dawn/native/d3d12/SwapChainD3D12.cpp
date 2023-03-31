@@ -21,6 +21,7 @@
 #include "dawn/dawn_wsi.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/d3d/D3DError.h"
+#include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 
@@ -156,7 +157,7 @@ MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
 
     // Precompute the configuration parameters we want for the DXGI swapchain.
     mConfig.bufferCount = PresentModeToBufferCount(GetPresentMode());
-    mConfig.format = D3D12TextureFormat(GetFormat());
+    mConfig.format = d3d::DXGITextureFormat(GetFormat());
     mConfig.swapChainFlags = PresentModeToSwapChainFlags(GetPresentMode());
     mConfig.usage = ToDXGIUsage(GetUsage());
 

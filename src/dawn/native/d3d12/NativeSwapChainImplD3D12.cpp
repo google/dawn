@@ -15,6 +15,7 @@
 #include "dawn/native/d3d12/NativeSwapChainImplD3D12.h"
 
 #include "dawn/common/Assert.h"
+#include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 
@@ -62,7 +63,7 @@ DawnSwapChainError NativeSwapChainImpl::Configure(WGPUTextureFormat format,
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
     swapChainDesc.Width = width;
     swapChainDesc.Height = height;
-    swapChainDesc.Format = D3D12TextureFormat(GetPreferredFormat());
+    swapChainDesc.Format = d3d::DXGITextureFormat(GetPreferredFormat());
     swapChainDesc.BufferUsage = D3D12SwapChainBufferUsage(usage);
     swapChainDesc.BufferCount = kFrameCount;
     swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
