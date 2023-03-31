@@ -2,7 +2,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void quantizeToF16_12e50e() {
   float arg_0 = 1.0f;
-  float res = float(min16float(arg_0));
+  float res = f16tof32(f32tof16(arg_0));
   prevent_dce.Store(0u, asuint(res));
 }
 

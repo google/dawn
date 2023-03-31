@@ -2106,12 +2106,13 @@ bool GeneratorImpl::EmitSignCall(utils::StringStream& out,
 bool GeneratorImpl::EmitQuantizeToF16Call(utils::StringStream& out,
                                           const ast::CallExpression* expr,
                                           const sem::Builtin* builtin) {
-    // Emulate by casting to min16float and back again.
+    // Cast to f16 and back
     std::string width;
     if (auto* vec = builtin->ReturnType()->As<type::Vector>()) {
         width = std::to_string(vec->Width());
     }
-    out << "float" << width << "(min16float" << width << "(";
+    out << "f16tof32(f32tof16"
+        << "(";
     if (!EmitExpression(out, expr->args[0])) {
         return false;
     }

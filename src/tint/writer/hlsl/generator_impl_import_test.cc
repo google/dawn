@@ -275,7 +275,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Scalar) {
 
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), std::string("float(min16float(v))"));
+    EXPECT_EQ(out.str(), std::string("f16tof32(f32tof16(v))"));
 }
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Vector) {
@@ -288,7 +288,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Vector) {
 
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), std::string("float3(min16float3(v))"));
+    EXPECT_EQ(out.str(), std::string("f16tof32(f32tof16(v))"));
 }
 
 }  // namespace
