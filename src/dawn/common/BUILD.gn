@@ -58,6 +58,9 @@ config("internal_config") {
     ]
   }
 
+  if (dawn_enable_d3d11) {
+    defines += [ "DAWN_ENABLE_BACKEND_D3D11" ]
+  }
   if (dawn_enable_d3d12) {
     defines += [ "DAWN_ENABLE_BACKEND_D3D12" ]
   }

@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "dawn/dawn_wsi.h"
-#include "dawn/native/DawnNative.h"
+#include "dawn/native/D3DBackend.h"
 
 struct ID3D12Device;
 struct ID3D12Resource;
@@ -126,11 +126,9 @@ class DAWN_NATIVE_EXPORT ExternalImageDXGI {
     std::unique_ptr<ExternalImageDXGIImpl> mImpl;
 };
 
-struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
+struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public d3d::AdapterDiscoveryOptions {
     AdapterDiscoveryOptions();
     explicit AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
-
-    Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
 };
 
 }  // namespace dawn::native::d3d12

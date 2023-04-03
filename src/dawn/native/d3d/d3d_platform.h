@@ -21,7 +21,7 @@
 // NOLINTNEXTLINE(build/include_order)
 #include "dawn/common/windows_with_undefs.h"
 
-#include <d3d11_2.h>  // NOLINT(build/include_order)
+#include <d3d11_4.h>  // NOLINT(build/include_order)
 #include <dxcapi.h>   // NOLINT(build/include_order)
 #include <dxgi1_4.h>  // NOLINT(build/include_order)
 #include <wrl.h>      // NOLINT(build/include_order)

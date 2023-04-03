@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_D3D12_BACKENDD3D12_H_
-#define SRC_DAWN_NATIVE_D3D12_BACKENDD3D12_H_
+#ifndef SRC_DAWN_NATIVE_D3D11_BACKENDD3D11_H_
+#define SRC_DAWN_NATIVE_D3D11_BACKENDD3D11_H_
 
 #include <vector>
 
-#include "dawn/native/BackendConnection.h"
-
 #include "dawn/native/d3d/BackendD3D.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
 
-namespace dawn::native::d3d12 {
+namespace dawn::native::d3d11 {
 
 class PlatformFunctions;
 
-class Backend final : public d3d::Backend {
+class Backend : public d3d::Backend {
   public:
     explicit Backend(InstanceBase* instance);
 
     MaybeError Initialize();
-
     const PlatformFunctions* GetFunctions() const;
 
   protected:
@@ -43,6 +39,6 @@ class Backend final : public d3d::Backend {
     using Base = d3d::Backend;
 };
 
-}  // namespace dawn::native::d3d12
+}  // namespace dawn::native::d3d11
 
-#endif  // SRC_DAWN_NATIVE_D3D12_BACKENDD3D12_H_
+#endif  // SRC_DAWN_NATIVE_D3D11_BACKENDD3D11_H_

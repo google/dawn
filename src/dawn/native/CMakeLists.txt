@@ -251,14 +251,16 @@ if (WINDOWS_STORE)
     target_link_libraries(dawn_native PRIVATE debug dxgi.lib)
 endif()
 
-if (DAWN_ENABLE_D3D12)
+if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE
+        "${DAWN_INCLUDE_DIR}/dawn/native/D3DBackend.h"
         "d3d/AdapterD3D.cpp"
         "d3d/AdapterD3D.h"
         "d3d/BackendD3D.cpp"
         "d3d/BackendD3D.h"
         "d3d/BlobD3D.cpp"
         "d3d/BlobD3D.h"
+        "d3d/D3DBackend.cpp"
         "d3d/D3DCompilationRequest.h"
         "d3d/D3DError.cpp"
         "d3d/D3DError.h"
@@ -272,6 +274,22 @@ if (DAWN_ENABLE_D3D12)
         "d3d/UtilsD3D.cpp"
         "d3d/UtilsD3D.h"
         "d3d/d3d_platform.h"
+    )
+endif()
+
+if (DAWN_ENABLE_D3D11)
+    target_sources(dawn_native PRIVATE
+        "${DAWN_INCLUDE_DIR}/dawn/native/D3D11Backend.h"
+        "d3d11/AdapterD3D11.cpp"
+        "d3d11/AdapterD3D11.h"
+        "d3d11/BackendD3D11.cpp"
+        "d3d11/BackendD3D11.h"
+        "d3d11/D3D11Backend.cpp"
+        "d3d11/DeviceInfoD3D11.cpp"
+        "d3d11/DeviceInfoD3D11.h"
+        "d3d11/PlatformFunctionsD3D11.cpp"
+        "d3d11/PlatformFunctionsD3D11.h"
+
     )
 endif()
 

@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 #include <variant>
+#include <vector>
 
 #include "dawn/native/BackendConnection.h"
 
@@ -73,6 +74,17 @@ class Backend : public BackendConnection {
     DxcVersionInfo GetDxcVersion() const;
 
     const PlatformFunctions* GetFunctions() const;
+
+    std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters(
+        const TogglesState& adapterToggles) override;
+    ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
+        const AdapterDiscoveryOptionsBase* optionsBase,
+        const TogglesState& adapterToggles) override;
+
+  protected:
+    virtual ResultOrError<Ref<AdapterBase>> CreateAdapterFromIDXGIAdapter(
+        ComPtr<IDXGIAdapter> dxgiAdapter,
+        const TogglesState& adapterToggles) = 0;
 
   private:
     // Acquiring DXC version information and store the result in mDxcVersionInfo. This function

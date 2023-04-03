@@ -44,6 +44,11 @@ namespace dawn::native {
 
 // Forward definitions of each backend's "Connect" function that creates new BackendConnection.
 // Conditionally compiled declarations are used to avoid using static constructors instead.
+#if defined(DAWN_ENABLE_BACKEND_D3D11)
+namespace d3d11 {
+BackendConnection* Connect(InstanceBase* instance);
+}
+#endif  // defined(DAWN_ENABLE_BACKEND_D3D11)
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
 namespace d3d12 {
 BackendConnection* Connect(InstanceBase* instance);
@@ -77,6 +82,9 @@ BackendsBitset GetEnabledBackends() {
 #if defined(DAWN_ENABLE_BACKEND_NULL)
     enabledBackends.set(wgpu::BackendType::Null);
 #endif  // defined(DAWN_ENABLE_BACKEND_NULL)
+#if defined(DAWN_ENABLE_BACKEND_D3D11)
+    enabledBackends.set(wgpu::BackendType::D3D11);
+#endif  // defined(DAWN_ENABLE_BACKEND_D3D11)
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
     enabledBackends.set(wgpu::BackendType::D3D12);
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
@@ -371,6 +379,12 @@ void InstanceBase::EnsureBackendConnection(wgpu::BackendType backendType) {
             Register(null::Connect(this), wgpu::BackendType::Null);
             break;
 #endif  // defined(DAWN_ENABLE_BACKEND_NULL)
+
+#if defined(DAWN_ENABLE_BACKEND_D3D11)
+        case wgpu::BackendType::D3D11:
+            Register(d3d11::Connect(this), wgpu::BackendType::D3D11);
+            break;
+#endif  // defined(DAWN_ENABLE_BACKEND_D3D11)
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
         case wgpu::BackendType::D3D12:

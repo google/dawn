@@ -34,6 +34,9 @@ class Adapter : public AdapterBase {
     IDXGIAdapter3* GetHardwareAdapter() const;
     Backend* GetBackend() const;
 
+  protected:
+    MaybeError InitializeImpl() override;
+
   private:
     ComPtr<IDXGIAdapter3> mHardwareAdapter;
     Backend* mBackend;

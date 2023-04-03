@@ -56,6 +56,7 @@ ComPtr<ID3D12Device> Adapter::GetDevice() const {
 }
 
 MaybeError Adapter::InitializeImpl() {
+    DAWN_TRY(Base::InitializeImpl());
     // D3D12 cannot check for feature support without a device.
     // Create the device to populate the adapter properties then reuse it when needed for actual
     // rendering.
@@ -67,33 +68,12 @@ MaybeError Adapter::InitializeImpl() {
 
     DAWN_TRY(InitializeDebugLayerFilters());
 
-    DXGI_ADAPTER_DESC1 adapterDesc;
-    GetHardwareAdapter()->GetDesc1(&adapterDesc);
-
-    mDeviceId = adapterDesc.DeviceId;
-    mVendorId = adapterDesc.VendorId;
-    mName = WCharToUTF8(adapterDesc.Description);
-
     DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 
-    if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
-        mAdapterType = wgpu::AdapterType::CPU;
-    } else {
-        mAdapterType =
-            (mDeviceInfo.isUMA) ? wgpu::AdapterType::IntegratedGPU : wgpu::AdapterType::DiscreteGPU;
-    }
-
-    // Convert the adapter's D3D12 driver version to a readable string like "24.21.13.9793".
-    LARGE_INTEGER umdVersion;
-    if (GetHardwareAdapter()->CheckInterfaceSupport(__uuidof(IDXGIDevice), &umdVersion) !=
-        DXGI_ERROR_UNSUPPORTED) {
-        uint64_t encodedVersion = umdVersion.QuadPart;
-        uint16_t mask = 0xFFFF;
-        mDriverVersion = {static_cast<uint16_t>((encodedVersion >> 48) & mask),
-                          static_cast<uint16_t>((encodedVersion >> 32) & mask),
-                          static_cast<uint16_t>((encodedVersion >> 16) & mask),
-                          static_cast<uint16_t>(encodedVersion & mask)};
-        mDriverDescription = std::string("D3D12 driver version ") + mDriverVersion.ToString();
+    // Base::InitializeImpl() cannot distinguish between discrete and integrated GPUs, so we need to
+    // overwrite it here.
+    if (mAdapterType == wgpu::AdapterType::DiscreteGPU && mDeviceInfo.isUMA) {
+        mAdapterType = wgpu::AdapterType::IntegratedGPU;
     }
 
     if (GetInstance()->IsAdapterBlocklistEnabled()) {
@@ -316,7 +296,7 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     limits->v1.maxComputeWorkgroupSizeZ = D3D12_CS_THREAD_GROUP_MAX_Z;
     limits->v1.maxComputeInvocationsPerWorkgroup = D3D12_CS_THREAD_GROUP_MAX_THREADS_PER_GROUP;
 
-    // https://docs.maxComputeWorkgroupSizeXmicrosoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_dispatch_arguments
+    // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_dispatch_arguments
     limits->v1.maxComputeWorkgroupsPerDimension = D3D12_CS_DISPATCH_MAX_THREAD_GROUPS_PER_DIMENSION;
 
     // https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-devices-downlevel-compute-shaders
@@ -610,7 +590,8 @@ ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor*
 // and the subequent call to CreateDevice will return a handle the existing device instead of
 // creating a new one.
 MaybeError Adapter::ResetInternalDeviceForTestingImpl() {
-    ASSERT(mD3d12Device.Reset() == 0);
+    [[maybe_unused]] auto refCount = mD3d12Device.Reset();
+    ASSERT(refCount == 0);
     DAWN_TRY(Initialize());
 
     return {};

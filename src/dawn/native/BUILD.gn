@@ -134,7 +134,9 @@ source_set("headers") {
 
     # Include all backend's public headers so that dependencies can include
     # them even when the backends are disabled.
+    "${dawn_root}/include/dawn/native/D3D11Backend.h",
     "${dawn_root}/include/dawn/native/D3D12Backend.h",
+    "${dawn_root}/include/dawn/native/D3DBackend.h",
     "${dawn_root}/include/dawn/native/MetalBackend.h",
     "${dawn_root}/include/dawn/native/NullBackend.h",
     "${dawn_root}/include/dawn/native/OpenGLBackend.h",
@@ -393,7 +395,7 @@ source_set("sources") {
   # Somehow use dxcompiler.lib makes CoreApp unable to activate
   # WinPIX should be added as third party tools and linked statically
 
-  if (dawn_enable_d3d12) {
+  if (dawn_enable_d3d11 || dawn_enable_d3d12) {
     sources += [
       "d3d/AdapterD3D.cpp",
       "d3d/AdapterD3D.h",
@@ -401,6 +403,7 @@ source_set("sources") {
       "d3d/BackendD3D.h",
       "d3d/BlobD3D.cpp",
       "d3d/BlobD3D.h",
+      "d3d/D3DBackend.cpp",
       "d3d/D3DCompilationRequest.h",
       "d3d/D3DError.cpp",
       "d3d/D3DError.h",
@@ -414,6 +417,21 @@ source_set("sources") {
       "d3d/UtilsD3D.cpp",
       "d3d/UtilsD3D.h",
       "d3d/d3d_platform.h",
+    ]
+  }
+
+  if (dawn_enable_d3d11) {
+    libs += [ "dxguid.lib" ]
+    sources += [
+      "d3d11/AdapterD3D11.cpp",
+      "d3d11/AdapterD3D11.h",
+      "d3d11/BackendD3D11.cpp",
+      "d3d11/BackendD3D11.h",
+      "d3d11/D3D11Backend.cpp",
+      "d3d11/DeviceInfoD3D11.cpp",
+      "d3d11/DeviceInfoD3D11.h",
+      "d3d11/PlatformFunctionsD3D11.cpp",
+      "d3d11/PlatformFunctionsD3D11.h",
     ]
   }
 
