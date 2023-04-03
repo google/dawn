@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
 #include <vector>
 
 #include "dawn/common/Assert.h"
@@ -22,8 +21,8 @@
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
-#include "dawn/native/vulkan/external_memory/MemoryService.h"
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementation.h"
+#include "dawn/native/vulkan/external_memory/MemoryServiceImplementationDmaBuf.h"
 
 namespace dawn::native::vulkan::external_memory {
 
@@ -358,14 +357,12 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
     bool mSupported = false;
 };
 
-Service::Service(Device* device) {
-    mImpl = std::make_unique<ServiceImplementationDmaBuf>(device);
+bool CheckDmaBufSupport(const VulkanDeviceInfo& deviceInfo) {
+    return ServiceImplementationDmaBuf::CheckSupport(deviceInfo);
 }
 
-// static
-bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
-    return deviceInfo.HasExt(DeviceExt::ExternalMemoryFD) &&
-           deviceInfo.HasExt(DeviceExt::ImageDrmFormatModifier);
+std::unique_ptr<ServiceImplementation> CreateDmaBufService(Device* device) {
+    return std::make_unique<ServiceImplementationDmaBuf>(device);
 }
 
 }  // namespace dawn::native::vulkan::external_memory

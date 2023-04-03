@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
+#include "dawn/native/vulkan/external_memory/MemoryServiceImplementationAHardwareBuffer.h"
 #include "dawn/common/Assert.h"
 #include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
@@ -21,7 +20,6 @@
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
-#include "dawn/native/vulkan/external_memory/MemoryService.h"
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementation.h"
 
 namespace dawn::native::vulkan::external_memory {
@@ -203,13 +201,12 @@ class ServiceImplementationAHardwareBuffer : public ServiceImplementation {
     bool mSupported = false;
 };
 
-Service::Service(Device* device) {
-    mImpl = std::make_unique<ServiceImplementationAHardwareBuffer>(device);
+bool CheckAHardwareBufferSupport(const VulkanDeviceInfo& deviceInfo) {
+    return ServiceImplementationAHardwareBuffer::CheckSupport(deviceInfo);
 }
 
-// static
-bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
-    return deviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer);
+std::unique_ptr<ServiceImplementation> CreateAHardwareBufferService(Device* device) {
+    return std::make_unique<ServiceImplementationAHardwareBuffer>(device);
 }
 
 }  // namespace dawn::native::vulkan::external_memory

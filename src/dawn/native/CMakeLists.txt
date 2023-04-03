@@ -585,13 +585,12 @@ if (DAWN_ENABLE_VULKAN)
 
     if (UNIX AND NOT APPLE)
         target_sources(dawn_native PRIVATE
+            "vulkan/external_memory/MemoryServiceImplementationDmaBuf.cpp"
+            "vulkan/external_memory/MemoryServiceImplementationDmaBuf.h"
             "vulkan/external_memory/MemoryServiceImplementationOpaqueFD.cpp"
+            "vulkan/external_memory/MemoryServiceImplementationOpaqueFD.h"
             "vulkan/external_semaphore/SemaphoreServiceImplementationFD.cpp"
             "vulkan/external_semaphore/SemaphoreServiceImplementationFD.h"
-        )
-    else()
-        target_sources(dawn_native PRIVATE
-            "vulkan/external_memory/MemoryServiceNull.cpp"
         )
     endif()
 endif()

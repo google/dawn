@@ -17,9 +17,11 @@
 
 #include <memory>
 
+#include "dawn/common/ityp_array.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/vulkan/ExternalHandle.h"
 #include "dawn/native/vulkan/external_memory/MemoryImportParams.h"
+#include "dawn/native/vulkan/external_memory/MemoryServiceImplementation.h"
 
 namespace dawn::native::vulkan {
 class Device;
@@ -27,8 +29,6 @@ struct VulkanDeviceInfo;
 }  // namespace dawn::native::vulkan
 
 namespace dawn::native::vulkan::external_memory {
-
-class ServiceImplementation;
 
 class Service {
   public:
@@ -38,7 +38,8 @@ class Service {
     static bool CheckSupport(const VulkanDeviceInfo& deviceInfo);
 
     // True if the device reports it supports importing external memory.
-    bool SupportsImportMemory(VkFormat format,
+    bool SupportsImportMemory(ExternalImageType externalImageType,
+                              VkFormat format,
                               VkImageType type,
                               VkImageTiling tiling,
                               VkImageUsageFlags usage,
@@ -56,10 +57,11 @@ class Service {
         VkImage image);
 
     // Returns the index of the queue memory from this services should be exported with.
-    uint32_t GetQueueFamilyIndex();
+    uint32_t GetQueueFamilyIndex(ExternalImageType externalImageType);
 
     // Given an external handle pointing to memory, import it into a VkDeviceMemory
-    ResultOrError<VkDeviceMemory> ImportMemory(ExternalMemoryHandle handle,
+    ResultOrError<VkDeviceMemory> ImportMemory(ExternalImageType externalImageType,
+                                               ExternalMemoryHandle handle,
                                                const MemoryImportParams& importParams,
                                                VkImage image);
 
@@ -68,7 +70,10 @@ class Service {
                                        const VkImageCreateInfo& baseCreateInfo);
 
   private:
-    std::unique_ptr<ServiceImplementation> mImpl;
+    ServiceImplementation* GetServiceImplementation(ExternalImageType externalImageType);
+
+    // ExternalImageType has 6 types. Vulkan backend uses 3 of them.
+    ityp::array<ExternalImageType, std::unique_ptr<ServiceImplementation>, 6> mServiceImpls = {};
 };
 
 }  // namespace dawn::native::vulkan::external_memory

@@ -794,7 +794,7 @@ MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* desc
     ASSERT(!GetFormat().IsMultiPlanar() || mCombinedAspect == Aspect::Color);
 
     mExternalState = ExternalState::PendingAcquire;
-    mExportQueueFamilyIndex = externalMemoryService->GetQueueFamilyIndex();
+    mExportQueueFamilyIndex = externalMemoryService->GetQueueFamilyIndex(descriptor->GetType());
 
     mPendingAcquireOldLayout = descriptor->releasedOldLayout;
     mPendingAcquireNewLayout = descriptor->releasedNewLayout;

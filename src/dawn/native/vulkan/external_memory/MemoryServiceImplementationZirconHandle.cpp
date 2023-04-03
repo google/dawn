@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
+#include "dawn/native/vulkan/external_memory/MemoryServiceImplementationZirconHandle.h"
 #include "dawn/common/Assert.h"
 #include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
@@ -21,7 +20,6 @@
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
-#include "dawn/native/vulkan/external_memory/MemoryService.h"
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementation.h"
 
 namespace dawn::native::vulkan::external_memory {
@@ -180,13 +178,12 @@ class ServiceImplementationZicronHandle : public ServiceImplementation {
     bool mSupported = false;
 };
 
-Service::Service(Device* device) {
-    mImpl = std::make_unique<ServiceImplementationZicronHandle>(device);
+bool CheckZirconHandleSupport(const VulkanDeviceInfo& deviceInfo) {
+    return ServiceImplementationZicronHandle::CheckSupport(deviceInfo);
 }
 
-// static
-bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
-    return deviceInfo.HasExt(DeviceExt::ExternalMemoryZirconHandle);
+std::unique_ptr<ServiceImplementation> CreateZirconHandleService(Device* device) {
+    return std::make_unique<ServiceImplementationZicronHandle>(device);
 }
 
 }  // namespace dawn::native::vulkan::external_memory
