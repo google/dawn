@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_STREAM_BYTEVECTORSINK_H_
 #define SRC_DAWN_NATIVE_STREAM_BYTEVECTORSINK_H_
 
+#include <cstdint>
 #include <ostream>
 #include <vector>
 
