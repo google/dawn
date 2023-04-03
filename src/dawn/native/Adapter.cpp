@@ -86,7 +86,7 @@ MaybeError AdapterBase::Initialize() {
 InstanceBase* AdapterBase::APIGetInstance() const {
     auto instance = GetInstance();
     ASSERT(instance != nullptr);
-    instance->Reference();
+    instance->APIReference();
     return instance;
 }
 

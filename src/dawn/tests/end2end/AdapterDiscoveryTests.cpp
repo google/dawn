@@ -335,4 +335,21 @@ TEST_F(AdapterCreationTest, PreferLowPower) {
     }
 }
 
+// Test that GetInstance() returns the correct Instance.
+TEST_F(AdapterCreationTest, GetInstance) {
+    wgpu::RequestAdapterOptions options = {};
+
+    MockCallback<WGPURequestAdapterCallback> cb;
+
+    WGPUAdapter cAdapter = nullptr;
+    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+        .WillOnce(SaveArg<1>(&cAdapter));
+    instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
+
+    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+
+    EXPECT_EQ(adapter.GetInstance().Get(), instance.Get());
+}
+
 }  // anonymous namespace
