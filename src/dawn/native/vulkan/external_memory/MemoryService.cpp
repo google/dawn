@@ -17,10 +17,10 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/external_memory/MemoryService.h"
 
-#if DAWN_PLATFORM_IS(LINUX) || DAWN_PLATFORM_IS(CHROMEOS)
+#if DAWN_PLATFORM_IS(LINUX_DESKTOP) || DAWN_PLATFORM_IS(CHROMEOS)
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementationDmaBuf.h"
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementationOpaqueFD.h"
-#endif  // DAWN_PLATFORM_IS(LINUX)
+#endif  // DAWN_PLATFORM_IS(LINUX_DESKTOP) || DAWN_PLATFORM_IS(CHROMEOS)
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementationAHardwareBuffer.h"
@@ -37,7 +37,7 @@ bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
     return CheckAHardwareBufferSupport(deviceInfo);
 #elif DAWN_PLATFORM_IS(FUCHSIA)
     return CheckZirconHandleSupport(deviceInfo);
-#elif DAWN_PLATFORM_IS(LINUX) || DAWN_PLATFORM_IS(CHROMEOS)
+#elif DAWN_PLATFORM_IS(LINUX_DESKTOP) || DAWN_PLATFORM_IS(CHROMEOS)
     return CheckOpaqueFDSupport(deviceInfo) || CheckDmaBufSupport(deviceInfo);
 #else
     return false;
@@ -51,7 +51,13 @@ Service::Service(Device* device) {
     }
 #endif  // DAWN_PLATFORM_IS(FUCHSIA)
 
-#if DAWN_PLATFORM_IS(LINUX) || DAWN_PLATFORM_IS(CHROMEOS)
+#if DAWN_PLATFORM_IS(ANDROID)
+    if (CheckAHardwareBufferSupport(device->GetDeviceInfo())) {
+        mServiceImpls[ExternalImageType::AHardwareBuffer] = CreateAHardwareBufferService(device);
+    }
+#endif  // DAWN_PLATFORM_IS(ANDROID)
+
+#if DAWN_PLATFORM_IS(LINUX_DESKTOP) || DAWN_PLATFORM_IS(CHROMEOS)
     if (CheckOpaqueFDSupport(device->GetDeviceInfo())) {
         mServiceImpls[ExternalImageType::OpaqueFD] = CreateOpaqueFDService(device);
     }
@@ -59,13 +65,7 @@ Service::Service(Device* device) {
     if (CheckDmaBufSupport(device->GetDeviceInfo())) {
         mServiceImpls[ExternalImageType::DmaBuf] = CreateDmaBufService(device);
     }
-#endif  // DAWN_PLATFORM_IS(LINUX) || DAWN_PLATFORM_IS(CHROMEOS)
-
-#if DAWN_PLATFORM_IS(ANDROID)
-    if (CheckAHardwareBufferSupport(device->GetDeviceInfo())) {
-        mServiceImpls[ExternalImageType::AHardwareBuffer] = CreateAHardwareBufferService(device);
-    }
-#endif  // DAWN_PLATFORM_IS(ANDROID)
+#endif  // DAWN_PLATFORM_IS(LINUX_DESKTOP) || DAWN_PLATFORM_IS(CHROMEOS)
 }
 
 Service::~Service() = default;
