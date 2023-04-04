@@ -214,6 +214,7 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
 }
 
 DAWN_INSTANTIATE_TEST(GpuMemorySyncTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -385,6 +386,7 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithDifferentQueueSubmits) {
 }
 
 DAWN_INSTANTIATE_TEST(StorageToUniformSyncTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -646,6 +648,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 }
 
 DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

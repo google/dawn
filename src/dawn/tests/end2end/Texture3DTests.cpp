@@ -118,6 +118,7 @@ TEST_P(Texture3DTests, Sampling) {
 }
 
 DAWN_INSTANTIATE_TEST(Texture3DTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

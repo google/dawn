@@ -29,6 +29,12 @@ BackendTestConfig::BackendTestConfig(wgpu::BackendType backendType,
       forceEnabledWorkarounds(forceEnabledWorkarounds),
       forceDisabledWorkarounds(forceDisabledWorkarounds) {}
 
+BackendTestConfig D3D11Backend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                               std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return BackendTestConfig(wgpu::BackendType::D3D11, forceEnabledWorkarounds,
+                             forceDisabledWorkarounds);
+}
+
 BackendTestConfig D3D12Backend(std::initializer_list<const char*> forceEnabledWorkarounds,
                                std::initializer_list<const char*> forceDisabledWorkarounds) {
     return BackendTestConfig(wgpu::BackendType::D3D12, forceEnabledWorkarounds,
@@ -71,6 +77,8 @@ TestAdapterProperties::TestAdapterProperties(const wgpu::AdapterProperties& prop
 
 std::string TestAdapterProperties::ParamName() const {
     switch (backendType) {
+        case wgpu::BackendType::D3D11:
+            return "D3D11";
         case wgpu::BackendType::D3D12:
             return "D3D12";
         case wgpu::BackendType::Metal:

@@ -108,6 +108,7 @@ TEST_P(InternalStorageBufferBindingTests, QueryResolveBufferBoundAsInternalStora
 }
 
 DAWN_INSTANTIATE_TEST(InternalStorageBufferBindingTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       VulkanBackend());

@@ -30,6 +30,7 @@ TEST_P(QueueTests, GetQueueSameObject) {
 }
 
 DAWN_INSTANTIATE_TEST(QueueTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       NullBackend(),
@@ -187,6 +188,7 @@ TEST_P(QueueWriteBufferTests, UnalignedDynamicUploader) {
 }
 
 DAWN_INSTANTIATE_TEST(QueueWriteBufferTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -771,6 +773,7 @@ TEST_P(QueueWriteTextureTests, WriteStencilAspectAfterOtherQueueWriteTextureCall
 }
 
 DAWN_INSTANTIATE_TEST(QueueWriteTextureTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
                                     "copy_with_non_zero_buffer_offset"}),

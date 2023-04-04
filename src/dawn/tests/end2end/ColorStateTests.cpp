@@ -1189,6 +1189,7 @@ TEST_P(ColorStateTest, SrcBlendFactorDstAlphaDstBlendFactorZero) {
 }
 
 DAWN_INSTANTIATE_TEST(ColorStateTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

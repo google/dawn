@@ -778,6 +778,7 @@ fn main() {
 auto GenerateParams() {
     auto params = MakeParamGenerator<ComputeLayoutMemoryBufferTestParams>(
         {
+            D3D11Backend(),
             D3D12Backend(),
             D3D12Backend({"use_dxc"}),
             MetalBackend(),

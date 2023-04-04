@@ -897,6 +897,7 @@ TEST_P(TextureFormatTest, RGB9E5Ufloat) {
 }
 
 DAWN_INSTANTIATE_TEST(TextureFormatTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

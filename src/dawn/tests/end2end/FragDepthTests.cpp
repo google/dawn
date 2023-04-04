@@ -224,6 +224,7 @@ TEST_P(FragDepthTests, RasterizationClipBeforeFS) {
 }
 
 DAWN_INSTANTIATE_TEST(FragDepthTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

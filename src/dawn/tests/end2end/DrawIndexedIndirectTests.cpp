@@ -710,6 +710,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
 }
 
 DAWN_INSTANTIATE_TEST(DrawIndexedIndirectTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

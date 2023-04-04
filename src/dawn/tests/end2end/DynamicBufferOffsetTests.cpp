@@ -573,6 +573,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
 }
 
 DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

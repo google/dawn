@@ -259,6 +259,7 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
 }
 
 DAWN_INSTANTIATE_TEST(MultisampledSamplingTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

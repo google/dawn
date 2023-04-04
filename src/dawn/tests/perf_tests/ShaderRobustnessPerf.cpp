@@ -497,7 +497,8 @@ TEST_P(ShaderRobustnessPerf, Run) {
 }
 
 DAWN_INSTANTIATE_TEST_P(ShaderRobustnessPerf,
-                        {D3D12Backend(), D3D12Backend({"disable_robustness"}, {}), MetalBackend(),
+                        {D3D11Backend(), D3D11Backend({"disable_robustness"}, {}), D3D12Backend(),
+                         D3D12Backend({"disable_robustness"}, {}), MetalBackend(),
                          MetalBackend({"disable_robustness"}, {}), OpenGLBackend(),
                          OpenGLBackend({"disable_robustness"}, {}), VulkanBackend(),
                          VulkanBackend({"disable_robustness"}, {})},
