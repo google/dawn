@@ -16,12 +16,12 @@
 #define SRC_DAWN_NATIVE_DEVICE_H_
 
 #include <memory>
-#include <mutex>
 #include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include "dawn/common/Mutex.h"
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
@@ -424,6 +424,13 @@ class DeviceBase : public RefCountedWithExternalCount {
     // method makes them to be submitted as soon as possbile in next ticks.
     virtual void ForceEventualFlushOfCommands() = 0;
 
+    // It is guaranteed that the wrapped mutex will outlive the Device (if the Device is deleted
+    // before the AutoLockAndHoldRef).
+    [[nodiscard]] Mutex::AutoLockAndHoldRef GetScopedLockSafeForDelete();
+    // This lock won't guarantee the wrapped mutex will be alive if the Device is deleted before the
+    // AutoLock. It would crash if such thing happens.
+    [[nodiscard]] Mutex::AutoLock GetScopedLock();
+
     // In the 'Normal' mode, currently recorded commands in the backend normally will be actually
     // submitted in the next Tick. However in the 'Passive' mode, the submission will be postponed
     // as late as possible, for example, until the client has explictly issued a submission.
@@ -480,6 +487,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     virtual void SetLabelImpl();
 
     virtual MaybeError TickImpl() = 0;
+    void FlushCallbackTaskQueue();
 
     ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 
@@ -595,6 +603,9 @@ class DeviceBase : public RefCountedWithExternalCount {
     std::unique_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
     std::string mLabel;
     CacheKey mDeviceCacheKey;
+
+    // This pointer is non-null if Feature::ImplicitDeviceSynchronization is turned on.
+    Ref<Mutex> mMutex = nullptr;
 };
 
 ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(

@@ -189,8 +189,8 @@ class RecordMember:
         self.handle_type = handle_type
 
 
-Method = namedtuple('Method',
-                    ['name', 'return_type', 'arguments', 'json_data'])
+Method = namedtuple(
+    'Method', ['name', 'return_type', 'arguments', 'autolock', 'json_data'])
 
 
 class ObjectType(Type):
@@ -337,11 +337,16 @@ def linked_record_members(json_data, types):
 
 
 def link_object(obj, types):
+    # Disable method's autolock if obj's "no autolock" = True
+    obj_scoped_autolock_enabled = not obj.json_data.get('no autolock', False)
+
     def make_method(json_data):
         arguments = linked_record_members(json_data.get('args', []), types)
+        autolock_enabled = obj_scoped_autolock_enabled and not json_data.get(
+            'no autolock', False)
         return Method(Name(json_data['name']),
-                      types[json_data.get('returns',
-                                          'void')], arguments, json_data)
+                      types[json_data.get('returns', 'void')], arguments,
+                      autolock_enabled, json_data)
 
     obj.methods = [make_method(m) for m in obj.json_data.get('methods', [])]
     obj.methods.sort(key=lambda method: method.name.canonical_case())
@@ -769,9 +774,9 @@ def as_formatType(typ):
 def c_methods(params, typ):
     return typ.methods + [
         x for x in [
-            Method(Name('reference'), params['types']['void'], [],
+            Method(Name('reference'), params['types']['void'], [], False,
                    {'tags': ['dawn', 'emscripten']}),
-            Method(Name('release'), params['types']['void'], [],
+            Method(Name('release'), params['types']['void'], [], False,
                    {'tags': ['dawn', 'emscripten']}),
         ] if item_is_enabled(params['enabled_tags'], x.json_data)
         and not item_is_disabled(params['disabled_tags'], x.json_data)

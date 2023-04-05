@@ -77,6 +77,7 @@
     },
     "adapter": {
         "category": "object",
+        "no autolock": true,
         "methods": [
             {
                 "name": "get instance",
@@ -579,6 +580,7 @@
     },
     "command encoder": {
         "category": "object",
+        "no autolock": true,
         "methods": [
             {
                 "name": "finish",
@@ -792,6 +794,7 @@
     },
     "compute pass encoder": {
         "category": "object",
+        "no autolock": true,
         "methods": [
             {
                 "name": "insert debug marker",
@@ -1203,10 +1206,12 @@
             },
             {
                 "name": "tick",
+                "no autolock": true,
                 "tags": ["dawn"]
             },
             {
                 "name": "set uncaptured error callback",
+                "no autolock": true,
                 "args": [
                     {"name": "callback", "type": "error callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
@@ -1214,6 +1219,7 @@
             },
             {
                 "name": "set logging callback",
+                "no autolock": true,
                 "tags": ["dawn"],
                 "args": [
                     {"name": "callback", "type": "logging callback"},
@@ -1222,6 +1228,7 @@
             },
             {
                 "name": "set device lost callback",
+                "no autolock": true,
                 "args": [
                     {"name": "callback", "type": "device lost callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
@@ -1469,7 +1476,8 @@
             {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]},
             {"value": 1004, "name": "dawn native", "tags": ["dawn", "native"]},
             {"value": 1005, "name": "chromium experimental dp4a", "tags": ["dawn"]},
-            {"value": 1006, "name": "timestamp query inside passes", "tags": ["dawn"]}
+            {"value": 1006, "name": "timestamp query inside passes", "tags": ["dawn"]},
+            {"value": 1007, "name": "implicit device synchronization", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
@@ -1527,6 +1535,7 @@
     },
     "instance": {
         "category": "object",
+        "no autolock": true,
         "methods": [
             {
                 "name": "create surface",
@@ -1856,6 +1865,7 @@
 
     "render bundle encoder": {
         "category": "object",
+        "no autolock": true,
         "methods": [
             {
                 "name": "set pipeline",
@@ -2027,6 +2037,7 @@
     },
     "render pass encoder": {
         "category": "object",
+        "no autolock": true,
         "methods": [
             {
                 "name": "set pipeline",
@@ -2482,6 +2493,7 @@
     },
     "surface": {
         "category": "object",
+        "no autolock": true,
         "methods": [
             {
                 "name": "get preferred format",

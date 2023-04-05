@@ -56,6 +56,17 @@ namespace {{native_namespace}} {
                     {% endif %}
                 {%- endfor-%}
 
+                {% if method.autolock %}
+                    {% if type.name.get() != "device" %}
+                        auto device = self->GetDevice();
+                    {% else %}
+                        auto device = self;
+                    {% endif %}
+                    auto deviceLock(device->GetScopedLock());
+                {% else %}
+                    // This method is specified to not use AutoLock in json script.
+                {% endif %}
+
                 {% if method.return_type.name.canonical_case() != "void" %}
                     auto result =
                 {%- endif %}

@@ -87,6 +87,9 @@ void EncodingContext::HandleError(std::unique_ptr<ErrorData> error) {
             mError = std::move(error);
         }
     } else {
+        // EncodingContext is unprotected from multiple threads by default, but this code will
+        // modify Device's internal states so we need to lock the device now.
+        auto deviceLock(mDevice->GetScopedLock());
         mDevice->HandleError(std::move(error));
     }
 }

@@ -46,18 +46,25 @@ class RefCounted {
     uint64_t GetRefCountPayload() const;
 
     void Reference();
+    // Release() is called by internal code, so it's assumed that there is already a thread
+    // synchronization in place for destruction.
     void Release();
 
     void APIReference() { Reference(); }
-    void APIRelease() { Release(); }
+    // APIRelease() can be called without any synchronization guarantees so we need to use a Release
+    // method that will call LockAndDeleteThis() on destruction.
+    void APIRelease() { ReleaseAndLockBeforeDestroy(); }
 
   protected:
     virtual ~RefCounted();
 
-    // A Derived class may override this if they require a custom deleter.
-    virtual void DeleteThis();
+    void ReleaseAndLockBeforeDestroy();
 
-  private:
+    // A Derived class may override these if they require a custom deleter.
+    virtual void DeleteThis();
+    // This calls DeleteThis() by default.
+    virtual void LockAndDeleteThis();
+
     RefCount mRefCount;
 };
 

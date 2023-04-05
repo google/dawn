@@ -293,6 +293,7 @@ dawn_test("dawn_unittests") {
     "unittests/LimitsTests.cpp",
     "unittests/LinkedListTests.cpp",
     "unittests/MathTests.cpp",
+    "unittests/MutexTests.cpp",
     "unittests/NumericTests.cpp",
     "unittests/ObjectBaseTests.cpp",
     "unittests/PerStageTests.cpp",

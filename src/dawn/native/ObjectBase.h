@@ -107,6 +107,7 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     // and they should ensure that their overriding versions call this underlying version
     // somewhere.
     void DeleteThis() override;
+    void LockAndDeleteThis() override;
 
     // Returns the list where this object may be tracked for future destruction. This can be
     // overrided to create hierarchical object tracking ownership:

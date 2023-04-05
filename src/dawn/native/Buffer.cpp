@@ -43,9 +43,14 @@ struct MapRequestTask : TrackTaskCallback {
 
   private:
     void FinishImpl() override {
-        ASSERT(mSerial != kMaxExecutionSerial);
-        TRACE_EVENT1(mPlatform, General, "Buffer::TaskInFlight::Finished", "serial",
-                     uint64_t(mSerial));
+        {
+            // This is called from a callback, and no lock will be held by default. Hence, we need
+            // to lock the mutex now because mSerial might be changed by another thread.
+            auto deviceLock(buffer->GetDevice()->GetScopedLock());
+            ASSERT(mSerial != kMaxExecutionSerial);
+            TRACE_EVENT1(mPlatform, General, "Buffer::TaskInFlight::Finished", "serial",
+                         uint64_t(mSerial));
+        }
         buffer->CallbackOnMapRequestCompleted(id, WGPUBufferMapAsyncStatus_Success);
     }
     void HandleDeviceLossImpl() override {
@@ -597,9 +602,14 @@ MaybeError BufferBase::ValidateUnmap() const {
 
 void BufferBase::CallbackOnMapRequestCompleted(MapRequestID mapID,
                                                WGPUBufferMapAsyncStatus status) {
-    if (mapID == mLastMapID && status == WGPUBufferMapAsyncStatus_Success &&
-        mState == BufferState::PendingMap) {
-        mState = BufferState::Mapped;
+    {
+        // This is called from a callback, and no lock will be held by default. Hence, we need to
+        // lock the mutex now because this will modify the buffer's states.
+        auto deviceLock(GetDevice()->GetScopedLock());
+        if (mapID == mLastMapID && status == WGPUBufferMapAsyncStatus_Success &&
+            mState == BufferState::PendingMap) {
+            mState = BufferState::Mapped;
+        }
     }
 
     auto cb = PrepareMappingCallback(mapID, status);

@@ -42,6 +42,7 @@ MaybeError AdapterBase::Initialize() {
 
     EnableFeature(Feature::DawnNative);
     EnableFeature(Feature::DawnInternalUsages);
+    EnableFeature(Feature::ImplicitDeviceSynchronization);
     InitializeSupportedFeaturesImpl();
 
     DAWN_TRY_CONTEXT(

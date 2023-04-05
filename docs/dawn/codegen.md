@@ -76,6 +76,8 @@ A **record** is a list of **record members**, each of which is a dictionary with
    - `"name"` a string
    - `"return_type"` (default to no return type) a string that's the name of the return type.
    - `"arguments"` a **record**, so an array of **record members**
+   - `"no autolock"`: a boolean flag (default is false) indicates that the method's generated code won't automatically do thread synchronization. This flag can only be true on device or device child objects currently.
+ - `"no autolock"`: a boolean flag (default is false) to indicate that the object's generated code won't automatically do thread synchronization. This will override individual method's `"no autolock"` flag. This flag can only be true on device or device child objects currently.
 
 **`"constant"`**
  - `"type"`: a string, the name of the base data type
