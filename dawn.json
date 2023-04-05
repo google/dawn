@@ -2958,13 +2958,6 @@
         "type": "size_t",
         "value":  "SIZE_MAX"
     },
-    "stride undefined" : {
-        "category": "constant",
-        "tags": ["deprecated"],
-        "_TODO": "crbug.com/dawn/520: Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.",
-        "type": "uint32_t",
-        "value":  "(0xffffffffUL)"
-    },
     "copy stride undefined" : {
         "category": "constant",
         "type": "uint32_t",
