@@ -17,7 +17,6 @@
 
 #include <vector>
 
-#include "dawn/dawn_wsi.h"
 #include "dawn/native/DawnNative.h"
 
 // The specifics of the Metal backend expose types in function signatures that might not be

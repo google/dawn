@@ -17,9 +17,7 @@
 
 #include "dawn/native/OpenGLBackend.h"
 
-#include "dawn/common/SwapChainUtils.h"
 #include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/NativeSwapChainImplGL.h"
 
 namespace dawn::native::opengl {
 
@@ -28,24 +26,6 @@ AdapterDiscoveryOptions::AdapterDiscoveryOptions(WGPUBackendType type)
 
 AdapterDiscoveryOptionsES::AdapterDiscoveryOptionsES()
     : AdapterDiscoveryOptions(WGPUBackendType_OpenGLES) {}
-
-DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
-                                                      PresentCallback present,
-                                                      void* presentUserdata) {
-    Device* backendDevice = ToBackend(FromAPI(device));
-
-    DawnSwapChainImplementation impl;
-    impl = CreateSwapChainImplementation(
-        new NativeSwapChainImpl(backendDevice, present, presentUserdata));
-    impl.textureUsage = WGPUTextureUsage_Present;
-
-    return impl;
-}
-
-WGPUTextureFormat GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain) {
-    NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-    return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
-}
 
 ExternalImageDescriptorEGLImage::ExternalImageDescriptorEGLImage()
     : ExternalImageDescriptor(ExternalImageType::EGLImage) {}

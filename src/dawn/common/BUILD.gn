@@ -263,7 +263,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "SlabAllocator.cpp",
       "SlabAllocator.h",
       "StackContainer.h",
-      "SwapChainUtils.h",
       "SystemUtils.cpp",
       "SystemUtils.h",
       "TypeTraits.h",

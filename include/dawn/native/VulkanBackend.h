@@ -20,7 +20,6 @@
 #include <array>
 #include <vector>
 
-#include "dawn/dawn_wsi.h"
 #include "dawn/native/DawnNative.h"
 
 namespace dawn::native::vulkan {
@@ -28,11 +27,6 @@ namespace dawn::native::vulkan {
 DAWN_NATIVE_EXPORT VkInstance GetInstance(WGPUDevice device);
 
 DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device, const char* pName);
-
-DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
-                                                                         ::VkSurfaceKHR surface);
-DAWN_NATIVE_EXPORT WGPUTextureFormat
-GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 
 struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
     AdapterDiscoveryOptions();

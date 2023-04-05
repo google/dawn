@@ -22,11 +22,9 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/common/Math.h"
-#include "dawn/common/SwapChainUtils.h"
 #include "dawn/native/d3d12/D3D11on12Util.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/ExternalImageDXGIImpl.h"
-#include "dawn/native/d3d12/NativeSwapChainImplD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 
@@ -34,21 +32,6 @@ namespace dawn::native::d3d12 {
 
 ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device) {
     return ToBackend(FromAPI(device))->GetD3D12Device();
-}
-
-DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device, HWND window) {
-    Device* backendDevice = ToBackend(FromAPI(device));
-
-    DawnSwapChainImplementation impl;
-    impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, window));
-    impl.textureUsage = WGPUTextureUsage_Present;
-
-    return impl;
-}
-
-WGPUTextureFormat GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain) {
-    NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-    return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
 }
 
 ExternalImageDescriptorDXGISharedHandle::ExternalImageDescriptorDXGISharedHandle()

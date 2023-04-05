@@ -322,19 +322,6 @@ class OldSwapChain final : public OldSwapChainBase {
     MaybeError OnBeforePresent(TextureViewBase*) override;
 };
 
-class NativeSwapChainImpl {
-  public:
-    using WSIContext = struct {};
-    void Init(WSIContext* context);
-    DawnSwapChainError Configure(WGPUTextureFormat format,
-                                 WGPUTextureUsage,
-                                 uint32_t width,
-                                 uint32_t height);
-    DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
-    DawnSwapChainError Present();
-    wgpu::TextureFormat GetPreferredFormat() const;
-};
-
 class Texture : public TextureBase {
   public:
     Texture(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);

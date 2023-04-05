@@ -17,16 +17,10 @@
 
 #include "dawn/native/NullBackend.h"
 
-#include "dawn/common/SwapChainUtils.h"
 #include "dawn/native/null/DeviceNull.h"
 
 namespace dawn::native::null {
 
-DawnSwapChainImplementation CreateNativeSwapChainImpl() {
-    DawnSwapChainImplementation impl;
-    impl = CreateSwapChainImplementation(new NativeSwapChainImpl());
-    impl.textureUsage = WGPUTextureUsage_Present;
-    return impl;
-}
+// Nothing for now \o/
 
 }  // namespace dawn::native::null

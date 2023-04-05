@@ -17,7 +17,6 @@
 
 typedef void* EGLImage;
 
-#include "dawn/dawn_wsi.h"
 #include "dawn/native/DawnNative.h"
 
 namespace dawn::native::opengl {
@@ -32,13 +31,6 @@ struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptio
 struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptionsES : public AdapterDiscoveryOptions {
     AdapterDiscoveryOptionsES();
 };
-
-using PresentCallback = void (*)(void*);
-DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
-                                                                         PresentCallback present,
-                                                                         void* presentUserdata);
-DAWN_NATIVE_EXPORT WGPUTextureFormat
-GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptorEGLImage : ExternalImageDescriptor {
   public:
