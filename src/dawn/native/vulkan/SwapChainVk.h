@@ -27,21 +27,6 @@ class Device;
 class Texture;
 struct VulkanSurfaceInfo;
 
-class OldSwapChain : public OldSwapChainBase {
-  public:
-    static Ref<OldSwapChain> Create(Device* device, const SwapChainDescriptor* descriptor);
-
-  protected:
-    OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
-    ~OldSwapChain() override;
-
-    TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-    MaybeError OnBeforePresent(TextureViewBase* texture) override;
-
-  private:
-    wgpu::TextureUsage mTextureUsage;
-};
-
 class SwapChain : public NewSwapChainBase {
   public:
     static ResultOrError<Ref<SwapChain>> Create(Device* device,

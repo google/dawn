@@ -463,8 +463,6 @@ class DeviceBase : public RefCountedWithExternalCount {
         const ShaderModuleDescriptor* descriptor,
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages) = 0;
-    virtual ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
-        const SwapChainDescriptor* descriptor) = 0;
     // Note that previousSwapChain may be nullptr, or come from a different backend.
     virtual ResultOrError<Ref<NewSwapChainBase>> CreateSwapChainImpl(
         Surface* surface,

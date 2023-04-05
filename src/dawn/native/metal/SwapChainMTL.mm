@@ -24,44 +24,6 @@
 
 namespace dawn::native::metal {
 
-// OldSwapChain
-
-// static
-Ref<OldSwapChain> OldSwapChain::Create(Device* device, const SwapChainDescriptor* descriptor) {
-    return AcquireRef(new OldSwapChain(device, descriptor));
-}
-
-OldSwapChain::OldSwapChain(Device* device, const SwapChainDescriptor* descriptor)
-    : OldSwapChainBase(device, descriptor) {
-    const auto& im = GetImplementation();
-    DawnWSIContextMetal wsiContext = {};
-    wsiContext.device = ToBackend(GetDevice())->GetMTLDevice();
-    wsiContext.queue = ToBackend(GetDevice())->GetMTLQueue();
-    im.Init(im.userData, &wsiContext);
-}
-
-OldSwapChain::~OldSwapChain() {}
-
-TextureBase* OldSwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
-    const auto& im = GetImplementation();
-    DawnSwapChainNextTexture next = {};
-    DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
-    if (error) {
-        GetDevice()->HandleError(DAWN_INTERNAL_ERROR(error));
-        return nullptr;
-    }
-
-    id<MTLTexture> nativeTexture = reinterpret_cast<id<MTLTexture>>(next.texture.ptr);
-
-    return Texture::CreateWrapping(ToBackend(GetDevice()), descriptor, nativeTexture).Detach();
-}
-
-MaybeError OldSwapChain::OnBeforePresent(TextureViewBase*) {
-    return {};
-}
-
-// SwapChain
-
 // static
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,

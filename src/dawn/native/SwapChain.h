@@ -52,42 +52,6 @@ class SwapChainBase : public ApiObjectBase {
     void DestroyImpl() override;
 };
 
-// The base class for implementation-based SwapChains that are deprecated.
-class OldSwapChainBase : public SwapChainBase {
-  public:
-    OldSwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor);
-
-    // Dawn API
-    void APIConfigure(wgpu::TextureFormat format,
-                      wgpu::TextureUsage allowedUsage,
-                      uint32_t width,
-                      uint32_t height) override;
-    TextureViewBase* APIGetCurrentTextureView() override;
-    void APIPresent() override;
-
-  protected:
-    ~OldSwapChainBase() override;
-    const DawnSwapChainImplementation& GetImplementation();
-    virtual TextureBase* GetNextTextureImpl(const TextureDescriptor*) = 0;
-    virtual MaybeError OnBeforePresent(TextureViewBase* view) = 0;
-
-  private:
-    MaybeError ValidateConfigure(wgpu::TextureFormat format,
-                                 wgpu::TextureUsage allowedUsage,
-                                 uint32_t width,
-                                 uint32_t height) const;
-    MaybeError ValidateGetCurrentTextureView() const;
-    MaybeError ValidatePresent() const;
-
-    DawnSwapChainImplementation mImplementation = {};
-    wgpu::TextureFormat mFormat = {};
-    wgpu::TextureUsage mAllowedUsage;
-    uint32_t mWidth = 0;
-    uint32_t mHeight = 0;
-    Ref<TextureBase> mCurrentTexture;
-    Ref<TextureViewBase> mCurrentTextureView;
-};
-
 // The base class for surface-based SwapChains that aren't ready yet.
 class NewSwapChainBase : public SwapChainBase {
   public:

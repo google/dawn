@@ -1746,27 +1746,20 @@ ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(
                          descriptor);
     }
 
-    // TODO(dawn:269): Remove this code path once implementation-based swapchains are removed.
-    if (surface == nullptr) {
-        return CreateSwapChainImpl(descriptor);
-    } else {
-        ASSERT(descriptor->implementation == 0);
+    NewSwapChainBase* previousSwapChain = surface->GetAttachedSwapChain();
+    ResultOrError<Ref<NewSwapChainBase>> maybeNewSwapChain =
+        CreateSwapChainImpl(surface, previousSwapChain, descriptor);
 
-        NewSwapChainBase* previousSwapChain = surface->GetAttachedSwapChain();
-        ResultOrError<Ref<NewSwapChainBase>> maybeNewSwapChain =
-            CreateSwapChainImpl(surface, previousSwapChain, descriptor);
-
-        if (previousSwapChain != nullptr) {
-            previousSwapChain->DetachFromSurface();
-        }
-
-        Ref<NewSwapChainBase> newSwapChain;
-        DAWN_TRY_ASSIGN(newSwapChain, std::move(maybeNewSwapChain));
-
-        newSwapChain->SetIsAttached();
-        surface->SetAttachedSwapChain(newSwapChain.Get());
-        return newSwapChain;
+    if (previousSwapChain != nullptr) {
+        previousSwapChain->DetachFromSurface();
     }
+
+    Ref<NewSwapChainBase> newSwapChain;
+    DAWN_TRY_ASSIGN(newSwapChain, std::move(maybeNewSwapChain));
+
+    newSwapChain->SetIsAttached();
+    surface->SetAttachedSwapChain(newSwapChain.Get());
+    return newSwapChain;
 }
 
 ResultOrError<Ref<TextureBase>> DeviceBase::CreateTexture(const TextureDescriptor* descriptor) {

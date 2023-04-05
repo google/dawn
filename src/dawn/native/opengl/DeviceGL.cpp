@@ -31,7 +31,6 @@
 #include "dawn/native/opengl/RenderPipelineGL.h"
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/ShaderModuleGL.h"
-#include "dawn/native/opengl/SwapChainGL.h"
 #include "dawn/native/opengl/TextureGL.h"
 
 namespace {
@@ -238,10 +237,6 @@ ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     ShaderModuleParseResult* parseResult,
     OwnedCompilationMessages* compilationMessages) {
     return ShaderModule::Create(this, descriptor, parseResult, compilationMessages);
-}
-ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
-    const SwapChainDescriptor* descriptor) {
-    return AcquireRef(new SwapChain(this, descriptor));
 }
 ResultOrError<Ref<NewSwapChainBase>> Device::CreateSwapChainImpl(
     Surface* surface,

@@ -215,10 +215,6 @@ ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     OwnedCompilationMessages* compilationMessages) {
     return ShaderModule::Create(this, descriptor, parseResult, compilationMessages);
 }
-ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
-    const SwapChainDescriptor* descriptor) {
-    return OldSwapChain::Create(this, descriptor);
-}
 ResultOrError<Ref<NewSwapChainBase>> Device::CreateSwapChainImpl(
     Surface* surface,
     NewSwapChainBase* previousSwapChain,

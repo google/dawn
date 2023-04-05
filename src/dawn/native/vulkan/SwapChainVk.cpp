@@ -34,56 +34,6 @@
 
 namespace dawn::native::vulkan {
 
-// OldSwapChain
-
-// static
-Ref<OldSwapChain> OldSwapChain::Create(Device* device, const SwapChainDescriptor* descriptor) {
-    return AcquireRef(new OldSwapChain(device, descriptor));
-}
-
-OldSwapChain::OldSwapChain(Device* device, const SwapChainDescriptor* descriptor)
-    : OldSwapChainBase(device, descriptor) {
-    const auto& im = GetImplementation();
-    DawnWSIContextVulkan wsiContext = {};
-    im.Init(im.userData, &wsiContext);
-
-    ASSERT(im.textureUsage != WGPUTextureUsage_None);
-    mTextureUsage = static_cast<wgpu::TextureUsage>(im.textureUsage);
-}
-
-OldSwapChain::~OldSwapChain() {}
-
-TextureBase* OldSwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
-    const auto& im = GetImplementation();
-    DawnSwapChainNextTexture next = {};
-    DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
-
-    if (error) {
-        GetDevice()->HandleError(DAWN_INTERNAL_ERROR(error));
-        return nullptr;
-    }
-
-    ::VkImage image = NativeNonDispatachableHandleFromU64<::VkImage>(next.texture.u64);
-    VkImage nativeTexture = VkImage::CreateFromHandle(image);
-    return Texture::CreateForSwapChain(ToBackend(GetDevice()), descriptor, nativeTexture).Detach();
-}
-
-MaybeError OldSwapChain::OnBeforePresent(TextureViewBase* view) {
-    Device* device = ToBackend(GetDevice());
-
-    // Perform the necessary pipeline barriers for the texture to be used with the usage
-    // requested by the implementation.
-    CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
-    ToBackend(view->GetTexture())
-        ->TransitionUsageNow(recordingContext, mTextureUsage, view->GetSubresourceRange());
-
-    DAWN_TRY(device->SubmitPendingCommands());
-
-    return {};
-}
-
-// SwapChain
-
 namespace {
 
 ResultOrError<VkSurfaceKHR> CreateVulkanSurface(Adapter* adapter, Surface* surface) {
