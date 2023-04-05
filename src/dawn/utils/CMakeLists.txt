@@ -68,33 +68,3 @@ endif()
 if (DAWN_ENABLE_METAL)
     target_link_libraries(dawn_utils PRIVATE "-framework Metal")
 endif()
-
-if(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
-    target_sources(dawn_utils PRIVATE
-        "BackendBinding.cpp"
-        "BackendBinding.h"
-    )
-    target_link_libraries(dawn_utils PRIVATE glfw)
-
-    if (DAWN_ENABLE_D3D12)
-        target_sources(dawn_utils PRIVATE "D3D12Binding.cpp")
-    endif()
-
-    if (DAWN_ENABLE_METAL)
-        target_sources(dawn_utils PRIVATE
-            "MetalBinding.mm"
-        )
-    endif()
-
-    if (DAWN_ENABLE_NULL)
-        target_sources(dawn_utils PRIVATE "NullBinding.cpp")
-    endif()
-
-    if (DAWN_ENABLE_OPENGL)
-        target_sources(dawn_utils PRIVATE "OpenGLBinding.cpp")
-    endif()
-
-    if (DAWN_ENABLE_VULKAN)
-        target_sources(dawn_utils PRIVATE "VulkanBinding.cpp")
-    endif()
-endif()
