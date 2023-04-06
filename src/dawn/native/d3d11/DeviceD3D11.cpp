@@ -36,6 +36,7 @@
 #include "dawn/native/d3d11/PlatformFunctionsD3D11.h"
 #include "dawn/native/d3d11/QueueD3D11.h"
 #include "dawn/native/d3d11/SamplerD3D11.h"
+#include "dawn/native/d3d11/ShaderModuleD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
@@ -278,7 +279,7 @@ ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const ShaderModuleDescriptor* descriptor,
     ShaderModuleParseResult* parseResult,
     OwnedCompilationMessages* compilationMessages) {
-    return DAWN_UNIMPLEMENTED_ERROR("CreateShaderModuleImpl");
+    return ShaderModule::Create(this, descriptor, parseResult, compilationMessages);
 }
 
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
