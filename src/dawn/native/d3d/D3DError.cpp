@@ -29,6 +29,7 @@ const char* HRESULTAsString(HRESULT result) {
         case S_FALSE:
             return "S_FALSE";
 
+        // Generic errors:
         case E_FAIL:
             return "E_FAIL";
         case E_INVALIDARG:
@@ -38,16 +39,37 @@ const char* HRESULTAsString(HRESULT result) {
         case E_NOTIMPL:
             return "E_NOTIMPL";
 
+        // DXGI errors:
         case DXGI_ERROR_INVALID_CALL:
             return "DXGI_ERROR_INVALID_CALL";
+        case DXGI_ERROR_UNSUPPORTED:
+            return "DXGI_ERROR_UNSUPPORTED";
+        case DXGI_ERROR_DEVICE_REMOVED:
+            return "DXGI_ERROR_DEVICE_REMOVED";
+        case DXGI_ERROR_DEVICE_HUNG:
+            return "DXGI_ERROR_DEVICE_HUNG";
+        case DXGI_ERROR_DEVICE_RESET:
+            return "DXGI_ERROR_DEVICE_RESET";
         case DXGI_ERROR_WAS_STILL_DRAWING:
             return "DXGI_ERROR_WAS_STILL_DRAWING";
 
+        // D3D11 errors:
+        case D3D11_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS:
+            return "D3D11_ERROR_TOO_MANY_UNIQUE_STATE_OBJECTS";
+        case D3D11_ERROR_FILE_NOT_FOUND:
+            return "D3D11_ERROR_FILE_NOT_FOUND";
+        case D3D11_ERROR_TOO_MANY_UNIQUE_VIEW_OBJECTS:
+            return "D3D11_ERROR_TOO_MANY_UNIQUE_VIEW_OBJECTS";
+        case D3D11_ERROR_DEFERRED_CONTEXT_MAP_WITHOUT_INITIAL_DISCARD:
+            return "D3D11_ERROR_DEFERRED_CONTEXT_MAP_WITHOUT_INITIAL_DISCARD";
+
+        // D3D12 errors:
         case D3D12_ERROR_ADAPTER_NOT_FOUND:
             return "D3D12_ERROR_ADAPTER_NOT_FOUND";
         case D3D12_ERROR_DRIVER_VERSION_MISMATCH:
             return "D3D12_ERROR_DRIVER_VERSION_MISMATCH";
 
+        // Fake errors used for testing:
         case E_FAKE_ERROR_FOR_TESTING:
             return "E_FAKE_ERROR_FOR_TESTING";
         case E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING:
