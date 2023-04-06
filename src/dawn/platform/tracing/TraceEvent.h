@@ -152,6 +152,7 @@
 #ifndef SRC_DAWN_PLATFORM_TRACING_TRACEEVENT_H_
 #define SRC_DAWN_PLATFORM_TRACING_TRACEEVENT_H_
 
+#include <atomic>
 #include <string>
 
 #include "dawn/platform/tracing/EventTracer.h"
@@ -670,10 +671,16 @@
 #define INTERNALTRACEEVENTUID(name_prefix) INTERNAL_TRACE_EVENT_UID2(name_prefix, __LINE__)
 
 // Implementation detail: internal macro to create static category.
-#define INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, category)    \
-    static const unsigned char* INTERNALTRACEEVENTUID(catstatic) = 0; \
-    if (!INTERNALTRACEEVENTUID(catstatic))                            \
-        INTERNALTRACEEVENTUID(catstatic) = TRACE_EVENT_API_GET_CATEGORY_ENABLED(platform, category);
+#define INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, category)                            \
+    static std::atomic<const unsigned char*> INTERNALTRACEEVENTUID(atomicCatstatic)(nullptr); \
+    const unsigned char* INTERNALTRACEEVENTUID(catstatic) =                                   \
+        INTERNALTRACEEVENTUID(atomicCatstatic).load(std::memory_order_acquire);               \
+    if (!INTERNALTRACEEVENTUID(catstatic)) {                                                  \
+        INTERNALTRACEEVENTUID(catstatic) =                                                    \
+            TRACE_EVENT_API_GET_CATEGORY_ENABLED(platform, category);                         \
+        INTERNALTRACEEVENTUID(atomicCatstatic)                                                \
+            .store(INTERNALTRACEEVENTUID(catstatic), std::memory_order_release);              \
+    }
 
 // Implementation detail: internal macro to create static category and add
 // event if the category is enabled.
