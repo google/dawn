@@ -35,7 +35,7 @@ class Adapter : public d3d::Adapter {
     bool SupportsExternalImages() const override;
 
     const DeviceInfo& GetDeviceInfo() const;
-    ComPtr<ID3D11Device> GetD3D11Device() const;
+    ResultOrError<ComPtr<ID3D11Device>> CreateD3D11Device();
 
   private:
     using Base = d3d::Adapter;
@@ -55,7 +55,6 @@ class Adapter : public d3d::Adapter {
                                                        const TogglesState& toggles) const override;
     ComPtr<ID3D11Device> mD3d11Device;
     D3D_FEATURE_LEVEL mFeatureLevel;
-
     DeviceInfo mDeviceInfo = {};
 };
 

@@ -284,12 +284,22 @@ if (DAWN_ENABLE_D3D11)
         "d3d11/AdapterD3D11.h"
         "d3d11/BackendD3D11.cpp"
         "d3d11/BackendD3D11.h"
+        "d3d11/CommandRecordingContextD3D11.cpp"
+        "d3d11/CommandRecordingContextD3D11.h"
         "d3d11/D3D11Backend.cpp"
+        "d3d11/DeviceD3D11.cpp"
+        "d3d11/DeviceD3D11.h"
         "d3d11/DeviceInfoD3D11.cpp"
         "d3d11/DeviceInfoD3D11.h"
+        "d3d11/Forward.h"
         "d3d11/PlatformFunctionsD3D11.cpp"
         "d3d11/PlatformFunctionsD3D11.h"
-
+        "d3d11/QueueD3D11.cpp"
+        "d3d11/QueueD3D11.h"
+        "d3d11/SamplerD3D11.cpp"
+        "d3d11/SamplerD3D11.h"
+        "d3d11/UtilsD3D11.cpp"
+        "d3d11/UtilsD3D11.h"
     )
 endif()
 

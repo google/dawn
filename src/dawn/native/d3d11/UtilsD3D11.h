@@ -12,27 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_D3D11_DEVICEINFOD3D11_H_
-#define SRC_DAWN_NATIVE_D3D11_DEVICEINFOD3D11_H_
+#ifndef SRC_DAWN_NATIVE_D3D11_UTILSD3D11_H_
+#define SRC_DAWN_NATIVE_D3D11_UTILSD3D11_H_
 
-#include "dawn/native/Error.h"
-#include "dawn/native/PerStage.h"
+#include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d/d3d_platform.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native::d3d11 {
 
-class Adapter;
+D3D11_COMPARISON_FUNC ToD3D11ComparisonFunc(wgpu::CompareFunction func);
 
-struct DeviceInfo {
-    bool isUMA;
-
-    // shaderModel indicates the maximum supported shader model, for example, the value 62
-    // indicates that current driver supports the maximum shader model is shader model 6.2.
-    uint32_t shaderModel;
-    PerStage<std::wstring> shaderProfiles;
-};
-
-ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<ID3D11Device>& device);
 }  // namespace dawn::native::d3d11
 
-#endif  // SRC_DAWN_NATIVE_D3D11_DEVICEINFOD3D11_H_
+#endif  // SRC_DAWN_NATIVE_D3D11_UTILSD3D11_H_

@@ -12,27 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_D3D11_DEVICEINFOD3D11_H_
-#define SRC_DAWN_NATIVE_D3D11_DEVICEINFOD3D11_H_
+#ifndef SRC_DAWN_NATIVE_D3D11_SAMPLERD3D11_H_
+#define SRC_DAWN_NATIVE_D3D11_SAMPLERD3D11_H_
 
-#include "dawn/native/Error.h"
-#include "dawn/native/PerStage.h"
+#include "dawn/native/Sampler.h"
+
 #include "dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native::d3d11 {
 
-class Adapter;
+class Device;
 
-struct DeviceInfo {
-    bool isUMA;
+class Sampler final : public SamplerBase {
+  public:
+    static ResultOrError<Ref<Sampler>> Create(Device* device, const SamplerDescriptor* descriptor);
 
-    // shaderModel indicates the maximum supported shader model, for example, the value 62
-    // indicates that current driver supports the maximum shader model is shader model 6.2.
-    uint32_t shaderModel;
-    PerStage<std::wstring> shaderProfiles;
+    ID3D11SamplerState* GetD3D11SamplerState() const;
+
+  private:
+    using SamplerBase::SamplerBase;
+
+    ~Sampler() override = default;
+    MaybeError Initialize(const SamplerDescriptor* descriptor);
+
+    ComPtr<ID3D11SamplerState> mD3d11SamplerState;
 };
 
-ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<ID3D11Device>& device);
 }  // namespace dawn::native::d3d11
 
-#endif  // SRC_DAWN_NATIVE_D3D11_DEVICEINFOD3D11_H_
+#endif  // SRC_DAWN_NATIVE_D3D11_SAMPLERD3D11_H_
