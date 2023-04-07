@@ -77,7 +77,7 @@ DXGI_USAGE ToDXGIUsage(wgpu::TextureUsage usage) {
 // static
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,
-                                                NewSwapChainBase* previousSwapChain,
+                                                SwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor) {
     Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, descriptor));
     DAWN_TRY(swapchain->Initialize(previousSwapChain));
@@ -94,7 +94,7 @@ void SwapChain::DestroyImpl() {
 // Initializes the swapchain on the surface. Note that `previousSwapChain` may or may not be
 // nullptr. If it is not nullptr it means that it is the swapchain previously in use on the
 // surface and that we have a chance to reuse it's underlying IDXGISwapChain and "buffers".
-MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
+MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     ASSERT(GetSurface()->GetType() == Surface::Type::WindowsHWND);
 
     // Precompute the configuration parameters we want for the DXGI swapchain.
@@ -116,8 +116,7 @@ MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
                     "D3D12 SwapChain cannot switch backend types from %s to %s.",
                     previousSwapChain->GetBackendType(), wgpu::BackendType::D3D12);
 
-    // TODO(crbug.com/dawn/269): use ToBackend once OldSwapChainBase is removed.
-    SwapChain* previousD3D12SwapChain = static_cast<SwapChain*>(previousSwapChain);
+    SwapChain* previousD3D12SwapChain = ToBackend(previousSwapChain);
 
     // TODO(crbug.com/dawn/269): Figure out switching an HWND between devices, it might
     // require just losing the reference to the swapchain, but might also need to wait for

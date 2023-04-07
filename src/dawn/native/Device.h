@@ -471,9 +471,9 @@ class DeviceBase : public RefCountedWithExternalCount {
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages) = 0;
     // Note that previousSwapChain may be nullptr, or come from a different backend.
-    virtual ResultOrError<Ref<NewSwapChainBase>> CreateSwapChainImpl(
+    virtual ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         Surface* surface,
-        NewSwapChainBase* previousSwapChain,
+        SwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const TextureDescriptor* descriptor) = 0;

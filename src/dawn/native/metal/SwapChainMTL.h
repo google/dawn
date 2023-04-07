@@ -27,11 +27,11 @@ namespace dawn::native::metal {
 class Device;
 class Texture;
 
-class SwapChain final : public NewSwapChainBase {
+class SwapChain final : public SwapChainBase {
   public:
     static ResultOrError<Ref<SwapChain>> Create(Device* device,
                                                 Surface* surface,
-                                                NewSwapChainBase* previousSwapChain,
+                                                SwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor);
 
     SwapChain(DeviceBase* device, Surface* surface, const SwapChainDescriptor* descriptor);
@@ -40,8 +40,8 @@ class SwapChain final : public NewSwapChainBase {
   private:
     void DestroyImpl() override;
 
-    using NewSwapChainBase::NewSwapChainBase;
-    MaybeError Initialize(NewSwapChainBase* previousSwapChain);
+    using SwapChainBase::SwapChainBase;
+    MaybeError Initialize(SwapChainBase* previousSwapChain);
 
     NSRef<CAMetalLayer> mLayer;
 

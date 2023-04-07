@@ -27,7 +27,7 @@ namespace dawn::native::metal {
 // static
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,
-                                                NewSwapChainBase* previousSwapChain,
+                                                SwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor) {
     Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, descriptor));
     DAWN_TRY(swapchain->Initialize(previousSwapChain));
@@ -35,7 +35,7 @@ ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
 }
 
 SwapChain::SwapChain(DeviceBase* dev, Surface* sur, const SwapChainDescriptor* desc)
-    : NewSwapChainBase(dev, sur, desc) {}
+    : SwapChainBase(dev, sur, desc) {}
 
 SwapChain::~SwapChain() = default;
 
@@ -44,7 +44,7 @@ void SwapChain::DestroyImpl() {
     DetachFromSurface();
 }
 
-MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
+MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     ASSERT(GetSurface()->GetType() == Surface::Type::MetalLayer);
 
     if (previousSwapChain != nullptr) {

@@ -166,13 +166,6 @@ TEST_P(SwapChainValidationTests, InvalidCreationFormat) {
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
 }
 
-// Checks that the implementation must be zero.
-TEST_P(SwapChainValidationTests, InvalidWithImplementation) {
-    wgpu::SwapChainDescriptor desc = goodDescriptor;
-    desc.implementation = 1;
-    ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
-}
-
 // Check swapchain operations with an error swapchain are errors
 TEST_P(SwapChainValidationTests, OperationsOnErrorSwapChain) {
     wgpu::SwapChain swapchain;
@@ -322,7 +315,7 @@ TEST_P(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_After
 }
 
 // Test that new swap chain present fails after device is lost
-TEST_P(SwapChainValidationTests, NewSwapChainPresentFailsAfterDeviceLost) {
+TEST_P(SwapChainValidationTests, SwapChainPresentFailsAfterDeviceLost) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
     wgpu::TextureView view = swapchain.GetCurrentTextureView();
 
@@ -331,7 +324,7 @@ TEST_P(SwapChainValidationTests, NewSwapChainPresentFailsAfterDeviceLost) {
 }
 
 // Test that new swap chain get current texture view fails after device is lost
-TEST_P(SwapChainValidationTests, NewSwapChainGetCurrentTextureViewFailsAfterDevLost) {
+TEST_P(SwapChainValidationTests, SwapChainGetCurrentTextureViewFailsAfterDevLost) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
 
     LoseDeviceForTesting();
@@ -339,7 +332,7 @@ TEST_P(SwapChainValidationTests, NewSwapChainGetCurrentTextureViewFailsAfterDevL
 }
 
 // Test that creation of a new swapchain fails after device is lost
-TEST_P(SwapChainValidationTests, CreateNewSwapChainFailsAfterDevLost) {
+TEST_P(SwapChainValidationTests, CreateSwapChainFailsAfterDevLost) {
     LoseDeviceForTesting();
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &goodDescriptor));
 }

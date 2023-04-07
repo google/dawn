@@ -230,12 +230,12 @@ Surface::~Surface() {
     }
 }
 
-NewSwapChainBase* Surface::GetAttachedSwapChain() {
+SwapChainBase* Surface::GetAttachedSwapChain() {
     ASSERT(!IsError());
     return mSwapChain.Get();
 }
 
-void Surface::SetAttachedSwapChain(NewSwapChainBase* swapChain) {
+void Surface::SetAttachedSwapChain(SwapChainBase* swapChain) {
     ASSERT(!IsError());
     mSwapChain = swapChain;
 }

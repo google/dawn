@@ -108,9 +108,9 @@ class DeviceMock : public DeviceBase {
                  ShaderModuleParseResult*,
                  OwnedCompilationMessages*),
                 (override));
-    MOCK_METHOD(ResultOrError<Ref<NewSwapChainBase>>,
+    MOCK_METHOD(ResultOrError<Ref<SwapChainBase>>,
                 CreateSwapChainImpl,
-                (Surface*, NewSwapChainBase*, const SwapChainDescriptor*),
+                (Surface*, SwapChainBase*, const SwapChainDescriptor*),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<TextureBase>>,
                 CreateTextureImpl,

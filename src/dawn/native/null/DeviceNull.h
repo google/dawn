@@ -146,9 +146,9 @@ class Device final : public DeviceBase {
         const ShaderModuleDescriptor* descriptor,
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages) override;
-    ResultOrError<Ref<NewSwapChainBase>> CreateSwapChainImpl(
+    ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         Surface* surface,
-        NewSwapChainBase* previousSwapChain,
+        SwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) override;
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
     ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
@@ -291,17 +291,17 @@ class ShaderModule final : public ShaderModuleBase {
                           OwnedCompilationMessages* compilationMessages);
 };
 
-class SwapChain final : public NewSwapChainBase {
+class SwapChain final : public SwapChainBase {
   public:
     static ResultOrError<Ref<SwapChain>> Create(Device* device,
                                                 Surface* surface,
-                                                NewSwapChainBase* previousSwapChain,
+                                                SwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor);
     ~SwapChain() override;
 
   private:
-    using NewSwapChainBase::NewSwapChainBase;
-    MaybeError Initialize(NewSwapChainBase* previousSwapChain);
+    using SwapChainBase::SwapChainBase;
+    MaybeError Initialize(SwapChainBase* previousSwapChain);
 
     Ref<Texture> mTexture;
 

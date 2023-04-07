@@ -111,9 +111,9 @@ class Device final : public DeviceBase {
         const ShaderModuleDescriptor* descriptor,
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages) override;
-    ResultOrError<Ref<NewSwapChainBase>> CreateSwapChainImpl(
+    ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         Surface* surface,
-        NewSwapChainBase* previousSwapChain,
+        SwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) override;
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
     ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(

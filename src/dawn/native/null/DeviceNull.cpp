@@ -173,9 +173,9 @@ ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     DAWN_TRY(module->Initialize(parseResult, compilationMessages));
     return module;
 }
-ResultOrError<Ref<NewSwapChainBase>> Device::CreateSwapChainImpl(
+ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     Surface* surface,
-    NewSwapChainBase* previousSwapChain,
+    SwapChainBase* previousSwapChain,
     const SwapChainDescriptor* descriptor) {
     return SwapChain::Create(this, surface, previousSwapChain, descriptor);
 }
@@ -424,14 +424,14 @@ MaybeError RenderPipeline::Initialize() {
 // static
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,
-                                                NewSwapChainBase* previousSwapChain,
+                                                SwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor) {
     Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, descriptor));
     DAWN_TRY(swapchain->Initialize(previousSwapChain));
     return swapchain;
 }
 
-MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
+MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     if (previousSwapChain != nullptr) {
         // TODO(crbug.com/dawn/269): figure out what should happen when surfaces are used by
         // multiple backends one after the other. It probably needs to block until the backend

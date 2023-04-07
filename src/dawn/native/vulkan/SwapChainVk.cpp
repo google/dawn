@@ -208,7 +208,7 @@ uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
 // static
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,
-                                                NewSwapChainBase* previousSwapChain,
+                                                SwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor) {
     Ref<SwapChain> swapchain = AcquireRef(new SwapChain(device, surface, descriptor));
     DAWN_TRY(swapchain->Initialize(previousSwapChain));
@@ -224,7 +224,7 @@ void SwapChain::DestroyImpl() {
 
 // Note that when we need to re-create the swapchain because it is out of date,
 // previousSwapChain can be set to `this`.
-MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
+MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     Device* device = ToBackend(GetDevice());
     Adapter* adapter = ToBackend(GetDevice()->GetAdapter());
 
@@ -241,8 +241,7 @@ MaybeError SwapChain::Initialize(NewSwapChainBase* previousSwapChain) {
                         "Vulkan SwapChain cannot switch backend types from %s to %s.",
                         previousSwapChain->GetBackendType(), wgpu::BackendType::Vulkan);
 
-        // TODO(crbug.com/dawn/269): use ToBackend once OldSwapChainBase is removed.
-        SwapChain* previousVulkanSwapChain = static_cast<SwapChain*>(previousSwapChain);
+        SwapChain* previousVulkanSwapChain = ToBackend(previousSwapChain);
 
         // TODO(crbug.com/dawn/269): Figure out switching a single surface between multiple
         // Vulkan devices on different VkInstances. Probably needs to block too!

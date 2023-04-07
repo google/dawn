@@ -27,17 +27,17 @@ class Device;
 class Texture;
 struct VulkanSurfaceInfo;
 
-class SwapChain : public NewSwapChainBase {
+class SwapChain : public SwapChainBase {
   public:
     static ResultOrError<Ref<SwapChain>> Create(Device* device,
                                                 Surface* surface,
-                                                NewSwapChainBase* previousSwapChain,
+                                                SwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor);
     ~SwapChain() override;
 
   private:
-    using NewSwapChainBase::NewSwapChainBase;
-    MaybeError Initialize(NewSwapChainBase* previousSwapChain);
+    using SwapChainBase::SwapChainBase;
+    MaybeError Initialize(SwapChainBase* previousSwapChain);
     void DestroyImpl() override;
 
     struct Config {
@@ -62,7 +62,7 @@ class SwapChain : public NewSwapChainBase {
     ResultOrError<Config> ChooseConfig(const VulkanSurfaceInfo& surfaceInfo) const;
     ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewInternal(bool isReentrant = false);
 
-    // NewSwapChainBase implementation
+    // SwapChainBase implementation
     MaybeError PresentImpl() override;
     ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override;
     void DetachFromSurfaceImpl() override;

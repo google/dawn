@@ -28,34 +28,14 @@ MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
                                        const Surface* surface,
                                        const SwapChainDescriptor* descriptor);
 
-TextureDescriptor GetSwapChainBaseTextureDescriptor(NewSwapChainBase* swapChain);
+TextureDescriptor GetSwapChainBaseTextureDescriptor(SwapChainBase* swapChain);
 
 class SwapChainBase : public ApiObjectBase {
   public:
-    explicit SwapChainBase(DeviceBase* device);
+    SwapChainBase(DeviceBase* device, Surface* surface, const SwapChainDescriptor* descriptor);
 
     static SwapChainBase* MakeError(DeviceBase* device);
-
     ObjectType GetType() const override;
-
-    // Dawn API
-    virtual void APIConfigure(wgpu::TextureFormat format,
-                              wgpu::TextureUsage allowedUsage,
-                              uint32_t width,
-                              uint32_t height) = 0;
-    virtual TextureViewBase* APIGetCurrentTextureView() = 0;
-    virtual void APIPresent() = 0;
-
-  protected:
-    SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
-    ~SwapChainBase() override;
-    void DestroyImpl() override;
-};
-
-// The base class for surface-based SwapChains that aren't ready yet.
-class NewSwapChainBase : public SwapChainBase {
-  public:
-    NewSwapChainBase(DeviceBase* device, Surface* surface, const SwapChainDescriptor* descriptor);
 
     // This is called when the swapchain is detached when one of the following happens:
     //
@@ -80,9 +60,9 @@ class NewSwapChainBase : public SwapChainBase {
     void APIConfigure(wgpu::TextureFormat format,
                       wgpu::TextureUsage allowedUsage,
                       uint32_t width,
-                      uint32_t height) override;
-    TextureViewBase* APIGetCurrentTextureView() override;
-    void APIPresent() override;
+                      uint32_t height);
+    TextureViewBase* APIGetCurrentTextureView();
+    void APIPresent();
 
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
@@ -94,10 +74,12 @@ class NewSwapChainBase : public SwapChainBase {
     wgpu::BackendType GetBackendType() const;
 
   protected:
-    ~NewSwapChainBase() override;
+    SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    ~SwapChainBase() override;
+    void DestroyImpl() override;
 
   private:
-    bool mAttached;
+    bool mAttached = false;
     uint32_t mWidth;
     uint32_t mHeight;
     wgpu::TextureFormat mFormat;

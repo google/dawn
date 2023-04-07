@@ -48,8 +48,8 @@ class Surface final : public ErrorMonad {
 
     Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor);
 
-    void SetAttachedSwapChain(NewSwapChainBase* swapChain);
-    NewSwapChainBase* GetAttachedSwapChain();
+    void SetAttachedSwapChain(SwapChainBase* swapChain);
+    SwapChainBase* GetAttachedSwapChain();
 
     // These are valid to call on all Surfaces.
     enum class Type {
@@ -96,7 +96,7 @@ class Surface final : public ErrorMonad {
     Type mType;
 
     // The swapchain will set this to null when it is destroyed.
-    Ref<NewSwapChainBase> mSwapChain;
+    Ref<SwapChainBase> mSwapChain;
 
     // MetalLayer
     void* mMetalLayer = nullptr;

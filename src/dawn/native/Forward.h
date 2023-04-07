@@ -48,7 +48,6 @@ class SamplerBase;
 class Surface;
 class ShaderModuleBase;
 class SwapChainBase;
-class NewSwapChainBase;
 class TextureBase;
 class TextureViewBase;
 
