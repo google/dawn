@@ -18,8 +18,6 @@
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
 
-#include "dawn/dawn_wsi.h"
-
 #import <QuartzCore/CAMetalLayer.h>
 
 namespace dawn::native::metal {

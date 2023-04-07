@@ -34,7 +34,6 @@ source_set("headers") {
   public_deps = [ ":headers_gen" ]
 
   sources = get_target_outputs(":headers_gen")
-  sources += [ "${dawn_root}/include/dawn/dawn_wsi.h" ]
 }
 
 ###############################################################################

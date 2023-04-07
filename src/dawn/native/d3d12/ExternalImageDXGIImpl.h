@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "dawn/common/LinkedList.h"
-#include "dawn/dawn_wsi.h"
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
