@@ -27,6 +27,7 @@ if (NOT DAWN_JINJA2_DIR)
     endif()
 else()
     message(STATUS "Dawn: using jinja2 at ${DAWN_JINJA2_DIR}")
+    message(STATUS "Dawn: using markupsafe at ${DAWN_MARKUPSAFE_DIR}")
 endif()
 
 # Function to invoke a generator_lib.py generator.
@@ -53,6 +54,9 @@ function(DawnGenerator)
     )
     if (DAWN_JINJA2_DIR)
         list(APPEND BASE_ARGS --jinja2-path ${DAWN_JINJA2_DIR})
+    endif()
+    if (DAWN_MARKUPSAFE_DIR)
+        list(APPEND BASE_ARGS --markupsafe-path ${DAWN_MARKUPSAFE_DIR})
     endif()
 
     # Call the generator to get the list of its dependencies.

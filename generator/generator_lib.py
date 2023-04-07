@@ -90,6 +90,16 @@ except ValueError:
     # --jinja2-path isn't passed, ignore the exception and just import Jinja2
     # assuming it already is in the Python PATH.
     pass
+kMarkupSafePath = '--markupsafe-path'
+try:
+    markupsafe_path_argv_index = sys.argv.index(kMarkupSafePath)
+    # Add parent path for the import to succeed.
+    path = os.path.join(sys.argv[markupsafe_path_argv_index + 1], os.pardir)
+    sys.path.insert(1, path)
+except ValueError:
+    # --markupsafe-path isn't passed, ignore the exception and just import
+    # assuming it already is in the Python PATH.
+    pass
 
 import jinja2
 
@@ -236,6 +246,11 @@ def run_generator(generator):
         default=None,
         type=str,
         help='Additional python path to set before loading Jinja2')
+    parser.add_argument(
+        kMarkupSafePath,
+        default=None,
+        type=str,
+        help='Additional python path to set before loading MarkupSafe')
     parser.add_argument(
         '--output-json-tarball',
         default=None,
