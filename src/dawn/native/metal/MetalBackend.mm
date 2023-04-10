@@ -38,6 +38,7 @@ WGPUTexture WrapIOSurface(WGPUDevice device, const ExternalImageDescriptorIOSurf
         waitEvents.push_back(
             {static_cast<id<MTLSharedEvent>>(waitEvent.sharedEvent), waitEvent.signaledValue});
     }
+    auto deviceLock(backendDevice->GetScopedLock());
     Ref<TextureBase> texture = backendDevice->CreateTextureWrappingIOSurface(
         cDescriptor, cDescriptor->ioSurface, std::move(waitEvents));
     return ToAPI(texture.Detach());
@@ -46,11 +47,15 @@ WGPUTexture WrapIOSurface(WGPUDevice device, const ExternalImageDescriptorIOSurf
 void IOSurfaceEndAccess(WGPUTexture cTexture,
                         ExternalImageIOSurfaceEndAccessDescriptor* descriptor) {
     Texture* texture = ToBackend(FromAPI(cTexture));
+    auto device = texture->GetDevice();
+    auto deviceLock(device->GetScopedLock());
     texture->IOSurfaceEndAccess(descriptor);
 }
 
 void WaitForCommandsToBeScheduled(WGPUDevice device) {
-    ToBackend(FromAPI(device))->WaitForCommandsToBeScheduled();
+    Device* backendDevice = ToBackend(FromAPI(device));
+    auto deviceLock(backendDevice->GetScopedLock());
+    backendDevice->WaitForCommandsToBeScheduled();
 }
 
 }  // namespace dawn::native::metal
