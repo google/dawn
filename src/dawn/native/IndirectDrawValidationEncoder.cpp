@@ -212,6 +212,8 @@ ResultOrError<ComputePipelineBase*> GetOrCreateRenderValidationPipeline(DeviceBa
         computePipelineDescriptor.compute.module = store->renderValidationShader.Get();
         computePipelineDescriptor.compute.entryPoint = "main";
 
+        // This will create new resource so we have to lock the device.
+        auto deviceLock(device->GetScopedLock());
         DAWN_TRY_ASSIGN(store->renderValidationPipeline,
                         device->CreateComputePipeline(&computePipelineDescriptor));
     }
