@@ -92,12 +92,10 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         options.binding_remapper_options.access_controls,
         options.binding_remapper_options.allow_collisions);
 
-    if (!options.external_texture_options.bindings_map.empty()) {
-        // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-        data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
-            options.external_texture_options.bindings_map);
-        manager.Add<transform::MultiplanarExternalTexture>();
-    }
+    // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
+    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+        options.external_texture_options.bindings_map);
+    manager.Add<transform::MultiplanarExternalTexture>();
 
     {  // Builtin polyfills
         // BuiltinPolyfill must come before DirectVariableAccess, due to the use of pointer

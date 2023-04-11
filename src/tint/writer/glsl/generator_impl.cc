@@ -180,12 +180,10 @@ SanitizedResult Sanitize(const Program* in,
         manager.Add<transform::Robustness>();
     }
 
-    if (!options.external_texture_options.bindings_map.empty()) {
-        // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-        data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
-            options.external_texture_options.bindings_map);
-        manager.Add<transform::MultiplanarExternalTexture>();
-    }
+    // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
+    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+        options.external_texture_options.bindings_map);
+    manager.Add<transform::MultiplanarExternalTexture>();
 
     {  // Builtin polyfills
         transform::BuiltinPolyfill::Builtins polyfills;
