@@ -37,6 +37,7 @@
 #include "dawn/native/d3d11/QueueD3D11.h"
 #include "dawn/native/d3d11/SamplerD3D11.h"
 #include "dawn/native/d3d11/ShaderModuleD3D11.h"
+#include "dawn/native/d3d11/TextureD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
@@ -295,13 +296,13 @@ ResultOrError<Ref<NewSwapChainBase>> Device::CreateSwapChainImpl(
 }
 
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
-    return DAWN_UNIMPLEMENTED_ERROR("CreateTextureImpl");
+    return Texture::Create(this, descriptor);
 }
 
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     TextureBase* texture,
     const TextureViewDescriptor* descriptor) {
-    return DAWN_UNIMPLEMENTED_ERROR("CreateTextureViewImpl");
+    return TextureView::Create(texture, descriptor);
 }
 
 void Device::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
