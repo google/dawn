@@ -32,6 +32,7 @@
 #include "dawn/native/d3d11/BackendD3D11.h"
 #include "dawn/native/d3d11/BindGroupD3D11.h"
 #include "dawn/native/d3d11/BindGroupLayoutD3D11.h"
+#include "dawn/native/d3d11/ComputePipelineD3D11.h"
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "dawn/native/d3d11/PlatformFunctionsD3D11.h"
 #include "dawn/native/d3d11/QueueD3D11.h"
@@ -255,7 +256,7 @@ ResultOrError<Ref<CommandBufferBase>> Device::CreateCommandBuffer(
 
 Ref<ComputePipelineBase> Device::CreateUninitializedComputePipelineImpl(
     const ComputePipelineDescriptor* descriptor) {
-    return nullptr;
+    return ComputePipeline::CreateUninitialized(this, descriptor);
 }
 
 ResultOrError<Ref<PipelineLayoutBase>> Device::CreatePipelineLayoutImpl(
@@ -307,7 +308,9 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
 
 void Device::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
                                                 WGPUCreateComputePipelineAsyncCallback callback,
-                                                void* userdata) {}
+                                                void* userdata) {
+    ComputePipeline::InitializeAsync(std::move(computePipeline), callback, userdata);
+}
 
 void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
                                                WGPUCreateRenderPipelineAsyncCallback callback,

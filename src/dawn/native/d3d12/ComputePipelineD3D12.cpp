@@ -47,7 +47,7 @@ MaybeError ComputePipeline::Initialize() {
         compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
     }
 
-    // SPRIV-cross does matrix multiplication expecting row major matrices
+    // Tint does matrix multiplication expecting row major matrices
     compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
     // FXC can miscompile code that depends on special float values (NaN, INF, etc) when IEEE

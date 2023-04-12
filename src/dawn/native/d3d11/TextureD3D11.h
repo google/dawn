@@ -40,13 +40,8 @@ class Texture final : public TextureBase {
     DXGI_FORMAT GetD3D11CopyableSubresourceFormat(Aspect aspect) const;
 
     D3D11_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(const Format& format,
-                                                   uint32_t mipLevel,
-                                                   uint32_t baseSlice,
-                                                   uint32_t sliceCount) const;
-    D3D11_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor(uint32_t mipLevel,
-                                                   uint32_t baseArrayLayer,
-                                                   uint32_t layerCount,
-                                                   Aspect aspects,
+                                                   const SubresourceRange& range) const;
+    D3D11_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor(const SubresourceRange& range,
                                                    bool depthReadOnly,
                                                    bool stencilReadOnly) const;
 
