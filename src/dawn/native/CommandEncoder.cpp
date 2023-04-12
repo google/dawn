@@ -771,11 +771,15 @@ void CommandEncoder::TrackQueryAvailability(QuerySetBase* querySet, uint32_t que
 // Implementation of the API's command recording methods
 
 ComputePassEncoder* CommandEncoder::APIBeginComputePass(const ComputePassDescriptor* descriptor) {
+    // This function will create new object, need to lock the Device.
+    auto deviceLock(GetDevice()->GetScopedLock());
+
     return BeginComputePass(descriptor).Detach();
 }
 
 Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescriptor* descriptor) {
     DeviceBase* device = GetDevice();
+    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
     bool success = mEncodingContext.TryEncode(
         this,
@@ -830,11 +834,15 @@ Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescri
 }
 
 RenderPassEncoder* CommandEncoder::APIBeginRenderPass(const RenderPassDescriptor* descriptor) {
+    // This function will create new object, need to lock the Device.
+    auto deviceLock(GetDevice()->GetScopedLock());
+
     return BeginRenderPass(descriptor).Detach();
 }
 
 Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescriptor* descriptor) {
     DeviceBase* device = GetDevice();
+    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
     RenderPassResourceUsageTracker usageTracker;
 
@@ -1047,13 +1055,14 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
                 descriptor.dimension = wgpu::TextureDimension::e2D;
                 descriptor.mipLevelCount = 1;
 
-                // We are creating new resources. Need to lock the Device.
+                // We are creating new resources. Device must already be locked via
+                // APIBeginRenderPass -> ApplyRenderPassWorkarounds.
                 // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at
                 // Command Submit time, so the locking would be removed from here at that point.
                 Ref<TextureBase> temporaryResolveTexture;
                 Ref<TextureViewBase> temporaryResolveView;
                 {
-                    auto deviceLock(GetDevice()->GetScopedLock());
+                    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
                     DAWN_TRY_ASSIGN(temporaryResolveTexture, device->CreateTexture(&descriptor));
 

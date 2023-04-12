@@ -431,6 +431,12 @@ class DeviceBase : public RefCountedWithExternalCount {
     // AutoLock. It would crash if such thing happens.
     [[nodiscard]] Mutex::AutoLock GetScopedLock();
 
+    // This method returns true if Feature::ImplicitDeviceSynchronization is turned on and the
+    // device is locked by current thread. This method is only enabled when DAWN_ENABLE_ASSERTS is
+    // turned on. Thus it should only be wrapped inside ASSERT() macro. i.e.
+    // ASSERT(device.IsLockedByCurrentThread())
+    bool IsLockedByCurrentThreadIfNeeded() const;
+
     // In the 'Normal' mode, currently recorded commands in the backend normally will be actually
     // submitted in the next Tick. However in the 'Passive' mode, the submission will be postponed
     // as late as possible, for example, until the client has explictly issued a submission.

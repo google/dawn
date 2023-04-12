@@ -92,10 +92,6 @@ struct DeviceBase::DeprecationWarnings {
 };
 
 namespace {
-bool IsMutexLockedByCurrentThreadIfNeeded(const Ref<Mutex>& mutex) {
-    return mutex == nullptr || mutex->IsLockedByCurrentThread();
-}
-
 struct LoggingCallbackTask : CallbackTask {
   public:
     LoggingCallbackTask() = delete;
@@ -873,7 +869,7 @@ Ref<RenderPipelineBase> DeviceBase::GetCachedRenderPipeline(
 
 Ref<ComputePipelineBase> DeviceBase::AddOrGetCachedComputePipeline(
     Ref<ComputePipelineBase> computePipeline) {
-    ASSERT(IsMutexLockedByCurrentThreadIfNeeded(mMutex));
+    ASSERT(IsLockedByCurrentThreadIfNeeded());
     auto [cachedPipeline, inserted] = mCaches->computePipelines.insert(computePipeline.Get());
     if (inserted) {
         computePipeline->SetIsCachedReference();
@@ -885,7 +881,7 @@ Ref<ComputePipelineBase> DeviceBase::AddOrGetCachedComputePipeline(
 
 Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
     Ref<RenderPipelineBase> renderPipeline) {
-    ASSERT(IsMutexLockedByCurrentThreadIfNeeded(mMutex));
+    ASSERT(IsLockedByCurrentThreadIfNeeded());
     auto [cachedPipeline, inserted] = mCaches->renderPipelines.insert(renderPipeline.Get());
     if (inserted) {
         renderPipeline->SetIsCachedReference();
@@ -2046,6 +2042,10 @@ Mutex::AutoLockAndHoldRef DeviceBase::GetScopedLockSafeForDelete() {
 
 Mutex::AutoLock DeviceBase::GetScopedLock() {
     return Mutex::AutoLock(mMutex.Get());
+}
+
+bool DeviceBase::IsLockedByCurrentThreadIfNeeded() const {
+    return mMutex == nullptr || mMutex->IsLockedByCurrentThread();
 }
 
 IgnoreLazyClearCountScope::IgnoreLazyClearCountScope(DeviceBase* device)
