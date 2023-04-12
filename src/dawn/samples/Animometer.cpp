@@ -186,6 +186,7 @@ int main(int argc, const char* argv[]) {
     timer->Start();
     while (!ShouldQuit()) {
         utils::ScopedAutoreleasePool pool;
+        ProcessEvents();
         frameCount++;
         frame();
         if (frameCount % 60 == 0) {

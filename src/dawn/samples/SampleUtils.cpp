@@ -391,3 +391,7 @@ bool ShouldQuit() {
 GLFWwindow* GetGLFWWindow() {
     return window;
 }
+
+void ProcessEvents() {
+    dawn::native::InstanceProcessEvents(instance->Get());
+}

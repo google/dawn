@@ -323,6 +323,7 @@ int main(int argc, const char* argv[]) {
 
     while (!ShouldQuit()) {
         utils::ScopedAutoreleasePool pool;
+        ProcessEvents();
         frame();
         utils::USleep(16000);
     }

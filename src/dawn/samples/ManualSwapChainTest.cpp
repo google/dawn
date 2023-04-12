@@ -339,6 +339,7 @@ int main(int argc, const char* argv[]) {
     while (windows.size() != 0) {
         utils::ScopedAutoreleasePool pool;
         glfwPollEvents();
+        wgpuInstanceProcessEvents(instance->Get());
 
         for (auto it = windows.begin(); it != windows.end();) {
             GLFWwindow* window = it->first;
