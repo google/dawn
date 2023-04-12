@@ -33,14 +33,8 @@ namespace tint::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
-    for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* expr = node->As<ast::Expression>()) {
-            if (Is<type::ExternalTexture>(program->TypeOf(expr))) {
-                return true;
-            }
-        }
-    }
-    return false;
+    auto ext = program->Types().Find<type::ExternalTexture>();
+    return ext != nullptr;
 }
 
 /// This struct stores symbols for new bindings created as a result of transforming a
