@@ -29,7 +29,7 @@ TEST_F(MslGeneratorImplTest, Emit_Discard) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  discard_fragment();\n");
 }
 

@@ -50,7 +50,7 @@ Result Generate(const Program* program, const Options& options) {
     // Generate the MSL code.
     auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program);
     result.success = impl->Generate();
-    result.error = impl->error();
+    result.error = impl->Diagnostics().str();
     result.msl = impl->result();
     result.has_invariant_attribute = impl->HasInvariant();
     result.workgroup_allocations = impl->DynamicWorkgroupAllocations();

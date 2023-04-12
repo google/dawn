@@ -36,7 +36,7 @@ ParserImplWrapperForTest::~ParserImplWrapperForTest() {
 std::string ToString(const Program& program) {
     writer::wgsl::GeneratorImpl writer(&program);
     if (!writer.Generate()) {
-        return "WGSL writer error: " + writer.error();
+        return "WGSL writer error: " + writer.Diagnostics().str();
     }
     return writer.result();
 }
@@ -45,7 +45,7 @@ std::string ToString(const Program& program, utils::VectorRef<const ast::Stateme
     writer::wgsl::GeneratorImpl writer(&program);
     for (const auto* stmt : stmts) {
         if (!writer.EmitStatement(stmt)) {
-            return "WGSL writer error: " + writer.error();
+            return "WGSL writer error: " + writer.Diagnostics().str();
         }
     }
     return writer.result();
@@ -58,13 +58,13 @@ std::string ToString(const Program& program, const ast::Node* node) {
         [&](const ast::Expression* expr) {
             utils::StringStream out;
             if (!writer.EmitExpression(out, expr)) {
-                return "WGSL writer error: " + writer.error();
+                return "WGSL writer error: " + writer.Diagnostics().str();
             }
             return out.str();
         },
         [&](const ast::Statement* stmt) {
             if (!writer.EmitStatement(stmt)) {
-                return "WGSL writer error: " + writer.error();
+                return "WGSL writer error: " + writer.Diagnostics().str();
             }
             return writer.result();
         },

@@ -30,7 +30,7 @@ TEST_F(HlslGeneratorImplTest_Expression, IndexAccessor) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "ary[5]");
 }
 

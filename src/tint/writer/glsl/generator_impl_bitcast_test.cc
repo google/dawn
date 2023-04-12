@@ -31,7 +31,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "intBitsToFloat(a)");
 }
 
@@ -43,7 +43,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "int(a)");
 }
 
@@ -55,7 +55,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "uint(a)");
 }
 

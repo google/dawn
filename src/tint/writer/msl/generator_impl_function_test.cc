@@ -33,7 +33,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
   using namespace metal;
@@ -59,7 +59,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
   using namespace metal;
@@ -76,7 +76,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_NoReturn_Void) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -105,7 +105,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_WithInOutVars) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -150,7 +150,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_WithInOut_Builtins) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -206,7 +206,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_DifferentSta
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -289,7 +289,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_HelperFuncti
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -357,7 +357,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RW_StorageBu
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -396,7 +396,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RO_StorageBu
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -440,7 +440,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -491,7 +491,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RW
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -543,7 +543,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RO
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -578,7 +578,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
   using namespace metal;
@@ -612,7 +612,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayReturn) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
   using namespace metal;
@@ -689,7 +689,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;

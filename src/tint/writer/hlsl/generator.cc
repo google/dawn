@@ -45,7 +45,7 @@ Result Generate(const Program* program, const Options& options) {
     // Generate the HLSL code.
     auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program);
     result.success = impl->Generate();
-    result.error = impl->error();
+    result.error = impl->Diagnostics().str();
     result.hlsl = impl->result();
 
     // Collect the list of entry points in the sanitized program.

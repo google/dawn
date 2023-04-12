@@ -29,7 +29,7 @@ TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  return;\n");
 }
 
@@ -41,7 +41,7 @@ TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  return 123;\n");
 }
 

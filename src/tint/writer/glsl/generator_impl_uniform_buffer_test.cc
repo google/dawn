@@ -30,7 +30,7 @@ TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 struct Simple {
@@ -50,7 +50,7 @@ TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple_Desktop) {
 
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#version 440
 
 struct Simple {

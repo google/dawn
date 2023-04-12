@@ -26,7 +26,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConstAssert) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     // const asserts are not emitted
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -39,7 +39,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionConstAssert) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     // const asserts are not emitted
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 

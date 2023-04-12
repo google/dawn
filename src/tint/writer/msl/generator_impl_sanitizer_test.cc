@@ -44,7 +44,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength) {
     opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
     GeneratorImpl& gen = SanitizeAndBuild(opts);
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#include <metal_stdlib>
@@ -101,7 +101,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
     opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
     GeneratorImpl& gen = SanitizeAndBuild(opts);
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#include <metal_stdlib>
@@ -162,7 +162,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
     opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
     GeneratorImpl& gen = SanitizeAndBuild(opts);
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#include <metal_stdlib>
@@ -222,7 +222,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
     options.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2}, 2u);
     GeneratorImpl& gen = SanitizeAndBuild(options);
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#include <metal_stdlib>
@@ -281,7 +281,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniformMissingBinding) 
     GeneratorImpl& gen = SanitizeAndBuild(options);
 
     ASSERT_FALSE(gen.Generate());
-    EXPECT_THAT(gen.error(), HasSubstr("Unable to translate builtin: arrayLength"));
+    EXPECT_THAT(gen.Diagnostics().str(), HasSubstr("Unable to translate builtin: arrayLength"));
 }
 
 }  // namespace

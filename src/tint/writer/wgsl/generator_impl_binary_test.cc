@@ -51,7 +51,7 @@ TEST_P(WgslBinaryTest, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

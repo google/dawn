@@ -27,7 +27,7 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(b)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  {
     return;
   }

@@ -116,7 +116,7 @@ TEST_P(WgslGenerator_F32LiteralTest, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.error();
+    ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), GetParam().expected);
 }
 
@@ -164,7 +164,7 @@ TEST_P(WgslGenerator_F16LiteralTest, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.error();
+    ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), GetParam().expected);
 }
 

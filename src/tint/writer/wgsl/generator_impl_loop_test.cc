@@ -33,7 +33,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(l)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  loop {
     break;
   }
@@ -54,7 +54,7 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(l)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  loop {
     break;
 
@@ -79,7 +79,7 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing_BreakIf) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(l)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  loop {
     discard;
 
@@ -105,7 +105,7 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for({
     _ = 1i;
     _ = 2i;
@@ -127,7 +127,7 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithSimpleCond) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for(; true; ) {
     return;
   }
@@ -147,7 +147,7 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithSimpleCont) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for(; ; i = (i + 1i)) {
     return;
   }
@@ -169,7 +169,7 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for(; ; {
     _ = 1i;
     _ = 2i;
@@ -191,7 +191,7 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for(var i : i32; true; i = (i + 1i)) {
     return;
   }
@@ -213,7 +213,7 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for({
     _ = 1i;
     _ = 2i;
@@ -238,7 +238,7 @@ TEST_F(WgslGeneratorImplTest, Emit_While) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while(true) {
     return;
   }
@@ -257,7 +257,7 @@ TEST_F(WgslGeneratorImplTest, Emit_While_WithContinue) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while(true) {
     continue;
   }
@@ -278,7 +278,7 @@ TEST_F(WgslGeneratorImplTest, Emit_WhileMultiCond) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while((true && false)) {
     return;
   }

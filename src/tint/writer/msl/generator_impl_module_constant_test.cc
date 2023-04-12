@@ -28,7 +28,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_AInt) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -46,7 +46,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -64,7 +64,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_i32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -82,7 +82,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_u32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -100,7 +100,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -120,7 +120,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -138,7 +138,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_AInt) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -156,7 +156,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -174,7 +174,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -194,7 +194,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -212,7 +212,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_mat2x3_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -230,7 +230,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_mat2x3_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -250,7 +250,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_mat2x3_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -268,7 +268,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_arr_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -302,7 +302,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_arr_vec2_bool) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 

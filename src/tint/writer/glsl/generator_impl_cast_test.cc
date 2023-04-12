@@ -29,7 +29,7 @@ TEST_F(GlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "1.0f");
 }
 
@@ -40,7 +40,7 @@ TEST_F(GlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "vec3(1.0f, 2.0f, 3.0f)");
 }
 

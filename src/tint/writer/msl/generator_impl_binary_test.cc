@@ -48,7 +48,7 @@ TEST_P(MslBinaryTest, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -92,7 +92,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
 using Op = ast::BinaryOp;
@@ -126,7 +126,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr2)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr2)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
 using Op = ast::BinaryOp;
@@ -153,7 +153,7 @@ TEST_F(MslBinaryTest, ModF32) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
@@ -168,7 +168,7 @@ TEST_F(MslBinaryTest, ModF16) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
@@ -181,7 +181,7 @@ TEST_F(MslBinaryTest, ModVec3F32) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
@@ -196,7 +196,7 @@ TEST_F(MslBinaryTest, ModVec3F16) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
@@ -209,7 +209,7 @@ TEST_F(MslBinaryTest, BoolAnd) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool(left & right)");
 }
 
@@ -222,7 +222,7 @@ TEST_F(MslBinaryTest, BoolOr) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool(left | right)");
 }
 

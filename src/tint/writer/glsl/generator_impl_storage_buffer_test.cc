@@ -48,7 +48,7 @@ TEST_F(GlslGeneratorImplTest_StorageBuffer, Align) {
 
     // TODO(crbug.com/tint/1421) offsets do not currently work on GLSL ES.
     // They will likely require manual padding.
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 struct Nephews {
@@ -71,7 +71,7 @@ TEST_F(GlslGeneratorImplTest_StorageBuffer, Align_Desktop) {
 
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#version 440
 
 struct Nephews {

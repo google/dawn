@@ -83,7 +83,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), R"(abs(1))");
 }
 
@@ -94,7 +94,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_ScalarLength) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), R"(fabs(2.0f))");
 }
 
@@ -108,7 +108,7 @@ TEST_P(MslImportData_DualParam_ScalarTest, Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1.0f, 2.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -126,7 +126,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_DualParam_ScalarDistance) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), R"(fabs(2.0f - 3.0f))");
 }
 
@@ -140,7 +140,7 @@ TEST_P(MslImportData_DualParam_VectorTest, Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) +
                              R"((float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f)))");
 }
@@ -165,7 +165,7 @@ TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1, 2)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -182,7 +182,7 @@ TEST_P(MslImportData_TripleParam_ScalarTest, Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1.0f, 2.0f, 3.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -203,7 +203,7 @@ TEST_P(MslImportData_TripleParam_VectorTest, Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(
         out.str(),
         std::string(param.msl_name) +
@@ -226,7 +226,7 @@ TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1, 2, 3)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
@@ -244,7 +244,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
 
@@ -257,7 +257,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_QuantizeToF16_Scalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float(half(v))");
 }
 
@@ -270,7 +270,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_QuantizeToF16_Vector) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float3(half3(v))");
 }
 

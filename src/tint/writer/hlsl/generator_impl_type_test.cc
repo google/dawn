@@ -42,7 +42,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool ary[4]");
 }
 
@@ -55,7 +55,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool ary[5][4]");
 }
 
@@ -68,7 +68,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool ary[6][5][4]");
 }
 
@@ -81,7 +81,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool[4]");
 }
 
@@ -93,7 +93,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, bool_, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool");
 }
 
@@ -105,7 +105,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_F16) {
     utils::StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, f16, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float16_t");
 }
 
@@ -117,7 +117,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
     utils::StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, f32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float");
 }
 
@@ -129,7 +129,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
     utils::StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, i32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "int");
 }
 
@@ -143,7 +143,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix_F16) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "matrix<float16_t, 2, 3>");
 }
 
@@ -157,7 +157,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix_F32) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float2x3");
 }
 
@@ -172,7 +172,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 
     TextGenerator::TextBuffer buf;
     auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
+    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
   int a;
   float b;
@@ -190,7 +190,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "RWByteAddressBuffer g : register(u0);\n");
 }
 
@@ -207,7 +207,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, sem_s, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "S");
 }
 
@@ -220,7 +220,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr(R"(struct S {
   int tint_symbol;
   float tint_symbol_1;
@@ -239,7 +239,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
 
     TextGenerator::TextBuffer buf;
     auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
+    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
   int a;
   float b;
@@ -255,7 +255,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
     utils::StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, u32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "uint");
 }
 
@@ -268,7 +268,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
     utils::StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, vec3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float3");
 }
 
@@ -280,7 +280,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, void_, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "void");
 }
 
@@ -292,7 +292,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitSampler) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "SamplerState");
 }
 
@@ -304,7 +304,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitSamplerComparison) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "SamplerComparisonState");
 }
 
@@ -336,7 +336,7 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -367,7 +367,7 @@ TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("Texture2DMS<float4> tex : register(t1, space2);"));
 }
 
@@ -413,7 +413,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Type,
@@ -519,7 +519,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
     utils::StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, s, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
-        << gen.error();
+        << gen.Diagnostics();
     EXPECT_EQ(out.str(), "Texture2DMS<float4>");
 }
 
@@ -556,7 +556,7 @@ TEST_P(HlslStorageTexturesTest, Emit) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(

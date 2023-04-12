@@ -33,7 +33,7 @@ TEST_F(GlslGeneratorImplTest, Generate) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 void my_func() {
@@ -47,7 +47,7 @@ TEST_F(GlslGeneratorImplTest, GenerateDesktop) {
 
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#version 440
 
 void my_func() {
@@ -70,7 +70,7 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexES) {
 
     GeneratorImpl& gen = Build(Version(Version::Standard::kES, 3, 1));
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 #extension GL_OES_sample_variables : require
 
@@ -95,7 +95,7 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexDesktop) {
 
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(#version 440
 
 int my_func() {

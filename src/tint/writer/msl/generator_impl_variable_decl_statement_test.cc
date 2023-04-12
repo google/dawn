@@ -34,7 +34,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
 }
 
@@ -47,7 +47,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Let) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  float const a = 0.0f;\n");
 }
 
@@ -60,7 +60,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "");  // Not a mistake - 'const' is inlined
 }
 
@@ -70,7 +70,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_AInt) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -88,7 +88,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -106,7 +106,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_i32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -124,7 +124,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_u32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -142,7 +142,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -162,7 +162,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -180,7 +180,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_AInt) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -198,7 +198,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -216,7 +216,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -236,7 +236,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -254,7 +254,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -272,7 +272,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -292,7 +292,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -310,7 +310,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_arr_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -344,7 +344,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_arr_vec2_bool) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
@@ -378,7 +378,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  tint_array<float, 5> a = {};\n");
 }
 
@@ -396,7 +396,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  S a = {};
 )");
 }
@@ -410,7 +410,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector_f32) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  float2 a = 0.0f;\n");
 }
 
@@ -425,7 +425,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector_f16) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  half2 a = 0.0h;\n");
 }
 
@@ -439,7 +439,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix_f32) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  float3x2 a = float3x2(0.0f);\n");
 }
 
@@ -455,7 +455,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix_f16) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  half3x2 a = half3x2(0.0h);\n");
 }
 
@@ -467,7 +467,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec_f32)
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);
 )");
 }
@@ -482,7 +482,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec_f16)
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(half3 a = half3(0.0h);
 )");
 }
@@ -495,7 +495,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroMat_f32)
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(),
               R"(float2x3 a = float2x3(float3(0.0f), float3(0.0f));
 )");
@@ -511,7 +511,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroMat_f16)
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(),
               R"(half2x3 a = half2x3(half3(0.0h), half3(0.0h));
 )");
@@ -526,7 +526,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr(R"(thread tint_private_vars_struct tint_private_vars = {};
     float const tint_symbol = tint_private_vars.a;
     return;
@@ -542,7 +542,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("threadgroup float tint_symbol_2;\n"));
 }
 

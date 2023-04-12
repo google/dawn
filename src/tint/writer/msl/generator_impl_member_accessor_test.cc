@@ -29,7 +29,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "str.mem");
 }
 
@@ -41,7 +41,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
 
     GeneratorImpl& gen = Build();
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "my_vec.xyz");
 }
 
@@ -53,7 +53,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
 
     GeneratorImpl& gen = Build();
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "my_vec.gbr");
 }
 

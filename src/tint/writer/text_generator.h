@@ -102,9 +102,6 @@ class TextGenerator {
     /// @returns the list of diagnostics raised by the generator.
     const diag::List& Diagnostics() const { return diagnostics_; }
 
-    /// @returns the error
-    std::string error() const { return diagnostics_.str(); }
-
     /// @return a new, unique identifier with the given prefix.
     /// @param prefix optional prefix to apply to the generated identifier. If
     /// empty "tint_symbol" will be used.

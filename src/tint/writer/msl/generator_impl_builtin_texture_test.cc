@@ -287,7 +287,7 @@ TEST_P(MslGeneratorBuiltinTextureTest, Call) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
 
     auto expected = expected_texture_overload(param.overload);
     EXPECT_EQ(expected, out.str());

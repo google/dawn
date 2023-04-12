@@ -25,7 +25,7 @@ TEST_F(WgslGeneratorImplTest, Generate) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(fn my_func() {
 }
 )");

@@ -34,7 +34,7 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(l)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while (true) {
     break;
   }
@@ -55,7 +55,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(l)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while (true) {
     break;
     {
@@ -79,7 +79,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing_BreakIf) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(l)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while (true) {
     break;
     {
@@ -113,7 +113,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(outer)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while (true) {
     while (true) {
       break;
@@ -153,7 +153,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(outer)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while (true) {
     float lhs = 2.5f;
     float other = 0.0f;
@@ -178,7 +178,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoop) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for(; ; ) {
     return;
   }
@@ -198,7 +198,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInit) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for(int i = 0; ; ) {
     return;
   }
@@ -226,7 +226,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  {
     {
       f(1);
@@ -252,7 +252,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCond) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  for(; true; ) {
     return;
   }
@@ -273,7 +273,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCont) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(),
               R"(  for(; ; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
     return;
@@ -302,7 +302,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while (true) {
     return;
     {
@@ -328,7 +328,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(),
               R"(  for(int i = 0; true; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
     a_statement();
@@ -358,7 +358,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  {
     {
       f(1);
@@ -388,7 +388,7 @@ TEST_F(MslGeneratorImplTest, Emit_While) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while(true) {
     return;
   }
@@ -407,7 +407,7 @@ TEST_F(MslGeneratorImplTest, Emit_While_WithContinue) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while(true) {
     continue;
   }
@@ -429,7 +429,7 @@ TEST_F(MslGeneratorImplTest, Emit_WhileWithMultiCond) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while((t && false)) {
     return;
   }

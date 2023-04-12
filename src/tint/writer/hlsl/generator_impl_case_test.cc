@@ -30,7 +30,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
+    ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -45,7 +45,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
+    ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -63,7 +63,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
+    ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  case 5:
   case 6: {
     break;
@@ -79,7 +79,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitCase(s, 0u)) << gen.error();
+    ASSERT_TRUE(gen.EmitCase(s, 0u)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  default: {
     break;
   }

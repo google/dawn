@@ -28,7 +28,7 @@ TEST_F(MslGeneratorImplTest, Emit_Continue) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  while (true) {
     if (false) {
       break;

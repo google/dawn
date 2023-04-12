@@ -27,7 +27,7 @@ TEST_F(MslGeneratorImplTest, Emit_Break) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(b)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  break;\n");
 }
 

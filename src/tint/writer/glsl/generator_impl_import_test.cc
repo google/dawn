@@ -41,7 +41,7 @@ TEST_P(GlslImportData_SingleParamTest, FloatScalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
@@ -80,7 +80,7 @@ TEST_P(GlslImportData_SingleIntParamTest, IntScalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1)");
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
@@ -97,7 +97,7 @@ TEST_P(GlslImportData_SingleVectorParamTest, FloatVector) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(
         out.str(),
         std::string(param.glsl_name) +
@@ -140,7 +140,7 @@ TEST_P(GlslImportData_DualParam_ScalarTest, Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f, 2.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
@@ -162,7 +162,7 @@ TEST_P(GlslImportData_DualParam_VectorTest, Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(),
               std::string(param.glsl_name) + "(vec3(1.0f, 2.0f, 3.0f), vec3(4.0f, 5.0f, 6.0f))");
 }
@@ -187,7 +187,7 @@ TEST_P(GlslImportData_DualParam_Int_Test, IntScalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1, 2)");
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
@@ -205,7 +205,7 @@ TEST_P(GlslImportData_TripleParam_ScalarTest, Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f, 2.0f, 3.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
@@ -225,7 +225,7 @@ TEST_P(GlslImportData_TripleParam_VectorTest, Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(),
               std::string(param.glsl_name) +
                   R"((vec3(1.0f, 2.0f, 3.0f), vec3(4.0f, 5.0f, 6.0f), vec3(7.0f, 8.0f, 9.0f)))");
@@ -246,7 +246,7 @@ TEST_P(GlslImportData_TripleParam_Int_Test, IntScalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1, 2, 3)");
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
@@ -262,7 +262,7 @@ TEST_F(GlslGeneratorImplTest_Import, GlslImportData_Determinant) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
 

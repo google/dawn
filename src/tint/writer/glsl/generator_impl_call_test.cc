@@ -32,7 +32,7 @@ TEST_F(GlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "my_func()");
 }
 
@@ -52,7 +52,7 @@ TEST_F(GlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "my_func(param1, param2)");
 }
 
@@ -72,7 +72,7 @@ TEST_F(GlslGeneratorImplTest_Call, EmitStatement_Call) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    ASSERT_TRUE(gen.EmitStatement(call)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(call)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
 }
 

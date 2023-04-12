@@ -30,7 +30,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "as_type<float>(a)");
 }
 

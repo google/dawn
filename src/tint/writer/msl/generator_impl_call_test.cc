@@ -32,7 +32,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "my_func()");
 }
 
@@ -55,7 +55,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "my_func(param1, param2)");
 }
 
@@ -76,7 +76,7 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
 }
 

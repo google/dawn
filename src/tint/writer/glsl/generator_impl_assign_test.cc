@@ -29,7 +29,7 @@ TEST_F(GlslGeneratorImplTest_Assign, Emit_Assign) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(assign)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
 }
 

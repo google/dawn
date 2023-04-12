@@ -28,7 +28,7 @@ TEST_F(GlslUnaryOpTest, AddressOf) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "expr");
 }
 
@@ -40,7 +40,7 @@ TEST_F(GlslUnaryOpTest, Complement) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "~(expr)");
 }
 
@@ -53,7 +53,7 @@ TEST_F(GlslUnaryOpTest, Indirection) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "expr");
 }
 
@@ -65,7 +65,7 @@ TEST_F(GlslUnaryOpTest, Not) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "!(expr)");
 }
 
@@ -77,7 +77,7 @@ TEST_F(GlslUnaryOpTest, Negation) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "-(expr)");
 }
 
@@ -88,7 +88,7 @@ TEST_F(GlslUnaryOpTest, IntMin) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(-2147483647 - 1)");
 }
 

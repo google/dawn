@@ -38,7 +38,7 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(s)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5: {
       break;
@@ -65,7 +65,7 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(s)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5:
     default: {

@@ -39,7 +39,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#version 310 es
@@ -79,7 +79,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#version 310 es
@@ -123,7 +123,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_ViaLets) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#version 310 es
@@ -160,7 +160,7 @@ TEST_F(GlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#version 310 es
@@ -202,7 +202,7 @@ TEST_F(GlslSanitizerTest, PromoteStructInitializerToConstVar) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#version 310 es
@@ -248,7 +248,7 @@ TEST_F(GlslSanitizerTest, InlinePtrLetsBasic) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#version 310 es
@@ -297,7 +297,7 @@ TEST_F(GlslSanitizerTest, InlinePtrLetsComplexChain) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     auto got = gen.result();
     auto* expect = R"(#version 310 es

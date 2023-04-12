@@ -29,7 +29,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Bool) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("false"));
 }
 
@@ -38,7 +38,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Int) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("-12345"));
 }
 
@@ -47,7 +47,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, UInt) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("56779u"));
 }
 
@@ -57,7 +57,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Float) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("1073741824.0f"));
 }
 
@@ -69,7 +69,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, F16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("32752.0hf"));
 }
 
@@ -78,7 +78,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Float) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("-0.00001200000042445026f"));
 }
 
@@ -89,7 +89,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_F16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("-0.0011997222900390625hf"));
 }
 
@@ -98,7 +98,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Bool) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("true"));
 }
 
@@ -107,7 +107,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Int) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("-12345"));
 }
 
@@ -116,7 +116,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Uint) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("12345u"));
 }
 
@@ -125,7 +125,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_F32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("vec3(1.0f, 2.0f, 3.0f)"));
 }
 
@@ -136,7 +136,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_F16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("f16vec3(1.0hf, 2.0hf, 3.0hf)"));
 }
 
@@ -145,7 +145,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_Empty_F32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("vec3(0.0f)"));
 }
 
@@ -156,7 +156,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_Empty_F16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("f16vec3(0.0hf)"));
 }
 
@@ -165,7 +165,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F32_Literal) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("vec3(2.0f)"));
 }
 
@@ -176,7 +176,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F16_Literal) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("f16vec3(2.0hf)"));
 }
 
@@ -187,7 +187,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F32_Var) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr(R"(float v = 2.0f;
   vec3 tint_symbol = vec3(v);)"));
 }
@@ -201,7 +201,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F16_Var) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr(R"(float16_t v = 2.0hf;
   f16vec3 tint_symbol = f16vec3(v);)"));
 }
@@ -211,7 +211,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_Bool) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("bvec3(true)"));
 }
 
@@ -220,7 +220,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_Int) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("ivec3(2)"));
 }
 
@@ -229,7 +229,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_UInt) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("uvec3(2u)"));
 }
 
@@ -238,7 +238,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Mat_F32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_THAT(gen.result(), HasSubstr("mat2x3(vec3(1.0f, 2.0f, 3.0f), vec3(3.0f, 4.0f, 5.0f))"));
 }
@@ -250,7 +250,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Mat_F16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_THAT(gen.result(),
                 HasSubstr("f16mat2x3(f16vec3(1.0hf, 2.0hf, 3.0hf), f16vec3(3.0hf, 4.0hf, 5.0hf))"));
@@ -277,7 +277,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Mat_Complex_F32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_THAT(gen.result(), HasSubstr("mat4(vec4(2.0f, 3.0f, 4.0f, 8.0f), vec4(0.0f), "
                                         "vec4(7.0f), vec4(42.0f, 21.0f, 6.0f, -5.0f))"));
@@ -306,7 +306,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Mat_Complex_F16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_THAT(gen.result(),
                 HasSubstr("f16mat4(f16vec4(2.0hf, 3.0hf, 4.0hf, 8.0hf), f16vec4(0.0hf), "
@@ -318,7 +318,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Mat_Empty_F32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_THAT(gen.result(), HasSubstr("mat2x3 tint_symbol = mat2x3(vec3(0.0f), vec3(0.0f))"));
 }
@@ -330,7 +330,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Mat_Empty_F16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_THAT(gen.result(),
                 HasSubstr("f16mat2x3 tint_symbol = f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))"));
@@ -349,7 +349,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Mat_Identity_F32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_THAT(gen.result(), HasSubstr("mat4 m_2 = mat4(m_1);"));
 }
@@ -369,7 +369,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Mat_Identity_F16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_THAT(gen.result(), HasSubstr("f16mat4 m_2 = f16mat4(m_1);"));
 }
@@ -380,7 +380,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Array) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("vec3[3](vec3(1.0f, 2.0f, 3.0f), "
                                         "vec3(4.0f, 5.0f, 6.0f), "
                                         "vec3(7.0f, 8.0f, 9.0f))"));
@@ -391,7 +391,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Array_Empty) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("vec3[3](vec3(0.0f), vec3(0.0f), vec3(0.0f))"));
 }
 
@@ -406,7 +406,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Struct) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("S(1, 2.0f, ivec3(3, 4, 5))"));
 }
 
@@ -421,7 +421,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, Type_Struct_Empty) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_THAT(gen.result(), HasSubstr("S(0"));
 }
 

@@ -27,7 +27,7 @@ TEST_F(MslGeneratorImplTest, Emit_Block) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(b)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  {
     return;
   }
@@ -42,7 +42,7 @@ TEST_F(MslGeneratorImplTest, Emit_Block_WithoutNewline) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitBlock(b)) << gen.error();
+    ASSERT_TRUE(gen.EmitBlock(b)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), R"(  {
     return;
   }

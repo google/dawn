@@ -28,7 +28,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalLet) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
+    ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "const float pos[3] = float[3](1.0f, 2.0f, 3.0f);\n");
 }
 
@@ -41,7 +41,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_AInt) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -61,7 +61,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -81,7 +81,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_i32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -101,7 +101,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_u32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -121,7 +121,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -143,7 +143,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
@@ -164,7 +164,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_AInt) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -184,7 +184,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -204,7 +204,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -226,7 +226,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
@@ -247,7 +247,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_AFloat) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -267,7 +267,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -289,7 +289,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f16) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
@@ -310,7 +310,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_arr_f32) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
@@ -333,7 +333,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_arr_vec2_bool) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
     EXPECT_EQ(gen.result(), R"(#version 310 es
 

@@ -29,7 +29,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Continue) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(c)) << gen.error();
+    ASSERT_TRUE(gen.EmitStatement(c)) << gen.Diagnostics();
     EXPECT_EQ(gen.result(), "  continue;\n");
 }
 
