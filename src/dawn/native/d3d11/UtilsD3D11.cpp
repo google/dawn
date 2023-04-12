@@ -17,6 +17,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/d3d/D3DError.h"
+#include "dawn/native/d3d11/DeviceD3D11.h"
 
 namespace dawn::native::d3d11 {
 
@@ -41,6 +42,25 @@ D3D11_COMPARISON_FUNC ToD3D11ComparisonFunc(wgpu::CompareFunction func) {
         case wgpu::CompareFunction::Undefined:
             UNREACHABLE();
     }
+}
+
+void SetDebugName(Device* device,
+                  ID3D11DeviceChild* object,
+                  const char* prefix,
+                  std::string label) {
+    if (!object) {
+        return;
+    }
+
+    if (label.empty() || !device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
+        object->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(prefix), prefix);
+        return;
+    }
+
+    std::string objectName = prefix;
+    objectName += "_";
+    objectName += label;
+    object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
 }
 
 }  // namespace dawn::native::d3d11

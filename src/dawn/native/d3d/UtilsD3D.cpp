@@ -392,4 +392,71 @@ DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format) {
     }
 }
 
+DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format) {
+    switch (format) {
+        case wgpu::VertexFormat::Uint8x2:
+            return DXGI_FORMAT_R8G8_UINT;
+        case wgpu::VertexFormat::Uint8x4:
+            return DXGI_FORMAT_R8G8B8A8_UINT;
+        case wgpu::VertexFormat::Sint8x2:
+            return DXGI_FORMAT_R8G8_SINT;
+        case wgpu::VertexFormat::Sint8x4:
+            return DXGI_FORMAT_R8G8B8A8_SINT;
+        case wgpu::VertexFormat::Unorm8x2:
+            return DXGI_FORMAT_R8G8_UNORM;
+        case wgpu::VertexFormat::Unorm8x4:
+            return DXGI_FORMAT_R8G8B8A8_UNORM;
+        case wgpu::VertexFormat::Snorm8x2:
+            return DXGI_FORMAT_R8G8_SNORM;
+        case wgpu::VertexFormat::Snorm8x4:
+            return DXGI_FORMAT_R8G8B8A8_SNORM;
+        case wgpu::VertexFormat::Uint16x2:
+            return DXGI_FORMAT_R16G16_UINT;
+        case wgpu::VertexFormat::Uint16x4:
+            return DXGI_FORMAT_R16G16B16A16_UINT;
+        case wgpu::VertexFormat::Sint16x2:
+            return DXGI_FORMAT_R16G16_SINT;
+        case wgpu::VertexFormat::Sint16x4:
+            return DXGI_FORMAT_R16G16B16A16_SINT;
+        case wgpu::VertexFormat::Unorm16x2:
+            return DXGI_FORMAT_R16G16_UNORM;
+        case wgpu::VertexFormat::Unorm16x4:
+            return DXGI_FORMAT_R16G16B16A16_UNORM;
+        case wgpu::VertexFormat::Snorm16x2:
+            return DXGI_FORMAT_R16G16_SNORM;
+        case wgpu::VertexFormat::Snorm16x4:
+            return DXGI_FORMAT_R16G16B16A16_SNORM;
+        case wgpu::VertexFormat::Float16x2:
+            return DXGI_FORMAT_R16G16_FLOAT;
+        case wgpu::VertexFormat::Float16x4:
+            return DXGI_FORMAT_R16G16B16A16_FLOAT;
+        case wgpu::VertexFormat::Float32:
+            return DXGI_FORMAT_R32_FLOAT;
+        case wgpu::VertexFormat::Float32x2:
+            return DXGI_FORMAT_R32G32_FLOAT;
+        case wgpu::VertexFormat::Float32x3:
+            return DXGI_FORMAT_R32G32B32_FLOAT;
+        case wgpu::VertexFormat::Float32x4:
+            return DXGI_FORMAT_R32G32B32A32_FLOAT;
+        case wgpu::VertexFormat::Uint32:
+            return DXGI_FORMAT_R32_UINT;
+        case wgpu::VertexFormat::Uint32x2:
+            return DXGI_FORMAT_R32G32_UINT;
+        case wgpu::VertexFormat::Uint32x3:
+            return DXGI_FORMAT_R32G32B32_UINT;
+        case wgpu::VertexFormat::Uint32x4:
+            return DXGI_FORMAT_R32G32B32A32_UINT;
+        case wgpu::VertexFormat::Sint32:
+            return DXGI_FORMAT_R32_SINT;
+        case wgpu::VertexFormat::Sint32x2:
+            return DXGI_FORMAT_R32G32_SINT;
+        case wgpu::VertexFormat::Sint32x3:
+            return DXGI_FORMAT_R32G32B32_SINT;
+        case wgpu::VertexFormat::Sint32x4:
+            return DXGI_FORMAT_R32G32B32A32_SINT;
+        default:
+            UNREACHABLE();
+    }
+}
+
 }  // namespace dawn::native::d3d

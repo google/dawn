@@ -15,13 +15,18 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_UTILSD3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_UTILSD3D11_H_
 
+#include <string>
+
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d/d3d_platform.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native::d3d11 {
 
+class Device;
+
 D3D11_COMPARISON_FUNC ToD3D11ComparisonFunc(wgpu::CompareFunction func);
+void SetDebugName(Device* device, ID3D11DeviceChild* object, const char* prefix, std::string label);
 
 }  // namespace dawn::native::d3d11
 

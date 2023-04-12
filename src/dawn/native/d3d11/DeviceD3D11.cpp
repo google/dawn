@@ -36,6 +36,7 @@
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "dawn/native/d3d11/PlatformFunctionsD3D11.h"
 #include "dawn/native/d3d11/QueueD3D11.h"
+#include "dawn/native/d3d11/RenderPipelineD3D11.h"
 #include "dawn/native/d3d11/SamplerD3D11.h"
 #include "dawn/native/d3d11/ShaderModuleD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
@@ -270,7 +271,7 @@ ResultOrError<Ref<QuerySetBase>> Device::CreateQuerySetImpl(const QuerySetDescri
 
 Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
     const RenderPipelineDescriptor* descriptor) {
-    return nullptr;
+    return RenderPipeline::CreateUninitialized(this, descriptor);
 }
 
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
@@ -285,13 +286,8 @@ ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
 }
 
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
-    const SwapChainDescriptor* descriptor) {
-    return DAWN_UNIMPLEMENTED_ERROR("CreateSwapChainImpl");
-}
-
-ResultOrError<Ref<NewSwapChainBase>> Device::CreateSwapChainImpl(
     Surface* surface,
-    NewSwapChainBase* previousSwapChain,
+    SwapChainBase* previousSwapChain,
     const SwapChainDescriptor* descriptor) {
     return DAWN_UNIMPLEMENTED_ERROR("CreateSwapChainImpl");
 }
@@ -314,7 +310,9 @@ void Device::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> compute
 
 void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
                                                WGPUCreateRenderPipelineAsyncCallback callback,
-                                               void* userdata) {}
+                                               void* userdata) {
+    RenderPipeline::InitializeAsync(std::move(renderPipeline), callback, userdata);
+}
 
 MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t sourceOffset,
@@ -409,21 +407,10 @@ float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
 }
 
-bool Device::ShouldDuplicateNumWorkgroupsForDispatchIndirect(
-    ComputePipelineBase* computePipeline) const {
-    return false;
-}
-
 void Device::SetLabelImpl() {}
 
 bool Device::MayRequireDuplicationOfIndirectParameters() const {
     return true;
-}
-
-bool Device::ShouldDuplicateParametersForDrawIndirect(
-    const RenderPipelineBase* renderPipelineBase) const {
-    // return ToBackend(renderPipelineBase)->UsesVertexOrInstanceIndex();
-    return false;
 }
 
 uint64_t Device::GetBufferCopyOffsetAlignmentForDepthStencil() const {
