@@ -45,40 +45,31 @@ GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
-bool GeneratorImpl::Generate() {
+void GeneratorImpl::Generate() {
     // Generate global declarations in the order they appear in the module.
     for (auto* decl : program_->AST().GlobalDeclarations()) {
-        if (!Switch(
-                decl,  //
-                [&](const ast::DiagnosticDirective* dd) {
-                    return EmitDiagnosticControl(dd->control);
-                },
-                [&](const ast::Enable* e) { return EmitEnable(e); },
-                [&](const ast::TypeDecl* td) { return EmitTypeDecl(td); },
-                [&](const ast::Function* func) { return EmitFunction(func); },
-                [&](const ast::Variable* var) { return EmitVariable(var); },
-                [&](const ast::ConstAssert* ca) { return EmitConstAssert(ca); },
-                [&](Default) {
-                    TINT_UNREACHABLE(Writer, diagnostics_);
-                    return false;
-                })) {
-            return false;
-        }
+        Switch(
+            decl,  //
+            [&](const ast::DiagnosticDirective* dd) { EmitDiagnosticControl(dd->control); },
+            [&](const ast::Enable* e) { EmitEnable(e); },
+            [&](const ast::TypeDecl* td) { EmitTypeDecl(td); },
+            [&](const ast::Function* func) { EmitFunction(func); },
+            [&](const ast::Variable* var) { EmitVariable(var); },
+            [&](const ast::ConstAssert* ca) { EmitConstAssert(ca); },
+            [&](Default) { TINT_UNREACHABLE(Writer, diagnostics_); });
+
         if (decl != program_->AST().GlobalDeclarations().Back()) {
             line();
         }
     }
-
-    return true;
 }
 
-bool GeneratorImpl::EmitDiagnosticControl(const ast::DiagnosticControl& diagnostic) {
+void GeneratorImpl::EmitDiagnosticControl(const ast::DiagnosticControl& diagnostic) {
     line() << "DiagnosticControl [severity: " << diagnostic.severity
            << ", rule: " << program_->Symbols().NameFor(diagnostic.rule_name->symbol) << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitEnable(const ast::Enable* enable) {
+void GeneratorImpl::EmitEnable(const ast::Enable* enable) {
     auto l = line();
     l << "Enable [";
     for (auto* ext : enable->extensions) {
@@ -88,13 +79,12 @@ bool GeneratorImpl::EmitEnable(const ast::Enable* enable) {
         l << ext->name;
     }
     l << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
-    return Switch(
-        ty,
-        [&](const ast::Alias* alias) {  //
+void GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
+    Switch(
+        ty,  //
+        [&](const ast::Alias* alias) {
             line() << "Alias [";
             {
                 ScopedIndent ai(this);
@@ -103,87 +93,53 @@ bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
                 line() << "expr: ";
                 {
                     ScopedIndent ex(this);
-                    if (!EmitExpression(alias->type)) {
-                        return false;
-                    }
+                    EmitExpression(alias->type);
                 }
             }
             line() << "]";
-            return true;
         },
-        [&](const ast::Struct* str) {  //
-            return EmitStructType(str);
-        },
-        [&](Default) {  //
+        [&](const ast::Struct* str) { EmitStructType(str); },
+        [&](Default) {
             diagnostics_.add_error(diag::System::Writer,
                                    "unknown declared type: " + std::string(ty->TypeInfo().name));
-            return false;
         });
 }
 
-bool GeneratorImpl::EmitExpression(const ast::Expression* expr) {
-    return Switch(
-        expr,
-        [&](const ast::IndexAccessorExpression* a) {  //
-            return EmitIndexAccessor(a);
-        },
-        [&](const ast::BinaryExpression* b) {  //
-            return EmitBinary(b);
-        },
-        [&](const ast::BitcastExpression* b) {  //
-            return EmitBitcast(b);
-        },
-        [&](const ast::CallExpression* c) {  //
-            return EmitCall(c);
-        },
-        [&](const ast::IdentifierExpression* i) {  //
-            return EmitIdentifier(i);
-        },
-        [&](const ast::LiteralExpression* l) {  //
-            return EmitLiteral(l);
-        },
-        [&](const ast::MemberAccessorExpression* m) {  //
-            return EmitMemberAccessor(m);
-        },
-        [&](const ast::PhonyExpression*) {  //
-            line() << "[PhonyExpression]";
-            return true;
-        },
-        [&](const ast::UnaryOpExpression* u) {  //
-            return EmitUnaryOp(u);
-        },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer, "unknown expression type");
-            return false;
-        });
+void GeneratorImpl::EmitExpression(const ast::Expression* expr) {
+    Switch(
+        expr,  //
+        [&](const ast::IndexAccessorExpression* a) { EmitIndexAccessor(a); },
+        [&](const ast::BinaryExpression* b) { EmitBinary(b); },
+        [&](const ast::BitcastExpression* b) { EmitBitcast(b); },
+        [&](const ast::CallExpression* c) { EmitCall(c); },
+        [&](const ast::IdentifierExpression* i) { EmitIdentifier(i); },
+        [&](const ast::LiteralExpression* l) { EmitLiteral(l); },
+        [&](const ast::MemberAccessorExpression* m) { EmitMemberAccessor(m); },
+        [&](const ast::PhonyExpression*) { line() << "[PhonyExpression]"; },
+        [&](const ast::UnaryOpExpression* u) { EmitUnaryOp(u); },
+        [&](Default) { diagnostics_.add_error(diag::System::Writer, "unknown expression type"); });
 }
 
-bool GeneratorImpl::EmitIndexAccessor(const ast::IndexAccessorExpression* expr) {
+void GeneratorImpl::EmitIndexAccessor(const ast::IndexAccessorExpression* expr) {
     line() << "IndexAccessorExpression [";
     {
         ScopedIndent iae(this);
         line() << "object: ";
         {
             ScopedIndent obj(this);
-            if (!EmitExpression(expr->object)) {
-                return false;
-            }
+            EmitExpression(expr->object);
         }
 
         line() << "index: ";
         {
             ScopedIndent idx(this);
-            if (!EmitExpression(expr->index)) {
-                return false;
-            }
+            EmitExpression(expr->index);
         }
     }
     line() << "]";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitMemberAccessor(const ast::MemberAccessorExpression* expr) {
+void GeneratorImpl::EmitMemberAccessor(const ast::MemberAccessorExpression* expr) {
     line() << "MemberAccessorExpression [";
     {
         ScopedIndent mae(this);
@@ -191,40 +147,32 @@ bool GeneratorImpl::EmitMemberAccessor(const ast::MemberAccessorExpression* expr
         line() << "object: ";
         {
             ScopedIndent obj(this);
-            if (!EmitExpression(expr->object)) {
-                return false;
-            }
+            EmitExpression(expr->object);
         }
         line() << "member: " << program_->Symbols().NameFor(expr->member->symbol);
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitBitcast(const ast::BitcastExpression* expr) {
+void GeneratorImpl::EmitBitcast(const ast::BitcastExpression* expr) {
     line() << "BitcastExpression [";
     {
         ScopedIndent bc(this);
         {
             line() << "type: ";
             ScopedIndent ty(this);
-            if (!EmitExpression(expr->type)) {
-                return false;
-            }
+            EmitExpression(expr->type);
         }
         {
             line() << "expr: ";
             ScopedIndent exp(this);
-            if (!EmitExpression(expr->expr)) {
-                return false;
-            }
+            EmitExpression(expr->expr);
         }
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitCall(const ast::CallExpression* expr) {
+void GeneratorImpl::EmitCall(const ast::CallExpression* expr) {
     line() << "Call [";
     {
         ScopedIndent cl(this);
@@ -232,9 +180,7 @@ bool GeneratorImpl::EmitCall(const ast::CallExpression* expr) {
         line() << "target: [";
         {
             ScopedIndent tgt(this);
-            if (!EmitExpression(expr->target)) {
-                return false;
-            }
+            EmitExpression(expr->target);
         }
         line() << "]";
 
@@ -246,9 +192,7 @@ bool GeneratorImpl::EmitCall(const ast::CallExpression* expr) {
                     line() << "arg: [";
                     {
                         ScopedIndent arg_val(this);
-                        if (!EmitExpression(arg)) {
-                            return false;
-                        }
+                        EmitExpression(arg);
                     }
                     line() << "]";
                 }
@@ -257,21 +201,16 @@ bool GeneratorImpl::EmitCall(const ast::CallExpression* expr) {
         }
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitLiteral(const ast::LiteralExpression* lit) {
-    bool ret = false;
+void GeneratorImpl::EmitLiteral(const ast::LiteralExpression* lit) {
     line() << "LiteralExpression [";
     {
         ScopedIndent le(this);
-        ret = Switch(
-            lit,
-            [&](const ast::BoolLiteralExpression* l) {  //
-                line() << (l->value ? "true" : "false");
-                return true;
-            },
-            [&](const ast::FloatLiteralExpression* l) {  //
+        Switch(
+            lit,  //
+            [&](const ast::BoolLiteralExpression* l) { line() << (l->value ? "true" : "false"); },
+            [&](const ast::FloatLiteralExpression* l) {
                 // f16 literals are also emitted as float value with suffix "h".
                 // Note that all normal and subnormal f16 values are normal f32 values, and since
                 // NaN and Inf are not allowed to be spelled in literal, it should be fine to emit
@@ -281,33 +220,23 @@ bool GeneratorImpl::EmitLiteral(const ast::LiteralExpression* lit) {
                 } else {
                     line() << FloatToBitPreservingString(static_cast<float>(l->value)) << l->suffix;
                 }
-                return true;
             },
-            [&](const ast::IntLiteralExpression* l) {  //
-                line() << l->value << l->suffix;
-                return true;
-            },
-            [&](Default) {  //
-                diagnostics_.add_error(diag::System::Writer, "unknown literal type");
-                return false;
-            });
+            [&](const ast::IntLiteralExpression* l) { line() << l->value << l->suffix; },
+            [&](Default) { diagnostics_.add_error(diag::System::Writer, "unknown literal type"); });
     }
     line() << "]";
-    return ret;
 }
 
-bool GeneratorImpl::EmitIdentifier(const ast::IdentifierExpression* expr) {
-    bool ret = false;
+void GeneratorImpl::EmitIdentifier(const ast::IdentifierExpression* expr) {
     line() << "IdentifierExpression [";
     {
         ScopedIndent ie(this);
-        ret = EmitIdentifier(expr->identifier);
+        EmitIdentifier(expr->identifier);
     }
     line() << "]";
-    return ret;
 }
 
-bool GeneratorImpl::EmitIdentifier(const ast::Identifier* ident) {
+void GeneratorImpl::EmitIdentifier(const ast::Identifier* ident) {
     line() << "Identifier [";
     {
         ScopedIndent id(this);
@@ -329,9 +258,7 @@ bool GeneratorImpl::EmitIdentifier(const ast::Identifier* ident) {
                     {
                         ScopedIndent args(this);
                         for (auto* expr : tmpl_ident->arguments) {
-                            if (!EmitExpression(expr)) {
-                                return false;
-                            }
+                            EmitExpression(expr);
                         }
                     }
                     line() << "]";
@@ -343,10 +270,9 @@ bool GeneratorImpl::EmitIdentifier(const ast::Identifier* ident) {
         }
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitFunction(const ast::Function* func) {
+void GeneratorImpl::EmitFunction(const ast::Function* func) {
     line() << "Function [";
     {
         ScopedIndent funct(this);
@@ -355,9 +281,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             line() << "attrs: [";
             {
                 ScopedIndent attrs(this);
-                if (!EmitAttributes(func->attributes)) {
-                    return false;
-                }
+                EmitAttributes(func->attributes);
             }
             line() << "]";
         }
@@ -376,18 +300,14 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
                             line() << "attrs: [";
                             {
                                 ScopedIndent attrs(this);
-                                if (!EmitAttributes(v->attributes)) {
-                                    return false;
-                                }
+                                EmitAttributes(v->attributes);
                             }
                             line() << "]";
                         }
                         line() << "type: [";
                         {
                             ScopedIndent ty(this);
-                            if (!EmitExpression(v->type)) {
-                                return false;
-                            }
+                            EmitExpression(v->type);
                         }
                         line() << "]";
                     }
@@ -406,9 +326,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
                     line() << "attrs: [";
                     {
                         ScopedIndent attrs(this);
-                        if (!EmitAttributes(func->return_type_attributes)) {
-                            return false;
-                        }
+                        EmitAttributes(func->return_type_attributes);
                     }
                     line() << "]";
                 }
@@ -416,9 +334,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
                 line() << "type: [";
                 {
                     ScopedIndent ty(this);
-                    if (!EmitExpression(func->return_type)) {
-                        return false;
-                    }
+                    EmitExpression(func->return_type);
                 }
                 line() << "]";
             } else {
@@ -430,26 +346,20 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
         {
             ScopedIndent bdy(this);
             if (func->body) {
-                if (!EmitBlockHeader(func->body)) {
-                    return false;
-                }
-                if (!EmitStatementsWithIndent(func->body->statements)) {
-                    return false;
-                }
+                EmitBlockHeader(func->body);
+                EmitStatementsWithIndent(func->body->statements);
             }
         }
         line() << "]";
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitImageFormat(const builtin::TexelFormat fmt) {
+void GeneratorImpl::EmitImageFormat(const builtin::TexelFormat fmt) {
     line() << "builtin::TexelFormat [" << fmt << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
+void GeneratorImpl::EmitStructType(const ast::Struct* str) {
     line() << "Struct [";
     {
         ScopedIndent strct(this);
@@ -458,9 +368,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
             line() << "attrs: [";
             {
                 ScopedIndent attrs(this);
-                if (!EmitAttributes(str->attributes)) {
-                    return false;
-                }
+                EmitAttributes(str->attributes);
             }
             line() << "]";
         }
@@ -477,9 +385,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
                         line() << "attrs: [";
                         {
                             ScopedIndent attrs(this);
-                            if (!EmitAttributes(mem->attributes)) {
-                                return false;
-                            }
+                            EmitAttributes(mem->attributes);
                         }
                         line() << "]";
                     }
@@ -488,9 +394,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
                     line() << "type: [";
                     {
                         ScopedIndent ty(this);
-                        if (!EmitExpression(mem->type)) {
-                            return false;
-                        }
+                        EmitExpression(mem->type);
                     }
                     line() << "]";
                 }
@@ -500,10 +404,9 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
         line() << "]";
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitVariable(const ast::Variable* v) {
+void GeneratorImpl::EmitVariable(const ast::Variable* v) {
     line() << "Variable [";
     {
         ScopedIndent variable(this);
@@ -511,14 +414,12 @@ bool GeneratorImpl::EmitVariable(const ast::Variable* v) {
             line() << "attrs: [";
             {
                 ScopedIndent attr(this);
-                if (!EmitAttributes(v->attributes)) {
-                    return false;
-                }
+                EmitAttributes(v->attributes);
             }
             line() << "]";
         }
 
-        bool ok = Switch(
+        Switch(
             v,  //
             [&](const ast::Var* var) {
                 if (var->declared_address_space || var->declared_access) {
@@ -528,18 +429,14 @@ bool GeneratorImpl::EmitVariable(const ast::Variable* v) {
                         line() << "address_space: [";
                         {
                             ScopedIndent addr(this);
-                            if (!EmitExpression(var->declared_address_space)) {
-                                return false;
-                            }
+                            EmitExpression(var->declared_address_space);
                         }
                         line() << "]";
                         if (var->declared_access) {
                             line() << "access: [";
                             {
                                 ScopedIndent acs(this);
-                                if (!EmitExpression(var->declared_access)) {
-                                    return false;
-                                }
+                                EmitExpression(var->declared_access);
                             }
                             line() << "]";
                         }
@@ -548,27 +445,13 @@ bool GeneratorImpl::EmitVariable(const ast::Variable* v) {
                 } else {
                     line() << "Var []";
                 }
-                return true;
             },
-            [&](const ast::Let*) {
-                line() << "Let []";
-                return true;
-            },
-            [&](const ast::Override*) {
-                line() << "Override []";
-                return true;
-            },
-            [&](const ast::Const*) {
-                line() << "Const []";
-                return true;
-            },
+            [&](const ast::Let*) { line() << "Let []"; },
+            [&](const ast::Override*) { line() << "Override []"; },
+            [&](const ast::Const*) { line() << "Const []"; },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled variable type " << v->TypeInfo().name;
-                return false;
             });
-        if (!ok) {
-            return false;
-        }
 
         line() << "name: " << program_->Symbols().NameFor(v->name->symbol);
 
@@ -576,9 +459,7 @@ bool GeneratorImpl::EmitVariable(const ast::Variable* v) {
             line() << "type: [";
             {
                 ScopedIndent vty(this);
-                if (!EmitExpression(ty)) {
-                    return false;
-                }
+                EmitExpression(ty);
             }
             line() << "]";
         }
@@ -587,21 +468,18 @@ bool GeneratorImpl::EmitVariable(const ast::Variable* v) {
             line() << "initializer: [";
             {
                 ScopedIndent init(this);
-                if (!EmitExpression(v->initializer)) {
-                    return false;
-                }
+                EmitExpression(v->initializer);
             }
             line() << "]";
         }
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
+void GeneratorImpl::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
     for (auto* attr : attrs) {
-        bool ok = Switch(
-            attr,
+        Switch(
+            attr,  //
             [&](const ast::WorkgroupAttribute* workgroup) {
                 auto values = workgroup->Values();
                 line() << "WorkgroupAttribute [";
@@ -609,65 +487,49 @@ bool GeneratorImpl::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs
                     ScopedIndent wg(this);
                     for (size_t i = 0; i < 3; i++) {
                         if (values[i]) {
-                            if (!EmitExpression(values[i])) {
-                                return false;
-                            }
+                            EmitExpression(values[i]);
                         }
                     }
                 }
                 line() << "]";
-                return true;
             },
             [&](const ast::StageAttribute* stage) {
                 line() << "StageAttribute [" << stage->stage << "]";
-                return true;
             },
             [&](const ast::BindingAttribute* binding) {
                 line() << "BindingAttribute [";
                 {
                     ScopedIndent ba(this);
-                    if (!EmitExpression(binding->expr)) {
-                        return false;
-                    }
+                    EmitExpression(binding->expr);
                 }
                 line() << "]";
-                return true;
             },
             [&](const ast::GroupAttribute* group) {
                 line() << "GroupAttribute [";
                 {
                     ScopedIndent ga(this);
-                    if (!EmitExpression(group->expr)) {
-                        return false;
-                    }
+                    EmitExpression(group->expr);
                 }
                 line() << "]";
-                return true;
             },
             [&](const ast::LocationAttribute* location) {
                 line() << "LocationAttribute [";
                 {
                     ScopedIndent la(this);
-                    if (!EmitExpression(location->expr)) {
-                        return false;
-                    }
+                    EmitExpression(location->expr);
                 }
                 line() << "]";
-                return true;
             },
             [&](const ast::BuiltinAttribute* builtin) {
                 line() << "BuiltinAttribute [";
                 {
                     ScopedIndent ba(this);
-                    if (!EmitExpression(builtin->builtin)) {
-                        return false;
-                    }
+                    EmitExpression(builtin->builtin);
                 }
                 line() << "]";
-                return true;
             },
             [&](const ast::DiagnosticAttribute* diagnostic) {
-                return EmitDiagnosticControl(diagnostic->control);
+                EmitDiagnosticControl(diagnostic->control);
             },
             [&](const ast::InterpolateAttribute* interpolate) {
                 line() << "InterpolateAttribute [";
@@ -676,99 +538,68 @@ bool GeneratorImpl::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs
                     line() << "type: [";
                     {
                         ScopedIndent ty(this);
-                        if (!EmitExpression(interpolate->type)) {
-                            return false;
-                        }
+                        EmitExpression(interpolate->type);
                     }
                     line() << "]";
                     if (interpolate->sampling) {
                         line() << "sampling: [";
                         {
                             ScopedIndent sa(this);
-                            if (!EmitExpression(interpolate->sampling)) {
-                                return false;
-                            }
+                            EmitExpression(interpolate->sampling);
                         }
                         line() << "]";
                     }
                 }
                 line() << "]";
-                return true;
             },
-            [&](const ast::InvariantAttribute*) {
-                line() << "InvariantAttribute []";
-                return true;
-            },
+            [&](const ast::InvariantAttribute*) { line() << "InvariantAttribute []"; },
             [&](const ast::IdAttribute* override_deco) {
                 line() << "IdAttribute [";
                 {
                     ScopedIndent id(this);
-                    if (!EmitExpression(override_deco->expr)) {
-                        return false;
-                    }
+                    EmitExpression(override_deco->expr);
                 }
                 line() << "]";
-                return true;
             },
-            [&](const ast::MustUseAttribute*) {
-                line() << "MustUseAttribute []";
-                return true;
-            },
+            [&](const ast::MustUseAttribute*) { line() << "MustUseAttribute []"; },
             [&](const ast::StructMemberOffsetAttribute* offset) {
                 line() << "StructMemberOffsetAttribute [";
                 {
                     ScopedIndent smoa(this);
-                    if (!EmitExpression(offset->expr)) {
-                        return false;
-                    }
+                    EmitExpression(offset->expr);
                 }
                 line() << "]";
-                return true;
             },
             [&](const ast::StructMemberSizeAttribute* size) {
                 line() << "StructMemberSizeAttribute [";
                 {
                     ScopedIndent smsa(this);
-                    if (!EmitExpression(size->expr)) {
-                        return false;
-                    }
+                    EmitExpression(size->expr);
                 }
                 line() << "]";
-                return true;
             },
             [&](const ast::StructMemberAlignAttribute* align) {
                 line() << "StructMemberAlignAttribute [";
                 {
                     ScopedIndent smaa(this);
-                    if (!EmitExpression(align->expr)) {
-                        return false;
-                    }
+                    EmitExpression(align->expr);
                 }
                 line() << "]";
-                return true;
             },
             [&](const ast::StrideAttribute* stride) {
                 line() << "StrideAttribute [" << stride->stride << "]";
-                return true;
             },
             [&](const ast::InternalAttribute* internal) {
                 line() << "InternalAttribute [" << internal->InternalName() << "]";
-                return true;
             },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "Unsupported attribute '" << attr->TypeInfo().name << "'";
-                return false;
             });
-
-        if (!ok) {
-            return false;
-        }
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitBinary(const ast::BinaryExpression* expr) {
+void GeneratorImpl::EmitBinary(const ast::BinaryExpression* expr) {
     line() << "BinaryExpression [";
     {
         ScopedIndent be(this);
@@ -776,33 +607,26 @@ bool GeneratorImpl::EmitBinary(const ast::BinaryExpression* expr) {
         {
             ScopedIndent lhs(this);
 
-            if (!EmitExpression(expr->lhs)) {
-                return false;
-            }
+            EmitExpression(expr->lhs);
         }
         line() << "]";
         line() << "op: [";
         {
             ScopedIndent op(this);
-            if (!EmitBinaryOp(expr->op)) {
-                return false;
-            }
+            EmitBinaryOp(expr->op);
         }
         line() << "]";
         line() << "rhs: [";
         {
             ScopedIndent rhs(this);
-            if (!EmitExpression(expr->rhs)) {
-                return false;
-            }
+            EmitExpression(expr->rhs);
         }
         line() << "]";
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitBinaryOp(const ast::BinaryOp op) {
+void GeneratorImpl::EmitBinaryOp(const ast::BinaryOp op) {
     switch (op) {
         case ast::BinaryOp::kAnd:
             line() << "&";
@@ -860,12 +684,11 @@ bool GeneratorImpl::EmitBinaryOp(const ast::BinaryOp op) {
             break;
         case ast::BinaryOp::kNone:
             diagnostics_.add_error(diag::System::Writer, "missing binary operation type");
-            return false;
+            break;
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitUnaryOp(const ast::UnaryOpExpression* expr) {
+void GeneratorImpl::EmitUnaryOp(const ast::UnaryOpExpression* expr) {
     line() << "UnaryOpExpression [";
     {
         ScopedIndent uoe(this);
@@ -894,137 +717,106 @@ bool GeneratorImpl::EmitUnaryOp(const ast::UnaryOpExpression* expr) {
         line() << "expr: [";
         {
             ScopedIndent ex(this);
-            if (!EmitExpression(expr->expr)) {
-                return false;
-            }
+            EmitExpression(expr->expr);
         }
         line() << "]";
     }
     line() << "]";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
-    {
-        if (!EmitBlockHeader(stmt)) {
-            return false;
-        }
-    }
-    if (!EmitStatementsWithIndent(stmt->statements)) {
-        return false;
-    }
-
-    return true;
+void GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
+    EmitBlockHeader(stmt);
+    EmitStatementsWithIndent(stmt->statements);
 }
 
-bool GeneratorImpl::EmitBlockHeader(const ast::BlockStatement* stmt) {
+void GeneratorImpl::EmitBlockHeader(const ast::BlockStatement* stmt) {
     if (!stmt->attributes.IsEmpty()) {
         line() << "attrs: [";
         {
             ScopedIndent attrs(this);
-            if (!EmitAttributes(stmt->attributes)) {
-                return false;
-            }
+            EmitAttributes(stmt->attributes);
         }
         line() << "]";
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
-    return Switch(
+void GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
+    Switch(
         stmt,  //
-        [&](const ast::AssignmentStatement* a) { return EmitAssign(a); },
-        [&](const ast::BlockStatement* b) { return EmitBlock(b); },
-        [&](const ast::BreakStatement* b) { return EmitBreak(b); },
-        [&](const ast::BreakIfStatement* b) { return EmitBreakIf(b); },
-        [&](const ast::CallStatement* c) { return EmitCall(c->expr); },
-        [&](const ast::CompoundAssignmentStatement* c) { return EmitCompoundAssign(c); },
-        [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
-        [&](const ast::DiscardStatement* d) { return EmitDiscard(d); },
-        [&](const ast::IfStatement* i) { return EmitIf(i); },
-        [&](const ast::IncrementDecrementStatement* l) { return EmitIncrementDecrement(l); },
-        [&](const ast::LoopStatement* l) { return EmitLoop(l); },
-        [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
-        [&](const ast::WhileStatement* l) { return EmitWhile(l); },
-        [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
-        [&](const ast::ConstAssert* c) { return EmitConstAssert(c); },
-        [&](const ast::SwitchStatement* s) { return EmitSwitch(s); },
-        [&](const ast::VariableDeclStatement* v) { return EmitVariable(v->variable); },
+        [&](const ast::AssignmentStatement* a) { EmitAssign(a); },
+        [&](const ast::BlockStatement* b) { EmitBlock(b); },
+        [&](const ast::BreakStatement* b) { EmitBreak(b); },
+        [&](const ast::BreakIfStatement* b) { EmitBreakIf(b); },
+        [&](const ast::CallStatement* c) { EmitCall(c->expr); },
+        [&](const ast::CompoundAssignmentStatement* c) { EmitCompoundAssign(c); },
+        [&](const ast::ContinueStatement* c) { EmitContinue(c); },
+        [&](const ast::DiscardStatement* d) { EmitDiscard(d); },
+        [&](const ast::IfStatement* i) { EmitIf(i); },
+        [&](const ast::IncrementDecrementStatement* l) { EmitIncrementDecrement(l); },
+        [&](const ast::LoopStatement* l) { EmitLoop(l); },
+        [&](const ast::ForLoopStatement* l) { EmitForLoop(l); },
+        [&](const ast::WhileStatement* l) { EmitWhile(l); },
+        [&](const ast::ReturnStatement* r) { EmitReturn(r); },
+        [&](const ast::ConstAssert* c) { EmitConstAssert(c); },
+        [&](const ast::SwitchStatement* s) { EmitSwitch(s); },
+        [&](const ast::VariableDeclStatement* v) { EmitVariable(v->variable); },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer,
                                    "unknown statement type: " + std::string(stmt->TypeInfo().name));
-            return false;
         });
 }
 
-bool GeneratorImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
+void GeneratorImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
-        if (!EmitStatement(s)) {
-            return false;
-        }
+        EmitStatement(s);
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
+void GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
-    return EmitStatements(stmts);
+    EmitStatements(stmts);
 }
 
-bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
+void GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
     line() << "AssignmentStatement [";
     {
         ScopedIndent as(this);
         line() << "lhs: [";
         {
             ScopedIndent lhs(this);
-            if (!EmitExpression(stmt->lhs)) {
-                return false;
-            }
+            EmitExpression(stmt->lhs);
         }
         line() << "]";
         line() << "rhs: [";
         {
             ScopedIndent rhs(this);
-            if (!EmitExpression(stmt->rhs)) {
-                return false;
-            }
-            line() << "]";
+            EmitExpression(stmt->rhs);
         }
+        line() << "]";
     }
     line() << "]";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
+void GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
     line() << "BreakStatement []";
-    return true;
 }
 
-bool GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
+void GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
     line() << "BreakIfStatement [";
     {
         ScopedIndent bis(this);
-        if (!EmitExpression(b->condition)) {
-            return false;
-        }
+        EmitExpression(b->condition);
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
+void GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
     line() << "CaseStatement [";
     {
         ScopedIndent cs(this);
         if (stmt->selectors.Length() == 1 && stmt->ContainsDefault()) {
             line() << "selector: default";
-            if (!EmitBlockHeader(stmt->body)) {
-                return false;
-            }
+            EmitBlockHeader(stmt->body);
         } else {
             line() << "selectors: [";
             {
@@ -1032,65 +824,52 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
                 for (auto* sel : stmt->selectors) {
                     if (sel->IsDefault()) {
                         line() << "default []";
-                    } else if (!EmitExpression(sel->expr)) {
-                        return false;
+                    } else {
+                        EmitExpression(sel->expr);
                     }
                 }
             }
             line() << "]";
-            if (!EmitBlockHeader(stmt->body)) {
-                return false;
-            }
+            EmitBlockHeader(stmt->body);
         }
-        if (!EmitStatementsWithIndent(stmt->body->statements)) {
-            return false;
-        }
+        EmitStatementsWithIndent(stmt->body->statements);
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitCompoundAssign(const ast::CompoundAssignmentStatement* stmt) {
+void GeneratorImpl::EmitCompoundAssign(const ast::CompoundAssignmentStatement* stmt) {
     line() << "CompoundAssignmentStatement [";
     {
         ScopedIndent cas(this);
         line() << "lhs: [";
         {
             ScopedIndent lhs(this);
-            if (!EmitExpression(stmt->lhs)) {
-                return false;
-            }
+            EmitExpression(stmt->lhs);
         }
         line() << "]";
 
         line() << "op: [";
         {
             ScopedIndent op(this);
-            if (!EmitBinaryOp(stmt->op)) {
-                return false;
-            }
+            EmitBinaryOp(stmt->op);
         }
         line() << "]";
         line() << "rhs: [";
         {
             ScopedIndent rhs(this);
 
-            if (!EmitExpression(stmt->rhs)) {
-                return false;
-            }
+            EmitExpression(stmt->rhs);
         }
         line() << "]";
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
+void GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
     line() << "ContinueStatement []";
-    return true;
 }
 
-bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
+void GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     {
         line() << "IfStatement [";
         {
@@ -1098,20 +877,14 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
             line() << "condition: [";
             {
                 ScopedIndent cond(this);
-                if (!EmitExpression(stmt->condition)) {
-                    return false;
-                }
+                EmitExpression(stmt->condition);
             }
             line() << "]";
-            if (!EmitBlockHeader(stmt->body)) {
-                return false;
-            }
+            EmitBlockHeader(stmt->body);
         }
         line() << "] ";
     }
-    if (!EmitStatementsWithIndent(stmt->body->statements)) {
-        return false;
-    }
+    EmitStatementsWithIndent(stmt->body->statements);
 
     const ast::Statement* e = stmt->else_statement;
     while (e) {
@@ -1121,19 +894,13 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
                 {
                     ScopedIndent ifs(this);
                     line() << "condition: [";
-                    if (!EmitExpression(elseif->condition)) {
-                        return false;
-                    }
+                    EmitExpression(elseif->condition);
                 }
                 line() << "]";
-                if (!EmitBlockHeader(elseif->body)) {
-                    return false;
-                }
+                EmitBlockHeader(elseif->body);
             }
             line() << "]";
-            if (!EmitStatementsWithIndent(elseif->body->statements)) {
-                return false;
-            }
+            EmitStatementsWithIndent(elseif->body->statements);
             e = elseif->else_statement;
         } else {
             auto* body = e->As<ast::BlockStatement>();
@@ -1141,80 +908,61 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
                 line() << "Else [";
                 {
                     ScopedIndent els(this);
-                    if (!EmitBlockHeader(body)) {
-                        return false;
-                    }
+                    EmitBlockHeader(body);
                 }
                 line() << "]";
             }
-            if (!EmitStatementsWithIndent(body->statements)) {
-                return false;
-            }
+            EmitStatementsWithIndent(body->statements);
             break;
         }
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
+void GeneratorImpl::EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
     line() << "IncrementDecrementStatement [";
     {
         ScopedIndent ids(this);
         line() << "expr: [";
-        if (!EmitExpression(stmt->lhs)) {
-            return false;
-        }
+        EmitExpression(stmt->lhs);
         line() << "]";
         line() << "dir: " << (stmt->increment ? "++" : "--");
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
+void GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
     line() << "DiscardStatement []";
-    return true;
 }
 
-bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
+void GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
     line() << "LoopStatement [";
     {
         ScopedIndent ls(this);
-        if (!EmitStatements(stmt->body->statements)) {
-            return false;
-        }
+        EmitStatements(stmt->body->statements);
 
         if (stmt->continuing && !stmt->continuing->Empty()) {
             line() << "Continuing [";
             {
                 ScopedIndent cont(this);
-                if (!EmitStatementsWithIndent(stmt->continuing->statements)) {
-                    return false;
-                }
+                EmitStatementsWithIndent(stmt->continuing->statements);
             }
             line() << "]";
         }
     }
     line() << "]";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
+void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     TextBuffer init_buf;
     if (auto* init = stmt->initializer) {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &init_buf);
-        if (!EmitStatement(init)) {
-            return false;
-        }
+        EmitStatement(init);
     }
 
     TextBuffer cont_buf;
     if (auto* cont = stmt->continuing) {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &cont_buf);
-        if (!EmitStatement(cont)) {
-            return false;
-        }
+        EmitStatement(cont);
     }
 
     line() << "ForLoopStatement [";
@@ -1244,9 +992,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
         {
             ScopedIndent con(this);
             if (auto* cond = stmt->condition) {
-                if (!EmitExpression(cond)) {
-                    return false;
-                }
+                EmitExpression(cond);
             }
         }
 
@@ -1269,90 +1015,62 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
                     break;
             }
         }
-        if (!EmitBlockHeader(stmt->body)) {
-            return false;
-        }
-
-        if (!EmitStatementsWithIndent(stmt->body->statements)) {
-            return false;
-        }
+        EmitBlockHeader(stmt->body);
+        EmitStatementsWithIndent(stmt->body->statements);
     }
     line() << "]";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
+void GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
     line() << "WhileStatement [";
     {
         ScopedIndent ws(this);
-        {
-            auto* cond = stmt->condition;
-            if (!EmitExpression(cond)) {
-                return false;
-            }
-        }
-        if (!EmitBlockHeader(stmt->body)) {
-            return false;
-        }
-        if (!EmitStatementsWithIndent(stmt->body->statements)) {
-            return false;
-        }
+        EmitExpression(stmt->condition);
+        EmitBlockHeader(stmt->body);
+        EmitStatementsWithIndent(stmt->body->statements);
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
+void GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
     line() << "ReturnStatement [";
     {
         ScopedIndent ret(this);
         if (stmt->value) {
-            if (!EmitExpression(stmt->value)) {
-                return false;
-            }
+            EmitExpression(stmt->value);
         }
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitConstAssert(const ast::ConstAssert* stmt) {
+void GeneratorImpl::EmitConstAssert(const ast::ConstAssert* stmt) {
     line() << "ConstAssert [";
     {
         ScopedIndent ca(this);
-        if (!EmitExpression(stmt->condition)) {
-            return false;
-        }
+        EmitExpression(stmt->condition);
     }
     line() << "]";
-    return true;
 }
 
-bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
+void GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     line() << "SwitchStatement [";
     {
         ScopedIndent ss(this);
         line() << "condition: [";
         {
             ScopedIndent cond(this);
-            if (!EmitExpression(stmt->condition)) {
-                return false;
-            }
+            EmitExpression(stmt->condition);
         }
         line() << "]";
 
         {
             ScopedIndent si(this);
             for (auto* s : stmt->body) {
-                if (!EmitCase(s)) {
-                    return false;
-                }
+                EmitCase(s);
             }
         }
     }
     line() << "]";
-    return true;
 }
 
 }  // namespace tint::writer::syntax_tree

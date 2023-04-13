@@ -26,7 +26,8 @@ Result Generate(const Program* program, const Options&) {
 
     // Generate the AST dump.
     auto impl = std::make_unique<GeneratorImpl>(program);
-    result.success = impl->Generate();
+    impl->Generate();
+    result.success = impl->Diagnostics().empty();
     result.error = impl->Diagnostics().str();
     result.ast = impl->result();
 

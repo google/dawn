@@ -49,165 +49,125 @@ class GeneratorImpl : public TextGenerator {
     ~GeneratorImpl();
 
     /// Generates the result data
-    /// @returns true on successful generation; false otherwise
-    bool Generate();
+    void Generate();
 
     /// Handles generating a diagnostic control
     /// @param diagnostic the diagnostic control node
-    /// @returns true if the diagnostic control was emitted
-    bool EmitDiagnosticControl(const ast::DiagnosticControl& diagnostic);
+    void EmitDiagnosticControl(const ast::DiagnosticControl& diagnostic);
     /// Handles generating an enable directive
     /// @param enable the enable node
-    /// @returns true if the enable directive was emitted
-    bool EmitEnable(const ast::Enable* enable);
+    void EmitEnable(const ast::Enable* enable);
     /// Handles generating a declared type
     /// @param ty the declared type to generate
-    /// @returns true if the declared type was emitted
-    bool EmitTypeDecl(const ast::TypeDecl* ty);
+    void EmitTypeDecl(const ast::TypeDecl* ty);
     /// Handles an index accessor expression
     /// @param expr the expression to emit
-    /// @returns true if the index accessor was emitted
-    bool EmitIndexAccessor(const ast::IndexAccessorExpression* expr);
+    void EmitIndexAccessor(const ast::IndexAccessorExpression* expr);
     /// Handles an assignment statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitAssign(const ast::AssignmentStatement* stmt);
+    void EmitAssign(const ast::AssignmentStatement* stmt);
     /// Handles generating a binary expression
     /// @param expr the binary expression
-    /// @returns true if the expression was emitted, false otherwise
-    bool EmitBinary(const ast::BinaryExpression* expr);
+    void EmitBinary(const ast::BinaryExpression* expr);
     /// Handles generating a binary operator
     /// @param op the binary operator
-    /// @returns true if the operator was emitted, false otherwise
-    bool EmitBinaryOp(const ast::BinaryOp op);
+    void EmitBinaryOp(const ast::BinaryOp op);
     /// Handles generating a bitcast expression
     /// @param expr the bitcast expression
-    /// @returns true if the bitcast was emitted
-    bool EmitBitcast(const ast::BitcastExpression* expr);
+    void EmitBitcast(const ast::BitcastExpression* expr);
     /// Handles a block statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitBlock(const ast::BlockStatement* stmt);
+    void EmitBlock(const ast::BlockStatement* stmt);
     /// Handles emitting the start of a block statement (including attributes)
     /// @param stmt the block statement to emit the header for
-    /// @returns true if the statement was emitted successfully
-    bool EmitBlockHeader(const ast::BlockStatement* stmt);
+    void EmitBlockHeader(const ast::BlockStatement* stmt);
     /// Handles a break statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitBreak(const ast::BreakStatement* stmt);
+    void EmitBreak(const ast::BreakStatement* stmt);
     /// Handles a break-if statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitBreakIf(const ast::BreakIfStatement* stmt);
+    void EmitBreakIf(const ast::BreakIfStatement* stmt);
     /// Handles generating a call expression
     /// @param expr the call expression
-    /// @returns true if the call expression is emitted
-    bool EmitCall(const ast::CallExpression* expr);
+    void EmitCall(const ast::CallExpression* expr);
     /// Handles a case statement
     /// @param stmt the statement
-    /// @returns true if the statment was emitted successfully
-    bool EmitCase(const ast::CaseStatement* stmt);
+    void EmitCase(const ast::CaseStatement* stmt);
     /// Handles a compound assignment statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitCompoundAssign(const ast::CompoundAssignmentStatement* stmt);
+    void EmitCompoundAssign(const ast::CompoundAssignmentStatement* stmt);
     /// Handles generating a literal expression
     /// @param expr the literal expression expression
-    /// @returns true if the literal expression is emitted
-    bool EmitLiteral(const ast::LiteralExpression* expr);
+    void EmitLiteral(const ast::LiteralExpression* expr);
     /// Handles a continue statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitContinue(const ast::ContinueStatement* stmt);
+    void EmitContinue(const ast::ContinueStatement* stmt);
     /// Handles generate an Expression
     /// @param expr the expression
-    /// @returns true if the expression was emitted
-    bool EmitExpression(const ast::Expression* expr);
+    void EmitExpression(const ast::Expression* expr);
     /// Handles generating a function
     /// @param func the function to generate
-    /// @returns true if the function was emitted
-    bool EmitFunction(const ast::Function* func);
+    void EmitFunction(const ast::Function* func);
     /// Handles generating an identifier expression
     /// @param expr the identifier expression
-    /// @returns true if the identifier was emitted
-    bool EmitIdentifier(const ast::IdentifierExpression* expr);
+    void EmitIdentifier(const ast::IdentifierExpression* expr);
     /// Handles generating an identifier
     /// @param ident the identifier
-    /// @returns true if the identifier was emitted
-    bool EmitIdentifier(const ast::Identifier* ident);
+    void EmitIdentifier(const ast::Identifier* ident);
     /// Handles an if statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was successfully emitted
-    bool EmitIf(const ast::IfStatement* stmt);
+    void EmitIf(const ast::IfStatement* stmt);
     /// Handles an increment/decrement statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was successfully emitted
-    bool EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt);
+    void EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt);
     /// Handles generating a discard statement
     /// @param stmt the discard statement
-    /// @returns true if the statement was successfully emitted
-    bool EmitDiscard(const ast::DiscardStatement* stmt);
+    void EmitDiscard(const ast::DiscardStatement* stmt);
     /// Handles a loop statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emtited
-    bool EmitLoop(const ast::LoopStatement* stmt);
+    void EmitLoop(const ast::LoopStatement* stmt);
     /// Handles a for-loop statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emtited
-    bool EmitForLoop(const ast::ForLoopStatement* stmt);
+    void EmitForLoop(const ast::ForLoopStatement* stmt);
     /// Handles a while statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emtited
-    bool EmitWhile(const ast::WhileStatement* stmt);
+    void EmitWhile(const ast::WhileStatement* stmt);
     /// Handles a member accessor expression
     /// @param expr the member accessor expression
-    /// @returns true if the member accessor was emitted
-    bool EmitMemberAccessor(const ast::MemberAccessorExpression* expr);
+    void EmitMemberAccessor(const ast::MemberAccessorExpression* expr);
     /// Handles return statements
     /// @param stmt the statement to emit
-    /// @returns true if the statement was successfully emitted
-    bool EmitReturn(const ast::ReturnStatement* stmt);
+    void EmitReturn(const ast::ReturnStatement* stmt);
     /// Handles const assertion statements
     /// @param stmt the statement to emit
-    /// @returns true if the statement was successfully emitted
-    bool EmitConstAssert(const ast::ConstAssert* stmt);
+    void EmitConstAssert(const ast::ConstAssert* stmt);
     /// Handles statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted
-    bool EmitStatement(const ast::Statement* stmt);
+    void EmitStatement(const ast::Statement* stmt);
     /// Handles a statement list
     /// @param stmts the statements to emit
-    /// @returns true if the statements were emitted
-    bool EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
+    void EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
     /// Handles a statement list with an increased indentation
     /// @param stmts the statements to emit
-    /// @returns true if the statements were emitted
-    bool EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
+    void EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
     /// Handles generating a switch statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted
-    bool EmitSwitch(const ast::SwitchStatement* stmt);
+    void EmitSwitch(const ast::SwitchStatement* stmt);
     /// Handles generating a struct declaration
     /// @param str the struct
-    /// @returns true if the struct is emitted
-    bool EmitStructType(const ast::Struct* str);
+    void EmitStructType(const ast::Struct* str);
     /// Handles emitting an image format
     /// @param fmt the format to generate
-    /// @returns true if the format is emitted
-    bool EmitImageFormat(const builtin::TexelFormat fmt);
+    void EmitImageFormat(const builtin::TexelFormat fmt);
     /// Handles a unary op expression
     /// @param expr the expression to emit
-    /// @returns true if the expression was emitted
-    bool EmitUnaryOp(const ast::UnaryOpExpression* expr);
+    void EmitUnaryOp(const ast::UnaryOpExpression* expr);
     /// Handles generating a variable
     /// @param var the variable to generate
-    /// @returns true if the variable was emitted
-    bool EmitVariable(const ast::Variable* var);
+    void EmitVariable(const ast::Variable* var);
     /// Handles generating a attribute list
     /// @param attrs the attribute list
-    /// @returns true if the attributes were emitted
-    bool EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs);
+    void EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs);
 };
 
 }  // namespace tint::writer::syntax_tree
