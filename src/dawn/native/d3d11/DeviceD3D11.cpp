@@ -39,6 +39,7 @@
 #include "dawn/native/d3d11/RenderPipelineD3D11.h"
 #include "dawn/native/d3d11/SamplerD3D11.h"
 #include "dawn/native/d3d11/ShaderModuleD3D11.h"
+#include "dawn/native/d3d11/SwapChainD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -289,7 +290,7 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     Surface* surface,
     SwapChainBase* previousSwapChain,
     const SwapChainDescriptor* descriptor) {
-    return DAWN_UNIMPLEMENTED_ERROR("CreateSwapChainImpl");
+    return SwapChain::Create(this, surface, previousSwapChain, descriptor);
 }
 
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {

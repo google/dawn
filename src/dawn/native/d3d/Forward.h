@@ -21,10 +21,12 @@ namespace dawn::native::d3d {
 
 class Adapter;
 class Device;
+class SwapChain;
 
 struct D3DBackendTraits {
     using AdapterType = Adapter;
     using DeviceType = Device;
+    using SwapChainType = SwapChain;
 };
 
 template <typename T>
