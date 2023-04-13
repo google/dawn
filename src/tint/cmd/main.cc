@@ -34,9 +34,9 @@
 
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
-#if TINT_BUILD_SPV_READER
+#if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
-#endif  // TINT_BUILD_SPV_READER
+#endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
 #include "src/tint/ast/module.h"
 #include "src/tint/cmd/generate_external_texture_bindings.h"
