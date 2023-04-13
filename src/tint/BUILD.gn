@@ -307,17 +307,6 @@ libtint_source_set("libtint_program_src") {
   ]
 }
 
-libtint_source_set("libtint_demangler_src") {
-  sources = [
-    "demangler.cc",
-    "demangler.h",
-  ]
-  deps = [
-    ":libtint_base_src",
-    ":libtint_program_src",
-  ]
-}
-
 libtint_source_set("libtint_initializer_src") {
   sources = [ "tint.cc" ]
 }
@@ -1095,7 +1084,6 @@ source_set("libtint") {
     ":libtint_ast_src",
     ":libtint_base_src",
     ":libtint_constant_src",
-    ":libtint_demangler_src",
     ":libtint_initializer_src",
     ":libtint_inspector_src",
     ":libtint_program_src",
@@ -2019,11 +2007,6 @@ if (tint_build_unittests) {
     ]
   }
 
-  tint_unittests_source_set("tint_unittests_demangler_src") {
-    sources = [ "demangler_test.cc" ]
-    deps = [ ":libtint_demangler_src" ]
-  }
-
   if (build_with_chromium) {
     tint_unittests_source_set("tint_unittests_fuzzer_src") {
       sources = [ "fuzzers/random_generator_test.cc" ]
@@ -2047,7 +2030,6 @@ if (tint_build_unittests) {
       ":tint_unittests_cmd_src",
       ":tint_unittests_constant_src",
       ":tint_unittests_core_src",
-      ":tint_unittests_demangler_src",
       ":tint_unittests_diagnostic_src",
       ":tint_unittests_inspector_src",
       ":tint_unittests_resolver_src",

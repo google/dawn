@@ -34,7 +34,6 @@ TINT_END_DISABLE_WARNING(OLD_STYLE_CAST);
 TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 
 #include "gtest/gtest.h"
-#include "src/tint/demangler.h"
 #include "src/tint/reader/spirv/fail_stream.h"
 #include "src/tint/reader/spirv/function.h"
 #include "src/tint/reader/spirv/namer.h"

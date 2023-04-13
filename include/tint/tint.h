@@ -21,7 +21,6 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
-#include "src/tint/demangler.h"
 #include "src/tint/diagnostic/printer.h"
 #include "src/tint/inspector/inspector.h"
 #include "src/tint/reader/reader.h"

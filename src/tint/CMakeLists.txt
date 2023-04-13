@@ -245,8 +245,6 @@ list(APPEND TINT_LIB_SRCS
   constant/node.h
   constant/value.cc
   constant/value.h
-  demangler.cc
-  demangler.h
   inspector/entry_point.cc
   inspector/entry_point.h
   inspector/inspector.cc
@@ -892,7 +890,6 @@ if(TINT_BUILD_TESTS)
     constant/scalar_test.cc
     constant/splat_test.cc
     debug_test.cc
-    demangler_test.cc
     diagnostic/diagnostic_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc

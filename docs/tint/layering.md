@@ -13,7 +13,7 @@ tint (except for `base` which is a mix of things in `src/tint` and
                   |
                   V
 +-----------------------------------------+
-| Val | Demangler | Inspector | Transform |
+|       Val | Inspector | Transform       |
 +-----------------------------------------+
    |              |
    +--------------+------------------------------+
