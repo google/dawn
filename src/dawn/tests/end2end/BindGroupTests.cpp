@@ -170,6 +170,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
         struct VertexUniformBuffer {
             transform : vec4f
         }
+
         @group(0) @binding(0) var <uniform> vertexUbo : VertexUniformBuffer;
 
         @vertex
@@ -189,8 +190,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
         }
         @group(0) @binding(1) var <uniform> fragmentUbo : FragmentUniformBuffer;
 
-        @fragment
-        fn main() -> @location(0) vec4f {
+        @fragment fn main() -> @location(0) vec4f {
             return fragmentUbo.color;
         })");
 
@@ -203,17 +203,20 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
     struct Data {
         float transform[8];
-        char padding[256 - sizeof(transform)];
+        char padding[256 - 8 * sizeof(float)];
         float color[4];
     };
-    Data data{{1.f, 0.f, 0.f, 1.0f}, {0}, {0.f, 1.f, 0.f, 1.f}};
+    ASSERT(offsetof(Data, color) == 256);
+    Data data{
+        {1.f, 0.f, 0.f, 1.0f},
+        {0},
+        {0.f, 1.f, 0.f, 1.f},
+    };
     wgpu::Buffer buffer =
         utils::CreateBufferFromData(device, &data, sizeof(data), wgpu::BufferUsage::Uniform);
-
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                             {{0, buffer, offsetof(Data, transform), sizeof(Data::transform)},
-                              {1, buffer, offsetof(Data, color), sizeof(Data::color)}});
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+        device, pipeline.GetBindGroupLayout(0),
+        {{0, buffer, 0, sizeof(Data::transform)}, {1, buffer, 256, sizeof(Data::color)}});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -989,9 +992,6 @@ TEST_P(BindGroupTests, DrawThenChangePipelineTwiceAndBindGroup) {
 // Regression test for crbug.com/dawn/408 where dynamic offsets were applied in the wrong order.
 // Dynamic offsets should be applied in increasing order of binding number.
 TEST_P(BindGroupTests, DynamicOffsetOrder) {
-    // D3D11 doesn't support partial updates of dynamic uniform buffers.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
     // We will put the following values and the respective offsets into a buffer.
     // The test will ensure that the correct dynamic offset is applied to each buffer by reading the
     // value from an offset binding.
@@ -1507,7 +1507,6 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
 }
 
 DAWN_INSTANTIATE_TEST(BindGroupTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

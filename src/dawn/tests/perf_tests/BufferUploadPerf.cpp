@@ -147,8 +147,7 @@ TEST_P(BufferUploadPerf, Run) {
 }
 
 DAWN_INSTANTIATE_TEST_P(BufferUploadPerf,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         VulkanBackend()},
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend()},
                         {UploadMethod::WriteBuffer, UploadMethod::MappedAtCreation},
                         {UploadSize::BufferSize_1KB, UploadSize::BufferSize_64KB,
                          UploadSize::BufferSize_1MB, UploadSize::BufferSize_4MB,

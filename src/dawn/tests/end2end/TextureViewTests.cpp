@@ -977,7 +977,6 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
 }
 
 DAWN_INSTANTIATE_TEST(TextureViewSamplingTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -985,7 +984,6 @@ DAWN_INSTANTIATE_TEST(TextureViewSamplingTest,
                       VulkanBackend());
 
 DAWN_INSTANTIATE_TEST(TextureViewRenderingTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
                       MetalBackend(),
@@ -1026,7 +1024,6 @@ TEST_P(TextureViewTest, DestroyedTexture) {
 }
 
 DAWN_INSTANTIATE_TEST(TextureViewTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1043,7 +1040,6 @@ TEST_P(TextureView3DTest, BasicTest) {
 }
 
 DAWN_INSTANTIATE_TEST(TextureView3DTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1118,7 +1114,6 @@ TEST_P(TextureView1DTest, Sampling) {
 }
 
 DAWN_INSTANTIATE_TEST(TextureView1DTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       VulkanBackend(),

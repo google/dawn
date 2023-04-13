@@ -443,7 +443,6 @@ fn FSMain(@location(0) color : vec4f) -> @location(0) vec4f {
 // DawnTestBase::CreateDeviceImpl always disable disallow_unsafe_apis toggle.
 DAWN_INSTANTIATE_TEST_P(ShaderF16Tests,
                         {
-                            D3D11Backend(),
                             D3D12Backend(),
                             D3D12Backend({"use_dxc"}),
                             VulkanBackend(),

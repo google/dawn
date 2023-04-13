@@ -199,9 +199,8 @@ TEST_P(RequiredBufferSizeInCopyTests, MinimumBufferSize) {
 
 DAWN_INSTANTIATE_TEST_P(
     RequiredBufferSizeInCopyTests,
-    {D3D11Backend(), D3D12Backend(),
-     D3D12Backend({"d3d12_split_buffer_texture_copy_for_rows_per_image_paddings"}), MetalBackend(),
-     OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    {D3D12Backend(), D3D12Backend({"d3d12_split_buffer_texture_copy_for_rows_per_image_paddings"}),
+     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
     {Type::T2BCopy, Type::B2TCopy},
     {wgpu::TextureDimension::e3D, wgpu::TextureDimension::e2D},
     {2u, 1u},

@@ -76,7 +76,6 @@ TEST_P(RenderAttachmentTest, MoreFragmentOutputsThanAttachments) {
 }
 
 DAWN_INSTANTIATE_TEST(RenderAttachmentTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
                       MetalBackend(),

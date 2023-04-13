@@ -59,7 +59,6 @@ TEST_P(BasicTests, QueueWriteBufferError) {
 }
 
 DAWN_INSTANTIATE_TEST(BasicTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

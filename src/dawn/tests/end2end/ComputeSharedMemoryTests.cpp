@@ -197,7 +197,6 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeSharedMemoryTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

@@ -59,7 +59,6 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
 }
 
 DAWN_INSTANTIATE_TEST(ViewportOrientationTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

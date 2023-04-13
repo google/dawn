@@ -553,7 +553,6 @@ TEST_P(BufferMappingTests, RegressChromium1421170) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferMappingTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -714,11 +713,7 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
     buffer.Unmap();
 }
 
-DAWN_INSTANTIATE_TEST(BufferMappingCallbackTests,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      MetalBackend(),
-                      VulkanBackend());
+DAWN_INSTANTIATE_TEST(BufferMappingCallbackTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 class BufferMappedAtCreationTests : public DawnTest {
   protected:
@@ -966,7 +961,6 @@ TEST_P(BufferMappedAtCreationTests, GetMappedRangeZeroSized) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferMappedAtCreationTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
                       MetalBackend(),
@@ -1114,7 +1108,6 @@ TEST_P(BufferTests, CreateBufferOOMMapAsync) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1147,7 +1140,6 @@ TEST_P(BufferNoSuballocationTests, WriteBufferThenDestroy) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferNoSuballocationTests,
-                      D3D11Backend({"disable_resource_suballocation"}),
                       D3D12Backend({"disable_resource_suballocation"}),
                       MetalBackend({"disable_resource_suballocation"}),
                       OpenGLBackend({"disable_resource_suballocation"}),

@@ -311,7 +311,6 @@ TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsWithOffsetNoop) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeDispatchTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

@@ -307,8 +307,6 @@ TEST_P(VertexOnlyRenderPipelineTest, MultiplePass) {
 }
 
 DAWN_INSTANTIATE_TEST(VertexOnlyRenderPipelineTest,
-                      D3D11Backend(),
-                      D3D11Backend({"use_placeholder_fragment_in_vertex_only_pipeline"}),
                       D3D12Backend(),
                       D3D12Backend({"use_placeholder_fragment_in_vertex_only_pipeline"}),
                       MetalBackend(),

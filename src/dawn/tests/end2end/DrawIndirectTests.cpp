@@ -129,7 +129,6 @@ TEST_P(DrawIndirectTest, IndirectOffset) {
 }
 
 DAWN_INSTANTIATE_TEST(DrawIndirectTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

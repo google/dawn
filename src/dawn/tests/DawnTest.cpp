@@ -299,9 +299,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         argLen = sizeof(kBackendArg) - 1;
         if (strncmp(argv[i], kBackendArg, argLen) == 0) {
             const char* param = argv[i] + argLen;
-            if (strcmp("d3d11", param) == 0) {
-                mBackendTypeFilter = wgpu::BackendType::D3D11;
-            } else if (strcmp("d3d12", param) == 0) {
+            if (strcmp("d3d12", param) == 0) {
                 mBackendTypeFilter = wgpu::BackendType::D3D12;
             } else if (strcmp("metal", param) == 0) {
                 mBackendTypeFilter = wgpu::BackendType::Metal;
@@ -722,9 +720,9 @@ DawnTestBase::~DawnTestBase() {
     mAdapter = nullptr;
     mInstance = nullptr;
 
-    // D3D11 and D3D12's GPU-based validation will accumulate objects over time if the backend
-    // device is not destroyed and recreated, so we reset it here.
-    if ((IsD3D11() || IsD3D12()) && IsBackendValidationEnabled()) {
+    // D3D12's GPU-based validation will accumulate objects over time if the backend device is not
+    // destroyed and recreated, so we reset it here.
+    if (IsD3D12() && IsBackendValidationEnabled()) {
         mBackendAdapter.ResetInternalDeviceForTesting();
     }
     mWireHelper.reset();
@@ -733,10 +731,6 @@ DawnTestBase::~DawnTestBase() {
     EXPECT_EQ(gTestEnv->GetInstance()->GetDeviceCountForTesting(), 0u);
 
     gCurrentTest = nullptr;
-}
-
-bool DawnTestBase::IsD3D11() const {
-    return mParam.adapterProperties.backendType == wgpu::BackendType::D3D11;
 }
 
 bool DawnTestBase::IsD3D12() const {
@@ -1566,7 +1560,7 @@ void DawnTestBase::SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userda
 
 void DawnTestBase::ResolveExpectations() {
     for (const auto& expectation : mDeferredExpectations) {
-        EXPECT_TRUE(mReadbackSlots[expectation.readbackSlot].mappedData != nullptr);
+        DAWN_ASSERT(mReadbackSlots[expectation.readbackSlot].mappedData != nullptr);
 
         // Get a pointer to the mapped copy of the data for the expectation.
         const char* data =

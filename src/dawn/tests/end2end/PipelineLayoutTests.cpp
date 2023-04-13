@@ -144,7 +144,6 @@ TEST_P(PipelineLayoutTests, ComputeAndRenderSamePipelineLayout) {
 }
 
 DAWN_INSTANTIATE_TEST(PipelineLayoutTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

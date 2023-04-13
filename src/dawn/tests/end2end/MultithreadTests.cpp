@@ -50,8 +50,8 @@ class MultithreadTests : public DawnTest {
         // TODO(crbug.com/dawn/1678): DawnWire doesn't support thread safe API yet.
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
-        // TODO(crbug.com/dawn/1679): OpenGL/D3D11 backend doesn't support thread safe API yet.
-        DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES() || IsD3D11());
+        // TODO(crbug.com/dawn/1679): OpenGL backend doesn't support thread safe API yet.
+        DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
     }
 
     wgpu::Buffer CreateBuffer(uint32_t size, wgpu::BufferUsage usage) {
@@ -389,7 +389,6 @@ TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
 }  // namespace
 
 DAWN_INSTANTIATE_TEST(MultithreadEncodingTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -397,7 +396,6 @@ DAWN_INSTANTIATE_TEST(MultithreadEncodingTests,
                       VulkanBackend());
 
 DAWN_INSTANTIATE_TEST(MultithreadDrawIndexedIndirectTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -405,7 +403,6 @@ DAWN_INSTANTIATE_TEST(MultithreadDrawIndexedIndirectTests,
                       VulkanBackend());
 
 DAWN_INSTANTIATE_TEST(MultithreadTimestampQueryTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

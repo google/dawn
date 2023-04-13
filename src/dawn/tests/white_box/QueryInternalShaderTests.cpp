@@ -224,8 +224,4 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(QueryInternalShaderTests,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      MetalBackend(),
-                      VulkanBackend());
+DAWN_INSTANTIATE_TEST(QueryInternalShaderTests, D3D12Backend(), MetalBackend(), VulkanBackend());

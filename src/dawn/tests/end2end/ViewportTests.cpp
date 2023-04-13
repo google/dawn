@@ -220,7 +220,6 @@ TEST_P(ViewportTest, EmptyViewport) {
 }
 
 DAWN_INSTANTIATE_TEST(ViewportTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

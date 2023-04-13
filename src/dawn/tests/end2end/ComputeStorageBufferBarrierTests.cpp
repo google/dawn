@@ -409,7 +409,6 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeStorageBufferBarrierTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

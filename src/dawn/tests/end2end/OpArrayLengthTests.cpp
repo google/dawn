@@ -275,7 +275,6 @@ TEST_P(OpArrayLengthTest, Vertex) {
 }
 
 DAWN_INSTANTIATE_TEST(OpArrayLengthTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

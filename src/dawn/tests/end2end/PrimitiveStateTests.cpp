@@ -357,7 +357,6 @@ TEST_P(DepthClippingTest, UnclippedNotClamped) {
 }
 
 DAWN_INSTANTIATE_TEST(DepthClippingTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

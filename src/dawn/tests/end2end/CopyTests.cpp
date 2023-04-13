@@ -1353,7 +1353,6 @@ TEST_P(CopyTests_T2B, Texture3DMipUnaligned) {
 }
 
 DAWN_INSTANTIATE_TEST(CopyTests_T2B,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1947,7 +1946,6 @@ TEST_P(CopyTests_B2T, Texture3DMipUnaligned) {
 }
 
 DAWN_INSTANTIATE_TEST(CopyTests_B2T,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -2448,7 +2446,7 @@ TEST_P(CopyTests_T2T, Texture3DMipUnaligned) {
 
 DAWN_INSTANTIATE_TEST_P(
     CopyTests_T2T,
-    {D3D11Backend(), D3D12Backend(),
+    {D3D12Backend(),
      D3D12Backend({"use_temp_buffer_in_small_format_texture_to_texture_copy_from_greater_to_less_"
                    "mip_level"}),
      D3D12Backend(
@@ -2472,8 +2470,8 @@ TEST_P(CopyTests_Formats, SrgbCompatibility) {
 }
 
 DAWN_INSTANTIATE_TEST_P(CopyTests_Formats,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         OpenGLESBackend(), VulkanBackend()},
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                         VulkanBackend()},
                         {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8UnormSrgb,
                          wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::BGRA8UnormSrgb});
 
@@ -2504,7 +2502,6 @@ TEST_P(CopyTests_B2B, ZeroSizedCopy) {
 }
 
 DAWN_INSTANTIATE_TEST(CopyTests_B2B,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -2533,7 +2530,6 @@ TEST_P(ClearBufferTests, ZeroSizedClear) {
 }
 
 DAWN_INSTANTIATE_TEST(ClearBufferTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -2716,9 +2712,8 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
 
 DAWN_INSTANTIATE_TEST_P(
     CopyToDepthStencilTextureAfterDestroyingBigBufferTests,
-    {D3D11Backend(), D3D12Backend(),
-     D3D12Backend({"d3d12_force_clear_copyable_depth_stencil_texture_on_creation"}), MetalBackend(),
-     OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    {D3D12Backend(), D3D12Backend({"d3d12_force_clear_copyable_depth_stencil_texture_on_creation"}),
+     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
     {wgpu::TextureFormat::Depth16Unorm, wgpu::TextureFormat::Stencil8},
     {InitializationMethod::CopyBufferToTexture, InitializationMethod::WriteTexture,
      InitializationMethod::CopyTextureToTexture},
@@ -2916,7 +2911,6 @@ TEST_P(T2TCopyFromDirtyHeapTests, From2DMultiMipmapLevelTexture) {
 }
 
 DAWN_INSTANTIATE_TEST(T2TCopyFromDirtyHeapTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

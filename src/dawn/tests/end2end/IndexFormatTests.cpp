@@ -473,21 +473,18 @@ TEST_P(LineStripPrimitiveRestartTests, Uint16PrimitiveRestart) {
 }
 
 DAWN_INSTANTIATE_TEST(IndexFormatTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
 DAWN_INSTANTIATE_TEST(TriangleStripPrimitiveRestartTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
 DAWN_INSTANTIATE_TEST(LineStripPrimitiveRestartTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

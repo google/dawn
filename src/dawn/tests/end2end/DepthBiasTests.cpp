@@ -390,7 +390,6 @@ TEST_P(DepthBiasTests, PositiveSlopeBiasOn24bit) {
 }
 
 DAWN_INSTANTIATE_TEST(DepthBiasTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

@@ -46,7 +46,6 @@ TEST_P(CommandEncoderTests, WriteBuffer) {
 }
 
 DAWN_INSTANTIATE_TEST(CommandEncoderTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

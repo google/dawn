@@ -189,7 +189,6 @@ TEST_P(TextureSubresourceTest, ArrayLayersTest) {
 }
 
 DAWN_INSTANTIATE_TEST(TextureSubresourceTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

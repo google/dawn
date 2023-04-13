@@ -322,7 +322,6 @@ TEST_P(FirstIndexOffsetTests, IndexedIndirectBothOffset) {
 }
 
 DAWN_INSTANTIATE_TEST(FirstIndexOffsetTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

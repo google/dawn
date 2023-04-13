@@ -840,7 +840,6 @@ TEST_P(DepthStencilStateTest, StencilReferenceInitialized) {
 }
 
 DAWN_INSTANTIATE_TEST(DepthStencilStateTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

@@ -59,9 +59,6 @@ struct AdapterTestParam {
 
 std::ostream& operator<<(std::ostream& os, const AdapterTestParam& param);
 
-BackendTestConfig D3D11Backend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
-                               std::initializer_list<const char*> forceDisabledWorkarounds = {});
-
 BackendTestConfig D3D12Backend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
                                std::initializer_list<const char*> forceDisabledWorkarounds = {});
 

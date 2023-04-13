@@ -829,7 +829,6 @@ TEST_P(VertexFormatTest, Sint32x4) {
 }
 
 DAWN_INSTANTIATE_TEST(VertexFormatTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

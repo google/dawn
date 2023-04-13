@@ -298,7 +298,6 @@ TEST_P(PrimitiveTopologyTest, TriangleStrip) {
 }
 
 DAWN_INSTANTIATE_TEST(PrimitiveTopologyTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

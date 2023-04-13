@@ -152,7 +152,6 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
 }
 
 DAWN_INSTANTIATE_TEST(ScissorTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

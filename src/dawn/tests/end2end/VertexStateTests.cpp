@@ -645,7 +645,6 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
 }
 
 DAWN_INSTANTIATE_TEST(VertexStateTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -692,7 +691,6 @@ TEST_P(OptionalVertexStateTest, Basic) {
 }
 
 DAWN_INSTANTIATE_TEST(OptionalVertexStateTest,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

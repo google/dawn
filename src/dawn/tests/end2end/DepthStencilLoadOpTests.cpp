@@ -231,14 +231,14 @@ namespace {
 
 auto GenerateParam() {
     auto params1 = MakeParamGenerator<DepthStencilLoadOpTestParams>(
-        {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
-         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+        {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
+         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
         {wgpu::TextureFormat::Depth32Float, wgpu::TextureFormat::Depth16Unorm},
         {Check::CopyDepth, Check::DepthTest, Check::SampleDepth});
 
     auto params2 = MakeParamGenerator<DepthStencilLoadOpTestParams>(
-        {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
-         MetalBackend(), MetalBackend({"metal_use_combined_depth_stencil_format_for_stencil8"}),
+        {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
+         MetalBackend({"metal_use_combined_depth_stencil_format_for_stencil8"}),
          MetalBackend(
              {"metal_use_both_depth_and_stencil_attachments_for_combined_depth_stencil_formats"}),
          OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
@@ -294,9 +294,8 @@ TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint16) {
 }
 
 DAWN_INSTANTIATE_TEST_P(StencilClearValueOverflowTest,
-                        {D3D11Backend(), D3D12Backend(),
-                         D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
-                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                        {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
+                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         {wgpu::TextureFormat::Depth24PlusStencil8,
                          wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureFormat::Stencil8},
                         {Check::CopyStencil, Check::StencilTest});
@@ -413,8 +412,8 @@ TEST_P(DepthTextureClearTwiceTest, ClearDepthAspectTwice) {
 }
 
 DAWN_INSTANTIATE_TEST_P(DepthTextureClearTwiceTest,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         OpenGLESBackend(), VulkanBackend()},
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                         VulkanBackend()},
                         {wgpu::TextureFormat::Depth16Unorm, wgpu::TextureFormat::Depth24Plus,
                          wgpu::TextureFormat::Depth32Float,
                          wgpu::TextureFormat::Depth32FloatStencil8,

@@ -867,7 +867,6 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
 }
 
 DAWN_INSTANTIATE_TEST(StorageTextureTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -932,7 +931,6 @@ TEST_P(BGRA8UnormStorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 }
 
 DAWN_INSTANTIATE_TEST(BGRA8UnormStorageTextureTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

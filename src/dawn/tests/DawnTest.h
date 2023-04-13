@@ -224,7 +224,6 @@ class DawnTestBase {
     void SetUp();
     void TearDown();
 
-    bool IsD3D11() const;
     bool IsD3D12() const;
     bool IsMetal() const;
     bool IsNull() const;

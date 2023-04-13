@@ -38,7 +38,6 @@ TEST_P(MemoryAllocationStressTests, LargeBuffer) {
 }
 
 DAWN_INSTANTIATE_TEST(MemoryAllocationStressTests,
-                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

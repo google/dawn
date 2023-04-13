@@ -144,7 +144,6 @@ TEST_P(SubresourceTrackingPerf, Run) {
 }
 
 DAWN_INSTANTIATE_TEST_P(SubresourceTrackingPerf,
-                        {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         VulkanBackend()},
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend()},
                         {1, 4, 16, 256},
                         {2, 3, 8});
