@@ -15,6 +15,8 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -25,7 +27,8 @@ TEST_F(WgslGeneratorImplTest, Generate) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(fn my_func() {
 }
 )");

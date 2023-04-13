@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -23,8 +25,9 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
     auto* alias = Alias("a", ty.f32());
 
     GeneratorImpl& gen = Build();
+    gen.EmitTypeDecl(alias);
 
-    ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.Diagnostics();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(alias a = f32;
 )");
 }
@@ -38,9 +41,11 @@ TEST_F(WgslGeneratorImplTest, EmitTypeDecl_Struct) {
     auto* alias = Alias("B", ty.Of(s));
 
     GeneratorImpl& gen = Build();
+    gen.EmitTypeDecl(s);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    ASSERT_TRUE(gen.EmitTypeDecl(s)) << gen.Diagnostics();
-    ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.Diagnostics();
+    gen.EmitTypeDecl(alias);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(struct A {
   a : f32,
   b : i32,
@@ -59,7 +64,8 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.Diagnostics();
+    gen.EmitTypeDecl(alias);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(alias B = A;
 )");
 }

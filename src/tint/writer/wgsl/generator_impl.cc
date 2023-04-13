@@ -46,20 +46,16 @@ GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
-bool GeneratorImpl::Generate() {
+void GeneratorImpl::Generate() {
     // Generate directives before any other global declarations.
     bool has_directives = false;
     for (auto enable : program_->AST().Enables()) {
-        if (!EmitEnable(enable)) {
-            return false;
-        }
+        EmitEnable(enable);
         has_directives = true;
     }
     for (auto diagnostic : program_->AST().DiagnosticDirectives()) {
         auto out = line();
-        if (!EmitDiagnosticControl(out, diagnostic->control)) {
-            return false;
-        }
+        EmitDiagnosticControl(out, diagnostic->control);
         out << ";";
         has_directives = true;
     }
@@ -71,34 +67,26 @@ bool GeneratorImpl::Generate() {
         if (decl->IsAnyOf<ast::DiagnosticDirective, ast::Enable>()) {
             continue;
         }
-        if (!Switch(
-                decl,  //
-                [&](const ast::TypeDecl* td) { return EmitTypeDecl(td); },
-                [&](const ast::Function* func) { return EmitFunction(func); },
-                [&](const ast::Variable* var) { return EmitVariable(line(), var); },
-                [&](const ast::ConstAssert* ca) { return EmitConstAssert(ca); },
-                [&](Default) {
-                    TINT_UNREACHABLE(Writer, diagnostics_);
-                    return false;
-                })) {
-            return false;
-        }
+        Switch(
+            decl,  //
+            [&](const ast::TypeDecl* td) { return EmitTypeDecl(td); },
+            [&](const ast::Function* func) { return EmitFunction(func); },
+            [&](const ast::Variable* var) { return EmitVariable(line(), var); },
+            [&](const ast::ConstAssert* ca) { return EmitConstAssert(ca); },
+            [&](Default) { TINT_UNREACHABLE(Writer, diagnostics_); });
         if (decl != program_->AST().GlobalDeclarations().Back()) {
             line();
         }
     }
-
-    return true;
 }
 
-bool GeneratorImpl::EmitDiagnosticControl(utils::StringStream& out,
+void GeneratorImpl::EmitDiagnosticControl(utils::StringStream& out,
                                           const ast::DiagnosticControl& diagnostic) {
     out << "diagnostic(" << diagnostic.severity << ", "
         << program_->Symbols().NameFor(diagnostic.rule_name->symbol) << ")";
-    return true;
 }
 
-bool GeneratorImpl::EmitEnable(const ast::Enable* enable) {
+void GeneratorImpl::EmitEnable(const ast::Enable* enable) {
     auto out = line();
     out << "enable ";
     for (auto* ext : enable->extensions) {
@@ -108,69 +96,40 @@ bool GeneratorImpl::EmitEnable(const ast::Enable* enable) {
         out << ext->name;
     }
     out << ";";
-    return true;
 }
 
-bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
-    return Switch(
-        ty,
-        [&](const ast::Alias* alias) {  //
+void GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
+    Switch(
+        ty,  //
+        [&](const ast::Alias* alias) {
             auto out = line();
             out << "alias " << program_->Symbols().NameFor(alias->name->symbol) << " = ";
-            if (!EmitExpression(out, alias->type)) {
-                return false;
-            }
+            EmitExpression(out, alias->type);
             out << ";";
-            return true;
         },
-        [&](const ast::Struct* str) {  //
-            return EmitStructType(str);
-        },
-        [&](Default) {  //
+        [&](const ast::Struct* str) { EmitStructType(str); },
+        [&](Default) {
             diagnostics_.add_error(diag::System::Writer,
                                    "unknown declared type: " + std::string(ty->TypeInfo().name));
-            return false;
         });
 }
 
-bool GeneratorImpl::EmitExpression(utils::StringStream& out, const ast::Expression* expr) {
-    return Switch(
-        expr,
-        [&](const ast::IndexAccessorExpression* a) {  //
-            return EmitIndexAccessor(out, a);
-        },
-        [&](const ast::BinaryExpression* b) {  //
-            return EmitBinary(out, b);
-        },
-        [&](const ast::BitcastExpression* b) {  //
-            return EmitBitcast(out, b);
-        },
-        [&](const ast::CallExpression* c) {  //
-            return EmitCall(out, c);
-        },
-        [&](const ast::IdentifierExpression* i) {  //
-            return EmitIdentifier(out, i);
-        },
-        [&](const ast::LiteralExpression* l) {  //
-            return EmitLiteral(out, l);
-        },
-        [&](const ast::MemberAccessorExpression* m) {  //
-            return EmitMemberAccessor(out, m);
-        },
-        [&](const ast::PhonyExpression*) {  //
-            out << "_";
-            return true;
-        },
-        [&](const ast::UnaryOpExpression* u) {  //
-            return EmitUnaryOp(out, u);
-        },
-        [&](Default) {
-            diagnostics_.add_error(diag::System::Writer, "unknown expression type");
-            return false;
-        });
+void GeneratorImpl::EmitExpression(utils::StringStream& out, const ast::Expression* expr) {
+    Switch(
+        expr,  //
+        [&](const ast::IndexAccessorExpression* a) { EmitIndexAccessor(out, a); },
+        [&](const ast::BinaryExpression* b) { EmitBinary(out, b); },
+        [&](const ast::BitcastExpression* b) { EmitBitcast(out, b); },
+        [&](const ast::CallExpression* c) { EmitCall(out, c); },
+        [&](const ast::IdentifierExpression* i) { EmitIdentifier(out, i); },
+        [&](const ast::LiteralExpression* l) { EmitLiteral(out, l); },
+        [&](const ast::MemberAccessorExpression* m) { EmitMemberAccessor(out, m); },
+        [&](const ast::PhonyExpression*) { out << "_"; },
+        [&](const ast::UnaryOpExpression* u) { EmitUnaryOp(out, u); },
+        [&](Default) { diagnostics_.add_error(diag::System::Writer, "unknown expression type"); });
 }
 
-bool GeneratorImpl::EmitIndexAccessor(utils::StringStream& out,
+void GeneratorImpl::EmitIndexAccessor(utils::StringStream& out,
                                       const ast::IndexAccessorExpression* expr) {
     bool paren_lhs =
         !expr->object
@@ -178,23 +137,17 @@ bool GeneratorImpl::EmitIndexAccessor(utils::StringStream& out,
     if (paren_lhs) {
         out << "(";
     }
-    if (!EmitExpression(out, expr->object)) {
-        return false;
-    }
+    EmitExpression(out, expr->object);
     if (paren_lhs) {
         out << ")";
     }
     out << "[";
 
-    if (!EmitExpression(out, expr->index)) {
-        return false;
-    }
+    EmitExpression(out, expr->index);
     out << "]";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitMemberAccessor(utils::StringStream& out,
+void GeneratorImpl::EmitMemberAccessor(utils::StringStream& out,
                                        const ast::MemberAccessorExpression* expr) {
     bool paren_lhs =
         !expr->object
@@ -202,36 +155,25 @@ bool GeneratorImpl::EmitMemberAccessor(utils::StringStream& out,
     if (paren_lhs) {
         out << "(";
     }
-    if (!EmitExpression(out, expr->object)) {
-        return false;
-    }
+    EmitExpression(out, expr->object);
     if (paren_lhs) {
         out << ")";
     }
 
     out << "." << program_->Symbols().NameFor(expr->member->symbol);
-    return true;
 }
 
-bool GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr) {
+void GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr) {
     out << "bitcast<";
-    if (!EmitExpression(out, expr->type)) {
-        return false;
-    }
+    EmitExpression(out, expr->type);
 
     out << ">(";
-    if (!EmitExpression(out, expr->expr)) {
-        return false;
-    }
-
+    EmitExpression(out, expr->expr);
     out << ")";
-    return true;
 }
 
-bool GeneratorImpl::EmitCall(utils::StringStream& out, const ast::CallExpression* expr) {
-    if (!EmitExpression(out, expr->target)) {
-        return false;
-    }
+void GeneratorImpl::EmitCall(utils::StringStream& out, const ast::CallExpression* expr) {
+    EmitExpression(out, expr->target);
     out << "(";
 
     bool first = true;
@@ -242,24 +184,16 @@ bool GeneratorImpl::EmitCall(utils::StringStream& out, const ast::CallExpression
         }
         first = false;
 
-        if (!EmitExpression(out, arg)) {
-            return false;
-        }
+        EmitExpression(out, arg);
     }
-
     out << ")";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit) {
-    return Switch(
-        lit,
-        [&](const ast::BoolLiteralExpression* l) {  //
-            out << (l->value ? "true" : "false");
-            return true;
-        },
-        [&](const ast::FloatLiteralExpression* l) {  //
+void GeneratorImpl::EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit) {
+    Switch(
+        lit,  //
+        [&](const ast::BoolLiteralExpression* l) { out << (l->value ? "true" : "false"); },
+        [&](const ast::FloatLiteralExpression* l) {
             // f16 literals are also emitted as float value with suffix "h".
             // Note that all normal and subnormal f16 values are normal f32 values, and since NaN
             // and Inf are not allowed to be spelled in literal, it should be fine to emit f16
@@ -269,24 +203,17 @@ bool GeneratorImpl::EmitLiteral(utils::StringStream& out, const ast::LiteralExpr
             } else {
                 out << FloatToBitPreservingString(static_cast<float>(l->value)) << l->suffix;
             }
-            return true;
         },
-        [&](const ast::IntLiteralExpression* l) {  //
-            out << l->value << l->suffix;
-            return true;
-        },
-        [&](Default) {  //
-            diagnostics_.add_error(diag::System::Writer, "unknown literal type");
-            return false;
-        });
+        [&](const ast::IntLiteralExpression* l) { out << l->value << l->suffix; },
+        [&](Default) { diagnostics_.add_error(diag::System::Writer, "unknown literal type"); });
 }
 
-bool GeneratorImpl::EmitIdentifier(utils::StringStream& out,
+void GeneratorImpl::EmitIdentifier(utils::StringStream& out,
                                    const ast::IdentifierExpression* expr) {
-    return EmitIdentifier(out, expr->identifier);
+    EmitIdentifier(out, expr->identifier);
 }
 
-bool GeneratorImpl::EmitIdentifier(utils::StringStream& out, const ast::Identifier* ident) {
+void GeneratorImpl::EmitIdentifier(utils::StringStream& out, const ast::Identifier* ident) {
     if (auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>()) {
         if (!tmpl_ident->attributes.IsEmpty()) {
             EmitAttributes(out, tmpl_ident->attributes);
@@ -298,21 +225,16 @@ bool GeneratorImpl::EmitIdentifier(utils::StringStream& out, const ast::Identifi
             if (expr != tmpl_ident->arguments.Front()) {
                 out << ", ";
             }
-            if (!EmitExpression(out, expr)) {
-                return false;
-            }
+            EmitExpression(out, expr);
         }
     } else {
         out << program_->Symbols().NameFor(ident->symbol);
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitFunction(const ast::Function* func) {
+void GeneratorImpl::EmitFunction(const ast::Function* func) {
     if (func->attributes.Length()) {
-        if (!EmitAttributes(line(), func->attributes)) {
-            return false;
-        }
+        EmitAttributes(line(), func->attributes);
     }
     {
         auto out = line();
@@ -326,17 +248,13 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             first = false;
 
             if (!v->attributes.IsEmpty()) {
-                if (!EmitAttributes(out, v->attributes)) {
-                    return false;
-                }
+                EmitAttributes(out, v->attributes);
                 out << " ";
             }
 
             out << program_->Symbols().NameFor(v->name->symbol) << " : ";
 
-            if (!EmitExpression(out, v->type)) {
-                return false;
-            }
+            EmitExpression(out, v->type);
         }
 
         out << ")";
@@ -345,51 +263,39 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             out << " -> ";
 
             if (!func->return_type_attributes.IsEmpty()) {
-                if (!EmitAttributes(out, func->return_type_attributes)) {
-                    return false;
-                }
+                EmitAttributes(out, func->return_type_attributes);
                 out << " ";
             }
 
-            if (!EmitExpression(out, func->return_type)) {
-                return false;
-            }
+            EmitExpression(out, func->return_type);
         }
 
         if (func->body) {
             out << " ";
-            if (!EmitBlockHeader(out, func->body)) {
-                return false;
-            }
+            EmitBlockHeader(out, func->body);
         }
     }
 
     if (func->body) {
-        if (!EmitStatementsWithIndent(func->body->statements)) {
-            return false;
-        }
+        EmitStatementsWithIndent(func->body->statements);
         line() << "}";
     }
-
-    return true;
 }
 
-bool GeneratorImpl::EmitImageFormat(utils::StringStream& out, const builtin::TexelFormat fmt) {
+void GeneratorImpl::EmitImageFormat(utils::StringStream& out, const builtin::TexelFormat fmt) {
     switch (fmt) {
         case builtin::TexelFormat::kUndefined:
             diagnostics_.add_error(diag::System::Writer, "unknown image format");
-            return false;
+            break;
         default:
             out << fmt;
+            break;
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
+void GeneratorImpl::EmitStructType(const ast::Struct* str) {
     if (str->attributes.Length()) {
-        if (!EmitAttributes(line(), str->attributes)) {
-            return false;
-        }
+        EmitAttributes(line(), str->attributes);
     }
     line() << "struct " << program_->Symbols().NameFor(str->name->symbol) << " {";
 
@@ -424,9 +330,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
             if (attr->Is<ast::StructMemberOffsetAttribute>()) {
                 auto l = line();
                 l << "/* ";
-                if (!EmitAttributes(l, utils::Vector{attr})) {
-                    return false;
-                }
+                EmitAttributes(l, utils::Vector{attr});
                 l << " */";
             } else {
                 attributes_sanitized.Push(attr);
@@ -434,92 +338,60 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
         }
 
         if (!attributes_sanitized.IsEmpty()) {
-            if (!EmitAttributes(line(), attributes_sanitized)) {
-                return false;
-            }
+            EmitAttributes(line(), attributes_sanitized);
         }
 
         auto out = line();
         out << program_->Symbols().NameFor(mem->name->symbol) << " : ";
-        if (!EmitExpression(out, mem->type)) {
-            return false;
-        }
+        EmitExpression(out, mem->type);
         out << ",";
     }
     decrement_indent();
 
     line() << "}";
-    return true;
 }
 
-bool GeneratorImpl::EmitVariable(utils::StringStream& out, const ast::Variable* v) {
+void GeneratorImpl::EmitVariable(utils::StringStream& out, const ast::Variable* v) {
     if (!v->attributes.IsEmpty()) {
-        if (!EmitAttributes(out, v->attributes)) {
-            return false;
-        }
+        EmitAttributes(out, v->attributes);
         out << " ";
     }
 
-    bool ok = Switch(
+    Switch(
         v,  //
         [&](const ast::Var* var) {
             out << "var";
             if (var->declared_address_space || var->declared_access) {
                 out << "<";
                 TINT_DEFER(out << ">");
-                if (!EmitExpression(out, var->declared_address_space)) {
-                    return false;
-                }
+                EmitExpression(out, var->declared_address_space);
                 if (var->declared_access) {
                     out << ", ";
-                    if (!EmitExpression(out, var->declared_access)) {
-                        return false;
-                    }
+                    EmitExpression(out, var->declared_access);
                 }
             }
-            return true;
         },
-        [&](const ast::Let*) {
-            out << "let";
-            return true;
-        },
-        [&](const ast::Override*) {
-            out << "override";
-            return true;
-        },
-        [&](const ast::Const*) {
-            out << "const";
-            return true;
-        },
+        [&](const ast::Let*) { out << "let"; }, [&](const ast::Override*) { out << "override"; },
+        [&](const ast::Const*) { out << "const"; },
         [&](Default) {
             TINT_ICE(Writer, diagnostics_) << "unhandled variable type " << v->TypeInfo().name;
-            return false;
         });
-    if (!ok) {
-        return false;
-    }
 
     out << " " << program_->Symbols().NameFor(v->name->symbol);
 
     if (auto ty = v->type) {
         out << " : ";
-        if (!EmitExpression(out, ty)) {
-            return false;
-        }
+        EmitExpression(out, ty);
     }
 
     if (v->initializer != nullptr) {
         out << " = ";
-        if (!EmitExpression(out, v->initializer)) {
-            return false;
-        }
+        EmitExpression(out, v->initializer);
     }
     out << ";";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitAttributes(utils::StringStream& out,
+void GeneratorImpl::EmitAttributes(utils::StringStream& out,
                                    utils::VectorRef<const ast::Attribute*> attrs) {
     bool first = true;
     for (auto* attr : attrs) {
@@ -528,8 +400,8 @@ bool GeneratorImpl::EmitAttributes(utils::StringStream& out,
         }
         first = false;
         out << "@";
-        bool ok = Switch(
-            attr,
+        Switch(
+            attr,  //
             [&](const ast::WorkgroupAttribute* workgroup) {
                 auto values = workgroup->Values();
                 out << "workgroup_size(";
@@ -538,150 +410,90 @@ bool GeneratorImpl::EmitAttributes(utils::StringStream& out,
                         if (i > 0) {
                             out << ", ";
                         }
-                        if (!EmitExpression(out, values[i])) {
-                            return false;
-                        }
+                        EmitExpression(out, values[i]);
                     }
                 }
                 out << ")";
-                return true;
             },
-            [&](const ast::StageAttribute* stage) {
-                out << stage->stage;
-                return true;
-            },
+            [&](const ast::StageAttribute* stage) { out << stage->stage; },
             [&](const ast::BindingAttribute* binding) {
                 out << "binding(";
-                if (!EmitExpression(out, binding->expr)) {
-                    return false;
-                }
+                EmitExpression(out, binding->expr);
                 out << ")";
-                return true;
             },
             [&](const ast::GroupAttribute* group) {
                 out << "group(";
-                if (!EmitExpression(out, group->expr)) {
-                    return false;
-                }
+                EmitExpression(out, group->expr);
                 out << ")";
-                return true;
             },
             [&](const ast::LocationAttribute* location) {
                 out << "location(";
-                if (!EmitExpression(out, location->expr)) {
-                    return false;
-                }
+                EmitExpression(out, location->expr);
                 out << ")";
-                return true;
             },
             [&](const ast::BuiltinAttribute* builtin) {
                 out << "builtin(";
-                if (!EmitExpression(out, builtin->builtin)) {
-                    return false;
-                }
+                EmitExpression(out, builtin->builtin);
                 out << ")";
-                return true;
             },
             [&](const ast::DiagnosticAttribute* diagnostic) {
-                return EmitDiagnosticControl(out, diagnostic->control);
+                EmitDiagnosticControl(out, diagnostic->control);
             },
             [&](const ast::InterpolateAttribute* interpolate) {
                 out << "interpolate(";
-                if (!EmitExpression(out, interpolate->type)) {
-                    return false;
-                }
+                EmitExpression(out, interpolate->type);
                 if (interpolate->sampling) {
                     out << ", ";
-                    if (!EmitExpression(out, interpolate->sampling)) {
-                        return false;
-                    }
+                    EmitExpression(out, interpolate->sampling);
                 }
                 out << ")";
-                return true;
             },
-            [&](const ast::InvariantAttribute*) {
-                out << "invariant";
-                return true;
-            },
+            [&](const ast::InvariantAttribute*) { out << "invariant"; },
             [&](const ast::IdAttribute* override_deco) {
                 out << "id(";
-                if (!EmitExpression(out, override_deco->expr)) {
-                    return false;
-                }
+                EmitExpression(out, override_deco->expr);
                 out << ")";
-                return true;
             },
-            [&](const ast::MustUseAttribute*) {
-                out << "must_use";
-                return true;
-            },
+            [&](const ast::MustUseAttribute*) { out << "must_use"; },
             [&](const ast::StructMemberOffsetAttribute* offset) {
                 out << "offset(";
-                if (!EmitExpression(out, offset->expr)) {
-                    return false;
-                }
+                EmitExpression(out, offset->expr);
                 out << ")";
-                return true;
             },
             [&](const ast::StructMemberSizeAttribute* size) {
                 out << "size(";
-                if (!EmitExpression(out, size->expr)) {
-                    return false;
-                }
+                EmitExpression(out, size->expr);
                 out << ")";
-                return true;
             },
             [&](const ast::StructMemberAlignAttribute* align) {
                 out << "align(";
-                if (!EmitExpression(out, align->expr)) {
-                    return false;
-                }
+                EmitExpression(out, align->expr);
                 out << ")";
-                return true;
             },
-            [&](const ast::StrideAttribute* stride) {
-                out << "stride(" << stride->stride << ")";
-                return true;
-            },
+            [&](const ast::StrideAttribute* stride) { out << "stride(" << stride->stride << ")"; },
             [&](const ast::InternalAttribute* internal) {
                 out << "internal(" << internal->InternalName() << ")";
-                return true;
             },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "Unsupported attribute '" << attr->TypeInfo().name << "'";
-                return false;
             });
-
-        if (!ok) {
-            return false;
-        }
     }
-
-    return true;
 }
 
-bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr) {
+void GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr) {
     out << "(";
 
-    if (!EmitExpression(out, expr->lhs)) {
-        return false;
-    }
+    EmitExpression(out, expr->lhs);
     out << " ";
-    if (!EmitBinaryOp(out, expr->op)) {
-        return false;
-    }
+    EmitBinaryOp(out, expr->op);
     out << " ";
 
-    if (!EmitExpression(out, expr->rhs)) {
-        return false;
-    }
-
+    EmitExpression(out, expr->rhs);
     out << ")";
-    return true;
 }
 
-bool GeneratorImpl::EmitBinaryOp(utils::StringStream& out, const ast::BinaryOp op) {
+void GeneratorImpl::EmitBinaryOp(utils::StringStream& out, const ast::BinaryOp op) {
     switch (op) {
         case ast::BinaryOp::kAnd:
             out << "&";
@@ -739,12 +551,11 @@ bool GeneratorImpl::EmitBinaryOp(utils::StringStream& out, const ast::BinaryOp o
             break;
         case ast::BinaryOp::kNone:
             diagnostics_.add_error(diag::System::Writer, "missing binary operation type");
-            return false;
+            break;
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr) {
+void GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr) {
     switch (expr->op) {
         case ast::UnaryOp::kAddressOf:
             out << "&";
@@ -763,131 +574,94 @@ bool GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpr
             break;
     }
     out << "(";
-
-    if (!EmitExpression(out, expr->expr)) {
-        return false;
-    }
-
+    EmitExpression(out, expr->expr);
     out << ")";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
+void GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
     {
         auto out = line();
-        if (!EmitBlockHeader(out, stmt)) {
-            return false;
-        }
+        EmitBlockHeader(out, stmt);
     }
-    if (!EmitStatementsWithIndent(stmt->statements)) {
-        return false;
-    }
+    EmitStatementsWithIndent(stmt->statements);
     line() << "}";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitBlockHeader(utils::StringStream& out, const ast::BlockStatement* stmt) {
+void GeneratorImpl::EmitBlockHeader(utils::StringStream& out, const ast::BlockStatement* stmt) {
     if (!stmt->attributes.IsEmpty()) {
-        if (!EmitAttributes(out, stmt->attributes)) {
-            return false;
-        }
+        EmitAttributes(out, stmt->attributes);
         out << " ";
     }
     out << "{";
-    return true;
 }
 
-bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
-    return Switch(
+void GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
+    Switch(
         stmt,  //
-        [&](const ast::AssignmentStatement* a) { return EmitAssign(a); },
-        [&](const ast::BlockStatement* b) { return EmitBlock(b); },
-        [&](const ast::BreakStatement* b) { return EmitBreak(b); },
-        [&](const ast::BreakIfStatement* b) { return EmitBreakIf(b); },
+        [&](const ast::AssignmentStatement* a) { EmitAssign(a); },
+        [&](const ast::BlockStatement* b) { EmitBlock(b); },
+        [&](const ast::BreakStatement* b) { EmitBreak(b); },
+        [&](const ast::BreakIfStatement* b) { EmitBreakIf(b); },
         [&](const ast::CallStatement* c) {
             auto out = line();
-            if (!EmitCall(out, c->expr)) {
-                return false;
-            }
+            EmitCall(out, c->expr);
             out << ";";
-            return true;
         },
-        [&](const ast::CompoundAssignmentStatement* c) { return EmitCompoundAssign(c); },
-        [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
-        [&](const ast::DiscardStatement* d) { return EmitDiscard(d); },
-        [&](const ast::IfStatement* i) { return EmitIf(i); },
-        [&](const ast::IncrementDecrementStatement* l) { return EmitIncrementDecrement(l); },
-        [&](const ast::LoopStatement* l) { return EmitLoop(l); },
-        [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
-        [&](const ast::WhileStatement* l) { return EmitWhile(l); },
-        [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
-        [&](const ast::ConstAssert* c) { return EmitConstAssert(c); },
-        [&](const ast::SwitchStatement* s) { return EmitSwitch(s); },
-        [&](const ast::VariableDeclStatement* v) { return EmitVariable(line(), v->variable); },
+        [&](const ast::CompoundAssignmentStatement* c) { EmitCompoundAssign(c); },
+        [&](const ast::ContinueStatement* c) { EmitContinue(c); },
+        [&](const ast::DiscardStatement* d) { EmitDiscard(d); },
+        [&](const ast::IfStatement* i) { EmitIf(i); },
+        [&](const ast::IncrementDecrementStatement* l) { EmitIncrementDecrement(l); },
+        [&](const ast::LoopStatement* l) { EmitLoop(l); },
+        [&](const ast::ForLoopStatement* l) { EmitForLoop(l); },
+        [&](const ast::WhileStatement* l) { EmitWhile(l); },
+        [&](const ast::ReturnStatement* r) { EmitReturn(r); },
+        [&](const ast::ConstAssert* c) { EmitConstAssert(c); },
+        [&](const ast::SwitchStatement* s) { EmitSwitch(s); },
+        [&](const ast::VariableDeclStatement* v) { EmitVariable(line(), v->variable); },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer,
                                    "unknown statement type: " + std::string(stmt->TypeInfo().name));
-            return false;
         });
 }
 
-bool GeneratorImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
+void GeneratorImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
-        if (!EmitStatement(s)) {
-            return false;
-        }
+        EmitStatement(s);
     }
-    return true;
 }
 
-bool GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
+void GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
-    return EmitStatements(stmts);
+    EmitStatements(stmts);
 }
 
-bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
+void GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
     auto out = line();
 
-    if (!EmitExpression(out, stmt->lhs)) {
-        return false;
-    }
-
+    EmitExpression(out, stmt->lhs);
     out << " = ";
-
-    if (!EmitExpression(out, stmt->rhs)) {
-        return false;
-    }
-
+    EmitExpression(out, stmt->rhs);
     out << ";";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
+void GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
     line() << "break;";
-    return true;
 }
 
-bool GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
+void GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
     auto out = line();
 
     out << "break if ";
-    if (!EmitExpression(out, b->condition)) {
-        return false;
-    }
+    EmitExpression(out, b->condition);
     out << ";";
-    return true;
 }
 
-bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
+void GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
     if (stmt->selectors.Length() == 1 && stmt->ContainsDefault()) {
         auto out = line();
         out << "default: ";
-        if (!EmitBlockHeader(out, stmt->body)) {
-            return false;
-        }
+        EmitBlockHeader(out, stmt->body);
     } else {
         auto out = line();
         out << "case ";
@@ -902,74 +676,48 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
 
             if (sel->IsDefault()) {
                 out << "default";
-            } else if (!EmitExpression(out, sel->expr)) {
-                return false;
+            } else {
+                EmitExpression(out, sel->expr);
             }
         }
         out << ": ";
-        if (!EmitBlockHeader(out, stmt->body)) {
-            return false;
-        }
+        EmitBlockHeader(out, stmt->body);
     }
-    if (!EmitStatementsWithIndent(stmt->body->statements)) {
-        return false;
-    }
-
+    EmitStatementsWithIndent(stmt->body->statements);
     line() << "}";
-    return true;
 }
 
-bool GeneratorImpl::EmitCompoundAssign(const ast::CompoundAssignmentStatement* stmt) {
+void GeneratorImpl::EmitCompoundAssign(const ast::CompoundAssignmentStatement* stmt) {
     auto out = line();
 
-    if (!EmitExpression(out, stmt->lhs)) {
-        return false;
-    }
-
+    EmitExpression(out, stmt->lhs);
     out << " ";
-    if (!EmitBinaryOp(out, stmt->op)) {
-        return false;
-    }
+    EmitBinaryOp(out, stmt->op);
     out << "= ";
-
-    if (!EmitExpression(out, stmt->rhs)) {
-        return false;
-    }
-
+    EmitExpression(out, stmt->rhs);
     out << ";";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
+void GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
     line() << "continue;";
-    return true;
 }
 
-bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
+void GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     {
         auto out = line();
 
         if (!stmt->attributes.IsEmpty()) {
-            if (!EmitAttributes(out, stmt->attributes)) {
-                return false;
-            }
+            EmitAttributes(out, stmt->attributes);
             out << " ";
         }
 
         out << "if (";
-        if (!EmitExpression(out, stmt->condition)) {
-            return false;
-        }
+        EmitExpression(out, stmt->condition);
         out << ") ";
-        if (!EmitBlockHeader(out, stmt->body)) {
-            return false;
-        }
+        EmitBlockHeader(out, stmt->body);
     }
 
-    if (!EmitStatementsWithIndent(stmt->body->statements)) {
-        return false;
-    }
+    EmitStatementsWithIndent(stmt->body->statements);
 
     const ast::Statement* e = stmt->else_statement;
     while (e) {
@@ -977,74 +725,52 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
             {
                 auto out = line();
                 out << "} else if (";
-                if (!EmitExpression(out, elseif->condition)) {
-                    return false;
-                }
+                EmitExpression(out, elseif->condition);
                 out << ") ";
-                if (!EmitBlockHeader(out, elseif->body)) {
-                    return false;
-                }
+                EmitBlockHeader(out, elseif->body);
             }
-            if (!EmitStatementsWithIndent(elseif->body->statements)) {
-                return false;
-            }
+            EmitStatementsWithIndent(elseif->body->statements);
             e = elseif->else_statement;
         } else {
             auto* body = e->As<ast::BlockStatement>();
             {
                 auto out = line();
                 out << "} else ";
-                if (!EmitBlockHeader(out, body)) {
-                    return false;
-                }
+                EmitBlockHeader(out, body);
             }
-            if (!EmitStatementsWithIndent(body->statements)) {
-                return false;
-            }
+            EmitStatementsWithIndent(body->statements);
             break;
         }
     }
 
     line() << "}";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
+void GeneratorImpl::EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
     auto out = line();
-    if (!EmitExpression(out, stmt->lhs)) {
-        return false;
-    }
+    EmitExpression(out, stmt->lhs);
     out << (stmt->increment ? "++" : "--") << ";";
-    return true;
 }
 
-bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
+void GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
     line() << "discard;";
-    return true;
 }
 
-bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
+void GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
     {
         auto out = line();
 
         if (!stmt->attributes.IsEmpty()) {
-            if (!EmitAttributes(out, stmt->attributes)) {
-                return false;
-            }
+            EmitAttributes(out, stmt->attributes);
             out << " ";
         }
 
         out << "loop ";
-        if (!EmitBlockHeader(out, stmt->body)) {
-            return false;
-        }
+        EmitBlockHeader(out, stmt->body);
     }
     increment_indent();
 
-    if (!EmitStatements(stmt->body->statements)) {
-        return false;
-    }
+    EmitStatements(stmt->body->statements);
 
     if (stmt->continuing && !stmt->continuing->Empty()) {
         line();
@@ -1052,49 +778,37 @@ bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
             auto out = line();
             out << "continuing ";
             if (!stmt->continuing->attributes.IsEmpty()) {
-                if (!EmitAttributes(out, stmt->continuing->attributes)) {
-                    return false;
-                }
+                EmitAttributes(out, stmt->continuing->attributes);
                 out << " ";
             }
             out << "{";
         }
-        if (!EmitStatementsWithIndent(stmt->continuing->statements)) {
-            return false;
-        }
+        EmitStatementsWithIndent(stmt->continuing->statements);
         line() << "}";
     }
 
     decrement_indent();
     line() << "}";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
+void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     TextBuffer init_buf;
     if (auto* init = stmt->initializer) {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &init_buf);
-        if (!EmitStatement(init)) {
-            return false;
-        }
+        EmitStatement(init);
     }
 
     TextBuffer cont_buf;
     if (auto* cont = stmt->continuing) {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &cont_buf);
-        if (!EmitStatement(cont)) {
-            return false;
-        }
+        EmitStatement(cont);
     }
 
     {
         auto out = line();
 
         if (!stmt->attributes.IsEmpty()) {
-            if (!EmitAttributes(out, stmt->attributes)) {
-                return false;
-            }
+            EmitAttributes(out, stmt->attributes);
             out << " ";
         }
 
@@ -1119,9 +833,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
             out << "; ";
 
             if (auto* cond = stmt->condition) {
-                if (!EmitExpression(out, cond)) {
-                    return false;
-                }
+                EmitExpression(out, cond);
             }
 
             out << "; ";
@@ -1142,28 +854,20 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
             }
         }
         out << " ";
-        if (!EmitBlockHeader(out, stmt->body)) {
-            return false;
-        }
+        EmitBlockHeader(out, stmt->body);
     }
 
-    if (!EmitStatementsWithIndent(stmt->body->statements)) {
-        return false;
-    }
+    EmitStatementsWithIndent(stmt->body->statements);
 
     line() << "}";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
+void GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
     {
         auto out = line();
 
         if (!stmt->attributes.IsEmpty()) {
-            if (!EmitAttributes(out, stmt->attributes)) {
-                return false;
-            }
+            EmitAttributes(out, stmt->attributes);
             out << " ";
         }
 
@@ -1172,69 +876,50 @@ bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
             ScopedParen sp(out);
 
             auto* cond = stmt->condition;
-            if (!EmitExpression(out, cond)) {
-                return false;
-            }
+            EmitExpression(out, cond);
         }
         out << " ";
-        if (!EmitBlockHeader(out, stmt->body)) {
-            return false;
-        }
+        EmitBlockHeader(out, stmt->body);
     }
 
-    if (!EmitStatementsWithIndent(stmt->body->statements)) {
-        return false;
-    }
+    EmitStatementsWithIndent(stmt->body->statements);
 
     line() << "}";
-
-    return true;
 }
 
-bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
+void GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
     auto out = line();
+
     out << "return";
     if (stmt->value) {
         out << " ";
-        if (!EmitExpression(out, stmt->value)) {
-            return false;
-        }
+        EmitExpression(out, stmt->value);
     }
     out << ";";
-    return true;
 }
 
-bool GeneratorImpl::EmitConstAssert(const ast::ConstAssert* stmt) {
+void GeneratorImpl::EmitConstAssert(const ast::ConstAssert* stmt) {
     auto out = line();
     out << "const_assert ";
-    if (!EmitExpression(out, stmt->condition)) {
-        return false;
-    }
+    EmitExpression(out, stmt->condition);
     out << ";";
-    return true;
 }
 
-bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
+void GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {
         auto out = line();
 
         if (!stmt->attributes.IsEmpty()) {
-            if (!EmitAttributes(out, stmt->attributes)) {
-                return false;
-            }
+            EmitAttributes(out, stmt->attributes);
             out << " ";
         }
 
         out << "switch(";
-        if (!EmitExpression(out, stmt->condition)) {
-            return false;
-        }
+        EmitExpression(out, stmt->condition);
         out << ") ";
 
         if (!stmt->body_attributes.IsEmpty()) {
-            if (!EmitAttributes(out, stmt->body_attributes)) {
-                return false;
-            }
+            EmitAttributes(out, stmt->body_attributes);
             out << " ";
         }
 
@@ -1244,14 +929,11 @@ bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {
         ScopedIndent si(this);
         for (auto* s : stmt->body) {
-            if (!EmitCase(s)) {
-                return false;
-            }
+            EmitCase(s);
         }
     }
 
     line() << "}";
-    return true;
 }
 
 }  // namespace tint::writer::wgsl

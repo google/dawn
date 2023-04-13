@@ -15,6 +15,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -51,7 +53,8 @@ TEST_P(WgslBinaryTest, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
+    gen.EmitExpression(out, expr);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

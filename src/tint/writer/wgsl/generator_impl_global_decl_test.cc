@@ -18,6 +18,8 @@
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::wgsl {
@@ -34,8 +36,8 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  @compute @workgroup_size(1i, 1i, 1i)
   fn test_function() {
     var a : f32;
@@ -78,8 +80,8 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  var<private> a0 : f32;
 
   struct S0 {
@@ -111,8 +113,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), "  @group(0) @binding(0) var s : sampler;\n");
 }
 
@@ -123,8 +125,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), "  @group(0) @binding(0) var t : texture_1d<f32>;\n");
 }
 
@@ -135,8 +137,8 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalConst) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  const explicit : f32 = 1.0f;
 
   const inferred = 1.0f;
@@ -150,8 +152,8 @@ TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  override a : f32;
 
   @id(7) override b : f32;

@@ -15,6 +15,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::wgsl {
@@ -29,7 +31,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
+    gen.EmitExpression(out, bitcast);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bitcast<f32>(1i)");
 }
 

@@ -17,6 +17,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::wgsl {
@@ -116,7 +118,8 @@ TEST_P(WgslGenerator_F32LiteralTest, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.Diagnostics();
+    gen.EmitLiteral(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), GetParam().expected);
 }
 
@@ -164,7 +167,8 @@ TEST_P(WgslGenerator_F16LiteralTest, Emit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.Diagnostics();
+    gen.EmitLiteral(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), GetParam().expected);
 }
 

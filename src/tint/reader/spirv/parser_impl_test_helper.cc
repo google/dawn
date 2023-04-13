@@ -17,6 +17,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/generator_impl.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::reader::spirv::test {
 
 // Default to not dumping the SPIR-V assembly.
@@ -35,7 +37,9 @@ ParserImplWrapperForTest::~ParserImplWrapperForTest() {
 
 std::string ToString(const Program& program) {
     writer::wgsl::GeneratorImpl writer(&program);
-    if (!writer.Generate()) {
+    writer.Generate();
+
+    if (!writer.Diagnostics().empty()) {
         return "WGSL writer error: " + writer.Diagnostics().str();
     }
     return writer.result();
@@ -44,9 +48,10 @@ std::string ToString(const Program& program) {
 std::string ToString(const Program& program, utils::VectorRef<const ast::Statement*> stmts) {
     writer::wgsl::GeneratorImpl writer(&program);
     for (const auto* stmt : stmts) {
-        if (!writer.EmitStatement(stmt)) {
-            return "WGSL writer error: " + writer.Diagnostics().str();
-        }
+        writer.EmitStatement(stmt);
+    }
+    if (!writer.Diagnostics().empty()) {
+        return "WGSL writer error: " + writer.Diagnostics().str();
     }
     return writer.result();
 }
@@ -57,13 +62,15 @@ std::string ToString(const Program& program, const ast::Node* node) {
         node,
         [&](const ast::Expression* expr) {
             utils::StringStream out;
-            if (!writer.EmitExpression(out, expr)) {
+            writer.EmitExpression(out, expr);
+            if (!writer.Diagnostics().empty()) {
                 return "WGSL writer error: " + writer.Diagnostics().str();
             }
             return out.str();
         },
         [&](const ast::Statement* stmt) {
-            if (!writer.EmitStatement(stmt)) {
+            writer.EmitStatement(stmt);
+            if (!writer.Diagnostics().empty()) {
                 return "WGSL writer error: " + writer.Diagnostics().str();
             }
             return writer.result();

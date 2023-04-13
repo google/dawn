@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::wgsl {
@@ -29,7 +31,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Return) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
+    gen.EmitStatement(r);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), "  return;\n");
 }
 
@@ -41,7 +44,8 @@ TEST_F(WgslGeneratorImplTest, Emit_ReturnWithValue) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
+    gen.EmitStatement(r);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), "  return 123i;\n");
 }
 

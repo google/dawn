@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -24,7 +26,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Enable) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitEnable(enable));
+    gen.EmitEnable(enable);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(enable f16;
 )");
 }

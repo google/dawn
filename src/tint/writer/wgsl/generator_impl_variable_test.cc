@@ -15,6 +15,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::wgsl {
@@ -28,7 +30,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(var<private> a : f32;)");
 }
 
@@ -38,7 +41,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_AddressSpace) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(var<private> a : f32;)");
 }
 
@@ -50,7 +54,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(@binding(0) @group(0) var<storage, read> a : S;)");
 }
 
@@ -62,7 +67,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(@binding(0) @group(0) var<storage, read_write> a : S;)");
 }
 
@@ -72,7 +78,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(@group(1) @binding(2) var a : sampler;)");
 }
 
@@ -82,7 +89,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Initializer) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(var<private> a : f32 = 1.0f;)");
 }
 
@@ -93,7 +101,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Let_Explicit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(let a : f32 = 1.0f;)");
 }
 
@@ -104,7 +113,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Let_Inferred) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(let a = 1.0f;)");
 }
 
@@ -115,7 +125,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const_Explicit) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(const a : f32 = 1.0f;)");
 }
 
@@ -126,7 +137,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const_Inferred) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.Diagnostics();
+    gen.EmitVariable(out, v);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(const a = 1.0f;)");
 }
 
