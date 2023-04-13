@@ -19,6 +19,7 @@
 #include <wrl/client.h>
 
 #include <memory>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -1058,9 +1059,76 @@ TEST_P(D3D12SharedHandleUsageTests, SRGBReinterpretation) {
         utils::RGBA8(247, 125, 105, 255), texture, 0, 0);
 }
 
+class D3D12SharedHandleMultithreadTests : public D3D12SharedHandleUsageTests {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        // TODO(crbug.com/dawn/1678): DawnWire doesn't support thread safe API yet.
+        if (!UsesWire()) {
+            features.push_back(wgpu::FeatureName::ImplicitDeviceSynchronization);
+        }
+        return features;
+    }
+
+    void SetUp() override {
+        D3D12SharedHandleUsageTests::SetUp();
+        // TODO(crbug.com/dawn/1678): DawnWire doesn't support thread safe API yet.
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    }
+};
+
+// Test the destroy device before destroying the external image won't cause deadlock.
+TEST_P(D3D12SharedHandleMultithreadTests, DestroyDeviceBeforeImageNoDeadLock) {
+    wgpu::Texture texture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
+    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
+                     &externalImage);
+
+    ASSERT_NE(texture.Get(), nullptr);
+
+    dawn::native::d3d12::ExternalImageDXGIFenceDescriptor signalFence;
+    externalImage->EndAccess(texture.Get(), &signalFence);
+    EXPECT_TRUE(externalImage->IsValid());
+
+    // Destroy device, it should destroy image internally.
+    device.Destroy();
+    EXPECT_FALSE(externalImage->IsValid());
+}
+
+// Test that using the external image and destroying the device simultaneously on different threads
+// won't race.
+TEST_P(D3D12SharedHandleMultithreadTests, DestroyDeviceAndUseImageInParallel) {
+    wgpu::Texture texture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
+    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
+                     &externalImage);
+
+    ASSERT_NE(texture.Get(), nullptr);
+    EXPECT_TRUE(externalImage->IsValid());
+
+    std::thread thread1([&] {
+        dawn::native::d3d12::ExternalImageDXGIFenceDescriptor signalFence;
+        externalImage->EndAccess(texture.Get(), &signalFence);
+    });
+
+    std::thread thread2([&] {
+        // Destroy device, it should destroy image internally.
+        device.Destroy();
+        EXPECT_FALSE(externalImage->IsValid());
+    });
+
+    thread1.join();
+    thread2.join();
+}
+
 DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleValidation,
                         {D3D12Backend()},
                         {SyncMode::kKeyedMutex, SyncMode::kFence});
 DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleUsageTests,
+                        {D3D12Backend()},
+                        {SyncMode::kKeyedMutex, SyncMode::kFence});
+DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleMultithreadTests,
                         {D3D12Backend()},
                         {SyncMode::kKeyedMutex, SyncMode::kFence});

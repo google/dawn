@@ -53,31 +53,55 @@ ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
 }
 
 ExternalImageDXGIImpl::~ExternalImageDXGIImpl() {
-    Destroy();
+    auto deviceLock(GetScopedDeviceLock());
+    DestroyInternal();
+}
+
+Mutex::AutoLock ExternalImageDXGIImpl::GetScopedDeviceLock() const {
+    if (mBackendDevice != nullptr) {
+        return mBackendDevice->GetScopedLock();
+    }
+    return Mutex::AutoLock();
 }
 
 bool ExternalImageDXGIImpl::IsValid() const {
+    auto deviceLock(GetScopedDeviceLock());
+
     return IsInList();
 }
 
-void ExternalImageDXGIImpl::Destroy() {
+void ExternalImageDXGIImpl::DestroyInternal() {
+    // Linked list is not thread safe. A mutex must already be locked before
+    // endtering this method. Either via Device::DestroyImpl() or ~ExternalImageDXGIImpl.
+    ASSERT(mBackendDevice == nullptr || mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     if (IsInList()) {
         RemoveFromList();
-        mBackendDevice = nullptr;
         mD3D12Resource = nullptr;
         mD3D11on12ResourceCache = nullptr;
+
+        // We don't set mBackendDevice to null here to let its mutex accessible until dtor. This
+        // also to avoid data racing with non-null check in GetScopedDeviceLock()
     }
 }
 
 WGPUTexture ExternalImageDXGIImpl::BeginAccess(
     const ExternalImageDXGIBeginAccessDescriptor* descriptor) {
-    ASSERT(mBackendDevice != nullptr);
     ASSERT(descriptor != nullptr);
+
+    auto deviceLock(GetScopedDeviceLock());
+
+    if (!IsInList()) {
+        dawn::ErrorLog() << "Cannot use external image after device destruction";
+        return nullptr;
+    }
+
     // Ensure the texture usage is allowed
     if (!IsSubset(descriptor->usage, static_cast<WGPUTextureUsageFlags>(mUsage))) {
         dawn::ErrorLog() << "Texture usage is not valid for external image";
         return nullptr;
     }
+
+    ASSERT(mBackendDevice != nullptr);
 
     TextureDescriptor textureDescriptor = {};
     textureDescriptor.usage = static_cast<wgpu::TextureUsage>(descriptor->usage);
@@ -130,6 +154,14 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
 
 void ExternalImageDXGIImpl::EndAccess(WGPUTexture texture,
                                       ExternalImageDXGIFenceDescriptor* signalFence) {
+    auto deviceLock(GetScopedDeviceLock());
+
+    if (!IsInList()) {
+        dawn::ErrorLog() << "Cannot use external image after device destruction";
+        return;
+    }
+
+    ASSERT(mBackendDevice != nullptr);
     ASSERT(signalFence != nullptr);
 
     Texture* backendTexture = ToBackend(FromAPI(texture));

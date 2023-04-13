@@ -29,7 +29,7 @@ class Mutex : public RefCounted, NonCopyable {
   public:
     template <typename MutexRef>
     struct AutoLockBase : NonMovable {
-        AutoLockBase() = delete;
+        AutoLockBase() : mMutex(nullptr) {}
         explicit AutoLockBase(MutexRef mutex) : mMutex(std::move(mutex)) {
             if (mMutex != nullptr) {
                 mMutex->Lock();
