@@ -223,6 +223,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
                                  TextureBase* dataTexture,
                                  const TextureCopy& dst,
                                  const Extent3D& copyExtent) {
+    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     ASSERT(dst.texture->GetFormat().format == wgpu::TextureFormat::Depth16Unorm);
     ASSERT(dataTexture->GetFormat().format == wgpu::TextureFormat::RG8Uint);
 
@@ -297,7 +298,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
         RenderPassDescriptor rpDesc = {};
         rpDesc.depthStencilAttachment = &dsAttachment;
 
-        Ref<RenderPassEncoder> pass = AcquireRef(commandEncoder->APIBeginRenderPass(&rpDesc));
+        Ref<RenderPassEncoder> pass = commandEncoder->BeginRenderPass(&rpDesc);
         // Bind the resources.
         pass->APISetBindGroup(0, bindGroup.Get());
         // Discard all fragments outside the copy region.
@@ -307,7 +308,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
         pass->APISetPipeline(pipeline.Get());
         pass->APIDraw(3, 1, 0, 0);
 
-        pass->APIEnd();
+        pass->End();
     }
     return {};
 }
@@ -317,6 +318,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
                            TextureBase* dataTexture,
                            const TextureCopy& dst,
                            const Extent3D& copyExtent) {
+    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     const Format& format = dst.texture->GetFormat();
     ASSERT(dst.aspect == Aspect::Stencil);
 
@@ -415,7 +417,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         RenderPassDescriptor rpDesc = {};
         rpDesc.depthStencilAttachment = &dsAttachment;
 
-        Ref<RenderPassEncoder> pass = AcquireRef(commandEncoder->APIBeginRenderPass(&rpDesc));
+        Ref<RenderPassEncoder> pass = commandEncoder->BeginRenderPass(&rpDesc);
         // Bind the resources.
         pass->APISetBindGroup(0, bindGroup.Get());
         // Discard all fragments outside the copy region.
@@ -438,7 +440,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
             // since WebGPU doesn't have push constants.
             pass->APIDraw(3, 1, 0, 1u << bit);
         }
-        pass->APIEnd();
+        pass->End();
     }
     return {};
 }

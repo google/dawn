@@ -583,7 +583,7 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
     passEncoder->APISetViewport(destination->origin.x, destination->origin.y, copySize->width,
                                 copySize->height, 0.0, 1.0);
     passEncoder->APIDraw(3);
-    passEncoder->APIEnd();
+    passEncoder->End();
 
     // Finsh encoding.
     Ref<CommandBufferBase> commandBuffer;

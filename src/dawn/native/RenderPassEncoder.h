@@ -44,6 +44,8 @@ class RenderPassEncoder final : public RenderEncoderBase {
 
     ObjectType GetType() const override;
 
+    // NOTE: this will lock the device internally. To avoid deadlock when the device is already
+    // locked, use End() instead.
     void APIEnd();
     void APIEndPass();  // TODO(dawn:1286): Remove after deprecation period.
 
@@ -62,6 +64,10 @@ class RenderPassEncoder final : public RenderEncoderBase {
     void APIEndOcclusionQuery();
 
     void APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
+
+    // Internal code that already locked the device should call this method instead of
+    // APIEnd() to avoid the device being locked again.
+    void End();
 
   protected:
     RenderPassEncoder(DeviceBase* device,

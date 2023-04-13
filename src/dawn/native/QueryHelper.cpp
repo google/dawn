@@ -187,6 +187,7 @@ MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
                                                 BufferBase* availability,
                                                 BufferBase* params) {
     DeviceBase* device = encoder->GetDevice();
+    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
     ComputePipelineBase* pipeline;
     DAWN_TRY_ASSIGN(pipeline, GetOrCreateTimestampComputePipeline(device));

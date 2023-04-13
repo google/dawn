@@ -136,6 +136,14 @@ void RenderPassEncoder::TrackQueryAvailability(QuerySetBase* querySet, uint32_t 
 }
 
 void RenderPassEncoder::APIEnd() {
+    // The encoding context might create additional resources, so we need to lock the device.
+    auto deviceLock(GetDevice()->GetScopedLock());
+    End();
+}
+
+void RenderPassEncoder::End() {
+    ASSERT(GetDevice()->IsLockedByCurrentThreadIfNeeded());
+
     if (mEnded && IsValidationEnabled()) {
         GetDevice()->HandleError(DAWN_VALIDATION_ERROR("%s was already ended.", this));
         return;

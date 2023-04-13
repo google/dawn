@@ -97,6 +97,7 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
                             const TextureCopy& src,
                             const TextureCopy& dst,
                             const Extent3D& copyExtent) {
+    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     // ASSERT that the texture have depth and are not multisampled.
     ASSERT(src.texture->GetFormat().HasDepth());
     ASSERT(dst.texture->GetFormat().HasDepth());
@@ -216,11 +217,11 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
         rpDesc.depthStencilAttachment = &dsAttachment;
 
         // Draw to perform the blit.
-        Ref<RenderPassEncoder> pass = AcquireRef(commandEncoder->APIBeginRenderPass(&rpDesc));
+        Ref<RenderPassEncoder> pass = commandEncoder->BeginRenderPass(&rpDesc);
         pass->APISetBindGroup(0, bindGroup.Get());
         pass->APISetPipeline(pipeline.Get());
         pass->APIDraw(3, 1, 0, 0);
-        pass->APIEnd();
+        pass->End();
     }
 
     return {};

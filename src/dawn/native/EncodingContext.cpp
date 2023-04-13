@@ -133,9 +133,20 @@ MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
         // Note: If encoding validation commands fails, no commands should be in mPendingCommands,
         //       so swap back the renderCommands to ensure that they are not leaked.
         CommandAllocator renderCommands = std::move(mPendingCommands);
-        DAWN_TRY_WITH_CLEANUP(EncodeIndirectDrawValidationCommands(
-                                  mDevice, commandEncoder, &usageTracker, &indirectDrawMetadata),
-                              { mPendingCommands = std::move(renderCommands); });
+
+        // The below function might create new resources. Device must already be locked via
+        // renderpassEncoder's APIEnd().
+        // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at
+        // Command Submit time, so the locking would be removed from here at that point.
+        {
+            ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+
+            DAWN_TRY_WITH_CLEANUP(
+                EncodeIndirectDrawValidationCommands(mDevice, commandEncoder, &usageTracker,
+                                                     &indirectDrawMetadata),
+                { mPendingCommands = std::move(renderCommands); });
+        }
+
         CommitCommands(std::move(mPendingCommands));
         CommitCommands(std::move(renderCommands));
     }
