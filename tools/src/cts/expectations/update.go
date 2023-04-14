@@ -73,6 +73,10 @@ func (c *Content) Update(results result.List, testlist []query.Query) (Diagnosti
 		tagSets:  tagSets,
 	}
 
+	if err := u.preserveRetryOnFailures(); err != nil {
+		return nil, err
+	}
+
 	// Update those expectations!
 	if err := u.build(); err != nil {
 		return nil, fmt.Errorf("while updating expectations: %w", err)
@@ -261,6 +265,35 @@ func (qt *queryTree) markAsConsumed(q query.Query, t result.Tags, line int) {
 			}
 		}
 	}
+}
+
+// preserveRetryOnFailures changes any results matching expectations with a
+// RetryOnFailure expectation to RetryOnFailure.
+func (u *updater) preserveRetryOnFailures() error {
+	// For each expectation...
+	for _, c := range u.in.Chunks {
+		for _, ex := range c.Expectations {
+			// Does the expectation contain a RetryOnFailure status?
+			if !container.NewSet(ex.Status...).Contains(string(result.RetryOnFailure)) {
+				continue // Nope.
+			}
+
+			q := query.Parse(ex.Query)
+
+			glob, err := u.qt.tree.Glob(q)
+			if err != nil {
+				return err
+			}
+			for _, indices := range glob {
+				for _, idx := range indices.Data {
+					if u.qt.results[idx].Tags.ContainsAll(ex.Tags) {
+						u.qt.results[idx].Status = result.RetryOnFailure
+					}
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // build is the updater top-level function.
