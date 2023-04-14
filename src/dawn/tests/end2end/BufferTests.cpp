@@ -984,6 +984,7 @@ TEST_P(BufferTests, CreateBufferOOM) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());
+    DAWN_TEST_UNSUPPORTED_IF(IsTsan());
 
     wgpu::BufferDescriptor descriptor;
     descriptor.usage = wgpu::BufferUsage::CopyDst;
@@ -1010,6 +1011,7 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());
+    DAWN_TEST_UNSUPPORTED_IF(IsTsan());
 
     // Test non-mappable buffer
     {
@@ -1076,6 +1078,7 @@ TEST_P(BufferTests, CreateBufferOOMMapAsync) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());
+    DAWN_TEST_UNSUPPORTED_IF(IsTsan());
 
     auto RunTest = [this](const wgpu::BufferDescriptor& descriptor) {
         wgpu::Buffer buffer;

@@ -887,6 +887,14 @@ bool DawnTestBase::IsAsan() const {
 #endif
 }
 
+bool DawnTestBase::IsTsan() const {
+#if defined(THREAD_SANITIZER)
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool DawnTestBase::HasToggleEnabled(const char* toggle) const {
     auto toggles = dawn::native::GetTogglesUsed(backendDevice);
     return std::find_if(toggles.begin(), toggles.end(), [toggle](const char* name) {
@@ -999,8 +1007,8 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
     // to CreateDeviceImpl.
     mNextIsolationKeyQueue.push(std::move(isolationKey));
 
-    // RequestDevice is overriden by CreateDeviceImpl and device descriptor is ignored by it. Give
-    // an empty descriptor.
+    // RequestDevice is overriden by CreateDeviceImpl and device descriptor is ignored by it.
+    // Give an empty descriptor.
     // TODO(dawn:1684): Replace empty DeviceDescriptor with nullptr after Dawn wire support it.
     wgpu::DeviceDescriptor deviceDesc = {};
     mAdapter.RequestDevice(
@@ -1012,8 +1020,8 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
     FlushWire();
     ASSERT(apiDevice);
 
-    // Set up the mocks for uncaptured errors and device loss. The loss of the device is expected
-    // to happen at the end of the test so at it directly.
+    // Set up the mocks for uncaptured errors and device loss. The loss of the device is
+    // expected to happen at the end of the test so at it directly.
     apiDevice.SetUncapturedErrorCallback(mDeviceErrorCallback.Callback(),
                                          mDeviceErrorCallback.MakeUserdata(apiDevice.Get()));
     apiDevice.SetDeviceLostCallback(mDeviceLostCallback.Callback(),
@@ -1045,8 +1053,8 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
 }
 
 void DawnTestBase::SetUp() {
-    // Setup the per-test platform. Tests can provide one by overloading CreateTestPlatform. This is
-    // NOT a thread-safe operation and is allowed here for testing only.
+    // Setup the per-test platform. Tests can provide one by overloading CreateTestPlatform.
+    // This is NOT a thread-safe operation and is allowed here for testing only.
     mTestPlatform = CreateTestPlatform();
     dawn::native::FromAPI(gTestEnv->GetInstance()->Get())
         ->SetPlatformForTesting(mTestPlatform.get());
@@ -1058,9 +1066,10 @@ void DawnTestBase::SetUp() {
         "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
     mWireHelper->BeginWireTrace(traceName.c_str());
 
-    // RequestAdapter is overriden to ignore RequestAdapterOptions, but dawn_wire requires a valid
-    // pointer, so give a empty option.
-    // TODO(dawn:1684): Replace empty RequestAdapterOptions with nullptr after Dawn wire support it.
+    // RequestAdapter is overriden to ignore RequestAdapterOptions, but dawn_wire requires a
+    // valid pointer, so give a empty option.
+    // TODO(dawn:1684): Replace empty RequestAdapterOptions with nullptr after Dawn wire support
+    // it.
     wgpu::RequestAdapterOptions options = {};
     mInstance.RequestAdapter(
         &options,
@@ -1094,8 +1103,8 @@ void DawnTestBase::DestroyDevice(wgpu::Device device) {
         resolvedDevice = this->device;
     }
 
-    // No expectation is added because the expectations for this kind of destruction is set up as
-    // soon as the device is created.
+    // No expectation is added because the expectations for this kind of destruction is set up
+    // as soon as the device is created.
     resolvedDevice.Destroy();
 }
 
