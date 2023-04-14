@@ -83,6 +83,10 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
             if (properties.backendType == wgpu::BackendType::Null) {
                 continue;
             }
+            // TODO(dawn:1705): Remove this once D3D11 backend is fully implemented.
+            if (properties.backendType == wgpu::BackendType::D3D11) {
+                continue;
+            }
             availableAdapterProperties.push_back(properties);
         }
     }
@@ -129,6 +133,10 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
             adapter.GetProperties(&properties);
 
             if (properties.backendType == wgpu::BackendType::Null) {
+                continue;
+            }
+            // TODO(dawn:1705): Remove this once D3D11 backend is fully implemented.
+            if (properties.backendType == wgpu::BackendType::D3D11) {
                 continue;
             }
             availableAdapterProperties.push_back(properties);
