@@ -33,12 +33,6 @@
       "Bucket": "try",
       "Builder": "mac-dawn-rel"
     },
-    // crbug.com/1382149 Remove MacExp when mac-dawn-rel migrates to new config
-    "MacExp": {
-      "Project": "chromium",
-      "Bucket": "try",
-      "Builder": "dawn-try-mac-amd-exp"
-    },
     "Linux": {
       "Project": "chromium",
       "Bucket": "try",
