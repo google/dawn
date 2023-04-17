@@ -1,0 +1,35 @@
+# Copyright 2023 The Dawn Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
+
+import("//testing/test.gni")
+
+test("dawn_benchmarks") {
+  deps = [
+    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/src/dawn:proc",
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native:sources",
+    "${dawn_root}/src/dawn/native:static",
+    "//third_party/google_benchmark",
+    "//third_party/google_benchmark:benchmark_main",
+  ]
+  sources = [
+    "BGLCreation.cpp",
+    "NullDeviceSetup.cpp",
+    "NullDeviceSetup.h",
+  ]
+  configs += [ "${dawn_root}/include/dawn:public" ]
+}

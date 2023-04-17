@@ -110,6 +110,10 @@ deps = {
     'url': '{chromium_git}/catapult.git@c1e70d412ce01fb194f73f7abfdac710aae87dae',
     'condition': 'dawn_standalone',
   },
+  'third_party/google_benchmark/src': {
+    'url': '{chromium_git}/external/github.com/google/benchmark.git' + '@' + 'efc89f0b524780b1994d5dddd83a92718e5be492',
+    'condition': 'dawn_standalone',
+  },
 
   # Jinja2 and MarkupSafe for the code generator
   'third_party/jinja2': {
@@ -204,10 +208,6 @@ deps = {
   },
 
   # Misc dependencies inherited from Tint
-  'third_party/benchmark': {
-    'url': '{chromium_git}/external/github.com/google/benchmark.git@e991355c02b93fe17713efe04cbc2e278e00fdbd',
-    'condition': 'dawn_standalone',
-  },
   'third_party/protobuf': {
     'url': '{chromium_git}/external/github.com/protocolbuffers/protobuf.git@fde7cf7358ec7cd69e8db9be4f1fa6a5c431386a',
     'condition': 'dawn_standalone',
