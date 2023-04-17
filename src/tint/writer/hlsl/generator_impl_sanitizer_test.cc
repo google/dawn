@@ -237,7 +237,7 @@ void main() {
     EXPECT_EQ(expect, got);
 }
 
-TEST_F(HlslSanitizerTest, InlinePtrLetsBasic) {
+TEST_F(HlslSanitizerTest, SimplifyPointersBasic) {
     // var v : i32;
     // let p : ptr<function, i32> = &v;
     // let x : i32 = *p;
@@ -269,7 +269,7 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsBasic) {
     EXPECT_EQ(expect, got);
 }
 
-TEST_F(HlslSanitizerTest, InlinePtrLetsComplexChain) {
+TEST_F(HlslSanitizerTest, SimplifyPointersComplexChain) {
     // var a : array<mat4x4<f32>, 4u>;
     // let ap : ptr<function, array<mat4x4<f32>, 4u>> = &a;
     // let mp : ptr<function, mat4x4<f32>> = &(*ap)[3i];

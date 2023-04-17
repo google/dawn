@@ -28,16 +28,6 @@ TEST_F(SimplifyPointersTest, EmptyModule) {
     EXPECT_FALSE(ShouldRun<SimplifyPointers>(src));
 }
 
-TEST_F(SimplifyPointersTest, NoAddressOf) {
-    auto* src = R"(
-fn f(p : ptr<function, i32>) {
-  var v : i32;
-}
-)";
-
-    EXPECT_FALSE(ShouldRun<SimplifyPointers>(src));
-}
-
 TEST_F(SimplifyPointersTest, FoldPointer) {
     auto* src = R"(
 fn f() {
@@ -51,6 +41,36 @@ fn f() {
 fn f() {
   var v : i32;
   let x : i32 = v;
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, UnusedPointerParam) {
+    auto* src = R"(
+fn f(p : ptr<function, i32>) {
+}
+)";
+
+    auto* expect = src;
+
+    auto got = Run<Unshadow, SimplifyPointers>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SimplifyPointersTest, ReferencedPointerParam) {
+    auto* src = R"(
+fn f(p : ptr<function, i32>) {
+  let x = p;
+}
+)";
+
+    auto* expect = R"(
+fn f(p : ptr<function, i32>) {
 }
 )";
 

@@ -2982,9 +2982,8 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
             out << "x" << mat->rows();
         }
     } else if (TINT_UNLIKELY(type->Is<type::Pointer>())) {
-        TINT_ICE(Writer, diagnostics_)
-            << "Attempting to emit pointer type. These should have been removed "
-               "with the InlinePointerLets transform";
+        TINT_ICE(Writer, diagnostics_) << "Attempting to emit pointer type. These should have been "
+                                          "removed with the SimplifyPointers transform";
         return false;
     } else if (type->Is<type::Sampler>()) {
         return false;

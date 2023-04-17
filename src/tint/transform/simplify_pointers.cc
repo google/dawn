@@ -132,6 +132,13 @@ struct SimplifyPointers::State {
         utils::Hashmap<const ast::Expression*, Symbol, 8> saved_vars;
 
         bool needs_transform = false;
+        for (auto* ty : ctx.src->Types()) {
+            if (ty->Is<type::Pointer>()) {
+                // Program contains pointers which need removing.
+                needs_transform = true;
+                break;
+            }
+        }
 
         // Find all the pointer-typed `let` declarations.
         // Note that these must be function-scoped, as module-scoped `let`s are not
