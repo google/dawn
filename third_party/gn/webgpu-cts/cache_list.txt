@@ -13,6 +13,7 @@ data/webgpu/shader/execution/case-cache/asinh.json
 data/webgpu/shader/execution/case-cache/atan.json
 data/webgpu/shader/execution/case-cache/atan2.json
 data/webgpu/shader/execution/case-cache/atanh.json
+data/webgpu/shader/execution/case-cache/bitcast.json
 data/webgpu/shader/execution/case-cache/ceil.json
 data/webgpu/shader/execution/case-cache/clamp.json
 data/webgpu/shader/execution/case-cache/cos.json
