@@ -517,6 +517,7 @@ list(APPEND TINT_LIB_SRCS
   utils/bitcast.h
   utils/bitset.h
   utils/block_allocator.h
+  utils/bump_allocator.h
   utils/compiler_macros.h
   utils/concat.h
   utils/crc32.h
@@ -998,6 +999,7 @@ if(TINT_BUILD_TESTS)
     utils/bitcast_test.cc
     utils/bitset_test.cc
     utils/block_allocator_test.cc
+    utils/bump_allocator_test.cc
     utils/crc32_test.cc
     utils/defer_test.cc
     utils/enum_set_test.cc
