@@ -22,12 +22,12 @@ namespace {
 using SymbolTest = testing::Test;
 
 TEST_F(SymbolTest, ToStr) {
-    Symbol sym(1, ProgramID::New());
+    Symbol sym(1, ProgramID::New(), "");
     EXPECT_EQ("$1", sym.to_str());
 }
 
 TEST_F(SymbolTest, CopyAssign) {
-    Symbol sym1(1, ProgramID::New());
+    Symbol sym1(1, ProgramID::New(), "");
     Symbol sym2;
 
     EXPECT_FALSE(sym2.IsValid());
@@ -38,9 +38,9 @@ TEST_F(SymbolTest, CopyAssign) {
 
 TEST_F(SymbolTest, Comparison) {
     auto program_id = ProgramID::New();
-    Symbol sym1(1, program_id);
-    Symbol sym2(2, program_id);
-    Symbol sym3(1, program_id);
+    Symbol sym1(1, program_id, "1");
+    Symbol sym2(2, program_id, "2");
+    Symbol sym3(1, program_id, "3");
 
     EXPECT_TRUE(sym1 == sym3);
     EXPECT_FALSE(sym1 != sym3);

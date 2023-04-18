@@ -21,7 +21,7 @@ namespace tint::reader::spirv {
 namespace {
 
 TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
-    Symbol sym(Symbol(1, {}));
+    Symbol sym(Symbol(1, {}, "1"));
 
     TypeManager ty;
     EXPECT_EQ(ty.Void(), ty.Void());
@@ -50,8 +50,8 @@ TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
 }
 
 TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
-    Symbol sym_a(Symbol(1, {}));
-    Symbol sym_b(Symbol(2, {}));
+    Symbol sym_a(Symbol(1, {}, "1"));
+    Symbol sym_b(Symbol(2, {}, "2"));
 
     TypeManager ty;
     EXPECT_NE(ty.Pointer(ty.I32(), builtin::AddressSpace::kUndefined),

@@ -22,12 +22,12 @@ using IdentifierTest = TestHelper;
 
 TEST_F(IdentifierTest, Creation) {
     auto* i = Ident("ident");
-    EXPECT_EQ(i->symbol, Symbol(1, ID()));
+    EXPECT_EQ(i->symbol, Symbol(1, ID(), "ident"));
 }
 
 TEST_F(IdentifierTest, Creation_WithSource) {
     auto* i = Ident(Source{{20, 2}}, "ident");
-    EXPECT_EQ(i->symbol, Symbol(1, ID()));
+    EXPECT_EQ(i->symbol, Symbol(1, ID(), "ident"));
 
     auto src = i->source;
     EXPECT_EQ(src.range.begin.line, 20u);

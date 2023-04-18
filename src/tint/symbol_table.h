@@ -16,9 +16,10 @@
 #define SRC_TINT_SYMBOL_TABLE_H_
 
 #include <string>
-#include "utils/hashmap.h"
 
 #include "src/tint/symbol.h"
+#include "utils/bump_allocator.h"
+#include "utils/hashmap.h"
 
 namespace tint {
 
@@ -29,21 +30,28 @@ class SymbolTable {
     /// @param program_id the identifier of the program that owns this symbol
     /// table
     explicit SymbolTable(tint::ProgramID program_id);
-    /// Copy constructor
-    SymbolTable(const SymbolTable&);
     /// Move Constructor
     SymbolTable(SymbolTable&&);
     /// Destructor
     ~SymbolTable();
 
-    /// Copy assignment
-    /// @param other the symbol table to copy
-    /// @returns the new symbol table
-    SymbolTable& operator=(const SymbolTable& other);
     /// Move assignment
     /// @param other the symbol table to move
     /// @returns the symbol table
     SymbolTable& operator=(SymbolTable&& other);
+
+    /// Wrap sets this symbol table to hold symbols which point to the allocated names in @p o.
+    /// The symbol table after Wrap is intended to temporarily extend the objects
+    /// of an existing immutable SymbolTable
+    /// As the copied objects are owned by @p o, @p o must not be destructed
+    /// or assigned while using this symbol table.
+    /// @param o the immutable SymbolTable to extend
+    void Wrap(const SymbolTable& o) {
+        next_symbol_ = o.next_symbol_;
+        name_to_symbol_ = o.name_to_symbol_;
+        last_prefix_to_index_ = o.last_prefix_to_index_;
+        program_id_ = o.program_id_;
+    }
 
     /// Registers a name into the symbol table, returning the Symbol.
     /// @param name the name to register
@@ -70,11 +78,11 @@ class SymbolTable {
 
     /// Foreach calls the callback function `F` for each symbol in the table.
     /// @param callback must be a function or function-like object with the
-    /// signature: `void(Symbol, const std::string&)`
+    /// signature: `void(Symbol)`
     template <typename F>
     void Foreach(F&& callback) const {
-        for (auto it : symbol_to_name_) {
-            callback(it.key, it.value);
+        for (auto it : name_to_symbol_) {
+            callback(it.value);
         }
     }
 
@@ -82,13 +90,17 @@ class SymbolTable {
     tint::ProgramID ProgramID() const { return program_id_; }
 
   private:
+    SymbolTable(const SymbolTable&) = delete;
+    SymbolTable& operator=(const SymbolTable& other) = delete;
+
     // The value to be associated to the next registered symbol table entry.
     uint32_t next_symbol_ = 1;
 
-    utils::Hashmap<Symbol, std::string, 0> symbol_to_name_;
-    utils::Hashmap<std::string, Symbol, 0> name_to_symbol_;
+    utils::Hashmap<std::string_view, Symbol, 0> name_to_symbol_;
     utils::Hashmap<std::string, size_t, 0> last_prefix_to_index_;
     tint::ProgramID program_id_;
+
+    utils::BumpAllocator name_allocator_;
 };
 
 /// @param symbol_table the SymbolTable

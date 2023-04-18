@@ -55,8 +55,7 @@
 	</Type>
 
 	<Type Name="tint::Symbol">
-		<!-- Requires TINT_SYMBOL_STORE_DEBUG_NAME defined to 1 -->
-		<DisplayString Optional="true">{debug_name_,sb}</DisplayString>
+		<DisplayString Optional="true">{name_,sb}</DisplayString>
 	</Type>
 
 	<!--=================================================================-->

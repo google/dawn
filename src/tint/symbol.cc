@@ -20,12 +20,8 @@ namespace tint {
 
 Symbol::Symbol() = default;
 
-Symbol::Symbol(uint32_t val, tint::ProgramID program_id) : val_(val), program_id_(program_id) {}
-
-#if TINT_SYMBOL_STORE_DEBUG_NAME
-Symbol::Symbol(uint32_t val, tint::ProgramID pid, std::string debug_name)
-    : val_(val), program_id_(pid), debug_name_(std::move(debug_name)) {}
-#endif
+Symbol::Symbol(uint32_t val, tint::ProgramID pid, std::string_view name)
+    : val_(val), program_id_(pid), name_(name) {}
 
 Symbol::Symbol(const Symbol& o) = default;
 
@@ -54,6 +50,10 @@ bool Symbol::operator<(const Symbol& other) const {
 
 std::string Symbol::to_str() const {
     return "$" + std::to_string(val_);
+}
+
+std::string Symbol::Name() const {
+    return std::string(name_);
 }
 
 }  // namespace tint

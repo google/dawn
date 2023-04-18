@@ -15,13 +15,6 @@
 #ifndef SRC_TINT_SYMBOL_H_
 #define SRC_TINT_SYMBOL_H_
 
-// If TINT_SYMBOL_STORE_DEBUG_NAME is 1, Symbol instances store a `debug_name_`
-// member initialized with the name of the identifier they represent. This
-// member is not exposed, but is useful for debugging purposes.
-#ifndef TINT_SYMBOL_STORE_DEBUG_NAME
-#define TINT_SYMBOL_STORE_DEBUG_NAME 0
-#endif
-
 #include <string>
 
 #include "src/tint/program_id.h"
@@ -36,15 +29,10 @@ class Symbol {
     Symbol();
     /// Constructor
     /// @param val the symbol value
-    /// @param program_id the identifier of the program that owns this Symbol
-    Symbol(uint32_t val, tint::ProgramID program_id);
-#if TINT_SYMBOL_STORE_DEBUG_NAME
-    /// Constructor
-    /// @param val the symbol value
     /// @param pid the identifier of the program that owns this Symbol
-    /// @param debug_name name of symbols used only for debugging
-    Symbol(uint32_t val, tint::ProgramID pid, std::string debug_name);
-#endif
+    /// @param name the name this symbol represents
+    Symbol(uint32_t val, tint::ProgramID pid, std::string_view name);
+
     /// Copy constructor
     /// @param o the symbol to copy
     Symbol(const Symbol& o);
@@ -88,15 +76,17 @@ class Symbol {
     /// @return the string representation of the symbol
     std::string to_str() const;
 
+    /// Converts the symbol to the registered name
+    /// @returns the string representing the name of the symbol
+    std::string Name() const;
+
     /// @returns the identifier of the Program that owns this symbol.
     tint::ProgramID ProgramID() const { return program_id_; }
 
   private:
     uint32_t val_ = static_cast<uint32_t>(-1);
     tint::ProgramID program_id_;
-#if TINT_SYMBOL_STORE_DEBUG_NAME
-    std::string debug_name_;
-#endif
+    std::string_view name_;
 };
 
 /// @param sym the Symbol

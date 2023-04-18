@@ -23,8 +23,8 @@ class ScopeStackTest : public ProgramBuilder, public testing::Test {};
 
 TEST_F(ScopeStackTest, Get) {
     ScopeStack<Symbol, uint32_t> s;
-    Symbol a(1, ID());
-    Symbol b(3, ID());
+    Symbol a(1, ID(), "1");
+    Symbol b(3, ID(), "3");
     s.Push();
     s.Set(a, 5u);
     s.Set(b, 10u);
@@ -45,14 +45,14 @@ TEST_F(ScopeStackTest, Get) {
 
 TEST_F(ScopeStackTest, Get_MissingSymbol) {
     ScopeStack<Symbol, uint32_t> s;
-    Symbol sym(1, ID());
+    Symbol sym(1, ID(), "1");
     EXPECT_EQ(s.Get(sym), 0u);
 }
 
 TEST_F(ScopeStackTest, Set) {
     ScopeStack<Symbol, uint32_t> s;
-    Symbol a(1, ID());
-    Symbol b(2, ID());
+    Symbol a(1, ID(), "1");
+    Symbol b(2, ID(), "2");
 
     EXPECT_EQ(s.Set(a, 5u), 0u);
     EXPECT_EQ(s.Get(a), 5u);
@@ -69,8 +69,8 @@ TEST_F(ScopeStackTest, Set) {
 
 TEST_F(ScopeStackTest, Clear) {
     ScopeStack<Symbol, uint32_t> s;
-    Symbol a(1, ID());
-    Symbol b(2, ID());
+    Symbol a(1, ID(), "1");
+    Symbol b(2, ID(), "2");
 
     EXPECT_EQ(s.Set(a, 5u), 0u);
     EXPECT_EQ(s.Get(a), 5u);

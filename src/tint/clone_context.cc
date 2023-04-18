@@ -33,7 +33,7 @@ CloneContext::CloneContext(ProgramBuilder* to, Program const* from, bool auto_cl
         // Almost all transforms will want to clone all symbols before doing any
         // work, to avoid any newly created symbols clashing with existing symbols
         // in the source program and causing them to be renamed.
-        from->Symbols().Foreach([&](Symbol s, const std::string&) { Clone(s); });
+        from->Symbols().Foreach([&](Symbol s) { Clone(s); });
     }
 }
 

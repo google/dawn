@@ -76,7 +76,7 @@ ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
     builder.ast_ =
         builder.create<ast::Module>(program->AST().source, program->AST().GlobalDeclarations());
     builder.sem_ = sem::Info::Wrap(program->Sem());
-    builder.symbols_ = program->Symbols();
+    builder.symbols_.Wrap(program->Symbols());
     builder.diagnostics_ = program->Diagnostics();
     return builder;
 }
