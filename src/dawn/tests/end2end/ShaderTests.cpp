@@ -549,6 +549,42 @@ fn fragmentMain() -> @location(0) vec4f {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
+// Regression test for crbug.com/dawn/1733. Even when user defined attribute input is empty,
+// Builtin input for the next stage could still cause register mismatch issue on D3D12 HLSL
+// compiler. So the TruncateInterstageVariables transform should still be run. This test is not in
+// dawn_unittests/RenderPipelineValidationTests because we want to test the compilation of the
+// pipeline in D3D12 backend.
+TEST_P(ShaderTests, WGSLInterstageVariablesEmptyUserAttributeSubset) {
+    std::string shader = R"(
+struct VertexOut {
+    @builtin(position) position : vec4f,
+    @location(1) attribute1 : f32,
+    @location(3) attribute3 : vec4f,
+}
+
+@vertex
+fn vertexMain() -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4f(0.0, 0.0, 0.0, 1.0);
+    output.attribute1 = 1.0;
+    output.attribute3 = vec4f(0.0, 0.0, 0.0, 1.0);
+    return output;
+}
+
+@fragment
+fn fragmentMain(@builtin(position) position : vec4<f32>) -> @location(0) vec4f {
+    return vec4f(0.0, 0.0, 0.0, 1.0);
+})";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.vertex.entryPoint = "vertexMain";
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.cFragment.entryPoint = "fragmentMain";
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+}
+
 // This is a regression test for an issue caused by the FirstIndexOffset transfrom being done before
 // the BindingRemapper, causing an intermediate AST to be invalid (and fail the overall
 // compilation).

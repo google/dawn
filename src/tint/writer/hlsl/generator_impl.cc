@@ -241,13 +241,11 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // CanonicalizeEntryPointIO must come after Robustness
     manager.Add<transform::CanonicalizeEntryPointIO>();
 
-    if (options.interstage_locations.any()) {
+    if (options.truncate_interstage_variables) {
         // When interstage_locations is empty, it means there's no user-defined interstage variables
-        // being used in the next stage. This is treated as a special case.
-        // TruncateInterstageVariables transform is trying to solve the HLSL compiler register
-        // mismatch issue. So it is not needed if no register is assigned to any interstage
-        // variables. As a result we only add this transform when there is at least one interstage
-        // locations being used.
+        // being used in the next stage. Still, HLSL compiler register mismatch could happen, if
+        // there's builtin inputs used in the next stage. So we still run
+        // TruncateInterstageVariables transform.
 
         // TruncateInterstageVariables itself will skip when interstage_locations matches exactly
         // with the current stage output.

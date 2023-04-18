@@ -232,6 +232,7 @@ ResultOrError<std::string> TranslateToHLSL(
         // Pass in the actually used interstage locations for tint to potentially truncate unused
         // outputs.
         options.interstage_locations = r.interstageLocations;
+        options.truncate_interstage_variables = true;
     }
 
     options.polyfill_reflect_vec2_f32 = r.polyfillReflectVec2F32;
