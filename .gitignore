@@ -11,12 +11,12 @@
 /testing
 /third_party/abseil-cpp/
 /third_party/angle
-/third_party/benchmark
 /third_party/binutils
 /third_party/catapult
 /third_party/clang-format
 /third_party/cpplint
 /third_party/glfw
+/third_party/google_benchmark/src
 /third_party/googletest
 /third_party/gpuweb
 /third_party/jinja2
