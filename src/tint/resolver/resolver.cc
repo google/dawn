@@ -139,18 +139,20 @@ bool Resolver::Resolve() {
         return false;
     }
 
+    // Check before std::move()'ing enabled_extensions_
+    const bool disable_uniformity_analysis =
+        enabled_extensions_.Contains(builtin::Extension::kChromiumDisableUniformityAnalysis);
+
     // Create the semantic module.
     auto* mod = builder_->create<sem::Module>(std::move(dependencies_.ordered_globals),
                                               std::move(enabled_extensions_));
     ApplyDiagnosticSeverities(mod);
     builder_->Sem().SetModule(mod);
 
-    if (result) {
+    if (result && !disable_uniformity_analysis) {
         // Run the uniformity analysis, which requires a complete semantic module.
-        if (!enabled_extensions_.Contains(builtin::Extension::kChromiumDisableUniformityAnalysis)) {
-            if (!AnalyzeUniformity(builder_, dependencies_)) {
-                return false;
-            }
+        if (!AnalyzeUniformity(builder_, dependencies_)) {
+            return false;
         }
     }
 
