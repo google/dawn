@@ -258,12 +258,6 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
 
 ################################################################################
-# Flaky on Intel Mac
-# KEEP
-################################################################################
-crbug.com/dawn/1500 [ intel-gen-9 monterey ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ RetryOnFailure ]
-
-################################################################################
 # copyToTexture,canvas:color_space_conversion:* fail with swiftshader
 # The other tests about canvas and image bitmap fail with swiftshader on Linux
 # KEEP
