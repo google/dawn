@@ -67,7 +67,7 @@ TEST_F(DepthTextureTest, Dim) {
 
 TEST_F(DepthTextureTest, FriendlyName) {
     DepthTexture d(TextureDimension::kCube);
-    EXPECT_EQ(d.FriendlyName(Symbols()), "texture_depth_cube");
+    EXPECT_EQ(d.FriendlyName(), "texture_depth_cube");
 }
 
 TEST_F(DepthTextureTest, Clone) {

@@ -24,8 +24,8 @@ using AstAliasTest = TestHelper;
 TEST_F(AstAliasTest, Create) {
     auto u32 = ty.u32();
     auto* a = Alias("a_type", u32);
-    CheckIdentifier(Symbols(), a->name, "a_type");
-    CheckIdentifier(Symbols(), a->type, "u32");
+    CheckIdentifier(a->name, "a_type");
+    CheckIdentifier(a->type, "u32");
 }
 
 }  // namespace

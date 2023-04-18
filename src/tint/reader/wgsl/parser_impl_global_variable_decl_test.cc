@@ -30,9 +30,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutInitializer) {
     auto* var = e.value->As<ast::Var>();
     ASSERT_NE(var, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
-    ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
-    ast::CheckIdentifier(p->builder().Symbols(), var->declared_address_space, "private");
+    ast::CheckIdentifier(var->name, "a");
+    ast::CheckIdentifier(var->type, "f32");
+    ast::CheckIdentifier(var->declared_address_space, "private");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 14u);
@@ -54,9 +54,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithInitializer) {
     auto* var = e.value->As<ast::Var>();
     ASSERT_NE(var, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
-    ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
-    ast::CheckIdentifier(p->builder().Symbols(), var->declared_address_space, "private");
+    ast::CheckIdentifier(var->name, "a");
+    ast::CheckIdentifier(var->type, "f32");
+    ast::CheckIdentifier(var->declared_address_space, "private");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 14u);
@@ -79,9 +79,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
     auto* var = e.value->As<ast::Var>();
     ASSERT_NE(var, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
-    ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
-    ast::CheckIdentifier(p->builder().Symbols(), var->declared_address_space, "uniform");
+    ast::CheckIdentifier(var->name, "a");
+    ast::CheckIdentifier(var->type, "f32");
+    ast::CheckIdentifier(var->declared_address_space, "uniform");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 36u);
@@ -109,9 +109,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     auto* var = e.value->As<ast::Var>();
     ASSERT_NE(var, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), var->name, "a");
-    ast::CheckIdentifier(p->builder().Symbols(), var->type, "f32");
-    ast::CheckIdentifier(p->builder().Symbols(), var->declared_address_space, "uniform");
+    ast::CheckIdentifier(var->name, "a");
+    ast::CheckIdentifier(var->type, "f32");
+    ast::CheckIdentifier(var->declared_address_space, "uniform");
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 36u);

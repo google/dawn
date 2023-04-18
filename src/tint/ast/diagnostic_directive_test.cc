@@ -29,7 +29,7 @@ TEST_F(DiagnosticDirectiveTest, Creation) {
     EXPECT_EQ(diag->source.range.end.line, 10u);
     EXPECT_EQ(diag->source.range.end.column, 15u);
     EXPECT_EQ(diag->control.severity, builtin::DiagnosticSeverity::kWarning);
-    CheckIdentifier(Symbols(), diag->control.rule_name, "foo");
+    CheckIdentifier(diag->control.rule_name, "foo");
 }
 
 }  // namespace

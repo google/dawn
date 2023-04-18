@@ -66,7 +66,7 @@ void GeneratorImpl::Generate() {
 
 void GeneratorImpl::EmitDiagnosticControl(const ast::DiagnosticControl& diagnostic) {
     line() << "DiagnosticControl [severity: " << diagnostic.severity
-           << ", rule: " << program_->Symbols().NameFor(diagnostic.rule_name->symbol) << "]";
+           << ", rule: " << diagnostic.rule_name->symbol.Name() << "]";
 }
 
 void GeneratorImpl::EmitEnable(const ast::Enable* enable) {
@@ -89,7 +89,7 @@ void GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
             {
                 ScopedIndent ai(this);
 
-                line() << "name: " << program_->Symbols().NameFor(alias->name->symbol);
+                line() << "name: " << alias->name->symbol.Name();
                 line() << "expr: ";
                 {
                     ScopedIndent ex(this);
@@ -149,7 +149,7 @@ void GeneratorImpl::EmitMemberAccessor(const ast::MemberAccessorExpression* expr
             ScopedIndent obj(this);
             EmitExpression(expr->object);
         }
-        line() << "member: " << program_->Symbols().NameFor(expr->member->symbol);
+        line() << "member: " << expr->member->symbol.Name();
     }
     line() << "]";
 }
@@ -252,7 +252,7 @@ void GeneratorImpl::EmitIdentifier(const ast::Identifier* ident) {
                     }
                     line() << "]";
                 }
-                line() << "name: " << program_->Symbols().NameFor(ident->symbol);
+                line() << "name: " << ident->symbol.Name();
                 if (!tmpl_ident->arguments.IsEmpty()) {
                     line() << "args: [";
                     {
@@ -266,7 +266,7 @@ void GeneratorImpl::EmitIdentifier(const ast::Identifier* ident) {
             }
             line() << "]";
         } else {
-            line() << program_->Symbols().NameFor(ident->symbol);
+            line() << ident->symbol.Name();
         }
     }
     line() << "]";
@@ -285,7 +285,7 @@ void GeneratorImpl::EmitFunction(const ast::Function* func) {
             }
             line() << "]";
         }
-        line() << "name: " << program_->Symbols().NameFor(func->name->symbol);
+        line() << "name: " << func->name->symbol.Name();
 
         if (!func->params.IsEmpty()) {
             line() << "params: [";
@@ -295,7 +295,7 @@ void GeneratorImpl::EmitFunction(const ast::Function* func) {
                     line() << "param: [";
                     {
                         ScopedIndent param(this);
-                        line() << "name: " << program_->Symbols().NameFor(v->name->symbol);
+                        line() << "name: " << v->name->symbol.Name();
                         if (!v->attributes.IsEmpty()) {
                             line() << "attrs: [";
                             {
@@ -372,7 +372,7 @@ void GeneratorImpl::EmitStructType(const ast::Struct* str) {
             }
             line() << "]";
         }
-        line() << "name: " << program_->Symbols().NameFor(str->name->symbol);
+        line() << "name: " << str->name->symbol.Name();
         line() << "members: [";
         {
             ScopedIndent membs(this);
@@ -390,7 +390,7 @@ void GeneratorImpl::EmitStructType(const ast::Struct* str) {
                         line() << "]";
                     }
 
-                    line() << "name: " << program_->Symbols().NameFor(mem->name->symbol);
+                    line() << "name: " << mem->name->symbol.Name();
                     line() << "type: [";
                     {
                         ScopedIndent ty(this);
@@ -453,7 +453,7 @@ void GeneratorImpl::EmitVariable(const ast::Variable* v) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled variable type " << v->TypeInfo().name;
             });
 
-        line() << "name: " << program_->Symbols().NameFor(v->name->symbol);
+        line() << "name: " << v->name->symbol.Name();
 
         if (auto ty = v->type) {
             line() << "type: [";

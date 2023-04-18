@@ -28,7 +28,7 @@ bool Void::Equals(const UniqueNode& other) const {
     return other.Is<Void>();
 }
 
-std::string Void::FriendlyName(const SymbolTable&) const {
+std::string Void::FriendlyName() const {
     return "void";
 }
 

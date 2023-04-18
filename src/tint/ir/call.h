@@ -42,8 +42,7 @@ class Call : public Castable<Call, Instruction> {
 
     /// Writes the call arguments to the given stream.
     /// @param out the output stream
-    /// @param st the symbol table
-    void EmitArgs(utils::StringStream& out, const SymbolTable& st) const;
+    void EmitArgs(utils::StringStream& out) const;
 
   private:
     utils::Vector<Value*, 1> args_;

@@ -29,7 +29,7 @@ bool AbstractInt::Equals(const UniqueNode& other) const {
     return other.Is<AbstractInt>();
 }
 
-std::string AbstractInt::FriendlyName(const SymbolTable&) const {
+std::string AbstractInt::FriendlyName() const {
     return "abstract-int";
 }
 

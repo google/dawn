@@ -41,7 +41,7 @@ TEST_F(BoolTest, Equals) {
 
 TEST_F(BoolTest, FriendlyName) {
     Bool b;
-    EXPECT_EQ(b.FriendlyName(Symbols()), "bool");
+    EXPECT_EQ(b.FriendlyName(), "bool");
 }
 
 TEST_F(BoolTest, Clone) {

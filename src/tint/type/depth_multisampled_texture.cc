@@ -46,7 +46,7 @@ bool DepthMultisampledTexture::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string DepthMultisampledTexture::FriendlyName(const SymbolTable&) const {
+std::string DepthMultisampledTexture::FriendlyName() const {
     utils::StringStream out;
     out << "texture_depth_multisampled_" << dim();
     return out.str();

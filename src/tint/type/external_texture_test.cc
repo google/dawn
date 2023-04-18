@@ -64,7 +64,7 @@ TEST_F(ExternalTextureTest, Dim) {
 
 TEST_F(ExternalTextureTest, FriendlyName) {
     ExternalTexture s;
-    EXPECT_EQ(s.FriendlyName(Symbols()), "texture_external");
+    EXPECT_EQ(s.FriendlyName(), "texture_external");
 }
 
 TEST_F(ExternalTextureTest, Clone) {

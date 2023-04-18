@@ -71,13 +71,13 @@ TEST_F(VectorTest, Equals) {
 TEST_F(VectorTest, FriendlyName) {
     auto* f32 = create<F32>();
     auto* v = create<Vector>(f32, 3u);
-    EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
+    EXPECT_EQ(v->FriendlyName(), "vec3<f32>");
 }
 
 TEST_F(VectorTest, FriendlyName_Packed) {
     auto* f32 = create<F32>();
     auto* v = create<Vector>(f32, 3u, true);
-    EXPECT_EQ(v->FriendlyName(Symbols()), "__packed_vec3<f32>");
+    EXPECT_EQ(v->FriendlyName(), "__packed_vec3<f32>");
 }
 
 TEST_F(VectorTest, Clone) {

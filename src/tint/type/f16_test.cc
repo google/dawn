@@ -41,7 +41,7 @@ TEST_F(F16Test, Equals) {
 
 TEST_F(F16Test, FriendlyName) {
     F16 f;
-    EXPECT_EQ(f.FriendlyName(Symbols()), "f16");
+    EXPECT_EQ(f.FriendlyName(), "f16");
 }
 
 TEST_F(F16Test, Clone) {

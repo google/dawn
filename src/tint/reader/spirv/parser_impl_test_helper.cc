@@ -75,7 +75,7 @@ std::string ToString(const Program& program, const ast::Node* node) {
             }
             return writer.result();
         },
-        [&](const ast::Identifier* ident) { return program.Symbols().NameFor(ident->symbol); },
+        [&](const ast::Identifier* ident) { return ident->symbol.Name(); },
         [&](Default) {
             return "<unhandled AST node type " + std::string(node->TypeInfo().name) + ">";
         });

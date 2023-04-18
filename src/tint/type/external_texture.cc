@@ -31,7 +31,7 @@ bool ExternalTexture::Equals(const UniqueNode& other) const {
     return other.Is<ExternalTexture>();
 }
 
-std::string ExternalTexture::FriendlyName(const SymbolTable&) const {
+std::string ExternalTexture::FriendlyName() const {
     return "texture_external";
 }
 

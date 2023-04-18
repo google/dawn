@@ -131,15 +131,13 @@ class Struct : public Castable<Struct, Type> {
         return pipeline_stage_uses_;
     }
 
-    /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
-    /// @param symbols the program's symbol table
     /// @returns a multiline string that describes the layout of this struct,
     /// including size and alignment information.
-    std::string Layout(const tint::SymbolTable& symbols) const;
+    std::string Layout() const;
 
     /// @param concrete the conversion-rank ordered concrete versions of this abstract structure.
     void SetConcreteTypes(utils::VectorRef<const Struct*> concrete) { concrete_types_ = concrete; }

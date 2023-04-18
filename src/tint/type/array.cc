@@ -81,14 +81,14 @@ bool Array::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string Array::FriendlyName(const SymbolTable& symbols) const {
+std::string Array::FriendlyName() const {
     utils::StringStream out;
     if (!IsStrideImplicit()) {
         out << "@stride(" << stride_ << ") ";
     }
-    out << "array<" << element_->FriendlyName(symbols);
+    out << "array<" << element_->FriendlyName();
 
-    auto count_str = count_->FriendlyName(symbols);
+    auto count_str = count_->FriendlyName();
     if (!count_str.empty()) {
         out << ", " << count_str;
     }

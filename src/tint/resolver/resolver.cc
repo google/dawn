@@ -128,8 +128,7 @@ bool Resolver::Resolve() {
     // Pre-allocate the marked bitset with the total number of AST nodes.
     marked_.Resize(builder_->ASTNodes().Count());
 
-    if (!DependencyGraph::Build(builder_->AST(), builder_->Symbols(), diagnostics_,
-                                dependencies_)) {
+    if (!DependencyGraph::Build(builder_->AST(), diagnostics_, dependencies_)) {
         return false;
     }
 
@@ -266,8 +265,7 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
 
     if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined,
                                       const_cast<type::Type*>(ty), v->source)) {
-        AddNote("while instantiating 'let' " + builder_->Symbols().NameFor(v->name->symbol),
-                v->source);
+        AddNote("while instantiating 'let' " + v->name->symbol.Name(), v->source);
         return nullptr;
     }
 
@@ -329,8 +327,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 
     if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined,
                                       const_cast<type::Type*>(ty), v->source)) {
-        AddNote("while instantiating 'override' " + builder_->Symbols().NameFor(v->name->symbol),
-                v->source);
+        AddNote("while instantiating 'override' " + v->name->symbol.Name(), v->source);
         return nullptr;
     }
 
@@ -423,8 +420,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 
     if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined,
                                       const_cast<type::Type*>(ty), c->source)) {
-        AddNote("while instantiating 'const' " + builder_->Symbols().NameFor(c->name->symbol),
-                c->source);
+        AddNote("while instantiating 'const' " + c->name->symbol.Name(), c->source);
         return nullptr;
     }
 
@@ -524,8 +520,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
     if (!ApplyAddressSpaceUsageToType(address_space, var_ty,
                                       var->type ? var->type->source : var->source)) {
-        AddNote("while instantiating 'var' " + builder_->Symbols().NameFor(var->name->symbol),
-                var->source);
+        AddNote("while instantiating 'var' " + var->name->symbol.Name(), var->source);
         return nullptr;
     }
 
@@ -611,8 +606,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
     Mark(param->name);
 
     auto add_note = [&] {
-        AddNote("while instantiating parameter " + builder_->Symbols().NameFor(param->name->symbol),
-                param->source);
+        AddNote("while instantiating parameter " + param->name->symbol.Name(), param->source);
     };
 
     for (auto* attr : param->attributes) {
@@ -879,7 +873,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
         {  // Check the parameter name is unique for the function
             if (auto added = parameter_names.Add(param->name->symbol, param->source); !added) {
-                auto name = builder_->Symbols().NameFor(param->name->symbol);
+                auto name = param->name->symbol.Name();
                 AddError("redefinition of parameter '" + name + "'", param->source);
                 AddNote("previous definition is here", *added.value);
                 return nullptr;
@@ -944,8 +938,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
     if (auto* str = return_type->As<sem::Struct>()) {
         if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined, str, decl->source)) {
-            AddNote("while instantiating return type for " +
-                        builder_->Symbols().NameFor(decl->name->symbol),
+            AddNote("while instantiating return type for " + decl->name->symbol.Name(),
                     decl->source);
             return nullptr;
         }
@@ -1577,7 +1570,7 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
                 break;
             case Alias::ModuleScope: {
                 auto* func = var.expr->Stmt()->Function();
-                auto func_name = builder_->Symbols().NameFor(func->Declaration()->name->symbol);
+                auto func_name = func->Declaration()->name->symbol.Name();
                 AddNote(
                     "aliases with module-scope variable " + var.access + " in '" + func_name + "'",
                     var.expr->Declaration()->source);
@@ -2147,8 +2140,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         auto resolved = dependencies_.resolved_identifiers.Get(ident);
         if (!resolved) {
             TINT_ICE(Resolver, diagnostics_)
-                << "identifier '" << builder_->Symbols().NameFor(ident->symbol)
-                << "' was not resolved";
+                << "identifier '" << ident->symbol.Name() << "' was not resolved";
             return nullptr;
         }
 
@@ -2355,27 +2347,27 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
         auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>();
         if (!tmpl_ident) {
             if (TINT_UNLIKELY(min_args != 0)) {
-                AddError("expected '<' for '" + b.Symbols().NameFor(ident->symbol) + "'",
+                AddError("expected '<' for '" + ident->symbol.Name() + "'",
                          Source{ident->source.range.end});
             }
             return nullptr;
         }
         if (min_args == max_args) {
             if (TINT_UNLIKELY(tmpl_ident->arguments.Length() != min_args)) {
-                AddError("'" + b.Symbols().NameFor(ident->symbol) + "' requires " +
-                             std::to_string(min_args) + " template arguments",
+                AddError("'" + ident->symbol.Name() + "' requires " + std::to_string(min_args) +
+                             " template arguments",
                          ident->source);
                 return nullptr;
             }
         } else {
             if (TINT_UNLIKELY(tmpl_ident->arguments.Length() < min_args)) {
-                AddError("'" + b.Symbols().NameFor(ident->symbol) + "' requires at least " +
+                AddError("'" + ident->symbol.Name() + "' requires at least " +
                              std::to_string(min_args) + " template arguments",
                          ident->source);
                 return nullptr;
             }
             if (TINT_UNLIKELY(tmpl_ident->arguments.Length() > max_args)) {
-                AddError("'" + b.Symbols().NameFor(ident->symbol) + "' requires at most " +
+                AddError("'" + ident->symbol.Name() + "' requires at most " +
                              std::to_string(max_args) + " template arguments",
                          ident->source);
                 return nullptr;
@@ -2752,7 +2744,7 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
             break;
     }
 
-    auto name = builder_->Symbols().NameFor(ident->symbol);
+    auto name = ident->symbol.Name();
     TINT_ICE(Resolver, diagnostics_) << ident->source << " unhandled builtin type '" << name << "'";
     return nullptr;
 }
@@ -2940,7 +2932,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     auto resolved = dependencies_.resolved_identifiers.Get(ident);
     if (!resolved) {
         TINT_ICE(Resolver, diagnostics_)
-            << "identifier '" << builder_->Symbols().NameFor(ident->symbol) << "' was not resolved";
+            << "identifier '" << ident->symbol.Name() << "' was not resolved";
         return nullptr;
     }
 
@@ -2968,12 +2960,11 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                             if (auto decl = loop_block->Decls().Find(symbol)) {
                                 if (decl->order >= loop_block->NumDeclsAtFirstContinue()) {
                                     AddError("continue statement bypasses declaration of '" +
-                                                 builder_->Symbols().NameFor(symbol) + "'",
+                                                 symbol.Name() + "'",
                                              loop_block->FirstContinue()->source);
-                                    AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
-                                                "' declared here",
+                                    AddNote("identifier '" + symbol.Name() + "' declared here",
                                             decl->variable->Declaration()->source);
-                                    AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
+                                    AddNote("identifier '" + symbol.Name() +
                                                 "' referenced in continuing block here",
                                             expr->source);
                                     return nullptr;
@@ -3011,7 +3002,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                     // Note: The spec is currently vague around the rules here. See
                     // https://github.com/gpuweb/gpuweb/issues/3081. Remove this comment when
                     // resolved.
-                    std::string desc = "var '" + builder_->Symbols().NameFor(symbol) + "' ";
+                    std::string desc = "var '" + symbol.Name() + "' ";
                     AddError(desc + "cannot be referenced at module-scope", expr->source);
                     AddNote(desc + "declared here", variable->Declaration()->source);
                     return nullptr;
@@ -3116,7 +3107,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     }
 
     TINT_UNREACHABLE(Resolver, diagnostics_)
-        << "unhandled resolved identifier: " << resolved->String(builder_->Symbols(), diagnostics_);
+        << "unhandled resolved identifier: " << resolved->String(diagnostics_);
     return nullptr;
 }
 
@@ -3151,8 +3142,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
             }
 
             if (member == nullptr) {
-                AddError("struct member " + builder_->Symbols().NameFor(symbol) + " not found",
-                         expr->source);
+                AddError("struct member " + symbol.Name() + " not found", expr->source);
                 return nullptr;
             }
 
@@ -3173,7 +3163,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
         },
 
         [&](const type::Vector* vec) -> sem::ValueExpression* {
-            std::string s = builder_->Symbols().NameFor(expr->member->symbol);
+            std::string s = expr->member->symbol.Name();
             auto size = s.size();
             utils::Vector<uint32_t, 4> swizzle;
             swizzle.Reserve(s.size());
@@ -3474,7 +3464,7 @@ bool Resolver::InternalAttribute(const ast::InternalAttribute* attr) {
 bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
     Mark(control.rule_name);
 
-    auto rule_name = builder_->Symbols().NameFor(control.rule_name->symbol);
+    auto rule_name = control.rule_name->symbol.Name();
     auto rule = builtin::ParseDiagnosticRule(rule_name);
     if (rule != builtin::DiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control.severity);
@@ -3646,7 +3636,7 @@ type::Type* Resolver::Alias(const ast::Alias* alias) {
 
 sem::Struct* Resolver::Structure(const ast::Struct* str) {
     auto struct_name = [&] {  //
-        return builder_->Symbols().NameFor(str->name->symbol);
+        return str->name->symbol.Name();
     };
 
     if (validator_.IsValidationEnabled(str->attributes,
@@ -3687,8 +3677,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         Mark(member);
         Mark(member->name);
         if (auto added = member_map.Add(member->name->symbol, member); !added) {
-            AddError("redefinition of '" + builder_->Symbols().NameFor(member->name->symbol) + "'",
-                     member->source);
+            AddError("redefinition of '" + member->name->symbol.Name() + "'", member->source);
             AddNote("previous definition is here", (*added.value)->source);
             return nullptr;
         }
@@ -4230,7 +4219,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(builtin::AddressSpace address_space,
                     address_space, const_cast<type::Type*>(member->Type()), decl->type->source)) {
                 utils::StringStream err;
                 err << "while analyzing structure member " << sem_.TypeNameOf(str) << "."
-                    << builder_->Symbols().NameFor(member->Name());
+                    << member->Name().Name();
                 AddNote(err.str(), member->Source());
                 return false;
             }
@@ -4369,9 +4358,9 @@ void Resolver::ApplyDiagnosticSeverities(NODE* node) {
 
 bool Resolver::CheckNotTemplated(const char* use, const ast::Identifier* ident) {
     if (TINT_UNLIKELY(ident->Is<ast::TemplatedIdentifier>())) {
-        AddError(std::string(use) + " '" + builder_->Symbols().NameFor(ident->symbol) +
-                     "' does not take template arguments",
-                 ident->source);
+        AddError(
+            std::string(use) + " '" + ident->symbol.Name() + "' does not take template arguments",
+            ident->source);
         if (auto resolved = dependencies_.resolved_identifiers.Get(ident)) {
             if (auto* ast_node = resolved->Node()) {
                 sem_.NoteDeclarationSource(ast_node);
@@ -4385,9 +4374,7 @@ bool Resolver::CheckNotTemplated(const char* use, const ast::Identifier* ident) 
 void Resolver::ErrorMismatchedResolvedIdentifier(const Source& source,
                                                  const ResolvedIdentifier& resolved,
                                                  std::string_view wanted) {
-    AddError("cannot use " + resolved.String(builder_->Symbols(), diagnostics_) + " as " +
-                 std::string(wanted),
-             source);
+    AddError("cannot use " + resolved.String(diagnostics_) + " as " + std::string(wanted), source);
     sem_.NoteDeclarationSource(resolved.Node());
 }
 

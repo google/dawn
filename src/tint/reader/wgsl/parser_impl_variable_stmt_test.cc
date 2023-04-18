@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), call->target, ast::Template("array", "i32"));
+    ast::CheckIdentifier(call->target, ast::Template("array", "i32"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
@@ -98,7 +98,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), call->target, ast::Template("array", "i32"));
+    ast::CheckIdentifier(call->target, ast::Template("array", "i32"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
@@ -114,7 +114,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
 
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
-    ast::CheckIdentifier(p->builder().Symbols(), call->target, ast::Template("vec2", "i32"));
+    ast::CheckIdentifier(call->target, ast::Template("vec2", "i32"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
@@ -131,7 +131,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
     ASSERT_NE(e->variable->initializer, nullptr);
     auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), call->target, ast::Template("vec2", "i32"));
+    ast::CheckIdentifier(call->target, ast::Template("vec2", "i32"));
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let) {
@@ -168,11 +168,11 @@ TEST_F(ParserImplTest, VariableStmt_Let_ComplexExpression) {
 
     ASSERT_TRUE(expr->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = expr->lhs->As<ast::IdentifierExpression>();
-    ast::CheckIdentifier(p->builder().Symbols(), ident_expr->identifier, "collide");
+    ast::CheckIdentifier(ident_expr->identifier, "collide");
 
     ASSERT_TRUE(expr->rhs->Is<ast::IdentifierExpression>());
     ident_expr = expr->rhs->As<ast::IdentifierExpression>();
-    ast::CheckIdentifier(p->builder().Symbols(), ident_expr->identifier, "collide_1");
+    ast::CheckIdentifier(ident_expr->identifier, "collide_1");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {

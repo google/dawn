@@ -52,10 +52,9 @@ class Type : public Castable<Type, UniqueNode> {
     /// Destructor
     ~Type() override;
 
-    /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
-    virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
+    virtual std::string FriendlyName() const = 0;
 
     /// @returns the inner most pointee type if this is a pointer, `this`
     /// otherwise

@@ -83,7 +83,7 @@ TEST_F(SampledTextureTest, Type) {
 TEST_F(SampledTextureTest, FriendlyName) {
     F32 f32;
     SampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.FriendlyName(Symbols()), "texture_3d<f32>");
+    EXPECT_EQ(s.FriendlyName(), "texture_3d<f32>");
 }
 
 TEST_F(SampledTextureTest, Clone) {

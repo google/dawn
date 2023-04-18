@@ -25,7 +25,7 @@ using BitcastExpressionTest = TestHelper;
 TEST_F(BitcastExpressionTest, Create) {
     auto* expr = Expr("expr");
     auto* exp = Bitcast(ty.f32(), expr);
-    CheckIdentifier(Symbols(), exp->type, "f32");
+    CheckIdentifier(exp->type, "f32");
     ASSERT_EQ(exp->expr, expr);
 }
 

@@ -21,21 +21,21 @@ using namespace tint::number_suffixes;  // NOLINT
 using AstCheckIdentifierTest = TestHelper;
 
 TEST_F(AstCheckIdentifierTest, NonTemplated) {
-    CheckIdentifier(Symbols(), Ident("abc"), "abc");
+    CheckIdentifier(Ident("abc"), "abc");
 }
 
 TEST_F(AstCheckIdentifierTest, TemplatedScalars) {
-    CheckIdentifier(Symbols(), Ident("abc", 1_i, 2_u, 3_f, 4_h, 5_a, 6._a, true),  //
+    CheckIdentifier(Ident("abc", 1_i, 2_u, 3_f, 4_h, 5_a, 6._a, true),  //
                     Template("abc", 1_i, 2_u, 3_f, 4_h, 5_a, 6._a, true));
 }
 
 TEST_F(AstCheckIdentifierTest, TemplatedIdentifiers) {
-    CheckIdentifier(Symbols(), Ident("abc", "one", "two", "three"),  //
+    CheckIdentifier(Ident("abc", "one", "two", "three"),  //
                     Template("abc", "one", "two", "three"));
 }
 
 TEST_F(AstCheckIdentifierTest, NestedTemplate) {
-    CheckIdentifier(Symbols(), Ident("abc", "pre", Ident("nested", 42_a), "post"),  //
+    CheckIdentifier(Ident("abc", "pre", Ident("nested", 42_a), "post"),  //
                     Template("abc", "pre", Template("nested", 42_a), "post"));
 }
 

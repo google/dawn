@@ -40,7 +40,7 @@ TEST_F(IR_InstructionTest, Bitcast) {
     EXPECT_EQ(4_i, val->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = bitcast(4)");
 }
 

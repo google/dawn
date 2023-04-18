@@ -36,19 +36,6 @@ TEST_F(SymbolTableTest, DeduplicatesNames) {
     EXPECT_EQ(Symbol(1, program_id, "name"), s.Register("name"));
 }
 
-TEST_F(SymbolTableTest, ReturnsNameForSymbol) {
-    auto program_id = ProgramID::New();
-    SymbolTable s{program_id};
-    auto sym = s.Register("name");
-    EXPECT_EQ("name", s.NameFor(sym));
-}
-
-TEST_F(SymbolTableTest, ReturnsBlankForMissingSymbol) {
-    auto program_id = ProgramID::New();
-    SymbolTable s{program_id};
-    EXPECT_EQ("$2", s.NameFor(Symbol(2, program_id, "$2")));
-}
-
 TEST_F(SymbolTableTest, AssertsForBlankString) {
     EXPECT_FATAL_FAILURE(
         {

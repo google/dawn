@@ -27,7 +27,6 @@
 #include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/builtin/texel_format.h"
 #include "src/tint/diagnostic/diagnostic.h"
-#include "src/tint/symbol_table.h"
 #include "src/tint/utils/hashmap.h"
 
 namespace tint::resolver {
@@ -164,10 +163,9 @@ class ResolvedIdentifier {
         return !(*this == other);
     }
 
-    /// @param symbols the program's symbol table
     /// @param diagnostics diagnostics used to report ICEs
     /// @return a description of the resolved symbol
-    std::string String(const SymbolTable& symbols, diag::List& diagnostics) const;
+    std::string String(diag::List& diagnostics) const;
 
   private:
     std::variant<UnresolvedIdentifier,
@@ -196,14 +194,10 @@ struct DependencyGraph {
     /// Build() performs symbol resolution and dependency analysis on `module`,
     /// populating `output` with the resulting dependency graph.
     /// @param module the AST module to analyse
-    /// @param symbols the symbol table
     /// @param diagnostics the diagnostic list to populate with errors / warnings
     /// @param output the resulting DependencyGraph
     /// @returns true on success, false on error
-    static bool Build(const ast::Module& module,
-                      const SymbolTable& symbols,
-                      diag::List& diagnostics,
-                      DependencyGraph& output);
+    static bool Build(const ast::Module& module, diag::List& diagnostics, DependencyGraph& output);
 
     /// All globals in dependency-sorted order.
     utils::Vector<const ast::Node*, 32> ordered_globals;

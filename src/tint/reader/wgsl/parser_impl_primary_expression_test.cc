@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident) {
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
-    ast::CheckIdentifier(p->builder().Symbols(), e.value, "a");
+    ast::CheckIdentifier(e.value, "a");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
@@ -116,7 +116,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructInitializer_Empty) {
     auto* call = e->As<ast::CallExpression>();
 
     ASSERT_NE(call->target, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), call->target, "S");
+    ast::CheckIdentifier(call->target, "S");
 
     ASSERT_EQ(call->args.Length(), 0u);
 }
@@ -140,7 +140,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructInitializer_NotEmpty) {
     auto* call = e->As<ast::CallExpression>();
 
     ASSERT_NE(call->target, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), call->target, "S");
+    ast::CheckIdentifier(call->target, "S");
 
     ASSERT_EQ(call->args.Length(), 2u);
 
@@ -215,7 +215,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
 
     ASSERT_TRUE(e->Is<ast::CallExpression>());
     auto* call = e->As<ast::CallExpression>();
-    ast::CheckIdentifier(p->builder().Symbols(), call->target, "f32");
+    ast::CheckIdentifier(call->target, "f32");
 
     ASSERT_EQ(call->args.Length(), 1u);
     ASSERT_TRUE(call->args[0]->Is<ast::IntLiteralExpression>());
@@ -233,7 +233,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
 
     auto* c = e->As<ast::BitcastExpression>();
 
-    ast::CheckIdentifier(p->builder().Symbols(), c->type, "f32");
+    ast::CheckIdentifier(c->type, "f32");
 
     ASSERT_TRUE(c->expr->Is<ast::IntLiteralExpression>());
 }

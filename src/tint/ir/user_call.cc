@@ -24,11 +24,11 @@ UserCall::UserCall(Value* result, Symbol name, utils::VectorRef<Value*> args)
 
 UserCall::~UserCall() = default;
 
-utils::StringStream& UserCall::ToString(utils::StringStream& out, const SymbolTable& st) const {
-    Result()->ToString(out, st);
+utils::StringStream& UserCall::ToString(utils::StringStream& out) const {
+    Result()->ToString(out);
     out << " = call(";
-    out << st.NameFor(name_) << ", ";
-    EmitArgs(out, st);
+    out << name_.Name() << ", ";
+    EmitArgs(out);
     out << ")";
     return out;
 }

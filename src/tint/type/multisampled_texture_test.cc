@@ -79,7 +79,7 @@ TEST_F(MultisampledTextureTest, Type) {
 TEST_F(MultisampledTextureTest, FriendlyName) {
     F32 f32;
     MultisampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.FriendlyName(Symbols()), "texture_multisampled_3d<f32>");
+    EXPECT_EQ(s.FriendlyName(), "texture_multisampled_3d<f32>");
 }
 
 TEST_F(MultisampledTextureTest, Clone) {

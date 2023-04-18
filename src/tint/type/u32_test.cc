@@ -41,7 +41,7 @@ TEST_F(U32Test, Equals) {
 
 TEST_F(U32Test, FriendlyName) {
     U32 u;
-    EXPECT_EQ(u.FriendlyName(Symbols()), "u32");
+    EXPECT_EQ(u.FriendlyName(), "u32");
 }
 
 TEST_F(U32Test, Clone) {

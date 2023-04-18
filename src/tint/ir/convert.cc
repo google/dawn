@@ -24,11 +24,11 @@ Convert::Convert(Value* result, const type::Type* from, utils::VectorRef<Value*>
 
 Convert::~Convert() = default;
 
-utils::StringStream& Convert::ToString(utils::StringStream& out, const SymbolTable& st) const {
-    Result()->ToString(out, st);
-    out << " = convert(" << Result()->Type()->FriendlyName(st) << ", " << from_->FriendlyName(st)
+utils::StringStream& Convert::ToString(utils::StringStream& out) const {
+    Result()->ToString(out);
+    out << " = convert(" << Result()->Type()->FriendlyName() << ", " << from_->FriendlyName()
         << ", ";
-    EmitArgs(out, st);
+    EmitArgs(out);
     out << ")";
     return out;
 }

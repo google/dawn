@@ -47,7 +47,7 @@ TEST_F(IR_InstructionTest, CreateAnd) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 & 2");
 }
 
@@ -74,7 +74,7 @@ TEST_F(IR_InstructionTest, CreateOr) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 | 2");
 }
 
@@ -101,7 +101,7 @@ TEST_F(IR_InstructionTest, CreateXor) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 ^ 2");
 }
 
@@ -128,7 +128,7 @@ TEST_F(IR_InstructionTest, CreateLogicalAnd) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 && 2");
 }
 
@@ -155,7 +155,7 @@ TEST_F(IR_InstructionTest, CreateLogicalOr) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 || 2");
 }
 
@@ -182,7 +182,7 @@ TEST_F(IR_InstructionTest, CreateEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 == 2");
 }
 
@@ -209,7 +209,7 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 != 2");
 }
 
@@ -236,7 +236,7 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 < 2");
 }
 
@@ -263,7 +263,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 > 2");
 }
 
@@ -290,7 +290,7 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 <= 2");
 }
 
@@ -317,7 +317,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (bool) = 4 >= 2");
 }
 
@@ -344,7 +344,7 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 << 2");
 }
 
@@ -371,7 +371,7 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 >> 2");
 }
 
@@ -398,7 +398,7 @@ TEST_F(IR_InstructionTest, CreateAdd) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 + 2");
 }
 
@@ -425,7 +425,7 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 - 2");
 }
 
@@ -452,7 +452,7 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 * 2");
 }
 
@@ -479,7 +479,7 @@ TEST_F(IR_InstructionTest, CreateDivide) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 / 2");
 }
 
@@ -506,7 +506,7 @@ TEST_F(IR_InstructionTest, CreateModulo) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    instr->ToString(str, b.builder.ir.symbols);
+    instr->ToString(str);
     EXPECT_EQ(str.str(), "%42 (i32) = 4 % 2");
 }
 

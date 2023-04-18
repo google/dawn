@@ -468,7 +468,7 @@ struct DecomposeMemoryAccess::State {
         return utils::GetOrCreate(load_funcs, LoadStoreKey{el_ty, buffer}, [&] {
             utils::Vector params{b.Param("offset", b.ty.u32())};
 
-            auto name = b.Symbols().New(ctx.dst->Symbols().NameFor(buffer) + "_load");
+            auto name = b.Symbols().New(buffer.Name() + "_load");
 
             if (auto* intrinsic = IntrinsicLoadFor(ctx.dst, el_ty, address_space, buffer)) {
                 auto el_ast_ty = CreateASTTypeFor(ctx, el_ty);
@@ -551,7 +551,7 @@ struct DecomposeMemoryAccess::State {
                 b.Param("value", CreateASTTypeFor(ctx, el_ty)),
             };
 
-            auto name = b.Symbols().New(ctx.dst->Symbols().NameFor(buffer) + "_store");
+            auto name = b.Symbols().New(buffer.Name() + "_store");
 
             if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, el_ty, buffer)) {
                 b.Func(name, params, b.ty.void_(), nullptr,
@@ -677,7 +677,7 @@ struct DecomposeMemoryAccess::State {
                 ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());
             }
 
-            auto name = b.Symbols().New(ctx.dst->Symbols().NameFor(buffer) + intrinsic->str());
+            auto name = b.Symbols().New(buffer.Name() + intrinsic->str());
             b.Func(name, std::move(params), ret_ty, nullptr,
                    utils::Vector{
                        atomic,

@@ -24,7 +24,7 @@ using BuiltinAttributeTest = TestHelper;
 
 TEST_F(BuiltinAttributeTest, Creation) {
     auto* d = Builtin(builtin::BuiltinValue::kFragDepth);
-    CheckIdentifier(Symbols(), d->builtin, "frag_depth");
+    CheckIdentifier(d->builtin, "frag_depth");
 }
 
 TEST_F(BuiltinAttributeTest, Assert_Null_Builtin) {

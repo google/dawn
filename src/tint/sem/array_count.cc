@@ -33,8 +33,8 @@ bool NamedOverrideArrayCount::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string NamedOverrideArrayCount::FriendlyName(const SymbolTable& symbols) const {
-    return symbols.NameFor(variable->Declaration()->name->symbol);
+std::string NamedOverrideArrayCount::FriendlyName() const {
+    return variable->Declaration()->name->symbol.Name();
 }
 
 type::ArrayCount* NamedOverrideArrayCount::Clone(type::CloneContext&) const {
@@ -53,7 +53,7 @@ bool UnnamedOverrideArrayCount::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string UnnamedOverrideArrayCount::FriendlyName(const SymbolTable&) const {
+std::string UnnamedOverrideArrayCount::FriendlyName() const {
     return "[unnamed override-expression]";
 }
 

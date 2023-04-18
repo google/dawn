@@ -35,9 +35,8 @@ class AbstractFloat final : public Castable<AbstractFloat, AbstractNumeric> {
     /// @returns true if this type is equal to the given type
     bool Equals(const UniqueNode& other) const override;
 
-    /// @param symbols the program's symbol table
     /// @returns the name for this type when printed in diagnostics.
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type

@@ -25,10 +25,10 @@ Builtin::Builtin(Value* result, builtin::Function func, utils::VectorRef<Value*>
 
 Builtin::~Builtin() = default;
 
-utils::StringStream& Builtin::ToString(utils::StringStream& out, const SymbolTable& st) const {
-    Result()->ToString(out, st);
+utils::StringStream& Builtin::ToString(utils::StringStream& out) const {
+    Result()->ToString(out);
     out << " = " << builtin::str(func_) << "(";
-    EmitArgs(out, st);
+    EmitArgs(out);
     out << ")";
     return out;
 }

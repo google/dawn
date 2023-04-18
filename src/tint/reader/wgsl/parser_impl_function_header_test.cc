@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType) {
 
     EXPECT_EQ(f->name, "main");
     EXPECT_EQ(f->params.Length(), 0u);
-    ast::CheckIdentifier(p->builder().Symbols(), f->return_type, "f32");
+    ast::CheckIdentifier(f->return_type, "f32");
     ASSERT_EQ(f->return_type_attributes.Length(), 1u);
 
     auto* loc = f->return_type_attributes[0]->As<ast::LocationAttribute>();
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {
 
     EXPECT_EQ(f->name, "main");
     EXPECT_EQ(f->params.Length(), 0u);
-    ast::CheckIdentifier(p->builder().Symbols(), f->return_type, "f32");
+    ast::CheckIdentifier(f->return_type, "f32");
     ASSERT_EQ(f->return_type_attributes.Length(), 1u);
     EXPECT_TRUE(f->return_type_attributes[0]->Is<ast::InvariantAttribute>());
 }

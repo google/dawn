@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, "A");
+    ast::CheckIdentifier(t.value, "A");
     EXPECT_EQ(t->expr->source.range, (Source::Range{{1u, 1u}, {1u, 2u}}));
 }
 
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, "bool");
+    ast::CheckIdentifier(t.value, "bool");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
@@ -60,7 +60,7 @@ TEST_F(ParserImplTest, TypeDecl_F16) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, "f16");
+    ast::CheckIdentifier(t.value, "f16");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, "f32");
+    ast::CheckIdentifier(t.value, "f32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -82,7 +82,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, "i32");
+    ast::CheckIdentifier(t.value, "i32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, TypeDecl_U32) {
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, "u32");
+    ast::CheckIdentifier(t.value, "u32");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -117,8 +117,7 @@ TEST_P(VecTest, Parse) {
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
-    ast::CheckIdentifier(p->builder().Symbols(), t.value,
-                         ast::Template("vec" + std::to_string(params.count), "f32"));
+    ast::CheckIdentifier(t.value, ast::Template("vec" + std::to_string(params.count), "f32"));
     EXPECT_EQ(t.value->source.range, params.range);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
@@ -153,7 +152,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("ptr", "function", "f32"));
+    ast::CheckIdentifier(t.value, ast::Template("ptr", "function", "f32"));
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
 
@@ -165,8 +164,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_WithAccess) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value,
-                         ast::Template("ptr", "function", "f32", "read"));
+    ast::CheckIdentifier(t.value, ast::Template("ptr", "function", "f32", "read"));
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25u}}));
 }
 
@@ -178,8 +176,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value,
-                         ast::Template("ptr", "function", ast::Template("vec2", "f32")));
+    ast::CheckIdentifier(t.value, ast::Template("ptr", "function", ast::Template("vec2", "f32")));
 
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25}}));
 }
@@ -232,7 +229,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("atomic", "f32"));
+    ast::CheckIdentifier(t.value, ast::Template("atomic", "f32"));
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 12u}}));
 }
 
@@ -244,8 +241,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_ToVec) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value,
-                         ast::Template("atomic", ast::Template("vec2", "f32")));
+    ast::CheckIdentifier(t.value, ast::Template("atomic", ast::Template("vec2", "f32")));
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 
@@ -267,7 +263,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_AbstractIntLiteralSize) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("array", "f32", 5_a));
+    ast::CheckIdentifier(t.value, ast::Template("array", "f32", 5_a));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
@@ -278,7 +274,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("array", "f32", 5_i));
+    ast::CheckIdentifier(t.value, ast::Template("array", "f32", 5_i));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
@@ -289,7 +285,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("array", "f32", 5_u));
+    ast::CheckIdentifier(t.value, ast::Template("array", "f32", 5_u));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
@@ -300,7 +296,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("array", "f32", "size"));
+    ast::CheckIdentifier(t.value, ast::Template("array", "f32", "size"));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_ExpressionSize) {
@@ -311,17 +307,15 @@ TEST_F(ParserImplTest, TypeDecl_Array_ExpressionSize) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    auto name_for = [&](const Symbol& sym) { return p->builder().Symbols().NameFor(sym); };
-
     auto* arr = t->expr->identifier->As<ast::TemplatedIdentifier>();
-    EXPECT_EQ(name_for(arr->symbol), "array");
+    EXPECT_EQ(arr->symbol.Name(), "array");
     EXPECT_TRUE(arr->attributes.IsEmpty());
 
     ASSERT_EQ(arr->arguments.Length(), 2u);
 
     auto* ty = As<ast::IdentifierExpression>(arr->arguments[0]);
     ASSERT_NE(ty, nullptr);
-    EXPECT_EQ(name_for(ty->identifier->symbol), "f32");
+    EXPECT_EQ(ty->identifier->symbol.Name(), "f32");
 
     auto* count = As<ast::BinaryExpression>(arr->arguments[1]);
     ASSERT_NE(count, nullptr);
@@ -329,7 +323,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_ExpressionSize) {
 
     auto* count_lhs = As<ast::IdentifierExpression>(count->lhs);
     ASSERT_NE(count_lhs, nullptr);
-    EXPECT_EQ(name_for(count_lhs->identifier->symbol), "size");
+    EXPECT_EQ(count_lhs->identifier->symbol.Name(), "size");
 
     auto* count_rhs = As<ast::IntLiteralExpression>(count->rhs);
     ASSERT_NE(count_rhs, nullptr);
@@ -344,7 +338,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("array", "u32"));
+    ast::CheckIdentifier(t.value, ast::Template("array", "u32"));
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 11u}}));
 }
 
@@ -356,8 +350,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
     ASSERT_NE(t.value, nullptr) << p->error();
     ASSERT_FALSE(p->has_error());
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value,
-                         ast::Template("array", ast::Template("vec4", "u32")));
+    ast::CheckIdentifier(t.value, ast::Template("array", ast::Template("vec4", "u32")));
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 
@@ -406,7 +399,7 @@ TEST_P(MatrixTest, Parse) {
     std::string expected_name =
         "mat" + std::to_string(GetParam().columns) + "x" + std::to_string(GetParam().rows);
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template(expected_name, "f32"));
+    ast::CheckIdentifier(t.value, ast::Template(expected_name, "f32"));
     EXPECT_EQ(t.value->source.range, params.range);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
@@ -453,7 +446,7 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, "sampler");
+    ast::CheckIdentifier(t.value, "sampler");
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 
@@ -465,7 +458,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), t.value, ast::Template("texture_cube", "f32"));
+    ast::CheckIdentifier(t.value, ast::Template("texture_cube", "f32"));
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 

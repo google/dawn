@@ -98,22 +98,22 @@ TEST_F(ArrayTest, Equals) {
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSized) {
     auto* arr = create<Array>(create<I32>(), create<RuntimeArrayCount>(), 0u, 4u, 4u, 4u);
-    EXPECT_EQ(arr->FriendlyName(Symbols()), "array<i32>");
+    EXPECT_EQ(arr->FriendlyName(), "array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSized) {
     auto* arr = create<Array>(create<I32>(), create<ConstantArrayCount>(5u), 4u, 20u, 4u, 4u);
-    EXPECT_EQ(arr->FriendlyName(Symbols()), "array<i32, 5>");
+    EXPECT_EQ(arr->FriendlyName(), "array<i32, 5>");
 }
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSizedNonImplicitStride) {
     auto* arr = create<Array>(create<I32>(), create<RuntimeArrayCount>(), 0u, 4u, 8u, 4u);
-    EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(8) array<i32>");
+    EXPECT_EQ(arr->FriendlyName(), "@stride(8) array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSizedNonImplicitStride) {
     auto* arr = create<Array>(create<I32>(), create<ConstantArrayCount>(5u), 4u, 20u, 8u, 4u);
-    EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(8) array<i32, 5>");
+    EXPECT_EQ(arr->FriendlyName(), "@stride(8) array<i32, 5>");
 }
 
 TEST_F(ArrayTest, IsConstructable) {

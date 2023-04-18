@@ -39,13 +39,12 @@ TEST_P(VariableQualifierTest, ParsesAddressSpace) {
     EXPECT_FALSE(sc.errored);
     EXPECT_TRUE(sc.matched);
     if (params.address_space != builtin::AddressSpace::kUndefined) {
-        ast::CheckIdentifier(p->builder().Symbols(), sc->address_space,
-                             utils::ToString(params.address_space));
+        ast::CheckIdentifier(sc->address_space, utils::ToString(params.address_space));
     } else {
         EXPECT_EQ(sc->address_space, nullptr);
     }
     if (params.access != builtin::Access::kUndefined) {
-        ast::CheckIdentifier(p->builder().Symbols(), sc->access, utils::ToString(params.access));
+        ast::CheckIdentifier(sc->access, utils::ToString(params.access));
     } else {
         EXPECT_EQ(sc->access, nullptr);
     }

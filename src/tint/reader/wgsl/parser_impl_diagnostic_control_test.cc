@@ -33,7 +33,7 @@ TEST_P(DiagnosticControlParserTest, DiagnosticControl_Valid) {
 
     auto* r = e->rule_name;
     ASSERT_NE(r, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), r, "foo");
+    ast::CheckIdentifier(r, "foo");
 }
 INSTANTIATE_TEST_SUITE_P(DiagnosticControlParserTest,
                          DiagnosticControlParserTest,
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, DiagnosticControl_Valid_TrailingComma) {
 
     auto* r = e->rule_name;
     ASSERT_NE(r, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), r, "foo");
+    ast::CheckIdentifier(r, "foo");
 }
 
 TEST_F(ParserImplTest, DiagnosticControl_MissingOpenParen) {

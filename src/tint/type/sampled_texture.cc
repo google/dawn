@@ -39,9 +39,9 @@ bool SampledTexture::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
+std::string SampledTexture::FriendlyName() const {
     utils::StringStream out;
-    out << "texture_" << dim() << "<" << type_->FriendlyName(symbols) << ">";
+    out << "texture_" << dim() << "<" << type_->FriendlyName() << ">";
     return out.str();
 }
 

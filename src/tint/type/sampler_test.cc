@@ -55,12 +55,12 @@ TEST_F(SamplerTest, Equals) {
 
 TEST_F(SamplerTest, FriendlyNameSampler) {
     Sampler s{SamplerKind::kSampler};
-    EXPECT_EQ(s.FriendlyName(Symbols()), "sampler");
+    EXPECT_EQ(s.FriendlyName(), "sampler");
 }
 
 TEST_F(SamplerTest, FriendlyNameComparisonSampler) {
     Sampler s{SamplerKind::kComparisonSampler};
-    EXPECT_EQ(s.FriendlyName(Symbols()), "sampler_comparison");
+    EXPECT_EQ(s.FriendlyName(), "sampler_comparison");
 }
 
 TEST_F(SamplerTest, Clone) {

@@ -64,7 +64,7 @@ utils::StringStream& Disassembler::Indent() {
 void Disassembler::EmitBlockInstructions(const Block* b) {
     for (const auto* instr : b->instructions) {
         Indent();
-        instr->ToString(out_, mod_.symbols) << std::endl;
+        instr->ToString(out_) << std::endl;
     }
 }
 
@@ -89,8 +89,7 @@ void Disassembler::Walk(const FlowNode* node) {
     tint::Switch(
         node,
         [&](const ir::Function* f) {
-            Indent() << "%bb" << GetIdForNode(f) << " = Function " << mod_.symbols.NameFor(f->name)
-                     << std::endl;
+            Indent() << "%bb" << GetIdForNode(f) << " = Function " << f->name.Name() << std::endl;
 
             {
                 ScopedIndent func_indent(&indent_size_);
@@ -120,7 +119,7 @@ void Disassembler::Walk(const FlowNode* node) {
                 if (v != b->branch.args.Front()) {
                     out_ << ", ";
                 }
-                v->ToString(out_, mod_.symbols);
+                v->ToString(out_);
             }
             out_ << ")" << std::endl;
 
@@ -132,7 +131,7 @@ void Disassembler::Walk(const FlowNode* node) {
         },
         [&](const ir::Switch* s) {
             Indent() << "%bb" << GetIdForNode(s) << " = Switch (";
-            s->condition->ToString(out_, mod_.symbols);
+            s->condition->ToString(out_);
             out_ << ")" << std::endl;
 
             {
@@ -148,7 +147,7 @@ void Disassembler::Walk(const FlowNode* node) {
                         if (selector.IsDefault()) {
                             out_ << "default";
                         } else {
-                            selector.val->ToString(out_, mod_.symbols);
+                            selector.val->ToString(out_);
                         }
                     }
                     out_ << std::endl;
@@ -161,7 +160,7 @@ void Disassembler::Walk(const FlowNode* node) {
         },
         [&](const ir::If* i) {
             Indent() << "%bb" << GetIdForNode(i) << " = if (";
-            i->condition->ToString(out_, mod_.symbols);
+            i->condition->ToString(out_);
             out_ << ")" << std::endl;
 
             {

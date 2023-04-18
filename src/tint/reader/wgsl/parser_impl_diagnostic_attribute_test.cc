@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, DiagnosticAttribute_Valid) {
     EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kOff);
     auto* r = d->control.rule_name;
     ASSERT_NE(r, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), r, "foo");
+    ast::CheckIdentifier(r, "foo");
 }
 
 }  // namespace

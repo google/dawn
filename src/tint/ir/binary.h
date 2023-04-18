@@ -76,9 +76,8 @@ class Binary : public Castable<Binary, Instruction> {
 
     /// Write the instruction to the given stream
     /// @param out the stream to write to
-    /// @param st the symbol table
     /// @returns the stream
-    utils::StringStream& ToString(utils::StringStream& out, const SymbolTable& st) const override;
+    utils::StringStream& ToString(utils::StringStream& out) const override;
 
   private:
     Kind kind_;

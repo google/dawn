@@ -29,9 +29,8 @@ class ArrayCount : public Castable<ArrayCount, UniqueNode> {
   public:
     ~ArrayCount() override;
 
-    /// @param symbols the symbol table
     /// @returns the friendly name for this array count
-    virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
+    virtual std::string FriendlyName() const = 0;
 
     /// @param ctx the clone context
     /// @returns a clone of this type
@@ -60,9 +59,8 @@ class ConstantArrayCount final : public Castable<ConstantArrayCount, ArrayCount>
     /// @returns true if this array count is equal to other
     bool Equals(const UniqueNode& other) const override;
 
-    /// @param symbols the symbol table
     /// @returns the friendly name for this array count
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type
@@ -87,9 +85,8 @@ class RuntimeArrayCount final : public Castable<RuntimeArrayCount, ArrayCount> {
     /// @returns true if this array count is equal to other
     bool Equals(const UniqueNode& other) const override;
 
-    /// @param symbols the symbol table
     /// @returns the friendly name for this array count
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type

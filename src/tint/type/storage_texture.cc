@@ -43,7 +43,7 @@ bool StorageTexture::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string StorageTexture::FriendlyName(const SymbolTable&) const {
+std::string StorageTexture::FriendlyName() const {
     utils::StringStream out;
     out << "texture_storage_" << dim() << "<" << texel_format_ << ", " << access_ << ">";
     return out.str();

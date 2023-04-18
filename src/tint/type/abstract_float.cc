@@ -28,7 +28,7 @@ bool AbstractFloat::Equals(const UniqueNode& other) const {
     return other.Is<AbstractFloat>();
 }
 
-std::string AbstractFloat::FriendlyName(const SymbolTable&) const {
+std::string AbstractFloat::FriendlyName() const {
     return "abstract-float";
 }
 

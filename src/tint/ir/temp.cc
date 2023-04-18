@@ -24,8 +24,8 @@ Temp::Temp(const type::Type* type, Id id) : type_(type), id_(id) {}
 
 Temp::~Temp() = default;
 
-utils::StringStream& Temp::ToString(utils::StringStream& out, const SymbolTable& st) const {
-    out << "%" << std::to_string(AsId()) << " (" << type_->FriendlyName(st) << ")";
+utils::StringStream& Temp::ToString(utils::StringStream& out) const {
+    out << "%" << std::to_string(AsId()) << " (" << type_->FriendlyName() << ")";
     return out;
 }
 

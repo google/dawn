@@ -40,9 +40,8 @@ class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, t
     /// @returns true if this array count is equal @p other
     bool Equals(const type::UniqueNode& other) const override;
 
-    /// @param symbols the symbol table
     /// @returns the friendly name for this array count
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type
@@ -70,9 +69,8 @@ class UnnamedOverrideArrayCount final
     /// @returns true if this array count is equal @p other
     bool Equals(const type::UniqueNode& other) const override;
 
-    /// @param symbols the symbol table
     /// @returns the friendly name for this array count
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type

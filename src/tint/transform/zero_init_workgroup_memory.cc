@@ -365,7 +365,7 @@ struct ZeroInitWorkgroupMemory::State {
         }
 
         TINT_UNREACHABLE(Transform, b.Diagnostics())
-            << "could not zero workgroup type: " << ty->FriendlyName(ctx.src->Symbols());
+            << "could not zero workgroup type: " << ty->FriendlyName();
         return false;
     }
 

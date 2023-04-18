@@ -35,9 +35,8 @@ class AbstractInt final : public Castable<AbstractInt, AbstractNumeric> {
     /// @returns true if the this type is equal to @p other
     bool Equals(const UniqueNode& other) const override;
 
-    /// @param symbols the program's symbol table
     /// @returns the name for this type when printed in diagnostics.
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type

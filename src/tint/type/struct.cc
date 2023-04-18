@@ -92,14 +92,14 @@ uint32_t Struct::Size() const {
     return size_;
 }
 
-std::string Struct::FriendlyName(const SymbolTable& symbols) const {
-    return symbols.NameFor(name_);
+std::string Struct::FriendlyName() const {
+    return name_.Name();
 }
 
-std::string Struct::Layout(const tint::SymbolTable& symbols) const {
+std::string Struct::Layout() const {
     utils::StringStream ss;
 
-    auto member_name_of = [&](const StructMember* sm) { return symbols.NameFor(sm->Name()); };
+    auto member_name_of = [&](const StructMember* sm) { return sm->Name().Name(); };
 
     if (Members().IsEmpty()) {
         return {};
@@ -128,7 +128,7 @@ std::string Struct::Layout(const tint::SymbolTable& symbols) const {
            << align << ") size(" << std::setw(size_w) << size << ") */   " << s << ";\n";
     };
 
-    print_struct_begin_line(Align(), Size(), UnwrapRef()->FriendlyName(symbols));
+    print_struct_begin_line(Align(), Size(), UnwrapRef()->FriendlyName());
 
     for (size_t i = 0; i < Members().Length(); ++i) {
         auto* const m = Members()[i];
@@ -147,7 +147,7 @@ std::string Struct::Layout(const tint::SymbolTable& symbols) const {
         // Output member
         std::string member_name = member_name_of(m);
         print_member_line(m->Offset(), m->Align(), m->Size(),
-                          member_name + " : " + m->Type()->UnwrapRef()->FriendlyName(symbols));
+                          member_name + " : " + m->Type()->UnwrapRef()->FriendlyName());
     }
 
     // Output struct size padding, if any
@@ -163,7 +163,7 @@ std::string Struct::Layout(const tint::SymbolTable& symbols) const {
 }
 
 Struct* Struct::Clone(CloneContext& ctx) const {
-    auto sym = ctx.dst.st->Register(ctx.src.st->NameFor(name_));
+    auto sym = ctx.dst.st->Register(name_.Name());
 
     utils::Vector<const StructMember*, 4> members;
     for (const auto& mem : members_) {
@@ -192,7 +192,7 @@ StructMember::StructMember(tint::Source source,
 StructMember::~StructMember() = default;
 
 StructMember* StructMember::Clone(CloneContext& ctx) const {
-    auto sym = ctx.dst.st->Register(ctx.src.st->NameFor(name_));
+    auto sym = ctx.dst.st->Register(name_.Name());
     auto* ty = type_->Clone(ctx);
     return ctx.dst.mgr->Get<StructMember>(source_, sym, ty, index_, offset_, align_, size_,
                                           location_);

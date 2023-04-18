@@ -28,10 +28,10 @@ using VariableTest = TestHelper;
 TEST_F(VariableTest, Creation) {
     auto* v = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction);
 
-    CheckIdentifier(Symbols(), v->name, "my_var");
-    CheckIdentifier(Symbols(), v->declared_address_space, "function");
+    CheckIdentifier(v->name, "my_var");
+    CheckIdentifier(v->declared_address_space, "function");
     EXPECT_EQ(v->declared_access, nullptr);
-    CheckIdentifier(Symbols(), v->type, "i32");
+    CheckIdentifier(v->type, "i32");
     EXPECT_EQ(v->source.range.begin.line, 0u);
     EXPECT_EQ(v->source.range.begin.column, 0u);
     EXPECT_EQ(v->source.range.end.line, 0u);
@@ -42,9 +42,9 @@ TEST_F(VariableTest, CreationWithSource) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}}, "i",
                   ty.f32(), builtin::AddressSpace::kPrivate, utils::Empty);
 
-    CheckIdentifier(Symbols(), v->name, "i");
-    CheckIdentifier(Symbols(), v->declared_address_space, "private");
-    CheckIdentifier(Symbols(), v->type, "f32");
+    CheckIdentifier(v->name, "i");
+    CheckIdentifier(v->declared_address_space, "private");
+    CheckIdentifier(v->type, "f32");
     EXPECT_EQ(v->source.range.begin.line, 27u);
     EXPECT_EQ(v->source.range.begin.column, 4u);
     EXPECT_EQ(v->source.range.end.line, 27u);
@@ -55,9 +55,9 @@ TEST_F(VariableTest, CreationEmpty) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}}, "a_var",
                   ty.i32(), builtin::AddressSpace::kWorkgroup, utils::Empty);
 
-    CheckIdentifier(Symbols(), v->name, "a_var");
-    CheckIdentifier(Symbols(), v->declared_address_space, "workgroup");
-    CheckIdentifier(Symbols(), v->type, "i32");
+    CheckIdentifier(v->name, "a_var");
+    CheckIdentifier(v->declared_address_space, "workgroup");
+    CheckIdentifier(v->type, "i32");
     EXPECT_EQ(v->source.range.begin.line, 27u);
     EXPECT_EQ(v->source.range.begin.column, 4u);
     EXPECT_EQ(v->source.range.end.line, 27u);

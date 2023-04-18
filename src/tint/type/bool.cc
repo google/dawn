@@ -34,7 +34,7 @@ bool Bool::Equals(const UniqueNode& other) const {
     return other.Is<Bool>();
 }
 
-std::string Bool::FriendlyName(const SymbolTable&) const {
+std::string Bool::FriendlyName() const {
     return "bool";
 }
 

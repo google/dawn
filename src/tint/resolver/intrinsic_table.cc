@@ -65,7 +65,7 @@ class Any final : public Castable<Any, type::Type> {
 
     // Stub implementations for type::Type conformance.
     bool Equals(const type::UniqueNode&) const override { return false; }
-    std::string FriendlyName(const SymbolTable&) const override { return "<any>"; }
+    std::string FriendlyName() const override { return "<any>"; }
     type::Type* Clone(type::CloneContext&) const override { return nullptr; }
 };
 
@@ -977,11 +977,9 @@ const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const ty
 }
 
 const sem::Struct* build_atomic_compare_exchange_result(MatchState& state, const type::Type* ty) {
-    return build_struct(
-        state.builder,
-        "__atomic_compare_exchange_result" + ty->FriendlyName(state.builder.Symbols()),
-        {{"old_value", const_cast<type::Type*>(ty)},
-         {"exchanged", state.builder.create<type::Bool>()}});
+    return build_struct(state.builder, "__atomic_compare_exchange_result" + ty->FriendlyName(),
+                        {{"old_value", const_cast<type::Type*>(ty)},
+                         {"exchanged", state.builder.create<type::Bool>()}});
 }
 
 /// ParameterInfo describes a parameter
@@ -1230,14 +1228,13 @@ class Impl : public IntrinsicTable {
 
 /// @return a string representing a call to a builtin with the given argument
 /// types.
-std::string CallSignature(ProgramBuilder& builder,
-                          const char* intrinsic_name,
+std::string CallSignature(const char* intrinsic_name,
                           utils::VectorRef<const type::Type*> args,
                           const type::Type* template_arg = nullptr) {
     utils::StringStream ss;
     ss << intrinsic_name;
     if (template_arg) {
-        ss << "<" << template_arg->FriendlyName(builder.Symbols()) << ">";
+        ss << "<" << template_arg->FriendlyName() << ">";
     }
     ss << "(";
     {
@@ -1247,7 +1244,7 @@ std::string CallSignature(ProgramBuilder& builder,
                 ss << ", ";
             }
             first = false;
-            ss << arg->UnwrapRef()->FriendlyName(builder.Symbols());
+            ss << arg->UnwrapRef()->FriendlyName();
         }
     }
     ss << ")";
@@ -1274,7 +1271,7 @@ Impl::Builtin Impl::Lookup(builtin::Function builtin_type,
     // Generates an error when no overloads match the provided arguments
     auto on_no_match = [&](utils::VectorRef<Candidate> candidates) {
         utils::StringStream ss;
-        ss << "no matching call to " << CallSignature(builder, intrinsic_name, args) << std::endl;
+        ss << "no matching call to " << CallSignature(intrinsic_name, args) << std::endl;
         if (!candidates.IsEmpty()) {
             ss << std::endl
                << candidates.Length() << " candidate function"
@@ -1343,7 +1340,7 @@ IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,
     // Generates an error when no overloads match the provided arguments
     auto on_no_match = [&, name = intrinsic_name](utils::VectorRef<Candidate> candidates) {
         utils::StringStream ss;
-        ss << "no matching overload for " << CallSignature(builder, name, args) << std::endl;
+        ss << "no matching overload for " << CallSignature(name, args) << std::endl;
         if (!candidates.IsEmpty()) {
             ss << std::endl
                << candidates.Length() << " candidate operator"
@@ -1421,7 +1418,7 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
     // Generates an error when no overloads match the provided arguments
     auto on_no_match = [&, name = intrinsic_name](utils::VectorRef<Candidate> candidates) {
         utils::StringStream ss;
-        ss << "no matching overload for " << CallSignature(builder, name, args) << std::endl;
+        ss << "no matching overload for " << CallSignature(name, args) << std::endl;
         if (!candidates.IsEmpty()) {
             ss << std::endl
                << candidates.Length() << " candidate operator"
@@ -1456,7 +1453,7 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
     // Generates an error when no overloads match the provided arguments
     auto on_no_match = [&](utils::VectorRef<Candidate> candidates) {
         utils::StringStream ss;
-        ss << "no matching constructor for " << CallSignature(builder, name, args, template_arg)
+        ss << "no matching constructor for " << CallSignature(name, args, template_arg)
            << std::endl;
         Candidates ctor, conv;
         for (auto candidate : candidates) {
@@ -1871,7 +1868,7 @@ void Impl::ErrAmbiguousOverload(const char* intrinsic_name,
     ss << "ambiguous overload while attempting to match " << intrinsic_name;
     for (size_t i = 0; i < std::numeric_limits<size_t>::max(); i++) {
         if (auto* ty = templates.Type(i)) {
-            ss << ((i == 0) ? "<" : ", ") << ty->FriendlyName(builder.Symbols());
+            ss << ((i == 0) ? "<" : ", ") << ty->FriendlyName();
         } else {
             if (i > 0) {
                 ss << ">";
@@ -1886,7 +1883,7 @@ void Impl::ErrAmbiguousOverload(const char* intrinsic_name,
             ss << ", ";
         }
         first = false;
-        ss << arg->FriendlyName(builder.Symbols());
+        ss << arg->FriendlyName();
     }
     ss << "):\n";
     for (auto& candidate : candidates) {

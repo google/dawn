@@ -74,13 +74,13 @@ TEST_F(ReferenceTest, Equals) {
 TEST_F(ReferenceTest, FriendlyName) {
     auto* r =
         create<Reference>(create<I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kRead);
-    EXPECT_EQ(r->FriendlyName(Symbols()), "ref<i32, read>");
+    EXPECT_EQ(r->FriendlyName(), "ref<i32, read>");
 }
 
 TEST_F(ReferenceTest, FriendlyNameWithAddressSpace) {
     auto* r =
         create<Reference>(create<I32>(), builtin::AddressSpace::kWorkgroup, builtin::Access::kRead);
-    EXPECT_EQ(r->FriendlyName(Symbols()), "ref<workgroup, i32, read>");
+    EXPECT_EQ(r->FriendlyName(), "ref<workgroup, i32, read>");
 }
 
 TEST_F(ReferenceTest, Clone) {

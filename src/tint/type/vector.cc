@@ -47,12 +47,12 @@ bool Vector::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string Vector::FriendlyName(const SymbolTable& symbols) const {
+std::string Vector::FriendlyName() const {
     utils::StringStream out;
     if (packed_) {
         out << "__packed_";
     }
-    out << "vec" << width_ << "<" << subtype_->FriendlyName(symbols) << ">";
+    out << "vec" << width_ << "<" << subtype_->FriendlyName() << ">";
     return out.str();
 }
 

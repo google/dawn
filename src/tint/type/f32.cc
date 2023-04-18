@@ -34,7 +34,7 @@ bool F32::Equals(const UniqueNode& other) const {
     return other.Is<F32>();
 }
 
-std::string F32::FriendlyName(const SymbolTable&) const {
+std::string F32::FriendlyName() const {
     return "f32";
 }
 

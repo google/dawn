@@ -1332,7 +1332,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
         if (target == Target::kAll) {
             return true;
         }
-        auto name = src->Symbols().NameFor(symbol);
+        auto name = symbol.Name();
         if (!text::utf8::IsASCII(name)) {
             // name is non-ascii. All of the backend keywords are ascii, so rename if we're not
             // preserving unicode symbols.
@@ -1388,7 +1388,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
 
     Data::Remappings out;
     for (auto it : remappings) {
-        out[ctx.src->Symbols().NameFor(it.key)] = ctx.dst->Symbols().NameFor(it.value);
+        out[it.key.Name()] = it.value.Name();
     }
     outputs.Add<Data>(std::move(out));
 

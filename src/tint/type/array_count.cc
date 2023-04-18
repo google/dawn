@@ -36,7 +36,7 @@ bool ConstantArrayCount::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string ConstantArrayCount::FriendlyName(const SymbolTable&) const {
+std::string ConstantArrayCount::FriendlyName() const {
     return std::to_string(value);
 }
 
@@ -52,7 +52,7 @@ bool RuntimeArrayCount::Equals(const UniqueNode& other) const {
     return other.Is<RuntimeArrayCount>();
 }
 
-std::string RuntimeArrayCount::FriendlyName(const SymbolTable&) const {
+std::string RuntimeArrayCount::FriendlyName() const {
     return "";
 }
 

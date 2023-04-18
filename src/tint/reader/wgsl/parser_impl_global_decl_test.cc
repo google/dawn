@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
 
     auto* v = program.AST().GlobalVariables()[0];
     EXPECT_EQ(v->name->symbol, program.Symbols().Get("a"));
-    ast::CheckIdentifier(program.Symbols(), v->type, ast::Template("vec2", "i32"));
+    ast::CheckIdentifier(v->type, ast::Template("vec2", "i32"));
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred) {
@@ -107,8 +107,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
     auto program = p->program();
     ASSERT_EQ(program.AST().TypeDecls().Length(), 1u);
     ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Alias>());
-    ast::CheckIdentifier(program.Symbols(), program.AST().TypeDecls()[0]->As<ast::Alias>()->name,
-                         "A");
+    ast::CheckIdentifier(program.AST().TypeDecls()[0]->As<ast::Alias>()->name, "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
@@ -129,7 +128,7 @@ alias B = A;)");
     ASSERT_TRUE(program.AST().TypeDecls()[1]->Is<ast::Alias>());
     auto* alias = program.AST().TypeDecls()[1]->As<ast::Alias>();
     EXPECT_EQ(alias->name->symbol, program.Symbols().Get("B"));
-    ast::CheckIdentifier(program.Symbols(), alias->type, "A");
+    ast::CheckIdentifier(alias->type, "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
@@ -146,7 +145,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 
     auto program = p->program();
     ASSERT_EQ(program.AST().Functions().Length(), 1u);
-    ast::CheckIdentifier(program.Symbols(), program.AST().Functions()[0]->name, "main");
+    ast::CheckIdentifier(program.AST().Functions()[0]->name, "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
@@ -156,7 +155,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
 
     auto program = p->program();
     ASSERT_EQ(program.AST().Functions().Length(), 1u);
-    ast::CheckIdentifier(program.Symbols(), program.AST().Functions()[0]->name, "main");
+    ast::CheckIdentifier(program.AST().Functions()[0]->name, "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {

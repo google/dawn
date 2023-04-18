@@ -50,7 +50,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
         if (!f->IsEntryPoint()) {
             continue;
         }
-        if (src->Symbols().NameFor(f->name->symbol) == cfg->entry_point_name) {
+        if (f->name->symbol.Name() == cfg->entry_point_name) {
             entry_point = f;
             break;
         }

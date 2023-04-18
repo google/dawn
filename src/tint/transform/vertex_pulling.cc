@@ -385,7 +385,7 @@ struct VertexPulling::State {
                     err << "VertexAttributeDescriptor for location "
                         << std::to_string(attribute_desc.shader_location) << " has format "
                         << attribute_desc.format << " but shader expects "
-                        << var.type->FriendlyName(src->Symbols());
+                        << var.type->FriendlyName();
                     b.Diagnostics().add_error(diag::System::Transform, err.str());
                     return nullptr;
                 }

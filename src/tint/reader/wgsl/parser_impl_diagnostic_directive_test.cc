@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, DiagnosticDirective_Valid) {
 
     auto* r = directive->control.rule_name;
     ASSERT_NE(r, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), r, "foo");
+    ast::CheckIdentifier(r, "foo");
 }
 
 TEST_F(ParserImplTest, DiagnosticDirective_MissingSemicolon) {

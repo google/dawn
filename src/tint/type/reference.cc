@@ -44,13 +44,13 @@ bool Reference::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string Reference::FriendlyName(const SymbolTable& symbols) const {
+std::string Reference::FriendlyName() const {
     utils::StringStream out;
     out << "ref<";
     if (address_space_ != builtin::AddressSpace::kUndefined) {
         out << address_space_ << ", ";
     }
-    out << subtype_->FriendlyName(symbols) << ", " << access_;
+    out << subtype_->FriendlyName() << ", " << access_;
     out << ">";
     return out.str();
 }

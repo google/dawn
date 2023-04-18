@@ -133,7 +133,7 @@ struct SpirvAtomic::State {
                         auto* member = str->members[i];
                         if (forked.atomic_members.count(i)) {
                             auto type = AtomicTypeFor(ctx.src->Sem().Get(member)->Type());
-                            auto name = ctx.src->Symbols().NameFor(member->name->symbol);
+                            auto name = member->name->symbol.Name();
                             members.Push(b.Member(name, type, ctx.Clone(member->attributes)));
                         } else {
                             members.Push(ctx.Clone(member));
@@ -157,8 +157,7 @@ struct SpirvAtomic::State {
     ForkedStruct& Fork(const ast::Struct* str) {
         auto& forked = forked_structs[str];
         if (!forked.name.IsValid()) {
-            forked.name =
-                b.Symbols().New(ctx.src->Symbols().NameFor(str->name->symbol) + "_atomic");
+            forked.name = b.Symbols().New(str->name->symbol.Name() + "_atomic");
         }
         return forked;
     }
@@ -220,8 +219,7 @@ struct SpirvAtomic::State {
             },
             [&](const type::Reference* ref) { return AtomicTypeFor(ref->StoreType()); },
             [&](Default) {
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type: " << ty->FriendlyName(ctx.src->Symbols());
+                TINT_ICE(Transform, b.Diagnostics()) << "unhandled type: " << ty->FriendlyName();
                 return ast::Type{};
             });
     }

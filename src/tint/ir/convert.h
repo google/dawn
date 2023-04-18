@@ -45,9 +45,8 @@ class Convert : public Castable<Convert, Call> {
 
     /// Write the instruction to the given stream
     /// @param out the stream to write to
-    /// @param st the symbol table
     /// @returns the stream
-    utils::StringStream& ToString(utils::StringStream& out, const SymbolTable& st) const override;
+    utils::StringStream& ToString(utils::StringStream& out) const override;
 
   private:
     const type::Type* from_ = nullptr;

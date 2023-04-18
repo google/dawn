@@ -237,7 +237,7 @@ void EmitJson(const tint::Program* program) {
 
         std::cout << std::endl;
         std::cout << "{" << std::endl;
-        std::cout << "\"name\": \"" << s->FriendlyName(program->Symbols()) << "\"," << std::endl;
+        std::cout << "\"name\": \"" << s->FriendlyName() << "\"," << std::endl;
         std::cout << "\"align\": " << s->Align() << "," << std::endl;
         std::cout << "\"size\": " << s->Size() << "," << std::endl;
         std::cout << "\"members\": [";
@@ -265,8 +265,7 @@ void EmitJson(const tint::Program* program) {
             }
 
             std::cout << "{" << std::endl;
-            std::cout << "\"name\": \"" << program->Symbols().NameFor(m->Name()) << "\","
-                      << std::endl;
+            std::cout << "\"name\": \"" << m->Name().Name() << "\"," << std::endl;
             std::cout << "\"offset\": " << m->Offset() << "," << std::endl;
             std::cout << "\"align\": " << m->Align() << "," << std::endl;
             std::cout << "\"size\": " << m->Size() << std::endl;
@@ -307,7 +306,7 @@ void EmitText(const tint::Program* program) {
                 continue;
             }
             const auto* s = ty->As<tint::type::Struct>();
-            std::cout << s->Layout(program->Symbols()) << std::endl << std::endl;
+            std::cout << s->Layout() << std::endl << std::endl;
         }
     }
 }

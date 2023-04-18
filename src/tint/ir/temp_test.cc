@@ -32,7 +32,7 @@ TEST_F(IR_TempTest, id) {
     auto* val = b.builder.Temp(b.builder.ir.types.Get<type::I32>());
     EXPECT_EQ(4u, val->AsId());
 
-    val->ToString(str, b.builder.ir.symbols);
+    val->ToString(str);
     EXPECT_EQ("%4 (i32)", str.str());
 }
 

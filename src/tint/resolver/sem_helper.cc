@@ -32,7 +32,7 @@ std::string SemHelper::TypeNameOf(const type::Type* ty) const {
 }
 
 std::string SemHelper::RawTypeNameOf(const type::Type* ty) const {
-    return ty->FriendlyName(builder_->Symbols());
+    return ty->FriendlyName();
 }
 
 type::Type* SemHelper::TypeOf(const ast::Expression* expr) const {
@@ -45,7 +45,7 @@ std::string SemHelper::Describe(const sem::Expression* expr) const {
         expr,  //
         [&](const sem::VariableUser* var_expr) {
             auto* variable = var_expr->Variable()->Declaration();
-            auto name = builder_->Symbols().NameFor(variable->name->symbol);
+            auto name = variable->name->symbol.Name();
             auto* kind = Switch(
                 variable,                                            //
                 [&](const ast::Var*) { return "var"; },              //
@@ -57,16 +57,16 @@ std::string SemHelper::Describe(const sem::Expression* expr) const {
             return std::string(kind) + " '" + name + "'";
         },
         [&](const sem::ValueExpression* val_expr) {
-            auto type = val_expr->Type()->FriendlyName(builder_->Symbols());
+            auto type = val_expr->Type()->FriendlyName();
             return "value expression of type '" + type + "'";
         },
         [&](const sem::TypeExpression* ty_expr) {
-            auto name = ty_expr->Type()->FriendlyName(builder_->Symbols());
+            auto name = ty_expr->Type()->FriendlyName();
             return "type '" + name + "'";
         },
         [&](const sem::FunctionExpression* fn_expr) {
             auto* fn = fn_expr->Function()->Declaration();
-            auto name = builder_->Symbols().NameFor(fn->name->symbol);
+            auto name = fn->name->symbol.Name();
             return "function '" + name + "'";
         },
         [&](const sem::BuiltinEnumExpression<builtin::Access>* access) {
@@ -128,37 +128,28 @@ void SemHelper::NoteDeclarationSource(const ast::Node* node) const {
     Switch(
         node,
         [&](const ast::Struct* n) {
-            AddNote("struct '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
-                    n->source);
+            AddNote("struct '" + n->name->symbol.Name() + "' declared here", n->source);
         },
         [&](const ast::Alias* n) {
-            AddNote("alias '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
-                    n->source);
+            AddNote("alias '" + n->name->symbol.Name() + "' declared here", n->source);
         },
         [&](const ast::Var* n) {
-            AddNote("var '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
-                    n->source);
+            AddNote("var '" + n->name->symbol.Name() + "' declared here", n->source);
         },
         [&](const ast::Let* n) {
-            AddNote("let '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
-                    n->source);
+            AddNote("let '" + n->name->symbol.Name() + "' declared here", n->source);
         },
         [&](const ast::Override* n) {
-            AddNote("override '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
-                    n->source);
+            AddNote("override '" + n->name->symbol.Name() + "' declared here", n->source);
         },
         [&](const ast::Const* n) {
-            AddNote("const '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
-                    n->source);
+            AddNote("const '" + n->name->symbol.Name() + "' declared here", n->source);
         },
         [&](const ast::Parameter* n) {
-            AddNote(
-                "parameter '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
-                n->source);
+            AddNote("parameter '" + n->name->symbol.Name() + "' declared here", n->source);
         },
         [&](const ast::Function* n) {
-            AddNote("function '" + builder_->Symbols().NameFor(n->name->symbol) + "' declared here",
-                    n->source);
+            AddNote("function '" + n->name->symbol.Name() + "' declared here", n->source);
         });
 }
 

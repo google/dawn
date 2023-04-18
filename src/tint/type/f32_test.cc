@@ -41,7 +41,7 @@ TEST_F(F32Test, Equals) {
 
 TEST_F(F32Test, FriendlyName) {
     F32 f;
-    EXPECT_EQ(f.FriendlyName(Symbols()), "f32");
+    EXPECT_EQ(f.FriendlyName(), "f32");
 }
 
 TEST_F(F32Test, Clone) {

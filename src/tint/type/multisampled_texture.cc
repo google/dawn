@@ -40,9 +40,9 @@ bool MultisampledTexture::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string MultisampledTexture::FriendlyName(const SymbolTable& symbols) const {
+std::string MultisampledTexture::FriendlyName() const {
     utils::StringStream out;
-    out << "texture_multisampled_" << dim() << "<" << type_->FriendlyName(symbols) << ">";
+    out << "texture_multisampled_" << dim() << "<" << type_->FriendlyName() << ">";
     return out.str();
 }
 

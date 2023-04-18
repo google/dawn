@@ -26,8 +26,8 @@ TEST_F(ParserImplTest, StructMember_Parses) {
     ASSERT_FALSE(m.errored);
     ASSERT_NE(m.value, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), m->name, "a");
-    ast::CheckIdentifier(p->builder().Symbols(), m->type, "i32");
+    ast::CheckIdentifier(m->name, "a");
+    ast::CheckIdentifier(m->type, "i32");
     EXPECT_EQ(m->attributes.Length(), 0u);
 
     EXPECT_EQ(m->source.range, (Source::Range{{1u, 1u}, {1u, 2u}}));
@@ -42,8 +42,8 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAlignAttribute) {
     ASSERT_FALSE(m.errored);
     ASSERT_NE(m.value, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), m->name, "a");
-    ast::CheckIdentifier(p->builder().Symbols(), m->type, "i32");
+    ast::CheckIdentifier(m->name, "a");
+    ast::CheckIdentifier(m->type, "i32");
     EXPECT_EQ(m->attributes.Length(), 1u);
     EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberAlignAttribute>());
 
@@ -65,8 +65,8 @@ TEST_F(ParserImplTest, StructMember_ParsesWithSizeAttribute) {
     ASSERT_FALSE(m.errored);
     ASSERT_NE(m.value, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), m->name, "a");
-    ast::CheckIdentifier(p->builder().Symbols(), m->type, "i32");
+    ast::CheckIdentifier(m->name, "a");
+    ast::CheckIdentifier(m->type, "i32");
     EXPECT_EQ(m->attributes.Length(), 1u);
     ASSERT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
     auto* s = m->attributes[0]->As<ast::StructMemberSizeAttribute>();
@@ -87,8 +87,8 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleattributes) {
     ASSERT_FALSE(m.errored);
     ASSERT_NE(m.value, nullptr);
 
-    ast::CheckIdentifier(p->builder().Symbols(), m->name, "a");
-    ast::CheckIdentifier(p->builder().Symbols(), m->type, "i32");
+    ast::CheckIdentifier(m->name, "a");
+    ast::CheckIdentifier(m->type, "i32");
     EXPECT_EQ(m->attributes.Length(), 2u);
     ASSERT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
     auto* size_attr = m->attributes[0]->As<ast::StructMemberSizeAttribute>();

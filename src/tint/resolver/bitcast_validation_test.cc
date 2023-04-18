@@ -115,8 +115,7 @@ TEST_P(ResolverBitcastValidationTestInvalidSrcTy, Test) {
     auto* cast = Bitcast(dst.ast(*this), Expr(Source{{12, 34}}, "src"));
     WrapInFunction(Let("src", src.expr(*this, 0)), cast);
 
-    auto expected =
-        "12:34 error: '" + src.sem(*this)->FriendlyName(Symbols()) + "' cannot be bitcast";
+    auto expected = "12:34 error: '" + src.sem(*this)->FriendlyName() + "' cannot be bitcast";
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), expected);
@@ -150,8 +149,7 @@ TEST_P(ResolverBitcastValidationTestInvalidDstTy, Test) {
     Alias("T", dst.ast(*this));
     WrapInFunction(Bitcast(ty(Source{{12, 34}}, "T"), src.expr(*this, 0)));
 
-    auto expected =
-        "12:34 error: cannot bitcast to '" + dst.sem(*this)->FriendlyName(Symbols()) + "'";
+    auto expected = "12:34 error: cannot bitcast to '" + dst.sem(*this)->FriendlyName() + "'";
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), expected);
@@ -183,8 +181,8 @@ TEST_P(ResolverBitcastValidationTestIncompatible, Test) {
 
     WrapInFunction(Bitcast(Source{{12, 34}}, dst.ast(*this), src.expr(*this, 0)));
 
-    auto expected = "12:34 error: cannot bitcast from '" + src.sem(*this)->FriendlyName(Symbols()) +
-                    "' to '" + dst.sem(*this)->FriendlyName(Symbols()) + "'";
+    auto expected = "12:34 error: cannot bitcast from '" + src.sem(*this)->FriendlyName() +
+                    "' to '" + dst.sem(*this)->FriendlyName() + "'";
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), expected);

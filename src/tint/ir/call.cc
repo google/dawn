@@ -26,14 +26,14 @@ Call::Call(Value* result, utils::VectorRef<Value*> args) : Base(result), args_(a
 
 Call::~Call() = default;
 
-void Call::EmitArgs(utils::StringStream& out, const SymbolTable& st) const {
+void Call::EmitArgs(utils::StringStream& out) const {
     bool first = true;
     for (const auto* arg : args_) {
         if (!first) {
             out << ", ";
         }
         first = false;
-        arg->ToString(out, st);
+        arg->ToString(out);
     }
 }
 

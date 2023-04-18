@@ -264,8 +264,7 @@ struct Robustness::State {
                 auto* sem_param = sem.Get(param);
                 if (auto* ptr = sem_param->Type()->As<type::Pointer>()) {
                     if (ActionFor(ptr->AddressSpace()) == Action::kPredicate) {
-                        auto name = b.Symbols().New(src->Symbols().NameFor(param->name->symbol) +
-                                                    "_predicate");
+                        auto name = b.Symbols().New(param->name->symbol.Name() + "_predicate");
                         ctx.InsertAfter(fn->params, param, b.Param(name, b.ty.bool_()));
 
                         // Associate the pointer parameter expressions with the predicate.

@@ -165,7 +165,7 @@ struct PreservePadding::State {
                 return call_helper([&]() {
                     utils::Vector<const ast::Statement*, 8> body;
                     for (auto member : str->Members()) {
-                        auto name = sym.NameFor(member->Declaration()->name->symbol);
+                        auto name = member->Declaration()->name->symbol.Name();
                         body.Push(MakeAssignment(member->Type(),
                                                  b.MemberAccessor(b.Deref(kDestParamName), name),
                                                  b.MemberAccessor(kValueParamName, name)));

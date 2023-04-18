@@ -178,7 +178,7 @@ struct FunctionInfo {
     /// @param func the AST function
     /// @param builder the program builder
     FunctionInfo(const ast::Function* func, const ProgramBuilder* builder) {
-        name = builder->Symbols().NameFor(func->name->symbol);
+        name = func->name->symbol.Name();
         callsite_tag = {CallSiteTag::CallSiteNoRestriction};
         function_tag = NoRestriction;
 
@@ -196,7 +196,7 @@ struct FunctionInfo {
         parameters.Resize(func->params.Length());
         for (size_t i = 0; i < func->params.Length(); i++) {
             auto* param = func->params[i];
-            auto param_name = builder->Symbols().NameFor(param->name->symbol);
+            auto param_name = param->name->symbol.Name();
             auto* sem = builder->Sem().Get<sem::Parameter>(param);
             parameters[i].sem = sem;
 
@@ -397,14 +397,12 @@ class UniformityGraph {
     /// @param expr the expression to get the symbol name of
     /// @returns the symbol name
     inline std::string NameFor(const ast::IdentifierExpression* expr) {
-        return builder_->Symbols().NameFor(expr->identifier->symbol);
+        return expr->identifier->symbol.Name();
     }
 
     /// @param var the variable to get the name of
     /// @returns the name of the variable @p var
-    inline std::string NameFor(const ast::Variable* var) {
-        return builder_->Symbols().NameFor(var->name->symbol);
-    }
+    inline std::string NameFor(const ast::Variable* var) { return var->name->symbol.Name(); }
 
     /// @param var the variable to get the name of
     /// @returns the name of the variable @p var
@@ -413,7 +411,7 @@ class UniformityGraph {
     /// @param fn the function to get the name of
     /// @returns the name of the function @p fn
     inline std::string NameFor(const sem::Function* fn) {
-        return builder_->Symbols().NameFor(fn->Declaration()->name->symbol);
+        return fn->Declaration()->name->symbol.Name();
     }
 
     /// Process a function.

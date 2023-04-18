@@ -46,7 +46,7 @@ TEST_F(TypeStructTest, FriendlyName) {
     auto name = Sym("my_struct");
     auto* s = create<Struct>(Source{}, name, utils::Empty, 4u /* align */, 4u /* size */,
                              4u /* size_no_padding */);
-    EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
+    EXPECT_EQ(s->FriendlyName(), "my_struct");
 }
 
 TEST_F(TypeStructTest, Layout) {
@@ -70,7 +70,7 @@ TEST_F(TypeStructTest, Layout) {
     auto* sem_inner_st = p.Sem().Get(inner_st);
     auto* sem_outer_st = p.Sem().Get(outer_st);
 
-    EXPECT_EQ(sem_inner_st->Layout(p.Symbols()),
+    EXPECT_EQ(sem_inner_st->Layout(),
               R"(/*            align(16) size(64) */ struct Inner {
 /* offset( 0) align( 4) size( 4) */   a : i32;
 /* offset( 4) align( 4) size( 4) */   b : u32;
@@ -81,7 +81,7 @@ TEST_F(TypeStructTest, Layout) {
 /* offset(32) align( 8) size(32) */   e : mat4x2<f32>;
 /*                               */ };)");
 
-    EXPECT_EQ(sem_outer_st->Layout(p.Symbols()),
+    EXPECT_EQ(sem_outer_st->Layout(),
               R"(/*            align(16) size(80) */ struct Outer {
 /* offset( 0) align(16) size(64) */   inner : Inner;
 /* offset(64) align( 4) size( 4) */   a : i32;
@@ -224,7 +224,7 @@ TEST_F(TypeStructTest, Clone) {
     auto* st = s->Clone(ctx);
 
     EXPECT_TRUE(new_st.Get("my_struct").IsValid());
-    EXPECT_EQ(new_st.NameFor(st->Name()), "my_struct");
+    EXPECT_EQ(st->Name().Name(), "my_struct");
 
     EXPECT_EQ(st->Align(), 4u);
     EXPECT_EQ(st->Size(), 8u);
@@ -233,14 +233,14 @@ TEST_F(TypeStructTest, Clone) {
     auto members = st->Members();
     ASSERT_EQ(members.Length(), 2u);
 
-    EXPECT_EQ(new_st.NameFor(members[0]->Name()), "b");
+    EXPECT_EQ(members[0]->Name().Name(), "b");
     EXPECT_TRUE(members[0]->Type()->Is<Vector>());
     EXPECT_EQ(members[0]->Index(), 0u);
     EXPECT_EQ(members[0]->Offset(), 0u);
     EXPECT_EQ(members[0]->Align(), 16u);
     EXPECT_EQ(members[0]->Size(), 12u);
 
-    EXPECT_EQ(new_st.NameFor(members[1]->Name()), "a");
+    EXPECT_EQ(members[1]->Name().Name(), "a");
     EXPECT_TRUE(members[1]->Type()->Is<I32>());
     EXPECT_EQ(members[1]->Index(), 1u);
     EXPECT_EQ(members[1]->Offset(), 16u);

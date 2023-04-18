@@ -351,7 +351,7 @@ struct CanonicalizeEntryPointIO::State {
             }
         }
 
-        auto name = ctx.src->Symbols().NameFor(param->Declaration()->name->symbol);
+        auto name = param->Declaration()->name->symbol.Name();
         auto* input_expr = AddInput(name, param->Type(), param->Location(), std::move(attributes));
         inner_call_parameters.Push(input_expr);
     }
@@ -376,7 +376,7 @@ struct CanonicalizeEntryPointIO::State {
                 continue;
             }
 
-            auto name = ctx.src->Symbols().NameFor(member->Name());
+            auto name = member->Name().Name();
 
             auto attributes =
                 CloneShaderIOAttributes(member->Declaration()->attributes, do_interpolate);
@@ -405,7 +405,7 @@ struct CanonicalizeEntryPointIO::State {
                     continue;
                 }
 
-                auto name = ctx.src->Symbols().NameFor(member->Name());
+                auto name = member->Name().Name();
                 auto attributes =
                     CloneShaderIOAttributes(member->Declaration()->attributes, do_interpolate);
 
@@ -530,7 +530,7 @@ struct CanonicalizeEntryPointIO::State {
             } else {
                 name = ctx.dst->Symbols().Register(outval.name);
             }
-            member_names.insert(ctx.dst->Symbols().NameFor(name));
+            member_names.insert(name.Name());
 
             wrapper_struct_output_members.Push({
                 ctx.dst->Member(name, outval.type, std::move(outval.attributes)),
@@ -598,7 +598,7 @@ struct CanonicalizeEntryPointIO::State {
         } else {
             // Add a suffix to the function name, as the wrapper function will take
             // the original entry point name.
-            auto ep_name = ctx.src->Symbols().NameFor(func_ast->name->symbol);
+            auto ep_name = func_ast->name->symbol.Name();
             inner_name = ctx.dst->Symbols().New(ep_name + "_inner");
         }
 

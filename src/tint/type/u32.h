@@ -34,10 +34,9 @@ class U32 final : public Castable<U32, Type> {
     /// @returns true if the this type is equal to @p other
     bool Equals(const UniqueNode& other) const override;
 
-    /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @returns the size in bytes of the type.
     uint32_t Size() const override;

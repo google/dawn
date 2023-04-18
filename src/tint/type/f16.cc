@@ -34,7 +34,7 @@ bool F16::Equals(const UniqueNode& other) const {
     return other.Is<F16>();
 }
 
-std::string F16::FriendlyName(const SymbolTable&) const {
+std::string F16::FriendlyName() const {
     return "f16";
 }
 

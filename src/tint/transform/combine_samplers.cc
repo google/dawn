@@ -183,11 +183,9 @@ struct CombineSamplers::State {
                 for (auto pair : fn->TextureSamplerPairs()) {
                     const sem::Variable* texture_var = pair.first;
                     const sem::Variable* sampler_var = pair.second;
-                    std::string name =
-                        ctx.src->Symbols().NameFor(texture_var->Declaration()->name->symbol);
+                    std::string name = texture_var->Declaration()->name->symbol.Name();
                     if (sampler_var) {
-                        name += "_" + ctx.src->Symbols().NameFor(
-                                          sampler_var->Declaration()->name->symbol);
+                        name += "_" + sampler_var->Declaration()->name->symbol.Name();
                     }
                     if (IsGlobal(pair)) {
                         // Both texture and sampler are global; add a new global variable

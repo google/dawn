@@ -63,11 +63,6 @@ class SymbolTable {
     /// @returns the symbol for the name or Symbol() if not found.
     Symbol Get(const std::string& name) const;
 
-    /// Returns the name for the given symbol
-    /// @param symbol the symbol to retrieve the name for
-    /// @returns the symbol name or "" if not found
-    std::string NameFor(const Symbol symbol) const;
-
     /// Returns a new unique symbol with the given name, possibly suffixed with a
     /// unique number.
     /// @param name the symbol name

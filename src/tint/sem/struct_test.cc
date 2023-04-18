@@ -52,7 +52,7 @@ TEST_F(SemStructTest, FriendlyName) {
     auto* impl = create<ast::Struct>(Ident(name), utils::Empty, utils::Empty);
     auto* s = create<sem::Struct>(impl, impl->source, impl->name->symbol, utils::Empty,
                                   4u /* align */, 4u /* size */, 4u /* size_no_padding */);
-    EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
+    EXPECT_EQ(s->FriendlyName(), "my_struct");
 }
 
 }  // namespace

@@ -71,7 +71,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
         bool has_runtime_sized_array = false;
         utils::Vector<const ast::StructMember*, 8> new_members;
         for (auto* mem : str->Members()) {
-            auto name = src->Symbols().NameFor(mem->Name());
+            auto name = mem->Name().Name();
 
             if (offset < mem->Offset()) {
                 CreatePadding(&new_members, &padding_members, ctx.dst, mem->Offset() - offset);

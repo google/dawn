@@ -33,7 +33,7 @@ bool Sampler::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string Sampler::FriendlyName(const SymbolTable&) const {
+std::string Sampler::FriendlyName() const {
     return kind_ == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 

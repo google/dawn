@@ -34,7 +34,7 @@ bool I32::Equals(const UniqueNode& other) const {
     return other.Is<I32>();
 }
 
-std::string I32::FriendlyName(const SymbolTable&) const {
+std::string I32::FriendlyName() const {
     return "i32";
 }
 

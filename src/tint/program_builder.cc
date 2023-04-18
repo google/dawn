@@ -115,11 +115,11 @@ const type::Type* ProgramBuilder::TypeOf(const ast::TypeDecl* type_decl) const {
 
 std::string ProgramBuilder::FriendlyName(ast::Type type) const {
     TINT_ASSERT_PROGRAM_IDS_EQUAL(ProgramBuilder, type, ID());
-    return type.expr ? Symbols().NameFor(type->identifier->symbol) : "<null>";
+    return type.expr ? type->identifier->symbol.Name() : "<null>";
 }
 
 std::string ProgramBuilder::FriendlyName(const type::Type* type) const {
-    return type ? type->FriendlyName(Symbols()) : "<null>";
+    return type ? type->FriendlyName() : "<null>";
 }
 
 std::string ProgramBuilder::FriendlyName(std::nullptr_t) const {

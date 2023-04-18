@@ -56,11 +56,6 @@ Symbol SymbolTable::Get(const std::string& name) const {
     return it ? *it : Symbol();
 }
 
-std::string SymbolTable::NameFor(const Symbol symbol) const {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL(Symbol, program_id_, symbol);
-    return symbol.Name();
-}
-
 Symbol SymbolTable::New(std::string prefix /* = "" */) {
     if (prefix.empty()) {
         prefix = "tint_symbol";

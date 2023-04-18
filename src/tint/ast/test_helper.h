@@ -72,25 +72,21 @@ struct IsTemplatedIdentifierMatcher<TemplatedIdentifierMatcher<ARGS...>> {
 };
 
 /// A testing utility for checking that an Identifier matches the expected values.
-/// @param symbols the symbol table
 /// @param got the identifier
 /// @param expected the expected identifier name
 template <typename... ARGS>
-void CheckIdentifier(const SymbolTable& symbols, const Identifier* got, std::string_view expected) {
+void CheckIdentifier(const Identifier* got, std::string_view expected) {
     EXPECT_FALSE(got->Is<TemplatedIdentifier>());
-    EXPECT_EQ(symbols.NameFor(got->symbol), expected);
+    EXPECT_EQ(got->symbol.Name(), expected);
 }
 
 /// A testing utility for checking that an Identifier matches the expected name and template
 /// arguments.
-/// @param symbols the symbol table
 /// @param ident the identifier
 /// @param expected the expected identifier name and arguments
 template <typename... ARGS>
-void CheckIdentifier(const SymbolTable& symbols,
-                     const Identifier* ident,
-                     const TemplatedIdentifierMatcher<ARGS...>& expected) {
-    EXPECT_EQ(symbols.NameFor(ident->symbol), expected.name);
+void CheckIdentifier(const Identifier* ident, const TemplatedIdentifierMatcher<ARGS...>& expected) {
+    EXPECT_EQ(ident->symbol.Name(), expected.name);
     ASSERT_TRUE(ident->Is<TemplatedIdentifier>());
     auto* got = ident->As<TemplatedIdentifier>();
     ASSERT_EQ(got->arguments.Length(), std::tuple_size_v<decltype(expected.args)>);
@@ -102,12 +98,12 @@ void CheckIdentifier(const SymbolTable& symbols,
         using T = std::decay_t<decltype(expected_arg)>;
         if constexpr (traits::IsStringLike<T>) {
             ASSERT_TRUE(got_arg->Is<IdentifierExpression>());
-            CheckIdentifier(symbols, got_arg->As<IdentifierExpression>()->identifier, expected_arg);
+            CheckIdentifier(got_arg->As<IdentifierExpression>()->identifier, expected_arg);
         } else if constexpr (IsTemplatedIdentifierMatcher<T>::value) {
             ASSERT_TRUE(got_arg->Is<IdentifierExpression>());
             auto* got_ident = got_arg->As<IdentifierExpression>()->identifier;
             ASSERT_TRUE(got_ident->Is<TemplatedIdentifier>());
-            CheckIdentifier(symbols, got_ident->As<TemplatedIdentifier>(), expected_arg);
+            CheckIdentifier(got_ident->As<TemplatedIdentifier>(), expected_arg);
         } else if constexpr (std::is_same_v<T, bool>) {
             ASSERT_TRUE(got_arg->Is<BoolLiteralExpression>());
             EXPECT_EQ(got_arg->As<BoolLiteralExpression>()->value, expected_arg);
@@ -149,30 +145,24 @@ void CheckIdentifier(const SymbolTable& symbols,
 }
 
 /// A testing utility for checking that an IdentifierExpression matches the expected values.
-/// @param symbols the symbol table
 /// @param expr the IdentifierExpression
 /// @param expected the expected identifier name
 template <typename... ARGS>
-void CheckIdentifier(const SymbolTable& symbols,
-                     const Expression* expr,
-                     std::string_view expected) {
+void CheckIdentifier(const Expression* expr, std::string_view expected) {
     auto* expr_ident = expr->As<IdentifierExpression>();
     ASSERT_NE(expr_ident, nullptr) << "expression is not a IdentifierExpression";
-    CheckIdentifier(symbols, expr_ident->identifier, expected);
+    CheckIdentifier(expr_ident->identifier, expected);
 }
 
 /// A testing utility for checking that an IdentifierExpression matches the expected name and
 /// template arguments.
-/// @param symbols the symbol table
 /// @param expr the IdentifierExpression
 /// @param expected the expected identifier name and arguments
 template <typename... ARGS>
-void CheckIdentifier(const SymbolTable& symbols,
-                     const Expression* expr,
-                     const TemplatedIdentifierMatcher<ARGS...>& expected) {
+void CheckIdentifier(const Expression* expr, const TemplatedIdentifierMatcher<ARGS...>& expected) {
     auto* expr_ident = expr->As<IdentifierExpression>();
     ASSERT_NE(expr_ident, nullptr) << "expression is not a IdentifierExpression";
-    CheckIdentifier(symbols, expr_ident->identifier, expected);
+    CheckIdentifier(expr_ident->identifier, expected);
 }
 
 }  // namespace tint::ast

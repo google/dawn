@@ -38,10 +38,9 @@ class Atomic final : public Castable<Atomic, Type> {
     /// @returns the atomic type
     const type::Type* Type() const { return subtype_; }
 
-    /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @returns the size in bytes of the type.
     uint32_t Size() const override;

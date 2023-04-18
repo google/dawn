@@ -23,12 +23,12 @@ Construct::Construct(Value* result, utils::VectorRef<Value*> args) : Base(result
 
 Construct::~Construct() = default;
 
-utils::StringStream& Construct::ToString(utils::StringStream& out, const SymbolTable& st) const {
-    Result()->ToString(out, st);
-    out << " = construct(" << Result()->Type()->FriendlyName(st);
+utils::StringStream& Construct::ToString(utils::StringStream& out) const {
+    Result()->ToString(out);
+    out << " = construct(" << Result()->Type()->FriendlyName();
     if (!Args().IsEmpty()) {
         out << ", ";
-        EmitArgs(out, st);
+        EmitArgs(out);
     }
     out << ")";
     return out;

@@ -33,7 +33,7 @@ TEST_F(FunctionTest, Creation_i32ReturnType) {
     auto* f = Func("func", params, i32, utils::Empty);
     EXPECT_EQ(f->name->symbol, Symbols().Get("func"));
     ASSERT_EQ(f->params.Length(), 1u);
-    CheckIdentifier(Symbols(), f->return_type, "i32");
+    CheckIdentifier(f->return_type, "i32");
     EXPECT_EQ(f->params[0], var);
 }
 

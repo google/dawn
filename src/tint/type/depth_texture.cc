@@ -47,7 +47,7 @@ bool DepthTexture::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string DepthTexture::FriendlyName(const SymbolTable&) const {
+std::string DepthTexture::FriendlyName() const {
     utils::StringStream out;
     out << "texture_depth_" << dim();
     return out.str();

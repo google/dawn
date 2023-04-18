@@ -51,9 +51,9 @@ bool Matrix::Equals(const UniqueNode& other) const {
     return false;
 }
 
-std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
+std::string Matrix::FriendlyName() const {
     utils::StringStream out;
-    out << "mat" << columns_ << "x" << rows_ << "<" << subtype_->FriendlyName(symbols) << ">";
+    out << "mat" << columns_ << "x" << rows_ << "<" << subtype_->FriendlyName() << ">";
     return out.str();
 }
 

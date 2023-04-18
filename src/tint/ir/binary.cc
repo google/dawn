@@ -29,9 +29,9 @@ Binary::Binary(Kind kind, Value* result, Value* lhs, Value* rhs)
 
 Binary::~Binary() = default;
 
-utils::StringStream& Binary::ToString(utils::StringStream& out, const SymbolTable& st) const {
-    Result()->ToString(out, st) << " = ";
-    lhs_->ToString(out, st) << " ";
+utils::StringStream& Binary::ToString(utils::StringStream& out) const {
+    Result()->ToString(out) << " = ";
+    lhs_->ToString(out) << " ";
 
     switch (GetKind()) {
         case Binary::Kind::kAdd:
@@ -90,7 +90,7 @@ utils::StringStream& Binary::ToString(utils::StringStream& out, const SymbolTabl
             break;
     }
     out << " ";
-    rhs_->ToString(out, st);
+    rhs_->ToString(out);
 
     return out;
 }

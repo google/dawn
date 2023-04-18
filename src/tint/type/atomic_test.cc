@@ -47,7 +47,7 @@ TEST_F(AtomicTest, Equals) {
 
 TEST_F(AtomicTest, FriendlyName) {
     auto* a = create<Atomic>(create<I32>());
-    EXPECT_EQ(a->FriendlyName(Symbols()), "atomic<i32>");
+    EXPECT_EQ(a->FriendlyName(), "atomic<i32>");
 }
 
 TEST_F(AtomicTest, Clone) {

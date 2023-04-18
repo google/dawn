@@ -82,8 +82,8 @@ void GeneratorImpl::Generate() {
 
 void GeneratorImpl::EmitDiagnosticControl(utils::StringStream& out,
                                           const ast::DiagnosticControl& diagnostic) {
-    out << "diagnostic(" << diagnostic.severity << ", "
-        << program_->Symbols().NameFor(diagnostic.rule_name->symbol) << ")";
+    out << "diagnostic(" << diagnostic.severity << ", " << diagnostic.rule_name->symbol.Name()
+        << ")";
 }
 
 void GeneratorImpl::EmitEnable(const ast::Enable* enable) {
@@ -103,7 +103,7 @@ void GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
         ty,  //
         [&](const ast::Alias* alias) {
             auto out = line();
-            out << "alias " << program_->Symbols().NameFor(alias->name->symbol) << " = ";
+            out << "alias " << alias->name->symbol.Name() << " = ";
             EmitExpression(out, alias->type);
             out << ";";
         },
@@ -160,7 +160,7 @@ void GeneratorImpl::EmitMemberAccessor(utils::StringStream& out,
         out << ")";
     }
 
-    out << "." << program_->Symbols().NameFor(expr->member->symbol);
+    out << "." << expr->member->symbol.Name();
 }
 
 void GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr) {
@@ -219,7 +219,7 @@ void GeneratorImpl::EmitIdentifier(utils::StringStream& out, const ast::Identifi
             EmitAttributes(out, tmpl_ident->attributes);
             out << " ";
         }
-        out << program_->Symbols().NameFor(ident->symbol) << "<";
+        out << ident->symbol.Name() << "<";
         TINT_DEFER(out << ">");
         for (auto* expr : tmpl_ident->arguments) {
             if (expr != tmpl_ident->arguments.Front()) {
@@ -228,7 +228,7 @@ void GeneratorImpl::EmitIdentifier(utils::StringStream& out, const ast::Identifi
             EmitExpression(out, expr);
         }
     } else {
-        out << program_->Symbols().NameFor(ident->symbol);
+        out << ident->symbol.Name();
     }
 }
 
@@ -238,7 +238,7 @@ void GeneratorImpl::EmitFunction(const ast::Function* func) {
     }
     {
         auto out = line();
-        out << "fn " << program_->Symbols().NameFor(func->name->symbol) << "(";
+        out << "fn " << func->name->symbol.Name() << "(";
 
         bool first = true;
         for (auto* v : func->params) {
@@ -252,7 +252,7 @@ void GeneratorImpl::EmitFunction(const ast::Function* func) {
                 out << " ";
             }
 
-            out << program_->Symbols().NameFor(v->name->symbol) << " : ";
+            out << v->name->symbol.Name() << " : ";
 
             EmitExpression(out, v->type);
         }
@@ -297,7 +297,7 @@ void GeneratorImpl::EmitStructType(const ast::Struct* str) {
     if (str->attributes.Length()) {
         EmitAttributes(line(), str->attributes);
     }
-    line() << "struct " << program_->Symbols().NameFor(str->name->symbol) << " {";
+    line() << "struct " << str->name->symbol.Name() << " {";
 
     auto add_padding = [&](uint32_t size) {
         line() << "@size(" << size << ")";
@@ -342,7 +342,7 @@ void GeneratorImpl::EmitStructType(const ast::Struct* str) {
         }
 
         auto out = line();
-        out << program_->Symbols().NameFor(mem->name->symbol) << " : ";
+        out << mem->name->symbol.Name() << " : ";
         EmitExpression(out, mem->type);
         out << ",";
     }
@@ -377,7 +377,7 @@ void GeneratorImpl::EmitVariable(utils::StringStream& out, const ast::Variable* 
             TINT_ICE(Writer, diagnostics_) << "unhandled variable type " << v->TypeInfo().name;
         });
 
-    out << " " << program_->Symbols().NameFor(v->name->symbol);
+    out << " " << v->name->symbol.Name();
 
     if (auto ty = v->type) {
         out << " : ";

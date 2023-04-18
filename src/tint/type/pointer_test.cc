@@ -74,13 +74,13 @@ TEST_F(PointerTest, Equals) {
 TEST_F(PointerTest, FriendlyName) {
     auto* r =
         create<Pointer>(create<I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kRead);
-    EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<i32, read>");
+    EXPECT_EQ(r->FriendlyName(), "ptr<i32, read>");
 }
 
 TEST_F(PointerTest, FriendlyNameWithAddressSpace) {
     auto* r =
         create<Pointer>(create<I32>(), builtin::AddressSpace::kWorkgroup, builtin::Access::kRead);
-    EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<workgroup, i32, read>");
+    EXPECT_EQ(r->FriendlyName(), "ptr<workgroup, i32, read>");
 }
 
 TEST_F(PointerTest, Clone) {

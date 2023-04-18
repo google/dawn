@@ -125,12 +125,9 @@ TEST_F(ModuleTest, CloneOrder) {
     ASSERT_TRUE(decls[2]->Is<ast::Alias>());
     ASSERT_TRUE(decls[4]->Is<ast::Alias>());
 
-    ASSERT_EQ(cloned.Symbols().NameFor(decls[0]->As<ast::Alias>()->name->symbol),
-              "inserted_before_F");
-    ASSERT_EQ(cloned.Symbols().NameFor(decls[2]->As<ast::Alias>()->name->symbol),
-              "inserted_before_A");
-    ASSERT_EQ(cloned.Symbols().NameFor(decls[4]->As<ast::Alias>()->name->symbol),
-              "inserted_before_V");
+    ASSERT_EQ(decls[0]->As<ast::Alias>()->name->symbol.Name(), "inserted_before_F");
+    ASSERT_EQ(decls[2]->As<ast::Alias>()->name->symbol.Name(), "inserted_before_A");
+    ASSERT_EQ(decls[4]->As<ast::Alias>()->name->symbol.Name(), "inserted_before_V");
 }
 
 TEST_F(ModuleTest, Directives) {

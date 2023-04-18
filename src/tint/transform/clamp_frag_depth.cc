@@ -127,7 +127,7 @@ struct ClampFragDepth::State {
                 auto helper = io_structs_clamp_helpers.GetOrCreate(struct_ty, [&] {
                     auto return_ty = fn->return_type;
                     auto fn_sym =
-                        b.Symbols().New("clamp_frag_depth_" + sym.NameFor(struct_ty->name->symbol));
+                        b.Symbols().New("clamp_frag_depth_" + struct_ty->name->symbol.Name());
 
                     utils::Vector<const ast::Expression*, 8u> initializer_args;
                     for (auto* member : struct_ty->members) {

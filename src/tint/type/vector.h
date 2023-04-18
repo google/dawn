@@ -40,10 +40,9 @@ class Vector : public Castable<Vector, Type> {
     /// @returns the type of the vector elements
     const Type* type() const { return subtype_; }
 
-    /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @returns the number of elements in the vector
     uint32_t Width() const { return width_; }

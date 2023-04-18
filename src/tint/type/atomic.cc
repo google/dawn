@@ -42,9 +42,9 @@ bool Atomic::Equals(const type::UniqueNode& other) const {
     return false;
 }
 
-std::string Atomic::FriendlyName(const SymbolTable& symbols) const {
+std::string Atomic::FriendlyName() const {
     utils::StringStream out;
-    out << "atomic<" << subtype_->FriendlyName(symbols) << ">";
+    out << "atomic<" << subtype_->FriendlyName() << ">";
     return out.str();
 }
 

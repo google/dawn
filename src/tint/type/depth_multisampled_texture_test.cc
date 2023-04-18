@@ -55,7 +55,7 @@ TEST_F(DepthMultisampledTextureTest, Dim) {
 
 TEST_F(DepthMultisampledTextureTest, FriendlyName) {
     DepthMultisampledTexture d(TextureDimension::k2d);
-    EXPECT_EQ(d.FriendlyName(Symbols()), "texture_depth_multisampled_2d");
+    EXPECT_EQ(d.FriendlyName(), "texture_depth_multisampled_2d");
 }
 
 TEST_F(DepthMultisampledTextureTest, Clone) {

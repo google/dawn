@@ -26,10 +26,10 @@ Bitcast::Bitcast(Value* result, Value* val) : Base(result), val_(val) {
 
 Bitcast::~Bitcast() = default;
 
-utils::StringStream& Bitcast::ToString(utils::StringStream& out, const SymbolTable& st) const {
-    Result()->ToString(out, st);
+utils::StringStream& Bitcast::ToString(utils::StringStream& out) const {
+    Result()->ToString(out);
     out << " = bitcast(";
-    val_->ToString(out, st);
+    val_->ToString(out);
     out << ")";
     return out;
 }

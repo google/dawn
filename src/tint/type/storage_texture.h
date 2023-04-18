@@ -58,10 +58,9 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @returns the access control
     builtin::Access access() const { return access_; }
 
-    /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
-    std::string FriendlyName(const SymbolTable& symbols) const override;
+    std::string FriendlyName() const override;
 
     /// @param format the storage texture image format
     /// @param type_mgr the Manager used to build the returned type

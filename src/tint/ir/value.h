@@ -53,10 +53,8 @@ class Value : public Castable<Value> {
 
     /// Write the value to the given stream
     /// @param out the stream to write to
-    /// @param st the symbol table
     /// @returns the stream
-    virtual utils::StringStream& ToString(utils::StringStream& out,
-                                          const SymbolTable& st) const = 0;
+    virtual utils::StringStream& ToString(utils::StringStream& out) const = 0;
 
   protected:
     /// Constructor

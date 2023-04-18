@@ -311,7 +311,7 @@ TEST_F(ParserImplTest, Attribute_Workgroup_WithIdent) {
               ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_NE(values[1], nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), values[1], "height");
+    ast::CheckIdentifier(values[1], "height");
 
     ASSERT_EQ(values[2], nullptr);
 }

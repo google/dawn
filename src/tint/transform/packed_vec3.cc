@@ -120,7 +120,7 @@ struct PackedVec3::State {
                         // type, to avoid changing the array element stride.
                         return b.ty(packed_vec3_wrapper_struct_names.GetOrCreate(vec, [&]() {
                             auto name = b.Symbols().New(
-                                "tint_packed_vec3_" + vec->type()->FriendlyName(src->Symbols()) +
+                                "tint_packed_vec3_" + vec->type()->FriendlyName() +
                                 (array_element ? "_array_element" : "_struct_member"));
                             auto* member =
                                 b.Member(kStructMemberName, MakePackedVec3(vec),
@@ -191,9 +191,8 @@ struct PackedVec3::State {
                             }
                         }
                         // Create the new structure.
-                        auto struct_name = b.Symbols().New(
-                            src->Symbols().NameFor(str->Declaration()->name->symbol) +
-                            "_tint_packed_vec3");
+                        auto struct_name = b.Symbols().New(str->Declaration()->name->symbol.Name() +
+                                                           "_tint_packed_vec3");
                         b.Structure(struct_name, std::move(members));
                         return struct_name;
                     });

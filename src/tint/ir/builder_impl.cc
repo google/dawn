@@ -146,7 +146,7 @@ FlowNode* BuilderImpl::FindEnclosingControl(ControlFlags flags) {
 }
 
 Symbol BuilderImpl::CloneSymbol(Symbol sym) const {
-    return clone_ctx_.type_ctx.dst.st->Register(clone_ctx_.type_ctx.src.st->NameFor(sym));
+    return clone_ctx_.type_ctx.dst.st->Register(sym.Name());
 }
 
 ResultType BuilderImpl::Build() {

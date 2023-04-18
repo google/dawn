@@ -39,8 +39,7 @@ TEST_F(ParserImplTest, AttributeList_Parses) {
     EXPECT_EQ(exp->value, 4u);
 
     ASSERT_TRUE(attr_1->Is<ast::BuiltinAttribute>());
-    ast::CheckIdentifier(p->builder().Symbols(), attr_1->As<ast::BuiltinAttribute>()->builtin,
-                         "position");
+    ast::CheckIdentifier(attr_1->As<ast::BuiltinAttribute>()->builtin, "position");
 }
 
 TEST_F(ParserImplTest, AttributeList_Invalid) {

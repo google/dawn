@@ -96,7 +96,7 @@ TEST_F(StorageTextureTest, Format) {
 TEST_F(StorageTextureTest, FriendlyName) {
     auto* s = Create(TextureDimension::k2dArray, builtin::TexelFormat::kRgba32Float,
                      builtin::Access::kReadWrite);
-    EXPECT_EQ(s->FriendlyName(Symbols()), "texture_storage_2d_array<rgba32float, read_write>");
+    EXPECT_EQ(s->FriendlyName(), "texture_storage_2d_array<rgba32float, read_write>");
 }
 
 TEST_F(StorageTextureTest, F32) {

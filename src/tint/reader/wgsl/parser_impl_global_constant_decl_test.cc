@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, GlobalConstDecl) {
 
     EXPECT_EQ(c->name->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(c->type, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), c->type, "f32");
+    ast::CheckIdentifier(c->type, "f32");
 
     EXPECT_EQ(c->source.range.begin.line, 1u);
     EXPECT_EQ(c->source.range.begin.column, 7u);
@@ -121,7 +121,7 @@ TEST_F(ParserImplTest, GlobalOverrideDecl_WithId) {
 
     EXPECT_EQ(override->name->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(override->type, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), override->type, "f32");
+    ast::CheckIdentifier(override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
     EXPECT_EQ(override->source.range.begin.column, 17u);
@@ -151,7 +151,7 @@ TEST_F(ParserImplTest, GlobalOverrideDecl_WithId_TrailingComma) {
 
     EXPECT_EQ(override->name->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(override->type, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), override->type, "f32");
+    ast::CheckIdentifier(override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
     EXPECT_EQ(override->source.range.begin.column, 18u);
@@ -181,7 +181,7 @@ TEST_F(ParserImplTest, GlobalOverrideDecl_WithoutId) {
 
     EXPECT_EQ(override->name->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(override->type, nullptr);
-    ast::CheckIdentifier(p->builder().Symbols(), override->type, "f32");
+    ast::CheckIdentifier(override->type, "f32");
 
     EXPECT_EQ(override->source.range.begin.line, 1u);
     EXPECT_EQ(override->source.range.begin.column, 10u);

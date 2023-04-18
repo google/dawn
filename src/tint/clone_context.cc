@@ -49,7 +49,7 @@ Symbol CloneContext::Clone(Symbol s) {
         if (symbol_transform_) {
             return symbol_transform_(s);
         }
-        return dst->Symbols().New(src->Symbols().NameFor(s));
+        return dst->Symbols().New(s.Name());
     });
 }
 

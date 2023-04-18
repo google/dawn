@@ -61,7 +61,6 @@
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/switch.h"
-#include "src/tint/symbol_table.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/defer.h"
@@ -143,19 +142,16 @@ void AddNote(diag::List& diagnostics, const std::string& msg, const Source& sour
 class DependencyScanner {
   public:
     /// Constructor
-    /// @param syms the program symbol table
     /// @param globals_by_name map of global symbol to Global pointer
     /// @param diagnostics diagnostic messages, appended with any errors found
     /// @param graph the dependency graph to populate with resolved symbols
     /// @param edges the map of globals-to-global dependency edges, which will
     /// be populated by calls to Scan()
-    DependencyScanner(const SymbolTable& syms,
-                      const GlobalMap& globals_by_name,
+    DependencyScanner(const GlobalMap& globals_by_name,
                       diag::List& diagnostics,
                       DependencyGraph& graph,
                       DependencyEdges& edges)
-        : symbols_(syms),
-          globals_(globals_by_name),
+        : globals_(globals_by_name),
           diagnostics_(diagnostics),
           graph_(graph),
           dependency_edges_(edges) {
@@ -331,7 +327,7 @@ class DependencyScanner {
     void Declare(Symbol symbol, const ast::Node* node) {
         auto* old = scope_stack_.Set(symbol, node);
         if (old != nullptr && node != old) {
-            auto name = symbols_.NameFor(symbol);
+            auto name = symbol.Name();
             AddError(diagnostics_, "redeclaration of '" + name + "'", node->source);
             AddNote(diagnostics_, "'" + name + "' previously declared here", old->source);
         }
@@ -440,7 +436,7 @@ class DependencyScanner {
     void AddDependency(const ast::Identifier* from, Symbol to) {
         auto* resolved = scope_stack_.Get(to);
         if (!resolved) {
-            auto s = symbols_.NameFor(to);
+            auto s = to.Name();
             if (auto builtin_fn = builtin::ParseFunction(s);
                 builtin_fn != builtin::Function::kNone) {
                 graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_fn));
@@ -496,7 +492,6 @@ class DependencyScanner {
     }
 
     using VariableMap = utils::Hashmap<Symbol, const ast::Variable*, 32>;
-    const SymbolTable& symbols_;
     const GlobalMap& globals_;
     diag::List& diagnostics_;
     DependencyGraph& graph_;
@@ -510,8 +505,8 @@ class DependencyScanner {
 struct DependencyAnalysis {
   public:
     /// Constructor
-    DependencyAnalysis(const SymbolTable& symbols, diag::List& diagnostics, DependencyGraph& graph)
-        : symbols_(symbols), diagnostics_(diagnostics), graph_(graph) {}
+    DependencyAnalysis(diag::List& diagnostics, DependencyGraph& graph)
+        : diagnostics_(diagnostics), graph_(graph) {}
 
     /// Performs global dependency analysis on the module, emitting any errors to
     /// #diagnostics.
@@ -562,7 +557,7 @@ struct DependencyAnalysis {
     /// @returns the name of the global declaration node
     /// @note will raise an ICE if the node is not a type, function or variable
     /// declaration
-    std::string NameOf(const ast::Node* node) const { return symbols_.NameFor(SymbolOf(node)); }
+    std::string NameOf(const ast::Node* node) const { return SymbolOf(node).Name(); }
 
     /// @param node the ast::Node of the global declaration
     /// @returns a string representation of the global declaration kind
@@ -597,7 +592,7 @@ struct DependencyAnalysis {
     /// Walks the global declarations, determining the dependencies of each global
     /// and adding these to each global's Global::deps field.
     void DetermineDependencies() {
-        DependencyScanner scanner(symbols_, globals_, diagnostics_, graph_, dependency_edges_);
+        DependencyScanner scanner(globals_, diagnostics_, graph_, dependency_edges_);
         for (auto* global : declaration_order_) {
             scanner.Scan(global);
         }
@@ -762,16 +757,13 @@ struct DependencyAnalysis {
         for (auto* node : sorted_) {
             auto symbol = SymbolOf(node);
             auto* global = *globals_.Find(symbol);
-            printf("%s depends on:\n", symbols_.NameFor(symbol).c_str());
+            printf("%s depends on:\n", symbol.Name().c_str());
             for (auto* dep : global->deps) {
                 printf("  %s\n", NameOf(dep->node).c_str());
             }
         }
         printf("=========================\n");
     }
-
-    /// Program symbols
-    const SymbolTable& symbols_;
 
     /// Program diagnostics
     diag::List& diagnostics_;
@@ -802,37 +794,36 @@ DependencyGraph::DependencyGraph(DependencyGraph&&) = default;
 DependencyGraph::~DependencyGraph() = default;
 
 bool DependencyGraph::Build(const ast::Module& module,
-                            const SymbolTable& symbols,
                             diag::List& diagnostics,
                             DependencyGraph& output) {
-    DependencyAnalysis da{symbols, diagnostics, output};
+    DependencyAnalysis da{diagnostics, output};
     return da.Run(module);
 }
 
-std::string ResolvedIdentifier::String(const SymbolTable& symbols, diag::List& diagnostics) const {
+std::string ResolvedIdentifier::String(diag::List& diagnostics) const {
     if (auto* node = Node()) {
         return Switch(
             node,
             [&](const ast::TypeDecl* n) {  //
-                return "type '" + symbols.NameFor(n->name->symbol) + "'";
+                return "type '" + n->name->symbol.Name() + "'";
             },
             [&](const ast::Var* n) {  //
-                return "var '" + symbols.NameFor(n->name->symbol) + "'";
+                return "var '" + n->name->symbol.Name() + "'";
             },
             [&](const ast::Let* n) {  //
-                return "let '" + symbols.NameFor(n->name->symbol) + "'";
+                return "let '" + n->name->symbol.Name() + "'";
             },
             [&](const ast::Const* n) {  //
-                return "const '" + symbols.NameFor(n->name->symbol) + "'";
+                return "const '" + n->name->symbol.Name() + "'";
             },
             [&](const ast::Override* n) {  //
-                return "override '" + symbols.NameFor(n->name->symbol) + "'";
+                return "override '" + n->name->symbol.Name() + "'";
             },
             [&](const ast::Function* n) {  //
-                return "function '" + symbols.NameFor(n->name->symbol) + "'";
+                return "function '" + n->name->symbol.Name() + "'";
             },
             [&](const ast::Parameter* n) {  //
-                return "parameter '" + symbols.NameFor(n->name->symbol) + "'";
+                return "parameter '" + n->name->symbol.Name() + "'";
             },
             [&](Default) {
                 TINT_UNREACHABLE(Resolver, diagnostics)
