@@ -15,6 +15,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -29,7 +31,8 @@ TEST_F(GlslGeneratorImplTest_Identifier, EmitIdentifierExpression) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.Diagnostics();
+    gen.EmitExpression(out, i);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "foo");
 }
 

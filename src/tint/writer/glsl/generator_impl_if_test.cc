@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -30,7 +32,8 @@ TEST_F(GlslGeneratorImplTest_If, Emit_If) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    ASSERT_TRUE(gen.EmitStatement(i)) << gen.Diagnostics();
+    gen.EmitStatement(i);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   }
@@ -52,8 +55,8 @@ TEST_F(GlslGeneratorImplTest_If, Emit_IfWithElseIf) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.EmitStatement(i)) << gen.Diagnostics();
+    gen.EmitStatement(i);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
@@ -77,8 +80,8 @@ TEST_F(GlslGeneratorImplTest_If, Emit_IfWithElse) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.EmitStatement(i)) << gen.Diagnostics();
+    gen.EmitStatement(i);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
@@ -92,9 +95,7 @@ TEST_F(GlslGeneratorImplTest_If, Emit_IfWithMultiple) {
     GlobalVar("else_cond", ty.bool_(), builtin::AddressSpace::kPrivate);
 
     auto* else_cond = Expr("else_cond");
-
     auto* else_body = Block(Return());
-
     auto* else_body_2 = Block(Return());
 
     auto* cond = Expr("cond");
@@ -105,8 +106,8 @@ TEST_F(GlslGeneratorImplTest_If, Emit_IfWithMultiple) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.EmitStatement(i)) << gen.Diagnostics();
+    gen.EmitStatement(i);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {

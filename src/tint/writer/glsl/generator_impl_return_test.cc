@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::glsl {
@@ -26,10 +28,9 @@ TEST_F(GlslGeneratorImplTest_Return, Emit_Return) {
     WrapInFunction(r);
 
     GeneratorImpl& gen = Build();
-
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
+    gen.EmitStatement(r);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), "  return;\n");
 }
 
@@ -38,10 +39,9 @@ TEST_F(GlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
     Func("f", utils::Empty, ty.i32(), utils::Vector{r});
 
     GeneratorImpl& gen = Build();
-
     gen.increment_indent();
-
-    ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
+    gen.EmitStatement(r);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), "  return 123;\n");
 }
 

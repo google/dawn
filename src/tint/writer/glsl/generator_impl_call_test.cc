@@ -16,6 +16,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::glsl {
@@ -32,7 +34,8 @@ TEST_F(GlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
+    gen.EmitExpression(out, call);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "my_func()");
 }
 
@@ -52,7 +55,8 @@ TEST_F(GlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
+    gen.EmitExpression(out, call);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "my_func(param1, param2)");
 }
 
@@ -72,7 +76,8 @@ TEST_F(GlslGeneratorImplTest_Call, EmitStatement_Call) {
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
-    ASSERT_TRUE(gen.EmitStatement(call)) << gen.Diagnostics();
+    gen.EmitStatement(call);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
 }
 

@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gmock/gmock.h"
 #include "src/tint/writer/glsl/test_helper.h"
+
+#include "gmock/gmock.h"
 
 using ::testing::HasSubstr;
 
@@ -29,8 +30,8 @@ TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple) {
     GlobalVar("simple", ty.Of(simple), builtin::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 struct Simple {
@@ -49,8 +50,8 @@ TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple_Desktop) {
     GlobalVar("simple", ty.Of(simple), builtin::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(#version 440
 
 struct Simple {

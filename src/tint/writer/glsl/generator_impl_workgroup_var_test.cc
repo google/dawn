@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gmock/gmock.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/writer/glsl/test_helper.h"
+
+#include "gmock/gmock.h"
 
 using ::testing::HasSubstr;
 
@@ -35,8 +36,8 @@ TEST_F(GlslGeneratorImplTest_WorkgroupVar, Basic) {
              WorkgroupSize(1_i),
          });
     GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_THAT(gen.result(), HasSubstr("shared float wg;\n"));
 }
 
@@ -51,8 +52,8 @@ TEST_F(GlslGeneratorImplTest_WorkgroupVar, Aliased) {
              WorkgroupSize(1_i),
          });
     GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_THAT(gen.result(), HasSubstr("shared float wg;\n"));
 }
 

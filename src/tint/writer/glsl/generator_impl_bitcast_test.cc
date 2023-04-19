@@ -16,6 +16,8 @@
 
 #include "src/tint/utils/string_stream.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::glsl {
@@ -31,7 +33,8 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
+    gen.EmitExpression(out, bitcast);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "intBitsToFloat(a)");
 }
 
@@ -43,7 +46,8 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
+    gen.EmitExpression(out, bitcast);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "int(a)");
 }
 
@@ -55,7 +59,8 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
+    gen.EmitExpression(out, bitcast);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "uint(a)");
 }
 

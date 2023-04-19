@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gmock/gmock.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/writer/glsl/test_helper.h"
+
+#include "gmock/gmock.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -118,8 +119,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
     WrapInFunction(Var("expr", ty.f32(), expr));
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 struct Data {
@@ -169,8 +170,8 @@ TEST_P(GlslGeneratorImplTest_MemberAccessor_StorageBufferLoad, Test) {
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_THAT(gen.result(), HasSubstr(p.expected));
 }
 
@@ -222,7 +223,8 @@ TEST_P(GlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_THAT(gen.result(), HasSubstr(p.expected));
 }
 
@@ -277,8 +279,9 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -330,8 +333,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_Matrix_Single_El
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -378,8 +381,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -426,8 +429,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -473,8 +476,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -526,8 +529,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -587,8 +590,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Swizz
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -649,8 +652,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -710,8 +713,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Index
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -770,8 +773,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -831,8 +834,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Swizzle_SingleL
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     auto* expected =
         R"(#version 310 es
 precision highp float;
@@ -870,7 +873,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
     WrapInFunction(var, expr);
 
     GeneratorImpl& gen = SanitizeAndBuild();
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_THAT(gen.result(), HasSubstr("my_vec.xyz"));
 }
 
@@ -880,7 +884,8 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
     WrapInFunction(var, expr);
 
     GeneratorImpl& gen = SanitizeAndBuild();
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_THAT(gen.result(), HasSubstr("my_vec.gbr"));
 }
 

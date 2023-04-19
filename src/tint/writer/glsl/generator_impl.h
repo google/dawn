@@ -83,135 +83,111 @@ class GeneratorImpl : public TextGenerator {
     GeneratorImpl(const Program* program, const Version& version);
     ~GeneratorImpl();
 
-    /// @returns true on successful generation; false otherwise
-    bool Generate();
+    /// Generates the GLSL shader
+    void Generate();
 
     /// Record an extension directive within the generator
     /// @param ext the extension to record
-    /// @returns true if the extension directive was recorded successfully
-    bool RecordExtension(const ast::Enable* ext);
+    void RecordExtension(const ast::Enable* ext);
     /// Handles an index accessor expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
-    /// @returns true if the index accessor was emitted
-    bool EmitIndexAccessor(utils::StringStream& out, const ast::IndexAccessorExpression* expr);
+    void EmitIndexAccessor(utils::StringStream& out, const ast::IndexAccessorExpression* expr);
     /// Handles an assignment statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitAssign(const ast::AssignmentStatement* stmt);
+    void EmitAssign(const ast::AssignmentStatement* stmt);
     /// Handles emission of bitwise operators (&|) on bool scalars and vectors
     /// @param out the output of the expression stream
     /// @param expr the binary expression
-    /// @returns true if the expression was emitted, false otherwise
-    bool EmitBitwiseBoolOp(utils::StringStream& out, const ast::BinaryExpression* expr);
+    void EmitBitwiseBoolOp(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a binary expression
     /// @param out the output of the expression stream
     /// @param expr the binary expression
-    /// @returns true if the expression was emitted, false otherwise
-    bool EmitFloatModulo(utils::StringStream& out, const ast::BinaryExpression* expr);
+    void EmitFloatModulo(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating the modulo operator on float vector operands
     /// @param out the output of the expression stream
     /// @param expr the binary expression
-    /// @returns true if the expression was emitted, false otherwise
-    bool EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr);
+    void EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a bitcast expression
     /// @param out the output of the expression stream
     /// @param expr the expression
-    /// @returns true if the binary expression was emitted
-    bool EmitVectorRelational(utils::StringStream& out, const ast::BinaryExpression* expr);
+    void EmitVectorRelational(utils::StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a vector relational expression
     /// @param out the output of the expression stream
     /// @param expr the expression
-    /// @returns true if the vector relational expression was emitted
-    bool EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr);
+    void EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr);
     /// Emits a list of statements
     /// @param stmts the statement list
-    /// @returns true if the statements were emitted successfully
-    bool EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
+    void EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
     /// Emits a list of statements with an indentation
     /// @param stmts the statement list
-    /// @returns true if the statements were emitted successfully
-    bool EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
+    void EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
     /// Handles a block statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitBlock(const ast::BlockStatement* stmt);
+    void EmitBlock(const ast::BlockStatement* stmt);
     /// Handles a break statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitBreak(const ast::BreakStatement* stmt);
+    void EmitBreak(const ast::BreakStatement* stmt);
     /// Handles a break-if statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitBreakIf(const ast::BreakIfStatement* stmt);
+    void EmitBreakIf(const ast::BreakIfStatement* stmt);
     /// Handles generating a call expression
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @returns true if the call expression is emitted
-    bool EmitCall(utils::StringStream& out, const ast::CallExpression* expr);
+    void EmitCall(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a function call expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param fn the function being called
-    /// @returns true if the expression is emitted
-    bool EmitFunctionCall(utils::StringStream& out, const sem::Call* call, const sem::Function* fn);
+    void EmitFunctionCall(utils::StringStream& out, const sem::Call* call, const sem::Function* fn);
     /// Handles generating a builtin call expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param builtin the builtin being called
-    /// @returns true if the expression is emitted
-    bool EmitBuiltinCall(utils::StringStream& out,
+    void EmitBuiltinCall(utils::StringStream& out,
                          const sem::Call* call,
                          const sem::Builtin* builtin);
     /// Handles generating a value conversion expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param conv the value conversion
-    /// @returns true if the expression is emitted
-    bool EmitValueConversion(utils::StringStream& out,
+    void EmitValueConversion(utils::StringStream& out,
                              const sem::Call* call,
                              const sem::ValueConversion* conv);
     /// Handles generating a value constructor expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param ctor the value constructor
-    /// @returns true if the expression is emitted
-    bool EmitValueConstructor(utils::StringStream& out,
+    void EmitValueConstructor(utils::StringStream& out,
                               const sem::Call* call,
                               const sem::ValueConstructor* ctor);
     /// Handles generating a barrier builtin call
     /// @param out the output of the expression stream
     /// @param builtin the semantic information for the barrier builtin
-    /// @returns true if the call expression is emitted
-    bool EmitBarrierCall(utils::StringStream& out, const sem::Builtin* builtin);
+    void EmitBarrierCall(utils::StringStream& out, const sem::Builtin* builtin);
     /// Handles generating an atomic builtin call for a workgroup variable
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the atomic builtin
-    /// @returns true if the call expression is emitted
-    bool EmitWorkgroupAtomicCall(utils::StringStream& out,
+    void EmitWorkgroupAtomicCall(utils::StringStream& out,
                                  const ast::CallExpression* expr,
                                  const sem::Builtin* builtin);
     /// Handles generating an array.length() call
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @returns true if the array length expression is emitted
-    bool EmitArrayLength(utils::StringStream& out, const ast::CallExpression* expr);
+    void EmitArrayLength(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a call to `bitfieldExtract`
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @returns true if the expression is emitted
-    bool EmitExtractBits(utils::StringStream& out, const ast::CallExpression* expr);
+    void EmitExtractBits(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a call to `bitfieldInsert`
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @returns true if the expression is emitted
-    bool EmitInsertBits(utils::StringStream& out, const ast::CallExpression* expr);
+    void EmitInsertBits(utils::StringStream& out, const ast::CallExpression* expr);
     /// Emulates 'fma' on GLSL ES, where it is unsupported.
     /// @param out the output of the expression stream
     /// @param expr the fma() expression
-    /// @returns true if the expression is emitted
-    bool EmitEmulatedFMA(utils::StringStream& out, const ast::CallExpression* expr);
+    void EmitEmulatedFMA(utils::StringStream& out, const ast::CallExpression* expr);
     /// Create a float literal zero AST node, and associated semantic nodes.
     /// @param stmt the statement which will own the semantic expression node
     /// @returns an AST expression representing 0.0f
@@ -222,130 +198,109 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param builtin the semantic information for the texture builtin
-    /// @returns true if the call expression is emitted
-    bool EmitTextureCall(utils::StringStream& out,
+    void EmitTextureCall(utils::StringStream& out,
                          const sem::Call* call,
                          const sem::Builtin* builtin);
     /// Handles generating a call to the `select()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @returns true if the call expression is emitted
-    bool EmitCountOneBitsCall(utils::StringStream& out, const ast::CallExpression* expr);
+    void EmitCountOneBitsCall(utils::StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a call to the `countOneBits()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
-    /// @returns true if the call expression is emitted
-    bool EmitSelectCall(utils::StringStream& out,
+    void EmitSelectCall(utils::StringStream& out,
                         const ast::CallExpression* expr,
                         const sem::Builtin* builtin);
     /// Handles generating a call to the `dot()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
-    /// @returns true if the call expression is emitted
-    bool EmitDotCall(utils::StringStream& out,
+    void EmitDotCall(utils::StringStream& out,
                      const ast::CallExpression* expr,
                      const sem::Builtin* builtin);
     /// Handles generating a call to the `modf()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
-    /// @returns true if the call expression is emitted
-    bool EmitModfCall(utils::StringStream& out,
+    void EmitModfCall(utils::StringStream& out,
                       const ast::CallExpression* expr,
                       const sem::Builtin* builtin);
     /// Handles generating a call to the `frexp()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
-    /// @returns true if the call expression is emitted
-    bool EmitFrexpCall(utils::StringStream& out,
+    void EmitFrexpCall(utils::StringStream& out,
                        const ast::CallExpression* expr,
                        const sem::Builtin* builtin);
     /// Handles generating a call to the `degrees()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
-    /// @returns true if the call expression is emitted
-    bool EmitDegreesCall(utils::StringStream& out,
+    void EmitDegreesCall(utils::StringStream& out,
                          const ast::CallExpression* expr,
                          const sem::Builtin* builtin);
     /// Handles generating a call to the `radians()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
-    /// @returns true if the call expression is emitted
-    bool EmitRadiansCall(utils::StringStream& out,
+    void EmitRadiansCall(utils::StringStream& out,
                          const ast::CallExpression* expr,
                          const sem::Builtin* builtin);
     /// Handles generating a call to the `quantizeToF16()` intrinsic
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
-    /// @returns true if the call expression is emitted
-    bool EmitQuantizeToF16Call(utils::StringStream& out,
+    void EmitQuantizeToF16Call(utils::StringStream& out,
                                const ast::CallExpression* expr,
                                const sem::Builtin* builtin);
     /// Handles a case statement
     /// @param stmt the statement
-    /// @returns true if the statement was emitted successfully
-    bool EmitCase(const ast::CaseStatement* stmt);
+    void EmitCase(const ast::CaseStatement* stmt);
     /// Handles generating a discard statement
     /// @param stmt the discard statement
-    /// @returns true if the statement was successfully emitted
-    bool EmitDiscard(const ast::DiscardStatement* stmt);
+    void EmitDiscard(const ast::DiscardStatement* stmt);
     /// Handles a continue statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted successfully
-    bool EmitContinue(const ast::ContinueStatement* stmt);
+    void EmitContinue(const ast::ContinueStatement* stmt);
     /// Handles generate an Expression
     /// @param out the output of the expression stream
     /// @param expr the expression
-    /// @returns true if the expression was emitted
-    bool EmitExpression(utils::StringStream& out, const ast::Expression* expr);
+    void EmitExpression(utils::StringStream& out, const ast::Expression* expr);
     /// Handles generating a function
     /// @param func the function to generate
-    /// @returns true if the function was emitted
-    bool EmitFunction(const ast::Function* func);
+    void EmitFunction(const ast::Function* func);
 
     /// Handles emitting a global variable
     /// @param global the global variable
-    /// @returns true on success
-    bool EmitGlobalVariable(const ast::Variable* global);
+    void EmitGlobalVariable(const ast::Variable* global);
 
     /// Handles emitting a global variable with the uniform address space
     /// @param var the AST node for the 'var'
     /// @param sem the semantic node for the 'var'
-    /// @returns true on success
-    bool EmitUniformVariable(const ast::Var* var, const sem::Variable* sem);
+    void EmitUniformVariable(const ast::Var* var, const sem::Variable* sem);
 
     /// Handles emitting a global variable with the storage address space
     /// @param var the AST node for the 'var'
     /// @param sem the semantic node for the 'var'
-    /// @returns true on success
-    bool EmitStorageVariable(const ast::Var* var, const sem::Variable* sem);
+    void EmitStorageVariable(const ast::Var* var, const sem::Variable* sem);
 
     /// Handles emitting a global variable with the handle address space
     /// @param var the AST node for the 'var'
     /// @param sem the semantic node for the 'var'
-    /// @returns true on success
-    bool EmitHandleVariable(const ast::Var* var, const sem::Variable* sem);
+    void EmitHandleVariable(const ast::Var* var, const sem::Variable* sem);
 
     /// Handles emitting a global variable with the private address space
     /// @param var the global variable
-    /// @returns true on success
-    bool EmitPrivateVariable(const sem::Variable* var);
+    void EmitPrivateVariable(const sem::Variable* var);
 
     /// Handles emitting a global variable with the workgroup address space
     /// @param var the global variable
-    /// @returns true on success
-    bool EmitWorkgroupVariable(const sem::Variable* var);
+    void EmitWorkgroupVariable(const sem::Variable* var);
 
     /// Handles emitting a global variable with the input or output address space
     /// @param var the global variable
-    /// @returns true on success
-    bool EmitIOVariable(const sem::GlobalVariable* var);
+    void EmitIOVariable(const sem::GlobalVariable* var);
 
     /// Handles emitting interpolation qualifiers
     /// @param out the output of the expression stream
@@ -356,62 +311,49 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param var the global variable semantics
     /// @param attrs the attributes
-    /// @returns true if the attributes were emitted
-    bool EmitAttributes(utils::StringStream& out,
+    void EmitAttributes(utils::StringStream& out,
                         const sem::GlobalVariable* var,
                         utils::VectorRef<const ast::Attribute*> attrs);
     /// Handles emitting the entry point function
     /// @param func the entry point
-    /// @returns true if the entry point function was emitted
-    bool EmitEntryPointFunction(const ast::Function* func);
+    void EmitEntryPointFunction(const ast::Function* func);
     /// Handles an if statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was successfully emitted
-    bool EmitIf(const ast::IfStatement* stmt);
+    void EmitIf(const ast::IfStatement* stmt);
     /// Handles a constant value
     /// @param out the output stream
     /// @param constant the constant value to emit
-    /// @returns true if the constant value was successfully emitted
-    bool EmitConstant(utils::StringStream& out, const constant::Value* constant);
+    void EmitConstant(utils::StringStream& out, const constant::Value* constant);
     /// Handles a literal
     /// @param out the output stream
     /// @param lit the literal to emit
-    /// @returns true if the literal was successfully emitted
-    bool EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit);
+    void EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit);
     /// Handles a loop statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted
-    bool EmitLoop(const ast::LoopStatement* stmt);
+    void EmitLoop(const ast::LoopStatement* stmt);
     /// Handles a for loop statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted
-    bool EmitForLoop(const ast::ForLoopStatement* stmt);
+    void EmitForLoop(const ast::ForLoopStatement* stmt);
     /// Handles a while statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted
-    bool EmitWhile(const ast::WhileStatement* stmt);
+    void EmitWhile(const ast::WhileStatement* stmt);
     /// Handles generating an identifier expression
     /// @param out the output of the expression stream
     /// @param expr the identifier expression
-    /// @returns true if the identifier was emitted
-    bool EmitIdentifier(utils::StringStream& out, const ast::IdentifierExpression* expr);
+    void EmitIdentifier(utils::StringStream& out, const ast::IdentifierExpression* expr);
     /// Handles a member accessor expression
     /// @param out the output of the expression stream
     /// @param expr the member accessor expression
-    /// @returns true if the member accessor was emitted
-    bool EmitMemberAccessor(utils::StringStream& out, const ast::MemberAccessorExpression* expr);
+    void EmitMemberAccessor(utils::StringStream& out, const ast::MemberAccessorExpression* expr);
     /// Handles return statements
     /// @param stmt the statement to emit
-    /// @returns true if the statement was successfully emitted
-    bool EmitReturn(const ast::ReturnStatement* stmt);
+    void EmitReturn(const ast::ReturnStatement* stmt);
     /// Handles statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted
-    bool EmitStatement(const ast::Statement* stmt);
+    void EmitStatement(const ast::Statement* stmt);
     /// Handles generating a switch statement
     /// @param stmt the statement to emit
-    /// @returns true if the statement was emitted
-    bool EmitSwitch(const ast::SwitchStatement* stmt);
+    void EmitSwitch(const ast::SwitchStatement* stmt);
     /// Handles generating type
     /// @param out the output stream
     /// @param type the type to generate
@@ -420,8 +362,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param name the name of the variable, used for array emission.
     /// @param name_printed (optional) if not nullptr and an array was printed
     /// then the boolean is set to true.
-    /// @returns true if the type is emitted
-    bool EmitType(utils::StringStream& out,
+    void EmitType(utils::StringStream& out,
                   const type::Type* type,
                   builtin::AddressSpace address_space,
                   builtin::Access access,
@@ -433,8 +374,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param address_space the address space of the variable
     /// @param access the access control type of the variable
     /// @param name the name to emit
-    /// @returns true if the type is emitted
-    bool EmitTypeAndName(utils::StringStream& out,
+    void EmitTypeAndName(utils::StringStream& out,
                          const type::Type* type,
                          builtin::AddressSpace address_space,
                          builtin::Access access,
@@ -443,35 +383,28 @@ class GeneratorImpl : public TextGenerator {
     /// this function will simply return `true` without emitting anything.
     /// @param buffer the text buffer that the type declaration will be written to
     /// @param ty the struct to generate
-    /// @returns true if the struct is emitted
-    bool EmitStructType(TextBuffer* buffer, const sem::Struct* ty);
+    void EmitStructType(TextBuffer* buffer, const sem::Struct* ty);
     /// Handles generating the members of a structure
     /// @param buffer the text buffer that the struct members will be written to
     /// @param ty the struct to generate
-    /// @returns true if the struct members are emitted
-    bool EmitStructMembers(TextBuffer* buffer, const sem::Struct* ty);
+    void EmitStructMembers(TextBuffer* buffer, const sem::Struct* ty);
     /// Handles a unary op expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
-    /// @returns true if the expression was emitted
-    bool EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr);
+    void EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr);
     /// Emits the zero value for the given type
     /// @param out the output stream
     /// @param type the type to emit the value for
-    /// @returns true if the zero value was successfully emitted.
-    bool EmitZeroValue(utils::StringStream& out, const type::Type* type);
+    void EmitZeroValue(utils::StringStream& out, const type::Type* type);
     /// Handles generating a 'var' declaration
     /// @param var the variable to generate
-    /// @returns true if the variable was emitted
-    bool EmitVar(const ast::Var* var);
+    void EmitVar(const ast::Var* var);
     /// Handles generating a function-scope 'let' declaration
     /// @param let the variable to generate
-    /// @returns true if the variable was emitted
-    bool EmitLet(const ast::Let* let);
+    void EmitLet(const ast::Let* let);
     /// Handles generating a module-scope 'let' declaration
     /// @param let the 'let' to emit
-    /// @returns true if the variable was emitted
-    bool EmitProgramConstVariable(const ast::Variable* let);
+    void EmitProgramConstVariable(const ast::Variable* let);
     /// Handles generating a builtin method name
     /// @param builtin the semantic info for the builtin
     /// @returns the name or "" if not valid
@@ -510,9 +443,8 @@ class GeneratorImpl : public TextGenerator {
     ///        Where:
     ///          `buffer` is the body of the generated function
     ///          `params` is the name of all the generated function parameters
-    /// @returns true if the call expression is emitted
     template <typename F>
-    bool CallBuiltinHelper(utils::StringStream& out,
+    void CallBuiltinHelper(utils::StringStream& out,
                            const ast::CallExpression* call,
                            const sem::Builtin* builtin,
                            F&& build);
@@ -523,7 +455,7 @@ class GeneratorImpl : public TextGenerator {
     type::Type* BoolTypeToUint(const type::Type* type);
 
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
-    std::function<bool()> emit_continuing_;
+    std::function<void()> emit_continuing_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
     std::unordered_map<const type::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const type::Vector*, std::string> int_dot_funcs_;

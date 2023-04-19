@@ -289,7 +289,8 @@ TEST_P(GlslGeneratorBuiltinTextureTest, Call) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    gen.Generate();
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
     auto expected = expected_texture_overload(param.overload);
 

@@ -45,7 +45,8 @@ Result Generate(const Program* program, const Options& options, const std::strin
 
     // Generate the GLSL code.
     auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program, options.version);
-    result.success = impl->Generate();
+    impl->Generate();
+    result.success = impl->Diagnostics().empty();
     result.error = impl->Diagnostics().str();
     result.glsl = impl->result();
 

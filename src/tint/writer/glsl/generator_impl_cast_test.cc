@@ -15,6 +15,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::writer::glsl {
@@ -29,7 +31,8 @@ TEST_F(GlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.Diagnostics();
+    gen.EmitExpression(out, cast);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "1.0f");
 }
 
@@ -40,7 +43,8 @@ TEST_F(GlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.Diagnostics();
+    gen.EmitExpression(out, cast);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "vec3(1.0f, 2.0f, 3.0f)");
 }
 

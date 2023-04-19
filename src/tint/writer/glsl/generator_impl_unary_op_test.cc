@@ -15,6 +15,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -28,7 +30,8 @@ TEST_F(GlslUnaryOpTest, AddressOf) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
+    gen.EmitExpression(out, op);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "expr");
 }
 
@@ -40,7 +43,8 @@ TEST_F(GlslUnaryOpTest, Complement) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
+    gen.EmitExpression(out, op);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "~(expr)");
 }
 
@@ -53,7 +57,8 @@ TEST_F(GlslUnaryOpTest, Indirection) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
+    gen.EmitExpression(out, op);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "expr");
 }
 
@@ -65,7 +70,8 @@ TEST_F(GlslUnaryOpTest, Not) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
+    gen.EmitExpression(out, op);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "!(expr)");
 }
 
@@ -77,7 +83,8 @@ TEST_F(GlslUnaryOpTest, Negation) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
+    gen.EmitExpression(out, op);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "-(expr)");
 }
 
@@ -88,7 +95,8 @@ TEST_F(GlslUnaryOpTest, IntMin) {
     GeneratorImpl& gen = Build();
 
     utils::StringStream out;
-    ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
+    gen.EmitExpression(out, op);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(-2147483647 - 1)");
 }
 

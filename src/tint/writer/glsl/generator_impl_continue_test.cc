@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -27,7 +29,8 @@ TEST_F(GlslGeneratorImplTest_Continue, Emit_Continue) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
+    gen.EmitStatement(loop);
+    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.result(), R"(  while (true) {
     if (false) {
       break;
