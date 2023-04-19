@@ -148,11 +148,10 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
                 group = 0;
 
                 for (auto* global : src->AST().GlobalVariables()) {
-                    if (global->HasBindingPoint()) {
-                        auto* global_sem = src->Sem().Get<sem::GlobalVariable>(global);
-                        auto binding_point = global_sem->BindingPoint();
-                        if (binding_point.group >= group) {
-                            group = binding_point.group + 1;
+                    auto* global_sem = src->Sem().Get<sem::GlobalVariable>(global);
+                    if (auto bp = global_sem->BindingPoint()) {
+                        if (bp->group >= group) {
+                            group = bp->group + 1;
                         }
                     }
                 }

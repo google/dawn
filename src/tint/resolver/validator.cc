@@ -1346,11 +1346,14 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     utils::Hashmap<sem::BindingPoint, const ast::Variable*, 8> binding_points;
     for (auto* global : func->TransitivelyReferencedGlobals()) {
         auto* var_decl = global->Declaration()->As<ast::Var>();
-        if (!var_decl || !var_decl->HasBindingPoint()) {
+        if (!var_decl) {
             continue;
         }
         auto bp = global->BindingPoint();
-        if (auto added = binding_points.Add(bp, var_decl);
+        if (!bp) {
+            continue;
+        }
+        if (auto added = binding_points.Add(*bp, var_decl);
             !added &&
             IsValidationEnabled(decl->attributes,
                                 ast::DisabledValidation::kBindingPointCollision) &&
@@ -1364,7 +1367,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             AddError(
                 "entry point '" + func_name +
                     "' references multiple variables that use the same resource binding @group(" +
-                    std::to_string(bp.group) + "), @binding(" + std::to_string(bp.binding) + ")",
+                    std::to_string(bp->group) + "), @binding(" + std::to_string(bp->binding) + ")",
                 var_decl->source);
             AddNote("first resource binding usage declared here", (*added.value)->source);
             return false;

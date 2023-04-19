@@ -165,14 +165,14 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
                    builtin::AddressSpace address_space,
                    builtin::Access access,
                    const constant::Value* constant_value,
-                   sem::BindingPoint binding_point = {},
+                   std::optional<sem::BindingPoint> binding_point = std::nullopt,
                    std::optional<uint32_t> location = std::nullopt);
 
     /// Destructor
     ~GlobalVariable() override;
 
     /// @returns the resource binding point for the variable
-    sem::BindingPoint BindingPoint() const { return binding_point_; }
+    std::optional<sem::BindingPoint> BindingPoint() const { return binding_point_; }
 
     /// @param id the constant identifier to assign to this variable
     void SetOverrideId(OverrideId id) { override_id_ = id; }
@@ -184,7 +184,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     std::optional<uint32_t> Location() const { return location_; }
 
   private:
-    const sem::BindingPoint binding_point_;
+    const std::optional<sem::BindingPoint> binding_point_;
 
     tint::OverrideId override_id_;
     std::optional<uint32_t> location_;
@@ -208,7 +208,7 @@ class Parameter final : public Castable<Parameter, Variable> {
               builtin::AddressSpace address_space,
               builtin::Access access,
               const ParameterUsage usage = ParameterUsage::kNone,
-              sem::BindingPoint binding_point = {},
+              std::optional<sem::BindingPoint> binding_point = {},
               std::optional<uint32_t> location = std::nullopt);
 
     /// Destructor
@@ -239,7 +239,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     void SetShadows(const CastableBase* shadows) { shadows_ = shadows; }
 
     /// @returns the resource binding point for the parameter
-    sem::BindingPoint BindingPoint() const { return binding_point_; }
+    std::optional<sem::BindingPoint> BindingPoint() const { return binding_point_; }
 
     /// @returns the location value for the parameter, if set
     std::optional<uint32_t> Location() const { return location_; }
@@ -249,7 +249,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     const ParameterUsage usage_;
     CallTarget const* owner_ = nullptr;
     const CastableBase* shadows_ = nullptr;
-    const sem::BindingPoint binding_point_;
+    const std::optional<sem::BindingPoint> binding_point_;
     const std::optional<uint32_t> location_;
 };
 

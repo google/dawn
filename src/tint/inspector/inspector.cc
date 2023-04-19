@@ -531,8 +531,8 @@ std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(
         auto* texture = pair.first->As<sem::GlobalVariable>();
         auto* sampler = pair.second ? pair.second->As<sem::GlobalVariable>() : nullptr;
         SamplerTexturePair new_pair;
-        new_pair.sampler_binding_point = sampler ? sampler->BindingPoint() : placeholder;
-        new_pair.texture_binding_point = texture->BindingPoint();
+        new_pair.sampler_binding_point = sampler ? *sampler->BindingPoint() : placeholder;
+        new_pair.texture_binding_point = *texture->BindingPoint();
         new_pairs.push_back(new_pair);
     }
     return new_pairs;
@@ -834,8 +834,8 @@ void Inspector::GenerateSamplerTargets() {
 
         GetOriginatingResources(std::array<const ast::Expression*, 2>{t, s},
                                 [&](std::array<const sem::GlobalVariable*, 2> globals) {
-                                    auto texture_binding_point = globals[0]->BindingPoint();
-                                    auto sampler_binding_point = globals[1]->BindingPoint();
+                                    auto texture_binding_point = *globals[0]->BindingPoint();
+                                    auto sampler_binding_point = *globals[1]->BindingPoint();
 
                                     for (auto* entry_point : entry_points) {
                                         const auto& ep_name =

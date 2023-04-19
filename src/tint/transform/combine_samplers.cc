@@ -107,10 +107,10 @@ struct CombineSamplers::State {
                                               const sem::Variable* sampler_var,
                                               std::string name) {
         SamplerTexturePair bp_pair;
-        bp_pair.texture_binding_point = texture_var->As<sem::GlobalVariable>()->BindingPoint();
-        bp_pair.sampler_binding_point = sampler_var
-                                            ? sampler_var->As<sem::GlobalVariable>()->BindingPoint()
-                                            : binding_info->placeholder_binding_point;
+        bp_pair.texture_binding_point = *texture_var->As<sem::GlobalVariable>()->BindingPoint();
+        bp_pair.sampler_binding_point =
+            sampler_var ? *sampler_var->As<sem::GlobalVariable>()->BindingPoint()
+                        : binding_info->placeholder_binding_point;
         auto it = binding_info->binding_map.find(bp_pair);
         if (it != binding_info->binding_map.end()) {
             name = it->second;
@@ -161,9 +161,8 @@ struct CombineSamplers::State {
             if (tint::IsAnyOf<type::Texture, type::Sampler>(type) &&
                 !type->Is<type::StorageTexture>()) {
                 ctx.Remove(ctx.src->AST().GlobalDeclarations(), global);
-            } else if (global->HasBindingPoint()) {
-                auto binding_point = global_sem->BindingPoint();
-                if (binding_point.group == 0 && binding_point.binding == 0) {
+            } else if (auto binding_point = global_sem->BindingPoint()) {
+                if (binding_point->group == 0 && binding_point->binding == 0) {
                     auto* attribute =
                         ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision);
                     ctx.InsertFront(global->attributes, attribute);

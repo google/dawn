@@ -867,14 +867,14 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             [&](const ast::BindingAttribute*) {
                 auto bp = sem->BindingPoint();
                 push_annot(spv::Op::OpDecorate, {Operand(var_id), U32Operand(SpvDecorationBinding),
-                                                 Operand(bp.binding)});
+                                                 Operand(bp->binding)});
                 return true;
             },
             [&](const ast::GroupAttribute*) {
                 auto bp = sem->BindingPoint();
                 push_annot(
                     spv::Op::OpDecorate,
-                    {Operand(var_id), U32Operand(SpvDecorationDescriptorSet), Operand(bp.group)});
+                    {Operand(var_id), U32Operand(SpvDecorationDescriptorSet), Operand(bp->group)});
                 return true;
             },
             [&](const ast::IdAttribute*) {

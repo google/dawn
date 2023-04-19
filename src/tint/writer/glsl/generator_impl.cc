@@ -2031,7 +2031,7 @@ bool GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable
         TINT_ICE(Writer, builder_.Diagnostics()) << "storage variable must be of struct type";
         return false;
     }
-    auto bp = sem->As<sem::GlobalVariable>()->BindingPoint();
+    auto bp = *sem->As<sem::GlobalVariable>()->BindingPoint();
     {
         auto out = line();
         out << "layout(binding = " << bp.binding << ", std140";
@@ -2052,7 +2052,7 @@ bool GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable
         TINT_ICE(Writer, builder_.Diagnostics()) << "storage variable must be of struct type";
         return false;
     }
-    auto bp = sem->As<sem::GlobalVariable>()->BindingPoint();
+    auto bp = *sem->As<sem::GlobalVariable>()->BindingPoint();
     line() << "layout(binding = " << bp.binding << ", std430) buffer "
            << UniqueIdentifier(StructName(str) + "_ssbo") << " {";
     EmitStructMembers(current_buffer_, str);

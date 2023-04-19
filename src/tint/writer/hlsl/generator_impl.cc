@@ -3066,7 +3066,7 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
 }
 
 bool GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable* sem) {
-    auto binding_point = sem->As<sem::GlobalVariable>()->BindingPoint();
+    auto binding_point = *sem->As<sem::GlobalVariable>()->BindingPoint();
     auto* type = sem->Type()->UnwrapRef();
     auto name = var->name->symbol.Name();
     line() << "cbuffer cbuffer_" << name << RegisterAndSpace('b', binding_point) << " {";
@@ -3095,7 +3095,7 @@ bool GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable
 
     auto* global_sem = sem->As<sem::GlobalVariable>();
     out << RegisterAndSpace(sem->Access() == builtin::Access::kRead ? 't' : 'u',
-                            global_sem->BindingPoint())
+                            *global_sem->BindingPoint())
         << ";";
 
     return true;
@@ -3124,14 +3124,14 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
 
     if (register_space) {
         auto bp = sem->As<sem::GlobalVariable>()->BindingPoint();
-        out << " : register(" << register_space << bp.binding;
+        out << " : register(" << register_space << bp->binding;
         // Omit the space if it's 0, as it's the default.
         // SM 5.0 doesn't support spaces, so we don't emit them if group is 0 for better
         // compatibility.
-        if (bp.group == 0) {
+        if (bp->group == 0) {
             out << ")";
         } else {
-            out << ", space" << bp.group << ")";
+            out << ", space" << bp->group << ")";
         }
     }
 

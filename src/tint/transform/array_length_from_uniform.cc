@@ -82,13 +82,14 @@ struct ArrayLengthFromUniform::State {
 
         IterateArrayLengthOnStorageVar([&](const ast::CallExpression*, const sem::VariableUser*,
                                            const sem::GlobalVariable* var) {
-            auto binding = var->BindingPoint();
-            auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
-            if (idx_itr == cfg->bindpoint_to_size_index.end()) {
-                return;
-            }
-            if (idx_itr->second > max_buffer_size_index) {
-                max_buffer_size_index = idx_itr->second;
+            if (auto binding = var->BindingPoint()) {
+                auto idx_itr = cfg->bindpoint_to_size_index.find(*binding);
+                if (idx_itr == cfg->bindpoint_to_size_index.end()) {
+                    return;
+                }
+                if (idx_itr->second > max_buffer_size_index) {
+                    max_buffer_size_index = idx_itr->second;
+                }
             }
         });
 
@@ -120,7 +121,10 @@ struct ArrayLengthFromUniform::State {
                                            const sem::VariableUser* storage_buffer_sem,
                                            const sem::GlobalVariable* var) {
             auto binding = var->BindingPoint();
-            auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
+            if (!binding) {
+                return;
+            }
+            auto idx_itr = cfg->bindpoint_to_size_index.find(*binding);
             if (idx_itr == cfg->bindpoint_to_size_index.end()) {
                 return;
             }

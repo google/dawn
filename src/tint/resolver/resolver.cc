@@ -276,7 +276,7 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         sem = builder_->create<sem::GlobalVariable>(
             v, ty, sem::EvaluationStage::kRuntime, builtin::AddressSpace::kUndefined,
             builtin::Access::kUndefined,
-            /* constant_value */ nullptr, sem::BindingPoint{}, std::nullopt);
+            /* constant_value */ nullptr, std::nullopt, std::nullopt);
     } else {
         sem = builder_->create<sem::LocalVariable>(v, ty, sem::EvaluationStage::kRuntime,
                                                    builtin::AddressSpace::kUndefined,
@@ -336,7 +336,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
     auto* sem = builder_->create<sem::GlobalVariable>(
         v, ty, sem::EvaluationStage::kOverride, builtin::AddressSpace::kUndefined,
         builtin::Access::kUndefined,
-        /* constant_value */ nullptr, sem::BindingPoint{}, std::nullopt);
+        /* constant_value */ nullptr, std::nullopt, std::nullopt);
     sem->SetInitializer(rhs);
 
     if (auto* id_attr = ast::GetAttribute<ast::IdAttribute>(v->attributes)) {
@@ -430,7 +430,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
     auto* sem = is_global
                     ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
                           c, ty, sem::EvaluationStage::kConstant, builtin::AddressSpace::kUndefined,
-                          builtin::Access::kUndefined, value, sem::BindingPoint{}, std::nullopt))
+                          builtin::Access::kUndefined, value, std::nullopt, std::nullopt))
                     : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
                           c, ty, sem::EvaluationStage::kConstant, builtin::AddressSpace::kUndefined,
                           builtin::Access::kUndefined, current_statement_, value));
@@ -528,7 +528,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
     sem::Variable* sem = nullptr;
     if (is_global) {
-        sem::BindingPoint binding_point;
+        std::optional<sem::BindingPoint> binding_point;
         if (var->HasBindingPoint()) {
             uint32_t binding = 0;
             {
@@ -640,8 +640,9 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         }
     }
 
-    sem::BindingPoint binding_point;
+    std::optional<sem::BindingPoint> binding_point;
     if (param->HasBindingPoint()) {
+        binding_point = sem::BindingPoint{};
         {
             ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@binding value"};
             TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
@@ -651,7 +652,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
             if (!materialized) {
                 return nullptr;
             }
-            binding_point.binding = materialized->ConstantValue()->ValueAs<u32>();
+            binding_point->binding = materialized->ConstantValue()->ValueAs<u32>();
         }
         {
             ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@group value"};
@@ -662,7 +663,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
             if (!materialized) {
                 return nullptr;
             }
-            binding_point.group = materialized->ConstantValue()->ValueAs<u32>();
+            binding_point->group = materialized->ConstantValue()->ValueAs<u32>();
         }
     }
 

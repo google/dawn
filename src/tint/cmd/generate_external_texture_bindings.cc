@@ -36,12 +36,13 @@ writer::ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(
     std::vector<sem::BindingPoint> ext_tex_bps;
     for (auto* var : program->AST().GlobalVariables()) {
         if (auto* sem_var = program->Sem().Get(var)->As<sem::GlobalVariable>()) {
-            auto bp = sem_var->BindingPoint();
-            auto& n = group_to_next_binding_number[bp.group];
-            n = std::max(n, bp.binding + 1);
+            if (auto bp = sem_var->BindingPoint()) {
+                auto& n = group_to_next_binding_number[bp->group];
+                n = std::max(n, bp->binding + 1);
 
-            if (sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
-                ext_tex_bps.emplace_back(bp);
+                if (sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
+                    ext_tex_bps.emplace_back(*bp);
+                }
             }
         }
     }

@@ -71,10 +71,8 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
             auto* func = src->Sem().Get(func_ast);
             std::unordered_map<sem::BindingPoint, int> binding_point_counts;
             for (auto* global : func->TransitivelyReferencedGlobals()) {
-                if (global->Declaration()->HasBindingPoint()) {
-                    BindingPoint from = global->BindingPoint();
-
-                    auto bp_it = remappings->binding_points.find(from);
+                if (auto from = global->BindingPoint()) {
+                    auto bp_it = remappings->binding_points.find(*from);
                     if (bp_it != remappings->binding_points.end()) {
                         // Remapped
                         BindingPoint to = bp_it->second;
@@ -83,8 +81,8 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
                         }
                     } else {
                         // No remapping
-                        if (binding_point_counts[from]++) {
-                            add_collision_attr.emplace(from);
+                        if (binding_point_counts[*from]++) {
+                            add_collision_attr.emplace(*from);
                         }
                     }
                 }
@@ -97,7 +95,7 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
             auto* global_sem = src->Sem().Get<sem::GlobalVariable>(var);
 
             // The original binding point
-            BindingPoint from = global_sem->BindingPoint();
+            BindingPoint from = *global_sem->BindingPoint();
 
             // The binding point after remapping
             BindingPoint bp = from;
