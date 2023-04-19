@@ -427,10 +427,23 @@ MaybeError ValidateFragmentState(DeviceBase* device,
     }
     DAWN_TRY(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats));
 
-    DAWN_INVALID_IF(fragmentMetadata.usesSampleMaskOutput && alphaToCoverageEnabled,
-                    "alphaToCoverageEnabled is true when the sample_mask builtin is a "
-                    "pipeline output of fragment stage of %s.",
-                    descriptor->module);
+    if (alphaToCoverageEnabled) {
+        DAWN_INVALID_IF(fragmentMetadata.usesSampleMaskOutput,
+                        "alphaToCoverageEnabled is true when the sample_mask builtin is a "
+                        "pipeline output of fragment stage of %s.",
+                        descriptor->module);
+
+        DAWN_INVALID_IF(descriptor->targetCount == 0 ||
+                            descriptor->targets[0].format == wgpu::TextureFormat::Undefined,
+                        "alphaToCoverageEnabled is true when color target[0] is not present.");
+
+        const Format* format;
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->targets[0].format));
+        DAWN_INVALID_IF(
+            !format->HasAlphaChannel(),
+            "alphaToCoverageEnabled is true when target[0].format (%s) has no alpha channel.",
+            format->format);
+    }
 
     return {};
 }
@@ -532,6 +545,10 @@ MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
 
     DAWN_TRY_CONTEXT(ValidateMultisampleState(&descriptor->multisample),
                      "validating multisample state.");
+
+    DAWN_INVALID_IF(
+        descriptor->multisample.alphaToCoverageEnabled && descriptor->fragment == nullptr,
+        "alphaToCoverageEnabled is true when fragment state is not present.");
 
     if (descriptor->fragment != nullptr) {
         DAWN_TRY_CONTEXT(ValidateFragmentState(device, descriptor->fragment, descriptor->layout,
