@@ -29,6 +29,8 @@ class Sampler final : public SamplerBase {
 
     ID3D11SamplerState* GetD3D11SamplerState() const;
 
+    void SetLabelImpl() override;
+
   private:
     using SamplerBase::SamplerBase;
 

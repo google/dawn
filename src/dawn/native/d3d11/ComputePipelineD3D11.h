@@ -39,7 +39,7 @@ class ComputePipeline final : public ComputePipelineBase {
   private:
     using ComputePipelineBase::ComputePipelineBase;
     ~ComputePipeline() override;
-    void DestroyImpl() override;
+    void SetLabelImpl() override;
 
     ComPtr<ID3D11ComputeShader> mComputeShader;
 };

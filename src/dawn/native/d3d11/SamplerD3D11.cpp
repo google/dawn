@@ -92,11 +92,16 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
                               ->CreateSamplerState(&samplerDesc, &mD3d11SamplerState),
                           "ID3D11Device::CreateSamplerState"));
 
+    SetLabelImpl();
     return {};
 }
 
 ID3D11SamplerState* Sampler::GetD3D11SamplerState() const {
     return mD3d11SamplerState.Get();
+}
+
+void Sampler::SetLabelImpl() {
+    SetDebugName(ToBackend(GetDevice()), mD3d11SamplerState.Get(), "Dawn_Sampler", GetLabel());
 }
 
 }  // namespace dawn::native::d3d11

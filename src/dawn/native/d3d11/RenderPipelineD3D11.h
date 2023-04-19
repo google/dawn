@@ -47,7 +47,7 @@ class RenderPipeline final : public RenderPipelineBase {
     ~RenderPipeline() override;
 
     MaybeError Initialize() override;
-    void DestroyImpl() override;
+    void SetLabelImpl() override;
 
     MaybeError InitializeRasterizerState();
     MaybeError InitializeInputLayout(const Blob& vertexShader);

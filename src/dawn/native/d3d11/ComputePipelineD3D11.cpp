@@ -21,6 +21,7 @@
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/ShaderModuleD3D11.h"
+#include "dawn/native/d3d11/UtilsD3D11.h"
 
 namespace dawn::native::d3d11 {
 
@@ -32,10 +33,6 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
 }
 
 ComputePipeline::~ComputePipeline() = default;
-
-void ComputePipeline::DestroyImpl() {
-    ComputePipelineBase::DestroyImpl();
-}
 
 MaybeError ComputePipeline::Initialize() {
     Device* device = ToBackend(GetDevice());
@@ -68,7 +65,13 @@ MaybeError ComputePipeline::Initialize() {
                               nullptr, &mComputeShader),
                           "D3D11 create compute shader"));
 
+    SetLabelImpl();
+
     return {};
+}
+
+void ComputePipeline::SetLabelImpl() {
+    SetDebugName(ToBackend(GetDevice()), mComputeShader.Get(), "Dawn_ComputePipeline", GetLabel());
 }
 
 void ComputePipeline::ApplyNow(CommandRecordingContext* commandContext) {
