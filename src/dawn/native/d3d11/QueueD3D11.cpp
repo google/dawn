@@ -14,6 +14,7 @@
 
 #include "dawn/native/d3d11/QueueD3D11.h"
 
+#include "dawn/native/d3d11/BufferD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
 
@@ -31,7 +32,8 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
                                   const void* data,
                                   size_t size) {
-    return DAWN_UNIMPLEMENTED_ERROR("WriteBuffer is not implemented for D3D11");
+    CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
+    return ToBackend(buffer)->Write(commandContext, bufferOffset, data, size);
 }
 
 MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,

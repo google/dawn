@@ -290,6 +290,8 @@ if (DAWN_ENABLE_D3D11)
         "d3d11/BindGroupD3D11.h"
         "d3d11/BindGroupLayoutD3D11.cpp"
         "d3d11/BindGroupLayoutD3D11.h"
+        "d3d11/BufferD3D11.cpp"
+        "d3d11/BufferD3D11.h"
         "d3d11/CommandRecordingContextD3D11.cpp"
         "d3d11/CommandRecordingContextD3D11.h"
         "d3d11/ComputePipelineD3D11.cpp"

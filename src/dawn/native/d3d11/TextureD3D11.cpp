@@ -137,8 +137,7 @@ MaybeError Texture::InitializeAsInternalTexture() {
     SetLabelImpl();
 
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-        CommandRecordingContext* commandContext;
-        DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
+        CommandRecordingContext* commandContext = device->GetPendingCommandContext();
         DAWN_TRY(
             ClearTexture(commandContext, GetAllSubresources(), TextureBase::ClearValue::NonZero));
     }

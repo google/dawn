@@ -32,6 +32,7 @@
 #include "dawn/native/d3d11/BackendD3D11.h"
 #include "dawn/native/d3d11/BindGroupD3D11.h"
 #include "dawn/native/d3d11/BindGroupLayoutD3D11.h"
+#include "dawn/native/d3d11/BufferD3D11.h"
 #include "dawn/native/d3d11/ComputePipelineD3D11.h"
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "dawn/native/d3d11/PlatformFunctionsD3D11.h"
@@ -120,6 +121,8 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     // Create the fence event.
     mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
+    DAWN_TRY(PreparePendingCommandContext());
+
     SetLabelImpl();
 
     return {};
@@ -145,17 +148,22 @@ ID3D11Device5* Device::GetD3D11Device5() const {
     return mD3d11Device5.Get();
 }
 
-ResultOrError<CommandRecordingContext*> Device::GetPendingCommandContext(
-    Device::SubmitMode submitMode) {
+CommandRecordingContext* Device::GetPendingCommandContext(Device::SubmitMode submitMode) {
     // Callers of GetPendingCommandList do so to record commands. Only reserve a command
     // allocator when it is needed so we don't submit empty command lists
-    if (!mPendingCommands.IsOpen()) {
-        DAWN_TRY(mPendingCommands.Open(this));
-    }
-    if (submitMode == Device::SubmitMode::Normal) {
+    DAWN_ASSERT(mPendingCommands.IsOpen());
+
+    if (submitMode == SubmitMode::Normal) {
         mPendingCommands.SetNeedsSubmit();
     }
     return &mPendingCommands;
+}
+
+MaybeError Device::PreparePendingCommandContext() {
+    if (!mPendingCommands.IsOpen()) {
+        DAWN_TRY(mPendingCommands.Open(this));
+    }
+    return {};
 }
 
 MaybeError Device::TickImpl() {
@@ -178,9 +186,7 @@ MaybeError Device::NextSerial() {
     TRACE_EVENT1(GetPlatform(), General, "D3D11Device::SignalFence", "serial",
                  uint64_t(GetLastSubmittedCommandSerial()));
 
-    CommandRecordingContext* commandContext;
-    DAWN_TRY_ASSIGN(commandContext, GetPendingCommandContext());
-
+    CommandRecordingContext* commandContext = GetPendingCommandContext();
     DAWN_TRY(CheckHRESULT(commandContext->GetD3D11DeviceContext4()->Signal(
                               mFence.Get(), uint64_t(GetLastSubmittedCommandSerial())),
                           "D3D11 command queue signal fence"));
@@ -247,7 +253,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> Device::CreateBindGroupLayoutImpl(
 }
 
 ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
-    return DAWN_UNIMPLEMENTED_ERROR("CreateBufferImpl");
+    return Buffer::Create(this, descriptor);
 }
 
 ResultOrError<Ref<CommandBufferBase>> Device::CreateCommandBuffer(
@@ -320,7 +326,9 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
-    return DAWN_UNIMPLEMENTED_ERROR("CopyFromStagingToBufferImpl");
+    CommandRecordingContext* commandContext = GetPendingCommandContext();
+    return ToBackend(destination)
+        ->CopyFromBuffer(commandContext, destinationOffset, size, ToBackend(source), sourceOffset);
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
@@ -335,9 +343,6 @@ const DeviceInfo& Device::GetDeviceInfo() const {
 }
 
 MaybeError Device::WaitForIdleForDestruction() {
-    // Immediately forget about all pending commands
-    mPendingCommands.Release();
-
     DAWN_TRY(NextSerial());
     // Wait for all in-flight commands to finish executing
     DAWN_TRY(WaitForSerial(GetLastSubmittedCommandSerial()));
@@ -394,6 +399,8 @@ void Device::DestroyImpl() {
         ::CloseHandle(mFenceEvent);
         mFenceEvent = nullptr;
     }
+
+    mPendingCommands.Release();
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
