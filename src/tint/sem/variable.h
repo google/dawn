@@ -91,10 +91,10 @@ class Variable : public Castable<Variable, Node> {
     void SetInitializer(const ValueExpression* initializer) { initializer_ = initializer; }
 
     /// @returns the expressions that use the variable
-    const std::vector<const VariableUser*>& Users() const { return users_; }
+    utils::VectorRef<const VariableUser*> Users() const { return users_; }
 
     /// @param user the user to add
-    void AddUser(const VariableUser* user) { users_.emplace_back(user); }
+    void AddUser(const VariableUser* user) { users_.Push(user); }
 
   private:
     const ast::Variable* const declaration_;
@@ -104,7 +104,7 @@ class Variable : public Castable<Variable, Node> {
     const builtin::Access access_;
     const constant::Value* constant_value_;
     const ValueExpression* initializer_ = nullptr;
-    std::vector<const VariableUser*> users_;
+    utils::Vector<const VariableUser*, 8> users_;
 };
 
 /// LocalVariable is a function-scope variable

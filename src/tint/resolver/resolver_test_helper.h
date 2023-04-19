@@ -97,11 +97,11 @@ class TestHelper : public ProgramBuilder {
     /// @return true if all users are as expected
     bool CheckVarUsers(const ast::Variable* var,
                        utils::VectorRef<const ast::Expression*> expected_users) {
-        auto& var_users = Sem().Get(var)->Users();
-        if (var_users.size() != expected_users.Length()) {
+        auto var_users = Sem().Get(var)->Users();
+        if (var_users.Length() != expected_users.Length()) {
             return false;
         }
-        for (size_t i = 0; i < var_users.size(); i++) {
+        for (size_t i = 0; i < var_users.Length(); i++) {
             if (var_users[i]->Declaration() != expected_users[i]) {
                 return false;
             }
