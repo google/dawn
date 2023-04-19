@@ -176,7 +176,7 @@ deps = {
     'condition': 'dawn_node',
   },
   'third_party/gpuweb': {
-    'url': '{github_git}/gpuweb/gpuweb.git@1f8a05afc72627d9f7f45d6067f3e373d0a81f8e',
+    'url': '{github_git}/gpuweb/gpuweb.git@2e75d5e68e80e4c28575c7836ee00ca22cf4ca63',
     'condition': 'dawn_node',
   },
 

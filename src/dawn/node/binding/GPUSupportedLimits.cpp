@@ -148,8 +148,4 @@ uint32_t GPUSupportedLimits::getMaxComputeWorkgroupsPerDimension(Napi::Env) {
     return limits_.limits.maxComputeWorkgroupsPerDimension;
 }
 
-uint32_t GPUSupportedLimits::getMaxFragmentCombinedOutputResources(Napi::Env) {
-    return limits_.limits.maxFragmentCombinedOutputResources;
-}
-
 }  // namespace wgpu::binding

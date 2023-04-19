@@ -33,6 +33,7 @@ class GPU final : public interop::GPU {
         Napi::Env env,
         interop::GPURequestAdapterOptions options) override;
     interop::GPUTextureFormat getPreferredCanvasFormat(Napi::Env) override;
+    interop::Interface<interop::WGSLLanguageFeatures> getWgslLanguageFeatures(Napi::Env) override;
 
   private:
     const Flags flags_;

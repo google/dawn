@@ -1701,6 +1701,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::DawnNative:
         case wgpu::FeatureName::ChromiumExperimentalDp4a:
         case wgpu::FeatureName::TimestampQueryInsidePasses:
+        case wgpu::FeatureName::ImplicitDeviceSynchronization:
         case wgpu::FeatureName::Undefined:
             return false;
     }

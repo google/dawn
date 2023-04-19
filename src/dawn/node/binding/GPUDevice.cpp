@@ -93,10 +93,7 @@ class DeviceLostInfo : public interop::GPUDeviceLostInfo {
   public:
     DeviceLostInfo(interop::GPUDeviceLostReason reason, std::string message)
         : reason_(reason), message_(message) {}
-    std::variant<interop::GPUDeviceLostReason, interop::UndefinedType> getReason(
-        Napi::Env env) override {
-        return reason_;
-    }
+    interop::GPUDeviceLostReason getReason(Napi::Env env) override { return reason_; }
     std::string getMessage(Napi::Env) override { return message_; }
 
   private:

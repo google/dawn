@@ -60,7 +60,6 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMaxComputeWorkgroupSizeY(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupSizeZ(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupsPerDimension(Napi::Env) override;
-    uint32_t getMaxFragmentCombinedOutputResources(Napi::Env) override;
 
   private:
     wgpu::SupportedLimits limits_;

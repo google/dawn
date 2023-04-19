@@ -229,4 +229,8 @@ interop::GPUTextureFormat GPU::getPreferredCanvasFormat(Napi::Env) {
     UNIMPLEMENTED();
 }
 
+interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(Napi::Env) {
+    UNIMPLEMENTED();
+}
+
 }  // namespace wgpu::binding
