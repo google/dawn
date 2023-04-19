@@ -23,7 +23,7 @@
 namespace tint::type {
 
 /// A sampled texture type.
-class SampledTexture final : public Castable<SampledTexture, Texture> {
+class SampledTexture final : public utils::Castable<SampledTexture, Texture> {
   public:
     /// Constructor
     /// @param dim the dimensionality of the texture

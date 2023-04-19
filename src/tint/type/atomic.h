@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// A atomic type.
-class Atomic final : public Castable<Atomic, Type> {
+class Atomic final : public utils::Castable<Atomic, Type> {
   public:
     /// Constructor
     /// @param subtype the atomic type

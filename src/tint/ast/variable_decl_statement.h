@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// A variable declaration statement
-class VariableDeclStatement final : public Castable<VariableDeclStatement, Statement> {
+class VariableDeclStatement final : public utils::Castable<VariableDeclStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

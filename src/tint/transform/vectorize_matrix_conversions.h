@@ -20,7 +20,8 @@
 namespace tint::transform {
 
 /// A transform that converts matrix conversions (between f32 and f16 matrices) to the vector form.
-class VectorizeMatrixConversions final : public Castable<VectorizeMatrixConversions, Transform> {
+class VectorizeMatrixConversions final
+    : public utils::Castable<VectorizeMatrixConversions, Transform> {
   public:
     /// Constructor
     VectorizeMatrixConversions();

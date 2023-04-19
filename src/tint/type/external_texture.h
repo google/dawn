@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// An external texture type
-class ExternalTexture final : public Castable<ExternalTexture, Texture> {
+class ExternalTexture final : public utils::Castable<ExternalTexture, Texture> {
   public:
     /// Constructor
     ExternalTexture();

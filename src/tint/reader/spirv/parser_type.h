@@ -23,11 +23,11 @@
 #include "src/tint/builtin/access.h"
 #include "src/tint/builtin/address_space.h"
 #include "src/tint/builtin/texel_format.h"
-#include "src/tint/castable.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/sampler_kind.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/block_allocator.h"
+#include "src/tint/utils/castable.h"
 
 // Forward declarations
 namespace tint {
@@ -37,7 +37,7 @@ class ProgramBuilder;
 namespace tint::reader::spirv {
 
 /// Type is the base class for all types
-class Type : public Castable<Type> {
+class Type : public utils::Castable<Type> {
   public:
     /// Constructor
     Type();
@@ -97,7 +97,7 @@ class Type : public Castable<Type> {
 using TypeList = std::vector<const Type*>;
 
 /// `void` type
-struct Void final : public Castable<Void, Type> {
+struct Void final : public utils::Castable<Void, Type> {
     /// @param b the ProgramBuilder used to construct the AST types
     /// @returns the constructed ast::Type node for the given type
     ast::Type Build(ProgramBuilder& b) const override;
@@ -109,7 +109,7 @@ struct Void final : public Castable<Void, Type> {
 };
 
 /// `bool` type
-struct Bool final : public Castable<Bool, Type> {
+struct Bool final : public utils::Castable<Bool, Type> {
     /// @param b the ProgramBuilder used to construct the AST types
     /// @returns the constructed ast::Type node for the given type
     ast::Type Build(ProgramBuilder& b) const override;
@@ -121,7 +121,7 @@ struct Bool final : public Castable<Bool, Type> {
 };
 
 /// `u32` type
-struct U32 final : public Castable<U32, Type> {
+struct U32 final : public utils::Castable<U32, Type> {
     /// @param b the ProgramBuilder used to construct the AST types
     /// @returns the constructed ast::Type node for the given type
     ast::Type Build(ProgramBuilder& b) const override;
@@ -133,7 +133,7 @@ struct U32 final : public Castable<U32, Type> {
 };
 
 /// `f32` type
-struct F32 final : public Castable<F32, Type> {
+struct F32 final : public utils::Castable<F32, Type> {
     /// @param b the ProgramBuilder used to construct the AST types
     /// @returns the constructed ast::Type node for the given type
     ast::Type Build(ProgramBuilder& b) const override;
@@ -145,7 +145,7 @@ struct F32 final : public Castable<F32, Type> {
 };
 
 /// `i32` type
-struct I32 final : public Castable<I32, Type> {
+struct I32 final : public utils::Castable<I32, Type> {
     /// @param b the ProgramBuilder used to construct the AST types
     /// @returns the constructed ast::Type node for the given type
     ast::Type Build(ProgramBuilder& b) const override;
@@ -157,7 +157,7 @@ struct I32 final : public Castable<I32, Type> {
 };
 
 /// `ptr<SC, T, AM>` type
-struct Pointer final : public Castable<Pointer, Type> {
+struct Pointer final : public utils::Castable<Pointer, Type> {
     /// Constructor
     /// @param ty the store type
     /// @param sc the pointer address space
@@ -188,7 +188,7 @@ struct Pointer final : public Castable<Pointer, Type> {
 /// `ref<SC, T, AM>` type
 /// Note this has no AST representation, but is used for type tracking in the
 /// reader.
-struct Reference final : public Castable<Reference, Type> {
+struct Reference final : public utils::Castable<Reference, Type> {
     /// Constructor
     /// @param ty the referenced type
     /// @param sc the reference address space
@@ -217,7 +217,7 @@ struct Reference final : public Castable<Reference, Type> {
 };
 
 /// `vecN<T>` type
-struct Vector final : public Castable<Vector, Type> {
+struct Vector final : public utils::Castable<Vector, Type> {
     /// Constructor
     /// @param ty the element type
     /// @param sz the number of elements in the vector
@@ -243,7 +243,7 @@ struct Vector final : public Castable<Vector, Type> {
 };
 
 /// `matNxM<T>` type
-struct Matrix final : public Castable<Matrix, Type> {
+struct Matrix final : public utils::Castable<Matrix, Type> {
     /// Constructor
     /// @param ty the matrix element type
     /// @param c the number of columns in the matrix
@@ -272,7 +272,7 @@ struct Matrix final : public Castable<Matrix, Type> {
 };
 
 /// `array<T, N>` type
-struct Array final : public Castable<Array, Type> {
+struct Array final : public utils::Castable<Array, Type> {
     /// Constructor
     /// @param el the element type
     /// @param sz the number of elements in the array. 0 represents runtime-sized
@@ -302,7 +302,7 @@ struct Array final : public Castable<Array, Type> {
 };
 
 /// `sampler` type
-struct Sampler final : public Castable<Sampler, Type> {
+struct Sampler final : public utils::Castable<Sampler, Type> {
     /// Constructor
     /// @param k the sampler kind
     explicit Sampler(type::SamplerKind k);
@@ -325,7 +325,7 @@ struct Sampler final : public Castable<Sampler, Type> {
 };
 
 /// Base class for texture types
-struct Texture : public Castable<Texture, Type> {
+struct Texture : public utils::Castable<Texture, Type> {
     ~Texture() override;
 
     /// Constructor
@@ -341,7 +341,7 @@ struct Texture : public Castable<Texture, Type> {
 };
 
 /// `texture_depth_D` type
-struct DepthTexture final : public Castable<DepthTexture, Texture> {
+struct DepthTexture final : public utils::Castable<DepthTexture, Texture> {
     /// Constructor
     /// @param d the texture dimensions
     explicit DepthTexture(type::TextureDimension d);
@@ -361,7 +361,7 @@ struct DepthTexture final : public Castable<DepthTexture, Texture> {
 };
 
 /// `texture_depth_multisampled_D` type
-struct DepthMultisampledTexture final : public Castable<DepthMultisampledTexture, Texture> {
+struct DepthMultisampledTexture final : public utils::Castable<DepthMultisampledTexture, Texture> {
     /// Constructor
     /// @param d the texture dimensions
     explicit DepthMultisampledTexture(type::TextureDimension d);
@@ -381,7 +381,7 @@ struct DepthMultisampledTexture final : public Castable<DepthMultisampledTexture
 };
 
 /// `texture_multisampled_D<T>` type
-struct MultisampledTexture final : public Castable<MultisampledTexture, Texture> {
+struct MultisampledTexture final : public utils::Castable<MultisampledTexture, Texture> {
     /// Constructor
     /// @param d the texture dimensions
     /// @param t the multisampled texture type
@@ -405,7 +405,7 @@ struct MultisampledTexture final : public Castable<MultisampledTexture, Texture>
 };
 
 /// `texture_D<T>` type
-struct SampledTexture final : public Castable<SampledTexture, Texture> {
+struct SampledTexture final : public utils::Castable<SampledTexture, Texture> {
     /// Constructor
     /// @param d the texture dimensions
     /// @param t the sampled texture type
@@ -429,7 +429,7 @@ struct SampledTexture final : public Castable<SampledTexture, Texture> {
 };
 
 /// `texture_storage_D<F>` type
-struct StorageTexture final : public Castable<StorageTexture, Texture> {
+struct StorageTexture final : public utils::Castable<StorageTexture, Texture> {
     /// Constructor
     /// @param d the texture dimensions
     /// @param f the storage image format
@@ -457,7 +457,7 @@ struct StorageTexture final : public Castable<StorageTexture, Texture> {
 };
 
 /// Base class for named types
-struct Named : public Castable<Named, Type> {
+struct Named : public utils::Castable<Named, Type> {
     /// Constructor
     /// @param n the type name
     explicit Named(Symbol n);
@@ -479,7 +479,7 @@ struct Named : public Castable<Named, Type> {
 };
 
 /// `type T = N` type
-struct Alias final : public Castable<Alias, Named> {
+struct Alias final : public utils::Castable<Alias, Named> {
     /// Constructor
     /// @param n the alias name
     /// @param t the aliased type
@@ -498,7 +498,7 @@ struct Alias final : public Castable<Alias, Named> {
 };
 
 /// `struct N { ... };` type
-struct Struct final : public Castable<Struct, Named> {
+struct Struct final : public utils::Castable<Struct, Named> {
     /// Constructor
     /// @param n the struct name
     /// @param m the member types

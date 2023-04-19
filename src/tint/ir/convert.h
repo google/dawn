@@ -15,16 +15,16 @@
 #ifndef SRC_TINT_IR_CONVERT_H_
 #define SRC_TINT_IR_CONVERT_H_
 
-#include "src/tint/castable.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
 /// A value conversion instruction in the IR.
-class Convert : public Castable<Convert, Call> {
+class Convert : public utils::Castable<Convert, Call> {
   public:
     /// Constructor
     /// @param result the result value

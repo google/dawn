@@ -43,7 +43,7 @@ enum class BinaryOp {
 };
 
 /// An binary expression
-class BinaryExpression final : public Castable<BinaryExpression, Expression> {
+class BinaryExpression final : public utils::Castable<BinaryExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

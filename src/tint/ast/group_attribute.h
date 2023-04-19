@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// A group attribute
-class GroupAttribute final : public Castable<GroupAttribute, Attribute> {
+class GroupAttribute final : public utils::Castable<GroupAttribute, Attribute> {
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node

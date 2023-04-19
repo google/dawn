@@ -26,7 +26,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Matrix);
 namespace tint::type {
 
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
-    : Base(utils::Hash(TypeInfo::Of<Vector>().full_hashcode, columns, column_type),
+    : Base(utils::Hash(utils::TypeInfo::Of<Vector>().full_hashcode, columns, column_type),
            type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,

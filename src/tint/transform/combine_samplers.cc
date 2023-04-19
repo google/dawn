@@ -158,7 +158,7 @@ struct CombineSamplers::State {
         for (auto* global : ctx.src->AST().GlobalVariables()) {
             auto* global_sem = sem.Get(global)->As<sem::GlobalVariable>();
             auto* type = ctx.src->TypeOf(global->type);
-            if (tint::IsAnyOf<type::Texture, type::Sampler>(type) &&
+            if (tint::utils::IsAnyOf<type::Texture, type::Sampler>(type) &&
                 !type->Is<type::StorageTexture>()) {
                 ctx.Remove(ctx.src->AST().GlobalDeclarations(), global);
             } else if (auto binding_point = global_sem->BindingPoint()) {

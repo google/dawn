@@ -91,7 +91,7 @@ namespace {
 const char kTempNamePrefix[] = "tint_tmp";
 
 bool last_is_break(const ast::BlockStatement* stmts) {
-    return IsAnyOf<ast::BreakStatement>(stmts->Last());
+    return utils::IsAnyOf<ast::BreakStatement>(stmts->Last());
 }
 
 bool IsRelational(tint::ast::BinaryOp op) {

@@ -25,7 +25,7 @@ namespace tint::type {
 /// Deduplication is achieved by comparing a temporary object to the set of existing objects, using
 /// Hash() and Equals(). If an existing object is found, then the pointer to that object is
 /// returned, otherwise a new object is constructed, added to the Manager's set and returned.
-class UniqueNode : public Castable<UniqueNode, Node> {
+class UniqueNode : public utils::Castable<UniqueNode, Node> {
   public:
     /// Constructor
     /// @param hash the immutable hash for the node

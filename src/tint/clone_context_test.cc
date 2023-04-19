@@ -30,7 +30,7 @@ struct Allocator {
     utils::BlockAllocator<Cloneable> alloc;
 };
 
-struct Node : public Castable<Node, Cloneable> {
+struct Node : public utils::Castable<Node, Cloneable> {
     Node(Allocator* alloc,
          Symbol n,
          const Node* node_a = nullptr,
@@ -55,7 +55,7 @@ struct Node : public Castable<Node, Cloneable> {
     }
 };
 
-struct Replaceable : public Castable<Replaceable, Node> {
+struct Replaceable : public utils::Castable<Replaceable, Node> {
     Replaceable(Allocator* alloc,
                 Symbol n,
                 const Node* node_a = nullptr,
@@ -64,18 +64,18 @@ struct Replaceable : public Castable<Replaceable, Node> {
         : Base(alloc, n, node_a, node_b, node_c) {}
 };
 
-struct Replacement : public Castable<Replacement, Replaceable> {
+struct Replacement : public utils::Castable<Replacement, Replaceable> {
     Replacement(Allocator* alloc, Symbol n) : Base(alloc, n) {}
 };
 
-struct NotANode : public Castable<NotANode, Cloneable> {
+struct NotANode : public utils::Castable<NotANode, Cloneable> {
     explicit NotANode(Allocator* alloc) : allocator(alloc) {}
 
     Allocator* const allocator;
     NotANode* Clone(CloneContext*) const override { return allocator->Create<NotANode>(); }
 };
 
-struct ProgramNode : public Castable<ProgramNode, Cloneable> {
+struct ProgramNode : public utils::Castable<ProgramNode, Cloneable> {
     ProgramNode(Allocator* alloc, ProgramID id, ProgramID cloned_id)
         : allocator(alloc), program_id(id), cloned_program_id(cloned_id) {}
 
@@ -1051,7 +1051,7 @@ TEST_F(CloneContextNodeTest, CloneIntoSameBuilder) {
 }
 
 TEST_F(CloneContextNodeTest, CloneWithReplaceAll_SameTypeTwice) {
-    std::string node_name = TypeInfo::Of<Node>().name;
+    std::string node_name = utils::TypeInfo::Of<Node>().name;
 
     EXPECT_FATAL_FAILURE(
         {
@@ -1066,8 +1066,8 @@ TEST_F(CloneContextNodeTest, CloneWithReplaceAll_SameTypeTwice) {
 }
 
 TEST_F(CloneContextNodeTest, CloneWithReplaceAll_BaseThenDerived) {
-    std::string node_name = TypeInfo::Of<Node>().name;
-    std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
+    std::string node_name = utils::TypeInfo::Of<Node>().name;
+    std::string replaceable_name = utils::TypeInfo::Of<Replaceable>().name;
 
     EXPECT_FATAL_FAILURE(
         {
@@ -1082,8 +1082,8 @@ TEST_F(CloneContextNodeTest, CloneWithReplaceAll_BaseThenDerived) {
 }
 
 TEST_F(CloneContextNodeTest, CloneWithReplaceAll_DerivedThenBase) {
-    std::string node_name = TypeInfo::Of<Node>().name;
-    std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
+    std::string node_name = utils::TypeInfo::Of<Node>().name;
+    std::string replaceable_name = utils::TypeInfo::Of<Replaceable>().name;
 
     EXPECT_FATAL_FAILURE(
         {

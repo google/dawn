@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// A signed int 32 type.
-class I32 final : public Castable<I32, Type> {
+class I32 final : public utils::Castable<I32, Type> {
   public:
     /// Constructor
     I32();

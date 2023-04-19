@@ -24,7 +24,7 @@ namespace tint::transform {
 /// the offset= decoration.
 ///
 /// @note This transform requires the CanonicalizeEntryPointIO transform to have been run first.
-class PadStructs final : public Castable<PadStructs, Transform> {
+class PadStructs final : public utils::Castable<PadStructs, Transform> {
   public:
     /// Constructor
     PadStructs();

@@ -45,7 +45,7 @@ enum class PipelineStageUsage {
 };
 
 /// Struct holds the Type information for structures.
-class Struct : public Castable<Struct, Type> {
+class Struct : public utils::Castable<Struct, Type> {
   public:
     /// Constructor
     /// @param source the source of the structure
@@ -164,7 +164,7 @@ class Struct : public Castable<Struct, Type> {
 };
 
 /// StructMember holds the type information for structure members.
-class StructMember : public Castable<StructMember, Node> {
+class StructMember : public utils::Castable<StructMember, Node> {
   public:
     /// Constructor
     /// @param source the source of the struct member

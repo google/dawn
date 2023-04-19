@@ -195,7 +195,7 @@ class Inspector {
     /// @returns vector of all of the bindings for depth textures.
     std::vector<ResourceBinding> GetTextureResourceBindings(
         const std::string& entry_point,
-        const tint::TypeInfo* texture_type,
+        const tint::utils::TypeInfo* texture_type,
         ResourceBinding::ResourceType resource_type);
 
     /// @param entry_point name of the entry point to get information about.

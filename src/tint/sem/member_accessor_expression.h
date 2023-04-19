@@ -30,7 +30,7 @@ namespace tint::sem {
 
 /// MemberAccessorExpression holds the semantic information for a
 /// ast::MemberAccessorExpression node.
-class MemberAccessorExpression : public Castable<MemberAccessorExpression, ValueExpression> {
+class MemberAccessorExpression : public utils::Castable<MemberAccessorExpression, ValueExpression> {
   public:
     /// Destructor
     ~MemberAccessorExpression() override;
@@ -64,7 +64,8 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Value
 /// StructMemberAccess holds the semantic information for a
 /// ast::MemberAccessorExpression node that represents an access to a structure
 /// member.
-class StructMemberAccess final : public Castable<StructMemberAccess, MemberAccessorExpression> {
+class StructMemberAccess final
+    : public utils::Castable<StructMemberAccess, MemberAccessorExpression> {
   public:
     /// Constructor
     /// @param declaration the AST node
@@ -96,7 +97,7 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
 
 /// Swizzle holds the semantic information for a ast::MemberAccessorExpression
 /// node that represents a vector swizzle.
-class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
+class Swizzle final : public utils::Castable<Swizzle, MemberAccessorExpression> {
   public:
     /// Constructor
     /// @param declaration the AST node

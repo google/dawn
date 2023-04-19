@@ -17,16 +17,16 @@
 
 #include <variant>
 
-#include "src/tint/castable.h"
 #include "src/tint/constant/clone_context.h"
 #include "src/tint/constant/node.h"
 #include "src/tint/number.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/castable.h"
 
 namespace tint::constant {
 
 /// Value is the interface to a compile-time evaluated expression value.
-class Value : public Castable<Value, Node> {
+class Value : public utils::Castable<Value, Node> {
   public:
     /// Constructor
     Value();

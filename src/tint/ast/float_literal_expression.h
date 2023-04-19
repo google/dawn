@@ -22,7 +22,8 @@
 namespace tint::ast {
 
 /// A float literal
-class FloatLiteralExpression final : public Castable<FloatLiteralExpression, LiteralExpression> {
+class FloatLiteralExpression final
+    : public utils::Castable<FloatLiteralExpression, LiteralExpression> {
   public:
     /// Literal suffix
     enum class Suffix {

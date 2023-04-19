@@ -26,7 +26,7 @@ namespace tint::sem {
 
 /// FunctionExpression holds the semantic information for expression nodes that resolve to
 /// functions.
-class FunctionExpression : public Castable<FunctionExpression, Expression> {
+class FunctionExpression : public utils::Castable<FunctionExpression, Expression> {
   public:
     /// Constructor
     /// @param declaration the AST node

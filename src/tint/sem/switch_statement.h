@@ -37,7 +37,7 @@ class ValueExpression;
 namespace tint::sem {
 
 /// Holds semantic information about an switch statement
-class SwitchStatement final : public Castable<SwitchStatement, CompoundStatement> {
+class SwitchStatement final : public utils::Castable<SwitchStatement, CompoundStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this switch statement
@@ -64,7 +64,7 @@ class SwitchStatement final : public Castable<SwitchStatement, CompoundStatement
 };
 
 /// Holds semantic information about a switch case statement
-class CaseStatement final : public Castable<CaseStatement, CompoundStatement> {
+class CaseStatement final : public utils::Castable<CaseStatement, CompoundStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this case statement
@@ -98,7 +98,7 @@ class CaseStatement final : public Castable<CaseStatement, CompoundStatement> {
 };
 
 /// Holds semantic information about a switch case selector
-class CaseSelector final : public Castable<CaseSelector, Node> {
+class CaseSelector final : public utils::Castable<CaseSelector, Node> {
   public:
     /// Constructor
     /// @param decl the selector declaration

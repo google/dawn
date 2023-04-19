@@ -38,7 +38,7 @@ namespace tint::transform {
 ///
 /// This transform also handles increment and decrement statements in the same
 /// manner, by replacing `i++` with `i = i + 1`.
-class ExpandCompoundAssignment final : public Castable<ExpandCompoundAssignment, Transform> {
+class ExpandCompoundAssignment final : public utils::Castable<ExpandCompoundAssignment, Transform> {
   public:
     /// Constructor
     ExpandCompoundAssignment();

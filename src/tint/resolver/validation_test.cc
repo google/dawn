@@ -50,13 +50,13 @@ namespace {
 
 using ResolverValidationTest = ResolverTest;
 
-class FakeStmt final : public Castable<FakeStmt, ast::Statement> {
+class FakeStmt final : public utils::Castable<FakeStmt, ast::Statement> {
   public:
     FakeStmt(ProgramID pid, ast::NodeID nid, Source src) : Base(pid, nid, src) {}
     FakeStmt* Clone(CloneContext*) const override { return nullptr; }
 };
 
-class FakeExpr final : public Castable<FakeExpr, ast::Expression> {
+class FakeExpr final : public utils::Castable<FakeExpr, ast::Expression> {
   public:
     FakeExpr(ProgramID pid, ast::NodeID nid, Source src) : Base(pid, nid, src) {}
     FakeExpr* Clone(CloneContext*) const override { return nullptr; }

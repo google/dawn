@@ -15,12 +15,12 @@
 #ifndef SRC_TINT_SEM_NODE_H_
 #define SRC_TINT_SEM_NODE_H_
 
-#include "src/tint/castable.h"
+#include "src/tint/utils/castable.h"
 
 namespace tint::sem {
 
 /// Node is the base class for all semantic nodes
-class Node : public Castable<Node> {
+class Node : public utils::Castable<Node> {
   public:
     /// Constructor
     Node();

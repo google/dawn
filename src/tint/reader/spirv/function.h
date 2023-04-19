@@ -407,7 +407,7 @@ inline utils::StringStream& operator<<(utils::StringStream& o, const DefInfo& di
 /// become immutable. The builders may hold mutable state while the
 /// StatementBlock is being constructed, which becomes an immutable node on
 /// StatementBlock::Finalize().
-class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
+class StatementBuilder : public utils::Castable<StatementBuilder, ast::Statement> {
   public:
     /// Constructor
     StatementBuilder() : Base(ProgramID(), ast::NodeID(), Source{}) {}

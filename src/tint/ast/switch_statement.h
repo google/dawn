@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// A switch statement
-class SwitchStatement final : public Castable<SwitchStatement, Statement> {
+class SwitchStatement final : public utils::Castable<SwitchStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

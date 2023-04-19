@@ -26,7 +26,8 @@ ArrayCount::ArrayCount(size_t hash) : Base(hash) {}
 ArrayCount::~ArrayCount() = default;
 
 ConstantArrayCount::ConstantArrayCount(uint32_t val)
-    : Base(static_cast<size_t>(TypeInfo::Of<ConstantArrayCount>().full_hashcode)), value(val) {}
+    : Base(static_cast<size_t>(utils::TypeInfo::Of<ConstantArrayCount>().full_hashcode)),
+      value(val) {}
 ConstantArrayCount::~ConstantArrayCount() = default;
 
 bool ConstantArrayCount::Equals(const UniqueNode& other) const {
@@ -45,7 +46,7 @@ ConstantArrayCount* ConstantArrayCount::Clone(CloneContext& ctx) const {
 }
 
 RuntimeArrayCount::RuntimeArrayCount()
-    : Base(static_cast<size_t>(TypeInfo::Of<RuntimeArrayCount>().full_hashcode)) {}
+    : Base(static_cast<size_t>(utils::TypeInfo::Of<RuntimeArrayCount>().full_hashcode)) {}
 RuntimeArrayCount::~RuntimeArrayCount() = default;
 
 bool RuntimeArrayCount::Equals(const UniqueNode& other) const {

@@ -90,7 +90,7 @@ namespace tint::writer::msl {
 namespace {
 
 bool last_is_break(const ast::BlockStatement* stmts) {
-    return IsAnyOf<ast::BreakStatement>(stmts->Last());
+    return utils::IsAnyOf<ast::BreakStatement>(stmts->Last());
 }
 
 void PrintF32(utils::StringStream& out, float value) {

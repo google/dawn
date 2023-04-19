@@ -26,7 +26,7 @@ namespace tint::sem {
 
 /// Call is the base class for semantic nodes that hold semantic information for
 /// ast::CallExpression nodes.
-class Call final : public Castable<Call, ValueExpression> {
+class Call final : public utils::Castable<Call, ValueExpression> {
   public:
     /// Constructor
     /// @param declaration the AST node

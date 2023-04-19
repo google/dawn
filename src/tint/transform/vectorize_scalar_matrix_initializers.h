@@ -21,7 +21,7 @@ namespace tint::transform {
 
 /// A transform that converts scalar matrix initializers to the vector form.
 class VectorizeScalarMatrixInitializers final
-    : public Castable<VectorizeScalarMatrixInitializers, Transform> {
+    : public utils::Castable<VectorizeScalarMatrixInitializers, Transform> {
   public:
     /// Constructor
     VectorizeScalarMatrixInitializers();

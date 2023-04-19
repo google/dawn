@@ -29,7 +29,7 @@ namespace tint::ast {
 /// * sem::Builtin
 /// * sem::ValueConstructor
 /// * sem::ValueConversion
-class CallExpression final : public Castable<CallExpression, Expression> {
+class CallExpression final : public utils::Castable<CallExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

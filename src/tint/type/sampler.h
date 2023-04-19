@@ -23,7 +23,7 @@
 namespace tint::type {
 
 /// A sampler type.
-class Sampler final : public Castable<Sampler, Type> {
+class Sampler final : public utils::Castable<Sampler, Type> {
   public:
     /// Constructor
     /// @param kind the kind of sampler

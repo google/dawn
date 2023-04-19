@@ -29,7 +29,7 @@ namespace tint::transform {
 /// @note Depends on the following transforms to have been run first:
 /// * PromoteSideEffectsToDecl
 /// * ExpandCompoundAssignment
-class DemoteToHelper final : public Castable<DemoteToHelper, Transform> {
+class DemoteToHelper final : public utils::Castable<DemoteToHelper, Transform> {
   public:
     /// Constructor
     DemoteToHelper();

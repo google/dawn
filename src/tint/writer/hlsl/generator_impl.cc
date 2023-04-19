@@ -330,7 +330,7 @@ bool GeneratorImpl::Generate() {
         return false;
     }
 
-    const TypeInfo* last_kind = nullptr;
+    const utils::TypeInfo* last_kind = nullptr;
     size_t last_padding_line = 0;
 
     auto* mod = builder_.Sem().Module();
@@ -2794,7 +2794,7 @@ bool GeneratorImpl::EmitCase(const ast::SwitchStatement* s, size_t case_idx) {
         return false;
     }
 
-    if (!tint::IsAnyOf<ast::BreakStatement>(stmt->body->Last())) {
+    if (!tint::utils::IsAnyOf<ast::BreakStatement>(stmt->body->Last())) {
         line() << "break;";
     }
 

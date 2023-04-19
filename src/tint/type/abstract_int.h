@@ -23,7 +23,7 @@ namespace tint::type {
 
 /// An abstract-int type.
 /// @see https://www.w3.org/TR/WGSL/#abstractint
-class AbstractInt final : public Castable<AbstractInt, AbstractNumeric> {
+class AbstractInt final : public utils::Castable<AbstractInt, AbstractNumeric> {
   public:
     /// Constructor
     AbstractInt();

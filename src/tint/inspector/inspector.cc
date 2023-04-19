@@ -456,7 +456,7 @@ std::vector<ResourceBinding> Inspector::GetWriteOnlyStorageTextureResourceBindin
 
 std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
     const std::string& entry_point,
-    const tint::TypeInfo* texture_type,
+    const tint::utils::TypeInfo* texture_type,
     ResourceBinding::ResourceType resource_type) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {
@@ -485,19 +485,20 @@ std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
 
 std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
     const std::string& entry_point) {
-    return GetTextureResourceBindings(entry_point, &TypeInfo::Of<type::DepthTexture>(),
+    return GetTextureResourceBindings(entry_point, &utils::TypeInfo::Of<type::DepthTexture>(),
                                       ResourceBinding::ResourceType::kDepthTexture);
 }
 
 std::vector<ResourceBinding> Inspector::GetDepthMultisampledTextureResourceBindings(
     const std::string& entry_point) {
-    return GetTextureResourceBindings(entry_point, &TypeInfo::Of<type::DepthMultisampledTexture>(),
+    return GetTextureResourceBindings(entry_point,
+                                      &utils::TypeInfo::Of<type::DepthMultisampledTexture>(),
                                       ResourceBinding::ResourceType::kDepthMultisampledTexture);
 }
 
 std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
     const std::string& entry_point) {
-    return GetTextureResourceBindings(entry_point, &TypeInfo::Of<type::ExternalTexture>(),
+    return GetTextureResourceBindings(entry_point, &utils::TypeInfo::Of<type::ExternalTexture>(),
                                       ResourceBinding::ResourceType::kExternalTexture);
 }
 

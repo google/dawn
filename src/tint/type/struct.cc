@@ -58,7 +58,7 @@ Struct::Struct(tint::Source source,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)
-    : Base(utils::Hash(TypeInfo::Of<Struct>().full_hashcode, name), FlagsFrom(members)),
+    : Base(utils::Hash(utils::TypeInfo::Of<Struct>().full_hashcode, name), FlagsFrom(members)),
       source_(source),
       name_(name),
       members_(std::move(members)),

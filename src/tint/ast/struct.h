@@ -26,7 +26,7 @@
 namespace tint::ast {
 
 /// A struct statement.
-class Struct final : public Castable<Struct, TypeDecl> {
+class Struct final : public utils::Castable<Struct, TypeDecl> {
   public:
     /// Create a new struct statement
     /// @param pid the identifier of the program that owns this node

@@ -21,7 +21,7 @@ namespace tint::transform {
 
 /// ForLoopToLoop is a Transform that converts a for-loop statement into a loop
 /// statement. This is required by the SPIR-V writer.
-class ForLoopToLoop final : public Castable<ForLoopToLoop, Transform> {
+class ForLoopToLoop final : public utils::Castable<ForLoopToLoop, Transform> {
   public:
     /// Constructor
     ForLoopToLoop();

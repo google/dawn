@@ -16,16 +16,16 @@
 #define SRC_TINT_IR_BUILTIN_H_
 
 #include "src/tint/builtin/function.h"
-#include "src/tint/castable.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
 /// A value conversion instruction in the IR.
-class Builtin : public Castable<Builtin, Call> {
+class Builtin : public utils::Castable<Builtin, Call> {
   public:
     /// Constructor
     /// @param result the result value

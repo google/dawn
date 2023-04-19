@@ -52,7 +52,7 @@ namespace tint::transform {
 /// information needed to represent a combined sampler in GLSL
 /// (dimensionality, component type, etc). The GLSL writer outputs such
 /// (Tint) Textures as (GLSL) Samplers.
-class CombineSamplers final : public Castable<CombineSamplers, Transform> {
+class CombineSamplers final : public utils::Castable<CombineSamplers, Transform> {
   public:
     /// A pair of binding points.
     using SamplerTexturePair = sem::SamplerTexturePair;
@@ -62,7 +62,7 @@ class CombineSamplers final : public Castable<CombineSamplers, Transform> {
 
     /// The client-provided mapping from separate texture and sampler binding
     /// points to combined sampler binding point.
-    struct BindingInfo final : public Castable<Data, transform::Data> {
+    struct BindingInfo final : public utils::Castable<Data, transform::Data> {
         /// Constructor
         /// @param map the map of all (texture, sampler) -> (combined) pairs
         /// @param placeholder the binding point to use for placeholder samplers.

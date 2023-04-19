@@ -60,7 +60,7 @@ Array::Array(const Type* element,
              uint32_t size,
              uint32_t stride,
              uint32_t implicit_stride)
-    : Base(utils::Hash(TypeInfo::Of<Array>().full_hashcode, count, align, size, stride),
+    : Base(utils::Hash(utils::TypeInfo::Of<Array>().full_hashcode, count, align, size, stride),
            FlagsFrom(element, count)),
       element_(element),
       count_(count),

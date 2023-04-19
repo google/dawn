@@ -18,8 +18,8 @@
 #include <cstdint>
 #include <iterator>
 
-#include "src/tint/castable.h"
 #include "src/tint/utils/bitcast.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/traits.h"
 
 namespace tint::utils {

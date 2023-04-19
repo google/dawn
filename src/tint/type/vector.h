@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// A vector type.
-class Vector : public Castable<Vector, Type> {
+class Vector : public utils::Castable<Vector, Type> {
   public:
     /// Constructor
     /// @param subtype the vector element type

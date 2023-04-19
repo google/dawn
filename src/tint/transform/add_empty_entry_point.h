@@ -20,7 +20,7 @@
 namespace tint::transform {
 
 /// Add an empty entry point to the module, if no other entry points exist.
-class AddEmptyEntryPoint final : public Castable<AddEmptyEntryPoint, Transform> {
+class AddEmptyEntryPoint final : public utils::Castable<AddEmptyEntryPoint, Transform> {
   public:
     /// Constructor
     AddEmptyEntryPoint();

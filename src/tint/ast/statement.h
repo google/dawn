@@ -22,7 +22,7 @@
 namespace tint::ast {
 
 /// Base statement class
-class Statement : public Castable<Statement, Node> {
+class Statement : public utils::Castable<Statement, Node> {
   public:
     ~Statement() override;
 

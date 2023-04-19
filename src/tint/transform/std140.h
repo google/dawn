@@ -28,7 +28,7 @@ namespace tint::transform {
 /// sufficient to have any WGSL structure be std140-layout conformant.
 ///
 /// @note This transform requires the PromoteSideEffectsToDecl transform to have been run first.
-class Std140 final : public Castable<Std140, Transform> {
+class Std140 final : public utils::Castable<Std140, Transform> {
   public:
     /// Constructor
     Std140();

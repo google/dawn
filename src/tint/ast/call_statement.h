@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// A call expression
-class CallStatement final : public Castable<CallStatement, Statement> {
+class CallStatement final : public utils::Castable<CallStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

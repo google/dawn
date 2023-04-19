@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractInt);
 
 namespace tint::type {
 
-AbstractInt::AbstractInt() : Base(utils::Hash(TypeInfo::Of<AbstractInt>().full_hashcode)) {}
+AbstractInt::AbstractInt() : Base(utils::Hash(utils::TypeInfo::Of<AbstractInt>().full_hashcode)) {}
 
 AbstractInt::~AbstractInt() = default;
 

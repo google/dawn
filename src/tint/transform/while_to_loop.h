@@ -21,7 +21,7 @@ namespace tint::transform {
 
 /// WhileToLoop is a Transform that converts a while statement into a loop
 /// statement. This is required by the SPIR-V writer.
-class WhileToLoop final : public Castable<WhileToLoop, Transform> {
+class WhileToLoop final : public utils::Castable<WhileToLoop, Transform> {
   public:
     /// Constructor
     WhileToLoop();

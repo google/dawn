@@ -21,7 +21,7 @@
 namespace tint::sem {
 
 /// ValueConstructor is the CallTarget for a value constructor.
-class ValueConstructor final : public Castable<ValueConstructor, CallTarget> {
+class ValueConstructor final : public utils::Castable<ValueConstructor, CallTarget> {
   public:
     /// Constructor
     /// @param type the type that's being constructed

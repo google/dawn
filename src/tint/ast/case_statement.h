@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// A case statement
-class CaseStatement final : public Castable<CaseStatement, Statement> {
+class CaseStatement final : public utils::Castable<CaseStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

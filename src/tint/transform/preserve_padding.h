@@ -26,7 +26,7 @@ namespace tint::transform {
 /// assignments into element-wise assignments via helper functions.
 ///
 /// @note Assumes that the DirectVariableTransform will be run afterwards for backends that need it.
-class PreservePadding final : public Castable<PreservePadding, Transform> {
+class PreservePadding final : public utils::Castable<PreservePadding, Transform> {
   public:
     /// Constructor
     PreservePadding();

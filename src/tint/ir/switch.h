@@ -24,7 +24,7 @@
 namespace tint::ir {
 
 /// Flow node representing a switch statement
-class Switch : public Castable<Switch, FlowNode> {
+class Switch : public utils::Castable<Switch, FlowNode> {
   public:
     /// A case selector
     struct CaseSelector {

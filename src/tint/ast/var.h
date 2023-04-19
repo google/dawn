@@ -39,7 +39,7 @@ namespace tint::ast {
 /// ```
 ///
 /// @see https://www.w3.org/TR/WGSL/#var-decls
-class Var final : public Castable<Var, Variable> {
+class Var final : public utils::Castable<Var, Variable> {
   public:
     /// Create a 'var' variable
     /// @param pid the identifier of the program that owns this node

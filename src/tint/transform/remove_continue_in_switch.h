@@ -23,7 +23,7 @@ namespace tint::transform {
 /// bool variable, and checking if the variable is set after the switch to
 /// continue. It is necessary to work around FXC "error X3708: continue cannot
 /// be used in a switch". See crbug.com/tint/1080.
-class RemoveContinueInSwitch final : public Castable<RemoveContinueInSwitch, Transform> {
+class RemoveContinueInSwitch final : public utils::Castable<RemoveContinueInSwitch, Transform> {
   public:
     /// Constructor
     RemoveContinueInSwitch();

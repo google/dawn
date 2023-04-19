@@ -54,7 +54,7 @@ namespace tint::transform {
 ///     return clamp_frag_depth(0.0);
 ///   }
 /// ```
-class ClampFragDepth final : public Castable<ClampFragDepth, Transform> {
+class ClampFragDepth final : public utils::Castable<ClampFragDepth, Transform> {
   public:
     /// Constructor
     ClampFragDepth();

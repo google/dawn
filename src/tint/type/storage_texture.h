@@ -30,7 +30,7 @@ class Manager;
 namespace tint::type {
 
 /// A storage texture type.
-class StorageTexture final : public Castable<StorageTexture, Texture> {
+class StorageTexture final : public utils::Castable<StorageTexture, Texture> {
   public:
     /// Constructor
     /// @param dim the dimensionality of the texture

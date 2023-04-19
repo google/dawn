@@ -88,10 +88,11 @@ namespace tint::transform {
 ///  }
 /// ```
 ///
-class TruncateInterstageVariables final : public Castable<TruncateInterstageVariables, Transform> {
+class TruncateInterstageVariables final
+    : public utils::Castable<TruncateInterstageVariables, Transform> {
   public:
     /// Configuration options for the transform
-    struct Config final : public Castable<Config, Data> {
+    struct Config final : public utils::Castable<Config, Data> {
         /// Constructor
         Config();
 

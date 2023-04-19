@@ -22,7 +22,7 @@ namespace tint::transform {
 /// ZeroInitWorkgroupMemory is a transform that injects code at the top of entry
 /// points to zero-initialize workgroup memory used by that entry point (and all
 /// transitive functions called by that entry point)
-class ZeroInitWorkgroupMemory final : public Castable<ZeroInitWorkgroupMemory, Transform> {
+class ZeroInitWorkgroupMemory final : public utils::Castable<ZeroInitWorkgroupMemory, Transform> {
   public:
     /// Constructor
     ZeroInitWorkgroupMemory();

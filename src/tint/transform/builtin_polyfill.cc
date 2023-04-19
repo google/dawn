@@ -1251,7 +1251,8 @@ struct BuiltinPolyfill::State {
                     auto* src_ty = conv->Source();
                     if (tint::Is<type::F32>(type::Type::ElementOf(src_ty))) {
                         auto* dst_ty = conv->Target();
-                        if (tint::IsAnyOf<type::I32, type::U32>(type::Type::ElementOf(dst_ty))) {
+                        if (tint::utils::IsAnyOf<type::I32, type::U32>(
+                                type::Type::ElementOf(dst_ty))) {
                             return f32_conv_polyfills.GetOrCreate(dst_ty, [&] {  //
                                 return ConvF32ToIU32(src_ty, dst_ty);
                             });

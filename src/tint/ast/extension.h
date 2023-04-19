@@ -24,7 +24,7 @@ namespace tint::ast {
 /// ```
 ///   enable f16;
 /// ```
-class Extension final : public Castable<Extension, Node> {
+class Extension final : public utils::Castable<Extension, Node> {
   public:
     /// Create a extension
     /// @param pid the identifier of the program that owns this node

@@ -77,7 +77,7 @@ bool IsAtomicBuiltin(builtin::Function i);
 bool IsDP4aBuiltin(builtin::Function i);
 
 /// Builtin holds the semantic information for a builtin function.
-class Builtin final : public Castable<Builtin, CallTarget> {
+class Builtin final : public utils::Castable<Builtin, CallTarget> {
   public:
     /// Constructor
     /// @param type the builtin type

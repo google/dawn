@@ -22,15 +22,15 @@
 namespace tint {
 namespace {
 
-struct Animal : public tint::Castable<Animal> {};
-struct Amphibian : public tint::Castable<Amphibian, Animal> {};
-struct Mammal : public tint::Castable<Mammal, Animal> {};
-struct Reptile : public tint::Castable<Reptile, Animal> {};
-struct Frog : public tint::Castable<Frog, Amphibian> {};
-struct Bear : public tint::Castable<Bear, Mammal> {};
-struct Lizard : public tint::Castable<Lizard, Reptile> {};
-struct Gecko : public tint::Castable<Gecko, Lizard> {};
-struct Iguana : public tint::Castable<Iguana, Lizard> {};
+struct Animal : public tint::utils::Castable<Animal> {};
+struct Amphibian : public tint::utils::Castable<Amphibian, Animal> {};
+struct Mammal : public tint::utils::Castable<Mammal, Animal> {};
+struct Reptile : public tint::utils::Castable<Reptile, Animal> {};
+struct Frog : public tint::utils::Castable<Frog, Amphibian> {};
+struct Bear : public tint::utils::Castable<Bear, Mammal> {};
+struct Lizard : public tint::utils::Castable<Lizard, Reptile> {};
+struct Gecko : public tint::utils::Castable<Gecko, Lizard> {};
+struct Iguana : public tint::utils::Castable<Iguana, Lizard> {};
 
 TEST(Castable, SwitchNoDefault) {
     std::unique_ptr<Animal> frog = std::make_unique<Frog>();
@@ -331,8 +331,8 @@ TEST(Castable, SwitchInferCastableReturnTypeWithDefault) {
             gecko.get(),                     //
             [](Mammal* p) { return p; },     //
             [](Amphibian* p) { return p; },  //
-            [](Default) -> CastableBase* { return nullptr; });
-        static_assert(std::is_same_v<decltype(result), CastableBase*>);
+            [](Default) -> utils::CastableBase* { return nullptr; });
+        static_assert(std::is_same_v<decltype(result), utils::CastableBase*>);
         EXPECT_EQ(result, nullptr);
     }
 }
@@ -444,12 +444,12 @@ TEST(Castable, SwitchExplicitCastableReturnTypeWithDefault) {
         EXPECT_EQ(result, nullptr);
     }
     {
-        auto* result = Switch<CastableBase>(
+        auto* result = Switch<utils::CastableBase>(
             bear.get(),                   //
             [](Mammal* p) { return p; },  //
             [](Amphibian* p) { return const_cast<const Amphibian*>(p); },
             [](Default) { return nullptr; });
-        static_assert(std::is_same_v<decltype(result), const CastableBase*>);
+        static_assert(std::is_same_v<decltype(result), const utils::CastableBase*>);
         EXPECT_EQ(result, bear.get());
     }
     {
@@ -476,11 +476,11 @@ TEST(Castable, SwitchExplicitCastableReturnTypeWithoutDefault) {
         EXPECT_EQ(result, nullptr);
     }
     {
-        auto* result = Switch<CastableBase>(
+        auto* result = Switch<utils::CastableBase>(
             bear.get(),                                                     //
             [](Mammal* p) { return p; },                                    //
             [](Amphibian* p) { return const_cast<const Amphibian*>(p); });  //
-        static_assert(std::is_same_v<decltype(result), const CastableBase*>);
+        static_assert(std::is_same_v<decltype(result), const utils::CastableBase*>);
         EXPECT_EQ(result, bear.get());
     }
     {

@@ -37,7 +37,8 @@ namespace tint::transform {
 /// decoding, gamut conversion, and gamma encoding steps. Specifically
 // for BT.709 to SRGB conversion, it takes the fast path only doing the yuv->rgb
 // step and skipping all other steps.
-class MultiplanarExternalTexture final : public Castable<MultiplanarExternalTexture, Transform> {
+class MultiplanarExternalTexture final
+    : public utils::Castable<MultiplanarExternalTexture, Transform> {
   public:
     /// This struct identifies the binding groups and locations for new bindings to
     /// use when transforming a texture_external instance.
@@ -51,7 +52,7 @@ class MultiplanarExternalTexture final : public Castable<MultiplanarExternalText
     /// NewBindingPoints is consumed by the MultiplanarExternalTexture transform.
     /// Data holds information about location of each texture_external binding and
     /// which binding slots it should expand into.
-    struct NewBindingPoints final : public Castable<Data, transform::Data> {
+    struct NewBindingPoints final : public utils::Castable<Data, transform::Data> {
         /// Constructor
         /// @param bm a map to the new binding slots to use.
         explicit NewBindingPoints(BindingsMap bm);

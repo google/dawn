@@ -38,7 +38,7 @@ class IdentifierExpression;
 namespace tint::ast {
 
 /// A Function statement.
-class Function final : public Castable<Function, Node> {
+class Function final : public utils::Castable<Function, Node> {
   public:
     /// Create a function
     /// @param pid the identifier of the program that owns this node

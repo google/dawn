@@ -25,7 +25,7 @@ class Identifier;
 namespace tint::ast {
 
 /// An identifier expression
-class IdentifierExpression final : public Castable<IdentifierExpression, Expression> {
+class IdentifierExpression final : public utils::Castable<IdentifierExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

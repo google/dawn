@@ -15,13 +15,13 @@
 #ifndef SRC_TINT_IR_FLOW_NODE_H_
 #define SRC_TINT_IR_FLOW_NODE_H_
 
-#include "src/tint/castable.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::ir {
 
 /// Base class for flow nodes
-class FlowNode : public Castable<FlowNode> {
+class FlowNode : public utils::Castable<FlowNode> {
   public:
     ~FlowNode() override;
 

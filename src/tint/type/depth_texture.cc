@@ -34,7 +34,7 @@ bool IsValidDepthDimension(TextureDimension dim) {
 }  // namespace
 
 DepthTexture::DepthTexture(TextureDimension dim)
-    : Base(utils::Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim), dim) {
+    : Base(utils::Hash(utils::TypeInfo::Of<DepthTexture>().full_hashcode, dim), dim) {
     TINT_ASSERT(Type, IsValidDepthDimension(dim));
 }
 

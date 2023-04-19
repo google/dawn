@@ -693,7 +693,8 @@ class StructuredTraverser {
 
 /// A StatementBuilder for ast::SwitchStatement
 /// @see StatementBuilder
-struct SwitchStatementBuilder final : public Castable<SwitchStatementBuilder, StatementBuilder> {
+struct SwitchStatementBuilder final
+    : public utils::Castable<SwitchStatementBuilder, StatementBuilder> {
     /// Constructor
     /// @param cond the switch statement condition
     explicit SwitchStatementBuilder(const ast::Expression* cond) : condition(cond) {}
@@ -717,7 +718,7 @@ struct SwitchStatementBuilder final : public Castable<SwitchStatementBuilder, St
 
 /// A StatementBuilder for ast::IfStatement
 /// @see StatementBuilder
-struct IfStatementBuilder final : public Castable<IfStatementBuilder, StatementBuilder> {
+struct IfStatementBuilder final : public utils::Castable<IfStatementBuilder, StatementBuilder> {
     /// Constructor
     /// @param c the if-statement condition
     explicit IfStatementBuilder(const ast::Expression* c) : cond(c) {}
@@ -738,7 +739,7 @@ struct IfStatementBuilder final : public Castable<IfStatementBuilder, StatementB
 
 /// A StatementBuilder for ast::LoopStatement
 /// @see StatementBuilder
-struct LoopStatementBuilder final : public Castable<LoopStatementBuilder, StatementBuilder> {
+struct LoopStatementBuilder final : public utils::Castable<LoopStatementBuilder, StatementBuilder> {
     /// @param builder the program builder
     /// @returns the built ast::LoopStatement
     ast::LoopStatement* Build(ProgramBuilder* builder) const override {

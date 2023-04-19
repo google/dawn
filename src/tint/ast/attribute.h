@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// The base class for all attributes
-class Attribute : public Castable<Attribute, Node> {
+class Attribute : public utils::Castable<Attribute, Node> {
   public:
     ~Attribute() override;
 

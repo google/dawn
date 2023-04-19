@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// A void type
-class Void final : public Castable<Void, Type> {
+class Void final : public utils::Castable<Void, Type> {
   public:
     /// Constructor
     Void();

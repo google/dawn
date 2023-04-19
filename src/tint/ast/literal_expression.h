@@ -22,7 +22,7 @@
 namespace tint::ast {
 
 /// Base class for a literal value expressions
-class LiteralExpression : public Castable<LiteralExpression, Expression> {
+class LiteralExpression : public utils::Castable<LiteralExpression, Expression> {
   public:
     ~LiteralExpression() override;
 

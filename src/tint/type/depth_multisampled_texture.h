@@ -23,7 +23,7 @@
 namespace tint::type {
 
 /// A multisampled depth texture type.
-class DepthMultisampledTexture final : public Castable<DepthMultisampledTexture, Texture> {
+class DepthMultisampledTexture final : public utils::Castable<DepthMultisampledTexture, Texture> {
   public:
     /// Constructor
     /// @param dim the dimensionality of the texture

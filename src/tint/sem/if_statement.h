@@ -28,7 +28,7 @@ class ValueExpression;
 namespace tint::sem {
 
 /// Holds semantic information about an if statement
-class IfStatement final : public Castable<IfStatement, CompoundStatement> {
+class IfStatement final : public utils::Castable<IfStatement, CompoundStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this if statement

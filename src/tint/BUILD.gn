@@ -195,8 +195,6 @@ template("libtint_source_set") {
 
 libtint_source_set("libtint_base_src") {
   sources = [
-    "castable.cc",
-    "castable.h",
     "debug.cc",
     "debug.h",
     "diagnostic/diagnostic.cc",
@@ -222,6 +220,8 @@ libtint_source_set("libtint_base_src") {
     "utils/bitset.h",
     "utils/block_allocator.h",
     "utils/bump_allocator.h",
+    "utils/castable.cc",
+    "utils/castable.h",
     "utils/compiler_macros.h",
     "utils/concat.h",
     "utils/crc32.h",
@@ -1590,6 +1590,7 @@ if (tint_build_unittests) {
       "utils/bitset_test.cc",
       "utils/block_allocator_test.cc",
       "utils/bump_allocator_test.cc",
+      "utils/castable_test.cc",
       "utils/crc32_test.cc",
       "utils/defer_test.cc",
       "utils/enum_set_test.cc",
@@ -1982,7 +1983,6 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_base_src") {
     sources = [
-      "castable_test.cc",
       "debug_test.cc",
       "number_test.cc",
       "reflection_test.cc",

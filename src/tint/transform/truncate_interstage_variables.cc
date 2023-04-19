@@ -57,7 +57,7 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
         b.Diagnostics().add_error(
             diag::System::Transform,
             "missing transform data for " +
-                std::string(TypeInfo::Of<TruncateInterstageVariables>().name));
+                std::string(utils::TypeInfo::Of<TruncateInterstageVariables>().name));
         return Program(std::move(b));
     }
 

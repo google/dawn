@@ -21,7 +21,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractFloat);
 
 namespace tint::type {
 
-AbstractFloat::AbstractFloat() : Base(utils::Hash(TypeInfo::Of<AbstractFloat>().full_hashcode)) {}
+AbstractFloat::AbstractFloat()
+    : Base(utils::Hash(utils::TypeInfo::Of<AbstractFloat>().full_hashcode)) {}
+
 AbstractFloat::~AbstractFloat() = default;
 
 bool AbstractFloat::Equals(const UniqueNode& other) const {

@@ -22,7 +22,7 @@
 namespace tint::ast {
 
 /// The must_use attribute
-class MustUseAttribute final : public Castable<MustUseAttribute, Attribute> {
+class MustUseAttribute final : public utils::Castable<MustUseAttribute, Attribute> {
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node

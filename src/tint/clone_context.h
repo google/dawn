@@ -21,10 +21,10 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/castable.h"
 #include "src/tint/debug.h"
 #include "src/tint/program_id.h"
 #include "src/tint/symbol.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/hashset.h"
@@ -49,7 +49,7 @@ ProgramID ProgramIDOf(const Program*);
 ProgramID ProgramIDOf(const ProgramBuilder*);
 
 /// Cloneable is the base class for all objects that can be cloned
-class Cloneable : public Castable<Cloneable> {
+class Cloneable : public utils::Castable<Cloneable> {
   public:
     /// Constructor
     Cloneable();
@@ -308,18 +308,18 @@ class CloneContext {
         using TPtr = utils::traits::ParameterType<F, 0>;
         using T = typename std::remove_pointer<TPtr>::type;
         for (auto& transform : transforms_) {
-            bool already_registered = transform.typeinfo->Is(&TypeInfo::Of<T>()) ||
-                                      TypeInfo::Of<T>().Is(transform.typeinfo);
+            bool already_registered = transform.typeinfo->Is(&utils::TypeInfo::Of<T>()) ||
+                                      utils::TypeInfo::Of<T>().Is(transform.typeinfo);
             if (TINT_UNLIKELY(already_registered)) {
-                TINT_ICE(Clone, Diagnostics())
-                    << "ReplaceAll() called with a handler for type " << TypeInfo::Of<T>().name
-                    << " that is already handled by a handler for type "
-                    << transform.typeinfo->name;
+                TINT_ICE(Clone, Diagnostics()) << "ReplaceAll() called with a handler for type "
+                                               << utils::TypeInfo::Of<T>().name
+                                               << " that is already handled by a handler for type "
+                                               << transform.typeinfo->name;
                 return *this;
             }
         }
         CloneableTransform transform;
-        transform.typeinfo = &TypeInfo::Of<T>();
+        transform.typeinfo = &utils::TypeInfo::Of<T>();
         transform.function = [=](const Cloneable* in) { return replacer(in->As<T>()); };
         transforms_.Push(std::move(transform));
         return *this;
@@ -554,8 +554,8 @@ class CloneContext {
         /// Destructor
         ~CloneableTransform();
 
-        // TypeInfo of the Cloneable that the transform operates on
-        const TypeInfo* typeinfo;
+        // utils::TypeInfo of the Cloneable that the transform operates on
+        const utils::TypeInfo* typeinfo;
         std::function<const Cloneable*(const Cloneable*)> function;
     };
 
@@ -598,7 +598,7 @@ class CloneContext {
         if (TINT_LIKELY(cast)) {
             return cast;
         }
-        CheckedCastFailure(obj, TypeInfo::Of<TO>());
+        CheckedCastFailure(obj, utils::TypeInfo::Of<TO>());
         return nullptr;
     }
 
@@ -608,7 +608,7 @@ class CloneContext {
 
     /// Adds an error diagnostic to Diagnostics() that the cloned object was not
     /// of the expected type.
-    void CheckedCastFailure(const Cloneable* got, const TypeInfo& expected);
+    void CheckedCastFailure(const Cloneable* got, const utils::TypeInfo& expected);
 
     /// @returns the diagnostic list of #dst
     diag::List& Diagnostics() const;

@@ -27,7 +27,7 @@ namespace tint::transform {
 /// The inner transforms will execute in the appended order.
 /// If any inner transform fails the manager will return immediately and
 /// the error can be retrieved with the Output's diagnostics.
-class Manager final : public Castable<Manager, Transform> {
+class Manager final : public utils::Castable<Manager, Transform> {
   public:
     /// Constructor
     Manager();

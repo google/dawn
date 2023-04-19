@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CASTABLE_H_
-#define SRC_TINT_CASTABLE_H_
+#ifndef SRC_TINT_UTILS_CASTABLE_H_
+#define SRC_TINT_UTILS_CASTABLE_H_
 
 #include <stdint.h>
 #include <functional>
@@ -42,20 +42,20 @@
 TINT_CASTABLE_PUSH_DISABLE_WARNINGS();
 
 // Forward declarations
-namespace tint {
+namespace tint::utils {
 class CastableBase;
 
 /// Ignore is used as a special type used for skipping over types for trait
 /// helper functions.
 class Ignore {};
-}  // namespace tint
+}  // namespace tint::utils
 
-namespace tint::detail {
+namespace tint::utils::detail {
 template <typename T>
 struct TypeInfoOf;
-}  // namespace tint::detail
+}  // namespace tint::utils::detail
 
-namespace tint {
+namespace tint::utils {
 
 /// True if all template types that are not Ignore derive from CastableBase
 template <typename... TYPES>
@@ -64,15 +64,15 @@ static constexpr bool IsCastable =
     !(std::is_same_v<TYPES, Ignore> && ...);
 
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
-#define TINT_INSTANTIATE_TYPEINFO(CLASS)                        \
-    TINT_CASTABLE_PUSH_DISABLE_WARNINGS();                      \
-    template <>                                                 \
-    const tint::TypeInfo tint::detail::TypeInfoOf<CLASS>::info{ \
-        &tint::detail::TypeInfoOf<CLASS::TrueBase>::info,       \
-        #CLASS,                                                 \
-        tint::TypeInfo::HashCodeOf<CLASS>(),                    \
-        tint::TypeInfo::FullHashCodeOf<CLASS>(),                \
-    };                                                          \
+#define TINT_INSTANTIATE_TYPEINFO(CLASS)                                      \
+    TINT_CASTABLE_PUSH_DISABLE_WARNINGS();                                    \
+    template <>                                                               \
+    const tint::utils::TypeInfo tint::utils::detail::TypeInfoOf<CLASS>::info{ \
+        &tint::utils::detail::TypeInfoOf<CLASS::TrueBase>::info,              \
+        #CLASS,                                                               \
+        tint::utils::TypeInfo::HashCodeOf<CLASS>(),                           \
+        tint::utils::TypeInfo::FullHashCodeOf<CLASS>(),                       \
+    };                                                                        \
     TINT_CASTABLE_POP_DISABLE_WARNINGS()
 
 /// Bit flags that can be passed to the template parameter `FLAGS` of Is() and As().
@@ -127,7 +127,7 @@ struct TypeInfo {
     /// @param object the object type to test from, which must be, or derive from type `FROM`.
     /// @see CastFlags
     template <typename TO, typename FROM, int FLAGS = 0>
-    static inline bool Is(const tint::TypeInfo* object) {
+    static inline bool Is(const tint::utils::TypeInfo* object) {
         constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
         constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
         constexpr const bool nocast = std::is_same<FROM, TO>::value;
@@ -155,7 +155,7 @@ struct TypeInfo {
     /// @param type the test type info
     /// @returns true if the class with this TypeInfo is of, or derives from the
     /// class with the given TypeInfo.
-    inline bool Is(const tint::TypeInfo* type) const {
+    inline bool Is(const tint::utils::TypeInfo* type) const {
         if (!Maybe(type->hashcode, full_hashcode)) {
             return false;
         }
@@ -346,12 +346,12 @@ class CastableBase {
     CastableBase& operator=(const CastableBase& other) = default;
 
     /// @returns the TypeInfo of the object
-    inline const tint::TypeInfo& TypeInfo() const { return *type_info_; }
+    inline const tint::utils::TypeInfo& TypeInfo() const { return *type_info_; }
 
     /// @returns true if this object is of, or derives from the class `TO`
     template <typename TO>
     inline bool Is() const {
-        return tint::Is<TO>(this);
+        return tint::utils::Is<TO>(this);
     }
 
     /// @returns true if this object is of, or derives from the class `TO` and pred(const TO*)
@@ -360,13 +360,13 @@ class CastableBase {
     /// derives from the class `TO`.
     template <typename TO, int FLAGS = 0, typename Pred = detail::Infer>
     inline bool Is(Pred&& pred) const {
-        return tint::Is<TO, FLAGS>(this, std::forward<Pred>(pred));
+        return tint::utils::Is<TO, FLAGS>(this, std::forward<Pred>(pred));
     }
 
     /// @returns true if this object is of, or derives from any of the `TO` classes.
     template <typename... TO>
     inline bool IsAnyOf() const {
-        return tint::IsAnyOf<TO...>(this);
+        return tint::utils::IsAnyOf<TO...>(this);
     }
 
     /// @returns this object dynamically cast to the type `TO` or `nullptr` if this object does not
@@ -374,7 +374,7 @@ class CastableBase {
     /// @see CastFlags
     template <typename TO, int FLAGS = 0>
     inline TO* As() {
-        return tint::As<TO, FLAGS>(this);
+        return tint::utils::As<TO, FLAGS>(this);
     }
 
     /// @returns this object dynamically cast to the type `TO` or `nullptr` if this object does not
@@ -382,14 +382,14 @@ class CastableBase {
     /// @see CastFlags
     template <typename TO, int FLAGS = 0>
     inline const TO* As() const {
-        return tint::As<const TO, FLAGS>(this);
+        return tint::utils::As<const TO, FLAGS>(this);
     }
 
   protected:
     CastableBase() = default;
 
     /// The type information for the object
-    const tint::TypeInfo* type_info_ = nullptr;
+    const tint::utils::TypeInfo* type_info_ = nullptr;
 };
 
 /// Castable is a helper to derive `CLASS` from `BASE`, automatically implementing the Is() and As()
@@ -433,7 +433,7 @@ class Castable : public BASE {
     /// @see CastFlags
     template <typename TO, int FLAGS = 0>
     inline bool Is() const {
-        return tint::Is<TO, FLAGS>(static_cast<const CLASS*>(this));
+        return tint::utils::Is<TO, FLAGS>(static_cast<const CLASS*>(this));
     }
 
     /// @returns true if this object is of, or derives from the class `TO` and
@@ -443,14 +443,15 @@ class Castable : public BASE {
     template <int FLAGS = 0, typename Pred = detail::Infer>
     inline bool Is(Pred&& pred) const {
         using TO = typename std::remove_pointer<utils::traits::ParameterType<Pred, 0>>::type;
-        return tint::Is<TO, FLAGS>(static_cast<const CLASS*>(this), std::forward<Pred>(pred));
+        return tint::utils::Is<TO, FLAGS>(static_cast<const CLASS*>(this),
+                                          std::forward<Pred>(pred));
     }
 
     /// @returns true if this object is of, or derives from any of the `TO`
     /// classes.
     template <typename... TO>
     inline bool IsAnyOf() const {
-        return tint::IsAnyOf<TO...>(static_cast<const CLASS*>(this));
+        return tint::utils::IsAnyOf<TO...>(static_cast<const CLASS*>(this));
     }
 
     /// @returns this object dynamically cast to the type `TO` or `nullptr` if
@@ -458,7 +459,7 @@ class Castable : public BASE {
     /// @see CastFlags
     template <typename TO, int FLAGS = 0>
     inline TO* As() {
-        return tint::As<TO, FLAGS>(this);
+        return tint::utils::As<TO, FLAGS>(this);
     }
 
     /// @returns this object dynamically cast to the type `TO` or `nullptr` if
@@ -466,7 +467,7 @@ class Castable : public BASE {
     /// @see CastFlags
     template <typename TO, int FLAGS = 0>
     inline const TO* As() const {
-        return tint::As<const TO, FLAGS>(this);
+        return tint::utils::As<const TO, FLAGS>(this);
     }
 };
 
@@ -530,8 +531,15 @@ struct CastableCommonBaseImpl<A, B, OTHERS...> {
 template <typename... TYPES>
 using CastableCommonBase = detail::CastableCommonBase<TYPES...>;
 
+}  // namespace tint::utils
+
+namespace tint {
+
+using utils::As;
+using utils::Is;
+
 }  // namespace tint
 
 TINT_CASTABLE_POP_DISABLE_WARNINGS();
 
-#endif  // SRC_TINT_CASTABLE_H_
+#endif  // SRC_TINT_UTILS_CASTABLE_H_

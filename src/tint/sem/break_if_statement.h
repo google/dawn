@@ -28,7 +28,7 @@ class ValueExpression;
 namespace tint::sem {
 
 /// Holds semantic information about a break-if statement
-class BreakIfStatement final : public Castable<BreakIfStatement, CompoundStatement> {
+class BreakIfStatement final : public utils::Castable<BreakIfStatement, CompoundStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this break-if statement

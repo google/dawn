@@ -21,7 +21,7 @@ namespace tint::transform {
 
 /// This transform converts all 1D texture types and accesses to 2D.
 /// This is required for GLSL ES, which does not support 1D textures.
-class Texture1DTo2D final : public Castable<Texture1DTo2D, Transform> {
+class Texture1DTo2D final : public utils::Castable<Texture1DTo2D, Transform> {
   public:
     /// Constructor
     Texture1DTo2D();

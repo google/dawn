@@ -65,9 +65,10 @@ struct ArrayLengthFromUniform::State {
     ApplyResult Run() {
         auto* cfg = inputs.Get<Config>();
         if (cfg == nullptr) {
-            b.Diagnostics().add_error(diag::System::Transform,
-                                      "missing transform data for " +
-                                          std::string(TypeInfo::Of<ArrayLengthFromUniform>().name));
+            b.Diagnostics().add_error(
+                diag::System::Transform,
+                "missing transform data for " +
+                    std::string(utils::TypeInfo::Of<ArrayLengthFromUniform>().name));
             return Program(std::move(b));
         }
 

@@ -19,12 +19,12 @@
 
 #include "src/tint/ast/module.h"
 #include "src/tint/ast/variable_decl_statement.h"
-#include "src/tint/castable.h"
 #include "src/tint/program.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/utils/castable.h"
 
 namespace tint::fuzzers::ast_fuzzer::util {
 /// @file

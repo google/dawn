@@ -27,7 +27,7 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class DecomposeStridedMatrix final : public Castable<DecomposeStridedMatrix, Transform> {
+class DecomposeStridedMatrix final : public utils::Castable<DecomposeStridedMatrix, Transform> {
   public:
     /// Constructor
     DecomposeStridedMatrix();

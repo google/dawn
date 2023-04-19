@@ -29,13 +29,13 @@ namespace tint::transform {
 
 /// DecomposeMemoryAccess is a transform used to replace storage and uniform buffer accesses with a
 /// combination of load, store or atomic functions on primitive types.
-class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Transform> {
+class DecomposeMemoryAccess final : public utils::Castable<DecomposeMemoryAccess, Transform> {
   public:
     /// Intrinsic is an InternalAttribute that's used to decorate a stub function so that the HLSL
     /// transforms this into calls to
     /// `[RW]ByteAddressBuffer.Load[N]()` or `[RW]ByteAddressBuffer.Store[N]()`,
     /// with a possible cast.
-    class Intrinsic final : public Castable<Intrinsic, ast::InternalAttribute> {
+    class Intrinsic final : public utils::Castable<Intrinsic, ast::InternalAttribute> {
       public:
         /// Intrinsic op
         enum class Op {

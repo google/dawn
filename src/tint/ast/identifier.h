@@ -20,7 +20,7 @@
 namespace tint::ast {
 
 /// An identifier
-class Identifier : public Castable<Identifier, Node> {
+class Identifier : public utils::Castable<Identifier, Node> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

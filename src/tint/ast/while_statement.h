@@ -22,7 +22,7 @@ namespace tint::ast {
 class Expression;
 
 /// A while loop statement
-class WhileStatement final : public Castable<WhileStatement, Statement> {
+class WhileStatement final : public utils::Castable<WhileStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

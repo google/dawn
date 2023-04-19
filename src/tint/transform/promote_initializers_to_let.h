@@ -25,7 +25,7 @@ namespace tint::transform {
 /// array or structure. For example, the following is not immediately expressable for HLSL:
 ///   `array<i32, 2>(1, 2)[0]`
 /// @see crbug.com/tint/406
-class PromoteInitializersToLet final : public Castable<PromoteInitializersToLet, Transform> {
+class PromoteInitializersToLet final : public utils::Castable<PromoteInitializersToLet, Transform> {
   public:
     /// Constructor
     PromoteInitializersToLet();

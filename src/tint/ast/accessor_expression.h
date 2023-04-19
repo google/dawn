@@ -20,7 +20,7 @@
 namespace tint::ast {
 
 /// Base class for IndexAccessorExpression and MemberAccessorExpression
-class AccessorExpression : public Castable<AccessorExpression, Expression> {
+class AccessorExpression : public utils::Castable<AccessorExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

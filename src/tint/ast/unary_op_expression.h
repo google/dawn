@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// A unary op expression
-class UnaryOpExpression final : public Castable<UnaryOpExpression, Expression> {
+class UnaryOpExpression final : public utils::Castable<UnaryOpExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

@@ -58,7 +58,7 @@ constexpr static const size_t kNumFixedParams = 8;
 constexpr static const size_t kNumFixedCandidates = 8;
 
 /// A special type that matches all TypeMatchers
-class Any final : public Castable<Any, type::Type> {
+class Any final : public utils::Castable<Any, type::Type> {
   public:
     Any() : Base(0u, type::Flags{}) {}
     ~Any() override = default;

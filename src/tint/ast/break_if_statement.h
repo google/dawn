@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// A break-if statement
-class BreakIfStatement final : public Castable<BreakIfStatement, Statement> {
+class BreakIfStatement final : public utils::Castable<BreakIfStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

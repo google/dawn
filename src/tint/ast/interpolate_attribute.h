@@ -27,7 +27,7 @@ class Expression;
 namespace tint::ast {
 
 /// An interpolate attribute
-class InterpolateAttribute final : public Castable<InterpolateAttribute, Attribute> {
+class InterpolateAttribute final : public utils::Castable<InterpolateAttribute, Attribute> {
   public:
     /// Create an interpolate attribute.
     /// @param pid the identifier of the program that owns this node

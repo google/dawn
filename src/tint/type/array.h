@@ -28,7 +28,7 @@
 namespace tint::type {
 
 /// Array holds the type information for Array nodes.
-class Array final : public Castable<Array, Type> {
+class Array final : public utils::Castable<Array, Type> {
   public:
     /// An error message string stating that the array count was expected to be a constant
     /// expression. Used by multiple writers and transforms.

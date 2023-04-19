@@ -15,17 +15,17 @@
 #ifndef SRC_TINT_CONSTANT_SCALAR_H_
 #define SRC_TINT_CONSTANT_SCALAR_H_
 
-#include "src/tint/castable.h"
 #include "src/tint/constant/value.h"
 #include "src/tint/number.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/hash.h"
 
 namespace tint::constant {
 
 /// Scalar holds a single scalar or abstract-numeric value.
 template <typename T>
-class Scalar : public Castable<Scalar<T>, Value> {
+class Scalar : public utils::Castable<Scalar<T>, Value> {
   public:
     static_assert(!std::is_same_v<UnwrapNumber<T>, T> || std::is_same_v<T, bool>,
                   "T must be a Number or bool");

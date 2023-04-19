@@ -2185,7 +2185,7 @@ TEST_F(MustUseAttributeTest, UsedOnFnWithNoReturnValue) {
 namespace InternalAttributeDeps {
 namespace {
 
-class TestAttribute : public Castable<TestAttribute, ast::InternalAttribute> {
+class TestAttribute : public utils::Castable<TestAttribute, ast::InternalAttribute> {
   public:
     TestAttribute(ProgramID pid, ast::NodeID nid, const ast::IdentifierExpression* dep)
         : Base(pid, nid, utils::Vector{dep}) {}

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/castable.h"
+#include "src/tint/utils/castable.h"
 
-namespace tint {
+namespace tint::utils {
 
 /// The unique TypeInfo for the CastableBase type
 /// @return doxygen-thinks-this-static-field-is-a-function :(
@@ -22,12 +22,12 @@ template <>
 const TypeInfo detail::TypeInfoOf<CastableBase>::info{
     nullptr,
     "CastableBase",
-    tint::TypeInfo::HashCodeOf<CastableBase>(),
-    tint::TypeInfo::FullHashCodeOf<CastableBase>(),
+    tint::utils::TypeInfo::HashCodeOf<CastableBase>(),
+    tint::utils::TypeInfo::FullHashCodeOf<CastableBase>(),
 };
 
 CastableBase::CastableBase(const CastableBase&) = default;
 
 CastableBase::~CastableBase() = default;
 
-}  // namespace tint
+}  // namespace tint::utils

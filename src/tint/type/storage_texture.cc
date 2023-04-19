@@ -29,7 +29,8 @@ StorageTexture::StorageTexture(TextureDimension dim,
                                builtin::TexelFormat format,
                                builtin::Access access,
                                Type* subtype)
-    : Base(utils::Hash(TypeInfo::Of<StorageTexture>().full_hashcode, dim, format, access), dim),
+    : Base(utils::Hash(utils::TypeInfo::Of<StorageTexture>().full_hashcode, dim, format, access),
+           dim),
       texel_format_(format),
       access_(access),
       subtype_(subtype) {}

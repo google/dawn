@@ -22,7 +22,7 @@
 namespace tint::ir {
 
 /// Flow node describing a loop.
-class Loop : public Castable<Loop, FlowNode> {
+class Loop : public utils::Castable<Loop, FlowNode> {
   public:
     /// Constructor
     Loop();

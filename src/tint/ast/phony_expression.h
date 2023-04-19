@@ -21,7 +21,7 @@ namespace tint::ast {
 
 /// Represents the `_` of a phony assignment `_ = <expr>`
 /// @see https://www.w3.org/TR/WGSL/#phony-assignment-section
-class PhonyExpression final : public Castable<PhonyExpression, Expression> {
+class PhonyExpression final : public utils::Castable<PhonyExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

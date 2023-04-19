@@ -57,7 +57,7 @@ using FindFirstParentReturnType = typename FindFirstParentReturn<TYPES...>::type
 }  // namespace detail
 
 /// Statement holds the semantic information for a statement.
-class Statement : public Castable<Statement, Node> {
+class Statement : public utils::Castable<Statement, Node> {
   public:
     /// Constructor
     /// @param declaration the AST node for this statement
@@ -133,7 +133,7 @@ class Statement : public Castable<Statement, Node> {
 
 /// CompoundStatement is the base class of statements that can hold other
 /// statements.
-class CompoundStatement : public Castable<Statement, Statement> {
+class CompoundStatement : public utils::Castable<Statement, Statement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this statement

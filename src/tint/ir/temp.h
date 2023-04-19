@@ -22,7 +22,7 @@
 namespace tint::ir {
 
 /// Temporary value in the IR.
-class Temp : public Castable<Temp, Value> {
+class Temp : public utils::Castable<Temp, Value> {
   public:
     /// A value id.
     using Id = uint32_t;

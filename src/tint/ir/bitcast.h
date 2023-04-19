@@ -15,16 +15,16 @@
 #ifndef SRC_TINT_IR_BITCAST_H_
 #define SRC_TINT_IR_BITCAST_H_
 
-#include "src/tint/castable.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
 /// A bitcast instruction in the IR.
-class Bitcast : public Castable<Bitcast, Instruction> {
+class Bitcast : public utils::Castable<Bitcast, Instruction> {
   public:
     /// Constructor
     /// @param result the result value

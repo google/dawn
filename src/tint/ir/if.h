@@ -27,7 +27,7 @@ class Block;
 namespace tint::ir {
 
 /// A flow node representing an if statement.
-class If : public Castable<If, FlowNode> {
+class If : public utils::Castable<If, FlowNode> {
   public:
     /// Constructor
     If();

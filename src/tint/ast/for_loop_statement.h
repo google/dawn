@@ -22,7 +22,7 @@ namespace tint::ast {
 class Expression;
 
 /// A for loop statement
-class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
+class ForLoopStatement final : public utils::Castable<ForLoopStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

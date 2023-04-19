@@ -14,7 +14,7 @@
 * Do not use C++ exceptions
 
 * Do not use C++ RTTI.
-   Instead, use `tint::Castable::As<T>()` from
+   Instead, use `tint::utils::Castable::As<T>()` from
    [src/castable.h](../src/castable.h)
 
 * Generally, avoid `assert`.  Instead, issue a [diagnostic](../src/diagnostic.h)

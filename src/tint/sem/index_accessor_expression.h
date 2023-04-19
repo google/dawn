@@ -23,7 +23,8 @@
 namespace tint::sem {
 
 /// IndexAccessorExpression holds the semantic information for a ast::IndexAccessorExpression node.
-class IndexAccessorExpression final : public Castable<IndexAccessorExpression, ValueExpression> {
+class IndexAccessorExpression final
+    : public utils::Castable<IndexAccessorExpression, ValueExpression> {
   public:
     /// Constructor
     /// @param declaration the AST node

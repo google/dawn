@@ -23,7 +23,7 @@
 namespace tint::type {
 
 /// A depth texture type.
-class DepthTexture final : public Castable<DepthTexture, Texture> {
+class DepthTexture final : public utils::Castable<DepthTexture, Texture> {
   public:
     /// Constructor
     /// @param dim the dimensionality of the texture

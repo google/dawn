@@ -27,7 +27,7 @@ class Terminator;
 namespace tint::ir {
 
 /// An IR representation of a function
-class Function : public Castable<Function, FlowNode> {
+class Function : public utils::Castable<Function, FlowNode> {
   public:
     /// Constructor
     Function();

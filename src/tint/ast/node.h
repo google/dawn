@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// AST base class node
-class Node : public Castable<Node, Cloneable> {
+class Node : public utils::Castable<Node, Cloneable> {
   public:
     ~Node() override;
 

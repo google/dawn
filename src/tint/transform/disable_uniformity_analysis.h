@@ -20,7 +20,8 @@
 namespace tint::transform {
 
 /// Disable uniformity analysis for the program.
-class DisableUniformityAnalysis final : public Castable<DisableUniformityAnalysis, Transform> {
+class DisableUniformityAnalysis final
+    : public utils::Castable<DisableUniformityAnalysis, Transform> {
   public:
     /// Constructor
     DisableUniformityAnalysis();

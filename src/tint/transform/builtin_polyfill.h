@@ -20,7 +20,7 @@
 namespace tint::transform {
 
 /// Implements builtins for backends that do not have a native implementation.
-class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
+class BuiltinPolyfill final : public utils::Castable<BuiltinPolyfill, Transform> {
   public:
     /// Constructor
     BuiltinPolyfill();
@@ -89,7 +89,7 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
 
     /// Config is consumed by the BuiltinPolyfill transform.
     /// Config specifies the builtins that should be polyfilled.
-    struct Config final : public Castable<Data, transform::Data> {
+    struct Config final : public utils::Castable<Data, transform::Data> {
         /// Constructor
         /// @param b the list of builtins to polyfill
         explicit Config(const Builtins& b);

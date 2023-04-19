@@ -67,7 +67,7 @@ struct CallTargetSignature {
 
 /// CallTarget is the base for callable functions, builtins, value constructors and value
 /// conversions.
-class CallTarget : public Castable<CallTarget, Node> {
+class CallTarget : public utils::Castable<CallTarget, Node> {
   public:
     /// Constructor
     /// @param stage the earliest evaluation stage for a call to this target

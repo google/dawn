@@ -20,7 +20,7 @@
 namespace tint::ast {
 
 /// An integer literal. The literal may have an 'i', 'u' or no suffix.
-class IntLiteralExpression final : public Castable<IntLiteralExpression, LiteralExpression> {
+class IntLiteralExpression final : public utils::Castable<IntLiteralExpression, LiteralExpression> {
   public:
     /// Literal suffix
     enum class Suffix {

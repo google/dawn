@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// A bitcast expression
-class BitcastExpression final : public Castable<BitcastExpression, Expression> {
+class BitcastExpression final : public utils::Castable<BitcastExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

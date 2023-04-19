@@ -25,7 +25,7 @@ namespace tint::ir {
 /// A flow node comprising a block of statements. The instructions in the block are a linear list of
 /// instructions to execute. The block will branch at the end. The only blocks which do not branch
 /// are the end blocks of functions.
-class Block : public Castable<Block, FlowNode> {
+class Block : public utils::Castable<Block, FlowNode> {
   public:
     /// Constructor
     Block();

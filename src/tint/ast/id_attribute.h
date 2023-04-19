@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// An id attribute for pipeline-overridable constants
-class IdAttribute final : public Castable<IdAttribute, Attribute> {
+class IdAttribute final : public utils::Castable<IdAttribute, Attribute> {
   public:
     /// Create an id attribute.
     /// @param pid the identifier of the program that owns this node

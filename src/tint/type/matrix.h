@@ -27,7 +27,7 @@ class Vector;
 namespace tint::type {
 
 /// A matrix type
-class Matrix final : public Castable<Matrix, Type> {
+class Matrix final : public utils::Castable<Matrix, Type> {
   public:
     /// Constructor
     /// @param column_type the type of a column of the matrix

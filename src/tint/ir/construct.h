@@ -15,16 +15,16 @@
 #ifndef SRC_TINT_IR_CONSTRUCT_H_
 #define SRC_TINT_IR_CONSTRUCT_H_
 
-#include "src/tint/castable.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
 /// A constructor instruction in the IR.
-class Construct : public Castable<Construct, Call> {
+class Construct : public utils::Castable<Construct, Call> {
   public:
     /// Constructor
     /// @param result the result value

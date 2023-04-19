@@ -2508,7 +2508,7 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
 }
 
 bool Validator::NoDuplicateAttributes(utils::VectorRef<const ast::Attribute*> attributes) const {
-    utils::Hashmap<const TypeInfo*, Source, 8> seen;
+    utils::Hashmap<const utils::TypeInfo*, Source, 8> seen;
     utils::Vector<const ast::DiagnosticControl*, 8> diagnostic_controls;
     for (auto* d : attributes) {
         if (auto* diag = d->As<ast::DiagnosticAttribute>()) {

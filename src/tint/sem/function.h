@@ -47,7 +47,7 @@ namespace tint::sem {
 using WorkgroupSize = std::array<std::optional<uint32_t>, 3>;
 
 /// Function holds the semantic information for function nodes.
-class Function final : public Castable<Function, CallTarget> {
+class Function final : public utils::Castable<Function, CallTarget> {
   public:
     /// A vector of [Variable*, sem::BindingPoint] pairs
     using VariableBindings = std::vector<std::pair<const Variable*, sem::BindingPoint>>;
@@ -219,14 +219,14 @@ class Function final : public Castable<Function, CallTarget> {
     /// must be decorated with both binding and group attributes.
     /// @param type the type of the variables to find
     /// @returns the referenced variables
-    VariableBindings TransitivelyReferencedVariablesOfType(const tint::TypeInfo* type) const;
+    VariableBindings TransitivelyReferencedVariablesOfType(const tint::utils::TypeInfo* type) const;
 
     /// Retrieves any referenced variables of the given type. Note, the variables
     /// must be decorated with both binding and group attributes.
     /// @returns the referenced variables
     template <typename T>
     VariableBindings TransitivelyReferencedVariablesOfType() const {
-        return TransitivelyReferencedVariablesOfType(&TypeInfo::Of<T>());
+        return TransitivelyReferencedVariablesOfType(&utils::TypeInfo::Of<T>());
     }
 
     /// Checks if the given entry point is an ancestor

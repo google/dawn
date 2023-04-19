@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// A diagnostic attribute
-class DiagnosticAttribute final : public Castable<DiagnosticAttribute, Attribute> {
+class DiagnosticAttribute final : public utils::Castable<DiagnosticAttribute, Attribute> {
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node

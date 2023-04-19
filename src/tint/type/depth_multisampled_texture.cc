@@ -33,7 +33,7 @@ bool IsValidDepthDimension(TextureDimension dim) {
 }  // namespace
 
 DepthMultisampledTexture::DepthMultisampledTexture(TextureDimension dim)
-    : Base(utils::Hash(TypeInfo::Of<DepthMultisampledTexture>().full_hashcode, dim), dim) {
+    : Base(utils::Hash(utils::TypeInfo::Of<DepthMultisampledTexture>().full_hashcode, dim), dim) {
     TINT_ASSERT(Type, IsValidDepthDimension(dim));
 }
 

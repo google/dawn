@@ -25,7 +25,7 @@
 namespace tint::type {
 
 /// An array count
-class ArrayCount : public Castable<ArrayCount, UniqueNode> {
+class ArrayCount : public utils::Castable<ArrayCount, UniqueNode> {
   public:
     ~ArrayCount() override;
 
@@ -48,7 +48,7 @@ class ArrayCount : public Castable<ArrayCount, UniqueNode> {
 /// const N = 123;
 /// type arr = array<i32, N>
 /// ```
-class ConstantArrayCount final : public Castable<ConstantArrayCount, ArrayCount> {
+class ConstantArrayCount final : public utils::Castable<ConstantArrayCount, ArrayCount> {
   public:
     /// Constructor
     /// @param val the constant-expression value
@@ -75,7 +75,7 @@ class ConstantArrayCount final : public Castable<ConstantArrayCount, ArrayCount>
 /// ```
 /// type arr = array<i32>
 /// ```
-class RuntimeArrayCount final : public Castable<RuntimeArrayCount, ArrayCount> {
+class RuntimeArrayCount final : public utils::Castable<RuntimeArrayCount, ArrayCount> {
   public:
     /// Constructor
     RuntimeArrayCount();

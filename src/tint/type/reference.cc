@@ -27,7 +27,10 @@ namespace tint::type {
 Reference::Reference(const Type* subtype,
                      builtin::AddressSpace address_space,
                      builtin::Access access)
-    : Base(utils::Hash(TypeInfo::Of<Reference>().full_hashcode, address_space, subtype, access),
+    : Base(utils::Hash(utils::TypeInfo::Of<Reference>().full_hashcode,
+                       address_space,
+                       subtype,
+                       access),
            type::Flags{}),
       subtype_(subtype),
       address_space_(address_space),

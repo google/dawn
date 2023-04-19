@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// A workgroup attribute
-class StageAttribute final : public Castable<StageAttribute, Attribute> {
+class StageAttribute final : public utils::Castable<StageAttribute, Attribute> {
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node

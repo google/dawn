@@ -24,7 +24,7 @@
 namespace tint::type {
 
 /// A pointer type.
-class Pointer final : public Castable<Pointer, Type> {
+class Pointer final : public utils::Castable<Pointer, Type> {
   public:
     /// Constructor
     /// @param subtype the pointee type

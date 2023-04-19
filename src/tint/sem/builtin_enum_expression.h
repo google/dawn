@@ -26,7 +26,7 @@ namespace tint::sem {
 
 /// Base class for BuiltinEnumExpression.
 /// Useful for Is() queries.
-class BuiltinEnumExpressionBase : public Castable<BuiltinEnumExpressionBase, Expression> {
+class BuiltinEnumExpressionBase : public utils::Castable<BuiltinEnumExpressionBase, Expression> {
   public:
     /// Constructor
     /// @param declaration the AST node
@@ -41,7 +41,7 @@ class BuiltinEnumExpressionBase : public Castable<BuiltinEnumExpressionBase, Exp
 /// builtin enumerator value.
 template <typename ENUM>
 class BuiltinEnumExpression
-    : public Castable<BuiltinEnumExpression<ENUM>, BuiltinEnumExpressionBase> {
+    : public utils::Castable<BuiltinEnumExpression<ENUM>, BuiltinEnumExpressionBase> {
   public:
     /// Constructor
     /// @param declaration the AST node

@@ -52,7 +52,7 @@ class StateBase {
 // This first transform converts side-effecting for-loops to loops and else-ifs
 // to else {if}s so that the next transform, DecomposeSideEffects, can insert
 // hoisted expressions above their current location.
-struct SimplifySideEffectStatements : Castable<PromoteSideEffectsToDecl, Transform> {
+struct SimplifySideEffectStatements : tint::utils::Castable<PromoteSideEffectsToDecl, Transform> {
     ApplyResult Apply(const Program* src, const DataMap& inputs, DataMap& outputs) const override;
 };
 
@@ -87,7 +87,7 @@ Transform::ApplyResult SimplifySideEffectStatements::Apply(const Program* src,
 // Decomposes side-effecting expressions to ensure order of evaluation. This
 // handles both breaking down logical binary expressions for short-circuit
 // evaluation, as well as hoisting expressions to ensure order of evaluation.
-struct DecomposeSideEffects : Castable<PromoteSideEffectsToDecl, Transform> {
+struct DecomposeSideEffects : tint::utils::Castable<PromoteSideEffectsToDecl, Transform> {
     class CollectHoistsState;
     class DecomposeState;
     ApplyResult Apply(const Program* src, const DataMap& inputs, DataMap& outputs) const override;

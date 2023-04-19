@@ -771,7 +771,7 @@ bool Resolver::AllocateOverridableConstantIds() {
 
 void Resolver::SetShadows() {
     for (auto it : dependencies_.shadows) {
-        CastableBase* b = sem_.Get(it.value);
+        utils::CastableBase* b = sem_.Get(it.value);
         if (TINT_UNLIKELY(!b)) {
             TINT_ICE(Resolver, diagnostics_)
                 << "AST node '" << it.value->TypeInfo().name << "' had no semantic info\n"
@@ -4265,7 +4265,8 @@ template <typename SEM, typename F>
 SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback) {
     builder_->Sem().Add(ast, sem);
 
-    auto* as_compound = As<sem::CompoundStatement, CastFlags::kDontErrorOnImpossibleCast>(sem);
+    auto* as_compound =
+        As<sem::CompoundStatement, utils::CastFlags::kDontErrorOnImpossibleCast>(sem);
 
     // Helper to handle attributes that are supported on certain types of statement.
     auto handle_attributes = [&](auto* stmt, sem::Statement* sem_stmt, const char* use) {

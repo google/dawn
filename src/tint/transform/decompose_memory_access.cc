@@ -62,7 +62,7 @@ bool ShouldRun(const Program* program) {
 
 /// Offset is a simple ast::Expression builder interface, used to build byte
 /// offsets for storage and uniform buffer accesses.
-struct Offset : Castable<Offset> {
+struct Offset : utils::Castable<Offset> {
     /// @returns builds and returns the ast::Expression in `ctx.dst`
     virtual const ast::Expression* Build(CloneContext& ctx) const = 0;
 };
@@ -86,7 +86,7 @@ struct OffsetExpr : Offset {
 
 /// OffsetLiteral is an implementation of Offset that constructs a u32 literal
 /// value.
-struct OffsetLiteral final : Castable<OffsetLiteral, Offset> {
+struct OffsetLiteral final : utils::Castable<OffsetLiteral, Offset> {
     uint32_t const literal = 0;
 
     explicit OffsetLiteral(uint32_t lit) : literal(lit) {}

@@ -15,10 +15,10 @@
 #ifndef SRC_TINT_CONSTANT_COMPOSITE_H_
 #define SRC_TINT_CONSTANT_COMPOSITE_H_
 
-#include "src/tint/castable.h"
 #include "src/tint/constant/value.h"
 #include "src/tint/number.h"
 #include "src/tint/type/type.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/vector.h"
 
@@ -28,7 +28,7 @@ namespace tint::constant {
 /// Composite may be of a vector, matrix, array or structure type.
 /// If each element is the same type and value, then a Splat would be a more efficient constant
 /// implementation. Use CreateComposite() to create the appropriate type.
-class Composite : public Castable<Composite, Value> {
+class Composite : public utils::Castable<Composite, Value> {
   public:
     /// Constructor
     /// @param t the compsite type

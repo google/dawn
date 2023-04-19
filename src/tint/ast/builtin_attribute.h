@@ -27,7 +27,7 @@ class Expression;
 namespace tint::ast {
 
 /// A builtin attribute
-class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
+class BuiltinAttribute final : public utils::Castable<BuiltinAttribute, Attribute> {
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node

@@ -21,7 +21,7 @@ namespace tint::ir {
 
 /// Flow node used as the end of a function. Must only be used as the `end_target` in a function
 /// flow node. There are no instructions and no branches from this node.
-class Terminator : public Castable<Terminator, FlowNode> {
+class Terminator : public utils::Castable<Terminator, FlowNode> {
   public:
     /// Constructor
     Terminator();

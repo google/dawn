@@ -23,7 +23,7 @@ namespace tint::type {
 
 /// An abstract-float type.
 /// @see https://www.w3.org/TR/WGSL/#abstractFloat
-class AbstractFloat final : public Castable<AbstractFloat, AbstractNumeric> {
+class AbstractFloat final : public utils::Castable<AbstractFloat, AbstractNumeric> {
   public:
     /// Constructor
     AbstractFloat();

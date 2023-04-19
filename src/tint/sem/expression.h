@@ -26,7 +26,7 @@ class Statement;
 namespace tint::sem {
 
 /// Expression holds the semantic information for expression nodes.
-class Expression : public Castable<Expression, Node> {
+class Expression : public utils::Castable<Expression, Node> {
   public:
     /// Constructor
     /// @param declaration the AST node

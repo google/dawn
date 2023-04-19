@@ -23,7 +23,7 @@ namespace tint::sem {
 /// Load is a semantic expression which represents the load of a reference to a non-reference value.
 /// Loads from reference types are implicit in WGSL, so the Load semantic node shares the same AST
 /// node as the inner semantic node.
-class Load final : public Castable<Load, ValueExpression> {
+class Load final : public utils::Castable<Load, ValueExpression> {
   public:
     /// Constructor
     /// @param reference the reference expression being loaded

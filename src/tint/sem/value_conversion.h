@@ -20,7 +20,7 @@
 namespace tint::sem {
 
 /// ValueConversion is the CallTarget for a value conversion (cast).
-class ValueConversion final : public Castable<ValueConversion, CallTarget> {
+class ValueConversion final : public utils::Castable<ValueConversion, CallTarget> {
   public:
     /// Constructor
     /// @param type the target type of the cast

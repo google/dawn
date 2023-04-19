@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// Base expression class
-class Expression : public Castable<Expression, Node> {
+class Expression : public utils::Castable<Expression, Node> {
   public:
     ~Expression() override;
 

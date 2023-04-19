@@ -29,7 +29,7 @@ namespace tint::sem {
 
 /// Module holds the top-level semantic types, functions and global variables
 /// used by a Program.
-class Module final : public Castable<Module, Node> {
+class Module final : public utils::Castable<Module, Node> {
   public:
     /// Constructor
     /// @param dep_ordered_decls the dependency-ordered module-scope declarations

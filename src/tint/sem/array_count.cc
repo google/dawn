@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::UnnamedOverrideArrayCount);
 namespace tint::sem {
 
 NamedOverrideArrayCount::NamedOverrideArrayCount(const GlobalVariable* var)
-    : Base(static_cast<size_t>(TypeInfo::Of<NamedOverrideArrayCount>().full_hashcode)),
+    : Base(static_cast<size_t>(utils::TypeInfo::Of<NamedOverrideArrayCount>().full_hashcode)),
       variable(var) {}
 NamedOverrideArrayCount::~NamedOverrideArrayCount() = default;
 
@@ -43,7 +43,8 @@ type::ArrayCount* NamedOverrideArrayCount::Clone(type::CloneContext&) const {
 }
 
 UnnamedOverrideArrayCount::UnnamedOverrideArrayCount(const ValueExpression* e)
-    : Base(static_cast<size_t>(TypeInfo::Of<UnnamedOverrideArrayCount>().full_hashcode)), expr(e) {}
+    : Base(static_cast<size_t>(utils::TypeInfo::Of<UnnamedOverrideArrayCount>().full_hashcode)),
+      expr(e) {}
 UnnamedOverrideArrayCount::~UnnamedOverrideArrayCount() = default;
 
 bool UnnamedOverrideArrayCount::Equals(const UniqueNode& other) const {

@@ -28,7 +28,7 @@ class ValueExpression;
 namespace tint::sem {
 
 /// Holds semantic information about a while statement
-class WhileStatement final : public Castable<WhileStatement, CompoundStatement> {
+class WhileStatement final : public utils::Castable<WhileStatement, CompoundStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this while statement

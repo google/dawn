@@ -19,14 +19,14 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/castable.h"
 #include "src/tint/program.h"
+#include "src/tint/utils/castable.h"
 
 namespace tint::transform {
 
 /// Data is the base class for transforms that accept extra input or emit extra
 /// output information along with a Program.
-class Data : public Castable<Data> {
+class Data : public utils::Castable<Data> {
   public:
     /// Constructor
     Data();
@@ -72,7 +72,7 @@ class DataMap {
     template <typename T>
     void Put(std::unique_ptr<T>&& data) {
         static_assert(std::is_base_of<Data, T>::value, "T does not derive from Data");
-        map_[&TypeInfo::Of<T>()] = std::move(data);
+        map_[&utils::TypeInfo::Of<T>()] = std::move(data);
     }
 
     /// Creates the data of type `T` with the provided arguments and adds it into
@@ -94,7 +94,7 @@ class DataMap {
     /// Put()
     template <typename T>
     T* Get() {
-        auto it = map_.find(&TypeInfo::Of<T>());
+        auto it = map_.find(&utils::TypeInfo::Of<T>());
         if (it == map_.end()) {
             return nullptr;
         }
@@ -122,7 +122,7 @@ class DataMap {
         PutAll(std::forward<Tn>(remainder)...);
     }
 
-    std::unordered_map<const TypeInfo*, std::unique_ptr<Data>> map_;
+    std::unordered_map<const utils::TypeInfo*, std::unique_ptr<Data>> map_;
 };
 
 /// The return type of Run()
@@ -151,7 +151,7 @@ class Output {
 };
 
 /// Interface for Program transforms
-class Transform : public Castable<Transform> {
+class Transform : public utils::Castable<Transform> {
   public:
     /// Constructor
     Transform();

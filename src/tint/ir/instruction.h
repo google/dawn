@@ -15,15 +15,15 @@
 #ifndef SRC_TINT_IR_INSTRUCTION_H_
 #define SRC_TINT_IR_INSTRUCTION_H_
 
-#include "src/tint/castable.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/symbol_table.h"
+#include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
 /// An instruction in the IR.
-class Instruction : public Castable<Instruction> {
+class Instruction : public utils::Castable<Instruction> {
   public:
     Instruction(const Instruction& instr) = delete;
     Instruction(Instruction&& instr) = delete;

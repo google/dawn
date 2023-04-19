@@ -24,7 +24,8 @@
 namespace tint::ast {
 
 /// A struct member size attribute
-class StructMemberSizeAttribute final : public Castable<StructMemberSizeAttribute, Attribute> {
+class StructMemberSizeAttribute final
+    : public utils::Castable<StructMemberSizeAttribute, Attribute> {
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node

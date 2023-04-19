@@ -29,7 +29,7 @@ class Variable;
 namespace tint::sem {
 
 /// ValueExpression holds the semantic information for expression nodes.
-class ValueExpression : public Castable<ValueExpression, Expression> {
+class ValueExpression : public utils::Castable<ValueExpression, Expression> {
   public:
     /// Constructor
     /// @param declaration the AST node

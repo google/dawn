@@ -82,7 +82,7 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * Unshadow
-class CanonicalizeEntryPointIO final : public Castable<CanonicalizeEntryPointIO, Transform> {
+class CanonicalizeEntryPointIO final : public utils::Castable<CanonicalizeEntryPointIO, Transform> {
   public:
     /// ShaderStyle is an enumerator of different ways to emit shader IO.
     enum class ShaderStyle {
@@ -97,7 +97,7 @@ class CanonicalizeEntryPointIO final : public Castable<CanonicalizeEntryPointIO,
     };
 
     /// Configuration options for the transform.
-    struct Config final : public Castable<Config, Data> {
+    struct Config final : public utils::Castable<Config, Data> {
         /// Constructor
         /// @param style the approach to use for emitting shader IO.
         /// @param sample_mask an optional sample mask to combine with shader masks

@@ -47,7 +47,7 @@ enum Flag {
 using Flags = utils::EnumSet<Flag>;
 
 /// Base class for a type in the system
-class Type : public Castable<Type, UniqueNode> {
+class Type : public utils::Castable<Type, UniqueNode> {
   public:
     /// Destructor
     ~Type() override;

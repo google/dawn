@@ -20,7 +20,7 @@
 namespace tint::ast {
 
 /// A loop statement
-class LoopStatement final : public Castable<LoopStatement, Statement> {
+class LoopStatement final : public utils::Castable<LoopStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

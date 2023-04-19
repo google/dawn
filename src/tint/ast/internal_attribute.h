@@ -30,7 +30,7 @@ namespace tint::ast {
 /// An attribute used to indicate that a function is tint-internal.
 /// These attributes are not produced by generators, but instead are usually
 /// created by transforms for consumption by a particular backend.
-class InternalAttribute : public Castable<InternalAttribute, Attribute> {
+class InternalAttribute : public utils::Castable<InternalAttribute, Attribute> {
   public:
     /// Constructor
     /// @param program_id the identifier of the program that owns this node

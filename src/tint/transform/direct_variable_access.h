@@ -32,7 +32,7 @@ namespace tint::transform {
 /// comments in src/tint/transform/direct_variable_access.cc.
 ///
 /// @note DirectVariableAccess requires the transform::Unshadow transform to have been run first.
-class DirectVariableAccess final : public Castable<DirectVariableAccess, Transform> {
+class DirectVariableAccess final : public utils::Castable<DirectVariableAccess, Transform> {
   public:
     /// Constructor
     DirectVariableAccess();
@@ -49,7 +49,7 @@ class DirectVariableAccess final : public Castable<DirectVariableAccess, Transfo
 
     /// Config is consumed by the DirectVariableAccess transform.
     /// Config specifies the behavior of the transform.
-    struct Config final : public Castable<Data, transform::Data> {
+    struct Config final : public utils::Castable<Data, transform::Data> {
         /// Constructor
         /// @param options behavior of the transform
         explicit Config(const Options& options);

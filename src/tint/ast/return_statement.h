@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// A return statement
-class ReturnStatement final : public Castable<ReturnStatement, Statement> {
+class ReturnStatement final : public utils::Castable<ReturnStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

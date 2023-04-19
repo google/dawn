@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// An assignment statement
-class AssignmentStatement final : public Castable<AssignmentStatement, Statement> {
+class AssignmentStatement final : public utils::Castable<AssignmentStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

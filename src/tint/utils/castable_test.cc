@@ -12,25 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/castable.h"
+#include "src/tint/utils/castable.h"
 
 #include <memory>
 #include <string>
 
 #include "gtest/gtest.h"
 
-namespace tint {
+namespace tint::utils {
 namespace {
 
-struct Animal : public tint::Castable<Animal> {};
-struct Amphibian : public tint::Castable<Amphibian, Animal> {};
-struct Mammal : public tint::Castable<Mammal, Animal> {};
-struct Reptile : public tint::Castable<Reptile, Animal> {};
-struct Frog : public tint::Castable<Frog, Amphibian> {};
-struct Bear : public tint::Castable<Bear, Mammal> {};
-struct Lizard : public tint::Castable<Lizard, Reptile> {};
-struct Gecko : public tint::Castable<Gecko, Lizard> {};
-struct Iguana : public tint::Castable<Iguana, Lizard> {};
+struct Animal : public tint::utils::Castable<Animal> {};
+struct Amphibian : public tint::utils::Castable<Amphibian, Animal> {};
+struct Mammal : public tint::utils::Castable<Mammal, Animal> {};
+struct Reptile : public tint::utils::Castable<Reptile, Animal> {};
+struct Frog : public tint::utils::Castable<Frog, Amphibian> {};
+struct Bear : public tint::utils::Castable<Bear, Mammal> {};
+struct Lizard : public tint::utils::Castable<Lizard, Reptile> {};
+struct Gecko : public tint::utils::Castable<Gecko, Lizard> {};
+struct Iguana : public tint::utils::Castable<Iguana, Lizard> {};
 
 TEST(CastableBase, Is) {
     std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
@@ -291,4 +291,4 @@ TINT_INSTANTIATE_TYPEINFO(Bear);
 TINT_INSTANTIATE_TYPEINFO(Lizard);
 TINT_INSTANTIATE_TYPEINFO(Gecko);
 
-}  // namespace tint
+}  // namespace tint::utils

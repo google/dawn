@@ -25,10 +25,10 @@ namespace tint::transform {
 ///
 /// All module-scope variables, types, and functions that are not used by the
 /// target entry point will also be removed.
-class SingleEntryPoint final : public Castable<SingleEntryPoint, Transform> {
+class SingleEntryPoint final : public utils::Castable<SingleEntryPoint, Transform> {
   public:
     /// Configuration options for the transform
-    struct Config final : public Castable<Config, Data> {
+    struct Config final : public utils::Castable<Config, Data> {
         /// Constructor
         /// @param entry_point the name of the entry point to keep
         explicit Config(std::string entry_point = "");

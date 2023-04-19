@@ -38,7 +38,7 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * ExpandCompoundAssignment
-class PackedVec3 final : public Castable<PackedVec3, Transform> {
+class PackedVec3 final : public utils::Castable<PackedVec3, Transform> {
   public:
     /// Constructor
     PackedVec3();

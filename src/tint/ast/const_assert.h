@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// A `const_assert` statement
-class ConstAssert final : public Castable<ConstAssert, Statement> {
+class ConstAssert final : public utils::Castable<ConstAssert, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

@@ -137,10 +137,10 @@ using VertexStateDescriptor = std::vector<VertexBufferLayoutDescriptor>;
 /// shader to use.
 ///
 /// The SingleEntryPoint transform must have run before VertexPulling.
-class VertexPulling final : public Castable<VertexPulling, Transform> {
+class VertexPulling final : public utils::Castable<VertexPulling, Transform> {
   public:
     /// Configuration options for the transform
-    struct Config final : public Castable<Config, Data> {
+    struct Config final : public utils::Castable<Config, Data> {
         /// Constructor
         Config();
 

@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::ExternalTexture);
 namespace tint::type {
 
 ExternalTexture::ExternalTexture()
-    : Base(static_cast<size_t>(TypeInfo::Of<ExternalTexture>().full_hashcode),
+    : Base(static_cast<size_t>(utils::TypeInfo::Of<ExternalTexture>().full_hashcode),
            TextureDimension::k2d) {}
 
 ExternalTexture::~ExternalTexture() = default;

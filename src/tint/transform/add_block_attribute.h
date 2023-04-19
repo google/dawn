@@ -24,11 +24,11 @@ namespace tint::transform {
 
 /// AddBlockAttribute is a transform that wrap the store type of a buffer into a struct if possible,
 /// then adds an `@internal(block)` attribute to the wrapper struct.
-class AddBlockAttribute final : public Castable<AddBlockAttribute, Transform> {
+class AddBlockAttribute final : public utils::Castable<AddBlockAttribute, Transform> {
   public:
     /// BlockAttribute is an InternalAttribute that is used to decorate a
     // structure that is used as a buffer in SPIR-V or GLSL.
-    class BlockAttribute final : public Castable<BlockAttribute, ast::InternalAttribute> {
+    class BlockAttribute final : public utils::Castable<BlockAttribute, ast::InternalAttribute> {
       public:
         /// Constructor
         /// @param program_id the identifier of the program that owns this node

@@ -21,7 +21,7 @@
 namespace tint::type {
 
 /// A texture type.
-class Texture : public Castable<Texture, Type> {
+class Texture : public utils::Castable<Texture, Type> {
   public:
     /// Constructor
     /// @param hash the unique hash of the node

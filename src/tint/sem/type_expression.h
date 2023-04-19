@@ -25,7 +25,7 @@ class Type;
 namespace tint::sem {
 
 /// TypeExpression holds the semantic information for expression nodes that resolve to types.
-class TypeExpression : public Castable<TypeExpression, Expression> {
+class TypeExpression : public utils::Castable<TypeExpression, Expression> {
   public:
     /// Constructor
     /// @param declaration the AST node

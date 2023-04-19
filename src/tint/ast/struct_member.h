@@ -28,7 +28,7 @@ class Identifier;
 namespace tint::ast {
 
 /// A struct member statement.
-class StructMember final : public Castable<StructMember, Node> {
+class StructMember final : public utils::Castable<StructMember, Node> {
   public:
     /// Create a new struct member statement
     /// @param pid the identifier of the program that owns this node
