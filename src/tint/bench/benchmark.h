@@ -51,6 +51,15 @@ std::variant<Source::File, Error> LoadInputFile(std::string name);
 /// @returns either the loaded Program or an Error
 std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
 
+// If TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAM_HEADER is defined, include that to
+// declare the TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS() macro, which appends
+// external programs to the TINT_BENCHMARK_WGSL_PROGRAMS() list.
+#ifdef TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAM_HEADER
+#include TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAM_HEADER
+#else
+#define TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS(x)
+#endif
+
 /// Declares a benchmark with the given function and WGSL file name
 #define TINT_BENCHMARK_WGSL_PROGRAM(FUNC, WGSL_NAME) BENCHMARK_CAPTURE(FUNC, WGSL_NAME, WGSL_NAME);
 
@@ -69,7 +78,8 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "simple-fragment.wgsl");               \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "simple-vertex.wgsl");                 \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-fragment.wgsl"); \
-    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-vertex.wgsl");
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-vertex.wgsl");   \
+    TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS(FUNC)
 
 }  // namespace tint::bench
 

@@ -170,6 +170,8 @@ option_if_not_defined(TINT_BUILD_TESTS "Build tests" ON)
 option_if_not_defined(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 option_if_not_defined(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
 
+set_if_not_defined(TINT_EXTERNAL_BENCHMARK_CORPUS_DIR "" "Directory that holds a corpus of external shaders to benchmark.")
+
 option_if_not_defined(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
 option_if_not_defined(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 option_if_not_defined(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to detect non-deterministic output" OFF)
@@ -306,6 +308,8 @@ message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 message(STATUS "Tint build remote-compile tool: ${TINT_BUILD_REMOTE_COMPILE}")
+message(STATUS "Tint external benchmark corpus dir: ${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}")
+
 
 if (NOT ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS} STREQUAL "")
   message(STATUS "Using provided LIB_FUZZING_ENGINE options: ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}")
