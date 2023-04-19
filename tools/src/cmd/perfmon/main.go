@@ -134,16 +134,17 @@ func run(cfgPath string) error {
 
 // Config holds the root configuration options for the perfmon tool
 type Config struct {
-	WorkingDir           string
-	RootChange           git.Hash
-	Dawn                 GitConfig
-	Results              GitConfig
-	Gerrit               GerritConfig
-	Timeouts             TimeoutsConfig
-	ExternalAccounts     []string
-	BenchmarkRepetitions int
-	BenchmarkMaxTemp     float32 // celsius
-	CPUTempSensorName    string  // Name of the sensor to use for CPU temp
+	WorkingDir              string
+	RootChange              git.Hash
+	Dawn                    GitConfig
+	Results                 GitConfig
+	Gerrit                  GerritConfig
+	Timeouts                TimeoutsConfig
+	ExternalAccounts        []string
+	BenchmarkRepetitions    int
+	BenchmarkMaxTemp        float32 // celsius
+	CPUTempSensorName       string  // Name of the sensor to use for CPU temp
+	ExternalBenchmarkCorpus string
 }
 
 // GitConfig holds the configuration options for accessing a git repo
@@ -725,6 +726,7 @@ func (e env) buildTint() error {
 		"-DCMAKE_BUILD_TYPE=Release",
 		"-DCMAKE_BUILD_TESTS=0",
 		"-DCMAKE_BUILD_SAMPLES=0",
+		"-DTINT_EXTERNAL_BENCHMARK_CORPUS_DIR="+e.cfg.ExternalBenchmarkCorpus,
 		"-DTINT_BUILD_DOCS=0",
 		"-DTINT_BUILD_SAMPLES=0",
 		"-DTINT_BUILD_TESTS=0",
