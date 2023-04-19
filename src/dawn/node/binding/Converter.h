@@ -270,6 +270,8 @@ class Converter {
 
     [[nodiscard]] bool Convert(interop::GPUQueryType& out, wgpu::QueryType in);
 
+    [[nodiscard]] bool Convert(interop::GPUBufferMapState& out, wgpu::BufferMapState in);
+
     // The two conversion methods don't generate an error when false is returned. That
     // responsibility is left to the caller if it is needed (it isn't always needed, see
     // https://gpuweb.github.io/gpuweb/#gpu-supportedfeatures)
