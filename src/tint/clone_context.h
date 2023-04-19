@@ -25,10 +25,10 @@
 #include "src/tint/debug.h"
 #include "src/tint/program_id.h"
 #include "src/tint/symbol.h"
-#include "src/tint/traits.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/hashset.h"
+#include "src/tint/utils/traits.h"
 #include "src/tint/utils/vector.h"
 
 // Forward declarations
@@ -74,8 +74,8 @@ class CloneContext {
     /// ParamTypeIsPtrOf<F, T> is true iff the first parameter of
     /// F is a pointer of (or derives from) type T.
     template <typename F, typename T>
-    static constexpr bool ParamTypeIsPtrOf =
-        traits::IsTypeOrDerived<typename std::remove_pointer<traits::ParameterType<F, 0>>::type, T>;
+    static constexpr bool ParamTypeIsPtrOf = utils::traits::
+        IsTypeOrDerived<typename std::remove_pointer<utils::traits::ParameterType<F, 0>>::type, T>;
 
   public:
     /// SymbolTransform is a function that takes a symbol and returns a new
@@ -303,8 +303,9 @@ class CloneContext {
     ///        `T* (T*)`, where `T` derives from Cloneable
     /// @returns this CloneContext so calls can be chained
     template <typename F>
-    traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>, CloneContext>& ReplaceAll(F&& replacer) {
-        using TPtr = traits::ParameterType<F, 0>;
+    utils::traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>, CloneContext>& ReplaceAll(
+        F&& replacer) {
+        using TPtr = utils::traits::ParameterType<F, 0>;
         using T = typename std::remove_pointer<TPtr>::type;
         for (auto& transform : transforms_) {
             bool already_registered = transform.typeinfo->Is(&TypeInfo::Of<T>()) ||
@@ -355,7 +356,9 @@ class CloneContext {
     /// references of the original object. A type mismatch will result in an
     /// assertion in debug builds, and undefined behavior in release builds.
     /// @returns this CloneContext so calls can be chained
-    template <typename WHAT, typename WITH, typename = traits::EnableIfIsType<WITH, Cloneable>>
+    template <typename WHAT,
+              typename WITH,
+              typename = utils::traits::EnableIfIsType<WITH, Cloneable>>
     CloneContext& Replace(const WHAT* what, const WITH* with) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, with);

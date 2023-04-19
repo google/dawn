@@ -29,9 +29,9 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/sem/variable.h"
-#include "src/tint/traits.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/utils/traits.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::resolver {
@@ -587,7 +587,7 @@ struct DataType<alias<T, ID>> {
     /// @param args the value nested elements will be initialized with
     /// @return a new AST expression of the alias type
     template <bool IS_COMPOSITE = is_composite>
-    static inline traits::EnableIf<!IS_COMPOSITE, const ast::Expression*> Expr(
+    static inline utils::traits::EnableIf<!IS_COMPOSITE, const ast::Expression*> Expr(
         ProgramBuilder& b,
         utils::VectorRef<Scalar> args) {
         // Cast
@@ -598,7 +598,7 @@ struct DataType<alias<T, ID>> {
     /// @param args the value nested elements will be initialized with
     /// @return a new AST expression of the alias type
     template <bool IS_COMPOSITE = is_composite>
-    static inline traits::EnableIf<IS_COMPOSITE, const ast::Expression*> Expr(
+    static inline utils::traits::EnableIf<IS_COMPOSITE, const ast::Expression*> Expr(
         ProgramBuilder& b,
         utils::VectorRef<Scalar> args) {
         // Construct
@@ -819,7 +819,7 @@ constexpr bool IsValue = std::is_same_v<T, Value>;
 /// Creates a Value of DataType<T> from a scalar `v`
 template <typename T>
 Value Val(T v) {
-    static_assert(traits::IsTypeIn<T, Scalar>, "v must be a Number of bool");
+    static_assert(utils::traits::IsTypeIn<T, Scalar>, "v must be a Number of bool");
     return Value::Create<T>(utils::Vector<Scalar, 1>{v});
 }
 

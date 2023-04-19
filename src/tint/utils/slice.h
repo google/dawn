@@ -19,8 +19,8 @@
 #include <iterator>
 
 #include "src/tint/castable.h"
-#include "src/tint/traits.h"
 #include "src/tint/utils/bitcast.h"
+#include "src/tint/utils/traits.h"
 
 namespace tint::utils {
 
@@ -73,8 +73,8 @@ struct CanReinterpretSlice {
           // or
           //   derives from TO
           (std::is_same_v<std::remove_const_t<FROM_EL>, std::remove_const_t<TO_EL>> ||
-           (IsCastable<FROM_EL, TO_EL> &&
-            (MODE == ReinterpretMode::kUnsafe || traits::IsTypeOrDerived<FROM_EL, TO_EL>)))));
+           (IsCastable<FROM_EL, TO_EL> && (MODE == ReinterpretMode::kUnsafe ||
+                                           utils::traits::IsTypeOrDerived<FROM_EL, TO_EL>)))));
 };
 
 /// Specialization of 'CanReinterpretSlice' for when TO and FROM are equal types.

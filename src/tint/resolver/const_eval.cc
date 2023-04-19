@@ -447,7 +447,8 @@ ConstEval::Result TransformElements(ProgramBuilder& builder,
     auto* ty = First(cs...)->Type();
     auto* el_ty = type::Type::ElementOf(ty, &n);
     if (el_ty == ty) {
-        constexpr bool kHasIndexParam = traits::IsType<size_t, traits::LastParameterType<F>>;
+        constexpr bool kHasIndexParam =
+            utils::traits::IsType<size_t, utils::traits::LastParameterType<F>>;
         if constexpr (kHasIndexParam) {
             return f(cs..., index);
         } else {

@@ -96,7 +96,7 @@ void CheckIdentifier(const Identifier* ident, const TemplatedIdentifierMatcher<A
         const auto* got_arg = got->arguments[arg_idx++];
 
         using T = std::decay_t<decltype(expected_arg)>;
-        if constexpr (traits::IsStringLike<T>) {
+        if constexpr (utils::traits::IsStringLike<T>) {
             ASSERT_TRUE(got_arg->Is<IdentifierExpression>());
             CheckIdentifier(got_arg->As<IdentifierExpression>()->identifier, expected_arg);
         } else if constexpr (IsTemplatedIdentifierMatcher<T>::value) {

@@ -81,7 +81,7 @@ class Info {
               typename RESULT = GetResultType<SEM, AST>>
     const RESULT* Get(const AST* ast_node) const {
         static_assert(std::is_same_v<SEM, InferFromAST> ||
-                          !traits::IsTypeOrDerived<SemanticNodeTypeFor<AST>, SEM>,
+                          !utils::traits::IsTypeOrDerived<SemanticNodeTypeFor<AST>, SEM>,
                       "explicit template argument is unnecessary");
         if (ast_node && ast_node->node_id.value < nodes_.size()) {
             return As<RESULT>(nodes_[ast_node->node_id.value]);

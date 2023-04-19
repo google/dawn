@@ -20,8 +20,8 @@
 #include <tuple>
 #include <utility>
 
-#include "src/tint/traits.h"
 #include "src/tint/utils/crc32.h"
+#include "src/tint/utils/traits.h"
 
 #if defined(__clang__)
 /// Temporarily disable certain warnings when using Castable API
@@ -60,7 +60,7 @@ namespace tint {
 /// True if all template types that are not Ignore derive from CastableBase
 template <typename... TYPES>
 static constexpr bool IsCastable =
-    ((traits::IsTypeOrDerived<TYPES, CastableBase> || std::is_same_v<TYPES, Ignore>)&&...) &&
+    ((utils::traits::IsTypeOrDerived<TYPES, CastableBase> || std::is_same_v<TYPES, Ignore>)&&...) &&
     !(std::is_same_v<TYPES, Ignore> && ...);
 
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
@@ -220,8 +220,8 @@ struct TypeInfo {
             return HashCodeOf<std::remove_cv_t<std::tuple_element_t<0, TUPLE>>>();
         } else {
             constexpr auto kMid = kCount / 2;
-            return CombinedHashCodeOfTuple<traits::SliceTuple<0, kMid, TUPLE>>() |
-                   CombinedHashCodeOfTuple<traits::SliceTuple<kMid, kCount - kMid, TUPLE>>();
+            return CombinedHashCodeOfTuple<utils::traits::SliceTuple<0, kMid, TUPLE>>() |
+                   CombinedHashCodeOfTuple<utils::traits::SliceTuple<kMid, kCount - kMid, TUPLE>>();
         }
     }
 
@@ -245,8 +245,8 @@ struct TypeInfo {
                 // Possibly one of the types in `TUPLE`.
                 // Split the search in two, and scan each block.
                 static constexpr auto kMid = kCount / 2;
-                return IsAnyOfTuple<traits::SliceTuple<0, kMid, TUPLE>>() ||
-                       IsAnyOfTuple<traits::SliceTuple<kMid, kCount - kMid, TUPLE>>();
+                return IsAnyOfTuple<utils::traits::SliceTuple<0, kMid, TUPLE>>() ||
+                       IsAnyOfTuple<utils::traits::SliceTuple<kMid, kCount - kMid, TUPLE>>();
             }
             return false;
         }
@@ -442,7 +442,7 @@ class Castable : public BASE {
     /// object is of, or derives from the class `TO`.
     template <int FLAGS = 0, typename Pred = detail::Infer>
     inline bool Is(Pred&& pred) const {
-        using TO = typename std::remove_pointer<traits::ParameterType<Pred, 0>>::type;
+        using TO = typename std::remove_pointer<utils::traits::ParameterType<Pred, 0>>::type;
         return tint::Is<TO, FLAGS>(static_cast<const CLASS*>(this), std::forward<Pred>(pred));
     }
 
@@ -512,7 +512,7 @@ struct CastableCommonBaseImpl<Ignore, T> {
 template <typename A, typename B>
 struct CastableCommonBaseImpl<A, B> {
     /// The common base class for A, B and OTHERS
-    using type = std::conditional_t<traits::IsTypeOrDerived<A, B>,
+    using type = std::conditional_t<utils::traits::IsTypeOrDerived<A, B>,
                                     B,  // A derives from B
                                     CastableCommonBase<A, typename B::TrueBase>>;
 };

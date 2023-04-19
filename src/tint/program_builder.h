@@ -170,53 +170,53 @@ class ProgramBuilder {
 
     /// Evaluates to true if T can be converted to an identifier.
     template <typename T>
-    static constexpr const bool IsIdentifierLike = std::is_same_v<T, Symbol> ||  // Symbol
-                                                   std::is_enum_v<T> ||          // Enum
-                                                   traits::IsStringLike<T>;      // String
+    static constexpr const bool IsIdentifierLike = std::is_same_v<T, Symbol> ||     // Symbol
+                                                   std::is_enum_v<T> ||             // Enum
+                                                   utils::traits::IsStringLike<T>;  // String
 
     /// A helper used to disable overloads if the first type in `TYPES` is a Source. Used to avoid
     /// ambiguities in overloads that take a Source as the first parameter and those that
     /// perfectly-forward the first argument.
     template <typename... TYPES>
-    using DisableIfSource =
-        traits::EnableIf<!IsSource<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+    using DisableIfSource = utils::traits::EnableIf<
+        !IsSource<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to disable overloads if the first type in `TYPES` is a scalar type. Used to
     /// avoid ambiguities in overloads that take a scalar as the first parameter and those that
     /// perfectly-forward the first argument.
     template <typename... TYPES>
-    using DisableIfScalar =
-        traits::EnableIf<!IsScalar<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+    using DisableIfScalar = utils::traits::EnableIf<
+        !IsScalar<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to enable overloads if the first type in `TYPES` is a scalar type. Used to
     /// avoid ambiguities in overloads that take a scalar as the first parameter and those that
     /// perfectly-forward the first argument.
     template <typename... TYPES>
-    using EnableIfScalar =
-        traits::EnableIf<IsScalar<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+    using EnableIfScalar = utils::traits::EnableIf<
+        IsScalar<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to disable overloads if the first type in `TYPES` is a utils::Vector,
     /// utils::VectorRef or utils::VectorRef.
     template <typename... TYPES>
-    using DisableIfVectorLike = traits::EnableIf<
-        !detail::IsVectorLike<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>::value>;
+    using DisableIfVectorLike = utils::traits::EnableIf<!detail::IsVectorLike<
+        utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>::value>;
 
     /// A helper used to enable overloads if the first type in `TYPES` is identifier-like.
     template <typename... TYPES>
-    using EnableIfIdentifierLike =
-        traits::EnableIf<IsIdentifierLike<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+    using EnableIfIdentifierLike = utils::traits::EnableIf<
+        IsIdentifierLike<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to disable overloads if the first type in `TYPES` is Infer or an abstract
     /// numeric.
     template <typename... TYPES>
-    using DisableIfInferOrAbstract =
-        traits::EnableIf<!IsInferOrAbstract<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+    using DisableIfInferOrAbstract = utils::traits::EnableIf<
+        !IsInferOrAbstract<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to enable overloads if the first type in `TYPES` is Infer or an abstract
     /// numeric.
     template <typename... TYPES>
-    using EnableIfInferOrAbstract =
-        traits::EnableIf<IsInferOrAbstract<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+    using EnableIfInferOrAbstract = utils::traits::EnableIf<
+        IsInferOrAbstract<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// VarOptions is a helper for accepting an arbitrary number of order independent options for
     /// constructing an ast::Var.
@@ -258,7 +258,8 @@ class ProgramBuilder {
         template <typename... ARGS>
         explicit LetOptions(ARGS&&... args) {
             static constexpr bool has_init =
-                (traits::IsTypeOrDerived<traits::PtrElTy<ARGS>, ast::Expression> || ...);
+                (utils::traits::IsTypeOrDerived<utils::traits::PtrElTy<ARGS>, ast::Expression> ||
+                 ...);
             static_assert(has_init, "Let() must be constructed with an initializer expression");
             (Set(std::forward<ARGS>(args)), ...);
         }
@@ -281,7 +282,8 @@ class ProgramBuilder {
         template <typename... ARGS>
         explicit ConstOptions(ARGS&&... args) {
             static constexpr bool has_init =
-                (traits::IsTypeOrDerived<traits::PtrElTy<ARGS>, ast::Expression> || ...);
+                (utils::traits::IsTypeOrDerived<utils::traits::PtrElTy<ARGS>, ast::Expression> ||
+                 ...);
             static_assert(has_init, "Const() must be constructed with an initializer expression");
             (Set(std::forward<ARGS>(args)), ...);
         }
@@ -476,7 +478,7 @@ class ProgramBuilder {
     /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
-    traits::EnableIfIsType<T, ast::Node>* create(const Source& source, ARGS&&... args) {
+    utils::traits::EnableIfIsType<T, ast::Node>* create(const Source& source, ARGS&&... args) {
         AssertNotMoved();
         return ast_nodes_.Create<T>(id_, AllocateNodeID(), source, std::forward<ARGS>(args)...);
     }
@@ -488,7 +490,7 @@ class ProgramBuilder {
     /// destructed.
     /// @returns the node pointer
     template <typename T>
-    traits::EnableIfIsType<T, ast::Node>* create() {
+    utils::traits::EnableIfIsType<T, ast::Node>* create() {
         AssertNotMoved();
         return ast_nodes_.Create<T>(id_, AllocateNodeID(), source_);
     }
@@ -502,10 +504,10 @@ class ProgramBuilder {
     /// @param args the remaining arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename ARG0, typename... ARGS>
-    traits::EnableIf</* T is ast::Node and ARG0 is not Source */
-                     traits::IsTypeOrDerived<T, ast::Node> &&
-                         !traits::IsTypeOrDerived<ARG0, Source>,
-                     T>*
+    utils::traits::EnableIf</* T is ast::Node and ARG0 is not Source */
+                            utils::traits::IsTypeOrDerived<T, ast::Node> &&
+                                !utils::traits::IsTypeOrDerived<ARG0, Source>,
+                            T>*
     create(ARG0&& arg0, ARGS&&... args) {
         AssertNotMoved();
         return ast_nodes_.Create<T>(id_, AllocateNodeID(), source_, std::forward<ARG0>(arg0),
@@ -517,9 +519,9 @@ class ProgramBuilder {
     /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
-    traits::EnableIf<traits::IsTypeOrDerived<T, sem::Node> &&
-                         !traits::IsTypeOrDerived<T, type::Node>,
-                     T>*
+    utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, sem::Node> &&
+                                !utils::traits::IsTypeOrDerived<T, type::Node>,
+                            T>*
     create(ARGS&&... args) {
         AssertNotMoved();
         return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
@@ -530,10 +532,10 @@ class ProgramBuilder {
     /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
-    traits::EnableIf<traits::IsTypeOrDerived<T, constant::Value> &&
-                         !traits::IsTypeOrDerived<T, constant::Composite> &&
-                         !traits::IsTypeOrDerived<T, constant::Splat>,
-                     T>*
+    utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Value> &&
+                                !utils::traits::IsTypeOrDerived<T, constant::Composite> &&
+                                !utils::traits::IsTypeOrDerived<T, constant::Splat>,
+                            T>*
     create(ARGS&&... args) {
         AssertNotMoved();
         return constant_nodes_.Create<T>(std::forward<ARGS>(args)...);
@@ -547,9 +549,10 @@ class ProgramBuilder {
     /// @param type the composite type
     /// @param elements the composite elements
     /// @returns the node pointer
-    template <typename T,
-              typename = traits::EnableIf<traits::IsTypeOrDerived<T, constant::Composite> ||
-                                          traits::IsTypeOrDerived<T, constant::Splat>>>
+    template <
+        typename T,
+        typename = utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Composite> ||
+                                           utils::traits::IsTypeOrDerived<T, constant::Splat>>>
     const constant::Value* create(const type::Type* type,
                                   utils::VectorRef<const constant::Value*> elements) {
         AssertNotMoved();
@@ -561,7 +564,9 @@ class ProgramBuilder {
     /// @param element the splat element
     /// @param n the number of elements
     /// @returns the node pointer
-    template <typename T, typename = traits::EnableIf<traits::IsTypeOrDerived<T, constant::Splat>>>
+    template <
+        typename T,
+        typename = utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Splat>>>
     const constant::Splat* create(const type::Type* type,
                                   const constant::Value* element,
                                   size_t n) {
@@ -576,7 +581,7 @@ class ProgramBuilder {
     /// @param args the arguments to pass to the constructor
     /// @returns the new, or existing node
     template <typename T, typename... ARGS>
-    traits::EnableIfIsType<T, type::Node>* create(ARGS&&... args) {
+    utils::traits::EnableIfIsType<T, type::Node>* create(ARGS&&... args) {
         AssertNotMoved();
         return types_.Get<T>(std::forward<ARGS>(args)...);
     }
@@ -615,7 +620,8 @@ class ProgramBuilder {
                   typename = DisableIfSource<NAME>,
                   typename = std::enable_if_t<!std::is_same_v<std::decay_t<NAME>, ast::Type>>>
         ast::Type operator()(NAME&& name, ARGS&&... args) const {
-            if constexpr (traits::IsTypeOrDerived<traits::PtrElTy<NAME>, ast::Expression>) {
+            if constexpr (utils::traits::IsTypeOrDerived<utils::traits::PtrElTy<NAME>,
+                                                         ast::Expression>) {
                 static_assert(sizeof...(ARGS) == 0);
                 return {name};
             } else {
@@ -1479,7 +1485,8 @@ class ProgramBuilder {
     /// @return an ast::Identifier with the given symbol
     template <typename IDENTIFIER>
     const ast::Identifier* Ident(IDENTIFIER&& identifier) {
-        if constexpr (traits::IsTypeOrDerived<traits::PtrElTy<IDENTIFIER>, ast::Identifier>) {
+        if constexpr (utils::traits::IsTypeOrDerived<utils::traits::PtrElTy<IDENTIFIER>,
+                                                     ast::Identifier>) {
             return identifier;  // Passthrough
         } else {
             return Ident(source_, std::forward<IDENTIFIER>(identifier));
@@ -1518,7 +1525,7 @@ class ProgramBuilder {
 
     /// @param expr the expression
     /// @return expr (passthrough)
-    template <typename T, typename = traits::EnableIfIsType<T, ast::Expression>>
+    template <typename T, typename = utils::traits::EnableIfIsType<T, ast::Expression>>
     const T* Expr(const T* expr) {
         return expr;
     }
@@ -2734,8 +2741,9 @@ class ProgramBuilder {
     const ast::MemberAccessorExpression* MemberAccessor(const Source& source,
                                                         OBJECT&& object,
                                                         MEMBER&& member) {
-        static_assert(!traits::IsType<traits::PtrElTy<MEMBER>, ast::TemplatedIdentifier>,
-                      "it is currently invalid for a structure to hold a templated member");
+        static_assert(
+            !utils::traits::IsType<utils::traits::PtrElTy<MEMBER>, ast::TemplatedIdentifier>,
+            "it is currently invalid for a structure to hold a templated member");
         return create<ast::MemberAccessorExpression>(source, Expr(std::forward<OBJECT>(object)),
                                                      Ident(std::forward<MEMBER>(member)));
     }
@@ -2882,8 +2890,8 @@ class ProgramBuilder {
         utils::VectorRef<const ast::Attribute*> attributes = utils::Empty,
         utils::VectorRef<const ast::Attribute*> return_type_attributes = utils::Empty) {
         const ast::BlockStatement* block = nullptr;
-        using BODY_T = traits::PtrElTy<BODY>;
-        if constexpr (traits::IsTypeOrDerived<BODY_T, ast::BlockStatement> ||
+        using BODY_T = utils::traits::PtrElTy<BODY>;
+        if constexpr (utils::traits::IsTypeOrDerived<BODY_T, ast::BlockStatement> ||
                       std::is_same_v<BODY_T, std::nullptr_t>) {
             block = body;
         } else {
@@ -3753,8 +3761,9 @@ class ProgramBuilder {
     const ast::DiagnosticAttribute* DiagnosticAttribute(const Source& source,
                                                         builtin::DiagnosticSeverity severity,
                                                         NAME&& rule_name) {
-        static_assert(!traits::IsType<traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
-                      "it is invalid for a diagnostic rule name to be templated");
+        static_assert(
+            !utils::traits::IsType<utils::traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
+            "it is invalid for a diagnostic rule name to be templated");
         return create<ast::DiagnosticAttribute>(
             source, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
     }
@@ -3872,7 +3881,7 @@ class ProgramBuilder {
     /// @param args a mix of ast::Expression, ast::Statement, ast::Variables.
     /// @returns the function
     template <typename... ARGS,
-              typename = traits::EnableIf<(CanWrapInStatement<ARGS>::value && ...)>>
+              typename = utils::traits::EnableIf<(CanWrapInStatement<ARGS>::value && ...)>>
     const ast::Function* WrapInFunction(ARGS&&... args) {
         utils::Vector stmts{
             WrapInStatement(std::forward<ARGS>(args))...,

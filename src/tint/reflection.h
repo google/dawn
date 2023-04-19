@@ -15,7 +15,8 @@
 #ifndef SRC_TINT_REFLECTION_H_
 #define SRC_TINT_REFLECTION_H_
 
-#include "src/tint/traits.h"
+#include <type_traits>
+
 #include "src/tint/utils/concat.h"
 #include "src/tint/utils/foreach_macro.h"
 

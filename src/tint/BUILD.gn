@@ -218,7 +218,6 @@ libtint_source_set("libtint_base_src") {
     "symbol.h",
     "symbol_table.cc",
     "symbol_table.h",
-    "traits.h",
     "utils/bitcast.h",
     "utils/bitset.h",
     "utils/block_allocator.h",
@@ -243,6 +242,7 @@ libtint_source_set("libtint_base_src") {
     "utils/string.h",
     "utils/string_stream.cc",
     "utils/string_stream.h",
+    "utils/traits.h",
     "utils/unique_allocator.h",
     "utils/unique_vector.h",
     "utils/vector.h",
@@ -1606,6 +1606,7 @@ if (tint_build_unittests) {
       "utils/slice_test.cc",
       "utils/string_stream_test.cc",
       "utils/string_test.cc",
+      "utils/traits_test.cc",
       "utils/transform_test.cc",
       "utils/unique_allocator_test.cc",
       "utils/unique_vector_test.cc",
@@ -1990,7 +1991,6 @@ if (tint_build_unittests) {
       "switch_test.cc",
       "symbol_table_test.cc",
       "symbol_test.cc",
-      "traits_test.cc",
     ]
     deps = [ ":libtint_base_src" ]
   }

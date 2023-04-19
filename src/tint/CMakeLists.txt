@@ -348,7 +348,6 @@ list(APPEND TINT_LIB_SRCS
   symbol.cc
   symbol.h
   tint.cc
-  traits.h
   transform/add_empty_entry_point.cc
   transform/add_empty_entry_point.h
   transform/add_block_attribute.cc
@@ -535,6 +534,7 @@ list(APPEND TINT_LIB_SRCS
   utils/string.h
   utils/string_stream.cc
   utils/string_stream.h
+  utils/traits.h
   utils/unique_allocator.h
   utils/unique_vector.h
   utils/vector.h
@@ -969,7 +969,6 @@ if(TINT_BUILD_TESTS)
     symbol_test.cc
     test_main.cc
     text/unicode_test.cc
-    traits_test.cc
     transform/transform_test.cc
     type/array_test.cc
     type/atomic_test.cc
@@ -1013,6 +1012,7 @@ if(TINT_BUILD_TESTS)
     utils/slice_test.cc
     utils/string_stream_test.cc
     utils/string_test.cc
+    utils/traits_test.cc
     utils/transform_test.cc
     utils/unique_allocator_test.cc
     utils/unique_vector_test.cc

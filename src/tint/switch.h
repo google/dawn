@@ -43,13 +43,14 @@ namespace tint::detail {
 /// @note does not handle the Default case
 /// @see Switch().
 template <typename FN>
-using SwitchCaseType = std::remove_pointer_t<traits::ParameterType<std::remove_reference_t<FN>, 0>>;
+using SwitchCaseType =
+    std::remove_pointer_t<utils::traits::ParameterType<std::remove_reference_t<FN>, 0>>;
 
 /// Evaluates to true if the function `FN` has the signature of a Default case in a Switch().
 /// @see Switch().
 template <typename FN>
 inline constexpr bool IsDefaultCase =
-    std::is_same_v<traits::ParameterType<std::remove_reference_t<FN>, 0>, Default>;
+    std::is_same_v<utils::traits::ParameterType<std::remove_reference_t<FN>, 0>, Default>;
 
 /// Searches the list of Switch cases for a Default case, returning the index of the Default case.
 /// If the a Default case is not found in the tuple, then -1 is returned.
@@ -163,7 +164,7 @@ namespace tint {
 /// consistent case type.
 template <typename RETURN_TYPE = detail::Infer, typename T = CastableBase, typename... CASES>
 inline auto Switch(T* object, CASES&&... cases) {
-    using ReturnType = detail::SwitchReturnType<RETURN_TYPE, traits::ReturnType<CASES>...>;
+    using ReturnType = detail::SwitchReturnType<RETURN_TYPE, utils::traits::ReturnType<CASES>...>;
     static constexpr int kDefaultIndex = detail::IndexOfDefaultCase<std::tuple<CASES...>>();
     static constexpr bool kHasDefaultCase = kDefaultIndex >= 0;
     static constexpr bool kHasReturnType = !std::is_same_v<ReturnType, void>;

@@ -65,9 +65,9 @@ class Manager final {
     ///         constructed, then the same pointer is returned.
     template <typename NODE, typename... ARGS>
     NODE* Get(ARGS&&... args) {
-        if constexpr (traits::IsTypeOrDerived<NODE, Type>) {
+        if constexpr (utils::traits::IsTypeOrDerived<NODE, Type>) {
             return types_.Get<NODE>(std::forward<ARGS>(args)...);
-        } else if constexpr (traits::IsTypeOrDerived<NODE, UniqueNode>) {
+        } else if constexpr (utils::traits::IsTypeOrDerived<NODE, UniqueNode>) {
             return unique_nodes_.Get<NODE>(std::forward<ARGS>(args)...);
         } else {
             return nodes_.Create<NODE>(std::forward<ARGS>(args)...);
@@ -78,7 +78,7 @@ class Manager final {
     /// @return a pointer to an instance of `T` with the provided arguments, or nullptr if the item
     ///         was not found.
     template <typename TYPE,
-              typename _ = std::enable_if<traits::IsTypeOrDerived<TYPE, Type>>,
+              typename _ = std::enable_if<utils::traits::IsTypeOrDerived<TYPE, Type>>,
               typename... ARGS>
     TYPE* Find(ARGS&&... args) const {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);

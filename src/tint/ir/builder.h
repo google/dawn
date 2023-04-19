@@ -90,7 +90,8 @@ class Builder {
     /// @param args the arguments
     /// @returns the new constant value
     template <typename T, typename... ARGS>
-    traits::EnableIf<traits::IsTypeOrDerived<T, constant::Value>, const T>* create(ARGS&&... args) {
+    utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Value>, const T>* create(
+        ARGS&&... args) {
         return ir.constants.Create<T>(std::forward<ARGS>(args)...);
     }
 

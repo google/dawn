@@ -21,10 +21,10 @@
 #include <limits>
 #include <optional>
 
-#include "src/tint/traits.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/string_stream.h"
+#include "src/tint/utils/traits.h"
 
 // Forward declaration
 namespace tint {
@@ -274,7 +274,7 @@ using f32 = Number<float>;
 /// However since C++ don't have native binary16 type, the value is stored as float.
 using f16 = Number<detail::NumberKindF16>;
 
-template <typename T, traits::EnableIf<IsFloatingPoint<T>>* = nullptr>
+template <typename T, utils::traits::EnableIf<IsFloatingPoint<T>>* = nullptr>
 inline const auto kPi = T(UnwrapNumber<T>(3.14159265358979323846));
 
 /// True iff T is an abstract number type
@@ -282,7 +282,7 @@ template <typename T>
 constexpr bool IsAbstract = std::is_same_v<T, AInt> || std::is_same_v<T, AFloat>;
 
 /// @returns the friendly name of Number type T
-template <typename T, traits::EnableIf<IsNumber<T>>* = nullptr>
+template <typename T, utils::traits::EnableIf<IsNumber<T>>* = nullptr>
 const char* FriendlyName() {
     if constexpr (std::is_same_v<T, AInt>) {
         return "abstract-int";
@@ -302,7 +302,7 @@ const char* FriendlyName() {
 }
 
 /// @returns the friendly name of T when T is bool
-template <typename T, traits::EnableIf<std::is_same_v<T, bool>>* = nullptr>
+template <typename T, utils::traits::EnableIf<std::is_same_v<T, bool>>* = nullptr>
 const char* FriendlyName() {
     return "bool";
 }
@@ -438,7 +438,8 @@ inline std::optional<AInt> CheckedAdd(AInt a, AInt b) {
 }
 
 /// @returns a + b, or an empty optional if the resulting value overflowed the float value
-template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT,
+          typename = utils::traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedAdd(FloatingPointT a, FloatingPointT b) {
     auto result = FloatingPointT{a.value + b.value};
     if (!std::isfinite(result.value)) {
@@ -470,7 +471,8 @@ inline std::optional<AInt> CheckedSub(AInt a, AInt b) {
 }
 
 /// @returns a + b, or an empty optional if the resulting value overflowed the float value
-template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT,
+          typename = utils::traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedSub(FloatingPointT a, FloatingPointT b) {
     auto result = FloatingPointT{a.value - b.value};
     if (!std::isfinite(result.value)) {
@@ -514,7 +516,8 @@ inline std::optional<AInt> CheckedMul(AInt a, AInt b) {
 }
 
 /// @returns a * b, or an empty optional if the resulting value overflowed the float value
-template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT,
+          typename = utils::traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedMul(FloatingPointT a, FloatingPointT b) {
     auto result = FloatingPointT{a.value * b.value};
     if (!std::isfinite(result.value)) {
@@ -537,7 +540,8 @@ inline std::optional<AInt> CheckedDiv(AInt a, AInt b) {
 }
 
 /// @returns a / b, or an empty optional if the resulting value overflowed the float value
-template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT,
+          typename = utils::traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedDiv(FloatingPointT a, FloatingPointT b) {
     if (b == FloatingPointT{0.0} || b == FloatingPointT{-0.0}) {
         return {};
@@ -577,7 +581,8 @@ inline std::optional<AInt> CheckedMod(AInt a, AInt b) {
 
 /// @returns the remainder of a / b, or an empty optional if the resulting value overflowed the
 /// float value
-template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT,
+          typename = utils::traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedMod(FloatingPointT a, FloatingPointT b) {
     if (b == FloatingPointT{0.0} || b == FloatingPointT{-0.0}) {
         return {};
@@ -599,7 +604,8 @@ inline std::optional<AInt> CheckedMadd(AInt a, AInt b, AInt c) {
 
 /// @returns the value of `base` raised to the power `exp`, or an empty optional if the operation
 /// cannot be performed.
-template <typename FloatingPointT, typename = traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
+template <typename FloatingPointT,
+          typename = utils::traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedPow(FloatingPointT base, FloatingPointT exp) {
     static_assert(IsNumber<FloatingPointT>);
     if ((base < 0) || (base == 0 && exp <= 0)) {

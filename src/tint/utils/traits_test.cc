@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/traits.h"
+#include "src/tint/utils/traits.h"
 
 #include "gtest/gtest.h"
 
-namespace tint::traits {
+namespace tint::utils::traits {
 
 namespace {
 
@@ -241,4 +241,4 @@ TEST(SliceTuple, MixedTupleSliceHighPart) {
     static_assert(std::is_same_v<std::tuple_element_t<1, sliced>, float>);
 }
 
-}  // namespace tint::traits
+}  // namespace tint::utils::traits

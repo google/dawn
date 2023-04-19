@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/traits.h"
+#include "src/tint/utils/traits.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::utils {
