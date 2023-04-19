@@ -27,7 +27,26 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
     }
     auto& program = std::get<bench::ProgramAndFile>(res).program;
     for (auto _ : state) {
-        auto res = Generate(&program, {});
+        tint::writer::msl::Options gen_options = {};
+        gen_options.array_length_from_uniform.ubo_binding = tint::writer::BindingPoint{0, 30};
+        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+            tint::writer::BindingPoint{0, 0}, 0);
+        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+            tint::writer::BindingPoint{0, 1}, 1);
+        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+            tint::writer::BindingPoint{0, 2}, 2);
+        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+            tint::writer::BindingPoint{0, 3}, 3);
+        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+            tint::writer::BindingPoint{0, 4}, 4);
+        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+            tint::writer::BindingPoint{0, 5}, 5);
+        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+            tint::writer::BindingPoint{0, 6}, 6);
+        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+            tint::writer::BindingPoint{0, 7}, 7);
+
+        auto res = Generate(&program, gen_options);
         if (!res.error.empty()) {
             state.SkipWithError(res.error.c_str());
         }
