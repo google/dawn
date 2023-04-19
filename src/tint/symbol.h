@@ -77,6 +77,10 @@ class Symbol {
     std::string to_str() const;
 
     /// Converts the symbol to the registered name
+    /// @returns the string_view representing the name of the symbol
+    std::string_view NameView() const;
+
+    /// Converts the symbol to the registered name
     /// @returns the string representing the name of the symbol
     std::string Name() const;
 

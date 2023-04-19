@@ -52,6 +52,10 @@ std::string Symbol::to_str() const {
     return "$" + std::to_string(val_);
 }
 
+std::string_view Symbol::NameView() const {
+    return name_;
+}
+
 std::string Symbol::Name() const {
     return std::string(name_);
 }

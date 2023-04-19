@@ -56,12 +56,12 @@ class SymbolTable {
     /// Registers a name into the symbol table, returning the Symbol.
     /// @param name the name to register
     /// @returns the symbol representing the given name
-    Symbol Register(const std::string& name);
+    Symbol Register(std::string_view name);
 
     /// Returns the symbol for the given `name`
     /// @param name the name to lookup
     /// @returns the symbol for the name or Symbol() if not found.
-    Symbol Get(const std::string& name) const;
+    Symbol Get(std::string_view name) const;
 
     /// Returns a new unique symbol with the given name, possibly suffixed with a
     /// unique number.
@@ -69,7 +69,7 @@ class SymbolTable {
     /// @returns a new, unnamed symbol with the given name. If the name is already
     /// taken then this will be suffixed with an underscore and a unique numerical
     /// value
-    Symbol New(std::string name = "");
+    Symbol New(std::string_view name = "");
 
     /// Foreach calls the callback function `F` for each symbol in the table.
     /// @param callback must be a function or function-like object with the
@@ -87,6 +87,8 @@ class SymbolTable {
   private:
     SymbolTable(const SymbolTable&) = delete;
     SymbolTable& operator=(const SymbolTable& other) = delete;
+
+    Symbol RegisterInternal(std::string_view name);
 
     // The value to be associated to the next registered symbol table entry.
     uint32_t next_symbol_ = 1;
