@@ -23,11 +23,11 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
     auto decl = p->expect_ident_with_type_specifier("test");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(decl.errored);
-    ASSERT_EQ(decl->name, "my_var");
+    ast::CheckIdentifier(decl->name, "my_var");
     ASSERT_NE(decl->type, nullptr);
     ast::CheckIdentifier(decl->type, "f32");
 
-    EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
+    EXPECT_EQ(decl->name->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
     EXPECT_EQ(decl->type->source.range, (Source::Range{{1u, 10u}, {1u, 13u}}));
 }
 
@@ -36,11 +36,11 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses_AllowInferredType) {
     auto decl = p->expect_optionally_typed_ident("test");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(decl.errored);
-    ASSERT_EQ(decl->name, "my_var");
+    ast::CheckIdentifier(decl->name, "my_var");
     ASSERT_NE(decl->type, nullptr);
     ast::CheckIdentifier(decl->type, "f32");
 
-    EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
+    EXPECT_EQ(decl->name->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
     EXPECT_EQ(decl->type->source.range, (Source::Range{{1u, 10u}, {1u, 13u}}));
 }
 
@@ -56,10 +56,10 @@ TEST_F(ParserImplTest, VariableIdentDecl_Inferred_Parses_AllowInferredType) {
     auto decl = p->expect_optionally_typed_ident("test");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(decl.errored);
-    ASSERT_EQ(decl->name, "my_var");
+    ast::CheckIdentifier(decl->name, "my_var");
     ASSERT_EQ(decl->type, nullptr);
 
-    EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
+    EXPECT_EQ(decl->name->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {

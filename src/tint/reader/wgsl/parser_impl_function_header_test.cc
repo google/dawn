@@ -25,7 +25,7 @@ TEST_F(ParserImplTest, FunctionHeader) {
     EXPECT_TRUE(f.matched);
     EXPECT_FALSE(f.errored);
 
-    EXPECT_EQ(f->name, "main");
+    ast::CheckIdentifier(f->name, "main");
     ASSERT_EQ(f->params.Length(), 2u);
     EXPECT_EQ(f->params[0]->name->symbol, p->builder().Symbols().Get("a"));
     EXPECT_EQ(f->params[1]->name->symbol, p->builder().Symbols().Get("b"));
@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, FunctionHeader_TrailingComma) {
     EXPECT_TRUE(f.matched);
     EXPECT_FALSE(f.errored);
 
-    EXPECT_EQ(f->name, "main");
+    ast::CheckIdentifier(f->name, "main");
     ASSERT_EQ(f->params.Length(), 1u);
     EXPECT_EQ(f->params[0]->name->symbol, p->builder().Symbols().Get("a"));
     EXPECT_EQ(f->return_type, nullptr);
@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType) {
     EXPECT_TRUE(f.matched);
     EXPECT_FALSE(f.errored);
 
-    EXPECT_EQ(f->name, "main");
+    ast::CheckIdentifier(f->name, "main");
     EXPECT_EQ(f->params.Length(), 0u);
     ast::CheckIdentifier(f->return_type, "f32");
     ASSERT_EQ(f->return_type_attributes.Length(), 1u);
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {
     EXPECT_TRUE(f.matched);
     EXPECT_FALSE(f.errored);
 
-    EXPECT_EQ(f->name, "main");
+    ast::CheckIdentifier(f->name, "main");
     EXPECT_EQ(f->params.Length(), 0u);
     ast::CheckIdentifier(f->return_type, "f32");
     ASSERT_EQ(f->return_type_attributes.Length(), 1u);

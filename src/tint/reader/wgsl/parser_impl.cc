@@ -182,10 +182,8 @@ ParserImpl::TypedIdentifier::TypedIdentifier() = default;
 
 ParserImpl::TypedIdentifier::TypedIdentifier(const TypedIdentifier&) = default;
 
-ParserImpl::TypedIdentifier::TypedIdentifier(ast::Type type_in,
-                                             std::string name_in,
-                                             Source source_in)
-    : type(type_in), name(std::move(name_in)), source(std::move(source_in)) {}
+ParserImpl::TypedIdentifier::TypedIdentifier(ast::Type type_in, const ast::Identifier* name_in)
+    : type(type_in), name(name_in) {}
 
 ParserImpl::TypedIdentifier::~TypedIdentifier() = default;
 
@@ -194,7 +192,7 @@ ParserImpl::FunctionHeader::FunctionHeader() = default;
 ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
-                                           std::string n,
+                                           const ast::Identifier* n,
                                            utils::VectorRef<const ast::Parameter*> p,
                                            ast::Type ret_ty,
                                            utils::VectorRef<const ast::Attribute*> ret_attrs)
@@ -725,19 +723,18 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(AttributeList& attr
     }
 
     TINT_DEFER(attrs.Clear());
-
     if (is_overridable) {
-        return builder_.Override(decl->source,       // source
-                                 decl->name,         // symbol
-                                 decl->type,         // type
-                                 initializer,        // initializer
-                                 std::move(attrs));  // attributes
+        return builder_.Override(decl->name->source,  // source
+                                 decl->name,          // symbol
+                                 decl->type,          // type
+                                 initializer,         // initializer
+                                 std::move(attrs));   // attributes
     }
-    return builder_.GlobalConst(decl->source,       // source
-                                decl->name,         // symbol
-                                decl->type,         // type
-                                initializer,        // initializer
-                                std::move(attrs));  // attributes
+    return builder_.GlobalConst(decl->name->source,  // source
+                                decl->name,          // symbol
+                                decl->type,          // type
+                                initializer,         // initializer
+                                std::move(attrs));   // attributes
 }
 
 // variable_decl
@@ -765,7 +762,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
         return Failure::kErrored;
     }
 
-    return VarDeclInfo{decl->source, decl->name, vq.address_space, vq.access, decl->type};
+    return VarDeclInfo{decl->name->source, decl->name, vq.address_space, vq.access, decl->type};
 }
 
 Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_specifier(
@@ -777,7 +774,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_
     }
 
     if (allow_inferred && !peek_is(Token::Type::kColon)) {
-        return TypedIdentifier{ast::Type{}, ident.value, ident.source};
+        return TypedIdentifier{ast::Type{}, ident.value};
     }
 
     if (!expect(use, Token::Type::kColon)) {
@@ -793,7 +790,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_
         return add_error(t.source(), "invalid type", use);
     }
 
-    return TypedIdentifier{type.value, ident.value, ident.source};
+    return TypedIdentifier{type.value, ident.value};
 }
 
 // optionally_typed_ident
@@ -1009,7 +1006,7 @@ Expect<const ast::StructMember*> ParserImpl::expect_struct_member() {
         return Failure::kErrored;
     }
 
-    return builder_.Member(decl->source, decl->name, decl->type, std::move(attrs.value));
+    return builder_.Member(decl->name->source, decl->name, decl->type, std::move(attrs.value));
 }
 
 // const_assert_statement
@@ -1126,8 +1123,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     }
 
     return FunctionHeader{
-        source,      std::move(name.value),        std::move(params.value),
-        return_type, std::move(return_attributes),
+        source, name.value, std::move(params.value), return_type, std::move(return_attributes),
     };
 }
 
@@ -1167,7 +1163,7 @@ Expect<const ast::Parameter*> ParserImpl::expect_param() {
         return Failure::kErrored;
     }
 
-    return builder_.Param(decl->source,             // source
+    return builder_.Param(decl->name->source,       // source
                           decl->name,               // symbol
                           decl->type,               // type
                           std::move(attrs.value));  // attributes
@@ -1449,10 +1445,10 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
             return add_error(peek(), "missing initializer for 'const' declaration");
         }
 
-        auto* const_ = builder_.Const(typed_ident->source,  // source
-                                      typed_ident->name,    // symbol
-                                      typed_ident->type,    // type
-                                      initializer.value);   // initializer
+        auto* const_ = builder_.Const(typed_ident->name->source,  // source
+                                      typed_ident->name,          // symbol
+                                      typed_ident->type,          // type
+                                      initializer.value);         // initializer
 
         return create<ast::VariableDeclStatement>(decl_source, const_);
     }
@@ -1477,10 +1473,10 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
             return add_error(peek(), "missing initializer for 'let' declaration");
         }
 
-        auto* let = builder_.Let(typed_ident->source,  // source
-                                 typed_ident->name,    // symbol
-                                 typed_ident->type,    // type
-                                 initializer.value);   // initializer
+        auto* let = builder_.Let(typed_ident->name->source,  // source
+                                 typed_ident->name,          // symbol
+                                 typed_ident->type,          // type
+                                 initializer.value);         // initializer
 
         return create<ast::VariableDeclStatement>(decl_source, let);
     }
@@ -2152,8 +2148,7 @@ Maybe<const ast::Expression*> ParserImpl::component_or_swizzle_specifier(
                 return Failure::kErrored;
             }
 
-            prefix = builder_.MemberAccessor(ident.source, prefix,
-                                             builder_.Ident(ident.source, ident.value));
+            prefix = builder_.MemberAccessor(ident.source, prefix, ident.value);
             continue;
         }
 
@@ -3115,8 +3110,7 @@ Expect<ast::DiagnosticControl> ParserImpl::expect_diagnostic_control() {
         }
         match(Token::Type::kComma);
 
-        return ast::DiagnosticControl(severity_control.value,
-                                      builder_.Ident(rule_name.source, rule_name.value));
+        return ast::DiagnosticControl(severity_control.value, rule_name.value);
     });
 }
 
@@ -3220,7 +3214,7 @@ Expect<uint32_t> ParserImpl::expect_nonzero_positive_sint(std::string_view use) 
     return {static_cast<uint32_t>(sint.value), sint.source};
 }
 
-Expect<std::string> ParserImpl::expect_ident(std::string_view use) {
+Expect<const ast::Identifier*> ParserImpl::expect_ident(std::string_view use) {
     auto& t = peek();
     if (t.IsIdentifier()) {
         synchronized_ = true;
@@ -3230,7 +3224,7 @@ Expect<std::string> ParserImpl::expect_ident(std::string_view use) {
             return add_error(t.source(), "'" + t.to_str() + "' is a reserved keyword");
         }
 
-        return {t.to_str(), t.source()};
+        return builder_.Ident(t.source(), t.to_str());
     }
     if (handle_error(t)) {
         return Failure::kErrored;

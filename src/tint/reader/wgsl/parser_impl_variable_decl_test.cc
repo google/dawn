@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
     EXPECT_FALSE(p->has_error());
     EXPECT_TRUE(v.matched);
     EXPECT_FALSE(v.errored);
-    EXPECT_EQ(v->name, "my_var");
+    ast::CheckIdentifier(v->name, "my_var");
     EXPECT_NE(v->type, nullptr);
 
     ast::CheckIdentifier(v->type, "f32");
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, VariableDecl_Unicode_Parses) {
     EXPECT_FALSE(p->has_error());
     EXPECT_TRUE(v.matched);
     EXPECT_FALSE(v.errored);
-    EXPECT_EQ(v->name, ident);
+    ast::CheckIdentifier(v->name, ident);
     EXPECT_NE(v->type, nullptr);
 
     ast::CheckIdentifier(v->type, "f32");
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, VariableDecl_Inferred_Parses) {
     EXPECT_FALSE(p->has_error());
     EXPECT_TRUE(v.matched);
     EXPECT_FALSE(v.errored);
-    EXPECT_EQ(v->name, "my_var");
+    ast::CheckIdentifier(v->name, "my_var");
     EXPECT_EQ(v->type, nullptr);
 
     EXPECT_EQ(v->source.range, (Source::Range{{1u, 5u}, {1u, 11u}}));
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, VariableDecl_WithAddressSpace) {
     EXPECT_TRUE(v.matched);
     EXPECT_FALSE(v.errored);
     EXPECT_FALSE(p->has_error());
-    EXPECT_EQ(v->name, "my_var");
+    ast::CheckIdentifier(v->name, "my_var");
 
     ast::CheckIdentifier(v->type, "f32");
     ast::CheckIdentifier(v->address_space, "private");
@@ -98,7 +98,7 @@ TEST_F(ParserImplTest, VariableDecl_WithPushConstant) {
     EXPECT_TRUE(v.matched);
     EXPECT_FALSE(v.errored);
     EXPECT_FALSE(p->has_error());
-    EXPECT_EQ(v->name, "my_var");
+    ast::CheckIdentifier(v->name, "my_var");
 
     ast::CheckIdentifier(v->type, "f32");
     ast::CheckIdentifier(v->address_space, "push_constant");

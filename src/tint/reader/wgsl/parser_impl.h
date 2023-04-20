@@ -211,17 +211,14 @@ class ParserImpl {
         /// Constructor
         /// @param type_in parsed type
         /// @param name_in parsed identifier
-        /// @param source_in source to the identifier
-        TypedIdentifier(ast::Type type_in, std::string name_in, Source source_in);
+        TypedIdentifier(ast::Type type_in, const ast::Identifier* name_in);
         /// Destructor
         ~TypedIdentifier();
 
         /// Parsed type. type.expr be nullptr for inferred types.
         ast::Type type;
         /// Parsed identifier.
-        std::string name;
-        /// Source to the identifier.
-        Source source;
+        const ast::Identifier* name = nullptr;
     };
 
     /// FunctionHeader contains the parsed information for a function header.
@@ -238,7 +235,7 @@ class ParserImpl {
         /// @param ret_ty function return type
         /// @param ret_attrs return type attributes
         FunctionHeader(Source src,
-                       std::string n,
+                       const ast::Identifier* n,
                        utils::VectorRef<const ast::Parameter*> p,
                        ast::Type ret_ty,
                        utils::VectorRef<const ast::Attribute*> ret_attrs);
@@ -252,7 +249,7 @@ class ParserImpl {
         /// Parsed header source
         Source source;
         /// Function name
-        std::string name;
+        const ast::Identifier* name;
         /// Function parameters
         utils::Vector<const ast::Parameter*, 8> params;
         /// Function return type
@@ -266,7 +263,7 @@ class ParserImpl {
         /// Variable declaration source
         Source source;
         /// Variable name
-        std::string name;
+        const ast::Identifier* name = nullptr;
         /// Variable address space
         const ast::Expression* address_space = nullptr;
         /// Variable access control
@@ -698,7 +695,7 @@ class ParserImpl {
     /// Consumes the next token on match.
     /// @param use a description of what was being parsed if an error was raised
     /// @returns the parsed identifier.
-    Expect<std::string> expect_ident(std::string_view use);
+    Expect<const ast::Identifier*> expect_ident(std::string_view use);
     /// Parses a lexical block starting with the token `start` and ending with
     /// the token `end`. `body` is called to parse the lexical block body
     /// between the `start` and `end` tokens. If the `start` or `end` tokens
