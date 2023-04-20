@@ -625,7 +625,13 @@ if (DAWN_ENABLE_VULKAN)
     target_link_libraries(dawn_native PUBLIC Vulkan-Headers)
     target_include_directories(dawn_native PRIVATE ${DAWN_VULKAN_TOOLS_DIR})
 
-    if (UNIX AND NOT APPLE)
+    if (ANDROID)
+        target_sources(dawn_native PRIVATE
+            "vulkan/external_memory/MemoryServiceAHardwareBuffer.cpp"
+            "vulkan/external_semaphore/ServiceImplementationFD.cpp"
+            "vulkan/external_semaphore/ServiceImplementationFD.h"
+        )
+    elseif (UNIX AND NOT APPLE)
         target_sources(dawn_native PRIVATE
             "vulkan/external_memory/MemoryServiceImplementationDmaBuf.cpp"
             "vulkan/external_memory/MemoryServiceImplementationDmaBuf.h"
