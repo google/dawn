@@ -55,7 +55,7 @@ declare_args() {
   dawn_complete_static_libs = false
 
   # Enables the compilation of Dawn's D3D11 backend
-  dawn_enable_d3d11 = is_win && !build_with_chromium
+  dawn_enable_d3d11 = false
 
   # Enables the compilation of Dawn's D3D12 backend
   dawn_enable_d3d12 = is_win
