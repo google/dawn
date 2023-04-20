@@ -27,6 +27,7 @@ namespace dawn::native::d3d11 {
 
 class CommandRecordingContext;
 class ComputePipeline;
+class RenderPipeline;
 
 class CommandBuffer final : public CommandBufferBase {
   public:
@@ -38,8 +39,14 @@ class CommandBuffer final : public CommandBufferBase {
     using CommandBufferBase::CommandBufferBase;
 
     MaybeError ExecuteComputePass(CommandRecordingContext* commandContext);
+    MaybeError ExecuteRenderPass(BeginRenderPassCmd* renderPass,
+                                 CommandRecordingContext* commandContext);
     void HandleDebugCommands(CommandRecordingContext* commandContext, Command command);
 
+    MaybeError RecordFirstIndexOffset(RenderPipeline* renderPipeline,
+                                      CommandRecordingContext* commandContext,
+                                      uint32_t firstVertex,
+                                      uint32_t firstInstance);
     MaybeError RecordNumWorkgroupsForDispatch(ComputePipeline* computePipeline,
                                               CommandRecordingContext* commandContext,
                                               DispatchCmd* dispatchCmd);
