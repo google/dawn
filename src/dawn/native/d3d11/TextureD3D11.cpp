@@ -85,9 +85,9 @@ MaybeError Texture::InitializeAsInternalTexture() {
             textureDescriptor.CPUAccessFlags = 0;
             textureDescriptor.MiscFlags = 0;
             ComPtr<ID3D11Texture1D> d3d11Texture1D;
-            DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateTexture1D(
-                                      &textureDescriptor, nullptr, &d3d11Texture1D),
-                                  "D3D11 create texture1d"));
+            DAWN_TRY(CheckOutOfMemoryHRESULT(device->GetD3D11Device()->CreateTexture1D(
+                                                 &textureDescriptor, nullptr, &d3d11Texture1D),
+                                             "D3D11 create texture1d"));
             mD3d11Resource = std::move(d3d11Texture1D);
             break;
         }
@@ -109,9 +109,9 @@ MaybeError Texture::InitializeAsInternalTexture() {
                 textureDescriptor.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
             }
             ComPtr<ID3D11Texture2D> d3d11Texture2D;
-            DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateTexture2D(
-                                      &textureDescriptor, nullptr, &d3d11Texture2D),
-                                  "D3D11 create texture2d"));
+            DAWN_TRY(CheckOutOfMemoryHRESULT(device->GetD3D11Device()->CreateTexture2D(
+                                                 &textureDescriptor, nullptr, &d3d11Texture2D),
+                                             "D3D11 create texture2d"));
             mD3d11Resource = std::move(d3d11Texture2D);
             break;
         }
@@ -127,9 +127,9 @@ MaybeError Texture::InitializeAsInternalTexture() {
             textureDescriptor.CPUAccessFlags = 0;
             textureDescriptor.MiscFlags = 0;
             ComPtr<ID3D11Texture3D> d3d11Texture3D;
-            DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateTexture3D(
-                                      &textureDescriptor, nullptr, &d3d11Texture3D),
-                                  "D3D11 create texture3d"));
+            DAWN_TRY(CheckOutOfMemoryHRESULT(device->GetD3D11Device()->CreateTexture3D(
+                                                 &textureDescriptor, nullptr, &d3d11Texture3D),
+                                             "D3D11 create texture3d"));
             mD3d11Resource = std::move(d3d11Texture3D);
             break;
         }

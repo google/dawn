@@ -162,7 +162,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     uint64_t size = std::max(GetSize(), uint64_t(4u));
     size_t alignment = D3D11BufferSizeAlignment(GetUsage());
-    if (size > std::numeric_limits<uint64_t>::max() - alignment) {
+    // Check for overflow, bufferDescriptor.ByteWidth is a UINT.
+    if (size > std::numeric_limits<UINT>::max() - alignment) {
         // Alignment would overlow.
         return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
     }
@@ -177,10 +178,10 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     bufferDescriptor.MiscFlags = D3D11BufferMiscFlags(GetUsage());
     bufferDescriptor.StructureByteStride = 0;
 
-    DAWN_TRY(CheckHRESULT(ToBackend(GetDevice())
-                              ->GetD3D11Device()
-                              ->CreateBuffer(&bufferDescriptor, nullptr, &mD3d11Buffer),
-                          "ID3D11Device::CreateBuffer"));
+    DAWN_TRY(CheckOutOfMemoryHRESULT(ToBackend(GetDevice())
+                                         ->GetD3D11Device()
+                                         ->CreateBuffer(&bufferDescriptor, nullptr, &mD3d11Buffer),
+                                     "ID3D11Device::CreateBuffer"));
 
     SetLabelImpl();
     return {};
