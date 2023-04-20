@@ -1107,7 +1107,7 @@ BindGroupBase* DeviceBase::APICreateBindGroup(const BindGroupDescriptor* descrip
     Ref<BindGroupBase> result;
     if (ConsumedError(CreateBindGroup(descriptor), &result, "calling %s.CreateBindGroup(%s).", this,
                       descriptor)) {
-        return BindGroupBase::MakeError(this);
+        return BindGroupBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -1116,7 +1116,7 @@ BindGroupLayoutBase* DeviceBase::APICreateBindGroupLayout(
     Ref<BindGroupLayoutBase> result;
     if (ConsumedError(CreateBindGroupLayout(descriptor), &result,
                       "calling %s.CreateBindGroupLayout(%s).", this, descriptor)) {
-        return BindGroupLayoutBase::MakeError(this);
+        return BindGroupLayoutBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -1133,7 +1133,7 @@ CommandEncoder* DeviceBase::APICreateCommandEncoder(const CommandEncoderDescript
     Ref<CommandEncoder> result;
     if (ConsumedError(CreateCommandEncoder(descriptor), &result,
                       "calling %s.CreateCommandEncoder(%s).", this, descriptor)) {
-        return CommandEncoder::MakeError(this);
+        return CommandEncoder::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -1145,7 +1145,7 @@ ComputePipelineBase* DeviceBase::APICreateComputePipeline(
     Ref<ComputePipelineBase> result;
     if (ConsumedError(CreateComputePipeline(descriptor), &result,
                       "calling %s.CreateComputePipeline(%s).", this, descriptor)) {
-        return ComputePipelineBase::MakeError(this);
+        return ComputePipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -1176,7 +1176,7 @@ PipelineLayoutBase* DeviceBase::APICreatePipelineLayout(
     Ref<PipelineLayoutBase> result;
     if (ConsumedError(CreatePipelineLayout(descriptor), &result,
                       "calling %s.CreatePipelineLayout(%s).", this, descriptor)) {
-        return PipelineLayoutBase::MakeError(this);
+        return PipelineLayoutBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -1192,7 +1192,7 @@ SamplerBase* DeviceBase::APICreateSampler(const SamplerDescriptor* descriptor) {
     Ref<SamplerBase> result;
     if (ConsumedError(CreateSampler(descriptor), &result, "calling %s.CreateSampler(%s).", this,
                       descriptor)) {
-        return SamplerBase::MakeError(this);
+        return SamplerBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -1223,7 +1223,7 @@ RenderBundleEncoder* DeviceBase::APICreateRenderBundleEncoder(
     Ref<RenderBundleEncoder> result;
     if (ConsumedError(CreateRenderBundleEncoder(descriptor), &result,
                       "calling %s.CreateRenderBundleEncoder(%s).", this, descriptor)) {
-        return RenderBundleEncoder::MakeError(this);
+        return RenderBundleEncoder::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -1235,7 +1235,7 @@ RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
     Ref<RenderPipelineBase> result;
     if (ConsumedError(CreateRenderPipeline(descriptor), &result,
                       "calling %s.CreateRenderPipeline(%s).", this, descriptor)) {
-        return RenderPipelineBase::MakeError(this);
+        return RenderPipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -1249,7 +1249,7 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     if (ConsumedError(CreateShaderModule(descriptor, compilationMessages.get()), &result,
                       "calling %s.CreateShaderModule(%s).", this, descriptor)) {
         DAWN_ASSERT(result == nullptr);
-        result = ShaderModuleBase::MakeError(this);
+        result = ShaderModuleBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
     // Move compilation messages into ShaderModuleBase and emit tint errors and warnings
     // after all other operations are finished, even if any of them is failed and result

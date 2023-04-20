@@ -159,7 +159,8 @@ struct SubmittedWorkDone : TrackTaskCallback {
 
 class ErrorQueue : public QueueBase {
   public:
-    explicit ErrorQueue(DeviceBase* device) : QueueBase(device, ObjectBase::kError) {}
+    explicit ErrorQueue(DeviceBase* device, const char* label)
+        : QueueBase(device, ObjectBase::kError, label) {}
 
   private:
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override {
@@ -177,7 +178,8 @@ void TrackTaskCallback::SetFinishedSerial(ExecutionSerial serial) {
 QueueBase::QueueBase(DeviceBase* device, const QueueDescriptor* descriptor)
     : ApiObjectBase(device, descriptor->label) {}
 
-QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag) : ApiObjectBase(device, tag) {}
+QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+    : ApiObjectBase(device, tag, label) {}
 
 QueueBase::~QueueBase() {
     ASSERT(mTasksInFlight.Empty());
@@ -186,8 +188,8 @@ QueueBase::~QueueBase() {
 void QueueBase::DestroyImpl() {}
 
 // static
-QueueBase* QueueBase::MakeError(DeviceBase* device) {
-    return new ErrorQueue(device);
+QueueBase* QueueBase::MakeError(DeviceBase* device, const char* label) {
+    return new ErrorQueue(device, label);
 }
 
 ObjectType QueueBase::GetType() const {

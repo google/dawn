@@ -114,7 +114,9 @@ QuerySetBase::QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descrip
 QuerySetBase::QuerySetBase(DeviceBase* device,
                            const QuerySetDescriptor* descriptor,
                            ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag), mQueryType(descriptor->type), mQueryCount(descriptor->count) {}
+    : ApiObjectBase(device, tag, descriptor->label),
+      mQueryType(descriptor->type),
+      mQueryCount(descriptor->count) {}
 
 QuerySetBase::~QuerySetBase() {
     // Uninitialized or already destroyed

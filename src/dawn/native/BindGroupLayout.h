@@ -61,7 +61,7 @@ class BindGroupLayoutBase : public ApiObjectBase, public CachedObject {
                         PipelineCompatibilityToken pipelineCompatibilityToken);
     ~BindGroupLayoutBase() override;
 
-    static BindGroupLayoutBase* MakeError(DeviceBase* device);
+    static BindGroupLayoutBase* MakeError(DeviceBase* device, const char* label = nullptr);
 
     ObjectType GetType() const override;
 
@@ -147,7 +147,7 @@ class BindGroupLayoutBase : public ApiObjectBase, public CachedObject {
     }
 
   private:
-    BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
 
     BindingCounts mBindingCounts = {};
     ityp::vector<BindingIndex, BindingInfo> mBindingInfo;

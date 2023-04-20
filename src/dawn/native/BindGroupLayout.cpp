@@ -491,8 +491,10 @@ BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
     GetObjectTrackingList()->Track(this);
 }
 
-BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag) {}
+BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
+                                         ObjectBase::ErrorTag tag,
+                                         const char* label)
+    : ApiObjectBase(device, tag, label) {}
 
 BindGroupLayoutBase::~BindGroupLayoutBase() = default;
 
@@ -504,8 +506,8 @@ void BindGroupLayoutBase::DestroyImpl() {
 }
 
 // static
-BindGroupLayoutBase* BindGroupLayoutBase::MakeError(DeviceBase* device) {
-    return new BindGroupLayoutBase(device, ObjectBase::kError);
+BindGroupLayoutBase* BindGroupLayoutBase::MakeError(DeviceBase* device, const char* label) {
+    return new BindGroupLayoutBase(device, ObjectBase::kError, label);
 }
 
 ObjectType BindGroupLayoutBase::GetType() const {

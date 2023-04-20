@@ -36,7 +36,7 @@ class SamplerBase : public ApiObjectBase, public CachedObject {
     SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor);
     ~SamplerBase() override;
 
-    static SamplerBase* MakeError(DeviceBase* device);
+    static SamplerBase* MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 
@@ -56,7 +56,7 @@ class SamplerBase : public ApiObjectBase, public CachedObject {
     void DestroyImpl() override;
 
   private:
-    SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
 
     // TODO(cwallez@chromium.org): Store a crypto hash of the items instead?
     wgpu::AddressMode mAddressModeU;

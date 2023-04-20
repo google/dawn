@@ -177,7 +177,7 @@ BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
 BufferBase::BufferBase(DeviceBase* device,
                        const BufferDescriptor* descriptor,
                        ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag),
+    : ApiObjectBase(device, tag, descriptor->label),
       mSize(descriptor->size),
       mUsage(descriptor->usage),
       mState(BufferState::Unmapped) {

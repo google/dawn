@@ -36,7 +36,8 @@ class ComputePassEncoder final : public ProgrammableEncoder {
                                           EncodingContext* encodingContext);
     static Ref<ComputePassEncoder> MakeError(DeviceBase* device,
                                              CommandEncoder* commandEncoder,
-                                             EncodingContext* encodingContext);
+                                             EncodingContext* encodingContext,
+                                             const char* label);
 
     ObjectType GetType() const override;
 
@@ -75,7 +76,8 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     ComputePassEncoder(DeviceBase* device,
                        CommandEncoder* commandEncoder,
                        EncodingContext* encodingContext,
-                       ErrorTag errorTag);
+                       ErrorTag errorTag,
+                       const char* label);
 
   private:
     void DestroyImpl() override;

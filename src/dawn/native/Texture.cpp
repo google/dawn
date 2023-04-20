@@ -584,7 +584,7 @@ static constexpr Format kUnusedFormat;
 TextureBase::TextureBase(DeviceBase* device,
                          const TextureDescriptor* descriptor,
                          ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag),
+    : ApiObjectBase(device, tag, descriptor->label),
       mDimension(descriptor->dimension),
       mFormat(kUnusedFormat),
       mSize(descriptor->size),
@@ -796,7 +796,7 @@ TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descrip
     Ref<TextureViewBase> result;
     if (device->ConsumedError(CreateView(descriptor), &result, "calling %s.CreateView(%s).", this,
                               descriptor)) {
-        return TextureViewBase::MakeError(device);
+        return TextureViewBase::MakeError(device, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
 }
@@ -849,16 +849,16 @@ TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescript
     GetObjectTrackingList()->Track(this);
 }
 
-TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag), mFormat(kUnusedFormat) {}
+TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+    : ApiObjectBase(device, tag, label), mFormat(kUnusedFormat) {}
 
 TextureViewBase::~TextureViewBase() = default;
 
 void TextureViewBase::DestroyImpl() {}
 
 // static
-TextureViewBase* TextureViewBase::MakeError(DeviceBase* device) {
-    return new TextureViewBase(device, ObjectBase::kError);
+TextureViewBase* TextureViewBase::MakeError(DeviceBase* device, const char* label) {
+    return new TextureViewBase(device, ObjectBase::kError, label);
 }
 
 ObjectType TextureViewBase::GetType() const {

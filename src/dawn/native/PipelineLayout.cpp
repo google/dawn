@@ -74,8 +74,10 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     GetObjectTrackingList()->Track(this);
 }
 
-PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag) {}
+PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
+                                       ObjectBase::ErrorTag tag,
+                                       const char* label)
+    : ApiObjectBase(device, tag, label) {}
 
 PipelineLayoutBase::~PipelineLayoutBase() = default;
 
@@ -87,8 +89,8 @@ void PipelineLayoutBase::DestroyImpl() {
 }
 
 // static
-PipelineLayoutBase* PipelineLayoutBase::MakeError(DeviceBase* device) {
-    return new PipelineLayoutBase(device, ObjectBase::kError);
+PipelineLayoutBase* PipelineLayoutBase::MakeError(DeviceBase* device, const char* label) {
+    return new PipelineLayoutBase(device, ObjectBase::kError, label);
 }
 
 // static

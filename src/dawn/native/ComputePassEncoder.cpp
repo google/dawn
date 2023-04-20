@@ -128,15 +128,18 @@ Ref<ComputePassEncoder> ComputePassEncoder::Create(DeviceBase* device,
 ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        CommandEncoder* commandEncoder,
                                        EncodingContext* encodingContext,
-                                       ErrorTag errorTag)
-    : ProgrammableEncoder(device, encodingContext, errorTag), mCommandEncoder(commandEncoder) {}
+                                       ErrorTag errorTag,
+                                       const char* label)
+    : ProgrammableEncoder(device, encodingContext, errorTag, label),
+      mCommandEncoder(commandEncoder) {}
 
 // static
 Ref<ComputePassEncoder> ComputePassEncoder::MakeError(DeviceBase* device,
                                                       CommandEncoder* commandEncoder,
-                                                      EncodingContext* encodingContext) {
+                                                      EncodingContext* encodingContext,
+                                                      const char* label) {
     return AcquireRef(
-        new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError));
+        new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError, label));
 }
 
 void ComputePassEncoder::DestroyImpl() {

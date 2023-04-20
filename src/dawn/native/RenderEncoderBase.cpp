@@ -47,8 +47,9 @@ RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
 
 RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                      EncodingContext* encodingContext,
-                                     ErrorTag errorTag)
-    : ProgrammableEncoder(device, encodingContext, errorTag),
+                                     ErrorTag errorTag,
+                                     const char* label)
+    : ProgrammableEncoder(device, encodingContext, errorTag, label),
       mIndirectDrawMetadata(device->GetLimits()),
       mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
       mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {}

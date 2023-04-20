@@ -43,7 +43,7 @@ class RenderBundleBase final : public ApiObjectBase {
                      RenderPassResourceUsage resourceUsage,
                      IndirectDrawMetadata indirectDrawMetadata);
 
-    static RenderBundleBase* MakeError(DeviceBase* device);
+    static RenderBundleBase* MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 
@@ -57,7 +57,7 @@ class RenderBundleBase final : public ApiObjectBase {
     const IndirectDrawMetadata& GetIndirectDrawMetadata();
 
   private:
-    RenderBundleBase(DeviceBase* device, ErrorTag errorTag);
+    RenderBundleBase(DeviceBase* device, ErrorTag errorTag, const char* label);
 
     void DestroyImpl() override;
 

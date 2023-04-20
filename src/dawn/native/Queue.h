@@ -49,7 +49,7 @@ class QueueBase : public ApiObjectBase {
   public:
     ~QueueBase() override;
 
-    static QueueBase* MakeError(DeviceBase* device);
+    static QueueBase* MakeError(DeviceBase* device, const char* label);
 
     ObjectType GetType() const override;
 
@@ -84,7 +84,7 @@ class QueueBase : public ApiObjectBase {
 
   protected:
     QueueBase(DeviceBase* device, const QueueDescriptor* descriptor);
-    QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
     void DestroyImpl() override;
 
   private:

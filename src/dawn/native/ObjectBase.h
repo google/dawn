@@ -79,7 +79,7 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
 
     ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag);
     ApiObjectBase(DeviceBase* device, const char* label);
-    ApiObjectBase(DeviceBase* device, ErrorTag tag);
+    ApiObjectBase(DeviceBase* device, ErrorTag tag, const char* label = nullptr);
     ~ApiObjectBase() override;
 
     virtual ObjectType GetType() const = 0;

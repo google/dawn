@@ -475,12 +475,12 @@ void BindGroupBase::DeleteThis() {
     ApiObjectBase::DeleteThis();
 }
 
-BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag), mBindingData() {}
+BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+    : ApiObjectBase(device, tag, label), mBindingData() {}
 
 // static
-BindGroupBase* BindGroupBase::MakeError(DeviceBase* device) {
-    return new BindGroupBase(device, ObjectBase::kError);
+BindGroupBase* BindGroupBase::MakeError(DeviceBase* device, const char* label) {
+    return new BindGroupBase(device, ObjectBase::kError, label);
 }
 
 ObjectType BindGroupBase::GetType() const {

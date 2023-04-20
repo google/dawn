@@ -102,15 +102,18 @@ Ref<RenderPassEncoder> RenderPassEncoder::Create(DeviceBase* device,
 RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
                                      CommandEncoder* commandEncoder,
                                      EncodingContext* encodingContext,
-                                     ErrorTag errorTag)
-    : RenderEncoderBase(device, encodingContext, errorTag), mCommandEncoder(commandEncoder) {}
+                                     ErrorTag errorTag,
+                                     const char* label)
+    : RenderEncoderBase(device, encodingContext, errorTag, label),
+      mCommandEncoder(commandEncoder) {}
 
 // static
 Ref<RenderPassEncoder> RenderPassEncoder::MakeError(DeviceBase* device,
                                                     CommandEncoder* commandEncoder,
-                                                    EncodingContext* encodingContext) {
+                                                    EncodingContext* encodingContext,
+                                                    const char* label) {
     return AcquireRef(
-        new RenderPassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError));
+        new RenderPassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError, label));
 }
 
 void RenderPassEncoder::DestroyImpl() {

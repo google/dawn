@@ -730,8 +730,10 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     StreamIn(&mCacheKey, CacheKey::Type::RenderPipeline, device->GetCacheKey());
 }
 
-RenderPipelineBase::RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : PipelineBase(device, tag) {}
+RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
+                                       ObjectBase::ErrorTag tag,
+                                       const char* label)
+    : PipelineBase(device, tag, label) {}
 
 RenderPipelineBase::~RenderPipelineBase() = default;
 
@@ -747,11 +749,11 @@ void RenderPipelineBase::DestroyImpl() {
 }
 
 // static
-RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device) {
+RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device, const char* label) {
     class ErrorRenderPipeline final : public RenderPipelineBase {
       public:
-        explicit ErrorRenderPipeline(DeviceBase* device)
-            : RenderPipelineBase(device, ObjectBase::kError) {}
+        explicit ErrorRenderPipeline(DeviceBase* device, const char* label)
+            : RenderPipelineBase(device, ObjectBase::kError, label) {}
 
         MaybeError Initialize() override {
             UNREACHABLE();
@@ -759,7 +761,7 @@ RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device) {
         }
     };
 
-    return new ErrorRenderPipeline(device);
+    return new ErrorRenderPipeline(device, label);
 }
 
 ObjectType RenderPipelineBase::GetType() const {

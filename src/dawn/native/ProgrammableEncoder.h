@@ -53,7 +53,10 @@ class ProgrammableEncoder : public ApiObjectBase {
                             const uint32_t* dynamicOffsets) const;
 
     // Construct an "error" programmable pass encoder.
-    ProgrammableEncoder(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
+    ProgrammableEncoder(DeviceBase* device,
+                        EncodingContext* encodingContext,
+                        ErrorTag errorTag,
+                        const char* label);
 
     EncodingContext* mEncodingContext = nullptr;
 

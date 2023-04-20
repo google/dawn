@@ -140,7 +140,7 @@ class TextureViewBase : public ApiObjectBase {
     TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor);
     ~TextureViewBase() override;
 
-    static TextureViewBase* MakeError(DeviceBase* device);
+    static TextureViewBase* MakeError(DeviceBase* device, const char* label = nullptr);
 
     ObjectType GetType() const override;
 
@@ -160,7 +160,7 @@ class TextureViewBase : public ApiObjectBase {
     void DestroyImpl() override;
 
   private:
-    TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
 
     ApiObjectList* GetObjectTrackingList() override;
 

@@ -89,8 +89,8 @@ SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor
     GetObjectTrackingList()->Track(this);
 }
 
-SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag) {}
+SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+    : ApiObjectBase(device, tag, label) {}
 
 SamplerBase::~SamplerBase() = default;
 
@@ -102,8 +102,8 @@ void SamplerBase::DestroyImpl() {
 }
 
 // static
-SamplerBase* SamplerBase::MakeError(DeviceBase* device) {
-    return new SamplerBase(device, ObjectBase::kError);
+SamplerBase* SamplerBase::MakeError(DeviceBase* device, const char* label) {
+    return new SamplerBase(device, ObjectBase::kError, label);
 }
 
 ObjectType SamplerBase::GetType() const {

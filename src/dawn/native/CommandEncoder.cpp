@@ -710,8 +710,8 @@ Ref<CommandEncoder> CommandEncoder::Create(DeviceBase* device,
 }
 
 // static
-CommandEncoder* CommandEncoder::MakeError(DeviceBase* device) {
-    return new CommandEncoder(device, ObjectBase::kError);
+CommandEncoder* CommandEncoder::MakeError(DeviceBase* device, const char* label) {
+    return new CommandEncoder(device, ObjectBase::kError, label);
 }
 
 CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor)
@@ -728,8 +728,8 @@ CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescripto
     }
 }
 
-CommandEncoder::CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag),
+CommandEncoder::CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+    : ApiObjectBase(device, tag, label),
       mEncodingContext(device, this),
       mUsageValidationMode(UsageValidationMode::Default) {
     mEncodingContext.HandleError(DAWN_VALIDATION_ERROR("%s is invalid.", this));
@@ -830,7 +830,8 @@ Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescri
         return passEncoder;
     }
 
-    return ComputePassEncoder::MakeError(device, this, &mEncodingContext);
+    return ComputePassEncoder::MakeError(device, this, &mEncodingContext,
+                                         descriptor ? descriptor->label : nullptr);
 }
 
 RenderPassEncoder* CommandEncoder::APIBeginRenderPass(const RenderPassDescriptor* descriptor) {
@@ -1011,14 +1012,16 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             MaybeError error =
                 ApplyClearBigIntegerColorValueWithDraw(passEncoder.Get(), descriptor);
             if (error.IsError()) {
-                return RenderPassEncoder::MakeError(device, this, &mEncodingContext);
+                return RenderPassEncoder::MakeError(device, this, &mEncodingContext,
+                                                    descriptor ? descriptor->label : nullptr);
             }
         }
 
         return passEncoder;
     }
 
-    return RenderPassEncoder::MakeError(device, this, &mEncodingContext);
+    return RenderPassEncoder::MakeError(device, this, &mEncodingContext,
+                                        descriptor ? descriptor->label : nullptr);
 }
 
 // This function handles render pass workarounds. Because some cases may require
@@ -1627,7 +1630,7 @@ CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* desc
 
     Ref<CommandBufferBase> commandBuffer;
     if (GetDevice()->ConsumedError(Finish(descriptor), &commandBuffer)) {
-        return CommandBufferBase::MakeError(GetDevice());
+        return CommandBufferBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
     }
     ASSERT(!IsError());
     return commandBuffer.Detach();

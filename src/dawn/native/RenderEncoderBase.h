@@ -67,7 +67,10 @@ class RenderEncoderBase : public ProgrammableEncoder {
 
   protected:
     // Construct an "error" render encoder base.
-    RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
+    RenderEncoderBase(DeviceBase* device,
+                      EncodingContext* encodingContext,
+                      ErrorTag errorTag,
+                      const char* label);
 
     void DestroyImpl() override;
 

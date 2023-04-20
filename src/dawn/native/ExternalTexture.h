@@ -55,7 +55,7 @@ class ExternalTextureBase : public ApiObjectBase {
     const Origin2D& GetVisibleOrigin() const;
 
     MaybeError ValidateCanUseInSubmitNow() const;
-    static ExternalTextureBase* MakeError(DeviceBase* device);
+    static ExternalTextureBase* MakeError(DeviceBase* device, const char* label = nullptr);
 
     void APIExpire();
     void APIDestroy();
@@ -71,7 +71,7 @@ class ExternalTextureBase : public ApiObjectBase {
 
   private:
     enum class ExternalTextureState { Active, Expired, Destroyed };
-    ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
 
     MaybeError ValidateRefresh();
     MaybeError ValidateExpire();

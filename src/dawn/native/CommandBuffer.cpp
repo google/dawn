@@ -33,12 +33,14 @@ CommandBufferBase::CommandBufferBase(CommandEncoder* encoder,
     GetObjectTrackingList()->Track(this);
 }
 
-CommandBufferBase::CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag) {}
+CommandBufferBase::CommandBufferBase(DeviceBase* device,
+                                     ObjectBase::ErrorTag tag,
+                                     const char* label)
+    : ApiObjectBase(device, tag, label) {}
 
 // static
-CommandBufferBase* CommandBufferBase::MakeError(DeviceBase* device) {
-    return new CommandBufferBase(device, ObjectBase::kError);
+CommandBufferBase* CommandBufferBase::MakeError(DeviceBase* device, const char* label) {
+    return new CommandBufferBase(device, ObjectBase::kError, label);
 }
 
 ObjectType CommandBufferBase::GetType() const {

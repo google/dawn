@@ -37,8 +37,9 @@ ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
 
 ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
                                          EncodingContext* encodingContext,
-                                         ErrorTag errorTag)
-    : ApiObjectBase(device, errorTag),
+                                         ErrorTag errorTag,
+                                         const char* label)
+    : ApiObjectBase(device, errorTag, label),
       mEncodingContext(encodingContext),
       mValidationEnabled(device->IsValidationEnabled()) {}
 

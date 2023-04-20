@@ -56,8 +56,10 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
     StreamIn(&mCacheKey, CacheKey::Type::ComputePipeline, device->GetCacheKey());
 }
 
-ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : PipelineBase(device, tag) {}
+ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
+                                         ObjectBase::ErrorTag tag,
+                                         const char* label)
+    : PipelineBase(device, tag, label) {}
 
 ComputePipelineBase::~ComputePipelineBase() = default;
 
@@ -69,11 +71,11 @@ void ComputePipelineBase::DestroyImpl() {
 }
 
 // static
-ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
+ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device, const char* label) {
     class ErrorComputePipeline final : public ComputePipelineBase {
       public:
-        explicit ErrorComputePipeline(DeviceBase* device)
-            : ComputePipelineBase(device, ObjectBase::kError) {}
+        explicit ErrorComputePipeline(DeviceBase* device, const char* label)
+            : ComputePipelineBase(device, ObjectBase::kError, label) {}
 
         MaybeError Initialize() override {
             UNREACHABLE();
@@ -81,7 +83,7 @@ ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
         }
     };
 
-    return new ErrorComputePipeline(device);
+    return new ErrorComputePipeline(device, label);
 }
 
 ObjectType ComputePipelineBase::GetType() const {

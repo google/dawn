@@ -51,12 +51,12 @@ void RenderBundleBase::DestroyImpl() {
 }
 
 // static
-RenderBundleBase* RenderBundleBase::MakeError(DeviceBase* device) {
-    return new RenderBundleBase(device, ObjectBase::kError);
+RenderBundleBase* RenderBundleBase::MakeError(DeviceBase* device, const char* label) {
+    return new RenderBundleBase(device, ObjectBase::kError, label);
 }
 
-RenderBundleBase::RenderBundleBase(DeviceBase* device, ErrorTag errorTag)
-    : ApiObjectBase(device, errorTag), mIndirectDrawMetadata(device->GetLimits()) {}
+RenderBundleBase::RenderBundleBase(DeviceBase* device, ErrorTag errorTag, const char* label)
+    : ApiObjectBase(device, errorTag, label), mIndirectDrawMetadata(device->GetLimits()) {}
 
 ObjectType RenderBundleBase::GetType() const {
     return ObjectType::RenderBundle;

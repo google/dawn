@@ -40,7 +40,8 @@ class RenderPassEncoder final : public RenderEncoderBase {
                                          std::function<void()> endCallback = nullptr);
     static Ref<RenderPassEncoder> MakeError(DeviceBase* device,
                                             CommandEncoder* commandEncoder,
-                                            EncodingContext* encodingContext);
+                                            EncodingContext* encodingContext,
+                                            const char* label);
 
     ObjectType GetType() const override;
 
@@ -84,7 +85,8 @@ class RenderPassEncoder final : public RenderEncoderBase {
     RenderPassEncoder(DeviceBase* device,
                       CommandEncoder* commandEncoder,
                       EncodingContext* encodingContext,
-                      ErrorTag errorTag);
+                      ErrorTag errorTag,
+                      const char* label);
 
   private:
     void DestroyImpl() override;

@@ -108,8 +108,8 @@ RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
     GetObjectTrackingList()->Track(this);
 }
 
-RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag)
-    : RenderEncoderBase(device, &mBundleEncodingContext, errorTag),
+RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag, const char* label)
+    : RenderEncoderBase(device, &mBundleEncodingContext, errorTag, label),
       mBundleEncodingContext(device, this) {}
 
 void RenderBundleEncoder::DestroyImpl() {
@@ -125,8 +125,8 @@ Ref<RenderBundleEncoder> RenderBundleEncoder::Create(
 }
 
 // static
-RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device) {
-    return new RenderBundleEncoder(device, ObjectBase::kError);
+RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device, const char* label) {
+    return new RenderBundleEncoder(device, ObjectBase::kError, label);
 }
 
 ObjectType RenderBundleEncoder::GetType() const {
@@ -142,7 +142,7 @@ RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* d
 
     if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result, "calling %s.Finish(%s).", this,
                                    descriptor)) {
-        return RenderBundleBase::MakeError(GetDevice());
+        return RenderBundleBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
     }
 
     return result;

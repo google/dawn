@@ -138,8 +138,10 @@ ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
 }
 
 // Error external texture cannot be used in bind group.
-ExternalTextureBase::ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag), mState(ExternalTextureState::Destroyed) {}
+ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
+                                         ObjectBase::ErrorTag tag,
+                                         const char* label)
+    : ApiObjectBase(device, tag, label), mState(ExternalTextureState::Destroyed) {}
 
 ExternalTextureBase::~ExternalTextureBase() = default;
 
@@ -371,8 +373,8 @@ void ExternalTextureBase::DestroyImpl() {
 }
 
 // static
-ExternalTextureBase* ExternalTextureBase::MakeError(DeviceBase* device) {
-    return new ExternalTextureBase(device, ObjectBase::kError);
+ExternalTextureBase* ExternalTextureBase::MakeError(DeviceBase* device, const char* label) {
+    return new ExternalTextureBase(device, ObjectBase::kError, label);
 }
 
 BufferBase* ExternalTextureBase::GetParamsBuffer() const {
