@@ -334,6 +334,10 @@ class Token {
     /// Returns the string value of the token
     /// @return std::string
     std::string to_str() const;
+    /// Returns the string view of the token
+    /// @return std::string_view
+    /// @note if the token is not an identifier, an empty string_view will be returned.
+    std::string_view to_str_view() const;
     /// Returns the float value of the token. 0 is returned if the token does not
     /// contain a float value.
     /// @return double

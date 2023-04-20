@@ -72,39 +72,42 @@ constexpr uint32_t kMaxParseDepth = 128;
 constexpr size_t const kMaxResynchronizeLookahead = 32;
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
+//
+// Must be called with an identifier token.
 bool is_reserved(const Token& t) {
-    return t == "NULL" || t == "Self" || t == "abstract" || t == "active" || t == "alignas" ||
-           t == "alignof" || t == "as" || t == "asm" || t == "asm_fragment" || t == "async" ||
-           t == "attribute" || t == "auto" || t == "await" || t == "become" ||
-           t == "binding_array" || t == "cast" || t == "catch" || t == "class" || t == "co_await" ||
-           t == "co_return" || t == "co_yield" || t == "coherent" || t == "column_major" ||
-           t == "common" || t == "compile" || t == "compile_fragment" || t == "concept" ||
-           t == "const_cast" || t == "consteval" || t == "constexpr" || t == "constinit" ||
-           t == "crate" || t == "debugger" || t == "decltype" || t == "delete" || t == "demote" ||
-           t == "demote_to_helper" || t == "do" || t == "dynamic_cast" || t == "enum" ||
-           t == "explicit" || t == "export" || t == "extends" || t == "extern" || t == "external" ||
-           t == "filter" || t == "final" || t == "finally" || t == "friend" || t == "from" ||
-           t == "fxgroup" || t == "get" || t == "goto" || t == "groupshared" || t == "highp" ||
-           t == "impl" || t == "implements" || t == "import" || t == "inline" ||
-           t == "instanceof" || t == "interface" || t == "layout" || t == "lowp" || t == "macro" ||
-           t == "macro_rules" || t == "match" || t == "mediump" || t == "meta" || t == "mod" ||
-           t == "module" || t == "move" || t == "mut" || t == "mutable" || t == "namespace" ||
-           t == "new" || t == "nil" || t == "noexcept" || t == "noinline" ||
-           t == "nointerpolation" || t == "noperspective" || t == "null" || t == "nullptr" ||
-           t == "of" || t == "operator" || t == "package" || t == "packoffset" ||
-           t == "partition" || t == "pass" || t == "patch" || t == "pixelfragment" ||
-           t == "precise" || t == "precision" || t == "premerge" || t == "priv" ||
-           t == "protected" || t == "pub" || t == "public" || t == "readonly" || t == "ref" ||
-           t == "regardless" || t == "register" || t == "reinterpret_cast" || t == "require" ||
-           t == "resource" || t == "restrict" || t == "self" || t == "set" || t == "shared" ||
-           t == "sizeof" || t == "smooth" || t == "snorm" || t == "static" ||
-           t == "static_assert" || t == "static_cast" || t == "std" || t == "subroutine" ||
-           t == "super" || t == "target" || t == "template" || t == "this" || t == "thread_local" ||
-           t == "throw" || t == "trait" || t == "try" || t == "type" || t == "typedef" ||
-           t == "typeid" || t == "typename" || t == "typeof" || t == "union" || t == "unless" ||
-           t == "unorm" || t == "unsafe" || t == "unsized" || t == "use" || t == "using" ||
-           t == "varying" || t == "virtual" || t == "volatile" || t == "wgsl" || t == "where" ||
-           t == "with" || t == "writeonly" || t == "yield";
+    auto s = t.to_str_view();
+    return s == "NULL" || s == "Self" || s == "abstract" || s == "active" || s == "alignas" ||
+           s == "alignof" || s == "as" || s == "asm" || s == "asm_fragment" || s == "async" ||
+           s == "attribute" || s == "auto" || s == "await" || s == "become" ||
+           s == "binding_array" || s == "cast" || s == "catch" || s == "class" || s == "co_await" ||
+           s == "co_return" || s == "co_yield" || s == "coherent" || s == "column_major" ||
+           s == "common" || s == "compile" || s == "compile_fragment" || s == "concept" ||
+           s == "const_cast" || s == "consteval" || s == "constexpr" || s == "constinit" ||
+           s == "crate" || s == "debugger" || s == "decltype" || s == "delete" || s == "demote" ||
+           s == "demote_to_helper" || s == "do" || s == "dynamic_cast" || s == "enum" ||
+           s == "explicit" || s == "export" || s == "extends" || s == "extern" || s == "external" ||
+           s == "filter" || s == "final" || s == "finally" || s == "friend" || s == "from" ||
+           s == "fxgroup" || s == "get" || s == "goto" || s == "groupshared" || s == "highp" ||
+           s == "impl" || s == "implements" || s == "import" || s == "inline" ||
+           s == "instanceof" || s == "interface" || s == "layout" || s == "lowp" || s == "macro" ||
+           s == "macro_rules" || s == "match" || s == "mediump" || s == "meta" || s == "mod" ||
+           s == "module" || s == "move" || s == "mut" || s == "mutable" || s == "namespace" ||
+           s == "new" || s == "nil" || s == "noexcept" || s == "noinline" ||
+           s == "nointerpolation" || s == "noperspective" || s == "null" || s == "nullptr" ||
+           s == "of" || s == "operator" || s == "package" || s == "packoffset" ||
+           s == "partition" || s == "pass" || s == "patch" || s == "pixelfragment" ||
+           s == "precise" || s == "precision" || s == "premerge" || s == "priv" ||
+           s == "protected" || s == "pub" || s == "public" || s == "readonly" || s == "ref" ||
+           s == "regardless" || s == "register" || s == "reinterpret_cast" || s == "require" ||
+           s == "resource" || s == "restrict" || s == "self" || s == "set" || s == "shared" ||
+           s == "sizeof" || s == "smooth" || s == "snorm" || s == "static" ||
+           s == "static_assert" || s == "static_cast" || s == "std" || s == "subroutine" ||
+           s == "super" || s == "target" || s == "template" || s == "this" || s == "thread_local" ||
+           s == "throw" || s == "trait" || s == "try" || s == "type" || s == "typedef" ||
+           s == "typeid" || s == "typename" || s == "typeof" || s == "union" || s == "unless" ||
+           s == "unorm" || s == "unsafe" || s == "unsized" || s == "use" || s == "using" ||
+           s == "varying" || s == "virtual" || s == "volatile" || s == "wgsl" || s == "where" ||
+           s == "with" || s == "writeonly" || s == "yield";
 }
 
 /// Enter-exit counters for block token types.

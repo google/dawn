@@ -256,6 +256,18 @@ std::string Token::to_str() const {
     }
 }
 
+std::string_view Token::to_str_view() const {
+    if (type_ != Type::kIdentifier) {
+        return {};
+    }
+
+    if (auto* view = std::get_if<std::string_view>(&value_)) {
+        return *view;
+    }
+    auto& s = std::get<std::string>(value_);
+    return {s.data(), s.length()};
+}
+
 double Token::to_f64() const {
     return std::get<double>(value_);
 }
