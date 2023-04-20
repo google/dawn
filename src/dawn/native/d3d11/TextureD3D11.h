@@ -22,6 +22,10 @@
 #include "dawn/native/Texture.h"
 #include "dawn/native/d3d/d3d_platform.h"
 
+namespace dawn::native {
+struct CopyTextureToTextureCmd;
+}  // namespace dawn::native
+
 namespace dawn::native::d3d11 {
 
 class CommandRecordingContext;
@@ -48,6 +52,15 @@ class Texture final : public TextureBase {
     MaybeError EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                                    const SubresourceRange& range);
 
+    MaybeError Write(CommandRecordingContext* commandContext,
+                     const SubresourceRange& subresources,
+                     const Origin3D& origin,
+                     const Extent3D& size,
+                     const uint8_t* data,
+                     uint32_t bytesPerRow,
+                     uint32_t rowsPerImage);
+    static MaybeError Copy(CommandRecordingContext* commandContext, CopyTextureToTextureCmd* copy);
+
   private:
     Texture(Device* device, const TextureDescriptor* descriptor, TextureState state);
     ~Texture() override;
@@ -62,11 +75,9 @@ class Texture final : public TextureBase {
     void SetLabelImpl() override;
     void DestroyImpl() override;
 
-    MaybeError ClearTexture(CommandRecordingContext* commandContext,
-                            const SubresourceRange& range,
-                            TextureBase::ClearValue clearValue);
-
-    MaybeError WriteTexture();
+    MaybeError Clear(CommandRecordingContext* commandContext,
+                     const SubresourceRange& range,
+                     TextureBase::ClearValue clearValue);
 
     ComPtr<ID3D11Resource> mD3d11Resource;
 };
@@ -76,12 +87,12 @@ class TextureView final : public TextureViewBase {
     static Ref<TextureView> Create(TextureBase* texture, const TextureViewDescriptor* descriptor);
 
     DXGI_FORMAT GetD3D11Format() const;
-    ResultOrError<ComPtr<ID3D11ShaderResourceView>> GetD3D11ShaderResourceView() const;
-    ResultOrError<ComPtr<ID3D11RenderTargetView>> GetD3D11RenderTargetView() const;
-    ResultOrError<ComPtr<ID3D11DepthStencilView>> GetD3D11DepthStencilView(
+    ResultOrError<ComPtr<ID3D11ShaderResourceView>> CreateD3D11ShaderResourceView() const;
+    ResultOrError<ComPtr<ID3D11RenderTargetView>> CreateD3D11RenderTargetView() const;
+    ResultOrError<ComPtr<ID3D11DepthStencilView>> CreateD3D11DepthStencilView(
         bool depthReadOnly,
         bool stencilReadOnly) const;
-    ResultOrError<ComPtr<ID3D11UnorderedAccessView>> GetD3D11UnorderedAccessView() const;
+    ResultOrError<ComPtr<ID3D11UnorderedAccessView>> CreateD3D11UnorderedAccessView() const;
 
   private:
     using TextureViewBase::TextureViewBase;

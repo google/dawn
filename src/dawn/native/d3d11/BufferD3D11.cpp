@@ -471,18 +471,18 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
     return {};
 }
 
-MaybeError Buffer::CopyFromBuffer(CommandRecordingContext* commandContext,
-                                  uint64_t offset,
-                                  size_t size,
-                                  Buffer* source,
-                                  uint64_t sourceOffset) {
-    if (size == 0) {
-        // Skip no-op copies.
-        return {};
-    }
+// static
+MaybeError Buffer::Copy(CommandRecordingContext* commandContext,
+                        Buffer* source,
+                        uint64_t sourceOffset,
+                        size_t size,
+                        Buffer* destination,
+                        uint64_t destinationOffset) {
+    DAWN_ASSERT(size != 0);
 
     DAWN_TRY(source->EnsureDataInitialized(commandContext));
-    DAWN_TRY(EnsureDataInitializedAsDestination(commandContext, offset, size));
+    DAWN_TRY(
+        destination->EnsureDataInitializedAsDestination(commandContext, destinationOffset, size));
 
     D3D11_BOX srcBox;
     srcBox.left = sourceOffset;
@@ -492,8 +492,9 @@ MaybeError Buffer::CopyFromBuffer(CommandRecordingContext* commandContext,
     srcBox.front = 0;
     srcBox.back = 1;
     commandContext->GetD3D11DeviceContext()->CopySubresourceRegion(
-        GetD3D11Buffer(), /*DstSubresource=*/0, /*DstX=*/offset, /*DstY=*/0, /*DstZ=*/0,
-        source->GetD3D11Buffer(), /*SrcSubresource=*/0, &srcBox);
+        destination->mD3d11Buffer.Get(), /*DstSubresource=*/0, /*DstX=*/destinationOffset,
+        /*DstY=*/0,
+        /*DstZ=*/0, source->mD3d11Buffer.Get(), /*SrcSubresource=*/0, &srcBox);
 
     return {};
 }

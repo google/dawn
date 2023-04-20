@@ -56,11 +56,13 @@ class Buffer final : public BufferBase {
                      uint64_t offset,
                      const void* data,
                      size_t size);
-    MaybeError CopyFromBuffer(CommandRecordingContext* commandContext,
-                              uint64_t offset,
-                              size_t size,
-                              Buffer* source,
-                              uint64_t sourceOffset);
+
+    static MaybeError Copy(CommandRecordingContext* commandContext,
+                           Buffer* source,
+                           uint64_t sourceOffset,
+                           size_t size,
+                           Buffer* destination,
+                           uint64_t destinationOffset);
 
     class ScopedMap : public NonCopyable {
       public:

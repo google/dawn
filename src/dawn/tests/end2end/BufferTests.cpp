@@ -553,6 +553,7 @@ TEST_P(BufferMappingTests, RegressChromium1421170) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferMappingTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -633,6 +634,11 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionAndThenMap) {
 }
 
 TEST_P(BufferMappingCallbackTests, UseTheBufferAndThenMap) {
+    // TODO(dawn:1705): enable this test for D3D11. D3D11 MapAsync() calls
+    // ID3D11DeviceContext::Map() which will synchronize with GPU. so the callback will always be
+    // called earlier comparing to other backends.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
     buffer.Unmap();
@@ -672,6 +678,11 @@ TEST_P(BufferMappingCallbackTests, UseTheBufferAndThenMap) {
 }
 
 TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
+    // TODO(dawn:1705): enable this test for D3D11. D3D11 MapAsync() calls
+    // ID3D11DeviceContext::Map() which will synchronize with GPU. so the callback will always be
+    // called earlier comparing to other backends.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     wgpu::Buffer buffer = CreateMapReadBuffer(4);
     MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, wgpu::kWholeMapSize);
     buffer.Unmap();
@@ -713,7 +724,11 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
     buffer.Unmap();
 }
 
-DAWN_INSTANTIATE_TEST(BufferMappingCallbackTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(BufferMappingCallbackTests,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      VulkanBackend());
 
 class BufferMappedAtCreationTests : public DawnTest {
   protected:
@@ -961,6 +976,7 @@ TEST_P(BufferMappedAtCreationTests, GetMappedRangeZeroSized) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferMappedAtCreationTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
                       MetalBackend(),
@@ -1111,6 +1127,7 @@ TEST_P(BufferTests, CreateBufferOOMMapAsync) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1143,6 +1160,7 @@ TEST_P(BufferNoSuballocationTests, WriteBufferThenDestroy) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferNoSuballocationTests,
+                      D3D11Backend({"disable_resource_suballocation"}),
                       D3D12Backend({"disable_resource_suballocation"}),
                       MetalBackend({"disable_resource_suballocation"}),
                       OpenGLBackend({"disable_resource_suballocation"}),
