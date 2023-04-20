@@ -39,6 +39,176 @@
 #include "dawn/native/d3d11/UtilsD3D11.h"
 
 namespace dawn::native::d3d11 {
+namespace {
+
+class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
+  public:
+    MaybeError Apply(CommandRecordingContext* commandContext) {
+        BeforeApply();
+        for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+            DAWN_TRY(
+                ApplyBindGroup(commandContext, index, mBindGroups[index], mDynamicOffsets[index]));
+        }
+        AfterApply();
+        return {};
+    }
+
+    void AfterDispatch(CommandRecordingContext* commandContext) {
+        // Clear the UAVs after the dispatch, otherwise the buffer cannot be used as input in vertex
+        // or pixel stage.
+        for (UINT uav : mUnorderedAccessViews) {
+            ID3D11UnorderedAccessView* nullUAV = nullptr;
+            commandContext->GetD3D11DeviceContext1()->CSSetUnorderedAccessViews(uav, 1, &nullUAV,
+                                                                                nullptr);
+        }
+        mUnorderedAccessViews.clear();
+    }
+
+  private:
+    MaybeError ApplyBindGroup(CommandRecordingContext* commandContext,
+                              BindGroupIndex index,
+                              BindGroupBase* group,
+                              const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets) {
+        const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[index];
+        for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
+             ++bindingIndex) {
+            const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
+            const uint32_t bindingSlot = indices[bindingIndex];
+
+            switch (bindingInfo.bindingType) {
+                case BindingInfoType::Buffer: {
+                    BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
+                    ID3D11Buffer* d3d11Buffer = ToBackend(binding.buffer)->GetD3D11Buffer();
+                    auto offset = binding.offset;
+                    if (bindingInfo.buffer.hasDynamicOffset) {
+                        // Dynamic buffers are packed at the front of BindingIndices.
+                        offset += dynamicOffsets[bindingIndex];
+                    }
+
+                    auto* deviceContext = commandContext->GetD3D11DeviceContext1();
+
+                    switch (bindingInfo.buffer.type) {
+                        case wgpu::BufferBindingType::Uniform: {
+                            // https://learn.microsoft.com/en-us/windows/win32/api/d3d11_1/nf-d3d11_1-id3d11devicecontext1-vssetconstantbuffers1
+                            // Offset and size are measured in shader constants, which are 16 bytes
+                            // (4*32-bit components). And the offsets and counts must be multiples
+                            // of 16.
+                            ASSERT(IsAligned(offset, 256));
+                            UINT firstConstant = static_cast<UINT>(offset / 16);
+                            UINT size = static_cast<UINT>(binding.size / 16);
+                            UINT numConstants = Align(size, 16);
+
+                            if (bindingInfo.visibility & wgpu::ShaderStage::Vertex) {
+                                deviceContext->VSSetConstantBuffers1(bindingSlot, 1, &d3d11Buffer,
+                                                                     &firstConstant, &numConstants);
+                            }
+                            if (bindingInfo.visibility & wgpu::ShaderStage::Fragment) {
+                                deviceContext->PSSetConstantBuffers1(bindingSlot, 1, &d3d11Buffer,
+                                                                     &firstConstant, &numConstants);
+                            }
+                            if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
+                                deviceContext->CSSetConstantBuffers1(bindingSlot, 1, &d3d11Buffer,
+                                                                     &firstConstant, &numConstants);
+                            }
+                            break;
+                        }
+                        case wgpu::BufferBindingType::Storage: {
+                            ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
+                            DAWN_TRY_ASSIGN(d3d11UAV, ToBackend(binding.buffer)
+                                                          ->CreateD3D11UnorderedAccessView1(
+                                                              0, binding.buffer->GetSize()));
+                            UINT firstElement = offset / 4;
+                            if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
+                                deviceContext->CSSetUnorderedAccessViews(
+                                    bindingSlot, 1, d3d11UAV.GetAddressOf(), &firstElement);
+                                // Record the bounded UAVs so that we can clear them after the
+                                // dispatch.
+                                mUnorderedAccessViews.emplace_back(bindingSlot);
+                            } else {
+                                return DAWN_INTERNAL_ERROR(
+                                    "Storage buffers are only supported in compute shaders");
+                            }
+                            break;
+                        }
+                        case wgpu::BufferBindingType::ReadOnlyStorage: {
+                            ComPtr<ID3D11ShaderResourceView> d3d11SRV;
+                            DAWN_TRY_ASSIGN(d3d11SRV, ToBackend(binding.buffer)
+                                                          ->CreateD3D11ShaderResourceView(
+                                                              binding.offset, binding.size));
+                            if (bindingInfo.visibility & wgpu::ShaderStage::Vertex) {
+                                deviceContext->VSSetShaderResources(bindingSlot, 1,
+                                                                    d3d11SRV.GetAddressOf());
+                            }
+                            if (bindingInfo.visibility & wgpu::ShaderStage::Fragment) {
+                                deviceContext->PSSetShaderResources(bindingSlot, 1,
+                                                                    d3d11SRV.GetAddressOf());
+                            }
+                            if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
+                                deviceContext->CSSetShaderResources(bindingSlot, 1,
+                                                                    d3d11SRV.GetAddressOf());
+                            }
+                            break;
+                        }
+                        case wgpu::BufferBindingType::Undefined:
+                            UNREACHABLE();
+                    }
+                    break;
+                }
+
+                case BindingInfoType::Sampler: {
+                    Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
+                    ID3D11SamplerState* d3d11SamplerState = sampler->GetD3D11SamplerState();
+                    if (bindingInfo.visibility & wgpu::ShaderStage::Vertex) {
+                        commandContext->GetD3D11DeviceContext1()->VSSetSamplers(bindingSlot, 1,
+                                                                                &d3d11SamplerState);
+                    }
+                    if (bindingInfo.visibility & wgpu::ShaderStage::Fragment) {
+                        commandContext->GetD3D11DeviceContext1()->PSSetSamplers(bindingSlot, 1,
+                                                                                &d3d11SamplerState);
+                    }
+                    if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
+                        commandContext->GetD3D11DeviceContext1()->CSSetSamplers(bindingSlot, 1,
+                                                                                &d3d11SamplerState);
+                    }
+                    break;
+                }
+
+                case BindingInfoType::Texture: {
+                    TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
+                    ComPtr<ID3D11ShaderResourceView> srv;
+                    DAWN_TRY_ASSIGN(srv, view->CreateD3D11ShaderResourceView());
+                    if (bindingInfo.visibility & wgpu::ShaderStage::Vertex) {
+                        commandContext->GetD3D11DeviceContext1()->VSSetShaderResources(
+                            bindingSlot, 1, srv.GetAddressOf());
+                    }
+                    if (bindingInfo.visibility & wgpu::ShaderStage::Fragment) {
+                        commandContext->GetD3D11DeviceContext1()->PSSetShaderResources(
+                            bindingSlot, 1, srv.GetAddressOf());
+                    }
+                    if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
+                        commandContext->GetD3D11DeviceContext1()->CSSetShaderResources(
+                            bindingSlot, 1, srv.GetAddressOf());
+                    }
+                    break;
+                }
+
+                case BindingInfoType::StorageTexture: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Storage textures are not supported");
+                }
+
+                case BindingInfoType::ExternalTexture: {
+                    return DAWN_UNIMPLEMENTED_ERROR("External textures are not supported");
+                    break;
+                }
+            }
+        }
+        return {};
+    }
+
+    std::vector<UINT> mUnorderedAccessViews;
+};
+
+}  // namespace
 
 // Create CommandBuffer
 Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
@@ -51,12 +221,44 @@ MaybeError CommandBuffer::Execute() {
 
     ID3D11DeviceContext1* d3d11DeviceContext1 = commandContext->GetD3D11DeviceContext1();
 
+    auto LazyClearSyncScope = [commandContext](const SyncScopeResourceUsage& scope) -> MaybeError {
+        for (size_t i = 0; i < scope.textures.size(); i++) {
+            Texture* texture = ToBackend(scope.textures[i]);
+
+            // Clear subresources that are not render attachments. Render attachments will be
+            // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
+            // subresource has not been initialized before the render pass.
+            DAWN_TRY(scope.textureUsages[i].Iterate([&](const SubresourceRange& range,
+                                                        wgpu::TextureUsage usage) -> MaybeError {
+                if (usage & ~wgpu::TextureUsage::RenderAttachment) {
+                    DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));
+                }
+                return {};
+            }));
+        }
+
+        for (BufferBase* buffer : scope.buffers) {
+            DAWN_TRY(ToBackend(buffer)->EnsureDataInitialized(commandContext));
+        }
+
+        return {};
+    };
+
+    size_t nextComputePassNumber = 0;
+
     Command type;
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::BeginComputePass: {
                 mCommands.NextCommand<BeginComputePassCmd>();
-                return DAWN_UNIMPLEMENTED_ERROR("Compute pass not implemented");
+                for (const SyncScopeResourceUsage& scope :
+                     GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
+                    DAWN_TRY(LazyClearSyncScope(scope));
+                }
+                DAWN_TRY(ExecuteComputePass(commandContext));
+
+                nextComputePassNumber++;
+                break;
             }
 
             case Command::BeginRenderPass: {
@@ -255,13 +457,135 @@ MaybeError CommandBuffer::Execute() {
             case Command::InsertDebugMarker:
             case Command::PopDebugGroup:
             case Command::PushDebugGroup: {
-                return DAWN_UNIMPLEMENTED_ERROR("Debug markers unimplemented");
+                HandleDebugCommands(commandContext, type);
+                break;
             }
 
             default:
                 return DAWN_FORMAT_INTERNAL_ERROR("Unknown command type: %d", type);
         }
     }
+
+    return {};
+}
+
+MaybeError CommandBuffer::ExecuteComputePass(CommandRecordingContext* commandContext) {
+    ComputePipeline* lastPipeline = nullptr;
+    BindGroupTracker bindGroupTracker = {};
+
+    Command type;
+    while (mCommands.NextCommandId(&type)) {
+        switch (type) {
+            case Command::EndComputePass: {
+                mCommands.NextCommand<EndComputePassCmd>();
+                return {};
+            }
+
+            case Command::Dispatch: {
+                DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
+
+                DAWN_TRY(bindGroupTracker.Apply(commandContext));
+
+                DAWN_TRY(RecordNumWorkgroupsForDispatch(lastPipeline, commandContext, dispatch));
+                commandContext->GetD3D11DeviceContext()->Dispatch(dispatch->x, dispatch->y,
+                                                                  dispatch->z);
+                bindGroupTracker.AfterDispatch(commandContext);
+
+                break;
+            }
+
+            case Command::DispatchIndirect: {
+                // TODO(1716): figure how to update num workgroups builtins
+                DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
+
+                DAWN_TRY(bindGroupTracker.Apply(commandContext));
+
+                uint64_t indirectBufferOffset = dispatch->indirectOffset;
+                Buffer* indirectBuffer = ToBackend(dispatch->indirectBuffer.Get());
+
+                commandContext->GetD3D11DeviceContext()->DispatchIndirect(
+                    indirectBuffer->GetD3D11Buffer(), indirectBufferOffset);
+
+                bindGroupTracker.AfterDispatch(commandContext);
+
+                break;
+            }
+
+            case Command::SetComputePipeline: {
+                SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
+                lastPipeline = ToBackend(cmd->pipeline).Get();
+                lastPipeline->ApplyNow(commandContext);
+                bindGroupTracker.OnSetPipeline(lastPipeline);
+                break;
+            }
+
+            case Command::SetBindGroup: {
+                SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
+
+                uint32_t* dynamicOffsets = nullptr;
+                if (cmd->dynamicOffsetCount > 0) {
+                    dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                }
+
+                bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(),
+                                                cmd->dynamicOffsetCount, dynamicOffsets);
+
+                break;
+            }
+
+            case Command::WriteTimestamp: {
+                return DAWN_UNIMPLEMENTED_ERROR("WriteTimestamp unimplemented");
+            }
+
+            case Command::InsertDebugMarker:
+            case Command::PopDebugGroup:
+            case Command::PushDebugGroup: {
+                HandleDebugCommands(commandContext, type);
+                break;
+            }
+
+            default:
+                UNREACHABLE();
+        }
+    }
+
+    // EndComputePass should have been called
+    UNREACHABLE();
+}
+
+void CommandBuffer::HandleDebugCommands(CommandRecordingContext* commandContext, Command command) {
+    switch (command) {
+        case Command::InsertDebugMarker: {
+            InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
+            std::wstring label = UTF8ToWStr(mCommands.NextData<char>(cmd->length + 1));
+            commandContext->GetD3DUserDefinedAnnotation()->SetMarker(label.c_str());
+            break;
+        }
+
+        case Command::PopDebugGroup: {
+            std::ignore = mCommands.NextCommand<PopDebugGroupCmd>();
+            commandContext->GetD3DUserDefinedAnnotation()->EndEvent();
+            break;
+        }
+
+        case Command::PushDebugGroup: {
+            PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
+            std::wstring label = UTF8ToWStr(mCommands.NextData<char>(cmd->length + 1));
+            commandContext->GetD3DUserDefinedAnnotation()->BeginEvent(label.c_str());
+            break;
+        }
+        default:
+            UNREACHABLE();
+    }
+}
+
+MaybeError CommandBuffer::RecordNumWorkgroupsForDispatch(ComputePipeline* computePipeline,
+                                                         CommandRecordingContext* commandContext,
+                                                         DispatchCmd* dispatchCmd) {
+    // TODO(dawn:1705): only update the uniform buffer when the value changes.
+    static_assert(sizeof(DispatchCmd) == sizeof(uint32_t[3]));
+    DAWN_TRY(commandContext->GetUniformBuffer()->Write(commandContext, 0, dispatchCmd,
+                                                       sizeof(*dispatchCmd)));
 
     return {};
 }

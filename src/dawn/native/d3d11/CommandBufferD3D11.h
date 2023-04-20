@@ -20,11 +20,13 @@
 namespace dawn::native {
 enum class Command;
 struct BeginRenderPassCmd;
+struct DispatchCmd;
 }  // namespace dawn::native
 
 namespace dawn::native::d3d11 {
 
 class CommandRecordingContext;
+class ComputePipeline;
 
 class CommandBuffer final : public CommandBufferBase {
   public:
@@ -34,6 +36,13 @@ class CommandBuffer final : public CommandBufferBase {
 
   private:
     using CommandBufferBase::CommandBufferBase;
+
+    MaybeError ExecuteComputePass(CommandRecordingContext* commandContext);
+    void HandleDebugCommands(CommandRecordingContext* commandContext, Command command);
+
+    MaybeError RecordNumWorkgroupsForDispatch(ComputePipeline* computePipeline,
+                                              CommandRecordingContext* commandContext,
+                                              DispatchCmd* dispatchCmd);
 };
 
 }  // namespace dawn::native::d3d11

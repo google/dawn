@@ -21,6 +21,7 @@
 
 namespace dawn::native::d3d11 {
 class CommandAllocatorManager;
+class Buffer;
 class Device;
 
 class CommandRecordingContext {
@@ -38,12 +39,17 @@ class CommandRecordingContext {
     ID3D11DeviceContext* GetD3D11DeviceContext() const;
     ID3D11DeviceContext1* GetD3D11DeviceContext1() const;
     ID3D11DeviceContext4* GetD3D11DeviceContext4() const;
+    ID3DUserDefinedAnnotation* GetD3DUserDefinedAnnotation() const;
+    Buffer* GetUniformBuffer() const;
 
   private:
     bool mIsOpen = false;
     bool mNeedsSubmit = false;
     ComPtr<ID3D11Device> mD3D11Device;
     ComPtr<ID3D11DeviceContext4> mD3D11DeviceContext4;
+    ComPtr<ID3DUserDefinedAnnotation> mD3D11UserDefinedAnnotation;
+    // The uniform buffer for built in variables.
+    Ref<Buffer> mUniformBuffer;
 };
 
 }  // namespace dawn::native::d3d11

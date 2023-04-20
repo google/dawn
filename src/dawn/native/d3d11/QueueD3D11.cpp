@@ -30,6 +30,10 @@ Ref<Queue> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
     Device* device = ToBackend(GetDevice());
 
+    // CommandBuffer::Execute() will modify the state of the global immediate device context, it may
+    // affect following usage of it.
+    // TODO(dawn:1770): figure how if we need to track and restore the state of the immediate device
+    // context.
     TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
     for (uint32_t i = 0; i < commandCount; ++i) {
         DAWN_TRY(ToBackend(commands[i])->Execute());
