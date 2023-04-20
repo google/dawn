@@ -23,27 +23,27 @@ namespace {
 
 class DiagnosticSeverityTest : public TestHelper {
   protected:
-    /// Create a program with two functions, setting the severity for "chromium_unreachable_code"
+    /// Create a program with two functions, setting the severity for "chromium.unreachable_code"
     /// using an attribute. Test that we correctly track the severity of the filter for the
     /// functions and the statements with them.
-    /// @param global_severity the global severity of the "chromium_unreachable_code" filter
+    /// @param global_severity the global severity of the "chromium.unreachable_code" filter
     void Run(builtin::DiagnosticSeverity global_severity) {
-        // @diagnostic(off, chromium_unreachable_code)
+        // @diagnostic(off, chromium.unreachable_code)
         // fn foo() {
-        //   @diagnostic(info, chromium_unreachable_code) {
-        //     @diagnostic(error, chromium_unreachable_code)
-        //     if (true) @diagnostic(warning, chromium_unreachable_code) {
+        //   @diagnostic(info, chromium.unreachable_code) {
+        //     @diagnostic(error, chromium.unreachable_code)
+        //     if (true) @diagnostic(warning, chromium.unreachable_code) {
         //       return;
         //     } else if (false) {
         //       return;
-        //     } else @diagnostic(info, chromium_unreachable_code) {
+        //     } else @diagnostic(info, chromium.unreachable_code) {
         //       return;
         //     }
         //     return;
         //
-        //     @diagnostic(error, chromium_unreachable_code)
-        //     switch (42) @diagnostic(off, chromium_unreachable_code) {
-        //       case 0 @diagnostic(warning, chromium_unreachable_code) {
+        //     @diagnostic(error, chromium.unreachable_code)
+        //     switch (42) @diagnostic(off, chromium.unreachable_code) {
+        //       case 0 @diagnostic(warning, chromium.unreachable_code) {
         //         return;
         //       }
         //       default {
@@ -51,21 +51,21 @@ class DiagnosticSeverityTest : public TestHelper {
         //       }
         //     }
         //
-        //     @diagnostic(error, chromium_unreachable_code)
-        //     for (var i = 0; false; i++) @diagnostic(warning, chromium_unreachable_code) {
+        //     @diagnostic(error, chromium.unreachable_code)
+        //     for (var i = 0; false; i++) @diagnostic(warning, chromium.unreachable_code) {
         //       return;
         //     }
         //
-        //     @diagnostic(warning, chromium_unreachable_code)
-        //     loop @diagnostic(off, chromium_unreachable_code) {
+        //     @diagnostic(warning, chromium.unreachable_code)
+        //     loop @diagnostic(off, chromium.unreachable_code) {
         //       return;
-        //       continuing @diagnostic(info, chromium_unreachable_code) {
+        //       continuing @diagnostic(info, chromium.unreachable_code) {
         //         break if true;
         //       }
         //     }
         //
-        //     @diagnostic(error, chromium_unreachable_code)
-        //     while (false) @diagnostic(warning, chromium_unreachable_code) {
+        //     @diagnostic(error, chromium.unreachable_code)
+        //     while (false) @diagnostic(warning, chromium.unreachable_code) {
         //       return;
         //     }
         //   }
@@ -74,7 +74,7 @@ class DiagnosticSeverityTest : public TestHelper {
         // fn bar() {
         //   return;
         // }
-        auto rule = builtin::DiagnosticRule::kChromiumUnreachableCode;
+        auto rule = builtin::ChromiumDiagnosticRule::kUnreachableCode;
         auto func_severity = builtin::DiagnosticSeverity::kOff;
         auto block_severity = builtin::DiagnosticSeverity::kInfo;
         auto if_severity = builtin::DiagnosticSeverity::kError;
@@ -91,7 +91,7 @@ class DiagnosticSeverityTest : public TestHelper {
         auto while_severity = builtin::DiagnosticSeverity::kError;
         auto while_body_severity = builtin::DiagnosticSeverity::kWarning;
         auto attr = [&](auto severity) {
-            return utils::Vector{DiagnosticAttribute(severity, "chromium_unreachable_code")};
+            return utils::Vector{DiagnosticAttribute(severity, "chromium", "unreachable_code")};
         };
 
         auto* return_foo_if = Return();
@@ -123,7 +123,7 @@ class DiagnosticSeverityTest : public TestHelper {
                          attr(while_severity));
         auto* block_1 =
             Block(utils::Vector{if_foo, return_foo_block, swtch, fl, l, wl}, attr(block_severity));
-        auto* func_attr = DiagnosticAttribute(func_severity, "chromium_unreachable_code");
+        auto* func_attr = DiagnosticAttribute(func_severity, "chromium", "unreachable_code");
         auto* foo = Func("foo", {}, ty.void_(), utils::Vector{block_1}, utils::Vector{func_attr});
 
         auto* return_bar = Return();
@@ -173,7 +173,7 @@ class DiagnosticSeverityTest : public TestHelper {
 };
 
 TEST_F(DiagnosticSeverityTest, WithDirective) {
-    DiagnosticDirective(builtin::DiagnosticSeverity::kError, "chromium_unreachable_code");
+    DiagnosticDirective(builtin::DiagnosticSeverity::kError, "chromium", "unreachable_code");
     Run(builtin::DiagnosticSeverity::kError);
 }
 

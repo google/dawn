@@ -50,7 +50,8 @@ size_t Distance(std::string_view str_a, std::string_view str_b) {
 
 void SuggestAlternatives(std::string_view got,
                          Slice<char const* const> strings,
-                         utils::StringStream& ss) {
+                         utils::StringStream& ss,
+                         std::string_view prefix /* = "" */) {
     // If the string typed was within kSuggestionDistance of one of the possible enum values,
     // suggest that. Don't bother with suggestions if the string was extremely long.
     constexpr size_t kSuggestionDistance = 5;
@@ -66,7 +67,7 @@ void SuggestAlternatives(std::string_view got,
             }
         }
         if (candidate) {
-            ss << "Did you mean '" << candidate << "'?\n";
+            ss << "Did you mean '" << prefix << candidate << "'?\n";
         }
     }
 
@@ -76,7 +77,7 @@ void SuggestAlternatives(std::string_view got,
         if (str != strings[0]) {
             ss << ", ";
         }
-        ss << "'" << str << "'";
+        ss << "'" << prefix << str << "'";
     }
 }
 

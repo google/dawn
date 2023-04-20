@@ -28,27 +28,43 @@
 
 namespace tint::builtin {
 
-/// ParseDiagnosticRule parses a DiagnosticRule from a string.
+/// ParseCoreDiagnosticRule parses a CoreDiagnosticRule from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or DiagnosticRule::kUndefined if the string could not be parsed.
-DiagnosticRule ParseDiagnosticRule(std::string_view str) {
-    if (str == "chromium_unreachable_code") {
-        return DiagnosticRule::kChromiumUnreachableCode;
-    }
+/// @returns the parsed enum, or CoreDiagnosticRule::kUndefined if the string could not be parsed.
+CoreDiagnosticRule ParseCoreDiagnosticRule(std::string_view str) {
     if (str == "derivative_uniformity") {
-        return DiagnosticRule::kDerivativeUniformity;
+        return CoreDiagnosticRule::kDerivativeUniformity;
     }
-    return DiagnosticRule::kUndefined;
+    return CoreDiagnosticRule::kUndefined;
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, DiagnosticRule value) {
+utils::StringStream& operator<<(utils::StringStream& out, CoreDiagnosticRule value) {
     switch (value) {
-        case DiagnosticRule::kUndefined:
+        case CoreDiagnosticRule::kUndefined:
             return out << "undefined";
-        case DiagnosticRule::kChromiumUnreachableCode:
-            return out << "chromium_unreachable_code";
-        case DiagnosticRule::kDerivativeUniformity:
+        case CoreDiagnosticRule::kDerivativeUniformity:
             return out << "derivative_uniformity";
+    }
+    return out << "<unknown>";
+}
+
+/// ParseChromiumDiagnosticRule parses a ChromiumDiagnosticRule from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or ChromiumDiagnosticRule::kUndefined if the string could not be
+/// parsed.
+ChromiumDiagnosticRule ParseChromiumDiagnosticRule(std::string_view str) {
+    if (str == "unreachable_code") {
+        return ChromiumDiagnosticRule::kUnreachableCode;
+    }
+    return ChromiumDiagnosticRule::kUndefined;
+}
+
+utils::StringStream& operator<<(utils::StringStream& out, ChromiumDiagnosticRule value) {
+    switch (value) {
+        case ChromiumDiagnosticRule::kUndefined:
+            return out << "undefined";
+        case ChromiumDiagnosticRule::kUnreachableCode:
+            return out << "unreachable_code";
     }
     return out << "<unknown>";
 }

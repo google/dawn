@@ -19,11 +19,17 @@ See:
 namespace tint::builtin {
 namespace {
 
-namespace diagnostic_rule_tests {
+namespace core_diagnostic_rule_tests {
 
-{{ Eval "TestParsePrintEnum" (Sem.Enum "diagnostic_rule")}}
+{{ Eval "TestParsePrintEnum" (Sem.Enum "core_diagnostic_rule")}}
 
-}  // namespace diagnostic_rule_tests
+}  // namespace core_diagnostic_rule_tests
+
+namespace chromium_diagnostic_rule_tests {
+
+{{ Eval "TestParsePrintEnum" (Sem.Enum "chromium_diagnostic_rule")}}
+
+}  // namespace chromium_diagnostic_rule_tests
 
 }  // namespace
 }  // namespace tint::builtin

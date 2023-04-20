@@ -19,7 +19,9 @@ See:
 namespace tint::builtin {
 namespace {
 
-{{ Eval "BenchmarkParseEnum" (Sem.Enum "diagnostic_rule")}}
+{{ Eval "BenchmarkParseEnum" (Sem.Enum "core_diagnostic_rule")}}
+
+{{ Eval "BenchmarkParseEnum" (Sem.Enum "chromium_diagnostic_rule")}}
 
 }  // namespace
 }  // namespace tint::builtin

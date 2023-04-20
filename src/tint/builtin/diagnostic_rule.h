@@ -24,32 +24,55 @@
 #define SRC_TINT_BUILTIN_DIAGNOSTIC_RULE_H_
 
 #include <string>
+#include <variant>
 
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::builtin {
 
-/// The diagnostic rule.
-enum class DiagnosticRule {
+/// WGSL core diagnostic rules.
+enum class CoreDiagnosticRule {
     kUndefined,
-    kChromiumUnreachableCode,
     kDerivativeUniformity,
 };
 
 /// @param out the stream to write to
-/// @param value the DiagnosticRule
+/// @param value the CoreDiagnosticRule
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, DiagnosticRule value);
+utils::StringStream& operator<<(utils::StringStream& out, CoreDiagnosticRule value);
 
-/// ParseDiagnosticRule parses a DiagnosticRule from a string.
+/// ParseCoreDiagnosticRule parses a CoreDiagnosticRule from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or DiagnosticRule::kUndefined if the string could not be parsed.
-DiagnosticRule ParseDiagnosticRule(std::string_view str);
+/// @returns the parsed enum, or CoreDiagnosticRule::kUndefined if the string could not be parsed.
+CoreDiagnosticRule ParseCoreDiagnosticRule(std::string_view str);
 
-constexpr const char* kDiagnosticRuleStrings[] = {
-    "chromium_unreachable_code",
+constexpr const char* kCoreDiagnosticRuleStrings[] = {
     "derivative_uniformity",
 };
+
+/// Chromium-specific diagnostic rules.
+enum class ChromiumDiagnosticRule {
+    kUndefined,
+    kUnreachableCode,
+};
+
+/// @param out the stream to write to
+/// @param value the ChromiumDiagnosticRule
+/// @returns `out` so calls can be chained
+utils::StringStream& operator<<(utils::StringStream& out, ChromiumDiagnosticRule value);
+
+/// ParseChromiumDiagnosticRule parses a ChromiumDiagnosticRule from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or ChromiumDiagnosticRule::kUndefined if the string could not be
+/// parsed.
+ChromiumDiagnosticRule ParseChromiumDiagnosticRule(std::string_view str);
+
+constexpr const char* kChromiumDiagnosticRuleStrings[] = {
+    "unreachable_code",
+};
+
+/// All diagnostic rules understood by Tint.
+using DiagnosticRule = std::variant<CoreDiagnosticRule, ChromiumDiagnosticRule>;
 
 }  // namespace tint::builtin
 

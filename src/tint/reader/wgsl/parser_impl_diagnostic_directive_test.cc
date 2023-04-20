@@ -20,7 +20,7 @@
 namespace tint::reader::wgsl {
 namespace {
 
-TEST_F(ParserImplTest, DiagnosticDirective_Valid) {
+TEST_F(ParserImplTest, DiagnosticDirective_Name) {
     auto p = parser("diagnostic(off, foo);");
     p->diagnostic_directive();
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -33,7 +33,25 @@ TEST_F(ParserImplTest, DiagnosticDirective_Valid) {
 
     auto* r = directive->control.rule_name;
     ASSERT_NE(r, nullptr);
-    ast::CheckIdentifier(r, "foo");
+    EXPECT_EQ(r->category, nullptr);
+    ast::CheckIdentifier(r->name, "foo");
+}
+
+TEST_F(ParserImplTest, DiagnosticDirective_CategoryName) {
+    auto p = parser("diagnostic(off, foo.bar);");
+    p->diagnostic_directive();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    auto& ast = p->builder().AST();
+    ASSERT_EQ(ast.DiagnosticDirectives().Length(), 1u);
+    auto* directive = ast.DiagnosticDirectives()[0];
+    EXPECT_EQ(directive->control.severity, builtin::DiagnosticSeverity::kOff);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], directive);
+
+    auto* r = directive->control.rule_name;
+    ASSERT_NE(r, nullptr);
+    ast::CheckIdentifier(r->category, "foo");
+    ast::CheckIdentifier(r->name, "bar");
 }
 
 TEST_F(ParserImplTest, DiagnosticDirective_MissingSemicolon) {

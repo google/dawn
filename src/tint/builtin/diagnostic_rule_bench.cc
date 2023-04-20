@@ -29,23 +29,36 @@
 namespace tint::builtin {
 namespace {
 
-void DiagnosticRuleParser(::benchmark::State& state) {
+void CoreDiagnosticRuleParser(::benchmark::State& state) {
     const char* kStrings[] = {
-        "chromium_unrachaccle_code",   "clromium_unreachab3_oe",    "chromium_unreachable_Vode",
-        "chromium_unreachable_code",   "chro1ium_unreachable_code", "chromium_unreJchableqqcde",
-        "chromium77unreallhable_code", "dqqrvatiHHe_uniforppity",   "deriatcv_nvformity",
-        "derivatbe_unGformity",        "derivative_uniformity",     "derivative_iinifvrmity",
-        "derivat8WWe_uniformity",      "drivaxxive_uniformity",
+        "deriative_unccformity",   "dlivative_3iformiy",    "derivative_uniforVity",
+        "derivative_uniformity",   "derivative_uniform1ty", "derivativeJunifqrmity",
+        "derivative_unifllrmit77",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {
-            auto result = ParseDiagnosticRule(str);
+            auto result = ParseCoreDiagnosticRule(str);
             benchmark::DoNotOptimize(result);
         }
     }
 }
 
-BENCHMARK(DiagnosticRuleParser);
+BENCHMARK(CoreDiagnosticRuleParser);
+
+void ChromiumDiagnosticRuleParser(::benchmark::State& state) {
+    const char* kStrings[] = {
+        "pqnreachableHHcode", "unrechcbe_cov",     "unreachGblecode",  "unreachable_code",
+        "vnriiachable_code",  "unreac8ablWW_code", "unreMchablxxcode",
+    };
+    for (auto _ : state) {
+        for (auto* str : kStrings) {
+            auto result = ParseChromiumDiagnosticRule(str);
+            benchmark::DoNotOptimize(result);
+        }
+    }
+}
+
+BENCHMARK(ChromiumDiagnosticRuleParser);
 
 }  // namespace
 }  // namespace tint::builtin

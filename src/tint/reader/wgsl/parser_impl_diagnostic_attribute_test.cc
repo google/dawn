@@ -20,7 +20,7 @@
 namespace tint::reader::wgsl {
 namespace {
 
-TEST_F(ParserImplTest, DiagnosticAttribute_Valid) {
+TEST_F(ParserImplTest, DiagnosticAttribute_Name) {
     auto p = parser("diagnostic(off, foo)");
     auto a = p->attribute();
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -30,7 +30,22 @@ TEST_F(ParserImplTest, DiagnosticAttribute_Valid) {
     EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kOff);
     auto* r = d->control.rule_name;
     ASSERT_NE(r, nullptr);
-    ast::CheckIdentifier(r, "foo");
+    EXPECT_EQ(r->category, nullptr);
+    ast::CheckIdentifier(r->name, "foo");
+}
+
+TEST_F(ParserImplTest, DiagnosticAttribute_CategoryName) {
+    auto p = parser("diagnostic(off, foo.bar)");
+    auto a = p->attribute();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_TRUE(a.matched);
+    auto* d = a.value->As<ast::DiagnosticAttribute>();
+    ASSERT_NE(d, nullptr);
+    EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kOff);
+    auto* r = d->control.rule_name;
+    ASSERT_NE(r, nullptr);
+    ast::CheckIdentifier(r->category, "foo");
+    ast::CheckIdentifier(r->name, "bar");
 }
 
 }  // namespace

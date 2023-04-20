@@ -1289,10 +1289,16 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
                 }
             },
             [&](const ast::DiagnosticAttribute* diagnostic) {
-                preserved_identifiers.Add(diagnostic->control.rule_name);
+                if (auto* category = diagnostic->control.rule_name->category) {
+                    preserved_identifiers.Add(category);
+                }
+                preserved_identifiers.Add(diagnostic->control.rule_name->name);
             },
             [&](const ast::DiagnosticDirective* diagnostic) {
-                preserved_identifiers.Add(diagnostic->control.rule_name);
+                if (auto* category = diagnostic->control.rule_name->category) {
+                    preserved_identifiers.Add(category);
+                }
+                preserved_identifiers.Add(diagnostic->control.rule_name->name);
             },
             [&](const ast::IdentifierExpression* expr) {
                 Switch(

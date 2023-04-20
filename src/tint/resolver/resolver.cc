@@ -3466,15 +3466,33 @@ bool Resolver::InternalAttribute(const ast::InternalAttribute* attr) {
 
 bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
     Mark(control.rule_name);
+    Mark(control.rule_name->name);
+    auto name = control.rule_name->name->symbol.Name();
 
-    auto rule_name = control.rule_name->symbol.Name();
-    auto rule = builtin::ParseDiagnosticRule(rule_name);
-    if (rule != builtin::DiagnosticRule::kUndefined) {
+    if (control.rule_name->category) {
+        Mark(control.rule_name->category);
+        if (control.rule_name->category->symbol.Name() == "chromium") {
+            auto rule = builtin::ParseChromiumDiagnosticRule(name);
+            if (rule != builtin::ChromiumDiagnosticRule::kUndefined) {
+                validator_.DiagnosticFilters().Set(rule, control.severity);
+            } else {
+                utils::StringStream ss;
+                ss << "unrecognized diagnostic rule 'chromium." << name << "'\n";
+                utils::SuggestAlternatives(name, builtin::kChromiumDiagnosticRuleStrings, ss,
+                                           "chromium.");
+                AddWarning(ss.str(), control.rule_name->source);
+            }
+        }
+        return true;
+    }
+
+    auto rule = builtin::ParseCoreDiagnosticRule(name);
+    if (rule != builtin::CoreDiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control.severity);
     } else {
         utils::StringStream ss;
-        ss << "unrecognized diagnostic rule '" << rule_name << "'\n";
-        utils::SuggestAlternatives(rule_name, builtin::kDiagnosticRuleStrings, ss);
+        ss << "unrecognized diagnostic rule '" << name << "'\n";
+        utils::SuggestAlternatives(name, builtin::kCoreDiagnosticRuleStrings, ss);
         AddWarning(ss.str(), control.rule_name->source);
     }
     return true;

@@ -39,6 +39,7 @@
 #include "src/tint/ast/diagnostic_attribute.h"
 #include "src/tint/ast/diagnostic_control.h"
 #include "src/tint/ast/diagnostic_directive.h"
+#include "src/tint/ast/diagnostic_rule_name.h"
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/enable.h"
@@ -3752,57 +3753,129 @@ class ProgramBuilder {
                                                                   validation);
     }
 
-    /// Creates an ast::DiagnosticAttribute
-    /// @param source the source information
-    /// @param severity the diagnostic severity control
-    /// @param rule_name the diagnostic rule name
-    /// @returns the diagnostic attribute pointer
+    /// Passthrough overload
+    /// @param name the diagnostic rule name
+    /// @returns @p name
+    const ast::DiagnosticRuleName* DiagnosticRuleName(const ast::DiagnosticRuleName* name) {
+        return name;
+    }
+
+    /// Creates an ast::DiagnosticRuleName
+    /// @param name the diagnostic rule name
+    /// @returns the diagnostic rule name
     template <typename NAME>
-    const ast::DiagnosticAttribute* DiagnosticAttribute(const Source& source,
-                                                        builtin::DiagnosticSeverity severity,
-                                                        NAME&& rule_name) {
+    const ast::DiagnosticRuleName* DiagnosticRuleName(NAME&& name) {
         static_assert(
             !utils::traits::IsType<utils::traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
             "it is invalid for a diagnostic rule name to be templated");
+        auto* name_ident = Ident(std::forward<NAME>(name));
+        return create<ast::DiagnosticRuleName>(name_ident->source, name_ident);
+    }
+
+    /// Creates an ast::DiagnosticRuleName
+    /// @param category the diagnostic rule category
+    /// @param name the diagnostic rule name
+    /// @returns the diagnostic rule name
+    template <typename CATEGORY, typename NAME, typename = DisableIfSource<CATEGORY>>
+    const ast::DiagnosticRuleName* DiagnosticRuleName(CATEGORY&& category, NAME&& name) {
+        static_assert(
+            !utils::traits::IsType<utils::traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
+            "it is invalid for a diagnostic rule name to be templated");
+        static_assert(
+            !utils::traits::IsType<utils::traits::PtrElTy<CATEGORY>, ast::TemplatedIdentifier>,
+            "it is invalid for a diagnostic rule category to be templated");
+        auto* category_ident = Ident(std::forward<CATEGORY>(category));
+        auto* name_ident = Ident(std::forward<NAME>(name));
+        Source source = category_ident->source;
+        source.range.end = name_ident->source.range.end;
+        return create<ast::DiagnosticRuleName>(source, category_ident, name_ident);
+    }
+
+    /// Creates an ast::DiagnosticRuleName
+    /// @param source the source information
+    /// @param name the diagnostic rule name
+    /// @returns the diagnostic rule name
+    template <typename NAME>
+    const ast::DiagnosticRuleName* DiagnosticRuleName(const Source& source, NAME&& name) {
+        static_assert(
+            !utils::traits::IsType<utils::traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
+            "it is invalid for a diagnostic rule name to be templated");
+        auto* name_ident = Ident(std::forward<NAME>(name));
+        return create<ast::DiagnosticRuleName>(source, name_ident);
+    }
+
+    /// Creates an ast::DiagnosticRuleName
+    /// @param source the source information
+    /// @param category the diagnostic rule category
+    /// @param name the diagnostic rule name
+    /// @returns the diagnostic rule name
+    template <typename CATEGORY, typename NAME>
+    const ast::DiagnosticRuleName* DiagnosticRuleName(const Source& source,
+                                                      CATEGORY&& category,
+                                                      NAME&& name) {
+        static_assert(
+            !utils::traits::IsType<utils::traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
+            "it is invalid for a diagnostic rule name to be templated");
+        static_assert(
+            !utils::traits::IsType<utils::traits::PtrElTy<CATEGORY>, ast::TemplatedIdentifier>,
+            "it is invalid for a diagnostic rule category to be templated");
+        auto* category_ident = Ident(std::forward<CATEGORY>(category));
+        auto* name_ident = Ident(std::forward<NAME>(name));
+        return create<ast::DiagnosticRuleName>(source, category_ident, name_ident);
+    }
+
+    /// Creates an ast::DiagnosticAttribute
+    /// @param source the source information
+    /// @param severity the diagnostic severity control
+    /// @param rule_args the arguments used to construct the rule name
+    /// @returns the diagnostic attribute pointer
+    template <typename... RULE_ARGS>
+    const ast::DiagnosticAttribute* DiagnosticAttribute(const Source& source,
+                                                        builtin::DiagnosticSeverity severity,
+                                                        RULE_ARGS&&... rule_args) {
         return create<ast::DiagnosticAttribute>(
-            source, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
+            source, ast::DiagnosticControl(
+                        severity, DiagnosticRuleName(std::forward<RULE_ARGS>(rule_args)...)));
     }
 
     /// Creates an ast::DiagnosticAttribute
     /// @param severity the diagnostic severity control
-    /// @param rule_name the diagnostic rule name
+    /// @param rule_args the arguments used to construct the rule name
     /// @returns the diagnostic attribute pointer
-    template <typename NAME>
+    template <typename... RULE_ARGS>
     const ast::DiagnosticAttribute* DiagnosticAttribute(builtin::DiagnosticSeverity severity,
-                                                        NAME&& rule_name) {
+                                                        RULE_ARGS&&... rule_args) {
         return create<ast::DiagnosticAttribute>(
-            source_, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
+            source_, ast::DiagnosticControl(
+                         severity, DiagnosticRuleName(std::forward<RULE_ARGS>(rule_args)...)));
     }
 
     /// Add a diagnostic directive to the module.
     /// @param source the source information
     /// @param severity the diagnostic severity control
-    /// @param rule_name the diagnostic rule name
+    /// @param rule_args the arguments used to construct the rule name
     /// @returns the diagnostic directive pointer
-    template <typename NAME>
+    template <typename... RULE_ARGS>
     const ast::DiagnosticDirective* DiagnosticDirective(const Source& source,
                                                         builtin::DiagnosticSeverity severity,
-                                                        NAME&& rule_name) {
-        auto* directive = create<ast::DiagnosticDirective>(
-            source, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
+                                                        RULE_ARGS&&... rule_args) {
+        auto* rule = DiagnosticRuleName(std::forward<RULE_ARGS>(rule_args)...);
+        auto* directive =
+            create<ast::DiagnosticDirective>(source, ast::DiagnosticControl(severity, rule));
         AST().AddDiagnosticDirective(directive);
         return directive;
     }
 
     /// Add a diagnostic directive to the module.
     /// @param severity the diagnostic severity control
-    /// @param rule_name the diagnostic rule name
+    /// @param rule_args the arguments used to construct the rule name
     /// @returns the diagnostic directive pointer
-    template <typename NAME>
+    template <typename... RULE_ARGS>
     const ast::DiagnosticDirective* DiagnosticDirective(builtin::DiagnosticSeverity severity,
-                                                        NAME&& rule_name) {
-        auto* directive = create<ast::DiagnosticDirective>(
-            source_, ast::DiagnosticControl(severity, Ident(std::forward<NAME>(rule_name))));
+                                                        RULE_ARGS&&... rule_args) {
+        auto* rule = DiagnosticRuleName(std::forward<RULE_ARGS>(rule_args)...);
+        auto* directive =
+            create<ast::DiagnosticDirective>(source_, ast::DiagnosticControl(severity, rule));
         AST().AddDiagnosticDirective(directive);
         return directive;
     }

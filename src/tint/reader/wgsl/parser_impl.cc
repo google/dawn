@@ -3092,7 +3092,7 @@ Expect<builtin::DiagnosticSeverity> ParserImpl::expect_severity_control_name() {
 }
 
 // diagnostic_control
-// : PAREN_LEFT severity_control_name COMMA ident_pattern_token COMMA ? PAREN_RIGHT
+// : PAREN_LEFT severity_control_name COMMA diagnostic_rule_name COMMA ? PAREN_RIGHT
 Expect<ast::DiagnosticControl> ParserImpl::expect_diagnostic_control() {
     return expect_paren_block("diagnostic control", [&]() -> Expect<ast::DiagnosticControl> {
         auto severity_control = expect_severity_control_name();
@@ -3104,7 +3104,7 @@ Expect<ast::DiagnosticControl> ParserImpl::expect_diagnostic_control() {
             return Failure::kErrored;
         }
 
-        auto rule_name = expect_ident("diagnostic control");
+        auto rule_name = expect_diagnostic_rule_name();
         if (rule_name.errored) {
             return Failure::kErrored;
         }
@@ -3112,6 +3112,31 @@ Expect<ast::DiagnosticControl> ParserImpl::expect_diagnostic_control() {
 
         return ast::DiagnosticControl(severity_control.value, rule_name.value);
     });
+}
+
+// diagnostic_rule_name :
+// | diagnostic_name_token
+// | diagnostic_name_token '.' diagnostic_name_token
+Expect<const ast::DiagnosticRuleName*> ParserImpl::expect_diagnostic_rule_name() {
+    if (peek_is(Token::Type::kPeriod, 1)) {
+        auto category = expect_ident("", "diagnostic rule category");
+        if (category.errored) {
+            return Failure::kErrored;
+        }
+        if (!expect("diagnostic rule", Token::Type::kPeriod)) {
+            return Failure::kErrored;
+        }
+        auto name = expect_ident("", "diagnostic rule name");
+        if (name.errored) {
+            return Failure::kErrored;
+        }
+        return builder_.DiagnosticRuleName(category.value, name.value);
+    }
+    auto name = expect_ident("", "diagnostic rule name");
+    if (name.errored) {
+        return Failure::kErrored;
+    }
+    return builder_.DiagnosticRuleName(name.value);
 }
 
 bool ParserImpl::match(Token::Type tok, Source* source /*= nullptr*/) {
@@ -3214,7 +3239,9 @@ Expect<uint32_t> ParserImpl::expect_nonzero_positive_sint(std::string_view use) 
     return {static_cast<uint32_t>(sint.value), sint.source};
 }
 
-Expect<const ast::Identifier*> ParserImpl::expect_ident(std::string_view use) {
+Expect<const ast::Identifier*> ParserImpl::expect_ident(
+    std::string_view use,
+    std::string_view kind /* = "identifier" */) {
     auto& t = peek();
     if (t.IsIdentifier()) {
         synchronized_ = true;
@@ -3230,7 +3257,7 @@ Expect<const ast::Identifier*> ParserImpl::expect_ident(std::string_view use) {
         return Failure::kErrored;
     }
     synchronized_ = false;
-    return add_error(t.source(), "expected identifier", use);
+    return add_error(t.source(), "expected " + std::string(kind), use);
 }
 
 template <typename F, typename T>

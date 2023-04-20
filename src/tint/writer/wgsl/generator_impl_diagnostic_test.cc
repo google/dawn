@@ -22,25 +22,25 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_DiagnosticDirective) {
-    DiagnosticDirective(builtin::DiagnosticSeverity::kError, "chromium_unreachable_code");
+    DiagnosticDirective(builtin::DiagnosticSeverity::kError, "chromium", "unreachable_code");
 
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(diagnostic(error, chromium_unreachable_code);
+    EXPECT_EQ(gen.result(), R"(diagnostic(error, chromium.unreachable_code);
 
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_DiagnosticAttribute) {
     auto* attr =
-        DiagnosticAttribute(builtin::DiagnosticSeverity::kError, "chromium_unreachable_code");
+        DiagnosticAttribute(builtin::DiagnosticSeverity::kError, "chromium", "unreachable_code");
     Func("foo", {}, ty.void_(), {}, utils::Vector{attr});
 
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(@diagnostic(error, chromium_unreachable_code)
+    EXPECT_EQ(gen.result(), R"(@diagnostic(error, chromium.unreachable_code)
 fn foo() {
 }
 )");

@@ -23,7 +23,7 @@ namespace {
 using SeverityPair = std::pair<std::string, builtin::DiagnosticSeverity>;
 class DiagnosticControlParserTest : public ParserImplTestWithParam<SeverityPair> {};
 
-TEST_P(DiagnosticControlParserTest, DiagnosticControl_Valid) {
+TEST_P(DiagnosticControlParserTest, DiagnosticControl_Name) {
     auto& params = GetParam();
     auto p = parser("(" + params.first + ", foo)");
     auto e = p->expect_diagnostic_control();
@@ -33,7 +33,21 @@ TEST_P(DiagnosticControlParserTest, DiagnosticControl_Valid) {
 
     auto* r = e->rule_name;
     ASSERT_NE(r, nullptr);
-    ast::CheckIdentifier(r, "foo");
+    EXPECT_EQ(r->category, nullptr);
+    ast::CheckIdentifier(r->name, "foo");
+}
+TEST_P(DiagnosticControlParserTest, DiagnosticControl_CategoryAndName) {
+    auto& params = GetParam();
+    auto p = parser("(" + params.first + ", foo.bar)");
+    auto e = p->expect_diagnostic_control();
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_EQ(e->severity, params.second);
+
+    auto* r = e->rule_name;
+    ASSERT_NE(r, nullptr);
+    ast::CheckIdentifier(r->category, "foo");
+    ast::CheckIdentifier(r->name, "bar");
 }
 INSTANTIATE_TEST_SUITE_P(DiagnosticControlParserTest,
                          DiagnosticControlParserTest,
@@ -43,7 +57,7 @@ INSTANTIATE_TEST_SUITE_P(DiagnosticControlParserTest,
                                          SeverityPair{"info", builtin::DiagnosticSeverity::kInfo},
                                          SeverityPair{"off", builtin::DiagnosticSeverity::kOff}));
 
-TEST_F(ParserImplTest, DiagnosticControl_Valid_TrailingComma) {
+TEST_F(ParserImplTest, DiagnosticControl_Name_TrailingComma) {
     auto p = parser("(error, foo,)");
     auto e = p->expect_diagnostic_control();
     EXPECT_FALSE(e.errored);
@@ -52,7 +66,21 @@ TEST_F(ParserImplTest, DiagnosticControl_Valid_TrailingComma) {
 
     auto* r = e->rule_name;
     ASSERT_NE(r, nullptr);
-    ast::CheckIdentifier(r, "foo");
+    EXPECT_EQ(r->category, nullptr);
+    ast::CheckIdentifier(r->name, "foo");
+}
+
+TEST_F(ParserImplTest, DiagnosticControl_CategoryAndName_TrailingComma) {
+    auto p = parser("(error, foo.bar,)");
+    auto e = p->expect_diagnostic_control();
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_EQ(e->severity, builtin::DiagnosticSeverity::kError);
+
+    auto* r = e->rule_name;
+    ASSERT_NE(r, nullptr);
+    ast::CheckIdentifier(r->category, "foo");
+    ast::CheckIdentifier(r->name, "bar");
 }
 
 TEST_F(ParserImplTest, DiagnosticControl_MissingOpenParen) {
@@ -102,7 +130,15 @@ TEST_F(ParserImplTest, DiagnosticControl_MissingRuleName) {
     auto e = p->expect_diagnostic_control();
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), R"(1:6: expected identifier for diagnostic control)");
+    EXPECT_EQ(p->error(), R"(1:6: expected diagnostic rule name)");
+}
+
+TEST_F(ParserImplTest, DiagnosticControl_MissingRuleCategory) {
+    auto p = parser("(off,for.foo)");
+    auto e = p->expect_diagnostic_control();
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), R"(1:6: expected diagnostic rule category)");
 }
 
 TEST_F(ParserImplTest, DiagnosticControl_InvalidRuleName) {

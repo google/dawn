@@ -15,20 +15,33 @@
 #include <string>
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/ast/diagnostic_control.h"
+#include "src/tint/ast/diagnostic_rule_name.h"
 #include "src/tint/ast/test_helper.h"
-#include "src/tint/builtin/diagnostic_severity.h"
 
 namespace tint::ast {
 namespace {
 
-using DiagnosticControlTest = TestHelper;
+using DiagnosticRuleNameTest = TestHelper;
 
-TEST_F(DiagnosticControlTest, Assert_RuleNotNull) {
+TEST_F(DiagnosticRuleNameTest, String) {
+    EXPECT_EQ(DiagnosticRuleName("name")->String(), "name");
+    EXPECT_EQ(DiagnosticRuleName("category", "name")->String(), "category.name");
+}
+
+TEST_F(DiagnosticRuleNameTest, Assert_NameNotTemplated) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            DiagnosticControl control(builtin::DiagnosticSeverity::kWarning, nullptr);
+            b.create<ast::DiagnosticRuleName>(b.Ident("name", "a", "b", "c"));
+        },
+        "internal compiler error");
+}
+
+TEST_F(DiagnosticRuleNameTest, Assert_CategoryNotTemplated) {
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<ast::DiagnosticRuleName>(b.Ident("name"), b.Ident("category", "a", "b", "c"));
         },
         "internal compiler error");
 }

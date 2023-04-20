@@ -24,13 +24,10 @@ namespace tint::ast {
 
 DiagnosticControl::DiagnosticControl() = default;
 
-DiagnosticControl::DiagnosticControl(builtin::DiagnosticSeverity sev, const Identifier* rule)
+DiagnosticControl::DiagnosticControl(builtin::DiagnosticSeverity sev,
+                                     const DiagnosticRuleName* rule)
     : severity(sev), rule_name(rule) {
     TINT_ASSERT(AST, rule != nullptr);
-    if (rule) {
-        // It is invalid for a diagnostic rule name to be templated
-        TINT_ASSERT(AST, !rule->Is<TemplatedIdentifier>());
-    }
 }
 
 DiagnosticControl::DiagnosticControl(DiagnosticControl&&) = default;

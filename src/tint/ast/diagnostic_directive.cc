@@ -34,4 +34,5 @@ const DiagnosticDirective* DiagnosticDirective::Clone(CloneContext* ctx) const {
     DiagnosticControl dc(control.severity, rule);
     return ctx->dst->create<DiagnosticDirective>(src, std::move(dc));
 }
+
 }  // namespace tint::ast

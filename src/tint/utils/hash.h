@@ -134,7 +134,15 @@ struct Hasher<std::tuple<TYPES...>> {
     }
 };
 
-/// Hasher specialization for std::tuple
+/// Hasher specialization for std::pair
+template <typename A, typename B>
+struct Hasher<std::pair<A, B>> {
+    /// @param tuple the tuple to hash
+    /// @returns a hash of the tuple
+    size_t operator()(const std::pair<A, B>& tuple) const { return std::apply(Hash<A, B>, tuple); }
+};
+
+/// Hasher specialization for std::variant
 template <typename... TYPES>
 struct Hasher<std::variant<TYPES...>> {
     /// @param variant the variant to hash

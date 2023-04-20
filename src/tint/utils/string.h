@@ -72,9 +72,11 @@ size_t Distance(std::string_view a, std::string_view b);
 /// @param got the unrecognized string
 /// @param strings the list of possible values
 /// @param ss the stream to write the suggest and list of possible values to
+/// @param prefix the prefix to apply to the strings when printing (optional)
 void SuggestAlternatives(std::string_view got,
                          Slice<char const* const> strings,
-                         utils::StringStream& ss);
+                         utils::StringStream& ss,
+                         std::string_view prefix = "");
 
 }  // namespace tint::utils
 

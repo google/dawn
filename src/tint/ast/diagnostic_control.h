@@ -23,7 +23,7 @@
 
 // Forward declarations
 namespace tint::ast {
-class Identifier;
+class DiagnosticRuleName;
 }  // namespace tint::ast
 
 namespace tint::ast {
@@ -37,16 +37,16 @@ struct DiagnosticControl {
     /// Constructor
     /// @param sev the diagnostic severity
     /// @param rule the diagnostic rule name
-    DiagnosticControl(builtin::DiagnosticSeverity sev, const Identifier* rule);
+    DiagnosticControl(builtin::DiagnosticSeverity sev, const DiagnosticRuleName* rule);
 
     /// Move constructor
     DiagnosticControl(DiagnosticControl&&);
 
     /// The diagnostic severity control.
-    builtin::DiagnosticSeverity severity;
+    builtin::DiagnosticSeverity severity = builtin::DiagnosticSeverity::kUndefined;
 
     /// The diagnostic rule name.
-    const Identifier* rule_name;
+    const DiagnosticRuleName* rule_name = nullptr;
 };
 
 }  // namespace tint::ast

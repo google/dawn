@@ -159,9 +159,9 @@ Validator::Validator(
       atomic_composite_info_(atomic_composite_info),
       valid_type_storage_layouts_(valid_type_storage_layouts) {
     // Set default severities for filterable diagnostic rules.
-    diagnostic_filters_.Set(builtin::DiagnosticRule::kDerivativeUniformity,
+    diagnostic_filters_.Set(builtin::CoreDiagnosticRule::kDerivativeUniformity,
                             builtin::DiagnosticSeverity::kError);
-    diagnostic_filters_.Set(builtin::DiagnosticRule::kChromiumUnreachableCode,
+    diagnostic_filters_.Set(builtin::ChromiumDiagnosticRule::kUnreachableCode,
                             builtin::DiagnosticSeverity::kWarning);
 }
 
@@ -1417,7 +1417,7 @@ bool Validator::EvaluationStage(const sem::ValueExpression* expr,
 bool Validator::Statements(utils::VectorRef<const ast::Statement*> stmts) const {
     for (auto* stmt : stmts) {
         if (!sem_.Get(stmt)->IsReachable()) {
-            if (!AddDiagnostic(builtin::DiagnosticRule::kChromiumUnreachableCode,
+            if (!AddDiagnostic(builtin::ChromiumDiagnosticRule::kUnreachableCode,
                                "code is unreachable", stmt->source)) {
                 return false;
             }
@@ -2530,9 +2530,12 @@ bool Validator::DiagnosticControls(utils::VectorRef<const ast::DiagnosticControl
                                    const char* use) const {
     // Make sure that no two diagnostic controls conflict.
     // They conflict if the rule name is the same and the severity is different.
-    utils::Hashmap<Symbol, const ast::DiagnosticControl*, 8> diagnostics;
+    utils::Hashmap<std::pair<Symbol, Symbol>, const ast::DiagnosticControl*, 8> diagnostics;
     for (auto* dc : controls) {
-        auto diag_added = diagnostics.Add(dc->rule_name->symbol, dc);
+        auto category = dc->rule_name->category ? dc->rule_name->category->symbol : Symbol();
+        auto name = dc->rule_name->name->symbol;
+
+        auto diag_added = diagnostics.Add(std::make_pair(category, name), dc);
         if (!diag_added && (*diag_added.value)->severity != dc->severity) {
             {
                 utils::StringStream ss;
@@ -2541,8 +2544,8 @@ bool Validator::DiagnosticControls(utils::VectorRef<const ast::DiagnosticControl
             }
             {
                 utils::StringStream ss;
-                ss << "severity of '" << dc->rule_name->symbol.Name() << "' set to '"
-                   << dc->severity << "' here";
+                ss << "severity of '" << dc->rule_name->String() << "' set to '" << dc->severity
+                   << "' here";
                 AddNote(ss.str(), (*diag_added.value)->rule_name->source);
             }
             return false;

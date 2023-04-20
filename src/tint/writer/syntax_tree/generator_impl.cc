@@ -66,7 +66,7 @@ void GeneratorImpl::Generate() {
 
 void GeneratorImpl::EmitDiagnosticControl(const ast::DiagnosticControl& diagnostic) {
     line() << "DiagnosticControl [severity: " << diagnostic.severity
-           << ", rule: " << diagnostic.rule_name->symbol.Name() << "]";
+           << ", rule: " << diagnostic.rule_name->String() << "]";
 }
 
 void GeneratorImpl::EmitEnable(const ast::Enable* enable) {

@@ -192,9 +192,9 @@ fn tint_symbol() {
     EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
-TEST_F(RenamerTest, PreserveDiagnosticControls) {
+TEST_F(RenamerTest, PreserveCoreDiagnosticRuleName) {
     auto* src = R"(
-diagnostic(off, unreachable_code);
+diagnostic(off, chromium.unreachable_code);
 
 @diagnostic(off, derivative_uniformity)
 @fragment
@@ -208,7 +208,7 @@ fn entry(@location(0) value : f32) -> @location(0) f32 {
 )";
 
     auto* expect = R"(
-diagnostic(off, unreachable_code);
+diagnostic(off, chromium.unreachable_code);
 
 @diagnostic(off, derivative_uniformity) @fragment
 fn tint_symbol(@location(0) tint_symbol_1 : f32) -> @location(0) f32 {

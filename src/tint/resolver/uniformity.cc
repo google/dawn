@@ -1563,7 +1563,7 @@ class UniformityGraph {
                            builtin->Type() == builtin::Function::kTextureSampleCompare) {
                     // Get the severity of derivative uniformity violations in this context.
                     auto severity = sem_.DiagnosticSeverity(
-                        call, builtin::DiagnosticRule::kDerivativeUniformity);
+                        call, builtin::CoreDiagnosticRule::kDerivativeUniformity);
                     if (severity != builtin::DiagnosticSeverity::kOff) {
                         callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
                     }

@@ -636,14 +636,17 @@ class ParserImpl {
     /// Parses a single attribute, reporting an error if the next token does not
     /// represent a attribute.
     /// @see #attribute for the full list of attributes this method parses.
-    /// @return the parsed attribute, or nullptr on error.
+    /// @return the parsed attribute.
     Expect<const ast::Attribute*> expect_attribute();
     /// Parses a severity_control_name grammar element.
-    /// @return the parsed severity control name, or nullptr on error.
+    /// @return the parsed severity control name.
     Expect<builtin::DiagnosticSeverity> expect_severity_control_name();
     /// Parses a diagnostic_control grammar element.
-    /// @return the parsed diagnostic control, or nullptr on error.
+    /// @return the parsed diagnostic control.
     Expect<ast::DiagnosticControl> expect_diagnostic_control();
+    /// Parses a diagnostic_rule_name grammar element.
+    /// @return the parsed diagnostic rule name.
+    Expect<const ast::DiagnosticRuleName*> expect_diagnostic_rule_name();
 
     /// Splits a peekable token into to parts filling in the peekable fields.
     /// @param lhs the token to set in the current position
@@ -694,8 +697,11 @@ class ParserImpl {
     /// Errors if the next token is not an identifier.
     /// Consumes the next token on match.
     /// @param use a description of what was being parsed if an error was raised
+    /// @param kind a string describing the kind of identifier.
+    ///             Examples: "identifier", "diagnostic name"
     /// @returns the parsed identifier.
-    Expect<const ast::Identifier*> expect_ident(std::string_view use);
+    Expect<const ast::Identifier*> expect_ident(std::string_view use,
+                                                std::string_view kind = "identifier");
     /// Parses a lexical block starting with the token `start` and ending with
     /// the token `end`. `body` is called to parse the lexical block body
     /// between the `start` and `end` tokens. If the `start` or `end` tokens
