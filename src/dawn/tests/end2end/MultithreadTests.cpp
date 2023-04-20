@@ -91,6 +91,108 @@ class MultithreadTests : public DawnTest {
     dawn::Mutex mutex;
 };
 
+class MultithreadCachingTests : public MultithreadTests {
+  protected:
+    wgpu::ShaderModule CreateComputeShaderModule() const {
+        return utils::CreateShaderModule(device, R"(
+            struct SSBO {
+                value : u32
+            }
+            @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
+
+            @compute @workgroup_size(1) fn main() {
+                ssbo.value = 1;
+            })");
+    }
+
+    wgpu::BindGroupLayout CreateComputeBindGroupLayout() const {
+        return utils::MakeBindGroupLayout(
+            device, {
+                        {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+                    });
+    }
+};
+
+// Test that creating a same shader module (which will return the cached shader module) and release
+// it on multiple threads won't race.
+TEST_P(MultithreadCachingTests, RefAndReleaseCachedShaderModulesInParallel) {
+    RunInParallel(100, [this](uint32_t) {
+        wgpu::ShaderModule csModule = CreateComputeShaderModule();
+        EXPECT_NE(nullptr, csModule.Get());
+    });
+}
+
+// Test that creating a same compute pipeline (which will return the cached pipeline) and release it
+// on multiple threads won't race.
+TEST_P(MultithreadCachingTests, RefAndReleaseCachedComputePipelinesInParallel) {
+    wgpu::ShaderModule csModule = CreateComputeShaderModule();
+    wgpu::BindGroupLayout bglayout = CreateComputeBindGroupLayout();
+    wgpu::PipelineLayout pipelineLayout = utils::MakePipelineLayout(device, {bglayout});
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = csModule;
+    csDesc.compute.entryPoint = "main";
+    csDesc.layout = pipelineLayout;
+
+    RunInParallel(100, [&, this](uint32_t) {
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+        EXPECT_NE(nullptr, pipeline.Get());
+    });
+}
+
+// Test that creating a same bind group layout (which will return the cached layout) and
+// release it on multiple threads won't race.
+TEST_P(MultithreadCachingTests, RefAndReleaseCachedBindGroupLayoutsInParallel) {
+    RunInParallel(100, [&, this](uint32_t) {
+        wgpu::BindGroupLayout layout = CreateComputeBindGroupLayout();
+        EXPECT_NE(nullptr, layout.Get());
+    });
+}
+
+// Test that creating a same pipeline layout (which will return the cached layout) and
+// release it on multiple threads won't race.
+TEST_P(MultithreadCachingTests, RefAndReleaseCachedPipelineLayoutsInParallel) {
+    wgpu::BindGroupLayout bglayout = CreateComputeBindGroupLayout();
+
+    RunInParallel(100, [&, this](uint32_t) {
+        wgpu::PipelineLayout pipelineLayout = utils::MakePipelineLayout(device, {bglayout});
+        EXPECT_NE(nullptr, pipelineLayout.Get());
+    });
+}
+
+// Test that creating a same render pipeline (which will return the cached pipeline) and release it
+// on multiple threads won't race.
+TEST_P(MultithreadCachingTests, RefAndReleaseCachedRenderPipelinesInParallel) {
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
+        })");
+    renderPipelineDescriptor.vertex.module = vsModule;
+    renderPipelineDescriptor.cFragment.module = fsModule;
+    renderPipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+
+    RunInParallel(100, [&, this](uint32_t) {
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+        EXPECT_NE(nullptr, pipeline.Get());
+    });
+}
+
+// Test that creating a same sampler pipeline (which will return the cached sampler) and release it
+// on multiple threads won't race.
+TEST_P(MultithreadCachingTests, RefAndReleaseCachedSamplersInParallel) {
+    wgpu::SamplerDescriptor desc = {};
+    RunInParallel(100, [&, this](uint32_t) {
+        wgpu::Sampler sampler = device.CreateSampler(&desc);
+        EXPECT_NE(nullptr, sampler.Get());
+    });
+}
+
 class MultithreadEncodingTests : public MultithreadTests {};
 
 // Test that encoding render passes in parallel should work
@@ -387,6 +489,13 @@ TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
 }
 
 }  // namespace
+
+DAWN_INSTANTIATE_TEST(MultithreadCachingTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
 
 DAWN_INSTANTIATE_TEST(MultithreadEncodingTests,
                       D3D12Backend(),
