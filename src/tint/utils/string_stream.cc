@@ -24,10 +24,6 @@ StringStream::StringStream() {
 
 StringStream::~StringStream() = default;
 
-}  // namespace tint::utils
-
-namespace tint::text {
-
 utils::StringStream& operator<<(utils::StringStream& out, CodePoint code_point) {
     if (code_point < 0x7f) {
         // See https://en.cppreference.com/w/cpp/language/escape
@@ -52,4 +48,4 @@ utils::StringStream& operator<<(utils::StringStream& out, CodePoint code_point) 
     return out << "'U+" << std::hex << code_point.value << "'";
 }
 
-}  // namespace tint::text
+}  // namespace tint::utils

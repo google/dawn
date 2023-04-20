@@ -243,6 +243,8 @@ libtint_source_set("libtint_base_src") {
     "utils/string_stream.cc",
     "utils/string_stream.h",
     "utils/traits.h",
+    "utils/unicode.cc",
+    "utils/unicode.h",
     "utils/unique_allocator.h",
     "utils/unique_vector.h",
     "utils/vector.h",
@@ -255,8 +257,6 @@ libtint_source_set("libtint_base_src") {
   } else {
     sources += [ "diagnostic/printer_other.cc" ]
   }
-
-  deps = [ ":libtint_text_src" ]
 }
 
 libtint_source_set("libtint_clone_context_hdrs") {
@@ -303,7 +303,6 @@ libtint_source_set("libtint_program_src") {
     ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_sem_src",
-    ":libtint_text_src",
     ":libtint_type_src",
   ]
 }
@@ -330,13 +329,6 @@ libtint_source_set("libtint_inspector_src") {
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_type_src",
-  ]
-}
-
-libtint_source_set("libtint_text_src") {
-  sources = [
-    "text/unicode.cc",
-    "text/unicode.h",
   ]
 }
 
@@ -451,7 +443,6 @@ libtint_source_set("libtint_transform_src") {
     ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_sem_src",
-    ":libtint_text_src",
     ":libtint_type_src",
   ]
 }
@@ -974,7 +965,6 @@ libtint_source_set("libtint_wgsl_reader_src") {
     ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_reader_src",
-    ":libtint_text_src",
     ":libtint_type_src",
   ]
 }
@@ -1089,7 +1079,6 @@ source_set("libtint") {
     ":libtint_inspector_src",
     ":libtint_program_src",
     ":libtint_sem_src",
-    ":libtint_text_src",
     ":libtint_transform_src",
     ":libtint_type_src",
     ":libtint_writer_src",
@@ -1511,11 +1500,6 @@ if (tint_build_unittests) {
     ]
   }
 
-  tint_unittests_source_set("tint_unittests_text_src") {
-    sources = [ "text/unicode_test.cc" ]
-    deps = [ ":libtint_text_src" ]
-  }
-
   tint_unittests_source_set("tint_unittests_transform_src") {
     sources = [
       "transform/add_block_attribute_test.cc",
@@ -1609,6 +1593,7 @@ if (tint_build_unittests) {
       "utils/string_test.cc",
       "utils/traits_test.cc",
       "utils/transform_test.cc",
+      "utils/unicode_test.cc",
       "utils/unique_allocator_test.cc",
       "utils/unique_vector_test.cc",
       "utils/vector_test.cc",
@@ -2036,7 +2021,6 @@ if (tint_build_unittests) {
       ":tint_unittests_inspector_src",
       ":tint_unittests_resolver_src",
       ":tint_unittests_sem_src",
-      ":tint_unittests_text_src",
       ":tint_unittests_transform_src",
       ":tint_unittests_type_src",
       ":tint_unittests_utils_src",

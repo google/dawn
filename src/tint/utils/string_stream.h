@@ -23,7 +23,7 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/text/unicode.h"
+#include "src/tint/utils/unicode.h"
 
 namespace tint::utils {
 
@@ -183,16 +183,12 @@ class StringStream {
     std::stringstream sstream_;
 };
 
-}  // namespace tint::utils
-
-namespace tint::text {
-
 /// Writes the CodePoint to the stream.
 /// @param out the stream to write to
 /// @param codepoint the CodePoint to write
 /// @returns out so calls can be chained
 utils::StringStream& operator<<(utils::StringStream& out, CodePoint codepoint);
 
-}  // namespace tint::text
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_STRING_STREAM_H_

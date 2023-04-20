@@ -24,7 +24,7 @@
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
-#include "src/tint/text/unicode.h"
+#include "src/tint/utils/unicode.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::TruncateInterstageVariables);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::TruncateInterstageVariables::Config);

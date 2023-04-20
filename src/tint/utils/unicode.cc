@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/text/unicode.h"
+#include "src/tint/utils/unicode.h"
 
 #include <algorithm>
 
-namespace tint::text {
+namespace tint::utils {
 namespace {
 
 struct CodePointRange {
@@ -418,4 +418,4 @@ bool IsASCII(std::string_view str) {
 
 }  // namespace utf8
 
-}  // namespace tint::text
+}  // namespace tint::utils

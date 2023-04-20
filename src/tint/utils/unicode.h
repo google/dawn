@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_TEXT_UNICODE_H_
-#define SRC_TINT_TEXT_UNICODE_H_
+#ifndef SRC_TINT_UTILS_UNICODE_H_
+#define SRC_TINT_UTILS_UNICODE_H_
 
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
 #include <utility>
 
-namespace tint::text {
+namespace tint::utils {
 
 /// CodePoint is a unicode code point.
 struct CodePoint {
@@ -75,6 +75,6 @@ bool IsASCII(std::string_view);
 
 }  // namespace utf8
 
-}  // namespace tint::text
+}  // namespace tint::utils
 
-#endif  // SRC_TINT_TEXT_UNICODE_H_
+#endif  // SRC_TINT_UTILS_UNICODE_H_

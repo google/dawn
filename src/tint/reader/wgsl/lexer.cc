@@ -28,7 +28,7 @@
 #include "absl/strings/charconv.h"
 #include "src/tint/debug.h"
 #include "src/tint/number.h"
-#include "src/tint/text/unicode.h"
+#include "src/tint/utils/unicode.h"
 
 namespace tint::reader::wgsl {
 namespace {
@@ -45,16 +45,16 @@ bool read_blankspace(std::string_view str, size_t i, bool* is_blankspace, size_t
     // See https://www.w3.org/TR/WGSL/#blankspace
 
     auto* utf8 = reinterpret_cast<const uint8_t*>(&str[i]);
-    auto [cp, n] = text::utf8::Decode(utf8, str.size() - i);
+    auto [cp, n] = utils::utf8::Decode(utf8, str.size() - i);
 
     if (n == 0) {
         return false;
     }
 
-    static const auto kSpace = text::CodePoint(0x0020);  // space
-    static const auto kHTab = text::CodePoint(0x0009);   // horizontal tab
-    static const auto kL2R = text::CodePoint(0x200E);    // left-to-right mark
-    static const auto kR2L = text::CodePoint(0x200F);    // right-to-left mark
+    static const auto kSpace = utils::CodePoint(0x0020);  // space
+    static const auto kHTab = utils::CodePoint(0x0009);   // horizontal tab
+    static const auto kL2R = utils::CodePoint(0x200E);    // left-to-right mark
+    static const auto kR2L = utils::CodePoint(0x200F);    // right-to-left mark
 
     if (cp == kSpace || cp == kHTab || cp == kL2R || cp == kR2L) {
         *is_blankspace = true;
@@ -959,12 +959,12 @@ Token Lexer::try_ident() {
     // Must begin with an XID_Source unicode character, or underscore
     {
         auto* utf8 = reinterpret_cast<const uint8_t*>(&at(pos()));
-        auto [code_point, n] = text::utf8::Decode(utf8, length() - pos());
+        auto [code_point, n] = utils::utf8::Decode(utf8, length() - pos());
         if (n == 0) {
             advance();  // Skip the bad byte.
             return {Token::Type::kError, source, "invalid UTF-8"};
         }
-        if (code_point != text::CodePoint('_') && !code_point.IsXIDStart()) {
+        if (code_point != utils::CodePoint('_') && !code_point.IsXIDStart()) {
             return {};
         }
         // Consume start codepoint
@@ -974,7 +974,7 @@ Token Lexer::try_ident() {
     while (!is_eol()) {
         // Must continue with an XID_Continue unicode character
         auto* utf8 = reinterpret_cast<const uint8_t*>(&at(pos()));
-        auto [code_point, n] = text::utf8::Decode(utf8, line().size() - pos());
+        auto [code_point, n] = utils::utf8::Decode(utf8, line().size() - pos());
         if (n == 0) {
             advance();  // Skip the bad byte.
             return {Token::Type::kError, source, "invalid UTF-8"};

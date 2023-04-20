@@ -66,10 +66,10 @@ add_library(tint_diagnostic_utils
   diagnostic/formatter.h
   diagnostic/printer.cc
   diagnostic/printer.h
-  text/unicode.cc
-  text/unicode.h
   utils/debugger.cc
   utils/debugger.h
+  utils/unicode.cc
+  utils/unicode.h
 )
 tint_default_compile_options(tint_diagnostic_utils)
 
@@ -967,7 +967,6 @@ if(TINT_BUILD_TESTS)
     symbol_table_test.cc
     symbol_test.cc
     test_main.cc
-    text/unicode_test.cc
     transform/transform_test.cc
     type/array_test.cc
     type/atomic_test.cc
@@ -1014,6 +1013,7 @@ if(TINT_BUILD_TESTS)
     utils/string_test.cc
     utils/traits_test.cc
     utils/transform_test.cc
+    utils/unicode_test.cc
     utils/unique_allocator_test.cc
     utils/unique_vector_test.cc
     utils/vector_test.cc

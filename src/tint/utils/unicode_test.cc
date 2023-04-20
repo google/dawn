@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/text/unicode.h"
+#include "src/tint/utils/unicode.h"
 
 #include <string>
 #include <vector>
@@ -22,7 +22,7 @@
 /// Helper for constructing a CodePoint
 #define C(x) CodePoint(x)
 
-namespace tint::text {
+namespace tint::utils {
 
 ////////////////////////////////////////////////////////////////////////////////
 // CodePoint character set tests
@@ -335,16 +335,16 @@ INSTANTIATE_TEST_SUITE_P(Hindi,
                                  {C(0x0928), 3},  // न
                                  {C(0x092e), 3},  // म
                                  {C(0x0938), 3},  // स
-                                 {C(0x094d), 3},  // ्
+                                 {C(0x094d), 3},  // ् //
                                  {C(0x0924), 3},  // त
-                                 {C(0x0947), 3},  // े
+                                 {C(0x0947), 3},  // े //
                                  {C(' '), 1},
                                  {C(0x0926), 3},  // द
-                                 {C(0x0941), 3},  // ु
+                                 {C(0x0941), 3},  // ु //
                                  {C(0x0928), 3},  // न
-                                 {C(0x093f), 3},  // ि
+                                 {C(0x093f), 3},  // ि //
                                  {C(0x092f), 3},  // य
-                                 {C(0x093e), 3},  // ा
+                                 {C(0x093e), 3},  // ा //
                              },
                          }}));
 
@@ -487,4 +487,4 @@ INSTANTIATE_TEST_SUITE_P(Invalid,
 
 }  // namespace
 
-}  // namespace tint::text
+}  // namespace tint::utils

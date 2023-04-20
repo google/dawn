@@ -23,7 +23,7 @@ TEST_F(CountUTF16CodeUnitsFromUTF8StringTest, ValidUnicodeString) {
         uint64_t lengthInUTF16;
     };
 
-    // Referenced from src/tint/text/unicode_test.cc
+    // Referenced from src/tint/utils/unicode_test.cc
     constexpr std::array<TestCase, 12> kTestCases = {{
         {"", 0},
         {"abc", 3},
@@ -48,7 +48,7 @@ TEST_F(CountUTF16CodeUnitsFromUTF8StringTest, ValidUnicodeString) {
 }
 
 TEST_F(CountUTF16CodeUnitsFromUTF8StringTest, InvalidUnicodeString) {
-    // Referenced from src/tint/text/unicode_test.cc
+    // Referenced from src/tint/utils/unicode_test.cc
     constexpr std::array<const char*, 12> kTestCases = {{
         "\xed\xa0\x80",  // CodePoint == 0xD7FF + 1
         "\xed\xbf\xbf",  // CodePoint == 0xE000 - 1
