@@ -261,6 +261,8 @@ class DeviceBase : public RefCountedWithExternalCount {
     ResultOrError<Ref<TextureViewBase>> CreateTextureView(TextureBase* texture,
                                                           const TextureViewDescriptor* descriptor);
 
+    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsage(const Surface* surface) const;
+
     // Implementation of API object creation methods. DO NOT use them in a reentrant manner.
     BindGroupBase* APICreateBindGroup(const BindGroupDescriptor* descriptor);
     BindGroupLayoutBase* APICreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
@@ -283,6 +285,8 @@ class DeviceBase : public RefCountedWithExternalCount {
     ShaderModuleBase* APICreateShaderModule(const ShaderModuleDescriptor* descriptor);
     SwapChainBase* APICreateSwapChain(Surface* surface, const SwapChainDescriptor* descriptor);
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
+
+    wgpu::TextureUsage APIGetSupportedSurfaceUsage(Surface* surface);
 
     InternalPipelineStore* GetInternalPipelineStore();
 
@@ -491,6 +495,9 @@ class DeviceBase : public RefCountedWithExternalCount {
     virtual Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) = 0;
     virtual void SetLabelImpl();
+
+    virtual ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
+        const Surface* surface) const = 0;
 
     virtual MaybeError TickImpl() = 0;
     void FlushCallbackTaskQueue();

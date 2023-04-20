@@ -70,6 +70,7 @@ class Device final : public ObjectBase {
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
 
     WGPUAdapter GetAdapter();  // Not implemented in the wire.
+    WGPUTextureUsage GetSupportedSurfaceUsage(WGPUSurface);  // Not implemented in the wire.
     WGPUQueue GetQueue();
 
     void CancelCallbacksForDisconnect() override;

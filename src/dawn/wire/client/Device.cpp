@@ -221,6 +221,12 @@ WGPUAdapter Device::GetAdapter() {
     return nullptr;
 }
 
+WGPUTextureUsage Device::GetSupportedSurfaceUsage(WGPUSurface) {
+    // Not implemented in the wire.
+    UNREACHABLE();
+    return WGPUTextureUsage_RenderAttachment;
+}
+
 WGPUQueue Device::GetQueue() {
     // The queue is lazily created because if a Device is created by
     // Reserve/Inject, we cannot send the GetQueue message until

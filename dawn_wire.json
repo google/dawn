@@ -228,6 +228,7 @@
             "DeviceCreateErrorTexture",
             "DeviceGetAdapter",
             "DeviceGetQueue",
+            "DeviceGetSupportedSurfaceUsage",
             "DeviceInjectError"
         ],
         "client_special_objects": [

@@ -155,6 +155,9 @@ class Device final : public DeviceBase {
         TextureBase* texture,
         const TextureViewDescriptor* descriptor) override;
 
+    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
+        const Surface* surface) const override;
+
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
     void DestroyImpl() override;

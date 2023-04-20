@@ -517,6 +517,7 @@ class Adapter : public AdapterBase {
         EnableFeature(Feature::ShaderF16);
         EnableFeature(Feature::RG11B10UfloatRenderable);
         EnableFeature(Feature::BGRA8UnormStorage);
+        EnableFeature(Feature::SurfaceCapabilities);
     }
 
     void InitializeVendorArchitectureImpl() override {

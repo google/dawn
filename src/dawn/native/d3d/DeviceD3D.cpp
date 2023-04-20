@@ -27,6 +27,13 @@ Device::Device(AdapterBase* adapter,
 
 Device::~Device() = default;
 
+ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
+    const Surface* surface) const {
+    wgpu::TextureUsage usages =
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
+    return usages;
+}
+
 const PlatformFunctions* Device::GetFunctions() const {
     return ToBackend(GetAdapter())->GetBackend()->GetFunctions();
 }

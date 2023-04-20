@@ -155,6 +155,9 @@ class Device final : public DeviceBase {
                                            WGPUCreateRenderPipelineAsyncCallback callback,
                                            void* userdata) override;
 
+    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
+        const Surface* surface) const override;
+
     ResultOrError<VulkanDeviceKnobs> CreateDevice(VkPhysicalDevice physicalDevice);
     void GatherQueueFromDevice();
 

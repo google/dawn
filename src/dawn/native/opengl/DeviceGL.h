@@ -125,6 +125,9 @@ class Device final : public DeviceBase {
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) override;
 
+    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
+        const Surface* surface) const override;
+
     GLenum GetBGRAInternalFormat() const;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void DestroyImpl() override;

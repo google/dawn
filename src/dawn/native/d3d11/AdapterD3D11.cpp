@@ -84,6 +84,7 @@ MaybeError Adapter::InitializeImpl() {
 
 void Adapter::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::TextureCompressionBC);
+    EnableFeature(Feature::SurfaceCapabilities);
 }
 
 MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

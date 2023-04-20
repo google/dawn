@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/DawnTest.h"
+#include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"
+#include "dawn/tests/DawnTest.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "webgpu/webgpu_glfw.h"
 
@@ -235,4 +237,162 @@ TEST_P(SwapChainTests, SwitchingDevice) {
     }
 }
 
+// Test that calling Device.GetSupportedSurfaceUsage() will throw an error because
+// SurfaceCapabilities is not enabled.
+TEST_P(SwapChainTests, ErrorGetSurfaceSupportedUsage) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+    EXPECT_FALSE(device.HasFeature(wgpu::FeatureName::SurfaceCapabilities));
+
+    ASSERT_DEVICE_ERROR_MSG(
+        {
+            auto usageFlags = device.GetSupportedSurfaceUsage(surface);
+            EXPECT_EQ(usageFlags, wgpu::TextureUsage::None);
+        },
+        testing::HasSubstr("FeatureName::SurfaceCapabilities is not enabled"));
+}
+
+// Test that creating swapchain with TextureBinding usage without enabling SurfaceCapabilities
+// feature should fail.
+TEST_P(SwapChainTests, ErrorCreateWithTextureBindingUsage) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+    EXPECT_FALSE(device.HasFeature(wgpu::FeatureName::SurfaceCapabilities));
+
+    auto desc = baseDescriptor;
+    desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+
+    ASSERT_DEVICE_ERROR_MSG(
+        { auto swapchain = device.CreateSwapChain(surface, &desc); },
+        testing::HasSubstr("require enabling FeatureName::SurfaceCapabilities"));
+}
+
+class SwapChainWithAdditionalUsageTests : public SwapChainTests {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (!UsesWire() && SupportsFeatures({wgpu::FeatureName::SurfaceCapabilities})) {
+            features.push_back(wgpu::FeatureName::SurfaceCapabilities);
+        }
+        return features;
+    }
+
+    void SetUp() override {
+        SwapChainTests::SetUp();
+
+        // If parent class skipped the test, we should skip as well.
+        if (surface == nullptr) {
+            GTEST_SKIP();
+        }
+
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::SurfaceCapabilities}));
+    }
+
+    void SampleTexture(wgpu::TextureView view,
+                       uint32_t width,
+                       uint32_t height,
+                       utils::RGBA8 expectedColor) {
+        wgpu::TextureDescriptor texDescriptor;
+        texDescriptor.size = {width, height, 1};
+        texDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        texDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc |
+                              wgpu::TextureUsage::CopyDst;
+        texDescriptor.mipLevelCount = 1;
+        texDescriptor.sampleCount = 1;
+
+        wgpu::Texture dstTexture = device.CreateTexture(&texDescriptor);
+        wgpu::TextureView dstView = dstTexture.CreateView();
+
+        // Create a render pipeline to blit |view| into |dstView|.
+        utils::ComboRenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
+            @vertex
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                                            vec2f(-1.0, -1.0),
+                                            vec2f(-1.0,  1.0),
+                                            vec2f( 1.0, -1.0),
+                                            vec2f(-1.0,  1.0),
+                                            vec2f( 1.0, -1.0),
+                                            vec2f( 1.0,  1.0));
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
+            }
+        )");
+        pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var texture : texture_2d<f32>;
+
+            @fragment
+            fn main(@builtin(position) coord: vec4f) -> @location(0) vec4f {
+                return textureLoad(texture, vec2i(coord.xy), 0);
+            }
+        )");
+        pipelineDesc.cTargets[0].format = texDescriptor.format;
+
+        // Submit a render pass to perform the blit from |view| to |dstView|.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        {
+            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+
+            wgpu::BindGroup bindGroup =
+                utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, view}});
+
+            utils::ComboRenderPassDescriptor renderPassInfo({dstView});
+
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.Draw(6);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_TEXTURE_EQ(expectedColor, dstTexture, {0, 0});
+        EXPECT_TEXTURE_EQ(expectedColor, dstTexture, {width - 1, height - 1});
+    }
+};
+
+TEST_P(SwapChainWithAdditionalUsageTests, GetSurfaceSupportedUsage) {
+    auto usageFlags = device.GetSupportedSurfaceUsage(surface);
+    EXPECT_NE(usageFlags, wgpu::TextureUsage::None);
+}
+
+// Test that sampling from swapchain is supported.
+TEST_P(SwapChainWithAdditionalUsageTests, SamplingFromSwapChain) {
+    // Skip all tests if readable surface doesn't support texture binding
+    DAWN_TEST_UNSUPPORTED_IF(
+        (device.GetSupportedSurfaceUsage(surface) & wgpu::TextureUsage::TextureBinding) == 0);
+
+    auto desc = baseDescriptor;
+    desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &desc);
+    ClearTexture(swapchain.GetCurrentTextureView(), {1.0, 0.0, 0.0, 1.0});
+
+    SampleTexture(swapchain.GetCurrentTextureView(), baseDescriptor.width, baseDescriptor.height,
+                  utils::RGBA8::kRed);
+
+    swapchain.Present();
+}
+
+// Test that including unsupported usage flag will result in error.
+TEST_P(SwapChainWithAdditionalUsageTests, ErrorIncludeUnsupportedUsage) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    auto supportedUsage = device.GetSupportedSurfaceUsage(surface);
+
+    // Assuming StorageBinding is not supported.
+    DAWN_TEST_UNSUPPORTED_IF((supportedUsage & wgpu::TextureUsage::StorageBinding) != 0);
+
+    auto desc = baseDescriptor;
+    desc.usage = supportedUsage | wgpu::TextureUsage::StorageBinding;
+
+    ASSERT_DEVICE_ERROR_MSG({ auto swapchain = device.CreateSwapChain(surface, &desc); },
+                            testing::HasSubstr("is not supported"));
+}
+
 DAWN_INSTANTIATE_TEST(SwapChainTests, MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(SwapChainWithAdditionalUsageTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      NullBackend(),
+                      VulkanBackend());

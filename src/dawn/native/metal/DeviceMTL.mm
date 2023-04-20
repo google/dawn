@@ -240,6 +240,13 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPip
     RenderPipeline::InitializeAsync(std::move(renderPipeline), callback, userdata);
 }
 
+ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
+    const Surface* surface) const {
+    wgpu::TextureUsage usages =
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
+    return usages;
+}
+
 ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
     uint64_t frontendCompletedSerial{GetCompletedCommandSerial()};
     // sometimes we increase the serials, in which case the completed serial in

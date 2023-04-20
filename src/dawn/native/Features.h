@@ -46,6 +46,7 @@ enum class Feature {
     MultiPlanarFormats,
     DawnNative,
     ImplicitDeviceSynchronization,
+    SurfaceCapabilities,
 
     EnumCount,
     InvalidEnum = EnumCount,

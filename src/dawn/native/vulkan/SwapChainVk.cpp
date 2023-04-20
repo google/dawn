@@ -36,7 +36,7 @@ namespace dawn::native::vulkan {
 
 namespace {
 
-ResultOrError<VkSurfaceKHR> CreateVulkanSurface(Adapter* adapter, Surface* surface) {
+ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const Adapter* adapter, const Surface* surface) {
     const VulkanGlobalInfo& info = adapter->GetVulkanInstance()->GetGlobalInfo();
     const VulkanFunctions& fn = adapter->GetVulkanInstance()->GetFunctions();
     VkInstance instance = adapter->GetVulkanInstance()->GetVkInstance();
@@ -204,6 +204,33 @@ uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
 }
 
 }  // anonymous namespace
+
+// static
+ResultOrError<wgpu::TextureUsage> SwapChain::GetSupportedSurfaceUsage(const Device* device,
+                                                                      const Surface* surface) {
+    Adapter* adapter = ToBackend(device->GetAdapter());
+    const VulkanFunctions& fn = adapter->GetVulkanInstance()->GetFunctions();
+    VkInstance instanceVk = adapter->GetVulkanInstance()->GetVkInstance();
+    VkPhysicalDevice physicalDeviceVk = adapter->GetPhysicalDevice();
+
+    VkSurfaceKHR surfaceVk;
+    VkSurfaceCapabilitiesKHR surfaceCapsVk;
+    DAWN_TRY_ASSIGN(surfaceVk, CreateVulkanSurface(adapter, surface));
+
+    DAWN_TRY(CheckVkSuccess(
+        fn.GetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDeviceVk, surfaceVk, &surfaceCapsVk),
+        "GetPhysicalDeviceSurfaceCapabilitiesKHR"));
+
+    wgpu::TextureUsage supportedUsages = wgpu::TextureUsage::RenderAttachment;
+
+    if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_SAMPLED_BIT) {
+        supportedUsages |= wgpu::TextureUsage::TextureBinding;
+    }
+
+    fn.DestroySurfaceKHR(instanceVk, surfaceVk, nullptr);
+
+    return supportedUsages;
+}
 
 // static
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,

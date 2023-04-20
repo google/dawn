@@ -30,6 +30,9 @@ class Device : public DeviceBase {
            const TogglesState& deviceToggles);
     ~Device() override;
 
+    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
+        const Surface* surface) const override;
+
     const PlatformFunctions* GetFunctions() const;
     ComPtr<IDXGIFactory4> GetFactory() const;
 

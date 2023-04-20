@@ -217,6 +217,11 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPip
     RenderPipeline::InitializeAsync(std::move(renderPipeline), callback, userdata);
 }
 
+ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
+    const Surface* surface) const {
+    return SwapChain::GetSupportedSurfaceUsage(this, surface);
+}
+
 MaybeError Device::TickImpl() {
     RecycleCompletedCommands();
 

@@ -188,6 +188,11 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     return AcquireRef(new TextureView(texture, descriptor));
 }
 
+ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
+    const Surface* surface) const {
+    return wgpu::TextureUsage::RenderAttachment;
+}
+
 void Device::DestroyImpl() {
     ASSERT(GetState() == State::Disconnected);
 

@@ -1251,6 +1251,13 @@
                 "args": [
                     {"name": "descriptor", "type": "texture descriptor", "annotation": "const*"}
                 ]
+            },
+            {
+                "name": "get supported surface usage",
+                "returns": "texture usage",
+                "args": [
+                    {"name": "surface", "type": "surface"}
+                ]
             }
         ]
     },
@@ -1467,7 +1474,8 @@
             {"value": 1004, "name": "dawn native", "tags": ["dawn", "native"]},
             {"value": 1005, "name": "chromium experimental dp4a", "tags": ["dawn"]},
             {"value": 1006, "name": "timestamp query inside passes", "tags": ["dawn"]},
-            {"value": 1007, "name": "implicit device synchronization", "tags": ["dawn", "native"]}
+            {"value": 1007, "name": "implicit device synchronization", "tags": ["dawn", "native"]},
+            {"value": 1008, "name": "surface capabilities", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {

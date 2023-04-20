@@ -130,6 +130,9 @@ class Device final : public DeviceBase {
                                            WGPUCreateRenderPipelineAsyncCallback callback,
                                            void* userdata) override;
 
+    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
+        const Surface* surface) const override;
+
     void DestroyImpl() override;
     MaybeError WaitForIdleForDestruction() override;
     bool HasPendingCommands() const override;

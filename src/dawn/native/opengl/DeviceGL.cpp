@@ -253,6 +253,13 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     return AcquireRef(new TextureView(texture, descriptor));
 }
 
+ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
+    const Surface* surface) const {
+    wgpu::TextureUsage usages =
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
+    return usages;
+}
+
 void Device::SubmitFenceSync() {
     if (!mHasPendingCommands) {
         return;

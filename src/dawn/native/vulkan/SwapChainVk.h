@@ -33,6 +33,10 @@ class SwapChain : public SwapChainBase {
                                                 Surface* surface,
                                                 SwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor);
+
+    static ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsage(const Device* device,
+                                                                      const Surface* surface);
+
     ~SwapChain() override;
 
   private:

@@ -1242,6 +1242,15 @@ TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
     return result.Detach();
 }
 
+wgpu::TextureUsage DeviceBase::APIGetSupportedSurfaceUsage(Surface* surface) {
+    wgpu::TextureUsage result;
+    if (ConsumedError(GetSupportedSurfaceUsage(surface), &result,
+                      "calling %s.GetSupportedSurfaceUsage().", this)) {
+        return wgpu::TextureUsage::None;
+    }
+    return result;
+}
+
 // For Dawn Wire
 
 BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
@@ -1812,6 +1821,18 @@ ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateTextureView(
                          "validating %s against %s.", &desc, texture);
     }
     return CreateTextureViewImpl(texture, &desc);
+}
+
+ResultOrError<wgpu::TextureUsage> DeviceBase::GetSupportedSurfaceUsage(
+    const Surface* surface) const {
+    DAWN_TRY(ValidateIsAlive());
+
+    if (IsValidationEnabled()) {
+        DAWN_INVALID_IF(!HasFeature(Feature::SurfaceCapabilities), "%s is not enabled.",
+                        wgpu::FeatureName::SurfaceCapabilities);
+    }
+
+    return GetSupportedSurfaceUsageImpl(surface);
 }
 
 // Other implementation details

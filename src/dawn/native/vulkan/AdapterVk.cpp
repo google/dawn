@@ -263,6 +263,8 @@ void Adapter::InitializeSupportedFeaturesImpl() {
     // features.
     EnableFeature(Feature::MultiPlanarFormats);
 #endif  // DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
+
+    EnableFeature(Feature::SurfaceCapabilities);
 }
 
 MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
