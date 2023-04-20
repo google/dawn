@@ -209,7 +209,6 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
                 case BindingInfoType::ExternalTexture: {
                     return DAWN_UNIMPLEMENTED_ERROR("External textures are not supported");
-                    break;
                 }
             }
         }
