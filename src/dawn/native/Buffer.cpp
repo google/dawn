@@ -251,6 +251,9 @@ wgpu::BufferMapState BufferBase::APIGetMapState() const {
         case BufferState::Unmapped:
         case BufferState::Destroyed:
             return wgpu::BufferMapState::Unmapped;
+        default:
+            UNREACHABLE();
+            return wgpu::BufferMapState::Unmapped;
     }
 }
 

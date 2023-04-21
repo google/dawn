@@ -164,6 +164,9 @@ WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErr
         case InternalErrorType::Internal:
         case InternalErrorType::OutOfMemory:
             return WGPUCreatePipelineAsyncStatus_InternalError;
+        default:
+            UNREACHABLE();
+            return WGPUCreatePipelineAsyncStatus_Unknown;
     }
 }
 
