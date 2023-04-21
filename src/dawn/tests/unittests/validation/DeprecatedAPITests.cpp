@@ -136,15 +136,6 @@ TEST_P(DeprecationTests, MaxBufferSizeValidation) {
     EXPECT_DEPRECATION_ERROR_OR_WARNING(device.CreateBuffer(&descriptor));
 }
 
-// Test that multisampled texture with sampleType == float should be deprecated.
-TEST_P(DeprecationTests, MultisampledTextureSampleType) {
-    EXPECT_DEPRECATION_ERROR_OR_WARNING(utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
-                     wgpu::TextureViewDimension::e2D, true},
-                }));
-}
-
 INSTANTIATE_TEST_SUITE_P(DeprecatedAPITest,
                          DeprecationTests,
                          testing::Values(true, false),

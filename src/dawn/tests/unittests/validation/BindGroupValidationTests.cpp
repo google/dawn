@@ -1650,7 +1650,7 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextureViewDimension) {
 
 // Test that multisampled texture bindings are valid
 TEST_F(BindGroupLayoutValidationTest, MultisampledTextureSampleType) {
-    // Multisampled float sample type deprecated.
+    // Multisampled float sample type is not supported.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
                     {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
