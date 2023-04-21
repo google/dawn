@@ -21,6 +21,7 @@
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/binding/Flags.h"
+#include "src/dawn/node/binding/GPUAdapterInfo.h"
 #include "src/dawn/node/binding/GPUDevice.h"
 #include "src/dawn/node/binding/GPUSupportedFeatures.h"
 #include "src/dawn/node/binding/GPUSupportedLimits.h"
@@ -203,9 +204,15 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
 }
 
 interop::Promise<interop::Interface<interop::GPUAdapterInfo>> GPUAdapter::requestAdapterInfo(
-    Napi::Env,
+    Napi::Env env,
     std::vector<std::string> unmaskHints) {
-    UNIMPLEMENTED();
+    interop::Promise<interop::Interface<interop::GPUAdapterInfo>> promise(env, PROMISE_INFO);
+
+    WGPUAdapterProperties adapterProperties = {};
+    adapter_.GetProperties(&adapterProperties);
+
+    promise.Resolve(interop::GPUAdapterInfo::Create<GPUAdapterInfo>(env, adapterProperties));
+    return promise;
 }
 
 }  // namespace wgpu::binding
