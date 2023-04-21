@@ -131,11 +131,9 @@ MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* 
                     "Buffer is mapped at creation but its size (%u) is not a multiple of 4.",
                     descriptor->size);
 
-    if (descriptor->size > device->GetLimits().v1.maxBufferSize) {
-        DAWN_TRY(DAWN_MAKE_DEPRECATION_ERROR(
-            device, "Buffer size (%u) exceeds the max buffer size limit (%u).", descriptor->size,
-            device->GetLimits().v1.maxBufferSize));
-    }
+    DAWN_INVALID_IF(descriptor->size > device->GetLimits().v1.maxBufferSize,
+                    "Buffer size (%u) exceeds the max buffer size limit (%u).", descriptor->size,
+                    device->GetLimits().v1.maxBufferSize);
 
     return {};
 }

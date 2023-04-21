@@ -120,22 +120,6 @@ TEST_P(DeprecationTests, Dispatch) {
     pass.End();
 }
 
-// Test that creating a buffer with size exceeding the maximum buffer size limit should emits a
-// warning. (dawn:1525)
-TEST_P(DeprecationTests, MaxBufferSizeValidation) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-
-    descriptor.size = 256;
-    device.CreateBuffer(&descriptor);
-
-    descriptor.size = GetSupportedLimits().limits.maxBufferSize;
-    device.CreateBuffer(&descriptor);
-
-    descriptor.size = GetSupportedLimits().limits.maxBufferSize + 1;
-    EXPECT_DEPRECATION_ERROR_OR_WARNING(device.CreateBuffer(&descriptor));
-}
-
 INSTANTIATE_TEST_SUITE_P(DeprecatedAPITest,
                          DeprecationTests,
                          testing::Values(true, false),

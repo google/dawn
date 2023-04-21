@@ -96,6 +96,29 @@ TEST_F(BufferValidationTest, CreationSuccess) {
     }
 }
 
+// Test case where creation should succeed
+TEST_F(BufferValidationTest, CreationMaxBufferSize) {
+    // Success when at limit
+    {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = GetSupportedLimits().limits.maxBufferSize;
+        descriptor.usage = wgpu::BufferUsage::Uniform;
+
+        device.CreateBuffer(&descriptor);
+    }
+    // Error once it is pass the (default) limit on the device. (Note that MaxLimitTests tests at
+    // max possible limit given the adapters.)
+    {
+        wgpu::BufferDescriptor descriptor;
+        ASSERT_TRUE(GetSupportedLimits().limits.maxBufferSize <
+                    std::numeric_limits<uint32_t>::max());
+        descriptor.size = GetSupportedLimits().limits.maxBufferSize + 1;
+        descriptor.usage = wgpu::BufferUsage::Uniform;
+
+        ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+    }
+}
+
 // Test restriction on usages must not be None (0)
 TEST_F(BufferValidationTest, CreationMapUsageNotZero) {
     // Zero (None) usage is an error
