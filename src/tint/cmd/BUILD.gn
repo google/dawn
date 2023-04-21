@@ -34,7 +34,6 @@ executable("tint") {
   deps = [
     ":tint_cmd_helper",
     "${tint_root_dir}/src/tint:libtint",
-    "${tint_root_dir}/src/tint:libtint_base_src",
     "${tint_root_dir}/src/tint:tint_utils_io",
     "${tint_root_dir}/src/tint:tint_val",
     "${tint_spirv_tools_dir}/:spvtools",
@@ -65,7 +64,6 @@ executable("tint_info") {
   deps = [
     ":tint_cmd_helper",
     "${tint_root_dir}/src/tint:libtint",
-    "${tint_root_dir}/src/tint:libtint_base_src",
     "${tint_root_dir}/src/tint:tint_utils_io",
     "${tint_root_dir}/src/tint:tint_val",
     "${tint_spirv_tools_dir}/:spvtools",
