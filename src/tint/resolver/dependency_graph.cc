@@ -436,48 +436,44 @@ class DependencyScanner {
     void AddDependency(const ast::Identifier* from, Symbol to) {
         auto* resolved = scope_stack_.Get(to);
         if (!resolved) {
-            auto s = to.Name();
-            if (auto builtin_fn = builtin::ParseFunction(s);
-                builtin_fn != builtin::Function::kNone) {
-                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_fn));
-                return;
+            switch (to.Type()) {
+                case Symbol::BuiltinType::kNone:
+                    graph_.resolved_identifiers.Add(from, UnresolvedIdentifier{to.Name()});
+                    break;
+                case Symbol::BuiltinType::kFunction:
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier(to.BuiltinValue<builtin::Function>()));
+                    break;
+                case Symbol::BuiltinType::kBuiltin:
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier(to.BuiltinValue<builtin::Builtin>()));
+                    break;
+                case Symbol::BuiltinType::kBuiltinValue:
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier(to.BuiltinValue<builtin::BuiltinValue>()));
+                    break;
+                case Symbol::BuiltinType::kAddressSpace:
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier(to.BuiltinValue<builtin::AddressSpace>()));
+                    break;
+                case Symbol::BuiltinType::kTexelFormat:
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier(to.BuiltinValue<builtin::TexelFormat>()));
+                    break;
+                case Symbol::BuiltinType::kAccess:
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier(to.BuiltinValue<builtin::Access>()));
+                    break;
+                case Symbol::BuiltinType::kInterpolationType:
+                    graph_.resolved_identifiers.Add(
+                        from, ResolvedIdentifier(to.BuiltinValue<builtin::InterpolationType>()));
+                    break;
+                case Symbol::BuiltinType::kInterpolationSampling:
+                    graph_.resolved_identifiers.Add(
+                        from,
+                        ResolvedIdentifier(to.BuiltinValue<builtin::InterpolationSampling>()));
+                    break;
             }
-            if (auto builtin_ty = builtin::ParseBuiltin(s);
-                builtin_ty != builtin::Builtin::kUndefined) {
-                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_ty));
-                return;
-            }
-            if (auto builtin_val = builtin::ParseBuiltinValue(s);
-                builtin_val != builtin::BuiltinValue::kUndefined) {
-                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(builtin_val));
-                return;
-            }
-            if (auto addr = builtin::ParseAddressSpace(s);
-                addr != builtin::AddressSpace::kUndefined) {
-                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(addr));
-                return;
-            }
-            if (auto fmt = builtin::ParseTexelFormat(s); fmt != builtin::TexelFormat::kUndefined) {
-                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(fmt));
-                return;
-            }
-            if (auto access = builtin::ParseAccess(s); access != builtin::Access::kUndefined) {
-                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(access));
-                return;
-            }
-            if (auto i_type = builtin::ParseInterpolationType(s);
-                i_type != builtin::InterpolationType::kUndefined) {
-                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(i_type));
-                return;
-            }
-            if (auto i_smpl = builtin::ParseInterpolationSampling(s);
-                i_smpl != builtin::InterpolationSampling::kUndefined) {
-                graph_.resolved_identifiers.Add(from, ResolvedIdentifier(i_smpl));
-                return;
-            }
-
-            // Unresolved.
-            graph_.resolved_identifiers.Add(from, UnresolvedIdentifier{s});
             return;
         }
 

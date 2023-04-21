@@ -206,7 +206,10 @@ libtint_source_set("libtint_symbols_src") {
     "symbol_table.cc",
     "symbol_table.h",
   ]
-  deps = [ ":libtint_utils_src" ]
+  deps = [
+    ":libtint_builtins_src",
+    ":libtint_utils_src",
+  ]
 }
 
 libtint_source_set("libtint_utils_src") {

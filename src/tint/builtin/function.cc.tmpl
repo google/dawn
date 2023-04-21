@@ -15,7 +15,7 @@ See:
 
 namespace tint::builtin {
 
-Function ParseFunction(const std::string& name) {
+Function ParseFunction(std::string_view name) {
 {{- range Sem.Builtins  }}
     if (name == "{{.Name}}") {
         return Function::k{{PascalCase .Name}};

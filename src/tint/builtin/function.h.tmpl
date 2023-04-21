@@ -33,7 +33,7 @@ enum class Function {
 /// @param name the builtin name to parse
 /// @returns the parsed Function, or Function::kNone if `name` did not
 /// match any builtin function.
-Function ParseFunction(const std::string& name);
+Function ParseFunction(std::string_view name);
 
 /// @returns the name of the builtin function type. The spelling, including
 /// case, matches the name in the WGSL spec.
