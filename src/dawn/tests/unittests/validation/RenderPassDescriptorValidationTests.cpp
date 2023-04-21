@@ -1450,7 +1450,7 @@ TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilAllAspects) {
 
 // Tests validation for per-pixel accounting for render targets. The tests currently assume that the
 // default maxColorAttachmentBytesPerSample limit of 32 is used.
-TEST_P(DeprecationTests, RenderPassColorAttachmentBytesPerSample) {
+TEST_F(RenderPassDescriptorValidationTest, RenderPassColorAttachmentBytesPerSample) {
     struct TestCase {
         std::vector<wgpu::TextureFormat> formats;
         bool success;
@@ -1506,12 +1506,12 @@ TEST_P(DeprecationTests, RenderPassColorAttachmentBytesPerSample) {
         }
         utils::ComboRenderPassDescriptor descriptor(colorAttachmentInfo);
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&descriptor);
+        renderPassEncoder.End();
         if (testCase.success) {
-            wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&descriptor);
-            renderPassEncoder.End();
             commandEncoder.Finish();
         } else {
-            EXPECT_DEPRECATION_WARNING_ONLY(commandEncoder.BeginRenderPass(&descriptor));
+            ASSERT_DEVICE_ERROR(commandEncoder.Finish());
         }
     }
 }

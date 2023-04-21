@@ -519,9 +519,8 @@ MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
     }
     uint32_t maxColorAttachmentBytesPerSample =
         device->GetLimits().v1.maxColorAttachmentBytesPerSample;
-    // TODO(dawn:1522) Promote to DAWN_INVALID_IF after deprecation period.
-    DAWN_DEPRECATED_IF(
-        device, totalByteSize > maxColorAttachmentBytesPerSample,
+    DAWN_INVALID_IF(
+        totalByteSize > maxColorAttachmentBytesPerSample,
         "Total color attachment bytes per sample (%u) exceeds maximum (%u) with formats (%s).",
         totalByteSize, maxColorAttachmentBytesPerSample, TextureFormatsToString(formats));
 

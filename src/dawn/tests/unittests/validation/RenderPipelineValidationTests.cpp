@@ -1612,7 +1612,7 @@ TEST_F(RenderPipelineValidationTest, MaxFragmentCombinedOutputResources) {
 
 // Tests validation for per-pixel accounting for render targets. The tests currently assume that the
 // default maxColorAttachmentBytesPerSample limit of 32 is used.
-TEST_P(DeprecationTests, RenderPipelineColorAttachmentBytesPerSample) {
+TEST_F(RenderPipelineValidationTest, RenderPipelineColorAttachmentBytesPerSample) {
     // Creates a fragment shader with maximum number of color attachments to enable testing.
     auto CreateShader = [&](const std::vector<wgpu::TextureFormat>& formats) -> wgpu::ShaderModule {
         // Default type to use when formats.size() < kMaxColorAttachments.
@@ -1690,10 +1690,7 @@ TEST_P(DeprecationTests, RenderPipelineColorAttachmentBytesPerSample) {
 
     for (const TestCase& testCase : kTestCases) {
         utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            @vertex fn main() -> @builtin(position) vec4f {
-                return vec4f(0.0, 0.0, 0.0, 1.0);
-            })");
+        descriptor.vertex.module = vsModule;
         descriptor.vertex.entryPoint = "main";
         descriptor.cFragment.module = CreateShader(testCase.formats);
         descriptor.cFragment.entryPoint = "main";
@@ -1704,7 +1701,7 @@ TEST_P(DeprecationTests, RenderPipelineColorAttachmentBytesPerSample) {
         if (testCase.success) {
             device.CreateRenderPipeline(&descriptor);
         } else {
-            EXPECT_DEPRECATION_ERROR_OR_WARNING(device.CreateRenderPipeline(&descriptor));
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
         }
     }
 }

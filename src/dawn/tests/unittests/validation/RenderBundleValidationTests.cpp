@@ -1145,7 +1145,7 @@ TEST_F(RenderBundleValidationTest, TextureFormats) {
 
 // Tests validation for per-pixel accounting for render targets. The tests currently assume that the
 // default maxColorAttachmentBytesPerSample limit of 32 is used.
-TEST_P(DeprecationTests, RenderBundleColorFormatsBytesPerSample) {
+TEST_F(RenderBundleValidationTest, RenderBundleColorFormatsBytesPerSample) {
     struct TestCase {
         std::vector<wgpu::TextureFormat> formats;
         bool success;
@@ -1203,7 +1203,7 @@ TEST_P(DeprecationTests, RenderBundleColorFormatsBytesPerSample) {
         if (testCase.success) {
             device.CreateRenderBundleEncoder(&descriptor);
         } else {
-            EXPECT_DEPRECATION_ERROR_OR_WARNING(device.CreateRenderBundleEncoder(&descriptor));
+            ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&descriptor));
         }
     }
 }
