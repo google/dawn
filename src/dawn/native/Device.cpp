@@ -818,14 +818,9 @@ ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
         result = *iter;
     } else {
         DAWN_TRY_ASSIGN(result, CreateBindGroupLayoutImpl(descriptor, pipelineCompatibilityToken));
+        result->SetIsCachedReference();
         result->SetContentHash(blueprintHash);
-        // TODO(crbug.com/dawn/1769): We disable caching if multithreading is enabled. The cache
-        // would have been racing with the object's ref counting since it only stores raw pointers
-        // to the objects.
-        if (!HasFeature(Feature::ImplicitDeviceSynchronization)) {
-            result->SetIsCachedReference();
-            mCaches->bindGroupLayouts.insert(result.Get());
-        }
+        mCaches->bindGroupLayouts.insert(result.Get());
     }
 
     return std::move(result);
@@ -875,13 +870,6 @@ Ref<RenderPipelineBase> DeviceBase::GetCachedRenderPipeline(
 Ref<ComputePipelineBase> DeviceBase::AddOrGetCachedComputePipeline(
     Ref<ComputePipelineBase> computePipeline) {
     ASSERT(IsLockedByCurrentThreadIfNeeded());
-    // TODO(crbug.com/dawn/1769): We disable caching if multithreading is enabled. The cache would
-    // have been racing with the object's ref counting since it only stores raw pointers to the
-    // objects.
-    if (HasFeature(Feature::ImplicitDeviceSynchronization)) {
-        return computePipeline;
-    }
-
     auto [cachedPipeline, inserted] = mCaches->computePipelines.insert(computePipeline.Get());
     if (inserted) {
         computePipeline->SetIsCachedReference();
@@ -894,13 +882,6 @@ Ref<ComputePipelineBase> DeviceBase::AddOrGetCachedComputePipeline(
 Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
     Ref<RenderPipelineBase> renderPipeline) {
     ASSERT(IsLockedByCurrentThreadIfNeeded());
-    // TODO(crbug.com/dawn/1769): We disable caching if multithreading is enabled. The cache would
-    // have been racing with the object's ref counting since it only stores raw pointers to the
-    // objects.
-    if (HasFeature(Feature::ImplicitDeviceSynchronization)) {
-        return renderPipeline;
-    }
-
     auto [cachedPipeline, inserted] = mCaches->renderPipelines.insert(renderPipeline.Get());
     if (inserted) {
         renderPipeline->SetIsCachedReference();
@@ -958,14 +939,9 @@ ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::GetOrCreatePipelineLayout(
         result = *iter;
     } else {
         DAWN_TRY_ASSIGN(result, CreatePipelineLayoutImpl(descriptor));
+        result->SetIsCachedReference();
         result->SetContentHash(blueprintHash);
-        // TODO(crbug.com/dawn/1769): We disable caching if multithreading is enabled. The cache
-        // would have been racing with the object's ref counting since it only stores raw pointers
-        // to the objects.
-        if (!HasFeature(Feature::ImplicitDeviceSynchronization)) {
-            result->SetIsCachedReference();
-            mCaches->pipelineLayouts.insert(result.Get());
-        }
+        mCaches->pipelineLayouts.insert(result.Get());
     }
 
     return std::move(result);
@@ -996,14 +972,9 @@ ResultOrError<Ref<SamplerBase>> DeviceBase::GetOrCreateSampler(
         result = *iter;
     } else {
         DAWN_TRY_ASSIGN(result, CreateSamplerImpl(descriptor));
+        result->SetIsCachedReference();
         result->SetContentHash(blueprintHash);
-        // TODO(crbug.com/dawn/1769): We disable caching if multithreading is enabled. The cache
-        // would have been racing with the object's ref counting since it only stores raw pointers
-        // to the objects.
-        if (!HasFeature(Feature::ImplicitDeviceSynchronization)) {
-            result->SetIsCachedReference();
-            mCaches->samplers.insert(result.Get());
-        }
+        mCaches->samplers.insert(result.Get());
     }
 
     return std::move(result);
@@ -1041,14 +1012,9 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
         }
         DAWN_TRY_ASSIGN(result,
                         CreateShaderModuleImpl(descriptor, parseResult, compilationMessages));
+        result->SetIsCachedReference();
         result->SetContentHash(blueprintHash);
-        // TODO(crbug.com/dawn/1769): We disable caching if multithreading is enabled. The cache
-        // would have been racing with the object's ref counting since it only stores raw pointers
-        // to the objects.
-        if (!HasFeature(Feature::ImplicitDeviceSynchronization)) {
-            result->SetIsCachedReference();
-            mCaches->shaderModules.insert(result.Get());
-        }
+        mCaches->shaderModules.insert(result.Get());
     }
 
     return std::move(result);
