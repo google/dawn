@@ -180,6 +180,9 @@ class TemplateState {
         return numbers_[idx];
     }
 
+    /// @return the total number of type and number templates
+    size_t Count() const { return types_.Length() + numbers_.Length(); }
+
   private:
     utils::Vector<const type::Type*, 4> types_;
     utils::Vector<Number, 2> numbers_;
@@ -1589,6 +1592,7 @@ Impl::Candidate Impl::ScoreOverload(const OverloadInfo* overload,
     // The overloads with the lowest score will be displayed first (top-most).
     constexpr int kMismatchedParamCountPenalty = 3;
     constexpr int kMismatchedParamTypePenalty = 2;
+    constexpr int kMismatchedTemplateCountPenalty = 1;
     constexpr int kMismatchedTemplateTypePenalty = 1;
     constexpr int kMismatchedTemplateNumberPenalty = 1;
 
@@ -1600,6 +1604,15 @@ Impl::Candidate Impl::ScoreOverload(const OverloadInfo* overload,
     if (num_parameters != num_arguments) {
         score += kMismatchedParamCountPenalty * (std::max(num_parameters, num_arguments) -
                                                  std::min(num_parameters, num_arguments));
+    }
+
+    if (score == 0) {
+        // Check that all of the template arguments provided are actually expected by the overload.
+        size_t expected_templates = overload->num_template_types + overload->num_template_numbers;
+        size_t provided_templates = in_templates.Count();
+        if (provided_templates > expected_templates) {
+            score += kMismatchedTemplateCountPenalty * (provided_templates - expected_templates);
+        }
     }
 
     // Make a mutable copy of the input templates so we can implicitly match more templated

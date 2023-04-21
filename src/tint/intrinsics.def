@@ -862,6 +862,9 @@ fn textureStore<C: iu32>(texture: texture_storage_3d<u32_texel_format, write>, c
 @must_use @const("Zero") ctor f32() -> f32
 @must_use @const("Zero") ctor f16() -> f16
 @must_use @const("Zero") ctor bool() -> bool
+@must_use @const("Zero") ctor vec2() -> vec2<ia>
+@must_use @const("Zero") ctor vec3() -> vec3<ia>
+@must_use @const("Zero") ctor vec4() -> vec4<ia>
 @must_use @const("Zero") ctor vec2<T: concrete_scalar>() -> vec2<T>
 @must_use @const("Zero") ctor vec3<T: concrete_scalar>() -> vec3<T>
 @must_use @const("Zero") ctor vec4<T: concrete_scalar>() -> vec4<T>

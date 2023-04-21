@@ -1921,10 +1921,11 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Init) {
     EXPECT_EQ(r()->error(),
               R"(12:34 error: no matching constructor for vec2<f32>(abstract-float, bool)
 
-4 candidate constructors:
+5 candidate constructors:
   vec2(x: T, y: T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2(T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2(vec2<T>) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec2() -> vec2<abstract-int>
   vec2<T>() -> vec2<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
@@ -1948,10 +1949,11 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Init) {
     EXPECT_EQ(r()->error(),
               R"(12:34 error: no matching constructor for vec2<f32>(abstract-float, bool)
 
-4 candidate constructors:
+5 candidate constructors:
   vec2(x: T, y: T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2(T) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec2(vec2<T>) -> vec2<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec2() -> vec2<abstract-int>
   vec2<T>() -> vec2<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:

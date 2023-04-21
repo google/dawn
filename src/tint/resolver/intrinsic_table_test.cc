@@ -841,12 +841,13 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3(i32, f32, i32)
 
-6 candidate constructors:
+7 candidate constructors:
   vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3() -> vec3<abstract-int>
   vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
@@ -867,12 +868,13 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3<i32>(i32, f32, i32)
 
-6 candidate constructors:
+7 candidate constructors:
   vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3() -> vec3<abstract-int>
   vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
@@ -971,9 +973,10 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3<f32>(array<u32>)
 
-6 candidate constructors:
+7 candidate constructors:
   vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3() -> vec3<abstract-int>
   vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool

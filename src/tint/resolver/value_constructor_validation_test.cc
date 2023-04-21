@@ -2299,11 +2299,26 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec2AndVe
     EXPECT_EQ(TypeOf(vec4_f16)->As<type::Vector>()->Width(), 4u);
 }
 
-TEST_F(ResolverValueConstructorValidationTest, CannotInferVectorElementTypeWithoutArgs) {
-    WrapInFunction(Call(Source{{12, 34}}, "vec3"));
+TEST_F(ResolverValueConstructorValidationTest, InferVecNoArgs) {
+    auto* v2 = vec2<Infer>();
+    auto* v3 = vec3<Infer>();
+    auto* v4 = vec4<Infer>();
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for vec3()"));
+    GlobalConst("v2", v2);
+    GlobalConst("v3", v3);
+    GlobalConst("v4", v4);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_TRUE(TypeOf(v2)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(v3)->Is<type::Vector>());
+    ASSERT_TRUE(TypeOf(v4)->Is<type::Vector>());
+    EXPECT_TRUE(TypeOf(v2)->As<type::Vector>()->type()->Is<type::AbstractInt>());
+    EXPECT_TRUE(TypeOf(v3)->As<type::Vector>()->type()->Is<type::AbstractInt>());
+    EXPECT_TRUE(TypeOf(v4)->As<type::Vector>()->type()->Is<type::AbstractInt>());
+    EXPECT_EQ(TypeOf(v2)->As<type::Vector>()->Width(), 2u);
+    EXPECT_EQ(TypeOf(v3)->As<type::Vector>()->Width(), 3u);
+    EXPECT_EQ(TypeOf(v4)->As<type::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverValueConstructorValidationTest, CannotInferVec2ElementTypeFromScalarsMismatch) {
