@@ -336,6 +336,10 @@ std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len) {
     if (len < 1) {
         return {};
     }
+    // Fast-path ASCII characters as they're always valid
+    if (ptr[0] <= 0x7f) {
+        return {CodePoint{ptr[0]}, 1};
+    }
 
     // Lookup table for the first byte of a UTF-8 sequence.
     // 0 indicates an invalid length.
