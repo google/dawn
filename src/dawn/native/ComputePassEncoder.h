@@ -42,7 +42,6 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     ObjectType GetType() const override;
 
     void APIEnd();
-    void APIEndPass();  // TODO(dawn:1286): Remove after deprecation period.
 
     void APIDispatchWorkgroups(uint32_t workgroupCountX,
                                uint32_t workgroupCountY = 1,
@@ -61,12 +60,6 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     void RestoreCommandBufferStateForTesting(CommandBufferStateTracker state) {
         RestoreCommandBufferState(std::move(state));
     }
-
-    // Deprecated
-    void APIDispatch(uint32_t workgroupCountX,
-                     uint32_t workgroupCountY = 1,
-                     uint32_t workgroupCountZ = 1);
-    void APIDispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
 
   protected:
     ComputePassEncoder(DeviceBase* device,

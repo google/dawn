@@ -34,7 +34,7 @@ class WireArgumentTests : public WireTest {
 TEST_F(WireArgumentTests, ValueArgument) {
     WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
     WGPUComputePassEncoder pass = wgpuCommandEncoderBeginComputePass(encoder, nullptr);
-    wgpuComputePassEncoderDispatch(pass, 1, 2, 3);
+    wgpuComputePassEncoderDispatchWorkgroups(pass, 1, 2, 3);
 
     WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr)).WillOnce(Return(apiEncoder));
@@ -42,7 +42,7 @@ TEST_F(WireArgumentTests, ValueArgument) {
     WGPUComputePassEncoder apiPass = api.GetNewComputePassEncoder();
     EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder, nullptr)).WillOnce(Return(apiPass));
 
-    EXPECT_CALL(api, ComputePassEncoderDispatch(apiPass, 1, 2, 3)).Times(1);
+    EXPECT_CALL(api, ComputePassEncoderDispatchWorkgroups(apiPass, 1, 2, 3)).Times(1);
 
     FlushClient();
 }

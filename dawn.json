@@ -844,28 +844,11 @@
                 ]
             },
             {
-                "name": "dispatch",
-                "tags": ["deprecated"],
-                "args": [
-                    {"name": "workgroupCountX", "type": "uint32_t"},
-                    {"name": "workgroupCountY", "type": "uint32_t", "default": "1"},
-                    {"name": "workgroupCountZ", "type": "uint32_t", "default": "1"}
-                ]
-            },
-            {
                 "name": "dispatch workgroups",
                 "args": [
                     {"name": "workgroupCountX", "type": "uint32_t"},
                     {"name": "workgroupCountY", "type": "uint32_t", "default": "1"},
                     {"name": "workgroupCountZ", "type": "uint32_t", "default": "1"}
-                ]
-            },
-            {
-                "name": "dispatch indirect",
-                "tags": ["deprecated"],
-                "args": [
-                  {"name": "indirect buffer", "type": "buffer"},
-                  {"name": "indirect offset", "type": "uint64_t"}
                 ]
             },
             {
@@ -877,10 +860,6 @@
             },
             {
                 "name": "end"
-            },
-            {
-                "name": "end pass",
-                "tags": ["deprecated"]
             },
             {
                 "name": "end pipeline statistics query",
@@ -2185,10 +2164,6 @@
             },
             {
                 "name": "end"
-            },
-            {
-                "name": "end pass",
-                "tags": ["deprecated"]
             },
             {
                 "name": "end pipeline statistics query",

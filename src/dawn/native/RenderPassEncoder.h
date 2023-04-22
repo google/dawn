@@ -48,7 +48,6 @@ class RenderPassEncoder final : public RenderEncoderBase {
     // NOTE: this will lock the device internally. To avoid deadlock when the device is already
     // locked, use End() instead.
     void APIEnd();
-    void APIEndPass();  // TODO(dawn:1286): Remove after deprecation period.
 
     void APISetStencilReference(uint32_t reference);
     void APISetBlendConstant(const Color* color);

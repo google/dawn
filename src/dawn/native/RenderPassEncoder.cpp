@@ -184,14 +184,6 @@ void RenderPassEncoder::End() {
     }
 }
 
-void RenderPassEncoder::APIEndPass() {
-    if (GetDevice()->ConsumedError(DAWN_MAKE_DEPRECATION_ERROR(
-            GetDevice(), "endPass() has been deprecated. Use end() instead."))) {
-        return;
-    }
-    APIEnd();
-}
-
 void RenderPassEncoder::APISetStencilReference(uint32_t reference) {
     mEncodingContext->TryEncode(
         this,
