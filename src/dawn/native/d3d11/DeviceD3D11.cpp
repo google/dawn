@@ -183,7 +183,8 @@ MaybeError Device::NextSerial() {
     TRACE_EVENT1(GetPlatform(), General, "D3D11Device::SignalFence", "serial",
                  uint64_t(GetLastSubmittedCommandSerial()));
 
-    CommandRecordingContext* commandContext = GetPendingCommandContext();
+    CommandRecordingContext* commandContext =
+        GetPendingCommandContext(DeviceBase::SubmitMode::Passive);
     DAWN_TRY(CheckHRESULT(commandContext->GetD3D11DeviceContext4()->Signal(
                               mFence.Get(), uint64_t(GetLastSubmittedCommandSerial())),
                           "D3D11 command queue signal fence"));
@@ -228,14 +229,10 @@ bool Device::HasPendingCommands() const {
     return mPendingCommands.NeedsSubmit();
 }
 
-void Device::ForceEventualFlushOfCommands() {
-    if (mPendingCommands.IsOpen()) {
-        mPendingCommands.SetNeedsSubmit();
-    }
-}
+void Device::ForceEventualFlushOfCommands() {}
 
 MaybeError Device::ExecutePendingCommandContext() {
-    return {};
+    return mPendingCommands.ExecuteCommandList(this);
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

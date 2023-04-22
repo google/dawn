@@ -407,6 +407,7 @@ MaybeError Buffer::Write(CommandRecordingContext* commandContext,
         return {};
     }
 
+    MarkUsedInPendingCommands();
     // Map the buffer if it is possible, so EnsureDataInitializedAsDestination() and WriteInternal()
     // can write the mapped memory directly.
     ScopedMap scopedMap;

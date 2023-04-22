@@ -634,11 +634,6 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionAndThenMap) {
 }
 
 TEST_P(BufferMappingCallbackTests, UseTheBufferAndThenMap) {
-    // TODO(dawn:1705): enable this test for D3D11. D3D11 MapAsync() calls
-    // ID3D11DeviceContext::Map() which will synchronize with GPU. so the callback will always be
-    // called earlier comparing to other backends.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
     wgpu::Buffer buffer = CreateMapWriteBuffer(4);
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, wgpu::kWholeMapSize);
     buffer.Unmap();
@@ -678,11 +673,6 @@ TEST_P(BufferMappingCallbackTests, UseTheBufferAndThenMap) {
 }
 
 TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
-    // TODO(dawn:1705): enable this test for D3D11. D3D11 MapAsync() calls
-    // ID3D11DeviceContext::Map() which will synchronize with GPU. so the callback will always be
-    // called earlier comparing to other backends.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
     wgpu::Buffer buffer = CreateMapReadBuffer(4);
     MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, wgpu::kWholeMapSize);
     buffer.Unmap();

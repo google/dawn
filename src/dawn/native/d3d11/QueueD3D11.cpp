@@ -38,6 +38,7 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     for (uint32_t i = 0; i < commandCount; ++i) {
         DAWN_TRY(ToBackend(commands[i])->Execute());
     }
+    DAWN_TRY(device->ExecutePendingCommandContext());
     TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D11::Execute");
 
     DAWN_TRY(device->NextSerial());
