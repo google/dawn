@@ -1239,6 +1239,15 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
     EXPECT_EQ(func_sem->WorkgroupSize()[2], 3u);
 }
 
+TEST_F(ResolverTest, Expr_MemberAccessor_Type) {
+    auto* mem = MemberAccessor(Ident(Source{{12, 34}}, "f32"), "member");
+    WrapInFunction(mem);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(12:34 error: cannot use type 'f32' as value
+12:34 note: are you missing '()' for value constructor?)");
+}
+
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
     auto* st = Structure(
         "S", utils::Vector{Member("first_member", ty.i32()), Member("second_member", ty.f32())});

@@ -105,8 +105,7 @@ void SemHelper::ErrorExpectedValueExpr(const sem::Expression* expr) const {
     ErrorUnexpectedExprKind(expr, "value");
     if (auto* ty_expr = expr->As<sem::TypeExpression>()) {
         if (auto* ident = ty_expr->Declaration()->As<ast::IdentifierExpression>()) {
-            AddNote("are you missing '()' for value constructor?",
-                    Source{{ident->source.range.end}});
+            AddNote("are you missing '()' for value constructor?", ident->source.End());
         }
     }
 }

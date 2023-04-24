@@ -3115,12 +3115,13 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
 }
 
 sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* expr) {
-    auto* structure = sem_.TypeOf(expr->object);
-    auto* storage_ty = structure->UnwrapRef();
     auto* object = sem_.GetVal(expr->object);
     if (!object) {
         return nullptr;
     }
+
+    auto* object_ty = object->Type();
+    auto* storage_ty = object_ty->UnwrapRef();
 
     auto* root_ident = object->RootIdentifier();
 
@@ -3152,7 +3153,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
             ty = member->Type();
 
             // If we're extracting from a reference, we return a reference.
-            if (auto* ref = structure->As<type::Reference>()) {
+            if (auto* ref = object_ty->As<type::Reference>()) {
                 ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
             }
 
@@ -3221,7 +3222,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 // A single element swizzle is just the type of the vector.
                 ty = vec->type();
                 // If we're extracting from a reference, we return a reference.
-                if (auto* ref = structure->As<type::Reference>()) {
+                if (auto* ref = object_ty->As<type::Reference>()) {
                     ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
                 }
             } else {
