@@ -1460,6 +1460,7 @@ fn main(@location(0) value : f32) -> @location(0) vec4f {
 }
 
 DAWN_INSTANTIATE_TEST(ShaderTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({"use_dxc"}),
                       MetalBackend(),

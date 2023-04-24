@@ -392,6 +392,7 @@ TEST_P(SwapChainWithAdditionalUsageTests, ErrorIncludeUnsupportedUsage) {
 
 DAWN_INSTANTIATE_TEST(SwapChainTests, MetalBackend(), VulkanBackend());
 DAWN_INSTANTIATE_TEST(SwapChainWithAdditionalUsageTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       NullBackend(),

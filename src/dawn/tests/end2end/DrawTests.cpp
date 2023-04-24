@@ -101,6 +101,7 @@ TEST_P(DrawTest, Uint32) {
 }
 
 DAWN_INSTANTIATE_TEST(DrawTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

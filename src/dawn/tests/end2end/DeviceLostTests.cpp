@@ -533,6 +533,7 @@ TEST_P(DeviceLostTest, SetLabelAfterDeviceLoss) {
 }
 
 DAWN_INSTANTIATE_TEST(DeviceLostTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       NullBackend(),

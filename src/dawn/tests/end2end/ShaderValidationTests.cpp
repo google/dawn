@@ -375,6 +375,7 @@ TEST_P(WorkgroupSizeValidationTest, ValidationAfterOverrideStorageSize) {
 }
 
 DAWN_INSTANTIATE_TEST(WorkgroupSizeValidationTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       NullBackend(),

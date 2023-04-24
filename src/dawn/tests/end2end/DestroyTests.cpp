@@ -213,6 +213,7 @@ TEST_P(DestroyTest, GetQueueAfterDeviceDestroy) {
 }
 
 DAWN_INSTANTIATE_TEST(DestroyTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
