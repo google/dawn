@@ -347,7 +347,7 @@ bool GeneratorImpl::Generate() {
         // WGSL can ignore the invariant attribute on pre MSL 2.1 devices.
         // See: https://github.com/gpuweb/gpuweb/issues/893#issuecomment-745537465
         line(&helpers_) << "#if __METAL_VERSION__ >= 210";
-        line(&helpers_) << "#define " << invariant_define_name_ << " @invariant";
+        line(&helpers_) << "#define " << invariant_define_name_ << " [[invariant]]";
         line(&helpers_) << "#else";
         line(&helpers_) << "#define " << invariant_define_name_;
         line(&helpers_) << "#endif";

@@ -119,7 +119,7 @@ TEST_F(MslGeneratorImplTest, HasInvariantAttribute_True) {
 using namespace metal;
 
 #if __METAL_VERSION__ >= 210
-#define TINT_INVARIANT @invariant
+#define TINT_INVARIANT [[invariant]]
 #else
 #define TINT_INVARIANT
 #endif
