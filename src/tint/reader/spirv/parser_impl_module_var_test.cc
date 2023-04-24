@@ -4132,6 +4132,35 @@ fn main() -> main_out {
     EXPECT_EQ(got, expected) << got;
 }
 
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_MultiplePerVertexVariables) {
+    // This is not currently supported, so just make sure we produce a meaningful error instead of
+    // crashing.
+    const std::string assembly = R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint Vertex %main "main" %1
+  OpDecorate %struct Block
+  OpMemberDecorate %struct 0 BuiltIn Position
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  %f32 = OpTypeFloat 32
+  %vec4f = OpTypeVector %f32 4
+  %struct = OpTypeStruct %vec4f
+  %struct_out_ptr = OpTypePointer Output %struct
+  %1 = OpVariable %struct_out_ptr Output
+  %2 = OpVariable %struct_out_ptr Output
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  OpReturn
+  OpFunctionEnd
+)";
+    auto p = parser(test::Assemble(assembly));
+
+    EXPECT_FALSE(p->Parse());
+    EXPECT_FALSE(p->success());
+    EXPECT_EQ(p->error(), "unsupported: multiple Position built-in variables in the same module");
+}
+
 TEST_F(SpvModuleScopeVarParserTest, Input_FlattenArray_OneLevel) {
     const std::string assembly = R"(
     OpCapability Shader
