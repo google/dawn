@@ -16,6 +16,10 @@
 #include <CoreVideo/CVPixelBuffer.h>
 #include <IOSurface/IOSurface.h>
 
+#include <memory>
+#include <thread>
+#include <vector>
+
 #include "dawn/tests/DawnTest.h"
 
 #include "dawn/native/MetalBackend.h"
@@ -588,5 +592,66 @@ TEST_P(IOSurfaceUsageTests, WriteThenConcurrentReadThenWrite) {
     EXPECT_TRUE(endWriteAccessDesc.isInitialized);
 }
 
+class IOSurfaceMultithreadTests : public IOSurfaceUsageTests {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        // TODO(crbug.com/dawn/1678): DawnWire doesn't support thread safe API yet.
+        if (!UsesWire()) {
+            features.push_back(wgpu::FeatureName::ImplicitDeviceSynchronization);
+        }
+        return features;
+    }
+
+    void SetUp() override {
+        IOSurfaceUsageTests::SetUp();
+        // TODO(crbug.com/dawn/1678): DawnWire doesn't support thread safe API yet.
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    }
+};
+
+// Test that texture with color is cleared when isInitialized = false. There shoudn't be any data
+// race if multiple of them are created on multiple threads.
+TEST_P(IOSurfaceMultithreadTests, UninitializedTexturesAreCleared_OnMultipleThreads) {
+    utils::RunInParallel(10, [this](uint32_t) {
+        ScopedIOSurfaceRef ioSurface =
+            CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32RGBA, 4);
+        uint32_t data = 0x04030201;
+
+        IOSurfaceLock(ioSurface.get(), 0, nullptr);
+        memcpy(IOSurfaceGetBaseAddress(ioSurface.get()), &data, sizeof(data));
+        IOSurfaceUnlock(ioSurface.get(), 0, nullptr);
+
+        wgpu::TextureDescriptor textureDescriptor;
+        textureDescriptor.dimension = wgpu::TextureDimension::e2D;
+        textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        textureDescriptor.size = {1, 1, 1};
+        textureDescriptor.sampleCount = 1;
+        textureDescriptor.mipLevelCount = 1;
+        textureDescriptor.usage =
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+
+        // wrap ioSurface and ensure color is not visible when isInitialized set to false
+        wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), false);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 0, 0, 0), ioSurfaceTexture, 0, 0);
+
+        dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
+        dawn::native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
+        EXPECT_TRUE(endAccessDesc.isInitialized);
+    });
+}
+
+// Test that wrapping multiple IOSurface and clear them on multiple threads work.
+TEST_P(IOSurfaceMultithreadTests, WrapAndClear_OnMultipleThreads) {
+    utils::RunInParallel(10, [this](uint32_t) {
+        ScopedIOSurfaceRef ioSurface =
+            CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32BGRA, 4);
+
+        uint32_t data = 0x04010203;
+        DoClearTest(ioSurface.get(), wgpu::TextureFormat::BGRA8Unorm, &data, sizeof(data));
+    });
+}
+
 DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend());
 DAWN_INSTANTIATE_TEST(IOSurfaceUsageTests, MetalBackend());
+DAWN_INSTANTIATE_TEST(IOSurfaceMultithreadTests, MetalBackend());

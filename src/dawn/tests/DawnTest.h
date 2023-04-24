@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_TESTS_DAWNTEST_H_
 #define SRC_DAWN_TESTS_DAWNTEST_H_
 
+#include <atomic>
 #include <memory>
 #include <queue>
 #include <string>
@@ -23,6 +24,7 @@
 #include <vector>
 
 #include "dawn/common/Log.h"
+#include "dawn/common/Mutex.h"
 #include "dawn/common/Platform.h"
 #include "dawn/common/Preprocessor.h"
 #include "dawn/dawn_proc_table.h"
@@ -623,7 +625,7 @@ class DawnTestBase {
     // Maps all the buffers and fill ReadbackSlot::mappedData
     void MapSlotsSynchronously();
     static void SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userdata);
-    size_t mNumPendingMapOperations = 0;
+    std::atomic<size_t> mNumPendingMapOperations = 0;
 
     // Reserve space where the data for an expectation can be copied
     struct ReadbackReservation {
@@ -656,6 +658,8 @@ class DawnTestBase {
     WGPUDevice mLastCreatedBackendDevice;
 
     std::unique_ptr<dawn::platform::Platform> mTestPlatform;
+
+    dawn::Mutex mMutex;
 };
 
 #define DAWN_SKIP_TEST_IF_BASE(condition, type, reason)   \

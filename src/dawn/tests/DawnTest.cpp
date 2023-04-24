@@ -15,6 +15,7 @@
 #include "dawn/tests/DawnTest.h"
 
 #include <algorithm>
+#include <atomic>
 #include <fstream>
 #include <iomanip>
 #include <regex>
@@ -1146,6 +1147,9 @@ std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
     deferred.size = size;
     deferred.expectation.reset(expectation);
 
+    // This expectation might be called from multiple threads
+    dawn::Mutex::AutoLock lg(&mMutex);
+
     mDeferredExpectations.push_back(std::move(deferred));
     mDeferredExpectations.back().message = std::make_unique<std::ostringstream>();
     return *(mDeferredExpectations.back().message.get());
@@ -1199,6 +1203,9 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
     deferred.rowBytes = extent.width * dataSize;
     deferred.bytesPerRow = bytesPerRow;
     deferred.expectation.reset(expectation);
+
+    // This expectation might be called from multiple threads
+    dawn::Mutex::AutoLock lg(&mMutex);
 
     mDeferredExpectations.push_back(std::move(deferred));
     mDeferredExpectations.back().message = std::make_unique<std::ostringstream>();
@@ -1504,11 +1511,16 @@ void DawnTestBase::FlushWire() {
 }
 
 void DawnTestBase::WaitForAllOperations() {
-    bool done = false;
+    // Callback might be invoked on another thread that calls the same WaitABit() method, not
+    // necessarily the current thread. So we need to use atomic here.
+    std::atomic<bool> done(false);
     device.GetQueue().OnSubmittedWorkDone(
-        0u, [](WGPUQueueWorkDoneStatus, void* userdata) { *static_cast<bool*>(userdata) = true; },
+        0u,
+        [](WGPUQueueWorkDoneStatus, void* userdata) {
+            *static_cast<std::atomic<bool>*>(userdata) = true;
+        },
         &done);
-    while (!done) {
+    while (!done.load()) {
         WaitABit();
     }
 }
@@ -1525,6 +1537,9 @@ DawnTestBase::ReadbackReservation DawnTestBase::ReserveReadback(wgpu::Device tar
     slot.buffer =
         utils::CreateBufferFromData(targetDevice, initialBufferData.data(), readbackSize,
                                     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst);
+
+    // This readback might be called from multiple threads
+    dawn::Mutex::AutoLock lg(&mMutex);
 
     ReadbackReservation reservation;
     reservation.device = targetDevice;
@@ -1551,7 +1566,7 @@ void DawnTestBase::MapSlotsSynchronously() {
     }
 
     // Busy wait until all map operations are done.
-    while (mNumPendingMapOperations != 0) {
+    while (mNumPendingMapOperations.load(std::memory_order_acquire) != 0) {
         WaitABit();
     }
 }
@@ -1562,7 +1577,8 @@ void DawnTestBase::SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userda
                 status == WGPUBufferMapAsyncStatus_DeviceLost);
     std::unique_ptr<MapReadUserdata> userdata(static_cast<MapReadUserdata*>(userdata_));
     DawnTestBase* test = userdata->test;
-    test->mNumPendingMapOperations--;
+
+    dawn::Mutex::AutoLock lg(&test->mMutex);
 
     ReadbackSlot* slot = &test->mReadbackSlots[userdata->slot];
     if (status == WGPUBufferMapAsyncStatus_Success) {
@@ -1571,6 +1587,8 @@ void DawnTestBase::SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userda
     } else {
         slot->mappedData = nullptr;
     }
+
+    test->mNumPendingMapOperations.fetch_sub(1, std::memory_order_release);
 }
 
 void DawnTestBase::ResolveExpectations() {
@@ -1629,6 +1647,8 @@ void DawnTestBase::ResolveDeferredExpectationsNow() {
     FlushWire();
 
     MapSlotsSynchronously();
+
+    dawn::Mutex::AutoLock lg(&mMutex);
     ResolveExpectations();
 
     mDeferredExpectations.clear();

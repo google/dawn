@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_UTILS_TESTUTILS_H_
 #define SRC_DAWN_UTILS_TESTUTILS_H_
 
+#include <functional>
 #include <ostream>
 
 #include "dawn/webgpu_cpp.h"
@@ -83,6 +84,10 @@ uint64_t GetTexelCountInCopyRegion(uint64_t bytesPerRow,
 void UnalignDynamicUploader(wgpu::Device device);
 
 uint32_t VertexFormatSize(wgpu::VertexFormat format);
+
+void RunInParallel(uint32_t numThreads,
+                   const std::function<void(uint32_t)>& workerFunc,
+                   const std::function<void()>& mainThreadFunc = nullptr);
 
 }  // namespace utils
 
