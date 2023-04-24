@@ -39,7 +39,9 @@ static_assert(sizeof(decltype(tint::Source::FileContent::data[0])) == sizeof(uin
               "tint::reader::wgsl requires the size of a std::string element "
               "to be a single byte");
 
-static constexpr size_t kDefaultListSize = 512;
+// A token is ~80bytes. The 4k here comes from looking at the number of tokens in the benchmark
+// programs and being a bit bigger then those need (atan2-const-eval is the outlier here).
+static constexpr size_t kDefaultListSize = 4092;
 
 bool read_blankspace(std::string_view str, size_t i, bool* is_blankspace, size_t* blankspace_size) {
     // See https://www.w3.org/TR/WGSL/#blankspace
@@ -95,8 +97,12 @@ Lexer::~Lexer() = default;
 std::vector<Token> Lexer::Lex() {
     std::vector<Token> tokens;
     tokens.reserve(kDefaultListSize);
+
     while (true) {
         tokens.emplace_back(next());
+        if (tokens.back().IsEof() || tokens.back().IsError()) {
+            break;
+        }
 
         // If the token can be split, we insert a placeholder element(s) into the stream to hold the
         // split character.
@@ -104,11 +110,7 @@ std::vector<Token> Lexer::Lex() {
         for (size_t i = 0; i < num_placeholders; i++) {
             auto src = tokens.back().source();
             src.range.begin.column++;
-            tokens.emplace_back(Token(Token::Type::kPlaceholder, src));
-        }
-
-        if (tokens.back().IsEof() || tokens.back().IsError()) {
-            break;
+            tokens.emplace_back(Token::Type::kPlaceholder, src);
         }
     }
     return tokens;
@@ -167,32 +169,32 @@ bool Lexer::is_eol() const {
 }
 
 Token Lexer::next() {
-    if (auto t = skip_blankspace_and_comments(); !t.IsUninitialized()) {
-        return t;
+    if (auto t = skip_blankspace_and_comments(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
     }
 
-    if (auto t = try_hex_float(); !t.IsUninitialized()) {
-        return t;
+    if (auto t = try_hex_float(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
     }
 
-    if (auto t = try_hex_integer(); !t.IsUninitialized()) {
-        return t;
+    if (auto t = try_hex_integer(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
     }
 
-    if (auto t = try_float(); !t.IsUninitialized()) {
-        return t;
+    if (auto t = try_float(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
     }
 
-    if (auto t = try_integer(); !t.IsUninitialized()) {
-        return t;
+    if (auto t = try_integer(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
     }
 
-    if (auto t = try_ident(); !t.IsUninitialized()) {
-        return t;
+    if (auto t = try_ident(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
     }
 
-    if (auto t = try_punctuation(); !t.IsUninitialized()) {
-        return t;
+    if (auto t = try_punctuation(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
     }
 
     return {Token::Type::kError, begin_source(),
@@ -237,7 +239,7 @@ bool Lexer::matches(size_t pos, char ch) {
     return line()[pos] == ch;
 }
 
-Token Lexer::skip_blankspace_and_comments() {
+std::optional<Token> Lexer::skip_blankspace_and_comments() {
     for (;;) {
         auto loc = location_;
         while (!is_eof()) {
@@ -249,7 +251,7 @@ Token Lexer::skip_blankspace_and_comments() {
             bool is_blankspace;
             size_t blankspace_size;
             if (!read_blankspace(line(), pos(), &is_blankspace, &blankspace_size)) {
-                return {Token::Type::kError, begin_source(), "invalid UTF-8"};
+                return Token{Token::Type::kError, begin_source(), "invalid UTF-8"};
             }
             if (!is_blankspace) {
                 break;
@@ -259,7 +261,7 @@ Token Lexer::skip_blankspace_and_comments() {
         }
 
         auto t = skip_comment();
-        if (!t.IsUninitialized()) {
+        if (t.has_value() && !t->IsUninitialized()) {
             return t;
         }
 
@@ -270,18 +272,18 @@ Token Lexer::skip_blankspace_and_comments() {
         }
     }
     if (is_eof()) {
-        return {Token::Type::kEOF, begin_source()};
+        return Token{Token::Type::kEOF, begin_source()};
     }
 
     return {};
 }
 
-Token Lexer::skip_comment() {
+std::optional<Token> Lexer::skip_comment() {
     if (matches(pos(), "//")) {
         // Line comment: ignore everything until the end of line.
         while (!is_eol()) {
             if (is_null()) {
-                return {Token::Type::kError, begin_source(), "null character found"};
+                return Token{Token::Type::kError, begin_source(), "null character found"};
             }
             advance();
         }
@@ -311,20 +313,20 @@ Token Lexer::skip_comment() {
                 // Newline: skip and update source location.
                 advance_line();
             } else if (is_null()) {
-                return {Token::Type::kError, begin_source(), "null character found"};
+                return Token{Token::Type::kError, begin_source(), "null character found"};
             } else {
                 // Anything else: skip and update source location.
                 advance();
             }
         }
         if (depth > 0) {
-            return {Token::Type::kError, source, "unterminated block comment"};
+            return Token{Token::Type::kError, source, "unterminated block comment"};
         }
     }
     return {};
 }
 
-Token Lexer::try_float() {
+std::optional<Token> Lexer::try_float() {
     auto start = pos();
     auto end = pos();
 
@@ -385,8 +387,8 @@ Token Lexer::try_float() {
         // If an 'e' or 'E' was present, then the number part must also be present.
         if (!has_digits) {
             const auto str = std::string{substr(start, end - start)};
-            return {Token::Type::kError, source,
-                    "incomplete exponent for floating point literal: " + str};
+            return Token{Token::Type::kError, source,
+                         "incomplete exponent for floating point literal: " + str};
         }
     }
 
@@ -452,9 +454,9 @@ Token Lexer::try_float() {
         if (!overflow && f) {
             advance(1);
             end_source(source);
-            return {Token::Type::kFloatLiteral_F, source, static_cast<double>(f.Get())};
+            return Token{Token::Type::kFloatLiteral_F, source, static_cast<double>(f.Get())};
         }
-        return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
+        return Token{Token::Type::kError, source, "value cannot be represented as 'f32'"};
     }
 
     if (has_h_suffix) {
@@ -462,23 +464,24 @@ Token Lexer::try_float() {
         if (!overflow && f) {
             advance(1);
             end_source(source);
-            return {Token::Type::kFloatLiteral_H, source, static_cast<double>(f.Get())};
+            return Token{Token::Type::kFloatLiteral_H, source, static_cast<double>(f.Get())};
         }
-        return {Token::Type::kError, source, "value cannot be represented as 'f16'"};
+        return Token{Token::Type::kError, source, "value cannot be represented as 'f16'"};
     }
 
     end_source(source);
 
     TINT_BEGIN_DISABLE_WARNING(FLOAT_EQUAL);
     if (overflow || value == HUGE_VAL || -value == HUGE_VAL) {
-        return {Token::Type::kError, source, "value cannot be represented as 'abstract-float'"};
+        return Token{Token::Type::kError, source,
+                     "value cannot be represented as 'abstract-float'"};
     } else {
-        return {Token::Type::kFloatLiteral, source, value};
+        return Token{Token::Type::kFloatLiteral, source, value};
     }
     TINT_END_DISABLE_WARNING(FLOAT_EQUAL);
 }
 
-Token Lexer::try_hex_float() {
+std::optional<Token> Lexer::try_hex_float() {
     constexpr uint64_t kExponentBits = 11;
     constexpr uint64_t kMantissaBits = 52;
     constexpr uint64_t kTotalBits = 1 + kExponentBits + kMantissaBits;
@@ -593,7 +596,8 @@ Token Lexer::try_hex_float() {
             // Skip leading 0s and the first 1
             if (seen_prior_one_bits) {
                 if (!set_next_mantissa_bit_to(v != 0, true)) {
-                    return {Token::Type::kError, source, "mantissa is too large for hex float"};
+                    return Token{Token::Type::kError, source,
+                                 "mantissa is too large for hex float"};
                 }
                 ++exponent;
             } else {
@@ -622,7 +626,8 @@ Token Lexer::try_hex_float() {
                 --exponent;
             } else {
                 if (!set_next_mantissa_bit_to(v != 0, false)) {
-                    return {Token::Type::kError, source, "mantissa is too large for hex float"};
+                    return Token{Token::Type::kError, source,
+                                 "mantissa is too large for hex float"};
                 }
             }
         }
@@ -663,7 +668,7 @@ Token Lexer::try_hex_float() {
             // Check if we've overflowed input_exponent. This only matters when
             // the mantissa is non-zero.
             if (!is_zero && (prev_exponent > input_exponent)) {
-                return {Token::Type::kError, source, "exponent is too large for hex float"};
+                return Token{Token::Type::kError, source, "exponent is too large for hex float"};
             }
             end++;
         }
@@ -680,7 +685,7 @@ Token Lexer::try_hex_float() {
         }
 
         if (!has_exponent_digits) {
-            return {Token::Type::kError, source, "expected an exponent value for hex float"};
+            return Token{Token::Type::kError, source, "expected an exponent value for hex float"};
         }
     }
 
@@ -696,7 +701,7 @@ Token Lexer::try_hex_float() {
         const uint64_t kIntMax = static_cast<uint64_t>(std::numeric_limits<int64_t>::max());
         const uint64_t kMaxInputExponent = kIntMax - kExponentBias;
         if (input_exponent > kMaxInputExponent) {
-            return {Token::Type::kError, source, "exponent is too large for hex float"};
+            return Token{Token::Type::kError, source, "exponent is too large for hex float"};
         }
 
         // Compute exponent so far
@@ -746,7 +751,7 @@ Token Lexer::try_hex_float() {
 
     if (signed_exponent >= kExponentMax || (signed_exponent == kExponentMax && mantissa != 0)) {
         std::string type = has_f_suffix ? "f32" : (has_h_suffix ? "f16" : "abstract-float");
-        return {Token::Type::kError, source, "value cannot be represented as '" + type + "'"};
+        return Token{Token::Type::kError, source, "value cannot be represented as '" + type + "'"};
     }
 
     // Combine sign, mantissa, and exponent
@@ -762,7 +767,7 @@ Token Lexer::try_hex_float() {
         // Check value fits in f32
         if (result_f64 < static_cast<double>(f32::kLowestValue) ||
             result_f64 > static_cast<double>(f32::kHighestValue)) {
-            return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
+            return Token{Token::Type::kError, source, "value cannot be represented as 'f32'"};
         }
         // Check the value can be exactly represented, i.e. only high 23 mantissa bits are valid for
         // normal f32 values, and less for subnormal f32 values. The rest low mantissa bits must be
@@ -803,19 +808,21 @@ Token Lexer::try_hex_float() {
         } else if (abs_result_f64 != 0.0) {
             // The result is smaller than the smallest subnormal f32 value, but not equal to zero.
             // Such value will never be exactly represented by f32.
-            return {Token::Type::kError, source, "value cannot be exactly represented as 'f32'"};
+            return Token{Token::Type::kError, source,
+                         "value cannot be exactly represented as 'f32'"};
         }
         // Check the low 52-valid_mantissa_bits mantissa bits must be 0.
         TINT_ASSERT(Reader, (0 <= valid_mantissa_bits) && (valid_mantissa_bits <= 23));
         if (result_u64 & ((uint64_t(1) << (52 - valid_mantissa_bits)) - 1)) {
-            return {Token::Type::kError, source, "value cannot be exactly represented as 'f32'"};
+            return Token{Token::Type::kError, source,
+                         "value cannot be exactly represented as 'f32'"};
         }
-        return {Token::Type::kFloatLiteral_F, source, result_f64};
+        return Token{Token::Type::kFloatLiteral_F, source, result_f64};
     } else if (has_h_suffix) {
         // Check value fits in f16
         if (result_f64 < static_cast<double>(f16::kLowestValue) ||
             result_f64 > static_cast<double>(f16::kHighestValue)) {
-            return {Token::Type::kError, source, "value cannot be represented as 'f16'"};
+            return Token{Token::Type::kError, source, "value cannot be represented as 'f16'"};
         }
         // Check the value can be exactly represented, i.e. only high 10 mantissa bits are valid for
         // normal f16 values, and less for subnormal f16 values. The rest low mantissa bits must be
@@ -854,17 +861,19 @@ Token Lexer::try_hex_float() {
         } else if (abs_result_f64 != 0.0) {
             // The result is smaller than the smallest subnormal f16 value, but not equal to zero.
             // Such value will never be exactly represented by f16.
-            return {Token::Type::kError, source, "value cannot be exactly represented as 'f16'"};
+            return Token{Token::Type::kError, source,
+                         "value cannot be exactly represented as 'f16'"};
         }
         // Check the low 52-valid_mantissa_bits mantissa bits must be 0.
         TINT_ASSERT(Reader, (0 <= valid_mantissa_bits) && (valid_mantissa_bits <= 10));
         if (result_u64 & ((uint64_t(1) << (52 - valid_mantissa_bits)) - 1)) {
-            return {Token::Type::kError, source, "value cannot be exactly represented as 'f16'"};
+            return Token{Token::Type::kError, source,
+                         "value cannot be exactly represented as 'f16'"};
         }
-        return {Token::Type::kFloatLiteral_H, source, result_f64};
+        return Token{Token::Type::kFloatLiteral_H, source, result_f64};
     }
 
-    return {Token::Type::kFloatLiteral, source, result_f64};
+    return Token{Token::Type::kFloatLiteral, source, result_f64};
 }
 
 Token Lexer::build_token_from_int_if_possible(Source source,
@@ -911,7 +920,7 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     return {Token::Type::kIntLiteral, source, value};
 }
 
-Token Lexer::try_hex_integer() {
+std::optional<Token> Lexer::try_hex_integer() {
     auto start = pos();
     auto curr = start;
 
@@ -924,14 +933,14 @@ Token Lexer::try_hex_integer() {
     }
 
     if (!is_hex(at(curr))) {
-        return {Token::Type::kError, source,
-                "integer or float hex literal has no significant digits"};
+        return Token{Token::Type::kError, source,
+                     "integer or float hex literal has no significant digits"};
     }
 
     return build_token_from_int_if_possible(source, curr, curr - start, 16);
 }
 
-Token Lexer::try_integer() {
+std::optional<Token> Lexer::try_integer() {
     auto start = pos();
     auto curr = start;
 
@@ -945,14 +954,14 @@ Token Lexer::try_integer() {
     // are not allowed.
     if (auto next = curr + 1; next < length()) {
         if (at(curr) == '0' && is_digit(at(next))) {
-            return {Token::Type::kError, source, "integer literal cannot have leading 0s"};
+            return Token{Token::Type::kError, source, "integer literal cannot have leading 0s"};
         }
     }
 
     return build_token_from_int_if_possible(source, start, 0, 10);
 }
 
-Token Lexer::try_ident() {
+std::optional<Token> Lexer::try_ident() {
     auto source = begin_source();
     auto start = pos();
 
@@ -962,7 +971,7 @@ Token Lexer::try_ident() {
         auto [code_point, n] = utils::utf8::Decode(utf8, length() - pos());
         if (n == 0) {
             advance();  // Skip the bad byte.
-            return {Token::Type::kError, source, "invalid UTF-8"};
+            return Token{Token::Type::kError, source, "invalid UTF-8"};
         }
         if (code_point != utils::CodePoint('_') && !code_point.IsXIDStart()) {
             return {};
@@ -977,7 +986,7 @@ Token Lexer::try_ident() {
         auto [code_point, n] = utils::utf8::Decode(utf8, line().size() - pos());
         if (n == 0) {
             advance();  // Skip the bad byte.
-            return {Token::Type::kError, source, "invalid UTF-8"};
+            return Token{Token::Type::kError, source, "invalid UTF-8"};
         }
         if (!code_point.IsXIDContinue()) {
             break;
@@ -999,15 +1008,14 @@ Token Lexer::try_ident() {
     auto str = substr(start, pos() - start);
     end_source(source);
 
-    auto t = check_keyword(source, str);
-    if (!t.IsUninitialized()) {
+    if (auto t = check_keyword(source, str); t.has_value() && !t->IsUninitialized()) {
         return t;
     }
 
-    return {Token::Type::kIdentifier, source, str};
+    return Token{Token::Type::kIdentifier, source, str};
 }
 
-Token Lexer::try_punctuation() {
+std::optional<Token> Lexer::try_punctuation() {
     auto source = begin_source();
     auto type = Token::Type::kUninitialized;
 
@@ -1177,97 +1185,99 @@ Token Lexer::try_punctuation() {
             type = Token::Type::kXor;
             advance(1);
         }
+    } else {
+        return {};
     }
 
     end_source(source);
 
-    return {type, source};
+    return Token{type, source};
 }
 
-Token Lexer::check_keyword(const Source& source, std::string_view str) {
+std::optional<Token> Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "alias") {
-        return {Token::Type::kAlias, source, "alias"};
+        return Token{Token::Type::kAlias, source, "alias"};
     }
     if (str == "bitcast") {
-        return {Token::Type::kBitcast, source, "bitcast"};
+        return Token{Token::Type::kBitcast, source, "bitcast"};
     }
     if (str == "break") {
-        return {Token::Type::kBreak, source, "break"};
+        return Token{Token::Type::kBreak, source, "break"};
     }
     if (str == "case") {
-        return {Token::Type::kCase, source, "case"};
+        return Token{Token::Type::kCase, source, "case"};
     }
     if (str == "const") {
-        return {Token::Type::kConst, source, "const"};
+        return Token{Token::Type::kConst, source, "const"};
     }
     if (str == "const_assert") {
-        return {Token::Type::kConstAssert, source, "const_assert"};
+        return Token{Token::Type::kConstAssert, source, "const_assert"};
     }
     if (str == "continue") {
-        return {Token::Type::kContinue, source, "continue"};
+        return Token{Token::Type::kContinue, source, "continue"};
     }
     if (str == "continuing") {
-        return {Token::Type::kContinuing, source, "continuing"};
+        return Token{Token::Type::kContinuing, source, "continuing"};
     }
     if (str == "diagnostic") {
-        return {Token::Type::kDiagnostic, source, "diagnostic"};
+        return Token{Token::Type::kDiagnostic, source, "diagnostic"};
     }
     if (str == "discard") {
-        return {Token::Type::kDiscard, source, "discard"};
+        return Token{Token::Type::kDiscard, source, "discard"};
     }
     if (str == "default") {
-        return {Token::Type::kDefault, source, "default"};
+        return Token{Token::Type::kDefault, source, "default"};
     }
     if (str == "else") {
-        return {Token::Type::kElse, source, "else"};
+        return Token{Token::Type::kElse, source, "else"};
     }
     if (str == "enable") {
-        return {Token::Type::kEnable, source, "enable"};
+        return Token{Token::Type::kEnable, source, "enable"};
     }
     if (str == "fallthrough") {
-        return {Token::Type::kFallthrough, source, "fallthrough"};
+        return Token{Token::Type::kFallthrough, source, "fallthrough"};
     }
     if (str == "false") {
-        return {Token::Type::kFalse, source, "false"};
+        return Token{Token::Type::kFalse, source, "false"};
     }
     if (str == "fn") {
-        return {Token::Type::kFn, source, "fn"};
+        return Token{Token::Type::kFn, source, "fn"};
     }
     if (str == "for") {
-        return {Token::Type::kFor, source, "for"};
+        return Token{Token::Type::kFor, source, "for"};
     }
     if (str == "if") {
-        return {Token::Type::kIf, source, "if"};
+        return Token{Token::Type::kIf, source, "if"};
     }
     if (str == "let") {
-        return {Token::Type::kLet, source, "let"};
+        return Token{Token::Type::kLet, source, "let"};
     }
     if (str == "loop") {
-        return {Token::Type::kLoop, source, "loop"};
+        return Token{Token::Type::kLoop, source, "loop"};
     }
     if (str == "override") {
-        return {Token::Type::kOverride, source, "override"};
+        return Token{Token::Type::kOverride, source, "override"};
     }
     if (str == "return") {
-        return {Token::Type::kReturn, source, "return"};
+        return Token{Token::Type::kReturn, source, "return"};
     }
     if (str == "requires") {
-        return {Token::Type::kRequires, source, "requires"};
+        return Token{Token::Type::kRequires, source, "requires"};
     }
     if (str == "struct") {
-        return {Token::Type::kStruct, source, "struct"};
+        return Token{Token::Type::kStruct, source, "struct"};
     }
     if (str == "switch") {
-        return {Token::Type::kSwitch, source, "switch"};
+        return Token{Token::Type::kSwitch, source, "switch"};
     }
     if (str == "true") {
-        return {Token::Type::kTrue, source, "true"};
+        return Token{Token::Type::kTrue, source, "true"};
     }
     if (str == "var") {
-        return {Token::Type::kVar, source, "var"};
+        return Token{Token::Type::kVar, source, "var"};
     }
     if (str == "while") {
-        return {Token::Type::kWhile, source, "while"};
+        return Token{Token::Type::kWhile, source, "while"};
     }
     return {};
 }

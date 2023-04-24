@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_READER_WGSL_LEXER_H_
 #define SRC_TINT_READER_WGSL_LEXER_H_
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -40,19 +41,19 @@ class Lexer {
 
     /// Advances past blankspace and comments, if present at the current position.
     /// @returns error token, EOF, or uninitialized
-    Token skip_blankspace_and_comments();
+    std::optional<Token> skip_blankspace_and_comments();
     /// Advances past a comment at the current position, if one exists.
     /// Returns an error if there was an unterminated block comment,
     /// or a null character was present.
     /// @returns uninitialized token on success, or error
-    Token skip_comment();
+    std::optional<Token> skip_comment();
 
     Token build_token_from_int_if_possible(Source source,
                                            size_t start,
                                            size_t prefix_count,
                                            int32_t base);
 
-    Token check_keyword(const Source&, std::string_view);
+    std::optional<Token> check_keyword(const Source&, std::string_view);
 
     /// The try_* methods have the following in common:
     /// - They assume there is at least one character to be consumed,
@@ -62,12 +63,12 @@ class Lexer {
     /// - Some can return an error token.
     /// - Otherwise they return an uninitialized token when they did not
     ///   match a token of the specfied kind.
-    Token try_float();
-    Token try_hex_float();
-    Token try_hex_integer();
-    Token try_ident();
-    Token try_integer();
-    Token try_punctuation();
+    std::optional<Token> try_float();
+    std::optional<Token> try_hex_float();
+    std::optional<Token> try_hex_integer();
+    std::optional<Token> try_ident();
+    std::optional<Token> try_integer();
+    std::optional<Token> try_punctuation();
 
     Source begin_source() const;
     void end_source(Source&) const;
