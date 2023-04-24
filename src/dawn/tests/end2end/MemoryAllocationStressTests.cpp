@@ -25,7 +25,7 @@ TEST_P(MemoryAllocationStressTests, LargeBuffer) {
     DAWN_TEST_UNSUPPORTED_IF(IsD3D12());
 
     // TODO(crbug.com/dawn/957): Check whether it can be reproduced on each backend.
-    DAWN_TEST_UNSUPPORTED_IF(IsMetal() || IsOpenGL() || IsOpenGLES() || IsVulkan());
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D11() || IsMetal() || IsOpenGL() || IsOpenGLES() || IsVulkan());
 
     uint32_t count = 100;
     for (uint32_t i = 0; i < count; i++) {
@@ -38,6 +38,7 @@ TEST_P(MemoryAllocationStressTests, LargeBuffer) {
 }
 
 DAWN_INSTANTIATE_TEST(MemoryAllocationStressTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
