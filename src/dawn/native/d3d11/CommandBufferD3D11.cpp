@@ -23,6 +23,7 @@
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandEncoder.h"
+#include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/RenderBundle.h"
@@ -309,25 +310,44 @@ MaybeError CommandBuffer::Execute() {
                     continue;
                 }
 
-                Buffer* buffer = ToBackend(copy->source.buffer.Get());
+                auto& src = copy->source;
+                auto& dst = copy->destination;
+
+                Buffer* buffer = ToBackend(src.buffer.Get());
+                uint64_t bufferOffset = src.offset;
+                Ref<BufferBase> stagingBuffer;
+                // If the buffer is not mappable, we need to create a staging buffer and copy the
+                // data from the buffer to the staging buffer.
+                if (!(buffer->GetUsage() & kMappableBufferUsages)) {
+                    const TexelBlockInfo& blockInfo =
+                        ToBackend(dst.texture)->GetFormat().GetAspectInfo(dst.aspect).block;
+                    // TODO(dawn:1768): use compute shader to copy data from buffer to texture.
+                    BufferDescriptor desc;
+                    DAWN_TRY_ASSIGN(desc.size,
+                                    ComputeRequiredBytesInCopy(blockInfo, copy->copySize,
+                                                               src.bytesPerRow, src.rowsPerImage));
+                    desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
+                    DAWN_TRY_ASSIGN(stagingBuffer, GetDevice()->CreateBuffer(&desc));
+
+                    DAWN_TRY(Buffer::Copy(commandContext, buffer, src.offset,
+                                          stagingBuffer->GetSize(), ToBackend(stagingBuffer.Get()),
+                                          0));
+                    buffer = ToBackend(stagingBuffer.Get());
+                    bufferOffset = 0;
+                }
+
                 Buffer::ScopedMap scopedMap;
                 DAWN_TRY_ASSIGN(scopedMap, Buffer::ScopedMap::Create(buffer));
                 DAWN_TRY(buffer->EnsureDataInitialized(commandContext));
 
-                if (!scopedMap.GetMappedData()) {
-                    // TODO(dawn:1768): implement CopyBufferToTexture with non-mappable buffers.
-                    return DAWN_UNIMPLEMENTED_ERROR(
-                        "CopyBufferToTexture isn't implemented with non-mappable buffers");
-                }
+                Texture* texture = ToBackend(dst.texture.Get());
+                SubresourceRange subresources = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
-                Texture* texture = ToBackend(copy->destination.texture.Get());
-                SubresourceRange subresources =
-                    GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
-                const uint8_t* data = scopedMap.GetMappedData() + copy->source.offset;
+                DAWN_ASSERT(scopedMap.GetMappedData());
+                const uint8_t* data = scopedMap.GetMappedData() + bufferOffset;
+                DAWN_TRY(texture->Write(commandContext, subresources, dst.origin, copy->copySize,
+                                        data, src.bytesPerRow, src.rowsPerImage));
 
-                DAWN_TRY(texture->Write(commandContext, subresources, copy->destination.origin,
-                                        copy->copySize, data, copy->source.bytesPerRow,
-                                        copy->source.rowsPerImage));
                 buffer->MarkUsedInPendingCommands();
                 break;
             }
@@ -348,6 +368,7 @@ MaybeError CommandBuffer::Execute() {
                              ->EnsureSubresourceContentInitialized(commandContext, subresources));
 
                 // Create a staging texture.
+                // TODO(dawn:1768): use compute shader to copy data from texture to buffer.
                 D3D11_TEXTURE2D_DESC stagingTextureDesc;
                 stagingTextureDesc.Width = copy->copySize.width;
                 stagingTextureDesc.Height = copy->copySize.height;
@@ -395,6 +416,12 @@ MaybeError CommandBuffer::Execute() {
                     }
                 }
 
+                Buffer* buffer = ToBackend(dst.buffer.Get());
+                Buffer::ScopedMap scopedDstMap;
+                DAWN_TRY_ASSIGN(scopedDstMap, Buffer::ScopedMap::Create(buffer));
+
+                DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
+
                 for (uint32_t z = 0; z < copy->copySize.depthOrArrayLayers; ++z) {
                     // Copy the staging texture to the buffer.
                     // The Map() will block until the GPU is done with the texture.
@@ -405,23 +432,35 @@ MaybeError CommandBuffer::Execute() {
                                                               D3D11_MAP_READ, 0, &mappedResource),
                                      "D3D11 map staging texture"));
 
-                    Buffer* buffer = ToBackend(dst.buffer.Get());
-
-                    Buffer::ScopedMap scopedMap;
-                    DAWN_TRY_ASSIGN(scopedMap, Buffer::ScopedMap::Create(buffer));
-                    DAWN_TRY(buffer->EnsureDataInitializedAsDestination(
-                        commandContext, dst.offset, dst.bytesPerRow * copy->copySize.height));
                     uint8_t* pSrcData = reinterpret_cast<uint8_t*>(mappedResource.pData);
-
                     const TexelBlockInfo& blockInfo =
                         ToBackend(src.texture)->GetFormat().GetAspectInfo(src.aspect).block;
-                    uint32_t memcpySize = blockInfo.byteSize * copy->copySize.width;
-                    uint8_t* pDstData = scopedMap.GetMappedData() + dst.offset +
-                                        dst.bytesPerRow * dst.rowsPerImage * z;
-                    for (uint32_t y = 0; y < copy->copySize.height; ++y) {
-                        memcpy(pDstData, pSrcData, memcpySize);
-                        pDstData += dst.bytesPerRow;
-                        pSrcData += mappedResource.RowPitch;
+                    uint32_t bytesPerRow = blockInfo.byteSize * copy->copySize.width;
+                    if (scopedDstMap.GetMappedData()) {
+                        uint8_t* pDstData = scopedDstMap.GetMappedData() + dst.offset +
+                                            dst.bytesPerRow * dst.rowsPerImage * z;
+                        for (uint32_t y = 0; y < copy->copySize.height; ++y) {
+                            memcpy(pDstData, pSrcData, bytesPerRow);
+                            pDstData += dst.bytesPerRow;
+                            pSrcData += mappedResource.RowPitch;
+                        }
+                    } else {
+                        uint64_t dstOffset = dst.offset + dst.bytesPerRow * dst.rowsPerImage * z;
+                        if (dst.bytesPerRow == bytesPerRow &&
+                            mappedResource.RowPitch == bytesPerRow) {
+                            // If there is no padding in the rows, we can upload the whole image in
+                            // one buffer->Write() call.
+                            DAWN_TRY(buffer->Write(commandContext, dstOffset, pSrcData,
+                                                   dst.bytesPerRow * copy->copySize.height));
+                        } else {
+                            // Otherwise, we need to upload each row separately.
+                            for (uint32_t y = 0; y < copy->copySize.height; ++y) {
+                                DAWN_TRY(buffer->Write(commandContext, dstOffset, pSrcData,
+                                                       bytesPerRow));
+                                dstOffset += dst.bytesPerRow;
+                                pSrcData += mappedResource.RowPitch;
+                            }
+                        }
                     }
                     d3d11DeviceContext1->Unmap(stagingTexture.Get(), z);
                 }
@@ -893,12 +932,11 @@ MaybeError CommandBuffer::RecordFirstIndexOffset(RenderPipeline* renderPipeline,
     }
 
     // TODO(dawn:1705): only update the uniform buffer when the value changes.
-    uint32_t offsets[] = {
+    uint32_t data[4] = {
         firstVertex,
         firstInstance,
     };
-    DAWN_TRY(
-        commandContext->GetUniformBuffer()->Write(commandContext, 0, offsets, sizeof(offsets)));
+    DAWN_TRY(commandContext->GetUniformBuffer()->Write(commandContext, 0, data, sizeof(data)));
 
     return {};
 }
@@ -907,9 +945,12 @@ MaybeError CommandBuffer::RecordNumWorkgroupsForDispatch(ComputePipeline* comput
                                                          CommandRecordingContext* commandContext,
                                                          DispatchCmd* dispatchCmd) {
     // TODO(dawn:1705): only update the uniform buffer when the value changes.
-    static_assert(sizeof(DispatchCmd) == sizeof(uint32_t[3]));
-    DAWN_TRY(commandContext->GetUniformBuffer()->Write(commandContext, 0, dispatchCmd,
-                                                       sizeof(*dispatchCmd)));
+    uint32_t data[4] = {
+        dispatchCmd->x,
+        dispatchCmd->y,
+        dispatchCmd->z,
+    };
+    DAWN_TRY(commandContext->GetUniformBuffer()->Write(commandContext, 0, data, sizeof(data)));
 
     return {};
 }

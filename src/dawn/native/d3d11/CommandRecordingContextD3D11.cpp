@@ -46,10 +46,10 @@ MaybeError CommandRecordingContext::Open(Device* device) {
             d3d11DeviceContext4.As(&mD3D11UserDefinedAnnotation),
             "D3D11 querying immediate context for ID3DUserDefinedAnnotation interface"));
 
-        constexpr size_t kMaxNumBuiltinElements = 3;
-
         // Create a uniform buffer for built in variables.
         BufferDescriptor descriptor;
+        // The maximum number of builtin elements is 4 (vec4). It must be multiple of 4.
+        constexpr size_t kMaxNumBuiltinElements = 4;
         descriptor.size = sizeof(uint32_t) * kMaxNumBuiltinElements;
         descriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
         descriptor.mappedAtCreation = false;

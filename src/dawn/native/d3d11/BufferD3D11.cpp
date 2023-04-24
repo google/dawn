@@ -59,9 +59,7 @@ MaybeError ValidationUsage(wgpu::BufferUsage usage) {
 // ID3D11DeviceContext::CopyResource for these copy operations.
 
 bool IsMappable(wgpu::BufferUsage usage) {
-    constexpr wgpu::BufferUsage kMapUsages =
-        wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
-    return usage & kMapUsages;
+    return usage & kMappableBufferUsages;
 }
 
 D3D11_USAGE D3D11BufferUsage(wgpu::BufferUsage usage) {
