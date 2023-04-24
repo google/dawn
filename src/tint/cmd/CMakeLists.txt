@@ -53,3 +53,15 @@ target_link_libraries(tint_info libtint tint_val)
 if (${TINT_BUILD_SPV_READER})
     target_link_libraries(tint_info SPIRV-Tools)
 endif()
+
+add_executable(tint-loopy "")
+target_sources(tint-loopy PRIVATE
+  "generate_external_texture_bindings.cc"
+  "generate_external_texture_bindings.h"
+  "helper.cc"
+  "helper.h"
+  "loopy.cc"
+)
+tint_default_compile_options(tint-loopy)
+target_link_libraries(tint-loopy libtint tint_val)
+
