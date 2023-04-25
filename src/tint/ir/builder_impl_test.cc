@@ -1858,6 +1858,24 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitStatement_Discard) {
+    auto* expr = Discard();
+    Func("test_function", {}, ty.void_(), expr,
+         utils::Vector{
+             create<ast::StageAttribute>(ast::PipelineStage::kFragment),
+         });
+
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitStatement(expr);
+    ASSERT_TRUE(r) << b.error();
+
+    Disassembler d(b.builder.ir);
+    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
+    EXPECT_EQ(d.AsString(), R"(%1 (void) = discard
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
     Func("my_func", utils::Vector{Param("p", ty.f32())}, ty.void_(), utils::Empty);
 

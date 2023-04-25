@@ -17,7 +17,6 @@
 
 #include "src/tint/constant/value.h"
 #include "src/tint/ir/value.h"
-#include "src/tint/symbol_table.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {

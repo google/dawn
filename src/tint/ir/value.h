@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_IR_VALUE_H_
 #define SRC_TINT_IR_VALUE_H_
 
-#include "src/tint/symbol_table.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"

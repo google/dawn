@@ -12,43 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_USER_CALL_H_
-#define SRC_TINT_IR_USER_CALL_H_
+#ifndef SRC_TINT_IR_DISCARD_H_
+#define SRC_TINT_IR_DISCARD_H_
 
-#include "src/tint/ir/call.h"
-#include "src/tint/symbol.h"
+#include "src/tint/ir/instruction.h"
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
-/// A user call instruction in the IR.
-class UserCall : public utils::Castable<UserCall, Call> {
+/// A discard instruction in the IR.
+class Discard : public utils::Castable<Discard, Instruction> {
   public:
     /// Constructor
-    /// @param result the result value
-    /// @param name the function name
-    /// @param args the function arguments
-    UserCall(Value* result, Symbol name, utils::VectorRef<Value*> args);
-    UserCall(const UserCall& instr) = delete;
-    UserCall(UserCall&& instr) = delete;
-    ~UserCall() override;
+    /// @param result the result id
+    explicit Discard(Value* result);
+    Discard(const Discard& instr) = delete;
+    Discard(Discard&& instr) = delete;
+    ~Discard() override;
 
-    UserCall& operator=(const UserCall& instr) = delete;
-    UserCall& operator=(UserCall&& instr) = delete;
-
-    /// @returns the function name
-    Symbol Name() const { return name_; }
+    Discard& operator=(const Discard& instr) = delete;
+    Discard& operator=(Discard&& instr) = delete;
 
     /// Write the instruction to the given stream
     /// @param out the stream to write to
     /// @returns the stream
     utils::StringStream& ToString(utils::StringStream& out) const override;
-
-  private:
-    Symbol name_{};
 };
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_USER_CALL_H_
+#endif  // SRC_TINT_IR_DISCARD_H_

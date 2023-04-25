@@ -17,8 +17,6 @@
 
 #include "src/tint/builtin/function.h"
 #include "src/tint/ir/call.h"
-#include "src/tint/symbol_table.h"
-#include "src/tint/type/type.h"
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 

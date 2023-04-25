@@ -27,6 +27,7 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
+#include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/function.h"
@@ -256,9 +257,7 @@ bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
         // TODO(dsinclair): Implement
         // },
         [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
-        // [&](const ast::DiscardStatement* d) {
-        // TODO(dsinclair): Implement
-        // },
+        [&](const ast::DiscardStatement* d) { return EmitDiscard(d); },
         [&](const ast::IfStatement* i) { return EmitIf(i); },
         [&](const ast::LoopStatement* l) { return EmitLoop(l); },
         [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
@@ -558,6 +557,16 @@ bool BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
         TINT_UNREACHABLE(IR, diagnostics_);
     }
 
+    return true;
+}
+
+// Discard is being treated as an instruction. The semantics in WGSL is demote_to_helper, so the
+// code has to continue as before it just predicates writes. If WGSL grows some kind of terminating
+// discard that would probably make sense as a FlowNode but would then require figuring out the
+// multi-level exit that is triggered.
+bool BuilderImpl::EmitDiscard(const ast::DiscardStatement*) {
+    auto* instr = builder.Discard();
+    current_flow_block->instructions.Push(instr);
     return true;
 }
 

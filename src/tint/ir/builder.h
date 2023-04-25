@@ -24,6 +24,7 @@
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/convert.h"
+#include "src/tint/ir/discard.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
@@ -38,6 +39,7 @@
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/u32.h"
+#include "src/tint/type/void.h"
 
 namespace tint::ir {
 
@@ -283,6 +285,10 @@ class Builder {
     /// @param val the value being bitcast
     /// @returns the instruction
     ir::Bitcast* Bitcast(const type::Type* type, Value* val);
+
+    /// Creates a discard instruction
+    /// @returns the instruction
+    ir::Discard* Discard();
 
     /// Creates a user function call instruction
     /// @param type the return type of the call

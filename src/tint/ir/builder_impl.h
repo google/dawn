@@ -42,6 +42,7 @@ class BreakStatement;
 class CallExpression;
 class CallStatement;
 class ContinueStatement;
+class DiscardStatement;
 class Expression;
 class ForLoopStatement;
 class Function;
@@ -144,6 +145,10 @@ class BuilderImpl {
     /// @param stmt the continue statement
     /// @returns true if successful, false otherwise.
     bool EmitContinue(const ast::ContinueStatement* stmt);
+
+    /// Emits a discard statement
+    /// @returns true if successful, false otherwise.
+    bool EmitDiscard(const ast::DiscardStatement*);
 
     /// Emits a break-if statement
     /// @param stmt the break-if statement

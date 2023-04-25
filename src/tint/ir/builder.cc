@@ -177,6 +177,10 @@ ir::Bitcast* Builder::Bitcast(const type::Type* type, Value* val) {
     return ir.instructions.Create<ir::Bitcast>(Runtime(type), val);
 }
 
+ir::Discard* Builder::Discard() {
+    return ir.instructions.Create<ir::Discard>(Runtime(ir.types.Get<type::Void>()));
+}
+
 ir::UserCall* Builder::UserCall(const type::Type* type,
                                 Symbol name,
                                 utils::VectorRef<Value*> args) {
