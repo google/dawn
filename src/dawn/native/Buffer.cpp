@@ -435,7 +435,8 @@ void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
         return static_cast<uint8_t*>(mStagingBuffer->GetMappedPointer()) + offset;
     }
     if (mSize == 0) {
-        return reinterpret_cast<uint8_t*>(intptr_t(0xCAFED00D));
+        static uint32_t zeroRange = 0xCAFED00D;
+        return &zeroRange;
     }
     uint8_t* start = static_cast<uint8_t*>(GetMappedPointer());
     return start == nullptr ? nullptr : start + offset;
