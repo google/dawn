@@ -85,6 +85,11 @@ struct ModuleScopeVarToEntryPointParam::State {
                 return;
             }
 
+            if (!str->Declaration()) {
+                // The struct is a built-in structure that we do not need to declare.
+                return;
+            }
+
             // Recurse into members.
             for (auto* member : str->Members()) {
                 CloneStructTypes(member->Type());
