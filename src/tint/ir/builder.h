@@ -28,8 +28,8 @@
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/runtime.h"
 #include "src/tint/ir/switch.h"
-#include "src/tint/ir/temp.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/value.h"
@@ -137,11 +137,11 @@ class Builder {
         return Constant(create<constant::Scalar<bool>>(ir.types.Get<type::Bool>(), v));
     }
 
-    /// Creates a new Temporary
+    /// Creates a new Runtime value
     /// @param type the type of the temporary
     /// @returns the new temporary
-    ir::Temp* Temp(const type::Type* type) {
-        return ir.values.Create<ir::Temp>(type, AllocateTempId());
+    ir::Runtime* Runtime(const type::Type* type) {
+        return ir.values.Create<ir::Runtime>(type, AllocateRuntimeId());
     }
 
     /// Creates an op for `lhs kind rhs`
@@ -315,14 +315,14 @@ class Builder {
                          builtin::Function func,
                          utils::VectorRef<Value*> args);
 
-    /// @returns a unique temp id
-    Temp::Id AllocateTempId();
+    /// @returns a unique runtime id
+    Runtime::Id AllocateRuntimeId();
 
     /// The IR module.
     Module ir;
 
     /// The next temporary number to allocate
-    Temp::Id next_temp_id = 1;
+    Runtime::Id next_runtime_id = 1;
 };
 
 }  // namespace tint::ir

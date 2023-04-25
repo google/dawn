@@ -624,7 +624,7 @@ utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
             // TODO(dsinclair): This should return utils::Failure; Switch back
             // once all the above cases are handled.
             auto* v = builder.ir.types.Get<type::Void>();
-            return builder.Temp(v);
+            return builder.Runtime(v);
         });
 }
 

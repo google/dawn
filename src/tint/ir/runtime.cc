@@ -12,29 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/temp.h"
-#include "src/tint/ir/test_helper.h"
-#include "src/tint/utils/string_stream.h"
+#include "src/tint/ir/runtime.h"
+
+#include <string>
+
+TINT_INSTANTIATE_TYPEINFO(tint::ir::Runtime);
 
 namespace tint::ir {
-namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+Runtime::Runtime(const type::Type* type, Id id) : type_(type), id_(id) {}
 
-using IR_TempTest = TestHelper;
+Runtime::~Runtime() = default;
 
-TEST_F(IR_TempTest, id) {
-    auto& b = CreateEmptyBuilder();
-
-    utils::StringStream str;
-
-    b.builder.next_temp_id = Temp::Id(4);
-    auto* val = b.builder.Temp(b.builder.ir.types.Get<type::I32>());
-    EXPECT_EQ(4u, val->AsId());
-
-    val->ToString(str);
-    EXPECT_EQ("%4 (i32)", str.str());
+utils::StringStream& Runtime::ToString(utils::StringStream& out) const {
+    out << "%" << std::to_string(AsId()) << " (" << type_->FriendlyName() << ")";
+    return out;
 }
 
-}  // namespace
 }  // namespace tint::ir

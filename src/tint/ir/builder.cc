@@ -93,12 +93,12 @@ void Builder::Branch(Block* from, FlowNode* to, utils::VectorRef<Value*> args) {
     to->inbound_branches.Push(from);
 }
 
-Temp::Id Builder::AllocateTempId() {
-    return next_temp_id++;
+Runtime::Id Builder::AllocateRuntimeId() {
+    return next_runtime_id++;
 }
 
 Binary* Builder::CreateBinary(Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs) {
-    return ir.instructions.Create<ir::Binary>(kind, Temp(type), lhs, rhs);
+    return ir.instructions.Create<ir::Binary>(kind, Runtime(type), lhs, rhs);
 }
 
 Binary* Builder::And(const type::Type* type, Value* lhs, Value* rhs) {
@@ -174,29 +174,29 @@ Binary* Builder::Modulo(const type::Type* type, Value* lhs, Value* rhs) {
 }
 
 ir::Bitcast* Builder::Bitcast(const type::Type* type, Value* val) {
-    return ir.instructions.Create<ir::Bitcast>(Temp(type), val);
+    return ir.instructions.Create<ir::Bitcast>(Runtime(type), val);
 }
 
 ir::UserCall* Builder::UserCall(const type::Type* type,
                                 Symbol name,
                                 utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::UserCall>(Temp(type), name, std::move(args));
+    return ir.instructions.Create<ir::UserCall>(Runtime(type), name, std::move(args));
 }
 
 ir::Convert* Builder::Convert(const type::Type* to,
                               const type::Type* from,
                               utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Convert>(Temp(to), from, std::move(args));
+    return ir.instructions.Create<ir::Convert>(Runtime(to), from, std::move(args));
 }
 
 ir::Construct* Builder::Construct(const type::Type* to, utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Construct>(Temp(to), std::move(args));
+    return ir.instructions.Create<ir::Construct>(Runtime(to), std::move(args));
 }
 
 ir::Builtin* Builder::Builtin(const type::Type* type,
                               builtin::Function func,
                               utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Builtin>(Temp(type), func, args);
+    return ir.instructions.Create<ir::Builtin>(Runtime(type), func, args);
 }
 
 }  // namespace tint::ir

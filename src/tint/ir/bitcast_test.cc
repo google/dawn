@@ -26,12 +26,12 @@ using IR_InstructionTest = TestHelper;
 TEST_F(IR_InstructionTest, Bitcast) {
     auto& b = CreateEmptyBuilder();
 
-    b.builder.next_temp_id = Temp::Id(42);
+    b.builder.next_runtime_id = Runtime::Id(42);
     const auto* instr =
         b.builder.Bitcast(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
 
-    ASSERT_TRUE(instr->Result()->Is<Temp>());
-    EXPECT_EQ(Temp::Id(42), instr->Result()->As<Temp>()->AsId());
+    ASSERT_TRUE(instr->Result()->Is<Runtime>());
+    EXPECT_EQ(Runtime::Id(42), instr->Result()->As<Runtime>()->AsId());
     ASSERT_NE(instr->Result()->Type(), nullptr);
 
     ASSERT_TRUE(instr->Val()->Is<Constant>());
@@ -47,7 +47,7 @@ TEST_F(IR_InstructionTest, Bitcast) {
 TEST_F(IR_InstructionTest, Bitcast_Usage) {
     auto& b = CreateEmptyBuilder();
 
-    b.builder.next_temp_id = Temp::Id(42);
+    b.builder.next_runtime_id = Runtime::Id(42);
     const auto* instr =
         b.builder.Bitcast(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
 

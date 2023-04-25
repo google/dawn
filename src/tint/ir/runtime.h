@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_TEMP_H_
-#define SRC_TINT_IR_TEMP_H_
+#ifndef SRC_TINT_IR_RUNTIME_H_
+#define SRC_TINT_IR_RUNTIME_H_
 
 #include "src/tint/ir/value.h"
 #include "src/tint/symbol_table.h"
@@ -21,33 +21,33 @@
 
 namespace tint::ir {
 
-/// Temporary value in the IR.
-class Temp : public utils::Castable<Temp, Value> {
+/// Runtime value in the IR.
+class Runtime : public utils::Castable<Runtime, Value> {
   public:
     /// A value id.
     using Id = uint32_t;
 
     /// Constructor
-    /// @param type the type of the temporary
+    /// @param type the type of the value
     /// @param id the id for the value
-    Temp(const type::Type* type, Id id);
+    Runtime(const type::Type* type, Id id);
 
     /// Destructor
-    ~Temp() override;
+    ~Runtime() override;
 
-    Temp(const Temp&) = delete;
-    Temp(Temp&&) = delete;
+    Runtime(const Runtime&) = delete;
+    Runtime(Runtime&&) = delete;
 
-    Temp& operator=(const Temp&) = delete;
-    Temp& operator=(Temp&&) = delete;
+    Runtime& operator=(const Runtime&) = delete;
+    Runtime& operator=(Runtime&&) = delete;
 
     /// @returns the value data as an `Id`.
     Id AsId() const { return id_; }
 
-    /// @returns the type of the temporary
+    /// @returns the type of the value
     const type::Type* Type() const override { return type_; }
 
-    /// Write the temp to the given stream
+    /// Write the id to the given stream
     /// @param out the stream to write to
     /// @returns the stream
     utils::StringStream& ToString(utils::StringStream& out) const override;
@@ -59,4 +59,4 @@ class Temp : public utils::Castable<Temp, Value> {
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_TEMP_H_
+#endif  // SRC_TINT_IR_RUNTIME_H_
