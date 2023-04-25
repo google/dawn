@@ -880,6 +880,9 @@ class ParserImpl : Reader {
     // The ast::Struct type names with only read-only members.
     std::unordered_set<Symbol> read_only_struct_types_;
 
+    // Maps from OpConstantComposite IDs to identifiers of module-scope const declarations.
+    std::unordered_map<uint32_t, Symbol> declared_constant_composites_;
+
     // The IDs of scalar spec constants
     std::unordered_set<uint32_t> scalar_spec_constants_;
 

@@ -1916,6 +1916,13 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
         case spv::Op::OpConstantComposite: {
             // Handle vector, matrix, array, and struct
 
+            auto itr = declared_constant_composites_.find(id);
+            if (itr != declared_constant_composites_.end()) {
+                // We've already declared this constant value as a module-scope const, so just
+                // reference that identifier.
+                return {original_ast_type, builder_.Expr(itr->second)};
+            }
+
             // Generate a composite from explicit components.
             ExpressionList ast_components;
             if (!inst->WhileEachInId([&](const uint32_t* id_ref) -> bool {
@@ -1930,8 +1937,20 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
                 // We've already emitted a diagnostic.
                 return {};
             }
-            return {original_ast_type, builder_.Call(source, original_ast_type->Build(builder_),
-                                                     std::move(ast_components))};
+
+            auto* expr = builder_.Call(source, original_ast_type->Build(builder_),
+                                       std::move(ast_components));
+
+            if (def_use_mgr_->NumUses(id) == 1) {
+                // The constant is only used once, so just inline its use.
+                return {original_ast_type, expr};
+            }
+
+            // Create a module-scope const declaration for the constant.
+            auto name = namer_.Name(id);
+            auto* decl = builder_.GlobalConst(name, expr);
+            declared_constant_composites_.insert({id, decl->name->symbol});
+            return {original_ast_type, builder_.Expr(name)};
         }
         default:
             break;

@@ -877,8 +877,7 @@ TEST_F(SpvUnaryBitTest, InsertBits_IntVector) {
     auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(
         body,
-        HasSubstr(
-            R"(let x_1 : vec2<i32> = insertBits(vec2<i32>(30i, 40i), vec2<i32>(40i, 30i), 10u, 20u);)"))
+        HasSubstr(R"(let x_1 : vec2<i32> = insertBits(x_28, vec2<i32>(40i, 30i), 10u, 20u);)"))
         << body;
 }
 
@@ -897,7 +896,7 @@ TEST_F(SpvUnaryBitTest, InsertBits_IntVector_SignedOffsetAndCount) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_1 : vec2<i32> = insertBits(vec2<i32>(30i, 40i), vec2<i32>(40i, 30i), u32(10i), u32(20i));)"))
+            R"(let x_1 : vec2<i32> = insertBits(x_28, vec2<i32>(40i, 30i), u32(10i), u32(20i));)"))
         << body;
 }
 
@@ -946,8 +945,7 @@ TEST_F(SpvUnaryBitTest, InsertBits_UintVector) {
     auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(
         body,
-        HasSubstr(
-            R"(let x_1 : vec2<u32> = insertBits(vec2<u32>(10u, 20u), vec2<u32>(20u, 10u), 10u, 20u);)"))
+        HasSubstr(R"(let x_1 : vec2<u32> = insertBits(x_26, vec2<u32>(20u, 10u), 10u, 20u);)"))
         << body;
 }
 
@@ -966,7 +964,7 @@ TEST_F(SpvUnaryBitTest, InsertBits_UintVector_SignedOffsetAndCount) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_1 : vec2<u32> = insertBits(vec2<u32>(10u, 20u), vec2<u32>(20u, 10u), u32(10i), u32(20i));)"))
+            R"(let x_1 : vec2<u32> = insertBits(x_26, vec2<u32>(20u, 10u), u32(10i), u32(20i));)"))
         << body;
 }
 
@@ -1012,9 +1010,7 @@ TEST_F(SpvUnaryBitTest, ExtractBits_IntVector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body,
-                HasSubstr("let x_1 : vec2<i32> = extractBits(vec2<i32>(30i, 40i), 10u, 20u);"))
-        << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = extractBits(x_28, 10u, 20u);")) << body;
 }
 
 TEST_F(SpvUnaryBitTest, ExtractBits_IntVector_SignedOffsetAndCount) {
@@ -1029,9 +1025,7 @@ TEST_F(SpvUnaryBitTest, ExtractBits_IntVector_SignedOffsetAndCount) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(
-        body,
-        HasSubstr("let x_1 : vec2<i32> = extractBits(vec2<i32>(30i, 40i), u32(10i), u32(20i));"))
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = extractBits(x_28, u32(10i), u32(20i));"))
         << body;
 }
 
@@ -1077,9 +1071,7 @@ TEST_F(SpvUnaryBitTest, ExtractBits_UintVector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body,
-                HasSubstr("let x_1 : vec2<u32> = extractBits(vec2<u32>(10u, 20u), 10u, 20u);"))
-        << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = extractBits(x_26, 10u, 20u);")) << body;
 }
 
 TEST_F(SpvUnaryBitTest, ExtractBits_UintVector_SignedOffsetAndCount) {
@@ -1094,9 +1086,7 @@ TEST_F(SpvUnaryBitTest, ExtractBits_UintVector_SignedOffsetAndCount) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(
-        body,
-        HasSubstr("let x_1 : vec2<u32> = extractBits(vec2<u32>(10u, 20u), u32(10i), u32(20i));"))
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = extractBits(x_26, u32(10i), u32(20i));"))
         << body;
 }
 

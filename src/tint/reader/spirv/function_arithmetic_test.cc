@@ -30,6 +30,11 @@ std::string Preamble() {
   OpEntryPoint Fragment %100 "main"
   OpExecutionMode %100 OriginUpperLeft
 
+  OpName %v2float_50_60 "v2float_50_60"
+  OpName %v2float_60_50 "v2float_60_50"
+  OpName %v3float_50_60_70 "v3float_50_60_70"
+  OpName %v3float_60_70_50 "v3float_60_70_50"
+
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -94,10 +99,10 @@ std::string AstFor(std::string assembly) {
         return "bitcast<vec2<u32>>(vec2<i32>(40i, 30i))";
     }
     if (assembly == "v2float_50_60") {
-        return "vec2<f32>(50.0f, 60.0f)";
+        return "v2float_50_60";
     }
     if (assembly == "v2float_60_50") {
-        return "vec2<f32>(60.0f, 50.0f)";
+        return "v2float_60_50";
     }
     return "bad case";
 }
@@ -271,7 +276,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = -(vec2<f32>(50.0f, 60.0f));"));
+                HasSubstr("let x_1 : vec2<f32> = -(v2float_50_60);"));
 }
 
 struct BinaryData {
@@ -704,10 +709,9 @@ TEST_F(SpvBinaryArithTestBasic, FMod_Vector) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(
-        test::ToString(p->program(), ast_body),
-        HasSubstr(
-            R"(let x_1 : vec2<f32> = (vec2<f32>(50.0f, 60.0f) - (vec2<f32>(60.0f, 50.0f) * floor((vec2<f32>(50.0f, 60.0f) / vec2<f32>(60.0f, 50.0f)))));)"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<f32> = (v2float_50_60 - (v2float_60_50 * "
+                          "floor((v2float_50_60 / v2float_60_50))));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
