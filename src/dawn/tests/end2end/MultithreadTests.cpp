@@ -546,6 +546,56 @@ TEST_P(MultithreadEncodingTests, RenderPassEncodersInParallel) {
     }
 }
 
+// Test that encoding render passes that resolve to a mip level in parallel should work
+TEST_P(MultithreadEncodingTests, RenderPassEncoders_ResolveToMipLevelOne_InParallel) {
+    // TODO(dawn:462): Issue in the D3D12 validation layers.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
+    constexpr uint32_t kRTSize = 16;
+    constexpr uint32_t kNumThreads = 10;
+
+    wgpu::Texture msaaRenderTarget =
+        CreateTexture(kRTSize, kRTSize, wgpu::TextureFormat::RGBA8Unorm,
+                      wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
+                      /*mipLevelCount=*/1, /*sampleCount=*/4);
+    wgpu::TextureView msaaRenderTargetView = msaaRenderTarget.CreateView();
+
+    // Resolve to mip level = 1 to force render pass workarounds (there shouldn't be any deadlock
+    // happening).
+    wgpu::Texture resolveTarget =
+        CreateTexture(kRTSize * 2, kRTSize * 2, wgpu::TextureFormat::RGBA8Unorm,
+                      wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
+                      /*mipLevelCount=*/2, /*sampleCount=*/1);
+    wgpu::TextureViewDescriptor resolveTargetViewDesc;
+    resolveTargetViewDesc.baseMipLevel = 1;
+    resolveTargetViewDesc.mipLevelCount = 1;
+    wgpu::TextureView resolveTargetView = resolveTarget.CreateView(&resolveTargetViewDesc);
+
+    std::vector<wgpu::CommandBuffer> commandBuffers(kNumThreads);
+
+    utils::RunInParallel(kNumThreads, [=, &commandBuffers](uint32_t index) {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        // Clear the renderTarget to red.
+        utils::ComboRenderPassDescriptor renderPass({msaaRenderTargetView});
+        renderPass.cColorAttachments[0].resolveTarget = resolveTargetView;
+        renderPass.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
+
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.End();
+
+        commandBuffers[index] = encoder.Finish();
+    });
+
+    // Verify that the command buffers executed correctly.
+    for (auto& commandBuffer : commandBuffers) {
+        queue.Submit(1, &commandBuffer);
+
+        EXPECT_TEXTURE_EQ(utils::RGBA8::kRed, resolveTarget, {0, 0}, 1);
+        EXPECT_TEXTURE_EQ(utils::RGBA8::kRed, resolveTarget, {kRTSize - 1, kRTSize - 1}, 1);
+    }
+}
+
 // Test that encoding compute passes in parallel should work
 TEST_P(MultithreadEncodingTests, ComputePassEncodersInParallel) {
     constexpr uint32_t kNumThreads = 10;
@@ -1303,10 +1353,13 @@ DAWN_INSTANTIATE_TEST(MultithreadCachingTests,
 
 DAWN_INSTANTIATE_TEST(MultithreadEncodingTests,
                       D3D12Backend(),
+                      D3D12Backend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend(),
+                      MetalBackend({"always_resolve_into_zero_level_and_layer"}),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      VulkanBackend({"always_resolve_into_zero_level_and_layer"}));
 
 DAWN_INSTANTIATE_TEST(
     MultithreadTextureCopyTests,
