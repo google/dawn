@@ -779,10 +779,6 @@ TEST_P(BufferMappedAtCreationTests, MapReadUsageSmall) {
 
 // Test that the simplest mappedAtCreation works for non-mappable buffers.
 TEST_P(BufferMappedAtCreationTests, NonMappableUsageSmall) {
-    // ID3D11DeviceContext::CopySubresourceRegion doesn't allow copying between mapped buffers.
-    // TODO(dawn:1772): enable this test for D3D11
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsBackendValidationEnabled());
-
     uint32_t myData = 4239;
     wgpu::Buffer buffer = BufferMappedAtCreationWithData(wgpu::BufferUsage::CopySrc, {myData});
     UnmapBuffer(buffer);
@@ -824,10 +820,6 @@ TEST_P(BufferMappedAtCreationTests, MapReadUsageLarge) {
 
 // Test mappedAtCreation for a large non-mappable buffer
 TEST_P(BufferMappedAtCreationTests, NonMappableUsageLarge) {
-    // ID3D11DeviceContext::CopySubresourceRegion doesn't allow copying between mapped buffers.
-    // TODO(dawn:1772): enable this test for D3D11
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsBackendValidationEnabled());
-
     constexpr uint64_t kDataSize = 1000 * 1000;
     std::vector<uint32_t> myData;
     for (uint32_t i = 0; i < kDataSize; ++i) {
