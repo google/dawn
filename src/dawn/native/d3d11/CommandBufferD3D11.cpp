@@ -367,54 +367,29 @@ MaybeError CommandBuffer::Execute() {
                 DAWN_TRY(ToBackend(src.texture)
                              ->EnsureSubresourceContentInitialized(commandContext, subresources));
 
-                // Create a staging texture.
-                // TODO(dawn:1768): use compute shader to copy data from texture to buffer.
-                D3D11_TEXTURE2D_DESC stagingTextureDesc;
-                stagingTextureDesc.Width = copy->copySize.width;
-                stagingTextureDesc.Height = copy->copySize.height;
-                stagingTextureDesc.MipLevels = 1;
-                stagingTextureDesc.ArraySize = copy->copySize.depthOrArrayLayers;
-                stagingTextureDesc.Format = ToBackend(src.texture)->GetD3D11Format();
-                stagingTextureDesc.SampleDesc.Count = 1;
-                stagingTextureDesc.SampleDesc.Quality = 0;
-                stagingTextureDesc.Usage = D3D11_USAGE_STAGING;
-                stagingTextureDesc.BindFlags = 0;
-                stagingTextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-                stagingTextureDesc.MiscFlags = 0;
+                TextureDescriptor desc = {};
+                desc.label = "CopyTextureToBufferStaging";
+                desc.dimension = src.texture->GetDimension();
+                desc.size.width = copy->copySize.width;
+                desc.size.height = copy->copySize.height;
+                desc.size.depthOrArrayLayers = copy->copySize.depthOrArrayLayers;
+                desc.format = src.texture->GetFormat().format;
+                desc.mipLevelCount = 1;
+                desc.sampleCount = 1;
 
-                ComPtr<ID3D11Texture2D> stagingTexture;
-                DAWN_TRY(CheckHRESULT(commandContext->GetD3D11Device()->CreateTexture2D(
-                                          &stagingTextureDesc, nullptr, &stagingTexture),
-                                      "D3D11 create staging texture"));
+                Ref<Texture> stagingTexture;
+                DAWN_TRY_ASSIGN(stagingTexture,
+                                Texture::CreateStaging(ToBackend(GetDevice()), &desc));
 
-                uint32_t subresource =
-                    src.texture->GetSubresourceIndex(src.mipLevel, src.origin.z, src.aspect);
+                CopyTextureToTextureCmd copyTextureToBufferCmd;
+                copyTextureToBufferCmd.source = src;
+                copyTextureToBufferCmd.destination.texture = stagingTexture.Get();
+                copyTextureToBufferCmd.destination.origin = {0, 0, 0};
+                copyTextureToBufferCmd.destination.mipLevel = 0;
+                copyTextureToBufferCmd.destination.aspect = src.aspect;
+                copyTextureToBufferCmd.copySize = copy->copySize;
 
-                if (src.texture->GetDimension() != wgpu::TextureDimension::e2D) {
-                    return DAWN_UNIMPLEMENTED_ERROR(
-                        "CopyTextureToBuffer is not implemented for non-2D textures");
-                } else {
-                    for (uint32_t z = 0; z < copy->copySize.depthOrArrayLayers; ++z) {
-                        // Copy the texture to the staging texture.
-                        if (src.texture->GetFormat().HasDepthOrStencil()) {
-                            d3d11DeviceContext1->CopySubresourceRegion(
-                                stagingTexture.Get(), z, 0, 0, 0,
-                                ToBackend(src.texture)->GetD3D11Resource(), subresource, nullptr);
-                        } else {
-                            D3D11_BOX srcBox;
-                            srcBox.left = src.origin.x;
-                            srcBox.right = src.origin.x + copy->copySize.width;
-                            srcBox.top = src.origin.y;
-                            srcBox.bottom = src.origin.y + copy->copySize.height;
-                            srcBox.front = 0;
-                            srcBox.back = 1;
-
-                            d3d11DeviceContext1->CopySubresourceRegion(
-                                stagingTexture.Get(), z, 0, 0, 0,
-                                ToBackend(src.texture)->GetD3D11Resource(), subresource, &srcBox);
-                        }
-                    }
-                }
+                DAWN_TRY(Texture::Copy(commandContext, &copyTextureToBufferCmd));
 
                 Buffer* buffer = ToBackend(dst.buffer.Get());
                 Buffer::ScopedMap scopedDstMap;
@@ -428,7 +403,7 @@ MaybeError CommandBuffer::Execute() {
                     // TODO(dawn:1705): avoid blocking the CPU.
                     D3D11_MAPPED_SUBRESOURCE mappedResource;
                     DAWN_TRY(
-                        CheckHRESULT(d3d11DeviceContext1->Map(stagingTexture.Get(), z,
+                        CheckHRESULT(d3d11DeviceContext1->Map(stagingTexture->GetD3D11Resource(), z,
                                                               D3D11_MAP_READ, 0, &mappedResource),
                                      "D3D11 map staging texture"));
 
@@ -462,7 +437,7 @@ MaybeError CommandBuffer::Execute() {
                             }
                         }
                     }
-                    d3d11DeviceContext1->Unmap(stagingTexture.Get(), z);
+                    d3d11DeviceContext1->Unmap(stagingTexture->GetD3D11Resource(), z);
                 }
 
                 dst.buffer->MarkUsedInPendingCommands();

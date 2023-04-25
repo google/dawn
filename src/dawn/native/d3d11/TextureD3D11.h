@@ -37,6 +37,8 @@ class Texture final : public TextureBase {
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const TextureDescriptor* descriptor,
                                               ComPtr<ID3D11Resource> d3d11Texture);
+    static ResultOrError<Ref<Texture>> CreateStaging(Device* device,
+                                                     const TextureDescriptor* descriptor);
 
     DXGI_FORMAT GetD3D11Format() const;
     ID3D11Resource* GetD3D11Resource() const;
@@ -62,9 +64,14 @@ class Texture final : public TextureBase {
     static MaybeError Copy(CommandRecordingContext* commandContext, CopyTextureToTextureCmd* copy);
 
   private:
-    Texture(Device* device, const TextureDescriptor* descriptor, TextureState state);
+    Texture(Device* device,
+            const TextureDescriptor* descriptor,
+            TextureState state,
+            bool isStaging);
     ~Texture() override;
-    using TextureBase::TextureBase;
+
+    template <typename T>
+    T GetD3D11TextureDesc() const;
 
     MaybeError InitializeAsInternalTexture();
     MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D11Resource> d3d11Texture);
@@ -79,6 +86,7 @@ class Texture final : public TextureBase {
                      const SubresourceRange& range,
                      TextureBase::ClearValue clearValue);
 
+    const bool mIsStaging = false;
     ComPtr<ID3D11Resource> mD3d11Resource;
 };
 

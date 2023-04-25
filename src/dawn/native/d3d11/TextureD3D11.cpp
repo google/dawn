@@ -53,7 +53,8 @@ UINT D3D11TextureBindFlags(wgpu::TextureUsage usage, const Format& format) {
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
-    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
+    Ref<Texture> texture = AcquireRef(
+        new Texture(device, descriptor, TextureState::OwnedInternal, /*isStaging=*/false));
     DAWN_TRY(texture->InitializeAsInternalTexture());
     return std::move(texture);
 }
@@ -62,74 +63,84 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescrip
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const TextureDescriptor* descriptor,
                                             ComPtr<ID3D11Resource> d3d11Texture) {
-    Ref<Texture> dawnTexture =
-        AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
+    Ref<Texture> dawnTexture = AcquireRef(
+        new Texture(device, descriptor, TextureState::OwnedExternal, /*isStaging=*/false));
     DAWN_TRY(dawnTexture->InitializeAsSwapChainTexture(std::move(d3d11Texture)));
     return std::move(dawnTexture);
+}
+
+ResultOrError<Ref<Texture>> Texture::CreateStaging(Device* device,
+                                                   const TextureDescriptor* descriptor) {
+    Ref<Texture> texture = AcquireRef(
+        new Texture(device, descriptor, TextureState::OwnedInternal, /*isStaging=*/true));
+    DAWN_TRY(texture->InitializeAsInternalTexture());
+    return std::move(texture);
+}
+
+template <typename T>
+T Texture::GetD3D11TextureDesc() const {
+    T desc;
+
+    if constexpr (std::is_same<T, D3D11_TEXTURE1D_DESC>::value) {
+        desc.Width = GetSize().width;
+        desc.ArraySize = GetArrayLayers();
+        desc.MiscFlags = 0;
+    } else if constexpr (std::is_same<T, D3D11_TEXTURE2D_DESC>::value) {
+        desc.Width = GetSize().width;
+        desc.Height = GetSize().height;
+        desc.ArraySize = GetArrayLayers();
+        desc.SampleDesc.Count = GetSampleCount();
+        desc.SampleDesc.Quality = 0;
+        desc.MiscFlags = 0;
+        if (GetArrayLayers() >= 6 && desc.Width == desc.Height) {
+            // Texture layers are more than 6. It can be used as a cube map.
+            desc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
+        }
+    } else if constexpr (std::is_same<T, D3D11_TEXTURE3D_DESC>::value) {
+        desc.Width = GetSize().width;
+        desc.Height = GetSize().height;
+        desc.Depth = GetSize().depthOrArrayLayers;
+        desc.MiscFlags = 0;
+    }
+
+    desc.MipLevels = static_cast<UINT16>(GetNumMipLevels());
+    desc.Format = d3d::DXGITextureFormat(GetFormat().format);
+    desc.Usage = mIsStaging ? D3D11_USAGE_STAGING : D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11TextureBindFlags(GetUsage(), GetFormat());
+    constexpr UINT kCPUReadWriteFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+    desc.CPUAccessFlags = mIsStaging ? kCPUReadWriteFlags : 0;
+
+    return desc;
 }
 
 MaybeError Texture::InitializeAsInternalTexture() {
     Device* device = ToBackend(GetDevice());
 
-    DXGI_FORMAT dxgiFormat = d3d::DXGITextureFormat(GetFormat().format);
-
     switch (GetDimension()) {
         case wgpu::TextureDimension::e1D: {
-            D3D11_TEXTURE1D_DESC textureDescriptor;
-            textureDescriptor.Width = GetSize().width;
-            textureDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
-            textureDescriptor.ArraySize = 1;
-            textureDescriptor.Format = dxgiFormat;
-            textureDescriptor.Usage = D3D11_USAGE_DEFAULT;
-            textureDescriptor.BindFlags = D3D11TextureBindFlags(GetUsage(), GetFormat());
-            textureDescriptor.CPUAccessFlags = 0;
-            textureDescriptor.MiscFlags = 0;
+            D3D11_TEXTURE1D_DESC desc = GetD3D11TextureDesc<D3D11_TEXTURE1D_DESC>();
             ComPtr<ID3D11Texture1D> d3d11Texture1D;
-            DAWN_TRY(CheckOutOfMemoryHRESULT(device->GetD3D11Device()->CreateTexture1D(
-                                                 &textureDescriptor, nullptr, &d3d11Texture1D),
-                                             "D3D11 create texture1d"));
+            DAWN_TRY(CheckOutOfMemoryHRESULT(
+                device->GetD3D11Device()->CreateTexture1D(&desc, nullptr, &d3d11Texture1D),
+                "D3D11 create texture1d"));
             mD3d11Resource = std::move(d3d11Texture1D);
             break;
         }
         case wgpu::TextureDimension::e2D: {
-            D3D11_TEXTURE2D_DESC textureDescriptor;
-            textureDescriptor.Width = GetSize().width;
-            textureDescriptor.Height = GetSize().height;
-            textureDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
-            textureDescriptor.ArraySize = GetArrayLayers();
-            textureDescriptor.Format = dxgiFormat;
-            textureDescriptor.SampleDesc.Count = GetSampleCount();
-            textureDescriptor.SampleDesc.Quality = 0;
-            textureDescriptor.Usage = D3D11_USAGE_DEFAULT;
-            textureDescriptor.BindFlags = D3D11TextureBindFlags(GetUsage(), GetFormat());
-            textureDescriptor.CPUAccessFlags = 0;
-            textureDescriptor.MiscFlags = 0;
-            if (GetArrayLayers() >= 6) {
-                // Texture layers are more than 6. It can be used as a cube map.
-                textureDescriptor.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
-            }
+            D3D11_TEXTURE2D_DESC desc = GetD3D11TextureDesc<D3D11_TEXTURE2D_DESC>();
             ComPtr<ID3D11Texture2D> d3d11Texture2D;
-            DAWN_TRY(CheckOutOfMemoryHRESULT(device->GetD3D11Device()->CreateTexture2D(
-                                                 &textureDescriptor, nullptr, &d3d11Texture2D),
-                                             "D3D11 create texture2d"));
+            DAWN_TRY(CheckOutOfMemoryHRESULT(
+                device->GetD3D11Device()->CreateTexture2D(&desc, nullptr, &d3d11Texture2D),
+                "D3D11 create texture2d"));
             mD3d11Resource = std::move(d3d11Texture2D);
             break;
         }
         case wgpu::TextureDimension::e3D: {
-            D3D11_TEXTURE3D_DESC textureDescriptor;
-            textureDescriptor.Width = GetSize().width;
-            textureDescriptor.Height = GetSize().height;
-            textureDescriptor.Depth = GetSize().depthOrArrayLayers;
-            textureDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
-            textureDescriptor.Format = dxgiFormat;
-            textureDescriptor.Usage = D3D11_USAGE_DEFAULT;
-            textureDescriptor.BindFlags = D3D11TextureBindFlags(GetUsage(), GetFormat());
-            textureDescriptor.CPUAccessFlags = 0;
-            textureDescriptor.MiscFlags = 0;
+            D3D11_TEXTURE3D_DESC desc = GetD3D11TextureDesc<D3D11_TEXTURE3D_DESC>();
             ComPtr<ID3D11Texture3D> d3d11Texture3D;
-            DAWN_TRY(CheckOutOfMemoryHRESULT(device->GetD3D11Device()->CreateTexture3D(
-                                                 &textureDescriptor, nullptr, &d3d11Texture3D),
-                                             "D3D11 create texture3d"));
+            DAWN_TRY(CheckOutOfMemoryHRESULT(
+                device->GetD3D11Device()->CreateTexture3D(&desc, nullptr, &d3d11Texture3D),
+                "D3D11 create texture3d"));
             mD3d11Resource = std::move(d3d11Texture3D);
             break;
         }
@@ -152,8 +163,11 @@ MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D11Resource> d3d11Tex
     return {};
 }
 
-Texture::Texture(Device* device, const TextureDescriptor* descriptor, TextureState state)
-    : TextureBase(device, descriptor, state) {}
+Texture::Texture(Device* device,
+                 const TextureDescriptor* descriptor,
+                 TextureState state,
+                 bool isStaging)
+    : TextureBase(device, descriptor, state), mIsStaging(isStaging) {}
 
 Texture::~Texture() = default;
 
@@ -386,9 +400,16 @@ MaybeError Texture::Copy(CommandRecordingContext* commandContext, CopyTextureToT
     if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize, dst.mipLevel)) {
         dst.texture->SetIsSubresourceContentInitialized(true, subresources);
     } else {
+        // Partial update subresource of a depth/stencil texture is not allowed.
+        DAWN_ASSERT(!dst.texture->GetFormat().HasDepthOrStencil());
         DAWN_TRY(ToBackend(dst.texture)
                      ->EnsureSubresourceContentInitialized(commandContext, subresources));
     }
+
+    bool isWholeTextureCopy =
+        src.texture->GetSize() == copy->copySize && dst.texture->GetSize() == copy->copySize;
+    // Partial update subresource of a depth/stencil texture is not allowed.
+    DAWN_ASSERT(isWholeTextureCopy || !dst.texture->GetFormat().HasDepthOrStencil());
 
     D3D11_BOX srcBox;
     srcBox.left = src.origin.x;
@@ -402,7 +423,8 @@ MaybeError Texture::Copy(CommandRecordingContext* commandContext, CopyTextureToT
 
     commandContext->GetD3D11DeviceContext1()->CopySubresourceRegion(
         ToBackend(dst.texture)->GetD3D11Resource(), dst.mipLevel, dst.origin.x, dst.origin.y,
-        dst.origin.z, ToBackend(src.texture)->GetD3D11Resource(), subresource, &srcBox);
+        dst.origin.z, ToBackend(src.texture)->GetD3D11Resource(), subresource,
+        isWholeTextureCopy ? nullptr : &srcBox);
 
     return {};
 }
