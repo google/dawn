@@ -627,9 +627,10 @@ if (DAWN_ENABLE_VULKAN)
 
     if (ANDROID)
         target_sources(dawn_native PRIVATE
-            "vulkan/external_memory/MemoryServiceAHardwareBuffer.cpp"
-            "vulkan/external_semaphore/ServiceImplementationFD.cpp"
-            "vulkan/external_semaphore/ServiceImplementationFD.h"
+            "vulkan/external_memory/MemoryServiceImplementationAHardwareBuffer.cpp"
+            "vulkan/external_memory/MemoryServiceImplementationAHardwareBuffer.h"
+            "vulkan/external_semaphore/SemaphoreServiceImplementationFD.cpp"
+            "vulkan/external_semaphore/SemaphoreServiceImplementationFD.h"
         )
     elseif (UNIX AND NOT APPLE)
         target_sources(dawn_native PRIVATE
