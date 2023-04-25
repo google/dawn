@@ -541,8 +541,9 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
     EXPECT_BUFFER_U32_EQ(1, result, 0);
 }
 
-// Verifies that devices can write to at least maxFragmentCombinedOutputResources of non color
-// attachment resources.
+// Verifies that devices can write to the limits specified for fragment outputs. This test
+// exercises an internal Vulkan maxFragmentCombinedOutputResources limit and makes sure that the
+// sub parts of the limit work as intended.
 TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
     // TODO(dawn:1692) Currently does not work on GL and GLES.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
@@ -552,21 +553,9 @@ TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
     // splitting a shared remaining count between the two resources if they are not separately
     // defined, or exceed the combined limit.
     wgpu::Limits limits = GetSupportedLimits().limits;
-    uint32_t attachmentCount = 1;
+    uint32_t attachmentCount = limits.maxColorAttachments;
     uint32_t storageBuffers = limits.maxStorageBuffersPerShaderStage;
     uint32_t storageTextures = limits.maxStorageTexturesPerShaderStage;
-    uint32_t maxCombinedResources = limits.maxFragmentCombinedOutputResources;
-    if (uint64_t(storageBuffers) + uint64_t(storageTextures) >= uint64_t(maxCombinedResources)) {
-        storageTextures = std::min(storageTextures, (maxCombinedResources - attachmentCount) / 2);
-        storageBuffers = maxCombinedResources - attachmentCount - storageTextures;
-    }
-    if (maxCombinedResources > attachmentCount + storageBuffers + storageTextures) {
-        // Increase the number of attachments if we still have bandwidth after maximizing the number
-        // of buffers and textures.
-        attachmentCount = std::min(limits.maxColorAttachments,
-                                   maxCombinedResources - storageBuffers - storageTextures);
-    }
-    ASSERT_LE(attachmentCount + storageBuffers + storageTextures, maxCombinedResources);
 
     // Create a shader to write out to all the resources.
     auto CreateShader = [&]() -> wgpu::ShaderModule {
@@ -707,21 +696,6 @@ TEST_P(MaxLimitTests, MaxBufferSizes) {
     wgpu::Limits tieredLimits = GetAdapterLimits().limits;
     EXPECT_LE(tieredLimits.maxStorageBufferBindingSize, tieredLimits.maxBufferSize);
     EXPECT_LE(tieredLimits.maxUniformBufferBindingSize, tieredLimits.maxBufferSize);
-
-    // Unset tiered limit usage to avoid affecting other tests.
-    GetAdapter().SetUseTieredLimits(false);
-}
-
-// Verifies that supported fragment combined output resource limits meet base requirements.
-TEST_P(MaxLimitTests, MaxFragmentCombinedOutputResources) {
-    // Base limits without tiering.
-    wgpu::Limits baseLimits = GetAdapterLimits().limits;
-    EXPECT_LE(baseLimits.maxColorAttachments, baseLimits.maxFragmentCombinedOutputResources);
-
-    // Base limits with tiering.
-    GetAdapter().SetUseTieredLimits(true);
-    wgpu::Limits tieredLimits = GetAdapterLimits().limits;
-    EXPECT_LE(tieredLimits.maxColorAttachments, tieredLimits.maxFragmentCombinedOutputResources);
 
     // Unset tiered limit usage to avoid affecting other tests.
     GetAdapter().SetUseTieredLimits(false);

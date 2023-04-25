@@ -328,8 +328,38 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
                                maxUniformBuffersPerShaderStage);
     CHECK_AND_SET_V1_MAX_LIMIT(maxUniformBufferRange, maxUniformBufferBindingSize);
     CHECK_AND_SET_V1_MAX_LIMIT(maxStorageBufferRange, maxStorageBufferBindingSize);
-    CHECK_AND_SET_V1_MAX_LIMIT(maxFragmentCombinedOutputResources,
-                               maxFragmentCombinedOutputResources);
+    CHECK_AND_SET_V1_MAX_LIMIT(maxColorAttachments, maxColorAttachments);
+
+    // Validate against maxFragmentCombinedOutputResources, tightening the limits when necessary.
+    const uint32_t minFragmentCombinedOutputResources =
+        baseLimits.v1.maxStorageBuffersPerShaderStage +
+        baseLimits.v1.maxStorageTexturesPerShaderStage + baseLimits.v1.maxColorAttachments;
+    const uint64_t maxFragmentCombinedOutputResources =
+        limits->v1.maxStorageBuffersPerShaderStage + limits->v1.maxStorageTexturesPerShaderStage +
+        limits->v1.maxColorAttachments;
+    // Only re-adjust the limits when the limit makes sense w.r.t to the required WebGPU limits.
+    // Otherwise, we ignore the maxFragmentCombinedOutputResources since it is known to yield
+    // incorrect values on desktop drivers.
+    bool readjustFragmentCombinedOutputResources =
+        vkLimits.maxFragmentCombinedOutputResources > minFragmentCombinedOutputResources &&
+        uint64_t(vkLimits.maxFragmentCombinedOutputResources) < maxFragmentCombinedOutputResources;
+    if (readjustFragmentCombinedOutputResources) {
+        // Split extra resources across the three other limits instead of using the default values
+        // since it would overflow.
+        uint32_t extraResources =
+            vkLimits.maxFragmentCombinedOutputResources - minFragmentCombinedOutputResources;
+        limits->v1.maxColorAttachments = std::min(
+            baseLimits.v1.maxColorAttachments + (extraResources / 3), vkLimits.maxColorAttachments);
+        extraResources -= limits->v1.maxColorAttachments - baseLimits.v1.maxColorAttachments;
+        limits->v1.maxStorageTexturesPerShaderStage =
+            std::min(baseLimits.v1.maxStorageTexturesPerShaderStage + (extraResources / 2),
+                     vkLimits.maxPerStageDescriptorStorageImages);
+        extraResources -= limits->v1.maxStorageTexturesPerShaderStage -
+                          baseLimits.v1.maxStorageTexturesPerShaderStage;
+        limits->v1.maxStorageBuffersPerShaderStage =
+            std::min(baseLimits.v1.maxStorageBuffersPerShaderStage + extraResources,
+                     vkLimits.maxPerStageDescriptorStorageBuffers);
+    }
 
     CHECK_AND_SET_V1_MIN_LIMIT(minUniformBufferOffsetAlignment, minUniformBufferOffsetAlignment);
     CHECK_AND_SET_V1_MIN_LIMIT(minStorageBufferOffsetAlignment, minStorageBufferOffsetAlignment);
@@ -366,7 +396,6 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
         vkLimits.maxComputeWorkGroupCount[2],
     });
 
-    CHECK_AND_SET_V1_MAX_LIMIT(maxColorAttachments, maxColorAttachments);
     if (!IsSubset(VkSampleCountFlags(VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT),
                   vkLimits.framebufferColorSampleCounts)) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferColorSampleCounts");

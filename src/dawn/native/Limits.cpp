@@ -73,8 +73,7 @@
     X(Maximum,               maxInterStageShaderComponents,        60,         60) \
     X(Maximum,               maxInterStageShaderVariables,         16,         16) \
     X(Maximum,                         maxColorAttachments,         8,          8) \
-    X(Maximum,            maxColorAttachmentBytesPerSample,        32,         32) \
-    X(Maximum,          maxFragmentCombinedOutputResources,         8,          8)
+    X(Maximum,            maxColorAttachmentBytesPerSample,        32,         32)
 // clang-format on
 
 #define LIMITS_EACH_GROUP(X)              \

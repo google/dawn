@@ -711,10 +711,6 @@ class Adapter : public AdapterBase {
             limits->v1.maxStorageTexturesPerShaderStage += (additional - additional / 2);
         }
 
-        limits->v1.maxFragmentCombinedOutputResources = limits->v1.maxColorAttachments +
-                                                        limits->v1.maxStorageBuffersPerShaderStage +
-                                                        limits->v1.maxStorageTexturesPerShaderStage;
-
         limits->v1.maxSamplersPerShaderStage = mtlLimits.maxSamplerStateArgumentEntriesPerFunc;
 
         // Metal limits are per-function, so the layout limits are the same as the stage

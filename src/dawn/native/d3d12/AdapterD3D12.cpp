@@ -238,9 +238,6 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     limits->v1.maxSamplersPerShaderStage = maxSamplersPerStage;
 
     limits->v1.maxColorAttachments = D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT;
-    limits->v1.maxFragmentCombinedOutputResources = limits->v1.maxColorAttachments +
-                                                    limits->v1.maxStorageBuffersPerShaderStage +
-                                                    limits->v1.maxStorageTexturesPerShaderStage;
 
     // https://docs.microsoft.com/en-us/windows/win32/direct3d12/root-signature-limits
     // In DWORDS. Descriptor tables cost 1, Root constants cost 1, Root descriptors cost 2.
