@@ -40,7 +40,7 @@ std::array<wgpu::BindGroup, 2> updateBGs;
 
 size_t pingpong = 0;
 
-static const uint32_t kNumParticles = 1000;
+static const uint32_t kNumParticles = 1024;
 
 struct Particle {
     std::array<float, 2> pos;
@@ -170,7 +170,7 @@ void initSim() {
         @binding(2) @group(0) var<storage, read_write> particlesB : Particles;
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
-        @compute @workgroup_size(1)
+        @compute @workgroup_size(64)
         fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3u) {
             var index : u32 = GlobalInvocationID.x;
             if (index >= params.particleCount) {
@@ -276,7 +276,7 @@ wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, 
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(updatePipeline);
         pass.SetBindGroup(0, updateBGs[i]);
-        pass.DispatchWorkgroups(kNumParticles);
+        pass.DispatchWorkgroups(kNumParticles / 64);
         pass.End();
     }
 
