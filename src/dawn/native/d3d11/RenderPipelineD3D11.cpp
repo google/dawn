@@ -200,7 +200,20 @@ void RenderPipeline::ApplyNow(CommandRecordingContext* commandContext,
     d3dDeviceContext1->RSSetState(mRasterizerState.Get());
     d3dDeviceContext1->VSSetShader(mVertexShader.Get(), nullptr, 0);
     d3dDeviceContext1->PSSetShader(mPixelShader.Get(), nullptr, 0);
+
+    ApplyBlendState(commandContext, blendColor);
+    ApplyDepthStencilState(commandContext, stencilReference);
+}
+
+void RenderPipeline::ApplyBlendState(CommandRecordingContext* commandContext,
+                                     const std::array<float, 4>& blendColor) {
+    ID3D11DeviceContext1* d3dDeviceContext1 = commandContext->GetD3D11DeviceContext1();
     d3dDeviceContext1->OMSetBlendState(mBlendState.Get(), blendColor.data(), GetSampleMask());
+}
+
+void RenderPipeline::ApplyDepthStencilState(CommandRecordingContext* commandContext,
+                                            uint32_t stencilReference) {
+    ID3D11DeviceContext1* d3dDeviceContext1 = commandContext->GetD3D11DeviceContext1();
     d3dDeviceContext1->OMSetDepthStencilState(mDepthStencilState.Get(), stencilReference);
 }
 
@@ -292,16 +305,27 @@ MaybeError RenderPipeline::InitializeBlendState() {
         D3D11_RENDER_TARGET_BLEND_DESC& rtBlendDesc =
             blendDesc.RenderTarget[static_cast<uint8_t>(i)];
         const ColorTargetState* descriptor = GetColorTargetState(ColorAttachmentIndex(i));
-        if (descriptor->blend) {
-            rtBlendDesc.BlendEnable = TRUE;
+        rtBlendDesc.BlendEnable = descriptor->blend != nullptr;
+        if (rtBlendDesc.BlendEnable) {
             rtBlendDesc.SrcBlend = D3DBlendFactor(descriptor->blend->color.srcFactor);
+            if (device->GetValidInternalFormat(descriptor->format).componentCount < 4 &&
+                rtBlendDesc.SrcBlend == D3D11_BLEND_DEST_ALPHA) {
+                // According to the D3D SPEC, the default value for missing components in an element
+                // format is "0" for any component except A, which gets "1". So here
+                // D3D11_BLEND_DEST_ALPHA should have same effect as D3D11_BLEND_ONE.
+                // Note that this replacement can be an optimization as using D3D11_BLEND_ONE means
+                // the GPU hardware no longer needs to get pixels from the destination texture. It
+                // can also be served as a workaround against an Intel driver issue about alpha
+                // blending (see http://crbug.com/dawn/1579 for more details).
+                rtBlendDesc.SrcBlend = D3D11_BLEND_ONE;
+            }
             rtBlendDesc.DestBlend = D3DBlendFactor(descriptor->blend->color.dstFactor);
             rtBlendDesc.BlendOp = D3DBlendOperation(descriptor->blend->color.operation);
             rtBlendDesc.SrcBlendAlpha = D3DBlendFactor(descriptor->blend->alpha.srcFactor);
             rtBlendDesc.DestBlendAlpha = D3DBlendFactor(descriptor->blend->alpha.dstFactor);
             rtBlendDesc.BlendOpAlpha = D3DBlendOperation(descriptor->blend->alpha.operation);
-            rtBlendDesc.RenderTargetWriteMask = D3DColorWriteMask(descriptor->writeMask);
         }
+        rtBlendDesc.RenderTargetWriteMask = D3DColorWriteMask(descriptor->writeMask);
     }
 
     DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateBlendState(&blendDesc, &mBlendState),
