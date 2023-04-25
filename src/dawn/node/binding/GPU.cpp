@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "src/dawn/node/binding/GPUAdapter.h"
 
@@ -229,8 +230,20 @@ interop::GPUTextureFormat GPU::getPreferredCanvasFormat(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(Napi::Env) {
-    UNIMPLEMENTED();
+interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(Napi::Env env) {
+    // TODO(crbug.com/dawn/1777)
+    struct Features : public interop::WGSLLanguageFeatures {
+        ~Features() = default;
+        bool has(Napi::Env, std::string) {
+            UNIMPLEMENTED();
+            return false;
+        }
+        std::vector<std::string> keys(Napi::Env) {
+            UNIMPLEMENTED();
+            return {};
+        }
+    };
+    return interop::WGSLLanguageFeatures::Create<Features>(env);
 }
 
 }  // namespace wgpu::binding
