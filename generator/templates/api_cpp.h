@@ -49,6 +49,12 @@ namespace {{metadata.namespace}} {
 
     {% endfor %}
 
+    // Special case definition of MipmapFilterMode for Dawn side.
+    // TODO(lokokung) Remove once Chromium side is updated.
+    {% if 'dawn' in enabled_tags %}
+         using MipmapFilterMode = FilterMode;
+    {% endif %}
+
     {% for type in by_category["bitmask"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {
             {% for value in type.values %}
