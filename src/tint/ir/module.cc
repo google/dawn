@@ -28,7 +28,7 @@ Module::Result Module::FromProgram(const Program* program) {
     BuilderImpl b(program);
     auto r = b.Build();
     if (!r) {
-        return b.error();
+        return b.Diagnostics().str();
     }
 
     return Result{r.Move()};

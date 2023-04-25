@@ -14,6 +14,7 @@
 
 #include "src/tint/ir/test_helper.h"
 
+#include "gmock/gmock.h"
 #include "src/tint/ast/case_selector.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/constant/scalar.h"
@@ -1472,7 +1473,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_True) {
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
     auto* val = r.Get()->As<Constant>()->value;
@@ -1486,7 +1487,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_False) {
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
     auto* val = r.Get()->As<Constant>()->value;
@@ -1500,7 +1501,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
     auto* val = r.Get()->As<Constant>()->value;
@@ -1515,7 +1516,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
     auto* val = r.Get()->As<Constant>()->value;
@@ -1529,7 +1530,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_I32) {
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
     auto* val = r.Get()->As<Constant>()->value;
@@ -1543,7 +1544,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
 
     auto& b = CreateBuilder();
     auto r = b.EmitLiteral(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     ASSERT_TRUE(r.Get()->Is<Constant>());
     auto* val = r.Get()->As<Constant>()->value;
@@ -1558,7 +1559,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1573,7 +1575,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1588,7 +1591,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1603,7 +1607,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1618,7 +1623,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1633,7 +1639,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1648,7 +1655,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1663,7 +1671,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1678,7 +1687,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1693,7 +1703,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1708,7 +1719,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1723,7 +1735,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1738,7 +1751,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1753,7 +1767,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1768,7 +1783,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1783,7 +1799,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1798,7 +1815,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1813,7 +1831,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1829,7 +1848,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1850,7 +1870,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1867,8 +1888,8 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Discard) {
 
     auto& b = CreateBuilder();
     InjectFlowBlock();
-    auto r = b.EmitStatement(expr);
-    ASSERT_TRUE(r) << b.error();
+    b.EmitStatement(expr);
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1884,8 +1905,8 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
 
     auto& b = CreateBuilder();
     InjectFlowBlock();
-    auto r = b.EmitStatement(stmt);
-    ASSERT_TRUE(r) << b.error();
+    b.EmitStatement(stmt);
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1904,7 +1925,8 @@ TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_ConstructEmpty) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1912,7 +1934,8 @@ TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_ConstructEmpty) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
+// Requires identifier expressions
+TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_Construct) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
     auto* expr = vec3(ty.f32(), 2_f, 3_f, i);
     WrapInFunction(expr);
@@ -1920,7 +1943,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1928,7 +1952,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
+// Requires identifier expressions
+TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_Convert) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_i));
     auto* expr = Call(ty.f32(), i);
     WrapInFunction(expr);
@@ -1936,7 +1961,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
@@ -1961,7 +1987,8 @@ FunctionEnd
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
+// Requires identifier expressions
+TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_Builtin) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
     auto* expr = Call("asin", i);
     WrapInFunction(expr);
@@ -1969,7 +1996,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
     auto& b = CreateBuilder();
     InjectFlowBlock();
     auto r = b.EmitExpression(expr);
-    ASSERT_TRUE(r) << b.error();
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
