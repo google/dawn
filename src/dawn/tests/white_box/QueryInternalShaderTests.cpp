@@ -89,6 +89,12 @@ class QueryInternalShaderTests : public DawnTest {
 
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_timestamp_query_conversion"));
+
+        // If implicit device synchronization is turned on, EncodeConvertTimestampsToNanoseconds
+        // will expect the device to be locked. But we are calling it directly without going through
+        // wgpu API, hence the device won't be locked on this route. This would lead to assertion
+        // failure. So disable the test if this feature is turned on.
+        DAWN_TEST_UNSUPPORTED_IF(IsImplicitDeviceSyncEnabled());
     }
 
     // Original timestamp values in query set for testing
