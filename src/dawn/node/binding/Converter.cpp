@@ -1724,7 +1724,7 @@ bool Converter::Convert(interop::GPUQueryType& out, wgpu::QueryType in) {
     return false;
 }
 
-bool Convert(interop::GPUBufferMapState& out, wgpu::BufferMapState in) {
+bool Converter::Convert(interop::GPUBufferMapState& out, wgpu::BufferMapState in) {
     switch (in) {
         case wgpu::BufferMapState::Unmapped:
             out = interop::GPUBufferMapState::kUnmapped;
