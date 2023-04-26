@@ -21,9 +21,9 @@
                OpMemberName %x__atomic_compare_exchange_resulti32 0 "old_value"
                OpMemberName %x__atomic_compare_exchange_resulti32 1 "exchanged"
                OpName %res "res"
-               OpName %__atomic_compare_exchange_resulti32 "__atomic_compare_exchange_resulti32"
-               OpMemberName %__atomic_compare_exchange_resulti32 0 "old_value"
-               OpMemberName %__atomic_compare_exchange_resulti32 1 "exchanged"
+               OpName %__atomic_compare_exchange_result_i32 "__atomic_compare_exchange_result_i32"
+               OpMemberName %__atomic_compare_exchange_result_i32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_result_i32 1 "exchanged"
                OpName %fragment_main_1 "fragment_main_1"
                OpName %fragment_main "fragment_main"
                OpName %compute_main_1 "compute_main_1"
@@ -35,8 +35,8 @@
                OpDecorate %sb_rw Binding 0
                OpMemberDecorate %x__atomic_compare_exchange_resulti32 0 Offset 0
                OpMemberDecorate %x__atomic_compare_exchange_resulti32 1 Offset 4
-               OpMemberDecorate %__atomic_compare_exchange_resulti32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_resulti32 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
         %int = OpTypeInt 32 1
 %SB_RW_atomic = OpTypeStruct %int
 %sb_rw_block = OpTypeStruct %SB_RW_atomic
@@ -51,7 +51,7 @@
          %16 = OpConstantNull %x__atomic_compare_exchange_resulti32
 %_ptr_Function_x__atomic_compare_exchange_resulti32 = OpTypePointer Function %x__atomic_compare_exchange_resulti32
       %int_1 = OpConstant %int 1
-%__atomic_compare_exchange_resulti32 = OpTypeStruct %int %bool
+%__atomic_compare_exchange_result_i32 = OpTypeStruct %int %bool
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
      %uint_0 = OpConstant %uint 0
@@ -71,7 +71,7 @@
          %29 = OpAccessChain %_ptr_StorageBuffer_int %sb_rw %uint_0 %uint_0
          %30 = OpAtomicCompareExchange %int %29 %uint_1 %uint_0 %uint_0 %20 %21
          %31 = OpIEqual %bool %30 %21
-         %22 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %30 %31
+         %22 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %30 %31
          %32 = OpCompositeExtract %int %22 0
          %33 = OpIEqual %bool %32 %20
          %34 = OpCompositeConstruct %x__atomic_compare_exchange_resulti32 %32 %33

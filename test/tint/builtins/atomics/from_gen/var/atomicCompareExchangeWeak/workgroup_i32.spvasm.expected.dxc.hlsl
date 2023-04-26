@@ -1,4 +1,4 @@
-struct atomic_compare_exchange_resulti32 {
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
@@ -18,11 +18,11 @@ void atomicCompareExchangeWeak_e88938() {
   arg_2 = 1;
   const int x_22 = arg_2;
   const int x_23 = arg_1;
-  atomic_compare_exchange_resulti32 atomic_result = (atomic_compare_exchange_resulti32)0;
+  atomic_compare_exchange_result_i32 atomic_result = (atomic_compare_exchange_result_i32)0;
   int atomic_compare_value = x_23;
   InterlockedCompareExchange(arg_0, atomic_compare_value, x_22, atomic_result.old_value);
   atomic_result.exchanged = atomic_result.old_value == atomic_compare_value;
-  const atomic_compare_exchange_resulti32 tint_symbol = atomic_result;
+  const atomic_compare_exchange_result_i32 tint_symbol = atomic_result;
   const int old_value_1 = tint_symbol.old_value;
   const int x_24 = old_value_1;
   const x__atomic_compare_exchange_resulti32 tint_symbol_3 = {x_24, (x_24 == x_22)};

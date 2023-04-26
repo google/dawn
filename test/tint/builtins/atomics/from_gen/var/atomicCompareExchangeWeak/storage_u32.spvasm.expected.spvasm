@@ -21,9 +21,9 @@
                OpMemberName %x__atomic_compare_exchange_resultu32 0 "old_value"
                OpMemberName %x__atomic_compare_exchange_resultu32 1 "exchanged"
                OpName %res "res"
-               OpName %__atomic_compare_exchange_resultu32 "__atomic_compare_exchange_resultu32"
-               OpMemberName %__atomic_compare_exchange_resultu32 0 "old_value"
-               OpMemberName %__atomic_compare_exchange_resultu32 1 "exchanged"
+               OpName %__atomic_compare_exchange_result_u32 "__atomic_compare_exchange_result_u32"
+               OpMemberName %__atomic_compare_exchange_result_u32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_result_u32 1 "exchanged"
                OpName %fragment_main_1 "fragment_main_1"
                OpName %fragment_main "fragment_main"
                OpName %compute_main_1 "compute_main_1"
@@ -35,8 +35,8 @@
                OpDecorate %sb_rw Binding 0
                OpMemberDecorate %x__atomic_compare_exchange_resultu32 0 Offset 0
                OpMemberDecorate %x__atomic_compare_exchange_resultu32 1 Offset 4
-               OpMemberDecorate %__atomic_compare_exchange_resultu32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_resultu32 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_result_u32 1 Offset 4
        %uint = OpTypeInt 32 0
 %SB_RW_atomic = OpTypeStruct %uint
 %sb_rw_block = OpTypeStruct %SB_RW_atomic
@@ -51,7 +51,7 @@
          %16 = OpConstantNull %x__atomic_compare_exchange_resultu32
 %_ptr_Function_x__atomic_compare_exchange_resultu32 = OpTypePointer Function %x__atomic_compare_exchange_resultu32
      %uint_1 = OpConstant %uint 1
-%__atomic_compare_exchange_resultu32 = OpTypeStruct %uint %bool
+%__atomic_compare_exchange_result_u32 = OpTypeStruct %uint %bool
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %atomicCompareExchangeWeak_63d8e6 = OpFunction %void None %6
@@ -69,7 +69,7 @@
          %27 = OpAccessChain %_ptr_StorageBuffer_uint %sb_rw %uint_0 %uint_0
          %28 = OpAtomicCompareExchange %uint %27 %uint_1 %uint_0 %uint_0 %20 %21
          %29 = OpIEqual %bool %28 %21
-         %22 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %28 %29
+         %22 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %28 %29
          %30 = OpCompositeExtract %uint %22 0
          %31 = OpIEqual %bool %30 %20
          %32 = OpCompositeConstruct %x__atomic_compare_exchange_resultu32 %30 %31

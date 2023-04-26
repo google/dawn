@@ -129,7 +129,7 @@ void BuiltinValueParser(::benchmark::State& state) {
             benchmark::DoNotOptimize(result);
         }
     }
-}
+}  // NOLINT(readability/fn_size)
 
 BENCHMARK(BuiltinValueParser);
 

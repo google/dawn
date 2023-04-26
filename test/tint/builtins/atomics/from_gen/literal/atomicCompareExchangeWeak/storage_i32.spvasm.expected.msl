@@ -2,11 +2,11 @@
 
 using namespace metal;
 
-struct atomic_compare_exchange_resulti32 {
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
-atomic_compare_exchange_resulti32 atomicCompareExchangeWeak_1(device atomic_int* atomic, int compare, int value) {
+atomic_compare_exchange_result_i32 atomicCompareExchangeWeak_1(device atomic_int* atomic, int compare, int value) {
   int old_value = compare;
   bool exchanged = atomic_compare_exchange_weak_explicit(atomic, &old_value, value, memory_order_relaxed, memory_order_relaxed);
   return {old_value, exchanged};
@@ -27,7 +27,7 @@ struct x__atomic_compare_exchange_resulti32 {
 
 void atomicCompareExchangeWeak_1bd40a(device SB_RW_atomic* const tint_symbol_2) {
   x__atomic_compare_exchange_resulti32 res = x__atomic_compare_exchange_resulti32{};
-  atomic_compare_exchange_resulti32 const tint_symbol = atomicCompareExchangeWeak_1(&((*(tint_symbol_2)).arg_0), 1, 1);
+  atomic_compare_exchange_result_i32 const tint_symbol = atomicCompareExchangeWeak_1(&((*(tint_symbol_2)).arg_0), 1, 1);
   int const old_value_1 = tint_symbol.old_value;
   int const x_19 = old_value_1;
   x__atomic_compare_exchange_resulti32 const tint_symbol_1 = {.old_value=x_19, .exchanged=(x_19 == 1)};

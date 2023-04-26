@@ -1,6 +1,6 @@
 #version 310 es
 
-struct atomic_compare_exchange_resulti32 {
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
@@ -10,10 +10,10 @@ shared int arg_0;
 void atomicCompareExchangeWeak_e88938() {
   int arg_1 = 1;
   int arg_2 = 1;
-  atomic_compare_exchange_resulti32 atomic_compare_result;
+  atomic_compare_exchange_result_i32 atomic_compare_result;
   atomic_compare_result.old_value = atomicCompSwap(arg_0, arg_1, arg_2);
   atomic_compare_result.exchanged = atomic_compare_result.old_value == arg_1;
-  atomic_compare_exchange_resulti32 res = atomic_compare_result;
+  atomic_compare_exchange_result_i32 res = atomic_compare_result;
 }
 
 void compute_main(uint local_invocation_index) {

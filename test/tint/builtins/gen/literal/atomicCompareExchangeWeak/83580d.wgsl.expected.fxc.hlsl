@@ -1,15 +1,15 @@
-struct atomic_compare_exchange_resultu32 {
+struct atomic_compare_exchange_result_u32 {
   uint old_value;
   bool exchanged;
 };
 groupshared uint arg_0;
 
 void atomicCompareExchangeWeak_83580d() {
-  atomic_compare_exchange_resultu32 atomic_result = (atomic_compare_exchange_resultu32)0;
+  atomic_compare_exchange_result_u32 atomic_result = (atomic_compare_exchange_result_u32)0;
   uint atomic_compare_value = 1u;
   InterlockedCompareExchange(arg_0, atomic_compare_value, 1u, atomic_result.old_value);
   atomic_result.exchanged = atomic_result.old_value == atomic_compare_value;
-  atomic_compare_exchange_resultu32 res = atomic_result;
+  atomic_compare_exchange_result_u32 res = atomic_result;
 }
 
 struct tint_symbol_1 {

@@ -1,7 +1,7 @@
 #version 310 es
 precision highp float;
 
-struct atomic_compare_exchange_resulti32 {
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
@@ -23,10 +23,10 @@ int foo() {
   int x = 0;
   tint_symbol_1 tint_symbol = tint_symbol_1(0, false);
   if (!(tint_discarded)) {
-    atomic_compare_exchange_resulti32 atomic_compare_result;
+    atomic_compare_exchange_result_i32 atomic_compare_result;
     atomic_compare_result.old_value = atomicCompSwap(a.inner, 0, 1);
     atomic_compare_result.exchanged = atomic_compare_result.old_value == 0;
-    atomic_compare_exchange_resulti32 tint_symbol_2 = atomic_compare_result;
+    atomic_compare_exchange_result_i32 tint_symbol_2 = atomic_compare_result;
     tint_symbol.old_value = tint_symbol_2.old_value;
     tint_symbol.exchanged = tint_symbol_2.exchanged;
   }

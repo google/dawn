@@ -1,8 +1,8 @@
-struct atomic_compare_exchange_resultu32 {
+struct atomic_compare_exchange_result_u32 {
   uint old_value;
   bool exchanged;
 };
-struct atomic_compare_exchange_resulti32 {
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
@@ -62,39 +62,39 @@ void main_inner(uint local_invocation_index) {
   }
   {
     uint value = 42u;
-    atomic_compare_exchange_resultu32 atomic_result_2 = (atomic_compare_exchange_resultu32)0;
+    atomic_compare_exchange_result_u32 atomic_result_2 = (atomic_compare_exchange_result_u32)0;
     uint atomic_compare_value = 0u;
     InterlockedCompareExchange(b_u32, atomic_compare_value, value, atomic_result_2.old_value);
     atomic_result_2.exchanged = atomic_result_2.old_value == atomic_compare_value;
-    const atomic_compare_exchange_resultu32 r1 = atomic_result_2;
-    atomic_compare_exchange_resultu32 atomic_result_3 = (atomic_compare_exchange_resultu32)0;
+    const atomic_compare_exchange_result_u32 r1 = atomic_result_2;
+    atomic_compare_exchange_result_u32 atomic_result_3 = (atomic_compare_exchange_result_u32)0;
     uint atomic_compare_value_1 = 0u;
     InterlockedCompareExchange(b_u32, atomic_compare_value_1, value, atomic_result_3.old_value);
     atomic_result_3.exchanged = atomic_result_3.old_value == atomic_compare_value_1;
-    const atomic_compare_exchange_resultu32 r2 = atomic_result_3;
-    atomic_compare_exchange_resultu32 atomic_result_4 = (atomic_compare_exchange_resultu32)0;
+    const atomic_compare_exchange_result_u32 r2 = atomic_result_3;
+    atomic_compare_exchange_result_u32 atomic_result_4 = (atomic_compare_exchange_result_u32)0;
     uint atomic_compare_value_2 = 0u;
     InterlockedCompareExchange(b_u32, atomic_compare_value_2, value, atomic_result_4.old_value);
     atomic_result_4.exchanged = atomic_result_4.old_value == atomic_compare_value_2;
-    const atomic_compare_exchange_resultu32 r3 = atomic_result_4;
+    const atomic_compare_exchange_result_u32 r3 = atomic_result_4;
   }
   {
     int value = 42;
-    atomic_compare_exchange_resulti32 atomic_result_5 = (atomic_compare_exchange_resulti32)0;
+    atomic_compare_exchange_result_i32 atomic_result_5 = (atomic_compare_exchange_result_i32)0;
     int atomic_compare_value_3 = 0;
     InterlockedCompareExchange(b_i32, atomic_compare_value_3, value, atomic_result_5.old_value);
     atomic_result_5.exchanged = atomic_result_5.old_value == atomic_compare_value_3;
-    const atomic_compare_exchange_resulti32 r1 = atomic_result_5;
-    atomic_compare_exchange_resulti32 atomic_result_6 = (atomic_compare_exchange_resulti32)0;
+    const atomic_compare_exchange_result_i32 r1 = atomic_result_5;
+    atomic_compare_exchange_result_i32 atomic_result_6 = (atomic_compare_exchange_result_i32)0;
     int atomic_compare_value_4 = 0;
     InterlockedCompareExchange(b_i32, atomic_compare_value_4, value, atomic_result_6.old_value);
     atomic_result_6.exchanged = atomic_result_6.old_value == atomic_compare_value_4;
-    const atomic_compare_exchange_resulti32 r2 = atomic_result_6;
-    atomic_compare_exchange_resulti32 atomic_result_7 = (atomic_compare_exchange_resulti32)0;
+    const atomic_compare_exchange_result_i32 r2 = atomic_result_6;
+    atomic_compare_exchange_result_i32 atomic_result_7 = (atomic_compare_exchange_result_i32)0;
     int atomic_compare_value_5 = 0;
     InterlockedCompareExchange(b_i32, atomic_compare_value_5, value, atomic_result_7.old_value);
     atomic_result_7.exchanged = atomic_result_7.old_value == atomic_compare_value_5;
-    const atomic_compare_exchange_resulti32 r3 = atomic_result_7;
+    const atomic_compare_exchange_result_i32 r3 = atomic_result_7;
   }
 }
 

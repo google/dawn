@@ -19,13 +19,13 @@
                OpName %main_inner "main_inner"
                OpName %local_invocation_index "local_invocation_index"
                OpName %value "value"
-               OpName %__atomic_compare_exchange_resultu32 "__atomic_compare_exchange_resultu32"
-               OpMemberName %__atomic_compare_exchange_resultu32 0 "old_value"
-               OpMemberName %__atomic_compare_exchange_resultu32 1 "exchanged"
+               OpName %__atomic_compare_exchange_result_u32 "__atomic_compare_exchange_result_u32"
+               OpMemberName %__atomic_compare_exchange_result_u32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_result_u32 1 "exchanged"
                OpName %value_0 "value"
-               OpName %__atomic_compare_exchange_resulti32 "__atomic_compare_exchange_resulti32"
-               OpMemberName %__atomic_compare_exchange_resulti32 0 "old_value"
-               OpMemberName %__atomic_compare_exchange_resulti32 1 "exchanged"
+               OpName %__atomic_compare_exchange_result_i32 "__atomic_compare_exchange_result_i32"
+               OpMemberName %__atomic_compare_exchange_result_i32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_result_i32 1 "exchanged"
                OpName %value_1 "value"
                OpName %value_2 "value"
                OpName %main "main"
@@ -38,10 +38,10 @@
                OpMemberDecorate %a_i32_block 0 Offset 0
                OpDecorate %a_i32 DescriptorSet 0
                OpDecorate %a_i32 Binding 1
-               OpMemberDecorate %__atomic_compare_exchange_resultu32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_resultu32 1 Offset 4
-               OpMemberDecorate %__atomic_compare_exchange_resulti32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_resulti32 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_result_u32 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
@@ -67,11 +67,11 @@
    %uint_264 = OpConstant %uint 264
     %uint_42 = OpConstant %uint 42
 %_ptr_Function_uint = OpTypePointer Function %uint
-%__atomic_compare_exchange_resultu32 = OpTypeStruct %uint %bool
+%__atomic_compare_exchange_result_u32 = OpTypeStruct %uint %bool
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
      %int_42 = OpConstant %int 42
 %_ptr_Function_int = OpTypePointer Function %int
-%__atomic_compare_exchange_resulti32 = OpTypeStruct %int %bool
+%__atomic_compare_exchange_result_i32 = OpTypeStruct %int %bool
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
         %113 = OpTypeFunction %void
  %main_inner = OpFunction %void None %15
@@ -95,59 +95,59 @@
          %43 = OpLoad %uint %value
          %44 = OpAtomicCompareExchange %uint %42 %uint_1 %uint_0 %uint_0 %43 %29
          %45 = OpIEqual %bool %44 %29
-         %38 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %44 %45
+         %38 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %44 %45
          %48 = OpAccessChain %_ptr_StorageBuffer_uint %a_u32 %uint_0
          %49 = OpLoad %uint %value
          %50 = OpAtomicCompareExchange %uint %48 %uint_1 %uint_0 %uint_0 %49 %29
          %51 = OpIEqual %bool %50 %29
-         %46 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %50 %51
+         %46 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %50 %51
          %54 = OpAccessChain %_ptr_StorageBuffer_uint %a_u32 %uint_0
          %55 = OpLoad %uint %value
          %56 = OpAtomicCompareExchange %uint %54 %uint_1 %uint_0 %uint_0 %55 %29
          %57 = OpIEqual %bool %56 %29
-         %52 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %56 %57
+         %52 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %56 %57
                OpStore %value_0 %int_42
          %65 = OpAccessChain %_ptr_StorageBuffer_int %a_i32 %uint_0
          %66 = OpLoad %int %value_0
          %67 = OpAtomicCompareExchange %int %65 %uint_1 %uint_0 %uint_0 %66 %32
          %68 = OpIEqual %bool %67 %32
-         %61 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %67 %68
+         %61 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %67 %68
          %71 = OpAccessChain %_ptr_StorageBuffer_int %a_i32 %uint_0
          %72 = OpLoad %int %value_0
          %73 = OpAtomicCompareExchange %int %71 %uint_1 %uint_0 %uint_0 %72 %32
          %74 = OpIEqual %bool %73 %32
-         %69 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %73 %74
+         %69 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %73 %74
          %77 = OpAccessChain %_ptr_StorageBuffer_int %a_i32 %uint_0
          %78 = OpLoad %int %value_0
          %79 = OpAtomicCompareExchange %int %77 %uint_1 %uint_0 %uint_0 %78 %32
          %80 = OpIEqual %bool %79 %32
-         %75 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %79 %80
+         %75 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %79 %80
                OpStore %value_1 %uint_42
          %84 = OpLoad %uint %value_1
          %85 = OpAtomicCompareExchange %uint %b_u32 %uint_2 %uint_0 %uint_0 %84 %29
          %86 = OpIEqual %bool %85 %29
-         %82 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %85 %86
+         %82 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %85 %86
          %89 = OpLoad %uint %value_1
          %90 = OpAtomicCompareExchange %uint %b_u32 %uint_2 %uint_0 %uint_0 %89 %29
          %91 = OpIEqual %bool %90 %29
-         %87 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %90 %91
+         %87 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %90 %91
          %94 = OpLoad %uint %value_1
          %95 = OpAtomicCompareExchange %uint %b_u32 %uint_2 %uint_0 %uint_0 %94 %29
          %96 = OpIEqual %bool %95 %29
-         %92 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %95 %96
+         %92 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %95 %96
                OpStore %value_2 %int_42
         %100 = OpLoad %int %value_2
         %101 = OpAtomicCompareExchange %int %b_i32 %uint_2 %uint_0 %uint_0 %100 %32
         %102 = OpIEqual %bool %101 %32
-         %98 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %101 %102
+         %98 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %101 %102
         %105 = OpLoad %int %value_2
         %106 = OpAtomicCompareExchange %int %b_i32 %uint_2 %uint_0 %uint_0 %105 %32
         %107 = OpIEqual %bool %106 %32
-        %103 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %106 %107
+        %103 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %106 %107
         %110 = OpLoad %int %value_2
         %111 = OpAtomicCompareExchange %int %b_i32 %uint_2 %uint_0 %uint_0 %110 %32
         %112 = OpIEqual %bool %111 %32
-        %108 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %111 %112
+        %108 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %111 %112
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %113

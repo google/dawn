@@ -2,18 +2,18 @@
 
 using namespace metal;
 
-struct atomic_compare_exchange_resulti32 {
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
-atomic_compare_exchange_resulti32 atomicCompareExchangeWeak_1(threadgroup atomic_int* atomic, int compare, int value) {
+atomic_compare_exchange_result_i32 atomicCompareExchangeWeak_1(threadgroup atomic_int* atomic, int compare, int value) {
   int old_value = compare;
   bool exchanged = atomic_compare_exchange_weak_explicit(atomic, &old_value, value, memory_order_relaxed, memory_order_relaxed);
   return {old_value, exchanged};
 }
 
 void atomicCompareExchangeWeak_e88938(threadgroup atomic_int* const tint_symbol) {
-  atomic_compare_exchange_resulti32 res = atomicCompareExchangeWeak_1(tint_symbol, 1, 1);
+  atomic_compare_exchange_result_i32 res = atomicCompareExchangeWeak_1(tint_symbol, 1, 1);
 }
 
 void compute_main_inner(uint local_invocation_index, threadgroup atomic_int* const tint_symbol_1) {

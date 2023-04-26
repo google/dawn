@@ -1,7 +1,7 @@
 #version 310 es
 precision highp float;
 
-struct atomic_compare_exchange_resultu32 {
+struct atomic_compare_exchange_result_u32 {
   uint old_value;
   bool exchanged;
 };
@@ -32,10 +32,10 @@ void atomicCompareExchangeWeak_63d8e6() {
   arg_2 = 1u;
   uint x_21 = arg_2;
   uint x_22 = arg_1;
-  atomic_compare_exchange_resultu32 atomic_compare_result;
+  atomic_compare_exchange_result_u32 atomic_compare_result;
   atomic_compare_result.old_value = atomicCompSwap(sb_rw.inner.arg_0, x_22, x_21);
   atomic_compare_result.exchanged = atomic_compare_result.old_value == x_22;
-  atomic_compare_exchange_resultu32 tint_symbol = atomic_compare_result;
+  atomic_compare_exchange_result_u32 tint_symbol = atomic_compare_result;
   uint old_value_1 = tint_symbol.old_value;
   uint x_23 = old_value_1;
   x__atomic_compare_exchange_resultu32 tint_symbol_1 = x__atomic_compare_exchange_resultu32(x_23, (x_23 == x_21));
@@ -58,7 +58,7 @@ void main() {
 }
 #version 310 es
 
-struct atomic_compare_exchange_resultu32 {
+struct atomic_compare_exchange_result_u32 {
   uint old_value;
   bool exchanged;
 };
@@ -89,10 +89,10 @@ void atomicCompareExchangeWeak_63d8e6() {
   arg_2 = 1u;
   uint x_21 = arg_2;
   uint x_22 = arg_1;
-  atomic_compare_exchange_resultu32 atomic_compare_result;
+  atomic_compare_exchange_result_u32 atomic_compare_result;
   atomic_compare_result.old_value = atomicCompSwap(sb_rw.inner.arg_0, x_22, x_21);
   atomic_compare_result.exchanged = atomic_compare_result.old_value == x_22;
-  atomic_compare_exchange_resultu32 tint_symbol = atomic_compare_result;
+  atomic_compare_exchange_result_u32 tint_symbol = atomic_compare_result;
   uint old_value_1 = tint_symbol.old_value;
   uint x_23 = old_value_1;
   x__atomic_compare_exchange_resultu32 tint_symbol_1 = x__atomic_compare_exchange_resultu32(x_23, (x_23 == x_21));

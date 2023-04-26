@@ -15,9 +15,9 @@
                OpMemberName %x__atomic_compare_exchange_resultu32 0 "old_value"
                OpMemberName %x__atomic_compare_exchange_resultu32 1 "exchanged"
                OpName %res "res"
-               OpName %__atomic_compare_exchange_resultu32 "__atomic_compare_exchange_resultu32"
-               OpMemberName %__atomic_compare_exchange_resultu32 0 "old_value"
-               OpMemberName %__atomic_compare_exchange_resultu32 1 "exchanged"
+               OpName %__atomic_compare_exchange_result_u32 "__atomic_compare_exchange_result_u32"
+               OpMemberName %__atomic_compare_exchange_result_u32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_result_u32 1 "exchanged"
                OpName %compute_main_inner "compute_main_inner"
                OpName %local_invocation_index_2 "local_invocation_index_2"
                OpName %compute_main_1 "compute_main_1"
@@ -27,8 +27,8 @@
                OpDecorate %local_invocation_index_1_param_1 BuiltIn LocalInvocationIndex
                OpMemberDecorate %x__atomic_compare_exchange_resultu32 0 Offset 0
                OpMemberDecorate %x__atomic_compare_exchange_resultu32 1 Offset 4
-               OpMemberDecorate %__atomic_compare_exchange_resultu32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_resultu32 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_result_u32 1 Offset 4
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %local_invocation_index_1_param_1 = OpVariable %_ptr_Input_uint Input
@@ -43,7 +43,7 @@
 %x__atomic_compare_exchange_resultu32 = OpTypeStruct %uint %bool
          %15 = OpConstantNull %x__atomic_compare_exchange_resultu32
 %_ptr_Function_x__atomic_compare_exchange_resultu32 = OpTypePointer Function %x__atomic_compare_exchange_resultu32
-%__atomic_compare_exchange_resultu32 = OpTypeStruct %uint %bool
+%__atomic_compare_exchange_result_u32 = OpTypeStruct %uint %bool
      %uint_2 = OpConstant %uint 2
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
@@ -55,7 +55,7 @@
                OpStore %res %15
          %24 = OpAtomicCompareExchange %uint %arg_0 %uint_2 %uint_0 %uint_0 %uint_1 %uint_1
          %25 = OpIEqual %bool %24 %uint_1
-         %18 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %24 %25
+         %18 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %24 %25
          %26 = OpCompositeExtract %uint %18 0
          %27 = OpIEqual %bool %26 %uint_1
          %28 = OpCompositeConstruct %x__atomic_compare_exchange_resultu32 %26 %27

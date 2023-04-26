@@ -18,9 +18,9 @@
                OpMemberName %tint_symbol_1 0 "old_value"
                OpMemberName %tint_symbol_1 1 "exchanged"
                OpName %tint_symbol "tint_symbol"
-               OpName %__atomic_compare_exchange_resulti32 "__atomic_compare_exchange_resulti32"
-               OpMemberName %__atomic_compare_exchange_resulti32 0 "old_value"
-               OpMemberName %__atomic_compare_exchange_resulti32 1 "exchanged"
+               OpName %__atomic_compare_exchange_result_i32 "__atomic_compare_exchange_result_i32"
+               OpMemberName %__atomic_compare_exchange_result_i32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_result_i32 1 "exchanged"
                OpName %foo "foo"
                OpDecorate %value Location 0
                OpDecorate %a_block Block
@@ -29,8 +29,8 @@
                OpDecorate %a Binding 0
                OpMemberDecorate %tint_symbol_1 0 Offset 0
                OpMemberDecorate %tint_symbol_1 1 Offset 4
-               OpMemberDecorate %__atomic_compare_exchange_resulti32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_resulti32 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
        %bool = OpTypeBool
           %2 = OpConstantNull %bool
 %_ptr_Private_bool = OpTypePointer Private %bool
@@ -48,7 +48,7 @@
 %tint_symbol_1 = OpTypeStruct %int %bool
 %_ptr_Function_tint_symbol_1 = OpTypePointer Function %tint_symbol_1
          %21 = OpConstantNull %tint_symbol_1
-%__atomic_compare_exchange_resulti32 = OpTypeStruct %int %bool
+%__atomic_compare_exchange_result_i32 = OpTypeStruct %int %bool
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
      %uint_0 = OpConstant %uint 0
@@ -71,7 +71,7 @@
          %33 = OpAccessChain %_ptr_StorageBuffer_int %a %uint_0
          %35 = OpAtomicCompareExchange %int %33 %uint_1 %uint_0 %uint_0 %int_1 %8
          %36 = OpIEqual %bool %35 %8
-         %26 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %35 %36
+         %26 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %35 %36
          %37 = OpAccessChain %_ptr_Function_int %tint_symbol %uint_0
          %38 = OpCompositeExtract %int %26 0
                OpStore %37 %38

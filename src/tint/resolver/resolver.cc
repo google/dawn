@@ -43,6 +43,7 @@
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/builtin/builtin.h"
+#include "src/tint/resolver/builtin_structs.h"
 #include "src/tint/resolver/uniformity.h"
 #include "src/tint/sem/break_if_statement.h"
 #include "src/tint/sem/builtin_enum_expression.h"
@@ -2336,6 +2337,7 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
     auto check_no_tmpl_args = [&](type::Type* ty) -> type::Type* {
         return TINT_LIKELY(CheckNotTemplated("type", ident)) ? ty : nullptr;
     };
+    auto af = [&] { return b.create<type::AbstractFloat>(); };
     auto f32 = [&] { return b.create<type::F32>(); };
     auto i32 = [&] { return b.create<type::I32>(); };
     auto u32 = [&] { return b.create<type::U32>(); };
@@ -2737,9 +2739,60 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
             return storage_texture(type::TextureDimension::k2dArray);
         case builtin::Builtin::kTextureStorage3D:
             return storage_texture(type::TextureDimension::k3d);
-        case builtin::Builtin::kPackedVec3: {
+        case builtin::Builtin::kPackedVec3:
             return packed_vec3_t();
-        }
+        case builtin::Builtin::kAtomicCompareExchangeResultI32:
+            return CreateAtomicCompareExchangeResult(*builder_, i32());
+        case builtin::Builtin::kAtomicCompareExchangeResultU32:
+            return CreateAtomicCompareExchangeResult(*builder_, u32());
+        case builtin::Builtin::kFrexpResultAbstract:
+            return CreateFrexpResult(*builder_, af());
+        case builtin::Builtin::kFrexpResultF16:
+            return CreateFrexpResult(*builder_, f16());
+        case builtin::Builtin::kFrexpResultF32:
+            return CreateFrexpResult(*builder_, f32());
+        case builtin::Builtin::kFrexpResultVec2Abstract:
+            return CreateFrexpResult(*builder_, vec(af(), 2));
+        case builtin::Builtin::kFrexpResultVec2F16:
+            return CreateFrexpResult(*builder_, vec(f16(), 2));
+        case builtin::Builtin::kFrexpResultVec2F32:
+            return CreateFrexpResult(*builder_, vec(f32(), 2));
+        case builtin::Builtin::kFrexpResultVec3Abstract:
+            return CreateFrexpResult(*builder_, vec(af(), 3));
+        case builtin::Builtin::kFrexpResultVec3F16:
+            return CreateFrexpResult(*builder_, vec(f16(), 3));
+        case builtin::Builtin::kFrexpResultVec3F32:
+            return CreateFrexpResult(*builder_, vec(f32(), 3));
+        case builtin::Builtin::kFrexpResultVec4Abstract:
+            return CreateFrexpResult(*builder_, vec(af(), 4));
+        case builtin::Builtin::kFrexpResultVec4F16:
+            return CreateFrexpResult(*builder_, vec(f16(), 4));
+        case builtin::Builtin::kFrexpResultVec4F32:
+            return CreateFrexpResult(*builder_, vec(f32(), 4));
+        case builtin::Builtin::kModfResultAbstract:
+            return CreateModfResult(*builder_, af());
+        case builtin::Builtin::kModfResultF16:
+            return CreateModfResult(*builder_, f16());
+        case builtin::Builtin::kModfResultF32:
+            return CreateModfResult(*builder_, f32());
+        case builtin::Builtin::kModfResultVec2Abstract:
+            return CreateModfResult(*builder_, vec(af(), 2));
+        case builtin::Builtin::kModfResultVec2F16:
+            return CreateModfResult(*builder_, vec(f16(), 2));
+        case builtin::Builtin::kModfResultVec2F32:
+            return CreateModfResult(*builder_, vec(f32(), 2));
+        case builtin::Builtin::kModfResultVec3Abstract:
+            return CreateModfResult(*builder_, vec(af(), 3));
+        case builtin::Builtin::kModfResultVec3F16:
+            return CreateModfResult(*builder_, vec(f16(), 3));
+        case builtin::Builtin::kModfResultVec3F32:
+            return CreateModfResult(*builder_, vec(f32(), 3));
+        case builtin::Builtin::kModfResultVec4Abstract:
+            return CreateModfResult(*builder_, vec(af(), 4));
+        case builtin::Builtin::kModfResultVec4F16:
+            return CreateModfResult(*builder_, vec(f16(), 4));
+        case builtin::Builtin::kModfResultVec4F32:
+            return CreateModfResult(*builder_, vec(f32(), 4));
         case builtin::Builtin::kUndefined:
             break;
     }

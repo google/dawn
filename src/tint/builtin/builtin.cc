@@ -28,6 +28,84 @@ namespace tint::builtin {
 /// @param str the string to parse
 /// @returns the parsed enum, or Builtin::kUndefined if the string could not be parsed.
 Builtin ParseBuiltin(std::string_view str) {
+    if (str == "__atomic_compare_exchange_result_i32") {
+        return Builtin::kAtomicCompareExchangeResultI32;
+    }
+    if (str == "__atomic_compare_exchange_result_u32") {
+        return Builtin::kAtomicCompareExchangeResultU32;
+    }
+    if (str == "__frexp_result_abstract") {
+        return Builtin::kFrexpResultAbstract;
+    }
+    if (str == "__frexp_result_f16") {
+        return Builtin::kFrexpResultF16;
+    }
+    if (str == "__frexp_result_f32") {
+        return Builtin::kFrexpResultF32;
+    }
+    if (str == "__frexp_result_vec2_abstract") {
+        return Builtin::kFrexpResultVec2Abstract;
+    }
+    if (str == "__frexp_result_vec2_f16") {
+        return Builtin::kFrexpResultVec2F16;
+    }
+    if (str == "__frexp_result_vec2_f32") {
+        return Builtin::kFrexpResultVec2F32;
+    }
+    if (str == "__frexp_result_vec3_abstract") {
+        return Builtin::kFrexpResultVec3Abstract;
+    }
+    if (str == "__frexp_result_vec3_f16") {
+        return Builtin::kFrexpResultVec3F16;
+    }
+    if (str == "__frexp_result_vec3_f32") {
+        return Builtin::kFrexpResultVec3F32;
+    }
+    if (str == "__frexp_result_vec4_abstract") {
+        return Builtin::kFrexpResultVec4Abstract;
+    }
+    if (str == "__frexp_result_vec4_f16") {
+        return Builtin::kFrexpResultVec4F16;
+    }
+    if (str == "__frexp_result_vec4_f32") {
+        return Builtin::kFrexpResultVec4F32;
+    }
+    if (str == "__modf_result_abstract") {
+        return Builtin::kModfResultAbstract;
+    }
+    if (str == "__modf_result_f16") {
+        return Builtin::kModfResultF16;
+    }
+    if (str == "__modf_result_f32") {
+        return Builtin::kModfResultF32;
+    }
+    if (str == "__modf_result_vec2_abstract") {
+        return Builtin::kModfResultVec2Abstract;
+    }
+    if (str == "__modf_result_vec2_f16") {
+        return Builtin::kModfResultVec2F16;
+    }
+    if (str == "__modf_result_vec2_f32") {
+        return Builtin::kModfResultVec2F32;
+    }
+    if (str == "__modf_result_vec3_abstract") {
+        return Builtin::kModfResultVec3Abstract;
+    }
+    if (str == "__modf_result_vec3_f16") {
+        return Builtin::kModfResultVec3F16;
+    }
+    if (str == "__modf_result_vec3_f32") {
+        return Builtin::kModfResultVec3F32;
+    }
+    if (str == "__modf_result_vec4_abstract") {
+        return Builtin::kModfResultVec4Abstract;
+    }
+    if (str == "__modf_result_vec4_f16") {
+        return Builtin::kModfResultVec4F16;
+    }
+    if (str == "__modf_result_vec4_f32") {
+        return Builtin::kModfResultVec4F32;
+    }
     if (str == "__packed_vec3") {
         return Builtin::kPackedVec3;
     }
@@ -245,6 +323,58 @@ utils::StringStream& operator<<(utils::StringStream& out, Builtin value) {
     switch (value) {
         case Builtin::kUndefined:
             return out << "undefined";
+        case Builtin::kAtomicCompareExchangeResultI32:
+            return out << "__atomic_compare_exchange_result_i32";
+        case Builtin::kAtomicCompareExchangeResultU32:
+            return out << "__atomic_compare_exchange_result_u32";
+        case Builtin::kFrexpResultAbstract:
+            return out << "__frexp_result_abstract";
+        case Builtin::kFrexpResultF16:
+            return out << "__frexp_result_f16";
+        case Builtin::kFrexpResultF32:
+            return out << "__frexp_result_f32";
+        case Builtin::kFrexpResultVec2Abstract:
+            return out << "__frexp_result_vec2_abstract";
+        case Builtin::kFrexpResultVec2F16:
+            return out << "__frexp_result_vec2_f16";
+        case Builtin::kFrexpResultVec2F32:
+            return out << "__frexp_result_vec2_f32";
+        case Builtin::kFrexpResultVec3Abstract:
+            return out << "__frexp_result_vec3_abstract";
+        case Builtin::kFrexpResultVec3F16:
+            return out << "__frexp_result_vec3_f16";
+        case Builtin::kFrexpResultVec3F32:
+            return out << "__frexp_result_vec3_f32";
+        case Builtin::kFrexpResultVec4Abstract:
+            return out << "__frexp_result_vec4_abstract";
+        case Builtin::kFrexpResultVec4F16:
+            return out << "__frexp_result_vec4_f16";
+        case Builtin::kFrexpResultVec4F32:
+            return out << "__frexp_result_vec4_f32";
+        case Builtin::kModfResultAbstract:
+            return out << "__modf_result_abstract";
+        case Builtin::kModfResultF16:
+            return out << "__modf_result_f16";
+        case Builtin::kModfResultF32:
+            return out << "__modf_result_f32";
+        case Builtin::kModfResultVec2Abstract:
+            return out << "__modf_result_vec2_abstract";
+        case Builtin::kModfResultVec2F16:
+            return out << "__modf_result_vec2_f16";
+        case Builtin::kModfResultVec2F32:
+            return out << "__modf_result_vec2_f32";
+        case Builtin::kModfResultVec3Abstract:
+            return out << "__modf_result_vec3_abstract";
+        case Builtin::kModfResultVec3F16:
+            return out << "__modf_result_vec3_f16";
+        case Builtin::kModfResultVec3F32:
+            return out << "__modf_result_vec3_f32";
+        case Builtin::kModfResultVec4Abstract:
+            return out << "__modf_result_vec4_abstract";
+        case Builtin::kModfResultVec4F16:
+            return out << "__modf_result_vec4_f16";
+        case Builtin::kModfResultVec4F32:
+            return out << "__modf_result_vec4_f32";
         case Builtin::kPackedVec3:
             return out << "__packed_vec3";
         case Builtin::kArray:

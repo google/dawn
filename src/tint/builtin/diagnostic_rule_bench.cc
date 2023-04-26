@@ -41,7 +41,7 @@ void CoreDiagnosticRuleParser(::benchmark::State& state) {
             benchmark::DoNotOptimize(result);
         }
     }
-}
+}  // NOLINT(readability/fn_size)
 
 BENCHMARK(CoreDiagnosticRuleParser);
 
@@ -56,7 +56,7 @@ void ChromiumDiagnosticRuleParser(::benchmark::State& state) {
             benchmark::DoNotOptimize(result);
         }
     }
-}
+}  // NOLINT(readability/fn_size)
 
 BENCHMARK(ChromiumDiagnosticRuleParser);
 

@@ -12,16 +12,16 @@
                OpName %atomicCompareExchangeWeak_e88938 "atomicCompareExchangeWeak_e88938"
                OpName %arg_1 "arg_1"
                OpName %arg_2 "arg_2"
-               OpName %__atomic_compare_exchange_resulti32 "__atomic_compare_exchange_resulti32"
-               OpMemberName %__atomic_compare_exchange_resulti32 0 "old_value"
-               OpMemberName %__atomic_compare_exchange_resulti32 1 "exchanged"
+               OpName %__atomic_compare_exchange_result_i32 "__atomic_compare_exchange_result_i32"
+               OpMemberName %__atomic_compare_exchange_result_i32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_result_i32 1 "exchanged"
                OpName %res "res"
                OpName %compute_main_inner "compute_main_inner"
                OpName %local_invocation_index "local_invocation_index"
                OpName %compute_main "compute_main"
                OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
-               OpMemberDecorate %__atomic_compare_exchange_resulti32 0 Offset 0
-               OpMemberDecorate %__atomic_compare_exchange_resulti32 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
@@ -34,25 +34,25 @@
 %_ptr_Function_int = OpTypePointer Function %int
          %14 = OpConstantNull %int
        %bool = OpTypeBool
-%__atomic_compare_exchange_resulti32 = OpTypeStruct %int %bool
+%__atomic_compare_exchange_result_i32 = OpTypeStruct %int %bool
      %uint_2 = OpConstant %uint 2
      %uint_0 = OpConstant %uint 0
-%_ptr_Function___atomic_compare_exchange_resulti32 = OpTypePointer Function %__atomic_compare_exchange_resulti32
-         %28 = OpConstantNull %__atomic_compare_exchange_resulti32
+%_ptr_Function___atomic_compare_exchange_result_i32 = OpTypePointer Function %__atomic_compare_exchange_result_i32
+         %28 = OpConstantNull %__atomic_compare_exchange_result_i32
          %29 = OpTypeFunction %void %uint
    %uint_264 = OpConstant %uint 264
 %atomicCompareExchangeWeak_e88938 = OpFunction %void None %7
          %10 = OpLabel
       %arg_1 = OpVariable %_ptr_Function_int Function %14
       %arg_2 = OpVariable %_ptr_Function_int Function %14
-        %res = OpVariable %_ptr_Function___atomic_compare_exchange_resulti32 Function %28
+        %res = OpVariable %_ptr_Function___atomic_compare_exchange_result_i32 Function %28
                OpStore %arg_1 %int_1
                OpStore %arg_2 %int_1
          %22 = OpLoad %int %arg_2
          %23 = OpLoad %int %arg_1
          %24 = OpAtomicCompareExchange %int %arg_0 %uint_2 %uint_0 %uint_0 %22 %23
          %25 = OpIEqual %bool %24 %23
-         %16 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %24 %25
+         %16 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %24 %25
                OpStore %res %16
                OpReturn
                OpFunctionEnd

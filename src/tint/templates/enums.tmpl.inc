@@ -191,7 +191,7 @@ void {{$enum}}Parser(::benchmark::State& state) {
             benchmark::DoNotOptimize(result);
         }
     }
-}
+} // NOLINT(readability/fn_size)
 
 BENCHMARK({{$enum}}Parser);
 {{- end -}}

@@ -1470,7 +1470,7 @@ class ProgramBuilder {
 
     /// @param name the symbol string
     /// @return a Symbol with the given name
-    Symbol Sym(const std::string& name) { return Symbols().Register(name); }
+    Symbol Sym(std::string_view name) { return Symbols().Register(name); }
 
     /// @param enumerator the enumerator
     /// @return a Symbol with the given enum value

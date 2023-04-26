@@ -2,11 +2,11 @@
 
 using namespace metal;
 
-struct atomic_compare_exchange_resultu32 {
+struct atomic_compare_exchange_result_u32 {
   uint old_value;
   bool exchanged;
 };
-atomic_compare_exchange_resultu32 atomicCompareExchangeWeak_1(device atomic_uint* atomic, uint compare, uint value) {
+atomic_compare_exchange_result_u32 atomicCompareExchangeWeak_1(device atomic_uint* atomic, uint compare, uint value) {
   uint old_value = compare;
   bool exchanged = atomic_compare_exchange_weak_explicit(atomic, &old_value, value, memory_order_relaxed, memory_order_relaxed);
   return {old_value, exchanged};
@@ -17,7 +17,7 @@ struct SB_RW {
 };
 
 void atomicCompareExchangeWeak_63d8e6(device SB_RW* const tint_symbol) {
-  atomic_compare_exchange_resultu32 res = atomicCompareExchangeWeak_1(&((*(tint_symbol)).arg_0), 1u, 1u);
+  atomic_compare_exchange_result_u32 res = atomicCompareExchangeWeak_1(&((*(tint_symbol)).arg_0), 1u, 1u);
 }
 
 fragment void fragment_main(device SB_RW* tint_symbol_1 [[buffer(0)]]) {

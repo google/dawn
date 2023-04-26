@@ -1,4 +1,4 @@
-struct atomic_compare_exchange_resulti32 {
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
@@ -7,11 +7,11 @@ groupshared int arg_0;
 void atomicCompareExchangeWeak_e88938() {
   int arg_1 = 1;
   int arg_2 = 1;
-  atomic_compare_exchange_resulti32 atomic_result = (atomic_compare_exchange_resulti32)0;
+  atomic_compare_exchange_result_i32 atomic_result = (atomic_compare_exchange_result_i32)0;
   int atomic_compare_value = arg_1;
   InterlockedCompareExchange(arg_0, atomic_compare_value, arg_2, atomic_result.old_value);
   atomic_result.exchanged = atomic_result.old_value == atomic_compare_value;
-  atomic_compare_exchange_resulti32 res = atomic_result;
+  atomic_compare_exchange_result_i32 res = atomic_result;
 }
 
 struct tint_symbol_1 {
