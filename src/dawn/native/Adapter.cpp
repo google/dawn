@@ -260,33 +260,6 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     const DawnTogglesDescriptor* deviceTogglesDesc = nullptr;
     FindInChain(descriptor->nextInChain, &deviceTogglesDesc);
 
-    // Handle the deprecated DawnTogglesDeviceDescriptor
-    // TODO(dawn:1495): Remove this fallback once Chromium is changed to use DawnToggleDescriptor
-    // and DawnTogglesDeviceDescriptor is removed.
-    const DawnTogglesDeviceDescriptor* deprecatedTogglesDeviceDesc = nullptr;
-    DawnTogglesDescriptor convertedDeviceTogglesDesc = {};
-    FindInChain(descriptor->nextInChain, &deprecatedTogglesDeviceDesc);
-
-    if (deprecatedTogglesDeviceDesc) {
-        // Emit the deprecation warning.
-        dawn::WarningLog()
-            << "DawnTogglesDeviceDescriptor is deprecated and replaced by DawnTogglesDescriptor.";
-        // Ensure that at most one toggles descriptor is used.
-        DAWN_INVALID_IF(
-            deviceTogglesDesc && deprecatedTogglesDeviceDesc,
-            "DawnTogglesDeviceDescriptor should not be used together with DawnTogglesDescriptor.");
-
-        convertedDeviceTogglesDesc.enabledToggles =
-            deprecatedTogglesDeviceDesc->forceEnabledToggles;
-        convertedDeviceTogglesDesc.enabledTogglesCount =
-            deprecatedTogglesDeviceDesc->forceEnabledTogglesCount;
-        convertedDeviceTogglesDesc.disabledToggles =
-            deprecatedTogglesDeviceDesc->forceDisabledToggles;
-        convertedDeviceTogglesDesc.disabledTogglesCount =
-            deprecatedTogglesDeviceDesc->forceDisabledTogglesCount;
-        deviceTogglesDesc = &convertedDeviceTogglesDesc;
-    }
-
     // Create device toggles state.
     TogglesState deviceToggles =
         TogglesState::CreateFromTogglesDescriptor(deviceTogglesDesc, ToggleStage::Device);
