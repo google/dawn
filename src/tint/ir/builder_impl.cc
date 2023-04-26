@@ -25,6 +25,7 @@
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/call_expression.h"
 #include "src/tint/ast/call_statement.h"
+#include "src/tint/ast/const.h"
 #include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/discard_statement.h"
@@ -602,9 +603,15 @@ void BuilderImpl::EmitVariable(const ast::Variable* var) {
                       "found an `Override` variable. The SubstituteOverrides "
                       "transform must be run before converting to IR");
         },
-        // [&](const ast::Const* c) {
-        // TODO(dsinclair): Implement
-        // },
+        [&](const ast::Const*) {
+            // Skip. This should be handled by const-eval already, so the const will be a
+            // `constant::` value at the usage sites. Can just ignore the `const` variable as it
+            // should never be used.
+            //
+            // TODO(dsinclair): Probably want to store the const variable somewhere and then in
+            // identifier expression log an error if we ever see a const identifier. Add this when
+            // identifiers and variables are supported.
+        },
         [&](Default) {
             add_error(var->source, "unknown variable: " + std::string(var->TypeInfo().name));
         });
