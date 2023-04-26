@@ -101,6 +101,10 @@ class MultithreadTests : public DawnTest {
 
 // Test that dropping a device's last ref on another thread won't crash Instance::ProcessEvents.
 TEST_P(MultithreadTests, Device_DroppedOnAnotherThread) {
+    // TODO(crbug.com/dawn/1779): This test seems to cause flakiness in other sampling tests on
+    // NVIDIA.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
+
     std::vector<wgpu::Device> devices(5);
 
     // Create devices.
@@ -132,6 +136,10 @@ TEST_P(MultithreadTests, Device_DroppedOnAnotherThread) {
 // Test that dropping a device's last ref inside a callback on another thread won't crash
 // Instance::ProcessEvents.
 TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
+    // TODO(crbug.com/dawn/1779): This test seems to cause flakiness in other sampling tests on
+    // NVIDIA.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
+
     std::vector<wgpu::Device> devices(10);
 
     // Create devices.
