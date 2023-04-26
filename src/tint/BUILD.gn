@@ -281,6 +281,8 @@ libtint_source_set("libtint_program_src") {
     "clone_context.cc",
     "program.cc",
     "program_builder.cc",
+    "resolver/builtin_structs.cc",
+    "resolver/builtin_structs.h",
     "resolver/const_eval.cc",
     "resolver/const_eval.h",
     "resolver/ctor_conv_intrinsic.cc",

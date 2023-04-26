@@ -20,6 +20,7 @@
 
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/program_builder.h"
+#include "src/tint/resolver/builtin_structs.h"
 #include "src/tint/sem/evaluation_stage.h"
 #include "src/tint/sem/pipeline_stage_set.h"
 #include "src/tint/sem/value_constructor.h"
@@ -819,170 +820,26 @@ bool match_atomic_compare_exchange_result(MatchState&, const type::Type* ty, con
     return false;
 }
 
-struct NameAndType {
-    std::string name;
-    const type::Type* type;
-};
-sem::Struct* build_struct(ProgramBuilder& b,
-                          std::string name,
-                          std::initializer_list<NameAndType> member_names_and_types) {
-    uint32_t offset = 0;
-    uint32_t max_align = 0;
-    utils::Vector<const sem::StructMember*, 4> members;
-    for (auto& m : member_names_and_types) {
-        uint32_t align = std::max<uint32_t>(m.type->Align(), 1);
-        uint32_t size = m.type->Size();
-        offset = utils::RoundUp(align, offset);
-        max_align = std::max(max_align, align);
-        members.Push(b.create<sem::StructMember>(
-            /* declaration */ nullptr,
-            /* source */ Source{},
-            /* name */ b.Sym(m.name),
-            /* type */ m.type,
-            /* index */ static_cast<uint32_t>(members.Length()),
-            /* offset */ offset,
-            /* align */ align,
-            /* size */ size,
-            /* location */ std::nullopt));
-        offset += size;
-    }
-    uint32_t size_without_padding = offset;
-    uint32_t size_with_padding = utils::RoundUp(max_align, offset);
-    return b.create<sem::Struct>(
-        /* declaration */ nullptr,
-        /* source */ Source{},
-        /* name */ b.Sym(name),
-        /* members */ std::move(members),
-        /* align */ max_align,
-        /* size */ size_with_padding,
-        /* size_no_padding */ size_without_padding);
-}
-
 const sem::Struct* build_modf_result(MatchState& state, const type::Type* el) {
-    auto build_f32 = [&] {
-        auto* ty = state.builder.create<type::F32>();
-        return build_struct(state.builder, "__modf_result_f32", {{"fract", ty}, {"whole", ty}});
-    };
-    auto build_f16 = [&] {
-        auto* ty = state.builder.create<type::F16>();
-        return build_struct(state.builder, "__modf_result_f16", {{"fract", ty}, {"whole", ty}});
-    };
-
-    return Switch(
-        el,                                             //
-        [&](const type::F32*) { return build_f32(); },  //
-        [&](const type::F16*) { return build_f16(); },  //
-        [&](const type::AbstractFloat*) {
-            auto* abstract = build_struct(state.builder, "__modf_result_abstract",
-                                          {{"fract", el}, {"whole", el}});
-            abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
-            return abstract;
-        },
-        [&](Default) {
-            TINT_ICE(Resolver, state.builder.Diagnostics())
-                << "unhandled modf type: " << state.builder.FriendlyName(el);
-            return nullptr;
-        });
+    return CreateModfResult(state.builder, el);
 }
 
 const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const type::Type* el) {
-    auto prefix = "__modf_result_vec" + std::to_string(n.Value());
-    auto build_f32 = [&] {
-        auto* vec =
-            state.builder.create<type::Vector>(state.builder.create<type::F32>(), n.Value());
-        return build_struct(state.builder, prefix + "_f32", {{"fract", vec}, {"whole", vec}});
-    };
-    auto build_f16 = [&] {
-        auto* vec =
-            state.builder.create<type::Vector>(state.builder.create<type::F16>(), n.Value());
-        return build_struct(state.builder, prefix + "_f16", {{"fract", vec}, {"whole", vec}});
-    };
-
-    return Switch(
-        el,                                             //
-        [&](const type::F32*) { return build_f32(); },  //
-        [&](const type::F16*) { return build_f16(); },  //
-        [&](const type::AbstractFloat*) {
-            auto* vec = state.builder.create<type::Vector>(el, n.Value());
-            auto* abstract =
-                build_struct(state.builder, prefix + "_abstract", {{"fract", vec}, {"whole", vec}});
-            abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
-            return abstract;
-        },
-        [&](Default) {
-            TINT_ICE(Resolver, state.builder.Diagnostics())
-                << "unhandled modf type: " << state.builder.FriendlyName(el);
-            return nullptr;
-        });
+    auto* vec = state.builder.create<type::Vector>(el, n.Value());
+    return CreateModfResult(state.builder, vec);
 }
 
 const sem::Struct* build_frexp_result(MatchState& state, const type::Type* el) {
-    auto build_f32 = [&] {
-        auto* f = state.builder.create<type::F32>();
-        auto* i = state.builder.create<type::I32>();
-        return build_struct(state.builder, "__frexp_result_f32", {{"fract", f}, {"exp", i}});
-    };
-    auto build_f16 = [&] {
-        auto* f = state.builder.create<type::F16>();
-        auto* i = state.builder.create<type::I32>();
-        return build_struct(state.builder, "__frexp_result_f16", {{"fract", f}, {"exp", i}});
-    };
-
-    return Switch(
-        el,                                             //
-        [&](const type::F32*) { return build_f32(); },  //
-        [&](const type::F16*) { return build_f16(); },  //
-        [&](const type::AbstractFloat*) {
-            auto* i = state.builder.create<type::AbstractInt>();
-            auto* abstract =
-                build_struct(state.builder, "__frexp_result_abstract", {{"fract", el}, {"exp", i}});
-            abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
-            return abstract;
-        },
-        [&](Default) {
-            TINT_ICE(Resolver, state.builder.Diagnostics())
-                << "unhandled frexp type: " << state.builder.FriendlyName(el);
-            return nullptr;
-        });
+    return CreateFrexpResult(state.builder, el);
 }
 
 const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const type::Type* el) {
-    auto prefix = "__frexp_result_vec" + std::to_string(n.Value());
-    auto build_f32 = [&] {
-        auto* f = state.builder.create<type::Vector>(state.builder.create<type::F32>(), n.Value());
-        auto* e = state.builder.create<type::Vector>(state.builder.create<type::I32>(), n.Value());
-        return build_struct(state.builder, prefix + "_f32", {{"fract", f}, {"exp", e}});
-    };
-    auto build_f16 = [&] {
-        auto* f = state.builder.create<type::Vector>(state.builder.create<type::F16>(), n.Value());
-        auto* e = state.builder.create<type::Vector>(state.builder.create<type::I32>(), n.Value());
-        return build_struct(state.builder, prefix + "_f16", {{"fract", f}, {"exp", e}});
-    };
-
-    return Switch(
-        el,                                             //
-        [&](const type::F32*) { return build_f32(); },  //
-        [&](const type::F16*) { return build_f16(); },  //
-        [&](const type::AbstractFloat*) {
-            auto* f = state.builder.create<type::Vector>(el, n.Value());
-            auto* e = state.builder.create<type::Vector>(state.builder.create<type::AbstractInt>(),
-                                                         n.Value());
-            auto* abstract =
-                build_struct(state.builder, prefix + "_abstract", {{"fract", f}, {"exp", e}});
-            abstract->SetConcreteTypes(utils::Vector{build_f32(), build_f16()});
-            return abstract;
-        },
-        [&](Default) {
-            TINT_ICE(Resolver, state.builder.Diagnostics())
-                << "unhandled frexp type: " << state.builder.FriendlyName(el);
-            return nullptr;
-        });
+    auto* vec = state.builder.create<type::Vector>(el, n.Value());
+    return CreateFrexpResult(state.builder, vec);
 }
 
 const sem::Struct* build_atomic_compare_exchange_result(MatchState& state, const type::Type* ty) {
-    return build_struct(state.builder, "__atomic_compare_exchange_result" + ty->FriendlyName(),
-                        {{"old_value", const_cast<type::Type*>(ty)},
-                         {"exchanged", state.builder.create<type::Bool>()}});
+    return CreateAtomicCompareExchangeResult(state.builder, ty);
 }
 
 /// ParameterInfo describes a parameter
