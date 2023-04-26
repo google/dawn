@@ -65,7 +65,7 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
         SamplerDescriptor desc = {};
         ASSERT(desc.minFilter == wgpu::FilterMode::Nearest);
         ASSERT(desc.magFilter == wgpu::FilterMode::Nearest);
-        ASSERT(desc.mipmapFilter == wgpu::FilterMode::Nearest);
+        ASSERT(desc.mipmapFilter == wgpu::MipmapFilterMode::Nearest);
         mPlaceholderSampler =
             ToBackend(layout->GetDevice()->GetOrCreateSampler(&desc).AcquireSuccess());
     }

@@ -63,10 +63,10 @@ Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
 
     D3D12_FILTER_TYPE mipmapFilter;
     switch (descriptor->mipmapFilter) {
-        case wgpu::FilterMode::Nearest:
+        case wgpu::MipmapFilterMode::Nearest:
             mipmapFilter = D3D12_FILTER_TYPE_POINT;
             break;
-        case wgpu::FilterMode::Linear:
+        case wgpu::MipmapFilterMode::Linear:
             mipmapFilter = D3D12_FILTER_TYPE_LINEAR;
             break;
     }

@@ -31,20 +31,20 @@ GLenum MagFilterMode(wgpu::FilterMode filter) {
     UNREACHABLE();
 }
 
-GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::FilterMode mipMapFilter) {
+GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::MipmapFilterMode mipMapFilter) {
     switch (minFilter) {
         case wgpu::FilterMode::Nearest:
             switch (mipMapFilter) {
-                case wgpu::FilterMode::Nearest:
+                case wgpu::MipmapFilterMode::Nearest:
                     return GL_NEAREST_MIPMAP_NEAREST;
-                case wgpu::FilterMode::Linear:
+                case wgpu::MipmapFilterMode::Linear:
                     return GL_NEAREST_MIPMAP_LINEAR;
             }
         case wgpu::FilterMode::Linear:
             switch (mipMapFilter) {
-                case wgpu::FilterMode::Nearest:
+                case wgpu::MipmapFilterMode::Nearest:
                     return GL_LINEAR_MIPMAP_NEAREST;
-                case wgpu::FilterMode::Linear:
+                case wgpu::MipmapFilterMode::Linear:
                     return GL_LINEAR_MIPMAP_LINEAR;
             }
     }

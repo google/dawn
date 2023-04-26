@@ -147,7 +147,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
             wgpu::SamplerDescriptor descriptor = {};
             descriptor.minFilter = wgpu::FilterMode::Linear;
             descriptor.magFilter = wgpu::FilterMode::Linear;
-            descriptor.mipmapFilter = wgpu::FilterMode::Linear;
+            descriptor.mipmapFilter = wgpu::MipmapFilterMode::Linear;
             descriptor.maxAnisotropy = maxAnisotropy;
             sampler = device.CreateSampler(&descriptor);
         }

@@ -29,11 +29,11 @@ MTLSamplerMinMagFilter FilterModeToMinMagFilter(wgpu::FilterMode mode) {
     }
 }
 
-MTLSamplerMipFilter FilterModeToMipFilter(wgpu::FilterMode mode) {
+MTLSamplerMipFilter FilterModeToMipFilter(wgpu::MipmapFilterMode mode) {
     switch (mode) {
-        case wgpu::FilterMode::Nearest:
+        case wgpu::MipmapFilterMode::Nearest:
             return MTLSamplerMipFilterNearest;
-        case wgpu::FilterMode::Linear:
+        case wgpu::MipmapFilterMode::Linear:
             return MTLSamplerMipFilterLinear;
     }
 }

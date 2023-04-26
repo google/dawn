@@ -416,7 +416,7 @@ TEST_P(ObjectCachingTest, SamplerDeduplication) {
     wgpu::Sampler otherSamplerMinFilter = device.CreateSampler(&otherSamplerDescMinFilter);
 
     wgpu::SamplerDescriptor otherSamplerDescMipmapFilter;
-    otherSamplerDescMipmapFilter.mipmapFilter = wgpu::FilterMode::Linear;
+    otherSamplerDescMipmapFilter.mipmapFilter = wgpu::MipmapFilterMode::Linear;
     wgpu::Sampler otherSamplerMipmapFilter = device.CreateSampler(&otherSamplerDescMipmapFilter);
 
     wgpu::SamplerDescriptor otherSamplerDescLodMinClamp;

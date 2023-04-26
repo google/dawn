@@ -64,7 +64,7 @@ class SamplerBase : public ApiObjectBase, public CachedObject {
     wgpu::AddressMode mAddressModeW;
     wgpu::FilterMode mMagFilter;
     wgpu::FilterMode mMinFilter;
-    wgpu::FilterMode mMipmapFilter;
+    wgpu::MipmapFilterMode mMipmapFilter;
     float mLodMinClamp;
     float mLodMaxClamp;
     wgpu::CompareFunction mCompareFunction;

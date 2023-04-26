@@ -107,12 +107,13 @@ class TextureViewSamplingTest : public DawnTest {
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         wgpu::FilterMode kFilterMode = wgpu::FilterMode::Nearest;
+        wgpu::MipmapFilterMode kMipmapFilterMode = wgpu::MipmapFilterMode::Nearest;
         wgpu::AddressMode kAddressMode = wgpu::AddressMode::ClampToEdge;
 
         wgpu::SamplerDescriptor samplerDescriptor = {};
         samplerDescriptor.minFilter = kFilterMode;
         samplerDescriptor.magFilter = kFilterMode;
-        samplerDescriptor.mipmapFilter = kFilterMode;
+        samplerDescriptor.mipmapFilter = kMipmapFilterMode;
         samplerDescriptor.addressModeU = kAddressMode;
         samplerDescriptor.addressModeV = kAddressMode;
         samplerDescriptor.addressModeW = kAddressMode;

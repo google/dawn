@@ -40,7 +40,7 @@ MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descr
     if (descriptor->maxAnisotropy > 1) {
         DAWN_INVALID_IF(descriptor->minFilter != wgpu::FilterMode::Linear ||
                             descriptor->magFilter != wgpu::FilterMode::Linear ||
-                            descriptor->mipmapFilter != wgpu::FilterMode::Linear,
+                            descriptor->mipmapFilter != wgpu::MipmapFilterMode::Linear,
                         "One of minFilter (%s), magFilter (%s) or mipmapFilter (%s) is not %s "
                         "while using anisotropic filter (maxAnisotropy is %f)",
                         descriptor->magFilter, descriptor->minFilter, descriptor->mipmapFilter,
@@ -52,7 +52,7 @@ MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descr
 
     DAWN_TRY(ValidateFilterMode(descriptor->minFilter));
     DAWN_TRY(ValidateFilterMode(descriptor->magFilter));
-    DAWN_TRY(ValidateFilterMode(descriptor->mipmapFilter));
+    DAWN_TRY(ValidateMipmapFilterMode(descriptor->mipmapFilter));
     DAWN_TRY(ValidateAddressMode(descriptor->addressModeU));
     DAWN_TRY(ValidateAddressMode(descriptor->addressModeV));
     DAWN_TRY(ValidateAddressMode(descriptor->addressModeW));
@@ -116,7 +116,7 @@ bool SamplerBase::IsComparison() const {
 
 bool SamplerBase::IsFiltering() const {
     return mMinFilter == wgpu::FilterMode::Linear || mMagFilter == wgpu::FilterMode::Linear ||
-           mMipmapFilter == wgpu::FilterMode::Linear;
+           mMipmapFilter == wgpu::MipmapFilterMode::Linear;
 }
 
 size_t SamplerBase::ComputeContentHash() {

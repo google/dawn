@@ -46,11 +46,11 @@ VkFilter VulkanSamplerFilter(wgpu::FilterMode filter) {
     UNREACHABLE();
 }
 
-VkSamplerMipmapMode VulkanMipMapMode(wgpu::FilterMode filter) {
+VkSamplerMipmapMode VulkanMipMapMode(wgpu::MipmapFilterMode filter) {
     switch (filter) {
-        case wgpu::FilterMode::Linear:
+        case wgpu::MipmapFilterMode::Linear:
             return VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        case wgpu::FilterMode::Nearest:
+        case wgpu::MipmapFilterMode::Nearest:
             return VK_SAMPLER_MIPMAP_MODE_NEAREST;
     }
     UNREACHABLE();

@@ -53,7 +53,7 @@ TEST_F(SamplerValidationTest, InvalidFilterAnisotropic) {
     kValidAnisoSamplerDesc.maxAnisotropy = 2;
     kValidAnisoSamplerDesc.minFilter = wgpu::FilterMode::Linear;
     kValidAnisoSamplerDesc.magFilter = wgpu::FilterMode::Linear;
-    kValidAnisoSamplerDesc.mipmapFilter = wgpu::FilterMode::Linear;
+    kValidAnisoSamplerDesc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
     {
         // when maxAnisotropy > 1, min, mag, mipmap filter should be linear
         device.CreateSampler(&kValidAnisoSamplerDesc);
@@ -67,7 +67,7 @@ TEST_F(SamplerValidationTest, InvalidFilterAnisotropic) {
         wgpu::SamplerDescriptor samplerDesc = kValidAnisoSamplerDesc;
         samplerDesc.minFilter = wgpu::FilterMode::Nearest;
         samplerDesc.magFilter = wgpu::FilterMode::Nearest;
-        samplerDesc.mipmapFilter = wgpu::FilterMode::Nearest;
+        samplerDesc.mipmapFilter = wgpu::MipmapFilterMode::Nearest;
         ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
     }
     {
@@ -82,7 +82,7 @@ TEST_F(SamplerValidationTest, InvalidFilterAnisotropic) {
     }
     {
         wgpu::SamplerDescriptor samplerDesc = kValidAnisoSamplerDesc;
-        samplerDesc.mipmapFilter = wgpu::FilterMode::Nearest;
+        samplerDesc.mipmapFilter = wgpu::MipmapFilterMode::Nearest;
         ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
     }
 }
@@ -92,7 +92,7 @@ TEST_F(SamplerValidationTest, ValidFilterAnisotropic) {
     kValidAnisoSamplerDesc.maxAnisotropy = 2;
     kValidAnisoSamplerDesc.minFilter = wgpu::FilterMode::Linear;
     kValidAnisoSamplerDesc.magFilter = wgpu::FilterMode::Linear;
-    kValidAnisoSamplerDesc.mipmapFilter = wgpu::FilterMode::Linear;
+    kValidAnisoSamplerDesc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
     { device.CreateSampler(); }
     {
         wgpu::SamplerDescriptor samplerDesc = kValidAnisoSamplerDesc;

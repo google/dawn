@@ -69,9 +69,6 @@ typedef uint32_t {{c_prefix}}Flags;
     typedef enum {{as_cType(type.name)}} {
         {% for value in type.values %}
             {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "08X")}},
-            {% if ("dawn" in enabled_tags) and (type == types["filter mode"]) %}
-                WGPUMipmapFilterMode_{{value.name.CamelCase()}} = 0x{{format(value.value, "08X")}},
-            {% endif %}
         {% endfor %}
         {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF
     } {{as_cType(type.name)}};
@@ -80,12 +77,6 @@ typedef uint32_t {{c_prefix}}Flags;
     {% endif %}
 
 {% endfor -%}
-
-// Special case definition of MipmapFilterMode for Dawn side.
-// TODO(lokokung) Remove once Chromium side is updated.
-{% if 'dawn' in enabled_tags %}
-    typedef WGPUFilterMode WGPUMipmapFilterMode;
-{% endif %}
 
 typedef struct {{c_prefix}}ChainedStruct {
     struct {{c_prefix}}ChainedStruct const * next;

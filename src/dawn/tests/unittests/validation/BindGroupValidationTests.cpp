@@ -3033,7 +3033,7 @@ TEST_F(SamplerTypeBindingTest, SamplerAndBindGroupMatches) {
         }
         {
             wgpu::SamplerDescriptor desc;
-            desc.mipmapFilter = wgpu::FilterMode::Linear;
+            desc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
             utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}});
         }
 
@@ -3061,7 +3061,7 @@ TEST_F(SamplerTypeBindingTest, SamplerAndBindGroupMatches) {
         }
         {
             wgpu::SamplerDescriptor desc;
-            desc.mipmapFilter = wgpu::FilterMode::Linear;
+            desc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
             ASSERT_DEVICE_ERROR(
                 utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}}));
         }
