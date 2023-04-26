@@ -291,69 +291,69 @@ void BuilderImpl::EmitCompoundAssignment(const ast::CompoundAssignmentStatement*
     }
 
     auto* ty = lhs.Get()->Type();
-    Binary* instr = nullptr;
+    Binary* inst = nullptr;
     switch (stmt->op) {
         case ast::BinaryOp::kAnd:
-            instr = builder.And(ty, lhs.Get(), rhs.Get());
+            inst = builder.And(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kOr:
-            instr = builder.Or(ty, lhs.Get(), rhs.Get());
+            inst = builder.Or(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kXor:
-            instr = builder.Xor(ty, lhs.Get(), rhs.Get());
+            inst = builder.Xor(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalAnd:
-            instr = builder.LogicalAnd(ty, lhs.Get(), rhs.Get());
+            inst = builder.LogicalAnd(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalOr:
-            instr = builder.LogicalOr(ty, lhs.Get(), rhs.Get());
+            inst = builder.LogicalOr(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kEqual:
-            instr = builder.Equal(ty, lhs.Get(), rhs.Get());
+            inst = builder.Equal(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNotEqual:
-            instr = builder.NotEqual(ty, lhs.Get(), rhs.Get());
+            inst = builder.NotEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThan:
-            instr = builder.LessThan(ty, lhs.Get(), rhs.Get());
+            inst = builder.LessThan(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThan:
-            instr = builder.GreaterThan(ty, lhs.Get(), rhs.Get());
+            inst = builder.GreaterThan(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThanEqual:
-            instr = builder.LessThanEqual(ty, lhs.Get(), rhs.Get());
+            inst = builder.LessThanEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThanEqual:
-            instr = builder.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
+            inst = builder.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftLeft:
-            instr = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
+            inst = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftRight:
-            instr = builder.ShiftRight(ty, lhs.Get(), rhs.Get());
+            inst = builder.ShiftRight(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kAdd:
-            instr = builder.Add(ty, lhs.Get(), rhs.Get());
+            inst = builder.Add(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kSubtract:
-            instr = builder.Subtract(ty, lhs.Get(), rhs.Get());
+            inst = builder.Subtract(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kMultiply:
-            instr = builder.Multiply(ty, lhs.Get(), rhs.Get());
+            inst = builder.Multiply(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kDivide:
-            instr = builder.Divide(ty, lhs.Get(), rhs.Get());
+            inst = builder.Divide(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kModulo:
-            instr = builder.Modulo(ty, lhs.Get(), rhs.Get());
+            inst = builder.Modulo(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNone:
             TINT_ICE(IR, diagnostics_) << "missing binary operand type";
             return;
     }
-    current_flow_block->instructions.Push(instr);
+    current_flow_block->instructions.Push(inst);
 
-    auto store = builder.Store(lhs.Get(), instr->Result());
+    auto store = builder.Store(lhs.Get(), inst->Result());
     current_flow_block->instructions.Push(store);
 }
 
@@ -617,8 +617,8 @@ void BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
 // discard that would probably make sense as a FlowNode but would then require figuring out the
 // multi-level exit that is triggered.
 void BuilderImpl::EmitDiscard(const ast::DiscardStatement*) {
-    auto* instr = builder.Discard();
-    current_flow_block->instructions.Push(instr);
+    auto* inst = builder.Discard();
+    current_flow_block->instructions.Push(inst);
 }
 
 void BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
@@ -718,27 +718,27 @@ utils::Result<Value*> BuilderImpl::EmitUnary(const ast::UnaryOpExpression* expr)
     auto* sem = program_->Sem().Get(expr);
     auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
 
-    Unary* instr = nullptr;
+    Unary* inst = nullptr;
     switch (expr->op) {
         case ast::UnaryOp::kAddressOf:
-            instr = builder.AddressOf(ty, val.Get());
+            inst = builder.AddressOf(ty, val.Get());
             break;
         case ast::UnaryOp::kComplement:
-            instr = builder.Complement(ty, val.Get());
+            inst = builder.Complement(ty, val.Get());
             break;
         case ast::UnaryOp::kIndirection:
-            instr = builder.Indirection(ty, val.Get());
+            inst = builder.Indirection(ty, val.Get());
             break;
         case ast::UnaryOp::kNegation:
-            instr = builder.Negation(ty, val.Get());
+            inst = builder.Negation(ty, val.Get());
             break;
         case ast::UnaryOp::kNot:
-            instr = builder.Not(ty, val.Get());
+            inst = builder.Not(ty, val.Get());
             break;
     }
 
-    current_flow_block->instructions.Push(instr);
-    return instr->Result();
+    current_flow_block->instructions.Push(inst);
+    return inst->Result();
 }
 
 utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
@@ -755,69 +755,69 @@ utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr)
     auto* sem = program_->Sem().Get(expr);
     auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
 
-    Binary* instr = nullptr;
+    Binary* inst = nullptr;
     switch (expr->op) {
         case ast::BinaryOp::kAnd:
-            instr = builder.And(ty, lhs.Get(), rhs.Get());
+            inst = builder.And(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kOr:
-            instr = builder.Or(ty, lhs.Get(), rhs.Get());
+            inst = builder.Or(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kXor:
-            instr = builder.Xor(ty, lhs.Get(), rhs.Get());
+            inst = builder.Xor(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalAnd:
-            instr = builder.LogicalAnd(ty, lhs.Get(), rhs.Get());
+            inst = builder.LogicalAnd(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLogicalOr:
-            instr = builder.LogicalOr(ty, lhs.Get(), rhs.Get());
+            inst = builder.LogicalOr(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kEqual:
-            instr = builder.Equal(ty, lhs.Get(), rhs.Get());
+            inst = builder.Equal(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNotEqual:
-            instr = builder.NotEqual(ty, lhs.Get(), rhs.Get());
+            inst = builder.NotEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThan:
-            instr = builder.LessThan(ty, lhs.Get(), rhs.Get());
+            inst = builder.LessThan(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThan:
-            instr = builder.GreaterThan(ty, lhs.Get(), rhs.Get());
+            inst = builder.GreaterThan(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kLessThanEqual:
-            instr = builder.LessThanEqual(ty, lhs.Get(), rhs.Get());
+            inst = builder.LessThanEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kGreaterThanEqual:
-            instr = builder.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
+            inst = builder.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftLeft:
-            instr = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
+            inst = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kShiftRight:
-            instr = builder.ShiftRight(ty, lhs.Get(), rhs.Get());
+            inst = builder.ShiftRight(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kAdd:
-            instr = builder.Add(ty, lhs.Get(), rhs.Get());
+            inst = builder.Add(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kSubtract:
-            instr = builder.Subtract(ty, lhs.Get(), rhs.Get());
+            inst = builder.Subtract(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kMultiply:
-            instr = builder.Multiply(ty, lhs.Get(), rhs.Get());
+            inst = builder.Multiply(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kDivide:
-            instr = builder.Divide(ty, lhs.Get(), rhs.Get());
+            inst = builder.Divide(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kModulo:
-            instr = builder.Modulo(ty, lhs.Get(), rhs.Get());
+            inst = builder.Modulo(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kNone:
             TINT_ICE(IR, diagnostics_) << "missing binary operand type";
             return utils::Failure;
     }
 
-    current_flow_block->instructions.Push(instr);
-    return instr->Result();
+    current_flow_block->instructions.Push(inst);
+    return inst->Result();
 }
 
 utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* expr) {
@@ -828,10 +828,10 @@ utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* exp
 
     auto* sem = program_->Sem().Get(expr);
     auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
-    auto* instr = builder.Bitcast(ty, val.Get());
+    auto* inst = builder.Bitcast(ty, val.Get());
 
-    current_flow_block->instructions.Push(instr);
-    return instr->Result();
+    current_flow_block->instructions.Push(inst);
+    return inst->Result();
 }
 
 void BuilderImpl::EmitCall(const ast::CallStatement* stmt) {
@@ -874,29 +874,29 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
 
     auto* ty = sem->Target()->ReturnType()->Clone(clone_ctx_.type_ctx);
 
-    Instruction* instr = nullptr;
+    Instruction* inst = nullptr;
 
     // If this is a builtin function, emit the specific builtin value
     if (auto* b = sem->Target()->As<sem::Builtin>()) {
-        instr = builder.Builtin(ty, b->Type(), args);
+        inst = builder.Builtin(ty, b->Type(), args);
     } else if (sem->Target()->As<sem::ValueConstructor>()) {
-        instr = builder.Construct(ty, std::move(args));
+        inst = builder.Construct(ty, std::move(args));
     } else if (auto* conv = sem->Target()->As<sem::ValueConversion>()) {
         auto* from = conv->Source()->Clone(clone_ctx_.type_ctx);
-        instr = builder.Convert(ty, from, std::move(args));
+        inst = builder.Convert(ty, from, std::move(args));
     } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
         TINT_UNIMPLEMENTED(IR, diagnostics_) << "missing templated ident support";
         return utils::Failure;
     } else {
         // Not a builtin and not a templated call, so this is a user function.
         auto name = CloneSymbol(expr->target->identifier->symbol);
-        instr = builder.UserCall(ty, name, std::move(args));
+        inst = builder.UserCall(ty, name, std::move(args));
     }
-    if (instr == nullptr) {
+    if (inst == nullptr) {
         return utils::Failure;
     }
-    current_flow_block->instructions.Push(instr);
-    return instr->Result();
+    current_flow_block->instructions.Push(inst);
+    return inst->Result();
 }
 
 utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {

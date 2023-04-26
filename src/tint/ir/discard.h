@@ -27,12 +27,12 @@ class Discard : public utils::Castable<Discard, Instruction> {
     /// Constructor
     /// @param result the result id
     explicit Discard(Value* result);
-    Discard(const Discard& instr) = delete;
-    Discard(Discard&& instr) = delete;
+    Discard(const Discard& inst) = delete;
+    Discard(Discard&& inst) = delete;
     ~Discard() override;
 
-    Discard& operator=(const Discard& instr) = delete;
-    Discard& operator=(Discard&& instr) = delete;
+    Discard& operator=(const Discard& inst) = delete;
+    Discard& operator=(Discard&& inst) = delete;
 
     /// Write the instruction to the given stream
     /// @param out the stream to write to

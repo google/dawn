@@ -56,12 +56,12 @@ class Binary : public utils::Castable<Binary, Instruction> {
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
     Binary(Kind kind, Value* result, Value* lhs, Value* rhs);
-    Binary(const Binary& instr) = delete;
-    Binary(Binary&& instr) = delete;
+    Binary(const Binary& inst) = delete;
+    Binary(Binary&& inst) = delete;
     ~Binary() override;
 
-    Binary& operator=(const Binary& instr) = delete;
-    Binary& operator=(Binary&& instr) = delete;
+    Binary& operator=(const Binary& inst) = delete;
+    Binary& operator=(Binary&& inst) = delete;
 
     /// @returns the kind of instruction
     Kind GetKind() const { return kind_; }

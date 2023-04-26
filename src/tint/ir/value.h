@@ -40,8 +40,8 @@ class Value : public utils::Castable<Value> {
     Value& operator=(Value&&) = delete;
 
     /// Adds an instruction which uses this value.
-    /// @param instr the instruction
-    void AddUsage(const Instruction* instr) { uses_.Add(instr); }
+    /// @param inst the instruction
+    void AddUsage(const Instruction* inst) { uses_.Add(inst); }
 
     /// @returns the vector of instructions which use this value. An instruction will only be
     /// returned once even if that instruction uses the given value multiple times.

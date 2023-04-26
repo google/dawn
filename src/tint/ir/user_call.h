@@ -30,12 +30,12 @@ class UserCall : public utils::Castable<UserCall, Call> {
     /// @param name the function name
     /// @param args the function arguments
     UserCall(Value* result, Symbol name, utils::VectorRef<Value*> args);
-    UserCall(const UserCall& instr) = delete;
-    UserCall(UserCall&& instr) = delete;
+    UserCall(const UserCall& inst) = delete;
+    UserCall(UserCall&& inst) = delete;
     ~UserCall() override;
 
-    UserCall& operator=(const UserCall& instr) = delete;
-    UserCall& operator=(UserCall&& instr) = delete;
+    UserCall& operator=(const UserCall& inst) = delete;
+    UserCall& operator=(UserCall&& inst) = delete;
 
     /// @returns the function name
     Symbol Name() const { return name_; }

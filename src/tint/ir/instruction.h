@@ -24,13 +24,13 @@ namespace tint::ir {
 /// An instruction in the IR.
 class Instruction : public utils::Castable<Instruction> {
   public:
-    Instruction(const Instruction& instr) = delete;
-    Instruction(Instruction&& instr) = delete;
+    Instruction(const Instruction& inst) = delete;
+    Instruction(Instruction&& inst) = delete;
     /// Destructor
     ~Instruction() override;
 
-    Instruction& operator=(const Instruction& instr) = delete;
-    Instruction& operator=(Instruction&& instr) = delete;
+    Instruction& operator=(const Instruction& inst) = delete;
+    Instruction& operator=(Instruction&& inst) = delete;
 
     /// @returns the result value for the instruction
     Value* Result() const { return result_; }

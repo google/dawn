@@ -28,12 +28,12 @@ class Call : public utils::Castable<Call, Instruction> {
     /// @param result the result value
     /// @param args the constructor arguments
     Call(Value* result, utils::VectorRef<Value*> args);
-    Call(const Call& instr) = delete;
-    Call(Call&& instr) = delete;
+    Call(const Call& inst) = delete;
+    Call(Call&& inst) = delete;
     ~Call() override;
 
-    Call& operator=(const Call& instr) = delete;
-    Call& operator=(Call&& instr) = delete;
+    Call& operator=(const Call& inst) = delete;
+    Call& operator=(Call&& inst) = delete;
 
     /// @returns the constructor arguments
     utils::VectorRef<Value*> Args() const { return args_; }

@@ -30,12 +30,12 @@ class Convert : public utils::Castable<Convert, Call> {
     /// @param from the type being converted from
     /// @param args the conversion arguments
     Convert(Value* result, const type::Type* from, utils::VectorRef<Value*> args);
-    Convert(const Convert& instr) = delete;
-    Convert(Convert&& instr) = delete;
+    Convert(const Convert& inst) = delete;
+    Convert(Convert&& inst) = delete;
     ~Convert() override;
 
-    Convert& operator=(const Convert& instr) = delete;
-    Convert& operator=(Convert&& instr) = delete;
+    Convert& operator=(const Convert& inst) = delete;
+    Convert& operator=(Convert&& inst) = delete;
 
     /// @returns the from type
     const type::Type* From() const { return from_; }

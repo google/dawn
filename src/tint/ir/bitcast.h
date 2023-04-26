@@ -28,12 +28,12 @@ class Bitcast : public utils::Castable<Bitcast, Instruction> {
     /// @param result the result value
     /// @param val the value being bitcast
     Bitcast(Value* result, Value* val);
-    Bitcast(const Bitcast& instr) = delete;
-    Bitcast(Bitcast&& instr) = delete;
+    Bitcast(const Bitcast& inst) = delete;
+    Bitcast(Bitcast&& inst) = delete;
     ~Bitcast() override;
 
-    Bitcast& operator=(const Bitcast& instr) = delete;
-    Bitcast& operator=(Bitcast&& instr) = delete;
+    Bitcast& operator=(const Bitcast& inst) = delete;
+    Bitcast& operator=(Bitcast&& inst) = delete;
 
     /// @returns the left-hand-side value for the instruction
     const Value* Val() const { return val_; }

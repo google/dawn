@@ -38,12 +38,12 @@ class Unary : public utils::Castable<Unary, Instruction> {
     /// @param result the result value
     /// @param val the lhs of the instruction
     Unary(Kind kind, Value* result, Value* val);
-    Unary(const Unary& instr) = delete;
-    Unary(Unary&& instr) = delete;
+    Unary(const Unary& inst) = delete;
+    Unary(Unary&& inst) = delete;
     ~Unary() override;
 
-    Unary& operator=(const Unary& instr) = delete;
-    Unary& operator=(Unary&& instr) = delete;
+    Unary& operator=(const Unary& inst) = delete;
+    Unary& operator=(Unary&& inst) = delete;
 
     /// @returns the kind of instruction
     Kind GetKind() const { return kind_; }

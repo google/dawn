@@ -30,12 +30,12 @@ class Builtin : public utils::Castable<Builtin, Call> {
     /// @param func the builtin function
     /// @param args the conversion arguments
     Builtin(Value* result, builtin::Function func, utils::VectorRef<Value*> args);
-    Builtin(const Builtin& instr) = delete;
-    Builtin(Builtin&& instr) = delete;
+    Builtin(const Builtin& inst) = delete;
+    Builtin(Builtin&& inst) = delete;
     ~Builtin() override;
 
-    Builtin& operator=(const Builtin& instr) = delete;
-    Builtin& operator=(Builtin&& instr) = delete;
+    Builtin& operator=(const Builtin& inst) = delete;
+    Builtin& operator=(Builtin&& inst) = delete;
 
     /// @returns the builtin function
     builtin::Function Func() const { return func_; }

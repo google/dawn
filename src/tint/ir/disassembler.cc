@@ -62,9 +62,9 @@ utils::StringStream& Disassembler::Indent() {
 }
 
 void Disassembler::EmitBlockInstructions(const Block* b) {
-    for (const auto* instr : b->instructions) {
+    for (const auto* inst : b->instructions) {
         Indent();
-        instr->ToString(out_) << std::endl;
+        inst->ToString(out_) << std::endl;
     }
 }
 

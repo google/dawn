@@ -25,15 +25,15 @@ TEST_F(IR_InstructionTest, Discard) {
     auto& b = CreateEmptyBuilder();
 
     b.builder.next_runtime_id = Runtime::Id(42);
-    const auto* instr = b.builder.Discard();
+    const auto* inst = b.builder.Discard();
 
-    ASSERT_TRUE(instr->Result()->Is<Runtime>());
-    EXPECT_EQ(Runtime::Id(42), instr->Result()->As<Runtime>()->AsId());
-    ASSERT_NE(instr->Result()->Type(), nullptr);
-    ASSERT_NE(instr->Result()->Type()->As<type::Void>(), nullptr);
+    ASSERT_TRUE(inst->Result()->Is<Runtime>());
+    EXPECT_EQ(Runtime::Id(42), inst->Result()->As<Runtime>()->AsId());
+    ASSERT_NE(inst->Result()->Type(), nullptr);
+    ASSERT_NE(inst->Result()->Type()->As<type::Void>(), nullptr);
 
     utils::StringStream str;
-    instr->ToString(str);
+    inst->ToString(str);
     EXPECT_EQ(str.str(), "%42 (void) = discard");
 }
 
