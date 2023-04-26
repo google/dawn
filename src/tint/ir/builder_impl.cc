@@ -17,6 +17,7 @@
 #include <iostream>
 
 #include "src/tint/ast/alias.h"
+#include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/bitcast_expression.h"
 #include "src/tint/ast/block_statement.h"
@@ -25,6 +26,7 @@
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/call_expression.h"
 #include "src/tint/ast/call_statement.h"
+#include "src/tint/ast/compound_assignment_statement.h"
 #include "src/tint/ast/const.h"
 #include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
@@ -54,8 +56,10 @@
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
+#include "src/tint/ir/value.h"
 #include "src/tint/program.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
@@ -236,17 +240,13 @@ void BuilderImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) 
 
 void BuilderImpl::EmitStatement(const ast::Statement* stmt) {
     tint::Switch(
-        stmt,
-        // [&](const ast::AssignmentStatement* a) {
-        // TODO(dsinclair): Implement
-        // },
+        stmt,  //
+        [&](const ast::AssignmentStatement* a) { EmitAssignment(a); },
         [&](const ast::BlockStatement* b) { EmitBlock(b); },
         [&](const ast::BreakStatement* b) { EmitBreak(b); },
         [&](const ast::BreakIfStatement* b) { EmitBreakIf(b); },
         [&](const ast::CallStatement* c) { EmitCall(c); },
-        // [&](const ast::CompoundAssignmentStatement* c) {
-        // TODO(dsinclair): Implement
-        // },
+        [&](const ast::CompoundAssignmentStatement* c) { EmitCompoundAssignment(c); },
         [&](const ast::ContinueStatement* c) { EmitContinue(c); },
         [&](const ast::DiscardStatement* d) { EmitDiscard(d); },
         [&](const ast::IfStatement* i) { EmitIf(i); },
@@ -263,6 +263,98 @@ void BuilderImpl::EmitStatement(const ast::Statement* stmt) {
             add_error(stmt->source,
                       "unknown statement type: " + std::string(stmt->TypeInfo().name));
         });
+}
+
+void BuilderImpl::EmitAssignment(const ast::AssignmentStatement* stmt) {
+    auto lhs = EmitExpression(stmt->lhs);
+    if (!lhs) {
+        return;
+    }
+
+    auto rhs = EmitExpression(stmt->rhs);
+    if (!rhs) {
+        return;
+    }
+    auto store = builder.Store(lhs.Get(), rhs.Get());
+    current_flow_block->instructions.Push(store);
+}
+
+void BuilderImpl::EmitCompoundAssignment(const ast::CompoundAssignmentStatement* stmt) {
+    auto lhs = EmitExpression(stmt->lhs);
+    if (!lhs) {
+        return;
+    }
+
+    auto rhs = EmitExpression(stmt->rhs);
+    if (!rhs) {
+        return;
+    }
+
+    auto* ty = lhs.Get()->Type();
+    Binary* instr = nullptr;
+    switch (stmt->op) {
+        case ast::BinaryOp::kAnd:
+            instr = builder.And(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kOr:
+            instr = builder.Or(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kXor:
+            instr = builder.Xor(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kLogicalAnd:
+            instr = builder.LogicalAnd(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kLogicalOr:
+            instr = builder.LogicalOr(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kEqual:
+            instr = builder.Equal(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kNotEqual:
+            instr = builder.NotEqual(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kLessThan:
+            instr = builder.LessThan(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kGreaterThan:
+            instr = builder.GreaterThan(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kLessThanEqual:
+            instr = builder.LessThanEqual(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kGreaterThanEqual:
+            instr = builder.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kShiftLeft:
+            instr = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kShiftRight:
+            instr = builder.ShiftRight(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kAdd:
+            instr = builder.Add(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kSubtract:
+            instr = builder.Subtract(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kMultiply:
+            instr = builder.Multiply(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kDivide:
+            instr = builder.Divide(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kModulo:
+            instr = builder.Modulo(ty, lhs.Get(), rhs.Get());
+            break;
+        case ast::BinaryOp::kNone:
+            TINT_ICE(IR, diagnostics_) << "missing binary operand type";
+            return;
+    }
+    current_flow_block->instructions.Push(instr);
+
+    auto store = builder.Store(lhs.Get(), instr->Result());
+    current_flow_block->instructions.Push(store);
 }
 
 void BuilderImpl::EmitBlock(const ast::BlockStatement* block) {

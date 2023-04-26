@@ -736,6 +736,8 @@ if(${TINT_BUILD_IR})
     ir/module.h
     ir/runtime.cc
     ir/runtime.h
+    ir/store.cc
+    ir/store.h
     ir/switch.cc
     ir/switch.h
     ir/terminator.cc
@@ -1419,6 +1421,7 @@ if(TINT_BUILD_TESTS)
       ir/constant_test.cc
       ir/discard_test.cc
       ir/runtime_test.cc
+      ir/store_test.cc
       ir/test_helper.h
       ir/unary_test.cc
     )

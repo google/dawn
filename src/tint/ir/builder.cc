@@ -227,4 +227,8 @@ ir::Builtin* Builder::Builtin(const type::Type* type,
     return ir.instructions.Create<ir::Builtin>(Runtime(type), func, args);
 }
 
+ir::Store* Builder::Store(Value* to, Value* from) {
+    return ir.instructions.Create<ir::Store>(to, from);
+}
+
 }  // namespace tint::ir

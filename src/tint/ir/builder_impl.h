@@ -34,6 +34,7 @@ class Program;
 }  // namespace tint
 namespace tint::ast {
 class Attribute;
+class AssignmentStatement;
 class BinaryExpression;
 class BitcastExpression;
 class BlockStatement;
@@ -41,6 +42,7 @@ class BreakIfStatement;
 class BreakStatement;
 class CallExpression;
 class CallStatement;
+class CompoundAssignmentStatement;
 class ContinueStatement;
 class DiscardStatement;
 class Expression;
@@ -141,6 +143,14 @@ class BuilderImpl {
     /// Emits a break-if statement
     /// @param stmt the break-if statement
     void EmitBreakIf(const ast::BreakIfStatement* stmt);
+
+    /// Emits an assignment statement
+    /// @param stmt the statement
+    void EmitAssignment(const ast::AssignmentStatement* stmt);
+
+    /// Emits a compound assignment statement
+    /// @param stmt the statement
+    void EmitCompoundAssignment(const ast::CompoundAssignmentStatement* stmt);
 
     /// Emits an expression
     /// @param expr the expression to emit

@@ -30,6 +30,7 @@
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/runtime.h"
+#include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/ir/unary.h"
@@ -358,6 +359,12 @@ class Builder {
     ir::Builtin* Builtin(const type::Type* type,
                          builtin::Function func,
                          utils::VectorRef<Value*> args);
+
+    /// Creates an store instruction
+    /// @param to the expression being stored too
+    /// @param from the expression being stored
+    /// @returns the instruction
+    ir::Store* Store(Value* to, Value* from);
 
     /// @returns a unique runtime id
     Runtime::Id AllocateRuntimeId();
