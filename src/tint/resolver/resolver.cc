@@ -2586,9 +2586,6 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
             return nullptr;
         }
 
-        if (TINT_UNLIKELY(!el_ty)) {
-            return nullptr;
-        }
         if (TINT_UNLIKELY(!validator_.Vector(el_ty, ident->source))) {
             return nullptr;
         }
