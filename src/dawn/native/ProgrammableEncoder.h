@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_PROGRAMMABLEENCODER_H_
 #define SRC_DAWN_NATIVE_PROGRAMMABLEENCODER_H_
 
+#include <string>
+
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"

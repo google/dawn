@@ -142,7 +142,10 @@ RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* d
 
     if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result, "calling %s.Finish(%s).", this,
                                    descriptor)) {
-        return RenderBundleBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
+        RenderBundleBase* errorRenderBundle =
+            RenderBundleBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
+        errorRenderBundle->SetEncoderLabel(this->GetLabel());
+        return errorRenderBundle;
     }
 
     return result;

@@ -29,7 +29,8 @@ CommandBufferBase::CommandBufferBase(CommandEncoder* encoder,
                                      const CommandBufferDescriptor* descriptor)
     : ApiObjectBase(encoder->GetDevice(), descriptor->label),
       mCommands(encoder->AcquireCommands()),
-      mResourceUsages(encoder->AcquireResourceUsages()) {
+      mResourceUsages(encoder->AcquireResourceUsages()),
+      mEncoderLabel(encoder->GetLabel()) {
     GetObjectTrackingList()->Track(this);
 }
 
@@ -45,6 +46,28 @@ CommandBufferBase* CommandBufferBase::MakeError(DeviceBase* device, const char* 
 
 ObjectType CommandBufferBase::GetType() const {
     return ObjectType::CommandBuffer;
+}
+
+void CommandBufferBase::FormatLabel(absl::FormatSink* s) const {
+    s->Append(ObjectTypeAsString(GetType()));
+
+    const std::string& label = GetLabel();
+    if (!label.empty()) {
+        s->Append(absl::StrFormat(" \"%s\"", label));
+    }
+
+    if (!mEncoderLabel.empty()) {
+        s->Append(absl::StrFormat(" from %s \"%s\"", ObjectTypeAsString(ObjectType::CommandEncoder),
+                                  mEncoderLabel));
+    }
+}
+
+const std::string& CommandBufferBase::GetEncoderLabel() const {
+    return mEncoderLabel;
+}
+
+void CommandBufferBase::SetEncoderLabel(std::string encoderLabel) {
+    mEncoderLabel = encoderLabel;
 }
 
 MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {

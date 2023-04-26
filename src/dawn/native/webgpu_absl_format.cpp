@@ -22,6 +22,7 @@
 #include "dawn/native/Format.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PerStage.h"
+#include "dawn/native/ProgrammableEncoder.h"
 #include "dawn/native/ShaderModule.h"
 #include "dawn/native/Subresource.h"
 #include "dawn/native/Surface.h"
@@ -156,36 +157,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     if (value->IsError()) {
         s->Append("Invalid ");
     }
-    s->Append(ObjectTypeAsString(value->GetType()));
-    const std::string& label = value->GetLabel();
-    if (!label.empty()) {
-        s->Append(absl::StrFormat(" \"%s\"", label));
-    }
-    s->Append("]");
-    return {true};
-}
-
-absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const TextureViewBase* value,
-    const absl::FormatConversionSpec& spec,
-    absl::FormatSink* s) {
-    if (value == nullptr) {
-        s->Append("[null]");
-        return {true};
-    }
-    s->Append("[");
-    if (value->IsError()) {
-        s->Append("Invalid ");
-    }
-    s->Append(ObjectTypeAsString(value->GetType()));
-    const std::string& label = value->GetLabel();
-    if (!label.empty()) {
-        s->Append(absl::StrFormat(" \"%s\"", label));
-    }
-    const std::string& textureLabel = value->GetTexture()->GetLabel();
-    if (!textureLabel.empty()) {
-        s->Append(absl::StrFormat(" of Texture \"%s\"", textureLabel));
-    }
+    value->FormatLabel(s);
     s->Append("]");
     return {true};
 }

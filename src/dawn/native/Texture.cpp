@@ -15,6 +15,7 @@
 #include "dawn/native/Texture.h"
 
 #include <algorithm>
+#include <string>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
@@ -863,6 +864,24 @@ TextureViewBase* TextureViewBase::MakeError(DeviceBase* device, const char* labe
 
 ObjectType TextureViewBase::GetType() const {
     return ObjectType::TextureView;
+}
+
+void TextureViewBase::FormatLabel(absl::FormatSink* s) const {
+    s->Append(ObjectTypeAsString(GetType()));
+
+    const std::string& label = GetLabel();
+    if (!label.empty()) {
+        s->Append(absl::StrFormat(" \"%s\"", label));
+    }
+    if (IsError()) {
+        return;
+    }
+
+    const std::string& textureLabel = mTexture->GetLabel();
+    if (!textureLabel.empty()) {
+        s->Append(" of ");
+        GetTexture()->FormatLabel(s);
+    }
 }
 
 const TextureBase* TextureViewBase::GetTexture() const {

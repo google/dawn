@@ -75,14 +75,6 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
-// Special case for TextureViews, since frequently the texture will be the
-// thing that's labeled.
-class TextureViewBase;
-absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const TextureViewBase* value,
-    const absl::FormatConversionSpec& spec,
-    absl::FormatSink* s);
-
 class AttachmentState;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const AttachmentState* value,

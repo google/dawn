@@ -1596,7 +1596,10 @@ CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* desc
 
     Ref<CommandBufferBase> commandBuffer;
     if (GetDevice()->ConsumedError(Finish(descriptor), &commandBuffer)) {
-        return CommandBufferBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
+        CommandBufferBase* errorCommandBuffer =
+            CommandBufferBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
+        errorCommandBuffer->SetEncoderLabel(this->GetLabel());
+        return errorCommandBuffer;
     }
     ASSERT(!IsError());
     return commandBuffer.Detach();
