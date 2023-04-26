@@ -173,6 +173,30 @@ Binary* Builder::Modulo(const type::Type* type, Value* lhs, Value* rhs) {
     return CreateBinary(Binary::Kind::kModulo, type, lhs, rhs);
 }
 
+Unary* Builder::CreateUnary(Unary::Kind kind, const type::Type* type, Value* val) {
+    return ir.instructions.Create<ir::Unary>(kind, Runtime(type), val);
+}
+
+Unary* Builder::AddressOf(const type::Type* type, Value* val) {
+    return CreateUnary(Unary::Kind::kAddressOf, type, val);
+}
+
+Unary* Builder::Complement(const type::Type* type, Value* val) {
+    return CreateUnary(Unary::Kind::kComplement, type, val);
+}
+
+Unary* Builder::Indirection(const type::Type* type, Value* val) {
+    return CreateUnary(Unary::Kind::kIndirection, type, val);
+}
+
+Unary* Builder::Negation(const type::Type* type, Value* val) {
+    return CreateUnary(Unary::Kind::kNegation, type, val);
+}
+
+Unary* Builder::Not(const type::Type* type, Value* val) {
+    return CreateUnary(Unary::Kind::kNot, type, val);
+}
+
 ir::Bitcast* Builder::Bitcast(const type::Type* type, Value* val) {
     return ir.instructions.Create<ir::Bitcast>(Runtime(type), val);
 }

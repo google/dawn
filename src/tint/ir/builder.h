@@ -32,6 +32,7 @@
 #include "src/tint/ir/runtime.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
+#include "src/tint/ir/unary.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/type/bool.h"
@@ -279,6 +280,43 @@ class Builder {
     /// @param rhs the rhs of the add
     /// @returns the operation
     Binary* Modulo(const type::Type* type, Value* lhs, Value* rhs);
+
+    /// Creates an op for `kind val`
+    /// @param kind the kind of operation
+    /// @param type the result type of the binary expression
+    /// @param val the value of the operation
+    /// @returns the operation
+    Unary* CreateUnary(Unary::Kind kind, const type::Type* type, Value* val);
+
+    /// Creates an AddressOf operation
+    /// @param type the result type of the expression
+    /// @param val the value
+    /// @returns the operation
+    Unary* AddressOf(const type::Type* type, Value* val);
+
+    /// Creates a Complement operation
+    /// @param type the result type of the expression
+    /// @param val the value
+    /// @returns the operation
+    Unary* Complement(const type::Type* type, Value* val);
+
+    /// Creates an Indirection operation
+    /// @param type the result type of the expression
+    /// @param val the value
+    /// @returns the operation
+    Unary* Indirection(const type::Type* type, Value* val);
+
+    /// Creates a Negation operation
+    /// @param type the result type of the expression
+    /// @param val the value
+    /// @returns the operation
+    Unary* Negation(const type::Type* type, Value* val);
+
+    /// Creates a Not operation
+    /// @param type the result type of the expression
+    /// @param val the value
+    /// @returns the operation
+    Unary* Not(const type::Type* type, Value* val);
 
     /// Creates a bitcast instruction
     /// @param type the result type of the bitcast

@@ -740,6 +740,8 @@ if(${TINT_BUILD_IR})
     ir/switch.h
     ir/terminator.cc
     ir/terminator.h
+    ir/unary.cc
+    ir/unary.h
     ir/user_call.cc
     ir/user_call.h
     ir/value.cc
@@ -1418,6 +1420,7 @@ if(TINT_BUILD_TESTS)
       ir/discard_test.cc
       ir/runtime_test.cc
       ir/test_helper.h
+      ir/unary_test.cc
     )
   endif()
 

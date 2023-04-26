@@ -53,6 +53,7 @@ class Node;
 class ReturnStatement;
 class Statement;
 class SwitchStatement;
+class UnaryOpExpression;
 class WhileStatement;
 class Variable;
 }  // namespace tint::ast
@@ -149,6 +150,11 @@ class BuilderImpl {
     /// Emits a variable
     /// @param var the variable to emit
     void EmitVariable(const ast::Variable* var);
+
+    /// Emits a Unary expression
+    /// @param expr the unary expression
+    /// @returns the value storing the result if successful, utils::Failure otherwise
+    utils::Result<Value*> EmitUnary(const ast::UnaryOpExpression* expr);
 
     /// Emits a binary expression
     /// @param expr the binary expression

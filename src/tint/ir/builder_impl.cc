@@ -46,6 +46,7 @@
 #include "src/tint/ast/struct_member_size_attribute.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/templated_identifier.h"
+#include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ir/function.h"
@@ -579,9 +580,7 @@ utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
         // [&](const ast::PhonyExpression*) {
         // TODO(dsinclair): Implement. The call may have side effects so has to be made.
         // },
-        // [&](const ast::UnaryOpExpression* u) {
-        // TODO(dsinclair): Implement
-        // },
+        [&](const ast::UnaryOpExpression* u) { return EmitUnary(u); },
         [&](Default) {
             add_error(expr->source,
                       "unknown expression type: " + std::string(expr->TypeInfo().name));
@@ -609,6 +608,38 @@ void BuilderImpl::EmitVariable(const ast::Variable* var) {
         [&](Default) {
             add_error(var->source, "unknown variable: " + std::string(var->TypeInfo().name));
         });
+}
+
+utils::Result<Value*> BuilderImpl::EmitUnary(const ast::UnaryOpExpression* expr) {
+    auto val = EmitExpression(expr->expr);
+    if (!val) {
+        return utils::Failure;
+    }
+
+    auto* sem = program_->Sem().Get(expr);
+    auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
+
+    Unary* instr = nullptr;
+    switch (expr->op) {
+        case ast::UnaryOp::kAddressOf:
+            instr = builder.AddressOf(ty, val.Get());
+            break;
+        case ast::UnaryOp::kComplement:
+            instr = builder.Complement(ty, val.Get());
+            break;
+        case ast::UnaryOp::kIndirection:
+            instr = builder.Indirection(ty, val.Get());
+            break;
+        case ast::UnaryOp::kNegation:
+            instr = builder.Negation(ty, val.Get());
+            break;
+        case ast::UnaryOp::kNot:
+            instr = builder.Not(ty, val.Get());
+            break;
+    }
+
+    current_flow_block->instructions.Push(instr);
+    return instr->Result();
 }
 
 utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
