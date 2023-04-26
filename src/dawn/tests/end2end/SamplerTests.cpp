@@ -53,6 +53,11 @@ class SamplerTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
+
+        // TODO(crbug.com/dawn/1779): D3D11 sampler tests seem to cause flakes in D3D12 sampler
+        // tests.
+        DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsD3D11());
+
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         wgpu::TextureDescriptor descriptor;
