@@ -85,6 +85,12 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_SYNTAX_TREE_WRITER=0" ]
   }
 
+  if (tint_build_ir) {
+    defines += [ "TINT_BUILD_IR=1" ]
+  } else {
+    defines += [ "TINT_BUILD_IR=0" ]
+  }
+
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",
@@ -1098,6 +1104,74 @@ libtint_source_set("libtint_syntax_tree_writer_src") {
   ]
 }
 
+libtint_source_set("libtint_ir_src") {
+  sources = [
+    "ir/binary.cc",
+    "ir/binary.h",
+    "ir/bitcast.cc",
+    "ir/bitcast.h",
+    "ir/block.cc",
+    "ir/block.h",
+    "ir/builder.cc",
+    "ir/builder.h",
+    "ir/builder_impl.cc",
+    "ir/builder_impl.h",
+    "ir/builtin.cc",
+    "ir/builtin.h",
+    "ir/call.cc",
+    "ir/call.h",
+    "ir/constant.cc",
+    "ir/constant.h",
+    "ir/construct.cc",
+    "ir/construct.h",
+    "ir/convert.cc",
+    "ir/convert.h",
+    "ir/debug.cc",
+    "ir/debug.h",
+    "ir/disassembler.cc",
+    "ir/disassembler.h",
+    "ir/discard.cc",
+    "ir/discard.h",
+    "ir/flow_node.cc",
+    "ir/flow_node.h",
+    "ir/function.cc",
+    "ir/function.h",
+    "ir/if.cc",
+    "ir/if.h",
+    "ir/instruction.cc",
+    "ir/instruction.h",
+    "ir/loop.cc",
+    "ir/loop.h",
+    "ir/module.cc",
+    "ir/module.h",
+    "ir/runtime.cc",
+    "ir/runtime.h",
+    "ir/store.cc",
+    "ir/store.h",
+    "ir/switch.cc",
+    "ir/switch.h",
+    "ir/terminator.cc",
+    "ir/terminator.h",
+    "ir/unary.cc",
+    "ir/unary.h",
+    "ir/user_call.cc",
+    "ir/user_call.h",
+    "ir/value.cc",
+    "ir/value.h",
+  ]
+
+  deps = [
+    ":libtint_ast_src",
+    ":libtint_builtins_src",
+    ":libtint_constant_src",
+    ":libtint_program_src",
+    ":libtint_sem_src",
+    ":libtint_symbols_src",
+    ":libtint_type_src",
+    ":libtint_utils_src",
+  ]
+}
+
 source_set("libtint") {
   public_deps = [
     ":libtint_ast_src",
@@ -1143,6 +1217,12 @@ source_set("libtint") {
 
   if (tint_build_syntax_tree_writer) {
     public_deps += [ ":libtint_syntax_tree_writer_src" ]
+  }
+
+  if (tint_build_ir) {
+    assert(!build_with_chromium,
+           "tint_build_ir cannot be used when building Chromium")
+    public_deps += [ ":libtint_ir_src" ]
   }
 
   configs += [ ":tint_common_config" ]
@@ -2019,6 +2099,22 @@ if (tint_build_unittests) {
     ]
   }
 
+  tint_unittests_source_set("tint_unittests_ir_src") {
+    sources = [
+      "ir/binary_test.cc",
+      "ir/bitcast_test.cc",
+      "ir/builder_impl_test.cc",
+      "ir/constant_test.cc",
+      "ir/discard_test.cc",
+      "ir/runtime_test.cc",
+      "ir/store_test.cc",
+      "ir/test_helper.h",
+      "ir/unary_test.cc",
+    ]
+
+    deps = [ ":libtint_ir_src" ]
+  }
+
   if (build_with_chromium) {
     tint_unittests_source_set("tint_unittests_fuzzer_src") {
       sources = [ "fuzzers/random_generator_test.cc" ]
@@ -2078,6 +2174,10 @@ if (tint_build_unittests) {
 
     if (tint_build_glsl_writer) {
       deps += [ ":tint_unittests_glsl_writer_src" ]
+    }
+
+    if (tint_build_ir) {
+      deps += [ ":tint_unittests_ir_src" ]
     }
 
     if (build_with_chromium) {
