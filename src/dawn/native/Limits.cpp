@@ -63,7 +63,7 @@
     X(Maximum,                       maxTextureDimension3D,      2048,       2048) \
     X(Maximum,                       maxTextureArrayLayers,       256,        256) \
     X(Maximum,                               maxBindGroups,         4,          4) \
-    X(Maximum,                     maxBindingsPerBindGroup,       640,        640) \
+    X(Maximum,                     maxBindingsPerBindGroup,      1000,       1000) \
     X(Maximum,                 maxUniformBufferBindingSize,     65536,      65536) \
     X(Alignment,           minUniformBufferOffsetAlignment,       256,        256) \
     X(Alignment,           minStorageBufferOffsetAlignment,       256,        256) \

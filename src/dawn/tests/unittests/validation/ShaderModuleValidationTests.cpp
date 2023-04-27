@@ -577,14 +577,14 @@ struct Buf {
 
 // Test that @binding must be less then kMaxBindingsPerBindGroup
 TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
-    static_assert(kMaxBindingsPerBindGroup == 640);
+    static_assert(kMaxBindingsPerBindGroup == 1000);
 
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.entryPoint = "main";
 
     // kMaxBindingsPerBindGroup-1 is valid.
     desc.compute.module = utils::CreateShaderModule(device, R"(
-        @group(0) @binding(639) var s : sampler;
+        @group(0) @binding(999) var s : sampler;
         @compute @workgroup_size(1) fn main() {
             _ = s;
         }
@@ -593,7 +593,7 @@ TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
 
     // kMaxBindingsPerBindGroup is an error
     desc.compute.module = utils::CreateShaderModule(device, R"(
-        @group(0) @binding(640) var s : sampler;
+        @group(0) @binding(1000) var s : sampler;
         @compute @workgroup_size(1) fn main() {
             _ = s;
         }

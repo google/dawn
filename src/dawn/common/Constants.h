@@ -19,7 +19,7 @@
 #include <cstdint>
 
 static constexpr uint32_t kMaxBindGroups = 4u;
-static constexpr uint32_t kMaxBindingsPerBindGroup = 640u;
+static constexpr uint32_t kMaxBindingsPerBindGroup = 1000u;
 static constexpr uint8_t kMaxVertexAttributes = 16u;
 static constexpr uint8_t kMaxVertexBuffers = 8u;
 static constexpr uint32_t kMaxVertexBufferArrayStride = 2048u;
