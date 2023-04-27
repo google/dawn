@@ -22,7 +22,6 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/common/Math.h"
-#include "dawn/native/d3d12/D3D11on12Util.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
@@ -46,12 +45,6 @@ ExternalImageDXGI::~ExternalImageDXGI() = default;
 
 bool ExternalImageDXGI::IsValid() const {
     return mImpl->IsValid();
-}
-
-WGPUTexture ExternalImageDXGI::ProduceTexture(
-    WGPUDevice device,
-    const ExternalImageDXGIBeginAccessDescriptor* descriptor) {
-    return BeginAccess(descriptor);
 }
 
 WGPUTexture ExternalImageDXGI::BeginAccess(

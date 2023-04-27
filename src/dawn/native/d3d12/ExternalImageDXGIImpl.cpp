@@ -20,19 +20,15 @@
 #include "dawn/common/Log.h"
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/native/d3d12/D3D11on12Util.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 
 namespace dawn::native::d3d12 {
 
 ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
                                              Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource,
-                                             const TextureDescriptor* textureDescriptor,
-                                             bool useFenceSynchronization)
+                                             const TextureDescriptor* textureDescriptor)
     : mBackendDevice(backendDevice),
       mD3D12Resource(std::move(d3d12Resource)),
-      mUseFenceSynchronization(useFenceSynchronization),
-      mD3D11on12ResourceCache(std::make_unique<D3D11on12ResourceCache>()),
       mUsage(textureDescriptor->usage),
       mDimension(textureDescriptor->dimension),
       mSize(textureDescriptor->size),
@@ -77,8 +73,6 @@ void ExternalImageDXGIImpl::DestroyInternal() {
     if (IsInList()) {
         RemoveFromList();
         mD3D12Resource = nullptr;
-        mD3D11on12ResourceCache = nullptr;
-
         // We don't set mBackendDevice to null here to let its mutex accessible until dtor. This
         // also to avoid data racing with non-null check in GetScopedDeviceLock()
     }
@@ -121,34 +115,23 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
     }
 
     std::vector<Ref<Fence>> waitFences;
-    Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource;
-    if (mUseFenceSynchronization) {
-        for (const ExternalImageDXGIFenceDescriptor& fenceDescriptor : descriptor->waitFences) {
-            ASSERT(fenceDescriptor.fenceHandle != nullptr);
-            // TODO(sunnyps): Use a fence cache instead of re-importing fences on each BeginAccess.
-            Ref<Fence> fence;
-            if (mBackendDevice->ConsumedError(
-                    Fence::CreateFromHandle(mBackendDevice->GetD3D12Device(),
-                                            fenceDescriptor.fenceHandle,
-                                            fenceDescriptor.fenceValue),
-                    &fence)) {
-                dawn::ErrorLog() << "Unable to create D3D12 fence for external image";
-                return nullptr;
-            }
-            waitFences.push_back(std::move(fence));
-        }
-    } else {
-        d3d11on12Resource = mD3D11on12ResourceCache->GetOrCreateD3D11on12Resource(
-            mBackendDevice.Get(), mD3D12Resource.Get());
-        if (d3d11on12Resource == nullptr) {
-            dawn::ErrorLog() << "Unable to create 11on12 resource for external image";
+    for (const ExternalImageDXGIFenceDescriptor& fenceDescriptor : descriptor->waitFences) {
+        ASSERT(fenceDescriptor.fenceHandle != nullptr);
+        // TODO(sunnyps): Use a fence cache instead of re-importing fences on each BeginAccess.
+        Ref<Fence> fence;
+        if (mBackendDevice->ConsumedError(
+                Fence::CreateFromHandle(mBackendDevice->GetD3D12Device(),
+                                        fenceDescriptor.fenceHandle, fenceDescriptor.fenceValue),
+                &fence)) {
+            dawn::ErrorLog() << "Unable to create D3D12 fence for external image";
             return nullptr;
         }
+        waitFences.push_back(std::move(fence));
     }
 
     Ref<TextureBase> texture = mBackendDevice->CreateD3D12ExternalTexture(
-        &textureDescriptor, mD3D12Resource, std::move(waitFences), std::move(d3d11on12Resource),
-        descriptor->isSwapChainTexture, descriptor->isInitialized);
+        &textureDescriptor, mD3D12Resource, std::move(waitFences), descriptor->isSwapChainTexture,
+        descriptor->isInitialized);
     return ToAPI(texture.Detach());
 }
 
@@ -167,15 +150,13 @@ void ExternalImageDXGIImpl::EndAccess(WGPUTexture texture,
     Texture* backendTexture = ToBackend(FromAPI(texture));
     ASSERT(backendTexture != nullptr);
 
-    if (mUseFenceSynchronization) {
-        ExecutionSerial fenceValue;
-        if (mBackendDevice->ConsumedError(backendTexture->EndAccess(), &fenceValue)) {
-            dawn::ErrorLog() << "D3D12 fence end access failed";
-            return;
-        }
-        signalFence->fenceHandle = mBackendDevice->GetFenceHandle();
-        signalFence->fenceValue = static_cast<uint64_t>(fenceValue);
+    ExecutionSerial fenceValue;
+    if (mBackendDevice->ConsumedError(backendTexture->EndAccess(), &fenceValue)) {
+        dawn::ErrorLog() << "D3D12 fence end access failed";
+        return;
     }
+    signalFence->fenceHandle = mBackendDevice->GetFenceHandle();
+    signalFence->fenceValue = static_cast<uint64_t>(fenceValue);
 }
 
 }  // namespace dawn::native::d3d12

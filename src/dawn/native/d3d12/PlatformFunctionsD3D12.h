@@ -57,14 +57,10 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
 
     PFN_SET_MARKER_ON_COMMAND_LIST pixSetMarkerOnCommandList = nullptr;
 
-    // Functions from D3D11.dll
-    PFN_D3D11ON12_CREATE_DEVICE d3d11on12CreateDevice = nullptr;
-
   private:
     using Base = d3d::PlatformFunctions;
 
     MaybeError LoadD3D12();
-    MaybeError LoadD3D11();
     void LoadPIXRuntime();
 
     DynamicLib mD3D12Lib;

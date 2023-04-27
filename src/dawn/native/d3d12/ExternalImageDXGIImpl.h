@@ -34,7 +34,6 @@ struct ID3D12Fence;
 
 namespace dawn::native::d3d12 {
 
-class D3D11on12ResourceCache;
 class Device;
 struct ExternalImageDXGIBeginAccessDescriptor;
 struct ExternalImageDescriptorDXGISharedHandle;
@@ -43,8 +42,7 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
   public:
     ExternalImageDXGIImpl(Device* backendDevice,
                           Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource,
-                          const TextureDescriptor* textureDescriptor,
-                          bool useFenceSynchronization);
+                          const TextureDescriptor* textureDescriptor);
     ~ExternalImageDXGIImpl();
 
     ExternalImageDXGIImpl(const ExternalImageDXGIImpl&) = delete;
@@ -65,9 +63,6 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
 
     Ref<Device> mBackendDevice;
     Microsoft::WRL::ComPtr<ID3D12Resource> mD3D12Resource;
-    const bool mUseFenceSynchronization;
-
-    std::unique_ptr<D3D11on12ResourceCache> mD3D11on12ResourceCache;
 
     wgpu::TextureUsage mUsage;
     wgpu::TextureUsage mUsageInternal = wgpu::TextureUsage::None;

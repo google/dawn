@@ -31,7 +31,6 @@
 #include "dawn/native/d3d12/CommandAllocatorManager.h"
 #include "dawn/native/d3d12/CommandBufferD3D12.h"
 #include "dawn/native/d3d12/ComputePipelineD3D12.h"
-#include "dawn/native/d3d12/D3D11on12Util.h"
 #include "dawn/native/d3d12/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
@@ -587,47 +586,25 @@ std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(
         }
     }
 
-    auto impl = std::make_unique<ExternalImageDXGIImpl>(
-        this, std::move(d3d12Resource), textureDescriptor, descriptor->useFenceSynchronization);
+    auto impl =
+        std::make_unique<ExternalImageDXGIImpl>(this, std::move(d3d12Resource), textureDescriptor);
     mExternalImageList.Append(impl.get());
     return impl;
 }
 
-Ref<TextureBase> Device::CreateD3D12ExternalTexture(
-    const TextureDescriptor* descriptor,
-    ComPtr<ID3D12Resource> d3d12Texture,
-    std::vector<Ref<Fence>> waitFences,
-    Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-    bool isSwapChainTexture,
-    bool isInitialized) {
+Ref<TextureBase> Device::CreateD3D12ExternalTexture(const TextureDescriptor* descriptor,
+                                                    ComPtr<ID3D12Resource> d3d12Texture,
+                                                    std::vector<Ref<Fence>> waitFences,
+                                                    bool isSwapChainTexture,
+                                                    bool isInitialized) {
     Ref<Texture> dawnTexture;
-    if (ConsumedError(Texture::CreateExternalImage(
-                          this, descriptor, std::move(d3d12Texture), std::move(waitFences),
-                          std::move(d3d11on12Resource), isSwapChainTexture, isInitialized),
-                      &dawnTexture)) {
+    if (ConsumedError(
+            Texture::CreateExternalImage(this, descriptor, std::move(d3d12Texture),
+                                         std::move(waitFences), isSwapChainTexture, isInitialized),
+            &dawnTexture)) {
         return nullptr;
     }
     return {dawnTexture};
-}
-
-ComPtr<ID3D11On12Device> Device::GetOrCreateD3D11on12Device() {
-    if (mD3d11On12Device == nullptr) {
-        ComPtr<ID3D11Device> d3d11Device;
-        D3D_FEATURE_LEVEL d3dFeatureLevel;
-        IUnknown* const iUnknownQueue = mCommandQueue.Get();
-        if (FAILED(GetFunctions()->d3d11on12CreateDevice(mD3d12Device.Get(), 0, nullptr, 0,
-                                                         &iUnknownQueue, 1, 1, &d3d11Device,
-                                                         nullptr, &d3dFeatureLevel))) {
-            return nullptr;
-        }
-
-        ComPtr<ID3D11On12Device> d3d11on12Device;
-        HRESULT hr = d3d11Device.As(&d3d11on12Device);
-        ASSERT(SUCCEEDED(hr));
-
-        mD3d11On12Device = std::move(d3d11on12Device);
-    }
-    return mD3d11On12Device;
 }
 
 const D3D12DeviceInfo& Device::GetDeviceInfo() const {

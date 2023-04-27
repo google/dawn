@@ -33,7 +33,6 @@ namespace dawn::native::d3d12 {
 
 class CommandRecordingContext;
 class Device;
-class D3D11on12ResourceCacheEntry;
 
 MaybeError ValidateD3D12TextureCanBeWrapped(ID3D12Resource* d3d12Resource,
                                             const TextureDescriptor* descriptor);
@@ -43,21 +42,18 @@ MaybeError ValidateD3D12VideoTextureCanBeShared(Device* device, DXGI_FORMAT text
 class Texture final : public TextureBase {
   public:
     static ResultOrError<Ref<Texture>> Create(Device* device, const TextureDescriptor* descriptor);
-    static ResultOrError<Ref<Texture>> CreateExternalImage(
-        Device* device,
-        const TextureDescriptor* descriptor,
-        ComPtr<ID3D12Resource> d3d12Texture,
-        std::vector<Ref<Fence>> waitFences,
-        Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-        bool isSwapChainTexture,
-        bool isInitialized);
+    static ResultOrError<Ref<Texture>> CreateExternalImage(Device* device,
+                                                           const TextureDescriptor* descriptor,
+                                                           ComPtr<ID3D12Resource> d3d12Texture,
+                                                           std::vector<Ref<Fence>> waitFences,
+                                                           bool isSwapChainTexture,
+                                                           bool isInitialized);
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const TextureDescriptor* descriptor,
                                               ComPtr<ID3D12Resource> d3d12Texture);
 
     // For external textures, returns the Device internal fence's value associated with the last
-    // ExecuteCommandLists that used this texture. If nullopt is returned, the texture wasn't used
-    // or keyed mutex is used instead of fences for synchronization.
+    // ExecuteCommandLists that used this texture. If nullopt is returned, the texture wasn't used.
     ResultOrError<ExecutionSerial> EndAccess();
 
     DXGI_FORMAT GetD3D12Format() const;
@@ -108,7 +104,6 @@ class Texture final : public TextureBase {
     MaybeError InitializeAsInternalTexture();
     MaybeError InitializeAsExternalTexture(ComPtr<ID3D12Resource> d3d12Texture,
                                            std::vector<Ref<Fence>> waitFences,
-                                           Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
                                            bool isSwapChainTexture);
     MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture);
 
@@ -147,7 +142,6 @@ class Texture final : public TextureBase {
     // TODO(dawn:1460): Encapsulate imported image fields e.g. std::unique_ptr<ExternalImportInfo>.
     std::vector<Ref<Fence>> mWaitFences;
     std::optional<ExecutionSerial> mSignalFenceValue;
-    Ref<D3D11on12ResourceCacheEntry> mD3D11on12Resource;
     bool mSwapChainTexture = false;
 
     SubresourceStorage<StateAndDecay> mSubresourceStateAndDecay;

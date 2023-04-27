@@ -30,7 +30,6 @@ struct ID3D12Resource;
 
 namespace dawn::native::d3d12 {
 
-class D3D11on12ResourceCache;
 class Device;
 class ExternalImageDXGIImpl;
 
@@ -52,12 +51,10 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImag
     // Note: SharedHandle must be a handle to a texture object.
     HANDLE sharedHandle = nullptr;
 
-    // Whether fence synchronization should be used instead of texture's keyed mutex.
+    // Deprecated: Fence synchronization is always used after keyed mutex support was removed.
+    // TODO(dawn:1612): Remove once Chromium stops setting this.
     bool useFenceSynchronization = false;
 };
-
-// Keyed mutex acquire/release uses a fixed key of 0 to match Chromium behavior.
-constexpr UINT64 kDXGIKeyedMutexAcquireReleaseKey = 0;
 
 struct DAWN_NATIVE_EXPORT ExternalImageDXGIFenceDescriptor {
     // Shared handle for the fence. This never passes ownership to the callee (when used as an input
@@ -79,16 +76,6 @@ struct DAWN_NATIVE_EXPORT ExternalImageDXGIBeginAccessDescriptor {
     bool isSwapChainTexture = false;
 };
 
-// TODO(dawn:576): Remove after changing Chromium code to use the new struct name.
-struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptorDXGIKeyedMutex
-    : ExternalImageDXGIBeginAccessDescriptor {
-  public:
-    // TODO(chromium:1241533): Remove deprecated keyed mutex params after removing associated
-    // code from Chromium - we use a fixed key of 0 for acquire and release everywhere now.
-    uint64_t acquireMutexKey;
-    uint64_t releaseMutexKey;
-};
-
 class DAWN_NATIVE_EXPORT ExternalImageDXGI {
   public:
     ~ExternalImageDXGI();
@@ -97,17 +84,13 @@ class DAWN_NATIVE_EXPORT ExternalImageDXGI {
         WGPUDevice device,
         const ExternalImageDescriptorDXGISharedHandle* descriptor);
 
-    // Returns true if the external image resources are still valid, otherwise ProduceTexture() is
+    // Returns true if the external image resources are still valid, otherwise BeginAccess() is
     // guaranteed to fail e.g. after device destruction.
     bool IsValid() const;
 
-    // TODO(sunnyps): |device| is ignored - remove after Chromium migrates to BeginAccess().
-    WGPUTexture ProduceTexture(WGPUDevice device,
-                               const ExternalImageDXGIBeginAccessDescriptor* descriptor);
-
-    // Creates WGPUTexture wrapping the DXGI shared handle. The provided wait fences or the
-    // texture's keyed mutex will be synchronized before using the texture in any command lists.
-    // Empty fences (nullptr handle) are ignored for convenience (EndAccess can return such fences).
+    // Creates WGPUTexture wrapping the DXGI shared handle. The provided wait fences will be
+    // synchronized before using the texture in any command lists. Empty fences (nullptr handle) are
+    // ignored for convenience (EndAccess can return such fences).
     WGPUTexture BeginAccess(const ExternalImageDXGIBeginAccessDescriptor* descriptor);
 
     // Returns the signalFence that the client must wait on for correct synchronization. Can return

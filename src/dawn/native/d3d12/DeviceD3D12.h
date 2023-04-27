@@ -140,11 +140,8 @@ class Device final : public d3d::Device {
     Ref<TextureBase> CreateD3D12ExternalTexture(const TextureDescriptor* descriptor,
                                                 ComPtr<ID3D12Resource> d3d12Texture,
                                                 std::vector<Ref<Fence>> waitFences,
-                                                Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
                                                 bool isSwapChainTexture,
                                                 bool isInitialized);
-
-    ComPtr<ID3D11On12Device> GetOrCreateD3D11on12Device();
 
     uint32_t GetOptimalBytesPerRowAlignment() const override;
     uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
@@ -224,9 +221,6 @@ class Device final : public d3d::Device {
     ComPtr<ID3D12Device> mD3d12Device;  // Device is owned by adapter and will not be outlived.
     ComPtr<ID3D12CommandQueue> mCommandQueue;
     ComPtr<ID3D12SharingContract> mD3d12SharingContract;
-
-    // 11on12 device corresponding to mCommandQueue
-    ComPtr<ID3D11On12Device> mD3d11On12Device;
 
     ComPtr<ID3D12CommandSignature> mDispatchIndirectSignature;
     ComPtr<ID3D12CommandSignature> mDrawIndirectSignature;

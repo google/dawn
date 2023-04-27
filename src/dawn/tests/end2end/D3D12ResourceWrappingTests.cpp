@@ -33,28 +33,7 @@ using Microsoft::WRL::ComPtr;
 
 namespace {
 
-enum class SyncMode {
-    kKeyedMutex,
-    kFence,
-};
-
-std::ostream& operator<<(std::ostream& o, const SyncMode& m) {
-    switch (m) {
-        case SyncMode::kKeyedMutex:
-            o << "KeyedMutex";
-            break;
-        case SyncMode::kFence:
-            o << "Fence";
-            break;
-    }
-    return o;
-}
-
-DAWN_TEST_PARAM_STRUCT(D3D12ResourceTestParams, SyncMode);
-
-using dawn::native::d3d12::kDXGIKeyedMutexAcquireReleaseKey;
-
-class D3D12ResourceTestBase : public DawnTestWithParams<D3D12ResourceTestParams> {
+class D3D12ResourceTestBase : public DawnTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::DawnInternalUsages};
@@ -62,7 +41,7 @@ class D3D12ResourceTestBase : public DawnTestWithParams<D3D12ResourceTestParams>
 
   public:
     void SetUp() override {
-        DawnTestWithParams<D3D12ResourceTestParams>::SetUp();
+        DawnTest::SetUp();
         if (UsesWire()) {
             return;
         }
@@ -110,12 +89,8 @@ class D3D12ResourceTestBase : public DawnTestWithParams<D3D12ResourceTestParams>
         baseD3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
         baseD3dDescriptor.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
         baseD3dDescriptor.CPUAccessFlags = 0;
-        baseD3dDescriptor.MiscFlags = D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
-        if (GetParam().mSyncMode == SyncMode::kKeyedMutex) {
-            baseD3dDescriptor.MiscFlags |= D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
-        } else {
-            baseD3dDescriptor.MiscFlags |= D3D11_RESOURCE_MISC_SHARED;
-        }
+        baseD3dDescriptor.MiscFlags =
+            D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED;
     }
 
   protected:
@@ -136,7 +111,6 @@ class D3D12ResourceTestBase : public DawnTestWithParams<D3D12ResourceTestParams>
         externalImageDesc.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(dawnDesc);
         externalImageDesc.sharedHandle = textureSharedHandle;
-        externalImageDesc.useFenceSynchronization = GetParam().mSyncMode == SyncMode::kFence;
 
         std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
             dawn::native::d3d12::ExternalImageDXGI::Create(targetDevice, &externalImageDesc);
@@ -418,17 +392,15 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         HANDLE fenceSharedHandle = nullptr;
         ComPtr<ID3D11Fence> d3d11Fence;
 
-        if (GetParam().mSyncMode == SyncMode::kFence) {
-            ComPtr<ID3D11Device5> d3d11Device5;
-            hr = mD3d11Device.As(&d3d11Device5);
-            ASSERT_EQ(hr, S_OK);
+        ComPtr<ID3D11Device5> d3d11Device5;
+        hr = mD3d11Device.As(&d3d11Device5);
+        ASSERT_EQ(hr, S_OK);
 
-            hr = d3d11Device5->CreateFence(0, D3D11_FENCE_FLAG_SHARED, IID_PPV_ARGS(&d3d11Fence));
-            ASSERT_EQ(hr, S_OK);
+        hr = d3d11Device5->CreateFence(0, D3D11_FENCE_FLAG_SHARED, IID_PPV_ARGS(&d3d11Fence));
+        ASSERT_EQ(hr, S_OK);
 
-            hr = d3d11Fence->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr, &fenceSharedHandle);
-            ASSERT_EQ(hr, S_OK);
-        }
+        hr = d3d11Fence->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr, &fenceSharedHandle);
+        ASSERT_EQ(hr, S_OK);
 
         *d3d11TextureOut = d3d11Texture.Detach();
         *d3d11FenceOut = d3d11Fence.Detach();
@@ -445,18 +417,6 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         HRESULT hr = d3d11Texture.As(&dxgiResource);
         ASSERT_EQ(hr, S_OK);
 
-        ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-
-        ComPtr<ID3D11DeviceContext4> d3d11DeviceContext4;
-
-        if (GetParam().mSyncMode == SyncMode::kKeyedMutex) {
-            hr = d3d11Texture.As(&dxgiKeyedMutex);
-            ASSERT_EQ(hr, S_OK);
-
-            hr = dxgiKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE);
-            ASSERT_EQ(hr, S_OK);
-        }
-
         ComPtr<ID3D11RenderTargetView> d3d11RTV;
         hr = mD3d11Device->CreateRenderTargetView(d3d11Texture.Get(), nullptr, &d3d11RTV);
         ASSERT_EQ(hr, S_OK);
@@ -466,16 +426,12 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
             static_cast<float>(clearColor.b), static_cast<float>(clearColor.a)};
         mD3d11DeviceContext->ClearRenderTargetView(d3d11RTV.Get(), colorRGBA);
 
-        if (dxgiKeyedMutex) {
-            hr = dxgiKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
-            ASSERT_EQ(hr, S_OK);
-        } else {
-            hr = mD3d11DeviceContext.As(&d3d11DeviceContext4);
-            ASSERT_EQ(hr, S_OK);
-            // The fence starts with 0 signaled, but that won't capture the render target view clear
-            // above, so signal explicitly with 1 and make the next Dawn access wait on 1.
-            d3d11DeviceContext4->Signal(d3d11Fence, fenceSignalValue);
-        }
+        ComPtr<ID3D11DeviceContext4> d3d11DeviceContext4;
+        hr = mD3d11DeviceContext.As(&d3d11DeviceContext4);
+        ASSERT_EQ(hr, S_OK);
+        // The fence starts with 0 signaled, but that won't capture the render target view clear
+        // above, so signal explicitly with 1 and make the next Dawn access wait on 1.
+        d3d11DeviceContext4->Signal(d3d11Fence, fenceSignalValue);
     }
 
     void WaitAndWrapD3D11Texture(
@@ -490,7 +446,6 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         externalImageDesc.sharedHandle = sharedHandle;
         externalImageDesc.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(&dawnDescriptor);
-        externalImageDesc.useFenceSynchronization = GetParam().mSyncMode == SyncMode::kFence;
 
         std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
             dawn::native::d3d12::ExternalImageDXGI::Create(device.Get(), &externalImageDesc);
@@ -538,7 +493,7 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
     void ExpectPixelRGBA8EQ(
         ID3D11Texture2D* d3d11Texture,
         const wgpu::Color& color,
-        const dawn::native::d3d12::ExternalImageDXGIFenceDescriptor* waitFence = nullptr) {
+        const dawn::native::d3d12::ExternalImageDXGIFenceDescriptor* waitFence) {
         D3D11_TEXTURE2D_DESC texture2DDesc;
         d3d11Texture->GetDesc(&texture2DDesc);
 
@@ -565,15 +520,7 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         d3dRc.bottom = texture2DDesc.Height;
         d3dRc.right = texture2DDesc.Width;
 
-        ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-        d3d11Texture->QueryInterface(IID_PPV_ARGS(&dxgiKeyedMutex));
-
-        if (dxgiKeyedMutex != nullptr) {
-            hr = dxgiKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE);
-            ASSERT_EQ(hr, S_OK);
-        }
-
-        if (waitFence != nullptr && waitFence->fenceHandle != nullptr) {
+        if (waitFence->fenceHandle != nullptr) {
             ComPtr<ID3D11Device5> d3d11Device5;
             mD3d11Device.As(&d3d11Device5);
             ASSERT_EQ(hr, S_OK);
@@ -611,11 +558,6 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         EXPECT_EQ(colorData[3], color.a * 255u);
 
         mD3d11DeviceContext->Unmap(spD3DTextureStaging.Get(), 0);
-
-        if (dxgiKeyedMutex != nullptr) {
-            hr = dxgiKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
-            ASSERT_EQ(hr, S_OK);
-        }
     }
 };
 
@@ -686,7 +628,6 @@ TEST_P(D3D12SharedHandleUsageTests, ClearInD3D12ReadbackInD3D11) {
     wgpu::Texture dawnTexture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
     std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
-    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
     WrapAndClearD3D11Texture(baseDawnDescriptor, baseD3dDescriptor, d3d11ClearColor, &dawnTexture,
                              &d3d11Texture, &externalImage, /*isInitialized=*/true);
     ASSERT_NE(dawnTexture.Get(), nullptr);
@@ -814,7 +755,6 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
 
 TEST_P(D3D12SharedHandleUsageTests, ConcurrentExternalImageReadAccess) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    DAWN_TEST_UNSUPPORTED_IF(GetParam().mSyncMode == SyncMode::kKeyedMutex);
 
     wgpu::Device device2 = CreateDevice();
     EXPECT_NE(device2, nullptr);
@@ -1178,9 +1118,6 @@ TEST_P(D3D12SharedHandleMultithreadTests, ClearInD3D12ReadbackInD3D11_TwoThreads
     // D3D12_Microsoft_Basic_Render_Driver_CPU when validation is enabled.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP() && IsBackendValidationEnabled());
 
-    // KeyedMutex doesn't guarantee the order of commands so skip it.
-    DAWN_TEST_UNSUPPORTED_IF(GetParam().mSyncMode != SyncMode::kFence);
-
     const wgpu::Color d3d11ClearColor{1.0f, 1.0f, 0.0f, 1.0f};
     const wgpu::Color d3d12ClearColor{0.0f, 0.0f, 1.0f, 1.0f};
 
@@ -1233,12 +1170,6 @@ TEST_P(D3D12SharedHandleMultithreadTests, ClearInD3D12ReadbackInD3D11_TwoThreads
     }
 }
 
-DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleValidation,
-                        {D3D12Backend()},
-                        {SyncMode::kKeyedMutex, SyncMode::kFence});
-DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleUsageTests,
-                        {D3D12Backend()},
-                        {SyncMode::kKeyedMutex, SyncMode::kFence});
-DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleMultithreadTests,
-                        {D3D12Backend()},
-                        {SyncMode::kKeyedMutex, SyncMode::kFence});
+DAWN_INSTANTIATE_TEST(D3D12SharedHandleValidation, D3D12Backend());
+DAWN_INSTANTIATE_TEST(D3D12SharedHandleUsageTests, D3D12Backend());
+DAWN_INSTANTIATE_TEST(D3D12SharedHandleMultithreadTests, D3D12Backend());
