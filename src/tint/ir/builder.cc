@@ -16,8 +16,6 @@
 
 #include <utility>
 
-#include "src/tint/ir/builder_impl.h"
-
 namespace tint::ir {
 
 Builder::Builder() {}

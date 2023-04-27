@@ -1104,6 +1104,24 @@ libtint_source_set("libtint_syntax_tree_writer_src") {
   ]
 }
 
+libtint_source_set("libtint_ir_builder_src") {
+  sources = [
+    "ir/builder_impl.cc",
+    "ir/builder_impl.h",
+    "ir/converter.cc",
+    "ir/converter.h",
+  ]
+  deps = [
+    ":libtint_ast_src",
+    ":libtint_constant_src",
+    ":libtint_ir_src",
+    ":libtint_program_src",
+    ":libtint_sem_src",
+    ":libtint_type_src",
+    ":libtint_utils_src",
+  ]
+}
+
 libtint_source_set("libtint_ir_src") {
   sources = [
     "ir/binary.cc",
@@ -1114,8 +1132,6 @@ libtint_source_set("libtint_ir_src") {
     "ir/block.h",
     "ir/builder.cc",
     "ir/builder.h",
-    "ir/builder_impl.cc",
-    "ir/builder_impl.h",
     "ir/builtin.cc",
     "ir/builtin.h",
     "ir/call.cc",
@@ -1161,11 +1177,8 @@ libtint_source_set("libtint_ir_src") {
   ]
 
   deps = [
-    ":libtint_ast_src",
     ":libtint_builtins_src",
     ":libtint_constant_src",
-    ":libtint_program_src",
-    ":libtint_sem_src",
     ":libtint_symbols_src",
     ":libtint_type_src",
     ":libtint_utils_src",
@@ -1222,7 +1235,10 @@ source_set("libtint") {
   if (tint_build_ir) {
     assert(!build_with_chromium,
            "tint_build_ir cannot be used when building Chromium")
-    public_deps += [ ":libtint_ir_src" ]
+    public_deps += [
+      ":libtint_ir_builder_src",
+      ":libtint_ir_src",
+    ]
   }
 
   configs += [ ":tint_common_config" ]
@@ -2112,7 +2128,10 @@ if (tint_build_unittests) {
       "ir/unary_test.cc",
     ]
 
-    deps = [ ":libtint_ir_src" ]
+    deps = [
+      ":libtint_ir_builder_src",
+      ":libtint_ir_src",
+    ]
   }
 
   if (build_with_chromium) {

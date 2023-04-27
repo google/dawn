@@ -28,29 +28,11 @@
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/vector.h"
 
-// Forward Declarations
-namespace tint {
-class Program;
-}  // namespace tint
-
 namespace tint::ir {
 
 /// Main module class for the IR.
 class Module {
   public:
-    /// The result type for the FromProgram method.
-    using Result = utils::Result<Module, std::string>;
-
-    /// Builds an ir::Module from the given Program
-    /// @param program the Program to use.
-    /// @returns the `utiils::Result` of generating the IR. The result will contain the `ir::Module`
-    /// on success, otherwise the `std::string` error.
-    ///
-    /// @note this assumes the program |IsValid|, and has had const-eval done so
-    /// any abstract values have been calculated and converted into the relevant
-    /// concrete types.
-    static Result FromProgram(const Program* program);
-
     /// Constructor
     Module();
     /// Move constructor
@@ -63,11 +45,6 @@ class Module {
     /// @param o the module to assign from
     /// @returns a reference to this module
     Module& operator=(Module&& o);
-
-    /// Converts the module back to a Program
-    /// @returns the resulting program, or nullptr on error
-    ///  (Note, this will probably turn into a utils::Result, just stubbing for now)
-    const Program* ToProgram() const;
 
   private:
     /// Program Id required to create other components

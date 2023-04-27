@@ -718,6 +718,8 @@ if(${TINT_BUILD_IR})
     ir/construct.h
     ir/convert.cc
     ir/convert.h
+    ir/converter.cc
+    ir/converter.h
     ir/debug.cc
     ir/debug.h
     ir/disassembler.cc
