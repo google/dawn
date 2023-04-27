@@ -655,6 +655,15 @@ void BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
 }
 
 utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
+    // If this is a value that has been const-eval'd return the result.
+    if (auto* sem = program_->Sem().Get(expr)->As<sem::ValueExpression>()) {
+        if (auto* v = sem->ConstantValue()) {
+            if (auto* cv = v->Clone(clone_ctx_)) {
+                return builder.Constant(cv);
+            }
+        }
+    }
+
     return tint::Switch(
         expr,
         // [&](const ast::IndexAccessorExpression* a) {
@@ -701,8 +710,8 @@ void BuilderImpl::EmitVariable(const ast::Variable* var) {
             // should never be used.
             //
             // TODO(dsinclair): Probably want to store the const variable somewhere and then in
-            // identifier expression log an error if we ever see a const identifier. Add this when
-            // identifiers and variables are supported.
+            // identifier expression log an error if we ever see a const identifier. Add this
+            // when identifiers and variables are supported.
         },
         [&](Default) {
             add_error(var->source, "unknown variable: " + std::string(var->TypeInfo().name));

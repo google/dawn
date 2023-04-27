@@ -1553,7 +1553,8 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
-    auto* expr = Add(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Add(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1564,12 +1565,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 + 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) + 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
-    auto* expr = Sub(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Sub(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1580,12 +1583,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 - 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) - 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
-    auto* expr = Mul(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Mul(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1596,12 +1601,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 * 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) * 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
-    auto* expr = Div(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Div(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1612,12 +1619,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 / 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) / 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
-    auto* expr = Mod(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Mod(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1628,12 +1637,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 % 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) % 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
-    auto* expr = And(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = And(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1644,12 +1655,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 & 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) & 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
-    auto* expr = Or(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Or(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1660,12 +1673,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 | 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) | 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
-    auto* expr = Xor(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Xor(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1676,12 +1691,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 ^ 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) ^ 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
-    auto* expr = LogicalAnd(true, false);
+    Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(true)});
+    auto* expr = LogicalAnd(Call("my_func"), false);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1692,12 +1709,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(bool) = true && false
+    EXPECT_EQ(d.AsString(), R"(%1(bool) = call(my_func, )
+%2(bool) = %1(bool) && false
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
-    auto* expr = LogicalOr(false, true);
+    Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(true)});
+    auto* expr = LogicalOr(Call("my_func"), true);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1708,12 +1727,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(bool) = false || true
+    EXPECT_EQ(d.AsString(), R"(%1(bool) = call(my_func, )
+%2(bool) = %1(bool) || true
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
-    auto* expr = Equal(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Equal(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1724,12 +1745,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(bool) = 3 == 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(bool) = %1(u32) == 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
-    auto* expr = NotEqual(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = NotEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1740,12 +1763,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(bool) = 3 != 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(bool) = %1(u32) != 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
-    auto* expr = LessThan(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = LessThan(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1756,12 +1781,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(bool) = 3 < 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(bool) = %1(u32) < 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
-    auto* expr = GreaterThan(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = GreaterThan(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1772,12 +1799,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(bool) = 3 > 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(bool) = %1(u32) > 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
-    auto* expr = LessThanEqual(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = LessThanEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1788,12 +1817,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(bool) = 3 <= 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(bool) = %1(u32) <= 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
-    auto* expr = GreaterThanEqual(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = GreaterThanEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1804,12 +1835,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(bool) = 3 >= 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(bool) = %1(u32) >= 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
-    auto* expr = Shl(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Shl(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1820,12 +1853,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 << 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) << 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
-    auto* expr = Shr(3_u, 4_u);
+    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    auto* expr = Shr(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1836,13 +1871,16 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 >> 4
+    EXPECT_EQ(d.AsString(), R"(%1(u32) = call(my_func, )
+%2(u32) = %1(u32) >> 4
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
-    auto* expr = LogicalAnd(LessThan(1_u, Add(Shr(3_u, 4_u), 9_u)),
-                            GreaterThan(2.5_f, Div(6.7_f, Mul(2.3_f, 5.5_f))));
+    Func("my_func", utils::Empty, ty.f32(), utils::Vector{Return(0_f)});
+
+    auto* expr = LogicalAnd(LessThan(Call("my_func"), 2_f),
+                            GreaterThan(2.5_f, Div(Call("my_func"), Mul(2.3_f, Call("my_func")))));
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1853,18 +1891,39 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = 3 >> 4
-%2(u32) = %1(u32) + 9
-%3(bool) = 1 < %2(u32)
-%4(f32) = 2.29999995231628417969 * 5.5
-%5(f32) = 6.69999980926513671875 / %4(f32)
-%6(bool) = 2.5 > %5(f32)
-%7(bool) = %3(bool) && %6(bool)
+    EXPECT_EQ(d.AsString(), R"(%1(f32) = call(my_func, )
+%2(bool) = %1(f32) < 2.0
+%3(f32) = call(my_func, )
+%4(f32) = call(my_func, )
+%5(f32) = 2.29999995231628417969 * %4(f32)
+%6(f32) = %3(f32) / %5(f32)
+%7(bool) = 2.5 > %6(f32)
+%8(bool) = %2(bool) && %7(bool)
+)");
+}
+
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound_WithConstEval) {
+    Func("my_func", utils::Vector{Param("p", ty.bool_())}, ty.bool_(), utils::Vector{Return(true)});
+    auto* expr = Call("my_func", LogicalAnd(LessThan(2.4_f, 2_f),
+                                            GreaterThan(2.5_f, Div(10_f, Mul(2.3_f, 9.4_f)))));
+    WrapInFunction(expr);
+
+    auto& b = CreateBuilder();
+    InjectFlowBlock();
+    auto r = b.EmitExpression(expr);
+    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    ASSERT_TRUE(r);
+
+    Disassembler d(b.builder.ir);
+    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
+    EXPECT_EQ(d.AsString(), R"(%1(bool) = call(my_func, false)
 )");
 }
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
-    auto* expr = Bitcast<f32>(3_u);
+    Func("my_func", utils::Empty, ty.f32(), utils::Vector{Return(0_f)});
+
+    auto* expr = Bitcast<f32>(Call("my_func"));
     WrapInFunction(expr);
 
     auto& b = CreateBuilder();
@@ -1875,7 +1934,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(f32) = bitcast(3)
+    EXPECT_EQ(d.AsString(), R"(%1(f32) = call(my_func, )
+%2(f32) = bitcast(%1(f32))
 )");
 }
 
@@ -1904,14 +1964,14 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
     WrapInFunction(stmt);
 
     auto& b = CreateBuilder();
+
     InjectFlowBlock();
     b.EmitStatement(stmt);
     ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(f32) = 2.0 * 3.0
-%2(void) = call(my_func, %1(f32))
+    EXPECT_EQ(d.AsString(), R"(%1(void) = call(my_func, 6.0)
 )");
 }
 
