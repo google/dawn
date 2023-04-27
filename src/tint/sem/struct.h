@@ -84,7 +84,7 @@ class StructMember final : public utils::Castable<StructMember, type::StructMemb
     /// @param offset the byte offset from the base of the structure
     /// @param align the byte alignment of the member
     /// @param size the byte size of the member
-    /// @param location the location attribute, if present
+    /// @param attributes the optional attributes
     StructMember(const ast::StructMember* declaration,
                  tint::Source source,
                  Symbol name,
@@ -93,7 +93,7 @@ class StructMember final : public utils::Castable<StructMember, type::StructMemb
                  uint32_t offset,
                  uint32_t align,
                  uint32_t size,
-                 std::optional<uint32_t> location);
+                 const type::StructMemberAttributes& attributes);
 
     /// Destructor
     ~StructMember() override;

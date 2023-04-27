@@ -22,6 +22,7 @@
 #include <unordered_set>
 
 #include "src/tint/builtin/address_space.h"
+#include "src/tint/builtin/interpolation.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/node.h"
 #include "src/tint/type/type.h"
@@ -163,6 +164,18 @@ class Struct : public utils::Castable<Struct, Type> {
     utils::Vector<const Struct*, 2> concrete_types_;
 };
 
+/// Attributes that can be applied to the StructMember
+struct StructMemberAttributes {
+    /// The value of a `@location` attribute
+    std::optional<uint32_t> location;
+    /// The value of a `@builtin` attribute
+    std::optional<builtin::BuiltinValue> builtin;
+    /// The values of a `@interpolate` attribute
+    std::optional<builtin::Interpolation> interpolation;
+    /// True if the member was annotated with `@invariant`
+    bool invariant = false;
+};
+
 /// StructMember holds the type information for structure members.
 class StructMember : public utils::Castable<StructMember, Node> {
   public:
@@ -174,7 +187,7 @@ class StructMember : public utils::Castable<StructMember, Node> {
     /// @param offset the byte offset from the base of the structure
     /// @param align the byte alignment of the member
     /// @param size the byte size of the member
-    /// @param location the location attribute, if present
+    /// @param attributes the optional attributes
     StructMember(tint::Source source,
                  Symbol name,
                  const type::Type* type,
@@ -182,7 +195,7 @@ class StructMember : public utils::Castable<StructMember, Node> {
                  uint32_t offset,
                  uint32_t align,
                  uint32_t size,
-                 std::optional<uint32_t> location);
+                 const StructMemberAttributes& attributes);
 
     /// Destructor
     ~StructMember() override;
@@ -215,8 +228,8 @@ class StructMember : public utils::Castable<StructMember, Node> {
     /// @returns byte size
     uint32_t Size() const { return size_; }
 
-    /// @returns the location, if set
-    std::optional<uint32_t> Location() const { return location_; }
+    /// @returns the optional attributes
+    const StructMemberAttributes& Attributes() const { return attributes_; }
 
     /// @param ctx the clone context
     /// @returns a clone of this struct member
@@ -231,7 +244,7 @@ class StructMember : public utils::Castable<StructMember, Node> {
     const uint32_t offset_;
     const uint32_t align_;
     const uint32_t size_;
-    const std::optional<uint32_t> location_;
+    const StructMemberAttributes attributes_;
 };
 
 }  // namespace tint::type

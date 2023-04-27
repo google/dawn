@@ -53,7 +53,7 @@ sem::Struct* BuildStruct(ProgramBuilder& b,
             /* offset */ offset,
             /* align */ align,
             /* size */ size,
-            /* location */ std::nullopt));
+            /* attributes */ type::StructMemberAttributes{}));
         offset += size;
     }
     uint32_t size_without_padding = offset;

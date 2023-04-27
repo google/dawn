@@ -354,7 +354,8 @@ class Resolver {
 
     /// Resolves the `@interpolate` attribute @p attr
     /// @returns true on success, false on failure
-    bool InterpolateAttribute(const ast::InterpolateAttribute* attr);
+    utils::Result<builtin::Interpolation> InterpolateAttribute(
+        const ast::InterpolateAttribute* attr);
 
     /// Resolves the internal attribute @p attr
     /// @returns true on success, false on failure

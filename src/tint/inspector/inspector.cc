@@ -621,8 +621,8 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
         // Recurse into members.
         for (auto* member : struct_ty->Members()) {
             AddEntryPointInOutVariables(name + "." + member->Name().Name(), member->Type(),
-                                        member->Declaration()->attributes, member->Location(),
-                                        variables);
+                                        member->Declaration()->attributes,
+                                        member->Attributes().location, variables);
         }
         return;
     }

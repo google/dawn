@@ -470,7 +470,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param var the variable to generate
     /// @returns true if the variable was emitted
     bool EmitVar(const ast::Var* var);
-    /// Handles generating a function-scope 'let' declaration
+    /// Handles generating a 'let' declaration
     /// @param let the variable to generate
     /// @returns true if the variable was emitted
     bool EmitLet(const ast::Let* let);

@@ -380,8 +380,8 @@ struct CanonicalizeEntryPointIO::State {
 
             auto attributes =
                 CloneShaderIOAttributes(member->Declaration()->attributes, do_interpolate);
-            auto* input_expr =
-                AddInput(name, member->Type(), member->Location(), std::move(attributes));
+            auto* input_expr = AddInput(name, member->Type(), member->Attributes().location,
+                                        std::move(attributes));
             inner_struct_values.Push(input_expr);
         }
 
@@ -410,8 +410,8 @@ struct CanonicalizeEntryPointIO::State {
                     CloneShaderIOAttributes(member->Declaration()->attributes, do_interpolate);
 
                 // Extract the original structure member.
-                AddOutput(name, member->Type(), member->Location(), std::move(attributes),
-                          ctx.dst->MemberAccessor(original_result, name));
+                AddOutput(name, member->Type(), member->Attributes().location,
+                          std::move(attributes), ctx.dst->MemberAccessor(original_result, name));
             }
         } else if (!inner_ret_type->Is<type::Void>()) {
             auto attributes =

@@ -3721,14 +3721,22 @@ bool Resolver::StrideAttribute(const ast::StrideAttribute*) {
     return true;
 }
 
-bool Resolver::InterpolateAttribute(const ast::InterpolateAttribute* attr) {
-    if (!InterpolationType(attr->type)) {
-        return false;
+utils::Result<builtin::Interpolation> Resolver::InterpolateAttribute(
+    const ast::InterpolateAttribute* attr) {
+    builtin::Interpolation out;
+    auto* type = InterpolationType(attr->type);
+    if (!type) {
+        return utils::Failure;
     }
-    if (attr->sampling && !InterpolationSampling(attr->sampling)) {
-        return false;
+    out.type = type->Value();
+    if (attr->sampling) {
+        auto* sampling = InterpolationSampling(attr->sampling);
+        if (!sampling) {
+            return utils::Failure;
+        }
+        out.sampling = sampling->Value();
     }
-    return true;
+    return out;
 }
 
 bool Resolver::InternalAttribute(const ast::InternalAttribute* attr) {
@@ -4021,7 +4029,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         bool has_offset_attr = false;
         bool has_align_attr = false;
         bool has_size_attr = false;
-        std::optional<uint32_t> location;
+        type::StructMemberAttributes attributes;
         for (auto* attribute : member->attributes) {
             Mark(attribute);
             bool ok = Switch(
@@ -4122,12 +4130,32 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     if (!value) {
                         return false;
                     }
-                    location = value.Get();
+                    attributes.location = value.Get();
                     return true;
                 },
-                [&](const ast::BuiltinAttribute* attr) -> bool { return BuiltinAttribute(attr); },
-                [&](const ast::InterpolateAttribute* attr) { return InterpolateAttribute(attr); },
-                [&](const ast::InvariantAttribute* attr) { return InvariantAttribute(attr); },
+                [&](const ast::BuiltinAttribute* attr) {
+                    auto value = BuiltinAttribute(attr);
+                    if (!value) {
+                        return false;
+                    }
+                    attributes.builtin = value.Get();
+                    return true;
+                },
+                [&](const ast::InterpolateAttribute* attr) {
+                    auto value = InterpolateAttribute(attr);
+                    if (!value) {
+                        return false;
+                    }
+                    attributes.interpolation = value.Get();
+                    return true;
+                },
+                [&](const ast::InvariantAttribute* attr) {
+                    if (!InvariantAttribute(attr)) {
+                        return false;
+                    }
+                    attributes.invariant = true;
+                    return true;
+                },
                 [&](const ast::StrideAttribute* attr) {
                     if (validator_.IsValidationEnabled(
                             member->attributes, ast::DisabledValidation::kIgnoreStrideAttribute)) {
@@ -4163,7 +4191,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         auto* sem_member = builder_->create<sem::StructMember>(
             member, member->source, member->name->symbol, type,
             static_cast<uint32_t>(sem_members.Length()), static_cast<uint32_t>(offset),
-            static_cast<uint32_t>(align), static_cast<uint32_t>(size), location);
+            static_cast<uint32_t>(align), static_cast<uint32_t>(size), attributes);
         builder_->Sem().Add(member, sem_member);
         sem_members.Push(sem_member);
 

@@ -101,10 +101,8 @@ TEST_F(TypeStructTest, Location) {
     auto* sem = p.Sem().Get(st);
     ASSERT_EQ(2u, sem->Members().Length());
 
-    EXPECT_TRUE(sem->Members()[0]->Location().has_value());
-    EXPECT_EQ(sem->Members()[0]->Location().value(), 1u);
-
-    EXPECT_FALSE(sem->Members()[1]->Location().has_value());
+    EXPECT_EQ(sem->Members()[0]->Attributes().location, 1u);
+    EXPECT_FALSE(sem->Members()[1]->Attributes().location.has_value());
 }
 
 TEST_F(TypeStructTest, IsConstructable) {
@@ -207,12 +205,15 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
 }
 
 TEST_F(TypeStructTest, Clone) {
+    type::StructMemberAttributes attrs_location_2;
+    attrs_location_2.location = 2;
+
     auto* s = create<Struct>(
         Source{}, Sym("my_struct"),
         utils::Vector{create<StructMember>(Source{}, Sym("b"), create<Vector>(create<F32>(), 3u),
-                                           0u, 0u, 16u, 12u, std::optional<uint32_t>{2}),
+                                           0u, 0u, 16u, 12u, attrs_location_2),
                       create<StructMember>(Source{}, Sym("a"), create<I32>(), 1u, 16u, 4u, 4u,
-                                           std::optional<uint32_t>())},
+                                           type::StructMemberAttributes{})},
         4u /* align */, 8u /* size */, 16u /* size_no_padding */);
 
     ProgramID id;

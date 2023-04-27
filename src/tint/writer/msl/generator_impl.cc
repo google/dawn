@@ -2852,88 +2852,51 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
         out << " " << mem_name;
         // Emit attributes
-        if (auto* decl = mem->Declaration()) {
-            for (auto* attr : decl->attributes) {
-                bool ok = Switch(
-                    attr,
-                    [&](const ast::BuiltinAttribute* builtin_attr) {
-                        auto builtin = program_->Sem().Get(builtin_attr)->Value();
-                        auto name = builtin_to_attribute(builtin);
-                        if (name.empty()) {
-                            diagnostics_.add_error(diag::System::Writer, "unknown builtin");
-                            return false;
-                        }
-                        out << " [[" << name << "]]";
-                        return true;
-                    },
-                    [&](const ast::LocationAttribute*) {
-                        auto& pipeline_stage_uses = str->PipelineStageUses();
-                        if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
-                            TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
-                            return false;
-                        }
+        auto& attributes = mem->Attributes();
 
-                        uint32_t loc = mem->Location().value();
-                        if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexInput)) {
-                            out << " [[attribute(" + std::to_string(loc) + ")]]";
-                        } else if (pipeline_stage_uses.count(
-                                       type::PipelineStageUsage::kVertexOutput)) {
-                            out << " [[user(locn" + std::to_string(loc) + ")]]";
-                        } else if (pipeline_stage_uses.count(
-                                       type::PipelineStageUsage::kFragmentInput)) {
-                            out << " [[user(locn" + std::to_string(loc) + ")]]";
-                        } else if (TINT_LIKELY(pipeline_stage_uses.count(
-                                       type::PipelineStageUsage::kFragmentOutput))) {
-                            out << " [[color(" + std::to_string(loc) + ")]]";
-                        } else {
-                            TINT_ICE(Writer, diagnostics_) << "invalid use of location decoration";
-                            return false;
-                        }
-                        return true;
-                    },
-                    [&](const ast::InterpolateAttribute* interpolate) {
-                        auto& sem = program_->Sem();
-                        auto i_type =
-                            sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationType>>(
-                                   interpolate->type)
-                                ->Value();
-
-                        auto i_smpl = builtin::InterpolationSampling::kUndefined;
-                        if (interpolate->sampling) {
-                            i_smpl =
-                                sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
-                                       interpolate->sampling)
-                                    ->Value();
-                        }
-
-                        auto name = interpolation_to_attribute(i_type, i_smpl);
-                        if (name.empty()) {
-                            diagnostics_.add_error(diag::System::Writer,
-                                                   "unknown interpolation attribute");
-                            return false;
-                        }
-                        out << " [[" << name << "]]";
-                        return true;
-                    },
-                    [&](const ast::InvariantAttribute*) {
-                        if (invariant_define_name_.empty()) {
-                            invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
-                        }
-                        out << " " << invariant_define_name_;
-                        return true;
-                    },
-                    [&](const ast::StructMemberOffsetAttribute*) { return true; },
-                    [&](const ast::StructMemberAlignAttribute*) { return true; },
-                    [&](const ast::StructMemberSizeAttribute*) { return true; },
-                    [&](Default) {
-                        TINT_ICE(Writer, diagnostics_)
-                            << "unhandled struct member attribute: " << attr->Name();
-                        return false;
-                    });
-                if (!ok) {
-                    return false;
-                }
+        if (auto builtin = attributes.builtin) {
+            auto name = builtin_to_attribute(builtin.value());
+            if (name.empty()) {
+                diagnostics_.add_error(diag::System::Writer, "unknown builtin");
+                return false;
             }
+            out << " [[" << name << "]]";
+        }
+
+        if (auto location = attributes.location) {
+            auto& pipeline_stage_uses = str->PipelineStageUses();
+            if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
+                TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
+                return false;
+            }
+
+            if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexInput)) {
+                out << " [[attribute(" + std::to_string(location.value()) + ")]]";
+            } else if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexOutput)) {
+                out << " [[user(locn" + std::to_string(location.value()) + ")]]";
+            } else if (pipeline_stage_uses.count(type::PipelineStageUsage::kFragmentInput)) {
+                out << " [[user(locn" + std::to_string(location.value()) + ")]]";
+            } else if (TINT_LIKELY(
+                           pipeline_stage_uses.count(type::PipelineStageUsage::kFragmentOutput))) {
+                out << " [[color(" + std::to_string(location.value()) + ")]]";
+            } else {
+                TINT_ICE(Writer, diagnostics_) << "invalid use of location decoration";
+                return false;
+            }
+        }
+
+        if (auto interpolation = attributes.interpolation) {
+            auto name = interpolation_to_attribute(interpolation->type, interpolation->sampling);
+            if (name.empty()) {
+                diagnostics_.add_error(diag::System::Writer, "unknown interpolation attribute");
+                return false;
+            }
+            out << " [[" << name << "]]";
+        }
+
+        if (attributes.invariant) {
+            invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
+            out << " " << invariant_define_name_;
         }
 
         out << ";";

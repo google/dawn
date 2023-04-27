@@ -747,6 +747,7 @@ libtint_source_set("libtint_builtins_src") {
     "builtin/extension.h",
     "builtin/function.cc",
     "builtin/function.h",
+    "builtin/interpolation.h",
     "builtin/interpolation_sampling.cc",
     "builtin/interpolation_sampling.h",
     "builtin/interpolation_type.cc",

@@ -826,8 +826,8 @@ struct VertexPulling::State {
                 auto* sem = src->Sem().Get(member);
                 info.type = sem->Type();
 
-                TINT_ASSERT(Transform, sem->Location().has_value());
-                location_info[sem->Location().value()] = info;
+                TINT_ASSERT(Transform, sem->Attributes().location.has_value());
+                location_info[sem->Attributes().location.value()] = info;
                 has_locations = true;
             } else {
                 auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(member->attributes);

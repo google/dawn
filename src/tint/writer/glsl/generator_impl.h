@@ -399,7 +399,7 @@ class GeneratorImpl : public TextGenerator {
     /// Handles generating a 'var' declaration
     /// @param var the variable to generate
     void EmitVar(const ast::Var* var);
-    /// Handles generating a function-scope 'let' declaration
+    /// Handles generating a 'let' declaration
     /// @param let the variable to generate
     void EmitLet(const ast::Let* let);
     /// Handles generating a module-scope 'let' declaration

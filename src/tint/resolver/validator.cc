@@ -1215,7 +1215,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     if (!validate_entry_point_attributes_inner(
                             member->Declaration()->attributes, member->Type(), member->Source(),
                             param_or_ret,
-                            /*is_struct_member*/ true, member->Location())) {
+                            /*is_struct_member*/ true, member->Attributes().location)) {
                         AddNote("while analyzing entry point '" + decl->name->symbol.Name() + "'",
                                 decl->source);
                         return false;
@@ -2105,9 +2105,9 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 },
                 [&](const ast::LocationAttribute* location) {
                     has_location = true;
-                    TINT_ASSERT(Resolver, member->Location().has_value());
-                    if (!LocationAttribute(location, member->Location().value(), member->Type(),
-                                           locations, stage, member->Source())) {
+                    TINT_ASSERT(Resolver, member->Attributes().location.has_value());
+                    if (!LocationAttribute(location, member->Attributes().location.value(),
+                                           member->Type(), locations, stage, member->Source())) {
                         return false;
                     }
                     return true;

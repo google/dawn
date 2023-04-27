@@ -40,8 +40,8 @@ StructMember::StructMember(const ast::StructMember* declaration,
                            uint32_t offset,
                            uint32_t align,
                            uint32_t size,
-                           std::optional<uint32_t> location)
-    : Base(source, name, type, index, offset, align, size, location), declaration_(declaration) {}
+                           const type::StructMemberAttributes& attributes)
+    : Base(source, name, type, index, offset, align, size, attributes), declaration_(declaration) {}
 
 StructMember::~StructMember() = default;
 

@@ -179,7 +179,7 @@ StructMember::StructMember(tint::Source source,
                            uint32_t offset,
                            uint32_t align,
                            uint32_t size,
-                           std::optional<uint32_t> location)
+                           const StructMemberAttributes& attributes)
     : source_(source),
       name_(name),
       type_(type),
@@ -187,7 +187,7 @@ StructMember::StructMember(tint::Source source,
       offset_(offset),
       align_(align),
       size_(size),
-      location_(location) {}
+      attributes_(attributes) {}
 
 StructMember::~StructMember() = default;
 
@@ -195,7 +195,7 @@ StructMember* StructMember::Clone(CloneContext& ctx) const {
     auto sym = ctx.dst.st->Register(name_.Name());
     auto* ty = type_->Clone(ctx);
     return ctx.dst.mgr->Get<StructMember>(source_, sym, ty, index_, offset_, align_, size_,
-                                          location_);
+                                          attributes_);
 }
 
 }  // namespace tint::type

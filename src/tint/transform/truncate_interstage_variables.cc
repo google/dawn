@@ -83,6 +83,8 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
         auto* func_sem = sem.Get(func_ast);
         auto* str = func_sem->ReturnType()->As<sem::Struct>();
 
+        // This transform is run after CanonicalizeEntryPointIO transform,
+        // So it is guaranteed that entry point inputs are already grouped in a struct.
         if (TINT_UNLIKELY(!str)) {
             TINT_ICE(Transform, ctx.dst->Diagnostics())
                 << "Entrypoint function return type is non-struct.\n"
@@ -91,20 +93,14 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
             continue;
         }
 
-        // This transform is run after CanonicalizeEntryPointIO transform,
-        // So it is guaranteed that entry point inputs are already grouped in a struct.
-        const ast::Struct* struct_ty = str->Declaration();
-
         // A prepass to check if any interstage variable locations in the entry point needs
         // truncating. If not we don't really need to handle this entry point.
         utils::Hashset<const sem::StructMember*, 16u> omit_members;
 
-        for (auto* member : struct_ty->members) {
-            if (ast::GetAttribute<ast::LocationAttribute>(member->attributes)) {
-                auto* m = sem.Get(member);
-                uint32_t location = m->Location().value();
-                if (!data->interstage_locations.test(location)) {
-                    omit_members.Add(m);
+        for (auto* member : str->Members()) {
+            if (auto location = member->Attributes().location) {
+                if (!data->interstage_locations.test(location.value())) {
+                    omit_members.Add(member);
                 }
             }
         }
