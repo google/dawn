@@ -53,7 +53,7 @@ class Value : public utils::Castable<Value> {
     /// Write the value to the given stream
     /// @param out the stream to write to
     /// @returns the stream
-    virtual utils::StringStream& ToString(utils::StringStream& out) const = 0;
+    virtual utils::StringStream& ToValue(utils::StringStream& out) const = 0;
 
   protected:
     /// Constructor

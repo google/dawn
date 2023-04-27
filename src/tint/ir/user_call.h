@@ -26,10 +26,11 @@ namespace tint::ir {
 class UserCall : public utils::Castable<UserCall, Call> {
   public:
     /// Constructor
-    /// @param result the result value
+    /// @param id the instruction id
+    /// @param type the result type
     /// @param name the function name
     /// @param args the function arguments
-    UserCall(Value* result, Symbol name, utils::VectorRef<Value*> args);
+    UserCall(uint32_t id, const type::Type* type, Symbol name, utils::VectorRef<Value*> args);
     UserCall(const UserCall& inst) = delete;
     UserCall(UserCall&& inst) = delete;
     ~UserCall() override;
@@ -43,7 +44,7 @@ class UserCall : public utils::Castable<UserCall, Call> {
     /// Write the instruction to the given stream
     /// @param out the stream to write to
     /// @returns the stream
-    utils::StringStream& ToString(utils::StringStream& out) const override;
+    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     Symbol name_{};

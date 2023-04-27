@@ -25,9 +25,10 @@ namespace tint::ir {
 class Bitcast : public utils::Castable<Bitcast, Instruction> {
   public:
     /// Constructor
-    /// @param result the result value
+    /// @param id the instruction id
+    /// @param type the result type
     /// @param val the value being bitcast
-    Bitcast(Value* result, Value* val);
+    Bitcast(uint32_t id, const type::Type* type, Value* val);
     Bitcast(const Bitcast& inst) = delete;
     Bitcast(Bitcast&& inst) = delete;
     ~Bitcast() override;
@@ -41,7 +42,7 @@ class Bitcast : public utils::Castable<Bitcast, Instruction> {
     /// Write the instruction to the given stream
     /// @param out the stream to write to
     /// @returns the stream
-    utils::StringStream& ToString(utils::StringStream& out) const override;
+    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     Value* val_ = nullptr;

@@ -34,10 +34,11 @@ class Unary : public utils::Castable<Unary, Instruction> {
     };
 
     /// Constructor
+    /// @param id the instruction id
     /// @param kind the kind of unary instruction
-    /// @param result the result value
+    /// @param type the result type
     /// @param val the lhs of the instruction
-    Unary(Kind kind, Value* result, Value* val);
+    Unary(uint32_t id, Kind kind, const type::Type* type, Value* val);
     Unary(const Unary& inst) = delete;
     Unary(Unary&& inst) = delete;
     ~Unary() override;
@@ -54,7 +55,7 @@ class Unary : public utils::Castable<Unary, Instruction> {
     /// Write the instruction to the given stream
     /// @param out the stream to write to
     /// @returns the stream
-    utils::StringStream& ToString(utils::StringStream& out) const override;
+    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     Kind kind_;

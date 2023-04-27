@@ -35,7 +35,7 @@ class Constant : public utils::Castable<Constant, Value> {
     /// Write the constant to the given stream
     /// @param out the stream to write to
     /// @returns the stream
-    utils::StringStream& ToString(utils::StringStream& out) const override;
+    utils::StringStream& ToValue(utils::StringStream& out) const override;
 
     /// The constants value
     const constant::Value* const value;

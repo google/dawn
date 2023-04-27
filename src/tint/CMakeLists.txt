@@ -738,8 +738,6 @@ if(${TINT_BUILD_IR})
     ir/loop.h
     ir/module.cc
     ir/module.h
-    ir/runtime.cc
-    ir/runtime.h
     ir/store.cc
     ir/store.h
     ir/switch.cc
@@ -1425,7 +1423,6 @@ if(TINT_BUILD_TESTS)
       ir/builder_impl_test.cc
       ir/constant_test.cc
       ir/discard_test.cc
-      ir/runtime_test.cc
       ir/store_test.cc
       ir/test_helper.h
       ir/unary_test.cc

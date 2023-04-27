@@ -19,13 +19,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Construct);
 
 namespace tint::ir {
 
-Construct::Construct(Value* result, utils::VectorRef<Value*> args) : Base(result, args) {}
+Construct::Construct(uint32_t id, const type::Type* type, utils::VectorRef<Value*> args)
+    : Base(id, type, args) {}
 
 Construct::~Construct() = default;
 
-utils::StringStream& Construct::ToString(utils::StringStream& out) const {
-    Result()->ToString(out);
-    out << " = construct(" << Result()->Type()->FriendlyName();
+utils::StringStream& Construct::ToInstruction(utils::StringStream& out) const {
+    ToValue(out) << " = construct(";
     if (!Args().IsEmpty()) {
         out << ", ";
         EmitArgs(out);

@@ -29,7 +29,7 @@ Constant::Constant(const constant::Value* val) : value(val) {}
 
 Constant::~Constant() = default;
 
-utils::StringStream& Constant::ToString(utils::StringStream& out) const {
+utils::StringStream& Constant::ToValue(utils::StringStream& out) const {
     std::function<void(const constant::Value*)> emit = [&](const constant::Value* c) {
         Switch(
             c,

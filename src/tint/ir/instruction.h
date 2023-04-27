@@ -22,7 +22,7 @@
 namespace tint::ir {
 
 /// An instruction in the IR.
-class Instruction : public utils::Castable<Instruction> {
+class Instruction : public utils::Castable<Instruction, Value> {
   public:
     Instruction(const Instruction& inst) = delete;
     Instruction(Instruction&& inst) = delete;
@@ -32,21 +32,36 @@ class Instruction : public utils::Castable<Instruction> {
     Instruction& operator=(const Instruction& inst) = delete;
     Instruction& operator=(Instruction&& inst) = delete;
 
-    /// @returns the result value for the instruction
-    Value* Result() const { return result_; }
+    /// @returns the type of the value
+    const type::Type* Type() const override { return type_; }
+
+    /// Write the value to the given stream
+    /// @param out the stream to write to
+    /// @returns the stream
+    utils::StringStream& ToValue(utils::StringStream& out) const override {
+        out << "%" << std::to_string(id_);
+        if (type_ != nullptr) {
+            out << "(" << Type()->FriendlyName() << ")";
+        }
+        return out;
+    }
 
     /// Write the instruction to the given stream
     /// @param out the stream to write to
     /// @returns the stream
-    virtual utils::StringStream& ToString(utils::StringStream& out) const = 0;
+    virtual utils::StringStream& ToInstruction(utils::StringStream& out) const = 0;
 
   protected:
     /// Constructor
-    /// @param result the result value
-    explicit Instruction(Value* result);
+    Instruction();
+    /// Constructor
+    /// @param id the instruction id
+    /// @param type the result type
+    Instruction(uint32_t id, const type::Type* type);
 
   private:
-    Value* result_ = nullptr;
+    uint32_t id_ = 0;
+    const type::Type* type_ = nullptr;
 };
 
 }  // namespace tint::ir

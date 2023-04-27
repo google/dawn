@@ -26,14 +26,13 @@ using IR_InstructionTest = TestHelper;
 TEST_F(IR_InstructionTest, CreateStore) {
     auto& b = CreateEmptyBuilder();
 
-    b.builder.next_runtime_id = Runtime::Id(42);
+    // TODO(dsinclair): This is wrong, but we don't have anything correct to store too at the
+    // moment.
+    auto* to = b.builder.Discard();
+    const auto* inst = b.builder.Store(to, b.builder.Constant(4_i));
 
-    auto* rt = b.builder.Runtime(b.builder.ir.types.Get<type::I32>());
-    const auto* inst = b.builder.Store(rt, b.builder.Constant(4_i));
-
-    ASSERT_TRUE(inst->Result()->Is<Runtime>());
-    ASSERT_NE(inst->Result()->Type(), nullptr);
-    EXPECT_EQ(Runtime::Id(42), inst->Result()->As<Runtime>()->AsId());
+    ASSERT_TRUE(inst->Is<Store>());
+    ASSERT_EQ(inst->to(), to);
 
     ASSERT_TRUE(inst->from()->Is<Constant>());
     auto lhs = inst->from()->As<Constant>()->value;
@@ -41,20 +40,19 @@ TEST_F(IR_InstructionTest, CreateStore) {
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    inst->ToString(str);
-    EXPECT_EQ(str.str(), "%42 (i32) = 4");
+    inst->ToInstruction(str);
+    EXPECT_EQ(str.str(), "store(%0, 4)");
 }
 
 TEST_F(IR_InstructionTest, Store_Usage) {
     auto& b = CreateEmptyBuilder();
 
-    b.builder.next_runtime_id = Runtime::Id(42);
-    auto* rt = b.builder.Runtime(b.builder.ir.types.Get<type::I32>());
-    const auto* inst = b.builder.Store(rt, b.builder.Constant(4_i));
+    auto* to = b.builder.Discard();
+    const auto* inst = b.builder.Store(to, b.builder.Constant(4_i));
 
-    ASSERT_NE(inst->Result(), nullptr);
-    ASSERT_EQ(inst->Result()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->Result()->Usage()[0], inst);
+    ASSERT_NE(inst->to(), nullptr);
+    ASSERT_EQ(inst->to()->Usage().Length(), 1u);
+    EXPECT_EQ(inst->to()->Usage()[0], inst);
 
     ASSERT_NE(inst->from(), nullptr);
     ASSERT_EQ(inst->from()->Usage().Length(), 1u);

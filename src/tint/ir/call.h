@@ -25,9 +25,10 @@ namespace tint::ir {
 class Call : public utils::Castable<Call, Instruction> {
   public:
     /// Constructor
-    /// @param result the result value
+    /// @param id the instruction id
+    /// @param type the result type
     /// @param args the constructor arguments
-    Call(Value* result, utils::VectorRef<Value*> args);
+    Call(uint32_t id, const type::Type* type, utils::VectorRef<Value*> args);
     Call(const Call& inst) = delete;
     Call(Call&& inst) = delete;
     ~Call() override;

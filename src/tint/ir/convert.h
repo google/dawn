@@ -26,10 +26,14 @@ namespace tint::ir {
 class Convert : public utils::Castable<Convert, Call> {
   public:
     /// Constructor
-    /// @param result the result value
-    /// @param from the type being converted from
+    /// @param id the instruction id
+    /// @param result_type the result type
+    /// @param from_type the type being converted from
     /// @param args the conversion arguments
-    Convert(Value* result, const type::Type* from, utils::VectorRef<Value*> args);
+    Convert(uint32_t id,
+            const type::Type* result_type,
+            const type::Type* from_type,
+            utils::VectorRef<Value*> args);
     Convert(const Convert& inst) = delete;
     Convert(Convert&& inst) = delete;
     ~Convert() override;
@@ -38,17 +42,17 @@ class Convert : public utils::Castable<Convert, Call> {
     Convert& operator=(Convert&& inst) = delete;
 
     /// @returns the from type
-    const type::Type* From() const { return from_; }
+    const type::Type* FromType() const { return from_type_; }
     /// @returns the to type
-    const type::Type* To() const { return Result()->Type(); }
+    const type::Type* ToType() const { return Type(); }
 
     /// Write the instruction to the given stream
     /// @param out the stream to write to
     /// @returns the stream
-    utils::StringStream& ToString(utils::StringStream& out) const override;
+    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
-    const type::Type* from_ = nullptr;
+    const type::Type* from_type_ = nullptr;
 };
 
 }  // namespace tint::ir

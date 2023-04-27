@@ -20,14 +20,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Builtin);
 // \cond DO_NOT_DOCUMENT
 namespace tint::ir {
 
-Builtin::Builtin(Value* result, builtin::Function func, utils::VectorRef<Value*> args)
-    : Base(result, args), func_(func) {}
+Builtin::Builtin(uint32_t id,
+                 const type::Type* type,
+                 builtin::Function func,
+                 utils::VectorRef<Value*> args)
+    : Base(id, type, args), func_(func) {}
 
 Builtin::~Builtin() = default;
 
-utils::StringStream& Builtin::ToString(utils::StringStream& out) const {
-    Result()->ToString(out);
-    out << " = " << builtin::str(func_) << "(";
+utils::StringStream& Builtin::ToInstruction(utils::StringStream& out) const {
+    ToValue(out) << " = " << builtin::str(func_) << "(";
     EmitArgs(out);
     out << ")";
     return out;

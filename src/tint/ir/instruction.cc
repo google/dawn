@@ -18,10 +18,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Instruction);
 
 namespace tint::ir {
 
-Instruction::Instruction(Value* result) : result_(result) {
-    TINT_ASSERT(IR, result_);
-    result_->AddUsage(this);
-}
+Instruction::Instruction() = default;
+
+Instruction::Instruction(uint32_t id, const type::Type* ty) : id_(id), type_(ty) {}
 
 Instruction::~Instruction() = default;
 

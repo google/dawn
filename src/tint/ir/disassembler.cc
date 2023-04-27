@@ -64,7 +64,7 @@ utils::StringStream& Disassembler::Indent() {
 void Disassembler::EmitBlockInstructions(const Block* b) {
     for (const auto* inst : b->instructions) {
         Indent();
-        inst->ToString(out_) << std::endl;
+        inst->ToInstruction(out_) << std::endl;
     }
 }
 
@@ -119,7 +119,7 @@ void Disassembler::Walk(const FlowNode* node) {
                 if (v != b->branch.args.Front()) {
                     out_ << ", ";
                 }
-                v->ToString(out_);
+                v->ToValue(out_);
             }
             out_ << ")" << std::endl;
 
@@ -131,7 +131,7 @@ void Disassembler::Walk(const FlowNode* node) {
         },
         [&](const ir::Switch* s) {
             Indent() << "%bb" << GetIdForNode(s) << " = Switch (";
-            s->condition->ToString(out_);
+            s->condition->ToValue(out_);
             out_ << ")" << std::endl;
 
             {
@@ -147,7 +147,7 @@ void Disassembler::Walk(const FlowNode* node) {
                         if (selector.IsDefault()) {
                             out_ << "default";
                         } else {
-                            selector.val->ToString(out_);
+                            selector.val->ToValue(out_);
                         }
                     }
                     out_ << std::endl;
@@ -160,7 +160,7 @@ void Disassembler::Walk(const FlowNode* node) {
         },
         [&](const ir::If* i) {
             Indent() << "%bb" << GetIdForNode(i) << " = if (";
-            i->condition->ToString(out_);
+            i->condition->ToValue(out_);
             out_ << ")" << std::endl;
 
             {

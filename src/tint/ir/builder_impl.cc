@@ -353,7 +353,7 @@ void BuilderImpl::EmitCompoundAssignment(const ast::CompoundAssignmentStatement*
     }
     current_flow_block->instructions.Push(inst);
 
-    auto store = builder.Store(lhs.Get(), inst->Result());
+    auto store = builder.Store(lhs.Get(), inst);
     current_flow_block->instructions.Push(store);
 }
 
@@ -738,7 +738,7 @@ utils::Result<Value*> BuilderImpl::EmitUnary(const ast::UnaryOpExpression* expr)
     }
 
     current_flow_block->instructions.Push(inst);
-    return inst->Result();
+    return inst;
 }
 
 utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
@@ -817,7 +817,7 @@ utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr)
     }
 
     current_flow_block->instructions.Push(inst);
-    return inst->Result();
+    return inst;
 }
 
 utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* expr) {
@@ -831,7 +831,7 @@ utils::Result<Value*> BuilderImpl::EmitBitcast(const ast::BitcastExpression* exp
     auto* inst = builder.Bitcast(ty, val.Get());
 
     current_flow_block->instructions.Push(inst);
-    return inst->Result();
+    return inst;
 }
 
 void BuilderImpl::EmitCall(const ast::CallStatement* stmt) {
@@ -896,7 +896,7 @@ utils::Result<Value*> BuilderImpl::EmitCall(const ast::CallExpression* expr) {
         return utils::Failure;
     }
     current_flow_block->instructions.Push(inst);
-    return inst->Result();
+    return inst;
 }
 
 utils::Result<Value*> BuilderImpl::EmitLiteral(const ast::LiteralExpression* lit) {

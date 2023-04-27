@@ -19,8 +19,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Binary);
 
 namespace tint::ir {
 
-Binary::Binary(Kind kind, Value* result, Value* lhs, Value* rhs)
-    : Base(result), kind_(kind), lhs_(lhs), rhs_(rhs) {
+Binary::Binary(uint32_t id, Kind kind, const type::Type* ty, Value* lhs, Value* rhs)
+    : Base(id, ty), kind_(kind), lhs_(lhs), rhs_(rhs) {
     TINT_ASSERT(IR, lhs_);
     TINT_ASSERT(IR, rhs_);
     lhs_->AddUsage(this);
@@ -29,9 +29,9 @@ Binary::Binary(Kind kind, Value* result, Value* lhs, Value* rhs)
 
 Binary::~Binary() = default;
 
-utils::StringStream& Binary::ToString(utils::StringStream& out) const {
-    Result()->ToString(out) << " = ";
-    lhs_->ToString(out) << " ";
+utils::StringStream& Binary::ToInstruction(utils::StringStream& out) const {
+    ToValue(out) << " = ";
+    lhs_->ToValue(out) << " ";
 
     switch (GetKind()) {
         case Binary::Kind::kAdd:
@@ -90,7 +90,7 @@ utils::StringStream& Binary::ToString(utils::StringStream& out) const {
             break;
     }
     out << " ";
-    rhs_->ToString(out);
+    rhs_->ToValue(out);
 
     return out;
 }

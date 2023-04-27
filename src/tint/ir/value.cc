@@ -15,7 +15,6 @@
 #include "src/tint/ir/value.h"
 
 #include "src/tint/ir/constant.h"
-#include "src/tint/ir/runtime.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Value);
 

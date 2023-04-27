@@ -20,19 +20,16 @@ namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
-                                        //
+
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, Bitcast) {
     auto& b = CreateEmptyBuilder();
-
-    b.builder.next_runtime_id = Runtime::Id(42);
     const auto* inst =
         b.builder.Bitcast(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
 
-    ASSERT_TRUE(inst->Result()->Is<Runtime>());
-    EXPECT_EQ(Runtime::Id(42), inst->Result()->As<Runtime>()->AsId());
-    ASSERT_NE(inst->Result()->Type(), nullptr);
+    ASSERT_TRUE(inst->Is<ir::Bitcast>());
+    ASSERT_NE(inst->Type(), nullptr);
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
     auto val = inst->Val()->As<Constant>()->value;
@@ -40,20 +37,14 @@ TEST_F(IR_InstructionTest, Bitcast) {
     EXPECT_EQ(4_i, val->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     utils::StringStream str;
-    inst->ToString(str);
-    EXPECT_EQ(str.str(), "%42 (i32) = bitcast(4)");
+    inst->ToInstruction(str);
+    EXPECT_EQ(str.str(), "%1(i32) = bitcast(4)");
 }
 
 TEST_F(IR_InstructionTest, Bitcast_Usage) {
     auto& b = CreateEmptyBuilder();
-
-    b.builder.next_runtime_id = Runtime::Id(42);
     const auto* inst =
         b.builder.Bitcast(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
-
-    ASSERT_NE(inst->Result(), nullptr);
-    ASSERT_EQ(inst->Result()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->Result()->Usage()[0], inst);
 
     ASSERT_NE(inst->Val(), nullptr);
     ASSERT_EQ(inst->Val()->Usage().Length(), 1u);
