@@ -22,9 +22,9 @@
 namespace tint::ast {
 class MemberAccessorExpression;
 }  // namespace tint::ast
-namespace tint::sem {
+namespace tint::type {
 class StructMember;
-}  // namespace tint::sem
+}  // namespace tint::type
 
 namespace tint::sem {
 
@@ -81,7 +81,7 @@ class StructMemberAccess final
                        const Statement* statement,
                        const constant::Value* constant,
                        const ValueExpression* object,
-                       const StructMember* member,
+                       const type::StructMember* member,
                        bool has_side_effects,
                        const Variable* root_ident = nullptr);
 
@@ -89,10 +89,10 @@ class StructMemberAccess final
     ~StructMemberAccess() override;
 
     /// @returns the structure member
-    StructMember const* Member() const { return member_; }
+    type::StructMember const* Member() const { return member_; }
 
   private:
-    StructMember const* const member_;
+    type::StructMember const* const member_;
 };
 
 /// Swizzle holds the semantic information for a ast::MemberAccessorExpression

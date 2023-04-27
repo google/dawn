@@ -41,7 +41,7 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
 
     auto* outer = Sem().Get(outer_expr);
     ASSERT_NE(outer, nullptr);
-    auto* str = outer->Type()->As<sem::Struct>();
+    auto* str = outer->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(outer->ConstantValue(), nullptr);
@@ -53,7 +53,7 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
     ASSERT_NE(o1->ConstantValue(), nullptr);
     EXPECT_FALSE(o1->ConstantValue()->AnyZero());
     EXPECT_FALSE(o1->ConstantValue()->AllZero());
-    EXPECT_TRUE(o1->ConstantValue()->Type()->Is<sem::Struct>());
+    EXPECT_TRUE(o1->ConstantValue()->Type()->Is<type::Struct>());
     EXPECT_EQ(o1->ConstantValue()->Index(0)->ValueAs<i32>(), 1_i);
     EXPECT_EQ(o1->ConstantValue()->Index(1)->ValueAs<u32>(), 2_u);
     EXPECT_EQ(o1->ConstantValue()->Index(2)->ValueAs<f32>(), 3_f);

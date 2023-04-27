@@ -790,8 +790,8 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
         ops.push_back(Operand(init_id));
     } else {
         auto* st = type->As<type::StorageTexture>();
-        if (st || type->Is<sem::Struct>()) {
-            // type is a sem::Struct or a type::StorageTexture
+        if (st || type->Is<type::Struct>()) {
+            // type is a type::Struct or a type::StorageTexture
             auto access = st ? st->access() : sem->Access();
             switch (access) {
                 case builtin::Access::kWrite:
@@ -1353,7 +1353,7 @@ uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
         // If the result is not a vector then we should have validated that the
         // value type is a correctly sized vector so we can just use it directly.
         if (result_type == value_type || result_type->Is<type::Matrix>() ||
-            result_type->Is<type::Array>() || result_type->Is<sem::Struct>()) {
+            result_type->Is<type::Array>() || result_type->Is<type::Struct>()) {
             ops.push_back(Operand(id));
             continue;
         }
@@ -1715,7 +1715,7 @@ uint32_t Builder::GenerateConstantIfNeeded(const constant::Value* constant) {
             }
             return composite(count.value());
         },
-        [&](const sem::Struct* s) { return composite(s->Members().Length()); },
+        [&](const type::Struct* s) { return composite(s->Members().Length()); },
         [&](Default) {
             error_ = "unhandled constant type: " + builder_.FriendlyName(ty);
             return 0;
@@ -2391,13 +2391,12 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             params.push_back(Operand(struct_id));
 
             auto* type = TypeOf(accessor->object)->UnwrapRef();
-            if (!type->Is<sem::Struct>()) {
+            if (!type->Is<type::Struct>()) {
                 error_ = "invalid type (" + type->FriendlyName() + ") for runtime array length";
                 return 0;
             }
             // Runtime array must be the last member in the structure
-            params.push_back(
-                Operand(uint32_t(type->As<sem::Struct>()->Declaration()->members.Length() - 1)));
+            params.push_back(Operand(uint32_t(type->As<type::Struct>()->Members().Length() - 1)));
 
             if (!push_function_inst(spv::Op::OpArrayLength, params)) {
                 return 0;
@@ -3702,7 +3701,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
             [&](const type::Reference* ref) {  //
                 return GenerateReferenceType(ref, result);
             },
-            [&](const sem::Struct* str) {  //
+            [&](const type::Struct* str) {  //
                 return GenerateStructType(str, result);
             },
             [&](const type::U32*) {
@@ -3914,7 +3913,7 @@ bool Builder::GenerateReferenceType(const type::Reference* ref, const Operand& r
     return true;
 }
 
-bool Builder::GenerateStructType(const sem::Struct* struct_type, const Operand& result) {
+bool Builder::GenerateStructType(const type::Struct* struct_type, const Operand& result) {
     auto struct_id = std::get<uint32_t>(result);
 
     if (struct_type->Name().IsValid()) {
@@ -3924,9 +3923,11 @@ bool Builder::GenerateStructType(const sem::Struct* struct_type, const Operand& 
     OperandList ops;
     ops.push_back(result);
 
-    auto* decl = struct_type->Declaration();
-    if (decl && ast::HasAttribute<transform::AddBlockAttribute::BlockAttribute>(decl->attributes)) {
-        push_annot(spv::Op::OpDecorate, {Operand(struct_id), U32Operand(SpvDecorationBlock)});
+    if (auto* sem_str = struct_type->As<sem::Struct>()) {
+        auto* decl = sem_str->Declaration();
+        if (ast::HasAttribute<transform::AddBlockAttribute::BlockAttribute>(decl->attributes)) {
+            push_annot(spv::Op::OpDecorate, {Operand(struct_id), U32Operand(SpvDecorationBlock)});
+        }
     }
 
     for (uint32_t i = 0; i < struct_type->Members().Length(); ++i) {
@@ -3944,7 +3945,7 @@ bool Builder::GenerateStructType(const sem::Struct* struct_type, const Operand& 
 
 uint32_t Builder::GenerateStructMember(uint32_t struct_id,
                                        uint32_t idx,
-                                       const sem::StructMember* member) {
+                                       const type::StructMember* member) {
     push_debug(spv::Op::OpMemberName,
                {Operand(struct_id), Operand(idx), Operand(member->Name().Name())});
 

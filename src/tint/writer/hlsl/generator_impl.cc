@@ -1094,7 +1094,7 @@ bool GeneratorImpl::EmitValueConstructor(utils::StringStream& out,
         }
     }
 
-    bool brackets = type->IsAnyOf<type::Array, sem::Struct>();
+    bool brackets = type->IsAnyOf<type::Array, type::Struct>();
 
     // For single-value vector initializers, swizzle the scalar to the right
     // vector dimension using .x
@@ -1887,7 +1887,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(utils::StringStream& out,
             return true;
         }
         case builtin::Function::kAtomicCompareExchangeWeak: {
-            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>())) {
                 return false;
             }
 
@@ -2004,7 +2004,7 @@ bool GeneratorImpl::EmitModfCall(utils::StringStream& out,
 
             // Emit the builtin return type unique to this overload. This does not
             // exist in the AST, so it will not be generated in Generate().
-            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>())) {
                 return false;
             }
 
@@ -2037,7 +2037,7 @@ bool GeneratorImpl::EmitFrexpCall(utils::StringStream& out,
 
             // Emit the builtin return type unique to this overload. This does not
             // exist in the AST, so it will not be generated in Generate().
-            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>())) {
                 return false;
             }
 
@@ -3287,7 +3287,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         for (auto* var : func->params) {
             auto* sem = builder_.Sem().Get(var);
             auto* type = sem->Type();
-            if (TINT_UNLIKELY(!type->Is<sem::Struct>())) {
+            if (TINT_UNLIKELY(!type->Is<type::Struct>())) {
                 // ICE likely indicates that the CanonicalizeEntryPointIO transform was
                 // not run, or a builtin parameter was added after it was run.
                 TINT_ICE(Writer, diagnostics_) << "Unsupported non-struct entry point parameter";
@@ -3437,7 +3437,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out,
 
             return true;
         },
-        [&](const sem::Struct* s) {
+        [&](const type::Struct* s) {
             if (!EmitStructType(&helpers_, s)) {
                 return false;
             }
@@ -3580,7 +3580,7 @@ bool GeneratorImpl::EmitValue(utils::StringStream& out, const type::Type* type, 
             }
             return true;
         },
-        [&](const sem::Struct*) {
+        [&](const type::Struct*) {
             out << "(";
             TINT_DEFER(out << ")" << value);
             return EmitType(out, type, builtin::AddressSpace::kUndefined,
@@ -4077,7 +4077,7 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
             out << "State";
             return true;
         },
-        [&](const sem::Struct* str) {
+        [&](const type::Struct* str) {
             out << StructName(str);
             return true;
         },
@@ -4202,7 +4202,7 @@ bool GeneratorImpl::EmitTypeAndName(utils::StringStream& out,
     return true;
 }
 
-bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
+bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
     auto it = emitted_structs_.emplace(str);
     if (!it.second) {
         return true;

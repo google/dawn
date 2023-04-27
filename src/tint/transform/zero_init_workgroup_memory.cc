@@ -168,19 +168,16 @@ struct ZeroInitWorkgroupMemory::State {
                 }
             }
 
-            if (auto* str = sem.Get(param)->Type()->As<sem::Struct>()) {
+            if (auto* str = sem.Get(param)->Type()->As<type::Struct>()) {
                 for (auto* member : str->Members()) {
-                    if (auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(
-                            member->Declaration()->attributes)) {
-                        auto builtin = sem.Get(builtin_attr)->Value();
-                        if (builtin == builtin::BuiltinValue::kLocalInvocationIndex) {
-                            local_index = [=] {
-                                auto* param_expr = b.Expr(ctx.Clone(param->name->symbol));
-                                auto* member_name = ctx.Clone(member->Declaration()->name);
-                                return b.MemberAccessor(param_expr, member_name);
-                            };
-                            break;
-                        }
+                    if (member->Attributes().builtin ==
+                        builtin::BuiltinValue::kLocalInvocationIndex) {
+                        local_index = [=] {
+                            auto* param_expr = b.Expr(ctx.Clone(param->name->symbol));
+                            auto member_name = ctx.Clone(member->Name());
+                            return b.MemberAccessor(param_expr, member_name);
+                        };
+                        break;
                     }
                 }
             }
@@ -318,9 +315,9 @@ struct ZeroInitWorkgroupMemory::State {
             return true;
         }
 
-        if (auto* str = ty->As<sem::Struct>()) {
+        if (auto* str = ty->As<type::Struct>()) {
             for (auto* member : str->Members()) {
-                auto name = ctx.Clone(member->Declaration()->name->symbol);
+                auto name = ctx.Clone(member->Name());
                 auto get_member = [&](uint32_t num_values) {
                     auto s = get_expr(num_values);
                     if (!s) {
@@ -444,7 +441,7 @@ struct ZeroInitWorkgroupMemory::State {
         if (ty->Is<type::Atomic>()) {
             return false;
         }
-        if (auto* str = ty->As<sem::Struct>()) {
+        if (auto* str = ty->As<type::Struct>()) {
             for (auto* member : str->Members()) {
                 if (!CanTriviallyZero(member->Type())) {
                     return false;

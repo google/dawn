@@ -1445,7 +1445,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Zero) {
     ASSERT_NE(sem, nullptr);
     auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<sem::Struct>());
+    EXPECT_TRUE(arr->ElemType()->Is<type::Struct>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->AllZero());
@@ -1662,7 +1662,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
     ASSERT_NE(sem, nullptr);
     auto* arr = sem->Type()->As<type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<sem::Struct>());
+    EXPECT_TRUE(arr->ElemType()->Is<type::Struct>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -1787,7 +1787,7 @@ TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 3u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -1828,7 +1828,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -1875,7 +1875,7 @@ TEST_F(ResolverConstEvalTest, Struct_VectorF32s_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 3u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -1928,7 +1928,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedVectors_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -1999,7 +1999,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2009,14 +2009,14 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Struct>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Struct>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->ValueAs<i32>(), 0_i);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->ValueAs<u32>(), 0_u);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(2)->ValueAs<f32>(), 0_f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Struct>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Struct>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->ValueAs<i32>(), 0_i);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<u32>(), 0_u);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 0_f);
@@ -2039,7 +2039,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2091,7 +2091,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedVectors_Construct) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2163,7 +2163,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_Construct) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2173,14 +2173,14 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_Construct) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Struct>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Struct>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->ValueAs<i32>(), 1_i);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->ValueAs<u32>(), 2_u);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(2)->ValueAs<f32>(), 3_f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Struct>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Struct>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->ValueAs<i32>(), 4_i);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<u32>(), 0_u);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 6_f);
@@ -2199,7 +2199,7 @@ TEST_F(ResolverConstEvalTest, Struct_Array_Construct) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<sem::Struct>();
+    auto* str = sem->Type()->As<type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(sem->ConstantValue(), nullptr);

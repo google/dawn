@@ -1265,7 +1265,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
     EXPECT_TRUE(sma->Member()->Type()->Is<type::F32>());
     EXPECT_EQ(sma->Object()->Declaration(), mem->object);
     EXPECT_EQ(sma->Member()->Index(), 1u);
-    EXPECT_EQ(sma->Member()->Declaration()->name->symbol, Symbols().Get("second_member"));
+    EXPECT_EQ(sma->Member()->Name().Name(), "second_member");
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {

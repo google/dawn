@@ -81,8 +81,8 @@ TEST_F(ResolverVariableTest, LocalVar_NoInitializer) {
     EXPECT_TRUE(TypeOf(f)->As<type::Reference>()->StoreType()->Is<type::F32>());
     EXPECT_TRUE(TypeOf(h)->As<type::Reference>()->StoreType()->Is<type::F16>());
     EXPECT_TRUE(TypeOf(b)->As<type::Reference>()->StoreType()->Is<type::Bool>());
-    EXPECT_TRUE(TypeOf(s)->As<type::Reference>()->StoreType()->Is<sem::Struct>());
-    EXPECT_TRUE(TypeOf(a)->As<type::Reference>()->StoreType()->Is<sem::Struct>());
+    EXPECT_TRUE(TypeOf(s)->As<type::Reference>()->StoreType()->Is<type::Struct>());
+    EXPECT_TRUE(TypeOf(a)->As<type::Reference>()->StoreType()->Is<type::Struct>());
 
     EXPECT_EQ(Sem().Get(i)->Initializer(), nullptr);
     EXPECT_EQ(Sem().Get(u)->Initializer(), nullptr);
@@ -161,8 +161,8 @@ TEST_F(ResolverVariableTest, LocalVar_WithInitializer) {
     EXPECT_TRUE(TypeOf(f)->As<type::Reference>()->StoreType()->Is<type::F32>());
     EXPECT_TRUE(TypeOf(h)->As<type::Reference>()->StoreType()->Is<type::F16>());
     EXPECT_TRUE(TypeOf(b)->As<type::Reference>()->StoreType()->Is<type::Bool>());
-    EXPECT_TRUE(TypeOf(s)->As<type::Reference>()->StoreType()->Is<sem::Struct>());
-    EXPECT_TRUE(TypeOf(a)->As<type::Reference>()->StoreType()->Is<sem::Struct>());
+    EXPECT_TRUE(TypeOf(s)->As<type::Reference>()->StoreType()->Is<type::Struct>());
+    EXPECT_TRUE(TypeOf(a)->As<type::Reference>()->StoreType()->Is<type::Struct>());
 
     EXPECT_EQ(Sem().Get(i)->Initializer()->Declaration(), i_c);
     EXPECT_EQ(Sem().Get(u)->Initializer()->Declaration(), u_c);
@@ -444,8 +444,8 @@ TEST_F(ResolverVariableTest, LocalLet) {
     ASSERT_TRUE(TypeOf(f)->Is<type::F32>());
     ASSERT_TRUE(TypeOf(h)->Is<type::F16>());
     ASSERT_TRUE(TypeOf(b)->Is<type::Bool>());
-    ASSERT_TRUE(TypeOf(s)->Is<sem::Struct>());
-    ASSERT_TRUE(TypeOf(a)->Is<sem::Struct>());
+    ASSERT_TRUE(TypeOf(s)->Is<type::Struct>());
+    ASSERT_TRUE(TypeOf(a)->Is<type::Struct>());
     ASSERT_TRUE(TypeOf(p)->Is<type::Pointer>());
     ASSERT_TRUE(TypeOf(p)->As<type::Pointer>()->StoreType()->Is<type::I32>());
 
@@ -924,7 +924,7 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_vu32)->Is<type::Vector>());
     ASSERT_TRUE(TypeOf(c_vf32)->Is<type::Vector>());
     ASSERT_TRUE(TypeOf(c_mf32)->Is<type::Matrix>());
-    ASSERT_TRUE(TypeOf(c_s)->Is<sem::Struct>());
+    ASSERT_TRUE(TypeOf(c_s)->Is<type::Struct>());
 
     EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());
@@ -987,7 +987,7 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_vaf)->Is<type::Vector>());
     ASSERT_TRUE(TypeOf(c_mf32)->Is<type::Matrix>());
     ASSERT_TRUE(TypeOf(c_maf32)->Is<type::Matrix>());
-    ASSERT_TRUE(TypeOf(c_s)->Is<sem::Struct>());
+    ASSERT_TRUE(TypeOf(c_s)->Is<type::Struct>());
 
     EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());

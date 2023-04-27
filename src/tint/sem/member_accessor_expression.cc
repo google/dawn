@@ -41,7 +41,7 @@ StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* decl
                                        const Statement* statement,
                                        const constant::Value* constant,
                                        const ValueExpression* object,
-                                       const StructMember* member,
+                                       const type::StructMember* member,
                                        bool has_side_effects,
                                        const Variable* root_ident /* = nullptr */)
     : Base(declaration,

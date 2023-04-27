@@ -144,7 +144,7 @@ struct Std140::State {
 
         // Scan structures for members that need forking
         for (auto* ty : src->Types()) {
-            if (auto* str = ty->As<sem::Struct>()) {
+            if (auto* str = ty->As<type::Struct>()) {
                 if (str->UsedAs(builtin::AddressSpace::kUniform)) {
                     for (auto* member : str->Members()) {
                         if (needs_fork(member->Type())) {
@@ -226,11 +226,11 @@ struct Std140::State {
     utils::Hashset<const sem::Variable*, 8> std140_uniforms;
 
     // Map of original structure to 'std140' forked structure
-    utils::Hashmap<const sem::Struct*, Symbol, 8> std140_structs;
+    utils::Hashmap<const type::Struct*, Symbol, 8> std140_structs;
 
     // Map of structure member in src of a matrix type, to list of decomposed column
     // members in ctx.dst.
-    utils::Hashmap<const sem::StructMember*, utils::Vector<const ast::StructMember*, 4>, 8>
+    utils::Hashmap<const type::StructMember*, utils::Vector<const ast::StructMember*, 4>, 8>
         std140_mat_members;
 
     /// Describes a matrix that has been forked to a std140-structure holding the decomposed column
@@ -403,7 +403,7 @@ struct Std140::State {
     ast::Type Std140Type(const type::Type* ty) {
         return Switch(
             ty,  //
-            [&](const sem::Struct* str) {
+            [&](const type::Struct* str) {
                 if (auto std140 = std140_structs.Find(str)) {
                     return b.ty(*std140);
                 }
@@ -631,7 +631,7 @@ struct Std140::State {
     const std::string ConvertSuffix(const type::Type* ty) {
         return Switch(
             ty,  //
-            [&](const sem::Struct* str) { return str->Name().Name(); },
+            [&](const type::Struct* str) { return str->Name().Name(); },
             [&](const type::Array* arr) {
                 auto count = arr->ConstantCount();
                 if (TINT_UNLIKELY(!count)) {
@@ -694,7 +694,7 @@ struct Std140::State {
 
             Switch(
                 ty,  //
-                [&](const sem::Struct* str) {
+                [&](const type::Struct* str) {
                     // Convert each of the structure members using either a converter function
                     // call, or by reassembling a std140 matrix from column vector members.
                     utils::Vector<const ast::Expression*, 8> args;
@@ -832,7 +832,7 @@ struct Std140::State {
         // As this is accessing only part of the matrix, we just need to pick the right column
         // vector member.
         auto column_idx = std::get<u32>(chain.indices[std140_mat_idx + 1]);
-        if (auto* str = tint::As<sem::Struct>(ty)) {
+        if (auto* str = tint::As<type::Struct>(ty)) {
             // Structure member matrix. The columns are decomposed into the structure.
             auto mat_member_idx = std::get<u32>(chain.indices[std140_mat_idx]);
             auto* mat_member = str->Members()[mat_member_idx];
@@ -913,7 +913,7 @@ struct Std140::State {
                 }
             }
 
-            if (auto* str = tint::As<sem::Struct>(ty)) {
+            if (auto* str = tint::As<type::Struct>(ty)) {
                 // Structure member matrix. The columns are decomposed into the structure.
                 auto mat_member_idx = std::get<u32>(chain.indices[std140_mat_idx]);
                 auto* mat_member = str->Members()[mat_member_idx];
@@ -1012,7 +1012,7 @@ struct Std140::State {
         stmts.Push(b.Decl(let));
 
         utils::Vector<const ast::MemberAccessorExpression*, 4> columns;
-        if (auto* str = tint::As<sem::Struct>(ty)) {
+        if (auto* str = tint::As<type::Struct>(ty)) {
             // Structure member matrix. The columns are decomposed into the structure.
             auto mat_member_idx = std::get<u32>(chain.indices[std140_mat_idx]);
             auto* mat_member = str->Members()[mat_member_idx];
@@ -1133,7 +1133,7 @@ struct Std140::State {
         auto idx = std::get<u32>(access);
         return Switch(
             ty,  //
-            [&](const sem::Struct* str) -> ExprTypeName {
+            [&](const type::Struct* str) -> ExprTypeName {
                 auto* member = str->Members()[idx];
                 auto member_name = member->Name().Name();
                 auto* expr = b.MemberAccessor(lhs, member_name);

@@ -147,7 +147,7 @@ struct ArrayLengthFromUniform::State {
             const ast::Expression* total_size = total_storage_buffer_size;
             auto* storage_buffer_type = storage_buffer_sem->Type()->UnwrapRef();
             const type::Array* array_type = nullptr;
-            if (auto* str = storage_buffer_type->As<sem::Struct>()) {
+            if (auto* str = storage_buffer_type->As<type::Struct>()) {
                 // The variable is a struct, so subtract the byte offset of the array
                 // member.
                 auto* array_member_sem = str->Members().Back();

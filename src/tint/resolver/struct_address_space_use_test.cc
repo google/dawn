@@ -32,7 +32,7 @@ TEST_F(ResolverAddressSpaceUseTest, UnreachableStruct) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_TRUE(sem->AddressSpaceUsage().empty());
 }
@@ -44,7 +44,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromParameter) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kUndefined));
 }
@@ -56,7 +56,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromReturnType) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kUndefined));
 }
@@ -68,7 +68,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromGlobal) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kPrivate));
 }
@@ -80,7 +80,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalAlias) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kPrivate));
 }
@@ -92,7 +92,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalStruct) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kPrivate));
 }
@@ -104,7 +104,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalArray) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kPrivate));
 }
@@ -116,7 +116,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableFromLocal) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kFunction));
 }
@@ -128,7 +128,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalAlias) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kFunction));
 }
@@ -140,7 +140,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalStruct) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kFunction));
 }
@@ -152,7 +152,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalArray) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kFunction));
 }
@@ -166,7 +166,7 @@ TEST_F(ResolverAddressSpaceUseTest, StructMultipleAddressSpaceUses) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* sem = TypeOf(s)->As<sem::Struct>();
+    auto* sem = TypeOf(s)->As<type::Struct>();
     ASSERT_NE(sem, nullptr);
     EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(builtin::AddressSpace::kUniform,
                                                                builtin::AddressSpace::kStorage,

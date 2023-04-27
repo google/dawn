@@ -925,7 +925,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f32) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
+    auto* ty = TypeOf(call)->As<type::Struct>();
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().Length(), 2u);
 
@@ -956,7 +956,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f16) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
+    auto* ty = TypeOf(call)->As<type::Struct>();
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().Length(), 2u);
 
@@ -985,7 +985,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f32) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
+    auto* ty = TypeOf(call)->As<type::Struct>();
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().Length(), 2u);
 
@@ -1020,7 +1020,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
+    auto* ty = TypeOf(call)->As<type::Struct>();
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().Length(), 2u);
 
@@ -1174,7 +1174,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfScalar_f32) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
+    auto* ty = TypeOf(call)->As<type::Struct>();
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().Length(), 2u);
 
@@ -1205,7 +1205,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfScalar_f16) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
+    auto* ty = TypeOf(call)->As<type::Struct>();
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().Length(), 2u);
 
@@ -1234,7 +1234,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector_f32) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
+    auto* ty = TypeOf(call)->As<type::Struct>();
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().Length(), 2u);
 
@@ -1269,7 +1269,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector_f16) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    auto* ty = TypeOf(call)->As<sem::Struct>();
+    auto* ty = TypeOf(call)->As<type::Struct>();
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().Length(), 2u);
 

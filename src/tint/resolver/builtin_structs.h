@@ -19,10 +19,8 @@
 namespace tint {
 class ProgramBuilder;
 }  // namespace tint
-namespace tint::sem {
-class Struct;
-}  // namespace tint::sem
 namespace tint::type {
+class Struct;
 class Type;
 }  // namespace tint::type
 
@@ -32,19 +30,19 @@ namespace tint::resolver {
  * @param ty the type of the `fract` and `whole` struct members.
  * @return the builtin struct type for a modf() builtin call.
  */
-sem::Struct* CreateModfResult(ProgramBuilder& b, const type::Type* ty);
+type::Struct* CreateModfResult(ProgramBuilder& b, const type::Type* ty);
 
 /**
  * @param fract the type of the `fract` struct member.
  * @return the builtin struct type for a frexp() builtin call.
  */
-sem::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* fract);
+type::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* fract);
 
 /**
  * @param ty the type of the `old_value` struct member.
  * @return the builtin struct type for a atomic_compare_exchange() builtin call.
  */
-sem::Struct* CreateAtomicCompareExchangeResult(ProgramBuilder& b, const type::Type* ty);
+type::Struct* CreateAtomicCompareExchangeResult(ProgramBuilder& b, const type::Type* ty);
 
 }  // namespace tint::resolver
 

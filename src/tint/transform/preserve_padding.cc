@@ -160,12 +160,12 @@ struct PreservePadding::State {
                     return body;
                 });
             },
-            [&](const sem::Struct* str) {
+            [&](const type::Struct* str) {
                 // Call a helper function that assigns each member separately.
                 return call_helper([&]() {
                     utils::Vector<const ast::Statement*, 8> body;
                     for (auto member : str->Members()) {
-                        auto name = member->Declaration()->name->symbol.Name();
+                        auto name = member->Name().Name();
                         body.Push(MakeAssignment(member->Type(),
                                                  b.MemberAccessor(b.Deref(kDestParamName), name),
                                                  b.MemberAccessor(kValueParamName, name)));
@@ -199,7 +199,7 @@ struct PreservePadding::State {
                 }
                 return HasPadding(col_ty);
             },
-            [&](const sem::Struct* str) {
+            [&](const type::Struct* str) {
                 uint32_t current_offset = 0;
                 for (auto* member : str->Members()) {
                     if (member->Offset() > current_offset) {

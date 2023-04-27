@@ -4328,7 +4328,7 @@ fn main() {
         // The first member should have an alignment of 16 bytes, a size of 12 bytes, and the second
         // member should have an offset of 12 bytes.
         auto* sem_str = got.program.Sem().Get(vars[0]);
-        auto* str_ty = sem_str->Type()->UnwrapRef()->As<sem::Struct>();
+        auto* str_ty = sem_str->Type()->UnwrapRef()->As<type::Struct>();
         ASSERT_NE(str_ty, nullptr);
         ASSERT_EQ(str_ty->Members().Length(), 2u);
         EXPECT_EQ(str_ty->Members()[0]->Align(), 16u);

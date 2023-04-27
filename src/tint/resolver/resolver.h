@@ -560,7 +560,7 @@ class Resolver {
     // It is a tuple of the structure type, number of arguments provided and earliest evaluation
     // stage.
     using StructConstructorSig =
-        utils::UnorderedKeyWrapper<std::tuple<const sem::Struct*, size_t, sem::EvaluationStage>>;
+        utils::UnorderedKeyWrapper<std::tuple<const type::Struct*, size_t, sem::EvaluationStage>>;
 
     /// ExprEvalStageConstraint describes a constraint on when expressions can be evaluated.
     struct ExprEvalStageConstraint {

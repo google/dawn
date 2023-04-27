@@ -522,7 +522,7 @@ struct DecomposeMemoryAccess::State {
                         auto* offset = b.Add("offset", u32(i * mat_ty->ColumnStride()));
                         values.Push(b.Call(load, offset));
                     }
-                } else if (auto* str = el_ty->As<sem::Struct>()) {
+                } else if (auto* str = el_ty->As<type::Struct>()) {
                     for (auto* member : str->Members()) {
                         auto* offset = b.Add("offset", u32(member->Offset()));
                         Symbol load = LoadFunc(member->Type()->UnwrapRef(), address_space, buffer);
@@ -607,7 +607,7 @@ struct DecomposeMemoryAccess::State {
                         }
                         return stmts;
                     },
-                    [&](const sem::Struct* str) {
+                    [&](const type::Struct* str) {
                         utils::Vector<const ast::Statement*, 8> stmts;
                         for (auto* member : str->Members()) {
                             auto* offset = b.Add("offset", u32(member->Offset()));
@@ -660,8 +660,8 @@ struct DecomposeMemoryAccess::State {
 
             // For intrinsics that return a struct, there is no AST node for it, so create one now.
             if (intrinsic->Type() == builtin::Function::kAtomicCompareExchangeWeak) {
-                auto* str = intrinsic->ReturnType()->As<sem::Struct>();
-                TINT_ASSERT(Transform, str && str->Declaration() == nullptr);
+                auto* str = intrinsic->ReturnType()->As<type::Struct>();
+                TINT_ASSERT(Transform, str);
 
                 utils::Vector<const ast::StructMember*, 8> ast_members;
                 ast_members.Reserve(str->Members().Length());
@@ -869,7 +869,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                 }
             } else {
                 if (auto access = state.TakeAccess(accessor->object)) {
-                    auto* str_ty = access.type->As<sem::Struct>();
+                    auto* str_ty = access.type->As<type::Struct>();
                     auto* member = str_ty->FindMember(accessor->member->symbol);
                     auto offset = member->Offset();
                     state.AddAccess(accessor, {

@@ -112,7 +112,7 @@ class TextGenerator {
     /// structures that start with double underscores. If the structure is a
     /// builtin, then the returned name will be a unique name without the leading
     /// underscores.
-    std::string StructName(const sem::Struct* s);
+    std::string StructName(const type::Struct* s);
 
     /// @param str the string
     /// @param suffix the suffix to remove
@@ -221,7 +221,7 @@ class TextGenerator {
     /// The primary text buffer that the generator will emit
     TextBuffer main_buffer_;
     /// Map of builtin structure to unique generated name
-    std::unordered_map<const sem::Struct*, std::string> builtin_struct_names_;
+    std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
 };
 
 }  // namespace tint::writer

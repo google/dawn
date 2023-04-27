@@ -79,7 +79,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
 
     // Map of builtin usages
     std::unordered_map<const sem::Variable*, const char*> builtin_vars;
-    std::unordered_map<const sem::StructMember*, const char*> builtin_members;
+    std::unordered_map<const type::StructMember*, const char*> builtin_members;
 
     bool has_vertex_or_instance_index = false;
 

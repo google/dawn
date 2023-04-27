@@ -53,7 +53,7 @@ struct SpirvAtomic::State {
     ProgramBuilder b;
     /// The clone context
     CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
-    std::unordered_map<const ast::Struct*, ForkedStruct> forked_structs;
+    std::unordered_map<const type::Struct*, ForkedStruct> forked_structs;
     std::unordered_set<const sem::Variable*> atomic_variables;
     utils::UniqueVector<const sem::ValueExpression*, 8> atomic_expressions;
 
@@ -123,7 +123,8 @@ struct SpirvAtomic::State {
         if (!forked_structs.empty()) {
             ctx.ReplaceAll([&](const ast::Struct* str) {
                 // Is `str` a structure we need to fork?
-                if (auto it = forked_structs.find(str); it != forked_structs.end()) {
+                auto* str_ty = ctx.src->Sem().Get(str);
+                if (auto it = forked_structs.find(str_ty); it != forked_structs.end()) {
                     const auto& forked = it->second;
 
                     // Re-create the structure swapping in the atomic-flavoured members
@@ -154,10 +155,10 @@ struct SpirvAtomic::State {
     }
 
   private:
-    ForkedStruct& Fork(const ast::Struct* str) {
+    ForkedStruct& Fork(const type::Struct* str) {
         auto& forked = forked_structs[str];
         if (!forked.name.IsValid()) {
-            forked.name = b.Symbols().New(str->name->symbol.Name() + "_atomic");
+            forked.name = b.Symbols().New(str->Name().Name() + "_atomic");
         }
         return forked;
     }
@@ -179,7 +180,7 @@ struct SpirvAtomic::State {
                     // Fork the struct (the first time) and mark member(s) that need to be made
                     // atomic.
                     auto* member = access->Member();
-                    Fork(member->Struct()->Declaration()).atomic_members.emplace(member->Index());
+                    Fork(member->Struct()).atomic_members.emplace(member->Index());
                     atomic_expressions.Add(access->Object());
                 },
                 [&](const sem::IndexAccessorExpression* index) {
@@ -198,7 +199,7 @@ struct SpirvAtomic::State {
             ty,  //
             [&](const type::I32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
             [&](const type::U32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
-            [&](const sem::Struct* str) { return b.ty(Fork(str->Declaration()).name); },
+            [&](const type::Struct* str) { return b.ty(Fork(str).name); },
             [&](const type::Array* arr) {
                 if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                     return b.ty.array(AtomicTypeFor(arr->ElemType()));
@@ -231,7 +232,7 @@ struct SpirvAtomic::State {
                 (atomic_variables.count(e->RootIdentifier()) != 0)) {
                 // If it's a struct member, make sure it's one we marked as atomic
                 if (auto* ma = e->As<sem::StructMemberAccess>()) {
-                    auto it = forked_structs.find(ma->Member()->Struct()->Declaration());
+                    auto it = forked_structs.find(ma->Member()->Struct());
                     if (it != forked_structs.end()) {
                         auto& forked = it->second;
                         return forked.atomic_members.count(ma->Member()->Index()) != 0;

@@ -30,7 +30,7 @@ std::string TextGenerator::UniqueIdentifier(const std::string& prefix) {
     return builder_.Symbols().New(prefix).Name();
 }
 
-std::string TextGenerator::StructName(const sem::Struct* s) {
+std::string TextGenerator::StructName(const type::Struct* s) {
     auto name = s->Name().Name();
     if (name.size() > 1 && name[0] == '_' && name[1] == '_') {
         name = utils::GetOrCreate(builtin_struct_names_, s,

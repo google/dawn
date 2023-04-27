@@ -383,11 +383,11 @@ class GeneratorImpl : public TextGenerator {
     /// this function will simply return `true` without emitting anything.
     /// @param buffer the text buffer that the type declaration will be written to
     /// @param ty the struct to generate
-    void EmitStructType(TextBuffer* buffer, const sem::Struct* ty);
+    void EmitStructType(TextBuffer* buffer, const type::Struct* ty);
     /// Handles generating the members of a structure
     /// @param buffer the text buffer that the struct members will be written to
     /// @param ty the struct to generate
-    void EmitStructMembers(TextBuffer* buffer, const sem::Struct* ty);
+    void EmitStructMembers(TextBuffer* buffer, const type::Struct* ty);
     /// Handles a unary op expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
@@ -460,7 +460,7 @@ class GeneratorImpl : public TextGenerator {
     std::unordered_map<const type::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const type::Vector*, std::string> int_dot_funcs_;
     std::unordered_map<BinaryOperandType, std::string> float_modulo_funcs_;
-    std::unordered_set<const sem::Struct*> emitted_structs_;
+    std::unordered_set<const type::Struct*> emitted_structs_;
     bool requires_oes_sample_variables_ = false;
     bool requires_default_precision_qualifier_ = false;
     bool requires_f16_extension_ = false;

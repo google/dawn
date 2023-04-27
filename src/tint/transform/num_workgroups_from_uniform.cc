@@ -99,10 +99,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
             }
 
             for (auto* member : str->Members()) {
-                auto* builtin =
-                    ast::GetAttribute<ast::BuiltinAttribute>(member->Declaration()->attributes);
-                if (!builtin ||
-                    src->Sem().Get(builtin)->Value() != builtin::BuiltinValue::kNumWorkgroups) {
+                if (member->Attributes().builtin != builtin::BuiltinValue::kNumWorkgroups) {
                     continue;
                 }
 

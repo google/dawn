@@ -200,7 +200,7 @@ bool Validator::AddDiagnostic(builtin::DiagnosticRule rule,
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Validator::IsPlain(const type::Type* type) const {
     return type->is_scalar() ||
-           type->IsAnyOf<type::Atomic, type::Vector, type::Matrix, type::Array, sem::Struct>();
+           type->IsAnyOf<type::Atomic, type::Vector, type::Matrix, type::Array, type::Struct>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
@@ -214,7 +214,7 @@ bool Validator::IsFixedFootprint(const type::Type* type) const {
             return !arr->Count()->Is<type::RuntimeArrayCount>() &&
                    IsFixedFootprint(arr->ElemType());
         },
-        [&](const sem::Struct* str) {
+        [&](const type::Struct* str) {
             for (auto* member : str->Members()) {
                 if (!IsFixedFootprint(member->Type())) {
                     return false;
@@ -235,7 +235,7 @@ bool Validator::IsHostShareable(const type::Type* type) const {
         [&](const type::Vector* vec) { return IsHostShareable(vec->type()); },
         [&](const type::Matrix* mat) { return IsHostShareable(mat->type()); },
         [&](const type::Array* arr) { return IsHostShareable(arr->ElemType()); },
-        [&](const sem::Struct* str) {
+        [&](const type::Struct* str) {
             for (auto* member : str->Members()) {
                 if (!IsHostShareable(member->Type())) {
                     return false;
@@ -397,11 +397,11 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
 
     auto is_uniform_struct_or_array = [address_space](const type::Type* ty) {
         return address_space == builtin::AddressSpace::kUniform &&
-               ty->IsAnyOf<type::Array, sem::Struct>();
+               ty->IsAnyOf<type::Array, type::Struct>();
     };
 
     auto is_uniform_struct = [address_space](const type::Type* ty) {
-        return address_space == builtin::AddressSpace::kUniform && ty->Is<sem::Struct>();
+        return address_space == builtin::AddressSpace::kUniform && ty->Is<type::Struct>();
     };
 
     auto required_alignment_of = [&](const type::Type* ty) {
@@ -413,7 +413,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
         return required_align;
     };
 
-    auto member_name_of = [](const sem::StructMember* sm) { return sm->Name().Name(); };
+    auto member_name_of = [](const type::StructMember* sm) { return sm->Name().Name(); };
 
     // Only validate the [type + address space] once
     if (!valid_type_storage_layouts_.Add(TypeAndAddressSpace{store_ty, address_space})) {
@@ -1138,12 +1138,12 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         }
 
         if (IsValidationEnabled(attrs, ast::DisabledValidation::kEntryPointParameter)) {
-            if (is_struct_member && ty->Is<sem::Struct>()) {
+            if (is_struct_member && ty->Is<type::Struct>()) {
                 AddError("nested structures cannot be used for entry point IO", source);
                 return false;
             }
 
-            if (!ty->Is<sem::Struct>() && !pipeline_io_attribute) {
+            if (!ty->Is<type::Struct>() && !pipeline_io_attribute) {
                 std::string err = "missing entry point IO attribute";
                 if (!is_struct_member) {
                     err += (param_or_ret == ParamOrRetType::kParameter ? " on parameter"
@@ -1763,7 +1763,7 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
 }
 
 bool Validator::StructureInitializer(const ast::CallExpression* ctor,
-                                     const sem::Struct* struct_type) const {
+                                     const type::Struct* struct_type) const {
     if (!struct_type->IsConstructible()) {
         AddError("structure constructor has non-constructible type", ctor->source);
         return false;
@@ -2564,8 +2564,8 @@ bool Validator::CheckTypeAccessAddressSpace(
             }
             return true;
         },
-        [&](const sem::Struct*) { return check_sub_atomics(); },  //
-        [&](const type::Array*) { return check_sub_atomics(); },  //
+        [&](const type::Struct*) { return check_sub_atomics(); },  //
+        [&](const type::Array*) { return check_sub_atomics(); },   //
         [&](Default) { return true; });
 }
 

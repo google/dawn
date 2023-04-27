@@ -496,7 +496,7 @@ class Builder {
     /// @param struct_type the vector to generate
     /// @param result the result operand
     /// @returns true if the vector was successfully generated
-    bool GenerateStructType(const sem::Struct* struct_type, const Operand& result);
+    bool GenerateStructType(const type::Struct* struct_type, const Operand& result);
     /// Generates a struct member
     /// @param struct_id the id of the parent structure
     /// @param idx the index of the member
@@ -504,7 +504,7 @@ class Builder {
     /// @returns the id of the struct member or 0 on error.
     uint32_t GenerateStructMember(uint32_t struct_id,
                                   uint32_t idx,
-                                  const sem::StructMember* member);
+                                  const type::StructMember* member);
     /// Generates a variable declaration statement
     /// @param stmt the statement to generate
     /// @returns true on successfull generation

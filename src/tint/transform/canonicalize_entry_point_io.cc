@@ -371,7 +371,7 @@ struct CanonicalizeEntryPointIO::State {
         // list to pass them through to the inner function.
         utils::Vector<const ast::Expression*, 8> inner_struct_values;
         for (auto* member : str->Members()) {
-            if (TINT_UNLIKELY(member->Type()->Is<sem::Struct>())) {
+            if (TINT_UNLIKELY(member->Type()->Is<type::Struct>())) {
                 TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
                 continue;
             }
@@ -400,7 +400,7 @@ struct CanonicalizeEntryPointIO::State {
         bool do_interpolate = func_ast->PipelineStage() != ast::PipelineStage::kFragment;
         if (auto* str = inner_ret_type->As<sem::Struct>()) {
             for (auto* member : str->Members()) {
-                if (TINT_UNLIKELY(member->Type()->Is<sem::Struct>())) {
+                if (TINT_UNLIKELY(member->Type()->Is<type::Struct>())) {
                     TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
                     continue;
                 }
@@ -639,7 +639,7 @@ struct CanonicalizeEntryPointIO::State {
         // aggregated into a single structure.
         if (!func_sem->Parameters().IsEmpty()) {
             for (auto* param : func_sem->Parameters()) {
-                if (param->Type()->Is<sem::Struct>()) {
+                if (param->Type()->Is<type::Struct>()) {
                     ProcessStructParameter(param);
                 } else {
                     ProcessNonStructParameter(param);

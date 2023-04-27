@@ -948,7 +948,7 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Scalar) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
@@ -961,7 +961,7 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
@@ -978,7 +978,7 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
@@ -995,7 +995,7 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
@@ -1012,7 +1012,7 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
@@ -1025,7 +1025,7 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
@@ -1042,7 +1042,7 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
@@ -1059,7 +1059,7 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);

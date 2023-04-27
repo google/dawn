@@ -170,8 +170,8 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-    gen.EmitStructType(&buf, sem_s);
+    auto* str = program->TypeOf(s)->As<type::Struct>();
+    gen.EmitStructType(&buf, str);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(buf.String(), R"(struct S {
   int a;
@@ -190,9 +190,9 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct) {
 
     GeneratorImpl& gen = Build();
 
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+    auto* str = program->TypeOf(s)->As<type::Struct>();
     utils::StringStream out;
-    gen.EmitType(out, sem_s, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, str, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "S");
 }
@@ -224,8 +224,8 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-    gen.EmitStructType(&buf, sem_s);
+    auto* str = program->TypeOf(s)->As<type::Struct>();
+    gen.EmitStructType(&buf, str);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(buf.String(), R"(struct S {
   int a;

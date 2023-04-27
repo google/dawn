@@ -54,7 +54,7 @@ bool ContainsMatrix(const type::Type* type) {
         return true;
     } else if (auto* ary = type->As<type::Array>()) {
         return ContainsMatrix(ary->ElemType());
-    } else if (auto* str = type->As<sem::Struct>()) {
+    } else if (auto* str = type->As<type::Struct>()) {
         for (auto* member : str->Members()) {
             if (ContainsMatrix(member->Type())) {
                 return true;
@@ -82,11 +82,6 @@ struct ModuleScopeVarToEntryPointParam::State {
         if (auto* str = ty->As<sem::Struct>()) {
             if (!cloned_structs_.emplace(str).second) {
                 // The struct has already been cloned.
-                return;
-            }
-
-            if (!str->Declaration()) {
-                // The struct is a built-in structure that we do not need to declare.
                 return;
             }
 

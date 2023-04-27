@@ -34,10 +34,10 @@ TEST_P(ResolverBuiltinStructs, Resolve) {
     auto* var = GlobalVar("p", ty(GetParam()), builtin::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    auto* str = As<sem::Struct>(TypeOf(var)->UnwrapRef());
+    auto* str = As<type::Struct>(TypeOf(var)->UnwrapRef());
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Name().Name(), utils::ToString(GetParam()));
-    EXPECT_EQ(str->Declaration(), nullptr);
+    EXPECT_FALSE(Is<sem::Struct>(str));
 }
 
 INSTANTIATE_TEST_SUITE_P(,

@@ -204,7 +204,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
 
                             const type::Array* array_type = Switch(
                                 storage_buffer_type->StoreType(),
-                                [&](const sem::Struct* str) {
+                                [&](const type::Struct* str) {
                                     // The variable is a struct, so subtract the byte offset of
                                     // the array member.
                                     auto* array_member_sem = str->Members().Back();

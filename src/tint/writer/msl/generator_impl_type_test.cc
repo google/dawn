@@ -245,8 +245,8 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
+    auto* str = program->TypeOf(s)->As<type::Struct>();
+    ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
   int a;
   float b;
@@ -292,8 +292,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
+    auto* str = program->TypeOf(type)->As<type::Struct>();
+    ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
     // for each field of the structure s.
@@ -401,8 +401,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
+    auto* str = program->TypeOf(type)->As<type::Struct>();
+    ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
     // for each field of the structure s.
@@ -493,8 +493,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
+    auto* str = program->TypeOf(type)->As<type::Struct>();
+    ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
     // for each field of the structure s.
@@ -577,8 +577,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
+    auto* str = program->TypeOf(type)->As<type::Struct>();
+    ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
     // for each field of the structure s.
@@ -639,8 +639,8 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
+    auto* str = program->TypeOf(type)->As<type::Struct>();
+    ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
   /* 0x0000 */ int tint_pad_2;
   /* 0x0004 */ tint_array<int8_t, 124> tint_pad_10;
@@ -698,8 +698,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
     GeneratorImpl& gen = Build();
 
     TextGenerator::TextBuffer buf;
-    auto* sem_s = program->TypeOf(type)->As<sem::Struct>();
-    ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.Diagnostics();
+    auto* str = program->TypeOf(type)->As<type::Struct>();
+    ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
   /* 0x0000 */ int a;
   /* 0x0004 */ float b;

@@ -60,7 +60,7 @@ struct LocalizeStructArrayAssignment::State {
                     continue;
                 }
                 auto og = GetOriginatingTypeAndAddressSpace(assign_stmt);
-                if (!(og.first->Is<sem::Struct>() &&
+                if (!(og.first->Is<type::Struct>() &&
                       (og.second == builtin::AddressSpace::kFunction ||
                        og.second == builtin::AddressSpace::kPrivate))) {
                     continue;

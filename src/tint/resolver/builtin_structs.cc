@@ -33,19 +33,18 @@ struct NameAndType {
     const type::Type* type;
 };
 
-sem::Struct* BuildStruct(ProgramBuilder& b,
-                         builtin::Builtin name,
-                         std::initializer_list<NameAndType> member_names_and_types) {
+type::Struct* BuildStruct(ProgramBuilder& b,
+                          builtin::Builtin name,
+                          std::initializer_list<NameAndType> member_names_and_types) {
     uint32_t offset = 0;
     uint32_t max_align = 0;
-    utils::Vector<const sem::StructMember*, 4> members;
+    utils::Vector<const type::StructMember*, 4> members;
     for (auto& m : member_names_and_types) {
         uint32_t align = std::max<uint32_t>(m.type->Align(), 1);
         uint32_t size = m.type->Size();
         offset = utils::RoundUp(align, offset);
         max_align = std::max(max_align, align);
-        members.Push(b.create<sem::StructMember>(
-            /* declaration */ nullptr,
+        members.Push(b.create<type::StructMember>(
             /* source */ Source{},
             /* name */ b.Sym(m.name),
             /* type */ m.type,
@@ -58,8 +57,7 @@ sem::Struct* BuildStruct(ProgramBuilder& b,
     }
     uint32_t size_without_padding = offset;
     uint32_t size_with_padding = utils::RoundUp(max_align, offset);
-    return b.create<sem::Struct>(
-        /* declaration */ nullptr,
+    return b.create<type::Struct>(
         /* source */ Source{},
         /* name */ b.Sym(name),
         /* members */ std::move(members),
@@ -85,7 +83,7 @@ constexpr std::array kModfVecAbstractNames{
     builtin::Builtin::kModfResultVec4Abstract,
 };
 
-sem::Struct* CreateModfResult(ProgramBuilder& b, const type::Type* ty) {
+type::Struct* CreateModfResult(ProgramBuilder& b, const type::Type* ty) {
     return Switch(
         ty,
         [&](const type::F32*) {
@@ -157,7 +155,7 @@ constexpr std::array kFrexpVecAbstractNames{
     builtin::Builtin::kFrexpResultVec3Abstract,
     builtin::Builtin::kFrexpResultVec4Abstract,
 };
-sem::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* ty) {
+type::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* ty) {
     return Switch(
         ty,  //
         [&](const type::F32*) {
@@ -222,7 +220,7 @@ sem::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* ty) {
         });
 }
 
-sem::Struct* CreateAtomicCompareExchangeResult(ProgramBuilder& b, const type::Type* ty) {
+type::Struct* CreateAtomicCompareExchangeResult(ProgramBuilder& b, const type::Type* ty) {
     return Switch(
         ty,  //
         [&](const type::I32*) {

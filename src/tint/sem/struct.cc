@@ -28,7 +28,9 @@ Struct::Struct(const ast::Struct* declaration,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)
-    : Base(source, name, members, align, size, size_no_padding), declaration_(declaration) {}
+    : Base(source, name, members, align, size, size_no_padding), declaration_(declaration) {
+    TINT_ASSERT(Semantic, declaration != nullptr);
+}
 
 Struct::~Struct() = default;
 
@@ -41,7 +43,9 @@ StructMember::StructMember(const ast::StructMember* declaration,
                            uint32_t align,
                            uint32_t size,
                            const type::StructMemberAttributes& attributes)
-    : Base(source, name, type, index, offset, align, size, attributes), declaration_(declaration) {}
+    : Base(source, name, type, index, offset, align, size, attributes), declaration_(declaration) {
+    TINT_ASSERT(Semantic, declaration != nullptr);
+}
 
 StructMember::~StructMember() = default;
 

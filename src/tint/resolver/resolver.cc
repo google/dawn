@@ -997,7 +997,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         func->AddParameter(p);
 
         auto* p_ty = const_cast<type::Type*>(p->Type());
-        if (auto* str = p_ty->As<sem::Struct>()) {
+        if (auto* str = p_ty->As<type::Struct>()) {
             switch (decl->PipelineStage()) {
                 case ast::PipelineStage::kVertex:
                     str->AddUsage(type::PipelineStageUsage::kVertexInput);
@@ -1096,7 +1096,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         }
     }
 
-    if (auto* str = return_type->As<sem::Struct>()) {
+    if (auto* str = return_type->As<type::Struct>()) {
         if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined, str, decl->source)) {
             AddNote("while instantiating return type for " + decl->name->symbol.Name(),
                     decl->source);
@@ -1761,7 +1761,7 @@ const type::Type* Resolver::ConcreteType(const type::Type* ty,
             }
             return nullptr;
         },
-        [&](const sem::Struct* s) -> const type::Type* {
+        [&](const type::Struct* s) -> const type::Type* {
             if (auto tys = s->ConcreteTypes(); !tys.IsEmpty()) {
                 return target_ty ? target_ty : tys[0];
             }
@@ -2143,7 +2143,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 }
                 return call;
             },
-            [&](const sem::Struct* str) -> sem::Call* {
+            [&](const type::Struct* str) -> sem::Call* {
                 auto* call_target = struct_ctors_.GetOrCreate(
                     StructConstructorSig{{str, args.Length(), args_stage}},
                     [&]() -> sem::ValueConstructor* {
@@ -3248,10 +3248,10 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
 
     return Switch(
         storage_ty,  //
-        [&](const sem::Struct* str) -> sem::ValueExpression* {
+        [&](const type::Struct* str) -> sem::ValueExpression* {
             auto symbol = expr->member->symbol;
 
-            const sem::StructMember* member = nullptr;
+            const type::StructMember* member = nullptr;
             for (auto* m : str->Members()) {
                 if (m->Name() == symbol) {
                     member = m;

@@ -38,6 +38,7 @@ class StructMember;
 namespace tint::sem {
 
 /// Struct holds the semantic information for structures.
+/// Unlike type::Struct, sem::Struct has an AST declaration node.
 class Struct final : public utils::Castable<Struct, type::Struct> {
   public:
     /// Constructor
@@ -47,8 +48,7 @@ class Struct final : public utils::Castable<Struct, type::Struct> {
     /// @param members the structure members
     /// @param align the byte alignment of the structure
     /// @param size the byte size of the structure
-    /// @param size_no_padding size of the members without the end of structure
-    /// alignment padding
+    /// @param size_no_padding size of the members without the end of structure alignment padding
     Struct(const ast::Struct* declaration,
            tint::Source source,
            Symbol name,
@@ -73,6 +73,7 @@ class Struct final : public utils::Castable<Struct, type::Struct> {
 };
 
 /// StructMember holds the semantic information for structure members.
+/// Unlike type::StructMember, sem::StructMember has an AST declaration node.
 class StructMember final : public utils::Castable<StructMember, type::StructMember> {
   public:
     /// Constructor

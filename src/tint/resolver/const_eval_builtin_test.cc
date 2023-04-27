@@ -166,7 +166,7 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
         ASSERT_NE(value, nullptr);
         EXPECT_TYPE(value->Type(), sem->Type());
 
-        if (value->Type()->Is<sem::Struct>()) {
+        if (value->Type()->Is<type::Struct>()) {
             // The result type of the constant-evaluated expression is a structure.
             // Compare each of the fields individually.
             for (size_t i = 0; i < expected_case.values.Length(); i++) {

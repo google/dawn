@@ -397,7 +397,7 @@ class Validator {
     /// @param struct_type the type of the structure
     /// @returns true on success, false otherwise
     bool StructureInitializer(const ast::CallExpression* ctor,
-                              const sem::Struct* struct_type) const;
+                              const type::Struct* struct_type) const;
 
     /// Validates a switch statement
     /// @param s the switch to validate

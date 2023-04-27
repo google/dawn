@@ -340,7 +340,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param buffer the text buffer that the type declaration will be written to
     /// @param str the struct to generate
     /// @returns true if the struct is emitted
-    bool EmitStructType(TextBuffer* buffer, const sem::Struct* str);
+    bool EmitStructType(TextBuffer* buffer, const type::Struct* str);
     /// Handles a unary op expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
@@ -418,7 +418,7 @@ class GeneratorImpl : public TextGenerator {
     /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
     /// class and struct return type
     using ACEWKeyType =
-        utils::UnorderedKeyWrapper<std::tuple<builtin::AddressSpace, const sem::Struct*>>;
+        utils::UnorderedKeyWrapper<std::tuple<builtin::AddressSpace, const type::Struct*>>;
     std::unordered_map<ACEWKeyType, std::string> atomicCompareExchangeWeak_;
 
     /// Unique name of the 'TINT_INVARIANT' preprocessor define.
@@ -440,7 +440,7 @@ class GeneratorImpl : public TextGenerator {
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
     std::unordered_map<const type::Type*, std::string> unary_minus_funcs_;
     std::unordered_map<uint32_t, std::string> int_dot_funcs_;
-    std::unordered_set<const sem::Struct*> emitted_structs_;
+    std::unordered_set<const type::Struct*> emitted_structs_;
 };
 
 }  // namespace tint::writer::msl

@@ -814,7 +814,7 @@ void GeneratorImpl::EmitWorkgroupAtomicCall(utils::StringStream& out,
             return;
         }
         case builtin::Function::kAtomicCompareExchangeWeak: {
-            EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>());
+            EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>());
 
             auto* dest = expr->args[0];
             auto* compare_value = expr->args[1];
@@ -1043,7 +1043,7 @@ void GeneratorImpl::EmitModfCall(utils::StringStream& out,
                       [&](TextBuffer* b, const std::vector<std::string>& params) {
                           // Emit the builtin return type unique to this overload. This does not
                           // exist in the AST, so it will not be generated in Generate().
-                          EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>());
+                          EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>());
 
                           {
                               auto l = line(b);
@@ -1064,7 +1064,7 @@ void GeneratorImpl::EmitFrexpCall(utils::StringStream& out,
                       [&](TextBuffer* b, const std::vector<std::string>& params) {
                           // Emit the builtin return type unique to this overload. This does not
                           // exist in the AST, so it will not be generated in Generate().
-                          EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>());
+                          EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>());
 
                           {
                               auto l = line(b);
@@ -1769,7 +1769,7 @@ void GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
 
 void GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable* sem) {
     auto* type = sem->Type()->UnwrapRef();
-    auto* str = type->As<sem::Struct>();
+    auto* str = type->As<type::Struct>();
     if (TINT_UNLIKELY(!str)) {
         TINT_ICE(Writer, builder_.Diagnostics()) << "storage variable must be of struct type";
         return;
@@ -1788,7 +1788,7 @@ void GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable
 
 void GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable* sem) {
     auto* type = sem->Type()->UnwrapRef();
-    auto* str = type->As<sem::Struct>();
+    auto* str = type->As<type::Struct>();
     if (TINT_UNLIKELY(!str)) {
         TINT_ICE(Writer, builder_.Diagnostics()) << "storage variable must be of struct type";
         return;
@@ -2040,7 +2040,7 @@ void GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         for (auto* var : func->params) {
             auto* sem = builder_.Sem().Get(var);
             auto* type = sem->Type();
-            if (TINT_UNLIKELY(!type->Is<sem::Struct>())) {
+            if (TINT_UNLIKELY(!type->Is<type::Struct>())) {
                 // ICE likely indicates that the CanonicalizeEntryPointIO transform was
                 // not run, or a builtin parameter was added after it was run.
                 TINT_ICE(Writer, diagnostics_) << "Unsupported non-struct entry point parameter";
@@ -2132,7 +2132,7 @@ void GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value
                 EmitConstant(out, constant->Index(i));
             }
         },
-        [&](const sem::Struct* s) {
+        [&](const type::Struct* s) {
             EmitStructType(&helpers_, s);
 
             out << StructName(s);
@@ -2210,7 +2210,7 @@ void GeneratorImpl::EmitZeroValue(utils::StringStream& out, const type::Type* ty
             }
             EmitZeroValue(out, mat->type());
         }
-    } else if (auto* str = type->As<sem::Struct>()) {
+    } else if (auto* str = type->As<type::Struct>()) {
         EmitType(out, type, builtin::AddressSpace::kUndefined, builtin::Access::kUndefined, "");
         bool first = true;
         ScopedParen sp(out);
@@ -2568,7 +2568,7 @@ void GeneratorImpl::EmitType(utils::StringStream& out,
         TINT_ICE(Writer, diagnostics_) << "Attempting to emit pointer type. These should have been "
                                           "removed with the SimplifyPointers transform";
     } else if (type->Is<type::Sampler>()) {
-    } else if (auto* str = type->As<sem::Struct>()) {
+    } else if (auto* str = type->As<type::Struct>()) {
         out << StructName(str);
     } else if (auto* tex = type->As<type::Texture>()) {
         if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
@@ -2669,7 +2669,7 @@ void GeneratorImpl::EmitTypeAndName(utils::StringStream& out,
     }
 }
 
-void GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
+void GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
     auto it = emitted_structs_.emplace(str);
     if (!it.second) {
         return;
@@ -2682,7 +2682,7 @@ void GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
     line(b);
 }
 
-void GeneratorImpl::EmitStructMembers(TextBuffer* b, const sem::Struct* str) {
+void GeneratorImpl::EmitStructMembers(TextBuffer* b, const type::Struct* str) {
     ScopedIndent si(b);
     for (auto* mem : str->Members()) {
         auto name = mem->Name().Name();
