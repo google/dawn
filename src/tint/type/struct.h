@@ -49,15 +49,13 @@ enum class PipelineStageUsage {
 class Struct : public utils::Castable<Struct, Type> {
   public:
     /// Constructor
-    /// @param source the source of the structure
     /// @param name the name of the structure
     /// @param members the structure members
     /// @param align the byte alignment of the structure
     /// @param size the byte size of the structure
     /// @param size_no_padding size of the members without the end of structure
     /// alignment padding
-    Struct(tint::Source source,
-           Symbol name,
+    Struct(Symbol name,
            utils::VectorRef<const StructMember*> members,
            uint32_t align,
            uint32_t size,
@@ -69,9 +67,6 @@ class Struct : public utils::Castable<Struct, Type> {
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
     bool Equals(const UniqueNode& other) const override;
-
-    /// @returns the source of the structure
-    tint::Source Source() const { return source_; }
 
     /// @returns the name of the structure
     Symbol Name() const { return name_; }
@@ -153,7 +148,6 @@ class Struct : public utils::Castable<Struct, Type> {
     Struct* Clone(CloneContext& ctx) const override;
 
   private:
-    const tint::Source source_;
     const Symbol name_;
     const utils::Vector<const StructMember*, 4> members_;
     const uint32_t align_;
@@ -180,7 +174,6 @@ struct StructMemberAttributes {
 class StructMember : public utils::Castable<StructMember, Node> {
   public:
     /// Constructor
-    /// @param source the source of the struct member
     /// @param name the name of the structure member
     /// @param type the type of the member
     /// @param index the index of the member in the structure
@@ -188,8 +181,7 @@ class StructMember : public utils::Castable<StructMember, Node> {
     /// @param align the byte alignment of the member
     /// @param size the byte size of the member
     /// @param attributes the optional attributes
-    StructMember(tint::Source source,
-                 Symbol name,
+    StructMember(Symbol name,
                  const type::Type* type,
                  uint32_t index,
                  uint32_t offset,
@@ -199,9 +191,6 @@ class StructMember : public utils::Castable<StructMember, Node> {
 
     /// Destructor
     ~StructMember() override;
-
-    /// @returns the source the struct member
-    const tint::Source& Source() const { return source_; }
 
     /// @returns the name of the structure member
     Symbol Name() const { return name_; }
@@ -236,7 +225,6 @@ class StructMember : public utils::Castable<StructMember, Node> {
     StructMember* Clone(CloneContext& ctx) const;
 
   private:
-    const tint::Source source_;
     const Symbol name_;
     const type::Struct* struct_;
     const type::Type* type_;

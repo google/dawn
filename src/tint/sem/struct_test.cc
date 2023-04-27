@@ -26,8 +26,8 @@ TEST_F(SemStructTest, Creation) {
     auto name = Sym("S");
     auto* impl = create<ast::Struct>(Ident(name), utils::Empty, utils::Empty);
     auto* ptr = impl;
-    auto* s = create<sem::Struct>(impl, impl->source, impl->name->symbol, utils::Empty,
-                                  4u /* align */, 8u /* size */, 16u /* size_no_padding */);
+    auto* s = create<sem::Struct>(impl, impl->name->symbol, utils::Empty, 4u /* align */,
+                                  8u /* size */, 16u /* size_no_padding */);
     EXPECT_EQ(s->Declaration(), ptr);
     EXPECT_EQ(s->Align(), 4u);
     EXPECT_EQ(s->Size(), 8u);
@@ -36,11 +36,11 @@ TEST_F(SemStructTest, Creation) {
 
 TEST_F(SemStructTest, Equals) {
     auto* a_impl = create<ast::Struct>(Ident("a"), utils::Empty, utils::Empty);
-    auto* a = create<sem::Struct>(a_impl, a_impl->source, a_impl->name->symbol, utils::Empty,
-                                  4u /* align */, 4u /* size */, 4u /* size_no_padding */);
+    auto* a = create<sem::Struct>(a_impl, a_impl->name->symbol, utils::Empty, 4u /* align */,
+                                  4u /* size */, 4u /* size_no_padding */);
     auto* b_impl = create<ast::Struct>(Ident("b"), utils::Empty, utils::Empty);
-    auto* b = create<sem::Struct>(b_impl, b_impl->source, b_impl->name->symbol, utils::Empty,
-                                  4u /* align */, 4u /* size */, 4u /* size_no_padding */);
+    auto* b = create<sem::Struct>(b_impl, b_impl->name->symbol, utils::Empty, 4u /* align */,
+                                  4u /* size */, 4u /* size_no_padding */);
 
     EXPECT_TRUE(a->Equals(*a));
     EXPECT_FALSE(a->Equals(*b));
@@ -50,8 +50,8 @@ TEST_F(SemStructTest, Equals) {
 TEST_F(SemStructTest, FriendlyName) {
     auto name = Sym("my_struct");
     auto* impl = create<ast::Struct>(Ident(name), utils::Empty, utils::Empty);
-    auto* s = create<sem::Struct>(impl, impl->source, impl->name->symbol, utils::Empty,
-                                  4u /* align */, 4u /* size */, 4u /* size_no_padding */);
+    auto* s = create<sem::Struct>(impl, impl->name->symbol, utils::Empty, 4u /* align */,
+                                  4u /* size */, 4u /* size_no_padding */);
     EXPECT_EQ(s->FriendlyName(), "my_struct");
 }
 

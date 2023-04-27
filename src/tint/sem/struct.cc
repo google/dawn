@@ -22,20 +22,18 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
 namespace tint::sem {
 
 Struct::Struct(const ast::Struct* declaration,
-               tint::Source source,
                Symbol name,
                utils::VectorRef<const StructMember*> members,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)
-    : Base(source, name, members, align, size, size_no_padding), declaration_(declaration) {
+    : Base(name, members, align, size, size_no_padding), declaration_(declaration) {
     TINT_ASSERT(Semantic, declaration != nullptr);
 }
 
 Struct::~Struct() = default;
 
 StructMember::StructMember(const ast::StructMember* declaration,
-                           tint::Source source,
                            Symbol name,
                            const type::Type* type,
                            uint32_t index,
@@ -43,7 +41,7 @@ StructMember::StructMember(const ast::StructMember* declaration,
                            uint32_t align,
                            uint32_t size,
                            const type::StructMemberAttributes& attributes)
-    : Base(source, name, type, index, offset, align, size, attributes), declaration_(declaration) {
+    : Base(name, type, index, offset, align, size, attributes), declaration_(declaration) {
     TINT_ASSERT(Semantic, declaration != nullptr);
 }
 

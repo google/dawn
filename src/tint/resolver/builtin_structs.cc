@@ -45,7 +45,6 @@ type::Struct* BuildStruct(ProgramBuilder& b,
         offset = utils::RoundUp(align, offset);
         max_align = std::max(max_align, align);
         members.Push(b.create<type::StructMember>(
-            /* source */ Source{},
             /* name */ b.Sym(m.name),
             /* type */ m.type,
             /* index */ static_cast<uint32_t>(members.Length()),
@@ -58,7 +57,6 @@ type::Struct* BuildStruct(ProgramBuilder& b,
     uint32_t size_without_padding = offset;
     uint32_t size_with_padding = utils::RoundUp(max_align, offset);
     return b.create<type::Struct>(
-        /* source */ Source{},
         /* name */ b.Sym(name),
         /* members */ std::move(members),
         /* align */ max_align,

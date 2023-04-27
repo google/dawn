@@ -445,7 +445,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
 
             // Recurse into the member type.
             if (!AddressSpaceLayout(m->Type(), address_space, m->Declaration()->type->source)) {
-                AddNote("see layout of struct:\n" + str->Layout(), str->Source());
+                AddNote("see layout of struct:\n" + str->Layout(), str->Declaration()->source);
                 note_usage();
                 return false;
             }
@@ -461,13 +461,13 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
                              "' is currently at offset " + std::to_string(m->Offset()) +
                              ". Consider setting @align(" + std::to_string(required_align) +
                              ") on this member",
-                         m->Source());
+                         m->Declaration()->source);
 
-                AddNote("see layout of struct:\n" + str->Layout(), str->Source());
+                AddNote("see layout of struct:\n" + str->Layout(), str->Declaration()->source);
 
                 if (auto* member_str = m->Type()->As<sem::Struct>()) {
                     AddNote("and layout of struct member:\n" + member_str->Layout(),
-                            member_str->Source());
+                            member_str->Declaration()->source);
                 }
 
                 note_usage();
@@ -483,19 +483,19 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
                     !enabled_extensions_.Contains(
                         builtin::Extension::kChromiumInternalRelaxedUniformLayout)) {
                     AddError(
-                        "uniform storage requires that the number of bytes between the "
-                        "start of the previous member of type struct and the current "
-                        "member be a multiple of 16 bytes, but there are currently " +
+                        "uniform storage requires that the number of bytes between the start of "
+                        "the previous member of type struct and the current member be a multiple "
+                        "of 16 bytes, but there are currently " +
                             std::to_string(prev_to_curr_offset) + " bytes between '" +
                             member_name_of(prev_member) + "' and '" + member_name_of(m) +
                             "'. Consider setting @align(16) on this member",
-                        m->Source());
+                        m->Declaration()->source);
 
-                    AddNote("see layout of struct:\n" + str->Layout(), str->Source());
+                    AddNote("see layout of struct:\n" + str->Layout(), str->Declaration()->source);
 
                     auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
                     AddNote("and layout of previous member struct:\n" + prev_member_str->Layout(),
-                            prev_member_str->Source());
+                            prev_member_str->Declaration()->source);
                     note_usage();
                     return false;
                 }
@@ -1213,8 +1213,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             if (auto* str = ty->As<sem::Struct>()) {
                 for (auto* member : str->Members()) {
                     if (!validate_entry_point_attributes_inner(
-                            member->Declaration()->attributes, member->Type(), member->Source(),
-                            param_or_ret,
+                            member->Declaration()->attributes, member->Type(),
+                            member->Declaration()->source, param_or_ret,
                             /*is_struct_member*/ true, member->Attributes().location)) {
                         AddNote("while analyzing entry point '" + decl->name->symbol.Name() + "'",
                                 decl->source);
@@ -2066,7 +2066,7 @@ bool Validator::Alias(const ast::Alias*) const {
 
 bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) const {
     if (str->Members().IsEmpty()) {
-        AddError("structures must have at least one member", str->Source());
+        AddError("structures must have at least one member", str->Declaration()->source);
         return false;
     }
 
@@ -2076,7 +2076,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
             if (r->Count()->Is<type::RuntimeArrayCount>()) {
                 if (member != str->Members().Back()) {
                     AddError("runtime arrays may only appear as the last member of a struct",
-                             member->Source());
+                             member->Declaration()->source);
                     return false;
                 }
             }
@@ -2088,7 +2088,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         } else if (!IsFixedFootprint(member->Type())) {
             AddError(
                 "a struct that contains a runtime array cannot be nested inside another struct",
-                member->Source());
+                member->Declaration()->source);
             return false;
         }
 
@@ -2107,7 +2107,8 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                     has_location = true;
                     TINT_ASSERT(Resolver, member->Attributes().location.has_value());
                     if (!LocationAttribute(location, member->Attributes().location.value(),
-                                           member->Type(), locations, stage, member->Source())) {
+                                           member->Type(), locations, stage,
+                                           member->Declaration()->source)) {
                         return false;
                     }
                     return true;

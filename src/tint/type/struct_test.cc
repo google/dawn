@@ -24,7 +24,7 @@ using TypeStructTest = TestHelper;
 
 TEST_F(TypeStructTest, Creation) {
     auto name = Sym("S");
-    auto* s = create<Struct>(Source{}, name, utils::Empty, 4u /* align */, 8u /* size */,
+    auto* s = create<Struct>(name, utils::Empty, 4u /* align */, 8u /* size */,
                              16u /* size_no_padding */);
     EXPECT_EQ(s->Align(), 4u);
     EXPECT_EQ(s->Size(), 8u);
@@ -32,9 +32,9 @@ TEST_F(TypeStructTest, Creation) {
 }
 
 TEST_F(TypeStructTest, Equals) {
-    auto* a = create<Struct>(Source{}, Sym("a"), utils::Empty, 4u /* align */, 4u /* size */,
+    auto* a = create<Struct>(Sym("a"), utils::Empty, 4u /* align */, 4u /* size */,
                              4u /* size_no_padding */);
-    auto* b = create<Struct>(Source{}, Sym("b"), utils::Empty, 4u /* align */, 4u /* size */,
+    auto* b = create<Struct>(Sym("b"), utils::Empty, 4u /* align */, 4u /* size */,
                              4u /* size_no_padding */);
 
     EXPECT_TRUE(a->Equals(*a));
@@ -44,8 +44,8 @@ TEST_F(TypeStructTest, Equals) {
 
 TEST_F(TypeStructTest, FriendlyName) {
     auto name = Sym("my_struct");
-    auto* s = create<Struct>(Source{}, name, utils::Empty, 4u /* align */, 4u /* size */,
-                             4u /* size_no_padding */);
+    auto* s =
+        create<Struct>(name, utils::Empty, 4u /* align */, 4u /* size */, 4u /* size_no_padding */);
     EXPECT_EQ(s->FriendlyName(), "my_struct");
 }
 
@@ -209,10 +209,10 @@ TEST_F(TypeStructTest, Clone) {
     attrs_location_2.location = 2;
 
     auto* s = create<Struct>(
-        Source{}, Sym("my_struct"),
-        utils::Vector{create<StructMember>(Source{}, Sym("b"), create<Vector>(create<F32>(), 3u),
-                                           0u, 0u, 16u, 12u, attrs_location_2),
-                      create<StructMember>(Source{}, Sym("a"), create<I32>(), 1u, 16u, 4u, 4u,
+        Sym("my_struct"),
+        utils::Vector{create<StructMember>(Sym("b"), create<Vector>(create<F32>(), 3u), 0u, 0u, 16u,
+                                           12u, attrs_location_2),
+                      create<StructMember>(Sym("a"), create<I32>(), 1u, 16u, 4u, 4u,
                                            type::StructMemberAttributes{})},
         4u /* align */, 8u /* size */, 16u /* size_no_padding */);
 

@@ -4189,9 +4189,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         }
 
         auto* sem_member = builder_->create<sem::StructMember>(
-            member, member->source, member->name->symbol, type,
-            static_cast<uint32_t>(sem_members.Length()), static_cast<uint32_t>(offset),
-            static_cast<uint32_t>(align), static_cast<uint32_t>(size), attributes);
+            member, member->name->symbol, type, static_cast<uint32_t>(sem_members.Length()),
+            static_cast<uint32_t>(offset), static_cast<uint32_t>(align),
+            static_cast<uint32_t>(size), attributes);
         builder_->Sem().Add(member, sem_member);
         sem_members.Push(sem_member);
 
@@ -4214,14 +4214,13 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     auto* out = builder_->create<sem::Struct>(
-        str, str->source, str->name->symbol, std::move(sem_members),
-        static_cast<uint32_t>(struct_align), static_cast<uint32_t>(struct_size),
-        static_cast<uint32_t>(size_no_padding));
+        str, str->name->symbol, std::move(sem_members), static_cast<uint32_t>(struct_align),
+        static_cast<uint32_t>(struct_size), static_cast<uint32_t>(size_no_padding));
 
     for (size_t i = 0; i < sem_members.Length(); i++) {
         auto* mem_type = sem_members[i]->Type();
         if (mem_type->Is<type::Atomic>()) {
-            atomic_composite_info_.Add(out, &sem_members[i]->Source());
+            atomic_composite_info_.Add(out, &sem_members[i]->Declaration()->source);
             break;
         } else {
             if (auto found = atomic_composite_info_.Get(mem_type)) {
@@ -4566,7 +4565,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(builtin::AddressSpace address_space,
                 utils::StringStream err;
                 err << "while analyzing structure member " << sem_.TypeNameOf(str) << "."
                     << member->Name().Name();
-                AddNote(err.str(), member->Source());
+                AddNote(err.str(), member->Declaration()->source);
                 return false;
             }
         }
