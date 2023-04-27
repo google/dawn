@@ -47,6 +47,7 @@ enum class Feature {
     DawnNative,
     ImplicitDeviceSynchronization,
     SurfaceCapabilities,
+    TransientAttachments,
 
     EnumCount,
     InvalidEnum = EnumCount,

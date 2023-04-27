@@ -494,6 +494,8 @@ VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& forma
         } else {
             flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         }
+        // TODO(1695): Check for TransientAttachment flag being present and
+        // convert it into the proper Vulkan flag.
     }
 
     // Choosing Vulkan image usages should not know about kReadOnlyRenderAttachment because that's
@@ -574,6 +576,13 @@ VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage
 
         case kPresentTextureUsage:
             return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+        case wgpu::TextureUsage::TransientAttachment:
+            // Will be covered by RenderAttachment above, as specification of
+            // TransientAttachment requires that RenderAttachment also be
+            // specified.
+            UNREACHABLE();
+            break;
 
         case wgpu::TextureUsage::None:
             break;

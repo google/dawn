@@ -286,7 +286,8 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor,
+MaybeError ValidateTextureUsage(const DeviceBase* device,
+                                const TextureDescriptor* descriptor,
                                 wgpu::TextureUsage usage,
                                 const Format* format) {
     DAWN_TRY(dawn::native::ValidateTextureUsage(usage));
@@ -317,6 +318,21 @@ MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor,
         !format->supportsStorageUsage && (usage & wgpu::TextureUsage::StorageBinding),
         "The texture usage (%s) includes %s, which is incompatible with the format (%s).", usage,
         wgpu::TextureUsage::StorageBinding, format->format);
+
+    const auto kTransientAttachment = wgpu::TextureUsage::TransientAttachment;
+    if (usage & kTransientAttachment) {
+        DAWN_INVALID_IF(
+            !device->HasFeature(Feature::TransientAttachments),
+            "The texture usage (%s) includes %s, which requires the %s feature to be set", usage,
+            kTransientAttachment, FeatureEnumToAPIFeature(Feature::TransientAttachments));
+
+        const auto kAllowedTransientUsage =
+            kTransientAttachment | wgpu::TextureUsage::RenderAttachment;
+        DAWN_INVALID_IF(usage != kAllowedTransientUsage,
+                        "The texture usage (%s) includes %s, which requires that the texture usage "
+                        "be exactly %s",
+                        usage, kTransientAttachment, kAllowedTransientUsage);
+    }
 
     // Only allows simple readonly texture usages.
     constexpr wgpu::TextureUsage kValidMultiPlanarUsages =
@@ -356,7 +372,7 @@ MaybeError ValidateTextureDescriptor(const DeviceBase* device,
         usage |= internalUsageDesc->internalUsage;
     }
 
-    DAWN_TRY(ValidateTextureUsage(descriptor, usage, format));
+    DAWN_TRY(ValidateTextureUsage(device, descriptor, usage, format));
     DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
     DAWN_TRY(ValidateSampleCount(descriptor, usage, format));
 

@@ -1025,4 +1025,60 @@ TEST_F(TextureValidationTest, APIValidateTextureDescriptor) {
     ASSERT_DEVICE_ERROR(device.ValidateTextureDescriptor(&desc));
 }
 
+// Tests that specification of the transient attachment on an unsupported device
+// causes an error.
+TEST_F(TextureValidationTest, TransientAttachmentOnUnsupportedDevice) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+}
+
+class TransientAttachmentValidationTest : public TextureValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TransientAttachments};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Tests that specification of the transient attachment with supported usage on
+// a supported device does not raise a validation error.
+TEST_F(TransientAttachmentValidationTest, Success) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment;
+
+    device.CreateTexture(&desc);
+}
+
+// Tests that specification of the transient attachment without specification of
+// the render attachment causes an error.
+TEST_F(TransientAttachmentValidationTest, NoRenderAttachment) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::TransientAttachment;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+}
+
+// Tests that specification of the transient attachment with flags beyond just
+// render attachment causes an error.
+TEST_F(TransientAttachmentValidationTest, FlagsBeyondRenderAttachment) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment |
+                 wgpu::TextureUsage::CopySrc;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+}
+
 }  // namespace

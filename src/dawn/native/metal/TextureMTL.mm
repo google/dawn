@@ -677,7 +677,16 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
         mtlDesc.usage |= MTLTextureUsagePixelFormatView;
     }
     mtlDesc.mipmapLevelCount = GetNumMipLevels();
+
+    // Create the texture in private storage mode unless the client has
+    // specified that this texture is for a transient attachment, in which case
+    // the texture should be created in memoryless storage mode.
     mtlDesc.storageMode = MTLStorageModePrivate;
+    if (@available(macOS 11.0, iOS 10.0, *)) {
+        if (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment) {
+            mtlDesc.storageMode = MTLStorageModeMemoryless;
+        }
+    }
 
     // Choose the correct MTLTextureType and paper over differences in how the array layer count
     // is specified.
@@ -778,6 +787,11 @@ MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descr
                                             const TextureDescriptor* textureDescriptor,
                                             IOSurfaceRef ioSurface,
                                             std::vector<MTLSharedEventAndSignalValue> waitEvents) {
+    DAWN_INVALID_IF(
+        GetInternalUsage() & wgpu::TextureUsage::TransientAttachment,
+        "Usage flags (%s) include %s, which is not compatible with creation from IOSurface.",
+        GetInternalUsage(), wgpu::TextureUsage::TransientAttachment);
+
     mIOSurface = ioSurface;
     mWaitEvents = std::move(waitEvents);
 

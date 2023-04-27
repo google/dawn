@@ -209,6 +209,33 @@ TEST_P(IOSurfaceValidationTests, InvalidFormat) {
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
+class IOSurfaceTransientAttachmentValidationTests : public IOSurfaceValidationTests {
+    void SetUp() override {
+        IOSurfaceValidationTests::SetUp();
+
+        // Skip all tests if the transient attachments feature is not supported.
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::TransientAttachments}));
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::TransientAttachments})) {
+            requiredFeatures.push_back(wgpu::FeatureName::TransientAttachments);
+        }
+        return requiredFeatures;
+    }
+};
+
+// Test that an error occurs if the transient attachment is specified.
+TEST_P(IOSurfaceTransientAttachmentValidationTests, ErrorWhenSpecified) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    descriptor.usage |= wgpu::TextureUsage::TransientAttachment;
+
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapIOSurface(&descriptor, defaultIOSurface.get()));
+    ASSERT_EQ(texture.Get(), nullptr);
+}
+
 // Fixture to test using IOSurfaces through different usages.
 // These tests are skipped if the harness is using the wire.
 class IOSurfaceUsageTests : public IOSurfaceTestBase {
@@ -653,5 +680,6 @@ TEST_P(IOSurfaceMultithreadTests, WrapAndClear_OnMultipleThreads) {
 }
 
 DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend());
+DAWN_INSTANTIATE_TEST(IOSurfaceTransientAttachmentValidationTests, MetalBackend());
 DAWN_INSTANTIATE_TEST(IOSurfaceUsageTests, MetalBackend());
 DAWN_INSTANTIATE_TEST(IOSurfaceMultithreadTests, MetalBackend());

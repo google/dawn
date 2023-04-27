@@ -513,6 +513,14 @@ class Adapter : public AdapterBase {
             EnableFeature(Feature::MultiPlanarFormats);
         }
 
+        if (@available(macOS 11.0, iOS 10.0, *)) {
+            // Memoryless storage mode for Metal textures is available only
+            // from the Apple2 family of GPUs on.
+            if ([*mDevice supportsFamily:MTLGPUFamilyApple2]) {
+                EnableFeature(Feature::TransientAttachments);
+            }
+        }
+
         EnableFeature(Feature::IndirectFirstInstance);
         EnableFeature(Feature::ShaderF16);
         EnableFeature(Feature::RG11B10UfloatRenderable);

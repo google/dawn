@@ -1892,3 +1892,111 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
         }
     }
 }
+
+class RenderPipelineTransientAttachmentValidationTest : public RenderPipelineValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::ShaderF16,
+                                                 wgpu::FeatureName::TransientAttachments};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 2;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Test case where creation should succeed.
+TEST_F(RenderPipelineTransientAttachmentValidationTest, CreationSuccess) {
+    constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.usage =
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment;
+    textureDescriptor.format = kColorFormat;
+    textureDescriptor.size.width = 4;
+    textureDescriptor.size.height = 4;
+
+    wgpu::Texture transientTexture = device.CreateTexture(&textureDescriptor);
+    utils::ComboRenderPassDescriptor renderPassDescriptor({transientTexture.CreateView()});
+
+    // Set load and store ops to supported values with transient attachments.
+    renderPassDescriptor.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    renderPass.SetPipeline(pipeline);
+    renderPass.End();
+
+    encoder.Finish();
+}
+
+// Creation of a pipeline that stores into a transient attachment should cause
+// an error.
+TEST_F(RenderPipelineTransientAttachmentValidationTest, StoreCausesError) {
+    constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.usage =
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment;
+    textureDescriptor.format = kColorFormat;
+    textureDescriptor.size.width = 4;
+    textureDescriptor.size.height = 4;
+
+    wgpu::Texture transientTexture = device.CreateTexture(&textureDescriptor);
+    utils::ComboRenderPassDescriptor renderPassDescriptor({transientTexture.CreateView()});
+
+    renderPassDescriptor.cColorAttachments[0].storeOp = wgpu::StoreOp::Store;
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    renderPass.SetPipeline(pipeline);
+    renderPass.End();
+
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Creation of a pipeline that loads from a transient attachment should cause
+// an error.
+TEST_F(RenderPipelineTransientAttachmentValidationTest, LoadCausesError) {
+    constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.usage =
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment;
+    textureDescriptor.format = kColorFormat;
+    textureDescriptor.size.width = 4;
+    textureDescriptor.size.height = 4;
+
+    wgpu::Texture transientTexture = device.CreateTexture(&textureDescriptor);
+    utils::ComboRenderPassDescriptor renderPassDescriptor({transientTexture.CreateView()});
+
+    renderPassDescriptor.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    renderPass.SetPipeline(pipeline);
+    renderPass.End();
+
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
