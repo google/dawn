@@ -131,6 +131,43 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
     return {};
 }
 
+static std::string name(AttributeKind kind) {
+    switch (kind) {
+        case AttributeKind::kAlign:
+            return "@align";
+        case AttributeKind::kBinding:
+            return "@binding";
+        case AttributeKind::kBuiltin:
+            return "@builtin";
+        case AttributeKind::kDiagnostic:
+            return "@diagnostic";
+        case AttributeKind::kGroup:
+            return "@group";
+        case AttributeKind::kId:
+            return "@id";
+        case AttributeKind::kInterpolate:
+            return "@interpolate";
+        case AttributeKind::kInvariant:
+            return "@invariant";
+        case AttributeKind::kLocation:
+            return "@location";
+        case AttributeKind::kOffset:
+            return "@offset";
+        case AttributeKind::kMustUse:
+            return "@must_use";
+        case AttributeKind::kSize:
+            return "@size";
+        case AttributeKind::kStage:
+            return "@stage";
+        case AttributeKind::kStride:
+            return "@stride";
+        case AttributeKind::kWorkgroup:
+            return "@workgroup_size";
+        case AttributeKind::kBindingAndGroup:
+            return "@binding";
+    }
+    return "<unknown>";
+}
 namespace FunctionInputAndOutputTests {
 using FunctionParameterAttributeTest = TestWithParams;
 TEST_P(FunctionParameterAttributeTest, IsValid) {
@@ -144,11 +181,16 @@ TEST_P(FunctionParameterAttributeTest, IsValid) {
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else if (params.kind == AttributeKind::kLocation || params.kind == AttributeKind::kBuiltin ||
+               params.kind == AttributeKind::kInvariant ||
+               params.kind == AttributeKind::kInterpolate) {
+        EXPECT_FALSE(r()->Resolve());
+        EXPECT_EQ(r()->error(), "error: " + name(params.kind) +
+                                    " is not valid for non-entry point function parameters");
     } else {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(r()->error(),
-                  "error: attribute is not valid for non-entry point function "
-                  "parameters");
+                  "error: " + name(params.kind) + " is not valid for function parameters");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -184,9 +226,9 @@ TEST_P(FunctionReturnTypeAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(),
-                  "error: attribute is not valid for non-entry point function "
-                  "return types");
+        EXPECT_EQ(r()->error(), "error: " + name(params.kind) +
+                                    " is not valid for non-entry point function "
+                                    "return types");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -234,10 +276,11 @@ TEST_P(ComputeShaderParameterAttributeTest, IsValid) {
         } else if (params.kind == AttributeKind::kInterpolate ||
                    params.kind == AttributeKind::kLocation ||
                    params.kind == AttributeKind::kInvariant) {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: attribute is not valid for compute shader inputs");
+            EXPECT_EQ(r()->error(), "12:34 error: " + name(params.kind) +
+                                        " is not valid for compute shader inputs");
         } else {
-            EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for function parameters");
+            EXPECT_EQ(r()->error(), "12:34 error: " + name(params.kind) +
+                                        " is not valid for function parameters");
         }
     }
 }
@@ -277,7 +320,8 @@ TEST_P(FragmentShaderParameterAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for function parameters");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for function parameters");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -331,7 +375,8 @@ TEST_P(VertexShaderParameterAttributeTest, IsValid) {
                       "12:34 error: invariant attribute must only be applied to a "
                       "position builtin");
         } else {
-            EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for function parameters");
+            EXPECT_EQ(r()->error(), "12:34 error: " + name(params.kind) +
+                                        " is not valid for function parameters");
         }
     }
 }
@@ -378,12 +423,12 @@ TEST_P(ComputeShaderReturnTypeAttributeTest, IsValid) {
         } else if (params.kind == AttributeKind::kInterpolate ||
                    params.kind == AttributeKind::kLocation ||
                    params.kind == AttributeKind::kInvariant) {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: attribute is not valid for compute shader output");
+            EXPECT_EQ(r()->error(), "12:34 error: " + name(params.kind) +
+                                        " is not valid for compute shader output");
         } else {
-            EXPECT_EQ(r()->error(),
-                      "12:34 error: attribute is not valid for entry point return "
-                      "types");
+            EXPECT_EQ(r()->error(), "12:34 error: " + name(params.kind) +
+                                        " is not valid for entry point return "
+                                        "types");
         }
     }
 }
@@ -434,8 +479,8 @@ TEST_P(FragmentShaderReturnTypeAttributeTest, IsValid) {
                       R"(34:56 error: duplicate location attribute
 12:34 note: first attribute declared here)");
         } else {
-            EXPECT_EQ(r()->error(),
-                      R"(12:34 error: attribute is not valid for entry point return types)");
+            EXPECT_EQ(r()->error(), "12:34 error: " + name(params.kind) +
+                                        " is not valid for entry point return types");
         }
     }
 }
@@ -484,8 +529,8 @@ TEST_P(VertexShaderReturnTypeAttributeTest, IsValid) {
                       R"(34:56 error: multiple entry point IO attributes
 12:34 note: previously consumed @location)");
         } else {
-            EXPECT_EQ(r()->error(),
-                      R"(12:34 error: attribute is not valid for entry point return types)");
+            EXPECT_EQ(r()->error(), "12:34 error: " + name(params.kind) +
+                                        " is not valid for entry point return types");
         }
     }
 }
@@ -591,7 +636,8 @@ TEST_P(StructAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for struct declarations");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for struct declarations");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -628,7 +674,8 @@ TEST_P(StructMemberAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for structure members");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for struct members");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -871,7 +918,8 @@ TEST_P(ArrayAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for array types");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for array types");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -898,7 +946,6 @@ TEST_P(VariableAttributeTest, IsValid) {
     auto& params = GetParam();
 
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
-    auto* attr = attrs[0];
     if (IsBindingAttribute(params.kind)) {
         GlobalVar("a", ty.sampler(type::SamplerKind::kSampler), attrs);
     } else {
@@ -910,8 +957,8 @@ TEST_P(VariableAttributeTest, IsValid) {
     } else {
         EXPECT_FALSE(r()->Resolve());
         if (!IsBindingAttribute(params.kind)) {
-            EXPECT_EQ(r()->error(), "12:34 error: attribute '" + attr->Name() +
-                                        "' is not valid for module-scope 'var'");
+            EXPECT_EQ(r()->error(),
+                      "12:34 error: " + name(params.kind) + " is not valid for module-scope 'var'");
         }
     }
 }
@@ -944,13 +991,22 @@ TEST_F(VariableAttributeTest, DuplicateAttribute) {
 12:34 note: first attribute declared here)");
 }
 
-TEST_F(VariableAttributeTest, LocalVariable) {
+TEST_F(VariableAttributeTest, LocalVar) {
     auto* v = Var("a", ty.f32(), utils::Vector{Binding(Source{{12, 34}}, 2_a)});
 
     WrapInFunction(v);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attributes are not valid on local variables");
+    EXPECT_EQ(r()->error(), "12:34 error: @binding is not valid for function-scope 'var'");
+}
+
+TEST_F(VariableAttributeTest, LocalLet) {
+    auto* v = Let("a", utils::Vector{Binding(Source{{12, 34}}, 2_a)}, Expr(1_a));
+
+    WrapInFunction(v);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: @binding is not valid for 'let' declaration");
 }
 
 using ConstantAttributeTest = TestWithParams;
@@ -965,7 +1021,7 @@ TEST_P(ConstantAttributeTest, IsValid) {
     } else {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(r()->error(),
-                  "12:34 error: attribute is not valid for module-scope 'const' declaration");
+                  "12:34 error: " + name(params.kind) + " is not valid for 'const' declaration");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -987,17 +1043,14 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kWorkgroup, false},
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 
-TEST_F(ConstantAttributeTest, DuplicateAttribute) {
+TEST_F(ConstantAttributeTest, InvalidAttribute) {
     GlobalConst("a", ty.f32(), Expr(1.23_f),
                 utils::Vector{
                     Id(Source{{12, 34}}, 0_a),
-                    Id(Source{{56, 78}}, 1_a),
                 });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(56:78 error: duplicate id attribute
-12:34 note: first attribute declared here)");
+    EXPECT_EQ(r()->error(), "12:34 error: @id is not valid for 'const' declaration");
 }
 
 using OverrideAttributeTest = TestWithParams;
@@ -1010,7 +1063,8 @@ TEST_P(OverrideAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for 'override' declaration");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for 'override' declaration");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -1056,7 +1110,8 @@ TEST_P(SwitchStatementAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for switch statements");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for switch statements");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -1089,7 +1144,8 @@ TEST_P(SwitchBodyAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for switch body");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for switch body");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -1122,7 +1178,8 @@ TEST_P(IfStatementAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for if statements");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for if statements");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -1155,7 +1212,8 @@ TEST_P(ForStatementAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for for statements");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for for statements");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -1188,7 +1246,8 @@ TEST_P(LoopStatementAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for loop statements");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for loop statements");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -1221,7 +1280,8 @@ TEST_P(WhileStatementAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for while statements");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: " + name(params.kind) + " is not valid for while statements");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
@@ -1251,7 +1311,8 @@ class BlockStatementTest : public TestWithParams {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
         } else {
             EXPECT_FALSE(r()->Resolve());
-            EXPECT_EQ(r()->error(), "error: attribute is not valid for block statements");
+            EXPECT_EQ(r()->error(),
+                      "error: " + name(GetParam().kind) + " is not valid for block statements");
         }
     }
 };

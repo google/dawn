@@ -43,7 +43,7 @@ TEST_F(ResolverUnresolvedIdentifierSuggestions, BuiltinValue) {
     Func("f",
          utils::Vector{
              Param("p", ty.i32(), utils::Vector{Builtin(Expr(Source{{12, 34}}, "positon"))})},
-         ty.void_(), utils::Empty);
+         ty.void_(), utils::Empty, utils::Vector{Stage(ast::PipelineStage::kVertex)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: unresolved builtin value 'positon'

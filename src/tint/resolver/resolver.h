@@ -312,13 +312,45 @@ class Resolver {
     /// current_function_
     bool WorkgroupSize(const ast::Function*);
 
-    /// Resolves the attribute @p attr
-    /// @returns true on success, false on failure
-    bool Attribute(const ast::Attribute* attr);
-
     /// Resolves the `@builtin` attribute @p attr
+    /// @returns the builtin value on success
+    utils::Result<tint::builtin::BuiltinValue> BuiltinAttribute(const ast::BuiltinAttribute* attr);
+
+    /// Resolves the `@location` attribute @p attr
+    /// @returns the location value on success.
+    utils::Result<uint32_t> LocationAttribute(const ast::LocationAttribute* attr);
+
+    /// Resolves the `@binding` attribute @p attr
+    /// @returns the binding value on success.
+    utils::Result<uint32_t> BindingAttribute(const ast::BindingAttribute* attr);
+
+    /// Resolves the `@group` attribute @p attr
+    /// @returns the group value on success.
+    utils::Result<uint32_t> GroupAttribute(const ast::GroupAttribute* attr);
+
+    /// Resolves the `@workgroup_size` attribute @p attr
+    /// @returns the workgroup size on success.
+    utils::Result<sem::WorkgroupSize> WorkgroupAttribute(const ast::WorkgroupAttribute* attr);
+
+    /// Resolves the `@diagnostic` attribute @p attr
     /// @returns true on success, false on failure
-    bool BuiltinAttribute(const ast::BuiltinAttribute* attr);
+    bool DiagnosticAttribute(const ast::DiagnosticAttribute* attr);
+
+    /// Resolves the stage attribute @p attr
+    /// @returns true on success, false on failure
+    bool StageAttribute(const ast::StageAttribute* attr);
+
+    /// Resolves the `@must_use` attribute @p attr
+    /// @returns true on success, false on failure
+    bool MustUseAttribute(const ast::MustUseAttribute* attr);
+
+    /// Resolves the `@invariant` attribute @p attr
+    /// @returns true on success, false on failure
+    bool InvariantAttribute(const ast::InvariantAttribute*);
+
+    /// Resolves the `@stride` attribute @p attr
+    /// @returns true on success, false on failure
+    bool StrideAttribute(const ast::StrideAttribute*);
 
     /// Resolves the `@interpolate` attribute @p attr
     /// @returns true on success, false on failure
@@ -427,12 +459,11 @@ class Resolver {
     /// nullptr is returned.
     /// @note the caller is expected to validate the parameter
     /// @param param the AST parameter
+    /// @param func the AST function that owns the parameter
     /// @param index the index of the parameter
-    sem::Parameter* Parameter(const ast::Parameter* param, uint32_t index);
-
-    /// @returns the location value for a `@location` attribute, validating the value's range and
-    /// type.
-    utils::Result<uint32_t> LocationAttribute(const ast::LocationAttribute* attr);
+    sem::Parameter* Parameter(const ast::Parameter* param,
+                              const ast::Function* func,
+                              uint32_t index);
 
     /// Records the address space usage for the given type, and any transient
     /// dependencies of the type. Validates that the type can be used for the
@@ -496,6 +527,11 @@ class Resolver {
     void ErrorMismatchedResolvedIdentifier(const Source& source,
                                            const ResolvedIdentifier& resolved,
                                            std::string_view wanted);
+
+    /// Raises an error that the attribute is not valid for the given use.
+    /// @param attr the invalue attribute
+    /// @param use the thing that the attribute was applied to
+    void ErrorInvalidAttribute(const ast::Attribute* attr, std::string_view use);
 
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;

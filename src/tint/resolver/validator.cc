@@ -606,32 +606,10 @@ bool Validator::GlobalVariable(
                 return false;
             }
 
-            for (auto* attr : decl->attributes) {
-                bool is_shader_io_attribute =
-                    attr->IsAnyOf<ast::BuiltinAttribute, ast::InterpolateAttribute,
-                                  ast::InvariantAttribute, ast::LocationAttribute>();
-                bool has_io_address_space = global->AddressSpace() == builtin::AddressSpace::kIn ||
-                                            global->AddressSpace() == builtin::AddressSpace::kOut;
-                if (!attr->IsAnyOf<ast::BindingAttribute, ast::GroupAttribute,
-                                   ast::InternalAttribute>() &&
-                    (!is_shader_io_attribute || !has_io_address_space)) {
-                    AddError("attribute '" + attr->Name() + "' is not valid for module-scope 'var'",
-                             attr->source);
-                    return false;
-                }
-            }
-
             return Var(global);
         },
         [&](const ast::Override*) { return Override(global, override_ids); },
-        [&](const ast::Const*) {
-            if (!decl->attributes.IsEmpty()) {
-                AddError("attribute is not valid for module-scope 'const' declaration",
-                         decl->attributes[0]->source);
-                return false;
-            }
-            return Const(global);
-        },
+        [&](const ast::Const*) { return Const(global); },
         [&](Default) {
             TINT_ICE(Resolver, diagnostics_)
                 << "Validator::GlobalVariable() called with a unknown variable type: "
@@ -773,9 +751,6 @@ bool Validator::Override(
                     ast::GetAttribute<ast::IdAttribute>((*var)->Declaration()->attributes)->source);
                 return false;
             }
-        } else {
-            AddError("attribute is not valid for 'override' declaration", attr->source);
-            return false;
         }
     }
 
@@ -792,26 +767,11 @@ bool Validator::Const(const sem::Variable*) const {
     return true;
 }
 
-bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) const {
+bool Validator::Parameter(const sem::Variable* var) const {
     auto* decl = var->Declaration();
 
     if (IsValidationDisabled(decl->attributes, ast::DisabledValidation::kFunctionParameter)) {
         return true;
-    }
-
-    for (auto* attr : decl->attributes) {
-        if (!func->IsEntryPoint() && !attr->Is<ast::InternalAttribute>()) {
-            AddError("attribute is not valid for non-entry point function parameters",
-                     attr->source);
-            return false;
-        }
-        if (!attr->IsAnyOf<ast::BuiltinAttribute, ast::InvariantAttribute, ast::LocationAttribute,
-                           ast::InterpolateAttribute, ast::InternalAttribute>() &&
-            (IsValidationEnabled(decl->attributes,
-                                 ast::DisabledValidation::kEntryPointParameter))) {
-            AddError("attribute is not valid for function parameters", attr->source);
-            return false;
-        }
     }
 
     if (auto* ref = var->Type()->As<type::Pointer>()) {
@@ -1028,14 +988,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                 }
                 return true;
             },
-            [&](Default) {
-                if (!attr->IsAnyOf<ast::DiagnosticAttribute, ast::StageAttribute,
-                                   ast::InternalAttribute>()) {
-                    AddError("attribute is not valid for functions", attr->source);
-                    return false;
-                }
-                return true;
-            });
+            [&](Default) { return true; });
         if (!ok) {
             return false;
         }
@@ -1068,24 +1021,6 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                        decl->attributes, ast::DisabledValidation::kFunctionHasNoBody))) {
             TINT_ICE(Resolver, diagnostics_)
                 << "Function " << decl->name->symbol.Name() << " has no body";
-        }
-
-        for (auto* attr : decl->return_type_attributes) {
-            if (!decl->IsEntryPoint()) {
-                AddError("attribute is not valid for non-entry point function return types",
-                         attr->source);
-                return false;
-            }
-            if (!attr->IsAnyOf<ast::BuiltinAttribute, ast::InternalAttribute,
-                               ast::LocationAttribute, ast::InterpolateAttribute,
-                               ast::InvariantAttribute>() &&
-                (IsValidationEnabled(decl->attributes,
-                                     ast::DisabledValidation::kEntryPointParameter) &&
-                 IsValidationEnabled(decl->attributes,
-                                     ast::DisabledValidation::kFunctionParameter))) {
-                AddError("attribute is not valid for entry point return types", attr->source);
-                return false;
-            }
         }
     }
 
@@ -1196,7 +1131,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             if (is_invalid_compute_shader_attribute) {
                 std::string input_or_output =
                     param_or_ret == ParamOrRetType::kParameter ? "inputs" : "output";
-                AddError("attribute is not valid for compute shader " + input_or_output,
+                AddError("@" + attr->Name() + " is not valid for compute shader " + input_or_output,
                          attr->source);
                 return false;
             }
@@ -2205,24 +2140,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                     }
                     return true;
                 },
-                [&](Default) {
-                    if (!attr->IsAnyOf<ast::BuiltinAttribute,             //
-                                       ast::InternalAttribute,            //
-                                       ast::InterpolateAttribute,         //
-                                       ast::InvariantAttribute,           //
-                                       ast::LocationAttribute,            //
-                                       ast::StructMemberOffsetAttribute,  //
-                                       ast::StructMemberAlignAttribute>()) {
-                        if (attr->Is<ast::StrideAttribute>() &&
-                            IsValidationDisabled(member->Declaration()->attributes,
-                                                 ast::DisabledValidation::kIgnoreStrideAttribute)) {
-                            return true;
-                        }
-                        AddError("attribute is not valid for structure members", attr->source);
-                        return false;
-                    }
-                    return true;
-                });
+                [&](Default) { return true; });
             if (!ok) {
                 return false;
             }
@@ -2241,13 +2159,6 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         }
     }
 
-    for (auto* attr : str->Declaration()->attributes) {
-        if (!(attr->IsAnyOf<ast::InternalAttribute>())) {
-            AddError("attribute is not valid for struct declarations", attr->source);
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -2260,7 +2171,8 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
                                   const bool is_input) const {
     std::string inputs_or_output = is_input ? "inputs" : "output";
     if (stage == ast::PipelineStage::kCompute) {
-        AddError("attribute is not valid for compute shader " + inputs_or_output, loc_attr->source);
+        AddError("@" + loc_attr->Name() + " is not valid for compute shader " + inputs_or_output,
+                 loc_attr->source);
         return false;
     }
 

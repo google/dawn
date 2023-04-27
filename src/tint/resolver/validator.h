@@ -348,10 +348,9 @@ class Validator {
     bool Matrix(const type::Type* el_ty, const Source& source) const;
 
     /// Validates a function parameter
-    /// @param func the function the variable is for
     /// @param var the variable to validate
     /// @returns true on success, false otherwise
-    bool Parameter(const ast::Function* func, const sem::Variable* var) const;
+    bool Parameter(const sem::Variable* var) const;
 
     /// Validates a return
     /// @param ret the return statement to validate

@@ -1084,7 +1084,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocation_Input) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: attribute is not valid for compute shader output)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @location is not valid for compute shader output)");
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocation_Output) {
@@ -1099,7 +1099,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocation_Output) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: attribute is not valid for compute shader inputs)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @location is not valid for compute shader inputs)");
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
@@ -1119,7 +1119,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: attribute is not valid for compute shader output\n"
+              "12:34 error: @location is not valid for compute shader output\n"
               "56:78 note: while analyzing entry point 'main'");
 }
 
@@ -1138,7 +1138,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: attribute is not valid for compute shader inputs\n"
+              "12:34 error: @location is not valid for compute shader inputs\n"
               "56:78 note: while analyzing entry point 'main'");
 }
 

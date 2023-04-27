@@ -247,6 +247,20 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         }
     }
 
+    for (auto* attribute : v->attributes) {
+        Mark(attribute);
+        bool ok = Switch(
+            attribute,  //
+            [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
+            [&](Default) {
+                ErrorInvalidAttribute(attribute, "'let' declaration");
+                return false;
+            });
+        if (!ok) {
+            return nullptr;
+        }
+    }
+
     if (!v->initializer) {
         AddError("'let' declaration must have an initializer", v->source);
         return nullptr;
@@ -340,37 +354,51 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         /* constant_value */ nullptr, std::nullopt, std::nullopt);
     sem->SetInitializer(rhs);
 
-    if (auto* id_attr = ast::GetAttribute<ast::IdAttribute>(v->attributes)) {
-        ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@id"};
-        TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+    for (auto* attribute : v->attributes) {
+        Mark(attribute);
+        bool ok = Switch(
+            attribute,  //
+            [&](const ast::IdAttribute* attr) {
+                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@id"};
+                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
-        auto* materialized = Materialize(ValueExpression(id_attr->expr));
-        if (!materialized) {
+                auto* materialized = Materialize(ValueExpression(attr->expr));
+                if (!materialized) {
+                    return false;
+                }
+                if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+                    AddError("@id must be an i32 or u32 value", attr->source);
+                    return false;
+                }
+
+                auto const_value = materialized->ConstantValue();
+                auto value = const_value->ValueAs<AInt>();
+                if (value < 0) {
+                    AddError("@id value must be non-negative", attr->source);
+                    return false;
+                }
+                if (value > std::numeric_limits<decltype(OverrideId::value)>::max()) {
+                    AddError(
+                        "@id value must be between 0 and " +
+                            std::to_string(std::numeric_limits<decltype(OverrideId::value)>::max()),
+                        attr->source);
+                    return false;
+                }
+
+                auto o = OverrideId{static_cast<decltype(OverrideId::value)>(value)};
+                sem->SetOverrideId(o);
+
+                // Track the constant IDs that are specified in the shader.
+                override_ids_.Add(o, sem);
+                return true;
+            },
+            [&](Default) {
+                ErrorInvalidAttribute(attribute, "'override' declaration");
+                return false;
+            });
+        if (!ok) {
             return nullptr;
         }
-        if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
-            AddError("@id must be an i32 or u32 value", id_attr->source);
-            return nullptr;
-        }
-
-        auto const_value = materialized->ConstantValue();
-        auto value = const_value->ValueAs<AInt>();
-        if (value < 0) {
-            AddError("@id value must be non-negative", id_attr->source);
-            return nullptr;
-        }
-        if (value > std::numeric_limits<decltype(OverrideId::value)>::max()) {
-            AddError("@id value must be between 0 and " +
-                         std::to_string(std::numeric_limits<decltype(OverrideId::value)>::max()),
-                     id_attr->source);
-            return nullptr;
-        }
-
-        auto o = OverrideId{static_cast<decltype(OverrideId::value)>(value)};
-        sem->SetOverrideId(o);
-
-        // Track the constant IDs that are specified in the shader.
-        override_ids_.Add(o, sem);
     }
 
     builder_->Sem().Add(v, sem);
@@ -391,6 +419,18 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
     if (!c->initializer) {
         AddError("'const' declaration must have an initializer", c->source);
         return nullptr;
+    }
+
+    for (auto* attribute : c->attributes) {
+        Mark(attribute);
+        bool ok = Switch(attribute,  //
+                         [&](Default) {
+                             ErrorInvalidAttribute(attribute, "'const' declaration");
+                             return false;
+                         });
+        if (!ok) {
+            return nullptr;
+        }
     }
 
     const sem::ValueExpression* rhs = nullptr;
@@ -529,72 +569,98 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
     sem::Variable* sem = nullptr;
     if (is_global) {
+        bool has_io_address_space = address_space == builtin::AddressSpace::kIn ||
+                                    address_space == builtin::AddressSpace::kOut;
+
+        std::optional<uint32_t> group, binding, location;
+        for (auto* attribute : var->attributes) {
+            Mark(attribute);
+            enum Status { kSuccess, kErrored, kInvalid };
+            auto res = Switch(
+                attribute,  //
+                [&](const ast::BindingAttribute* attr) {
+                    auto value = BindingAttribute(attr);
+                    if (!value) {
+                        return kErrored;
+                    }
+                    binding = value.Get();
+                    return kSuccess;
+                },
+                [&](const ast::GroupAttribute* attr) {
+                    auto value = GroupAttribute(attr);
+                    if (!value) {
+                        return kErrored;
+                    }
+                    group = value.Get();
+                    return kSuccess;
+                },
+                [&](const ast::LocationAttribute* attr) {
+                    if (!has_io_address_space) {
+                        return kInvalid;
+                    }
+                    auto value = LocationAttribute(attr);
+                    if (!value) {
+                        return kErrored;
+                    }
+                    location = value.Get();
+                    return kSuccess;
+                },
+                [&](const ast::BuiltinAttribute* attr) {
+                    if (!has_io_address_space) {
+                        return kInvalid;
+                    }
+                    return BuiltinAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](const ast::InterpolateAttribute* attr) {
+                    if (!has_io_address_space) {
+                        return kInvalid;
+                    }
+                    return InterpolateAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](const ast::InvariantAttribute* attr) {
+                    if (!has_io_address_space) {
+                        return kInvalid;
+                    }
+                    return InvariantAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](const ast::InternalAttribute* attr) {
+                    return InternalAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](Default) { return kInvalid; });
+
+            switch (res) {
+                case kSuccess:
+                    break;
+                case kErrored:
+                    return nullptr;
+                case kInvalid:
+                    ErrorInvalidAttribute(attribute, "module-scope 'var'");
+                    return nullptr;
+            }
+        }
+
         std::optional<sem::BindingPoint> binding_point;
-        if (var->HasBindingPoint()) {
-            uint32_t binding = 0;
-            {
-                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@binding"};
-                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
-
-                auto* attr = ast::GetAttribute<ast::BindingAttribute>(var->attributes);
-                auto* materialized = Materialize(ValueExpression(attr->expr));
-                if (!materialized) {
-                    return nullptr;
-                }
-                if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
-                    AddError("@binding must be an i32 or u32 value", attr->source);
-                    return nullptr;
-                }
-
-                auto const_value = materialized->ConstantValue();
-                auto value = const_value->ValueAs<AInt>();
-                if (value < 0) {
-                    AddError("@binding value must be non-negative", attr->source);
-                    return nullptr;
-                }
-                binding = u32(value);
-            }
-
-            uint32_t group = 0;
-            {
-                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@group"};
-                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
-
-                auto* attr = ast::GetAttribute<ast::GroupAttribute>(var->attributes);
-                auto* materialized = Materialize(ValueExpression(attr->expr));
-                if (!materialized) {
-                    return nullptr;
-                }
-                if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
-                    AddError("@group must be an i32 or u32 value", attr->source);
-                    return nullptr;
-                }
-
-                auto const_value = materialized->ConstantValue();
-                auto value = const_value->ValueAs<AInt>();
-                if (value < 0) {
-                    AddError("@group value must be non-negative", attr->source);
-                    return nullptr;
-                }
-                group = u32(value);
-            }
-            binding_point = {group, binding};
+        if (group && binding) {
+            binding_point = sem::BindingPoint{group.value(), binding.value()};
         }
-
-        std::optional<uint32_t> location;
-        if (auto* attr = ast::GetAttribute<ast::LocationAttribute>(var->attributes)) {
-            auto value = LocationAttribute(attr);
-            if (!value) {
-                return nullptr;
-            }
-            location = value.Get();
-        }
-
         sem = builder_->create<sem::GlobalVariable>(
             var, var_ty, sem::EvaluationStage::kRuntime, address_space, access,
             /* constant_value */ nullptr, binding_point, location);
 
     } else {
+        for (auto* attribute : var->attributes) {
+            Mark(attribute);
+            bool ok = Switch(
+                attribute,
+                [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
+                [&](Default) {
+                    ErrorInvalidAttribute(attribute, "function-scope 'var'");
+                    return false;
+                });
+            if (!ok) {
+                return nullptr;
+            }
+        }
         sem = builder_->create<sem::LocalVariable>(var, var_ty, sem::EvaluationStage::kRuntime,
                                                    address_space, access, current_statement_,
                                                    /* constant_value */ nullptr);
@@ -605,18 +671,93 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     return sem;
 }
 
-sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index) {
+sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
+                                    const ast::Function* func,
+                                    uint32_t index) {
     Mark(param->name);
 
     auto add_note = [&] {
         AddNote("while instantiating parameter " + param->name->symbol.Name(), param->source);
     };
 
-    for (auto* attr : param->attributes) {
-        if (!Attribute(attr)) {
-            return nullptr;
+    std::optional<uint32_t> location, group, binding;
+
+    if (func->IsEntryPoint()) {
+        for (auto* attribute : param->attributes) {
+            Mark(attribute);
+            bool ok = Switch(
+                attribute,  //
+                [&](const ast::LocationAttribute* attr) {
+                    auto value = LocationAttribute(attr);
+                    if (!value) {
+                        return false;
+                    }
+                    location = value.Get();
+                    return true;
+                },
+                [&](const ast::BuiltinAttribute* attr) -> bool { return BuiltinAttribute(attr); },
+                [&](const ast::InvariantAttribute* attr) -> bool {
+                    return InvariantAttribute(attr);
+                },
+                [&](const ast::InterpolateAttribute* attr) -> bool {
+                    return InterpolateAttribute(attr);
+                },
+                [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
+                [&](const ast::GroupAttribute* attr) -> bool {
+                    if (validator_.IsValidationEnabled(
+                            param->attributes, ast::DisabledValidation::kEntryPointParameter)) {
+                        ErrorInvalidAttribute(attribute, "function parameters");
+                        return false;
+                    }
+                    auto value = GroupAttribute(attr);
+                    if (!value) {
+                        return false;
+                    }
+                    group = value.Get();
+                    return true;
+                },
+                [&](const ast::BindingAttribute* attr) -> bool {
+                    if (validator_.IsValidationEnabled(
+                            param->attributes, ast::DisabledValidation::kEntryPointParameter)) {
+                        ErrorInvalidAttribute(attribute, "function parameters");
+                        return false;
+                    }
+                    auto value = BindingAttribute(attr);
+                    if (!value) {
+                        return false;
+                    }
+                    binding = value.Get();
+                    return true;
+                },
+                [&](Default) {
+                    ErrorInvalidAttribute(attribute, "function parameters");
+                    return false;
+                });
+            if (!ok) {
+                return nullptr;
+            }
+        }
+    } else {
+        for (auto* attribute : param->attributes) {
+            Mark(attribute);
+            bool ok = Switch(
+                attribute,  //
+                [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
+                [&](Default) {
+                    if (attribute->IsAnyOf<ast::LocationAttribute, ast::BuiltinAttribute,
+                                           ast::InvariantAttribute, ast::InterpolateAttribute>()) {
+                        ErrorInvalidAttribute(attribute, "non-entry point function parameters");
+                    } else {
+                        ErrorInvalidAttribute(attribute, "function parameters");
+                    }
+                    return false;
+                });
+            if (!ok) {
+                return nullptr;
+            }
         }
     }
+
     if (!validator_.NoDuplicateAttributes(param->attributes)) {
         return nullptr;
     }
@@ -642,70 +783,20 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
     }
 
     std::optional<sem::BindingPoint> binding_point;
-    if (param->HasBindingPoint()) {
-        binding_point = sem::BindingPoint{};
-        {
-            ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@binding value"};
-            TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
-
-            auto* attr = ast::GetAttribute<ast::BindingAttribute>(param->attributes);
-            auto* materialized = Materialize(ValueExpression(attr->expr));
-            if (!materialized) {
-                return nullptr;
-            }
-            binding_point->binding = materialized->ConstantValue()->ValueAs<u32>();
-        }
-        {
-            ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@group value"};
-            TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
-
-            auto* attr = ast::GetAttribute<ast::GroupAttribute>(param->attributes);
-            auto* materialized = Materialize(ValueExpression(attr->expr));
-            if (!materialized) {
-                return nullptr;
-            }
-            binding_point->group = materialized->ConstantValue()->ValueAs<u32>();
-        }
-    }
-
-    std::optional<uint32_t> location;
-    if (auto* attr = ast::GetAttribute<ast::LocationAttribute>(param->attributes)) {
-        auto value = LocationAttribute(attr);
-        if (!value) {
-            return nullptr;
-        }
-        location = value.Get();
+    if (group && binding) {
+        binding_point = sem::BindingPoint{group.value(), binding.value()};
     }
 
     auto* sem = builder_->create<sem::Parameter>(
         param, index, ty, builtin::AddressSpace::kUndefined, builtin::Access::kUndefined,
         sem::ParameterUsage::kNone, binding_point, location);
     builder_->Sem().Add(param, sem);
+
+    if (!validator_.Parameter(sem)) {
+        return nullptr;
+    }
+
     return sem;
-}
-
-utils::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute* attr) {
-    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@location value"};
-    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
-
-    auto* materialized = Materialize(ValueExpression(attr->expr));
-    if (!materialized) {
-        return utils::Failure;
-    }
-
-    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
-        AddError("@location must be an i32 or u32 value", attr->source);
-        return utils::Failure;
-    }
-
-    auto const_value = materialized->ConstantValue();
-    auto value = const_value->ValueAs<AInt>();
-    if (value < 0) {
-        AddError("@location value must be non-negative", attr->source);
-        return utils::Failure;
-    }
-
-    return static_cast<uint32_t>(value);
 }
 
 builtin::Access Resolver::DefaultAccessForAddressSpace(builtin::AddressSpace address_space) {
@@ -796,12 +887,6 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
         return nullptr;
     }
 
-    for (auto* attr : v->attributes) {
-        if (!Attribute(attr)) {
-            return nullptr;
-        }
-    }
-
     if (!validator_.NoDuplicateAttributes(v->attributes)) {
         return nullptr;
     }
@@ -860,8 +945,28 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
     validator_.DiagnosticFilters().Push();
     TINT_DEFER(validator_.DiagnosticFilters().Pop());
-    for (auto* attr : decl->attributes) {
-        if (!Attribute(attr)) {
+
+    for (auto* attribute : decl->attributes) {
+        Mark(attribute);
+        bool ok = Switch(
+            attribute,
+            [&](const ast::DiagnosticAttribute* attr) { return DiagnosticAttribute(attr); },
+            [&](const ast::StageAttribute* attr) { return StageAttribute(attr); },
+            [&](const ast::MustUseAttribute* attr) { return MustUseAttribute(attr); },
+            [&](const ast::WorkgroupAttribute* attr) {
+                auto value = WorkgroupAttribute(attr);
+                if (!value) {
+                    return false;
+                }
+                func->SetWorkgroupSize(value.Get());
+                return true;
+            },
+            [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
+            [&](Default) {
+                ErrorInvalidAttribute(attribute, "functions");
+                return false;
+            });
+        if (!ok) {
             return nullptr;
         }
     }
@@ -884,12 +989,8 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
             }
         }
 
-        auto* p = Parameter(param, parameter_index++);
+        auto* p = Parameter(param, decl, parameter_index++);
         if (!p) {
-            return nullptr;
-        }
-
-        if (!validator_.Parameter(decl, p)) {
             return nullptr;
         }
 
@@ -925,18 +1026,73 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
     func->SetReturnType(return_type);
 
-    // Determine if the return type has a location
-    for (auto* attr : decl->return_type_attributes) {
-        if (!Attribute(attr)) {
-            return nullptr;
-        }
+    if (decl->IsEntryPoint()) {
+        // Determine if the return type has a location
+        bool permissive = validator_.IsValidationDisabled(
+                              decl->attributes, ast::DisabledValidation::kEntryPointParameter) ||
+                          validator_.IsValidationDisabled(
+                              decl->attributes, ast::DisabledValidation::kFunctionParameter);
+        for (auto* attribute : decl->return_type_attributes) {
+            Mark(attribute);
+            enum Status { kSuccess, kErrored, kInvalid };
+            auto res = Switch(
+                attribute,  //
+                [&](const ast::LocationAttribute* attr) {
+                    auto value = LocationAttribute(attr);
+                    if (!value) {
+                        return kErrored;
+                    }
+                    func->SetReturnLocation(value.Get());
+                    return kSuccess;
+                },
+                [&](const ast::BuiltinAttribute* attr) {
+                    return BuiltinAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](const ast::InternalAttribute* attr) {
+                    return InternalAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](const ast::InterpolateAttribute* attr) {
+                    return InterpolateAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](const ast::InvariantAttribute* attr) {
+                    return InvariantAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](const ast::BindingAttribute* attr) {
+                    if (!permissive) {
+                        return kInvalid;
+                    }
+                    return BindingAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](const ast::GroupAttribute* attr) {
+                    if (!permissive) {
+                        return kInvalid;
+                    }
+                    return GroupAttribute(attr) ? kSuccess : kErrored;
+                },
+                [&](Default) { return kInvalid; });
 
-        if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
-            auto value = LocationAttribute(loc_attr);
-            if (!value) {
+            switch (res) {
+                case kSuccess:
+                    break;
+                case kErrored:
+                    return nullptr;
+                case kInvalid:
+                    ErrorInvalidAttribute(attribute, "entry point return types");
+                    return nullptr;
+            }
+        }
+    } else {
+        for (auto* attribute : decl->return_type_attributes) {
+            Mark(attribute);
+            bool ok = Switch(attribute,  //
+                             [&](Default) {
+                                 ErrorInvalidAttribute(attribute,
+                                                       "non-entry point function return types");
+                                 return false;
+                             });
+            if (!ok) {
                 return nullptr;
             }
-            func->SetReturnLocation(value.Get());
         }
     }
 
@@ -963,10 +1119,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
 
     ApplyDiagnosticSeverities(func);
-
-    if (!WorkgroupSize(decl)) {
-        return nullptr;
-    }
 
     if (decl->IsEntryPoint()) {
         entry_points_.Push(func);
@@ -1014,94 +1166,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
 
     return func;
-}
-
-bool Resolver::WorkgroupSize(const ast::Function* func) {
-    // Set work-group size defaults.
-    sem::WorkgroupSize ws;
-    for (size_t i = 0; i < 3; i++) {
-        ws[i] = 1;
-    }
-
-    auto* attr = ast::GetAttribute<ast::WorkgroupAttribute>(func->attributes);
-    if (!attr) {
-        return true;
-    }
-
-    auto values = attr->Values();
-    utils::Vector<const sem::ValueExpression*, 3> args;
-    utils::Vector<const type::Type*, 3> arg_tys;
-
-    constexpr const char* kErrBadExpr =
-        "workgroup_size argument must be a constant or override-expression of type "
-        "abstract-integer, i32 or u32";
-
-    for (size_t i = 0; i < 3; i++) {
-        // Each argument to this attribute can either be a literal, an identifier for a
-        // module-scope constants, a const-expression, or nullptr if not specified.
-        auto* value = values[i];
-        if (!value) {
-            break;
-        }
-        const auto* expr = ValueExpression(value);
-        if (!expr) {
-            return false;
-        }
-        auto* ty = expr->Type();
-        if (!ty->IsAnyOf<type::I32, type::U32, type::AbstractInt>()) {
-            AddError(kErrBadExpr, value->source);
-            return false;
-        }
-
-        if (expr->Stage() != sem::EvaluationStage::kConstant &&
-            expr->Stage() != sem::EvaluationStage::kOverride) {
-            AddError(kErrBadExpr, value->source);
-            return false;
-        }
-
-        args.Push(expr);
-        arg_tys.Push(ty);
-    }
-
-    auto* common_ty = type::Type::Common(arg_tys);
-    if (!common_ty) {
-        AddError("workgroup_size arguments must be of the same type, either i32 or u32",
-                 attr->source);
-        return false;
-    }
-
-    // If all arguments are abstract-integers, then materialize to i32.
-    if (common_ty->Is<type::AbstractInt>()) {
-        common_ty = builder_->create<type::I32>();
-    }
-
-    for (size_t i = 0; i < args.Length(); i++) {
-        auto* materialized = Materialize(args[i], common_ty);
-        if (!materialized) {
-            return false;
-        }
-        if (auto* value = materialized->ConstantValue()) {
-            if (value->ValueAs<AInt>() < 1) {
-                AddError("workgroup_size argument must be at least 1", values[i]->source);
-                return false;
-            }
-            ws[i] = value->ValueAs<u32>();
-        } else {
-            ws[i] = std::nullopt;
-        }
-    }
-
-    uint64_t total_size = static_cast<uint64_t>(ws[0].value_or(1));
-    for (size_t i = 1; i < 3; i++) {
-        total_size *= static_cast<uint64_t>(ws[i].value_or(1));
-        if (total_size > 0xffffffff) {
-            AddError("total workgroup grid size cannot exceed 0xffffffff", values[i]->source);
-            return false;
-        }
-    }
-
-    current_function_->SetWorkgroupSize(std::move(ws));
-    return true;
 }
 
 bool Resolver::Statements(utils::VectorRef<const ast::Statement*> stmts) {
@@ -3474,25 +3538,186 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     return sem;
 }
 
-bool Resolver::Attribute(const ast::Attribute* attr) {
-    Mark(attr);
-    return Switch(
-        attr,  //
-        [&](const ast::BuiltinAttribute* b) { return BuiltinAttribute(b); },
-        [&](const ast::DiagnosticAttribute* d) { return DiagnosticControl(d->control); },
-        [&](const ast::InterpolateAttribute* i) { return InterpolateAttribute(i); },
-        [&](const ast::InternalAttribute* i) { return InternalAttribute(i); },
-        [&](Default) { return true; });
+utils::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute* attr) {
+    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@location value"};
+    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
+    auto* materialized = Materialize(ValueExpression(attr->expr));
+    if (!materialized) {
+        return utils::Failure;
+    }
+
+    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+        AddError("@location must be an i32 or u32 value", attr->source);
+        return utils::Failure;
+    }
+
+    auto const_value = materialized->ConstantValue();
+    auto value = const_value->ValueAs<AInt>();
+    if (value < 0) {
+        AddError("@location value must be non-negative", attr->source);
+        return utils::Failure;
+    }
+
+    return static_cast<uint32_t>(value);
 }
 
-bool Resolver::BuiltinAttribute(const ast::BuiltinAttribute* attr) {
+utils::Result<uint32_t> Resolver::BindingAttribute(const ast::BindingAttribute* attr) {
+    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@binding"};
+    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
+    auto* materialized = Materialize(ValueExpression(attr->expr));
+    if (!materialized) {
+        return utils::Failure;
+    }
+    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+        AddError("@binding must be an i32 or u32 value", attr->source);
+        return utils::Failure;
+    }
+
+    auto const_value = materialized->ConstantValue();
+    auto value = const_value->ValueAs<AInt>();
+    if (value < 0) {
+        AddError("@binding value must be non-negative", attr->source);
+        return utils::Failure;
+    }
+    return static_cast<uint32_t>(value);
+}
+
+utils::Result<uint32_t> Resolver::GroupAttribute(const ast::GroupAttribute* attr) {
+    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@group"};
+    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
+    auto* materialized = Materialize(ValueExpression(attr->expr));
+    if (!materialized) {
+        return utils::Failure;
+    }
+    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+        AddError("@group must be an i32 or u32 value", attr->source);
+        return utils::Failure;
+    }
+
+    auto const_value = materialized->ConstantValue();
+    auto value = const_value->ValueAs<AInt>();
+    if (value < 0) {
+        AddError("@group value must be non-negative", attr->source);
+        return utils::Failure;
+    }
+    return static_cast<uint32_t>(value);
+}
+
+utils::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(
+    const ast::WorkgroupAttribute* attr) {
+    // Set work-group size defaults.
+    sem::WorkgroupSize ws;
+    for (size_t i = 0; i < 3; i++) {
+        ws[i] = 1;
+    }
+
+    auto values = attr->Values();
+    utils::Vector<const sem::ValueExpression*, 3> args;
+    utils::Vector<const type::Type*, 3> arg_tys;
+
+    constexpr const char* kErrBadExpr =
+        "workgroup_size argument must be a constant or override-expression of type "
+        "abstract-integer, i32 or u32";
+
+    for (size_t i = 0; i < 3; i++) {
+        // Each argument to this attribute can either be a literal, an identifier for a
+        // module-scope constants, a const-expression, or nullptr if not specified.
+        auto* value = values[i];
+        if (!value) {
+            break;
+        }
+        const auto* expr = ValueExpression(value);
+        if (!expr) {
+            return utils::Failure;
+        }
+        auto* ty = expr->Type();
+        if (!ty->IsAnyOf<type::I32, type::U32, type::AbstractInt>()) {
+            AddError(kErrBadExpr, value->source);
+            return utils::Failure;
+        }
+
+        if (expr->Stage() != sem::EvaluationStage::kConstant &&
+            expr->Stage() != sem::EvaluationStage::kOverride) {
+            AddError(kErrBadExpr, value->source);
+            return utils::Failure;
+        }
+
+        args.Push(expr);
+        arg_tys.Push(ty);
+    }
+
+    auto* common_ty = type::Type::Common(arg_tys);
+    if (!common_ty) {
+        AddError("workgroup_size arguments must be of the same type, either i32 or u32",
+                 attr->source);
+        return utils::Failure;
+    }
+
+    // If all arguments are abstract-integers, then materialize to i32.
+    if (common_ty->Is<type::AbstractInt>()) {
+        common_ty = builder_->create<type::I32>();
+    }
+
+    for (size_t i = 0; i < args.Length(); i++) {
+        auto* materialized = Materialize(args[i], common_ty);
+        if (!materialized) {
+            return utils::Failure;
+        }
+        if (auto* value = materialized->ConstantValue()) {
+            if (value->ValueAs<AInt>() < 1) {
+                AddError("workgroup_size argument must be at least 1", values[i]->source);
+                return utils::Failure;
+            }
+            ws[i] = value->ValueAs<u32>();
+        } else {
+            ws[i] = std::nullopt;
+        }
+    }
+
+    uint64_t total_size = static_cast<uint64_t>(ws[0].value_or(1));
+    for (size_t i = 1; i < 3; i++) {
+        total_size *= static_cast<uint64_t>(ws[i].value_or(1));
+        if (total_size > 0xffffffff) {
+            AddError("total workgroup grid size cannot exceed 0xffffffff", values[i]->source);
+            return utils::Failure;
+        }
+    }
+
+    return ws;
+}
+
+utils::Result<tint::builtin::BuiltinValue> Resolver::BuiltinAttribute(
+    const ast::BuiltinAttribute* attr) {
     auto* builtin_expr = BuiltinValueExpression(attr->builtin);
     if (!builtin_expr) {
-        return false;
+        return utils::Failure;
     }
     // Apply the resolved tint::sem::BuiltinEnumExpression<tint::builtin::BuiltinValue> to the
     // attribute.
     builder_->Sem().Add(attr, builtin_expr);
+    return builtin_expr->Value();
+}
+
+bool Resolver::DiagnosticAttribute(const ast::DiagnosticAttribute* attr) {
+    return DiagnosticControl(attr->control);
+}
+
+bool Resolver::StageAttribute(const ast::StageAttribute*) {
+    return true;
+}
+
+bool Resolver::MustUseAttribute(const ast::MustUseAttribute*) {
+    return true;
+}
+
+bool Resolver::InvariantAttribute(const ast::InvariantAttribute*) {
+    return true;
+}
+
+bool Resolver::StrideAttribute(const ast::StrideAttribute*) {
     return true;
 }
 
@@ -3626,24 +3851,30 @@ bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attribute
         return false;
     }
 
-    for (auto* attr : attributes) {
-        Mark(attr);
-        if (auto* sd = attr->As<ast::StrideAttribute>()) {
-            // If the element type is not plain, then el_ty->Align() may be 0, in which case we
-            // could get a DBZ in ArrayStrideAttribute(). In this case, validation will error
-            // about the invalid array element type (which is tested later), so this is just a
-            // seatbelt.
-            if (IsPlain(el_ty)) {
-                explicit_stride = sd->stride;
-                if (!validator_.ArrayStrideAttribute(sd, el_ty->Size(), el_ty->Align())) {
-                    return false;
+    for (auto* attribute : attributes) {
+        Mark(attribute);
+        bool ok = Switch(
+            attribute,  //
+            [&](const ast::StrideAttribute* attr) {
+                // If the element type is not plain, then el_ty->Align() may be 0, in which case we
+                // could get a DBZ in ArrayStrideAttribute(). In this case, validation will error
+                // about the invalid array element type (which is tested later), so this is just a
+                // seatbelt.
+                if (IsPlain(el_ty)) {
+                    explicit_stride = attr->stride;
+                    if (!validator_.ArrayStrideAttribute(attr, el_ty->Size(), el_ty->Align())) {
+                        return false;
+                    }
                 }
-            }
-            continue;
+                return true;
+            },
+            [&](Default) {
+                ErrorInvalidAttribute(attribute, "array types");
+                return false;
+            });
+        if (!ok) {
+            return false;
         }
-
-        AddError("attribute is not valid for array types", attr->source);
-        return false;
     }
 
     return true;
@@ -3727,8 +3958,18 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     if (!validator_.NoDuplicateAttributes(str->attributes)) {
         return nullptr;
     }
-    for (auto* attr : str->attributes) {
-        Mark(attr);
+
+    for (auto* attribute : str->attributes) {
+        Mark(attribute);
+        bool ok = Switch(
+            attribute, [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
+            [&](Default) {
+                ErrorInvalidAttribute(attribute, "struct declarations");
+                return false;
+            });
+        if (!ok) {
+            return nullptr;
+        }
     }
 
     utils::Vector<const sem::StructMember*, 8> sem_members;
@@ -3781,88 +4022,87 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         bool has_align_attr = false;
         bool has_size_attr = false;
         std::optional<uint32_t> location;
-        for (auto* attr : member->attributes) {
-            if (!Attribute(attr)) {
-                return nullptr;
-            }
+        for (auto* attribute : member->attributes) {
+            Mark(attribute);
             bool ok = Switch(
-                attr,  //
-                [&](const ast::StructMemberOffsetAttribute* o) {
-                    // Offset attributes are not part of the WGSL spec, but are emitted
-                    // by the SPIR-V reader.
+                attribute,  //
+                [&](const ast::StructMemberOffsetAttribute* attr) {
+                    // Offset attributes are not part of the WGSL spec, but are emitted by the
+                    // SPIR-V reader.
+
                     ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant,
                                                        "@offset value"};
                     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
-                    auto* materialized = Materialize(ValueExpression(o->expr));
+                    auto* materialized = Materialize(ValueExpression(attr->expr));
                     if (!materialized) {
                         return false;
                     }
                     auto const_value = materialized->ConstantValue();
                     if (!const_value) {
-                        AddError("@offset must be constant expression", o->expr->source);
+                        AddError("@offset must be constant expression", attr->expr->source);
                         return false;
                     }
                     offset = const_value->ValueAs<uint64_t>();
 
                     if (offset < struct_size) {
-                        AddError("offsets must be in ascending order", o->source);
+                        AddError("offsets must be in ascending order", attr->source);
                         return false;
                     }
                     has_offset_attr = true;
                     return true;
                 },
-                [&](const ast::StructMemberAlignAttribute* a) {
+                [&](const ast::StructMemberAlignAttribute* attr) {
                     ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@align"};
                     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
-                    auto* materialized = Materialize(ValueExpression(a->expr));
+                    auto* materialized = Materialize(ValueExpression(attr->expr));
                     if (!materialized) {
                         return false;
                     }
                     if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
-                        AddError("@align must be an i32 or u32 value", a->source);
+                        AddError("@align must be an i32 or u32 value", attr->source);
                         return false;
                     }
 
                     auto const_value = materialized->ConstantValue();
                     if (!const_value) {
-                        AddError("@align must be constant expression", a->source);
+                        AddError("@align must be constant expression", attr->source);
                         return false;
                     }
                     auto value = const_value->ValueAs<AInt>();
 
                     if (value <= 0 || !utils::IsPowerOfTwo(value)) {
                         AddError("@align value must be a positive, power-of-two integer",
-                                 a->source);
+                                 attr->source);
                         return false;
                     }
                     align = u32(value);
                     has_align_attr = true;
                     return true;
                 },
-                [&](const ast::StructMemberSizeAttribute* s) {
+                [&](const ast::StructMemberSizeAttribute* attr) {
                     ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@size"};
                     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
-                    auto* materialized = Materialize(ValueExpression(s->expr));
+                    auto* materialized = Materialize(ValueExpression(attr->expr));
                     if (!materialized) {
                         return false;
                     }
                     if (!materialized->Type()->IsAnyOf<type::U32, type::I32>()) {
-                        AddError("@size must be an i32 or u32 value", s->source);
+                        AddError("@size must be an i32 or u32 value", attr->source);
                         return false;
                     }
 
                     auto const_value = materialized->ConstantValue();
                     if (!const_value) {
-                        AddError("@size must be constant expression", s->expr->source);
+                        AddError("@size must be constant expression", attr->expr->source);
                         return false;
                     }
                     {
                         auto value = const_value->ValueAs<AInt>();
                         if (value <= 0) {
-                            AddError("@size must be a positive integer", s->source);
+                            AddError("@size must be a positive integer", attr->source);
                             return false;
                         }
                     }
@@ -3870,24 +4110,36 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     if (value < size) {
                         AddError("@size must be at least as big as the type's size (" +
                                      std::to_string(size) + ")",
-                                 s->source);
+                                 attr->source);
                         return false;
                     }
                     size = u32(value);
                     has_size_attr = true;
                     return true;
                 },
-                [&](const ast::LocationAttribute* loc_attr) {
-                    auto value = LocationAttribute(loc_attr);
+                [&](const ast::LocationAttribute* attr) {
+                    auto value = LocationAttribute(attr);
                     if (!value) {
                         return false;
                     }
                     location = value.Get();
                     return true;
                 },
+                [&](const ast::BuiltinAttribute* attr) -> bool { return BuiltinAttribute(attr); },
+                [&](const ast::InterpolateAttribute* attr) { return InterpolateAttribute(attr); },
+                [&](const ast::InvariantAttribute* attr) { return InvariantAttribute(attr); },
+                [&](const ast::StrideAttribute* attr) {
+                    if (validator_.IsValidationEnabled(
+                            member->attributes, ast::DisabledValidation::kIgnoreStrideAttribute)) {
+                        ErrorInvalidAttribute(attribute, "struct members");
+                        return false;
+                    }
+                    return StrideAttribute(attr);
+                },
+                [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
                 [&](Default) {
-                    // The validator will check attributes can be applied to the struct member.
-                    return true;
+                    ErrorInvalidAttribute(attribute, "struct members");
+                    return false;
                 });
             if (!ok) {
                 return nullptr;
@@ -4049,14 +4301,16 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
         }
 
         // Handle switch body attributes.
-        for (auto* attr : stmt->body_attributes) {
-            Mark(attr);
-            if (auto* dc = attr->As<ast::DiagnosticAttribute>()) {
-                if (!DiagnosticControl(dc->control)) {
+        for (auto* attribute : stmt->body_attributes) {
+            Mark(attribute);
+            bool ok = Switch(
+                attribute,
+                [&](const ast::DiagnosticAttribute* attr) { return DiagnosticAttribute(attr); },
+                [&](Default) {
+                    ErrorInvalidAttribute(attribute, "switch body");
                     return false;
-                }
-            } else {
-                AddError("attribute is not valid for switch body", attr->source);
+                });
+            if (!ok) {
                 return false;
             }
         }
@@ -4097,14 +4351,6 @@ sem::Statement* Resolver::VariableDeclStatement(const ast::VariableDeclStatement
         auto* variable = Variable(stmt->variable, /* is_global */ false);
         if (!variable) {
             return false;
-        }
-
-        for (auto* attr : stmt->variable->attributes) {
-            Mark(attr);
-            if (!attr->Is<ast::InternalAttribute>()) {
-                AddError("attributes are not valid on local variables", attr->source);
-                return false;
-            }
         }
 
         current_compound_statement_->AddDecl(variable->As<sem::LocalVariable>());
@@ -4339,16 +4585,16 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
 
     // Helper to handle attributes that are supported on certain types of statement.
     auto handle_attributes = [&](auto* stmt, sem::Statement* sem_stmt, const char* use) {
-        for (auto* attr : stmt->attributes) {
-            Mark(attr);
-            if (auto* dc = attr->template As<ast::DiagnosticAttribute>()) {
-                if (!DiagnosticControl(dc->control)) {
+        for (auto* attribute : stmt->attributes) {
+            Mark(attribute);
+            bool ok = Switch(
+                attribute,  //
+                [&](const ast::DiagnosticAttribute* attr) { return DiagnosticAttribute(attr); },
+                [&](Default) {
+                    ErrorInvalidAttribute(attribute, use);
                     return false;
-                }
-            } else {
-                utils::StringStream ss;
-                ss << "attribute is not valid for " << use;
-                AddError(ss.str(), attr->source);
+                });
+            if (!ok) {
                 return false;
             }
         }
@@ -4449,6 +4695,10 @@ void Resolver::ErrorMismatchedResolvedIdentifier(const Source& source,
                                                  std::string_view wanted) {
     AddError("cannot use " + resolved.String(diagnostics_) + " as " + std::string(wanted), source);
     sem_.NoteDeclarationSource(resolved.Node());
+}
+
+void Resolver::ErrorInvalidAttribute(const ast::Attribute* attr, std::string_view use) {
+    AddError("@" + attr->Name() + " is not valid for " + std::string(use), attr->source);
 }
 
 void Resolver::AddError(const std::string& msg, const Source& source) const {
