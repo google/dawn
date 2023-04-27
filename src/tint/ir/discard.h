@@ -16,14 +16,14 @@
 #define SRC_TINT_IR_DISCARD_H_
 
 #include "src/tint/debug.h"
-#include "src/tint/ir/instruction.h"
+#include "src/tint/ir/call.h"
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
 /// A discard instruction in the IR.
-class Discard : public utils::Castable<Discard, Instruction> {
+class Discard : public utils::Castable<Discard, Call> {
   public:
     /// Constructor
     Discard();

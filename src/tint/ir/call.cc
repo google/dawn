@@ -18,6 +18,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Call);
 
 namespace tint::ir {
 
+Call::Call() : Base() {}
+
 Call::Call(uint32_t id, const type::Type* type, utils::VectorRef<Value*> args)
     : Base(id, type), args_(args) {
     for (auto* arg : args) {

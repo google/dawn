@@ -24,11 +24,6 @@ namespace tint::ir {
 /// A Call instruction in the IR.
 class Call : public utils::Castable<Call, Instruction> {
   public:
-    /// Constructor
-    /// @param id the instruction id
-    /// @param type the result type
-    /// @param args the constructor arguments
-    Call(uint32_t id, const type::Type* type, utils::VectorRef<Value*> args);
     Call(const Call& inst) = delete;
     Call(Call&& inst) = delete;
     ~Call() override;
@@ -42,6 +37,15 @@ class Call : public utils::Castable<Call, Instruction> {
     /// Writes the call arguments to the given stream.
     /// @param out the output stream
     void EmitArgs(utils::StringStream& out) const;
+
+  protected:
+    /// Constructor
+    Call();
+    /// Constructor
+    /// @param id the instruction id
+    /// @param type the result type
+    /// @param args the constructor arguments
+    Call(uint32_t id, const type::Type* type, utils::VectorRef<Value*> args);
 
   private:
     utils::Vector<Value*, 1> args_;
