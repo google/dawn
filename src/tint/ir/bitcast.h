@@ -15,14 +15,14 @@
 #ifndef SRC_TINT_IR_BITCAST_H_
 #define SRC_TINT_IR_BITCAST_H_
 
-#include "src/tint/ir/instruction.h"
+#include "src/tint/ir/call.h"
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
 /// A bitcast instruction in the IR.
-class Bitcast : public utils::Castable<Bitcast, Instruction> {
+class Bitcast : public utils::Castable<Bitcast, Call> {
   public:
     /// Constructor
     /// @param id the instruction id
@@ -36,16 +36,10 @@ class Bitcast : public utils::Castable<Bitcast, Instruction> {
     Bitcast& operator=(const Bitcast& inst) = delete;
     Bitcast& operator=(Bitcast&& inst) = delete;
 
-    /// @returns the left-hand-side value for the instruction
-    const Value* Val() const { return val_; }
-
     /// Write the instruction to the given stream
     /// @param out the stream to write to
     /// @returns the stream
     utils::StringStream& ToInstruction(utils::StringStream& out) const override;
-
-  private:
-    Value* val_ = nullptr;
 };
 
 }  // namespace tint::ir
