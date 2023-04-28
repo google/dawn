@@ -105,10 +105,12 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                             // Offset and size are measured in shader constants, which are 16 bytes
                             // (4*32-bit components). And the offsets and counts must be multiples
                             // of 16.
-                            ASSERT(IsAligned(offset, 256));
-                            UINT firstConstant = static_cast<UINT>(offset / 16);
-                            UINT size = static_cast<UINT>(binding.size / 16);
-                            UINT numConstants = Align(size, 16);
+                            DAWN_ASSERT(IsAligned(offset, 256));
+                            uint32_t firstConstant = static_cast<uint32_t>(offset / 16);
+                            uint32_t size = static_cast<uint32_t>(Align(binding.size, 16) / 16);
+                            uint32_t numConstants = Align(size, 16);
+                            DAWN_ASSERT(offset + numConstants * 16 <=
+                                        binding.buffer->GetAllocatedSize());
 
                             if (bindingInfo.visibility & wgpu::ShaderStage::Vertex) {
                                 deviceContext->VSSetConstantBuffers1(bindingSlot, 1, &d3d11Buffer,
@@ -146,7 +148,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                             ComPtr<ID3D11ShaderResourceView> d3d11SRV;
                             DAWN_TRY_ASSIGN(d3d11SRV, ToBackend(binding.buffer)
                                                           ->CreateD3D11ShaderResourceView(
-                                                              binding.offset, binding.size));
+                                                              offset, binding.size));
                             if (bindingInfo.visibility & wgpu::ShaderStage::Vertex) {
                                 deviceContext->VSSetShaderResources(bindingSlot, 1,
                                                                     d3d11SRV.GetAddressOf());

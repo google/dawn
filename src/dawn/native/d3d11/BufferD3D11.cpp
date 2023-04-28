@@ -319,10 +319,10 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> Buffer::CreateD3D11ShaderResourc
 
     D3D11_SHADER_RESOURCE_VIEW_DESC desc;
     desc.Format = DXGI_FORMAT_R32_TYPELESS;
-    desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-    desc.Buffer.FirstElement = firstElement;
-    desc.Buffer.NumElements = numElements;
-
+    desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+    desc.BufferEx.FirstElement = firstElement;
+    desc.BufferEx.NumElements = numElements;
+    desc.BufferEx.Flags = D3D11_BUFFEREX_SRV_FLAG_RAW;
     ComPtr<ID3D11ShaderResourceView> srv;
     DAWN_TRY(CheckHRESULT(ToBackend(GetDevice())
                               ->GetD3D11Device()

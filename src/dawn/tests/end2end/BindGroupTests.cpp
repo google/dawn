@@ -241,6 +241,8 @@ TEST_P(BindGroupTests, ReusedUBO) {
 // shader. In D3D12 for example, these different types of bindings end up in different namespaces,
 // but the register offsets used must match between the shader module and descriptor range.
 TEST_P(BindGroupTests, UBOSamplerAndTexture) {
+    // TODO(dawn:1768): enable this test once computer shader B2T is supported.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
@@ -992,6 +994,9 @@ TEST_P(BindGroupTests, DrawThenChangePipelineTwiceAndBindGroup) {
 // Regression test for crbug.com/dawn/408 where dynamic offsets were applied in the wrong order.
 // Dynamic offsets should be applied in increasing order of binding number.
 TEST_P(BindGroupTests, DynamicOffsetOrder) {
+    // TODO(dawn:1776): Fix the UpdateSubresource1 16-byte alignment.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     // We will put the following values and the respective offsets into a buffer.
     // The test will ensure that the correct dynamic offset is applied to each buffer by reading the
     // value from an offset binding.
@@ -1076,6 +1081,9 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) {
     // // TODO(crbug.com/dawn/1106): Test output is wrong on D3D12 using WARP.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+    // TODO(dawn:1776): Fix the UpdateSubresource1 16-byte alignment.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     auto RunTestWith = [&](bool dynamicBufferFirst) {
         uint32_t dynamicBufferBindingNumber = dynamicBufferFirst ? 0 : 1;
@@ -1507,6 +1515,7 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
 }
 
 DAWN_INSTANTIATE_TEST(BindGroupTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
