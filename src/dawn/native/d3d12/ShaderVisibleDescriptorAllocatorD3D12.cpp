@@ -237,9 +237,11 @@ bool ShaderVisibleDescriptorAllocator::IsLastShaderVisibleHeapInLRUForTesting() 
 
 bool ShaderVisibleDescriptorAllocator::IsAllocationStillValid(
     const GPUDescriptorHeapAllocation& allocation) const {
-    // Consider valid if allocated for the pending submit and the shader visible heaps
-    // have not switched over.
-    return (allocation.GetLastUsageSerial() > mDevice->GetCompletedCommandSerial() &&
+    // Descriptor allocations are only valid for the serial they were created for and are
+    // re-allocated every submit. For this reason, we view any descriptors allocated prior to the
+    // pending submit as invalid. We must also verify the descriptor heap has not switched (because
+    // a larger descriptor heap was needed).
+    return (allocation.GetLastUsageSerial() == mDevice->GetPendingCommandSerial() &&
             allocation.GetHeapSerial() == mHeapSerial);
 }
 
