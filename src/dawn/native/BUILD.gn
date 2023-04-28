@@ -883,6 +883,7 @@ dawn_component("webgpu_dawn") {
   #    - SwiftShader can't be built without use_custom_libcxx.
   #      It should be built separately.
   DEFINE_PREFIX = "WGPU"
+  output_name = "webgpu_dawn"
 
   sources = get_target_outputs(":webgpu_dawn_native_proc_gen")
   deps = [
