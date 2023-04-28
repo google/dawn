@@ -541,6 +541,13 @@ crbug.com/dawn/1767 [ win ] webgpu:api,validation,capability_checks,limits,maxBi
 crbug.com/dawn/1767 [ win ] webgpu:api,validation,capability_checks,limits,maxBindingsPerBindGroup:createPipeline,at_over:* [ Failure ]
 
 ################################################################################
+# These tests are slow enough that they fail often on a lot of configurations,
+# especially code-coverage builders.
+# KEEP
+################################################################################
+crbug.com/dawn/1783 webgpu:shader,execution,expression,binary,* [ Slow ]
+
+################################################################################
 # untriaged failures
 ################################################################################
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
@@ -555,22 +562,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 win10 
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 win10 ] webgpu:api,validation,capability_checks,limits,maxUniformBufferBindingSize:createBindGroup,at_over:limitTest="atDefault";testValueName="atLimit";bufferPart="wholeBuffer" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 win10 ] webgpu:api,validation,capability_checks,limits,maxUniformBuffersPerShaderStage:createBindGroupLayout,at_over:limitTest="atDefault";testValueName="atLimit";visibility=3;order="shiftByHalf" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ ventura ] webgpu:api,validation,render_pipeline,fragment_state:targets_blend:isAsync=false;component="color" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x3e9b monterey target-cpu-64 ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="storage_r";vectorize="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="storage_r";vectorize="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 ubuntu ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="storage_rw";vectorize="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="storage_rw";vectorize=2 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="storage_rw";vectorize=3 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 ubuntu ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_compound:inputSource="storage_r";vectorize=2 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_compound:inputSource="storage_rw";vectorize="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_compound:inputSource="uniform";vectorize="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x3e9b monterey target-cpu-64 ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_compound:inputSource="uniform";vectorize="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_scalar_vector:inputSource="const";dim=2 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_scalar_vector:inputSource="storage_r";dim=4 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_vector_scalar:inputSource="const";dim=3 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_vector_scalar:inputSource="storage_r";dim=3 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_vector_scalar:inputSource="storage_rw";dim=4 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 ubuntu ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_vector_scalar:inputSource="uniform";dim=2 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation target-cpu-64 ventura ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition_vector_scalar:inputSource="uniform";dim=3 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";srcDoFlipYDuringCopy=true;dstPremultiplied=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ RetryOnFailure ]
 
