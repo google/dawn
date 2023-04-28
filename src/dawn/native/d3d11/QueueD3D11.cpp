@@ -81,8 +81,8 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
     Texture* texture = ToBackend(destination.texture);
 
     return texture->Write(commandContext, subresources, destination.origin, writeSizePixel,
-                          static_cast<const uint8_t*>(data), dataLayout.bytesPerRow,
-                          dataLayout.rowsPerImage);
+                          static_cast<const uint8_t*>(data) + dataLayout.offset,
+                          dataLayout.bytesPerRow, dataLayout.rowsPerImage);
 }
 
 }  // namespace dawn::native::d3d11
