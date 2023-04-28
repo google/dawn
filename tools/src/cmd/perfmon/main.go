@@ -223,10 +223,10 @@ func (cfg *GitConfig) setDefaults() {
 // setDefaults assigns default values to unassigned fields of cfg
 func (cfg *TimeoutsConfig) setDefaults() {
 	if cfg.Sync == 0 {
-		cfg.Sync = time.Minute * 10
+		cfg.Sync = time.Minute * 30
 	}
 	if cfg.Build == 0 {
-		cfg.Build = time.Minute * 10
+		cfg.Build = time.Minute * 30
 	}
 	if cfg.Benchmark == 0 {
 		cfg.Benchmark = time.Minute * 30
@@ -327,12 +327,12 @@ func (e env) doSomeWork() (bool, error) {
 					log.Printf("benchmarked %v changes", i)
 					return true, nil
 				}
-				benchRes, err := e.benchmarkTintChange(c)
+				benchRes, err := e.benchmarkTintChange(c.hash, c.desc)
 				if err != nil {
 					log.Printf("benchmarking failed: %v", err)
 					benchRes = &bench.Run{}
 				}
-				commitRes, err := e.benchmarksToCommitResults(c, *benchRes)
+				commitRes, err := e.benchmarksToCommitResults(c.hash, *benchRes)
 				if err != nil {
 					return true, err
 				}
@@ -353,13 +353,13 @@ func (e env) doSomeWork() (bool, error) {
 		}
 
 		if changeToBenchmark != nil {
-			log.Printf("re-benchmarking change '%v'", *changeToBenchmark)
-			benchRes, err := e.benchmarkTintChange(*changeToBenchmark)
+			log.Printf("re-benchmarking change '%v'", changeToBenchmark.hash)
+			benchRes, err := e.benchmarkTintChange(changeToBenchmark.hash, changeToBenchmark.desc)
 			if err != nil {
 				log.Printf("benchmarking failed: %v", err)
 				benchRes = &bench.Run{}
 			}
-			commitRes, err := e.benchmarksToCommitResults(*changeToBenchmark, *benchRes)
+			commitRes, err := e.benchmarksToCommitResults(changeToBenchmark.hash, *benchRes)
 			if err != nil {
 				return true, err
 			}
@@ -373,9 +373,15 @@ func (e env) doSomeWork() (bool, error) {
 	return false, nil
 }
 
+// HashAndDesc describes a single change to benchmark
+type HashAndDesc struct {
+	hash git.Hash
+	desc string
+}
+
 // changesToBenchmark fetches the list of changes that do not currently have
 // benchmark results, which should be benchmarked.
-func (e env) changesToBenchmark() ([]git.Hash, error) {
+func (e env) changesToBenchmark() ([]HashAndDesc, error) {
 	log.Println("syncing dawn repo...")
 	latest, err := e.dawnRepo.Fetch(e.cfg.Dawn.Branch, &git.FetchOptions{
 		Credentials: e.cfg.Dawn.Credentials,
@@ -394,10 +400,10 @@ func (e env) changesToBenchmark() ([]git.Hash, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to gather changes with existing benchmarks:\n  %w", err)
 	}
-	changesToBenchmark := make([]git.Hash, 0, len(allChanges))
+	changesToBenchmark := make([]HashAndDesc, 0, len(allChanges))
 	for _, c := range allChanges {
 		if _, exists := changesWithBenchmarks[c.Hash]; !exists {
-			changesToBenchmark = append(changesToBenchmark, c.Hash)
+			changesToBenchmark = append(changesToBenchmark, HashAndDesc{c.Hash, c.Subject})
 		}
 	}
 	// Reverse the order of changesToBenchmark, so that the oldest comes first.
@@ -412,7 +418,7 @@ func (e env) changesToBenchmark() ([]git.Hash, error) {
 // changeToRefineBenchmarks scans for the most suitable historic commit to
 // re-benchmark and refine the results. Returns nil if there are no suitable
 // changes.
-func (e env) changeToRefineBenchmarks() (*git.Hash, error) {
+func (e env) changeToRefineBenchmarks() (*HashAndDesc, error) {
 	log.Println("syncing results repo...")
 	if err := fetchAndCheckoutLatest(e.resultsRepo, e.cfg.Results); err != nil {
 		return nil, err
@@ -433,11 +439,11 @@ func (e env) changeToRefineBenchmarks() (*git.Hash, error) {
 		return nil, nil
 	}
 
-	type hashDelta struct {
-		hash  git.Hash
-		delta float64
+	type changeDelta struct {
+		change HashAndDesc
+		delta  float64
 	}
-	hashDeltas := make([]hashDelta, 0, len(results.Commits))
+	hashDeltas := make([]changeDelta, 0, len(results.Commits))
 	for i, c := range results.Commits {
 		hash, err := git.ParseHash(c.Commit)
 		if err != nil {
@@ -465,31 +471,32 @@ func (e env) changeToRefineBenchmarks() (*git.Hash, error) {
 		}
 		if count > 0 {
 			delta = delta / float64(count)
-			hashDeltas = append(hashDeltas, hashDelta{hash, delta})
+			desc := strings.Split(c.CommitDescription, "\n")[0]
+			hashDeltas = append(hashDeltas, changeDelta{HashAndDesc{hash, desc}, delta})
 		}
 	}
 
 	sort.Slice(hashDeltas, func(i, j int) bool { return hashDeltas[i].delta > hashDeltas[j].delta })
 
-	return &hashDeltas[0].hash, nil
+	return &hashDeltas[0].change, nil
 }
 
 // benchmarkTintChangeIfNotCached first checks the results cache for existing
 // benchmark values for the given change, returning those cached values if hit.
 // If the cache does not contain results for the change, then
 // e.benchmarkTintChange() is called.
-func (e env) benchmarkTintChangeIfNotCached(hash git.Hash) (*bench.Run, error) {
+func (e env) benchmarkTintChangeIfNotCached(hash git.Hash, desc string) (*bench.Run, error) {
 	if cached, ok := e.benchmarkCache[hash]; ok {
 		log.Printf("reusing cached benchmark results of '%v'...", hash)
 		return cached, nil
 	}
-	return e.benchmarkTintChange(hash)
+	return e.benchmarkTintChange(hash, desc)
 }
 
 // benchmarkTintChange checks out the given commit, fetches the dawn third party
 // dependencies, builds tint, then runs the benchmarks, returning the results.
-func (e env) benchmarkTintChange(hash git.Hash) (*bench.Run, error) {
-	log.Printf("checking out dawn at '%v'...", hash)
+func (e env) benchmarkTintChange(hash git.Hash, desc string) (*bench.Run, error) {
+	log.Printf("checking out dawn at '%v': %v...", hash, desc)
 	if err := checkout(hash, e.dawnRepo); err != nil {
 		return nil, err
 	}
@@ -769,15 +776,10 @@ func (e errFailedToBenchmark) Error() string {
 }
 
 // benchmarkTint runs the tint benchmarks e.cfg.BenchmarkRepetitions times,
-// returning the averaged results.
+// returning the median timing.
 func (e env) repeatedlyBenchmarkTint() (*bench.Run, error) {
-	type durationAndCount struct {
-		duration time.Duration
-		count    int
-	}
-
 	var ctx *bench.Context
-	acc := map[string]durationAndCount{}
+	testTimes := map[string][]time.Duration{}
 	for i := 0; i < e.cfg.BenchmarkRepetitions; i++ {
 		if err := e.waitForTempsToSettle(); err != nil {
 			return nil, err
@@ -788,10 +790,7 @@ func (e env) repeatedlyBenchmarkTint() (*bench.Run, error) {
 			return nil, err
 		}
 		for _, b := range run.Benchmarks {
-			v := acc[b.Name]
-			v.duration += b.Duration
-			v.count++
-			acc[b.Name] = v
+			testTimes[b.Name] = append(testTimes[b.Name], b.Duration)
 		}
 		if ctx == nil {
 			ctx = run.Context
@@ -799,10 +798,11 @@ func (e env) repeatedlyBenchmarkTint() (*bench.Run, error) {
 	}
 
 	out := bench.Run{Context: ctx}
-	for name, dc := range acc {
+	for name, times := range testTimes {
+		sort.Slice(times, func(i, j int) bool { return times[i] < times[j] })
 		out.Benchmarks = append(out.Benchmarks, bench.Benchmark{
 			Name:     name,
-			Duration: dc.duration / time.Duration(dc.count),
+			Duration: times[len(times)/2], // Median
 		})
 	}
 
@@ -817,12 +817,12 @@ func (e env) benchmarkTint() (*bench.Run, error) {
 		"--benchmark_enable_random_interleaving=true",
 	)
 	if err != nil {
-		return nil, errFailedToBenchmark{err}
+		return nil, errFailedToBenchmark{fmt.Errorf("failed to run benchmarks: %w\noutput: %v", err, out)}
 	}
 
 	results, err := bench.Parse(out)
 	if err != nil {
-		return nil, errFailedToBenchmark{err}
+		return nil, errFailedToBenchmark{fmt.Errorf("failed to parse benchmark results: %w\noutput: %v", err, out)}
 	}
 	return &results, nil
 }
@@ -930,6 +930,7 @@ func (e env) findGerritChangeToBenchmark() (*gerrit.ChangeInfo, error) {
 // benchmarks the gerrit change, posting the findings to the change
 func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 	current := change.Revisions[change.CurrentRevision]
+	fmt.Println("benchmarking", change.URL)
 	log.Printf("fetching '%v'...", current.Ref)
 	currentHash, err := e.dawnRepo.Fetch(current.Ref, &git.FetchOptions{
 		Credentials: e.cfg.Dawn.Credentials,
@@ -937,8 +938,8 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 	if err != nil {
 		return err
 	}
-	parent := current.Commit.Parents[0].Commit
-	parentHash, err := git.ParseHash(parent)
+	parent := current.Commit.Parents[0]
+	parentHash, err := git.ParseHash(parent.Commit)
 	if err != nil {
 		return fmt.Errorf("failed to parse parent hash '%v':\n  %v", parent, err)
 	}
@@ -955,7 +956,7 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 		return nil
 	}
 
-	newRun, err := e.benchmarkTintChange(currentHash)
+	newRun, err := e.benchmarkTintChange(currentHash, change.Subject)
 	if err != nil {
 		log.Printf("ERROR: %v", err)
 		buildErr := errFailedToBuild{}
@@ -968,12 +969,13 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 		}
 		return err
 	}
-	if _, err := e.dawnRepo.Fetch(parent, &git.FetchOptions{
+	if _, err := e.dawnRepo.Fetch(parent.Commit, &git.FetchOptions{
 		Credentials: e.cfg.Dawn.Credentials,
 	}); err != nil {
 		return err
 	}
-	parentRun, err := e.benchmarkTintChangeIfNotCached(parentHash)
+	parentRun, err := e.benchmarkTintChangeIfNotCached(parentHash,
+		fmt.Sprintf("[parent of %v] %v", currentHash.String()[:7], parent.Subject))
 	if err != nil {
 		return err
 	}
@@ -993,7 +995,7 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 	fmt.Fprintln(msg, "Perfmon analysis:")
 	fmt.Fprintln(msg)
 	fmt.Fprintln(msg, "```")
-	fmt.Fprintf(msg, "A: parent change (%v) -> B: patchset %v\n", parent[:7], current.Number)
+	fmt.Fprintf(msg, "A: parent change (%v) -> B: patchset %v\n", parent.Commit[:7], current.Number)
 	fmt.Fprintln(msg)
 	for _, line := range strings.Split(diff.Format(diffFmt), "\n") {
 		fmt.Fprintf(msg, "  %v\n", line)
@@ -1199,10 +1201,15 @@ func maxTemp(sensorName string) (float32, error) {
 func call(exe, wd string, timeout time.Duration, args ...string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, exe, args...)
+	args = append([]string{"-n", "-20", exe}, args...)
+	cmd := exec.CommandContext(ctx, "nice", args...)
 	cmd.Dir = wd
 	out, err := cmd.CombinedOutput()
 	if err != nil {
+		// Note: If you get a permission error with 'nice', then you either need
+		// to run as sudo (not recommended), or update your ulimits:
+		// Append to /etc/security/limits.conf:
+		//  <user>              -       nice       -20
 		return string(out), fmt.Errorf("'%v %v' failed:\n  %w\n%v", exe, args, err, string(out))
 	}
 	return string(out), nil

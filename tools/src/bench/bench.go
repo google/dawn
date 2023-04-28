@@ -145,7 +145,7 @@ func parseJSON(s string) (Run, error) {
 		} `json:"context"`
 		Benchmarks []struct {
 			Name          string        `json:"name"`
-			Time          float64       `json:"real_time"`
+			Time          float64       `json:"cpu_time"`
 			AggregateType AggregateType `json:"aggregate_name"`
 		} `json:"benchmarks"`
 	}
