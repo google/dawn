@@ -452,7 +452,7 @@ MaybeError EncodeMetalRenderPass(Device* device,
         std::array<id<MTLTexture>, kMaxColorAttachments> resolveTextures = {};
         for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
             if (mtlRenderPass.colorAttachments[i].storeAction ==
-                kMTLStoreActionStoreAndMultisampleResolve) {
+                MTLStoreActionStoreAndMultisampleResolve) {
                 hasStoreAndMSAAResolve = true;
                 resolveTextures[i] = mtlRenderPass.colorAttachments[i].resolveTexture;
 

@@ -213,7 +213,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
             switch (attachmentInfo.storeOp) {
                 case wgpu::StoreOp::Store:
                     descriptor.colorAttachments[i].storeAction =
-                        kMTLStoreActionStoreAndMultisampleResolve;
+                        MTLStoreActionStoreAndMultisampleResolve;
                     break;
                 case wgpu::StoreOp::Discard:
                     descriptor.colorAttachments[i].storeAction = MTLStoreActionMultisampleResolve;

@@ -43,10 +43,8 @@ MTLTextureUsage MetalTextureUsage(const Format& format, wgpu::TextureUsage usage
         // See TextureView::Initialize.
         // Depth views for depth/stencil textures in Metal simply use the original
         // texture's format, but stencil views require format reinterpretation.
-        if (@available(macOS 10.12, iOS 10.0, *)) {
-            if (IsSubset(Aspect::Depth | Aspect::Stencil, format.aspects)) {
-                result |= MTLTextureUsagePixelFormatView;
-            }
+        if (IsSubset(Aspect::Depth | Aspect::Stencil, format.aspects)) {
+            result |= MTLTextureUsagePixelFormatView;
         }
     }
 
@@ -332,10 +330,8 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
         case wgpu::TextureFormat::Depth16Unorm:
             if (@available(macOS 10.12, iOS 13.0, *)) {
                 return MTLPixelFormatDepth16Unorm;
-            } else {
-                // TODO(dawn:1181): Allow non-conformant implementation on macOS 10.11
-                UNREACHABLE();
             }
+            UNREACHABLE();
         case wgpu::TextureFormat::Stencil8:
             if (device->IsToggleEnabled(Toggle::MetalUseCombinedDepthStencilFormatForStencil8)) {
                 return MTLPixelFormatDepth32Float_Stencil8;
@@ -1169,19 +1165,8 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
 
         Aspect aspect = SelectFormatAspects(GetFormat(), descriptor->aspect);
         if (aspect == Aspect::Stencil && textureFormat != MTLPixelFormatStencil8) {
-            if (@available(macOS 10.12, iOS 10.0, *)) {
-                if (textureFormat == MTLPixelFormatDepth32Float_Stencil8) {
-                    viewFormat = MTLPixelFormatX32_Stencil8;
-                } else {
-                    UNREACHABLE();
-                }
-            } else {
-                // TODO(enga): Add a workaround to back combined depth/stencil textures
-                // with Sampled usage using two separate textures.
-                // Or, consider always using the workaround for D32S8.
-                return DAWN_INTERNAL_ERROR("Cannot create stencil-only texture view of combined "
-                                           "depth/stencil format.");
-            }
+            ASSERT(textureFormat == MTLPixelFormatDepth32Float_Stencil8);
+            viewFormat = MTLPixelFormatX32_Stencil8;
         } else if (GetTexture()->GetFormat().HasDepth() && GetTexture()->GetFormat().HasStencil()) {
             // Depth-only views for depth/stencil textures in Metal simply use the original
             // texture's format.

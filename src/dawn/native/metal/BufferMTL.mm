@@ -45,21 +45,12 @@ uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
 #if DAWN_PLATFORM_IS(MACOS)
     // 10.12 and 10.13 have a 1Gb limit.
     if (@available(macOS 10.12, *)) {
-        // |maxBufferLength| isn't always available on older systems. If available, use
-        // |recommendedMaxWorkingSetSize| instead. We can probably allocate more than this,
-        // but don't have a way to discover a better limit. MoltenVK also uses this heuristic.
         return 1024 * 1024 * 1024;
     }
-    // 10.11 has a 256Mb limit
-    if (@available(macOS 10.11, *)) {
-        return 256 * 1024 * 1024;
-    }
-    // 256Mb for other platform if any. (Need to have a return for all branches).
-    return 256 * 1024 * 1024;
-#else
-    // macOS / tvOS: 256Mb limit in versions without [MTLDevice maxBufferLength]
-    return 256 * 1024 * 1024;
 #endif
+
+    // 256Mb limit in versions without based on the data in the feature set tables.
+    return 256 * 1024 * 1024;
 }
 
 Buffer::Buffer(DeviceBase* dev, const BufferDescriptor* desc) : BufferBase(dev, desc) {}

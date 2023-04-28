@@ -80,15 +80,6 @@ MaybeError EnsureDestinationTextureInitialized(CommandRecordingContext* commandC
                                                const TextureCopy& dst,
                                                const Extent3D& size);
 
-// Allow use MTLStoreActionStoreAndMultismapleResolve because the logic in the backend is
-// first to compute what the "best" Metal render pass descriptor is, then fix it up if we
-// are not on macOS 10.12 (i.e. the EmulateStoreAndMSAAResolve toggle is on).
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability"
-constexpr MTLStoreAction kMTLStoreActionStoreAndMultisampleResolve =
-    MTLStoreActionStoreAndMultisampleResolve;
-#pragma clang diagnostic pop
-
 // Helper functions to encode Metal render passes that take care of multiple workarounds that
 // happen at the render pass start and end. Because workarounds wrap the encoding of the render
 // pass, the encoding must be entirely done by the `encodeInside` callback.
