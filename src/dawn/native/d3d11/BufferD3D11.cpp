@@ -401,9 +401,7 @@ MaybeError Buffer::Write(CommandRecordingContext* commandContext,
                          uint64_t offset,
                          const void* data,
                          size_t size) {
-    if (size == 0) {
-        return {};
-    }
+    DAWN_ASSERT(size != 0);
 
     MarkUsedInPendingCommands();
     // Map the buffer if it is possible, so EnsureDataInitializedAsDestination() and WriteInternal()

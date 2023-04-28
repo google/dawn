@@ -232,8 +232,6 @@ Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
 MaybeError CommandBuffer::Execute() {
     CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
 
-    ID3D11DeviceContext1* d3d11DeviceContext1 = commandContext->GetD3D11DeviceContext1();
-
     auto LazyClearSyncScope = [commandContext](const SyncScopeResourceUsage& scope) -> MaybeError {
         for (size_t i = 0; i < scope.textures.size(); i++) {
             Texture* texture = ToBackend(scope.textures[i]);
@@ -366,81 +364,30 @@ MaybeError CommandBuffer::Execute() {
                 auto& dst = copy->destination;
 
                 SubresourceRange subresources = GetSubresourcesAffectedByCopy(src, copy->copySize);
-                DAWN_TRY(ToBackend(src.texture)
-                             ->EnsureSubresourceContentInitialized(commandContext, subresources));
-
-                TextureDescriptor desc = {};
-                desc.label = "CopyTextureToBufferStaging";
-                desc.dimension = src.texture->GetDimension();
-                desc.size.width = copy->copySize.width;
-                desc.size.height = copy->copySize.height;
-                desc.size.depthOrArrayLayers = copy->copySize.depthOrArrayLayers;
-                desc.format = src.texture->GetFormat().format;
-                desc.mipLevelCount = 1;
-                desc.sampleCount = 1;
-
-                Ref<Texture> stagingTexture;
-                DAWN_TRY_ASSIGN(stagingTexture,
-                                Texture::CreateStaging(ToBackend(GetDevice()), &desc));
-
-                CopyTextureToTextureCmd copyTextureToBufferCmd;
-                copyTextureToBufferCmd.source = src;
-                copyTextureToBufferCmd.destination.texture = stagingTexture.Get();
-                copyTextureToBufferCmd.destination.origin = {0, 0, 0};
-                copyTextureToBufferCmd.destination.mipLevel = 0;
-                copyTextureToBufferCmd.destination.aspect = src.aspect;
-                copyTextureToBufferCmd.copySize = copy->copySize;
-
-                DAWN_TRY(Texture::Copy(commandContext, &copyTextureToBufferCmd));
 
                 Buffer* buffer = ToBackend(dst.buffer.Get());
                 Buffer::ScopedMap scopedDstMap;
                 DAWN_TRY_ASSIGN(scopedDstMap, Buffer::ScopedMap::Create(buffer));
 
-                DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
-
-                for (uint32_t z = 0; z < copy->copySize.depthOrArrayLayers; ++z) {
-                    // Copy the staging texture to the buffer.
-                    // The Map() will block until the GPU is done with the texture.
-                    // TODO(dawn:1705): avoid blocking the CPU.
-                    D3D11_MAPPED_SUBRESOURCE mappedResource;
-                    DAWN_TRY(
-                        CheckHRESULT(d3d11DeviceContext1->Map(stagingTexture->GetD3D11Resource(), z,
-                                                              D3D11_MAP_READ, 0, &mappedResource),
-                                     "D3D11 map staging texture"));
-
-                    uint8_t* pSrcData = reinterpret_cast<uint8_t*>(mappedResource.pData);
-                    const TexelBlockInfo& blockInfo =
-                        ToBackend(src.texture)->GetFormat().GetAspectInfo(src.aspect).block;
-                    uint32_t bytesPerRow = blockInfo.byteSize * copy->copySize.width;
-                    if (scopedDstMap.GetMappedData()) {
-                        uint8_t* pDstData = scopedDstMap.GetMappedData() + dst.offset +
-                                            dst.bytesPerRow * dst.rowsPerImage * z;
-                        for (uint32_t y = 0; y < copy->copySize.height; ++y) {
-                            memcpy(pDstData, pSrcData, bytesPerRow);
-                            pDstData += dst.bytesPerRow;
-                            pSrcData += mappedResource.RowPitch;
-                        }
-                    } else {
-                        uint64_t dstOffset = dst.offset + dst.bytesPerRow * dst.rowsPerImage * z;
-                        if (dst.bytesPerRow == bytesPerRow &&
-                            mappedResource.RowPitch == bytesPerRow) {
-                            // If there is no padding in the rows, we can upload the whole image in
-                            // one buffer->Write() call.
-                            DAWN_TRY(buffer->Write(commandContext, dstOffset, pSrcData,
-                                                   dst.bytesPerRow * copy->copySize.height));
-                        } else {
-                            // Otherwise, we need to upload each row separately.
-                            for (uint32_t y = 0; y < copy->copySize.height; ++y) {
-                                DAWN_TRY(buffer->Write(commandContext, dstOffset, pSrcData,
-                                                       bytesPerRow));
-                                dstOffset += dst.bytesPerRow;
-                                pSrcData += mappedResource.RowPitch;
-                            }
-                        }
-                    }
-                    d3d11DeviceContext1->Unmap(stagingTexture->GetD3D11Resource(), z);
+                Texture::ReadCallback callback;
+                if (scopedDstMap.GetMappedData()) {
+                    callback = [&](const uint8_t* data, uint64_t offset,
+                                   uint64_t size) -> MaybeError {
+                        memcpy(scopedDstMap.GetMappedData() + dst.offset + offset, data, size);
+                        return {};
+                    };
+                } else {
+                    callback = [&](const uint8_t* data, uint64_t offset,
+                                   uint64_t size) -> MaybeError {
+                        DAWN_TRY(ToBackend(dst.buffer)
+                                     ->Write(commandContext, dst.offset + offset, data, size));
+                        return {};
+                    };
                 }
+
+                DAWN_TRY(ToBackend(src.texture)
+                             ->Read(commandContext, subresources, src.origin, copy->copySize,
+                                    dst.bytesPerRow, dst.rowsPerImage, callback));
 
                 dst.buffer->MarkUsedInPendingCommands();
                 break;

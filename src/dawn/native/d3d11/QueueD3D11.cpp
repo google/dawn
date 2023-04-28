@@ -50,6 +50,11 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
                                   const void* data,
                                   size_t size) {
+    if (size == 0) {
+        // skip the empty write
+        return {};
+    }
+
     CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
     return ToBackend(buffer)->Write(commandContext, bufferOffset, data, size);
 }
