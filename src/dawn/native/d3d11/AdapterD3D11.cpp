@@ -25,6 +25,41 @@
 #include "dawn/native/d3d11/PlatformFunctionsD3D11.h"
 
 namespace dawn::native::d3d11 {
+namespace {
+
+MaybeError InitializeDebugLayerFilters(ComPtr<ID3D11Device> d3d11Device) {
+    ComPtr<ID3D11InfoQueue> infoQueue;
+    DAWN_TRY(CheckHRESULT(d3d11Device.As(&infoQueue),
+                          "D3D11 querying device for ID3D11InfoQueue interface"));
+
+    static D3D11_MESSAGE_ID kDenyIds[] = {
+        // D3D11 Debug layer warns no RTV set, however it is allowed.
+        D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET,
+    };
+
+    // Filter out info/message and only create errors from warnings or worse.
+    static D3D11_MESSAGE_SEVERITY kDenySeverities[] = {
+        D3D11_MESSAGE_SEVERITY_INFO,
+        D3D11_MESSAGE_SEVERITY_MESSAGE,
+    };
+
+    static D3D11_INFO_QUEUE_FILTER filter = {
+        {},  // AllowList
+        {
+            0,                           // NumCategories
+            nullptr,                     // pCategoryList
+            std::size(kDenySeverities),  // NumSeverities
+            kDenySeverities,             // pSeverityList
+            std::size(kDenyIds),         // NumIDs
+            kDenyIds,                    // pIDList
+        },                               // DenyList
+    };
+
+    return CheckHRESULT(infoQueue->PushStorageFilter(&filter),
+                        "D3D11 InfoQueue pushing storage filter");
+}
+
+}  // namespace
 
 Adapter::Adapter(Backend* backend,
                  ComPtr<IDXGIAdapter3> hardwareAdapter,
@@ -59,6 +94,10 @@ ResultOrError<ComPtr<ID3D11Device>> Adapter::CreateD3D11Device() {
                                   std::size(featureLevels), D3D11_SDK_VERSION, &device,
                                   /*pFeatureLevel=*/nullptr, /*[out] ppImmediateContext=*/nullptr),
                               "D3D11CreateDevice failed"));
+
+        if (GetInstance()->IsBackendValidationEnabled()) {
+            DAWN_TRY(InitializeDebugLayerFilters(device));
+        }
     }
     return device;
 }
