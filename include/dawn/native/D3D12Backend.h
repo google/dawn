@@ -50,10 +50,6 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImag
 
     // Note: SharedHandle must be a handle to a texture object.
     HANDLE sharedHandle = nullptr;
-
-    // Deprecated: Fence synchronization is always used after keyed mutex support was removed.
-    // TODO(dawn:1612): Remove once Chromium stops setting this.
-    bool useFenceSynchronization = false;
 };
 
 struct DAWN_NATIVE_EXPORT ExternalImageDXGIFenceDescriptor {
