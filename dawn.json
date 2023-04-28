@@ -489,7 +489,11 @@
             {"value": 2, "name": "unknown"},
             {"value": 3, "name": "device lost"},
             {"value": 4, "name": "destroyed before callback"},
-            {"value": 5, "name": "unmapped before callback"}
+            {"value": 5, "name": "unmapped before callback"},
+            {"value": 6, "name": "mapping already pending"},
+            {"value": 7, "name": "offset out of range"},
+            {"value": 8, "name": "size out of range"},
+            {"value": 9, "name": "validation error"}
         ]
     },
     "buffer map state": {
