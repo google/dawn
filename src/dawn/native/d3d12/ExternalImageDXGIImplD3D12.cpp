@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/d3d12/ExternalImageDXGIImpl.h"
+#include "dawn/native/d3d12/ExternalImageDXGIImplD3D12.h"
 
 #include <utility>
 #include <vector>
@@ -21,61 +21,24 @@
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/Forward.h"
 
 namespace dawn::native::d3d12 {
 
 ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
                                              Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource,
                                              const TextureDescriptor* textureDescriptor)
-    : mBackendDevice(backendDevice),
-      mD3D12Resource(std::move(d3d12Resource)),
-      mUsage(textureDescriptor->usage),
-      mDimension(textureDescriptor->dimension),
-      mSize(textureDescriptor->size),
-      mFormat(textureDescriptor->format),
-      mMipLevelCount(textureDescriptor->mipLevelCount),
-      mSampleCount(textureDescriptor->sampleCount),
-      mViewFormats(textureDescriptor->viewFormats,
-                   textureDescriptor->viewFormats + textureDescriptor->viewFormatCount) {
-    ASSERT(mBackendDevice != nullptr);
+    : Base(backendDevice, textureDescriptor), mD3D12Resource(std::move(d3d12Resource)) {
     ASSERT(mD3D12Resource != nullptr);
-    ASSERT(!textureDescriptor->nextInChain || textureDescriptor->nextInChain->sType ==
-                                                  wgpu::SType::DawnTextureInternalUsageDescriptor);
-    if (textureDescriptor->nextInChain) {
-        mUsageInternal = reinterpret_cast<const wgpu::DawnTextureInternalUsageDescriptor*>(
-                             textureDescriptor->nextInChain)
-                             ->internalUsage;
-    }
 }
 
-ExternalImageDXGIImpl::~ExternalImageDXGIImpl() {
-    auto deviceLock(GetScopedDeviceLock());
-    DestroyInternal();
-}
-
-Mutex::AutoLock ExternalImageDXGIImpl::GetScopedDeviceLock() const {
-    if (mBackendDevice != nullptr) {
-        return mBackendDevice->GetScopedLock();
-    }
-    return Mutex::AutoLock();
-}
-
-bool ExternalImageDXGIImpl::IsValid() const {
-    auto deviceLock(GetScopedDeviceLock());
-
-    return IsInList();
-}
+ExternalImageDXGIImpl::~ExternalImageDXGIImpl() = default;
 
 void ExternalImageDXGIImpl::DestroyInternal() {
-    // Linked list is not thread safe. A mutex must already be locked before
-    // endtering this method. Either via Device::DestroyImpl() or ~ExternalImageDXGIImpl.
-    ASSERT(mBackendDevice == nullptr || mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     if (IsInList()) {
-        RemoveFromList();
         mD3D12Resource = nullptr;
-        // We don't set mBackendDevice to null here to let its mutex accessible until dtor. This
-        // also to avoid data racing with non-null check in GetScopedDeviceLock()
     }
+    Base::DestroyInternal();
 }
 
 WGPUTexture ExternalImageDXGIImpl::BeginAccess(
@@ -120,7 +83,7 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
         // TODO(sunnyps): Use a fence cache instead of re-importing fences on each BeginAccess.
         Ref<Fence> fence;
         if (mBackendDevice->ConsumedError(
-                Fence::CreateFromHandle(mBackendDevice->GetD3D12Device(),
+                Fence::CreateFromHandle(ToBackend(mBackendDevice.Get())->GetD3D12Device(),
                                         fenceDescriptor.fenceHandle, fenceDescriptor.fenceValue),
                 &fence)) {
             dawn::ErrorLog() << "Unable to create D3D12 fence for external image";
@@ -129,9 +92,10 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
         waitFences.push_back(std::move(fence));
     }
 
-    Ref<TextureBase> texture = mBackendDevice->CreateD3D12ExternalTexture(
-        &textureDescriptor, mD3D12Resource, std::move(waitFences), descriptor->isSwapChainTexture,
-        descriptor->isInitialized);
+    Ref<TextureBase> texture =
+        ToBackend(mBackendDevice.Get())
+            ->CreateD3D12ExternalTexture(&textureDescriptor, mD3D12Resource, std::move(waitFences),
+                                         descriptor->isSwapChainTexture, descriptor->isInitialized);
     return ToAPI(texture.Detach());
 }
 
@@ -155,7 +119,7 @@ void ExternalImageDXGIImpl::EndAccess(WGPUTexture texture,
         dawn::ErrorLog() << "D3D12 fence end access failed";
         return;
     }
-    signalFence->fenceHandle = mBackendDevice->GetFenceHandle();
+    signalFence->fenceHandle = ToBackend(mBackendDevice.Get())->GetFenceHandle();
     signalFence->fenceValue = static_cast<uint64_t>(fenceValue);
 }
 

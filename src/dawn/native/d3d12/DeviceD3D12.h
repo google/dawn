@@ -25,11 +25,14 @@
 #include "dawn/native/d3d12/Forward.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 
+namespace dawn::native::d3d {
+struct ExternalImageDescriptorDXGISharedHandle;
+class ExternalImageDXGIImpl;
+}  // namespace dawn::native::d3d
+
 namespace dawn::native::d3d12 {
 
 class CommandAllocatorManager;
-struct ExternalImageDescriptorDXGISharedHandle;
-class ExternalImageDXGIImpl;
 class PlatformFunctions;
 class ResidencyManager;
 class ResourceAllocatorManager;
@@ -134,8 +137,8 @@ class Device final : public d3d::Device {
 
     StagingDescriptorAllocator* GetDepthStencilViewAllocator() const;
 
-    std::unique_ptr<ExternalImageDXGIImpl> CreateExternalImageDXGIImpl(
-        const ExternalImageDescriptorDXGISharedHandle* descriptor);
+    std::unique_ptr<d3d::ExternalImageDXGIImpl> CreateExternalImageDXGIImpl(
+        const d3d::ExternalImageDescriptorDXGISharedHandle* descriptor) override;
 
     Ref<TextureBase> CreateD3D12ExternalTexture(const TextureDescriptor* descriptor,
                                                 ComPtr<ID3D12Resource> d3d12Texture,
@@ -273,7 +276,7 @@ class Device final : public d3d::Device {
     float mTimestampPeriod = 1.0f;
 
     // List of external image resources opened using this device.
-    LinkedList<ExternalImageDXGIImpl> mExternalImageList;
+    LinkedList<d3d::ExternalImageDXGIImpl> mExternalImageList;
 };
 
 }  // namespace dawn::native::d3d12

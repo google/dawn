@@ -17,12 +17,57 @@
 
 #include "dawn/native/D3DBackend.h"
 
+#include <memory>
 #include <utility>
+
+#include "dawn/common/Log.h"
+#include "dawn/native/d3d/DeviceD3D.h"
+#include "dawn/native/d3d/ExternalImageDXGIImpl.h"
+#include "dawn/native/d3d/Forward.h"
 
 namespace dawn::native::d3d {
 
 AdapterDiscoveryOptions::AdapterDiscoveryOptions(WGPUBackendType type,
                                                  Microsoft::WRL::ComPtr<IDXGIAdapter> adapter)
     : AdapterDiscoveryOptionsBase(type), dxgiAdapter(std::move(adapter)) {}
+
+ExternalImageDescriptorDXGISharedHandle::ExternalImageDescriptorDXGISharedHandle()
+    : ExternalImageDescriptor(ExternalImageType::DXGISharedHandle) {}
+
+ExternalImageDXGI::ExternalImageDXGI(std::unique_ptr<ExternalImageDXGIImpl> impl)
+    : mImpl(std::move(impl)) {
+    ASSERT(mImpl != nullptr);
+}
+
+ExternalImageDXGI::~ExternalImageDXGI() = default;
+
+bool ExternalImageDXGI::IsValid() const {
+    return mImpl->IsValid();
+}
+
+WGPUTexture ExternalImageDXGI::BeginAccess(
+    const ExternalImageDXGIBeginAccessDescriptor* descriptor) {
+    return mImpl->BeginAccess(descriptor);
+}
+
+void ExternalImageDXGI::EndAccess(WGPUTexture texture,
+                                  ExternalImageDXGIFenceDescriptor* signalFence) {
+    mImpl->EndAccess(texture, signalFence);
+}
+
+// static
+std::unique_ptr<ExternalImageDXGI> ExternalImageDXGI::Create(
+    WGPUDevice device,
+    const ExternalImageDescriptorDXGISharedHandle* descriptor) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    auto deviceLock(backendDevice->GetScopedLock());
+    std::unique_ptr<ExternalImageDXGIImpl> impl =
+        backendDevice->CreateExternalImageDXGIImpl(descriptor);
+    if (!impl) {
+        dawn::ErrorLog() << "Failed to create DXGI external image";
+        return nullptr;
+    }
+    return std::unique_ptr<ExternalImageDXGI>(new ExternalImageDXGI(std::move(impl)));
+}
 
 }  // namespace dawn::native::d3d

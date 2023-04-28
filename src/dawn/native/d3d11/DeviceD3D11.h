@@ -79,6 +79,9 @@ class Device final : public d3d::Device {
     uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const override;
     void SetLabelImpl() override;
 
+    std::unique_ptr<d3d::ExternalImageDXGIImpl> CreateExternalImageDXGIImpl(
+        const d3d::ExternalImageDescriptorDXGISharedHandle* descriptor) override;
+
   private:
     using Base = d3d::Device;
     using Base::Base;

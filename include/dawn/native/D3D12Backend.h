@@ -20,9 +20,6 @@
 #include <windows.h>
 #include <wrl/client.h>
 
-#include <memory>
-#include <vector>
-
 #include "dawn/native/D3DBackend.h"
 
 struct ID3D12Device;
@@ -30,8 +27,13 @@ struct ID3D12Resource;
 
 namespace dawn::native::d3d12 {
 
+// TODO(dawn:1724): remove below once chrome is updated
+using d3d::ExternalImageDescriptorDXGISharedHandle;
+using d3d::ExternalImageDXGI;
+using d3d::ExternalImageDXGIBeginAccessDescriptor;
+using d3d::ExternalImageDXGIFenceDescriptor;
+
 class Device;
-class ExternalImageDXGIImpl;
 
 DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);
 
@@ -43,62 +45,6 @@ enum MemorySegment {
 DAWN_NATIVE_EXPORT uint64_t SetExternalMemoryReservation(WGPUDevice device,
                                                          uint64_t requestedReservationSize,
                                                          MemorySegment memorySegment);
-
-struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImageDescriptor {
-  public:
-    ExternalImageDescriptorDXGISharedHandle();
-
-    // Note: SharedHandle must be a handle to a texture object.
-    HANDLE sharedHandle = nullptr;
-};
-
-struct DAWN_NATIVE_EXPORT ExternalImageDXGIFenceDescriptor {
-    // Shared handle for the fence. This never passes ownership to the callee (when used as an input
-    // parameter) or to the caller (when used as a return value or output parameter).
-    HANDLE fenceHandle = nullptr;
-
-    // The value that was previously signaled on this fence and should be waited on.
-    uint64_t fenceValue = 0;
-};
-
-struct DAWN_NATIVE_EXPORT ExternalImageDXGIBeginAccessDescriptor {
-    bool isInitialized = false;  // Whether the texture is initialized on import
-    WGPUTextureUsageFlags usage = WGPUTextureUsage_None;
-
-    // A list of fences to wait on before accessing the texture.
-    std::vector<ExternalImageDXGIFenceDescriptor> waitFences;
-
-    // Whether the texture is for a WebGPU swap chain.
-    bool isSwapChainTexture = false;
-};
-
-class DAWN_NATIVE_EXPORT ExternalImageDXGI {
-  public:
-    ~ExternalImageDXGI();
-
-    static std::unique_ptr<ExternalImageDXGI> Create(
-        WGPUDevice device,
-        const ExternalImageDescriptorDXGISharedHandle* descriptor);
-
-    // Returns true if the external image resources are still valid, otherwise BeginAccess() is
-    // guaranteed to fail e.g. after device destruction.
-    bool IsValid() const;
-
-    // Creates WGPUTexture wrapping the DXGI shared handle. The provided wait fences will be
-    // synchronized before using the texture in any command lists. Empty fences (nullptr handle) are
-    // ignored for convenience (EndAccess can return such fences).
-    WGPUTexture BeginAccess(const ExternalImageDXGIBeginAccessDescriptor* descriptor);
-
-    // Returns the signalFence that the client must wait on for correct synchronization. Can return
-    // an empty fence (nullptr handle) if the texture wasn't accessed by Dawn.
-    // Note that merely calling Destroy() on the WGPUTexture does not ensure synchronization.
-    void EndAccess(WGPUTexture texture, ExternalImageDXGIFenceDescriptor* signalFence);
-
-  private:
-    explicit ExternalImageDXGI(std::unique_ptr<ExternalImageDXGIImpl> impl);
-
-    std::unique_ptr<ExternalImageDXGIImpl> mImpl;
-};
 
 struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public d3d::AdapterDiscoveryOptions {
     AdapterDiscoveryOptions();
