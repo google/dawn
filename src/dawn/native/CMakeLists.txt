@@ -260,7 +260,6 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/BackendD3D.h"
         "d3d/BlobD3D.cpp"
         "d3d/BlobD3D.h"
-        "d3d/D3DBackend.cpp"
         "d3d/D3DCompilationRequest.h"
         "d3d/D3DError.cpp"
         "d3d/D3DError.h"
@@ -300,7 +299,6 @@ if (DAWN_ENABLE_D3D11)
         "d3d11/CommandRecordingContextD3D11.h"
         "d3d11/ComputePipelineD3D11.cpp"
         "d3d11/ComputePipelineD3D11.h"
-        "d3d11/D3D11Backend.cpp"
         "d3d11/DeviceD3D11.cpp"
         "d3d11/DeviceD3D11.h"
         "d3d11/DeviceInfoD3D11.cpp"
@@ -646,6 +644,12 @@ endif()
 
 # TODO how to do the component build in CMake?
 target_sources(dawn_native PRIVATE "DawnNative.cpp")
+if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
+    target_sources(dawn_native PRIVATE "d3d/D3DBackend.cpp")
+endif()
+if (DAWN_ENABLE_D3D11)
+    target_sources(dawn_native PRIVATE "d3d11/D3D11Backend.cpp")
+endif()
 if (DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE "d3d12/D3D12Backend.cpp")
 endif()
