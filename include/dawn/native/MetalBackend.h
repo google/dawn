@@ -62,9 +62,6 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptorIOSurface : ExternalImageDescri
 
     IOSurfaceRef ioSurface;
 
-    // This has been deprecated.
-    uint32_t plane;
-
     // A list of events to wait on before accessing the texture.
     std::vector<ExternalImageMTLSharedEventDescriptor> waitEvents;
 };
