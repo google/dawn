@@ -143,6 +143,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
 }
 
 DAWN_INSTANTIATE_TEST(EntryPointTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
