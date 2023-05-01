@@ -631,9 +631,7 @@ void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
     mErrorScopeStack->Push(filter);
 }
 
-bool DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
-    // TODO(crbug.com/dawn/1324) Remove return and make function void when users are updated.
-    bool returnValue = true;
+void DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
     if (callback == nullptr) {
         static wgpu::ErrorCallback defaultCallback = [](WGPUErrorType, char const*, void*) {};
         callback = defaultCallback;
@@ -642,20 +640,18 @@ bool DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) 
     if (IsLost()) {
         mCallbackTaskManager->AddCallbackTask(
             std::bind(callback, WGPUErrorType_DeviceLost, "GPU device disconnected", userdata));
-        return returnValue;
+        return;
     }
     if (mErrorScopeStack->Empty()) {
         mCallbackTaskManager->AddCallbackTask(
             std::bind(callback, WGPUErrorType_Unknown, "No error scopes to pop", userdata));
-        return returnValue;
+        return;
     }
     ErrorScope scope = mErrorScopeStack->Pop();
     mCallbackTaskManager->AddCallbackTask(
         [callback, errorType = static_cast<WGPUErrorType>(scope.GetErrorType()),
          message = scope.GetErrorMessage(),
          userdata] { callback(errorType, message.c_str(), userdata); });
-
-    return returnValue;
 }
 
 BlobCache* DeviceBase::GetBlobCache() {

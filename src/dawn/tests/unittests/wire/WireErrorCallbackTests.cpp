@@ -149,7 +149,7 @@ TEST_F(WireErrorCallbackTests, PushPopErrorScopeCallback) {
     WGPUErrorCallback callback;
     void* userdata;
     EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
-        .WillOnce(DoAll(SaveArg<1>(&callback), SaveArg<2>(&userdata), Return(true)));
+        .WillOnce(DoAll(SaveArg<1>(&callback), SaveArg<2>(&userdata)));
     wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this);
     FlushClient();
 
@@ -174,8 +174,8 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeCallbackOrdering) {
         void* userdata1;
         void* userdata2;
         EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
-            .WillOnce(DoAll(SaveArg<1>(&callback1), SaveArg<2>(&userdata1), Return(true)))
-            .WillOnce(DoAll(SaveArg<1>(&callback2), SaveArg<2>(&userdata2), Return(true)));
+            .WillOnce(DoAll(SaveArg<1>(&callback1), SaveArg<2>(&userdata1)))
+            .WillOnce(DoAll(SaveArg<1>(&callback2), SaveArg<2>(&userdata2)));
         wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this);
         wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this + 1);
         FlushClient();
@@ -205,8 +205,8 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeCallbackOrdering) {
         void* userdata1;
         void* userdata2;
         EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
-            .WillOnce(DoAll(SaveArg<1>(&callback1), SaveArg<2>(&userdata1), Return(true)))
-            .WillOnce(DoAll(SaveArg<1>(&callback2), SaveArg<2>(&userdata2), Return(true)));
+            .WillOnce(DoAll(SaveArg<1>(&callback1), SaveArg<2>(&userdata1)))
+            .WillOnce(DoAll(SaveArg<1>(&callback2), SaveArg<2>(&userdata2)));
         wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this);
         wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this + 1);
         FlushClient();
@@ -231,7 +231,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeDeviceInFlightDestroy) {
     wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
     FlushClient();
 
-    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _)).WillOnce(Return(true));
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _)).Times(1);
     wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this);
     FlushClient();
 
@@ -248,7 +248,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeThenDisconnect) {
     EXPECT_CALL(api, DevicePushErrorScope(apiDevice, WGPUErrorFilter_Validation)).Times(1);
     wgpuDevicePushErrorScope(device, WGPUErrorFilter_Validation);
 
-    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _)).WillOnce(Return(true));
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _)).Times(1);
     wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this);
     FlushClient();
 
@@ -278,7 +278,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeEmptyStack) {
     WGPUErrorCallback callback;
     void* userdata;
     EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
-        .WillOnce(DoAll(SaveArg<1>(&callback), SaveArg<2>(&userdata), Return(true)));
+        .WillOnce(DoAll(SaveArg<1>(&callback), SaveArg<2>(&userdata)));
     wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this);
     FlushClient();
 
