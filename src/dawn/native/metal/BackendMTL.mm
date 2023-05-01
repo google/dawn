@@ -251,11 +251,13 @@ DAWN_NOINLINE bool IsGPUCounterSupported(id<MTLDevice> device,
 
 }  // anonymous namespace
 
-// The Metal backend's Adapter.
+// The Metal backend's PhysicalDevice.
 
-class Adapter : public PhysicalDeviceBase {
+class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    Adapter(InstanceBase* instance, id<MTLDevice> device, const TogglesState& requiredAdapterToggle)
+    PhysicalDevice(InstanceBase* instance,
+                   id<MTLDevice> device,
+                   const TogglesState& requiredAdapterToggle)
         : PhysicalDeviceBase(instance, wgpu::BackendType::Metal, requiredAdapterToggle),
           mDevice(device) {
         mName = std::string([[*mDevice name] UTF8String]);
@@ -803,28 +805,29 @@ ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
     const TogglesState& adapterToggles) {
     ASSERT(optionsBase->backendType == WGPUBackendType_Metal);
 
-    std::vector<Ref<PhysicalDeviceBase>> adapters;
+    std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
 #if DAWN_PLATFORM_IS(MACOS)
     NSRef<NSArray<id<MTLDevice>>> devices = AcquireNSRef(MTLCopyAllDevices());
 
     for (id<MTLDevice> device in devices.Get()) {
-        Ref<Adapter> adapter = AcquireRef(new Adapter(GetInstance(), device, adapterToggles));
-        if (!GetInstance()->ConsumedError(adapter->Initialize())) {
-            adapters.push_back(std::move(adapter));
+        Ref<PhysicalDevice> physicalDevice =
+            AcquireRef(new PhysicalDevice(GetInstance(), device, adapterToggles));
+        if (!GetInstance()->ConsumedError(physicalDevice->Initialize())) {
+            physicalDevices.push_back(std::move(physicalDevice));
         }
     }
 #endif
 
     // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
 #if defined(DAWN_PLATFORM_IOS)
-    Ref<Adapter> adapter =
-        AcquireRef(new Adapter(GetInstance(), MTLCreateSystemDefaultDevice(), adapterToggles));
-    if (!GetInstance()->ConsumedError(adapter->Initialize())) {
-        adapters.push_back(std::move(adapter));
+    Ref<PhysicalDevice> physicalDevice = AcquireRef(
+        new PhysicalDevice(GetInstance(), MTLCreateSystemDefaultDevice(), adapterToggles));
+    if (!GetInstance()->ConsumedError(physicalDevice->Initialize())) {
+        physicalDevices.push_back(std::move(physicalDevice));
     }
 #endif
 
-    return adapters;
+    return physicalDevices;
 }
 
 BackendConnection* Connect(InstanceBase* instance) {
