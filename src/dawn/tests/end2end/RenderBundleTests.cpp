@@ -194,6 +194,7 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
 }
 
 DAWN_INSTANTIATE_TEST(RenderBundleTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

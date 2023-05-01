@@ -555,9 +555,10 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
         DAWN_TRY_ASSIGN(d3d11RenderTargetViews[i], colorTextureView->CreateD3D11RenderTargetView());
         d3d11RenderTargetViewPtrs[i] = d3d11RenderTargetViews[i].Get();
         if (renderPass->colorAttachments[i].loadOp == wgpu::LoadOp::Clear) {
-            d3d11DeviceContext1->ClearRenderTargetView(
-                d3d11RenderTargetViews[i].Get(),
-                ConvertToFloatColor(renderPass->colorAttachments[i].clearColor).data());
+            std::array<float, 4> clearColor =
+                ConvertToFloatColor(renderPass->colorAttachments[i].clearColor);
+            d3d11DeviceContext1->ClearRenderTargetView(d3d11RenderTargetViews[i].Get(),
+                                                       clearColor.data());
         }
         attachmentCount = i;
         attachmentCount++;

@@ -166,6 +166,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
 }
 
 DAWN_INSTANTIATE_TEST(RenderPassTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
                       MetalBackend(),
@@ -225,6 +226,7 @@ TEST_P(RenderPassTest_RegressionDawn1071, ClearLowestMipOfR8Unorm) {
 }
 
 DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1071,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       MetalBackend({"metal_render_r8_rg8_unorm_small_mip_to_temp_texture"}),
@@ -238,6 +240,9 @@ class RenderPassTest_RegressionDawn1389 : public RenderPassTest {};
 TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16Unorm) {
     // TODO(crbug.com/dawn/1492): Support copying to Depth16Unorm on GL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    // TODO(dawn:1705): fix this test for Intel D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
 
     // Test all combinatons of multi-mip, multi-layer
     for (uint32_t mipLevelCount : {1, 5}) {
@@ -359,6 +364,7 @@ TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16
 }
 
 DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1389,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}),

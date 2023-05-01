@@ -193,7 +193,10 @@ MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName fe
     return {};
 }
 
-void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {}
+void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+    // D3D11 can only clear RTV with float values.
+    deviceToggles->Default(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
+}
 
 ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,
                                                          const TogglesState& deviceToggles) {

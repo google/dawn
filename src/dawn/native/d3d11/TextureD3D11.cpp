@@ -578,8 +578,8 @@ MaybeError Texture::Copy(CommandRecordingContext* commandContext, CopyTextureToT
             UNREACHABLE();
     }
 
-    bool isWholeSubresource = src.texture->CoverFullSubresource(copy->copySize);
-
+    bool isWholeSubresource = src.texture->CoverFullSubresource(src.mipLevel, copy->copySize) &&
+                              dst.texture->CoverFullSubresource(dst.mipLevel, copy->copySize);
     // Partial update subresource of a depth/stencil texture is not allowed.
     ASSERT(isWholeSubresource || !src.texture->GetFormat().HasDepthOrStencil());
 

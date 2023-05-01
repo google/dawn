@@ -80,7 +80,7 @@ class TextureBase : public ApiObjectBase {
     bool IsMultisampledTexture() const;
 
     // Returns true if the size covers the whole subresource.
-    bool CoverFullSubresource(const Extent3D& size) const;
+    bool CoverFullSubresource(uint32_t mipLevel, const Extent3D& size) const;
 
     // For a texture with non-block-compressed texture format, its physical size is always equal
     // to its virtual size. For a texture with block compressed texture format, the physical
