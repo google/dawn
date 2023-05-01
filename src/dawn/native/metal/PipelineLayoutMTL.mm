@@ -77,7 +77,7 @@ const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
     return mIndexInfo[stage];
 }
 
-uint32_t PipelineLayout::GetBufferBindingCount(SingleShaderStage stage) {
+uint32_t PipelineLayout::GetBufferBindingCount(SingleShaderStage stage) const {
     return mBufferBindingCount[stage];
 }
 

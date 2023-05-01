@@ -47,7 +47,7 @@ class PipelineLayout final : public PipelineLayoutBase {
     const BindingIndexInfo& GetBindingIndexInfo(SingleShaderStage stage) const;
 
     // The number of Metal vertex stage buffers used for the whole pipeline layout.
-    uint32_t GetBufferBindingCount(SingleShaderStage stage);
+    uint32_t GetBufferBindingCount(SingleShaderStage stage) const;
 
   private:
     PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);

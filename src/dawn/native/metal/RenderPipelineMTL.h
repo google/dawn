@@ -55,7 +55,7 @@ class RenderPipeline final : public RenderPipelineBase {
   private:
     using RenderPipelineBase::RenderPipelineBase;
 
-    NSRef<MTLVertexDescriptor> MakeVertexDesc();
+    NSRef<MTLVertexDescriptor> MakeVertexDesc() const;
 
     MTLPrimitiveType mMtlPrimitiveTopology;
     MTLWinding mMtlFrontFace;
