@@ -573,15 +573,18 @@ source_set("end2end_tests_sources") {
 
   libs = []
 
+  if (dawn_enable_d3d11 || dawn_enable_d3d12) {
+    libs += [
+      "d3d11.lib",
+      "dxgi.lib",
+    ]
+  }
+
   if (dawn_enable_d3d12) {
     sources += [
       "end2end/D3D12CachingTests.cpp",
       "end2end/D3D12ResourceWrappingTests.cpp",
       "end2end/VideoViewsTests_win.cpp",
-    ]
-    libs += [
-      "d3d11.lib",
-      "dxgi.lib",
     ]
   }
 

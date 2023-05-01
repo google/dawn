@@ -28,6 +28,10 @@
 #include "dawn/native/VulkanBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
+#if defined(DAWN_ENABLE_BACKEND_D3D11)
+#include "dawn/native/D3D11Backend.h"
+#endif  // defined(DAWN_ENABLE_BACKEND_D3D11)
+
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
 #include "dawn/native/D3D12Backend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
@@ -89,6 +93,54 @@ TEST(AdapterDiscoveryTests, OnlyVulkan) {
 }
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
+#if defined(DAWN_ENABLE_BACKEND_D3D11)
+// Test discovering only D3D11 adapters
+TEST(AdapterDiscoveryTests, OnlyD3D11) {
+    dawn::native::Instance instance;
+
+    dawn::native::d3d11::AdapterDiscoveryOptions options;
+    instance.DiscoverAdapters(&options);
+
+    const auto& adapters = instance.GetAdapters();
+    for (const auto& adapter : adapters) {
+        wgpu::AdapterProperties properties;
+        adapter.GetProperties(&properties);
+
+        EXPECT_EQ(properties.backendType, wgpu::BackendType::D3D11);
+    }
+}
+
+// Test discovering a D3D11 adapter from a prexisting DXGI adapter
+TEST(AdapterDiscoveryTests, MatchingDXGIAdapterD3D11) {
+    using Microsoft::WRL::ComPtr;
+
+    ComPtr<IDXGIFactory4> dxgiFactory;
+    HRESULT hr = ::CreateDXGIFactory2(0, IID_PPV_ARGS(&dxgiFactory));
+    ASSERT_EQ(hr, S_OK);
+
+    for (uint32_t adapterIndex = 0;; ++adapterIndex) {
+        ComPtr<IDXGIAdapter1> dxgiAdapter = nullptr;
+        if (dxgiFactory->EnumAdapters1(adapterIndex, &dxgiAdapter) == DXGI_ERROR_NOT_FOUND) {
+            break;  // No more adapters to enumerate.
+        }
+
+        dawn::native::Instance instance;
+
+        dawn::native::d3d11::AdapterDiscoveryOptions options;
+        options.dxgiAdapter = std::move(dxgiAdapter);
+        instance.DiscoverAdapters(&options);
+
+        const auto& adapters = instance.GetAdapters();
+        for (const auto& adapter : adapters) {
+            wgpu::AdapterProperties properties;
+            adapter.GetProperties(&properties);
+
+            EXPECT_EQ(properties.backendType, wgpu::BackendType::D3D11);
+        }
+    }
+}
+#endif  // defined(DAWN_ENABLE_BACKEND_D3D11)
+
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
 // Test discovering only D3D12 adapters
 TEST(AdapterDiscoveryTests, OnlyD3D12) {
@@ -107,7 +159,7 @@ TEST(AdapterDiscoveryTests, OnlyD3D12) {
 }
 
 // Test discovering a D3D12 adapter from a prexisting DXGI adapter
-TEST(AdapterDiscoveryTests, MatchingDXGIAdapter) {
+TEST(AdapterDiscoveryTests, MatchingDXGIAdapterD3D12) {
     using Microsoft::WRL::ComPtr;
 
     ComPtr<IDXGIFactory4> dxgiFactory;
