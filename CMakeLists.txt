@@ -77,6 +77,7 @@ function (set_if_not_defined name value description)
 endfunction()
 
 # Default values for the backend-enabling options
+set(ENABLE_D3D11 OFF)
 set(ENABLE_D3D12 OFF)
 set(ENABLE_METAL OFF)
 set(ENABLE_OPENGLES OFF)
@@ -86,6 +87,7 @@ set(USE_WAYLAND OFF)
 set(USE_X11 OFF)
 set(BUILD_SAMPLES OFF)
 if (WIN32)
+    set(ENABLE_D3D11 ON)
     set(ENABLE_D3D12 ON)
     if (NOT WINDOWS_STORE)
         # Enable Vulkan in win32 compilation only
