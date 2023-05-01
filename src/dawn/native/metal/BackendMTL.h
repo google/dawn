@@ -26,9 +26,9 @@ class Backend : public BackendConnection {
     explicit Backend(InstanceBase* instance);
     ~Backend() override;
 
-    std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters(
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters(
         const TogglesState& adapterToggles) override;
-    ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
+    ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* optionsBase,
         const TogglesState& adapterToggles) override;
 };

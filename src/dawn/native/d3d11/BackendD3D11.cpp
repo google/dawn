@@ -41,7 +41,7 @@ const PlatformFunctions* Backend::GetFunctions() const {
     return static_cast<const PlatformFunctions*>(Base::GetFunctions());
 }
 
-ResultOrError<Ref<AdapterBase>> Backend::CreateAdapterFromIDXGIAdapter(
+ResultOrError<Ref<PhysicalDeviceBase>> Backend::CreateAdapterFromIDXGIAdapter(
     ComPtr<IDXGIAdapter> dxgiAdapter,
     const TogglesState& adapterToggles) {
     ComPtr<IDXGIAdapter3> dxgiAdapter3;

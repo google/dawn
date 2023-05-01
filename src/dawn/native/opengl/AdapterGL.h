@@ -15,13 +15,13 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_ADAPTERGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_ADAPTERGL_H_
 
-#include "dawn/native/Adapter.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/opengl/EGLFunctions.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
 
 namespace dawn::native::opengl {
 
-class Adapter : public AdapterBase {
+class Adapter : public PhysicalDeviceBase {
   public:
     Adapter(InstanceBase* instance,
             wgpu::BackendType backendType,
@@ -31,7 +31,7 @@ class Adapter : public AdapterBase {
 
     ~Adapter() override = default;
 
-    // AdapterBase Implementation
+    // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
 
   private:

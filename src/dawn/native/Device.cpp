@@ -21,7 +21,6 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/common/Version_autogen.h"
-#include "dawn/native/Adapter.h"
 #include "dawn/native/AsyncTask.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindGroup.h"
@@ -42,6 +41,7 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/InternalPipelineStore.h"
 #include "dawn/native/ObjectType_autogen.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/PipelineCache.h"
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/Queue.h"
@@ -719,7 +719,7 @@ ApiObjectList* DeviceBase::GetObjectTrackingList(ObjectType type) {
     return &mObjectLists[type];
 }
 
-AdapterBase* DeviceBase::GetAdapter() const {
+PhysicalDeviceBase* DeviceBase::GetAdapter() const {
     return mAdapter.Get();
 }
 
@@ -1345,7 +1345,7 @@ MaybeError DeviceBase::Tick() {
     return {};
 }
 
-AdapterBase* DeviceBase::APIGetAdapter() {
+PhysicalDeviceBase* DeviceBase::APIGetAdapter() {
     mAdapter->Reference();
     return mAdapter.Get();
 }

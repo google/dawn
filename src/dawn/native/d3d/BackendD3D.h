@@ -75,14 +75,14 @@ class Backend : public BackendConnection {
 
     const PlatformFunctions* GetFunctions() const;
 
-    std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters(
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters(
         const TogglesState& adapterToggles) override;
-    ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
+    ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> DiscoverAdapters(
         const AdapterDiscoveryOptionsBase* optionsBase,
         const TogglesState& adapterToggles) override;
 
   protected:
-    virtual ResultOrError<Ref<AdapterBase>> CreateAdapterFromIDXGIAdapter(
+    virtual ResultOrError<Ref<PhysicalDeviceBase>> CreateAdapterFromIDXGIAdapter(
         ComPtr<IDXGIAdapter> dxgiAdapter,
         const TogglesState& adapterToggles) = 0;
 

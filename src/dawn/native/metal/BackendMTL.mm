@@ -253,10 +253,11 @@ DAWN_NOINLINE bool IsGPUCounterSupported(id<MTLDevice> device,
 
 // The Metal backend's Adapter.
 
-class Adapter : public AdapterBase {
+class Adapter : public PhysicalDeviceBase {
   public:
     Adapter(InstanceBase* instance, id<MTLDevice> device, const TogglesState& requiredAdapterToggle)
-        : AdapterBase(instance, wgpu::BackendType::Metal, requiredAdapterToggle), mDevice(device) {
+        : PhysicalDeviceBase(instance, wgpu::BackendType::Metal, requiredAdapterToggle),
+          mDevice(device) {
         mName = std::string([[*mDevice name] UTF8String]);
 
         PCIIDs ids;
@@ -283,7 +284,7 @@ class Adapter : public AdapterBase {
         mDriverDescription = "Metal driver on " + std::string(systemName) + [osVersion UTF8String];
     }
 
-    // AdapterBase Implementation
+    // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override {
         // Via dawn::native::metal::WrapIOSurface
         return true;
@@ -786,7 +787,8 @@ Backend::Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::Bac
 
 Backend::~Backend() = default;
 
-std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters(const TogglesState& adapterToggles) {
+std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters(
+    const TogglesState& adapterToggles) {
     AdapterDiscoveryOptions options;
     auto result = DiscoverAdapters(&options, adapterToggles);
     if (result.IsError()) {
@@ -796,12 +798,12 @@ std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters(const TogglesStat
     return result.AcquireSuccess();
 }
 
-ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
+ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
     const AdapterDiscoveryOptionsBase* optionsBase,
     const TogglesState& adapterToggles) {
     ASSERT(optionsBase->backendType == WGPUBackendType_Metal);
 
-    std::vector<Ref<AdapterBase>> adapters;
+    std::vector<Ref<PhysicalDeviceBase>> adapters;
 #if DAWN_PLATFORM_IS(MACOS)
     NSRef<NSArray<id<MTLDevice>>> devices = AcquireNSRef(MTLCopyAllDevices());
 

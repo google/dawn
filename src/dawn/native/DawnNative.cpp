@@ -81,7 +81,7 @@ DawnDeviceDescriptor::~DawnDeviceDescriptor() = default;
 
 Adapter::Adapter() = default;
 
-Adapter::Adapter(AdapterBase* impl) : mImpl(impl) {
+Adapter::Adapter(PhysicalDeviceBase* impl) : mImpl(impl) {
     if (mImpl != nullptr) {
         mImpl->Reference();
     }
@@ -210,7 +210,7 @@ bool Instance::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
 std::vector<Adapter> Instance::GetAdapters() const {
     // Adapters are owned by mImpl so it is safe to return non RAII pointers to them
     std::vector<Adapter> adapters;
-    for (const Ref<AdapterBase>& adapter : mImpl->GetAdapters()) {
+    for (const Ref<PhysicalDeviceBase>& adapter : mImpl->GetAdapters()) {
         adapters.push_back(Adapter(adapter.Get()));
     }
     return adapters;

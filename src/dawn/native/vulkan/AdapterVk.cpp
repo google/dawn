@@ -60,7 +60,7 @@ Adapter::Adapter(InstanceBase* instance,
                  VulkanInstance* vulkanInstance,
                  VkPhysicalDevice physicalDevice,
                  const TogglesState& adapterToggles)
-    : AdapterBase(instance, wgpu::BackendType::Vulkan, adapterToggles),
+    : PhysicalDeviceBase(instance, wgpu::BackendType::Vulkan, adapterToggles),
       mPhysicalDevice(physicalDevice),
       mVulkanInstance(vulkanInstance) {}
 

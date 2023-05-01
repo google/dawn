@@ -35,7 +35,7 @@ Adapter::Adapter(InstanceBase* instance)
               TogglesState(ToggleStage::Adapter).InheritFrom(instance->GetTogglesState())) {}
 
 Adapter::Adapter(InstanceBase* instance, const TogglesState& adapterToggles)
-    : AdapterBase(instance, wgpu::BackendType::Null, adapterToggles) {
+    : PhysicalDeviceBase(instance, wgpu::BackendType::Null, adapterToggles) {
     mVendorId = 0;
     mDeviceId = 0;
     mName = "Null backend";
@@ -83,11 +83,11 @@ class Backend : public BackendConnection {
     explicit Backend(InstanceBase* instance)
         : BackendConnection(instance, wgpu::BackendType::Null) {}
 
-    std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters(
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters(
         const TogglesState& adapterToggles) override {
         // There is always a single Null adapter because it is purely CPU based and doesn't
         // depend on the system.
-        std::vector<Ref<AdapterBase>> adapters;
+        std::vector<Ref<PhysicalDeviceBase>> adapters;
         Ref<Adapter> adapter = AcquireRef(new Adapter(GetInstance(), adapterToggles));
         adapters.push_back(std::move(adapter));
         return adapters;

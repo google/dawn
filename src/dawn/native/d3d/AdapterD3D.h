@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D_ADAPTERD3D_H_
 #define SRC_DAWN_NATIVE_D3D_ADAPTERD3D_H_
 
-#include "dawn/native/Adapter.h"
+#include "dawn/native/PhysicalDevice.h"
 
 #include "dawn/native/d3d/d3d_platform.h"
 
@@ -23,7 +23,7 @@ namespace dawn::native::d3d {
 
 class Backend;
 
-class Adapter : public AdapterBase {
+class Adapter : public PhysicalDeviceBase {
   public:
     Adapter(Backend* backend,
             ComPtr<IDXGIAdapter3> hardwareAdapter,

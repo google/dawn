@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_ADAPTERVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_ADAPTERVK_H_
 
-#include "dawn/native/Adapter.h"
+#include "dawn/native/PhysicalDevice.h"
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/vulkan_platform.h"
@@ -25,7 +25,7 @@ namespace dawn::native::vulkan {
 
 class VulkanInstance;
 
-class Adapter : public AdapterBase {
+class Adapter : public PhysicalDeviceBase {
   public:
     Adapter(InstanceBase* instance,
             VulkanInstance* vulkanInstance,
@@ -33,7 +33,7 @@ class Adapter : public AdapterBase {
             const TogglesState& adapterToggles);
     ~Adapter() override;
 
-    // AdapterBase Implementation
+    // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
 
     const VulkanDeviceInfo& GetDeviceInfo() const;

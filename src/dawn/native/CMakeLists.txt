@@ -30,7 +30,6 @@ target_sources(dawn_native PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn/native/DawnNative.h"
     "${DAWN_INCLUDE_DIR}/dawn/native/dawn_native_export.h"
     ${DAWN_NATIVE_UTILS_GEN_SOURCES}
-    "Adapter.cpp"
     "Adapter.h"
     "ApplyClearColorValueWithDrawHelper.cpp"
     "ApplyClearColorValueWithDrawHelper.h"
@@ -136,6 +135,8 @@ target_sources(dawn_native PRIVATE
     "PassResourceUsageTracker.h"
     "PerStage.cpp"
     "PerStage.h"
+    "PhysicalDevice.cpp"
+    "PhysicalDevice.h"
     "Pipeline.cpp"
     "Pipeline.h"
     "PipelineCache.cpp"

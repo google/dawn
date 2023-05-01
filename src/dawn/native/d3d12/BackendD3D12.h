@@ -35,7 +35,7 @@ class Backend final : public d3d::Backend {
     const PlatformFunctions* GetFunctions() const;
 
   protected:
-    ResultOrError<Ref<AdapterBase>> CreateAdapterFromIDXGIAdapter(
+    ResultOrError<Ref<PhysicalDeviceBase>> CreateAdapterFromIDXGIAdapter(
         ComPtr<IDXGIAdapter> dxgiAdapter,
         const TogglesState& adapterToggles) override;
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/Adapter.h"
+#include "dawn/native/PhysicalDevice.h"
 
 #include <algorithm>
 #include <memory>
@@ -27,16 +27,16 @@
 
 namespace dawn::native {
 
-AdapterBase::AdapterBase(InstanceBase* instance,
-                         wgpu::BackendType backend,
-                         const TogglesState& adapterToggles)
+PhysicalDeviceBase::PhysicalDeviceBase(InstanceBase* instance,
+                                       wgpu::BackendType backend,
+                                       const TogglesState& adapterToggles)
     : mInstance(instance), mBackend(backend), mTogglesState(adapterToggles) {
     ASSERT(adapterToggles.GetStage() == ToggleStage::Adapter);
 }
 
-AdapterBase::~AdapterBase() = default;
+PhysicalDeviceBase::~PhysicalDeviceBase() = default;
 
-MaybeError AdapterBase::Initialize() {
+MaybeError PhysicalDeviceBase::Initialize() {
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing adapter (backend=%s)", mBackend);
     InitializeVendorArchitectureImpl();
 
@@ -84,18 +84,18 @@ MaybeError AdapterBase::Initialize() {
     return {};
 }
 
-InstanceBase* AdapterBase::APIGetInstance() const {
+InstanceBase* PhysicalDeviceBase::APIGetInstance() const {
     auto instance = GetInstance();
     ASSERT(instance != nullptr);
     instance->APIReference();
     return instance;
 }
 
-bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
+bool PhysicalDeviceBase::APIGetLimits(SupportedLimits* limits) const {
     return GetLimits(limits);
 }
 
-void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
+void PhysicalDeviceBase::APIGetProperties(AdapterProperties* properties) const {
     MaybeError result = ValidateSingleSType(properties->nextInChain,
                                             wgpu::SType::DawnAdapterPropertiesPowerPreference);
     if (result.IsError()) {
@@ -119,15 +119,15 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     properties->backendType = mBackend;
 }
 
-bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
+bool PhysicalDeviceBase::APIHasFeature(wgpu::FeatureName feature) const {
     return mSupportedFeatures.IsEnabled(feature);
 }
 
-size_t AdapterBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
+size_t PhysicalDeviceBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
     return mSupportedFeatures.EnumerateFeatures(features);
 }
 
-DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
+DeviceBase* PhysicalDeviceBase::APICreateDevice(const DeviceDescriptor* descriptor) {
     DeviceDescriptor defaultDesc = {};
     if (descriptor == nullptr) {
         descriptor = &defaultDesc;
@@ -140,9 +140,9 @@ DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
     return result.AcquireSuccess().Detach();
 }
 
-void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
-                                   WGPURequestDeviceCallback callback,
-                                   void* userdata) {
+void PhysicalDeviceBase::APIRequestDevice(const DeviceDescriptor* descriptor,
+                                          WGPURequestDeviceCallback callback,
+                                          void* userdata) {
     static constexpr DeviceDescriptor kDefaultDescriptor = {};
     if (descriptor == nullptr) {
         descriptor = &kDefaultDescriptor;
@@ -165,36 +165,36 @@ void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
     callback(status, ToAPI(device.Detach()), nullptr, userdata);
 }
 
-void AdapterBase::InitializeVendorArchitectureImpl() {
+void PhysicalDeviceBase::InitializeVendorArchitectureImpl() {
     mVendorName = gpu_info::GetVendorName(mVendorId);
     mArchitectureName = gpu_info::GetArchitectureName(mVendorId, mDeviceId);
 }
 
-uint32_t AdapterBase::GetVendorId() const {
+uint32_t PhysicalDeviceBase::GetVendorId() const {
     return mVendorId;
 }
 
-uint32_t AdapterBase::GetDeviceId() const {
+uint32_t PhysicalDeviceBase::GetDeviceId() const {
     return mDeviceId;
 }
 
-const gpu_info::DriverVersion& AdapterBase::GetDriverVersion() const {
+const gpu_info::DriverVersion& PhysicalDeviceBase::GetDriverVersion() const {
     return mDriverVersion;
 }
 
-wgpu::BackendType AdapterBase::GetBackendType() const {
+wgpu::BackendType PhysicalDeviceBase::GetBackendType() const {
     return mBackend;
 }
 
-InstanceBase* AdapterBase::GetInstance() const {
+InstanceBase* PhysicalDeviceBase::GetInstance() const {
     return mInstance.Get();
 }
 
-FeaturesSet AdapterBase::GetSupportedFeatures() const {
+FeaturesSet PhysicalDeviceBase::GetSupportedFeatures() const {
     return mSupportedFeatures;
 }
 
-bool AdapterBase::SupportsAllRequiredFeatures(
+bool PhysicalDeviceBase::SupportsAllRequiredFeatures(
     const ityp::span<size_t, const wgpu::FeatureName>& features) const {
     for (wgpu::FeatureName f : features) {
         if (!mSupportedFeatures.IsEnabled(f)) {
@@ -204,7 +204,7 @@ bool AdapterBase::SupportsAllRequiredFeatures(
     return true;
 }
 
-bool AdapterBase::GetLimits(SupportedLimits* limits) const {
+bool PhysicalDeviceBase::GetLimits(SupportedLimits* limits) const {
     ASSERT(limits != nullptr);
     if (limits->nextInChain != nullptr) {
         return false;
@@ -217,16 +217,17 @@ bool AdapterBase::GetLimits(SupportedLimits* limits) const {
     return true;
 }
 
-const TogglesState& AdapterBase::GetTogglesState() const {
+const TogglesState& PhysicalDeviceBase::GetTogglesState() const {
     return mTogglesState;
 }
 
-void AdapterBase::EnableFeature(Feature feature) {
+void PhysicalDeviceBase::EnableFeature(Feature feature) {
     mSupportedFeatures.EnableFeature(feature);
 }
 
-MaybeError AdapterBase::ValidateFeatureSupportedWithToggles(wgpu::FeatureName feature,
-                                                            const TogglesState& toggles) const {
+MaybeError PhysicalDeviceBase::ValidateFeatureSupportedWithToggles(
+    wgpu::FeatureName feature,
+    const TogglesState& toggles) const {
     DAWN_TRY(ValidateFeatureName(feature));
     DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(feature),
                     "Requested feature %s is not supported.", feature);
@@ -243,7 +244,7 @@ MaybeError AdapterBase::ValidateFeatureSupportedWithToggles(wgpu::FeatureName fe
     return ValidateFeatureSupportedWithTogglesImpl(feature, toggles);
 }
 
-void AdapterBase::SetSupportedFeaturesForTesting(
+void PhysicalDeviceBase::SetSupportedFeaturesForTesting(
     const std::vector<wgpu::FeatureName>& requiredFeatures) {
     mSupportedFeatures = {};
     for (wgpu::FeatureName f : requiredFeatures) {
@@ -251,7 +252,7 @@ void AdapterBase::SetSupportedFeaturesForTesting(
     }
 }
 
-ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
+ResultOrError<Ref<DeviceBase>> PhysicalDeviceBase::CreateDeviceInternal(
     const DeviceDescriptor* descriptor) {
     ASSERT(descriptor != nullptr);
 
@@ -291,15 +292,15 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     return CreateDeviceImpl(descriptor, deviceToggles);
 }
 
-void AdapterBase::SetUseTieredLimits(bool useTieredLimits) {
+void PhysicalDeviceBase::SetUseTieredLimits(bool useTieredLimits) {
     mUseTieredLimits = useTieredLimits;
 }
 
-void AdapterBase::ResetInternalDeviceForTesting() {
+void PhysicalDeviceBase::ResetInternalDeviceForTesting() {
     mInstance->ConsumedError(ResetInternalDeviceForTestingImpl());
 }
 
-MaybeError AdapterBase::ResetInternalDeviceForTestingImpl() {
+MaybeError PhysicalDeviceBase::ResetInternalDeviceForTestingImpl() {
     return DAWN_INTERNAL_ERROR(
         "ResetInternalDeviceForTesting should only be used with the D3D12 backend.");
 }

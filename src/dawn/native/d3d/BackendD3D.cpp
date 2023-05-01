@@ -238,26 +238,27 @@ const PlatformFunctions* Backend::GetFunctions() const {
     return mFunctions.get();
 }
 
-std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters(const TogglesState& adapterToggles) {
+std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters(
+    const TogglesState& adapterToggles) {
     AdapterDiscoveryOptions options(ToAPI(GetType()), nullptr);
-    std::vector<Ref<AdapterBase>> adapters;
+    std::vector<Ref<PhysicalDeviceBase>> adapters;
     if (GetInstance()->ConsumedError(DiscoverAdapters(&options, adapterToggles), &adapters)) {
         return {};
     }
     return adapters;
 }
 
-ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
+ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
     const AdapterDiscoveryOptionsBase* optionsBase,
     const TogglesState& adapterToggles) {
     ASSERT(optionsBase->backendType == ToAPI(GetType()));
     const AdapterDiscoveryOptions* options =
         static_cast<const AdapterDiscoveryOptions*>(optionsBase);
 
-    std::vector<Ref<AdapterBase>> adapters;
+    std::vector<Ref<PhysicalDeviceBase>> adapters;
     if (options->dxgiAdapter != nullptr) {
         // |dxgiAdapter| was provided. Discover just that adapter.
-        Ref<AdapterBase> adapter;
+        Ref<PhysicalDeviceBase> adapter;
         DAWN_TRY_ASSIGN(adapter,
                         CreateAdapterFromIDXGIAdapter(options->dxgiAdapter, adapterToggles));
         adapters.push_back(std::move(adapter));
@@ -272,7 +273,7 @@ ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
         }
 
         ASSERT(dxgiAdapter != nullptr);
-        Ref<AdapterBase> adapter;
+        Ref<PhysicalDeviceBase> adapter;
         if (GetInstance()->ConsumedError(CreateAdapterFromIDXGIAdapter(dxgiAdapter, adapterToggles),
                                          &adapter)) {
             continue;

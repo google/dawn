@@ -24,7 +24,6 @@ namespace dawn::native {
 
 enum class ObjectType : uint32_t;
 
-class AdapterBase;
 class BindGroupBase;
 class BindGroupLayoutBase;
 class BufferBase;
@@ -34,6 +33,7 @@ class CommandEncoder;
 class ComputePassEncoder;
 class ExternalTextureBase;
 class InstanceBase;
+class PhysicalDeviceBase;
 class PipelineBase;
 class PipelineCacheBase;
 class PipelineLayoutBase;
@@ -50,6 +50,8 @@ class ShaderModuleBase;
 class SwapChainBase;
 class TextureBase;
 class TextureViewBase;
+
+using AdapterBase = PhysicalDeviceBase;
 
 class DeviceBase;
 

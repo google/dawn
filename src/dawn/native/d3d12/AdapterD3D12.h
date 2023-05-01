@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_ADAPTERD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_ADAPTERD3D12_H_
 
-#include "dawn/native/Adapter.h"
+#include "dawn/native/PhysicalDevice.h"
 
 #include "dawn/native/d3d/AdapterD3D.h"
 #include "dawn/native/d3d12/D3D12Info.h"
@@ -32,7 +32,7 @@ class Adapter : public d3d::Adapter {
             const TogglesState& adapterToggles);
     ~Adapter() override;
 
-    // AdapterBase Implementation
+    // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
 
     const D3D12DeviceInfo& GetDeviceInfo() const;

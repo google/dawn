@@ -33,8 +33,9 @@ namespace dawn::native::opengl {
 Backend::Backend(InstanceBase* instance, wgpu::BackendType backendType)
     : BackendConnection(instance, backendType) {}
 
-std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters(const TogglesState& adapterToggles) {
-    std::vector<Ref<AdapterBase>> adapters;
+std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters(
+    const TogglesState& adapterToggles) {
+    std::vector<Ref<PhysicalDeviceBase>> adapters;
 #if DAWN_PLATFORM_IS(WINDOWS)
     const char* eglLib = "libEGL.dll";
 #elif DAWN_PLATFORM_IS(MACOS)
@@ -83,7 +84,7 @@ std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters(const TogglesStat
     return adapters;
 }
 
-ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
+ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
     const AdapterDiscoveryOptionsBase* optionsBase,
     const TogglesState& adapterToggles) {
     // TODO(cwallez@chromium.org): For now only create a single OpenGL adapter because don't
@@ -102,7 +103,7 @@ ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
     DAWN_TRY(adapter->Initialize());
 
     mCreatedAdapter = true;
-    std::vector<Ref<AdapterBase>> adapters{std::move(adapter)};
+    std::vector<Ref<PhysicalDeviceBase>> adapters{std::move(adapter)};
     return std::move(adapters);
 }
 

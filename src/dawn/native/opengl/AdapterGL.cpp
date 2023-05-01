@@ -56,7 +56,7 @@ uint32_t GetVendorIdFromVendors(const char* vendor) {
 Adapter::Adapter(InstanceBase* instance,
                  wgpu::BackendType backendType,
                  const TogglesState& adapterToggle)
-    : AdapterBase(instance, backendType, adapterToggle) {}
+    : PhysicalDeviceBase(instance, backendType, adapterToggle) {}
 
 MaybeError Adapter::InitializeGLFunctions(void* (*getProc)(const char*)) {
     // Use getProc to populate the dispatch table

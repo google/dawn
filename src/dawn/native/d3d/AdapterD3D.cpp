@@ -26,7 +26,7 @@ Adapter::Adapter(Backend* backend,
                  ComPtr<IDXGIAdapter3> hardwareAdapter,
                  wgpu::BackendType backendType,
                  const TogglesState& adapterToggles)
-    : AdapterBase(backend->GetInstance(), backendType, adapterToggles),
+    : PhysicalDeviceBase(backend->GetInstance(), backendType, adapterToggles),
       mHardwareAdapter(std::move(hardwareAdapter)),
       mBackend(backend) {}
 

@@ -18,7 +18,6 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"
@@ -26,6 +25,7 @@
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/Queue.h"
@@ -170,7 +170,7 @@ class Device final : public DeviceBase {
     size_t mMemoryUsage = 0;
 };
 
-class Adapter : public AdapterBase {
+class Adapter : public PhysicalDeviceBase {
   public:
     // Create null adapter without providing toggles state for testing, only inherit instance's
     // toggles state
@@ -178,11 +178,11 @@ class Adapter : public AdapterBase {
     Adapter(InstanceBase* instance, const TogglesState& adapterToggles);
     ~Adapter() override;
 
-    // AdapterBase Implementation
+    // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
 
     // Used for the tests that intend to use an adapter without all features enabled.
-    using AdapterBase::SetSupportedFeaturesForTesting;
+    using PhysicalDeviceBase::SetSupportedFeaturesForTesting;
 
   private:
     MaybeError InitializeImpl() override;
