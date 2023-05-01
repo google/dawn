@@ -94,7 +94,7 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
 
   protected:
     Ref<dawn::native::InstanceBase> mNativeInstance;
-    dawn::native::null::Adapter mNativeAdapter;
+    dawn::native::null::PhysicalDevice mNativeAdapter;
 
     std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
     std::unique_ptr<dawn::wire::WireClient> mWireClient;

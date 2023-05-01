@@ -32,7 +32,7 @@ class PerThreadProcTests : public testing::Test {
 
   protected:
     Ref<dawn::native::InstanceBase> mNativeInstance;
-    dawn::native::null::Adapter mNativeAdapter;
+    dawn::native::null::PhysicalDevice mNativeAdapter;
 };
 
 // Test that procs can be set per thread. This test overrides deviceCreateBuffer with a placeholder

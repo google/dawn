@@ -47,9 +47,9 @@ class FeatureTests : public testing::Test {
     Ref<dawn::native::InstanceBase> mInstanceBase;
     // The adapter that inherit toggles states from the instance, also have DisallowUnsafeAPIs
     // enabled.
-    dawn::native::null::Adapter mAdapterBase;
+    dawn::native::null::PhysicalDevice mAdapterBase;
     // The adapter that override DisallowUnsafeAPIs to disabled in toggles state.
-    dawn::native::null::Adapter mUnsafeAdapterBase;
+    dawn::native::null::PhysicalDevice mUnsafeAdapterBase;
 };
 
 // Test the creation of a device will fail if the requested feature is not supported on the

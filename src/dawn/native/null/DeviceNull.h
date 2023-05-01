@@ -40,13 +40,13 @@
 
 namespace dawn::native::null {
 
-class Adapter;
 class BindGroup;
 class BindGroupLayout;
 class Buffer;
 class CommandBuffer;
 class ComputePipeline;
 class Device;
+class PhysicalDevice;
 using PipelineLayout = PipelineLayoutBase;
 class QuerySet;
 class Queue;
@@ -58,13 +58,13 @@ class Texture;
 using TextureView = TextureViewBase;
 
 struct NullBackendTraits {
-    using AdapterType = Adapter;
     using BindGroupType = BindGroup;
     using BindGroupLayoutType = BindGroupLayout;
     using BufferType = Buffer;
     using CommandBufferType = CommandBuffer;
     using ComputePipelineType = ComputePipeline;
     using DeviceType = Device;
+    using PhysicalDeviceType = PhysicalDevice;
     using PipelineLayoutType = PipelineLayout;
     using QuerySetType = QuerySet;
     using QueueType = Queue;
@@ -88,7 +88,7 @@ struct PendingOperation {
 
 class Device final : public DeviceBase {
   public:
-    static ResultOrError<Ref<Device>> Create(Adapter* adapter,
+    static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              const DeviceDescriptor* descriptor,
                                              const TogglesState& deviceToggles);
     ~Device() override;
@@ -170,13 +170,13 @@ class Device final : public DeviceBase {
     size_t mMemoryUsage = 0;
 };
 
-class Adapter : public PhysicalDeviceBase {
+class PhysicalDevice : public PhysicalDeviceBase {
   public:
     // Create null adapter without providing toggles state for testing, only inherit instance's
     // toggles state
-    explicit Adapter(InstanceBase* instance);
-    Adapter(InstanceBase* instance, const TogglesState& adapterToggles);
-    ~Adapter() override;
+    explicit PhysicalDevice(InstanceBase* instance);
+    PhysicalDevice(InstanceBase* instance, const TogglesState& adapterToggles);
+    ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
