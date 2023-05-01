@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/opengl/AdapterGL.h"
+#include "dawn/native/opengl/PhysicalDeviceGL.h"
 
 #include <memory>
 #include <string>
@@ -53,23 +53,23 @@ uint32_t GetVendorIdFromVendors(const char* vendor) {
 
 }  // anonymous namespace
 
-Adapter::Adapter(InstanceBase* instance,
-                 wgpu::BackendType backendType,
-                 const TogglesState& adapterToggle)
+PhysicalDevice::PhysicalDevice(InstanceBase* instance,
+                               wgpu::BackendType backendType,
+                               const TogglesState& adapterToggle)
     : PhysicalDeviceBase(instance, backendType, adapterToggle) {}
 
-MaybeError Adapter::InitializeGLFunctions(void* (*getProc)(const char*)) {
+MaybeError PhysicalDevice::InitializeGLFunctions(void* (*getProc)(const char*)) {
     // Use getProc to populate the dispatch table
     mEGLFunctions.Init(getProc);
     return mFunctions.Initialize(getProc);
 }
 
-bool Adapter::SupportsExternalImages() const {
+bool PhysicalDevice::SupportsExternalImages() const {
     // Via dawn::native::opengl::WrapExternalEGLImage
     return GetBackendType() == wgpu::BackendType::OpenGLES;
 }
 
-MaybeError Adapter::InitializeImpl() {
+MaybeError PhysicalDevice::InitializeImpl() {
     if (mFunctions.GetVersion().IsES()) {
         ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);
     } else {
@@ -92,7 +92,7 @@ MaybeError Adapter::InitializeImpl() {
     return {};
 }
 
-void Adapter::InitializeSupportedFeaturesImpl() {
+void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // TextureCompressionBC
     {
         // BC1, BC2 and BC3 are not supported in OpenGL or OpenGL ES core features.
@@ -149,12 +149,12 @@ void Adapter::InitializeSupportedFeaturesImpl() {
     }
 }
 
-MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
+MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     GetDefaultLimits(&limits->v1);
     return {};
 }
 
-void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     const OpenGLFunctions& gl = mFunctions;
 
     bool supportsBaseVertex = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 2);
@@ -217,8 +217,8 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
                            gl.GetVersion().IsES());
 }
 
-ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,
-                                                         const TogglesState& deviceToggles) {
+ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(const DeviceDescriptor* descriptor,
+                                                                const TogglesState& deviceToggles) {
     EGLenum api =
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
     std::unique_ptr<Device::Context> context;
@@ -226,8 +226,9 @@ ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor*
     return Device::Create(this, descriptor, mFunctions, std::move(context), deviceToggles);
 }
 
-MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
-                                                            const TogglesState& toggles) const {
+MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
+    wgpu::FeatureName feature,
+    const TogglesState& toggles) const {
     return {};
 }
 }  // namespace dawn::native::opengl

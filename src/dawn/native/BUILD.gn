@@ -620,8 +620,6 @@ source_set("sources") {
     ]
     sources += get_target_outputs(":opengl_loader_gen")
     sources += [
-      "opengl/AdapterGL.cpp",
-      "opengl/AdapterGL.h",
       "opengl/BackendGL.cpp",
       "opengl/BackendGL.h",
       "opengl/BindGroupGL.cpp",
@@ -649,6 +647,8 @@ source_set("sources") {
       "opengl/OpenGLVersion.h",
       "opengl/PersistentPipelineStateGL.cpp",
       "opengl/PersistentPipelineStateGL.h",
+      "opengl/PhysicalDeviceGL.cpp",
+      "opengl/PhysicalDeviceGL.h",
       "opengl/PipelineGL.cpp",
       "opengl/PipelineGL.h",
       "opengl/PipelineLayoutGL.cpp",

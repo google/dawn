@@ -488,8 +488,6 @@ if (DAWN_ENABLE_OPENGL)
     target_sources(dawn_native PRIVATE
         "${DAWN_INCLUDE_DIR}/dawn/native/OpenGLBackend.h"
         ${DAWN_NATIVE_OPENGL_AUTOGEN_SOURCES}
-        "opengl/AdapterGL.cpp"
-        "opengl/AdapterGL.h"
         "opengl/BackendGL.cpp"
         "opengl/BackendGL.h"
         "opengl/BindGroupGL.cpp"
@@ -517,6 +515,8 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/OpenGLVersion.h"
         "opengl/PersistentPipelineStateGL.cpp"
         "opengl/PersistentPipelineStateGL.h"
+        "opengl/PhysicalDeviceGL.cpp"
+        "opengl/PhysicalDeviceGL.h"
         "opengl/PipelineGL.cpp"
         "opengl/PipelineGL.h"
         "opengl/PipelineLayoutGL.cpp"

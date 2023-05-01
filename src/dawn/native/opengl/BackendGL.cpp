@@ -22,9 +22,9 @@
 #include "dawn/common/SystemUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/OpenGLBackend.h"
-#include "dawn/native/opengl/AdapterGL.h"
 #include "dawn/native/opengl/ContextEGL.h"
 #include "dawn/native/opengl/EGLFunctions.h"
+#include "dawn/native/opengl/PhysicalDeviceGL.h"
 
 namespace dawn::native::opengl {
 
@@ -97,7 +97,7 @@ ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
 
     DAWN_INVALID_IF(options->getProc == nullptr, "AdapterDiscoveryOptions::getProc must be set");
 
-    Ref<Adapter> adapter = AcquireRef(new Adapter(
+    Ref<PhysicalDevice> adapter = AcquireRef(new PhysicalDevice(
         GetInstance(), static_cast<wgpu::BackendType>(optionsBase->backendType), adapterToggles));
     DAWN_TRY(adapter->InitializeGLFunctions(options->getProc));
     DAWN_TRY(adapter->Initialize());

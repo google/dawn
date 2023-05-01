@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_OPENGL_ADAPTERGL_H_
-#define SRC_DAWN_NATIVE_OPENGL_ADAPTERGL_H_
+#ifndef SRC_DAWN_NATIVE_OPENGL_PHYSICALDEVICEGL_H_
+#define SRC_DAWN_NATIVE_OPENGL_PHYSICALDEVICEGL_H_
 
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/opengl/EGLFunctions.h"
@@ -21,15 +21,15 @@
 
 namespace dawn::native::opengl {
 
-class Adapter : public PhysicalDeviceBase {
+class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    Adapter(InstanceBase* instance,
-            wgpu::BackendType backendType,
-            const TogglesState& adapterToggle);
+    PhysicalDevice(InstanceBase* instance,
+                   wgpu::BackendType backendType,
+                   const TogglesState& adapterToggle);
 
     MaybeError InitializeGLFunctions(void* (*getProc)(const char*));
 
-    ~Adapter() override = default;
+    ~PhysicalDevice() override = default;
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
@@ -52,4 +52,4 @@ class Adapter : public PhysicalDeviceBase {
 
 }  // namespace dawn::native::opengl
 
-#endif  // SRC_DAWN_NATIVE_OPENGL_ADAPTERGL_H_
+#endif  // SRC_DAWN_NATIVE_OPENGL_PHYSICALDEVICEGL_H_
