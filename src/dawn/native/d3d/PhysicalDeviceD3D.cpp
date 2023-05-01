@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/d3d/AdapterD3D.h"
+#include "dawn/native/d3d/PhysicalDeviceD3D.h"
 
 #include <string>
 #include <utility>
@@ -22,25 +22,25 @@
 
 namespace dawn::native::d3d {
 
-Adapter::Adapter(Backend* backend,
-                 ComPtr<IDXGIAdapter3> hardwareAdapter,
-                 wgpu::BackendType backendType,
-                 const TogglesState& adapterToggles)
+PhysicalDevice::PhysicalDevice(Backend* backend,
+                               ComPtr<IDXGIAdapter3> hardwareAdapter,
+                               wgpu::BackendType backendType,
+                               const TogglesState& adapterToggles)
     : PhysicalDeviceBase(backend->GetInstance(), backendType, adapterToggles),
       mHardwareAdapter(std::move(hardwareAdapter)),
       mBackend(backend) {}
 
-Adapter::~Adapter() = default;
+PhysicalDevice::~PhysicalDevice() = default;
 
-IDXGIAdapter3* Adapter::GetHardwareAdapter() const {
+IDXGIAdapter3* PhysicalDevice::GetHardwareAdapter() const {
     return mHardwareAdapter.Get();
 }
 
-Backend* Adapter::GetBackend() const {
+Backend* PhysicalDevice::GetBackend() const {
     return mBackend;
 }
 
-MaybeError Adapter::InitializeImpl() {
+MaybeError PhysicalDevice::InitializeImpl() {
     DXGI_ADAPTER_DESC1 adapterDesc;
     GetHardwareAdapter()->GetDesc1(&adapterDesc);
 

@@ -14,9 +14,9 @@
 
 #include "dawn/native/d3d/DeviceD3D.h"
 
-#include "dawn/native/d3d/AdapterD3D.h"
 #include "dawn/native/d3d/BackendD3D.h"
 #include "dawn/native/d3d/Forward.h"
+#include "dawn/native/d3d/PhysicalDeviceD3D.h"
 
 namespace dawn::native::d3d {
 
@@ -35,23 +35,23 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 }
 
 const PlatformFunctions* Device::GetFunctions() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetFunctions();
+    return ToBackend(GetPhysicalDevice())->GetBackend()->GetFunctions();
 }
 
 ComPtr<IDXGIFactory4> Device::GetFactory() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetFactory();
+    return ToBackend(GetPhysicalDevice())->GetBackend()->GetFactory();
 }
 
 ComPtr<IDxcLibrary> Device::GetDxcLibrary() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetDxcLibrary();
+    return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcLibrary();
 }
 
 ComPtr<IDxcCompiler> Device::GetDxcCompiler() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetDxcCompiler();
+    return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcCompiler();
 }
 
 ComPtr<IDxcValidator> Device::GetDxcValidator() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetDxcValidator();
+    return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcValidator();
 }
 
 }  // namespace dawn::native::d3d

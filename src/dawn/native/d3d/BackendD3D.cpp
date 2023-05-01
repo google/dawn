@@ -260,7 +260,7 @@ ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
         // |dxgiAdapter| was provided. Discover just that adapter.
         Ref<PhysicalDeviceBase> adapter;
         DAWN_TRY_ASSIGN(adapter,
-                        CreateAdapterFromIDXGIAdapter(options->dxgiAdapter, adapterToggles));
+                        CreatePhysicalDeviceFromIDXGIAdapter(options->dxgiAdapter, adapterToggles));
         adapters.push_back(std::move(adapter));
         return std::move(adapters);
     }
@@ -274,8 +274,8 @@ ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
 
         ASSERT(dxgiAdapter != nullptr);
         Ref<PhysicalDeviceBase> adapter;
-        if (GetInstance()->ConsumedError(CreateAdapterFromIDXGIAdapter(dxgiAdapter, adapterToggles),
-                                         &adapter)) {
+        if (GetInstance()->ConsumedError(
+                CreatePhysicalDeviceFromIDXGIAdapter(dxgiAdapter, adapterToggles), &adapter)) {
             continue;
         }
 

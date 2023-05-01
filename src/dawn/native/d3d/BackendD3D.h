@@ -82,7 +82,7 @@ class Backend : public BackendConnection {
         const TogglesState& adapterToggles) override;
 
   protected:
-    virtual ResultOrError<Ref<PhysicalDeviceBase>> CreateAdapterFromIDXGIAdapter(
+    virtual ResultOrError<Ref<PhysicalDeviceBase>> CreatePhysicalDeviceFromIDXGIAdapter(
         ComPtr<IDXGIAdapter> dxgiAdapter,
         const TogglesState& adapterToggles) = 0;
 

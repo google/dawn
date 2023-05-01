@@ -49,7 +49,7 @@ class StagingDescriptorAllocator;
 // Definition of backend types
 class Device final : public d3d::Device {
   public:
-    static ResultOrError<Ref<Device>> Create(Adapter* adapter,
+    static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              const DeviceDescriptor* descriptor,
                                              const TogglesState& deviceToggles);
     ~Device() override;

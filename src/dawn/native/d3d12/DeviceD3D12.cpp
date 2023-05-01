@@ -24,7 +24,6 @@
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d12/AdapterD3D12.h"
 #include "dawn/native/d3d12/BackendD3D12.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
@@ -32,6 +31,7 @@
 #include "dawn/native/d3d12/CommandBufferD3D12.h"
 #include "dawn/native/d3d12/ComputePipelineD3D12.h"
 #include "dawn/native/d3d12/ExternalImageDXGIImplD3D12.h"
+#include "dawn/native/d3d12/PhysicalDeviceD3D12.h"
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "dawn/native/d3d12/QuerySetD3D12.h"
@@ -61,7 +61,7 @@ static constexpr uint64_t kZeroBufferSize = 1024 * 1024 * 4;  // 4 Mb
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 
 // static
-ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
+ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const DeviceDescriptor* descriptor,
                                           const TogglesState& deviceToggles) {
     Ref<Device> device = AcquireRef(new Device(adapter, descriptor, deviceToggles));
@@ -70,7 +70,7 @@ ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
 }
 
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
-    mD3d12Device = ToBackend(GetAdapter())->GetDevice();
+    mD3d12Device = ToBackend(GetPhysicalDevice())->GetDevice();
 
     ASSERT(mD3d12Device != nullptr);
 
@@ -233,17 +233,17 @@ ComPtr<ID3D12CommandSignature> Device::GetDrawIndexedIndirectSignature() const {
 // Ensure DXC if use_dxc toggles are set and validated.
 MaybeError Device::EnsureDXCIfRequired() {
     if (IsToggleEnabled(Toggle::UseDXC)) {
-        ASSERT(ToBackend(GetAdapter())->GetBackend()->IsDXCAvailable());
-        DAWN_TRY(ToBackend(GetAdapter())->GetBackend()->EnsureDxcCompiler());
-        DAWN_TRY(ToBackend(GetAdapter())->GetBackend()->EnsureDxcLibrary());
-        DAWN_TRY(ToBackend(GetAdapter())->GetBackend()->EnsureDxcValidator());
+        ASSERT(ToBackend(GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
+        DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcCompiler());
+        DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcLibrary());
+        DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcValidator());
     }
 
     return {};
 }
 
 const PlatformFunctions* Device::GetFunctions() const {
-    return ToBackend(GetAdapter())->GetBackend()->GetFunctions();
+    return ToBackend(GetPhysicalDevice())->GetBackend()->GetFunctions();
 }
 
 CommandAllocatorManager* Device::GetCommandAllocatorManager() const {
@@ -608,7 +608,7 @@ Ref<TextureBase> Device::CreateD3D12ExternalTexture(const TextureDescriptor* des
 }
 
 const D3D12DeviceInfo& Device::GetDeviceInfo() const {
-    return ToBackend(GetAdapter())->GetDeviceInfo();
+    return ToBackend(GetPhysicalDevice())->GetDeviceInfo();
 }
 
 MaybeError Device::WaitForIdleForDestruction() {
@@ -662,7 +662,7 @@ void AppendDebugLayerMessagesToError(ID3D12InfoQueue* infoQueue,
 }
 
 MaybeError Device::CheckDebugLayerAndGenerateErrors() {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled()) {
+    if (!GetPhysicalDevice()->GetInstance()->IsBackendValidationEnabled()) {
         return {};
     }
 
@@ -686,7 +686,7 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
 }
 
 void Device::AppendDebugLayerMessages(ErrorData* error) {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled()) {
+    if (!GetPhysicalDevice()->GetInstance()->IsBackendValidationEnabled()) {
         return;
     }
 

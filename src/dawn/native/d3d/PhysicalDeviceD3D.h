@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_D3D_ADAPTERD3D_H_
-#define SRC_DAWN_NATIVE_D3D_ADAPTERD3D_H_
+#ifndef SRC_DAWN_NATIVE_D3D_PHYSICALDEVICED3D_H_
+#define SRC_DAWN_NATIVE_D3D_PHYSICALDEVICED3D_H_
 
 #include "dawn/native/PhysicalDevice.h"
 
@@ -23,13 +23,13 @@ namespace dawn::native::d3d {
 
 class Backend;
 
-class Adapter : public PhysicalDeviceBase {
+class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    Adapter(Backend* backend,
-            ComPtr<IDXGIAdapter3> hardwareAdapter,
-            wgpu::BackendType backendType,
-            const TogglesState& adapterToggles);
-    ~Adapter() override;
+    PhysicalDevice(Backend* backend,
+                   ComPtr<IDXGIAdapter3> hardwareAdapter,
+                   wgpu::BackendType backendType,
+                   const TogglesState& adapterToggles);
+    ~PhysicalDevice() override;
 
     IDXGIAdapter3* GetHardwareAdapter() const;
     Backend* GetBackend() const;
@@ -44,4 +44,4 @@ class Adapter : public PhysicalDeviceBase {
 
 }  // namespace dawn::native::d3d
 
-#endif  // SRC_DAWN_NATIVE_D3D_ADAPTERD3D_H_
+#endif  // SRC_DAWN_NATIVE_D3D_PHYSICALDEVICED3D_H_

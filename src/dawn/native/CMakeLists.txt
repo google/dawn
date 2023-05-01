@@ -255,8 +255,6 @@ endif()
 if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE
         "${DAWN_INCLUDE_DIR}/dawn/native/D3DBackend.h"
-        "d3d/AdapterD3D.cpp"
-        "d3d/AdapterD3D.h"
         "d3d/BackendD3D.cpp"
         "d3d/BackendD3D.h"
         "d3d/BlobD3D.cpp"
@@ -269,6 +267,8 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/ExternalImageDXGIImpl.cpp"
         "d3d/ExternalImageDXGIImpl.h"
         "d3d/Forward.h"
+        "d3d/PhysicalDeviceD3D.cpp"
+        "d3d/PhysicalDeviceD3D.h"
         "d3d/PlatformFunctions.cpp"
         "d3d/PlatformFunctions.h"
         "d3d/ShaderUtils.cpp"
@@ -284,8 +284,6 @@ endif()
 if (DAWN_ENABLE_D3D11)
     target_sources(dawn_native PRIVATE
         "${DAWN_INCLUDE_DIR}/dawn/native/D3D11Backend.h"
-        "d3d11/AdapterD3D11.cpp"
-        "d3d11/AdapterD3D11.h"
         "d3d11/BackendD3D11.cpp"
         "d3d11/BackendD3D11.h"
         "d3d11/BindGroupD3D11.cpp"
@@ -305,6 +303,8 @@ if (DAWN_ENABLE_D3D11)
         "d3d11/DeviceInfoD3D11.cpp"
         "d3d11/DeviceInfoD3D11.h"
         "d3d11/Forward.h"
+        "d3d11/PhysicalDeviceD3D11.cpp"
+        "d3d11/PhysicalDeviceD3D11.h"
         "d3d11/PipelineLayoutD3D11.cpp"
         "d3d11/PipelineLayoutD3D11.h"
         "d3d11/PlatformFunctionsD3D11.cpp"
@@ -329,8 +329,6 @@ endif()
 if (DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE
         "${DAWN_INCLUDE_DIR}/dawn/native/D3D12Backend.h"
-        "d3d12/AdapterD3D12.cpp"
-        "d3d12/AdapterD3D12.h"
         "d3d12/BackendD3D12.cpp"
         "d3d12/BackendD3D12.h"
         "d3d12/BindGroupD3D12.cpp"
@@ -367,6 +365,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/IntegerTypes.h"
         "d3d12/PageableD3D12.cpp"
         "d3d12/PageableD3D12.h"
+        "d3d12/PhysicalDeviceD3D12.cpp"
+        "d3d12/PhysicalDeviceD3D12.h"
         "d3d12/PipelineLayoutD3D12.cpp"
         "d3d12/PipelineLayoutD3D12.h"
         "d3d12/PlatformFunctionsD3D12.cpp"

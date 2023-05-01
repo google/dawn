@@ -19,13 +19,13 @@
 
 namespace dawn::native::d3d {
 
-class Adapter;
+class PhysicalDevice;
 class Device;
 class SwapChain;
 
 struct D3DBackendTraits {
-    using AdapterType = Adapter;
     using DeviceType = Device;
+    using PhysicalDeviceType = PhysicalDevice;
     using SwapChainType = SwapChain;
 };
 

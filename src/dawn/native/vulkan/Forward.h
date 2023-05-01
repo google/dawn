@@ -39,13 +39,13 @@ class Texture;
 class TextureView;
 
 struct VulkanBackendTraits {
-    using AdapterType = Adapter;
     using BindGroupType = BindGroup;
     using BindGroupLayoutType = BindGroupLayout;
     using BufferType = Buffer;
     using CommandBufferType = CommandBuffer;
     using ComputePipelineType = ComputePipeline;
     using DeviceType = Device;
+    using PhysicalDeviceType = Adapter;
     using PipelineCacheType = PipelineCache;
     using PipelineLayoutType = PipelineLayout;
     using QuerySetType = QuerySet;

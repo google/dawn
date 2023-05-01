@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/d3d12/AdapterD3D12.h"
+#include "dawn/native/d3d12/PhysicalDeviceD3D12.h"
 
 #include <string>
 #include <utility>
@@ -29,33 +29,33 @@
 
 namespace dawn::native::d3d12 {
 
-Adapter::Adapter(Backend* backend,
-                 ComPtr<IDXGIAdapter3> hardwareAdapter,
-                 const TogglesState& adapterToggles)
+PhysicalDevice::PhysicalDevice(Backend* backend,
+                               ComPtr<IDXGIAdapter3> hardwareAdapter,
+                               const TogglesState& adapterToggles)
     : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D12, adapterToggles) {}
 
-Adapter::~Adapter() {
+PhysicalDevice::~PhysicalDevice() {
     CleanUpDebugLayerFilters();
 }
 
-bool Adapter::SupportsExternalImages() const {
+bool PhysicalDevice::SupportsExternalImages() const {
     // Via dawn::native::d3d12::ExternalImageDXGI::Create
     return true;
 }
 
-const D3D12DeviceInfo& Adapter::GetDeviceInfo() const {
+const D3D12DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
     return mDeviceInfo;
 }
 
-Backend* Adapter::GetBackend() const {
+Backend* PhysicalDevice::GetBackend() const {
     return static_cast<Backend*>(Base::GetBackend());
 }
 
-ComPtr<ID3D12Device> Adapter::GetDevice() const {
+ComPtr<ID3D12Device> PhysicalDevice::GetDevice() const {
     return mD3d12Device;
 }
 
-MaybeError Adapter::InitializeImpl() {
+MaybeError PhysicalDevice::InitializeImpl() {
     DAWN_TRY(Base::InitializeImpl());
     // D3D12 cannot check for feature support without a device.
     // Create the device to populate the adapter properties then reuse it when needed for actual
@@ -93,7 +93,7 @@ MaybeError Adapter::InitializeImpl() {
     return {};
 }
 
-bool Adapter::AreTimestampQueriesSupported() const {
+bool PhysicalDevice::AreTimestampQueriesSupported() const {
     D3D12_COMMAND_QUEUE_DESC queueDesc = {};
     queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
     queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -114,7 +114,7 @@ bool Adapter::AreTimestampQueriesSupported() const {
     return true;
 }
 
-void Adapter::InitializeSupportedFeaturesImpl() {
+void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::TextureCompressionBC);
     EnableFeature(Feature::MultiPlanarFormats);
     EnableFeature(Feature::Depth32FloatStencil8);
@@ -149,7 +149,7 @@ void Adapter::InitializeSupportedFeaturesImpl() {
     }
 }
 
-MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
+MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     D3D12_FEATURE_DATA_D3D12_OPTIONS featureData = {};
 
     DAWN_TRY(CheckHRESULT(mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,
@@ -320,8 +320,9 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     return {};
 }
 
-MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
-                                                            const TogglesState& toggles) const {
+MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
+    wgpu::FeatureName feature,
+    const TogglesState& toggles) const {
     // shader-f16 feature and chromium-experimental-dp4a feature require DXC 1.4 or higher for
     // D3D12. Note that DXC version is checked in InitializeSupportedFeaturesImpl.
     if (feature == wgpu::FeatureName::ShaderF16 ||
@@ -332,7 +333,7 @@ MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName fe
     return {};
 }
 
-MaybeError Adapter::InitializeDebugLayerFilters() {
+MaybeError PhysicalDevice::InitializeDebugLayerFilters() {
     if (!GetInstance()->IsBackendValidationEnabled()) {
         return {};
     }
@@ -423,7 +424,7 @@ MaybeError Adapter::InitializeDebugLayerFilters() {
     return {};
 }
 
-void Adapter::CleanUpDebugLayerFilters() {
+void PhysicalDevice::CleanUpDebugLayerFilters() {
     if (!GetInstance()->IsBackendValidationEnabled()) {
         return;
     }
@@ -443,7 +444,7 @@ void Adapter::CleanUpDebugLayerFilters() {
     infoQueue->PopStorageFilter();
 }
 
-void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     const bool useResourceHeapTier2 = (GetDeviceInfo().resourceHeapTier >= 2);
     deviceToggles->Default(Toggle::UseD3D12ResourceHeapTier2, useResourceHeapTier2);
     deviceToggles->Default(Toggle::UseD3D12RenderPass, GetDeviceInfo().supportsRenderPass);
@@ -578,8 +579,8 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     }
 }
 
-ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,
-                                                         const TogglesState& deviceToggles) {
+ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(const DeviceDescriptor* descriptor,
+                                                                const TogglesState& deviceToggles) {
     return Device::Create(this, descriptor, deviceToggles);
 }
 
@@ -587,7 +588,7 @@ ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor*
 // current ID3D12Device have not been destroyed, a non-zero value will be returned upon Reset()
 // and the subequent call to CreateDevice will return a handle the existing device instead of
 // creating a new one.
-MaybeError Adapter::ResetInternalDeviceForTestingImpl() {
+MaybeError PhysicalDevice::ResetInternalDeviceForTestingImpl() {
     [[maybe_unused]] auto refCount = mD3d12Device.Reset();
     ASSERT(refCount == 0);
     DAWN_TRY(Initialize());

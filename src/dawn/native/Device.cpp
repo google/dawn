@@ -715,8 +715,13 @@ ApiObjectList* DeviceBase::GetObjectTrackingList(ObjectType type) {
     return &mObjectLists[type];
 }
 
-PhysicalDeviceBase* DeviceBase::GetAdapter() const {
+AdapterBase* DeviceBase::GetAdapter() const {
     return mAdapter.Get();
+}
+
+PhysicalDeviceBase* DeviceBase::GetPhysicalDevice() const {
+    return mAdapter
+        .Get();  // TODO(dawn:1774): This will retrieve the PhysicalDevice from the AdapterBase.
 }
 
 dawn::platform::Platform* DeviceBase::GetPlatform() const {

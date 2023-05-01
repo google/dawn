@@ -25,7 +25,7 @@ struct ToBackendTraits;
 
 template <typename BackendTraits>
 struct ToBackendTraits<PhysicalDeviceBase, BackendTraits> {
-    using BackendType = typename BackendTraits::AdapterType;
+    using BackendType = typename BackendTraits::PhysicalDeviceType;
 };
 
 template <typename BackendTraits>

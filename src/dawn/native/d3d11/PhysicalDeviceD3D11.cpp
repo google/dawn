@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/d3d11/AdapterD3D11.h"
+#include "dawn/native/d3d11/PhysicalDeviceD3D11.h"
 
 #include <string>
 #include <utility>
@@ -61,23 +61,23 @@ MaybeError InitializeDebugLayerFilters(ComPtr<ID3D11Device> d3d11Device) {
 
 }  // namespace
 
-Adapter::Adapter(Backend* backend,
-                 ComPtr<IDXGIAdapter3> hardwareAdapter,
-                 const TogglesState& adapterToggles)
+PhysicalDevice::PhysicalDevice(Backend* backend,
+                               ComPtr<IDXGIAdapter3> hardwareAdapter,
+                               const TogglesState& adapterToggles)
     : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D11, adapterToggles) {}
 
-Adapter::~Adapter() = default;
+PhysicalDevice::~PhysicalDevice() = default;
 
-bool Adapter::SupportsExternalImages() const {
+bool PhysicalDevice::SupportsExternalImages() const {
     // TODO(dawn:1724): Implement external images on D3D11.
     return false;
 }
 
-const DeviceInfo& Adapter::GetDeviceInfo() const {
+const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
     return mDeviceInfo;
 }
 
-ResultOrError<ComPtr<ID3D11Device>> Adapter::CreateD3D11Device() {
+ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device() {
     ComPtr<ID3D11Device> device = std::move(mD3d11Device);
     if (!device) {
         const PlatformFunctions* functions = static_cast<Backend*>(GetBackend())->GetFunctions();
@@ -102,7 +102,7 @@ ResultOrError<ComPtr<ID3D11Device>> Adapter::CreateD3D11Device() {
     return device;
 }
 
-MaybeError Adapter::InitializeImpl() {
+MaybeError PhysicalDevice::InitializeImpl() {
     DAWN_TRY(Base::InitializeImpl());
     // D3D11 cannot check for feature support without a device.
     // Create the device to populate the adapter properties then reuse it when needed for actual
@@ -121,12 +121,12 @@ MaybeError Adapter::InitializeImpl() {
     return {};
 }
 
-void Adapter::InitializeSupportedFeaturesImpl() {
+void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::TextureCompressionBC);
     EnableFeature(Feature::SurfaceCapabilities);
 }
 
-MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
+MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     GetDefaultLimits(&limits->v1);
 
     // // https://docs.microsoft.com/en-us/windows/win32/direct3d12/hardware-feature-levels
@@ -188,18 +188,19 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     return {};
 }
 
-MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
-                                                            const TogglesState& toggles) const {
+MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
+    wgpu::FeatureName feature,
+    const TogglesState& toggles) const {
     return {};
 }
 
-void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     // D3D11 can only clear RTV with float values.
     deviceToggles->Default(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
 }
 
-ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,
-                                                         const TogglesState& deviceToggles) {
+ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(const DeviceDescriptor* descriptor,
+                                                                const TogglesState& deviceToggles) {
     return Device::Create(this, descriptor, deviceToggles);
 }
 
@@ -207,7 +208,7 @@ ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor*
 // current ID3D11Device have not been destroyed, a non-zero value will be returned upon Reset()
 // and the subequent call to CreateDevice will return a handle the existing device instead of
 // creating a new one.
-MaybeError Adapter::ResetInternalDeviceForTestingImpl() {
+MaybeError PhysicalDevice::ResetInternalDeviceForTestingImpl() {
     [[maybe_unused]] auto refCount = mD3d11Device.Reset();
     ASSERT(refCount == 0);
     DAWN_TRY(Initialize());

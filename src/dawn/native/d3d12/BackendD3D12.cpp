@@ -21,7 +21,7 @@
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d12/AdapterD3D12.h"
+#include "dawn/native/d3d12/PhysicalDeviceD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 
@@ -63,15 +63,16 @@ const PlatformFunctions* Backend::GetFunctions() const {
     return static_cast<const PlatformFunctions*>(Base::GetFunctions());
 }
 
-ResultOrError<Ref<PhysicalDeviceBase>> Backend::CreateAdapterFromIDXGIAdapter(
+ResultOrError<Ref<PhysicalDeviceBase>> Backend::CreatePhysicalDeviceFromIDXGIAdapter(
     ComPtr<IDXGIAdapter> dxgiAdapter,
     const TogglesState& adapterToggles) {
     ComPtr<IDXGIAdapter3> dxgiAdapter3;
     DAWN_TRY(CheckHRESULT(dxgiAdapter.As(&dxgiAdapter3), "DXGIAdapter retrieval"));
-    Ref<Adapter> adapter = AcquireRef(new Adapter(this, std::move(dxgiAdapter3), adapterToggles));
-    DAWN_TRY(adapter->Initialize());
+    Ref<PhysicalDevice> physicalDevice =
+        AcquireRef(new PhysicalDevice(this, std::move(dxgiAdapter3), adapterToggles));
+    DAWN_TRY(physicalDevice->Initialize());
 
-    return {std::move(adapter)};
+    return {std::move(physicalDevice)};
 }
 
 BackendConnection* Connect(InstanceBase* instance) {

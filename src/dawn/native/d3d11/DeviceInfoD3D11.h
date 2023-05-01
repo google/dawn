@@ -21,7 +21,7 @@
 
 namespace dawn::native::d3d11 {
 
-class Adapter;
+class PhysicalDevice;
 
 struct DeviceInfo {
     bool isUMA;
