@@ -39,6 +39,7 @@
 #include "src/tint/ast/identifier_expression.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/int_literal_expression.h"
+#include "src/tint/ast/let.h"
 #include "src/tint/ast/literal_expression.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/override.h"
@@ -50,6 +51,7 @@
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/templated_identifier.h"
 #include "src/tint/ast/unary_op_expression.h"
+#include "src/tint/ast/var.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ir/function.h"
@@ -69,8 +71,10 @@
 #include "src/tint/sem/value_constructor.h"
 #include "src/tint/sem/value_conversion.h"
 #include "src/tint/sem/value_expression.h"
+#include "src/tint/sem/variable.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/void.h"
+#include "src/tint/utils/scoped_assignment.h"
 
 namespace tint::ir {
 namespace {
@@ -169,10 +173,13 @@ ResultType BuilderImpl::Build() {
             [&](const ast::Alias*) {
                 // Folded away and doesn't appear in the IR.
             },
-            // [&](const ast::Variable* var) {
-            // TODO(dsinclair): Implement
-            // },
-            [&](const ast::Function* func) { return EmitFunction(func); },
+            [&](const ast::Variable* var) {
+                // Setup the current flow node to be the root block for the module. The builder will
+                // handle creating it if it doesn't exist already.
+                TINT_SCOPED_ASSIGNMENT(current_flow_block, builder.CreateRootBlockIfNeeded());
+                EmitVariable(var);
+            },
+            [&](const ast::Function* func) { EmitFunction(func); },
             // [&](const ast::Enable*) {
             // TODO(dsinclair): Implement? I think these need to be passed along so further stages
             // know what is enabled.
@@ -430,8 +437,8 @@ void BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
         BranchToIfNeeded(loop_node->start.target);
     }
 
-    // The loop merge can get disconnected if the loop returns directly, or the continuing target
-    // branches, eventually, to the merge, but nothing branched to the continuing target.
+    // The loop merge can get disconnected if the loop returns directly, or the continuing
+    // target branches, eventually, to the merge, but nothing branched to the continuing target.
     current_flow_block = loop_node->merge.target->As<Block>();
     if (!IsConnected(loop_node->merge.target)) {
         current_flow_block = nullptr;
@@ -613,9 +620,9 @@ void BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
 }
 
 // Discard is being treated as an instruction. The semantics in WGSL is demote_to_helper, so the
-// code has to continue as before it just predicates writes. If WGSL grows some kind of terminating
-// discard that would probably make sense as a FlowNode but would then require figuring out the
-// multi-level exit that is triggered.
+// code has to continue as before it just predicates writes. If WGSL grows some kind of
+// terminating discard that would probably make sense as a FlowNode but would then require
+// figuring out the multi-level exit that is triggered.
 void BuilderImpl::EmitDiscard(const ast::DiscardStatement*) {
     auto* inst = builder.Discard();
     current_flow_block->instructions.Push(inst);
@@ -691,14 +698,35 @@ utils::Result<Value*> BuilderImpl::EmitExpression(const ast::Expression* expr) {
 }
 
 void BuilderImpl::EmitVariable(const ast::Variable* var) {
+    auto* sem = program_->Sem().Get(var);
+
     return tint::Switch(  //
         var,
-        // [&](const ast::Var* var) {
-        // TODO(dsinclair): Implement
-        // },
-        // [&](const ast::Let*) {
-        // TODO(dsinclair): Implement
-        // },
+        [&](const ast::Var* v) {
+            auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
+            auto* val = builder.Declare(ty, sem->AddressSpace(), sem->Access());
+            current_flow_block->instructions.Push(val);
+
+            if (v->initializer) {
+                auto init = EmitExpression(v->initializer);
+                if (!init) {
+                    return;
+                }
+
+                auto* store = builder.Store(val, init.Get());
+                current_flow_block->instructions.Push(store);
+            }
+            // TODO(dsinclair): Store the mapping from the var name to the `Declare` value
+        },
+        [&](const ast::Let* l) {
+            // A `let` doesn't exist as a standalone item in the IR, it's just the result of the
+            // initializer.
+            auto init = EmitExpression(l->initializer);
+            if (!init) {
+                return;
+            }
+            // TODO(dsinclair): Store the mapping from the let name to the `init` value
+        },
         [&](const ast::Override*) {
             add_error(var->source,
                       "found an `Override` variable. The SubstituteOverrides "

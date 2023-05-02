@@ -20,6 +20,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/switch.h"
+#include "src/tint/utils/scoped_assignment.h"
 
 namespace tint::ir {
 namespace {
@@ -89,6 +90,8 @@ void Disassembler::Walk(const FlowNode* node) {
     tint::Switch(
         node,
         [&](const ir::Function* f) {
+            TINT_SCOPED_ASSIGNMENT(in_function_, true);
+
             Indent() << "%fn" << GetIdForNode(f) << " = func " << f->name.Name() << std::endl;
 
             {
@@ -241,11 +244,19 @@ void Disassembler::Walk(const FlowNode* node) {
                 Walk(l->merge.target);
             }
         },
-        [&](const ir::Terminator*) { Indent() << "func_end" << std::endl
-                                              << std::endl; });
+        [&](const ir::Terminator*) {
+            if (in_function_) {
+                Indent() << "func_end" << std::endl;
+            }
+            out_ << std::endl;
+        });
 }
 
 std::string Disassembler::Disassemble() {
+    if (mod_.root_block) {
+        Walk(mod_.root_block);
+    }
+
     for (const auto* func : mod_.functions) {
         Walk(func);
     }

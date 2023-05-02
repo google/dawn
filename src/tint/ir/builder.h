@@ -35,6 +35,7 @@
 #include "src/tint/ir/unary.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/ir/var.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -357,6 +358,19 @@ class Builder {
     /// @param from the expression being stored
     /// @returns the instruction
     ir::Store* Store(Value* to, Value* from);
+
+    /// Creates a new `var` declaration
+    /// @param type the var type
+    /// @param address_space the address space
+    /// @param access the access mode
+    /// @returns the instruction
+    ir::Var* Declare(const type::Type* type,
+                     builtin::AddressSpace address_space,
+                     builtin::Access access);
+
+    /// Retrieves the root block for the module, creating if necessary
+    /// @returns the root block
+    ir::Block* CreateRootBlockIfNeeded();
 
     /// The IR module.
     Module ir;

@@ -1173,6 +1173,8 @@ libtint_source_set("libtint_ir_src") {
     "ir/user_call.h",
     "ir/value.cc",
     "ir/value.h",
+    "ir/var.cc",
+    "ir/var.h",
   ]
 
   deps = [

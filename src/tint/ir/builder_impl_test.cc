@@ -1558,6 +1558,72 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
     EXPECT_EQ(2_u, val->As<constant::Scalar<u32>>()->ValueAs<f32>());
 }
 
+TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
+    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1(ref<private, u32, read_write>) = var private read_write
+ret
+
+)");
+}
+
+TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
+    auto* expr = Expr(2_u);
+    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate, expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1(ref<private, u32, read_write>) = var private read_write
+store %1(ref<private, u32, read_write>), 2u
+ret
+
+)");
+}
+
+TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
+    auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction);
+    WrapInFunction(a);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function
+  %fn1 = block
+  %1(ref<function, u32, read_write>) = var function read_write
+  ret
+func_end
+
+)");
+}
+
+TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
+    auto* expr = Expr(2_u);
+    auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction, expr);
+    WrapInFunction(a);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function
+  %fn1 = block
+  %1(ref<function, u32, read_write>) = var function read_write
+  store %1(ref<function, u32, read_write>), 2u
+  ret
+func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Add(Call("my_func"), 4_u);

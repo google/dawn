@@ -24,6 +24,17 @@ Builder::Builder(Module&& mod) : ir(std::move(mod)) {}
 
 Builder::~Builder() = default;
 
+ir::Block* Builder::CreateRootBlockIfNeeded() {
+    if (!ir.root_block) {
+        ir.root_block = CreateBlock();
+
+        // Everything in the module scope must have been const-eval's, so everything will go into a
+        // single block. So, we can create the terminator for the root-block now.
+        ir.root_block->branch.target = CreateTerminator();
+    }
+    return ir.root_block;
+}
+
 Block* Builder::CreateBlock() {
     return ir.flow_nodes.Create<Block>();
 }
@@ -223,6 +234,12 @@ ir::Builtin* Builder::Builtin(const type::Type* type,
 
 ir::Store* Builder::Store(Value* to, Value* from) {
     return ir.instructions.Create<ir::Store>(to, from);
+}
+
+ir::Var* Builder::Declare(const type::Type* type,
+                          builtin::AddressSpace address_space,
+                          builtin::Access access) {
+    return ir.instructions.Create<ir::Var>(next_inst_id(), type, address_space, access);
 }
 
 }  // namespace tint::ir

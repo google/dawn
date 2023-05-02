@@ -65,6 +65,9 @@ class Module {
     /// List of indexes into the functions list for the entry points
     utils::Vector<Function*, 8> entry_points;
 
+    /// The block containing module level declarations, if any exist.
+    Block* root_block = nullptr;
+
     /// The type manager for the module
     type::Manager types;
 

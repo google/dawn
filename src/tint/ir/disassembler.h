@@ -56,6 +56,7 @@ class Disassembler {
     std::unordered_map<const FlowNode*, size_t> flow_node_to_id_;
     size_t next_node_id_ = 0;
     uint32_t indent_size_ = 0;
+    bool in_function_ = false;
 };
 
 }  // namespace tint::ir

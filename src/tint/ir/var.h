@@ -1,0 +1,63 @@
+// Copyright 2023 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef SRC_TINT_IR_VAR_H_
+#define SRC_TINT_IR_VAR_H_
+
+#include "src/tint/builtin/access.h"
+#include "src/tint/builtin/address_space.h"
+#include "src/tint/ir/instruction.h"
+#include "src/tint/utils/castable.h"
+#include "src/tint/utils/string_stream.h"
+
+namespace tint::ir {
+
+/// An instruction in the IR.
+class Var : public utils::Castable<Var, Instruction> {
+  public:
+    /// Constructor
+    /// @param id the instruction id
+    /// @param type the type
+    /// @param address_space the address space of the var
+    /// @param access the access mode of the var
+    Var(uint32_t id,
+        const type::Type* type,
+        builtin::AddressSpace address_space,
+        builtin::Access access);
+    Var(const Var& inst) = delete;
+    Var(Var&& inst) = delete;
+    ~Var() override;
+
+    Var& operator=(const Var& inst) = delete;
+    Var& operator=(Var&& inst) = delete;
+
+    /// @returns the address space
+    builtin::AddressSpace AddressSpace() const { return address_space_; }
+
+    /// @returns the access mode
+    builtin::Access Access() const { return access_; }
+
+    /// Write the instruction to the given stream
+    /// @param out the stream to write to
+    /// @returns the stream
+    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
+
+  private:
+    builtin::AddressSpace address_space_;
+    builtin::Access access_;
+};
+
+}  // namespace tint::ir
+
+#endif  // SRC_TINT_IR_VAR_H_

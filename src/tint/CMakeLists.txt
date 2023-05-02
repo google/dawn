@@ -750,6 +750,8 @@ if(${TINT_BUILD_IR})
     ir/user_call.h
     ir/value.cc
     ir/value.h
+    ir/var.cc
+    ir/var.h
   )
 endif()
 
