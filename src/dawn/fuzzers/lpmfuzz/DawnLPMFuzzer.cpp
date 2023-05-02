@@ -54,17 +54,7 @@ class DevNull : public dawn::wire::CommandSerializer {
 };
 
 std::unique_ptr<dawn::native::Instance> sInstance;
-WGPUProcDeviceCreateSwapChain sOriginalDeviceCreateSwapChain = nullptr;
 static bool (*sAdapterSupported)(const dawn::native::Adapter&) = nullptr;
-
-WGPUSwapChain ErrorDeviceCreateSwapChain(WGPUDevice device,
-                                         WGPUSurface surface,
-                                         const WGPUSwapChainDescriptor*) {
-    WGPUSwapChainDescriptor desc = {};
-    // A 0 implementation will trigger a swapchain creation error.
-    desc.implementation = 0;
-    return sOriginalDeviceCreateSwapChain(device, surface, &desc);
-}
 
 }  // namespace
 
@@ -84,13 +74,6 @@ int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::na
     sAdapterSupported = AdapterSupported;
 
     DawnProcTable procs = dawn::native::GetProcs();
-
-    // Swapchains receive a pointer to an implementation. The fuzzer will pass garbage in so we
-    // intercept calls to create swapchains and make sure they always return error swapchains.
-    // This is ok for fuzzing because embedders of dawn_wire would always define their own
-    // swapchain handling.
-    sOriginalDeviceCreateSwapChain = procs.deviceCreateSwapChain;
-    procs.deviceCreateSwapChain = ErrorDeviceCreateSwapChain;
 
     // Override requestAdapter to find an adapter that the fuzzer supports.
     procs.instanceRequestAdapter = [](WGPUInstance cInstance,

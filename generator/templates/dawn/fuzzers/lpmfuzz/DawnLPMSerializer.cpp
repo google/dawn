@@ -30,7 +30,7 @@ void SerializedData(const fuzzing::Program& program, dawn::wire::ChunkedCommandS
     for (const fuzzing::Command& command : program.commands()) {
         switch (command.command_case()) {
 
-            {% for command in cmd_records["command"] %}
+            {% for command in cmd_records["cpp_generated_commands"] %}
             case fuzzing::Command::k{{command.name.CamelCase()}}: {
                 {{ command.name.CamelCase() }}Cmd {{ 'cmd' }};
                 // TODO(chromium:1374747): Populate command buffer with serialized code from generated

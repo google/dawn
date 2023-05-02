@@ -580,12 +580,12 @@ def compute_lpm_params(api_and_wire_params, lpm_json):
     # Start with all commands in dawn.json and dawn_wire.json
     lpm_params = api_and_wire_params.copy()
 
-    # Commands that are built through generation
-    proto_generated_commands = []
+    # Commands that are built through codegen
+    generated_commands = []
 
     # All commands, including hand written commands that we can't generate
     # through codegen
-    proto_all_commands = []
+    all_commands = []
 
     # Remove blocklisted commands from protobuf generation params
     blocklisted_cmds_proto = lpm_json.get('blocklisted_cmds')
@@ -594,13 +594,17 @@ def compute_lpm_params(api_and_wire_params, lpm_json):
         blocklisted = command.name.get() in blocklisted_cmds_proto
         custom = command.name.get() in custom_cmds_proto
 
-        if not blocklisted and not custom:
-            proto_generated_commands.append(command)
-        proto_all_commands.append(command)
+        if blocklisted:
+            continue
+
+        if not custom:
+            generated_commands.append(command)
+        all_commands.append(command)
 
     lpm_params['cmd_records'] = {
-        'proto_generated_commands': proto_generated_commands,
-        'proto_all_commands': proto_all_commands,
+        'proto_generated_commands': generated_commands,
+        'proto_all_commands': all_commands,
+        'cpp_generated_commands': generated_commands
     }
 
     return lpm_params
@@ -1132,6 +1136,12 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.proto',
                            lpm_params))
 
+            renders.append(
+                FileRender(
+                    'dawn/fuzzers/lpmfuzz/dawn_object_types_lpm.proto',
+                    'src/dawn/fuzzers/lpmfuzz/dawn_object_types_lpm_autogen.proto',
+                    lpm_params))
+
         if 'dawn_lpmfuzz_cpp' in targets:
             params_dawn_wire = parse_json(loaded_json,
                                           enabled_tags=['dawn', 'deprecated'],
@@ -1139,8 +1149,11 @@ class MultiGeneratorFromDawnJSON(Generator):
             api_and_wire_params = compute_wire_params(params_dawn_wire,
                                                       wire_json)
 
+            fuzzer_params = compute_lpm_params(api_and_wire_params, lpm_json)
+
             lpm_params = [
-                RENDER_PARAMS_BASE, params_dawn_wire, {}, api_and_wire_params
+                RENDER_PARAMS_BASE, params_dawn_wire, {}, api_and_wire_params,
+                fuzzer_params
             ]
 
             renders.append(
