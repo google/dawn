@@ -41,7 +41,7 @@ TEST_F(IR_InstructionTest, CreateStore) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "store(%0, 4)");
+    EXPECT_EQ(str.str(), "store %0, 4i");
 }
 
 TEST_F(IR_InstructionTest, Store_Usage) {

@@ -31,21 +31,22 @@ utils::StringStream& Unary::ToInstruction(utils::StringStream& out) const {
     ToValue(out) << " = ";
     switch (GetKind()) {
         case Unary::Kind::kAddressOf:
-            out << "&";
+            out << "addr_of";
             break;
         case Unary::Kind::kComplement:
-            out << "~";
+            out << "bit_complement";
             break;
         case Unary::Kind::kIndirection:
-            out << "*";
+            out << "indirection";
             break;
         case Unary::Kind::kNegation:
-            out << "-";
+            out << "negation";
             break;
         case Unary::Kind::kNot:
-            out << "!";
+            out << "log_not";
             break;
     }
+    out << " ";
     val_->ToValue(out);
     return out;
 }

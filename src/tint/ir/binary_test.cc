@@ -45,7 +45,7 @@ TEST_F(IR_InstructionTest, CreateAnd) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 & 2");
+    EXPECT_EQ(str.str(), "%1(i32) = bit_and 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateOr) {
@@ -69,7 +69,7 @@ TEST_F(IR_InstructionTest, CreateOr) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 | 2");
+    EXPECT_EQ(str.str(), "%1(i32) = bit_or 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateXor) {
@@ -93,7 +93,7 @@ TEST_F(IR_InstructionTest, CreateXor) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 ^ 2");
+    EXPECT_EQ(str.str(), "%1(i32) = bit_xor 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateLogicalAnd) {
@@ -117,7 +117,7 @@ TEST_F(IR_InstructionTest, CreateLogicalAnd) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = 4 && 2");
+    EXPECT_EQ(str.str(), "%1(bool) = log_and 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateLogicalOr) {
@@ -141,7 +141,7 @@ TEST_F(IR_InstructionTest, CreateLogicalOr) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = 4 || 2");
+    EXPECT_EQ(str.str(), "%1(bool) = log_or 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateEqual) {
@@ -165,7 +165,7 @@ TEST_F(IR_InstructionTest, CreateEqual) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = 4 == 2");
+    EXPECT_EQ(str.str(), "%1(bool) = eq 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateNotEqual) {
@@ -189,7 +189,7 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = 4 != 2");
+    EXPECT_EQ(str.str(), "%1(bool) = neq 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateLessThan) {
@@ -213,7 +213,7 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = 4 < 2");
+    EXPECT_EQ(str.str(), "%1(bool) = lt 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateGreaterThan) {
@@ -237,7 +237,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = 4 > 2");
+    EXPECT_EQ(str.str(), "%1(bool) = gt 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateLessThanEqual) {
@@ -261,7 +261,7 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = 4 <= 2");
+    EXPECT_EQ(str.str(), "%1(bool) = lte 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
@@ -285,7 +285,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = 4 >= 2");
+    EXPECT_EQ(str.str(), "%1(bool) = gte 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateShiftLeft) {
@@ -309,7 +309,7 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 << 2");
+    EXPECT_EQ(str.str(), "%1(i32) = shiftl 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateShiftRight) {
@@ -333,7 +333,7 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 >> 2");
+    EXPECT_EQ(str.str(), "%1(i32) = shiftr 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateAdd) {
@@ -357,7 +357,7 @@ TEST_F(IR_InstructionTest, CreateAdd) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 + 2");
+    EXPECT_EQ(str.str(), "%1(i32) = add 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateSubtract) {
@@ -381,7 +381,7 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 - 2");
+    EXPECT_EQ(str.str(), "%1(i32) = sub 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateMultiply) {
@@ -405,7 +405,7 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 * 2");
+    EXPECT_EQ(str.str(), "%1(i32) = mul 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateDivide) {
@@ -429,7 +429,7 @@ TEST_F(IR_InstructionTest, CreateDivide) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 / 2");
+    EXPECT_EQ(str.str(), "%1(i32) = div 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateModulo) {
@@ -453,7 +453,7 @@ TEST_F(IR_InstructionTest, CreateModulo) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = 4 % 2");
+    EXPECT_EQ(str.str(), "%1(i32) = mod 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, Binary_Usage) {

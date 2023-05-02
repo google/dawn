@@ -39,7 +39,7 @@ TEST_F(IR_InstructionTest, Bitcast) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = bitcast(4)");
+    EXPECT_EQ(str.str(), "%1(i32) = bitcast 4i");
 }
 
 TEST_F(IR_InstructionTest, Bitcast_Usage) {

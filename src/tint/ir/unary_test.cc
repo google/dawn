@@ -45,7 +45,7 @@ TEST_F(IR_InstructionTest, CreateAddressOf) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(ptr<private, i32, read_write>) = &4");
+    EXPECT_EQ(str.str(), "%1(ptr<private, i32, read_write>) = addr_of 4i");
 }
 
 TEST_F(IR_InstructionTest, CreateComplement) {
@@ -63,7 +63,7 @@ TEST_F(IR_InstructionTest, CreateComplement) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = ~4");
+    EXPECT_EQ(str.str(), "%1(i32) = bit_complement 4i");
 }
 
 TEST_F(IR_InstructionTest, CreateIndirection) {
@@ -83,7 +83,7 @@ TEST_F(IR_InstructionTest, CreateIndirection) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = *4");
+    EXPECT_EQ(str.str(), "%1(i32) = indirection 4i");
 }
 
 TEST_F(IR_InstructionTest, CreateNegation) {
@@ -101,7 +101,7 @@ TEST_F(IR_InstructionTest, CreateNegation) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = -4");
+    EXPECT_EQ(str.str(), "%1(i32) = negation 4i");
 }
 
 TEST_F(IR_InstructionTest, CreateNot) {
@@ -119,7 +119,7 @@ TEST_F(IR_InstructionTest, CreateNot) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = !true");
+    EXPECT_EQ(str.str(), "%1(bool) = log_not true");
 }
 
 TEST_F(IR_InstructionTest, Unary_Usage) {

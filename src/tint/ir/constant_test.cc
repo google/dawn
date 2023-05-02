@@ -32,7 +32,7 @@ TEST_F(IR_ConstantTest, f32) {
     EXPECT_EQ(1.2_f, c->value->As<constant::Scalar<f32>>()->ValueAs<f32>());
 
     c->ToValue(str);
-    EXPECT_EQ("1.20000004768371582031", str.str());
+    EXPECT_EQ("1.20000004768371582031f", str.str());
 
     EXPECT_TRUE(c->value->Is<constant::Scalar<f32>>());
     EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
@@ -50,7 +50,7 @@ TEST_F(IR_ConstantTest, f16) {
     EXPECT_EQ(1.1_h, c->value->As<constant::Scalar<f16>>()->ValueAs<f16>());
 
     c->ToValue(str);
-    EXPECT_EQ("1.099609375", str.str());
+    EXPECT_EQ("1.099609375h", str.str());
 
     EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
     EXPECT_TRUE(c->value->Is<constant::Scalar<f16>>());
@@ -68,7 +68,7 @@ TEST_F(IR_ConstantTest, i32) {
     EXPECT_EQ(1_i, c->value->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     c->ToValue(str);
-    EXPECT_EQ("1", str.str());
+    EXPECT_EQ("1i", str.str());
 
     EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
     EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());
@@ -86,7 +86,7 @@ TEST_F(IR_ConstantTest, u32) {
     EXPECT_EQ(2_u, c->value->As<constant::Scalar<u32>>()->ValueAs<u32>());
 
     c->ToValue(str);
-    EXPECT_EQ("2", str.str());
+    EXPECT_EQ("2u", str.str());
 
     EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
     EXPECT_FALSE(c->value->Is<constant::Scalar<f16>>());

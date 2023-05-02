@@ -25,9 +25,11 @@ UserCall::UserCall(uint32_t id, const type::Type* type, Symbol name, utils::Vect
 UserCall::~UserCall() = default;
 
 utils::StringStream& UserCall::ToInstruction(utils::StringStream& out) const {
-    ToValue(out) << " = call(" << name_.Name() << ", ";
+    ToValue(out) << " = call " << name_.Name();
+    if (Args().Length() > 0) {
+        out << ", ";
+    }
     EmitArgs(out);
-    out << ")";
     return out;
 }
 

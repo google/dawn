@@ -35,27 +35,33 @@ utils::StringStream& Constant::ToValue(utils::StringStream& out) const {
             c,
             [&](const constant::Scalar<AFloat>* scalar) { out << scalar->ValueAs<AFloat>().value; },
             [&](const constant::Scalar<AInt>* scalar) { out << scalar->ValueAs<AInt>().value; },
-            [&](const constant::Scalar<i32>* scalar) { out << scalar->ValueAs<i32>().value; },
-            [&](const constant::Scalar<u32>* scalar) { out << scalar->ValueAs<u32>().value; },
-            [&](const constant::Scalar<f32>* scalar) { out << scalar->ValueAs<f32>().value; },
-            [&](const constant::Scalar<f16>* scalar) { out << scalar->ValueAs<f16>().value; },
+            [&](const constant::Scalar<i32>* scalar) {
+                out << scalar->ValueAs<i32>().value << "i";
+            },
+            [&](const constant::Scalar<u32>* scalar) {
+                out << scalar->ValueAs<u32>().value << "u";
+            },
+            [&](const constant::Scalar<f32>* scalar) {
+                out << scalar->ValueAs<f32>().value << "f";
+            },
+            [&](const constant::Scalar<f16>* scalar) {
+                out << scalar->ValueAs<f16>().value << "h";
+            },
             [&](const constant::Scalar<bool>* scalar) {
                 out << (scalar->ValueAs<bool>() ? "true" : "false");
             },
             [&](const constant::Splat* splat) {
-                out << splat->Type()->FriendlyName() << "(";
+                out << splat->Type()->FriendlyName() << " ";
                 emit(splat->Index(0));
-                out << ")";
             },
             [&](const constant::Composite* composite) {
-                out << composite->Type()->FriendlyName() << "(";
+                out << composite->Type()->FriendlyName() << " ";
                 for (const auto* elem : composite->elements) {
                     if (elem != composite->elements[0]) {
                         out << ", ";
                     }
                     emit(elem);
                 }
-                out << ")";
             });
     };
     emit(value);
