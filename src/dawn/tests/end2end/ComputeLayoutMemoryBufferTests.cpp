@@ -528,6 +528,12 @@ TEST_P(ComputeLayoutMemoryBufferTests, StructMember) {
     // TODO(crbug.com/dawn/1606): find out why these tests fail on Windows for OpenGL.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsWindows());
 
+    const bool isUniform = GetParam().mAddressSpace == AddressSpace::Uniform;
+
+    // D3D11 doesn't support storage buffer with uniform address space
+    // TODO(dawn:1792): figure how to support it on D3D11
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && isUniform);
+
     // Sentinel value markers codes used to check that the start and end of
     // structures are correctly aligned. Each of these codes are distinct and
     // are not likely to be confused with data.
@@ -548,8 +554,6 @@ TEST_P(ComputeLayoutMemoryBufferTests, StructMember) {
     if (field.IsRequireF16Feature() && !device.HasFeature(wgpu::FeatureName::ShaderF16)) {
         return;
     }
-
-    const bool isUniform = GetParam().mAddressSpace == AddressSpace::Uniform;
 
     std::string shader = std::string(field.IsRequireF16Feature() ? "enable f16;" : "") +
                          R"(
@@ -699,6 +703,12 @@ TEST_P(ComputeLayoutMemoryBufferTests, NonStructMember) {
     // TODO(crbug.com/dawn/1606): find out why these tests fail on Windows for OpenGL.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsWindows());
 
+    const bool isUniform = GetParam().mAddressSpace == AddressSpace::Uniform;
+
+    // D3D11 doesn't support storage buffer with uniform address space
+    // TODO(dawn:1792): figure how to support it on D3D11
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && isUniform);
+
     auto params = GetParam();
 
     Field& field = params.mField;
@@ -711,8 +721,6 @@ TEST_P(ComputeLayoutMemoryBufferTests, NonStructMember) {
     if (field.IsRequireF16Feature() && !device.HasFeature(wgpu::FeatureName::ShaderF16)) {
         return;
     }
-
-    const bool isUniform = GetParam().mAddressSpace == AddressSpace::Uniform;
 
     std::string shader = std::string(field.IsRequireF16Feature() ? "enable f16;" : "") +
                          R"(
@@ -778,6 +786,7 @@ fn main() {
 auto GenerateParams() {
     auto params = MakeParamGenerator<ComputeLayoutMemoryBufferTestParams>(
         {
+            D3D11Backend(),
             D3D12Backend(),
             D3D12Backend({"use_dxc"}),
             MetalBackend(),

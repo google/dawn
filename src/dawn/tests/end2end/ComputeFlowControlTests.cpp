@@ -500,6 +500,7 @@ fn main() {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeFlowControlTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

@@ -107,6 +107,9 @@ class ComputeDispatchTests : public DawnTest {
     void IndirectTest(std::vector<uint32_t> indirectBufferData,
                       uint64_t indirectOffset,
                       bool useNumWorkgroups = true) {
+        // TODO(dawn:1791): fix indirect dispatch on D3D11
+        DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
         // Set up dst storage buffer to contain dispatch x, y, z
         wgpu::Buffer dst = utils::CreateBufferFromData<uint32_t>(
             device,
@@ -311,6 +314,7 @@ TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsWithOffsetNoop) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeDispatchTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

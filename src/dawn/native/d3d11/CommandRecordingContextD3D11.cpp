@@ -66,6 +66,8 @@ MaybeError CommandRecordingContext::Open(Device* device) {
         ID3D11Buffer* bufferPtr = mUniformBuffer->GetD3D11Buffer();
         mD3D11DeviceContext4->VSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot, 1,
                                                    &bufferPtr);
+        mD3D11DeviceContext4->CSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot, 1,
+                                                   &bufferPtr);
     }
 
     mIsOpen = true;
@@ -111,6 +113,8 @@ void CommandRecordingContext::Release() {
         mUniformBuffer = nullptr;
         ID3D11Buffer* nullBuffer = nullptr;
         mD3D11DeviceContext4->VSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot, 1,
+                                                   &nullBuffer);
+        mD3D11DeviceContext4->CSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot, 1,
                                                    &nullBuffer);
         mD3D11DeviceContext4 = nullptr;
         mD3D11Device = nullptr;
