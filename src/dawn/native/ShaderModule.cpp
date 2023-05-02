@@ -156,16 +156,16 @@ SampleTypeBit TintSampledKindToSampleTypeBit(tint::inspector::ResourceBinding::S
     UNREACHABLE();
 }
 
-ResultOrError<wgpu::TextureComponentType> TintComponentTypeToTextureComponentType(
+ResultOrError<TextureComponentType> TintComponentTypeToTextureComponentType(
     tint::inspector::ComponentType type) {
     switch (type) {
         case tint::inspector::ComponentType::kF32:
         case tint::inspector::ComponentType::kF16:
-            return wgpu::TextureComponentType::Float;
+            return TextureComponentType::Float;
         case tint::inspector::ComponentType::kI32:
-            return wgpu::TextureComponentType::Sint;
+            return TextureComponentType::Sint;
         case tint::inspector::ComponentType::kU32:
-            return wgpu::TextureComponentType::Uint;
+            return TextureComponentType::Uint;
         case tint::inspector::ComponentType::kUnknown:
             return DAWN_VALIDATION_ERROR("Attempted to convert 'Unknown' component type from Tint");
     }

@@ -205,20 +205,20 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
                 switch (sampleTypes) {
                     case SampleTypeBit::Float:
                     case SampleTypeBit::UnfilterableFloat:
-                        firstAspect->baseType = wgpu::TextureComponentType::Float;
+                        firstAspect->baseType = TextureComponentType::Float;
                         break;
                     case SampleTypeBit::Sint:
-                        firstAspect->baseType = wgpu::TextureComponentType::Sint;
+                        firstAspect->baseType = TextureComponentType::Sint;
                         break;
                     case SampleTypeBit::Uint:
-                        firstAspect->baseType = wgpu::TextureComponentType::Uint;
+                        firstAspect->baseType = TextureComponentType::Uint;
                         break;
                     default:
                         UNREACHABLE();
                 }
             } else {
                 ASSERT(sampleTypes & SampleTypeBit::Float);
-                firstAspect->baseType = wgpu::TextureComponentType::Float;
+                firstAspect->baseType = TextureComponentType::Float;
             }
             firstAspect->supportedSampleTypes = sampleTypes;
             firstAspect->format = format;
@@ -243,7 +243,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         firstAspect->block.byteSize = byteSize;
         firstAspect->block.width = 1;
         firstAspect->block.height = 1;
-        firstAspect->baseType = wgpu::TextureComponentType::Float;
+        firstAspect->baseType = TextureComponentType::Float;
         firstAspect->supportedSampleTypes = SampleTypeBit::Depth | SampleTypeBit::UnfilterableFloat;
         firstAspect->format = format;
         AddFormat(internalFormat);
@@ -272,7 +272,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         internalFormat.aspectInfo[0].block.byteSize = 1;
         internalFormat.aspectInfo[0].block.width = 1;
         internalFormat.aspectInfo[0].block.height = 1;
-        internalFormat.aspectInfo[0].baseType = wgpu::TextureComponentType::Uint;
+        internalFormat.aspectInfo[0].baseType = TextureComponentType::Uint;
         internalFormat.aspectInfo[0].supportedSampleTypes = SampleTypeBit::Uint;
         internalFormat.aspectInfo[0].format = format;
 
@@ -307,7 +307,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             firstAspect->block.byteSize = byteSize;
             firstAspect->block.width = width;
             firstAspect->block.height = height;
-            firstAspect->baseType = wgpu::TextureComponentType::Float;
+            firstAspect->baseType = TextureComponentType::Float;
             firstAspect->supportedSampleTypes = kAnyFloat;
             firstAspect->format = format;
             AddFormat(internalFormat);

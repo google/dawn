@@ -2671,16 +2671,6 @@
             {"value": 4, "name": "plane 1 only", "tags": ["dawn"]}
         ]
     },
-    "texture component type": {
-        "category": "enum",
-        "tags": ["dawn"],
-        "values": [
-            {"value": 0, "name": "float"},
-            {"value": 1, "name": "sint"},
-            {"value": 2, "name": "uint"},
-            {"value": 3, "name": "depth comparison"}
-        ]
-    },
     "texture data layout": {
         "category": "structure",
         "extensible": "in",

@@ -372,7 +372,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             constexpr std::array<GLbyte, MAX_TEXEL_SIZE> kClearColorDataBytes255 = {
                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
-            wgpu::TextureComponentType baseType = GetFormat().GetAspectInfo(Aspect::Color).baseType;
+            TextureComponentType baseType = GetFormat().GetAspectInfo(Aspect::Color).baseType;
 
             const GLFormat& glFormat = GetGLFormat();
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
@@ -409,21 +409,21 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
 
                     auto DoClear = [&]() {
                         switch (baseType) {
-                            case wgpu::TextureComponentType::Float: {
+                            case TextureComponentType::Float: {
                                 gl.ClearBufferfv(GL_COLOR, 0,
                                                  clearValue == TextureBase::ClearValue::Zero
                                                      ? kClearColorDataFloat0.data()
                                                      : kClearColorDataFloat1.data());
                                 break;
                             }
-                            case wgpu::TextureComponentType::Uint: {
+                            case TextureComponentType::Uint: {
                                 gl.ClearBufferuiv(GL_COLOR, 0,
                                                   clearValue == TextureBase::ClearValue::Zero
                                                       ? kClearColorDataUint0.data()
                                                       : kClearColorDataUint1.data());
                                 break;
                             }
-                            case wgpu::TextureComponentType::Sint: {
+                            case TextureComponentType::Sint: {
                                 gl.ClearBufferiv(GL_COLOR, 0,
                                                  reinterpret_cast<const GLint*>(
                                                      clearValue == TextureBase::ClearValue::Zero
@@ -431,9 +431,6 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                                                          : kClearColorDataUint1.data()));
                                 break;
                             }
-
-                            case wgpu::TextureComponentType::DepthComparison:
-                                UNREACHABLE();
                         }
                     };
 

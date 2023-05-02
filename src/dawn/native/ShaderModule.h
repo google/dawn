@@ -194,7 +194,7 @@ struct EntryPointMetadata {
 
     // An array to record the basic types (float, int and uint) of the fragment shader outputs.
     struct FragmentOutputVariableInfo {
-        wgpu::TextureComponentType baseType;
+        TextureComponentType baseType;
         uint8_t componentCount;
     };
     ityp::array<ColorAttachmentIndex, FragmentOutputVariableInfo, kMaxColorAttachments>

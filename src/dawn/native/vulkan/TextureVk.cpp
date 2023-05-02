@@ -1341,26 +1341,24 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                     ASSERT(aspects == Aspect::Color);
                     VkClearColorValue clearColorValue;
                     switch (GetFormat().GetAspectInfo(Aspect::Color).baseType) {
-                        case wgpu::TextureComponentType::Float:
+                        case TextureComponentType::Float:
                             clearColorValue.float32[0] = fClearColor;
                             clearColorValue.float32[1] = fClearColor;
                             clearColorValue.float32[2] = fClearColor;
                             clearColorValue.float32[3] = fClearColor;
                             break;
-                        case wgpu::TextureComponentType::Sint:
+                        case TextureComponentType::Sint:
                             clearColorValue.int32[0] = sClearColor;
                             clearColorValue.int32[1] = sClearColor;
                             clearColorValue.int32[2] = sClearColor;
                             clearColorValue.int32[3] = sClearColor;
                             break;
-                        case wgpu::TextureComponentType::Uint:
+                        case TextureComponentType::Uint:
                             clearColorValue.uint32[0] = uClearColor;
                             clearColorValue.uint32[1] = uClearColor;
                             clearColorValue.uint32[2] = uClearColor;
                             clearColorValue.uint32[3] = uClearColor;
                             break;
-                        case wgpu::TextureComponentType::DepthComparison:
-                            UNREACHABLE();
                     }
                     device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
                                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,

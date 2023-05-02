@@ -69,7 +69,7 @@ D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_PARAMETERS D3D12EndingAccessResolveParam
 
     // RESOLVE_MODE_AVERAGE is only valid for non-integer formats.
     ASSERT(resolveDestination->GetFormat().GetAspectInfo(Aspect::Color).baseType ==
-           wgpu::TextureComponentType::Float);
+           TextureComponentType::Float);
     resolveParameters.ResolveMode = D3D12_RESOLVE_MODE_AVERAGE;
 
     resolveParameters.SubresourceCount = 1;

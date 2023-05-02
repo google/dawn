@@ -129,6 +129,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+enum class TextureComponentType;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    TextureComponentType value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_WEBGPU_ABSL_FORMAT_H_

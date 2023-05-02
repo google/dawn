@@ -66,11 +66,15 @@ struct TexelBlockInfo {
     uint32_t height;
 };
 
+enum class TextureComponentType {
+    Float,
+    Sint,
+    Uint,
+};
+
 struct AspectInfo {
     TexelBlockInfo block;
-    // TODO(crbug.com/dawn/367): Replace TextureComponentType with TextureSampleType, or make it
-    // an internal Dawn enum.
-    wgpu::TextureComponentType baseType{};
+    TextureComponentType baseType{};
     SampleTypeBit supportedSampleTypes{};
     wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
 };

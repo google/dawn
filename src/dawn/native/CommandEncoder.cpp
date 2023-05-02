@@ -636,10 +636,10 @@ Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format&
     double minValue = 0;
     double maxValue = 0;
     switch (aspectInfo.baseType) {
-        case wgpu::TextureComponentType::Float: {
+        case TextureComponentType::Float: {
             return originalColor;
         }
-        case wgpu::TextureComponentType::Sint: {
+        case TextureComponentType::Sint: {
             const uint32_t bitsPerComponent =
                 (aspectInfo.block.byteSize * 8 / format.componentCount);
             maxValue =
@@ -647,16 +647,12 @@ Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format&
             minValue = -static_cast<double>(static_cast<uint64_t>(1) << (bitsPerComponent - 1));
             break;
         }
-        case wgpu::TextureComponentType::Uint: {
+        case TextureComponentType::Uint: {
             const uint32_t bitsPerComponent =
                 (aspectInfo.block.byteSize * 8 / format.componentCount);
             maxValue = static_cast<double>((static_cast<uint64_t>(1) << bitsPerComponent) - 1);
             break;
         }
-        case wgpu::TextureComponentType::DepthComparison:
-        default:
-            UNREACHABLE();
-            break;
     }
 
     return {std::clamp(originalColor.r, minValue, maxValue),

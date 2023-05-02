@@ -51,13 +51,11 @@ const char* GetTextureComponentTypeString(DeviceBase* device, wgpu::TextureForma
 
     const Format& formatInfo = device->GetValidInternalFormat(format);
     switch (formatInfo.GetAspectInfo(Aspect::Color).baseType) {
-        case wgpu::TextureComponentType::Sint:
+        case TextureComponentType::Sint:
             return "i32";
-        case wgpu::TextureComponentType::Uint:
+        case TextureComponentType::Uint:
             return "u32";
-        case wgpu::TextureComponentType::Float:
-        case wgpu::TextureComponentType::DepthComparison:
-        default:
+        case TextureComponentType::Float:
             UNREACHABLE();
             return "";
     }
@@ -178,12 +176,12 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
     uint32_t offset = 0;
     for (uint32_t i : IterateBitSet(key.colorTargetsToApplyClearColorValue)) {
         const Format& format = renderPassDescriptor->colorAttachments[i].view->GetFormat();
-        wgpu::TextureComponentType baseType = format.GetAspectInfo(Aspect::Color).baseType;
+        TextureComponentType baseType = format.GetAspectInfo(Aspect::Color).baseType;
 
         Color initialClearValue = GetClearColorValue(renderPassDescriptor->colorAttachments[i]);
         Color clearValue = ClampClearColorValueToLegalRange(initialClearValue, format);
         switch (baseType) {
-            case wgpu::TextureComponentType::Uint: {
+            case TextureComponentType::Uint: {
                 uint32_t* clearValuePtr = reinterpret_cast<uint32_t*>(clearValues.data() + offset);
                 clearValuePtr[0] = static_cast<uint32_t>(clearValue.r);
                 clearValuePtr[1] = static_cast<uint32_t>(clearValue.g);
@@ -191,7 +189,7 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
                 clearValuePtr[3] = static_cast<uint32_t>(clearValue.a);
                 break;
             }
-            case wgpu::TextureComponentType::Sint: {
+            case TextureComponentType::Sint: {
                 int32_t* clearValuePtr = reinterpret_cast<int32_t*>(clearValues.data() + offset);
                 clearValuePtr[0] = static_cast<int32_t>(clearValue.r);
                 clearValuePtr[1] = static_cast<int32_t>(clearValue.g);
@@ -199,7 +197,7 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
                 clearValuePtr[3] = static_cast<int32_t>(clearValue.a);
                 break;
             }
-            case wgpu::TextureComponentType::Float: {
+            case TextureComponentType::Float: {
                 float* clearValuePtr = reinterpret_cast<float*>(clearValues.data() + offset);
                 clearValuePtr[0] = static_cast<float>(clearValue.r);
                 clearValuePtr[1] = static_cast<float>(clearValue.g);
@@ -207,11 +205,6 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
                 clearValuePtr[3] = static_cast<float>(clearValue.a);
                 break;
             }
-
-            case wgpu::TextureComponentType::DepthComparison:
-            default:
-                UNREACHABLE();
-                break;
         }
         offset += sizeof(uint32_t) * 4;
     }
@@ -255,7 +248,7 @@ bool ShouldApplyClearBigIntegerColorValueWithDraw(
     // TODO(dawn:537): only check the color channels that are available in the current color format.
     Color clearValue = GetClearColorValue(colorAttachmentInfo);
     switch (format.GetAspectInfo(Aspect::Color).baseType) {
-        case wgpu::TextureComponentType::Uint: {
+        case TextureComponentType::Uint: {
             constexpr double kMaxUintRepresentableInFloat = 1 << std::numeric_limits<float>::digits;
             if (clearValue.r <= kMaxUintRepresentableInFloat &&
                 clearValue.g <= kMaxUintRepresentableInFloat &&
@@ -265,7 +258,7 @@ bool ShouldApplyClearBigIntegerColorValueWithDraw(
             }
             break;
         }
-        case wgpu::TextureComponentType::Sint: {
+        case TextureComponentType::Sint: {
             constexpr double kMaxSintRepresentableInFloat = 1 << std::numeric_limits<float>::digits;
             constexpr double kMinSintRepresentableInFloat = -kMaxSintRepresentableInFloat;
             if (clearValue.r <= kMaxSintRepresentableInFloat &&
@@ -280,9 +273,7 @@ bool ShouldApplyClearBigIntegerColorValueWithDraw(
             }
             break;
         }
-        case wgpu::TextureComponentType::Float:
-        case wgpu::TextureComponentType::DepthComparison:
-        default:
+        case TextureComponentType::Float:
             UNREACHABLE();
             return false;
     }

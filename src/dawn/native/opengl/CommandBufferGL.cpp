@@ -934,30 +934,27 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
             if (attachmentInfo->loadOp == wgpu::LoadOp::Clear) {
                 gl.ColorMask(true, true, true, true);
 
-                wgpu::TextureComponentType baseType =
+                TextureComponentType baseType =
                     attachmentInfo->view->GetFormat().GetAspectInfo(Aspect::Color).baseType;
                 switch (baseType) {
-                    case wgpu::TextureComponentType::Float: {
+                    case TextureComponentType::Float: {
                         const std::array<float, 4> appliedClearColor =
                             ConvertToFloatColor(attachmentInfo->clearColor);
                         gl.ClearBufferfv(GL_COLOR, i, appliedClearColor.data());
                         break;
                     }
-                    case wgpu::TextureComponentType::Uint: {
+                    case TextureComponentType::Uint: {
                         const std::array<uint32_t, 4> appliedClearColor =
                             ConvertToUnsignedIntegerColor(attachmentInfo->clearColor);
                         gl.ClearBufferuiv(GL_COLOR, i, appliedClearColor.data());
                         break;
                     }
-                    case wgpu::TextureComponentType::Sint: {
+                    case TextureComponentType::Sint: {
                         const std::array<int32_t, 4> appliedClearColor =
                             ConvertToSignedIntegerColor(attachmentInfo->clearColor);
                         gl.ClearBufferiv(GL_COLOR, i, appliedClearColor.data());
                         break;
                     }
-
-                    case wgpu::TextureComponentType::DepthComparison:
-                        UNREACHABLE();
                 }
             }
 
