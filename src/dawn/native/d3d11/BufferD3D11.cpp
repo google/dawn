@@ -445,23 +445,51 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
         return {};
     }
 
-    D3D11_BOX dstBox;
-    dstBox.left = offset;
-    dstBox.right = offset + size;
-    dstBox.top = 0;
-    dstBox.bottom = 1;
-    dstBox.front = 0;
-    dstBox.back = 1;
+    D3D11_BOX box;
+    box.left = offset;
+    box.right = offset + size;
+    box.top = 0;
+    box.bottom = 1;
+    box.front = 0;
+    box.back = 1;
 
-    // TODO(dawn:1739): check whether driver supports partial update of uniform buffer.
     if ((GetUsage() & wgpu::BufferUsage::Uniform)) {
-        d3d11DeviceContext1->UpdateSubresource1(GetD3D11Buffer(), /*DstSubresource=*/0, &dstBox,
-                                                data,
-                                                /*SrcRowPitch=*/0,
-                                                /*SrcDepthPitch*/ 0, D3D11_COPY_NO_OVERWRITE);
+        if (!IsAligned(box.left, 16) || !IsAligned(box.right, 16)) {
+            // Create a temp staging buffer to workaround the alignment issue.
+            BufferDescriptor descriptor;
+            descriptor.size = box.right - box.left;
+            DAWN_ASSERT(IsAligned(descriptor.size, 4));
+            descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+            descriptor.mappedAtCreation = false;
+            descriptor.label = "temp staging buffer";
+            Ref<BufferBase> stagingBufferBase;
+            DAWN_TRY_ASSIGN(stagingBufferBase, GetDevice()->CreateBuffer(&descriptor));
+            Ref<Buffer> stagingBuffer;
+            stagingBuffer = ToBackend(std::move(stagingBufferBase));
+            {
+                ScopedMap scopedMap;
+                DAWN_TRY_ASSIGN(scopedMap, ScopedMap::Create(stagingBuffer.Get()));
+                uint8_t* mappedData = scopedMap.GetMappedData();
+                DAWN_ASSERT(mappedData);
+                memcpy(mappedData, data, size);
+            }
+            box.left = 0;
+            box.right = descriptor.size;
+            commandContext->GetD3D11DeviceContext()->CopySubresourceRegion(
+                GetD3D11Buffer(), /*DstSubresource=*/0, /*DstX=*/offset,
+                /*DstY=*/0,
+                /*DstZ=*/0, stagingBuffer->GetD3D11Buffer(), /*SrcSubresource=*/0, &box);
+            stagingBuffer = nullptr;
+
+        } else {
+            // TODO(dawn:1739): check whether driver supports partial update of uniform buffer.
+            d3d11DeviceContext1->UpdateSubresource1(GetD3D11Buffer(), /*DstSubresource=*/0, &box,
+                                                    data,
+                                                    /*SrcRowPitch=*/0,
+                                                    /*SrcDepthPitch*/ 0, D3D11_COPY_NO_OVERWRITE);
+        }
     } else {
-        d3d11DeviceContext1->UpdateSubresource(GetD3D11Buffer(), /*DstSubresource=*/0, &dstBox,
-                                               data,
+        d3d11DeviceContext1->UpdateSubresource(GetD3D11Buffer(), /*DstSubresource=*/0, &box, data,
                                                /*SrcRowPitch=*/0,
                                                /*SrcDepthPitch*/ 0);
     }
