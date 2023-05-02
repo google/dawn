@@ -22,11 +22,11 @@
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/VulkanBackend.h"
-#include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BufferVk.h"
 #include "dawn/native/vulkan/CommandRecordingContext.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/ResourceHeapVk.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -621,10 +621,10 @@ bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
                             const VkImageCreateInfo& imageCreateInfo) {
     ASSERT(device);
 
-    VkPhysicalDevice physicalDevice = ToBackend(device->GetAdapter())->GetPhysicalDevice();
+    VkPhysicalDevice vkPhysicalDevice = ToBackend(device->GetAdapter())->GetVkPhysicalDevice();
     VkImageFormatProperties properties;
     if (device->fn.GetPhysicalDeviceImageFormatProperties(
-            physicalDevice, imageCreateInfo.format, imageCreateInfo.imageType,
+            vkPhysicalDevice, imageCreateInfo.format, imageCreateInfo.imageType,
             imageCreateInfo.tiling, imageCreateInfo.usage, imageCreateInfo.flags,
             &properties) != VK_SUCCESS) {
         UNREACHABLE();

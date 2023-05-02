@@ -24,7 +24,7 @@
 
 namespace dawn::native::vulkan {
 
-class Adapter;
+class PhysicalDevice;
 class Backend;
 struct VulkanFunctions;
 
@@ -86,8 +86,9 @@ ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFuncti
 ResultOrError<std::vector<VkPhysicalDevice>> GatherPhysicalDevices(
     VkInstance instance,
     const VulkanFunctions& vkFunctions);
-ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const Adapter& adapter);
-ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const Adapter& adapter, VkSurfaceKHR surface);
+ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDevice);
+ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const PhysicalDevice& physicalDevice,
+                                                   VkSurfaceKHR surface);
 }  // namespace dawn::native::vulkan
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_VULKANINFO_H_

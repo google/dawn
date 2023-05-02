@@ -14,9 +14,9 @@
 
 #include "dawn/native/vulkan/external_memory/MemoryServiceImplementationOpaqueFD.h"
 #include "dawn/common/Assert.h"
-#include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
@@ -67,7 +67,8 @@ class ServiceImplementationOpaqueFD : public ServiceImplementation {
         formatProperties.pNext = &externalFormatProperties;
 
         VkResult result = VkResult::WrapUnsafe(mDevice->fn.GetPhysicalDeviceImageFormatProperties2(
-            ToBackend(mDevice->GetAdapter())->GetPhysicalDevice(), &formatInfo, &formatProperties));
+            ToBackend(mDevice->GetPhysicalDevice())->GetVkPhysicalDevice(), &formatInfo,
+            &formatProperties));
 
         // If handle not supported, result == VK_ERROR_FORMAT_NOT_SUPPORTED
         if (result != VK_SUCCESS) {

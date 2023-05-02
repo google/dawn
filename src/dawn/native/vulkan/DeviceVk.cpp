@@ -23,7 +23,6 @@
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/VulkanBackend.h"
-#include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/BindGroupVk.h"
@@ -31,6 +30,7 @@
 #include "dawn/native/vulkan/CommandBufferVk.h"
 #include "dawn/native/vulkan/ComputePipelineVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/PipelineCacheVk.h"
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 #include "dawn/native/vulkan/QuerySetVk.h"
@@ -88,7 +88,7 @@ void DestroyCommandPoolAndBuffer(const VulkanFunctions& fn,
 }  // namespace
 
 // static
-ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
+ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const DeviceDescriptor* descriptor,
                                           const TogglesState& deviceToggles) {
     Ref<Device> device = AcquireRef(new Device(adapter, descriptor, deviceToggles));
@@ -96,28 +96,28 @@ ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
     return device;
 }
 
-Device::Device(Adapter* adapter,
+Device::Device(AdapterBase* adapter,
                const DeviceDescriptor* descriptor,
                const TogglesState& deviceToggles)
     : DeviceBase(adapter, descriptor, deviceToggles), mDebugPrefix(GetNextDeviceDebugPrefix()) {}
 
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     // Copy the adapter's device info to the device so that we can change the "knobs"
-    mDeviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
+    mDeviceInfo = ToBackend(GetPhysicalDevice())->GetDeviceInfo();
 
     // Initialize the "instance" procs of our local function table.
     VulkanFunctions* functions = GetMutableFunctions();
-    *functions = ToBackend(GetAdapter())->GetVulkanInstance()->GetFunctions();
+    *functions = ToBackend(GetPhysicalDevice())->GetVulkanInstance()->GetFunctions();
 
     // Two things are crucial if device initialization fails: the function pointers to destroy
     // objects, and the fence deleter that calls these functions. Do not do anything before
     // these two are set up, so that a failed initialization doesn't cause a crash in
     // DestroyImpl()
     {
-        VkPhysicalDevice physicalDevice = ToBackend(GetAdapter())->GetPhysicalDevice();
+        VkPhysicalDevice vkPhysicalDevice = ToBackend(GetPhysicalDevice())->GetVkPhysicalDevice();
 
         VulkanDeviceKnobs usedDeviceKnobs = {};
-        DAWN_TRY_ASSIGN(usedDeviceKnobs, CreateDevice(physicalDevice));
+        DAWN_TRY_ASSIGN(usedDeviceKnobs, CreateDevice(vkPhysicalDevice));
         *static_cast<VulkanDeviceKnobs*>(&mDeviceInfo) = usedDeviceKnobs;
 
         DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
@@ -139,7 +139,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 
     SetLabelImpl();
 
-    ToBackend(GetAdapter())->GetVulkanInstance()->StartListeningForDeviceMessages(this);
+    ToBackend(GetPhysicalDevice())->GetVulkanInstance()->StartListeningForDeviceMessages(this);
 
     return DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue));
 }
@@ -246,14 +246,14 @@ MaybeError Device::TickImpl() {
 }
 
 VkInstance Device::GetVkInstance() const {
-    return ToBackend(GetAdapter())->GetVulkanInstance()->GetVkInstance();
+    return ToBackend(GetPhysicalDevice())->GetVulkanInstance()->GetVkInstance();
 }
 const VulkanDeviceInfo& Device::GetDeviceInfo() const {
     return mDeviceInfo;
 }
 
 const VulkanGlobalInfo& Device::GetGlobalInfo() const {
-    return ToBackend(GetAdapter())->GetVulkanInstance()->GetGlobalInfo();
+    return ToBackend(GetPhysicalDevice())->GetVulkanInstance()->GetGlobalInfo();
 }
 
 VkDevice Device::GetVkDevice() const {
@@ -396,7 +396,7 @@ MaybeError Device::SubmitPendingCommands() {
     return {};
 }
 
-ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalDevice) {
+ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysicalDevice) {
     VulkanDeviceKnobs usedKnobs = {};
 
     // Default to asking for all avilable known extensions.
@@ -474,29 +474,32 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
     }
 
     if (HasFeature(Feature::TextureCompressionBC)) {
-        ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionBC == VK_TRUE);
+        ASSERT(ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionBC ==
+               VK_TRUE);
         usedKnobs.features.textureCompressionBC = VK_TRUE;
     }
 
     if (HasFeature(Feature::TextureCompressionETC2)) {
-        ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionETC2 == VK_TRUE);
+        ASSERT(ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionETC2 ==
+               VK_TRUE);
         usedKnobs.features.textureCompressionETC2 = VK_TRUE;
     }
 
     if (HasFeature(Feature::TextureCompressionASTC)) {
-        ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionASTC_LDR ==
-               VK_TRUE);
+        ASSERT(
+            ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionASTC_LDR ==
+            VK_TRUE);
         usedKnobs.features.textureCompressionASTC_LDR = VK_TRUE;
     }
 
     if (HasFeature(Feature::PipelineStatisticsQuery)) {
-        ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.pipelineStatisticsQuery ==
+        ASSERT(ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.pipelineStatisticsQuery ==
                VK_TRUE);
         usedKnobs.features.pipelineStatisticsQuery = VK_TRUE;
     }
 
     if (HasFeature(Feature::DepthClipControl)) {
-        const VulkanDeviceInfo& deviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
+        const VulkanDeviceInfo& deviceInfo = ToBackend(GetPhysicalDevice())->GetDeviceInfo();
         ASSERT(deviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
                deviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE);
 
@@ -509,7 +512,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
     // TODO(dawn:1510, tint:1473): After implementing a transform to handle the pipeline input /
     // output if necessary, relax the requirement of storageInputOutput16.
     if (HasFeature(Feature::ShaderF16)) {
-        const VulkanDeviceInfo& deviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
+        const VulkanDeviceInfo& deviceInfo = ToBackend(GetPhysicalDevice())->GetDeviceInfo();
         ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
                deviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
                deviceInfo.HasExt(DeviceExt::_16BitStorage) &&
@@ -583,7 +586,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
         createInfo.pEnabledFeatures = &usedKnobs.features;
     }
 
-    DAWN_TRY(CheckVkSuccess(fn.CreateDevice(physicalDevice, &createInfo, nullptr, &mVkDevice),
+    DAWN_TRY(CheckVkSuccess(fn.CreateDevice(vkPhysicalDevice, &createInfo, nullptr, &mVkDevice),
                             "vkCreateDevice"));
 
     return usedKnobs;
@@ -960,7 +963,8 @@ void Device::OnDebugMessage(std::string message) {
 }
 
 MaybeError Device::CheckDebugLayerAndGenerateErrors() {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled() || mDebugMessages.empty()) {
+    if (!GetPhysicalDevice()->GetInstance()->IsBackendValidationEnabled() ||
+        mDebugMessages.empty()) {
         return {};
     }
 
@@ -972,7 +976,7 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
 }
 
 void Device::AppendDebugLayerMessages(ErrorData* error) {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled()) {
+    if (!GetPhysicalDevice()->GetInstance()->IsBackendValidationEnabled()) {
         return;
     }
 
@@ -983,7 +987,8 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
 }
 
 void Device::CheckDebugMessagesAfterDestruction() const {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled() || mDebugMessages.empty()) {
+    if (!GetPhysicalDevice()->GetInstance()->IsBackendValidationEnabled() ||
+        mDebugMessages.empty()) {
         return;
     }
 
@@ -1068,7 +1073,7 @@ void Device::DestroyImpl() {
     // Enough of the Device's initialization happened that we can now do regular robust
     // deinitialization.
 
-    ToBackend(GetAdapter())->GetVulkanInstance()->StopListeningForDeviceMessages(this);
+    ToBackend(GetPhysicalDevice())->GetVulkanInstance()->StopListeningForDeviceMessages(this);
 
     // Immediately tag the recording context as unused so we don't try to submit it in Tick.
     mRecordingContext.needsSubmit = false;

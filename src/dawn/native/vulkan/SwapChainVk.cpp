@@ -21,10 +21,10 @@
 #include "dawn/common/Compiler.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/Surface.h"
-#include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
 
@@ -36,10 +36,11 @@ namespace dawn::native::vulkan {
 
 namespace {
 
-ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const Adapter* adapter, const Surface* surface) {
-    const VulkanGlobalInfo& info = adapter->GetVulkanInstance()->GetGlobalInfo();
-    const VulkanFunctions& fn = adapter->GetVulkanInstance()->GetFunctions();
-    VkInstance instance = adapter->GetVulkanInstance()->GetVkInstance();
+ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const PhysicalDevice* physicalDevice,
+                                                const Surface* surface) {
+    const VulkanGlobalInfo& info = physicalDevice->GetVulkanInstance()->GetGlobalInfo();
+    const VulkanFunctions& fn = physicalDevice->GetVulkanInstance()->GetFunctions();
+    VkInstance instance = physicalDevice->GetVulkanInstance()->GetVkInstance();
 
     // May not be used in the platform-specific switches below.
     DAWN_UNUSED(info);
@@ -148,7 +149,8 @@ ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const Adapter* adapter, const Su
             // Fall back to using XCB surfaces if the Xlib extension isn't available.
             // See https://xcb.freedesktop.org/MixingCalls/ for more information about
             // interoperability between Xlib and XCB
-            const XlibXcbFunctions* xlibXcb = adapter->GetInstance()->GetOrCreateXlibXcbFunctions();
+            const XlibXcbFunctions* xlibXcb =
+                physicalDevice->GetInstance()->GetOrCreateXlibXcbFunctions();
             ASSERT(xlibXcb != nullptr);
 
             if (info.HasExt(InstanceExt::XcbSurface) && xlibXcb->IsLoaded()) {
@@ -208,17 +210,17 @@ uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
 // static
 ResultOrError<wgpu::TextureUsage> SwapChain::GetSupportedSurfaceUsage(const Device* device,
                                                                       const Surface* surface) {
-    Adapter* adapter = ToBackend(device->GetAdapter());
-    const VulkanFunctions& fn = adapter->GetVulkanInstance()->GetFunctions();
-    VkInstance instanceVk = adapter->GetVulkanInstance()->GetVkInstance();
-    VkPhysicalDevice physicalDeviceVk = adapter->GetPhysicalDevice();
+    PhysicalDevice* physicalDevice = ToBackend(device->GetPhysicalDevice());
+    const VulkanFunctions& fn = physicalDevice->GetVulkanInstance()->GetFunctions();
+    VkInstance instanceVk = physicalDevice->GetVulkanInstance()->GetVkInstance();
+    VkPhysicalDevice vkPhysicalDevice = physicalDevice->GetVkPhysicalDevice();
 
     VkSurfaceKHR surfaceVk;
     VkSurfaceCapabilitiesKHR surfaceCapsVk;
-    DAWN_TRY_ASSIGN(surfaceVk, CreateVulkanSurface(adapter, surface));
+    DAWN_TRY_ASSIGN(surfaceVk, CreateVulkanSurface(physicalDevice, surface));
 
     DAWN_TRY(CheckVkSuccess(
-        fn.GetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDeviceVk, surfaceVk, &surfaceCapsVk),
+        fn.GetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, surfaceVk, &surfaceCapsVk),
         "GetPhysicalDeviceSurfaceCapabilitiesKHR"));
 
     wgpu::TextureUsage supportedUsages = wgpu::TextureUsage::RenderAttachment;
@@ -253,7 +255,7 @@ void SwapChain::DestroyImpl() {
 // previousSwapChain can be set to `this`.
 MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     Device* device = ToBackend(GetDevice());
-    Adapter* adapter = ToBackend(GetDevice()->GetAdapter());
+    PhysicalDevice* physicalDevice = ToBackend(GetDevice()->GetPhysicalDevice());
 
     VkSwapchainKHR previousVkSwapChain = VK_NULL_HANDLE;
 
@@ -292,11 +294,11 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     }
 
     if (mVkSurface == VK_NULL_HANDLE) {
-        DAWN_TRY_ASSIGN(mVkSurface, CreateVulkanSurface(adapter, GetSurface()));
+        DAWN_TRY_ASSIGN(mVkSurface, CreateVulkanSurface(physicalDevice, GetSurface()));
     }
 
     VulkanSurfaceInfo surfaceInfo;
-    DAWN_TRY_ASSIGN(surfaceInfo, GatherSurfaceInfo(*adapter, mVkSurface));
+    DAWN_TRY_ASSIGN(surfaceInfo, GatherSurfaceInfo(*physicalDevice, mVkSurface));
 
     DAWN_TRY_ASSIGN(mConfig, ChooseConfig(surfaceInfo));
 

@@ -15,9 +15,9 @@
 #include <zircon/syscalls.h>
 #include <utility>
 
-#include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
 #include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationZirconHandle.h"
@@ -29,14 +29,14 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
     explicit ServiceImplementationZirconHandle(Device* device)
         : ServiceImplementation(device),
           mSupported(CheckSupport(device->GetDeviceInfo(),
-                                  ToBackend(device->GetAdapter())->GetPhysicalDevice(),
+                                  ToBackend(device->GetAdapter())->GetVkPhysicalDevice(),
                                   device->fn)) {}
 
     ~ServiceImplementationZirconHandle() override = default;
 
     static bool CheckSupport(
         const VulkanDeviceInfo& deviceInfo,
-        VkPhysicalDevice physicalDevice,
+        VkPhysicalDevice vkPhysicalDevice,
         const VulkanFunctions& fn) static void CloseHandle(ExternalSemaphoreHandle handle) {
         if (!deviceInfo.HasExt(DeviceExt::ExternalSemaphoreZirconHandle)) {
             return false;
@@ -51,7 +51,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
         semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
         semaphoreProperties.pNext = nullptr;
 
-        fn.GetPhysicalDeviceExternalSemaphoreProperties(physicalDevice, &semaphoreInfo,
+        fn.GetPhysicalDeviceExternalSemaphoreProperties(vkPhysicalDevice, &semaphoreInfo,
                                                         &semaphoreProperties);
 
         VkFlags requiredFlags = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
@@ -160,9 +160,9 @@ std::unique_ptr<ServiceImplementation> CreateZirconHandleService(Device* device)
     return td::make_unique<ServiceImplementationZirconHandle>(device);
 }
 bool CheckZirconHandleSupport(const VulkanDeviceInfo& deviceInfo,
-                              VkPhysicalDevice physicalDevice,
+                              VkPhysicalDevice vkPhysicalDevice,
                               const VulkanFunctions& fn) {
-    return ServiceImplementationZirconHandle::CheckSupport(deviceInfo, physicalDevice, fn);
+    return ServiceImplementationZirconHandle::CheckSupport(deviceInfo, vkPhysicalDevice, fn);
 }
 
 }  // namespace dawn::native::vulkan::external_semaphore

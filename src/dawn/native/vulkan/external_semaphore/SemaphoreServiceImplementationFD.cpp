@@ -15,9 +15,9 @@
 #include <unistd.h>
 #include <utility>
 
-#include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementation.h"
 #include "dawn/native/vulkan/external_semaphore/SemaphoreServiceImplementationFD.h"
@@ -36,7 +36,7 @@ class ServiceImplementationFD : public ServiceImplementation {
     explicit ServiceImplementationFD(Device* device)
         : ServiceImplementation(device),
           mSupported(CheckSupport(device->GetDeviceInfo(),
-                                  ToBackend(device->GetAdapter())->GetPhysicalDevice(),
+                                  ToBackend(device->GetPhysicalDevice())->GetVkPhysicalDevice(),
                                   device->fn)) {}
 
     ~ServiceImplementationFD() override = default;

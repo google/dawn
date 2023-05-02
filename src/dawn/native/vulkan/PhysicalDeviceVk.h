@@ -25,19 +25,19 @@ namespace dawn::native::vulkan {
 
 class VulkanInstance;
 
-class Adapter : public PhysicalDeviceBase {
+class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    Adapter(InstanceBase* instance,
-            VulkanInstance* vulkanInstance,
-            VkPhysicalDevice physicalDevice,
-            const TogglesState& adapterToggles);
-    ~Adapter() override;
+    PhysicalDevice(InstanceBase* instance,
+                   VulkanInstance* vulkanInstance,
+                   VkPhysicalDevice physicalDevice,
+                   const TogglesState& adapterToggles);
+    ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
 
     const VulkanDeviceInfo& GetDeviceInfo() const;
-    VkPhysicalDevice GetPhysicalDevice() const;
+    VkPhysicalDevice GetVkPhysicalDevice() const;
     VulkanInstance* GetVulkanInstance() const;
 
     bool IsDepthStencilFormatSupported(VkFormat format) const;
@@ -57,7 +57,7 @@ class Adapter : public PhysicalDeviceBase {
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor,
                                                     const TogglesState& deviceToggles) override;
 
-    VkPhysicalDevice mPhysicalDevice;
+    VkPhysicalDevice mVkPhysicalDevice;
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};
 };

@@ -15,9 +15,9 @@
 #include <vector>
 
 #include "dawn/common/Assert.h"
-#include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
@@ -29,7 +29,7 @@ namespace dawn::native::vulkan::external_memory {
 namespace {
 
 bool GetFormatModifierProps(const VulkanFunctions& fn,
-                            VkPhysicalDevice physicalDevice,
+                            VkPhysicalDevice vkPhysicalDevice,
                             VkFormat format,
                             uint64_t modifier,
                             VkDrmFormatModifierPropertiesEXT* formatModifierProps) {
@@ -44,13 +44,13 @@ bool GetFormatModifierProps(const VulkanFunctions& fn,
     formatPropsChain.Add(&formatModifierPropsList,
                          VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT);
 
-    fn.GetPhysicalDeviceFormatProperties2(physicalDevice, format, &formatProps);
+    fn.GetPhysicalDeviceFormatProperties2(vkPhysicalDevice, format, &formatProps);
 
     uint32_t modifierCount = formatModifierPropsList.drmFormatModifierCount;
     formatModifierPropsVector.resize(modifierCount);
     formatModifierPropsList.pDrmFormatModifierProperties = formatModifierPropsVector.data();
 
-    fn.GetPhysicalDeviceFormatProperties2(physicalDevice, format, &formatProps);
+    fn.GetPhysicalDeviceFormatProperties2(vkPhysicalDevice, format, &formatProps);
     for (const auto& props : formatModifierPropsVector) {
         if (props.drmFormatModifier == modifier) {
             *formatModifierProps = props;
@@ -63,11 +63,11 @@ bool GetFormatModifierProps(const VulkanFunctions& fn,
 // Some modifiers use multiple planes (for example, see the comment for
 // I915_FORMAT_MOD_Y_TILED_CCS in drm/drm_fourcc.h).
 ResultOrError<uint32_t> GetModifierPlaneCount(const VulkanFunctions& fn,
-                                              VkPhysicalDevice physicalDevice,
+                                              VkPhysicalDevice vkPhysicalDevice,
                                               VkFormat format,
                                               uint64_t modifier) {
     VkDrmFormatModifierPropertiesEXT props;
-    if (GetFormatModifierProps(fn, physicalDevice, format, modifier, &props)) {
+    if (GetFormatModifierProps(fn, vkPhysicalDevice, format, modifier, &props)) {
         return static_cast<uint32_t>(props.drmFormatModifierPlaneCount);
     }
     return DAWN_VALIDATION_ERROR("DRM format modifier not supported.");
@@ -103,12 +103,12 @@ bool IsMultiPlanarVkFormat(VkFormat format) {
 }
 
 bool SupportsDisjoint(const VulkanFunctions& fn,
-                      VkPhysicalDevice physicalDevice,
+                      VkPhysicalDevice vkPhysicalDevice,
                       VkFormat format,
                       uint64_t modifier) {
     if (IsMultiPlanarVkFormat(format)) {
         VkDrmFormatModifierPropertiesEXT props;
-        return (GetFormatModifierProps(fn, physicalDevice, format, modifier, &props) &&
+        return (GetFormatModifierProps(fn, vkPhysicalDevice, format, modifier, &props) &&
                 (props.drmFormatModifierTilingFeatures & VK_FORMAT_FEATURE_DISJOINT_BIT));
     }
     return false;
@@ -153,9 +153,9 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
             static_cast<const ExternalImageDescriptorDmaBuf*>(descriptor);
 
         // Verify plane count for the modifier.
-        VkPhysicalDevice physicalDevice = ToBackend(mDevice->GetAdapter())->GetPhysicalDevice();
+        VkPhysicalDevice vkPhysicalDevice = ToBackend(mDevice->GetAdapter())->GetVkPhysicalDevice();
         uint32_t planeCount = 0;
-        if (mDevice->ConsumedError(GetModifierPlaneCount(mDevice->fn, physicalDevice, format,
+        if (mDevice->ConsumedError(GetModifierPlaneCount(mDevice->fn, vkPhysicalDevice, format,
                                                          dmaBufDescriptor->drmModifier),
                                    &planeCount)) {
             return false;
@@ -168,7 +168,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
             return false;
         }
         *supportsDisjoint =
-            SupportsDisjoint(mDevice->fn, physicalDevice, format, dmaBufDescriptor->drmModifier);
+            SupportsDisjoint(mDevice->fn, vkPhysicalDevice, format, dmaBufDescriptor->drmModifier);
 
         // Verify that the format modifier of the external memory and the requested Vulkan format
         // are actually supported together in a dma-buf import.
@@ -216,7 +216,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
                                   VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES);
 
         VkResult result = VkResult::WrapUnsafe(mDevice->fn.GetPhysicalDeviceImageFormatProperties2(
-            physicalDevice, &imageFormatInfo, &imageFormatProps));
+            vkPhysicalDevice, &imageFormatInfo, &imageFormatProps));
         if (result != VK_SUCCESS) {
             return false;
         }
@@ -303,12 +303,12 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
 
         const ExternalImageDescriptorDmaBuf* dmaBufDescriptor =
             static_cast<const ExternalImageDescriptorDmaBuf*>(descriptor);
-        VkPhysicalDevice physicalDevice = ToBackend(mDevice->GetAdapter())->GetPhysicalDevice();
+        VkPhysicalDevice vkPhysicalDevice = ToBackend(mDevice->GetAdapter())->GetVkPhysicalDevice();
         VkDevice device = mDevice->GetVkDevice();
 
         uint32_t planeCount;
         DAWN_TRY_ASSIGN(planeCount,
-                        GetModifierPlaneCount(mDevice->fn, physicalDevice, baseCreateInfo.format,
+                        GetModifierPlaneCount(mDevice->fn, vkPhysicalDevice, baseCreateInfo.format,
                                               dmaBufDescriptor->drmModifier));
 
         VkImageCreateInfo createInfo = baseCreateInfo;

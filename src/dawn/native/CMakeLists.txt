@@ -551,8 +551,6 @@ endif()
 if (DAWN_ENABLE_VULKAN)
     target_sources(dawn_native PRIVATE
         "${DAWN_INCLUDE_DIR}/dawn/native/VulkanBackend.h"
-        "vulkan/AdapterVk.cpp"
-        "vulkan/AdapterVk.h"
         "vulkan/BackendVk.cpp"
         "vulkan/BackendVk.h"
         "vulkan/BindGroupLayoutVk.cpp"
@@ -575,6 +573,8 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/FencedDeleter.cpp"
         "vulkan/FencedDeleter.h"
         "vulkan/Forward.h"
+        "vulkan/PhysicalDeviceVk.cpp"
+        "vulkan/PhysicalDeviceVk.h"
         "vulkan/PipelineCacheVk.cpp"
         "vulkan/PipelineCacheVk.h"
         "vulkan/PipelineLayoutVk.cpp"

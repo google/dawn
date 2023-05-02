@@ -19,13 +19,13 @@
 
 namespace dawn::native::vulkan {
 
-class Adapter;
 class BindGroup;
 class BindGroupLayout;
 class Buffer;
 class CommandBuffer;
 class ComputePipeline;
 class Device;
+class PhysicalDevice;
 class PipelineCache;
 class PipelineLayout;
 class QuerySet;
@@ -45,7 +45,7 @@ struct VulkanBackendTraits {
     using CommandBufferType = CommandBuffer;
     using ComputePipelineType = ComputePipeline;
     using DeviceType = Device;
-    using PhysicalDeviceType = Adapter;
+    using PhysicalDeviceType = PhysicalDevice;
     using PipelineCacheType = PipelineCache;
     using PipelineLayoutType = PipelineLayout;
     using QuerySetType = QuerySet;

@@ -679,8 +679,6 @@ source_set("sources") {
     deps += [ "${dawn_vulkan_tools_dir}:vulkan_tools_headers" ]
     public_deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
     sources += [
-      "vulkan/AdapterVk.cpp",
-      "vulkan/AdapterVk.h",
       "vulkan/BackendVk.cpp",
       "vulkan/BackendVk.h",
       "vulkan/BindGroupLayoutVk.cpp",
@@ -703,6 +701,8 @@ source_set("sources") {
       "vulkan/FencedDeleter.cpp",
       "vulkan/FencedDeleter.h",
       "vulkan/Forward.h",
+      "vulkan/PhysicalDeviceVk.cpp",
+      "vulkan/PhysicalDeviceVk.h",
       "vulkan/PipelineCacheVk.cpp",
       "vulkan/PipelineCacheVk.h",
       "vulkan/PipelineLayoutVk.cpp",

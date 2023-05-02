@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/vulkan/AdapterVk.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 
 #include <algorithm>
 #include <string>
@@ -56,39 +56,39 @@ gpu_info::DriverVersion DecodeVulkanDriverVersion(uint32_t vendorID, uint32_t ve
 
 }  // anonymous namespace
 
-Adapter::Adapter(InstanceBase* instance,
-                 VulkanInstance* vulkanInstance,
-                 VkPhysicalDevice physicalDevice,
-                 const TogglesState& adapterToggles)
+PhysicalDevice::PhysicalDevice(InstanceBase* instance,
+                               VulkanInstance* vulkanInstance,
+                               VkPhysicalDevice physicalDevice,
+                               const TogglesState& adapterToggles)
     : PhysicalDeviceBase(instance, wgpu::BackendType::Vulkan, adapterToggles),
-      mPhysicalDevice(physicalDevice),
+      mVkPhysicalDevice(physicalDevice),
       mVulkanInstance(vulkanInstance) {}
 
-Adapter::~Adapter() = default;
+PhysicalDevice::~PhysicalDevice() = default;
 
-const VulkanDeviceInfo& Adapter::GetDeviceInfo() const {
+const VulkanDeviceInfo& PhysicalDevice::GetDeviceInfo() const {
     return mDeviceInfo;
 }
 
-VkPhysicalDevice Adapter::GetPhysicalDevice() const {
-    return mPhysicalDevice;
+VkPhysicalDevice PhysicalDevice::GetVkPhysicalDevice() const {
+    return mVkPhysicalDevice;
 }
 
-VulkanInstance* Adapter::GetVulkanInstance() const {
+VulkanInstance* PhysicalDevice::GetVulkanInstance() const {
     return mVulkanInstance.Get();
 }
 
-bool Adapter::IsDepthStencilFormatSupported(VkFormat format) const {
+bool PhysicalDevice::IsDepthStencilFormatSupported(VkFormat format) const {
     ASSERT(format == VK_FORMAT_D16_UNORM_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT ||
            format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_S8_UINT);
 
     VkFormatProperties properties;
-    mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(mPhysicalDevice, format,
+    mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(mVkPhysicalDevice, format,
                                                                       &properties);
     return properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
 }
 
-MaybeError Adapter::InitializeImpl() {
+MaybeError PhysicalDevice::InitializeImpl() {
     DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 
     mDriverVersion = DecodeVulkanDriverVersion(mDeviceInfo.properties.vendorID,
@@ -183,7 +183,7 @@ MaybeError Adapter::InitializeImpl() {
     return {};
 }
 
-void Adapter::InitializeSupportedFeaturesImpl() {
+void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Initialize supported extensions
     if (mDeviceInfo.features.textureCompressionBC == VK_TRUE) {
         EnableFeature(Feature::TextureCompressionBC);
@@ -243,7 +243,7 @@ void Adapter::InitializeSupportedFeaturesImpl() {
 
     VkFormatProperties rg11b10Properties;
     mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
-        mPhysicalDevice, VK_FORMAT_B10G11R11_UFLOAT_PACK32, &rg11b10Properties);
+        mVkPhysicalDevice, VK_FORMAT_B10G11R11_UFLOAT_PACK32, &rg11b10Properties);
 
     if (IsSubset(static_cast<VkFormatFeatureFlags>(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
                                                    VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT),
@@ -253,7 +253,7 @@ void Adapter::InitializeSupportedFeaturesImpl() {
 
     VkFormatProperties bgra8unormProperties;
     mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
-        mPhysicalDevice, VK_FORMAT_B8G8R8A8_UNORM, &bgra8unormProperties);
+        mVkPhysicalDevice, VK_FORMAT_B8G8R8A8_UNORM, &bgra8unormProperties);
     if (bgra8unormProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) {
         EnableFeature(Feature::BGRA8UnormStorage);
     }
@@ -267,7 +267,7 @@ void Adapter::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::SurfaceCapabilities);
 }
 
-MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
+MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     GetDefaultLimits(&limits->v1);
     CombinedLimits baseLimits = *limits;
 
@@ -422,14 +422,14 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     return {};
 }
 
-bool Adapter::SupportsExternalImages() const {
+bool PhysicalDevice::SupportsExternalImages() const {
     // Via dawn::native::vulkan::WrapVulkanImage
     return external_memory::Service::CheckSupport(mDeviceInfo) &&
-           external_semaphore::Service::CheckSupport(mDeviceInfo, mPhysicalDevice,
+           external_semaphore::Service::CheckSupport(mDeviceInfo, mVkPhysicalDevice,
                                                      mVulkanInstance->GetFunctions());
 }
 
-void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     // TODO(crbug.com/dawn/857): tighten this workaround when this issue is fixed in both
     // Vulkan SPEC and drivers.
     deviceToggles->Default(Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy, true);
@@ -504,18 +504,19 @@ void Adapter::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     deviceToggles->Default(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline, true);
 }
 
-ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor,
-                                                         const TogglesState& deviceToggles) {
+ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(const DeviceDescriptor* descriptor,
+                                                                const TogglesState& deviceToggles) {
     return Device::Create(this, descriptor, deviceToggles);
 }
 
-MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
-                                                            const TogglesState& toggles) const {
+MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
+    wgpu::FeatureName feature,
+    const TogglesState& toggles) const {
     return {};
 }
 
 // Android devices with Qualcomm GPUs have a myriad of known issues. (dawn:1549)
-bool Adapter::IsAndroidQualcomm() const {
+bool PhysicalDevice::IsAndroidQualcomm() const {
 #if DAWN_PLATFORM_IS(ANDROID)
     return gpu_info::IsQualcomm(GetVendorId());
 #else
@@ -523,7 +524,7 @@ bool Adapter::IsAndroidQualcomm() const {
 #endif
 }
 
-bool Adapter::IsIntelMesa() const {
+bool PhysicalDevice::IsIntelMesa() const {
     if (mDeviceInfo.HasExt(DeviceExt::DriverProperties)) {
         return mDeviceInfo.driverProperties.driverID == VK_DRIVER_ID_INTEL_OPEN_SOURCE_MESA_KHR;
     }
