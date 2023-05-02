@@ -332,8 +332,6 @@ dawn_test("dawn_unittests") {
     "unittests/validation/CopyCommandsValidationTests.cpp",
     "unittests/validation/CopyTextureForBrowserTests.cpp",
     "unittests/validation/DebugMarkerValidationTests.cpp",
-    "unittests/validation/DeprecatedAPITests.cpp",
-    "unittests/validation/DeprecatedAPITests.h",
     "unittests/validation/DeviceValidationTests.cpp",
     "unittests/validation/DrawIndirectValidationTests.cpp",
     "unittests/validation/DrawVertexAndIndexBufferOOBValidationTests.cpp",

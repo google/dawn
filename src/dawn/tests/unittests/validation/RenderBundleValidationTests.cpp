@@ -14,11 +14,8 @@
 
 #include <vector>
 
-#include "dawn/tests/unittests/validation/DeprecatedAPITests.h"
-#include "dawn/tests/unittests/validation/ValidationTest.h"
-
 #include "dawn/common/Constants.h"
-
+#include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
