@@ -202,15 +202,24 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
                                      const DepthStencilState* descriptor) {
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
 
-    DAWN_TRY(ValidateCompareFunction(descriptor->depthCompare));
-    DAWN_TRY(ValidateCompareFunction(descriptor->stencilFront.compare));
-    DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.failOp));
-    DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.depthFailOp));
-    DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.passOp));
-    DAWN_TRY(ValidateCompareFunction(descriptor->stencilBack.compare));
-    DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.failOp));
-    DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.depthFailOp));
-    DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.passOp));
+    DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->depthCompare),
+                     "validating depth compare function");
+    DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->stencilFront.compare),
+                     "validating stencil front compare function");
+    DAWN_TRY_CONTEXT(ValidateStencilOperation(descriptor->stencilFront.failOp),
+                     "validating stencil front fail operation");
+    DAWN_TRY_CONTEXT(ValidateStencilOperation(descriptor->stencilFront.depthFailOp),
+                     "validating stencil front depth fail operation");
+    DAWN_TRY_CONTEXT(ValidateStencilOperation(descriptor->stencilFront.passOp),
+                     "validating stencil front pass operation");
+    DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->stencilBack.compare),
+                     "validating stencil back compare function");
+    DAWN_TRY_CONTEXT(ValidateStencilOperation(descriptor->stencilBack.failOp),
+                     "validating stencil back fail operation");
+    DAWN_TRY_CONTEXT(ValidateStencilOperation(descriptor->stencilBack.depthFailOp),
+                     "validating stencil back depth fail operation");
+    DAWN_TRY_CONTEXT(ValidateStencilOperation(descriptor->stencilBack.passOp),
+                     "validating stencil back pass operation");
 
     const Format* format;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
