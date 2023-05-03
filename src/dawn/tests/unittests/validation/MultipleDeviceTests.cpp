@@ -37,7 +37,7 @@ TEST_F(MultipleDeviceTest, ValidatesSameDevice) {
 // objects from a different device.
 TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
     wgpu::ShaderModuleWGSLDescriptor wgslDesc = {};
-    wgslDesc.source = R"(
+    wgslDesc.code = R"(
          @compute @workgroup_size(1, 1, 1) fn main() {
         }
     )";

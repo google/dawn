@@ -144,7 +144,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenLoggingCallback) {
     wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
     wgpu::ShaderModuleWGSLDescriptor wgslDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
-    wgslDesc.source = "@compute @workgroup_size(64) fn main() {}";
+    wgslDesc.code = "@compute @workgroup_size(64) fn main() {}";
 
     // Create a shader module so the transformed shaders are dumped.
     device.CreateShaderModule(&shaderModuleDesc);

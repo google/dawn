@@ -84,7 +84,7 @@ wgpu::ShaderModule CreateShaderModuleFromASM(
 
 wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source) {
     wgpu::ShaderModuleWGSLDescriptor wgslDesc;
-    wgslDesc.source = source;
+    wgslDesc.code = source;
     wgpu::ShaderModuleDescriptor descriptor;
     descriptor.nextInChain = &wgslDesc;
     return device.CreateShaderModule(&descriptor);

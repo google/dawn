@@ -955,7 +955,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
         DAWN_INVALID_IF(!result.success, "Tint WGSL failure: Generator: %s", result.error);
 
         newWgslCode = std::move(result.wgsl);
-        newWgslDesc.source = newWgslCode.c_str();
+        newWgslDesc.code = newWgslCode.c_str();
 
         spirvDesc = nullptr;
         wgslDesc = &newWgslDesc;
@@ -980,11 +980,16 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
 
     ASSERT(wgslDesc != nullptr);
 
-    auto tintSource = std::make_unique<TintSource>("", wgslDesc->source);
+    const char* code = wgslDesc->code ? wgslDesc->code : wgslDesc->source;
+    DAWN_INVALID_IF(code == nullptr,
+                    "At least one of ShaderModuleWGSLDescriptor.source or "
+                    "ShaderModuleWGSLDescriptor.code must be set.");
+
+    auto tintSource = std::make_unique<TintSource>("", code);
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;
-        dumpedMsg << "// Dumped WGSL:" << std::endl << wgslDesc->source;
+        dumpedMsg << "// Dumped WGSL:" << std::endl << code;
         device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
     }
 
@@ -1101,7 +1106,14 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
         mOriginalSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
     } else if (wgslDesc) {
         mType = Type::Wgsl;
-        mWgsl = std::string(wgslDesc->source);
+        if (wgslDesc->code) {
+            mWgsl = std::string(wgslDesc->code);
+        } else {
+            device->EmitDeprecationWarning(
+                "ShaderModuleWGSLDescriptor.source is deprecated, use "
+                "ShaderModuleWGSLDescriptor.code instead.");
+            mWgsl = std::string(wgslDesc->source);
+        }
     }
 }
 

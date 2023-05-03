@@ -43,7 +43,7 @@ Ref<ShaderModuleMock> ShaderModuleMock::Create(DeviceMock* device,
 // static
 Ref<ShaderModuleMock> ShaderModuleMock::Create(DeviceMock* device, const char* source) {
     ShaderModuleWGSLDescriptor wgslDesc = {};
-    wgslDesc.source = source;
+    wgslDesc.code = source;
     ShaderModuleDescriptor desc = {};
     desc.nextInChain = &wgslDesc;
     return Create(device, &desc);

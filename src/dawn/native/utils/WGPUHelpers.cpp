@@ -36,7 +36,7 @@ namespace dawn::native::utils {
 
 ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(DeviceBase* device, const char* source) {
     ShaderModuleWGSLDescriptor wgslDesc;
-    wgslDesc.source = source;
+    wgslDesc.code = source;
     ShaderModuleDescriptor descriptor;
     descriptor.nextInChain = &wgslDesc;
     return device->CreateShaderModule(&descriptor);

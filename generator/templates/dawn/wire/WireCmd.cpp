@@ -163,6 +163,8 @@
             {% if member.optional %}
                 bool has_{{memberName}} = record.{{memberName}} != nullptr;
                 if (has_{{memberName}})
+            {% else %}
+                ASSERT(record.{{memberName}} != nullptr);
             {% endif %}
             {
             result += Align(std::strlen(record.{{memberName}}), kWireBufferAlignment);

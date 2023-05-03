@@ -63,7 +63,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateDepthBlitPipeline(DeviceBase* 
     ShaderModuleWGSLDescriptor wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
-    wgslDesc.source = kBlitToDepthShaders;
+    wgslDesc.code = kBlitToDepthShaders;
 
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&shaderModuleDesc));

@@ -615,7 +615,7 @@ TEST_F(LabelTest, ShaderModule) {
     })";
 
     wgpu::ShaderModuleWGSLDescriptor wgslDesc;
-    wgslDesc.source = source;
+    wgslDesc.code = source;
     wgpu::ShaderModuleDescriptor descriptor;
     descriptor.nextInChain = &wgslDesc;
 

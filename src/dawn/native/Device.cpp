@@ -270,7 +270,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
             )";
         ShaderModuleDescriptor descriptor;
         ShaderModuleWGSLDescriptor wgslDesc;
-        wgslDesc.source = kEmptyFragmentShader;
+        wgslDesc.code = kEmptyFragmentShader;
         descriptor.nextInChain = &wgslDesc;
 
         DAWN_TRY_ASSIGN(mInternalPipelineStore->placeholderFragmentShader,

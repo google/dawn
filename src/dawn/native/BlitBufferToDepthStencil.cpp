@@ -125,7 +125,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRG8ToDepth16UnormPipeline(Devi
     ShaderModuleWGSLDescriptor wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
-    wgslDesc.source = kBlitRG8ToDepthShaders;
+    wgslDesc.code = kBlitRG8ToDepthShaders;
 
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&shaderModuleDesc));
@@ -176,7 +176,7 @@ ResultOrError<InternalPipelineStore::BlitR8ToStencilPipelines> GetOrCreateR8ToSt
     ShaderModuleWGSLDescriptor wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
-    wgslDesc.source = kBlitStencilShaders;
+    wgslDesc.code = kBlitStencilShaders;
 
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&shaderModuleDesc));
