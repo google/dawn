@@ -4236,5 +4236,30 @@ return;
     ASSERT_EQ(expect, got);
 }
 
+TEST_F(SpvParserHandleTest, OpUndef_FunctionParam) {
+    // We can't generate reasonable WGSL when an OpUndef is passed as an argument to a function
+    // parameter that is expecting an image object, so just make sure that we do not crash.
+    const auto assembly = Preamble() + FragMain() + " " + CommonTypes() + R"(
+     %f_ty = OpTypeFunction %void %f_storage_1d
+     %20 = OpUndef %f_storage_1d
+
+     %func = OpFunction %void None %f_ty
+     %im = OpFunctionParameter %f_storage_1d
+     %func_entry = OpLabel
+     OpImageWrite %im %uint_1 %v4float_null
+     OpReturn
+     OpFunctionEnd
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %foo = OpFunctionCall %void %func %20
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_EQ(p->error(), "invalid handle object passed as function parameter");
+}
+
 }  // namespace
 }  // namespace tint::reader::spirv

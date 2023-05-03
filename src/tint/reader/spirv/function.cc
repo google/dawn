@@ -5183,6 +5183,9 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
             const auto usage = parser_impl_.GetHandleUsage(arg_id);
             const auto* mem_obj_decl =
                 parser_impl_.GetMemoryObjectDeclarationForHandle(arg_id, usage.IsTexture());
+            if (!mem_obj_decl) {
+                return Fail() << "invalid handle object passed as function parameter";
+            }
             expr = MakeExpression(mem_obj_decl->result_id());
             // Pass the handle through instead of a pointer to the handle.
             expr.type = parser_impl_.GetHandleTypeForSpirvHandle(*mem_obj_decl);
