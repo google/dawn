@@ -17,18 +17,21 @@
 #include "dawn/common/Math.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/UtilsMetal.h"
 
 namespace dawn::native::metal {
 
 namespace {
 
 ResultOrError<id<MTLCounterSampleBuffer>> CreateCounterSampleBuffer(Device* device,
+                                                                    NSString* label,
                                                                     MTLCommonCounterSet counterSet,
                                                                     uint32_t count)
     API_AVAILABLE(macos(10.15), ios(14.0)) {
     NSRef<MTLCounterSampleBufferDescriptor> descriptorRef =
         AcquireNSRef([MTLCounterSampleBufferDescriptor new]);
     MTLCounterSampleBufferDescriptor* descriptor = descriptorRef.Get();
+    descriptor.label = label;
 
     // To determine which counters are available from a device, we need to iterate through
     // the counterSets property of a MTLDevice. Then configure which counters will be
@@ -81,6 +84,8 @@ MaybeError QuerySet::Initialize() {
             mVisibilityBuffer = AcquireNSPRef([device->GetMTLDevice()
                 newBufferWithLength:bufferSize
                             options:MTLResourceStorageModePrivate]);
+            SetDebugName(GetDevice(), mVisibilityBuffer.Get(), "Dawn_QuerySet_VisibilityBuffer",
+                         GetLabel());
 
             if (mVisibilityBuffer == nil) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate query set.");
@@ -89,18 +94,24 @@ MaybeError QuerySet::Initialize() {
         }
         case wgpu::QueryType::PipelineStatistics:
             if (@available(macOS 10.15, iOS 14.0, *)) {
-                DAWN_TRY_ASSIGN(mCounterSampleBuffer,
-                                CreateCounterSampleBuffer(device, MTLCommonCounterSetStatistic,
-                                                          GetQueryCount()));
+                NSRef<NSString> label = MakeDebugName(
+                    GetDevice(), "Dawn_QuerySet_PipelineStatisticCounterSampleBuffer", GetLabel());
+                DAWN_TRY_ASSIGN(
+                    mCounterSampleBuffer,
+                    CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetStatistic,
+                                              GetQueryCount()));
             } else {
                 UNREACHABLE();
             }
             break;
         case wgpu::QueryType::Timestamp:
             if (@available(macOS 10.15, iOS 14.0, *)) {
-                DAWN_TRY_ASSIGN(mCounterSampleBuffer,
-                                CreateCounterSampleBuffer(device, MTLCommonCounterSetTimestamp,
-                                                          GetQueryCount()));
+                NSRef<NSString> label = MakeDebugName(
+                    GetDevice(), "Dawn_QuerySet_TimestampCounterSampleBuffer", GetLabel());
+                DAWN_TRY_ASSIGN(
+                    mCounterSampleBuffer,
+                    CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetTimestamp,
+                                              GetQueryCount()));
             } else {
                 UNREACHABLE();
             }

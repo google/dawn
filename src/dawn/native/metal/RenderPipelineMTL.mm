@@ -341,6 +341,9 @@ MaybeError RenderPipeline::Initialize() {
         AcquireNSRef([MTLRenderPipelineDescriptor new]);
     MTLRenderPipelineDescriptor* descriptorMTL = descriptorMTLRef.Get();
 
+    NSRef<NSString> label = MakeDebugName(GetDevice(), "Dawn_RenderPipeline", GetLabel());
+    descriptorMTL.label = label.Get();
+
     NSRef<MTLVertexDescriptor> vertexDesc;
     if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
         vertexDesc = AcquireNSRef([MTLVertexDescriptor new]);

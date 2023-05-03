@@ -19,6 +19,7 @@
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/metal/CommandRecordingContext.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/UtilsMetal.h"
 
 #include <limits>
 
@@ -109,6 +110,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     if (mMtlBuffer == nullptr) {
         return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation failed");
     }
+    SetLabelImpl();
 
     // The buffers with mappedAtCreation == true will be initialized in
     // BufferBase::MapAtCreation().
@@ -233,6 +235,10 @@ void Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     [commandContext->EnsureBlit() fillBuffer:mMtlBuffer.Get()
                                        range:NSMakeRange(offset, size)
                                        value:clearValue];
+}
+
+void Buffer::SetLabelImpl() {
+    SetDebugName(GetDevice(), mMtlBuffer.Get(), "Dawn_Buffer", GetLabel());
 }
 
 }  // namespace dawn::native::metal

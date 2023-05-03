@@ -78,6 +78,7 @@ class Texture final : public TextureBase {
     void InitializeAsWrapping(const TextureDescriptor* descriptor, NSPRef<id<MTLTexture>> wrapped);
 
     void DestroyImpl() override;
+    void SetLabelImpl() override;
 
     MaybeError ClearTexture(CommandRecordingContext* commandContext,
                             const SubresourceRange& range,
@@ -108,6 +109,7 @@ class TextureView final : public TextureViewBase {
     using TextureViewBase::TextureViewBase;
     MaybeError Initialize(const TextureViewDescriptor* descriptor);
     void DestroyImpl() override;
+    void SetLabelImpl() override;
 
     NSPRef<id<MTLTexture>> mMtlTextureView;
 };

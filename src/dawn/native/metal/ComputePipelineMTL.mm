@@ -47,8 +47,19 @@ MaybeError ComputePipeline::Initialize() {
                                   &computeData));
 
     NSError* error = nullptr;
-    mMtlComputePipelineState.Acquire(
-        [mtlDevice newComputePipelineStateWithFunction:computeData.function.Get() error:&error]);
+    NSRef<NSString> label = MakeDebugName(GetDevice(), "Dawn_ComputePipeline", GetLabel());
+
+    NSRef<MTLComputePipelineDescriptor> descriptorRef =
+        AcquireNSRef([MTLComputePipelineDescriptor new]);
+    MTLComputePipelineDescriptor* descriptor = descriptorRef.Get();
+    descriptor.computeFunction = computeData.function.Get();
+    descriptor.label = label.Get();
+
+    mMtlComputePipelineState.Acquire([mtlDevice
+        newComputePipelineStateWithDescriptor:descriptor
+                                      options:MTLPipelineOptionNone
+                                   reflection:nil
+                                        error:&error]);
     if (error != nullptr) {
         return DAWN_INTERNAL_ERROR("Error creating pipeline state " +
                                    std::string([error.localizedDescription UTF8String]));
