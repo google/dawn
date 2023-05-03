@@ -65,6 +65,7 @@
 #include "src/tint/program.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
+#include "src/tint/sem/function.h"
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/switch_statement.h"
@@ -212,6 +213,39 @@ void BuilderImpl::EmitFunction(const ast::Function* ast_func) {
 
     if (ast_func->IsEntryPoint()) {
         builder.ir.entry_points.Push(ir_func);
+
+        switch (ast_func->PipelineStage()) {
+            case ast::PipelineStage::kVertex:
+                ir_func->pipeline_stage = Function::PipelineStage::kVertex;
+                break;
+            case ast::PipelineStage::kFragment:
+                ir_func->pipeline_stage = Function::PipelineStage::kFragment;
+                break;
+            case ast::PipelineStage::kCompute: {
+                ir_func->pipeline_stage = Function::PipelineStage::kCompute;
+
+                const auto* sem = program_->Sem().Get(ast_func);
+                auto wg_size = sem->WorkgroupSize();
+
+                uint32_t x = wg_size[0].value();
+                uint32_t y = 1;
+                uint32_t z = 1;
+                if (wg_size[1].has_value()) {
+                    y = wg_size[1].value();
+
+                    if (wg_size[2].has_value()) {
+                        z = wg_size[2].value();
+                    }
+                }
+
+                ir_func->workgroup_size = {x, y, z};
+                break;
+            }
+            default: {
+                TINT_ICE(IR, diagnostics_) << "Invalid pipeline stage";
+                return;
+            }
+        }
     }
 
     {
@@ -222,7 +256,6 @@ void BuilderImpl::EmitFunction(const ast::Function* ast_func) {
 
         // TODO(dsinclair): Store return type and attributes
         // TODO(dsinclair): Store parameters
-        // TODO(dsinclair): Store attributes
 
         // If the branch target has already been set then a `return` was called. Only set in the
         // case where `return` wasn't called.

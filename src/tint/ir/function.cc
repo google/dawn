@@ -22,4 +22,18 @@ Function::Function() : Base() {}
 
 Function::~Function() = default;
 
+utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value) {
+    switch (value) {
+        case Function::PipelineStage::kVertex:
+            return out << "vertex";
+        case Function::PipelineStage::kFragment:
+            return out << "fragment";
+        case Function::PipelineStage::kCompute:
+            return out << "compute";
+        default:
+            break;
+    }
+    return out << "<unknown>";
+}
+
 }  // namespace tint::ir
