@@ -15,10 +15,11 @@
 #include "src/tint/ir/disassembler.h"
 
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/root_terminator.h"
 #include "src/tint/ir/switch.h"
-#include "src/tint/ir/terminator.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -136,8 +137,10 @@ void Disassembler::Walk(const FlowNode* node) {
             Indent() << "%fn" << GetIdForNode(b) << " = block" << std::endl;
             EmitBlockInstructions(b);
 
-            if (b->branch.target->Is<Terminator>()) {
+            if (b->branch.target->Is<FunctionTerminator>()) {
                 Indent() << "ret";
+            } else if (b->branch.target->Is<RootTerminator>()) {
+                // Nothing to do
             } else {
                 Indent() << "branch "
                          << "%fn" << GetIdForNode(b->branch.target);
@@ -153,7 +156,7 @@ void Disassembler::Walk(const FlowNode* node) {
             }
             out_ << std::endl;
 
-            if (!b->branch.target->Is<Terminator>()) {
+            if (!b->branch.target->Is<FunctionTerminator>()) {
                 out_ << std::endl;
             }
 
@@ -272,10 +275,12 @@ void Disassembler::Walk(const FlowNode* node) {
                 Walk(l->merge.target);
             }
         },
-        [&](const ir::Terminator*) {
-            if (in_function_) {
-                Indent() << "func_end" << std::endl;
-            }
+        [&](const ir::FunctionTerminator*) {
+            TINT_ASSERT(IR, in_function_);
+            Indent() << "func_end" << std::endl << std::endl;
+        },
+        [&](const ir::RootTerminator*) {
+            TINT_ASSERT(IR, !in_function_);
             out_ << std::endl;
         });
 }

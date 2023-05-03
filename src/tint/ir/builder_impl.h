@@ -60,14 +60,6 @@ class UnaryOpExpression;
 class WhileStatement;
 class Variable;
 }  // namespace tint::ast
-namespace tint::ir {
-class Block;
-class If;
-class Function;
-class Loop;
-class Switch;
-class Terminator;
-}  // namespace tint::ir
 namespace tint::sem {
 class Builtin;
 }  // namespace tint::sem

@@ -61,7 +61,6 @@
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
-#include "src/tint/ir/terminator.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/program.h"
 #include "src/tint/sem/builtin.h"

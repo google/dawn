@@ -1567,7 +1567,8 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
 
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
 %1(ref<private, u32, read_write>) = var private read_write
-ret
+
+
 
 )");
 }
@@ -1583,7 +1584,8 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
 %1(ref<private, u32, read_write>) = var private read_write
 store %1(ref<private, u32, read_write>), 2u
-ret
+
+
 
 )");
 }
@@ -2117,7 +2119,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
 %1(ref<private, vec3<f32>, read_write>) = var private read_write
 store %1(ref<private, vec3<f32>, read_write>), vec3<f32> 0.0f
-ret
+
+
 
 )");
 }
@@ -2135,7 +2138,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
 %1(ref<private, f32, read_write>) = var private read_write
 store %1(ref<private, f32, read_write>), 1.0f
-ret
+
+
 
 %fn1 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
@@ -2159,7 +2163,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
 %1(ref<private, i32, read_write>) = var private read_write
 store %1(ref<private, i32, read_write>), 1i
-ret
+
+
 
 %fn1 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
@@ -2199,7 +2204,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
 %1(ref<private, f32, read_write>) = var private read_write
 store %1(ref<private, f32, read_write>), 1.0f
-ret
+
+
 
 %fn1 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block

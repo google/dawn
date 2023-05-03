@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_TERMINATOR_H_
-#define SRC_TINT_IR_TERMINATOR_H_
+#ifndef SRC_TINT_IR_ROOT_TERMINATOR_H_
+#define SRC_TINT_IR_ROOT_TERMINATOR_H_
 
 #include "src/tint/ir/flow_node.h"
 
@@ -21,13 +21,13 @@ namespace tint::ir {
 
 /// Flow node used as the end of a function. Must only be used as the `end_target` in a function
 /// flow node. There are no instructions and no branches from this node.
-class Terminator : public utils::Castable<Terminator, FlowNode> {
+class RootTerminator : public utils::Castable<RootTerminator, FlowNode> {
   public:
     /// Constructor
-    Terminator();
-    ~Terminator() override;
+    RootTerminator();
+    ~RootTerminator() override;
 };
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_TERMINATOR_H_
+#endif  // SRC_TINT_IR_ROOT_TERMINATOR_H_

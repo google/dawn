@@ -29,8 +29,8 @@ ir::Block* Builder::CreateRootBlockIfNeeded() {
         ir.root_block = CreateBlock();
 
         // Everything in the module scope must have been const-eval's, so everything will go into a
-        // single block. So, we can create the terminator for the root-block now.
-        ir.root_block->branch.target = CreateTerminator();
+        // single block. So, we can create the root terminator for the root-block now.
+        ir.root_block->branch.target = CreateRootTerminator();
     }
     return ir.root_block;
 }
@@ -39,14 +39,18 @@ Block* Builder::CreateBlock() {
     return ir.flow_nodes.Create<Block>();
 }
 
-Terminator* Builder::CreateTerminator() {
-    return ir.flow_nodes.Create<Terminator>();
+RootTerminator* Builder::CreateRootTerminator() {
+    return ir.flow_nodes.Create<RootTerminator>();
+}
+
+FunctionTerminator* Builder::CreateFunctionTerminator() {
+    return ir.flow_nodes.Create<FunctionTerminator>();
 }
 
 Function* Builder::CreateFunction() {
     auto* ir_func = ir.flow_nodes.Create<Function>();
     ir_func->start_target = CreateBlock();
-    ir_func->end_target = CreateTerminator();
+    ir_func->end_target = CreateFunctionTerminator();
 
     // Function is always branching into the start target
     ir_func->start_target->inbound_branches.Push(ir_func);

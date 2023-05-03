@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/terminator.h"
+#include "src/tint/ir/function_terminator.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Terminator);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::FunctionTerminator);
 
 namespace tint::ir {
 
-Terminator::Terminator() : Base() {}
+FunctionTerminator::FunctionTerminator() : Base() {}
 
-Terminator::~Terminator() = default;
+FunctionTerminator::~FunctionTerminator() = default;
 
 }  // namespace tint::ir

@@ -24,7 +24,7 @@
 // Forward declarations
 namespace tint::ir {
 class Block;
-class Terminator;
+class FunctionTerminator;
 }  // namespace tint::ir
 
 namespace tint::ir {
@@ -84,7 +84,7 @@ class Function : public utils::Castable<Function, FlowNode> {
     Block* start_target = nullptr;
     /// The end target is the end of the function. It is used as the branch target if a return is
     /// encountered in the function.
-    Terminator* end_target = nullptr;
+    FunctionTerminator* end_target = nullptr;
 };
 
 utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value);

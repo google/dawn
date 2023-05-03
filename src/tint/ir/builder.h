@@ -26,12 +26,13 @@
 #include "src/tint/ir/convert.h"
 #include "src/tint/ir/discard.h"
 #include "src/tint/ir/function.h"
+#include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/root_terminator.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
-#include "src/tint/ir/terminator.h"
 #include "src/tint/ir/unary.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/value.h"
@@ -59,8 +60,11 @@ class Builder {
     /// @returns a new block flow node
     Block* CreateBlock();
 
-    /// @returns a new terminator flow node
-    Terminator* CreateTerminator();
+    /// @returns a new root terminator flow node
+    RootTerminator* CreateRootTerminator();
+
+    /// @returns a new function terminator flow node
+    FunctionTerminator* CreateFunctionTerminator();
 
     /// Creates a function flow node
     /// @returns the flow node
