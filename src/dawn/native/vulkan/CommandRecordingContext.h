@@ -39,6 +39,7 @@ struct CommandPoolAndBuffer {
 struct CommandRecordingContext {
     VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
     std::vector<VkSemaphore> waitSemaphores = {};
+    std::vector<VkSemaphore> signalSemaphores = {};
 
     // The internal buffers used in the workaround of texture-to-texture copies with compressed
     // formats.

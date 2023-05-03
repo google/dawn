@@ -76,6 +76,7 @@ class SwapChain : public SwapChainBase {
     VkSurfaceKHR mVkSurface = VK_NULL_HANDLE;
     VkSwapchainKHR mSwapChain = VK_NULL_HANDLE;
     std::vector<VkImage> mSwapChainImages;
+    std::vector<VkSemaphore> mSwapChainSemaphores;
     uint32_t mLastImageIndex = 0;
 
     Ref<Texture> mBlitTexture;

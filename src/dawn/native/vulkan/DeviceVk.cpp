@@ -314,11 +314,11 @@ MaybeError Device::SubmitPendingCommands() {
             fn, &mRecordingContext, mRecordingContext.mappableBuffersForEagerTransition);
     }
 
-    ScopedSignalSemaphore scopedSignalSemaphore(this, VK_NULL_HANDLE);
+    ScopedSignalSemaphore externalTextureSemaphore(this, VK_NULL_HANDLE);
     if (mRecordingContext.externalTexturesForEagerTransition.size() > 0) {
         // Create an external semaphore for all external textures that have been used in the pending
         // submit.
-        DAWN_TRY_ASSIGN(*scopedSignalSemaphore.InitializeInto(),
+        DAWN_TRY_ASSIGN(*externalTextureSemaphore.InitializeInto(),
                         mExternalSemaphoreService->CreateExportableSemaphore());
     }
 
@@ -336,6 +336,10 @@ MaybeError Device::SubmitPendingCommands() {
     std::vector<VkPipelineStageFlags> dstStageMasks(mRecordingContext.waitSemaphores.size(),
                                                     VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
+    if (externalTextureSemaphore.Get() != VK_NULL_HANDLE) {
+        mRecordingContext.signalSemaphores.push_back(externalTextureSemaphore.Get());
+    }
+
     VkSubmitInfo submitInfo;
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.pNext = nullptr;
@@ -344,8 +348,8 @@ MaybeError Device::SubmitPendingCommands() {
     submitInfo.pWaitDstStageMask = dstStageMasks.data();
     submitInfo.commandBufferCount = mRecordingContext.commandBufferList.size();
     submitInfo.pCommandBuffers = mRecordingContext.commandBufferList.data();
-    submitInfo.signalSemaphoreCount = (scopedSignalSemaphore.Get() == VK_NULL_HANDLE ? 0 : 1);
-    submitInfo.pSignalSemaphores = AsVkArray(scopedSignalSemaphore.InitializeInto());
+    submitInfo.signalSemaphoreCount = mRecordingContext.signalSemaphores.size();
+    submitInfo.pSignalSemaphores = AsVkArray(mRecordingContext.signalSemaphores.data());
 
     VkFence fence = VK_NULL_HANDLE;
     DAWN_TRY_ASSIGN(fence, GetUnusedFence());
@@ -376,7 +380,7 @@ MaybeError Device::SubmitPendingCommands() {
         // Export the signal semaphore.
         ExternalSemaphoreHandle semaphoreHandle;
         DAWN_TRY_ASSIGN(semaphoreHandle,
-                        mExternalSemaphoreService->ExportSemaphore(scopedSignalSemaphore.Get()));
+                        mExternalSemaphoreService->ExportSemaphore(externalTextureSemaphore.Get()));
 
         // Update all external textures, eagerly transitioned in the submit, with the exported
         // handle, and the duplicated handles.
@@ -1086,6 +1090,7 @@ void Device::DestroyImpl() {
         fn.DestroySemaphore(mVkDevice, semaphore, nullptr);
     }
     mRecordingContext.waitSemaphores.clear();
+    mRecordingContext.signalSemaphores.clear();
 
     // Some commands might still be marked as in-flight if we shut down because of a device
     // loss. Recycle them as unused so that we free them below.
