@@ -233,7 +233,7 @@ bool SwapChainBase::IsAttached() const {
 }
 
 wgpu::BackendType SwapChainBase::GetBackendType() const {
-    return GetDevice()->GetAdapter()->GetBackendType();
+    return GetDevice()->GetPhysicalDevice()->GetBackendType();
 }
 
 MaybeError SwapChainBase::ValidatePresent() const {

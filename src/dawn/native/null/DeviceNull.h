@@ -193,7 +193,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
                                                        const TogglesState& toggles) const override;
 
     void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
-    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor,
+    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
+                                                    const DeviceDescriptor* descriptor,
                                                     const TogglesState& deviceToggles) override;
 };
 

@@ -286,7 +286,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     // mAdapter is not set for mock test devices.
     // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
     if (mAdapter != nullptr) {
-        mAdapter->GetInstance()->AddDevice(this);
+        mAdapter->GetPhysicalDevice()->GetInstance()->AddDevice(this);
     }
 
     return {};
@@ -344,11 +344,12 @@ void DeviceBase::WillDropLastExternalRef() {
     // mAdapter is not set for mock test devices.
     // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
     if (mAdapter != nullptr) {
-        mAdapter->GetInstance()->RemoveDevice(this);
+        mAdapter->GetPhysicalDevice()->GetInstance()->RemoveDevice(this);
 
         // Once last external ref dropped, all callbacks should be forwarded to Instance's callback
         // queue instead.
-        mCallbackTaskManager = mAdapter->GetInstance()->GetCallbackTaskManager();
+        mCallbackTaskManager =
+            mAdapter->GetPhysicalDevice()->GetInstance()->GetCallbackTaskManager();
     }
 }
 
@@ -659,9 +660,10 @@ BlobCache* DeviceBase::GetBlobCache() {
     // TODO(crbug.com/dawn/1481): Shader caching currently has a dependency on the WGSL writer to
     // generate cache keys. We can lift the dependency once we also cache frontend parsing,
     // transformations, and reflection.
-    return mAdapter->GetInstance()->GetBlobCache(!IsToggleEnabled(Toggle::DisableBlobCache));
+    return mAdapter->GetPhysicalDevice()->GetInstance()->GetBlobCache(
+        !IsToggleEnabled(Toggle::DisableBlobCache));
 #else
-    return mAdapter->GetInstance()->GetBlobCache(false);
+    return mAdapter->GetPhysicalDevice()->GetInstance()->GetBlobCache(false);
 #endif
 }
 
@@ -720,12 +722,11 @@ AdapterBase* DeviceBase::GetAdapter() const {
 }
 
 PhysicalDeviceBase* DeviceBase::GetPhysicalDevice() const {
-    return mAdapter
-        .Get();  // TODO(dawn:1774): This will retrieve the PhysicalDevice from the AdapterBase.
+    return mAdapter->GetPhysicalDevice();
 }
 
 dawn::platform::Platform* DeviceBase::GetPlatform() const {
-    return GetAdapter()->GetInstance()->GetPlatform();
+    return GetPhysicalDevice()->GetInstance()->GetPlatform();
 }
 
 ExecutionSerial DeviceBase::GetCompletedCommandSerial() const {
@@ -1346,7 +1347,7 @@ MaybeError DeviceBase::Tick() {
     return {};
 }
 
-PhysicalDeviceBase* DeviceBase::APIGetAdapter() {
+AdapterBase* DeviceBase::APIGetAdapter() {
     mAdapter->Reference();
     return mAdapter.Get();
 }
@@ -1373,7 +1374,7 @@ ExternalTextureBase* DeviceBase::APICreateExternalTexture(
 
 void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
     ASSERT(deviceDescriptor);
-    ASSERT(GetAdapter()->SupportsAllRequiredFeatures(
+    ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
         {deviceDescriptor->requiredFeatures, deviceDescriptor->requiredFeaturesCount}));
 
     for (uint32_t i = 0; i < deviceDescriptor->requiredFeaturesCount; ++i) {

@@ -29,7 +29,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
     explicit ServiceImplementationZirconHandle(Device* device)
         : ServiceImplementation(device),
           mSupported(CheckSupport(device->GetDeviceInfo(),
-                                  ToBackend(device->GetAdapter())->GetVkPhysicalDevice(),
+                                  ToBackend(device->GetPhysicalDevice())->GetVkPhysicalDevice(),
                                   device->fn)) {}
 
     ~ServiceImplementationZirconHandle() override = default;

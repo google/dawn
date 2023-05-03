@@ -89,10 +89,10 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     if (device->IsToggleEnabled(Toggle::UseDXC)) {
         // If UseDXC toggle are not forced to be disable, DXC should have been validated to be
         // available.
-        ASSERT(ToBackend(device->GetAdapter())->GetBackend()->IsDXCAvailable());
+        ASSERT(ToBackend(device->GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
         // We can get the DXC version information since IsDXCAvailable() is true.
         d3d::DxcVersionInfo dxcVersionInfo =
-            ToBackend(device->GetAdapter())->GetBackend()->GetDxcVersion();
+            ToBackend(device->GetPhysicalDevice())->GetBackend()->GetDxcVersion();
 
         req.bytecode.compiler = d3d::Compiler::DXC;
         req.bytecode.dxcLibrary = device->GetDxcLibrary().Get();

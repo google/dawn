@@ -81,7 +81,7 @@ DawnDeviceDescriptor::~DawnDeviceDescriptor() = default;
 
 Adapter::Adapter() = default;
 
-Adapter::Adapter(PhysicalDeviceBase* impl) : mImpl(impl) {
+Adapter::Adapter(AdapterBase* impl) : mImpl(impl) {
     if (mImpl != nullptr) {
         mImpl->Reference();
     }
@@ -122,20 +122,20 @@ WGPUAdapter Adapter::Get() const {
 }
 
 std::vector<const char*> Adapter::GetSupportedFeatures() const {
-    FeaturesSet supportedFeaturesSet = mImpl->GetSupportedFeatures();
+    FeaturesSet supportedFeaturesSet = mImpl->GetPhysicalDevice()->GetSupportedFeatures();
     return supportedFeaturesSet.GetEnabledFeatureNames();
 }
 
 bool Adapter::GetLimits(WGPUSupportedLimits* limits) const {
-    return mImpl->GetLimits(FromAPI(limits));
+    return mImpl->GetPhysicalDevice()->GetLimits(FromAPI(limits));
 }
 
 void Adapter::SetUseTieredLimits(bool useTieredLimits) {
-    mImpl->SetUseTieredLimits(useTieredLimits);
+    mImpl->GetPhysicalDevice()->SetUseTieredLimits(useTieredLimits);
 }
 
 bool Adapter::SupportsExternalImages() const {
-    return mImpl->SupportsExternalImages();
+    return mImpl->GetPhysicalDevice()->SupportsExternalImages();
 }
 
 Adapter::operator bool() const {
@@ -177,7 +177,7 @@ void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
 }
 
 void Adapter::ResetInternalDeviceForTesting() {
-    mImpl->ResetInternalDeviceForTesting();
+    mImpl->GetPhysicalDevice()->ResetInternalDeviceForTesting();
 }
 
 // AdapterDiscoverOptionsBase
@@ -210,7 +210,7 @@ bool Instance::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
 std::vector<Adapter> Instance::GetAdapters() const {
     // Adapters are owned by mImpl so it is safe to return non RAII pointers to them
     std::vector<Adapter> adapters;
-    for (const Ref<PhysicalDeviceBase>& adapter : mImpl->GetAdapters()) {
+    for (const Ref<AdapterBase>& adapter : mImpl->GetAdapters()) {
         adapters.push_back(Adapter(adapter.Get()));
     }
     return adapters;

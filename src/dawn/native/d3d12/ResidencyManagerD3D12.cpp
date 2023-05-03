@@ -115,7 +115,7 @@ void ResidencyManager::UpdateVideoMemoryInfo() {
 void ResidencyManager::UpdateMemorySegmentInfo(MemorySegmentInfo* segmentInfo) {
     DXGI_QUERY_VIDEO_MEMORY_INFO queryVideoMemoryInfo;
 
-    ToBackend(mDevice->GetAdapter())
+    ToBackend(mDevice->GetPhysicalDevice())
         ->GetHardwareAdapter()
         ->QueryVideoMemoryInfo(0, segmentInfo->dxgiSegment, &queryVideoMemoryInfo);
 

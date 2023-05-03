@@ -293,9 +293,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
     }
 
   private:
-    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor,
+    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
+                                                    const DeviceDescriptor* descriptor,
                                                     const TogglesState& deviceToggles) override {
-        return Device::Create(this, mDevice, descriptor, deviceToggles);
+        return Device::Create(adapter, mDevice, descriptor, deviceToggles);
     }
 
     void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override {

@@ -217,13 +217,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
                            gl.GetVersion().IsES());
 }
 
-ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(const DeviceDescriptor* descriptor,
+ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,
+                                                                const DeviceDescriptor* descriptor,
                                                                 const TogglesState& deviceToggles) {
     EGLenum api =
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
     std::unique_ptr<Device::Context> context;
     DAWN_TRY_ASSIGN(context, ContextEGL::Create(mEGLFunctions, api));
-    return Device::Create(this, descriptor, mFunctions, std::move(context), deviceToggles);
+    return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles);
 }
 
 MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(

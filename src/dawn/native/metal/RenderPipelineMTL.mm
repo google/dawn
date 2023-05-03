@@ -513,14 +513,14 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
 void RenderPipeline::InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
                                      WGPUCreateRenderPipelineAsyncCallback callback,
                                      void* userdata) {
-    AdapterBase* adapter = renderPipeline->GetDevice()->GetAdapter();
+    PhysicalDeviceBase* physicalDevice = renderPipeline->GetDevice()->GetPhysicalDevice();
     std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
         std::make_unique<CreateRenderPipelineAsyncTask>(std::move(renderPipeline), callback,
                                                         userdata);
     // Workaround a crash where the validation layers on AMD crash with partition alloc.
     // See crbug.com/dawn/1200.
-    if (adapter->GetInstance()->IsBackendValidationEnabled() &&
-        gpu_info::IsAMD(adapter->GetVendorId())) {
+    if (physicalDevice->GetInstance()->IsBackendValidationEnabled() &&
+        gpu_info::IsAMD(physicalDevice->GetVendorId())) {
         asyncTask->Run();
         return;
     }

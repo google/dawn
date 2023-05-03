@@ -127,12 +127,13 @@ size_t PhysicalDeviceBase::APIEnumerateFeatures(wgpu::FeatureName* features) con
     return mSupportedFeatures.EnumerateFeatures(features);
 }
 
-DeviceBase* PhysicalDeviceBase::APICreateDevice(const DeviceDescriptor* descriptor) {
+DeviceBase* PhysicalDeviceBase::CreateDevice(AdapterBase* adapter,
+                                             const DeviceDescriptor* descriptor) {
     DeviceDescriptor defaultDesc = {};
     if (descriptor == nullptr) {
         descriptor = &defaultDesc;
     }
-    auto result = CreateDeviceInternal(descriptor);
+    auto result = CreateDeviceInternal(adapter, descriptor);
     if (result.IsError()) {
         mInstance->ConsumedError(result.AcquireError());
         return nullptr;
@@ -140,14 +141,15 @@ DeviceBase* PhysicalDeviceBase::APICreateDevice(const DeviceDescriptor* descript
     return result.AcquireSuccess().Detach();
 }
 
-void PhysicalDeviceBase::APIRequestDevice(const DeviceDescriptor* descriptor,
-                                          WGPURequestDeviceCallback callback,
-                                          void* userdata) {
+void PhysicalDeviceBase::RequestDevice(AdapterBase* adapter,
+                                       const DeviceDescriptor* descriptor,
+                                       WGPURequestDeviceCallback callback,
+                                       void* userdata) {
     static constexpr DeviceDescriptor kDefaultDescriptor = {};
     if (descriptor == nullptr) {
         descriptor = &kDefaultDescriptor;
     }
-    auto result = CreateDeviceInternal(descriptor);
+    auto result = CreateDeviceInternal(adapter, descriptor);
 
     if (result.IsError()) {
         std::unique_ptr<ErrorData> errorData = result.AcquireError();
@@ -253,6 +255,7 @@ void PhysicalDeviceBase::SetSupportedFeaturesForTesting(
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDeviceBase::CreateDeviceInternal(
+    AdapterBase* adapter,
     const DeviceDescriptor* descriptor) {
     ASSERT(descriptor != nullptr);
 
@@ -289,7 +292,7 @@ ResultOrError<Ref<DeviceBase>> PhysicalDeviceBase::CreateDeviceInternal(
         DAWN_INVALID_IF(descriptor->requiredLimits->nextInChain != nullptr,
                         "nextInChain is not nullptr.");
     }
-    return CreateDeviceImpl(descriptor, deviceToggles);
+    return CreateDeviceImpl(adapter, descriptor, deviceToggles);
 }
 
 void PhysicalDeviceBase::SetUseTieredLimits(bool useTieredLimits) {

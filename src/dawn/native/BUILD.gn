@@ -184,6 +184,7 @@ source_set("sources") {
 
   sources = get_target_outputs(":utils_gen")
   sources += [
+    "Adapter.cpp",
     "Adapter.h",
     "ApplyClearColorValueWithDrawHelper.cpp",
     "ApplyClearColorValueWithDrawHelper.h",

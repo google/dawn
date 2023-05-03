@@ -153,7 +153,8 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
             static_cast<const ExternalImageDescriptorDmaBuf*>(descriptor);
 
         // Verify plane count for the modifier.
-        VkPhysicalDevice vkPhysicalDevice = ToBackend(mDevice->GetAdapter())->GetVkPhysicalDevice();
+        VkPhysicalDevice vkPhysicalDevice =
+            ToBackend(mDevice->GetPhysicalDevice())->GetVkPhysicalDevice();
         uint32_t planeCount = 0;
         if (mDevice->ConsumedError(GetModifierPlaneCount(mDevice->fn, vkPhysicalDevice, format,
                                                          dmaBufDescriptor->drmModifier),
@@ -303,7 +304,8 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
 
         const ExternalImageDescriptorDmaBuf* dmaBufDescriptor =
             static_cast<const ExternalImageDescriptorDmaBuf*>(descriptor);
-        VkPhysicalDevice vkPhysicalDevice = ToBackend(mDevice->GetAdapter())->GetVkPhysicalDevice();
+        VkPhysicalDevice vkPhysicalDevice =
+            ToBackend(mDevice->GetPhysicalDevice())->GetVkPhysicalDevice();
         VkDevice device = mDevice->GetVkDevice();
 
         uint32_t planeCount;

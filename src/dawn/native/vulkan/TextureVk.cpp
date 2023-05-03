@@ -621,7 +621,8 @@ bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
                             const VkImageCreateInfo& imageCreateInfo) {
     ASSERT(device);
 
-    VkPhysicalDevice vkPhysicalDevice = ToBackend(device->GetAdapter())->GetVkPhysicalDevice();
+    VkPhysicalDevice vkPhysicalDevice =
+        ToBackend(device->GetPhysicalDevice())->GetVkPhysicalDevice();
     VkImageFormatProperties properties;
     if (device->fn.GetPhysicalDeviceImageFormatProperties(
             vkPhysicalDevice, imageCreateInfo.format, imageCreateInfo.imageType,

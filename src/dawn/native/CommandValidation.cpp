@@ -79,7 +79,7 @@ MaybeError ValidateTimestampQuery(const DeviceBase* device,
 
     DAWN_INVALID_IF(!device->HasFeature(requiredFeature),
                     "Timestamp queries used without the %s feature enabled.",
-                    device->GetAdapter()
+                    device->GetPhysicalDevice()
                         ->GetInstance()
                         ->GetFeatureInfo(FeatureEnumToAPIFeature(requiredFeature))
                         ->name);

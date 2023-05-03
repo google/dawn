@@ -199,9 +199,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
 }
 
-ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(const DeviceDescriptor* descriptor,
+ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,
+                                                                const DeviceDescriptor* descriptor,
                                                                 const TogglesState& deviceToggles) {
-    return Device::Create(this, descriptor, deviceToggles);
+    return Device::Create(adapter, descriptor, deviceToggles);
 }
 
 // Resets the backend device and creates a new one. If any D3D11 objects belonging to the

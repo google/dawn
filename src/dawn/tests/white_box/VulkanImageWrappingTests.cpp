@@ -15,8 +15,8 @@
 #include <utility>
 
 #include "dawn/common/Math.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/tests/white_box/VulkanImageWrappingTests.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"

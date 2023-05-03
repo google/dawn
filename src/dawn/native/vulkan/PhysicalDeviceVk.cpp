@@ -504,9 +504,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline, true);
 }
 
-ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(const DeviceDescriptor* descriptor,
+ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,
+                                                                const DeviceDescriptor* descriptor,
                                                                 const TogglesState& deviceToggles) {
-    return Device::Create(this, descriptor, deviceToggles);
+    return Device::Create(adapter, descriptor, deviceToggles);
 }
 
 MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(

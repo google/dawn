@@ -48,10 +48,11 @@ class PhysicalDeviceBase : public RefCounted {
     void APIGetProperties(AdapterProperties* properties) const;
     bool APIHasFeature(wgpu::FeatureName feature) const;
     size_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
-    void APIRequestDevice(const DeviceDescriptor* descriptor,
-                          WGPURequestDeviceCallback callback,
-                          void* userdata);
-    DeviceBase* APICreateDevice(const DeviceDescriptor* descriptor = nullptr);
+    void RequestDevice(AdapterBase* adapter,
+                       const DeviceDescriptor* descriptor,
+                       WGPURequestDeviceCallback callback,
+                       void* userdata);
+    DeviceBase* CreateDevice(AdapterBase* adapter, const DeviceDescriptor* descriptor = nullptr);
 
     uint32_t GetVendorId() const;
     uint32_t GetDeviceId() const;
@@ -101,7 +102,8 @@ class PhysicalDeviceBase : public RefCounted {
     // Backend-specific force-setting and defaulting device toggles
     virtual void SetupBackendDeviceToggles(TogglesState* deviceToggles) const = 0;
 
-    virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor,
+    virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
+                                                            const DeviceDescriptor* descriptor,
                                                             const TogglesState& deviceToggles) = 0;
 
     virtual MaybeError InitializeImpl() = 0;
@@ -118,7 +120,8 @@ class PhysicalDeviceBase : public RefCounted {
         wgpu::FeatureName feature,
         const TogglesState& toggles) const = 0;
 
-    ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(const DeviceDescriptor* descriptor);
+    ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(AdapterBase* adapter,
+                                                        const DeviceDescriptor* descriptor);
 
     virtual MaybeError ResetInternalDeviceForTestingImpl();
     Ref<InstanceBase> mInstance;
