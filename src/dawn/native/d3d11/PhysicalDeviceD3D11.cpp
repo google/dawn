@@ -181,7 +181,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Max number of "constants" where each constant is a 16-byte float4
     limits->v1.maxUniformBufferBindingSize = D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16;
     // D3D11 has no documented limit on the size of a storage buffer binding.
-    limits->v1.maxStorageBufferBindingSize = 4294967295;
+    limits->v1.maxStorageBufferBindingSize = kAssumedMaxBufferSize;
     // D3D11 has no documented limit on the buffer size.
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
 
