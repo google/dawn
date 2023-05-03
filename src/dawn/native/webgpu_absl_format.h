@@ -19,6 +19,11 @@
 #include "dawn/native/dawn_platform.h"
 #include "dawn/native/webgpu_absl_format_autogen.h"
 
+namespace ityp {
+template <typename Index, typename Value>
+class span;
+}
+
 namespace dawn::native {
 
 //
@@ -134,6 +139,25 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     TextureComponentType value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
+
+template <typename I, typename T>
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const ityp::span<I, T>& values,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append("[");
+    bool first = true;
+    for (const auto& v : values) {
+        if (!first) {
+            s->Append(absl::StrFormat(", %s", v));
+        } else {
+            s->Append(absl::StrFormat("%s", v));
+        }
+        first = false;
+    }
+    s->Append("]");
+    return {true};
+}
 
 }  // namespace dawn::native
 
