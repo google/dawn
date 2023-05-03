@@ -166,6 +166,11 @@ class BuilderImpl {
     /// @returns the value storing the result if successful, utils::Failure otherwise
     utils::Result<Value*> EmitUnary(const ast::UnaryOpExpression* expr);
 
+    /// Emits a short-circult binary expression
+    /// @param expr the binary expression
+    /// @returns the value storing the result if successful, utils::Failure otherwise
+    utils::Result<Value*> EmitShortCircuit(const ast::BinaryExpression* expr);
+
     /// Emits a binary expression
     /// @param expr the binary expression
     /// @returns the value storing the result if successful, utils::Failure otherwise

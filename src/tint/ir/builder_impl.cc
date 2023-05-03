@@ -778,7 +778,66 @@ utils::Result<Value*> BuilderImpl::EmitUnary(const ast::UnaryOpExpression* expr)
     return inst;
 }
 
+// A short-circut needs special treatment. The short-circuit is decomposed into the relevant if
+// statements and declarations.
+utils::Result<Value*> BuilderImpl::EmitShortCircuit(const ast::BinaryExpression* expr) {
+    switch (expr->op) {
+        case ast::BinaryOp::kLogicalAnd:
+        case ast::BinaryOp::kLogicalOr:
+            break;
+        default:
+            TINT_ICE(IR, diagnostics_) << "invalid operation type for short-circut decomposition";
+            return utils::Failure;
+    }
+
+    auto lhs = EmitExpression(expr->lhs);
+    if (!lhs) {
+        return utils::Failure;
+    }
+
+    auto* ty = builder.ir.types.Get<type::Bool>();
+    auto* result_var =
+        builder.Declare(ty, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+    current_flow_block->instructions.Push(result_var);
+
+    auto* lhs_store = builder.Store(result_var, lhs.Get());
+    current_flow_block->instructions.Push(lhs_store);
+
+    auto* if_node = builder.CreateIf();
+    if_node->condition = lhs.Get();
+    BranchTo(if_node);
+
+    utils::Result<Value*> rhs;
+    {
+        FlowStackScope scope(this, if_node);
+
+        // If this is an `&&` then we only evaluate the RHS expression in the true block.
+        // If this is an `||` then we only evaluate the RHS expression in the false block.
+        if (expr->op == ast::BinaryOp::kLogicalAnd) {
+            current_flow_block = if_node->true_.target->As<Block>();
+        } else {
+            current_flow_block = if_node->false_.target->As<Block>();
+        }
+
+        rhs = EmitExpression(expr->rhs);
+        if (!rhs) {
+            return utils::Failure;
+        }
+        auto* rhs_store = builder.Store(result_var, rhs.Get());
+        current_flow_block->instructions.Push(rhs_store);
+
+        BranchTo(if_node->merge.target);
+    }
+    current_flow_block = if_node->merge.target->As<Block>();
+
+    return result_var;
+}
+
 utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr) {
+    if (expr->op == ast::BinaryOp::kLogicalAnd || expr->op == ast::BinaryOp::kLogicalOr) {
+        return EmitShortCircuit(expr);
+    }
+
     auto lhs = EmitExpression(expr->lhs);
     if (!lhs) {
         return utils::Failure;
@@ -802,12 +861,6 @@ utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr)
             break;
         case ast::BinaryOp::kXor:
             inst = builder.Xor(ty, lhs.Get(), rhs.Get());
-            break;
-        case ast::BinaryOp::kLogicalAnd:
-            inst = builder.LogicalAnd(ty, lhs.Get(), rhs.Get());
-            break;
-        case ast::BinaryOp::kLogicalOr:
-            inst = builder.LogicalOr(ty, lhs.Get(), rhs.Get());
             break;
         case ast::BinaryOp::kEqual:
             inst = builder.Equal(ty, lhs.Get(), rhs.Get());
@@ -848,6 +901,10 @@ utils::Result<Value*> BuilderImpl::EmitBinary(const ast::BinaryExpression* expr)
         case ast::BinaryOp::kModulo:
             inst = builder.Modulo(ty, lhs.Get(), rhs.Get());
             break;
+        case ast::BinaryOp::kLogicalAnd:
+        case ast::BinaryOp::kLogicalOr:
+            TINT_ICE(IR, diagnostics_) << "short circuit op should have already been handled";
+            return utils::Failure;
         case ast::BinaryOp::kNone:
             TINT_ICE(IR, diagnostics_) << "missing binary operand type";
             return utils::Failure;

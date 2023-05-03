@@ -203,8 +203,10 @@ void Disassembler::Walk(const FlowNode* node) {
                 Indent() << "# true branch" << std::endl;
                 Walk(i->true_.target);
 
-                Indent() << "# false branch" << std::endl;
-                Walk(i->false_.target);
+                if (!i->false_.target->IsDead()) {
+                    Indent() << "# false branch" << std::endl;
+                    Walk(i->false_.target);
+                }
             }
 
             if (i->merge.target->IsConnected()) {
