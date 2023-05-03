@@ -65,11 +65,11 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
 
     b.PushFunctionForTesting();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
-    ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.Diagnostics();
 
-    EXPECT_EQ(b.GenerateExpression(expr1), 8u) << b.error();
-    EXPECT_EQ(b.GenerateExpression(expr2), 17u) << b.error();
+    EXPECT_EQ(b.GenerateExpression(expr1), 8u) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(expr2), 17u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
@@ -107,8 +107,8 @@ TEST_F(BuiltinBuilderTest, Call_GLSLMethod_WithLoad_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect =
@@ -143,8 +143,8 @@ TEST_F(BuiltinBuilderTest, Call_GLSLMethod_WithLoad_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect =
@@ -182,8 +182,8 @@ TEST_P(BuiltinBoolTest, Call_Bool_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeBool
 %2 = OpTypePointer Private %3
@@ -209,8 +209,8 @@ TEST_P(BuiltinBoolTest, Call_Bool_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeBool
 %3 = OpTypeVector %4 3
@@ -244,9 +244,9 @@ TEST_F(BuiltinBuilderTest, Call_Select) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
-    ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -293,7 +293,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -337,7 +337,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -385,7 +385,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -446,7 +446,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -490,7 +490,7 @@ TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Scalar_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -531,7 +531,7 @@ TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Scalar_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -571,7 +571,7 @@ TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Vector_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -615,7 +615,7 @@ TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Vector_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -681,7 +681,7 @@ TEST_F(BuiltinBuilderTest, Call_Length_Scalar_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -718,7 +718,7 @@ TEST_F(BuiltinBuilderTest, Call_Length_Scalar_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -753,7 +753,7 @@ TEST_F(BuiltinBuilderTest, Call_Length_Vector_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -792,7 +792,7 @@ TEST_F(BuiltinBuilderTest, Call_Length_Vector_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -829,7 +829,7 @@ TEST_F(BuiltinBuilderTest, Call_Normalize_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -868,7 +868,7 @@ TEST_F(BuiltinBuilderTest, Call_Normalize_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -907,7 +907,7 @@ TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Scalar_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -948,7 +948,7 @@ TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Scalar_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -987,7 +987,7 @@ TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Vector_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1030,7 +1030,7 @@ TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Vector_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1078,7 +1078,7 @@ TEST_F(BuiltinBuilderTest, Call_Reflect_Vector_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1118,7 +1118,7 @@ TEST_F(BuiltinBuilderTest, Call_Reflect_Vector_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1156,7 +1156,7 @@ TEST_F(BuiltinBuilderTest, Call_Distance_Scalar_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -1194,7 +1194,7 @@ TEST_F(BuiltinBuilderTest, Call_Distance_Scalar_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -1230,7 +1230,7 @@ TEST_F(BuiltinBuilderTest, Call_Distance_Vector_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1270,7 +1270,7 @@ TEST_F(BuiltinBuilderTest, Call_Distance_Vector_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1308,7 +1308,7 @@ TEST_F(BuiltinBuilderTest, Call_Cross_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1348,7 +1348,7 @@ TEST_F(BuiltinBuilderTest, Call_Cross_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1388,7 +1388,7 @@ TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Scalar_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -1430,7 +1430,7 @@ TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Scalar_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -1470,7 +1470,7 @@ TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Vector_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1514,7 +1514,7 @@ TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Vector_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1563,7 +1563,7 @@ TEST_F(BuiltinBuilderTest, Call_FaceForward_Vector_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1604,7 +1604,7 @@ TEST_F(BuiltinBuilderTest, Call_FaceForward_Vector_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -1646,7 +1646,7 @@ TEST_F(BuiltinBuilderTest, Runtime_Call_Modf_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 %15 = OpExtInstImport "GLSL.std.450"
@@ -1700,7 +1700,7 @@ TEST_F(BuiltinBuilderTest, Runtime_Call_Modf_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 OpCapability Float16
@@ -1754,7 +1754,7 @@ TEST_F(BuiltinBuilderTest, Const_Call_Modf_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
@@ -1800,7 +1800,7 @@ TEST_F(BuiltinBuilderTest, Const_Call_Modf_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 OpCapability Float16
@@ -1850,7 +1850,7 @@ TEST_F(BuiltinBuilderTest, Runtime_Call_Frexp_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 %17 = OpExtInstImport "GLSL.std.450"
@@ -1906,7 +1906,7 @@ TEST_F(BuiltinBuilderTest, Runtime_Call_Frexp_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 OpCapability Float16
@@ -1961,7 +1961,7 @@ TEST_F(BuiltinBuilderTest, Const_Call_Frexp_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
@@ -2009,7 +2009,7 @@ TEST_F(BuiltinBuilderTest, Const_Call_Frexp_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 OpCapability Float16
@@ -2061,7 +2061,7 @@ TEST_F(BuiltinBuilderTest, Call_QuantizeToF16_Scalar) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
@@ -2100,7 +2100,7 @@ TEST_F(BuiltinBuilderTest, Call_QuantizeToF16_Vector) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
     auto got = DumpBuilder(b);
     auto* expect = R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
@@ -2164,8 +2164,8 @@ TEST_P(BuiltinIntTest, Call_SInt_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
@@ -2194,8 +2194,8 @@ TEST_P(BuiltinIntTest, Call_SInt_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
@@ -2225,8 +2225,8 @@ TEST_P(BuiltinIntTest, Call_UInt_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 0
 %2 = OpTypePointer Private %3
@@ -2255,8 +2255,8 @@ TEST_P(BuiltinIntTest, Call_UInt_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
@@ -2292,7 +2292,7 @@ TEST_P(Builtin_Builder_SingleParam_Sint_Test, Call_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -2330,7 +2330,7 @@ TEST_P(Builtin_Builder_SingleParam_Sint_Test, Call_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -2374,7 +2374,7 @@ TEST_F(Builtin_Builder_Abs_Uint_Test, Call_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpName %3 "a_func"
@@ -2407,7 +2407,7 @@ TEST_F(Builtin_Builder_Abs_Uint_Test, Call_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpName %3 "a_func"
@@ -2444,7 +2444,7 @@ TEST_P(Builtin_Builder_DualParam_SInt_Test, Call_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -2483,7 +2483,7 @@ TEST_P(Builtin_Builder_DualParam_SInt_Test, Call_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -2528,7 +2528,7 @@ TEST_P(Builtin_Builder_DualParam_UInt_Test, Call_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -2567,7 +2567,7 @@ TEST_P(Builtin_Builder_DualParam_UInt_Test, Call_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -2612,7 +2612,7 @@ TEST_P(Builtin_Builder_ThreeParam_Sint_Test, Call_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -2652,7 +2652,7 @@ TEST_P(Builtin_Builder_ThreeParam_Sint_Test, Call_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -2698,7 +2698,7 @@ TEST_P(Builtin_Builder_ThreeParam_Uint_Test, Call_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
@@ -2738,7 +2738,7 @@ TEST_P(Builtin_Builder_ThreeParam_Uint_Test, Call_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
@@ -2780,7 +2780,7 @@ TEST_F(BuiltinBuilderTest, Call_ExtractBits_i32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -2821,7 +2821,7 @@ TEST_F(BuiltinBuilderTest, Call_ExtractBits_u32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -2859,7 +2859,7 @@ TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_i32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -2901,7 +2901,7 @@ TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_u32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -2943,7 +2943,7 @@ TEST_F(BuiltinBuilderTest, Call_InsertBits_i32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -2988,7 +2988,7 @@ TEST_F(BuiltinBuilderTest, Call_InsertBits_u32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -3030,7 +3030,7 @@ TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_i32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -3076,7 +3076,7 @@ TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_u32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -3126,8 +3126,8 @@ TEST_F(BuiltinBuilderTest, Call_Determinant_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%12 = OpExtInstImport "GLSL.std.450"
@@ -3163,8 +3163,8 @@ TEST_F(BuiltinBuilderTest, Call_Determinant_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(%12 = OpExtInstImport "GLSL.std.450"
@@ -3198,8 +3198,8 @@ TEST_F(BuiltinBuilderTest, Call_Transpose_f32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpName %1 "var"
@@ -3236,8 +3236,8 @@ TEST_F(BuiltinBuilderTest, Call_Transpose_f16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpName %1 "var"
@@ -3277,8 +3277,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot_F32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -3308,8 +3308,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot_F16) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 16
 %3 = OpTypeVector %4 3
@@ -3337,8 +3337,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot_U32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
@@ -3376,8 +3376,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot_I32) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
@@ -3425,8 +3425,8 @@ TEST_P(BuiltinDeriveTest, Call_Derivative_Scalar) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
@@ -3458,8 +3458,8 @@ TEST_P(BuiltinDeriveTest, Call_Derivative_Vector) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     if (param.name != "dpdx" && param.name != "dpdy" && param.name != "fwidth") {
         EXPECT_EQ(DumpInstructions(b.Module().Capabilities()),
@@ -3530,7 +3530,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -3596,7 +3596,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -3667,7 +3667,7 @@ TEST_P(Builtin_Builder_AtomicRMW_i32, Test) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -3740,7 +3740,7 @@ TEST_P(Builtin_Builder_AtomicRMW_u32, Test) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -3818,7 +3818,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -3892,7 +3892,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -3954,7 +3954,7 @@ TEST_P(Builtin_Builder_DataPacking_Test, Binary) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     if (pack4) {
         auto got = DumpBuilder(b);
@@ -4025,7 +4025,7 @@ TEST_P(Builtin_Builder_DataUnpacking_Test, Binary) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     if (pack4) {
         auto got = DumpBuilder(b);
@@ -4093,7 +4093,7 @@ TEST_F(BuiltinBuilderTest, Call_WorkgroupBarrier) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -4127,7 +4127,7 @@ TEST_F(BuiltinBuilderTest, Call_StorageBarrier) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
@@ -4164,7 +4164,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot4I8Packed) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
@@ -4201,7 +4201,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot4U8Packed) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     auto got = DumpBuilder(b);
     auto expect = R"(OpEntryPoint GLCompute %3 "test_function"

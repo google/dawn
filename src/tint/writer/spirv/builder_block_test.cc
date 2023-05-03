@@ -33,9 +33,9 @@ TEST_F(BuilderTest, Block) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateStatement(outer)) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(outer)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -32,10 +33,10 @@ TEST_F(BuilderTest, Assign_Var) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
@@ -59,14 +60,15 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_FALSE(b.GenerateAssignStatement(assign)) << b.error();
+    tint::SetInternalCompilerErrorReporter(nullptr);
+
+    EXPECT_FALSE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_TRUE(b.has_error());
-    EXPECT_EQ(b.error(),
-              "Internal error: trying to add SPIR-V instruction 62 outside a "
-              "function");
+    EXPECT_THAT(b.Diagnostics().str(),
+                ::testing::HasSubstr("trying to add SPIR-V instruction 62 outside a function"));
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroInitializer) {
@@ -80,10 +82,10 @@ TEST_F(BuilderTest, Assign_Var_ZeroInitializer) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
@@ -110,10 +112,10 @@ TEST_F(BuilderTest, Assign_Var_Complex_InitializerNestedVector) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
@@ -143,10 +145,10 @@ TEST_F(BuilderTest, Assign_Var_Complex_Initializer) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
@@ -186,10 +188,10 @@ TEST_F(BuilderTest, Assign_StructMember) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
@@ -219,10 +221,10 @@ TEST_F(BuilderTest, Assign_Vector) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
@@ -252,10 +254,10 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
@@ -287,10 +289,10 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
     EXPECT_FALSE(b.has_error());
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32

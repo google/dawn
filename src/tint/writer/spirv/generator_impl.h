@@ -49,13 +49,10 @@ class GeneratorImpl {
     bool Generate();
 
     /// @returns the result data
-    const std::vector<uint32_t>& result() const;
+    const std::vector<uint32_t>& Result() const { return writer_.result(); }
 
-    /// @returns the result data
-    std::vector<uint32_t>& result();
-
-    /// @returns the error
-    std::string error() const;
+    /// @returns the list of diagnostics raised by the generator
+    diag::List Diagnostics() const { return builder_.Diagnostics(); }
 
   private:
     Builder builder_;

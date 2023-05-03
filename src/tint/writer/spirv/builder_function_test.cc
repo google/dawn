@@ -70,8 +70,8 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
     auto* var_a = program->AST().GlobalVariables()[0];
     auto* func = program->AST().Functions()[0];
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
     EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "a"
 OpName %6 "a_func"
 %3 = OpTypeFloat 32

@@ -30,7 +30,7 @@ TEST_F(BuilderTest, Return) {
 
     b.PushFunctionForTesting();
     EXPECT_TRUE(b.GenerateReturnStatement(ret));
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()), R"(OpReturn
 )");
@@ -46,7 +46,7 @@ TEST_F(BuilderTest, Return_WithValue) {
 
     b.PushFunctionForTesting();
     EXPECT_TRUE(b.GenerateReturnStatement(ret));
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -68,9 +68,9 @@ TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-    EXPECT_TRUE(b.GenerateReturnStatement(ret)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.Diagnostics();
+    EXPECT_TRUE(b.GenerateReturnStatement(ret)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Function %3

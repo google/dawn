@@ -29,7 +29,7 @@ TEST_F(BuilderTest, Discard) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(stmt)) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(stmt)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()), R"(OpKill
 )");
 }

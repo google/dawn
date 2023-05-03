@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -32,7 +33,7 @@ TEST_F(BuilderTest, If_Empty) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
 )");
@@ -56,11 +57,13 @@ TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_FALSE(b.GenerateIfStatement(expr)) << b.error();
+    tint::SetInternalCompilerErrorReporter(nullptr);
+
+    EXPECT_FALSE(b.GenerateIfStatement(expr)) << b.Diagnostics();
     EXPECT_TRUE(b.has_error());
-    EXPECT_EQ(b.error(),
-              "Internal error: trying to add SPIR-V instruction 247 outside a "
-              "function");
+    EXPECT_THAT(b.Diagnostics().str(),
+                ::testing::HasSubstr(
+                    "Internal error: trying to add SPIR-V instruction 247 outside a function"));
 }
 
 TEST_F(BuilderTest, If_WithStatements) {
@@ -76,9 +79,9 @@ TEST_F(BuilderTest, If_WithStatements) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -114,9 +117,9 @@ TEST_F(BuilderTest, If_WithElse) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -156,9 +159,9 @@ TEST_F(BuilderTest, If_WithElseIf) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -212,9 +215,9 @@ TEST_F(BuilderTest, If_WithMultiple) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -276,7 +279,7 @@ TEST_F(BuilderTest, If_WithBreak) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -318,7 +321,7 @@ TEST_F(BuilderTest, If_WithElseBreak) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -360,7 +363,7 @@ TEST_F(BuilderTest, If_WithContinueAndBreak) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -405,7 +408,7 @@ TEST_F(BuilderTest, If_WithElseContinue) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -441,7 +444,7 @@ TEST_F(BuilderTest, If_WithReturn) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %5 = OpTypeBool
@@ -471,7 +474,7 @@ TEST_F(BuilderTest, If_WithReturnValue) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeBool
 %1 = OpTypeFunction %2
 %5 = OpConstantTrue %2
@@ -503,7 +506,7 @@ TEST_F(BuilderTest, IfElse_BothReturn) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeBool
 %1 = OpTypeFunction %2
 %5 = OpConstantTrue %2
@@ -541,7 +544,7 @@ TEST_F(BuilderTest, If_WithNestedBlockReturnValue) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeBool
 %1 = OpTypeFunction %2
 %5 = OpConstantTrue %2
@@ -570,8 +573,8 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeBool
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -602,7 +605,7 @@ TEST_F(BuilderTest, If_ElseIf_WithReturn) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %5 = OpTypeBool
@@ -643,7 +646,7 @@ TEST_F(BuilderTest, Loop_If_ElseIf_WithBreak) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %9 = OpTypeBool

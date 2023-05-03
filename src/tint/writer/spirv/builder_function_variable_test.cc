@@ -29,7 +29,7 @@ TEST_F(BuilderTest, FunctionVar_NoAddressSpace) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %1 "var"
 )");
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
@@ -51,8 +51,8 @@ TEST_F(BuilderTest, FunctionVar_WithConstantInitializer) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %6 "var"
 )");
@@ -82,9 +82,9 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantInitializer) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(a)) << b.error();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(a)) << b.Diagnostics();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %7 "var"
 )");
@@ -117,9 +117,9 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantInitializerLoadedFromVar) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v2)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v2)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %3 "v"
 OpName %7 "v2"
@@ -152,9 +152,9 @@ TEST_F(BuilderTest, FunctionVar_LetWithVarInitializer) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v2)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v2)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %3 "v"
 OpName %7 "v2"
@@ -187,9 +187,9 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v2)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v2)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %3 "v2"
 )");
@@ -215,8 +215,8 @@ TEST_F(BuilderTest, FunctionVar_Let) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -235,8 +235,8 @@ TEST_F(BuilderTest, FunctionVar_Const) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), "");  // Not a mistake - 'const' is inlined
 }

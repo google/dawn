@@ -32,7 +32,7 @@ TEST_F(BuilderTest, Let_IndexAccessor_Vector) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -67,7 +67,7 @@ TEST_F(BuilderTest, Const_IndexAccessor_Vector) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -97,7 +97,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Vector) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -136,7 +136,7 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Vector) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -175,7 +175,7 @@ TEST_F(BuilderTest, Const_IndexAccessor_Vector2) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -210,7 +210,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Vector2) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -249,7 +249,7 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Vector2) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -293,7 +293,7 @@ TEST_F(BuilderTest, Let_IndexAccessor_Array_MultiLevel) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -341,7 +341,7 @@ TEST_F(BuilderTest, Const_IndexAccessor_Array_MultiLevel) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -371,7 +371,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Array_MultiLevel) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -414,7 +414,7 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Array_MultiLevel) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -460,7 +460,7 @@ TEST_F(BuilderTest, Const_IndexAccessor_Array_ArrayWithSwizzle) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -507,7 +507,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Array_ArrayWithSwizzle) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -552,7 +552,7 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Array_ArrayWithSwizzle) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -604,7 +604,7 @@ TEST_F(BuilderTest, Let_IndexAccessor_Nested_Array_f32) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -652,7 +652,7 @@ TEST_F(BuilderTest, Const_IndexAccessor_Nested_Array_f32) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -682,7 +682,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Array_Vec3_f32) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -724,7 +724,7 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Nested_Array_f32) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -770,7 +770,7 @@ TEST_F(BuilderTest, Let_IndexAccessor_Matrix) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -813,7 +813,7 @@ TEST_F(BuilderTest, Const_IndexAccessor_Matrix) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -846,7 +846,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Matrix) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -886,7 +886,7 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Matrix) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -936,7 +936,7 @@ TEST_F(BuilderTest, MemberAccessor) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -984,7 +984,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1030,7 +1030,7 @@ TEST_F(BuilderTest, MemberAccessor_NonPointer) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1072,7 +1072,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1117,7 +1117,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1165,7 +1165,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1218,7 +1218,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1256,7 +1256,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1290,7 +1290,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1321,7 +1321,7 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1353,7 +1353,7 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1384,7 +1384,7 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1438,7 +1438,7 @@ TEST_F(BuilderTest, IndexAccessor_Mixed_ArrayAndMember) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2

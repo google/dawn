@@ -27,7 +27,7 @@ TEST_F(BuilderTest, GlobalConstAssert) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     // const asserts are not emitted
     EXPECT_EQ(DumpInstructions(b.Module().Types()), "");
@@ -39,7 +39,7 @@ TEST_F(BuilderTest, FunctionConstAssert) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     // const asserts are not emitted
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeVoid

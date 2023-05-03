@@ -233,7 +233,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
@@ -330,7 +330,7 @@ TEST_F(BuilderTest, SampleIndex_SampleRateShadingCapability) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     // Make sure we generate the SampleRateShading capability.
     EXPECT_EQ(DumpInstructions(b.Module().Capabilities()),

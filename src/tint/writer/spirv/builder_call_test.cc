@@ -36,8 +36,8 @@ TEST_F(BuilderTest, Expression_Call) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(a_func)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 OpName %4 "a"
@@ -76,8 +76,8 @@ TEST_F(BuilderTest, Statement_Call) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(a_func)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
 
     EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 OpName %4 "a"

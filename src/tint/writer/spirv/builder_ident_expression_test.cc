@@ -32,8 +32,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"()");
 
@@ -49,7 +49,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %1 "var"
 )");
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
@@ -71,8 +71,8 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -92,7 +92,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %1 "var"
 )");
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
@@ -116,9 +116,9 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 7u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 7u) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -139,9 +139,9 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateFunctionVariable(let)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(let)) << b.Diagnostics();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 3u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 3u) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 2
 )");

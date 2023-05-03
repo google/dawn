@@ -29,7 +29,7 @@ TEST_F(SpvBuilderConstructorTest, Const) {
     spirv::Builder& b = Build();
 
     EXPECT_EQ(b.GenerateConstructorExpression(g, c), 2u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 42.2000008
@@ -43,7 +43,7 @@ TEST_F(SpvBuilderConstructorTest, Type) {
     spirv::Builder& b = Build();
 
     EXPECT_EQ(b.GenerateConstructorExpression(nullptr, t), 5u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -62,7 +62,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithCasts) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 4u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 2
@@ -100,10 +100,10 @@ TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.Diagnostics();
 
     EXPECT_EQ(b.GenerateExpression(t), 8u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Function %3
@@ -129,8 +129,8 @@ TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-    ASSERT_EQ(b.GenerateExpression(cast), 10u) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.Diagnostics();
+    ASSERT_EQ(b.GenerateExpression(cast), 10u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -159,7 +159,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(cast), 2u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
@@ -254,8 +254,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool_Var) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-    ASSERT_EQ(b.GenerateExpression(cast), 8u) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.Diagnostics();
+    ASSERT_EQ(b.GenerateExpression(cast), 8u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
@@ -3709,7 +3709,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 6u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %3 = OpTypeVector %2 3
@@ -3730,7 +3730,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F32) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 2u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstantNull %1
@@ -3749,7 +3749,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F16) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 2u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 16
 %2 = OpConstantNull %1
@@ -3766,7 +3766,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_I32) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 2u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstantNull %1
@@ -3783,7 +3783,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_U32) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 2u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstantNull %1
@@ -3800,7 +3800,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Bool) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 2u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeBool
 %2 = OpConstantNull %1
@@ -3817,7 +3817,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Vector) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 3u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeInt 32 1
 %1 = OpTypeVector %2 2
@@ -3835,7 +3835,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix_F32) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 4u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 2
@@ -3856,7 +3856,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix_F16) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 4u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 16
 %2 = OpTypeVector %3 2
@@ -3875,7 +3875,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 5u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeInt 32 1
 %3 = OpTypeInt 32 0
@@ -3895,7 +3895,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
     b.PushFunctionForTesting();
 
     EXPECT_EQ(b.GenerateExpression(t), 3u);
-    ASSERT_FALSE(b.has_error()) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2
@@ -3911,8 +3911,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_I32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstant %1 2
@@ -3935,8 +3935,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 2.4000001
@@ -3961,8 +3961,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_I32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 16
 %2 = OpConstant %1 0x1.33p+1
@@ -3985,8 +3985,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 2
@@ -4009,8 +4009,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 2.4000001
@@ -4035,8 +4035,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_U32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 16
 %2 = OpConstant %1 0x1.33p+1
@@ -4059,8 +4059,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 2
@@ -4083,8 +4083,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstant %1 2
@@ -4109,8 +4109,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_F32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 16
 %2 = OpConstant %1 0x1p+1
@@ -4135,8 +4135,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F16) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 2
@@ -4161,8 +4161,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F16) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstant %1 2
@@ -4187,8 +4187,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_F16) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 2
@@ -4212,8 +4212,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
@@ -4238,8 +4238,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -4266,8 +4266,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_I32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 16
 %3 = OpTypeVector %4 3
@@ -4292,8 +4292,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
@@ -4318,8 +4318,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
@@ -4346,8 +4346,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_U32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 16
 %3 = OpTypeVector %4 3
@@ -4372,8 +4372,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
@@ -4398,8 +4398,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
@@ -4426,8 +4426,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_F32) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 16
 %3 = OpTypeVector %4 3
@@ -4454,8 +4454,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F16) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
@@ -4482,8 +4482,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F16) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
@@ -4510,8 +4510,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_F16) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3

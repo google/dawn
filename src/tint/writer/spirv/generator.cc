@@ -46,8 +46,8 @@ Result Generate(const Program* program, const Options& options) {
     auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program,
                                                 zero_initialize_workgroup_memory);
     result.success = impl->Generate();
-    result.error = impl->error();
-    result.spirv = std::move(impl->result());
+    result.error = impl->Diagnostics().str();
+    result.spirv = std::move(impl->Result());
 
     return result;
 }

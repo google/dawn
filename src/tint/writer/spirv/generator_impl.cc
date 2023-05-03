@@ -183,16 +183,4 @@ bool GeneratorImpl::Generate() {
     return false;
 }
 
-const std::vector<uint32_t>& GeneratorImpl::result() const {
-    return writer_.result();
-}
-
-std::vector<uint32_t>& GeneratorImpl::result() {
-    return writer_.result();
-}
-
-std::string GeneratorImpl::error() const {
-    return builder_.error();
-}
-
 }  // namespace tint::writer::spirv

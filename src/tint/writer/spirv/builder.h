@@ -89,10 +89,11 @@ class Builder {
     /// @returns true if the SPIR-V was successfully built
     bool Build();
 
-    /// @returns the error string or blank if no error was reported.
-    const std::string& error() const { return error_; }
+    /// @returns the list of diagnostics raised by the builder
+    const diag::List& Diagnostics() const { return builder_.Diagnostics(); }
+
     /// @returns true if the builder encountered an error
-    bool has_error() const { return !error_.empty(); }
+    bool has_error() const { return Diagnostics().contains_errors(); }
 
     /// @returns the module that this builder has produced
     spirv::Module& Module() { return module_; }
@@ -509,7 +510,6 @@ class Builder {
     void PopScope();
 
     ProgramBuilder builder_;
-    std::string error_;
     spirv::Module module_;
     Function current_function_;
     uint32_t current_label_id_ = 0;

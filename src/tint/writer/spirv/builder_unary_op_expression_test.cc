@@ -29,7 +29,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 )");
@@ -45,7 +45,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %3 = OpConstant %2 1
 )");
@@ -61,7 +61,7 @@ TEST_F(BuilderTest, UnaryOp_Complement) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 )");
@@ -77,7 +77,7 @@ TEST_F(BuilderTest, UnaryOp_Not) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeBool
 %3 = OpConstantNull %2
 )");
@@ -95,9 +95,9 @@ TEST_F(BuilderTest, UnaryOp_LoadRequired) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 6u) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.Diagnostics();
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 6u) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3

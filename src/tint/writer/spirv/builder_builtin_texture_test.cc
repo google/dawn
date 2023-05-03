@@ -3727,10 +3727,10 @@ TEST_P(BuiltinTextureTest, Call) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.error();
-    ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.Diagnostics();
 
-    EXPECT_EQ(b.GenerateExpression(call), 8u) << b.error();
+    EXPECT_EQ(b.GenerateExpression(call), 8u) << b.Diagnostics();
 
     auto expected = expected_texture_overload(param.overload);
     EXPECT_EQ(expected.types, "\n" + DumpInstructions(b.Module().Types()));
@@ -3756,7 +3756,7 @@ TEST_P(BuiltinTextureTest, ValidateSPIRV) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     Validate(b);
 }
@@ -3781,12 +3781,14 @@ TEST_P(BuiltinTextureTest, OutsideFunction_IsError) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.error();
-    ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
+    tint::SetInternalCompilerErrorReporter(nullptr);
+
+    ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.Diagnostics();
     EXPECT_EQ(b.GenerateExpression(call), 0u);
-    EXPECT_THAT(b.error(),
-                ::testing::StartsWith("Internal error: trying to add SPIR-V instruction "));
-    EXPECT_THAT(b.error(), ::testing::EndsWith(" outside a function"));
+    EXPECT_THAT(b.Diagnostics().str(),
+                ::testing::HasSubstr("Internal error: trying to add SPIR-V instruction "));
+    EXPECT_THAT(b.Diagnostics().str(), ::testing::HasSubstr(" outside a function"));
 }
 
 }  // namespace

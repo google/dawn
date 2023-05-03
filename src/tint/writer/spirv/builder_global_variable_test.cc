@@ -30,7 +30,7 @@ TEST_F(BuilderTest, GlobalVar_WithAddressSpace) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %1 "var"
 )");
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
@@ -47,8 +47,8 @@ TEST_F(BuilderTest, GlobalVar_WithInitializer) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
+    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %6 "var"
 )");
@@ -71,7 +71,7 @@ TEST_F(BuilderTest, GlobalConst) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 42
@@ -96,7 +96,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_Initializer) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -126,7 +126,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_F16_Initializer) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 3
@@ -155,7 +155,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AInt_Initializer) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeInt 32 1
 %1 = OpTypeVector %2 3
@@ -184,7 +184,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Initializer) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -213,7 +213,7 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Initializer) {
 
     spirv::Builder& b = SanitizeAndBuild();
 
-    ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -238,7 +238,7 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %1 "var"
 )");
     EXPECT_EQ(DumpInstructions(b.Module().Annots()), R"(OpDecorate %1 Binding 2
@@ -486,7 +486,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Annots()), R"(OpDecorate %1 NonReadable
 OpDecorate %1 Binding 0
@@ -518,10 +518,10 @@ TEST_F(BuilderTest, GlobalVar_WorkgroupWithZeroInit) {
     std::unique_ptr<spirv::Builder> b =
         std::make_unique<spirv::Builder>(program.get(), kZeroInitializeWorkgroupMemory);
 
-    EXPECT_TRUE(b->GenerateGlobalVariable(var_scalar)) << b->error();
-    EXPECT_TRUE(b->GenerateGlobalVariable(var_array)) << b->error();
-    EXPECT_TRUE(b->GenerateGlobalVariable(var_struct)) << b->error();
-    ASSERT_FALSE(b->has_error()) << b->error();
+    EXPECT_TRUE(b->GenerateGlobalVariable(var_scalar)) << b->Diagnostics();
+    EXPECT_TRUE(b->GenerateGlobalVariable(var_array)) << b->Diagnostics();
+    EXPECT_TRUE(b->GenerateGlobalVariable(var_struct)) << b->Diagnostics();
+    ASSERT_FALSE(b->has_error()) << b->Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b->Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Workgroup %3

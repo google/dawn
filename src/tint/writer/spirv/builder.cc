@@ -261,7 +261,6 @@ bool Builder::Build() {
                                       builtin::Extension::kChromiumExperimentalPushConstant,
                                       builtin::Extension::kF16,
                                   })) {
-        error_ = builder_.Diagnostics().str();
         return false;
     }
 
@@ -300,7 +299,8 @@ void Builder::RegisterVariable(const sem::Variable* var, uint32_t id) {
 uint32_t Builder::LookupVariableID(const sem::Variable* var) {
     auto it = var_to_id_.find(var);
     if (it == var_to_id_.end()) {
-        error_ = "unable to find ID for variable: " + var->Declaration()->name->symbol.Name();
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "unable to find ID for variable: " + var->Declaration()->name->symbol.Name();
         return 0;
     }
     return it->second;
@@ -374,7 +374,7 @@ bool Builder::GenerateAssignStatement(const ast::AssignmentStatement* assign) {
 
 bool Builder::GenerateBreakStatement(const ast::BreakStatement*) {
     if (merge_stack_.empty()) {
-        error_ = "Attempted to break without a merge block";
+        TINT_ICE(Writer, builder_.Diagnostics()) << "Attempted to break without a merge block";
         return false;
     }
     if (!push_function_inst(spv::Op::OpBranch, {Operand(merge_stack_.back())})) {
@@ -398,7 +398,8 @@ bool Builder::GenerateBreakIfStatement(const ast::BreakIfStatement* stmt) {
 
 bool Builder::GenerateContinueStatement(const ast::ContinueStatement*) {
     if (continue_stack_.empty()) {
-        error_ = "Attempted to continue without a continue block";
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "Attempted to continue without a continue block";
         return false;
     }
     if (!push_function_inst(spv::Op::OpBranch, {Operand(continue_stack_.back())})) {
@@ -420,7 +421,7 @@ bool Builder::GenerateDiscardStatement(const ast::DiscardStatement*) {
 bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
     auto stage = pipeline_stage_to_execution_model(func->PipelineStage());
     if (stage == SpvExecutionModelMax) {
-        error_ = "Unknown pipeline stage provided";
+        TINT_ICE(Writer, builder_.Diagnostics()) << "Unknown pipeline stage provided";
         return false;
     }
 
@@ -437,8 +438,8 @@ bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
 
         uint32_t var_id = LookupVariableID(var);
         if (var_id == 0) {
-            error_ =
-                "unable to find ID for global variable: " + var->Declaration()->name->symbol.Name();
+            TINT_ICE(Writer, builder_.Diagnostics()) << "unable to find ID for global variable: " +
+                                                            var->Declaration()->name->symbol.Name();
             return false;
         }
 
@@ -461,9 +462,9 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
 
         // Check if the workgroup_size uses pipeline-overridable constants.
         if (!wgsize[0].has_value() || !wgsize[1].has_value() || !wgsize[2].has_value()) {
-            error_ =
-                "override-expressions should have been removed with the SubstituteOverride "
-                "transform";
+            TINT_ICE(Writer, builder_.Diagnostics())
+                << "override-expressions should have been removed with the SubstituteOverride "
+                   "transform";
             return false;
         }
         module_.PushExecutionMode(
@@ -506,7 +507,8 @@ uint32_t Builder::GenerateExpression(const sem::Expression* expr) {
         [&](const ast::LiteralExpression* l) { return GenerateLiteralIfNeeded(l); },
         [&](const ast::UnaryOpExpression* u) { return GenerateUnaryOpExpression(u); },
         [&](Default) {
-            error_ = "unknown expression type: " + std::string(expr->TypeInfo().name);
+            TINT_ICE(Writer, builder_.Diagnostics())
+                << "unknown expression type: " + std::string(expr->TypeInfo().name);
             return 0;
         });
 }
@@ -638,7 +640,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
 
     if (v->Is<ast::Let>()) {
         if (!v->initializer) {
-            error_ = "missing initializer for let";
+            TINT_ICE(Writer, builder_.Diagnostics()) << "missing initializer for let";
             return false;
         }
         RegisterVariable(sem, init_id);
@@ -819,7 +821,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                 return true;  // ignored
             },
             [&](Default) {
-                error_ = "unknown attribute";
+                TINT_ICE(Writer, builder_.Diagnostics()) << "unknown attribute";
                 return false;
             });
         if (!ok) {
@@ -1054,7 +1056,8 @@ uint32_t Builder::GenerateAccessorExpression(const ast::AccessorExpression* expr
                 return GenerateMemberAccessor(member, &info);
             },
             [&](Default) {
-                error_ = "invalid accessor in list: " + std::string(accessor->TypeInfo().name);
+                TINT_ICE(Writer, builder_.Diagnostics())
+                    << "invalid accessor in list: " + std::string(accessor->TypeInfo().name);
                 return false;
             });
         if (!ok) {
@@ -1092,7 +1095,8 @@ uint32_t Builder::GenerateIdentifierExpression(const ast::IdentifierExpression* 
             return LookupVariableID(user->Variable());
         }
     }
-    error_ = "identifier '" + expr->identifier->symbol.Name() + "' does not resolve to a variable";
+    TINT_ICE(Writer, builder_.Diagnostics())
+        << "identifier '" + expr->identifier->symbol.Name() + "' does not resolve to a variable";
     return 0;
 }
 
@@ -1186,7 +1190,7 @@ uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
             return GenerateValueConstructorOrConversion(call, var);
         }
     }
-    error_ = "unknown constructor expression";
+    TINT_ICE(Writer, builder_.Diagnostics()) << "unknown constructor expression";
     return 0;
 }
 
@@ -1349,7 +1353,7 @@ uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
                 ops.push_back(Operand(extract_id));
             }
         } else {
-            error_ = "Unhandled type cast value type";
+            TINT_ICE(Writer, builder_.Diagnostics()) << "Unhandled type cast value type";
             return 0;
         }
     }
@@ -1489,7 +1493,8 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
             zero_id = GenerateConstantIfNeeded(ScalarConstant::I32(0));
             one_id = GenerateConstantIfNeeded(ScalarConstant::I32(1));
         } else {
-            error_ = "invalid destination type for bool conversion";
+            TINT_ICE(Writer, builder_.Diagnostics())
+                << "invalid destination type for bool conversion";
             return false;
         }
         if (auto* to_vec = to_type->As<type::Vector>()) {
@@ -1525,9 +1530,9 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
     }
 
     if (op == spv::Op::OpNop) {
-        error_ =
-            "unable to determine conversion type for cast, from: " + from_type->FriendlyName() +
-            " to: " + to_type->FriendlyName();
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "unable to determine conversion type for cast, from: " + from_type->FriendlyName() +
+                   " to: " + to_type->FriendlyName();
         return 0;
     }
 
@@ -1572,9 +1577,9 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::LiteralExpression* lit) {
                     return;
             }
         },
-        [&](Default) { error_ = "unknown literal type"; });
+        [&](Default) { TINT_ICE(Writer, builder_.Diagnostics()) << "unknown literal type"; });
 
-    if (!error_.empty()) {
+    if (has_error()) {
         return false;
     }
 
@@ -1645,14 +1650,15 @@ uint32_t Builder::GenerateConstantIfNeeded(const constant::Value* constant) {
         [&](const type::Array* a) {
             auto count = a->ConstantCount();
             if (!count) {
-                error_ = type::Array::kErrExpectedConstantCount;
+                TINT_ICE(Writer, builder_.Diagnostics()) << type::Array::kErrExpectedConstantCount;
                 return static_cast<uint32_t>(0);
             }
             return composite(count.value());
         },
         [&](const type::Struct* s) { return composite(s->Members().Length()); },
         [&](Default) {
-            error_ = "unhandled constant type: " + ty->FriendlyName();
+            TINT_ICE(Writer, builder_.Diagnostics())
+                << "unhandled constant type: " + ty->FriendlyName();
             return 0;
         });
 }
@@ -1963,7 +1969,8 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
 
         // This should already have been validated by resolver
         if (lhs_mat->rows() != rhs_mat->rows() || lhs_mat->columns() != rhs_mat->columns()) {
-            error_ = "matrices must have same dimensionality for add or subtract";
+            TINT_ICE(Writer, builder_.Diagnostics())
+                << "matrices must have same dimensionality for add or subtract";
             return 0;
         }
 
@@ -2008,7 +2015,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
         } else if (lhs_is_bool_or_vec) {
             op = spv::Op::OpLogicalAnd;
         } else {
-            error_ = "invalid and expression";
+            TINT_ICE(Writer, builder_.Diagnostics()) << "invalid and expression";
             return 0;
         }
     } else if (expr->IsAdd()) {
@@ -2029,7 +2036,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
         } else if (lhs_is_integer_or_vec) {
             op = spv::Op::OpIEqual;
         } else {
-            error_ = "invalid equal expression";
+            TINT_ICE(Writer, builder_.Diagnostics()) << "invalid equal expression";
             return 0;
         }
     } else if (expr->IsGreaterThan()) {
@@ -2109,7 +2116,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
             // float matrix * matrix
             op = spv::Op::OpMatrixTimesMatrix;
         } else {
-            error_ = "invalid multiply expression";
+            TINT_ICE(Writer, builder_.Diagnostics()) << "invalid multiply expression";
             return 0;
         }
     } else if (expr->IsNotEqual()) {
@@ -2120,7 +2127,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
         } else if (lhs_is_integer_or_vec) {
             op = spv::Op::OpINotEqual;
         } else {
-            error_ = "invalid not-equal expression";
+            TINT_ICE(Writer, builder_.Diagnostics()) << "invalid not-equal expression";
             return 0;
         }
     } else if (expr->IsOr()) {
@@ -2129,7 +2136,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
         } else if (lhs_is_bool_or_vec) {
             op = spv::Op::OpLogicalOr;
         } else {
-            error_ = "invalid and expression";
+            TINT_ICE(Writer, builder_.Diagnostics()) << "invalid and expression";
             return 0;
         }
     } else if (expr->IsShiftLeft()) {
@@ -2144,7 +2151,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
     } else if (expr->IsXor()) {
         op = spv::Op::OpBitwiseXor;
     } else {
-        error_ = "unknown binary expression";
+        TINT_ICE(Writer, builder_.Diagnostics()) << "unknown binary expression";
         return 0;
     }
 
@@ -2205,7 +2212,8 @@ uint32_t Builder::GenerateFunctionCall(const sem::Call* call, const sem::Functio
 
     auto func_id = func_symbol_to_id_[ident->symbol];
     if (func_id == 0) {
-        error_ = "unable to find called function: " + ident->symbol.Name();
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "unable to find called function: " + ident->symbol.Name();
         return 0;
     }
     ops.push_back(Operand(func_id));
@@ -2309,16 +2317,18 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
         case builtin::Function::kArrayLength: {
             auto* address_of = call->Arguments()[0]->Declaration()->As<ast::UnaryOpExpression>();
             if (!address_of || address_of->op != ast::UnaryOp::kAddressOf) {
-                error_ = "arrayLength() expected pointer to member access, got " +
-                         std::string(address_of->TypeInfo().name);
+                TINT_ICE(Writer, builder_.Diagnostics())
+                    << "arrayLength() expected pointer to member access, got " +
+                           std::string(address_of->TypeInfo().name);
                 return 0;
             }
             auto* array_expr = address_of->expr;
 
             auto* accessor = array_expr->As<ast::MemberAccessorExpression>();
             if (!accessor) {
-                error_ = "arrayLength() expected pointer to member access, got pointer to " +
-                         std::string(array_expr->TypeInfo().name);
+                TINT_ICE(Writer, builder_.Diagnostics())
+                    << "arrayLength() expected pointer to member access, got pointer to " +
+                           std::string(array_expr->TypeInfo().name);
                 return 0;
             }
 
@@ -2330,7 +2340,8 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
 
             auto* type = TypeOf(accessor->object)->UnwrapRef();
             if (!type->Is<type::Struct>()) {
-                error_ = "invalid type (" + type->FriendlyName() + ") for runtime array length";
+                TINT_ICE(Writer, builder_.Diagnostics())
+                    << "invalid type (" + type->FriendlyName() + ") for runtime array length";
                 return 0;
             }
             // Runtime array must be the last member in the structure
@@ -2527,7 +2538,8 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
         default: {
             auto inst_id = builtin_to_glsl_method(builtin);
             if (inst_id == 0) {
-                error_ = "unknown method " + std::string(builtin->str());
+                TINT_ICE(Writer, builder_.Diagnostics())
+                    << "unknown method " + std::string(builtin->str());
                 return 0;
             }
             glsl_std450(inst_id);
@@ -2536,7 +2548,8 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
     }
 
     if (op == spv::Op::OpNop) {
-        error_ = "unable to determine operator for: " + std::string(builtin->str());
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "unable to determine operator for: " + std::string(builtin->str());
         return 0;
     }
 
@@ -2727,7 +2740,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             uint32_t spirv_dims = 0;
             switch (texture_type->dim()) {
                 case type::TextureDimension::kNone:
-                    error_ = "texture dimension is kNone";
+                    TINT_ICE(Writer, builder_.Diagnostics()) << "texture dimension is kNone";
                     return false;
                 case type::TextureDimension::k1d:
                 case type::TextureDimension::k2d:
@@ -2764,7 +2777,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             uint32_t spirv_dims = 0;
             switch (texture_type->dim()) {
                 default:
-                    error_ = "texture is not arrayed";
+                    TINT_ICE(Writer, builder_.Diagnostics()) << "texture is not arrayed";
                     return false;
                 case type::TextureDimension::k2dArray:
                 case type::TextureDimension::kCubeArray:
@@ -2954,7 +2967,8 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     }
 
     if (op == spv::Op::OpNop) {
-        error_ = "unable to determine operator for: " + std::string(builtin->str());
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "unable to determine operator for: " + std::string(builtin->str());
         return false;
     }
 
@@ -2984,8 +2998,8 @@ bool Builder::GenerateControlBarrierBuiltin(const sem::Builtin* builtin) {
         semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
                     static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
     } else {
-        error_ = "unexpected barrier builtin type ";
-        error_ += builtin::str(builtin->Type());
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "unexpected barrier builtin type " << builtin::str(builtin->Type());
         return false;
     }
 
@@ -3559,7 +3573,8 @@ bool Builder::GenerateStatement(const ast::Statement* stmt) {
             return true;  // Not emitted
         },
         [&](Default) {
-            error_ = "unknown statement type: " + std::string(stmt->TypeInfo().name);
+            TINT_ICE(Writer, builder_.Diagnostics())
+                << "unknown statement type: " + std::string(stmt->TypeInfo().name);
             return false;
         });
 }
@@ -3570,7 +3585,7 @@ bool Builder::GenerateVariableDeclStatement(const ast::VariableDeclStatement* st
 
 uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
     if (type == nullptr) {
-        error_ = "attempting to generate type from null type";
+        TINT_ICE(Writer, builder_.Diagnostics()) << "attempting to generate type from null type";
         return 0;
     }
 
@@ -3686,7 +3701,8 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 return true;
             },
             [&](Default) {
-                error_ = "unable to convert type: " + type->FriendlyName();
+                TINT_ICE(Writer, builder_.Diagnostics())
+                    << "unable to convert type: " + type->FriendlyName();
                 return false;
             });
 
@@ -3790,7 +3806,7 @@ bool Builder::GenerateArrayType(const type::Array* arr, const Operand& result) {
     } else {
         auto count = arr->ConstantCount();
         if (!count) {
-            error_ = type::Array::kErrExpectedConstantCount;
+            TINT_ICE(Writer, builder_.Diagnostics()) << type::Array::kErrExpectedConstantCount;
             return static_cast<uint32_t>(0);
         }
 
@@ -3828,7 +3844,7 @@ bool Builder::GeneratePointerType(const type::Pointer* ptr, const Operand& resul
 
     auto stg_class = ConvertAddressSpace(ptr->AddressSpace());
     if (stg_class == SpvStorageClassMax) {
-        error_ = "invalid address space for pointer";
+        TINT_ICE(Writer, builder_.Diagnostics()) << "invalid address space for pointer";
         return false;
     }
 
@@ -3845,7 +3861,7 @@ bool Builder::GenerateReferenceType(const type::Reference* ref, const Operand& r
 
     auto stg_class = ConvertAddressSpace(ref->AddressSpace());
     if (stg_class == SpvStorageClassMax) {
-        error_ = "invalid address space for reference";
+        TINT_ICE(Writer, builder_.Diagnostics()) << "invalid address space for reference";
         return false;
     }
 
@@ -4077,7 +4093,7 @@ bool Builder::push_function_inst(spv::Op op, const OperandList& operands) {
         utils::StringStream ss;
         ss << "Internal error: trying to add SPIR-V instruction " << int(op)
            << " outside a function";
-        error_ = ss.str();
+        TINT_ICE(Writer, builder_.Diagnostics()) << ss.str();
         return false;
     }
     current_function_.push_inst(op, operands);

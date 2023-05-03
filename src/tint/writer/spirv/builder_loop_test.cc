@@ -34,7 +34,7 @@ TEST_F(BuilderTest, Loop_Empty) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
@@ -64,9 +64,9 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -107,9 +107,9 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.Diagnostics();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -151,7 +151,7 @@ TEST_F(BuilderTest, Loop_WithBodyVariableAccessInContinuing) {
     spirv::Builder& b = Build();
 
     b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
 
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%7 = OpTypeInt 32 1
 %6 = OpTypePointer Function %7
@@ -186,7 +186,7 @@ TEST_F(BuilderTest, Loop_WithContinue) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
@@ -217,7 +217,7 @@ TEST_F(BuilderTest, Loop_WithBreak) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
@@ -246,7 +246,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
@@ -277,7 +277,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantNull %5
 )");
@@ -311,7 +311,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_ConditionIsVar) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 %8 = OpTypePointer Function %5
@@ -357,7 +357,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_Nested) {
 
     b.PushFunctionForTesting();
 
-    EXPECT_TRUE(b.GenerateLoopStatement(outer_loop)) << b.error();
+    EXPECT_TRUE(b.GenerateLoopStatement(outer_loop)) << b.Diagnostics();
     EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%9 = OpTypeBool
 %10 = OpConstantTrue %9
 )");
