@@ -207,11 +207,18 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.limits = LimitsForCompilationRequest::Create(limits.v1);
 
     CacheResult<d3d::CompiledShader> compiledShader;
-    DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
-                         d3d::CompileShader);
+    MaybeError compileError = [&]() -> MaybeError {
+        DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
+                             d3d::CompileShader);
+        return {};
+    }();
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         d3d::DumpCompiledShader(device, *compiledShader, compileFlags);
+    }
+
+    if (compileError.IsError()) {
+        return {compileError.AcquireError()};
     }
 
     device->GetBlobCache()->EnsureStored(compiledShader);
