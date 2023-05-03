@@ -593,7 +593,7 @@ struct BuiltinPolyfill::State {
         if (TINT_UNLIKELY(((!type::Type::DeepestElementOf(ty)->IsAnyOf<type::I32, type::U32>())))) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "insertBits polyfill only support i32, u32, and vector of i32 or u32, got "
-                << b.FriendlyName(ty);
+                << ty->FriendlyName();
             return {};
         }
 

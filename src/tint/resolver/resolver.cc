@@ -921,9 +921,8 @@ sem::Statement* Resolver::ConstAssert(const ast::ConstAssert* assertion) {
     }
     auto* cond = expr->ConstantValue();
     if (auto* ty = cond->Type(); !ty->Is<type::Bool>()) {
-        AddError(
-            "const assertion condition must be a bool, got '" + builder_->FriendlyName(ty) + "'",
-            assertion->condition->source);
+        AddError("const assertion condition must be a bool, got '" + ty->FriendlyName() + "'",
+                 assertion->condition->source);
         return nullptr;
     }
     if (!cond->ValueAs<bool>()) {
@@ -1833,8 +1832,8 @@ const sem::ValueExpression* Resolver::Materialize(const sem::ValueExpression* ex
         materialized_val = val.Get();
         if (TINT_UNLIKELY(!materialized_val)) {
             TINT_ICE(Resolver, diagnostics_)
-                << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type())
-                << " -> " << builder_->FriendlyName(concrete_ty) << ") returned invalid value";
+                << decl->source << "ConvertValue(" << expr_val->Type()->FriendlyName() << " -> "
+                << concrete_ty->FriendlyName() << ") returned invalid value";
             return nullptr;
         }
     }
@@ -2590,7 +2589,7 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
         }
         if (!ApplyAddressSpaceUsageToType(address_space, store_ty,
                                           store_ty_expr->Declaration()->source)) {
-            AddNote("while instantiating " + builder_->FriendlyName(out), ident->source);
+            AddNote("while instantiating " + out->FriendlyName(), ident->source);
             return nullptr;
         }
         return out;
@@ -3837,7 +3836,7 @@ const type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) 
 
     if (auto* ty = count_val->Type(); !ty->is_integer_scalar()) {
         AddError("array count must evaluate to a constant integer expression, but is type '" +
-                     builder_->FriendlyName(ty) + "'",
+                     ty->FriendlyName() + "'",
                  count_expr->source);
         return nullptr;
     }

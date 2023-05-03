@@ -124,8 +124,8 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
                 utils::GetOrCreate(matrix_convs, HelperFunctionKey{{src_type, dst_type}}, [&] {
                     auto name = b.Symbols().New(
                         "convert_mat" + std::to_string(src_type->columns()) + "x" +
-                        std::to_string(src_type->rows()) + "_" + b.FriendlyName(src_type->type()) +
-                        "_" + b.FriendlyName(dst_type->type()));
+                        std::to_string(src_type->rows()) + "_" + src_type->type()->FriendlyName() +
+                        "_" + dst_type->type()->FriendlyName());
                     b.Func(name,
                            utils::Vector{
                                b.Param("value", CreateASTTypeFor(ctx, src_type)),

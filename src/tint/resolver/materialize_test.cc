@@ -75,8 +75,6 @@ static std::ostream& operator<<(std::ostream& o, Expectation m) {
 template <typename CASE>
 class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
   protected:
-    using ProgramBuilder::FriendlyName;
-
     void CheckTypesAndValues(const sem::ValueExpression* expr,
                              const tint::type::Type* expected_sem_ty,
                              const std::variant<AInt, AFloat>& expected_value) {

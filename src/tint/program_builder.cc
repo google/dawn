@@ -113,19 +113,6 @@ const type::Type* ProgramBuilder::TypeOf(const ast::TypeDecl* type_decl) const {
     return Sem().Get(type_decl);
 }
 
-std::string ProgramBuilder::FriendlyName(ast::Type type) const {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL(ProgramBuilder, type, ID());
-    return type.expr ? type->identifier->symbol.Name() : "<null>";
-}
-
-std::string ProgramBuilder::FriendlyName(const type::Type* type) const {
-    return type ? type->FriendlyName() : "<null>";
-}
-
-std::string ProgramBuilder::FriendlyName(std::nullptr_t) const {
-    return "<null>";
-}
-
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}
 
 const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Expression* expr) {

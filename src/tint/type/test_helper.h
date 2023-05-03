@@ -45,15 +45,15 @@ using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 }  // namespace tint::type
 
 /// Helper macro for testing that a type was as expected
-#define EXPECT_TYPE(GOT, EXPECT)                                         \
-    do {                                                                 \
-        const type::Type* got = GOT;                                     \
-        const type::Type* expect = EXPECT;                               \
-        if (got != expect) {                                             \
-            ADD_FAILURE() << #GOT " != " #EXPECT "\n"                    \
-                          << "  " #GOT ": " << FriendlyName(got) << "\n" \
-                          << "  " #EXPECT ": " << FriendlyName(expect);  \
-        }                                                                \
+#define EXPECT_TYPE(GOT, EXPECT)                                                                \
+    do {                                                                                        \
+        const type::Type* got = GOT;                                                            \
+        const type::Type* expect = EXPECT;                                                      \
+        if (got != expect) {                                                                    \
+            ADD_FAILURE() << #GOT " != " #EXPECT "\n"                                           \
+                          << "  " #GOT ": " << (got ? got->FriendlyName() : "<null>") << "\n"   \
+                          << "  " #EXPECT ": " << (expect ? expect->FriendlyName() : "<null>"); \
+        }                                                                                       \
     } while (false)
 
 #endif  // SRC_TINT_TYPE_TEST_HELPER_H_

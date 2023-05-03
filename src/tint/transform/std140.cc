@@ -414,7 +414,7 @@ struct Std140::State {
                     auto std140_mat = std140_mats.GetOrCreate(mat, [&] {
                         auto name = b.Symbols().New("mat" + std::to_string(mat->columns()) + "x" +
                                                     std::to_string(mat->rows()) + "_" +
-                                                    src->FriendlyName(mat->type()));
+                                                    mat->type()->FriendlyName());
                         auto members =
                             DecomposedMatrixStructMembers(mat, "col", mat->Align(), mat->Size());
                         b.Structure(name, members);
@@ -652,7 +652,7 @@ struct Std140::State {
             [&](const type::F16*) { return "f16"; },
             [&](Default) {
                 TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type for conversion name: " << src->FriendlyName(ty);
+                    << "unhandled type for conversion name: " << ty->FriendlyName();
                 return "";
             });
     }
@@ -728,7 +728,7 @@ struct Std140::State {
                         stmts.Push(b.Return(b.Call(mat_ty, std::move(mat_args))));
                     } else {
                         TINT_ICE(Transform, b.Diagnostics())
-                            << "failed to find std140 matrix info for: " << src->FriendlyName(ty);
+                            << "failed to find std140 matrix info for: " << ty->FriendlyName();
                     }
                 },  //
                 [&](const type::Array* arr) {
@@ -758,7 +758,7 @@ struct Std140::State {
                 },
                 [&](Default) {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for conversion: " << src->FriendlyName(ty);
+                        << "unhandled type for conversion: " << ty->FriendlyName();
                 });
 
             // Generate the function
@@ -1104,7 +1104,7 @@ struct Std140::State {
                 },  //
                 [&](Default) -> ExprTypeName {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for access chain: " << src->FriendlyName(ty);
+                        << "unhandled type for access chain: " << ty->FriendlyName();
                     return {};
                 });
         }
@@ -1125,7 +1125,7 @@ struct Std140::State {
                 },  //
                 [&](Default) -> ExprTypeName {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for access chain: " << src->FriendlyName(ty);
+                        << "unhandled type for access chain: " << ty->FriendlyName();
                     return {};
                 });
         }
@@ -1154,7 +1154,7 @@ struct Std140::State {
             },  //
             [&](Default) -> ExprTypeName {
                 TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type for access chain: " << src->FriendlyName(ty);
+                    << "unhandled type for access chain: " << ty->FriendlyName();
                 return {};
             });
     }

@@ -1717,7 +1717,7 @@ uint32_t Builder::GenerateConstantIfNeeded(const constant::Value* constant) {
         },
         [&](const type::Struct* s) { return composite(s->Members().Length()); },
         [&](Default) {
-            error_ = "unhandled constant type: " + builder_.FriendlyName(ty);
+            error_ = "unhandled constant type: " + ty->FriendlyName();
             return 0;
         });
 }

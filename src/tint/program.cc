@@ -134,19 +134,6 @@ const type::Type* Program::TypeOf(const ast::TypeDecl* type_decl) const {
     return Sem().Get(type_decl);
 }
 
-std::string Program::FriendlyName(ast::Type type) const {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL(Program, type, ID());
-    return type ? type->identifier->symbol.Name() : "<null>";
-}
-
-std::string Program::FriendlyName(const type::Type* type) const {
-    return type ? type->FriendlyName() : "<null>";
-}
-
-std::string Program::FriendlyName(std::nullptr_t) const {
-    return "<null>";
-}
-
 void Program::AssertNotMoved() const {
     TINT_ASSERT(Program, !moved_);
 }

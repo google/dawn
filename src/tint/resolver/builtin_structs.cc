@@ -128,12 +128,12 @@ type::Struct* CreateModfResult(ProgramBuilder& b, const type::Type* ty) {
                 },
                 [&](Default) {
                     TINT_ICE(Resolver, b.Diagnostics())
-                        << "unhandled modf type: " << b.FriendlyName(ty);
+                        << "unhandled modf type: " << ty->FriendlyName();
                     return nullptr;
                 });
         },
         [&](Default) {
-            TINT_ICE(Resolver, b.Diagnostics()) << "unhandled modf type: " << b.FriendlyName(ty);
+            TINT_ICE(Resolver, b.Diagnostics()) << "unhandled modf type: " << ty->FriendlyName();
             return nullptr;
         });
 }
@@ -208,12 +208,12 @@ type::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* ty) {
                 },
                 [&](Default) {
                     TINT_ICE(Resolver, b.Diagnostics())
-                        << "unhandled frexp type: " << b.FriendlyName(ty);
+                        << "unhandled frexp type: " << ty->FriendlyName();
                     return nullptr;
                 });
         },
         [&](Default) {
-            TINT_ICE(Resolver, b.Diagnostics()) << "unhandled frexp type: " << b.FriendlyName(ty);
+            TINT_ICE(Resolver, b.Diagnostics()) << "unhandled frexp type: " << ty->FriendlyName();
             return nullptr;
         });
 }
@@ -231,7 +231,7 @@ type::Struct* CreateAtomicCompareExchangeResult(ProgramBuilder& b, const type::T
         },
         [&](Default) {
             TINT_ICE(Resolver, b.Diagnostics())
-                << "unhandled atomic_compare_exchange type: " << b.FriendlyName(ty);
+                << "unhandled atomic_compare_exchange type: " << ty->FriendlyName();
             return nullptr;
         });
 }

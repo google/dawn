@@ -251,7 +251,7 @@ struct Robustness::State {
             [&](Default) -> const ast::Expression* {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "unhandled object type in robustness of array index: "
-                    << src->FriendlyName(obj_type->UnwrapRef());
+                    << obj_type->UnwrapRef()->FriendlyName();
                 return nullptr;
             });
     }

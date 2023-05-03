@@ -271,7 +271,7 @@ ConstEval::Result ScalarConvert(const constant::Scalar<T>* scalar,
             // --- Below this point are the failure cases ---
         } else if constexpr (IsAbstract<FROM>) {
             // [abstract-numeric -> x] - materialization failure
-            auto msg = OverflowErrorMessage(scalar->value, builder.FriendlyName(target_ty));
+            auto msg = OverflowErrorMessage(scalar->value, target_ty->FriendlyName());
             if (use_runtime_semantics) {
                 builder.Diagnostics().add_warning(tint::diag::System::Resolver, msg, source);
                 switch (conv.Failure()) {
@@ -287,7 +287,7 @@ ConstEval::Result ScalarConvert(const constant::Scalar<T>* scalar,
         } else if constexpr (IsFloatingPoint<TO>) {
             // [x -> floating-point] - number not exactly representable
             // https://www.w3.org/TR/WGSL/#floating-point-conversion
-            auto msg = OverflowErrorMessage(scalar->value, builder.FriendlyName(target_ty));
+            auto msg = OverflowErrorMessage(scalar->value, target_ty->FriendlyName());
             if (use_runtime_semantics) {
                 builder.Diagnostics().add_warning(tint::diag::System::Resolver, msg, source);
                 switch (conv.Failure()) {
@@ -534,7 +534,7 @@ ConstEval::Result ConstEval::CreateScalar(const Source& source, const type::Type
 
     if constexpr (IsFloatingPoint<T>) {
         if (!std::isfinite(v.value)) {
-            AddError(OverflowErrorMessage(v, builder.FriendlyName(t)), source);
+            AddError(OverflowErrorMessage(v, t->FriendlyName()), source);
             if (use_runtime_semantics_) {
                 return ZeroValue(t);
             } else {
@@ -2689,7 +2689,7 @@ ConstEval::Result ConstEval::frexp(const type::Type* ty,
             [&](Default) {
                 TINT_ICE(Resolver, builder.Diagnostics())
                     << "unhandled element type for frexp() const-eval: "
-                    << builder.FriendlyName(s->Type());
+                    << s->Type()->FriendlyName();
                 return FractExp{utils::Failure, utils::Failure};
             });
     };
