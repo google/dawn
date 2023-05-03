@@ -19,6 +19,7 @@
 
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/symbol.h"
+#include "src/tint/type/type.h"
 
 // Forward declarations
 namespace tint::ir {
@@ -43,6 +44,22 @@ class Function : public utils::Castable<Function, FlowNode> {
         kVertex,
     };
 
+    /// Attributes attached to return types
+    enum class ReturnAttribute {
+        /// No return attribute
+        kNone,
+        /// Location attribute
+        kLocation,
+        /// Builtin Position attribute
+        kPosition,
+        /// Builtin FragDepth attribute
+        kFragDepth,
+        /// Builtin SampleMask
+        kSampleMask,
+        /// Invariant attribute
+        kInvariant,
+    };
+
     /// Constructor
     Function();
     ~Function() override;
@@ -56,6 +73,13 @@ class Function : public utils::Castable<Function, FlowNode> {
     /// If this is a `compute` entry point, holds the workgroup size information
     std::optional<std::array<uint32_t, 3>> workgroup_size;
 
+    /// The function return type
+    const type::Type* return_type = nullptr;
+    /// The function return attributes if any
+    utils::Vector<ReturnAttribute, 1> return_attributes;
+    /// If the return attribute is `kLocation` this stores the location value.
+    std::optional<uint32_t> return_location;
+
     /// The start target is the first block in a function.
     Block* start_target = nullptr;
     /// The end target is the end of the function. It is used as the branch target if a return is
@@ -64,6 +88,7 @@ class Function : public utils::Castable<Function, FlowNode> {
 };
 
 utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value);
+utils::StringStream& operator<<(utils::StringStream& out, Function::ReturnAttribute value);
 
 }  // namespace tint::ir
 

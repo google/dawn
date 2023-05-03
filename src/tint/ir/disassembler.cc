@@ -20,6 +20,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/switch.h"
+#include "src/tint/type/type.h"
 #include "src/tint/utils/scoped_assignment.h"
 
 namespace tint::ir {
@@ -92,7 +93,9 @@ void Disassembler::Walk(const FlowNode* node) {
         [&](const ir::Function* f) {
             TINT_SCOPED_ASSIGNMENT(in_function_, true);
 
-            Indent() << "%fn" << GetIdForNode(f) << " = func " << f->name.Name();
+            Indent() << "%fn" << GetIdForNode(f) << " = func " << f->name.Name() << "("
+                     << f->return_type->FriendlyName() << ")";
+
             if (f->pipeline_stage != Function::PipelineStage::kUndefined) {
                 out_ << " [@" << f->pipeline_stage;
 
@@ -101,6 +104,18 @@ void Disassembler::Walk(const FlowNode* node) {
                     out_ << " @workgroup_size(" << arr[0] << ", " << arr[1] << ", " << arr[2]
                          << ")";
                 }
+
+                if (!f->return_attributes.IsEmpty()) {
+                    out_ << " ra:";
+
+                    for (auto attr : f->return_attributes) {
+                        out_ << " @" << attr;
+                        if (attr == Function::ReturnAttribute::kLocation) {
+                            out_ << "(" << f->return_location.value() << ")";
+                        }
+                    }
+                }
+
                 out_ << "]";
             }
             out_ << std::endl;

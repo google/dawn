@@ -36,4 +36,22 @@ utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStag
     return out << "<unknown>";
 }
 
+utils::StringStream& operator<<(utils::StringStream& out, Function::ReturnAttribute value) {
+    switch (value) {
+        case Function::ReturnAttribute::kLocation:
+            return out << "location";
+        case Function::ReturnAttribute::kFragDepth:
+            return out << "frag_depth";
+        case Function::ReturnAttribute::kSampleMask:
+            return out << "sample_mask";
+        case Function::ReturnAttribute::kPosition:
+            return out << "position";
+        case Function::ReturnAttribute::kInvariant:
+            return out << "invariant";
+        default:
+            break;
+    }
+    return out << "<unknown>";
+}
+
 }  // namespace tint::ir

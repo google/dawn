@@ -39,6 +39,7 @@
 #include "src/tint/ast/identifier_expression.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/int_literal_expression.h"
+#include "src/tint/ast/invariant_attribute.h"
 #include "src/tint/ast/let.h"
 #include "src/tint/ast/literal_expression.h"
 #include "src/tint/ast/loop_statement.h"
@@ -211,6 +212,7 @@ void BuilderImpl::EmitFunction(const ast::Function* ast_func) {
 
     ast_to_flow_[ast_func] = ir_func;
 
+    const auto* sem = program_->Sem().Get(ast_func);
     if (ast_func->IsEntryPoint()) {
         builder.ir.entry_points.Push(ir_func);
 
@@ -224,7 +226,6 @@ void BuilderImpl::EmitFunction(const ast::Function* ast_func) {
             case ast::PipelineStage::kCompute: {
                 ir_func->pipeline_stage = Function::PipelineStage::kCompute;
 
-                const auto* sem = program_->Sem().Get(ast_func);
                 auto wg_size = sem->WorkgroupSize();
 
                 uint32_t x = wg_size[0].value();
@@ -246,7 +247,49 @@ void BuilderImpl::EmitFunction(const ast::Function* ast_func) {
                 return;
             }
         }
+
+        for (auto* attr : ast_func->return_type_attributes) {
+            tint::Switch(
+                attr,  //
+                [&](const ast::LocationAttribute*) {
+                    ir_func->return_attributes.Push(Function::ReturnAttribute::kLocation);
+                },
+                [&](const ast::InvariantAttribute*) {
+                    ir_func->return_attributes.Push(Function::ReturnAttribute::kInvariant);
+                },
+                [&](const ast::BuiltinAttribute* b) {
+                    if (auto* ident_sem =
+                            program_->Sem()
+                                .Get(b)
+                                ->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>()) {
+                        switch (ident_sem->Value()) {
+                            case builtin::BuiltinValue::kPosition:
+                                ir_func->return_attributes.Push(
+                                    Function::ReturnAttribute::kPosition);
+                                break;
+                            case builtin::BuiltinValue::kFragDepth:
+                                ir_func->return_attributes.Push(
+                                    Function::ReturnAttribute::kFragDepth);
+                                break;
+                            case builtin::BuiltinValue::kSampleMask:
+                                ir_func->return_attributes.Push(
+                                    Function::ReturnAttribute::kSampleMask);
+                                break;
+                            default:
+                                TINT_ICE(IR, diagnostics_)
+                                    << "Unknown builtin value in return attributes "
+                                    << ident_sem->Value();
+                                return;
+                        }
+                    } else {
+                        TINT_ICE(IR, diagnostics_) << "Builtin attribute sem invalid";
+                        return;
+                    }
+                });
+        }
     }
+    ir_func->return_type = sem->ReturnType()->Clone(clone_ctx_.type_ctx);
+    ir_func->return_location = sem->ReturnLocation();
 
     {
         FlowStackScope scope(this, ir_func);
@@ -400,9 +443,9 @@ void BuilderImpl::EmitBlock(const ast::BlockStatement* block) {
     scopes_.Push();
     TINT_DEFER(scopes_.Pop());
 
-    // Note, this doesn't need to emit a Block as the current block flow node should be
-    // sufficient as the blocks all get flattened. Each flow control node will inject the basic
-    // blocks it requires.
+    // Note, this doesn't need to emit a Block as the current block flow node should be sufficient
+    // as the blocks all get flattened. Each flow control node will inject the basic blocks it
+    // requires.
     EmitStatements(block->statements);
 }
 
@@ -439,9 +482,8 @@ void BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
     }
     current_flow_block = nullptr;
 
-    // If both branches went somewhere, then they both returned, continued or broke. So,
-    // there is no need for the if merge-block and there is nothing to branch to the merge
-    // block anyway.
+    // If both branches went somewhere, then they both returned, continued or broke. So, there is no
+    // need for the if merge-block and there is nothing to branch to the merge block anyway.
     if (IsConnected(if_node->merge.target)) {
         current_flow_block = if_node->merge.target->As<Block>();
     }
@@ -472,8 +514,8 @@ void BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
         BranchToIfNeeded(loop_node->start.target);
     }
 
-    // The loop merge can get disconnected if the loop returns directly, or the continuing
-    // target branches, eventually, to the merge, but nothing branched to the continuing target.
+    // The loop merge can get disconnected if the loop returns directly, or the continuing target
+    // branches, eventually, to the merge, but nothing branched to the continuing target.
     current_flow_block = loop_node->merge.target->As<Block>();
     if (!IsConnected(loop_node->merge.target)) {
         current_flow_block = nullptr;
@@ -661,9 +703,9 @@ void BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
 }
 
 // Discard is being treated as an instruction. The semantics in WGSL is demote_to_helper, so the
-// code has to continue as before it just predicates writes. If WGSL grows some kind of
-// terminating discard that would probably make sense as a FlowNode but would then require
-// figuring out the multi-level exit that is triggered.
+// code has to continue as before it just predicates writes. If WGSL grows some kind of terminating
+// discard that would probably make sense as a FlowNode but would then require figuring out the
+// multi-level exit that is triggered.
 void BuilderImpl::EmitDiscard(const ast::DiscardStatement*) {
     auto* inst = builder.Discard();
     current_flow_block->instructions.Push(inst);
@@ -783,8 +825,8 @@ void BuilderImpl::EmitVariable(const ast::Variable* var) {
             // should never be used.
             //
             // TODO(dsinclair): Probably want to store the const variable somewhere and then in
-            // identifier expression log an error if we ever see a const identifier. Add this
-            // when identifiers and variables are supported.
+            // identifier expression log an error if we ever see a const identifier. Add this when
+            // identifiers and variables are supported.
         },
         [&](Default) {
             add_error(var->source, "unknown variable: " + std::string(var->TypeInfo().name));
