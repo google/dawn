@@ -764,6 +764,7 @@ Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescri
             if (descriptor == nullptr) {
                 return {};
             }
+            cmd->label = std::string(descriptor->label ? descriptor->label : "");
 
             // Record timestamp writes at the beginning and end of compute pass. The timestamp write
             // at the end also be needed in BeginComputePassCmd because it's required by compute
@@ -839,6 +840,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             mEncodingContext.WillBeginRenderPass();
             BeginRenderPassCmd* cmd =
                 allocator->Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
+            cmd->label = std::string(descriptor->label ? descriptor->label : "");
 
             cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
             attachmentState = cmd->attachmentState;

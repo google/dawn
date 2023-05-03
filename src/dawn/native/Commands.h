@@ -17,6 +17,7 @@
 
 #include <array>
 #include <bitset>
+#include <string>
 #include <vector>
 
 #include "dawn/common/Constants.h"
@@ -83,6 +84,7 @@ struct BeginComputePassCmd {
 
     TimestampWrite beginTimestamp;
     TimestampWrite endTimestamp;
+    std::string label;
 };
 
 struct BeginOcclusionQueryCmd {
@@ -135,6 +137,7 @@ struct BeginRenderPassCmd {
     Ref<QuerySetBase> occlusionQuerySet;
     TimestampWrite beginTimestamp;
     TimestampWrite endTimestamp;
+    std::string label;
 };
 
 struct BufferCopy {
