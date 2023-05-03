@@ -3,17 +3,17 @@ void unused_entry_point() {
   return;
 }
 
-typedef int tint_workgroupUniformLoad_ret[128];
-tint_workgroupUniformLoad_ret tint_workgroupUniformLoad(inout int p[128]) {
+groupshared int v[128];
+
+typedef int tint_workgroupUniformLoad_v_ret[128];
+tint_workgroupUniformLoad_v_ret tint_workgroupUniformLoad_v() {
   GroupMemoryBarrierWithGroupSync();
-  const int result[128] = p;
+  const int result[128] = v;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
-groupshared int v[128];
-
 int foo() {
-  const int tint_symbol[128] = tint_workgroupUniformLoad(v);
+  const int tint_symbol[128] = tint_workgroupUniformLoad_v();
   return tint_symbol[0];
 }

@@ -3,17 +3,17 @@ void unused_entry_point() {
   return;
 }
 
-typedef int tint_workgroupUniformLoad_ret[4];
-tint_workgroupUniformLoad_ret tint_workgroupUniformLoad(inout int p[4]) {
+groupshared int v[4];
+
+typedef int tint_workgroupUniformLoad_v_ret[4];
+tint_workgroupUniformLoad_v_ret tint_workgroupUniformLoad_v() {
   GroupMemoryBarrierWithGroupSync();
-  const int result[4] = p;
+  const int result[4] = v;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
-groupshared int v[4];
-
 typedef int foo_ret[4];
 foo_ret foo() {
-  return tint_workgroupUniformLoad(v);
+  return tint_workgroupUniformLoad_v();
 }

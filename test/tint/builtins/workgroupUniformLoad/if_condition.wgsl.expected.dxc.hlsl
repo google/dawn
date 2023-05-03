@@ -3,17 +3,17 @@ void unused_entry_point() {
   return;
 }
 
-bool tint_workgroupUniformLoad(inout bool p) {
+groupshared bool v;
+
+bool tint_workgroupUniformLoad_v() {
   GroupMemoryBarrierWithGroupSync();
-  const bool result = p;
+  const bool result = v;
   GroupMemoryBarrierWithGroupSync();
   return result;
 }
 
-groupshared bool v;
-
 int foo() {
-  if (tint_workgroupUniformLoad(v)) {
+  if (tint_workgroupUniformLoad_v()) {
     return 42;
   }
   return 0;

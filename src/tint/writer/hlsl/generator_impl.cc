@@ -176,8 +176,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
 
     manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
 
-    manager.Add<transform::DirectVariableAccess>();
-
     // LocalizeStructArrayAssignment must come after:
     // * SimplifyPointers, because it assumes assignment to arrays in structs are
     // done directly, not indirectly.
@@ -229,8 +227,10 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         polyfills.workgroup_uniform_load = true;
         data.Add<transform::BuiltinPolyfill::Config>(polyfills);
-        manager.Add<transform::BuiltinPolyfill>();
+        manager.Add<transform::BuiltinPolyfill>();  // Must come before DirectVariableAccess
     }
+
+    manager.Add<transform::DirectVariableAccess>();
 
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as

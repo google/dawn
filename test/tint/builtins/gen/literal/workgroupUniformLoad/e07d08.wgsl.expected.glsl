@@ -1,20 +1,20 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-float16_t tint_workgroupUniformLoad(inout float16_t p) {
+shared float16_t arg_0;
+float16_t tint_workgroupUniformLoad_arg_0() {
   barrier();
-  float16_t result = p;
+  float16_t result = arg_0;
   barrier();
   return result;
 }
 
-shared float16_t arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   float16_t inner;
 } prevent_dce;
 
 void workgroupUniformLoad_e07d08() {
-  float16_t res = tint_workgroupUniformLoad(arg_0);
+  float16_t res = tint_workgroupUniformLoad_arg_0();
   prevent_dce.inner = res;
 }
 

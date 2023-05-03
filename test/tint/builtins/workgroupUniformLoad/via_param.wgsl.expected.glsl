@@ -4,20 +4,21 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void unused_entry_point() {
   return;
 }
-int tint_workgroupUniformLoad(inout int p) {
+shared int v[4];
+int tint_workgroupUniformLoad_v_X(uint p[1]) {
   barrier();
-  int result = p;
+  int result = v[p[0]];
   barrier();
   return result;
 }
 
-shared int v[4];
 int foo_v_X(uint p[1]) {
-  return tint_workgroupUniformLoad(v[p[0]]);
+  uint tint_symbol[1] = uint[1](p[0u]);
+  return tint_workgroupUniformLoad_v_X(tint_symbol);
 }
 
 int bar() {
-  uint tint_symbol[1] = uint[1](0u);
-  return foo_v_X(tint_symbol);
+  uint tint_symbol_1[1] = uint[1](0u);
+  return foo_v_X(tint_symbol_1);
 }
 

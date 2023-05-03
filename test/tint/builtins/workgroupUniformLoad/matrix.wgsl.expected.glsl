@@ -4,15 +4,15 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void unused_entry_point() {
   return;
 }
-mat3 tint_workgroupUniformLoad(inout mat3 p) {
+shared mat3 v;
+mat3 tint_workgroupUniformLoad_v() {
   barrier();
-  mat3 result = p;
+  mat3 result = v;
   barrier();
   return result;
 }
 
-shared mat3 v;
 mat3 foo() {
-  return tint_workgroupUniformLoad(v);
+  return tint_workgroupUniformLoad_v();
 }
 

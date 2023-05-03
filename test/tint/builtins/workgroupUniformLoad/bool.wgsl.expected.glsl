@@ -4,15 +4,15 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void unused_entry_point() {
   return;
 }
-bool tint_workgroupUniformLoad(inout bool p) {
+shared bool v;
+bool tint_workgroupUniformLoad_v() {
   barrier();
-  bool result = p;
+  bool result = v;
   barrier();
   return result;
 }
 
-shared bool v;
 bool foo() {
-  return tint_workgroupUniformLoad(v);
+  return tint_workgroupUniformLoad_v();
 }
 
