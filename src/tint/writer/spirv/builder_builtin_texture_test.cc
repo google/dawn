@@ -3726,16 +3726,16 @@ TEST_P(BuiltinTextureTest, Call) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
     ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.error();
     ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
     EXPECT_EQ(b.GenerateExpression(call), 8u) << b.error();
 
     auto expected = expected_texture_overload(param.overload);
-    EXPECT_EQ(expected.types, "\n" + DumpInstructions(b.types()));
-    EXPECT_EQ(expected.instructions, "\n" + DumpInstructions(b.functions()[0].instructions()));
-    EXPECT_EQ(expected.capabilities, "\n" + DumpInstructions(b.capabilities()));
+    EXPECT_EQ(expected.types, "\n" + DumpInstructions(b.Module().Types()));
+    EXPECT_EQ(expected.instructions, "\n" + DumpInstructions(b.CurrentFunction().instructions()));
+    EXPECT_EQ(expected.capabilities, "\n" + DumpInstructions(b.Module().Capabilities()));
 }
 
 // Check the SPIRV generated passes validation

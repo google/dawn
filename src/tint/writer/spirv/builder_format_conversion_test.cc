@@ -39,11 +39,11 @@ TEST_P(ImageFormatConversionTest, ImageFormatConversion) {
     EXPECT_EQ(b.convert_texel_format_to_spv(param.ast_format), param.spv_format);
 
     if (param.extended_format) {
-        EXPECT_EQ(DumpInstructions(b.capabilities()),
+        EXPECT_EQ(DumpInstructions(b.Module().Capabilities()),
                   R"(OpCapability StorageImageExtendedFormats
 )");
     } else {
-        EXPECT_EQ(DumpInstructions(b.capabilities()), "");
+        EXPECT_EQ(DumpInstructions(b.Module().Capabilities()), "");
     }
 }
 

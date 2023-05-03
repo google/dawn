@@ -31,7 +31,7 @@ TEST_F(BuilderTest, Literal_Bool_True) {
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
 )");
 }
@@ -46,7 +46,7 @@ TEST_F(BuilderTest, Literal_Bool_False) {
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeBool
 %2 = OpConstantFalse %1
 )");
 }
@@ -65,7 +65,7 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
     ASSERT_NE(b.GenerateLiteralIfNeeded(b_true), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
 %3 = OpConstantFalse %1
 )");
@@ -80,7 +80,7 @@ TEST_F(BuilderTest, Literal_I32) {
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 -23
 )");
 }
@@ -96,7 +96,7 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
     ASSERT_NE(b.GenerateLiteralIfNeeded(i2), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 -23
 )");
 }
@@ -111,7 +111,7 @@ TEST_F(BuilderTest, Literal_U32) {
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstant %1 23
 )");
 }
@@ -127,7 +127,7 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
     ASSERT_NE(b.GenerateLiteralIfNeeded(i2), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstant %1 23
 )");
 }
@@ -142,7 +142,7 @@ TEST_F(BuilderTest, Literal_F32) {
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 23.2450008
 )");
 }
@@ -158,7 +158,7 @@ TEST_F(BuilderTest, Literal_F32_Dedup) {
     ASSERT_NE(b.GenerateLiteralIfNeeded(i2), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 23.2450008
 )");
 }
@@ -175,7 +175,7 @@ TEST_F(BuilderTest, Literal_F16) {
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 16
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 16
 %2 = OpConstant %1 0x1.73cp+4
 )");
 }
@@ -193,7 +193,7 @@ TEST_F(BuilderTest, Literal_F16_Dedup) {
     ASSERT_NE(b.GenerateLiteralIfNeeded(i2), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 16
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeFloat 16
 %2 = OpConstant %1 0x1.73cp+4
 )");
 }

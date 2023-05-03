@@ -32,10 +32,10 @@ TEST_F(BuilderTest, Loop_Empty) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
@@ -63,17 +63,17 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %9 = OpConstant %3 2
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %5
 %5 = OpLabel
 OpLoopMerge %6 %7 None
@@ -106,18 +106,18 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %9 = OpConstant %3 2
 %10 = OpConstant %3 3
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %5
 %5 = OpLabel
 OpLoopMerge %6 %7 None
@@ -150,15 +150,15 @@ TEST_F(BuilderTest, Loop_WithBodyVariableAccessInContinuing) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%7 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%7 = OpTypeInt 32 1
 %6 = OpTypePointer Function %7
 %8 = OpConstantNull %7
 %9 = OpConstant %7 3
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
@@ -184,10 +184,10 @@ TEST_F(BuilderTest, Loop_WithContinue) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
@@ -215,10 +215,10 @@ TEST_F(BuilderTest, Loop_WithBreak) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
@@ -244,13 +244,13 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
@@ -275,13 +275,13 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantNull %5
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
@@ -309,15 +309,15 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_ConditionIsVar) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 %8 = OpTypePointer Function %5
 %9 = OpConstantNull %5
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
@@ -355,13 +355,13 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_Nested) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     EXPECT_TRUE(b.GenerateLoopStatement(outer_loop)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%9 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%9 = OpTypeBool
 %10 = OpConstantTrue %9
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None

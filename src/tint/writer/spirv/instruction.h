@@ -31,6 +31,11 @@ class Instruction {
     Instruction(spv::Op op, OperandList operands);
     /// Copy Constructor
     Instruction(const Instruction&);
+    /// Copy assignment operator
+    /// @param other the instruction to copy
+    /// @returns the new Instruction
+    Instruction& operator=(const Instruction& other);
+    /// Destructor
     ~Instruction();
 
     /// @returns the instructions op

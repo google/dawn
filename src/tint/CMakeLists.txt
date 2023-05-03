@@ -644,6 +644,8 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/generator_impl.h
     writer/spirv/instruction.cc
     writer/spirv/instruction.h
+    writer/spirv/module.cc
+    writer/spirv/module.h
     writer/spirv/operand.cc
     writer/spirv/operand.h
     writer/spirv/scalar_constant.h
@@ -1208,6 +1210,7 @@ if(TINT_BUILD_TESTS)
       writer/spirv/builder_type_test.cc
       writer/spirv/builder_unary_op_expression_test.cc
       writer/spirv/instruction_test.cc
+      writer/spirv/module_test.cc
       writer/spirv/operand_test.cc
       writer/spirv/scalar_constant_test.cc
       writer/spirv/spv_dump.cc

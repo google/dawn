@@ -31,9 +31,9 @@ TEST_F(BuilderTest, GlobalVar_WithAddressSpace) {
     spirv::Builder& b = Build();
 
     EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+    EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %1 "var"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -50,9 +50,9 @@ TEST_F(BuilderTest, GlobalVar_WithInitializer) {
     EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
     ASSERT_FALSE(b.has_error()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %6 "var"
+    EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %6 "var"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
@@ -73,15 +73,15 @@ TEST_F(BuilderTest, GlobalConst) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 42
 %4 = OpTypePointer Private %1
 %3 = OpVariable %4 Private %2
 %6 = OpTypeVoid
 %5 = OpTypeFunction %6
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].variables()), R"()");
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), R"(OpReturn
 )");
 
     Validate(b);
@@ -98,7 +98,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_Initializer) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 2
@@ -109,8 +109,8 @@ TEST_F(BuilderTest, GlobalConst_Vec_Initializer) {
 %10 = OpTypeVoid
 %9 = OpTypeFunction %10
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].variables()), R"()");
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), R"(OpReturn
 )");
 
     Validate(b);
@@ -128,7 +128,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_F16_Initializer) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 0x1p+0
 %4 = OpConstant %2 0x1p+1
@@ -139,8 +139,8 @@ TEST_F(BuilderTest, GlobalConst_Vec_F16_Initializer) {
 %10 = OpTypeVoid
 %9 = OpTypeFunction %10
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].variables()), R"()");
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), R"(OpReturn
 )");
 
     Validate(b);
@@ -157,7 +157,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AInt_Initializer) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeInt 32 1
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 2
@@ -168,8 +168,8 @@ TEST_F(BuilderTest, GlobalConst_Vec_AInt_Initializer) {
 %10 = OpTypeVoid
 %9 = OpTypeFunction %10
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].variables()), R"()");
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), R"(OpReturn
 )");
 
     Validate(b);
@@ -186,7 +186,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Initializer) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 2
@@ -197,8 +197,8 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Initializer) {
 %10 = OpTypeVoid
 %9 = OpTypeFunction %10
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].variables()), R"()");
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), R"(OpReturn
 )");
 
     Validate(b);
@@ -215,7 +215,7 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Initializer) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 2
@@ -226,8 +226,8 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Initializer) {
 %10 = OpTypeVoid
 %9 = OpTypeFunction %10
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].variables()), R"()");
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), R"(OpReturn
 )");
 
     Validate(b);
@@ -239,12 +239,12 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
     spirv::Builder& b = Build();
 
     EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+    EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %1 "var"
 )");
-    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Binding 2
+    EXPECT_EQ(DumpInstructions(b.Module().Annots()), R"(OpDecorate %1 Binding 2
 OpDecorate %1 DescriptorSet 3
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeSampler
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeSampler
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 )");
@@ -324,7 +324,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
     ASSERT_TRUE(b.Build());
 
-    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
+    EXPECT_EQ(DumpInstructions(b.Module().Annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %4 0 Offset 0
 OpMemberDecorate %4 1 Offset 4
@@ -332,7 +332,7 @@ OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "b_block"
+    EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %3 "b_block"
 OpMemberName %3 0 "inner"
 OpName %4 "A"
 OpMemberName %4 0 "a"
@@ -340,7 +340,7 @@ OpMemberName %4 1 "b"
 OpName %1 "b"
 OpName %8 "unused_entry_point"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeInt 32 1
 %4 = OpTypeStruct %5 %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
@@ -366,21 +366,21 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
     ASSERT_TRUE(b.Build());
 
-    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
+    EXPECT_EQ(DumpInstructions(b.Module().Annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %4 0 Offset 0
 OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "b_block"
+    EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %3 "b_block"
 OpMemberName %3 0 "inner"
 OpName %4 "A"
 OpMemberName %4 0 "a"
 OpName %1 "b"
 OpName %8 "unused_entry_point"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeInt 32 1
 %4 = OpTypeStruct %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
@@ -406,21 +406,21 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
     ASSERT_TRUE(b.Build());
 
-    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
+    EXPECT_EQ(DumpInstructions(b.Module().Annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %4 0 Offset 0
 OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "b_block"
+    EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %3 "b_block"
 OpMemberName %3 0 "inner"
 OpName %4 "A"
 OpMemberName %4 0 "a"
 OpName %1 "b"
 OpName %8 "unused_entry_point"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeInt 32 1
 %4 = OpTypeStruct %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
@@ -447,7 +447,7 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
     ASSERT_TRUE(b.Build());
 
-    EXPECT_EQ(DumpInstructions(b.annots()),
+    EXPECT_EQ(DumpInstructions(b.Module().Annots()),
               R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %4 0 Offset 0
@@ -457,7 +457,7 @@ OpDecorate %1 Binding 0
 OpDecorate %6 DescriptorSet 1
 OpDecorate %6 Binding 0
 )");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "b_block"
+    EXPECT_EQ(DumpInstructions(b.Module().Debug()), R"(OpName %3 "b_block"
 OpMemberName %3 0 "inner"
 OpName %4 "A"
 OpMemberName %4 0 "a"
@@ -465,7 +465,7 @@ OpName %1 "b"
 OpName %6 "c"
 OpName %9 "unused_entry_point"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%5 = OpTypeInt 32 1
 %4 = OpTypeStruct %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
@@ -488,11 +488,11 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 
     EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonReadable
+    EXPECT_EQ(DumpInstructions(b.Module().Annots()), R"(OpDecorate %1 NonReadable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 R32ui
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
@@ -523,7 +523,7 @@ TEST_F(BuilderTest, GlobalVar_WorkgroupWithZeroInit) {
     EXPECT_TRUE(b->GenerateGlobalVariable(var_struct)) << b->error();
     ASSERT_FALSE(b->has_error()) << b->error();
 
-    EXPECT_EQ(DumpInstructions(b->types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b->Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Workgroup %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Workgroup %4

@@ -17,11 +17,11 @@
 
 #include <vector>
 
-#include "src/tint/writer/spirv/builder.h"
+#include "src/tint/writer/spirv/module.h"
 
 namespace tint::writer::spirv {
 
-/// Writer to convert from builder to SPIR-V binary
+/// Writer to convert from module to SPIR-V binary.
 class BinaryWriter {
   public:
     /// Constructor
@@ -32,11 +32,10 @@ class BinaryWriter {
     /// @param bound the bound to output
     void WriteHeader(uint32_t bound);
 
-    /// Writes the given builder data into a binary. Note, this does not emit
-    /// the SPIR-V header. You **must** call WriteHeader() before WriteBuilder()
-    /// if you want the SPIR-V to be emitted.
-    /// @param builder the builder to assemble from
-    void WriteBuilder(Builder* builder);
+    /// Writes the given module data into a binary. Note, this does not emit the SPIR-V header. You
+    /// **must** call WriteHeader() before WriteModule() if you want the SPIR-V to be emitted.
+    /// @param module the module to assemble from
+    void WriteModule(const Module* module);
 
     /// Writes the given instruction into the binary.
     /// @param inst the instruction to assemble

@@ -63,7 +63,7 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
     ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
@@ -71,7 +71,7 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
     EXPECT_EQ(b.GenerateExpression(expr1), 8u) << b.error();
     EXPECT_EQ(b.GenerateExpression(expr2), 17u) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
@@ -85,7 +85,7 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
 %16 = OpConstantComposite %13 %14 %15
 )");
 
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(%9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
@@ -185,7 +185,7 @@ TEST_P(BuiltinBoolTest, Call_Bool_Scalar) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeBool
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -194,7 +194,8 @@ TEST_P(BuiltinBoolTest, Call_Bool_Scalar) {
 )");
 
     // both any and all are 'passthrough' for scalar booleans
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), "%10 = OpLoad %3 %1\nOpReturn\n");
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()),
+              "%10 = OpLoad %3 %1\nOpReturn\n");
 }
 
 TEST_P(BuiltinBoolTest, Call_Bool_Vector) {
@@ -211,7 +212,7 @@ TEST_P(BuiltinBoolTest, Call_Bool_Vector) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeBool
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -225,7 +226,7 @@ TEST_P(BuiltinBoolTest, Call_Bool_Vector) {
 OpReturn
 )",
                                       "${op}", param.op);
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), expected);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          BuiltinBoolTest,
@@ -247,7 +248,7 @@ TEST_F(BuiltinBuilderTest, Call_Select) {
     ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -260,7 +261,7 @@ TEST_F(BuiltinBuilderTest, Call_Select) {
 %12 = OpTypeVoid
 %11 = OpTypeFunction %12
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()),
               R"(%16 = OpLoad %8 %6
 %17 = OpLoad %3 %1
 %18 = OpLoad %3 %1
@@ -294,7 +295,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
@@ -305,13 +306,13 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
 %6 = OpTypeFunction %7
 %11 = OpTypeInt 32 0
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -338,7 +339,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%4 = OpTypeFloat 32
 %5 = OpTypeRuntimeArray %4
@@ -349,13 +350,13 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 %6 = OpTypeFunction %7
 %11 = OpTypeInt 32 0
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 1
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -386,7 +387,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
@@ -397,13 +398,13 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
 %6 = OpTypeFunction %7
 %11 = OpTypeInt 32 0
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -447,7 +448,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
@@ -458,13 +459,13 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
 %6 = OpTypeFunction %7
 %11 = OpTypeInt 32 0
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -2166,7 +2167,7 @@ TEST_P(BuiltinIntTest, Call_SInt_Scalar) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -2179,7 +2180,7 @@ TEST_P(BuiltinIntTest, Call_SInt_Scalar) {
 OpReturn
 )",
                                       "${op}", param.op);
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), expected);
 }
 
 TEST_P(BuiltinIntTest, Call_SInt_Vector) {
@@ -2196,7 +2197,7 @@ TEST_P(BuiltinIntTest, Call_SInt_Vector) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -2210,7 +2211,7 @@ TEST_P(BuiltinIntTest, Call_SInt_Vector) {
 OpReturn
 )",
                                       "${op}", param.op);
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), expected);
 }
 
 TEST_P(BuiltinIntTest, Call_UInt_Scalar) {
@@ -2227,7 +2228,7 @@ TEST_P(BuiltinIntTest, Call_UInt_Scalar) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeInt 32 0
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -2240,7 +2241,7 @@ TEST_P(BuiltinIntTest, Call_UInt_Scalar) {
 OpReturn
 )",
                                       "${op}", param.op);
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), expected);
 }
 
 TEST_P(BuiltinIntTest, Call_UInt_Vector) {
@@ -2257,7 +2258,7 @@ TEST_P(BuiltinIntTest, Call_UInt_Vector) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -2271,7 +2272,7 @@ TEST_P(BuiltinIntTest, Call_UInt_Vector) {
 OpReturn
 )",
                                       "${op}", param.op);
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), expected);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          BuiltinIntTest,
@@ -3279,7 +3280,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot_F32) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -3287,7 +3288,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot_F32) {
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()),
               R"(%11 = OpLoad %3 %1
 %12 = OpLoad %3 %1
 %10 = OpDot %4 %11 %12
@@ -3310,7 +3311,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot_F16) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 16
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 16
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -3318,7 +3319,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot_F16) {
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()),
               R"(%11 = OpLoad %3 %1
 %12 = OpLoad %3 %1
 %10 = OpDot %4 %11 %12
@@ -3339,7 +3340,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot_U32) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -3347,7 +3348,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot_U32) {
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()),
               R"(%11 = OpLoad %3 %1
 %12 = OpLoad %3 %1
 %13 = OpCompositeExtract %4 %11 0
@@ -3378,7 +3379,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot_I32) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -3386,7 +3387,7 @@ TEST_F(BuiltinBuilderTest, Call_Dot_I32) {
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()),
               R"(%11 = OpLoad %3 %1
 %12 = OpLoad %3 %1
 %13 = OpCompositeExtract %4 %11 0
@@ -3427,7 +3428,7 @@ TEST_P(BuiltinDeriveTest, Call_Derivative_Scalar) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -3440,7 +3441,7 @@ TEST_P(BuiltinDeriveTest, Call_Derivative_Scalar) {
 OpReturn
 )",
                                       "${op}", param.op);
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), expected);
 }
 
 TEST_P(BuiltinDeriveTest, Call_Derivative_Vector) {
@@ -3461,12 +3462,12 @@ TEST_P(BuiltinDeriveTest, Call_Derivative_Vector) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     if (param.name != "dpdx" && param.name != "dpdy" && param.name != "fwidth") {
-        EXPECT_EQ(DumpInstructions(b.capabilities()),
+        EXPECT_EQ(DumpInstructions(b.Module().Capabilities()),
                   R"(OpCapability DerivativeControl
 )");
     }
 
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -3480,7 +3481,7 @@ TEST_P(BuiltinDeriveTest, Call_Derivative_Vector) {
 OpReturn
 )",
                                       "${op}", param.op);
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+    EXPECT_EQ(DumpInstructions(b.Module().Functions()[0].instructions()), expected);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          BuiltinDeriveTest,
@@ -3531,7 +3532,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeInt 32 0
 %6 = OpTypeInt 32 1
@@ -3546,7 +3547,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
 %15 = OpTypePointer StorageBuffer %5
 %19 = OpTypePointer StorageBuffer %6
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(%16 = OpAccessChain %15 %1 %13 %13
@@ -3555,7 +3556,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
 %17 = OpAtomicLoad %6 %20 %12 %13
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -3597,7 +3598,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeInt 32 0
 %6 = OpTypeInt 32 1
@@ -3617,7 +3618,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
 %22 = OpTypePointer StorageBuffer %5
 %27 = OpTypePointer StorageBuffer %6
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(OpStore %12 %11
@@ -3630,7 +3631,7 @@ OpAtomicStore %23 %11 %20 %24
 OpAtomicStore %28 %11 %20 %29
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -3668,7 +3669,7 @@ TEST_P(Builtin_Builder_AtomicRMW_i32, Test) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     std::string expected_types = R"(%5 = OpTypeInt 32 1
 %4 = OpTypeStruct %5
@@ -3685,7 +3686,7 @@ TEST_P(Builtin_Builder_AtomicRMW_i32, Test) {
 %17 = OpConstant %15 0
 %19 = OpTypePointer StorageBuffer %5
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     std::string expected_instructions = R"(OpStore %11 %10
@@ -3695,7 +3696,7 @@ TEST_P(Builtin_Builder_AtomicRMW_i32, Test) {
     expected_instructions += "%14 = " + GetParam().op + " %5 %20 %16 %17 %21\n";
     expected_instructions += "OpReturn\n";
 
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -3741,7 +3742,7 @@ TEST_P(Builtin_Builder_AtomicRMW_u32, Test) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     std::string expected_types = R"(%5 = OpTypeInt 32 0
 %4 = OpTypeStruct %5
@@ -3757,7 +3758,7 @@ TEST_P(Builtin_Builder_AtomicRMW_u32, Test) {
 %16 = OpConstant %5 0
 %18 = OpTypePointer StorageBuffer %5
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     std::string expected_instructions = R"(OpStore %11 %10
@@ -3767,7 +3768,7 @@ TEST_P(Builtin_Builder_AtomicRMW_u32, Test) {
     expected_instructions += "%14 = " + GetParam().op + " %5 %19 %15 %16 %20\n";
     expected_instructions += "OpReturn\n";
 
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -3819,7 +3820,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeInt 32 0
 %6 = OpTypeInt 32 1
@@ -3840,7 +3841,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
 %23 = OpTypePointer StorageBuffer %5
 %28 = OpTypePointer StorageBuffer %6
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(OpStore %12 %11
@@ -3853,7 +3854,7 @@ OpStore %16 %15
 %26 = OpAtomicExchange %6 %29 %20 %21 %30
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -3893,7 +3894,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeInt 32 0
 %6 = OpTypeInt 32 1
@@ -3915,7 +3916,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 %28 = OpConstant %6 20
 %29 = OpConstant %6 10
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(%18 = OpAccessChain %17 %1 %15 %15
@@ -3928,7 +3929,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 %23 = OpCompositeConstruct %24 %30 %31
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -4094,7 +4095,7 @@ TEST_F(BuiltinBuilderTest, Call_WorkgroupBarrier) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -4102,13 +4103,13 @@ TEST_F(BuiltinBuilderTest, Call_WorkgroupBarrier) {
 %7 = OpConstant %6 2
 %8 = OpConstant %6 264
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(OpControlBarrier %7 %7 %8
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);
@@ -4128,7 +4129,7 @@ TEST_F(BuiltinBuilderTest, Call_StorageBarrier) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1_u);
+    ASSERT_EQ(b.Module().Functions().size(), 1_u);
 
     auto* expected_types = R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -4136,13 +4137,13 @@ TEST_F(BuiltinBuilderTest, Call_StorageBarrier) {
 %7 = OpConstant %6 2
 %8 = OpConstant %6 72
 )";
-    auto got_types = DumpInstructions(b.types());
+    auto got_types = DumpInstructions(b.Module().Types());
     EXPECT_EQ(expected_types, got_types);
 
     auto* expected_instructions = R"(OpControlBarrier %7 %7 %8
 OpReturn
 )";
-    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    auto got_instructions = DumpInstructions(b.Module().Functions()[0].instructions());
     EXPECT_EQ(expected_instructions, got_instructions);
 
     Validate(b);

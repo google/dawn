@@ -23,6 +23,8 @@ Instruction::Instruction(spv::Op op, OperandList operands)
 
 Instruction::Instruction(const Instruction&) = default;
 
+Instruction& Instruction::operator=(const Instruction&) = default;
+
 Instruction::~Instruction() = default;
 
 uint32_t Instruction::word_length() const {

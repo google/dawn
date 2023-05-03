@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,20 +18,34 @@
 namespace tint::writer::spirv {
 namespace {
 
-using BuilderTest = TestHelper;
+using SpvModuleTest = TestHelper;
 
-TEST_F(BuilderTest, Discard) {
-    auto* stmt = Discard();
+TEST_F(SpvModuleTest, TracksIdBounds) {
+    spirv::Module m;
 
-    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    for (size_t i = 0; i < 5; i++) {
+        EXPECT_EQ(m.NextId(), i + 1);
+    }
 
-    spirv::Builder& b = Build();
+    EXPECT_EQ(6u, m.IdBound());
+}
 
-    b.PushFunctionForTesting();
-    EXPECT_TRUE(b.GenerateStatement(stmt)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()), R"(OpKill
-)");
+TEST_F(SpvModuleTest, Capabilities_Dedup) {
+    spirv::Module m;
+
+    m.PushCapability(SpvCapabilityShader);
+    m.PushCapability(SpvCapabilityShader);
+    m.PushCapability(SpvCapabilityShader);
+
+    EXPECT_EQ(DumpInstructions(m.Capabilities()), "OpCapability Shader\n");
+}
+
+TEST_F(SpvModuleTest, DeclareExtension) {
+    spirv::Module m;
+
+    m.PushExtension("SPV_KHR_integer_dot_product");
+
+    EXPECT_EQ(DumpInstructions(m.Extensions()), "OpExtension \"SPV_KHR_integer_dot_product\"\n");
 }
 
 }  // namespace

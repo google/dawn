@@ -58,15 +58,6 @@ namespace {
 
 const char kGLSLstd450[] = "GLSL.std.450";
 
-uint32_t size_of(const InstructionList& instructions) {
-    uint32_t size = 0;
-    for (const auto& inst : instructions) {
-        size += inst.word_length();
-    }
-
-    return size;
-}
-
 uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
     SpvExecutionModel model = SpvExecutionModelVertex;
 
@@ -274,10 +265,10 @@ bool Builder::Build() {
         return false;
     }
 
-    push_capability(SpvCapabilityShader);
+    module_.PushCapability(SpvCapabilityShader);
 
-    push_memory_model(spv::Op::OpMemoryModel,
-                      {U32Operand(SpvAddressingModelLogical), U32Operand(SpvMemoryModelGLSL450)});
+    module_.PushMemoryModel(spv::Op::OpMemoryModel, {U32Operand(SpvAddressingModelLogical),
+                                                     U32Operand(SpvMemoryModelGLSL450)});
 
     for (auto ext : builder_.Sem().Module()->Extensions()) {
         GenerateExtension(ext);
@@ -325,85 +316,21 @@ void Builder::PopScope() {
 }
 
 Operand Builder::result_op() {
-    return Operand(next_id());
-}
-
-uint32_t Builder::total_size() const {
-    // The 5 covers the magic, version, generator, id bound and reserved.
-    uint32_t size = 5;
-
-    size += size_of(capabilities_);
-    size += size_of(extensions_);
-    size += size_of(ext_imports_);
-    size += size_of(memory_model_);
-    size += size_of(entry_points_);
-    size += size_of(execution_modes_);
-    size += size_of(debug_);
-    size += size_of(annotations_);
-    size += size_of(types_);
-    for (const auto& func : functions_) {
-        size += func.word_length();
-    }
-
-    return size;
-}
-
-void Builder::iterate(std::function<void(const Instruction&)> cb) const {
-    for (const auto& inst : capabilities_) {
-        cb(inst);
-    }
-    for (const auto& inst : extensions_) {
-        cb(inst);
-    }
-    for (const auto& inst : ext_imports_) {
-        cb(inst);
-    }
-    for (const auto& inst : memory_model_) {
-        cb(inst);
-    }
-    for (const auto& inst : entry_points_) {
-        cb(inst);
-    }
-    for (const auto& inst : execution_modes_) {
-        cb(inst);
-    }
-    for (const auto& inst : debug_) {
-        cb(inst);
-    }
-    for (const auto& inst : annotations_) {
-        cb(inst);
-    }
-    for (const auto& inst : types_) {
-        cb(inst);
-    }
-    for (const auto& func : functions_) {
-        func.iterate(cb);
-    }
-}
-
-void Builder::push_capability(uint32_t cap) {
-    if (capability_set_.count(cap) == 0) {
-        capability_set_.insert(cap);
-        capabilities_.push_back(Instruction{spv::Op::OpCapability, {Operand(cap)}});
-    }
-}
-
-void Builder::push_extension(const char* extension) {
-    extensions_.push_back(Instruction{spv::Op::OpExtension, {Operand(extension)}});
+    return Operand(module_.NextId());
 }
 
 bool Builder::GenerateExtension(builtin::Extension extension) {
     switch (extension) {
         case builtin::Extension::kChromiumExperimentalDp4A:
-            push_extension("SPV_KHR_integer_dot_product");
-            push_capability(SpvCapabilityDotProductKHR);
-            push_capability(SpvCapabilityDotProductInput4x8BitPackedKHR);
+            module_.PushExtension("SPV_KHR_integer_dot_product");
+            module_.PushCapability(SpvCapabilityDotProductKHR);
+            module_.PushCapability(SpvCapabilityDotProductInput4x8BitPackedKHR);
             break;
         case builtin::Extension::kF16:
-            push_capability(SpvCapabilityFloat16);
-            push_capability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
-            push_capability(SpvCapabilityStorageBuffer16BitAccess);
-            push_capability(SpvCapabilityStorageInputOutput16);
+            module_.PushCapability(SpvCapabilityFloat16);
+            module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
+            module_.PushCapability(SpvCapabilityStorageBuffer16BitAccess);
+            module_.PushCapability(SpvCapabilityStorageInputOutput16);
             break;
         default:
             return false;
@@ -517,7 +444,7 @@ bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
 
         operands.push_back(Operand(var_id));
     }
-    push_entry_point(spv::Op::OpEntryPoint, operands);
+    module_.PushEntryPoint(spv::Op::OpEntryPoint, operands);
 
     return true;
 }
@@ -527,8 +454,8 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
 
     // WGSL fragment shader origin is upper left
     if (func->PipelineStage() == ast::PipelineStage::kFragment) {
-        push_execution_mode(spv::Op::OpExecutionMode,
-                            {Operand(id), U32Operand(SpvExecutionModeOriginUpperLeft)});
+        module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                  {Operand(id), U32Operand(SpvExecutionModeOriginUpperLeft)});
     } else if (func->PipelineStage() == ast::PipelineStage::kCompute) {
         auto& wgsize = func_sem->WorkgroupSize();
 
@@ -539,7 +466,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
                 "transform";
             return false;
         }
-        push_execution_mode(
+        module_.PushExecutionMode(
             spv::Op::OpExecutionMode,
             {Operand(id), U32Operand(SpvExecutionModeLocalSize),  //
              Operand(wgsize[0].value()), Operand(wgsize[1].value()), Operand(wgsize[2].value())});
@@ -548,8 +475,8 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
     for (auto it : func_sem->TransitivelyReferencedBuiltinVariables()) {
         auto builtin = builder_.Sem().Get(it.second)->Value();
         if (builtin == builtin::BuiltinValue::kFragDepth) {
-            push_execution_mode(spv::Op::OpExecutionMode,
-                                {Operand(id), U32Operand(SpvExecutionModeDepthReplacing)});
+            module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                      {Operand(id), U32Operand(SpvExecutionModeDepthReplacing)});
         }
     }
 
@@ -599,7 +526,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     auto func_op = result_op();
     auto func_id = std::get<uint32_t>(func_op);
 
-    push_debug(spv::Op::OpName, {Operand(func_id), Operand(func_ast->name->symbol.Name())});
+    module_.PushDebug(spv::Op::OpName, {Operand(func_id), Operand(func_ast->name->symbol.Name())});
 
     auto ret_id = GenerateTypeIfNeeded(func->ReturnType());
     if (ret_id == 0) {
@@ -623,15 +550,18 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
             return false;
         }
 
-        push_debug(spv::Op::OpName,
-                   {Operand(param_id), Operand(param->Declaration()->name->symbol.Name())});
+        module_.PushDebug(spv::Op::OpName,
+                          {Operand(param_id), Operand(param->Declaration()->name->symbol.Name())});
         params.push_back(
             Instruction{spv::Op::OpFunctionParameter, {Operand(param_type_id), param_op}});
 
         RegisterVariable(param, param_id);
     }
 
-    push_function(Function{definition_inst, result_op(), std::move(params)});
+    // Start a new function.
+    current_function_ = Function{definition_inst, result_op(), std::move(params)};
+    current_label_id_ = current_function_.label_id();
+    TINT_DEFER(current_function_ = Function());
 
     for (auto* stmt : func_ast->body->statements) {
         if (!GenerateStatement(stmt)) {
@@ -659,6 +589,9 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
 
     func_symbol_to_id_[func_ast->name->symbol] = func_id;
 
+    // Add the function to the module.
+    module_.PushFunction(std::move(current_function_));
+
     return true;
 }
 
@@ -681,7 +614,7 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(const sem::Function* func) {
             ops.push_back(Operand(param_type_id));
         }
 
-        push_type(spv::Op::OpTypeFunction, std::move(ops));
+        module_.PushType(spv::Op::OpTypeFunction, std::move(ops));
         return func_type_id;
     });
 }
@@ -721,7 +654,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
         return false;
     }
 
-    push_debug(spv::Op::OpName, {Operand(var_id), Operand(v->name->symbol.Name())});
+    module_.PushDebug(spv::Op::OpName, {Operand(var_id), Operand(v->name->symbol.Name())});
 
     // TODO(dsinclair) We could detect if the initializer is fully const and emit
     // an initializer value for the variable instead of doing the OpLoad.
@@ -782,7 +715,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
         return false;
     }
 
-    push_debug(spv::Op::OpName, {Operand(var_id), Operand(v->name->symbol.Name())});
+    module_.PushDebug(spv::Op::OpName, {Operand(var_id), Operand(v->name->symbol.Name())});
 
     OperandList ops = {Operand(type_id), result, U32Operand(ConvertAddressSpace(sc))};
 
@@ -795,12 +728,12 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             auto access = st ? st->access() : sem->Access();
             switch (access) {
                 case builtin::Access::kWrite:
-                    push_annot(spv::Op::OpDecorate,
-                               {Operand(var_id), U32Operand(SpvDecorationNonReadable)});
+                    module_.PushAnnot(spv::Op::OpDecorate,
+                                      {Operand(var_id), U32Operand(SpvDecorationNonReadable)});
                     break;
                 case builtin::Access::kRead:
-                    push_annot(spv::Op::OpDecorate,
-                               {Operand(var_id), U32Operand(SpvDecorationNonWritable)});
+                    module_.PushAnnot(spv::Op::OpDecorate,
+                                      {Operand(var_id), U32Operand(SpvDecorationNonWritable)});
                     break;
                 case builtin::Access::kUndefined:
                 case builtin::Access::kReadWrite:
@@ -826,21 +759,22 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
         }
     }
 
-    push_type(spv::Op::OpVariable, std::move(ops));
+    module_.PushType(spv::Op::OpVariable, std::move(ops));
 
     for (auto* attr : v->attributes) {
         bool ok = Switch(
             attr,
             [&](const ast::BuiltinAttribute* builtin_attr) {
                 auto builtin = builder_.Sem().Get(builtin_attr)->Value();
-                push_annot(spv::Op::OpDecorate,
-                           {Operand(var_id), U32Operand(SpvDecorationBuiltIn),
-                            U32Operand(ConvertBuiltin(builtin, sem->AddressSpace()))});
+                module_.PushAnnot(spv::Op::OpDecorate,
+                                  {Operand(var_id), U32Operand(SpvDecorationBuiltIn),
+                                   U32Operand(ConvertBuiltin(builtin, sem->AddressSpace()))});
                 return true;
             },
             [&](const ast::LocationAttribute*) {
-                push_annot(spv::Op::OpDecorate, {Operand(var_id), U32Operand(SpvDecorationLocation),
-                                                 Operand(sem->Location().value())});
+                module_.PushAnnot(spv::Op::OpDecorate,
+                                  {Operand(var_id), U32Operand(SpvDecorationLocation),
+                                   Operand(sem->Location().value())});
                 return true;
             },
             [&](const ast::InterpolateAttribute* interpolate) {
@@ -860,19 +794,20 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                 return true;
             },
             [&](const ast::InvariantAttribute*) {
-                push_annot(spv::Op::OpDecorate,
-                           {Operand(var_id), U32Operand(SpvDecorationInvariant)});
+                module_.PushAnnot(spv::Op::OpDecorate,
+                                  {Operand(var_id), U32Operand(SpvDecorationInvariant)});
                 return true;
             },
             [&](const ast::BindingAttribute*) {
                 auto bp = sem->BindingPoint();
-                push_annot(spv::Op::OpDecorate, {Operand(var_id), U32Operand(SpvDecorationBinding),
-                                                 Operand(bp->binding)});
+                module_.PushAnnot(
+                    spv::Op::OpDecorate,
+                    {Operand(var_id), U32Operand(SpvDecorationBinding), Operand(bp->binding)});
                 return true;
             },
             [&](const ast::GroupAttribute*) {
                 auto bp = sem->BindingPoint();
-                push_annot(
+                module_.PushAnnot(
                     spv::Op::OpDecorate,
                     {Operand(var_id), U32Operand(SpvDecorationDescriptorSet), Operand(bp->group)});
                 return true;
@@ -1232,7 +1167,7 @@ uint32_t Builder::GetGLSLstd450Import() {
     auto result = result_op();
     auto id = std::get<uint32_t>(result);
 
-    push_ext_import(spv::Op::OpExtInstImport, {result, Operand(kGLSLstd450)});
+    module_.PushExtImport(spv::Op::OpExtInstImport, {result, Operand(kGLSLstd450)});
 
     // Remember it for later.
     import_name_to_id_[kGLSLstd450] = id;
@@ -1404,9 +1339,9 @@ uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
                     if (idx_id == 0) {
                         return 0;
                     }
-                    push_type(spv::Op::OpSpecConstantOp,
-                              {Operand(value_type_id), extract, U32Operand(SpvOpCompositeExtract),
-                               Operand(id), Operand(idx_id)});
+                    module_.PushType(spv::Op::OpSpecConstantOp, {Operand(value_type_id), extract,
+                                                                 U32Operand(SpvOpCompositeExtract),
+                                                                 Operand(id), Operand(idx_id)});
 
                     result_is_spec_composite = true;
                 }
@@ -1438,9 +1373,9 @@ uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
         ops[kOpsResultIdx] = result;
 
         if (result_is_spec_composite) {
-            push_type(spv::Op::OpSpecConstantComposite, ops);
+            module_.PushType(spv::Op::OpSpecConstantComposite, ops);
         } else if (result_is_constant_composite) {
-            push_type(spv::Op::OpConstantComposite, ops);
+            module_.PushType(spv::Op::OpConstantComposite, ops);
         } else {
             if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
                 return 0;
@@ -1674,13 +1609,13 @@ uint32_t Builder::GenerateConstantIfNeeded(const constant::Value* constant) {
         }
 
         auto& global_scope = scope_stack_[0];
-        return utils::GetOrCreate(global_scope.type_init_to_id_, OperandListKey{ops},
-                                  [&]() -> uint32_t {
-                                      auto result = result_op();
-                                      ops[kOpsResultIdx] = result;
-                                      push_type(spv::Op::OpConstantComposite, std::move(ops));
-                                      return std::get<uint32_t>(result);
-                                  });
+        return utils::GetOrCreate(
+            global_scope.type_init_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
+                auto result = result_op();
+                ops[kOpsResultIdx] = result;
+                module_.PushType(spv::Op::OpConstantComposite, std::move(ops));
+                return std::get<uint32_t>(result);
+            });
     };
 
     return Switch(
@@ -1762,28 +1697,31 @@ uint32_t Builder::GenerateConstantIfNeeded(const ScalarConstant& constant) {
 
     switch (constant.kind) {
         case ScalarConstant::Kind::kU32: {
-            push_type(spv::Op::OpConstant, {Operand(type_id), result, Operand(constant.value.u32)});
+            module_.PushType(spv::Op::OpConstant,
+                             {Operand(type_id), result, Operand(constant.value.u32)});
             break;
         }
         case ScalarConstant::Kind::kI32: {
-            push_type(spv::Op::OpConstant,
-                      {Operand(type_id), result, U32Operand(constant.value.i32)});
+            module_.PushType(spv::Op::OpConstant,
+                             {Operand(type_id), result, U32Operand(constant.value.i32)});
             break;
         }
         case ScalarConstant::Kind::kF32: {
-            push_type(spv::Op::OpConstant, {Operand(type_id), result, Operand(constant.value.f32)});
+            module_.PushType(spv::Op::OpConstant,
+                             {Operand(type_id), result, Operand(constant.value.f32)});
             break;
         }
         case ScalarConstant::Kind::kF16: {
-            push_type(spv::Op::OpConstant, {Operand(type_id), result,
-                                            U32Operand(constant.value.f16.bits_representation)});
+            module_.PushType(
+                spv::Op::OpConstant,
+                {Operand(type_id), result, U32Operand(constant.value.f16.bits_representation)});
             break;
         }
         case ScalarConstant::Kind::kBool: {
             if (constant.value.b) {
-                push_type(spv::Op::OpConstantTrue, {Operand(type_id), result});
+                module_.PushType(spv::Op::OpConstantTrue, {Operand(type_id), result});
             } else {
-                push_type(spv::Op::OpConstantFalse, {Operand(type_id), result});
+                module_.PushType(spv::Op::OpConstantFalse, {Operand(type_id), result});
             }
             break;
         }
@@ -1802,7 +1740,7 @@ uint32_t Builder::GenerateConstantNullIfNeeded(const type::Type* type) {
     return utils::GetOrCreate(const_null_to_id_, type, [&] {
         auto result = result_op();
 
-        push_type(spv::Op::OpConstantNull, {Operand(type_id), result});
+        module_.PushType(spv::Op::OpConstantNull, {Operand(type_id), result});
 
         return std::get<uint32_t>(result);
     });
@@ -1825,7 +1763,7 @@ uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const type::Vector* type, 
         for (uint32_t i = 0; i < type->Width(); i++) {
             ops.push_back(Operand(value_id));
         }
-        push_type(spv::Op::OpConstantComposite, ops);
+        module_.PushType(spv::Op::OpConstantComposite, ops);
 
         const_splat_to_id_[key] = result_id;
         return result_id;
@@ -2297,11 +2235,11 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
     }
 
     if (builtin->IsFineDerivative() || builtin->IsCoarseDerivative()) {
-        push_capability(SpvCapabilityDerivativeControl);
+        module_.PushCapability(SpvCapabilityDerivativeControl);
     }
 
     if (builtin->IsImageQuery()) {
-        push_capability(SpvCapabilityImageQuery);
+        module_.PushCapability(SpvCapabilityImageQuery);
     }
 
     if (builtin->IsTexture()) {
@@ -3290,7 +3228,8 @@ uint32_t Builder::GenerateSampledImage(const type::Type* texture_type,
             // We need to create the sampled image type and cache the result.
             auto sampled_image_type = result_op();
             auto texture_type_id = GenerateTypeIfNeeded(texture_type);
-            push_type(spv::Op::OpTypeSampledImage, {sampled_image_type, Operand(texture_type_id)});
+            module_.PushType(spv::Op::OpTypeSampledImage,
+                             {sampled_image_type, Operand(texture_type_id)});
             return std::get<uint32_t>(sampled_image_type);
         });
 
@@ -3357,7 +3296,7 @@ bool Builder::GenerateConditionalBlock(const ast::Expression* cond,
 
     // if there are no more else statements we branch on false to the merge
     // block otherwise we branch to the false block
-    auto false_block_id = else_stmt ? next_id() : merge_block_id;
+    auto false_block_id = else_stmt ? module_.NextId() : merge_block_id;
 
     if (!push_function_inst(spv::Op::OpBranchConditional,
                             {Operand(cond_id), Operand(true_block_id), Operand(false_block_id)})) {
@@ -3677,19 +3616,19 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 return GenerateArrayType(arr, result);
             },
             [&](const type::Bool*) {
-                push_type(spv::Op::OpTypeBool, {result});
+                module_.PushType(spv::Op::OpTypeBool, {result});
                 return true;
             },
             [&](const type::F32*) {
-                push_type(spv::Op::OpTypeFloat, {result, Operand(32u)});
+                module_.PushType(spv::Op::OpTypeFloat, {result, Operand(32u)});
                 return true;
             },
             [&](const type::F16*) {
-                push_type(spv::Op::OpTypeFloat, {result, Operand(16u)});
+                module_.PushType(spv::Op::OpTypeFloat, {result, Operand(16u)});
                 return true;
             },
             [&](const type::I32*) {
-                push_type(spv::Op::OpTypeInt, {result, Operand(32u), Operand(1u)});
+                module_.PushType(spv::Op::OpTypeInt, {result, Operand(32u), Operand(1u)});
                 return true;
             },
             [&](const type::Matrix* mat) {  //
@@ -3705,14 +3644,14 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                 return GenerateStructType(str, result);
             },
             [&](const type::U32*) {
-                push_type(spv::Op::OpTypeInt, {result, Operand(32u), Operand(0u)});
+                module_.PushType(spv::Op::OpTypeInt, {result, Operand(32u), Operand(0u)});
                 return true;
             },
             [&](const type::Vector* vec) {  //
                 return GenerateVectorType(vec, result);
             },
             [&](const type::Void*) {
-                push_type(spv::Op::OpTypeVoid, {result});
+                module_.PushType(spv::Op::OpTypeVoid, {result});
                 return true;
             },
             [&](const type::StorageTexture* tex) {
@@ -3734,7 +3673,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
             },
             [&](const type::Texture* tex) { return GenerateTextureType(tex, result); },
             [&](const type::Sampler* s) {
-                push_type(spv::Op::OpTypeSampler, {result});
+                module_.PushType(spv::Op::OpTypeSampler, {result});
 
                 // Register both of the sampler type names. In SPIR-V they're the same
                 // sampler type, so we need to match that when we do the dedup check.
@@ -3776,9 +3715,9 @@ bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& r
     if (dim == type::TextureDimension::k1d) {
         dim_literal = SpvDim1D;
         if (texture->Is<type::SampledTexture>()) {
-            push_capability(SpvCapabilitySampled1D);
+            module_.PushCapability(SpvCapabilitySampled1D);
         } else if (texture->Is<type::StorageTexture>()) {
-            push_capability(SpvCapabilityImage1D);
+            module_.PushCapability(SpvCapabilityImage1D);
         }
     }
     if (dim == type::TextureDimension::k3d) {
@@ -3806,7 +3745,7 @@ bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& r
 
     if (dim == type::TextureDimension::kCubeArray) {
         if (texture->IsAnyOf<type::SampledTexture, type::DepthTexture>()) {
-            push_capability(SpvCapabilitySampledCubeArray);
+            module_.PushCapability(SpvCapabilitySampledCubeArray);
         }
     }
 
@@ -3831,10 +3770,10 @@ bool Builder::GenerateTextureType(const type::Texture* texture, const Operand& r
         format_literal = convert_texel_format_to_spv(t->texel_format());
     }
 
-    push_type(spv::Op::OpTypeImage,
-              {result, Operand(type_id), Operand(dim_literal), Operand(depth_literal),
-               Operand(array_literal), Operand(ms_literal), Operand(sampled_literal),
-               Operand(format_literal)});
+    module_.PushType(spv::Op::OpTypeImage,
+                     {result, Operand(type_id), Operand(dim_literal), Operand(depth_literal),
+                      Operand(array_literal), Operand(ms_literal), Operand(sampled_literal),
+                      Operand(format_literal)});
 
     return true;
 }
@@ -3847,7 +3786,7 @@ bool Builder::GenerateArrayType(const type::Array* arr, const Operand& result) {
 
     auto result_id = std::get<uint32_t>(result);
     if (arr->Count()->Is<type::RuntimeArrayCount>()) {
-        push_type(spv::Op::OpTypeRuntimeArray, {result, Operand(elem_type)});
+        module_.PushType(spv::Op::OpTypeRuntimeArray, {result, Operand(elem_type)});
     } else {
         auto count = arr->ConstantCount();
         if (!count) {
@@ -3860,11 +3799,12 @@ bool Builder::GenerateArrayType(const type::Array* arr, const Operand& result) {
             return false;
         }
 
-        push_type(spv::Op::OpTypeArray, {result, Operand(elem_type), Operand(len_id)});
+        module_.PushType(spv::Op::OpTypeArray, {result, Operand(elem_type), Operand(len_id)});
     }
 
-    push_annot(spv::Op::OpDecorate,
-               {Operand(result_id), U32Operand(SpvDecorationArrayStride), Operand(arr->Stride())});
+    module_.PushAnnot(
+        spv::Op::OpDecorate,
+        {Operand(result_id), U32Operand(SpvDecorationArrayStride), Operand(arr->Stride())});
     return true;
 }
 
@@ -3875,7 +3815,8 @@ bool Builder::GenerateMatrixType(const type::Matrix* mat, const Operand& result)
         return false;
     }
 
-    push_type(spv::Op::OpTypeMatrix, {result, Operand(col_type_id), Operand(mat->columns())});
+    module_.PushType(spv::Op::OpTypeMatrix,
+                     {result, Operand(col_type_id), Operand(mat->columns())});
     return true;
 }
 
@@ -3891,7 +3832,7 @@ bool Builder::GeneratePointerType(const type::Pointer* ptr, const Operand& resul
         return false;
     }
 
-    push_type(spv::Op::OpTypePointer, {result, U32Operand(stg_class), Operand(subtype_id)});
+    module_.PushType(spv::Op::OpTypePointer, {result, U32Operand(stg_class), Operand(subtype_id)});
 
     return true;
 }
@@ -3908,7 +3849,7 @@ bool Builder::GenerateReferenceType(const type::Reference* ref, const Operand& r
         return false;
     }
 
-    push_type(spv::Op::OpTypePointer, {result, U32Operand(stg_class), Operand(subtype_id)});
+    module_.PushType(spv::Op::OpTypePointer, {result, U32Operand(stg_class), Operand(subtype_id)});
 
     return true;
 }
@@ -3917,7 +3858,8 @@ bool Builder::GenerateStructType(const type::Struct* struct_type, const Operand&
     auto struct_id = std::get<uint32_t>(result);
 
     if (struct_type->Name().IsValid()) {
-        push_debug(spv::Op::OpName, {Operand(struct_id), Operand(struct_type->Name().Name())});
+        module_.PushDebug(spv::Op::OpName,
+                          {Operand(struct_id), Operand(struct_type->Name().Name())});
     }
 
     OperandList ops;
@@ -3926,7 +3868,8 @@ bool Builder::GenerateStructType(const type::Struct* struct_type, const Operand&
     if (auto* sem_str = struct_type->As<sem::Struct>()) {
         auto* decl = sem_str->Declaration();
         if (ast::HasAttribute<transform::AddBlockAttribute::BlockAttribute>(decl->attributes)) {
-            push_annot(spv::Op::OpDecorate, {Operand(struct_id), U32Operand(SpvDecorationBlock)});
+            module_.PushAnnot(spv::Op::OpDecorate,
+                              {Operand(struct_id), U32Operand(SpvDecorationBlock)});
         }
     }
 
@@ -3939,15 +3882,15 @@ bool Builder::GenerateStructType(const type::Struct* struct_type, const Operand&
         ops.push_back(Operand(mem_id));
     }
 
-    push_type(spv::Op::OpTypeStruct, std::move(ops));
+    module_.PushType(spv::Op::OpTypeStruct, std::move(ops));
     return true;
 }
 
 uint32_t Builder::GenerateStructMember(uint32_t struct_id,
                                        uint32_t idx,
                                        const type::StructMember* member) {
-    push_debug(spv::Op::OpMemberName,
-               {Operand(struct_id), Operand(idx), Operand(member->Name().Name())});
+    module_.PushDebug(spv::Op::OpMemberName,
+                      {Operand(struct_id), Operand(idx), Operand(member->Name().Name())});
 
     // Note: This will generate layout annotations for *all* structs, whether or
     // not they are used in host-shareable variables. This is officially ok in
@@ -3955,20 +3898,20 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
     // to only generate the layout info for structs used for certain storage
     // classes.
 
-    push_annot(spv::Op::OpMemberDecorate,
-               {Operand(struct_id), Operand(idx), U32Operand(SpvDecorationOffset),
-                Operand(member->Offset())});
+    module_.PushAnnot(spv::Op::OpMemberDecorate,
+                      {Operand(struct_id), Operand(idx), U32Operand(SpvDecorationOffset),
+                       Operand(member->Offset())});
 
     // Infer and emit matrix layout.
     auto* matrix_type = GetNestedMatrixType(member->Type());
     if (matrix_type) {
-        push_annot(spv::Op::OpMemberDecorate,
-                   {Operand(struct_id), Operand(idx), U32Operand(SpvDecorationColMajor)});
+        module_.PushAnnot(spv::Op::OpMemberDecorate,
+                          {Operand(struct_id), Operand(idx), U32Operand(SpvDecorationColMajor)});
         const uint32_t scalar_elem_size = matrix_type->type()->Size();
         const uint32_t effective_row_count = (matrix_type->rows() == 2) ? 2 : 4;
-        push_annot(spv::Op::OpMemberDecorate,
-                   {Operand(struct_id), Operand(idx), U32Operand(SpvDecorationMatrixStride),
-                    Operand(effective_row_count * scalar_elem_size)});
+        module_.PushAnnot(spv::Op::OpMemberDecorate,
+                          {Operand(struct_id), Operand(idx), U32Operand(SpvDecorationMatrixStride),
+                           Operand(effective_row_count * scalar_elem_size)});
     }
 
     return GenerateTypeIfNeeded(member->Type());
@@ -3980,7 +3923,7 @@ bool Builder::GenerateVectorType(const type::Vector* vec, const Operand& result)
         return false;
     }
 
-    push_type(spv::Op::OpTypeVector, {result, Operand(type_id), Operand(vec->Width())});
+    module_.PushType(spv::Op::OpTypeVector, {result, Operand(type_id), Operand(vec->Width())});
     return true;
 }
 
@@ -4042,7 +3985,7 @@ SpvBuiltIn Builder::ConvertBuiltin(builtin::BuiltinValue builtin, builtin::Addre
         case builtin::BuiltinValue::kNumWorkgroups:
             return SpvBuiltInNumWorkgroups;
         case builtin::BuiltinValue::kSampleIndex:
-            push_capability(SpvCapabilitySampleRateShading);
+            module_.PushCapability(SpvCapabilitySampleRateShading);
             return SpvBuiltInSampleId;
         case builtin::BuiltinValue::kSampleMask:
             return SpvBuiltInSampleMask;
@@ -4057,10 +4000,11 @@ void Builder::AddInterpolationDecorations(uint32_t id,
                                           builtin::InterpolationSampling sampling) {
     switch (type) {
         case builtin::InterpolationType::kLinear:
-            push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationNoPerspective)});
+            module_.PushAnnot(spv::Op::OpDecorate,
+                              {Operand(id), U32Operand(SpvDecorationNoPerspective)});
             break;
         case builtin::InterpolationType::kFlat:
-            push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationFlat)});
+            module_.PushAnnot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationFlat)});
             break;
         case builtin::InterpolationType::kPerspective:
         case builtin::InterpolationType::kUndefined:
@@ -4068,11 +4012,12 @@ void Builder::AddInterpolationDecorations(uint32_t id,
     }
     switch (sampling) {
         case builtin::InterpolationSampling::kCentroid:
-            push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationCentroid)});
+            module_.PushAnnot(spv::Op::OpDecorate,
+                              {Operand(id), U32Operand(SpvDecorationCentroid)});
             break;
         case builtin::InterpolationSampling::kSample:
-            push_capability(SpvCapabilitySampleRateShading);
-            push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationSample)});
+            module_.PushCapability(SpvCapabilitySampleRateShading);
+            module_.PushAnnot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationSample)});
             break;
         case builtin::InterpolationSampling::kCenter:
         case builtin::InterpolationSampling::kUndefined:
@@ -4101,13 +4046,13 @@ SpvImageFormat Builder::convert_texel_format_to_spv(const builtin::TexelFormat f
         case builtin::TexelFormat::kRgba8Sint:
             return SpvImageFormatRgba8i;
         case builtin::TexelFormat::kRg32Uint:
-            push_capability(SpvCapabilityStorageImageExtendedFormats);
+            module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32ui;
         case builtin::TexelFormat::kRg32Sint:
-            push_capability(SpvCapabilityStorageImageExtendedFormats);
+            module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32i;
         case builtin::TexelFormat::kRg32Float:
-            push_capability(SpvCapabilityStorageImageExtendedFormats);
+            module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32f;
         case builtin::TexelFormat::kRgba16Uint:
             return SpvImageFormatRgba16ui;
@@ -4128,22 +4073,22 @@ SpvImageFormat Builder::convert_texel_format_to_spv(const builtin::TexelFormat f
 }
 
 bool Builder::push_function_inst(spv::Op op, const OperandList& operands) {
-    if (functions_.empty()) {
+    if (!current_function_) {
         utils::StringStream ss;
         ss << "Internal error: trying to add SPIR-V instruction " << int(op)
            << " outside a function";
         error_ = ss.str();
         return false;
     }
-    functions_.back().push_inst(op, operands);
+    current_function_.push_inst(op, operands);
     return true;
 }
 
 bool Builder::InsideBasicBlock() const {
-    if (functions_.empty()) {
+    if (!current_function_) {
         return false;
     }
-    const auto& instructions = functions_.back().instructions();
+    const auto& instructions = current_function_.instructions();
     if (instructions.empty()) {
         // The Function object does not explicitly represent its entry block
         // label.  So return *true* because an empty list means the only

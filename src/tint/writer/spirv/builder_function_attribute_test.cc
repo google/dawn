@@ -33,7 +33,7 @@ TEST_F(BuilderTest, Attribute_Stage) {
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.entry_points()),
+    EXPECT_EQ(DumpInstructions(b.Module().EntryPoints()),
               R"(OpEntryPoint Fragment %3 "main"
 )");
 }
@@ -76,7 +76,7 @@ TEST_P(Attribute_StageTest, Emit) {
     }
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    auto preamble = b.entry_points();
+    auto preamble = b.Module().EntryPoints();
     ASSERT_GE(preamble.size(), 1u);
     EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
 
@@ -99,7 +99,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.execution_modes()),
+    EXPECT_EQ(DumpInstructions(b.Module().ExecutionModes()),
               R"(OpExecutionMode %3 OriginUpperLeft
 )");
 }
@@ -111,7 +111,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.execution_modes()),
+    EXPECT_EQ(DumpInstructions(b.Module().ExecutionModes()),
               R"(OpExecutionMode %3 LocalSize 1 1 1
 )");
 }
@@ -126,7 +126,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Literals) {
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.execution_modes()),
+    EXPECT_EQ(DumpInstructions(b.Module().ExecutionModes()),
               R"(OpExecutionMode %3 LocalSize 2 4 6
 )");
 }
@@ -144,7 +144,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.execution_modes()),
+    EXPECT_EQ(DumpInstructions(b.Module().ExecutionModes()),
               R"(OpExecutionMode %3 LocalSize 2 3 4
 )");
 }
@@ -235,7 +235,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_FragDepth) {
 
     ASSERT_TRUE(b.Build());
 
-    EXPECT_EQ(DumpInstructions(b.execution_modes()),
+    EXPECT_EQ(DumpInstructions(b.Module().ExecutionModes()),
               R"(OpExecutionMode %11 OriginUpperLeft
 OpExecutionMode %11 DepthReplacing
 )");

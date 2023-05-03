@@ -94,8 +94,8 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     /// @param b the spirv::Builder containing the built SPIR-V module
     void Validate(spirv::Builder& b) {
         BinaryWriter writer;
-        writer.WriteHeader(b.id_bound());
-        writer.WriteBuilder(&b);
+        writer.WriteHeader(b.Module().IdBound());
+        writer.WriteModule(&b.Module());
         auto binary = writer.result();
 
         std::string spv_errors;

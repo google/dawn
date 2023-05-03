@@ -25,6 +25,8 @@ Function::Function(const Instruction& declaration,
 
 Function::Function(const Function& other) = default;
 
+Function& Function::operator=(const Function& other) = default;
+
 Function::~Function() = default;
 
 void Function::iterate(std::function<void(const Instruction&)> cb) const {

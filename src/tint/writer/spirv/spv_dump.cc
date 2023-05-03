@@ -60,8 +60,8 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 
 std::string DumpBuilder(Builder& builder) {
     BinaryWriter writer;
-    writer.WriteHeader(builder.id_bound());
-    writer.WriteBuilder(&builder);
+    writer.WriteHeader(builder.Module().IdBound());
+    writer.WriteModule(&builder.Module());
     return Disassemble(writer.result());
 }
 

@@ -333,11 +333,11 @@ TEST_F(BuilderTest, SampleIndex_SampleRateShadingCapability) {
     ASSERT_TRUE(b.Build()) << b.error();
 
     // Make sure we generate the SampleRateShading capability.
-    EXPECT_EQ(DumpInstructions(b.capabilities()),
+    EXPECT_EQ(DumpInstructions(b.Module().Capabilities()),
               R"(OpCapability Shader
 OpCapability SampleRateShading
 )");
-    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 BuiltIn SampleId
+    EXPECT_EQ(DumpInstructions(b.Module().Annots()), R"(OpDecorate %1 BuiltIn SampleId
 OpDecorate %1 Flat
 )");
 }

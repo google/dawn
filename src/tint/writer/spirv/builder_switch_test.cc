@@ -32,13 +32,13 @@ TEST_F(BuilderTest, Switch_Empty) {
 
     spirv::Builder& b = Build();
 
-    b.push_function(Function{});
+    b.PushFunctionForTesting();
 
     EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+    EXPECT_EQ(DumpInstructions(b.CurrentFunction().instructions()),
               R"(OpSelectionMerge %1 None
 OpSwitch %3 %4
 %4 = OpLabel

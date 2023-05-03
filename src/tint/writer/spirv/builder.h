@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_WRITER_SPIRV_BUILDER_H_
 #define SRC_TINT_WRITER_SPIRV_BUILDER_H_
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -39,6 +40,7 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/writer/spirv/function.h"
+#include "src/tint/writer/spirv/module.h"
 #include "src/tint/writer/spirv/scalar_constant.h"
 
 // Forward declarations
@@ -54,7 +56,7 @@ class Reference;
 
 namespace tint::writer::spirv {
 
-/// Builder class to create SPIR-V instructions from a module.
+/// Builder class to create a SPIR-V module from a Tint AST.
 class Builder {
   public:
     /// Contains information for generating accessor chains
@@ -92,100 +94,17 @@ class Builder {
     /// @returns true if the builder encountered an error
     bool has_error() const { return !error_.empty(); }
 
-    /// @returns the number of uint32_t's needed to make up the results
-    uint32_t total_size() const;
+    /// @returns the module that this builder has produced
+    spirv::Module& Module() { return module_; }
 
-    /// @returns the id bound for this program
-    uint32_t id_bound() const { return next_id_; }
-
-    /// @returns the next id to be used
-    uint32_t next_id() {
-        auto id = next_id_;
-        next_id_ += 1;
-        return id;
+    /// Add an empty function to the builder, to be used for testing purposes.
+    void PushFunctionForTesting() {
+        current_function_ = Function(Instruction(spv::Op::OpFunction, {}), {}, {});
     }
 
-    /// Iterates over all the instructions in the correct order and calls the
-    /// given callback
-    /// @param cb the callback to execute
-    void iterate(std::function<void(const Instruction&)> cb) const;
+    /// @returns the current function
+    const Function& CurrentFunction() { return current_function_; }
 
-    /// Adds an instruction to the list of capabilities, if the capability
-    /// hasn't already been added.
-    /// @param cap the capability to set
-    void push_capability(uint32_t cap);
-    /// @returns the capabilities
-    const InstructionList& capabilities() const { return capabilities_; }
-    /// Adds an instruction to the extensions
-    /// @param extension the name of the extension
-    void push_extension(const char* extension);
-    /// @returns the extensions
-    const InstructionList& extensions() const { return extensions_; }
-    /// Adds an instruction to the ext import
-    /// @param op the op to set
-    /// @param operands the operands for the instruction
-    void push_ext_import(spv::Op op, const OperandList& operands) {
-        ext_imports_.push_back(Instruction{op, operands});
-    }
-    /// @returns the ext imports
-    const InstructionList& ext_imports() const { return ext_imports_; }
-    /// Adds an instruction to the memory model
-    /// @param op the op to set
-    /// @param operands the operands for the instruction
-    void push_memory_model(spv::Op op, const OperandList& operands) {
-        memory_model_.push_back(Instruction{op, operands});
-    }
-    /// @returns the memory model
-    const InstructionList& memory_model() const { return memory_model_; }
-    /// Adds an instruction to the entry points
-    /// @param op the op to set
-    /// @param operands the operands for the instruction
-    void push_entry_point(spv::Op op, const OperandList& operands) {
-        entry_points_.push_back(Instruction{op, operands});
-    }
-    /// @returns the entry points
-    const InstructionList& entry_points() const { return entry_points_; }
-    /// Adds an instruction to the execution modes
-    /// @param op the op to set
-    /// @param operands the operands for the instruction
-    void push_execution_mode(spv::Op op, const OperandList& operands) {
-        execution_modes_.push_back(Instruction{op, operands});
-    }
-    /// @returns the execution modes
-    const InstructionList& execution_modes() const { return execution_modes_; }
-    /// Adds an instruction to the debug
-    /// @param op the op to set
-    /// @param operands the operands for the instruction
-    void push_debug(spv::Op op, const OperandList& operands) {
-        debug_.push_back(Instruction{op, operands});
-    }
-    /// @returns the debug instructions
-    const InstructionList& debug() const { return debug_; }
-    /// Adds an instruction to the types
-    /// @param op the op to set
-    /// @param operands the operands for the instruction
-    void push_type(spv::Op op, const OperandList& operands) {
-        types_.push_back(Instruction{op, operands});
-    }
-    /// @returns the type instructions
-    const InstructionList& types() const { return types_; }
-    /// Adds an instruction to the annotations
-    /// @param op the op to set
-    /// @param operands the operands for the instruction
-    void push_annot(spv::Op op, const OperandList& operands) {
-        annotations_.push_back(Instruction{op, operands});
-    }
-    /// @returns the annotations
-    const InstructionList& annots() const { return annotations_; }
-
-    /// Adds a function to the builder
-    /// @param func the function to add
-    void push_function(const Function& func) {
-        functions_.push_back(func);
-        current_label_id_ = func.label_id();
-    }
-    /// @returns the functions
-    const std::vector<Function>& functions() const { return functions_; }
     /// Pushes an instruction to the current function. If we're outside
     /// a function then issue an internal error and return false.
     /// @param op the operation
@@ -195,11 +114,11 @@ class Builder {
     /// Pushes a variable to the current function
     /// @param operands the variable operands
     void push_function_var(const OperandList& operands) {
-        if (TINT_UNLIKELY(functions_.empty())) {
+        if (TINT_UNLIKELY(!current_function_)) {
             TINT_ICE(Writer, builder_.Diagnostics())
                 << "push_function_var() called without a function";
         }
-        functions_.back().push_var(operands);
+        current_function_.push_var(operands);
     }
 
     /// @returns true if the current instruction insertion point is
@@ -591,18 +510,9 @@ class Builder {
 
     ProgramBuilder builder_;
     std::string error_;
-    uint32_t next_id_ = 1;
+    spirv::Module module_;
+    Function current_function_;
     uint32_t current_label_id_ = 0;
-    InstructionList capabilities_;
-    InstructionList extensions_;
-    InstructionList ext_imports_;
-    InstructionList memory_model_;
-    InstructionList entry_points_;
-    InstructionList execution_modes_;
-    InstructionList debug_;
-    InstructionList types_;
-    InstructionList annotations_;
-    std::vector<Function> functions_;
 
     // Scope holds per-block information
     struct Scope {
@@ -625,7 +535,6 @@ class Builder {
     std::vector<Scope> scope_stack_;
     std::vector<uint32_t> merge_stack_;
     std::vector<uint32_t> continue_stack_;
-    std::unordered_set<uint32_t> capability_set_;
     bool zero_initialize_workgroup_memory_ = false;
 
     struct ContinuingInfo {

@@ -28,9 +28,9 @@ BinaryWriter::BinaryWriter() = default;
 
 BinaryWriter::~BinaryWriter() = default;
 
-void BinaryWriter::WriteBuilder(Builder* builder) {
-    out_.reserve(builder->total_size());
-    builder->iterate([this](const Instruction& inst) { this->process_instruction(inst); });
+void BinaryWriter::WriteModule(const Module* module) {
+    out_.reserve(module->TotalSize());
+    module->Iterate([this](const Instruction& inst) { this->process_instruction(inst); });
 }
 
 void BinaryWriter::WriteInstruction(const Instruction& inst) {

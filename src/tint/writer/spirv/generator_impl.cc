@@ -175,8 +175,9 @@ GeneratorImpl::GeneratorImpl(const Program* program, bool zero_initialize_workgr
 
 bool GeneratorImpl::Generate() {
     if (builder_.Build()) {
-        writer_.WriteHeader(builder_.id_bound());
-        writer_.WriteBuilder(&builder_);
+        auto& module = builder_.Module();
+        writer_.WriteHeader(module.IdBound());
+        writer_.WriteModule(&module);
         return true;
     }
     return false;

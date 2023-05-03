@@ -33,11 +33,11 @@ TEST_F(BinaryWriterTest, Preamble) {
 }
 
 TEST_F(BinaryWriterTest, Float) {
-    spirv::Builder& b = Build();
+    Module m;
 
-    b.push_annot(spv::Op::OpKill, {Operand(2.4f)});
+    m.PushAnnot(spv::Op::OpKill, {Operand(2.4f)});
     BinaryWriter bw;
-    bw.WriteBuilder(&b);
+    bw.WriteModule(&m);
 
     auto res = bw.result();
     ASSERT_EQ(res.size(), 2u);
@@ -47,11 +47,11 @@ TEST_F(BinaryWriterTest, Float) {
 }
 
 TEST_F(BinaryWriterTest, Int) {
-    spirv::Builder& b = Build();
+    Module m;
 
-    b.push_annot(spv::Op::OpKill, {Operand(2u)});
+    m.PushAnnot(spv::Op::OpKill, {Operand(2u)});
     BinaryWriter bw;
-    bw.WriteBuilder(&b);
+    bw.WriteModule(&m);
 
     auto res = bw.result();
     ASSERT_EQ(res.size(), 2u);
@@ -59,11 +59,11 @@ TEST_F(BinaryWriterTest, Int) {
 }
 
 TEST_F(BinaryWriterTest, String) {
-    spirv::Builder& b = Build();
+    Module m;
 
-    b.push_annot(spv::Op::OpKill, {Operand("my_string")});
+    m.PushAnnot(spv::Op::OpKill, {Operand("my_string")});
     BinaryWriter bw;
-    bw.WriteBuilder(&b);
+    bw.WriteModule(&m);
 
     auto res = bw.result();
     ASSERT_EQ(res.size(), 4u);
@@ -84,11 +84,11 @@ TEST_F(BinaryWriterTest, String) {
 }
 
 TEST_F(BinaryWriterTest, String_Multiple4Length) {
-    spirv::Builder& b = Build();
+    Module m;
 
-    b.push_annot(spv::Op::OpKill, {Operand("mystring")});
+    m.PushAnnot(spv::Op::OpKill, {Operand("mystring")});
     BinaryWriter bw;
-    bw.WriteBuilder(&b);
+    bw.WriteModule(&m);
 
     auto res = bw.result();
     ASSERT_EQ(res.size(), 4u);
