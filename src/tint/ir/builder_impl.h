@@ -26,6 +26,7 @@
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/scope_stack.h"
 #include "src/tint/utils/result.h"
 
 // Forward Declarations
@@ -232,19 +233,17 @@ class BuilderImpl {
 
     void add_error(const Source& s, const std::string& err);
 
-    const Program* program_ = nullptr;
-
     Symbol CloneSymbol(Symbol sym) const;
 
-    diag::List diagnostics_;
-
+    const Program* program_ = nullptr;
     Function* current_function_ = nullptr;
+    ScopeStack<Symbol, Value*> scopes_;
+    constant::CloneContext clone_ctx_;
+    diag::List diagnostics_;
 
     /// Map from ast nodes to flow nodes, used to retrieve the flow node for a given AST node.
     /// Used for testing purposes.
     std::unordered_map<const ast::Node*, const FlowNode*> ast_to_flow_;
-
-    constant::CloneContext clone_ctx_;
 };
 
 }  // namespace tint::ir

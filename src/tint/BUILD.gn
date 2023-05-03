@@ -1118,6 +1118,7 @@ libtint_source_set("libtint_ir_builder_src") {
     ":libtint_ir_src",
     ":libtint_program_src",
     ":libtint_sem_src",
+    ":libtint_symbols_src",
     ":libtint_type_src",
     ":libtint_utils_src",
   ]

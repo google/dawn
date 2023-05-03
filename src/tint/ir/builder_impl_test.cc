@@ -2105,58 +2105,68 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
 )");
 }
 
-// TODO(dsinclair): This needs assignment in order to output correctly. The empty constructor ends
-// up materializing, so there is no expression to emit until there is a usage. When assigment is
-// implemented this can be enabled (and the output updated).
-TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_ConstructEmpty) {
+TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
     auto* expr = vec3(ty.f32());
     GlobalVar("i", builtin::AddressSpace::kPrivate, expr);
 
-    auto& b = CreateBuilder();
-    InjectFlowBlock();
-    auto r = b.EmitExpression(expr);
-    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
     ASSERT_TRUE(r);
 
-    Disassembler d(b.builder.ir);
-    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(vec3<f32>) = construct
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1(ref<private, vec3<f32>, read_write>) = var private read_write
+store %1(ref<private, vec3<f32>, read_write>), vec3<f32> 0.0f
+ret
+
 )");
 }
 
-// Requires identifier expressions
-TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_Construct) {
+TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
     auto* expr = vec3(ty.f32(), 2_f, 3_f, i);
     WrapInFunction(expr);
 
-    auto& b = CreateBuilder();
-    InjectFlowBlock();
-    auto r = b.EmitExpression(expr);
-    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
     ASSERT_TRUE(r);
 
-    Disassembler d(b.builder.ir);
-    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%2(vec3<f32>) = construct 2.0f, 3.0f, %1(void)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1(ref<private, f32, read_write>) = var private read_write
+store %1(ref<private, f32, read_write>), 1.0f
+ret
+
+%fn1 = func test_function
+  %fn2 = block
+  %2(vec3<f32>) = construct 2.0f, 3.0f, %1(ref<private, f32, read_write>)
+  ret
+func_end
+
 )");
 }
 
-// Requires identifier expressions
-TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_Convert) {
+TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_i));
     auto* expr = Call(ty.f32(), i);
     WrapInFunction(expr);
 
-    auto& b = CreateBuilder();
-    InjectFlowBlock();
-    auto r = b.EmitExpression(expr);
-    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
     ASSERT_TRUE(r);
 
-    Disassembler d(b.builder.ir);
-    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%2(f32) = convert i32, %1(void)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1(ref<private, i32, read_write>) = var private read_write
+store %1(ref<private, i32, read_write>), 1i
+ret
+
+%fn1 = func test_function
+  %fn2 = block
+  %2(f32) = convert i32, %1(ref<private, i32, read_write>)
+  ret
+func_end
+
 )");
 }
 
@@ -2177,21 +2187,26 @@ func_end
 )");
 }
 
-// Requires identifier expressions
-TEST_F(IR_BuilderImplTest, DISABLED_EmitExpression_Builtin) {
+TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
     auto* expr = Call("asin", i);
     WrapInFunction(expr);
 
-    auto& b = CreateBuilder();
-    InjectFlowBlock();
-    auto r = b.EmitExpression(expr);
-    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
-    ASSERT_TRUE(r);
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
 
-    Disassembler d(b.builder.ir);
-    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%2(f32) = asin %1(void)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1(ref<private, f32, read_write>) = var private read_write
+store %1(ref<private, f32, read_write>), 1.0f
+ret
+
+%fn1 = func test_function
+  %fn2 = block
+  %2(f32) = asin %1(ref<private, f32, read_write>)
+  ret
+func_end
+
 )");
 }
 
