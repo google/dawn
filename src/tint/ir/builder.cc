@@ -118,14 +118,6 @@ Binary* Builder::Xor(const type::Type* type, Value* lhs, Value* rhs) {
     return CreateBinary(Binary::Kind::kXor, type, lhs, rhs);
 }
 
-Binary* Builder::LogicalAnd(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kLogicalAnd, type, lhs, rhs);
-}
-
-Binary* Builder::LogicalOr(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kLogicalOr, type, lhs, rhs);
-}
-
 Binary* Builder::Equal(const type::Type* type, Value* lhs, Value* rhs) {
     return CreateBinary(Binary::Kind::kEqual, type, lhs, rhs);
 }

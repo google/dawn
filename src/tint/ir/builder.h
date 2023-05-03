@@ -170,20 +170,6 @@ class Builder {
     /// @returns the operation
     Binary* Xor(const type::Type* type, Value* lhs, Value* rhs);
 
-    /// Creates an LogicalAnd operation
-    /// @param type the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    Binary* LogicalAnd(const type::Type* type, Value* lhs, Value* rhs);
-
-    /// Creates an LogicalOr operation
-    /// @param type the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    Binary* LogicalOr(const type::Type* type, Value* lhs, Value* rhs);
-
     /// Creates an Equal operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add

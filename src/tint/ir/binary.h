@@ -36,9 +36,6 @@ class Binary : public utils::Castable<Binary, Instruction> {
         kOr,
         kXor,
 
-        kLogicalAnd,
-        kLogicalOr,
-
         kEqual,
         kNotEqual,
         kLessThan,

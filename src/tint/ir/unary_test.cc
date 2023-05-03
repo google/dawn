@@ -63,7 +63,7 @@ TEST_F(IR_InstructionTest, CreateComplement) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = bit_complement 4i");
+    EXPECT_EQ(str.str(), "%1(i32) = complement 4i");
 }
 
 TEST_F(IR_InstructionTest, CreateIndirection) {
@@ -119,7 +119,7 @@ TEST_F(IR_InstructionTest, CreateNot) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = log_not true");
+    EXPECT_EQ(str.str(), "%1(bool) = not true");
 }
 
 TEST_F(IR_InstructionTest, Unary_Usage) {

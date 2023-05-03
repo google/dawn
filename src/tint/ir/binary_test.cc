@@ -45,7 +45,7 @@ TEST_F(IR_InstructionTest, CreateAnd) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = bit_and 4i, 2i");
+    EXPECT_EQ(str.str(), "%1(i32) = and 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateOr) {
@@ -69,7 +69,7 @@ TEST_F(IR_InstructionTest, CreateOr) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = bit_or 4i, 2i");
+    EXPECT_EQ(str.str(), "%1(i32) = or 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateXor) {
@@ -93,55 +93,7 @@ TEST_F(IR_InstructionTest, CreateXor) {
 
     utils::StringStream str;
     inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = bit_xor 4i, 2i");
-}
-
-TEST_F(IR_InstructionTest, CreateLogicalAnd) {
-    auto& b = CreateEmptyBuilder();
-
-    const auto* inst = b.builder.LogicalAnd(b.builder.ir.types.Get<type::Bool>(),
-                                            b.builder.Constant(4_i), b.builder.Constant(2_i));
-
-    ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->GetKind(), Binary::Kind::kLogicalAnd);
-
-    ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
-    ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
-    ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = log_and 4i, 2i");
-}
-
-TEST_F(IR_InstructionTest, CreateLogicalOr) {
-    auto& b = CreateEmptyBuilder();
-
-    const auto* inst = b.builder.LogicalOr(b.builder.ir.types.Get<type::Bool>(),
-                                           b.builder.Constant(4_i), b.builder.Constant(2_i));
-
-    ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->GetKind(), Binary::Kind::kLogicalOr);
-
-    ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
-    ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
-    ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = log_or 4i, 2i");
+    EXPECT_EQ(str.str(), "%1(i32) = xor 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateEqual) {

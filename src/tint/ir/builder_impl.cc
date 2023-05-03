@@ -309,12 +309,6 @@ void BuilderImpl::EmitCompoundAssignment(const ast::CompoundAssignmentStatement*
         case ast::BinaryOp::kXor:
             inst = builder.Xor(ty, lhs.Get(), rhs.Get());
             break;
-        case ast::BinaryOp::kLogicalAnd:
-            inst = builder.LogicalAnd(ty, lhs.Get(), rhs.Get());
-            break;
-        case ast::BinaryOp::kLogicalOr:
-            inst = builder.LogicalOr(ty, lhs.Get(), rhs.Get());
-            break;
         case ast::BinaryOp::kEqual:
             inst = builder.Equal(ty, lhs.Get(), rhs.Get());
             break;
@@ -354,6 +348,10 @@ void BuilderImpl::EmitCompoundAssignment(const ast::CompoundAssignmentStatement*
         case ast::BinaryOp::kModulo:
             inst = builder.Modulo(ty, lhs.Get(), rhs.Get());
             break;
+        case ast::BinaryOp::kLogicalAnd:
+        case ast::BinaryOp::kLogicalOr:
+            TINT_ICE(IR, diagnostics_) << "invalid compound assignment";
+            return;
         case ast::BinaryOp::kNone:
             TINT_ICE(IR, diagnostics_) << "missing binary operand type";
             return;
@@ -790,11 +788,13 @@ utils::Result<Value*> BuilderImpl::EmitShortCircuit(const ast::BinaryExpression*
             return utils::Failure;
     }
 
+    // Evaluate the LHS of the short-circuit
     auto lhs = EmitExpression(expr->lhs);
     if (!lhs) {
         return utils::Failure;
     }
 
+    // Generate a variable to store the short-circut into
     auto* ty = builder.ir.types.Get<type::Bool>();
     auto* result_var =
         builder.Declare(ty, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);

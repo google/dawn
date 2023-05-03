@@ -49,19 +49,13 @@ utils::StringStream& Binary::ToInstruction(utils::StringStream& out) const {
             out << "mod";
             break;
         case Binary::Kind::kAnd:
-            out << "bit_and";
+            out << "and";
             break;
         case Binary::Kind::kOr:
-            out << "bit_or";
+            out << "or";
             break;
         case Binary::Kind::kXor:
-            out << "bit_xor";
-            break;
-        case Binary::Kind::kLogicalAnd:
-            out << "log_and";
-            break;
-        case Binary::Kind::kLogicalOr:
-            out << "log_or";
+            out << "xor";
             break;
         case Binary::Kind::kEqual:
             out << "eq";

@@ -34,7 +34,7 @@ utils::StringStream& Unary::ToInstruction(utils::StringStream& out) const {
             out << "addr_of";
             break;
         case Unary::Kind::kComplement:
-            out << "bit_complement";
+            out << "complement";
             break;
         case Unary::Kind::kIndirection:
             out << "indirection";
@@ -43,7 +43,7 @@ utils::StringStream& Unary::ToInstruction(utils::StringStream& out) const {
             out << "negation";
             break;
         case Unary::Kind::kNot:
-            out << "log_not";
+            out << "not";
             break;
     }
     out << " ";

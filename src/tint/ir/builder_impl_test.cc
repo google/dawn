@@ -1728,7 +1728,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = bit_and %1(u32), 4u
+%2(u32) = and %1(u32), 4u
 )");
 }
 
@@ -1746,7 +1746,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = bit_or %1(u32), 4u
+%2(u32) = or %1(u32), 4u
 )");
 }
 
@@ -1764,7 +1764,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = bit_xor %1(u32), 4u
+%2(u32) = xor %1(u32), 4u
 )");
 }
 
