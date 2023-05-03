@@ -169,22 +169,22 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         ASSERT(hr == S_OK);
 
         // Open the DX11 texture in Dawn from the shared handle and return it as a WebGPU texture.
-        dawn::native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
+        dawn::native::d3d::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
         externalImageDesc.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
         externalImageDesc.sharedHandle = sharedHandle;
 
-        std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
-            dawn::native::d3d12::ExternalImageDXGI::Create(mWGPUDevice, &externalImageDesc);
+        std::unique_ptr<dawn::native::d3d::ExternalImageDXGI> externalImage =
+            dawn::native::d3d::ExternalImageDXGI::Create(mWGPUDevice, &externalImageDesc);
 
         // Handle is no longer needed once resources are created.
         ::CloseHandle(sharedHandle);
 
-        dawn::native::d3d12::ExternalImageDXGIFenceDescriptor fenceDesc;
+        dawn::native::d3d::ExternalImageDXGIFenceDescriptor fenceDesc;
         fenceDesc.fenceHandle = fenceSharedHandle;
         fenceDesc.fenceValue = 1;
 
-        dawn::native::d3d12::ExternalImageDXGIBeginAccessDescriptor externalAccessDesc;
+        dawn::native::d3d::ExternalImageDXGIBeginAccessDescriptor externalAccessDesc;
         externalAccessDesc.isInitialized = true;
         externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(textureDesc.usage);
         externalAccessDesc.waitFences = {};

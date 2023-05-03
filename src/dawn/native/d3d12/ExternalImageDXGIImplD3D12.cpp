@@ -42,7 +42,7 @@ void ExternalImageDXGIImpl::DestroyInternal() {
 }
 
 WGPUTexture ExternalImageDXGIImpl::BeginAccess(
-    const ExternalImageDXGIBeginAccessDescriptor* descriptor) {
+    const d3d::ExternalImageDXGIBeginAccessDescriptor* descriptor) {
     ASSERT(descriptor != nullptr);
 
     auto deviceLock(GetScopedDeviceLock());
@@ -78,7 +78,7 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
     }
 
     std::vector<Ref<Fence>> waitFences;
-    for (const ExternalImageDXGIFenceDescriptor& fenceDescriptor : descriptor->waitFences) {
+    for (const d3d::ExternalImageDXGIFenceDescriptor& fenceDescriptor : descriptor->waitFences) {
         ASSERT(fenceDescriptor.fenceHandle != nullptr);
         // TODO(sunnyps): Use a fence cache instead of re-importing fences on each BeginAccess.
         Ref<Fence> fence;
@@ -100,7 +100,7 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
 }
 
 void ExternalImageDXGIImpl::EndAccess(WGPUTexture texture,
-                                      ExternalImageDXGIFenceDescriptor* signalFence) {
+                                      d3d::ExternalImageDXGIFenceDescriptor* signalFence) {
     auto deviceLock(GetScopedDeviceLock());
 
     if (!IsInList()) {

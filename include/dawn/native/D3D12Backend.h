@@ -27,12 +27,6 @@ struct ID3D12Resource;
 
 namespace dawn::native::d3d12 {
 
-// TODO(dawn:1724): remove below once chrome is updated
-using d3d::ExternalImageDescriptorDXGISharedHandle;
-using d3d::ExternalImageDXGI;
-using d3d::ExternalImageDXGIBeginAccessDescriptor;
-using d3d::ExternalImageDXGIFenceDescriptor;
-
 class Device;
 
 DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);

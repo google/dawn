@@ -39,7 +39,7 @@ PhysicalDevice::~PhysicalDevice() {
 }
 
 bool PhysicalDevice::SupportsExternalImages() const {
-    // Via dawn::native::d3d12::ExternalImageDXGI::Create
+    // Via dawn::native::d3d::ExternalImageDXGI::Create
     return true;
 }
 

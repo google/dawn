@@ -54,9 +54,10 @@ class ExternalImageDXGIImpl : public d3d::ExternalImageDXGIImpl {
 
     bool IsValid() const;
 
-    WGPUTexture BeginAccess(const ExternalImageDXGIBeginAccessDescriptor* descriptor) override;
+    WGPUTexture BeginAccess(const d3d::ExternalImageDXGIBeginAccessDescriptor* descriptor) override;
 
-    void EndAccess(WGPUTexture texture, ExternalImageDXGIFenceDescriptor* signalFence) override;
+    void EndAccess(WGPUTexture texture,
+                   d3d::ExternalImageDXGIFenceDescriptor* signalFence) override;
 
     // This method should only be called by internal code. Don't call this from D3D12Backend side,
     // or without locking.
