@@ -3318,7 +3318,7 @@ ConstEval::Result ConstEval::refract(const type::Type* ty,
             return utils::Failure;
         }
         auto e2_scaled = Mul(source, ty, e2_scale.Get(), e2);
-        if (!e1_scaled) {
+        if (!e2_scaled) {
             return utils::Failure;
         }
         return Sub(source, ty, e1_scaled.Get(), e2_scaled.Get());

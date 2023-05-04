@@ -2288,6 +2288,14 @@ std::vector<Case> RefractCases() {
             // Overflow the k^2 operation
             E({down_right, pos_y, Val(T::Highest())}, error_msg(T::Highest(), "*", T::Highest())),
         });
+    ConcatIntoIf<std::is_same_v<T, f32>>(  //
+        r, std::vector<Case>{
+               // Overflow the final multiply by e2 operation
+               // From https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=58526
+               E({Vec(T(-2.22218755e-15), T(0)), Vec(T(-198225753253481323832809619456.0), T(0)),
+                  Val(T(40.0313720703125))},
+                 error_msg(T(35267222007971840.0), "*", T(-198225753253481323832809619456.0))),
+           });
 
     return r;
 }
