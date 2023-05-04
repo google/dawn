@@ -36,19 +36,6 @@ namespace dawn::native {
 class InstanceBase;
 class AdapterBase;
 
-// An optional parameter of Adapter::CreateDevice() to send additional information when creating
-// a Device. For example, we can use it to enable a workaround, optimization or feature.
-struct DAWN_NATIVE_EXPORT DawnDeviceDescriptor {
-    DawnDeviceDescriptor();
-    ~DawnDeviceDescriptor();
-
-    std::vector<const char*> requiredFeatures;
-    std::vector<const char*> forceEnabledToggles;
-    std::vector<const char*> forceDisabledToggles;
-
-    const WGPURequiredLimits* requiredLimits = nullptr;
-};
-
 // Each toggle is assigned with a TogglesStage, indicating the validation and earliest usage
 // time of the toggle.
 enum class ToggleStage { Instance, Adapter, Device };
@@ -110,13 +97,9 @@ class DAWN_NATIVE_EXPORT Adapter {
     explicit operator bool() const;
 
     // Create a device on this adapter. On an error, nullptr is returned.
-    WGPUDevice CreateDevice(const DawnDeviceDescriptor* deviceDescriptor);
     WGPUDevice CreateDevice(const wgpu::DeviceDescriptor* deviceDescriptor);
     WGPUDevice CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor = nullptr);
 
-    void RequestDevice(const DawnDeviceDescriptor* descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata);
     void RequestDevice(const wgpu::DeviceDescriptor* descriptor,
                        WGPURequestDeviceCallback callback,
                        void* userdata);
