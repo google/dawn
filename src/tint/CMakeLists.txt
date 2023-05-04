@@ -1445,6 +1445,7 @@ if(TINT_BUILD_TESTS)
       ir/builder_impl_literal_test.cc
       ir/builder_impl_materialize_test.cc
       ir/builder_impl_test.cc
+      ir/builder_impl_unary_test.cc
       ir/builder_impl_var_test.cc
       ir/constant_test.cc
       ir/discard_test.cc
