@@ -377,24 +377,6 @@ void BuilderImpl::EmitCompoundAssignment(const ast::CompoundAssignmentStatement*
         case ast::BinaryOp::kXor:
             inst = builder.Xor(ty, lhs.Get(), rhs.Get());
             break;
-        case ast::BinaryOp::kEqual:
-            inst = builder.Equal(ty, lhs.Get(), rhs.Get());
-            break;
-        case ast::BinaryOp::kNotEqual:
-            inst = builder.NotEqual(ty, lhs.Get(), rhs.Get());
-            break;
-        case ast::BinaryOp::kLessThan:
-            inst = builder.LessThan(ty, lhs.Get(), rhs.Get());
-            break;
-        case ast::BinaryOp::kGreaterThan:
-            inst = builder.GreaterThan(ty, lhs.Get(), rhs.Get());
-            break;
-        case ast::BinaryOp::kLessThanEqual:
-            inst = builder.LessThanEqual(ty, lhs.Get(), rhs.Get());
-            break;
-        case ast::BinaryOp::kGreaterThanEqual:
-            inst = builder.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
-            break;
         case ast::BinaryOp::kShiftLeft:
             inst = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
             break;
@@ -416,6 +398,12 @@ void BuilderImpl::EmitCompoundAssignment(const ast::CompoundAssignmentStatement*
         case ast::BinaryOp::kModulo:
             inst = builder.Modulo(ty, lhs.Get(), rhs.Get());
             break;
+        case ast::BinaryOp::kLessThanEqual:
+        case ast::BinaryOp::kGreaterThanEqual:
+        case ast::BinaryOp::kGreaterThan:
+        case ast::BinaryOp::kLessThan:
+        case ast::BinaryOp::kNotEqual:
+        case ast::BinaryOp::kEqual:
         case ast::BinaryOp::kLogicalAnd:
         case ast::BinaryOp::kLogicalOr:
             TINT_ICE(IR, diagnostics_) << "invalid compound assignment";

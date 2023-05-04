@@ -44,6 +44,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kAdd);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, u32, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, u32, read_write> = add %1:ref<private, u32, read_write>, 1u
+  store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  ret
+func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Sub(Call("my_func"), 4_u);
@@ -59,6 +83,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
 %2:u32 = sub %1:u32, 4u
+)");
+}
+
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kSubtract);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, u32, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, u32, read_write> = sub %1:ref<private, u32, read_write>, 1u
+  store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  ret
+func_end
+
 )");
 }
 
@@ -80,6 +128,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kMultiply);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, u32, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, u32, read_write> = mul %1:ref<private, u32, read_write>, 1u
+  store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  ret
+func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Div(Call("my_func"), 4_u);
@@ -95,6 +167,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
 %2:u32 = div %1:u32, 4u
+)");
+}
+
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kDivide);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, u32, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, u32, read_write> = div %1:ref<private, u32, read_write>, 1u
+  store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  ret
+func_end
+
 )");
 }
 
@@ -116,6 +212,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kModulo);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, u32, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, u32, read_write> = mod %1:ref<private, u32, read_write>, 1u
+  store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  ret
+func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = And(Call("my_func"), 4_u);
@@ -131,6 +251,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
 %2:u32 = and %1:u32, 4u
+)");
+}
+
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.bool_());
+    auto* expr = CompoundAssign("v1", false, ast::BinaryOp::kAnd);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, bool, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, bool, read_write> = and %1:ref<private, bool, read_write>, false
+  store %1:ref<private, bool, read_write>, %2:ref<private, bool, read_write>
+  ret
+func_end
+
 )");
 }
 
@@ -152,6 +296,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.bool_());
+    auto* expr = CompoundAssign("v1", false, ast::BinaryOp::kOr);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, bool, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, bool, read_write> = or %1:ref<private, bool, read_write>, false
+  store %1:ref<private, bool, read_write>, %2:ref<private, bool, read_write>
+  ret
+func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Xor(Call("my_func"), 4_u);
@@ -167,6 +335,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
 %2:u32 = xor %1:u32, 4u
+)");
+}
+
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kXor);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, u32, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, u32, read_write> = xor %1:ref<private, u32, read_write>, 1u
+  store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  ret
+func_end
+
 )");
 }
 
@@ -367,6 +559,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kShiftLeft);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, u32, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, u32, read_write> = shiftl %1:ref<private, u32, read_write>, 1u
+  store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  ret
+func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Shr(Call("my_func"), 4_u);
@@ -382,6 +598,30 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
     EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
 %2:u32 = shiftr %1:u32, 4u
+)");
+}
+
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kShiftRight);
+    WrapInFunction(expr);
+
+    auto r = Build();
+    ASSERT_TRUE(r) << Error();
+    auto m = r.Move();
+
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+%1:ref<private, u32, read_write> = var private read_write
+
+
+
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  %2:ref<private, u32, read_write> = shiftr %1:ref<private, u32, read_write>, 1u
+  store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  ret
+func_end
+
 )");
 }
 
