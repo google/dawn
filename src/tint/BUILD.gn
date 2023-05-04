@@ -1858,7 +1858,10 @@ if (tint_build_unittests) {
     ]
 
     if (tint_build_ir) {
-      sources += [ "writer/spirv/generator_impl_ir_test.cc" ]
+      sources += [
+        "writer/spirv/generator_impl_ir_test.cc",
+        "writer/spirv/generator_impl_type_test.cc",
+      ]
       deps += [ ":libtint_ir_src" ]
     }
   }

@@ -12,22 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-
-#include "src/tint/ir/module.h"
-#include "src/tint/writer/spirv/generator_impl_ir.h"
-#include "src/tint/writer/spirv/spv_dump.h"
+#include "src/tint/writer/spirv/test_helper_ir.h"
 
 namespace tint::writer::spirv {
 namespace {
 
-using SpvGeneratorImplTest = testing::Test;
-
 TEST_F(SpvGeneratorImplTest, ModuleHeader) {
-    ir::Module module;
-    GeneratorImplIr generator(&module, false);
-    ASSERT_TRUE(generator.Generate()) << generator.Diagnostics().str();
-    auto got = Disassemble(generator.Result());
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
+    auto got = Disassemble(generator_.Result());
     EXPECT_EQ(got, R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 )");

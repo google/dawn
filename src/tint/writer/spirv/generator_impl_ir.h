@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "src/tint/diagnostic/diagnostic.h"
+#include "src/tint/utils/hashmap.h"
 #include "src/tint/writer/spirv/binary_writer.h"
 #include "src/tint/writer/spirv/module.h"
 
@@ -25,6 +26,9 @@
 namespace tint::ir {
 class Module;
 }  // namespace tint::ir
+namespace tint::type {
+class Type;
+}  // namespace tint::type
 
 namespace tint::writer::spirv {
 
@@ -49,11 +53,19 @@ class GeneratorImplIr {
     /// @returns the list of diagnostics raised by the generator
     diag::List Diagnostics() const { return diagnostics_; }
 
+    /// Get the result ID of the type `ty`, emitting a type declaration instruction if necessary.
+    /// @param ty the type to get the ID for
+    /// @returns the result ID of the type
+    uint32_t Type(const type::Type* ty);
+
   private:
     const ir::Module* ir_;
     spirv::Module module_;
     BinaryWriter writer_;
     diag::List diagnostics_;
+
+    /// The map of types to their result IDs.
+    utils::Hashmap<const type::Type*, uint32_t, 8> types_;
 
     bool zero_init_workgroup_memory_ = false;
 };

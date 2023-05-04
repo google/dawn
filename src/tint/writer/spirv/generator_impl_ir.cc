@@ -16,6 +16,14 @@
 
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/switch.h"
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
+#include "src/tint/type/type.h"
+#include "src/tint/type/u32.h"
+#include "src/tint/type/void.h"
 #include "src/tint/writer/spirv/module.h"
 
 namespace tint::writer::spirv {
@@ -43,6 +51,32 @@ bool GeneratorImplIr::Generate() {
     writer_.WriteModule(&module_);
 
     return true;
+}
+
+uint32_t GeneratorImplIr::Type(const type::Type* ty) {
+    return types_.GetOrCreate(ty, [&]() {
+        auto id = module_.NextId();
+        Switch(
+            ty,  //
+            [&](const type::Void*) { module_.PushType(spv::Op::OpTypeVoid, {id}); },
+            [&](const type::Bool*) { module_.PushType(spv::Op::OpTypeBool, {id}); },
+            [&](const type::I32*) {
+                module_.PushType(spv::Op::OpTypeInt, {id, 32u, 1u});
+            },
+            [&](const type::U32*) {
+                module_.PushType(spv::Op::OpTypeInt, {id, 32u, 0u});
+            },
+            [&](const type::F32*) {
+                module_.PushType(spv::Op::OpTypeFloat, {id, 32u});
+            },
+            [&](const type::F16*) {
+                module_.PushType(spv::Op::OpTypeFloat, {id, 16u});
+            },
+            [&](Default) {
+                TINT_ICE(Writer, diagnostics_) << "unhandled type: " << ty->FriendlyName();
+            });
+        return id;
+    });
 }
 
 }  // namespace tint::writer::spirv
