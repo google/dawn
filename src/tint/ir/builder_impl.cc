@@ -833,7 +833,7 @@ utils::Result<Value*> BuilderImpl::EmitUnary(const ast::UnaryOpExpression* expr)
     auto* sem = program_->Sem().Get(expr);
     auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
 
-    Unary* inst = nullptr;
+    Instruction* inst = nullptr;
     switch (expr->op) {
         case ast::UnaryOp::kAddressOf:
             inst = builder.AddressOf(ty, val.Get());

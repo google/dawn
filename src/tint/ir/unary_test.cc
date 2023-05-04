@@ -87,20 +87,6 @@ TEST_F(IR_InstructionTest, CreateNegation) {
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateNot) {
-    auto& b = CreateEmptyBuilder();
-    const auto* inst =
-        b.builder.Not(b.builder.ir.types.Get<type::Bool>(), b.builder.Constant(true));
-
-    ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->GetKind(), Unary::Kind::kNot);
-
-    ASSERT_TRUE(inst->Val()->Is<Constant>());
-    auto lhs = inst->Val()->As<Constant>()->value;
-    ASSERT_TRUE(lhs->Is<constant::Scalar<bool>>());
-    EXPECT_TRUE(lhs->As<constant::Scalar<bool>>()->ValueAs<bool>());
-}
-
 TEST_F(IR_InstructionTest, Unary_Usage) {
     auto& b = CreateEmptyBuilder();
     const auto* inst =

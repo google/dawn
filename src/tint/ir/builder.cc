@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "src/tint/constant/scalar.h"
+
 namespace tint::ir {
 
 Builder::Builder() {}
@@ -194,8 +196,8 @@ Unary* Builder::Negation(const type::Type* type, Value* val) {
     return CreateUnary(Unary::Kind::kNegation, type, val);
 }
 
-Unary* Builder::Not(const type::Type* type, Value* val) {
-    return CreateUnary(Unary::Kind::kNot, type, val);
+Binary* Builder::Not(const type::Type* type, Value* val) {
+    return Equal(type, val, Constant(create<constant::Scalar<bool>>(type, false)));
 }
 
 ir::Bitcast* Builder::Bitcast(const type::Type* type, Value* val) {

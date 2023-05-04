@@ -29,7 +29,6 @@ class Unary : public utils::Castable<Unary, Instruction> {
         kComplement,
         kIndirection,
         kNegation,
-        kNot,
     };
 
     /// Constructor

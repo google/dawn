@@ -493,9 +493,6 @@ void Disassembler::EmitUnary(const Unary* u) {
         case Unary::Kind::kNegation:
             out_ << "negation";
             break;
-        case Unary::Kind::kNot:
-            out_ << "not";
-            break;
     }
     out_ << " ";
     EmitValue(u->Val());

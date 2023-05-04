@@ -300,7 +300,7 @@ class Builder {
     /// @param type the result type of the expression
     /// @param val the value
     /// @returns the operation
-    Unary* Not(const type::Type* type, Value* val);
+    Binary* Not(const type::Type* type, Value* val);
 
     /// Creates a bitcast instruction
     /// @param type the result type of the bitcast

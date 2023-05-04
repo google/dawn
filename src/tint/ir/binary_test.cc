@@ -203,6 +203,25 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
+TEST_F(IR_InstructionTest, CreateNot) {
+    auto& b = CreateEmptyBuilder();
+    const auto* inst =
+        b.builder.Not(b.builder.ir.types.Get<type::Bool>(), b.builder.Constant(true));
+
+    ASSERT_TRUE(inst->Is<Binary>());
+    EXPECT_EQ(inst->GetKind(), Binary::Kind::kEqual);
+
+    ASSERT_TRUE(inst->LHS()->Is<Constant>());
+    auto lhs = inst->LHS()->As<Constant>()->value;
+    ASSERT_TRUE(lhs->Is<constant::Scalar<bool>>());
+    EXPECT_TRUE(lhs->As<constant::Scalar<bool>>()->ValueAs<bool>());
+
+    ASSERT_TRUE(inst->RHS()->Is<Constant>());
+    auto rhs = inst->RHS()->As<Constant>()->value;
+    ASSERT_TRUE(rhs->Is<constant::Scalar<bool>>());
+    EXPECT_FALSE(rhs->As<constant::Scalar<bool>>()->ValueAs<bool>());
+}
+
 TEST_F(IR_InstructionTest, CreateShiftLeft) {
     auto& b = CreateEmptyBuilder();
 
