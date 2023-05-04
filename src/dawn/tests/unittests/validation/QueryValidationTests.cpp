@@ -711,7 +711,7 @@ class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
   protected:
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         // Create a device with pipeline statistic query feature required. Note that Pipeline
-        // statistic query is an unsafe API, while DisallowUnsafeApis instance toggle is disabled
+        // statistic query is an unsafe API, while AllowUnsafeApis instance toggle is enabled
         // when ValidationTest creating testing instance, so we can test it.
         wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::PipelineStatisticsQuery};

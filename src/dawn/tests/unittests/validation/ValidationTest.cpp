@@ -125,15 +125,15 @@ ValidationTest::ValidationTest() {
 }
 
 void ValidationTest::SetUp() {
-    // Create an instance with toggle DisallowUnsafeApis disabled, which would be inherited to
+    // Create an instance with toggle AllowUnsafeAPIs enabled, which would be inherited to
     // adapter and device toggles and allow us to test unsafe apis (including experimental
-    // features). To test device of DisallowUnsafeApis enabled, require it in device toggles
+    // features). To test device with AllowUnsafeAPIs disabled, require it in device toggles
     // descriptor to override the inheritance.
-    const char* disallowUnsafeApisToggle = "disallow_unsafe_apis";
+    const char* allowUnsafeApisToggle = "allow_unsafe_apis";
     WGPUDawnTogglesDescriptor instanceToggles = {};
     instanceToggles.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-    instanceToggles.disabledTogglesCount = 1;
-    instanceToggles.disabledToggles = &disallowUnsafeApisToggle;
+    instanceToggles.enabledTogglesCount = 1;
+    instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
     WGPUInstanceDescriptor instanceDesc = {};
     instanceDesc.nextInChain = &instanceToggles.chain;

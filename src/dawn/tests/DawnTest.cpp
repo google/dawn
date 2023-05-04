@@ -374,14 +374,14 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
 }
 
 std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDiscoverAdapters() {
-    // Create an instance with toggle DisallowUnsafeApis disabled, which would be inherited to
+    // Create an instance with toggle AllowUnsafeAPIs enabled, which would be inherited to
     // adapter and device toggles and allow us to test unsafe apis (including experimental
     // features).
-    const char* disallowUnsafeApisToggle = "disallow_unsafe_apis";
+    const char* allowUnsafeApisToggle = "allow_unsafe_apis";
     WGPUDawnTogglesDescriptor instanceToggles = {};
     instanceToggles.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-    instanceToggles.disabledTogglesCount = 1;
-    instanceToggles.disabledToggles = &disallowUnsafeApisToggle;
+    instanceToggles.enabledTogglesCount = 1;
+    instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
     WGPUInstanceDescriptor instanceDesc = {};
     instanceDesc.nextInChain = &instanceToggles.chain;
@@ -993,7 +993,7 @@ WGPUDevice DawnTestBase::CreateDeviceImpl(std::string isolationKey) {
     deviceDescriptor.nextInChain = &cacheDesc;
     cacheDesc.isolationKey = isolationKey.c_str();
 
-    // Note that DisallowUnsafeApis is disabled when creating testing instance and would be
+    // Note that AllowUnsafeAPIs is enabled when creating testing instance and would be
     // inherited to all adapters' toggles set.
     ParamTogglesHelper deviceTogglesHelper(mParam, dawn::native::ToggleStage::Device);
     cacheDesc.nextInChain = &deviceTogglesHelper.togglesDesc;

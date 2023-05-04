@@ -58,7 +58,7 @@ struct FeatureInfo {
     const char* description;
     const char* url;
     // The enum of feature state, could be stable or experimental. Using an experimental feature
-    // requires DisallowUnsafeAPIs toggle being disabled.
+    // requires the AllowUnsafeAPIs toggle to be enabled.
     enum class FeatureState { Stable = 0, Experimental };
     FeatureState featureState;
 };

@@ -235,11 +235,12 @@ MaybeError PhysicalDeviceBase::ValidateFeatureSupportedWithToggles(
                     "Requested feature %s is not supported.", feature);
 
     const FeatureInfo* featureInfo = GetInstance()->GetFeatureInfo(feature);
-    // Experimental features are guarded by toggle DisallowUnsafeAPIs.
+    // Experimental features are guarded by the AllowUnsafeAPIs toggle.
     if (featureInfo->featureState == FeatureInfo::FeatureState::Experimental) {
-        // DisallowUnsafeAPIs toggle is by default enabled if not explicitly disabled.
-        DAWN_INVALID_IF(toggles.IsEnabled(Toggle::DisallowUnsafeAPIs),
-                        "Feature %s is guarded by toggle disallow_unsafe_apis.", featureInfo->name);
+        // AllowUnsafeAPIs toggle is by default disabled if not explicitly enabled.
+        DAWN_INVALID_IF(toggles.IsEnabled(Toggle::DisallowUnsafeAPIs) &&
+                            !toggles.IsEnabled(Toggle::AllowUnsafeAPIs),
+                        "Feature %s is guarded by toggle allow_unsafe_apis.", featureInfo->name);
     }
 
     // Do backend-specific validation.

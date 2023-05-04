@@ -359,6 +359,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     bool IsToggleEnabled(Toggle toggle) const;
     bool IsValidationEnabled() const;
     bool IsRobustnessEnabled() const;
+    bool AllowUnsafeAPIs() const;
     size_t GetLazyClearCountForTesting();
     void IncrementLazyClearCountForTesting();
     size_t GetDeprecationWarningCountForTesting();

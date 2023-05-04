@@ -177,6 +177,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Produces validation errors on API entry points or parameter combinations that aren't "
       "considered secure yet.",
       "http://crbug.com/1138528", ToggleStage::Instance}},
+    {Toggle::AllowUnsafeAPIs,
+     {"allow_unsafe_apis",
+      "Suppresses validation errors on API entry points or parameter combinations that aren't "
+      "considered secure yet.",
+      "http://crbug.com/1138528", ToggleStage::Instance}},
     {Toggle::FlushBeforeClientWaitSync,
      {"flush_before_client_wait_sync",
       "Call glFlush before glClientWaitSync to work around bugs in the latter",
@@ -450,6 +455,10 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
     TogglesInfo togglesInfo;
     for (uint32_t i = 0; i < togglesDesc->enabledTogglesCount; ++i) {
         Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->enabledToggles[i]);
+        if (toggle == Toggle::DisallowUnsafeAPIs) {
+            dawn::WarningLog() << "Enabling the disallow_unsafe_apis toggle is deprecated, disable "
+                                  "allow_unsafe_apis toggle instead.";
+        }
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
             // Accept the required toggles of current and earlier stage to allow override
@@ -462,6 +471,10 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
     }
     for (uint32_t i = 0; i < togglesDesc->disabledTogglesCount; ++i) {
         Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->disabledToggles[i]);
+        if (toggle == Toggle::DisallowUnsafeAPIs) {
+            dawn::WarningLog() << "Disabling the disallow_unsafe_apis toggle is deprecated, enable "
+                                  "allow_unsafe_apis toggle instead.";
+        }
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
             // Accept the required toggles of current and earlier stage to allow override

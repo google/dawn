@@ -63,4 +63,9 @@ const TogglesState& AdapterBase::GetTogglesState() const {
     return mPhysicalDevice->GetTogglesState();
 }
 
+bool AdapterBase::AllowUnsafeAPIs() const {
+    return GetTogglesState().IsEnabled(Toggle::AllowUnsafeAPIs) ||
+           !GetTogglesState().IsEnabled(Toggle::DisallowUnsafeAPIs);
+}
+
 }  // namespace dawn::native

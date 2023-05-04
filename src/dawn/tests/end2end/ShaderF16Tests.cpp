@@ -99,9 +99,9 @@ TEST_P(ShaderF16Tests, BasicShaderF16FeaturesTest) {
         GetParam().mRequireShaderF16Feature &&
         // Adapter support the feature
         IsShaderF16SupportedOnAdapter() &&
-        // Proper toggle, disallow_unsafe_apis and use_dxc if d3d12
-        // Note that "disallow_unsafe_apis" is always disabled in DawnTestBase::CreateDeviceImpl.
-        !HasToggleEnabled("disallow_unsafe_apis") && UseDxcEnabledOrNonD3D12();
+        // Proper toggle, allow_unsafe_apis and use_dxc if d3d12
+        // Note that "allow_unsafe_apis" is always enabled in DawnTestBase::CreateDeviceImpl.
+        HasToggleEnabled("allow_unsafe_apis") && UseDxcEnabledOrNonD3D12();
     const bool deviceSupportShaderF16Feature = device.HasFeature(wgpu::FeatureName::ShaderF16);
     EXPECT_EQ(deviceSupportShaderF16Feature, shouldShaderF16FeatureSupportedByDevice);
 
@@ -440,7 +440,7 @@ fn FSMain(@location(0) color : vec4f) -> @location(0) vec4f {
     }
 }
 
-// DawnTestBase::CreateDeviceImpl always disable disallow_unsafe_apis toggle.
+// DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
 DAWN_INSTANTIATE_TEST_P(ShaderF16Tests,
                         {
                             D3D12Backend(),
