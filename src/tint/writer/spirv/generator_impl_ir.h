@@ -64,6 +64,11 @@ class GeneratorImplIr {
     /// @param func the function to emit
     void EmitFunction(const ir::Function* func);
 
+    /// Emit entry point declarations for a function.
+    /// @param func the function to emit entry point declarations for
+    /// @param id the result ID of the function declaration
+    void EmitEntryPoint(const ir::Function* func, uint32_t id);
+
   private:
     const ir::Module* ir_;
     spirv::Module module_;
