@@ -28,11 +28,4 @@ Store::Store(Value* to, Value* from) : Base(), to_(to), from_(from) {
 
 Store::~Store() = default;
 
-utils::StringStream& Store::ToInstruction(utils::StringStream& out) const {
-    out << "store ";
-    to_->ToValue(out) << ", ";
-    from_->ToValue(out);
-    return out;
-}
-
 }  // namespace tint::ir

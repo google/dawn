@@ -18,7 +18,6 @@
 #include "src/tint/builtin/function.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -43,11 +42,6 @@ class Builtin : public utils::Castable<Builtin, Call> {
 
     /// @returns the builtin function
     builtin::Function Func() const { return func_; }
-
-    /// Write the instruction to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     const builtin::Function func_;

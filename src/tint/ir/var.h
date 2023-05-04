@@ -19,7 +19,6 @@
 #include "src/tint/builtin/address_space.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -47,11 +46,6 @@ class Var : public utils::Castable<Var, Instruction> {
 
     /// @returns the access mode
     builtin::Access Access() const { return access_; }
-
-    /// Write the instruction to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     builtin::AddressSpace address_space_;

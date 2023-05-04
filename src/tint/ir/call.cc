@@ -29,15 +29,4 @@ Call::Call(uint32_t id, const type::Type* type, utils::VectorRef<Value*> args)
 
 Call::~Call() = default;
 
-void Call::EmitArgs(utils::StringStream& out) const {
-    bool first = true;
-    for (const auto* arg : args_) {
-        if (!first) {
-            out << ", ";
-        }
-        first = false;
-        arg->ToValue(out);
-    }
-}
-
 }  // namespace tint::ir

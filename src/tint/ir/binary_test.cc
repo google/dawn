@@ -14,7 +14,6 @@
 
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/test_helper.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 namespace {
@@ -42,10 +41,6 @@ TEST_F(IR_InstructionTest, CreateAnd) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = and 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateOr) {
@@ -66,10 +61,6 @@ TEST_F(IR_InstructionTest, CreateOr) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = or 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateXor) {
@@ -90,10 +81,6 @@ TEST_F(IR_InstructionTest, CreateXor) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = xor 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateEqual) {
@@ -114,10 +101,6 @@ TEST_F(IR_InstructionTest, CreateEqual) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = eq 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateNotEqual) {
@@ -138,10 +121,6 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = neq 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateLessThan) {
@@ -162,10 +141,6 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = lt 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateGreaterThan) {
@@ -186,10 +161,6 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = gt 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateLessThanEqual) {
@@ -210,10 +181,6 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = lte 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
@@ -234,10 +201,6 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(bool) = gte 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateShiftLeft) {
@@ -258,10 +221,6 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = shiftl 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateShiftRight) {
@@ -282,10 +241,6 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = shiftr 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateAdd) {
@@ -306,10 +261,6 @@ TEST_F(IR_InstructionTest, CreateAdd) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = add 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateSubtract) {
@@ -330,10 +281,6 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = sub 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateMultiply) {
@@ -354,10 +301,6 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = mul 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateDivide) {
@@ -378,10 +321,6 @@ TEST_F(IR_InstructionTest, CreateDivide) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = div 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, CreateModulo) {
@@ -402,10 +341,6 @@ TEST_F(IR_InstructionTest, CreateModulo) {
     auto rhs = inst->RHS()->As<Constant>()->value;
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = mod 4i, 2i");
 }
 
 TEST_F(IR_InstructionTest, Binary_Usage) {

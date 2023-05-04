@@ -17,7 +17,6 @@
 
 #include "src/tint/ir/instruction.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -33,10 +32,6 @@ class Call : public utils::Castable<Call, Instruction> {
 
     /// @returns the constructor arguments
     utils::VectorRef<Value*> Args() const { return args_; }
-
-    /// Writes the call arguments to the given stream.
-    /// @param out the output stream
-    void EmitArgs(utils::StringStream& out) const;
 
   protected:
     /// Constructor

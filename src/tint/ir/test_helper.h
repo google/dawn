@@ -24,6 +24,7 @@
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/number.h"
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 

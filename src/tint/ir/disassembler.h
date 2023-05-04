@@ -19,8 +19,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "src/tint/ir/binary.h"
+#include "src/tint/ir/call.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/unary.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
@@ -46,8 +49,14 @@ class Disassembler {
 
   private:
     utils::StringStream& Indent();
-    void Walk(const FlowNode* node);
     size_t GetIdForNode(const FlowNode* node);
+
+    void Walk(const FlowNode* node);
+    void EmitInstruction(const Instruction* inst);
+    void EmitValue(const Value* val);
+    void EmitArgs(const Call* call);
+    void EmitBinary(const Binary* b);
+    void EmitUnary(const Unary* b);
 
     const Module& mod_;
     utils::StringStream out_;

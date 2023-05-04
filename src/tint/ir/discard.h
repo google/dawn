@@ -18,7 +18,6 @@
 #include "src/tint/debug.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -33,11 +32,6 @@ class Discard : public utils::Castable<Discard, Call> {
 
     Discard& operator=(const Discard& inst) = delete;
     Discard& operator=(Discard&& inst) = delete;
-
-    /// Write the instruction to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 };
 
 }  // namespace tint::ir

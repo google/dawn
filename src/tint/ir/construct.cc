@@ -24,10 +24,4 @@ Construct::Construct(uint32_t id, const type::Type* type, utils::VectorRef<Value
 
 Construct::~Construct() = default;
 
-utils::StringStream& Construct::ToInstruction(utils::StringStream& out) const {
-    ToValue(out) << " = construct ";
-    EmitArgs(out);
-    return out;
-}
-
 }  // namespace tint::ir

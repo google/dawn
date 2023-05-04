@@ -27,10 +27,4 @@ Convert::Convert(uint32_t id,
 
 Convert::~Convert() = default;
 
-utils::StringStream& Convert::ToInstruction(utils::StringStream& out) const {
-    ToValue(out) << " = convert " << from_type_->FriendlyName() << ", ";
-    EmitArgs(out);
-    return out;
-}
-
 }  // namespace tint::ir

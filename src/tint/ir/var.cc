@@ -27,9 +27,4 @@ Var::Var(uint32_t id,
 
 Var::~Var() = default;
 
-utils::StringStream& Var::ToInstruction(utils::StringStream& out) const {
-    ToValue(out) << " = var " << address_space_ << " " << access_;
-    return out;
-}
-
 }  // namespace tint::ir

@@ -18,7 +18,6 @@
 #include "src/tint/ir/call.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -45,11 +44,6 @@ class Convert : public utils::Castable<Convert, Call> {
     const type::Type* FromType() const { return from_type_; }
     /// @returns the to type
     const type::Type* ToType() const { return Type(); }
-
-    /// Write the instruction to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     const type::Type* from_type_ = nullptr;

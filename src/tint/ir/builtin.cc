@@ -28,11 +28,5 @@ Builtin::Builtin(uint32_t id,
 
 Builtin::~Builtin() = default;
 
-utils::StringStream& Builtin::ToInstruction(utils::StringStream& out) const {
-    ToValue(out) << " = " << builtin::str(func_) << " ";
-    EmitArgs(out);
-    return out;
-}
-
 }  // namespace tint::ir
 // \endcond

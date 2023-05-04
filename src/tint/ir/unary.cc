@@ -27,28 +27,4 @@ Unary::Unary(uint32_t id, Kind kind, const type::Type* type, Value* val)
 
 Unary::~Unary() = default;
 
-utils::StringStream& Unary::ToInstruction(utils::StringStream& out) const {
-    ToValue(out) << " = ";
-    switch (GetKind()) {
-        case Unary::Kind::kAddressOf:
-            out << "addr_of";
-            break;
-        case Unary::Kind::kComplement:
-            out << "complement";
-            break;
-        case Unary::Kind::kIndirection:
-            out << "indirection";
-            break;
-        case Unary::Kind::kNegation:
-            out << "negation";
-            break;
-        case Unary::Kind::kNot:
-            out << "not";
-            break;
-    }
-    out << " ";
-    val_->ToValue(out);
-    return out;
-}
-
 }  // namespace tint::ir

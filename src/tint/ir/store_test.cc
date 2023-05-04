@@ -14,7 +14,6 @@
 
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/test_helper.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 namespace {
@@ -32,16 +31,12 @@ TEST_F(IR_InstructionTest, CreateStore) {
     const auto* inst = b.builder.Store(to, b.builder.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Store>());
-    ASSERT_EQ(inst->to(), to);
+    ASSERT_EQ(inst->To(), to);
 
-    ASSERT_TRUE(inst->from()->Is<Constant>());
-    auto lhs = inst->from()->As<Constant>()->value;
+    ASSERT_TRUE(inst->From()->Is<Constant>());
+    auto lhs = inst->From()->As<Constant>()->value;
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "store %0, 4i");
 }
 
 TEST_F(IR_InstructionTest, Store_Usage) {
@@ -50,13 +45,13 @@ TEST_F(IR_InstructionTest, Store_Usage) {
     auto* to = b.builder.Discard();
     const auto* inst = b.builder.Store(to, b.builder.Constant(4_i));
 
-    ASSERT_NE(inst->to(), nullptr);
-    ASSERT_EQ(inst->to()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->to()->Usage()[0], inst);
+    ASSERT_NE(inst->To(), nullptr);
+    ASSERT_EQ(inst->To()->Usage().Length(), 1u);
+    EXPECT_EQ(inst->To()->Usage()[0], inst);
 
-    ASSERT_NE(inst->from(), nullptr);
-    ASSERT_EQ(inst->from()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->from()->Usage()[0], inst);
+    ASSERT_NE(inst->From(), nullptr);
+    ASSERT_EQ(inst->From()->Usage().Length(), 1u);
+    EXPECT_EQ(inst->From()->Usage()[0], inst);
 }
 
 }  // namespace

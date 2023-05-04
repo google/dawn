@@ -17,7 +17,6 @@
 
 #include "src/tint/ir/instruction.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -51,11 +50,6 @@ class Unary : public utils::Castable<Unary, Instruction> {
 
     /// @returns the value for the instruction
     const Value* Val() const { return val_; }
-
-    /// Write the instruction to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     Kind kind_;

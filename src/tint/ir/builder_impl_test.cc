@@ -42,7 +42,7 @@ TEST_F(IR_BuilderImplTest, Func) {
     EXPECT_EQ(1u, f->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, f->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func f(void)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func f():void
   %fn1 = block
   ret
 func_end
@@ -88,7 +88,8 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -136,7 +137,8 @@ TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -183,7 +185,8 @@ TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -230,7 +233,8 @@ TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -273,7 +277,8 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -330,7 +335,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -388,7 +394,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -463,7 +470,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -538,7 +546,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -595,7 +604,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -657,7 +667,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     // This is 1 because only the loop branch happens. The subsequent if return is dead code.
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -711,7 +722,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -857,7 +869,8 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1001,7 +1014,8 @@ TEST_F(IR_BuilderImplTest, While) {
     EXPECT_EQ(1u, if_flow->false_.target->inbound_branches.Length());
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1071,7 +1085,8 @@ TEST_F(IR_BuilderImplTest, While_Return) {
     EXPECT_EQ(1u, if_flow->false_.target->inbound_branches.Length());
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1178,7 +1193,8 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
     EXPECT_EQ(1u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1237,7 +1253,8 @@ TEST_F(IR_BuilderImplTest, Switch) {
     EXPECT_EQ(3u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1301,7 +1318,8 @@ TEST_F(IR_BuilderImplTest, Switch_MultiSelector) {
     EXPECT_EQ(1u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1345,7 +1363,8 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
     EXPECT_EQ(1u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1398,7 +1417,8 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
     // This is 1 because the if is dead-code eliminated and the return doesn't happen.
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1457,7 +1477,8 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     EXPECT_EQ(0u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
   branch %fn2
 
@@ -1566,7 +1587,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
-%1(ref<private, u32, read_write>) = var private read_write
+%1:ref<private, u32, read_write> = var private read_write
 
 
 
@@ -1582,8 +1603,8 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
-%1(ref<private, u32, read_write>) = var private read_write
-store %1(ref<private, u32, read_write>), 2u
+%1:ref<private, u32, read_write> = var private read_write
+store %1:ref<private, u32, read_write>, 2u
 
 
 
@@ -1598,9 +1619,10 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
-  %1(ref<function, u32, read_write>) = var function read_write
+  %1:ref<function, u32, read_write> = var function read_write
   ret
 func_end
 
@@ -1616,10 +1638,11 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+    EXPECT_EQ(Disassemble(m),
+              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn1 = block
-  %1(ref<function, u32, read_write>) = var function read_write
-  store %1(ref<function, u32, read_write>), 2u
+  %1:ref<function, u32, read_write> = var function read_write
+  store %1:ref<function, u32, read_write>, 2u
   ret
 func_end
 
@@ -1639,8 +1662,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = add %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = add %1:u32, 4u
 )");
 }
 
@@ -1657,8 +1680,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = sub %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = sub %1:u32, 4u
 )");
 }
 
@@ -1675,8 +1698,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = mul %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = mul %1:u32, 4u
 )");
 }
 
@@ -1693,8 +1716,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = div %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = div %1:u32, 4u
 )");
 }
 
@@ -1711,8 +1734,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = mod %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = mod %1:u32, 4u
 )");
 }
 
@@ -1729,8 +1752,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = and %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = and %1:u32, 4u
 )");
 }
 
@@ -1747,8 +1770,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = or %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = or %1:u32, 4u
 )");
 }
 
@@ -1765,8 +1788,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = xor %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = xor %1:u32, 4u
 )");
 }
 
@@ -1779,22 +1802,22 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func(bool)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func():bool
   %fn1 = block
   ret true
 func_end
 
-%fn2 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn3 = block
-  %1(bool) = call my_func
-  %2(bool) = var function read_write
-  store %2(bool), %1(bool)
+  %1:bool = call my_func
+  %2:bool = var function read_write
+  store %2:bool, %1:bool
   branch %fn4
 
-  %fn4 = if %1(bool) [t: %fn5, f: %fn6, m: %fn7]
+  %fn4 = if %1:bool [t: %fn5, f: %fn6, m: %fn7]
     # true branch
     %fn5 = block
-    store %2(bool), false
+    store %2:bool, false
     branch %fn7
 
   # if merge
@@ -1814,23 +1837,23 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func(bool)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func():bool
   %fn1 = block
   ret true
 func_end
 
-%fn2 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn3 = block
-  %1(bool) = call my_func
-  %2(bool) = var function read_write
-  store %2(bool), %1(bool)
+  %1:bool = call my_func
+  %2:bool = var function read_write
+  store %2:bool, %1:bool
   branch %fn4
 
-  %fn4 = if %1(bool) [t: %fn5, f: %fn6, m: %fn7]
+  %fn4 = if %1:bool [t: %fn5, f: %fn6, m: %fn7]
     # true branch
     # false branch
     %fn6 = block
-    store %2(bool), true
+    store %2:bool, true
     branch %fn7
 
   # if merge
@@ -1854,8 +1877,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(bool) = eq %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:bool = eq %1:u32, 4u
 )");
 }
 
@@ -1872,8 +1895,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(bool) = neq %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:bool = neq %1:u32, 4u
 )");
 }
 
@@ -1890,8 +1913,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(bool) = lt %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:bool = lt %1:u32, 4u
 )");
 }
 
@@ -1908,8 +1931,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(bool) = gt %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:bool = gt %1:u32, 4u
 )");
 }
 
@@ -1926,8 +1949,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(bool) = lte %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:bool = lte %1:u32, 4u
 )");
 }
 
@@ -1944,8 +1967,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(bool) = gte %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:bool = gte %1:u32, 4u
 )");
 }
 
@@ -1962,8 +1985,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = shiftl %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = shiftl %1:u32, 4u
 )");
 }
 
@@ -1980,8 +2003,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(u32) = call my_func
-%2(u32) = shiftr %1(u32), 4u
+    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
+%2:u32 = shiftr %1:u32, 4u
 )");
 }
 
@@ -1996,28 +2019,28 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func(f32)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func():f32
   %fn1 = block
   ret 0.0f
 func_end
 
-%fn2 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn3 = block
-  %1(f32) = call my_func
-  %2(bool) = lt %1(f32), 2.0f
-  %3(bool) = var function read_write
-  store %3(bool), %2(bool)
+  %1:f32 = call my_func
+  %2:bool = lt %1:f32, 2.0f
+  %3:bool = var function read_write
+  store %3:bool, %2:bool
   branch %fn4
 
-  %fn4 = if %2(bool) [t: %fn5, f: %fn6, m: %fn7]
+  %fn4 = if %2:bool [t: %fn5, f: %fn6, m: %fn7]
     # true branch
     %fn5 = block
-    %4(f32) = call my_func
-    %5(f32) = call my_func
-    %6(f32) = mul 2.29999995231628417969f, %5(f32)
-    %7(f32) = div %4(f32), %6(f32)
-    %8(bool) = gt 2.5f, %7(f32)
-    store %3(bool), %8(bool)
+    %4:f32 = call my_func
+    %5:f32 = call my_func
+    %6:f32 = mul 2.29999995231628417969f, %5:f32
+    %7:f32 = div %4:f32, %6:f32
+    %8:bool = gt 2.5f, %7:f32
+    store %3:bool, %8:bool
     branch %fn7
 
   # if merge
@@ -2038,14 +2061,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound_WithConstEval) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func(bool)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func():bool
   %fn1 = block
   ret true
 func_end
 
-%fn2 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn3 = block
-  %1(bool) = call my_func, false
+  %1:bool = call my_func, false
   ret
 func_end
 
@@ -2066,8 +2089,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(f32) = call my_func
-%2(f32) = bitcast %1(f32)
+    EXPECT_EQ(d.AsString(), R"(%1:f32 = call my_func
+%2:f32 = bitcast %1:f32
 )");
 }
 
@@ -2103,7 +2126,7 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
 
     Disassembler d(b.builder.ir);
     d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1(void) = call my_func, 6.0f
+    EXPECT_EQ(d.AsString(), R"(%1:void = call my_func, 6.0f
 )");
 }
 
@@ -2117,8 +2140,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
-%1(ref<private, vec3<f32>, read_write>) = var private read_write
-store %1(ref<private, vec3<f32>, read_write>), vec3<f32> 0.0f
+%1:ref<private, vec3<f32>, read_write> = var private read_write
+store %1:ref<private, vec3<f32>, read_write>, vec3<f32> 0.0f
 
 
 
@@ -2136,14 +2159,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
-%1(ref<private, f32, read_write>) = var private read_write
-store %1(ref<private, f32, read_write>), 1.0f
+%1:ref<private, f32, read_write> = var private read_write
+store %1:ref<private, f32, read_write>, 1.0f
 
 
 
-%fn1 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
-  %2(vec3<f32>) = construct 2.0f, 3.0f, %1(ref<private, f32, read_write>)
+  %2:vec3<f32> = construct 2.0f, 3.0f, %1:ref<private, f32, read_write>
   ret
 func_end
 
@@ -2161,14 +2184,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
-%1(ref<private, i32, read_write>) = var private read_write
-store %1(ref<private, i32, read_write>), 1i
+%1:ref<private, i32, read_write> = var private read_write
+store %1:ref<private, i32, read_write>, 1i
 
 
 
-%fn1 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
-  %2(f32) = convert i32, %1(ref<private, i32, read_write>)
+  %2:f32 = convert i32, %1:ref<private, i32, read_write>
   ret
 func_end
 
@@ -2184,7 +2207,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_MaterializedCall) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function(f32)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test_function():f32
   %fn1 = block
   ret 2.0f
 func_end
@@ -2202,14 +2225,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn0 = block
-%1(ref<private, f32, read_write>) = var private read_write
-store %1(ref<private, f32, read_write>), 1.0f
+%1:ref<private, f32, read_write> = var private read_write
+store %1:ref<private, f32, read_write>, 1.0f
 
 
 
-%fn1 = func test_function(void) [@compute @workgroup_size(1, 1, 1)]
+%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
-  %2(f32) = asin %1(ref<private, f32, read_write>)
+  %2:f32 = asin %1:ref<private, f32, read_write>
   ret
 func_end
 
@@ -2225,7 +2248,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Vertex) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(vec4<f32>) [@vertex ra: @position]
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec4<f32> [@vertex ra: @position]
   %fn1 = block
   ret vec4<f32> 0.0f
 func_end
@@ -2241,7 +2264,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Fragment) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(void) [@fragment]
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():void [@fragment]
   %fn1 = block
   ret
 func_end
@@ -2257,7 +2280,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Compute) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(void) [@compute @workgroup_size(8, 4, 2)]
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():void [@compute @workgroup_size(8, 4, 2)]
   %fn1 = block
   ret
 func_end
@@ -2273,7 +2296,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Return) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(vec3<f32>)
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec3<f32>
   %fn1 = block
   ret vec3<f32> 0.0f
 func_end
@@ -2290,7 +2313,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnPosition) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(vec4<f32>) [@vertex ra: @position]
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec4<f32> [@vertex ra: @position]
   %fn1 = block
   ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
 func_end
@@ -2307,7 +2330,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnPositionInvariant) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(vec4<f32>) [@vertex ra: @position @invariant]
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec4<f32> [@vertex ra: @position @invariant]
   %fn1 = block
   ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
 func_end
@@ -2323,7 +2346,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnLocation) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(vec4<f32>) [@fragment ra: @location(1)]
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec4<f32> [@fragment ra: @location(1)]
   %fn1 = block
   ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
 func_end
@@ -2340,7 +2363,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnFragDepth) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(f32) [@fragment ra: @frag_depth]
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():f32 [@fragment ra: @frag_depth]
   %fn1 = block
   ret 1.0f
 func_end
@@ -2357,7 +2380,7 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnSampleMask) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test(u32) [@fragment ra: @sample_mask]
+    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():u32 [@fragment ra: @sample_mask]
   %fn1 = block
   ret 1u
 func_end

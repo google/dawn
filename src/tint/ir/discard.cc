@@ -23,9 +23,4 @@ Discard::Discard() : Base() {}
 
 Discard::~Discard() = default;
 
-utils::StringStream& Discard::ToInstruction(utils::StringStream& out) const {
-    out << "discard";
-    return out;
-}
-
 }  // namespace tint::ir

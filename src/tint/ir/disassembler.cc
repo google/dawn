@@ -14,12 +14,25 @@
 
 #include "src/tint/ir/disassembler.h"
 
+#include "src//tint/ir/unary.h"
+#include "src/tint/constant/composite.h"
+#include "src/tint/constant/scalar.h"
+#include "src/tint/constant/splat.h"
+#include "src/tint/ir/binary.h"
+#include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/builtin.h"
+#include "src/tint/ir/construct.h"
+#include "src/tint/ir/convert.h"
+#include "src/tint/ir/discard.h"
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/root_terminator.h"
+#include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/user_call.h"
+#include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -67,7 +80,8 @@ utils::StringStream& Disassembler::Indent() {
 void Disassembler::EmitBlockInstructions(const Block* b) {
     for (const auto* inst : b->instructions) {
         Indent();
-        inst->ToInstruction(out_) << std::endl;
+        EmitInstruction(inst);
+        out_ << std::endl;
     }
 }
 
@@ -94,8 +108,8 @@ void Disassembler::Walk(const FlowNode* node) {
         [&](const ir::Function* f) {
             TINT_SCOPED_ASSIGNMENT(in_function_, true);
 
-            Indent() << "%fn" << GetIdForNode(f) << " = func " << f->name.Name() << "("
-                     << f->return_type->FriendlyName() << ")";
+            Indent() << "%fn" << GetIdForNode(f) << " = func " << f->name.Name()
+                     << "():" << f->return_type->FriendlyName();
 
             if (f->pipeline_stage != Function::PipelineStage::kUndefined) {
                 out_ << " [@" << f->pipeline_stage;
@@ -151,7 +165,7 @@ void Disassembler::Walk(const FlowNode* node) {
                     if (v != b->branch.args.Front()) {
                         out_ << ", ";
                     }
-                    v->ToValue(out_);
+                    EmitValue(v);
                 }
             }
             out_ << std::endl;
@@ -164,7 +178,7 @@ void Disassembler::Walk(const FlowNode* node) {
         },
         [&](const ir::Switch* s) {
             Indent() << "%fn" << GetIdForNode(s) << " = switch ";
-            s->condition->ToValue(out_);
+            EmitValue(s->condition);
             out_ << " [";
             for (const auto& c : s->cases) {
                 if (&c != &s->cases.Front()) {
@@ -179,7 +193,7 @@ void Disassembler::Walk(const FlowNode* node) {
                     if (selector.IsDefault()) {
                         out_ << "default";
                     } else {
-                        selector.val->ToValue(out_);
+                        EmitValue(selector.val);
                     }
                 }
                 out_ << ", %fn" << GetIdForNode(c.start.target) << ")";
@@ -202,7 +216,7 @@ void Disassembler::Walk(const FlowNode* node) {
                         if (selector.IsDefault()) {
                             out_ << "default";
                         } else {
-                            selector.val->ToValue(out_);
+                            EmitValue(selector.val);
                         }
                     }
                     out_ << std::endl;
@@ -217,7 +231,7 @@ void Disassembler::Walk(const FlowNode* node) {
         },
         [&](const ir::If* i) {
             Indent() << "%fn" << GetIdForNode(i) << " = if ";
-            i->condition->ToValue(out_);
+            EmitValue(i->condition);
             out_ << " [t: %fn" << GetIdForNode(i->true_.target) << ", f: %fn"
                  << GetIdForNode(i->false_.target);
             if (i->merge.target->IsConnected()) {
@@ -294,6 +308,197 @@ std::string Disassembler::Disassemble() {
         Walk(func);
     }
     return out_.str();
+}
+
+void Disassembler::EmitValue(const Value* val) {
+    tint::Switch(
+        val,
+        [&](const ir::Constant* constant) {
+            std::function<void(const constant::Value*)> emit = [&](const constant::Value* c) {
+                tint::Switch(
+                    c,
+                    [&](const constant::Scalar<AFloat>* scalar) {
+                        out_ << scalar->ValueAs<AFloat>().value;
+                    },
+                    [&](const constant::Scalar<AInt>* scalar) {
+                        out_ << scalar->ValueAs<AInt>().value;
+                    },
+                    [&](const constant::Scalar<i32>* scalar) {
+                        out_ << scalar->ValueAs<i32>().value << "i";
+                    },
+                    [&](const constant::Scalar<u32>* scalar) {
+                        out_ << scalar->ValueAs<u32>().value << "u";
+                    },
+                    [&](const constant::Scalar<f32>* scalar) {
+                        out_ << scalar->ValueAs<f32>().value << "f";
+                    },
+                    [&](const constant::Scalar<f16>* scalar) {
+                        out_ << scalar->ValueAs<f16>().value << "h";
+                    },
+                    [&](const constant::Scalar<bool>* scalar) {
+                        out_ << (scalar->ValueAs<bool>() ? "true" : "false");
+                    },
+                    [&](const constant::Splat* splat) {
+                        out_ << splat->Type()->FriendlyName() << " ";
+                        emit(splat->Index(0));
+                    },
+                    [&](const constant::Composite* composite) {
+                        out_ << composite->Type()->FriendlyName() << " ";
+                        for (const auto* elem : composite->elements) {
+                            if (elem != composite->elements[0]) {
+                                out_ << ", ";
+                            }
+                            emit(elem);
+                        }
+                    });
+            };
+            emit(constant->value);
+        },
+        [&](const ir::Instruction* i) {
+            out_ << "%" << std::to_string(i->Id());
+            if (i->Type() != nullptr) {
+                out_ << ":" << i->Type()->FriendlyName();
+            }
+        });
+}
+
+void Disassembler::EmitInstruction(const Instruction* inst) {
+    tint::Switch(
+        inst,  //
+        [&](const ir::Binary* b) { EmitBinary(b); }, [&](const ir::Unary* u) { EmitUnary(u); },
+        [&](const ir::Bitcast* b) {
+            EmitValue(b);
+            out_ << " = bitcast ";
+            EmitArgs(b);
+        },
+        [&](const ir::Discard*) { out_ << "discard"; },
+        [&](const ir::Builtin* b) {
+            EmitValue(b);
+            out_ << " = " << builtin::str(b->Func()) << " ";
+            EmitArgs(b);
+        },
+        [&](const ir::Construct* c) {
+            EmitValue(c);
+            out_ << " = construct ";
+            EmitArgs(c);
+        },
+        [&](const ir::Convert* c) {
+            EmitValue(c);
+            out_ << " = convert " << c->FromType()->FriendlyName() << ", ";
+            EmitArgs(c);
+        },
+        [&](const ir::Store* s) {
+            out_ << "store ";
+            EmitValue(s->To());
+            out_ << ", ";
+            EmitValue(s->From());
+        },
+        [&](const ir::UserCall* uc) {
+            EmitValue(uc);
+            out_ << " = call " << uc->Name().Name();
+            if (uc->Args().Length() > 0) {
+                out_ << ", ";
+            }
+            EmitArgs(uc);
+        },
+        [&](const ir::Var* v) {
+            EmitValue(v);
+            out_ << " = var " << v->AddressSpace() << " " << v->Access();
+        });
+}
+
+void Disassembler::EmitArgs(const Call* call) {
+    bool first = true;
+    for (const auto* arg : call->Args()) {
+        if (!first) {
+            out_ << ", ";
+        }
+        first = false;
+        EmitValue(arg);
+    }
+}
+
+void Disassembler::EmitBinary(const Binary* b) {
+    EmitValue(b);
+    out_ << " = ";
+    switch (b->GetKind()) {
+        case Binary::Kind::kAdd:
+            out_ << "add";
+            break;
+        case Binary::Kind::kSubtract:
+            out_ << "sub";
+            break;
+        case Binary::Kind::kMultiply:
+            out_ << "mul";
+            break;
+        case Binary::Kind::kDivide:
+            out_ << "div";
+            break;
+        case Binary::Kind::kModulo:
+            out_ << "mod";
+            break;
+        case Binary::Kind::kAnd:
+            out_ << "and";
+            break;
+        case Binary::Kind::kOr:
+            out_ << "or";
+            break;
+        case Binary::Kind::kXor:
+            out_ << "xor";
+            break;
+        case Binary::Kind::kEqual:
+            out_ << "eq";
+            break;
+        case Binary::Kind::kNotEqual:
+            out_ << "neq";
+            break;
+        case Binary::Kind::kLessThan:
+            out_ << "lt";
+            break;
+        case Binary::Kind::kGreaterThan:
+            out_ << "gt";
+            break;
+        case Binary::Kind::kLessThanEqual:
+            out_ << "lte";
+            break;
+        case Binary::Kind::kGreaterThanEqual:
+            out_ << "gte";
+            break;
+        case Binary::Kind::kShiftLeft:
+            out_ << "shiftl";
+            break;
+        case Binary::Kind::kShiftRight:
+            out_ << "shiftr";
+            break;
+    }
+    out_ << " ";
+    EmitValue(b->LHS());
+    out_ << ", ";
+    EmitValue(b->RHS());
+}
+
+void Disassembler::EmitUnary(const Unary* u) {
+    EmitValue(u);
+    out_ << " = ";
+    switch (u->GetKind()) {
+        case Unary::Kind::kAddressOf:
+            out_ << "addr_of";
+            break;
+        case Unary::Kind::kComplement:
+            out_ << "complement";
+            break;
+        case Unary::Kind::kIndirection:
+            out_ << "indirection";
+            break;
+        case Unary::Kind::kNegation:
+            out_ << "negation";
+            break;
+        case Unary::Kind::kNot:
+            out_ << "not";
+            break;
+    }
+    out_ << " ";
+    EmitValue(u->Val());
 }
 
 }  // namespace tint::ir

@@ -17,7 +17,6 @@
 
 #include "src/tint/constant/value.h"
 #include "src/tint/ir/value.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -31,11 +30,6 @@ class Constant : public utils::Castable<Constant, Value> {
 
     /// @returns the type of the constant
     const type::Type* Type() const override { return value->Type(); }
-
-    /// Write the constant to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    utils::StringStream& ToValue(utils::StringStream& out) const override;
 
     /// The constants value
     const constant::Value* const value;

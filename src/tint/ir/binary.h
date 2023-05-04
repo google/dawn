@@ -17,7 +17,6 @@
 
 #include "src/tint/ir/instruction.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -69,11 +68,6 @@ class Binary : public utils::Castable<Binary, Instruction> {
 
     /// @returns the right-hand-side value for the instruction
     const Value* RHS() const { return rhs_; }
-
-    /// Write the instruction to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     Kind kind_;

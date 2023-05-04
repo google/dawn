@@ -14,7 +14,6 @@
 
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/test_helper.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 namespace {
@@ -26,10 +25,6 @@ TEST_F(IR_InstructionTest, Discard) {
 
     const auto* inst = b.builder.Discard();
     ASSERT_TRUE(inst->Is<ir::Discard>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "discard");
 }
 
 }  // namespace

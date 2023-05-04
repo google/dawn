@@ -14,7 +14,6 @@
 
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/test_helper.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 namespace {
@@ -36,10 +35,6 @@ TEST_F(IR_InstructionTest, Bitcast) {
     auto val = inst->Args()[0]->As<Constant>()->value;
     ASSERT_TRUE(val->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, val->As<constant::Scalar<i32>>()->ValueAs<i32>());
-
-    utils::StringStream str;
-    inst->ToInstruction(str);
-    EXPECT_EQ(str.str(), "%1(i32) = bitcast 4i");
 }
 
 TEST_F(IR_InstructionTest, Bitcast_Usage) {

@@ -24,10 +24,4 @@ Bitcast::Bitcast(uint32_t id, const type::Type* type, Value* val)
 
 Bitcast::~Bitcast() = default;
 
-utils::StringStream& Bitcast::ToInstruction(utils::StringStream& out) const {
-    ToValue(out) << " = bitcast ";
-    EmitArgs(out);
-    return out;
-}
-
 }  // namespace tint::ir

@@ -18,7 +18,6 @@
 #include "src/tint/ir/call.h"
 #include "src/tint/symbol.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 
@@ -40,11 +39,6 @@ class UserCall : public utils::Castable<UserCall, Call> {
 
     /// @returns the function name
     Symbol Name() const { return name_; }
-
-    /// Write the instruction to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    utils::StringStream& ToInstruction(utils::StringStream& out) const override;
 
   private:
     Symbol name_{};

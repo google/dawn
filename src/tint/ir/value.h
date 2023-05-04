@@ -17,7 +17,6 @@
 
 #include "src/tint/type/type.h"
 #include "src/tint/utils/castable.h"
-#include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/unique_vector.h"
 
 // Forward declarations
@@ -49,11 +48,6 @@ class Value : public utils::Castable<Value> {
 
     /// @returns the type of the value
     virtual const type::Type* Type() const = 0;
-
-    /// Write the value to the given stream
-    /// @param out the stream to write to
-    /// @returns the stream
-    virtual utils::StringStream& ToValue(utils::StringStream& out) const = 0;
 
   protected:
     /// Constructor
