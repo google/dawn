@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_IR_FUNCTION_H_
 #define SRC_TINT_IR_FUNCTION_H_
 
+#include <array>
 #include <optional>
 
 #include "src/tint/ir/flow_node.h"
