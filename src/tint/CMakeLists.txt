@@ -1440,7 +1440,12 @@ if(TINT_BUILD_TESTS)
     list(APPEND TINT_TEST_SRCS
       ir/binary_test.cc
       ir/bitcast_test.cc
+      ir/builder_impl_binary_test.cc
+      ir/builder_impl_call_test.cc
+      ir/builder_impl_literal_test.cc
+      ir/builder_impl_materialize_test.cc
       ir/builder_impl_test.cc
+      ir/builder_impl_var_test.cc
       ir/constant_test.cc
       ir/discard_test.cc
       ir/store_test.cc
