@@ -226,19 +226,11 @@ void BuilderImpl::EmitFunction(const ast::Function* ast_func) {
                 ir_func->pipeline_stage = Function::PipelineStage::kCompute;
 
                 auto wg_size = sem->WorkgroupSize();
-
-                uint32_t x = wg_size[0].value();
-                uint32_t y = 1;
-                uint32_t z = 1;
-                if (wg_size[1].has_value()) {
-                    y = wg_size[1].value();
-
-                    if (wg_size[2].has_value()) {
-                        z = wg_size[2].value();
-                    }
-                }
-
-                ir_func->workgroup_size = {x, y, z};
+                ir_func->workgroup_size = {
+                    wg_size[0].value(),
+                    wg_size[1].value_or(1),
+                    wg_size[2].value_or(1),
+                };
                 break;
             }
             default: {
