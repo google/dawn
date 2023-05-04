@@ -19,11 +19,13 @@
 
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/utils/hashmap.h"
+#include "src/tint/utils/vector.h"
 #include "src/tint/writer/spirv/binary_writer.h"
 #include "src/tint/writer/spirv/module.h"
 
 // Forward declarations
 namespace tint::ir {
+class Function;
 class Module;
 }  // namespace tint::ir
 namespace tint::type {
@@ -58,14 +60,46 @@ class GeneratorImplIr {
     /// @returns the result ID of the type
     uint32_t Type(const type::Type* ty);
 
+    /// Emit a function.
+    /// @param func the function to emit
+    void EmitFunction(const ir::Function* func);
+
   private:
     const ir::Module* ir_;
     spirv::Module module_;
     BinaryWriter writer_;
     diag::List diagnostics_;
 
+    /// A function type used for an OpTypeFunction declaration.
+    struct FunctionType {
+        uint32_t return_type_id;
+        utils::Vector<uint32_t, 4> param_type_ids;
+
+        /// Hasher provides a hash function for the FunctionType.
+        struct Hasher {
+            /// @param ft the FunctionType to create a hash for
+            /// @return the hash value
+            inline std::size_t operator()(const FunctionType& ft) const {
+                size_t hash = utils::Hash(ft.return_type_id);
+                for (auto& p : ft.param_type_ids) {
+                    hash = utils::HashCombine(hash, p);
+                }
+                return hash;
+            }
+        };
+
+        /// Equality operator for FunctionType.
+        bool operator==(const FunctionType& other) const {
+            return (param_type_ids == other.param_type_ids) &&
+                   (return_type_id == other.return_type_id);
+        }
+    };
+
     /// The map of types to their result IDs.
     utils::Hashmap<const type::Type*, uint32_t, 8> types_;
+
+    /// The map of function types to their result IDs.
+    utils::Hashmap<FunctionType, uint32_t, 8, FunctionType::Hasher> function_types_;
 
     bool zero_init_workgroup_memory_ = false;
 };

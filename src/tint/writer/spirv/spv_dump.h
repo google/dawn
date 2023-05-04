@@ -32,6 +32,11 @@ std::string Disassemble(const std::vector<uint32_t>& data);
 /// @returns the builder as a SPIR-V disassembly string
 std::string DumpBuilder(Builder& builder);
 
+/// Dumps the given module to a SPIR-V disassembly string
+/// @param module the module to convert
+/// @returns the module as a SPIR-V disassembly string
+std::string DumpModule(Module& module);
+
 /// Dumps the given instruction to a SPIR-V disassembly string
 /// @param inst the instruction to dump
 /// @returns the instruction as a SPIR-V disassembly string

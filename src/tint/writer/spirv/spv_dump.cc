@@ -56,9 +56,13 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 }
 
 std::string DumpBuilder(Builder& builder) {
+    return DumpModule(builder.Module());
+}
+
+std::string DumpModule(Module& module) {
     BinaryWriter writer;
-    writer.WriteHeader(builder.Module().IdBound());
-    writer.WriteModule(&builder.Module());
+    writer.WriteHeader(module.IdBound());
+    writer.WriteModule(&module);
     return Disassemble(writer.result());
 }
 
