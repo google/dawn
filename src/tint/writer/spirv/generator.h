@@ -60,6 +60,11 @@ struct Options {
     /// VK_KHR_zero_initialize_workgroup_memory is enabled.
     bool use_zero_initialize_workgroup_memory_extension = false;
 
+#if TINT_BUILD_IR
+    /// Set to `true` to generate SPIR-V via the Tint IR instead of from the AST.
+    bool use_tint_ir = false;
+#endif
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
                  emit_vertex_point_size,

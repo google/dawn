@@ -18,7 +18,6 @@
 #include "src/tint/writer/spirv/binary_writer.h"
 
 namespace tint::writer::spirv {
-namespace {
 
 std::string Disassemble(const std::vector<uint32_t>& data) {
     std::string spv_errors;
@@ -55,8 +54,6 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     }
     return result;
 }
-
-}  // namespace
 
 std::string DumpBuilder(Builder& builder) {
     BinaryWriter writer;

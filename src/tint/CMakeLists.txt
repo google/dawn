@@ -650,6 +650,13 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/operand.h
     writer/spirv/scalar_constant.h
   )
+
+  if(${TINT_BUILD_IR})
+    list(APPEND TINT_LIB_SRCS
+      writer/spirv/generator_impl_ir.cc
+      writer/spirv/generator_impl_ir.h
+    )
+  endif()
 endif()
 
 if(${TINT_BUILD_WGSL_WRITER})
@@ -1217,6 +1224,12 @@ if(TINT_BUILD_TESTS)
       writer/spirv/spv_dump.h
       writer/spirv/test_helper.h
     )
+
+    if(${TINT_BUILD_IR})
+      list(APPEND TINT_TEST_SRCS
+        writer/spirv/generator_impl_ir_test.cc
+      )
+    endif()
   endif()
 
   if(${TINT_BUILD_WGSL_WRITER})

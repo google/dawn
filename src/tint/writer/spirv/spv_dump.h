@@ -22,6 +22,11 @@
 
 namespace tint::writer::spirv {
 
+/// Disassembles SPIR-V binary data into its textual form.
+/// @param data the SPIR-V binary data
+/// @returns the disassembled SPIR-V string
+std::string Disassemble(const std::vector<uint32_t>& data);
+
 /// Dumps the given builder to a SPIR-V disassembly string
 /// @param builder the builder to convert
 /// @returns the builder as a SPIR-V disassembly string

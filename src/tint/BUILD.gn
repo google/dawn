@@ -974,6 +974,17 @@ libtint_source_set("libtint_spv_writer_src") {
     ":libtint_utils_src",
     ":libtint_writer_src",
   ]
+
+  if (tint_build_ir) {
+    sources += [
+      "writer/spirv/generator_impl_ir.cc",
+      "writer/spirv/generator_impl_ir.h",
+    ]
+    deps += [
+      ":libtint_ir_builder_src",
+      ":libtint_ir_src",
+    ]
+  }
 }
 
 libtint_source_set("libtint_wgsl_reader_src") {
@@ -1845,6 +1856,11 @@ if (tint_build_unittests) {
       ":tint_unittests_ast_src",
       "${tint_spirv_tools_dir}/:spvtools",
     ]
+
+    if (tint_build_ir) {
+      sources += [ "writer/spirv/generator_impl_ir_test.cc" ]
+      deps += [ ":libtint_ir_src" ]
+    }
   }
 
   tint_unittests_source_set("tint_unittests_wgsl_reader_src") {

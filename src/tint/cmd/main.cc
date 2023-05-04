@@ -111,6 +111,7 @@ struct Options {
 #if TINT_BUILD_IR
     bool dump_ir = false;
     bool dump_ir_graph = false;
+    bool use_ir = false;
 #endif  // TINT_BUILD_IR
 
 #if TINT_BUILD_SYNTAX_TREE_WRITER
@@ -388,6 +389,8 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
             opts->dump_ir = true;
         } else if (arg == "--dump-ir-graph") {
             opts->dump_ir_graph = true;
+        } else if (arg == "--use-ir") {
+            opts->use_ir = true;
 #endif  // TINT_BUILD_IR
 #if TINT_BUILD_SYNTAX_TREE_WRITER
         } else if (arg == "--dump-ast") {
@@ -548,6 +551,9 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
+#if TINT_BUILD_IR
+    gen_options.use_tint_ir = options.use_ir;
+#endif
     auto result = tint::writer::spirv::Generate(program, gen_options);
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
@@ -1023,7 +1029,8 @@ int main(int argc, const char** argv) {
 #if TINT_BUILD_IR
         usage +=
             "  --dump-ir                 -- Writes the IR to stdout\n"
-            "  --dump-ir-graph           -- Writes the IR graph to 'tint.dot' as a dot graph\n";
+            "  --dump-ir-graph           -- Writes the IR graph to 'tint.dot' as a dot graph\n"
+            "  --use-ir                  -- Use the IR for writers and transforms when possible\n";
 #endif  // TINT_BUILD_IR
 #if TINT_BUILD_SYNTAX_TREE_WRITER
         usage += "  --dump-ast                -- Writes the AST to stdout\n";

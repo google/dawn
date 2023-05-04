@@ -17,6 +17,10 @@
 #include <utility>
 
 #include "src/tint/writer/spirv/generator_impl.h"
+#if TINT_BUILD_IR
+#include "src/tint/ir/converter.h"                    // nogncheck
+#include "src/tint/writer/spirv/generator_impl_ir.h"  // nogncheck
+#endif                                                // TINT_BUILD_IR
 
 namespace tint::writer::spirv {
 
@@ -31,23 +35,41 @@ Result Generate(const Program* program, const Options& options) {
         return result;
     }
 
-    // Sanitize the program.
-    auto sanitized_result = Sanitize(program, options);
-    if (!sanitized_result.program.IsValid()) {
-        result.success = false;
-        result.error = sanitized_result.program.Diagnostics().str();
-        return result;
-    }
-
-    // Generate the SPIR-V code.
     bool zero_initialize_workgroup_memory =
         !options.disable_workgroup_init && options.use_zero_initialize_workgroup_memory_extension;
 
-    auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program,
-                                                zero_initialize_workgroup_memory);
-    result.success = impl->Generate();
-    result.error = impl->Diagnostics().str();
-    result.spirv = std::move(impl->Result());
+#if TINT_BUILD_IR
+    if (options.use_tint_ir) {
+        // Convert the AST program to an IR module.
+        auto ir = ir::Converter::FromProgram(program);
+        if (!ir) {
+            result.error = "IR converter: " + ir.Failure();
+            return result;
+        }
+
+        // Generate the SPIR-V code.
+        auto impl = std::make_unique<GeneratorImplIr>(&ir.Get(), zero_initialize_workgroup_memory);
+        result.success = impl->Generate();
+        result.error = impl->Diagnostics().str();
+        result.spirv = std::move(impl->Result());
+    } else  // NOLINT(readability/braces)
+#endif
+    {
+        // Sanitize the program.
+        auto sanitized_result = Sanitize(program, options);
+        if (!sanitized_result.program.IsValid()) {
+            result.success = false;
+            result.error = sanitized_result.program.Diagnostics().str();
+            return result;
+        }
+
+        // Generate the SPIR-V code.
+        auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program,
+                                                    zero_initialize_workgroup_memory);
+        result.success = impl->Generate();
+        result.error = impl->Diagnostics().str();
+        result.spirv = std::move(impl->Result());
+    }
 
     return result;
 }
