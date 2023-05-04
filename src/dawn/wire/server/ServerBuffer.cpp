@@ -80,8 +80,12 @@ bool Server::DoBufferMapAsync(ObjectId bufferId,
     // WGPU_WHOLE_MAP_SIZE, which is by definition std::numeric_limits<size_t>::max(). Since
     // client does the default size computation, we should always have a valid actual size here
     // in server. All other invalid actual size can be caught by dawn native side validation.
-    if (offset64 > std::numeric_limits<size_t>::max() || size64 >= WGPU_WHOLE_MAP_SIZE) {
-        OnBufferMapAsyncCallback(userdata.get(), WGPUBufferMapAsyncStatus_Error);
+    if (offset64 > std::numeric_limits<size_t>::max()) {
+        OnBufferMapAsyncCallback(userdata.get(), WGPUBufferMapAsyncStatus_OffsetOutOfRange);
+        return true;
+    }
+    if (size64 >= WGPU_WHOLE_MAP_SIZE) {
+        OnBufferMapAsyncCallback(userdata.get(), WGPUBufferMapAsyncStatus_SizeOutOfRange);
         return true;
     }
 

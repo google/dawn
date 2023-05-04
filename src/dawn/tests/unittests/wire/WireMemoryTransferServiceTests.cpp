@@ -427,13 +427,14 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
 
     // Mock a failed callback.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs(
-            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_ValidationError);
+        }));
 
     FlushClient();
 
     // The client receives an error callback.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _)).Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_ValidationError, _)).Times(1);
 
     FlushServer();
 
@@ -684,13 +685,14 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
 
     // Mock an error callback.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs(
-            [&]() { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error); }));
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_ValidationError);
+        }));
 
     FlushClient();
 
     // The client receives an error callback.
-    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_Error, _)).Times(1);
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_ValidationError, _)).Times(1);
 
     FlushServer();
 

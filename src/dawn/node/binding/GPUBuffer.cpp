@@ -88,7 +88,7 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                     c->promise.Resolve();
                     c->state = State::Mapped;
                     break;
-                case WGPUBufferMapAsyncStatus_Error:
+                case WGPUBufferMapAsyncStatus_ValidationError:
                     c->promise.Reject(Errors::OperationError(c->env));
                     break;
                 case WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:

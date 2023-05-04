@@ -186,7 +186,7 @@ void Buffer::MapAsync(WGPUMapModeFlags mode,
     ASSERT(GetRefcount() != 0);
 
     if (mPendingMap) {
-        return callback(WGPUBufferMapAsyncStatus_Error, userdata);
+        return callback(WGPUBufferMapAsyncStatus_MappingAlreadyPending, userdata);
     }
 
     Client* client = GetClient();

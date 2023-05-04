@@ -378,7 +378,7 @@ void BufferBase::APIMapAsync(wgpu::MapMode mode,
     if (mState == BufferState::PendingMap) {
         if (callback) {
             GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
-                callback, WGPUBufferMapAsyncStatus_Error, userdata);
+                callback, WGPUBufferMapAsyncStatus_MappingAlreadyPending, userdata);
         }
         return;
     }
@@ -516,7 +516,7 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
     *status = WGPUBufferMapAsyncStatus_DeviceLost;
     DAWN_TRY(GetDevice()->ValidateIsAlive());
 
-    *status = WGPUBufferMapAsyncStatus_Error;
+    *status = WGPUBufferMapAsyncStatus_ValidationError;
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
     DAWN_INVALID_IF(uint64_t(offset) > mSize,

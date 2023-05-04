@@ -428,7 +428,7 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
     buffer.MapAsync(
         wgpu::MapMode::Read, 0, 4,
         [](WGPUBufferMapAsyncStatus status, void* userdata) {
-            ASSERT_EQ(WGPUBufferMapAsyncStatus_Error, status);
+            ASSERT_EQ(WGPUBufferMapAsyncStatus_MappingAlreadyPending, status);
             *static_cast<bool*>(userdata) = true;
         },
         &done2);
@@ -883,7 +883,7 @@ TEST_P(BufferMappedAtCreationTests, CreateThenMapBeforeUnmapFailure) {
         buffer.MapAsync(
             wgpu::MapMode::Write, 0, 4,
             [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                ASSERT_EQ(WGPUBufferMapAsyncStatus_Error, status);
+                ASSERT_EQ(WGPUBufferMapAsyncStatus_ValidationError, status);
                 *static_cast<bool*>(userdata) = true;
             },
             &done);
@@ -1094,7 +1094,7 @@ TEST_P(BufferTests, CreateBufferOOMMapAsync) {
         ASSERT_DEVICE_ERROR(buffer.MapAsync(
             wgpu::MapMode::Write, 0, 4,
             [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Error);
+                EXPECT_EQ(status, WGPUBufferMapAsyncStatus_ValidationError);
                 *static_cast<bool*>(userdata) = true;
             },
             &done));
