@@ -24,6 +24,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/IndirectDrawMetadata.h"
+#include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/PassResourceUsageTracker.h"
 #include "dawn/native/dawn_platform.h"
 
@@ -89,6 +90,16 @@ class EncodingContext {
                 HandleError(DAWN_VALIDATION_ERROR(
                     "Command cannot be recorded while %s is locked and %s is currently open.",
                     mTopLevelEncoder, mCurrentEncoder));
+            } else if (mTopLevelEncoder == nullptr) {
+                // Note: mTopLevelEncoder == nullptr is used as a flag for if Finish() has been
+                // called.
+                if (encoder->GetType() == ObjectType::CommandEncoder ||
+                    encoder->GetType() == ObjectType::RenderBundleEncoder) {
+                    HandleError(DAWN_VALIDATION_ERROR("%s is already finished.", encoder));
+                } else {
+                    HandleError(DAWN_VALIDATION_ERROR("Parent encoder of %s is already finished.",
+                                                      encoder));
+                }
             } else {
                 HandleError(DAWN_VALIDATION_ERROR("Recording in an error %s.", encoder));
             }
