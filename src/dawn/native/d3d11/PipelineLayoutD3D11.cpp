@@ -50,8 +50,10 @@ MaybeError PipelineLayout::Initialize() {
                             break;
                         case wgpu::BufferBindingType::Storage:
                         case kInternalStorageBufferBinding:
-                        case wgpu::BufferBindingType::ReadOnlyStorage:
                             mIndexInfo[group][bindingIndex] = unorderedAccessViewIndex++;
+                            break;
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                            mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
                             break;
                         case wgpu::BufferBindingType::Undefined:
                             UNREACHABLE();

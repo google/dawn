@@ -156,7 +156,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Allocate half of the UAVs to storage buffers, and half to storage textures.
     limits->v1.maxStorageTexturesPerShaderStage = maxUAVsPerStage / 2;
     limits->v1.maxStorageBuffersPerShaderStage = maxUAVsPerStage - maxUAVsPerStage / 2;
-    limits->v1.maxSampledTexturesPerShaderStage = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+    limits->v1.maxSampledTexturesPerShaderStage = D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT;
     limits->v1.maxSamplersPerShaderStage = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
     limits->v1.maxColorAttachments = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
 

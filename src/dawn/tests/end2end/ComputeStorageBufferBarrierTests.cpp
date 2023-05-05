@@ -202,6 +202,9 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
 // Test that Storage to Uniform buffer transitions work and synchronize correctly
 // by ping-ponging between Storage/Uniform usage in sequential compute passes.
 TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
+    // TODO(dawn:1721): D3D11 buffer cannot be uniform and storage at the same time.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     std::vector<uint32_t> data(kNumValues, 0);
     std::vector<uint32_t> expectedA(kNumValues, 0x1234 * kIterations);
     std::vector<uint32_t> expectedB(kNumValues, 0x1234 * (kIterations - 1));
@@ -270,6 +273,9 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
 // Test that Storage to Uniform buffer transitions work and synchronize correctly
 // by ping-ponging between Storage/Uniform usage in one compute pass.
 TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
+    // TODO(dawn:1721): D3D11 buffer cannot be uniform and storage at the same time.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     std::vector<uint32_t> data(kNumValues, 0);
     std::vector<uint32_t> expectedA(kNumValues, 0x1234 * kIterations);
     std::vector<uint32_t> expectedB(kNumValues, 0x1234 * (kIterations - 1));
@@ -409,6 +415,7 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeStorageBufferBarrierTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
