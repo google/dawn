@@ -303,6 +303,9 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
+    // TODO(dawn:1791): Test fails with D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
@@ -710,6 +713,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
 }
 
 DAWN_INSTANTIATE_TEST(DrawIndexedIndirectTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

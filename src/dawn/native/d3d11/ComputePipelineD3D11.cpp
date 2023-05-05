@@ -88,4 +88,8 @@ void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
     CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
 }
 
+bool ComputePipeline::UsesNumWorkgroups() const {
+    return GetStage(SingleShaderStage::Compute).metadata->usesNumWorkgroups;
+}
+
 }  // namespace dawn::native::d3d11

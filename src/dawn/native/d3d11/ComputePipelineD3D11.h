@@ -36,6 +36,8 @@ class ComputePipeline final : public ComputePipelineBase {
 
     MaybeError Initialize() override;
 
+    bool UsesNumWorkgroups() const;
+
   private:
     using ComputePipelineBase::ComputePipelineBase;
     ~ComputePipeline() override;
