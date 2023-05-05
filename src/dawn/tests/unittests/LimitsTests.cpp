@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include "dawn/common/Constants.h"
 #include "dawn/native/Limits.h"
 
 // Test |GetDefaultLimits| returns the default.
@@ -123,14 +124,22 @@ TEST(Limits, ValidateLimits) {
 // Test that |ApplyLimitTiers| degrades limits to the next best tier.
 TEST(Limits, ApplyLimitTiers) {
     auto SetLimitsStorageBufferBindingSizeTier2 = [](dawn::native::Limits* limits) {
+        // Tier 2 of maxStorageBufferBindingSize is 1GB
         limits->maxStorageBufferBindingSize = 1073741824;
+        // Also set the maxBufferSize to be large enough, as ApplyLimitTiers ensures tired
+        // maxStorageBufferBindingSize no larger than tiered maxBufferSize.
+        limits->maxBufferSize = 2147483648;
     };
     dawn::native::Limits limitsStorageBufferBindingSizeTier2;
     dawn::native::GetDefaultLimits(&limitsStorageBufferBindingSizeTier2);
     SetLimitsStorageBufferBindingSizeTier2(&limitsStorageBufferBindingSizeTier2);
 
     auto SetLimitsStorageBufferBindingSizeTier3 = [](dawn::native::Limits* limits) {
-        limits->maxStorageBufferBindingSize = 2147483647;
+        // Tier 3 of maxStorageBufferBindingSize is 2GB-4
+        limits->maxStorageBufferBindingSize = 2147483644;
+        // Also set the maxBufferSize to be large enough, as ApplyLimitTiers ensures tired
+        // maxStorageBufferBindingSize no larger than tiered maxBufferSize.
+        limits->maxBufferSize = 2147483648;
     };
     dawn::native::Limits limitsStorageBufferBindingSizeTier3;
     dawn::native::GetDefaultLimits(&limitsStorageBufferBindingSizeTier3);
@@ -205,5 +214,230 @@ TEST(Limits, ApplyLimitTiers) {
         SetLimitsComputeWorkgroupStorageSizeTier1(&expected);
         SetLimitsStorageBufferBindingSizeTier2(&expected);
         EXPECT_EQ(tiered, expected);
+    }
+}
+
+// Test that |ApplyLimitTiers| will hold the maxStorageBufferBindingSize no larger than
+// maxBufferSize restriction.
+TEST(Limits, TieredMaxStorageBufferBindingSizeNoLargerThanMaxBufferSize) {
+    // Start with the default for supported.
+    dawn::native::Limits defaults;
+    dawn::native::GetDefaultLimits(&defaults);
+
+    // Test reported maxStorageBufferBindingSize around 128MB, 1GB, 2GB-4 and 4GB-4.
+    constexpr uint64_t storageSizeTier1 = 134217728ull;   // 128MB
+    constexpr uint64_t storageSizeTier2 = 1073741824ull;  // 1GB
+    constexpr uint64_t storageSizeTier3 = 2147483644ull;  // 2GB-4
+    constexpr uint64_t storageSizeTier4 = 4294967292ull;  // 4GB-4
+    constexpr uint64_t possibleReportedMaxStorageBufferBindingSizes[] = {
+        storageSizeTier1,     storageSizeTier1 + 1, storageSizeTier2 - 1, storageSizeTier2,
+        storageSizeTier2 + 1, storageSizeTier3 - 1, storageSizeTier3,     storageSizeTier3 + 1,
+        storageSizeTier4 - 1, storageSizeTier4,     storageSizeTier4 + 1};
+    // Test reported maxBufferSize around 256MB, 1GB, 2GB and 4GB, and a large 256GB.
+    constexpr uint64_t bufferSizeTier1 = 0x10000000ull;    // 256MB
+    constexpr uint64_t bufferSizeTier2 = 0x40000000ull;    // 1GB
+    constexpr uint64_t bufferSizeTier3 = 0x80000000ull;    // 2GB
+    constexpr uint64_t bufferSizeTier4 = 0x100000000ull;   // 4GB
+    constexpr uint64_t bufferSizeLarge = 0x4000000000ull;  // 256GB
+    constexpr uint64_t possibleReportedMaxBufferSizes[] = {
+        bufferSizeTier1,     bufferSizeTier1 + 1, bufferSizeTier2 - 1, bufferSizeTier2,
+        bufferSizeTier2 + 1, bufferSizeTier3 - 1, bufferSizeTier3,     bufferSizeTier3 + 1,
+        bufferSizeTier4 - 1, bufferSizeTier4,     bufferSizeTier4 + 1, bufferSizeLarge};
+
+    // Test that tiered maxStorageBufferBindingSize is no larger than tiered maxBufferSize.
+    for (uint64_t reportedMaxStorageBufferBindingSizes :
+         possibleReportedMaxStorageBufferBindingSizes) {
+        for (uint64_t reportedMaxBufferSizes : possibleReportedMaxBufferSizes) {
+            dawn::native::Limits limits = defaults;
+            limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSizes;
+            limits.maxBufferSize = reportedMaxBufferSizes;
+
+            dawn::native::Limits tiered = ApplyLimitTiers(limits);
+
+            EXPECT_LE(tiered.maxStorageBufferBindingSize, tiered.maxBufferSize);
+        }
+    }
+}
+
+// Test that |ApplyLimitTiers| will hold the maxUniformBufferBindingSize no larger than
+// maxBufferSize restriction.
+TEST(Limits, TieredMaxUniformBufferBindingSizeNoLargerThanMaxBufferSize) {
+    // Start with the default for supported.
+    dawn::native::Limits defaults;
+    dawn::native::GetDefaultLimits(&defaults);
+
+    // Test reported maxStorageBufferBindingSize around 64KB, and a large 1GB.
+    constexpr uint64_t uniformSizeTier1 = 65536ull;       // 64KB
+    constexpr uint64_t uniformSizeLarge = 1073741824ull;  // 1GB
+    constexpr uint64_t possibleReportedMaxUniformBufferBindingSizes[] = {
+        uniformSizeTier1, uniformSizeTier1 + 1, uniformSizeLarge};
+    // Test reported maxBufferSize around 256MB, 1GB, 2GB and 4GB, and a large 256GB.
+    constexpr uint64_t bufferSizeTier1 = 0x10000000ull;    // 256MB
+    constexpr uint64_t bufferSizeTier2 = 0x40000000ull;    // 1GB
+    constexpr uint64_t bufferSizeTier3 = 0x80000000ull;    // 2GB
+    constexpr uint64_t bufferSizeTier4 = 0x100000000ull;   // 4GB
+    constexpr uint64_t bufferSizeLarge = 0x4000000000ull;  // 256GB
+    constexpr uint64_t possibleReportedMaxBufferSizes[] = {
+        bufferSizeTier1,     bufferSizeTier1 + 1, bufferSizeTier2 - 1, bufferSizeTier2,
+        bufferSizeTier2 + 1, bufferSizeTier3 - 1, bufferSizeTier3,     bufferSizeTier3 + 1,
+        bufferSizeTier4 - 1, bufferSizeTier4,     bufferSizeTier4 + 1, bufferSizeLarge};
+
+    // Test that tiered maxUniformBufferBindingSize is no larger than tiered maxBufferSize.
+    for (uint64_t reportedMaxUniformBufferBindingSizes :
+         possibleReportedMaxUniformBufferBindingSizes) {
+        for (uint64_t reportedMaxBufferSizes : possibleReportedMaxBufferSizes) {
+            dawn::native::Limits limits = defaults;
+            limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSizes;
+            limits.maxBufferSize = reportedMaxBufferSizes;
+
+            dawn::native::Limits tiered = ApplyLimitTiers(limits);
+
+            EXPECT_LE(tiered.maxUniformBufferBindingSize, tiered.maxBufferSize);
+        }
+    }
+}
+
+// Test |NormalizeLimits| works to enforce restriction of limits.
+TEST(Limits, NormalizeLimits) {
+    // Start with the default for supported.
+    dawn::native::Limits defaults;
+    dawn::native::GetDefaultLimits(&defaults);
+
+    // Test specific limit values are clamped to internal Dawn constants.
+    {
+        dawn::native::Limits limits = defaults;
+        limits.maxVertexBufferArrayStride = kMaxVertexBufferArrayStride + 1;
+        limits.maxColorAttachments = uint32_t(kMaxColorAttachments) + 1;
+        limits.maxBindGroups = kMaxBindGroups + 1;
+        limits.maxVertexAttributes = uint32_t(kMaxVertexAttributes) + 1;
+        limits.maxVertexBuffers = uint32_t(kMaxVertexBuffers) + 1;
+        limits.maxInterStageShaderComponents = kMaxInterStageShaderComponents + 1;
+        limits.maxSampledTexturesPerShaderStage = kMaxSampledTexturesPerShaderStage + 1;
+        limits.maxSamplersPerShaderStage = kMaxSamplersPerShaderStage + 1;
+        limits.maxStorageBuffersPerShaderStage = kMaxStorageBuffersPerShaderStage + 1;
+        limits.maxStorageTexturesPerShaderStage = kMaxStorageTexturesPerShaderStage + 1;
+        limits.maxUniformBuffersPerShaderStage = kMaxUniformBuffersPerShaderStage + 1;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxVertexBufferArrayStride, kMaxVertexBufferArrayStride);
+        EXPECT_EQ(limits.maxColorAttachments, uint32_t(kMaxColorAttachments));
+        EXPECT_EQ(limits.maxBindGroups, kMaxBindGroups);
+        EXPECT_EQ(limits.maxVertexAttributes, uint32_t(kMaxVertexAttributes));
+        EXPECT_EQ(limits.maxVertexBuffers, uint32_t(kMaxVertexBuffers));
+        EXPECT_EQ(limits.maxInterStageShaderComponents, kMaxInterStageShaderComponents);
+        EXPECT_EQ(limits.maxSampledTexturesPerShaderStage, kMaxSampledTexturesPerShaderStage);
+        EXPECT_EQ(limits.maxSamplersPerShaderStage, kMaxSamplersPerShaderStage);
+        EXPECT_EQ(limits.maxStorageBuffersPerShaderStage, kMaxStorageBuffersPerShaderStage);
+        EXPECT_EQ(limits.maxStorageTexturesPerShaderStage, kMaxStorageTexturesPerShaderStage);
+        EXPECT_EQ(limits.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
+    }
+
+    // Test maxStorageBufferBindingSize is clamped to maxBufferSize.
+    // maxStorageBufferBindingSize is no larger than maxBufferSize
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize;
+        dawn::native::Limits limits = defaults;
+        limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
+        limits.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.maxStorageBufferBindingSize, reportedMaxStorageBufferBindingSize);
+    }
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize - 1;
+        dawn::native::Limits limits = defaults;
+        limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
+        limits.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.maxStorageBufferBindingSize, reportedMaxStorageBufferBindingSize);
+    }
+    // maxStorageBufferBindingSize is equal to maxBufferSize+1, expect clamping to maxBufferSize
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize + 1;
+        dawn::native::Limits limits = defaults;
+        limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
+        limits.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.maxStorageBufferBindingSize, reportedMaxBufferSize);
+    }
+    // maxStorageBufferBindingSize is much larger than maxBufferSize, expect clamping to
+    // maxBufferSize
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxStorageBufferBindingSize = 4294967295;
+        dawn::native::Limits limits = defaults;
+        limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
+        limits.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.maxStorageBufferBindingSize, reportedMaxBufferSize);
+    }
+
+    // Test maxUniformBufferBindingSize is clamped to maxBufferSize.
+    // maxUniformBufferBindingSize is no larger than maxBufferSize
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxUniformBufferBindingSize = reportedMaxBufferSize - 1;
+        dawn::native::Limits limits = defaults;
+        limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSize;
+        limits.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.maxUniformBufferBindingSize, reportedMaxUniformBufferBindingSize);
+    }
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxUniformBufferBindingSize = reportedMaxBufferSize;
+        dawn::native::Limits limits = defaults;
+        limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSize;
+        limits.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.maxUniformBufferBindingSize, reportedMaxUniformBufferBindingSize);
+    }
+    // maxUniformBufferBindingSize is larger than maxBufferSize, expect clamping to maxBufferSize
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxUniformBufferBindingSize = reportedMaxBufferSize + 1;
+        dawn::native::Limits limits = defaults;
+        limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSize;
+        limits.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.maxUniformBufferBindingSize, reportedMaxBufferSize);
+    }
+    // maxUniformBufferBindingSize is much larger than maxBufferSize, expect clamping to
+    // maxBufferSize
+    {
+        constexpr uint64_t reportedMaxBufferSize = 2147483648;
+        constexpr uint64_t reportedMaxUniformBufferBindingSize = 4294967295;
+        dawn::native::Limits limits = defaults;
+        limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSize;
+        limits.maxBufferSize = reportedMaxBufferSize;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.maxBufferSize, reportedMaxBufferSize);
+        EXPECT_EQ(limits.maxUniformBufferBindingSize, reportedMaxBufferSize);
     }
 }

@@ -51,35 +51,7 @@ MaybeError PhysicalDeviceBase::Initialize() {
         "backend=%s type=%s)",
         mName, mDriverDescription, mVendorId, mDeviceId, mBackend, mAdapterType);
 
-    // Enforce internal Dawn constants for some limits to ensure they don't go over fixed-size
-    // arrays in Dawn's internal code.
-    mLimits.v1.maxVertexBufferArrayStride =
-        std::min(mLimits.v1.maxVertexBufferArrayStride, kMaxVertexBufferArrayStride);
-    mLimits.v1.maxColorAttachments =
-        std::min(mLimits.v1.maxColorAttachments, uint32_t(kMaxColorAttachments));
-    mLimits.v1.maxBindGroups = std::min(mLimits.v1.maxBindGroups, kMaxBindGroups);
-    mLimits.v1.maxVertexAttributes =
-        std::min(mLimits.v1.maxVertexAttributes, uint32_t(kMaxVertexAttributes));
-    mLimits.v1.maxVertexBuffers =
-        std::min(mLimits.v1.maxVertexBuffers, uint32_t(kMaxVertexBuffers));
-    mLimits.v1.maxInterStageShaderComponents =
-        std::min(mLimits.v1.maxInterStageShaderComponents, kMaxInterStageShaderComponents);
-    mLimits.v1.maxSampledTexturesPerShaderStage =
-        std::min(mLimits.v1.maxSampledTexturesPerShaderStage, kMaxSampledTexturesPerShaderStage);
-    mLimits.v1.maxSamplersPerShaderStage =
-        std::min(mLimits.v1.maxSamplersPerShaderStage, kMaxSamplersPerShaderStage);
-    mLimits.v1.maxStorageBuffersPerShaderStage =
-        std::min(mLimits.v1.maxStorageBuffersPerShaderStage, kMaxStorageBuffersPerShaderStage);
-    mLimits.v1.maxStorageTexturesPerShaderStage =
-        std::min(mLimits.v1.maxStorageTexturesPerShaderStage, kMaxStorageTexturesPerShaderStage);
-    mLimits.v1.maxUniformBuffersPerShaderStage =
-        std::min(mLimits.v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
-
-    // Additional enforcement for dependent limits.
-    mLimits.v1.maxStorageBufferBindingSize =
-        std::min(mLimits.v1.maxStorageBufferBindingSize, mLimits.v1.maxBufferSize);
-    mLimits.v1.maxUniformBufferBindingSize =
-        std::min(mLimits.v1.maxUniformBufferBindingSize, mLimits.v1.maxBufferSize);
+    NormalizeLimits(&mLimits.v1);
 
     return {};
 }

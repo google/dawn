@@ -53,6 +53,13 @@ struct LimitsForCompilationRequest {
     DAWN_VISITABLE_MEMBERS(LIMITS_FOR_COMPILATION_REQUEST_MEMBERS)
 };
 
+// Enforce restriction for limit values, including:
+//   1. Enforce internal Dawn constants for some limits to ensure they don't go over fixed-size
+//      arrays in Dawn's internal code;
+//   2. Additional enforcement for dependent limits, e.g. maxStorageBufferBindingSize and
+//      maxUniformBufferBindingSize must not be larger than maxBufferSize.
+void NormalizeLimits(Limits* limits);
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_LIMITS_H_
