@@ -106,8 +106,9 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     });
 
     // Declare the function.
-    auto decl = Instruction{spv::Op::OpFunction,
-                            {return_type_id, id, SpvFunctionControlMaskNone, function_type_id}};
+    auto decl =
+        Instruction{spv::Op::OpFunction,
+                    {return_type_id, id, U32Operand(SpvFunctionControlMaskNone), function_type_id}};
 
     // Create a function that we will add instructions to.
     // TODO(jrprice): Add the parameter declarations when they are supported in the IR.
