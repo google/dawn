@@ -19,11 +19,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Convert);
 
 namespace tint::ir {
 
-Convert::Convert(uint32_t id,
+Convert::Convert(uint32_t identifier,
                  const type::Type* to_type,
                  const type::Type* from_type,
-                 utils::VectorRef<Value*> args)
-    : Base(id, to_type, args), from_type_(from_type) {}
+                 utils::VectorRef<Value*> arguments)
+    : Base(identifier, to_type, arguments), from_type_(from_type) {}
 
 Convert::~Convert() = default;
 

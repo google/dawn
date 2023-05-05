@@ -13,14 +13,17 @@
 // limitations under the License.
 
 #include "src/tint/ir/construct.h"
+
+#include <utility>
+
 #include "src/tint/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Construct);
 
 namespace tint::ir {
 
-Construct::Construct(uint32_t id, const type::Type* type, utils::VectorRef<Value*> args)
-    : Base(id, type, args) {}
+Construct::Construct(uint32_t identifier, const type::Type* ty, utils::VectorRef<Value*> arguments)
+    : Base(identifier, ty, std::move(arguments)) {}
 
 Construct::~Construct() = default;
 

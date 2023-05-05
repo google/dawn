@@ -423,9 +423,9 @@ class Castable : public BASE {
     using TrueBase = BASE;
 
     /// Constructor
-    /// @param args the arguments to forward to the base class.
+    /// @param arguments the arguments to forward to the base class.
     template <typename... ARGS>
-    inline explicit Castable(ARGS&&... args) : TrueBase(std::forward<ARGS>(args)...) {
+    inline explicit Castable(ARGS&&... arguments) : TrueBase(std::forward<ARGS>(arguments)...) {
         this->type_info_ = &TypeInfo::Of<CLASS>();
     }
 

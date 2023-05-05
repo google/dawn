@@ -355,7 +355,11 @@ void Disassembler::EmitValue(const Value* val) {
             emit(constant->value);
         },
         [&](const ir::Instruction* i) {
-            out_ << "%" << std::to_string(i->Id());
+            if (i->id == ir::Instruction::kNoID) {
+                out_ << "<no-id>";
+            } else {
+                out_ << "%" << i->id;
+            }
             if (i->Type() != nullptr) {
                 out_ << ":" << i->Type()->FriendlyName();
             }
@@ -389,27 +393,27 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
         },
         [&](const ir::Store* s) {
             out_ << "store ";
-            EmitValue(s->To());
+            EmitValue(s->to);
             out_ << ", ";
-            EmitValue(s->From());
+            EmitValue(s->from);
         },
         [&](const ir::UserCall* uc) {
             EmitValue(uc);
-            out_ << " = call " << uc->Name().Name();
-            if (uc->Args().Length() > 0) {
+            out_ << " = call " << uc->name.Name();
+            if (uc->args.Length() > 0) {
                 out_ << ", ";
             }
             EmitArgs(uc);
         },
         [&](const ir::Var* v) {
             EmitValue(v);
-            out_ << " = var " << v->AddressSpace() << " " << v->Access();
+            out_ << " = var " << v->address_space << " " << v->access;
         });
 }
 
 void Disassembler::EmitArgs(const Call* call) {
     bool first = true;
-    for (const auto* arg : call->Args()) {
+    for (const auto* arg : call->args) {
         if (!first) {
             out_ << ", ";
         }

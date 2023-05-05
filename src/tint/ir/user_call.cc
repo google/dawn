@@ -13,14 +13,20 @@
 // limitations under the License.
 
 #include "src/tint/ir/user_call.h"
+
+#include <utility>
+
 #include "src/tint/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::UserCall);
 
 namespace tint::ir {
 
-UserCall::UserCall(uint32_t id, const type::Type* type, Symbol name, utils::VectorRef<Value*> args)
-    : Base(id, type, args), name_(name) {}
+UserCall::UserCall(uint32_t identifier,
+                   const type::Type* ty,
+                   Symbol n,
+                   utils::VectorRef<Value*> arguments)
+    : Base(identifier, ty, std::move(arguments)), name(n) {}
 
 UserCall::~UserCall() = default;
 

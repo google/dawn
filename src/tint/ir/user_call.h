@@ -37,11 +37,8 @@ class UserCall : public utils::Castable<UserCall, Call> {
     UserCall& operator=(const UserCall& inst) = delete;
     UserCall& operator=(UserCall&& inst) = delete;
 
-    /// @returns the function name
-    Symbol Name() const { return name_; }
-
-  private:
-    Symbol name_{};
+    /// The function name
+    Symbol name;
 };
 
 }  // namespace tint::ir

@@ -23,6 +23,9 @@ namespace tint::ir {
 /// An instruction in the IR.
 class Instruction : public utils::Castable<Instruction, Value> {
   public:
+    /// The identifier used by instructions that have no value.
+    static constexpr uint32_t kNoID = 0;
+
     Instruction(const Instruction& inst) = delete;
     Instruction(Instruction&& inst) = delete;
     /// Destructor
@@ -31,10 +34,14 @@ class Instruction : public utils::Castable<Instruction, Value> {
     Instruction& operator=(const Instruction& inst) = delete;
     Instruction& operator=(Instruction&& inst) = delete;
 
-    /// @returns the id of the instruction
-    uint32_t Id() const { return id_; }
     /// @returns the type of the value
-    const type::Type* Type() const override { return type_; }
+    const type::Type* Type() const override { return type; }
+
+    /// The instruction identifier
+    const uint32_t id = kNoID;
+
+    /// The instruction type
+    const type::Type* type = nullptr;
 
   protected:
     /// Constructor
@@ -43,10 +50,6 @@ class Instruction : public utils::Castable<Instruction, Value> {
     /// @param id the instruction id
     /// @param type the result type
     Instruction(uint32_t id, const type::Type* type);
-
-  private:
-    uint32_t id_ = 0;
-    const type::Type* type_ = nullptr;
 };
 
 }  // namespace tint::ir

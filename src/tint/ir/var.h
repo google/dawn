@@ -41,15 +41,11 @@ class Var : public utils::Castable<Var, Instruction> {
     Var& operator=(const Var& inst) = delete;
     Var& operator=(Var&& inst) = delete;
 
-    /// @returns the address space
-    builtin::AddressSpace AddressSpace() const { return address_space_; }
+    /// The variable address space
+    builtin::AddressSpace address_space = builtin::AddressSpace::kUndefined;
 
-    /// @returns the access mode
-    builtin::Access Access() const { return access_; }
-
-  private:
-    builtin::AddressSpace address_space_;
-    builtin::Access access_;
+    /// The variable access mode
+    builtin::Access access = builtin::Access::kUndefined;
 };
 
 }  // namespace tint::ir
