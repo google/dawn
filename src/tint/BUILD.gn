@@ -1122,8 +1122,8 @@ libtint_source_set("libtint_ir_builder_src") {
   sources = [
     "ir/builder_impl.cc",
     "ir/builder_impl.h",
-    "ir/converter.cc",
-    "ir/converter.h",
+    "ir/from_program.cc",
+    "ir/from_program.h",
   ]
   deps = [
     ":libtint_ast_src",

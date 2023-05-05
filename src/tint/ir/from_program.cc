@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/converter.h"
+#include "src/tint/ir/from_program.h"
 
 #include "src/tint/ir/builder_impl.h"
 #include "src/tint/program.h"
 
 namespace tint::ir {
 
-// static
-Converter::Result Converter::FromProgram(const Program* program) {
+utils::Result<Module, std::string> FromProgram(const Program* program) {
     if (!program->IsValid()) {
-        return Result{std::string("input program is not valid")};
+        return std::string("input program is not valid");
     }
 
     BuilderImpl b(program);
@@ -31,12 +30,7 @@ Converter::Result Converter::FromProgram(const Program* program) {
         return b.Diagnostics().str();
     }
 
-    return Result{r.Move()};
-}
-
-// static
-const Program* Converter::ToProgram() {
-    return nullptr;
+    return r.Move();
 }
 
 }  // namespace tint::ir

@@ -49,9 +49,9 @@
 #include "tint/tint.h"
 
 #if TINT_BUILD_IR
-#include "src/tint/ir/converter.h"     // nogncheck
 #include "src/tint/ir/debug.h"         // nogncheck
 #include "src/tint/ir/disassembler.h"  // nogncheck
+#include "src/tint/ir/from_program.h"  // nogncheck
 #include "src/tint/ir/module.h"        // nogncheck
 #endif                                 // TINT_BUILD_IR
 
@@ -1086,7 +1086,7 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_IR
     if (options.dump_ir || options.dump_ir_graph) {
-        auto result = tint::ir::Converter::FromProgram(program.get());
+        auto result = tint::ir::FromProgram(program.get());
         if (!result) {
             std::cerr << "Failed to build IR from program: " << result.Failure() << std::endl;
         } else {

@@ -18,7 +18,7 @@
 
 #include "src/tint/writer/spirv/generator_impl.h"
 #if TINT_BUILD_IR
-#include "src/tint/ir/converter.h"                    // nogncheck
+#include "src/tint/ir/from_program.h"                 // nogncheck
 #include "src/tint/writer/spirv/generator_impl_ir.h"  // nogncheck
 #endif                                                // TINT_BUILD_IR
 
@@ -41,7 +41,7 @@ Result Generate(const Program* program, const Options& options) {
 #if TINT_BUILD_IR
     if (options.use_tint_ir) {
         // Convert the AST program to an IR module.
-        auto ir = ir::Converter::FromProgram(program);
+        auto ir = ir::FromProgram(program);
         if (!ir) {
             result.error = "IR converter: " + ir.Failure();
             return result;

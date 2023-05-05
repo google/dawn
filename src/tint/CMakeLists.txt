@@ -727,14 +727,14 @@ if(${TINT_BUILD_IR})
     ir/construct.h
     ir/convert.cc
     ir/convert.h
-    ir/converter.cc
-    ir/converter.h
     ir/debug.cc
     ir/debug.h
     ir/disassembler.cc
     ir/disassembler.h
     ir/discard.cc
     ir/discard.h
+    ir/from_program.cc
+    ir/from_program.h
     ir/flow_node.cc
     ir/flow_node.h
     ir/function.cc
