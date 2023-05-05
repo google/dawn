@@ -31,10 +31,13 @@ template <typename KEY,
           typename VALUE,
           size_t N,
           typename HASH = Hasher<KEY>,
-          typename EQUAL = std::equal_to<KEY>>
+          typename EQUAL = EqualTo<KEY>>
 class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
     using Base = HashmapBase<KEY, VALUE, N, HASH, EQUAL>;
     using PutMode = typename Base::PutMode;
+
+    template <typename T>
+    using ReferenceKeyType = traits::CharArrayToCharPtr<std::remove_reference_t<T>>;
 
   public:
     /// The key type
@@ -51,7 +54,7 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
     /// The value returned by the Reference reflects the current state of the Hashmap, and so the
     /// referenced value may change, or transition between valid or invalid based on the current
     /// state of the Hashmap.
-    template <bool IS_CONST>
+    template <bool IS_CONST, typename K>
     class ReferenceT {
         /// `const Value` if IS_CONST, or `Value` if !IS_CONST
         using T = std::conditional_t<IS_CONST, const Value, Value>;
@@ -89,24 +92,34 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
         friend Hashmap;
 
         /// Constructor
-        ReferenceT(Map& map, const Key& key)
-            : map_(map), key_(key), cached_(nullptr), generation_(map.Generation() - 1) {}
+        template <typename K_ARG>
+        ReferenceT(Map& map, K_ARG&& key)
+            : map_(map),
+              key_(std::forward<K_ARG>(key)),
+              cached_(nullptr),
+              generation_(map.Generation() - 1) {}
 
         /// Constructor
-        ReferenceT(Map& map, const Key& key, T* value)
-            : map_(map), key_(key), cached_(value), generation_(map.Generation()) {}
+        template <typename K_ARG>
+        ReferenceT(Map& map, K_ARG&& key, T* value)
+            : map_(map),
+              key_(std::forward<K_ARG>(key)),
+              cached_(value),
+              generation_(map.Generation()) {}
 
         Map& map_;
-        const Key key_;
+        const K key_;
         mutable T* cached_ = nullptr;
         mutable size_t generation_ = 0;
     };
 
     /// A mutable reference returned by Find()
-    using Reference = ReferenceT</*IS_CONST*/ false>;
+    template <typename K>
+    using Reference = ReferenceT</*IS_CONST*/ false, K>;
 
     /// An immutable reference returned by Find()
-    using ConstReference = ReferenceT</*IS_CONST*/ true>;
+    template <typename K>
+    using ConstReference = ReferenceT</*IS_CONST*/ true, K>;
 
     /// Adds a value to the map, if the map does not already contain an entry with the key @p key.
     /// @param key the entry key.
@@ -129,7 +142,8 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
     /// @param key the key to search for.
     /// @returns the value of the entry that is equal to `value`, or no value if the entry was not
     ///          found.
-    std::optional<Value> Get(const Key& key) const {
+    template <typename K>
+    std::optional<Value> Get(K&& key) const {
         if (auto [found, index] = this->IndexOf(key); found) {
             return this->slots_[index].entry->value;
         }
@@ -169,18 +183,24 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
     /// @param key the entry's key value to search for.
     /// @returns the value of the entry.
     template <typename K>
-    Reference GetOrZero(K&& key) {
+    auto GetOrZero(K&& key) {
         auto res = Add(std::forward<K>(key), Value{});
-        return Reference(*this, key, res.value);
+        return Reference<ReferenceKeyType<K>>(*this, key, res.value);
     }
 
     /// @param key the key to search for.
     /// @returns a reference to the entry that is equal to the given value.
-    Reference Find(const Key& key) { return Reference(*this, key); }
+    template <typename K>
+    auto Find(K&& key) {
+        return Reference<ReferenceKeyType<K>>(*this, std::forward<K>(key));
+    }
 
     /// @param key the key to search for.
     /// @returns a reference to the entry that is equal to the given value.
-    ConstReference Find(const Key& key) const { return ConstReference(*this, key); }
+    template <typename K>
+    auto Find(K&& key) const {
+        return ConstReference<ReferenceKeyType<K>>(*this, std::forward<K>(key));
+    }
 
     /// @returns the keys of the map as a vector.
     /// @note the order of the returned vector is non-deterministic between compilers.
@@ -232,14 +252,16 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
     }
 
   private:
-    Value* Lookup(const Key& key) {
+    template <typename K>
+    Value* Lookup(K&& key) {
         if (auto [found, index] = this->IndexOf(key); found) {
             return &this->slots_[index].entry->value;
         }
         return nullptr;
     }
 
-    const Value* Lookup(const Key& key) const {
+    template <typename K>
+    const Value* Lookup(K&& key) const {
         if (auto [found, index] = this->IndexOf(key); found) {
             return &this->slots_[index].entry->value;
         }

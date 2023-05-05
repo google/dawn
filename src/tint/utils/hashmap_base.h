@@ -106,7 +106,7 @@ template <typename KEY,
           typename VALUE,
           size_t N,
           typename HASH = Hasher<KEY>,
-          typename EQUAL = std::equal_to<KEY>>
+          typename EQUAL = EqualTo<KEY>>
 class HashmapBase {
     static constexpr bool ValueIsVoid = std::is_same_v<VALUE, void>;
 
@@ -157,8 +157,9 @@ class HashmapBase {
     /// A slot can either be empty or filled with a value. If the slot is empty, #hash and #distance
     /// will be zero.
     struct Slot {
-        bool Equals(size_t key_hash, const Key& key) const {
-            return key_hash == hash && EQUAL()(key, KeyOf(*entry));
+        template <typename K>
+        bool Equals(size_t key_hash, K&& key) const {
+            return key_hash == hash && EQUAL()(std::forward<K>(key), KeyOf(*entry));
         }
 
         /// The slot value. If this does not contain a value, then the slot is vacant.
@@ -502,8 +503,9 @@ class HashmapBase {
     /// @param key the key to hash
     /// @returns a tuple holding the target slot index for the given value, and the hash of the
     /// value, respectively.
-    HashResult Hash(const Key& key) const {
-        size_t hash = HASH()(key);
+    template <typename K>
+    HashResult Hash(K&& key) const {
+        size_t hash = HASH()(std::forward<K>(key));
         size_t index = Wrap(hash);
         return {index, hash};
     }
@@ -512,7 +514,8 @@ class HashmapBase {
     /// @param key the key to search for.
     /// @returns a tuple holding a boolean representing whether the key was found in the map, and
     /// if found, the index of the slot that holds the key.
-    std::tuple<bool, size_t> IndexOf(const Key& key) const {
+    template <typename K>
+    std::tuple<bool, size_t> IndexOf(K&& key) const {
         const auto hash = Hash(key);
         const auto count = slots_.Length();
         for (size_t distance = 0, index = hash.scan_start; distance < count; distance++) {

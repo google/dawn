@@ -241,4 +241,9 @@ TEST(SliceTuple, MixedTupleSliceHighPart) {
     static_assert(std::is_same_v<std::tuple_element_t<1, sliced>, float>);
 }
 
+static_assert(std::is_same_v<char*, CharArrayToCharPtr<char[2]>>);
+static_assert(std::is_same_v<const char*, CharArrayToCharPtr<const char[2]>>);
+static_assert(std::is_same_v<int, CharArrayToCharPtr<int>>);
+static_assert(std::is_same_v<int[2], CharArrayToCharPtr<int[2]>>);
+
 }  // namespace tint::utils::traits

@@ -155,6 +155,134 @@ TEST(Hashmap, Index) {
     EXPECT_FALSE(one);
 }
 
+TEST(Hashmap, StringKeys) {
+    Hashmap<std::string, int, 4> map;
+    EXPECT_FALSE(map.Find("zero"));
+    EXPECT_FALSE(map.Find(std::string("zero")));
+    EXPECT_FALSE(map.Find(std::string_view("zero")));
+
+    map.Add("three", 3);
+    auto three_cstr = map.Find("three");
+    auto three_str = map.Find(std::string("three"));
+    auto three_sv = map.Find(std::string_view("three"));
+    map.Add(std::string("two"), 2);
+    auto two_cstr = map.Find("two");
+    auto two_str = map.Find(std::string("two"));
+    auto two_sv = map.Find(std::string_view("two"));
+    map.Add("four", 4);
+    auto four_cstr = map.Find("four");
+    auto four_str = map.Find(std::string("four"));
+    auto four_sv = map.Find(std::string_view("four"));
+    map.Add(std::string("eight"), 8);
+    auto eight_cstr = map.Find("eight");
+    auto eight_str = map.Find(std::string("eight"));
+    auto eight_sv = map.Find(std::string_view("eight"));
+
+    ASSERT_TRUE(three_cstr);
+    ASSERT_TRUE(three_str);
+    ASSERT_TRUE(three_sv);
+    ASSERT_TRUE(two_cstr);
+    ASSERT_TRUE(two_str);
+    ASSERT_TRUE(two_sv);
+    ASSERT_TRUE(four_cstr);
+    ASSERT_TRUE(four_str);
+    ASSERT_TRUE(four_sv);
+    ASSERT_TRUE(eight_cstr);
+    ASSERT_TRUE(eight_str);
+    ASSERT_TRUE(eight_sv);
+
+    EXPECT_EQ(*three_cstr, 3);
+    EXPECT_EQ(*three_str, 3);
+    EXPECT_EQ(*three_sv, 3);
+    EXPECT_EQ(*two_cstr, 2);
+    EXPECT_EQ(*two_str, 2);
+    EXPECT_EQ(*two_sv, 2);
+    EXPECT_EQ(*four_cstr, 4);
+    EXPECT_EQ(*four_str, 4);
+    EXPECT_EQ(*four_sv, 4);
+    EXPECT_EQ(*eight_cstr, 8);
+    EXPECT_EQ(*eight_str, 8);
+    EXPECT_EQ(*eight_sv, 8);
+
+    map.Add("zero", 0);  // Note: Find called before Add() is okay!
+    auto zero_cstr = map.Find("zero");
+    auto zero_str = map.Find(std::string("zero"));
+    auto zero_sv = map.Find(std::string_view("zero"));
+
+    map.Add(std::string("five"), 5);
+    auto five_cstr = map.Find("five");
+    auto five_str = map.Find(std::string("five"));
+    auto five_sv = map.Find(std::string_view("five"));
+    map.Add("six", 6);
+    auto six_cstr = map.Find("six");
+    auto six_str = map.Find(std::string("six"));
+    auto six_sv = map.Find(std::string_view("six"));
+    map.Add("one", 1);
+    auto one_cstr = map.Find("one");
+    auto one_str = map.Find(std::string("one"));
+    auto one_sv = map.Find(std::string_view("one"));
+    map.Add(std::string("seven"), 7);
+    auto seven_cstr = map.Find("seven");
+    auto seven_str = map.Find(std::string("seven"));
+    auto seven_sv = map.Find(std::string_view("seven"));
+
+    ASSERT_TRUE(zero_cstr);
+    ASSERT_TRUE(zero_str);
+    ASSERT_TRUE(zero_sv);
+    ASSERT_TRUE(three_cstr);
+    ASSERT_TRUE(three_str);
+    ASSERT_TRUE(three_sv);
+    ASSERT_TRUE(two_cstr);
+    ASSERT_TRUE(two_str);
+    ASSERT_TRUE(two_sv);
+    ASSERT_TRUE(four_cstr);
+    ASSERT_TRUE(four_str);
+    ASSERT_TRUE(four_sv);
+    ASSERT_TRUE(eight_cstr);
+    ASSERT_TRUE(eight_str);
+    ASSERT_TRUE(eight_sv);
+    ASSERT_TRUE(five_cstr);
+    ASSERT_TRUE(five_str);
+    ASSERT_TRUE(five_sv);
+    ASSERT_TRUE(six_cstr);
+    ASSERT_TRUE(six_str);
+    ASSERT_TRUE(six_sv);
+    ASSERT_TRUE(one_cstr);
+    ASSERT_TRUE(one_str);
+    ASSERT_TRUE(one_sv);
+    ASSERT_TRUE(seven_cstr);
+    ASSERT_TRUE(seven_str);
+    ASSERT_TRUE(seven_sv);
+
+    EXPECT_EQ(*zero_cstr, 0);
+    EXPECT_EQ(*zero_str, 0);
+    EXPECT_EQ(*zero_sv, 0);
+    EXPECT_EQ(*three_cstr, 3);
+    EXPECT_EQ(*three_str, 3);
+    EXPECT_EQ(*three_sv, 3);
+    EXPECT_EQ(*two_cstr, 2);
+    EXPECT_EQ(*two_str, 2);
+    EXPECT_EQ(*two_sv, 2);
+    EXPECT_EQ(*four_cstr, 4);
+    EXPECT_EQ(*four_str, 4);
+    EXPECT_EQ(*four_sv, 4);
+    EXPECT_EQ(*eight_cstr, 8);
+    EXPECT_EQ(*eight_str, 8);
+    EXPECT_EQ(*eight_sv, 8);
+    EXPECT_EQ(*five_cstr, 5);
+    EXPECT_EQ(*five_str, 5);
+    EXPECT_EQ(*five_sv, 5);
+    EXPECT_EQ(*six_cstr, 6);
+    EXPECT_EQ(*six_str, 6);
+    EXPECT_EQ(*six_sv, 6);
+    EXPECT_EQ(*one_cstr, 1);
+    EXPECT_EQ(*one_str, 1);
+    EXPECT_EQ(*one_sv, 1);
+    EXPECT_EQ(*seven_cstr, 7);
+    EXPECT_EQ(*seven_str, 7);
+    EXPECT_EQ(*seven_sv, 7);
+}
+
 TEST(Hashmap, Iterator) {
     using Map = Hashmap<int, std::string, 8>;
     using Entry = typename Map::Entry;
