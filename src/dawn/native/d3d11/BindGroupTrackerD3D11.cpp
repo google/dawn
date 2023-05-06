@@ -335,6 +335,7 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
             }
 
             case BindingInfoType::StorageTexture: {
+                // TODO(dawn:1798): Support storage textures.
                 UNREACHABLE();
                 break;
             }

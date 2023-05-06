@@ -169,6 +169,9 @@ class BufferZeroInitTest : public DawnTest {
                                        uint64_t bufferOffset,
                                        uint64_t boundBufferSize,
                                        const std::vector<uint32_t>& expectedBufferData) {
+        // TODO(dawn:1755): Buffer usage can't be both uniform and other accelerated usages with
+        // D3D11.
+        DAWN_SUPPRESS_TEST_IF(IsD3D11());
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.layout = nullptr;
         pipelineDescriptor.compute.module = module;
@@ -424,6 +427,9 @@ class BufferZeroInitTest : public DawnTest {
     }
 
     void TestBufferZeroInitAsIndirectBufferForDispatchIndirect(uint64_t indirectBufferOffset) {
+        // TODO(dawn:1798): Support storage textures.
+        DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
         constexpr wgpu::Color kClearColorGreen = {0.f, 1.f, 0.f, 1.f};
 
@@ -961,6 +967,9 @@ TEST_P(BufferZeroInitTest, Copy2DTextureToBuffer) {
 // Test that the code path of CopyTextureToBuffer clears the destination buffer correctly when it is
 // the first use of the buffer and the texture is a 2D array texture.
 TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
+    // TODO(dawn:1799): Figure this out.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     constexpr wgpu::Extent3D kTextureSize = {64u, 4u, 3u};
 
     // bytesPerRow == texelBlockSizeInBytes * copySize.width && rowsPerImage == copySize.height &&
@@ -1116,6 +1125,8 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
 
 // Test the buffer will be lazily initialized correctly when its first use is in SetVertexBuffer.
 TEST_P(BufferZeroInitTest, SetVertexBuffer) {
+    // TODO(dawn:1799): Figure this out.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     // Bind the whole buffer as a vertex buffer.
     {
         constexpr uint64_t kVertexBufferOffset = 0u;
@@ -1138,6 +1149,9 @@ TEST_P(BufferZeroInitTest, SetVertexBuffer) {
 TEST_P(BufferZeroInitTest, PaddingInitialized) {
     DAWN_SUPPRESS_TEST_IF(IsANGLE());                              // TODO(crbug.com/dawn/1084)
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());  // TODO(crbug.com/dawn/1214)
+
+    // TODO(dawn:1755): Buffer usage can't be both uniform and other accelerated usages with D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
     // A small sub-4-byte format means a single vertex can fit entirely within the padded buffer,
@@ -1382,6 +1396,7 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferZeroInitTest,
+                      D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
