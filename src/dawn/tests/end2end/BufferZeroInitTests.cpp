@@ -967,9 +967,6 @@ TEST_P(BufferZeroInitTest, Copy2DTextureToBuffer) {
 // Test that the code path of CopyTextureToBuffer clears the destination buffer correctly when it is
 // the first use of the buffer and the texture is a 2D array texture.
 TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
-    // TODO(dawn:1799): Figure this out.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
     constexpr wgpu::Extent3D kTextureSize = {64u, 4u, 3u};
 
     // bytesPerRow == texelBlockSizeInBytes * copySize.width && rowsPerImage == copySize.height &&

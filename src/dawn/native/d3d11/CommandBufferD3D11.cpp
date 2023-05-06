@@ -198,21 +198,14 @@ MaybeError CommandBuffer::Execute() {
                 Buffer::ScopedMap scopedDstMap;
                 DAWN_TRY_ASSIGN(scopedDstMap, Buffer::ScopedMap::Create(buffer));
 
-                Texture::ReadCallback callback;
-                if (scopedDstMap.GetMappedData()) {
-                    callback = [&](const uint8_t* data, uint64_t offset,
-                                   uint64_t size) -> MaybeError {
-                        memcpy(scopedDstMap.GetMappedData() + dst.offset + offset, data, size);
-                        return {};
-                    };
-                } else {
-                    callback = [&](const uint8_t* data, uint64_t offset,
-                                   uint64_t size) -> MaybeError {
-                        DAWN_TRY(ToBackend(dst.buffer)
-                                     ->Write(commandContext, dst.offset + offset, data, size));
-                        return {};
-                    };
-                }
+                DAWN_TRY(buffer->EnsureDataInitializedAsDestination(commandContext, copy));
+
+                Texture::ReadCallback callback = [&](const uint8_t* data, uint64_t offset,
+                                                     uint64_t size) -> MaybeError {
+                    DAWN_TRY(ToBackend(dst.buffer)
+                                 ->Write(commandContext, dst.offset + offset, data, size));
+                    return {};
+                };
 
                 DAWN_TRY(ToBackend(src.texture)
                              ->Read(commandContext, subresources, src.origin, copy->copySize,
