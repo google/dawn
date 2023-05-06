@@ -171,13 +171,12 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                     case kInternalStorageBufferBinding: {
                         ASSERT(IsSubset(bindingInfo.visibility, wgpu::ShaderStage::Compute));
                         ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
-                        DAWN_TRY_ASSIGN(d3d11UAV, ToBackend(binding.buffer)
-                                                      ->CreateD3D11UnorderedAccessView1(
-                                                          0, binding.buffer->GetSize()));
-                        UINT firstElement = offset / 4;
+                        DAWN_TRY_ASSIGN(
+                            d3d11UAV, ToBackend(binding.buffer)
+                                          ->CreateD3D11UnorderedAccessView1(offset, binding.size));
                         if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
                             deviceContext1->CSSetUnorderedAccessViews(
-                                bindingSlot, 1, d3d11UAV.GetAddressOf(), &firstElement);
+                                bindingSlot, 1, d3d11UAV.GetAddressOf(), nullptr);
                         }
                         break;
                     }
