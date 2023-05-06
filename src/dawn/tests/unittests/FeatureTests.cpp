@@ -34,9 +34,10 @@ class FeatureTests : public testing::Test {
               mInstanceBase.Get(),
               dawn::native::TogglesState(dawn::native::ToggleStage::Adapter)
                   .SetForTesting(dawn::native::Toggle::AllowUnsafeAPIs, true, true)),
-          mAdapterBase(&mPhysicalDevice),
-          mUnsafeAdapterBaseDisallow(&mUnsafePhysicalDeviceDisallow),
-          mUnsafeAdapterBase(&mUnsafePhysicalDevice) {}
+          mAdapterBase(&mPhysicalDevice, dawn::native::FeatureLevel::Core),
+          mUnsafeAdapterBaseDisallow(&mUnsafePhysicalDeviceDisallow,
+                                     dawn::native::FeatureLevel::Core),
+          mUnsafeAdapterBase(&mUnsafePhysicalDevice, dawn::native::FeatureLevel::Core) {}
 
     std::vector<wgpu::FeatureName> GetAllFeatureNames() {
         std::vector<wgpu::FeatureName> allFeatureNames(kTotalFeaturesCount);

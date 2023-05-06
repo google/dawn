@@ -53,7 +53,8 @@
         "members": [
             {"name": "compatible surface", "type": "surface", "optional": true},
             {"name": "power preference", "type": "power preference", "default": "undefined"},
-            {"name": "force fallback adapter", "type": "bool", "default": "false"}
+            {"name": "force fallback adapter", "type": "bool", "default": "false"},
+            {"name": "compatibility mode", "type": "bool", "default": "false"}
         ]
     },
     "request adapter status": {
@@ -140,7 +141,8 @@
             {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "driver description", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "adapter type", "type": "adapter type"},
-            {"name": "backend type", "type": "backend type"}
+            {"name": "backend type", "type": "backend type"},
+            {"name": "compatibility mode", "type": "bool", "default": "false"}
         ]
     },
     "adapter type": {

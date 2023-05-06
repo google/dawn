@@ -43,6 +43,10 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return true;
 }
 
+bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel) const {
+    return true;
+}
+
 const D3D12DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
     return mDeviceInfo;
 }

@@ -34,6 +34,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
+    bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
 
     const D3D12DeviceInfo& GetDeviceInfo() const;
     Backend* GetBackend() const;

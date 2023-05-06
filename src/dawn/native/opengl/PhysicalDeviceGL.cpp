@@ -227,6 +227,10 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* ada
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles);
 }
 
+bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
+    return featureLevel == FeatureLevel::Compatibility;
+}
+
 MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {

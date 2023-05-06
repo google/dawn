@@ -65,7 +65,7 @@ TEST(AdapterDiscoveryTests, OnlySwiftShader) {
     instance.DiscoverAdapters(&options);
 
     const auto& adapters = instance.GetAdapters();
-    EXPECT_LE(adapters.size(), 1u);  // 0 or 1 SwiftShader adapters.
+    EXPECT_LE(adapters.size(), 2u);  // 0 or 2 SwiftShader adapters.
     for (const auto& adapter : adapters) {
         wgpu::AdapterProperties properties;
         adapter.GetProperties(&properties);
@@ -260,6 +260,9 @@ class AdapterCreationTest : public ::testing::Test {
 
                 wgpu::AdapterProperties properties;
                 nativeAdapter.GetProperties(&properties);
+                if (properties.compatibilityMode) {
+                    continue;
+                }
                 swiftShaderAvailable =
                     swiftShaderAvailable ||
                     gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
@@ -385,6 +388,45 @@ TEST_F(AdapterCreationTest, PreferLowPower) {
         adapter.GetProperties(&properties);
         EXPECT_EQ(properties.adapterType, wgpu::AdapterType::IntegratedGPU);
     }
+}
+
+// Test that requesting a Compatibility adapter is supported.
+TEST_F(AdapterCreationTest, Compatibility) {
+    wgpu::RequestAdapterOptions options = {};
+    options.compatibilityMode = true;
+
+    MockCallback<WGPURequestAdapterCallback> cb;
+
+    WGPUAdapter cAdapter = nullptr;
+    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+        .WillOnce(SaveArg<1>(&cAdapter));
+    instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
+
+    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+
+    wgpu::AdapterProperties properties;
+    adapter.GetProperties(&properties);
+    EXPECT_TRUE(properties.compatibilityMode);
+}
+
+// Test that requesting a Non-Compatibility adapter is supported and is default.
+TEST_F(AdapterCreationTest, NonCompatibility) {
+    wgpu::RequestAdapterOptions options = {};
+
+    MockCallback<WGPURequestAdapterCallback> cb;
+
+    WGPUAdapter cAdapter = nullptr;
+    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+        .WillOnce(SaveArg<1>(&cAdapter));
+    instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
+
+    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+
+    wgpu::AdapterProperties properties;
+    adapter.GetProperties(&properties);
+    EXPECT_FALSE(properties.compatibilityMode);
 }
 
 // Test that GetInstance() returns the correct Instance.

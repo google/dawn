@@ -73,6 +73,10 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
 
+bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
+    return featureLevel == FeatureLevel::Compatibility;
+}
+
 const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
     return mDeviceInfo;
 }

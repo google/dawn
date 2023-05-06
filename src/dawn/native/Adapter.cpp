@@ -20,8 +20,10 @@
 
 namespace dawn::native {
 
-AdapterBase::AdapterBase(const Ref<PhysicalDeviceBase>& physicalDevice)
-    : mPhysicalDevice(std::move(physicalDevice)) {}
+AdapterBase::AdapterBase(const Ref<PhysicalDeviceBase>& physicalDevice, FeatureLevel featureLevel)
+    : mPhysicalDevice(std::move(physicalDevice)), mFeatureLevel(featureLevel) {
+    ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));
+}
 
 AdapterBase::~AdapterBase() = default;
 
@@ -39,6 +41,7 @@ bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
 
 void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     mPhysicalDevice->APIGetProperties(properties);
+    properties->compatibilityMode = mFeatureLevel == FeatureLevel::Compatibility;
 }
 
 bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
@@ -66,6 +69,10 @@ const TogglesState& AdapterBase::GetTogglesState() const {
 bool AdapterBase::AllowUnsafeAPIs() const {
     return GetTogglesState().IsEnabled(Toggle::AllowUnsafeAPIs) ||
            !GetTogglesState().IsEnabled(Toggle::DisallowUnsafeAPIs);
+}
+
+FeatureLevel AdapterBase::GetFeatureLevel() const {
+    return mFeatureLevel;
 }
 
 }  // namespace dawn::native

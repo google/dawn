@@ -27,7 +27,8 @@ class PerThreadProcTests : public testing::Test {
   public:
     PerThreadProcTests()
         : mNativeInstance(dawn::native::InstanceBase::Create()),
-          mAdapterBase(AcquireRef(new dawn::native::null::PhysicalDevice(mNativeInstance.Get()))) {}
+          mAdapterBase(AcquireRef(new dawn::native::null::PhysicalDevice(mNativeInstance.Get())),
+                       dawn::native::FeatureLevel::Core) {}
     ~PerThreadProcTests() override = default;
 
   protected:

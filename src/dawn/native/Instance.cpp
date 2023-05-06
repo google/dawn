@@ -255,6 +255,10 @@ ResultOrError<Ref<AdapterBase>> InstanceBase::RequestAdapterInternal(
         AdapterProperties properties;
         mAdapters[i]->APIGetProperties(&properties);
 
+        bool isCompatibility = mAdapters[i]->GetFeatureLevel() == FeatureLevel::Compatibility;
+        if (options->compatibilityMode != isCompatibility) {
+            continue;
+        }
         if (options->forceFallbackAdapter) {
             if (!gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID)) {
                 continue;
@@ -320,7 +324,12 @@ void InstanceBase::DiscoverDefaultAdapters() {
         for (Ref<PhysicalDeviceBase>& physicalDevice : physicalDevices) {
             ASSERT(physicalDevice->GetBackendType() == backend->GetType());
             ASSERT(physicalDevice->GetInstance() == this);
-            mAdapters.push_back(AcquireRef(new AdapterBase(std::move(physicalDevice))));
+            for (auto featureLevel : {FeatureLevel::Compatibility, FeatureLevel::Core}) {
+                if (physicalDevice->SupportsFeatureLevel(featureLevel)) {
+                    mAdapters.push_back(
+                        AcquireRef(new AdapterBase(std::move(physicalDevice), featureLevel)));
+                }
+            }
         }
     }
 
@@ -454,7 +463,12 @@ MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsB
         for (Ref<PhysicalDeviceBase>& physicalDevice : newPhysicalDevices) {
             ASSERT(physicalDevice->GetBackendType() == backend->GetType());
             ASSERT(physicalDevice->GetInstance() == this);
-            mAdapters.push_back(AcquireRef(new AdapterBase(std::move(physicalDevice))));
+            for (auto featureLevel : {FeatureLevel::Compatibility, FeatureLevel::Core}) {
+                if (physicalDevice->SupportsFeatureLevel(featureLevel)) {
+                    mAdapters.push_back(
+                        AcquireRef(new AdapterBase(std::move(physicalDevice), featureLevel)));
+                }
+            }
         }
     }
 

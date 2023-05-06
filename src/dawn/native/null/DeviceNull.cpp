@@ -51,6 +51,10 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
 
+bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel) const {
+    return true;
+}
+
 MaybeError PhysicalDevice::InitializeImpl() {
     return {};
 }
