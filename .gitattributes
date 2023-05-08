@@ -9,3 +9,4 @@
 *.wgsl   eol=lf
 *.h      eol=lf
 *.cpp    eol=lf
+*.bat    eol=crlf
