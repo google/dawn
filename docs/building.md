@@ -73,6 +73,9 @@ The most common GN build option is `is_debug=true/false`; otherwise
 On macOS you'll want to add the `use_system_xcode=true` in most cases.
 (and if you're a googler please get XCode from go/xcode).
 
+To generate a Microsoft Visual Studio solution, add `ide=vs2022` and
+`ninja-executable=<dawn parent directory>\dawn\third_party\ninja\ninja.exe`.
+The .sln file will be created in the output directory specified.
 
 ### Fuzzers on MacOS
 If you are attempting fuzz, using `TINT_BUILD_FUZZERS=ON`, the version of llvm
