@@ -361,6 +361,12 @@ MaybeError Device::SubmitPendingCommandBuffer() {
 }
 
 void Device::ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc) {
+    // Ensure commands are submitted before getting the last submited serial.
+    // Ignore the error since we still want to export the serial of the last successful
+    // submission - that was the last serial that was actually signaled.
+    ForceEventualFlushOfCommands();
+    DAWN_UNUSED(ConsumedError(SubmitPendingCommandBuffer()));
+
     desc->sharedEvent = *mMtlSharedEvent;
     desc->signaledValue = static_cast<uint64_t>(GetLastSubmittedCommandSerial());
 }
