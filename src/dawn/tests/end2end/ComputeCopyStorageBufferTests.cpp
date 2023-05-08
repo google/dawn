@@ -145,6 +145,7 @@ TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeCopyStorageBufferTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
