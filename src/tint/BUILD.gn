@@ -1807,6 +1807,7 @@ if (tint_build_unittests) {
     ]
 
     deps = [
+      ":libtint_builtins_src",
       ":libtint_spv_reader_src",
       ":libtint_wgsl_writer_src",
       "${tint_spirv_tools_dir}/:spvtools_opt",

@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  float2 const distance_1 = float2(2.0f);
+  float const x_10 = distance(distance_1, float2(2.0f));
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
+  return;
+}
+
