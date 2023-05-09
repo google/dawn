@@ -278,6 +278,7 @@ MaybeError Texture::Clear(CommandRecordingContext* commandContext,
     bool isRenderable = GetInternalUsage() & wgpu::TextureUsage::RenderAttachment;
 
     if (!isRenderable) {
+        // TODO(dawn:1802): Support clearing non-renderable textures.
         return DAWN_UNIMPLEMENTED_ERROR("Clearing non-renderable textures");
     }
 
