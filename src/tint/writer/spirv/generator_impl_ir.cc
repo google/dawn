@@ -55,6 +55,40 @@ bool GeneratorImplIr::Generate() {
     return true;
 }
 
+uint32_t GeneratorImplIr::Constant(const ir::Constant* constant) {
+    return constants_.GetOrCreate(constant, [&]() {
+        auto id = module_.NextId();
+        auto* ty = constant->Type();
+        auto* value = constant->value;
+        Switch(
+            ty,  //
+            [&](const type::Bool*) {
+                module_.PushType(
+                    value->ValueAs<bool>() ? spv::Op::OpConstantTrue : spv::Op::OpConstantFalse,
+                    {Type(ty), id});
+            },
+            [&](const type::I32*) {
+                module_.PushType(spv::Op::OpConstant, {Type(ty), id, value->ValueAs<u32>()});
+            },
+            [&](const type::U32*) {
+                module_.PushType(spv::Op::OpConstant,
+                                 {Type(ty), id, U32Operand(value->ValueAs<i32>())});
+            },
+            [&](const type::F32*) {
+                module_.PushType(spv::Op::OpConstant, {Type(ty), id, value->ValueAs<f32>()});
+            },
+            [&](const type::F16*) {
+                module_.PushType(
+                    spv::Op::OpConstant,
+                    {Type(ty), id, U32Operand(value->ValueAs<f16>().BitsRepresentation())});
+            },
+            [&](Default) {
+                TINT_ICE(Writer, diagnostics_) << "unhandled constant type: " << ty->FriendlyName();
+            });
+        return id;
+    });
+}
+
 uint32_t GeneratorImplIr::Type(const type::Type* ty) {
     return types_.GetOrCreate(ty, [&]() {
         auto id = module_.NextId();

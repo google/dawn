@@ -1229,6 +1229,7 @@ if(TINT_BUILD_TESTS)
 
     if(${TINT_BUILD_IR})
       list(APPEND TINT_TEST_SRCS
+        writer/spirv/generator_impl_constant_test.cc
         writer/spirv/generator_impl_function_test.cc
         writer/spirv/generator_impl_ir_test.cc
         writer/spirv/generator_impl_type_test.cc
