@@ -364,11 +364,6 @@ class Builder {
 
     /// The IR module.
     Module ir;
-
-  private:
-    uint32_t next_inst_id() { return next_instruction_id_++; }
-
-    uint32_t next_instruction_id_ = 1;
 };
 
 }  // namespace tint::ir

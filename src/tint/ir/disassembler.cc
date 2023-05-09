@@ -41,27 +41,29 @@ namespace tint::ir {
 namespace {
 
 class ScopedStopNode {
+    static constexpr size_t N = 32;
+
   public:
-    ScopedStopNode(std::unordered_set<const FlowNode*>* stop_nodes, const FlowNode* node)
+    ScopedStopNode(utils::Hashset<const FlowNode*, N>& stop_nodes, const FlowNode* node)
         : stop_nodes_(stop_nodes), node_(node) {
-        stop_nodes_->insert(node_);
+        stop_nodes_.Add(node_);
     }
 
-    ~ScopedStopNode() { stop_nodes_->erase(node_); }
+    ~ScopedStopNode() { stop_nodes_.Remove(node_); }
 
   private:
-    std::unordered_set<const FlowNode*>* stop_nodes_;
+    utils::Hashset<const FlowNode*, N>& stop_nodes_;
     const FlowNode* node_;
 };
 
 class ScopedIndent {
   public:
-    explicit ScopedIndent(uint32_t* indent) : indent_(indent) { (*indent_) += 2; }
+    explicit ScopedIndent(uint32_t& indent) : indent_(indent) { indent_ += 2; }
 
-    ~ScopedIndent() { (*indent_) -= 2; }
+    ~ScopedIndent() { indent_ -= 2; }
 
   private:
-    uint32_t* indent_;
+    uint32_t& indent_;
 };
 
 }  // namespace
@@ -85,30 +87,28 @@ void Disassembler::EmitBlockInstructions(const Block* b) {
     }
 }
 
-size_t Disassembler::GetIdForNode(const FlowNode* node) {
+size_t Disassembler::IdOf(const FlowNode* node) {
     TINT_ASSERT(IR, node);
+    return flow_node_ids_.GetOrCreate(node, [&] { return flow_node_ids_.Count(); });
+}
 
-    auto it = flow_node_to_id_.find(node);
-    if (it != flow_node_to_id_.end()) {
-        return it->second;
-    }
-    size_t id = next_node_id_++;
-    flow_node_to_id_[node] = id;
-    return id;
+std::string_view Disassembler::IdOf(const Value* value) {
+    TINT_ASSERT(IR, value);
+    return value_ids_.GetOrCreate(value, [&] { return std::to_string(value_ids_.Count()); });
 }
 
 void Disassembler::Walk(const FlowNode* node) {
-    if ((visited_.count(node) > 0) || (stop_nodes_.count(node) > 0)) {
+    if (visited_.Contains(node) || stop_nodes_.Contains(node)) {
         return;
     }
-    visited_.insert(node);
+    visited_.Add(node);
 
     tint::Switch(
         node,
         [&](const ir::Function* f) {
             TINT_SCOPED_ASSIGNMENT(in_function_, true);
 
-            Indent() << "%fn" << GetIdForNode(f) << " = func " << f->name.Name()
+            Indent() << "%fn" << IdOf(f) << " = func " << f->name.Name()
                      << "():" << f->return_type->FriendlyName();
 
             if (f->pipeline_stage != Function::PipelineStage::kUndefined) {
@@ -136,8 +136,8 @@ void Disassembler::Walk(const FlowNode* node) {
             out_ << std::endl;
 
             {
-                ScopedIndent func_indent(&indent_size_);
-                ScopedStopNode scope(&stop_nodes_, f->end_target);
+                ScopedIndent func_indent(indent_size_);
+                ScopedStopNode scope(stop_nodes_, f->end_target);
                 Walk(f->start_target);
             }
             Walk(f->end_target);
@@ -148,7 +148,7 @@ void Disassembler::Walk(const FlowNode* node) {
                 return;
             }
 
-            Indent() << "%fn" << GetIdForNode(b) << " = block" << std::endl;
+            Indent() << "%fn" << IdOf(b) << " = block" << std::endl;
             EmitBlockInstructions(b);
 
             if (b->branch.target->Is<FunctionTerminator>()) {
@@ -157,7 +157,7 @@ void Disassembler::Walk(const FlowNode* node) {
                 // Nothing to do
             } else {
                 Indent() << "branch "
-                         << "%fn" << GetIdForNode(b->branch.target);
+                         << "%fn" << IdOf(b->branch.target);
             }
             if (!b->branch.args.IsEmpty()) {
                 out_ << " ";
@@ -177,7 +177,7 @@ void Disassembler::Walk(const FlowNode* node) {
             Walk(b->branch.target);
         },
         [&](const ir::Switch* s) {
-            Indent() << "%fn" << GetIdForNode(s) << " = switch ";
+            Indent() << "%fn" << IdOf(s) << " = switch ";
             EmitValue(s->condition);
             out_ << " [";
             for (const auto& c : s->cases) {
@@ -196,16 +196,16 @@ void Disassembler::Walk(const FlowNode* node) {
                         EmitValue(selector.val);
                     }
                 }
-                out_ << ", %fn" << GetIdForNode(c.start.target) << ")";
+                out_ << ", %fn" << IdOf(c.start.target) << ")";
             }
             if (s->merge.target->IsConnected()) {
-                out_ << ", m: %fn" << GetIdForNode(s->merge.target);
+                out_ << ", m: %fn" << IdOf(s->merge.target);
             }
             out_ << "]" << std::endl;
 
             {
-                ScopedIndent switch_indent(&indent_size_);
-                ScopedStopNode scope(&stop_nodes_, s->merge.target);
+                ScopedIndent switch_indent(indent_size_);
+                ScopedStopNode scope(stop_nodes_, s->merge.target);
                 for (const auto& c : s->cases) {
                     Indent() << "# case ";
                     for (const auto& selector : c.selectors) {
@@ -230,18 +230,17 @@ void Disassembler::Walk(const FlowNode* node) {
             }
         },
         [&](const ir::If* i) {
-            Indent() << "%fn" << GetIdForNode(i) << " = if ";
+            Indent() << "%fn" << IdOf(i) << " = if ";
             EmitValue(i->condition);
-            out_ << " [t: %fn" << GetIdForNode(i->true_.target) << ", f: %fn"
-                 << GetIdForNode(i->false_.target);
+            out_ << " [t: %fn" << IdOf(i->true_.target) << ", f: %fn" << IdOf(i->false_.target);
             if (i->merge.target->IsConnected()) {
-                out_ << ", m: %fn" << GetIdForNode(i->merge.target);
+                out_ << ", m: %fn" << IdOf(i->merge.target);
             }
             out_ << "]" << std::endl;
 
             {
-                ScopedIndent if_indent(&indent_size_);
-                ScopedStopNode scope(&stop_nodes_, i->merge.target);
+                ScopedIndent if_indent(indent_size_);
+                ScopedStopNode scope(stop_nodes_, i->merge.target);
 
                 Indent() << "# true branch" << std::endl;
                 Walk(i->true_.target);
@@ -258,22 +257,21 @@ void Disassembler::Walk(const FlowNode* node) {
             }
         },
         [&](const ir::Loop* l) {
-            Indent() << "%fn" << GetIdForNode(l) << " = loop [s: %fn"
-                     << GetIdForNode(l->start.target);
+            Indent() << "%fn" << IdOf(l) << " = loop [s: %fn" << IdOf(l->start.target);
 
             if (l->continuing.target->IsConnected()) {
-                out_ << ", c: %fn" << GetIdForNode(l->continuing.target);
+                out_ << ", c: %fn" << IdOf(l->continuing.target);
             }
             if (l->merge.target->IsConnected()) {
-                out_ << ", m: %fn" << GetIdForNode(l->merge.target);
+                out_ << ", m: %fn" << IdOf(l->merge.target);
             }
             out_ << "]" << std::endl;
 
             {
-                ScopedStopNode loop_scope(&stop_nodes_, l->merge.target);
-                ScopedIndent loop_indent(&indent_size_);
+                ScopedStopNode loop_scope(stop_nodes_, l->merge.target);
+                ScopedIndent loop_indent(indent_size_);
                 {
-                    ScopedStopNode inner_scope(&stop_nodes_, l->continuing.target);
+                    ScopedStopNode inner_scope(stop_nodes_, l->continuing.target);
                     Indent() << "# loop start" << std::endl;
                     Walk(l->start.target);
                 }
@@ -355,11 +353,7 @@ void Disassembler::EmitValue(const Value* val) {
             emit(constant->value);
         },
         [&](const ir::Instruction* i) {
-            if (i->id == ir::Instruction::kNoID) {
-                out_ << "<no-id>";
-            } else {
-                out_ << "%" << i->id;
-            }
+            out_ << "%" << IdOf(i);
             if (i->Type() != nullptr) {
                 out_ << ":" << i->Type()->FriendlyName();
             }

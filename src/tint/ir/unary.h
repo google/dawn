@@ -32,11 +32,10 @@ class Unary : public utils::Castable<Unary, Instruction> {
     };
 
     /// Constructor
-    /// @param id the instruction id
     /// @param kind the kind of unary instruction
     /// @param type the result type
     /// @param val the lhs of the instruction
-    Unary(uint32_t id, Kind kind, const type::Type* type, Value* val);
+    Unary(Kind kind, const type::Type* type, Value* val);
     Unary(const Unary& inst) = delete;
     Unary(Unary&& inst) = delete;
     ~Unary() override;

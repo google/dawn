@@ -37,10 +37,9 @@ class Call : public utils::Castable<Call, Instruction> {
     /// Constructor
     Call() = delete;
     /// Constructor
-    /// @param id the instruction id
     /// @param type the result type
     /// @param args the constructor arguments
-    Call(uint32_t id, const type::Type* type, utils::VectorRef<Value*> args);
+    Call(const type::Type* type, utils::VectorRef<Value*> args);
 };
 
 }  // namespace tint::ir

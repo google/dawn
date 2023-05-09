@@ -109,7 +109,7 @@ void Builder::Branch(Block* from, FlowNode* to, utils::VectorRef<Value*> args) {
 }
 
 Binary* Builder::CreateBinary(Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs) {
-    return ir.instructions.Create<ir::Binary>(next_inst_id(), kind, type, lhs, rhs);
+    return ir.instructions.Create<ir::Binary>(kind, type, lhs, rhs);
 }
 
 Binary* Builder::And(const type::Type* type, Value* lhs, Value* rhs) {
@@ -177,7 +177,7 @@ Binary* Builder::Modulo(const type::Type* type, Value* lhs, Value* rhs) {
 }
 
 Unary* Builder::CreateUnary(Unary::Kind kind, const type::Type* type, Value* val) {
-    return ir.instructions.Create<ir::Unary>(next_inst_id(), kind, type, val);
+    return ir.instructions.Create<ir::Unary>(kind, type, val);
 }
 
 Unary* Builder::AddressOf(const type::Type* type, Value* val) {
@@ -201,7 +201,7 @@ Binary* Builder::Not(const type::Type* type, Value* val) {
 }
 
 ir::Bitcast* Builder::Bitcast(const type::Type* type, Value* val) {
-    return ir.instructions.Create<ir::Bitcast>(next_inst_id(), type, val);
+    return ir.instructions.Create<ir::Bitcast>(type, val);
 }
 
 ir::Discard* Builder::Discard() {
@@ -211,23 +211,23 @@ ir::Discard* Builder::Discard() {
 ir::UserCall* Builder::UserCall(const type::Type* type,
                                 Symbol name,
                                 utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::UserCall>(next_inst_id(), type, name, std::move(args));
+    return ir.instructions.Create<ir::UserCall>(type, name, std::move(args));
 }
 
 ir::Convert* Builder::Convert(const type::Type* to,
                               const type::Type* from,
                               utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Convert>(next_inst_id(), to, from, std::move(args));
+    return ir.instructions.Create<ir::Convert>(to, from, std::move(args));
 }
 
 ir::Construct* Builder::Construct(const type::Type* to, utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Construct>(next_inst_id(), to, std::move(args));
+    return ir.instructions.Create<ir::Construct>(to, std::move(args));
 }
 
 ir::Builtin* Builder::Builtin(const type::Type* type,
                               builtin::Function func,
                               utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Builtin>(next_inst_id(), type, func, args);
+    return ir.instructions.Create<ir::Builtin>(type, func, args);
 }
 
 ir::Store* Builder::Store(Value* to, Value* from) {
@@ -237,7 +237,7 @@ ir::Store* Builder::Store(Value* to, Value* from) {
 ir::Var* Builder::Declare(const type::Type* type,
                           builtin::AddressSpace address_space,
                           builtin::Access access) {
-    return ir.instructions.Create<ir::Var>(next_inst_id(), type, address_space, access);
+    return ir.instructions.Create<ir::Var>(type, address_space, access);
 }
 
 }  // namespace tint::ir

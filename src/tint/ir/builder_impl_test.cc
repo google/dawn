@@ -42,8 +42,8 @@ TEST_F(IR_BuilderImplTest, Func) {
     EXPECT_EQ(1u, f->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, f->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func f():void
-  %fn1 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = func f():void
+  %fn2 = block
   ret
 func_end
 
@@ -89,21 +89,21 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = if true [t: %fn3, f: %fn4, m: %fn5]
+  %fn3 = if true [t: %fn4, f: %fn5, m: %fn6]
     # true branch
-    %fn3 = block
-    branch %fn5
+    %fn4 = block
+    branch %fn6
 
     # false branch
-    %fn4 = block
-    branch %fn5
+    %fn5 = block
+    branch %fn6
 
   # if merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -138,20 +138,20 @@ TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = if true [t: %fn3, f: %fn4, m: %fn5]
+  %fn3 = if true [t: %fn4, f: %fn5, m: %fn6]
     # true branch
-    %fn3 = block
+    %fn4 = block
     ret
     # false branch
-    %fn4 = block
-    branch %fn5
+    %fn5 = block
+    branch %fn6
 
   # if merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -186,20 +186,20 @@ TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = if true [t: %fn3, f: %fn4, m: %fn5]
+  %fn3 = if true [t: %fn4, f: %fn5, m: %fn6]
     # true branch
-    %fn3 = block
-    branch %fn5
+    %fn4 = block
+    branch %fn6
 
     # false branch
-    %fn4 = block
+    %fn5 = block
     ret
   # if merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -234,16 +234,16 @@ TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = if true [t: %fn3, f: %fn4]
+  %fn3 = if true [t: %fn4, f: %fn5]
     # true branch
-    %fn3 = block
+    %fn4 = block
     ret
     # false branch
-    %fn4 = block
+    %fn5 = block
     ret
 func_end
 
@@ -278,30 +278,30 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = if true [t: %fn3, f: %fn4, m: %fn5]
+  %fn3 = if true [t: %fn4, f: %fn5, m: %fn6]
     # true branch
-    %fn3 = block
-    branch %fn6
+    %fn4 = block
+    branch %fn7
 
-    %fn6 = loop [s: %fn7, m: %fn8]
+    %fn7 = loop [s: %fn8, m: %fn9]
       # loop start
-      %fn7 = block
-      branch %fn8
+      %fn8 = block
+      branch %fn9
 
     # loop merge
-    %fn8 = block
-    branch %fn5
+    %fn9 = block
+    branch %fn6
 
     # false branch
-    %fn4 = block
-    branch %fn5
+    %fn5 = block
+    branch %fn6
 
   # if merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -336,17 +336,17 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, m: %fn4]
+  %fn3 = loop [s: %fn4, m: %fn5]
     # loop start
-    %fn3 = block
-    branch %fn4
+    %fn4 = block
+    branch %fn5
 
   # loop merge
-  %fn4 = block
+  %fn5 = block
   ret
 func_end
 
@@ -395,34 +395,34 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, c: %fn4, m: %fn5]
+  %fn3 = loop [s: %fn4, c: %fn5, m: %fn6]
     # loop start
-    %fn3 = block
-    branch %fn6
+    %fn4 = block
+    branch %fn7
 
-    %fn6 = if true [t: %fn7, f: %fn8, m: %fn9]
+    %fn7 = if true [t: %fn8, f: %fn9, m: %fn10]
       # true branch
-      %fn7 = block
-      branch %fn5
+      %fn8 = block
+      branch %fn6
 
       # false branch
-      %fn8 = block
-      branch %fn9
+      %fn9 = block
+      branch %fn10
 
     # if merge
-    %fn9 = block
-    branch %fn4
+    %fn10 = block
+    branch %fn5
 
     # loop continuing
-    %fn4 = block
-    branch %fn3
+    %fn5 = block
+    branch %fn4
 
   # loop merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -471,34 +471,34 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, c: %fn4, m: %fn5]
+  %fn3 = loop [s: %fn4, c: %fn5, m: %fn6]
     # loop start
-    %fn3 = block
-    branch %fn4
+    %fn4 = block
+    branch %fn5
 
     # loop continuing
-    %fn4 = block
-    branch %fn6
+    %fn5 = block
+    branch %fn7
 
-    %fn6 = if true [t: %fn7, f: %fn8, m: %fn9]
+    %fn7 = if true [t: %fn8, f: %fn9, m: %fn10]
       # true branch
-      %fn7 = block
-      branch %fn5
+      %fn8 = block
+      branch %fn6
 
       # false branch
-      %fn8 = block
-      branch %fn9
+      %fn9 = block
+      branch %fn10
 
     # if merge
-    %fn9 = block
-    branch %fn3
+    %fn10 = block
+    branch %fn4
 
   # loop merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -547,30 +547,30 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, c: %fn4]
+  %fn3 = loop [s: %fn4, c: %fn5]
     # loop start
-    %fn3 = block
-    branch %fn5
+    %fn4 = block
+    branch %fn6
 
-    %fn5 = if true [t: %fn6, f: %fn7, m: %fn8]
+    %fn6 = if true [t: %fn7, f: %fn8, m: %fn9]
       # true branch
-      %fn6 = block
+      %fn7 = block
       ret
       # false branch
-      %fn7 = block
-      branch %fn8
+      %fn8 = block
+      branch %fn9
 
     # if merge
-    %fn8 = block
-    branch %fn4
+    %fn9 = block
+    branch %fn5
 
     # loop continuing
-    %fn4 = block
-    branch %fn3
+    %fn5 = block
+    branch %fn4
 
 func_end
 
@@ -605,13 +605,13 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3]
+  %fn3 = loop [s: %fn4]
     # loop start
-    %fn3 = block
+    %fn4 = block
     ret
 func_end
 
@@ -668,13 +668,13 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3]
+  %fn3 = loop [s: %fn4]
     # loop start
-    %fn3 = block
+    %fn4 = block
     ret
 func_end
 
@@ -723,26 +723,26 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, m: %fn4]
+  %fn3 = loop [s: %fn4, m: %fn5]
     # loop start
-    %fn3 = block
-    branch %fn5
+    %fn4 = block
+    branch %fn6
 
-    %fn5 = if true [t: %fn6, f: %fn7]
+    %fn6 = if true [t: %fn7, f: %fn8]
       # true branch
-      %fn6 = block
-      branch %fn4
+      %fn7 = block
+      branch %fn5
 
       # false branch
-      %fn7 = block
-      branch %fn4
+      %fn8 = block
+      branch %fn5
 
   # loop merge
-  %fn4 = block
+  %fn5 = block
   ret
 func_end
 
@@ -870,108 +870,108 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, c: %fn4, m: %fn5]
+  %fn3 = loop [s: %fn4, c: %fn5, m: %fn6]
     # loop start
-    %fn3 = block
-    branch %fn6
+    %fn4 = block
+    branch %fn7
 
-    %fn6 = loop [s: %fn7, c: %fn8, m: %fn9]
+    %fn7 = loop [s: %fn8, c: %fn9, m: %fn10]
       # loop start
-      %fn7 = block
-      branch %fn10
+      %fn8 = block
+      branch %fn11
 
-      %fn10 = if true [t: %fn11, f: %fn12, m: %fn13]
+      %fn11 = if true [t: %fn12, f: %fn13, m: %fn14]
         # true branch
-        %fn11 = block
+        %fn12 = block
+        branch %fn10
+
+        # false branch
+        %fn13 = block
+        branch %fn14
+
+      # if merge
+      %fn14 = block
+      branch %fn15
+
+      %fn15 = if true [t: %fn16, f: %fn17, m: %fn18]
+        # true branch
+        %fn16 = block
         branch %fn9
 
         # false branch
-        %fn12 = block
-        branch %fn13
+        %fn17 = block
+        branch %fn18
 
       # if merge
-      %fn13 = block
-      branch %fn14
-
-      %fn14 = if true [t: %fn15, f: %fn16, m: %fn17]
-        # true branch
-        %fn15 = block
-        branch %fn8
-
-        # false branch
-        %fn16 = block
-        branch %fn17
-
-      # if merge
-      %fn17 = block
-      branch %fn8
+      %fn18 = block
+      branch %fn9
 
       # loop continuing
-      %fn8 = block
-      branch %fn18
+      %fn9 = block
+      branch %fn19
 
-      %fn18 = loop [s: %fn19, m: %fn20]
+      %fn19 = loop [s: %fn20, m: %fn21]
         # loop start
-        %fn19 = block
-        branch %fn20
+        %fn20 = block
+        branch %fn21
 
       # loop merge
-      %fn20 = block
-      branch %fn21
+      %fn21 = block
+      branch %fn22
 
-      %fn21 = loop [s: %fn22, c: %fn23, m: %fn24]
+      %fn22 = loop [s: %fn23, c: %fn24, m: %fn25]
         # loop start
-        %fn22 = block
-        branch %fn23
+        %fn23 = block
+        branch %fn24
 
         # loop continuing
-        %fn23 = block
-        branch %fn25
+        %fn24 = block
+        branch %fn26
 
-        %fn25 = if true [t: %fn26, f: %fn27, m: %fn28]
+        %fn26 = if true [t: %fn27, f: %fn28, m: %fn29]
           # true branch
-          %fn26 = block
-          branch %fn24
+          %fn27 = block
+          branch %fn25
 
           # false branch
-          %fn27 = block
-          branch %fn28
+          %fn28 = block
+          branch %fn29
 
         # if merge
-        %fn28 = block
-        branch %fn22
+        %fn29 = block
+        branch %fn23
 
       # loop merge
-      %fn24 = block
-      branch %fn7
+      %fn25 = block
+      branch %fn8
 
     # loop merge
-    %fn9 = block
-    branch %fn29
+    %fn10 = block
+    branch %fn30
 
-    %fn29 = if true [t: %fn30, f: %fn31, m: %fn32]
+    %fn30 = if true [t: %fn31, f: %fn32, m: %fn33]
       # true branch
-      %fn30 = block
-      branch %fn5
+      %fn31 = block
+      branch %fn6
 
       # false branch
-      %fn31 = block
-      branch %fn32
+      %fn32 = block
+      branch %fn33
 
     # if merge
-    %fn32 = block
-    branch %fn4
+    %fn33 = block
+    branch %fn5
 
     # loop continuing
-    %fn4 = block
-    branch %fn3
+    %fn5 = block
+    branch %fn4
 
   # loop merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -1015,34 +1015,34 @@ TEST_F(IR_BuilderImplTest, While) {
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, c: %fn4, m: %fn5]
+  %fn3 = loop [s: %fn4, c: %fn5, m: %fn6]
     # loop start
-    %fn3 = block
-    branch %fn6
+    %fn4 = block
+    branch %fn7
 
-    %fn6 = if false [t: %fn7, f: %fn8, m: %fn9]
+    %fn7 = if false [t: %fn8, f: %fn9, m: %fn10]
       # true branch
-      %fn7 = block
-      branch %fn9
+      %fn8 = block
+      branch %fn10
 
       # false branch
-      %fn8 = block
-      branch %fn5
+      %fn9 = block
+      branch %fn6
 
     # if merge
-    %fn9 = block
-    branch %fn4
+    %fn10 = block
+    branch %fn5
 
     # loop continuing
-    %fn4 = block
-    branch %fn3
+    %fn5 = block
+    branch %fn4
 
   # loop merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -1086,29 +1086,29 @@ TEST_F(IR_BuilderImplTest, While_Return) {
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, m: %fn4]
+  %fn3 = loop [s: %fn4, m: %fn5]
     # loop start
-    %fn3 = block
-    branch %fn5
+    %fn4 = block
+    branch %fn6
 
-    %fn5 = if true [t: %fn6, f: %fn7, m: %fn8]
+    %fn6 = if true [t: %fn7, f: %fn8, m: %fn9]
       # true branch
-      %fn6 = block
-      branch %fn8
+      %fn7 = block
+      branch %fn9
 
       # false branch
-      %fn7 = block
-      branch %fn4
+      %fn8 = block
+      branch %fn5
 
     # if merge
-    %fn8 = block
+    %fn9 = block
     ret
   # loop merge
-  %fn4 = block
+  %fn5 = block
   ret
 func_end
 
@@ -1194,17 +1194,17 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = loop [s: %fn3, m: %fn4]
+  %fn3 = loop [s: %fn4, m: %fn5]
     # loop start
-    %fn3 = block
-    branch %fn4
+    %fn4 = block
+    branch %fn5
 
   # loop merge
-  %fn4 = block
+  %fn5 = block
   ret
 func_end
 
@@ -1254,25 +1254,25 @@ TEST_F(IR_BuilderImplTest, Switch) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = switch 1i [c: (0i, %fn3), c: (1i, %fn4), c: (default, %fn5), m: %fn6]
+  %fn3 = switch 1i [c: (0i, %fn4), c: (1i, %fn5), c: (default, %fn6), m: %fn7]
     # case 0i
-    %fn3 = block
-    branch %fn6
+    %fn4 = block
+    branch %fn7
 
     # case 1i
-    %fn4 = block
-    branch %fn6
+    %fn5 = block
+    branch %fn7
 
     # case default
-    %fn5 = block
-    branch %fn6
+    %fn6 = block
+    branch %fn7
 
   # switch merge
-  %fn6 = block
+  %fn7 = block
   ret
 func_end
 
@@ -1319,17 +1319,17 @@ TEST_F(IR_BuilderImplTest, Switch_MultiSelector) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = switch 1i [c: (0i 1i default, %fn3), m: %fn4]
+  %fn3 = switch 1i [c: (0i 1i default, %fn4), m: %fn5]
     # case 0i 1i default
-    %fn3 = block
-    branch %fn4
+    %fn4 = block
+    branch %fn5
 
   # switch merge
-  %fn4 = block
+  %fn5 = block
   ret
 func_end
 
@@ -1364,17 +1364,17 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = switch 1i [c: (default, %fn3), m: %fn4]
+  %fn3 = switch 1i [c: (default, %fn4), m: %fn5]
     # case default
-    %fn3 = block
-    branch %fn4
+    %fn4 = block
+    branch %fn5
 
   # switch merge
-  %fn4 = block
+  %fn5 = block
   ret
 func_end
 
@@ -1418,21 +1418,21 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = switch 1i [c: (0i, %fn3), c: (default, %fn4), m: %fn5]
+  %fn3 = switch 1i [c: (0i, %fn4), c: (default, %fn5), m: %fn6]
     # case 0i
-    %fn3 = block
-    branch %fn5
+    %fn4 = block
+    branch %fn6
 
     # case default
-    %fn4 = block
-    branch %fn5
+    %fn5 = block
+    branch %fn6
 
   # switch merge
-  %fn5 = block
+  %fn6 = block
   ret
 func_end
 
@@ -1478,16 +1478,16 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
-  branch %fn2
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
 
-  %fn2 = switch 1i [c: (0i, %fn3), c: (default, %fn4)]
+  %fn3 = switch 1i [c: (0i, %fn4), c: (default, %fn5)]
     # case 0i
-    %fn3 = block
+    %fn4 = block
     ret
     # case default
-    %fn4 = block
+    %fn5 = block
     ret
 func_end
 

@@ -91,14 +91,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     auto m = r.Move();
     ASSERT_TRUE(r);
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, i32, read_write> = var private read_write
 store %1:ref<private, i32, read_write>, 1i
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:f32 = convert i32, %1:ref<private, i32, read_write>
   ret
 func_end
@@ -115,7 +115,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
     auto m = r.Move();
     ASSERT_TRUE(r);
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, vec3<f32>, read_write> = var private read_write
 store %1:ref<private, vec3<f32>, read_write>, vec3<f32> 0.0f
 
@@ -134,14 +134,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
     auto m = r.Move();
     ASSERT_TRUE(r);
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, f32, read_write> = var private read_write
 store %1:ref<private, f32, read_write>, 1.0f
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:vec3<f32> = construct 2.0f, 3.0f, %1:ref<private, f32, read_write>
   ret
 func_end

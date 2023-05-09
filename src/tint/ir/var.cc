@@ -19,11 +19,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Var);
 
 namespace tint::ir {
 
-Var::Var(uint32_t identifier,
-         const type::Type* ty,
-         builtin::AddressSpace addr_space,
-         builtin::Access acc)
-    : Base(identifier, ty), address_space(addr_space), access(acc) {}
+Var::Var(const type::Type* ty, builtin::AddressSpace addr_space, builtin::Access acc)
+    : Base(ty), address_space(addr_space), access(acc) {}
 
 Var::~Var() = default;
 

@@ -53,13 +53,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, u32, read_write> = add %1:ref<private, u32, read_write>, 1u
   store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
   ret
@@ -95,13 +95,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, u32, read_write> = sub %1:ref<private, u32, read_write>, 1u
   store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
   ret
@@ -137,13 +137,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, u32, read_write> = mul %1:ref<private, u32, read_write>, 1u
   store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
   ret
@@ -179,13 +179,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, u32, read_write> = div %1:ref<private, u32, read_write>, 1u
   store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
   ret
@@ -221,13 +221,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, u32, read_write> = mod %1:ref<private, u32, read_write>, 1u
   store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
   ret
@@ -263,13 +263,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, bool, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, bool, read_write> = and %1:ref<private, bool, read_write>, false
   store %1:ref<private, bool, read_write>, %2:ref<private, bool, read_write>
   ret
@@ -305,13 +305,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, bool, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, bool, read_write> = or %1:ref<private, bool, read_write>, false
   store %1:ref<private, bool, read_write>, %2:ref<private, bool, read_write>
   ret
@@ -347,13 +347,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, u32, read_write> = xor %1:ref<private, u32, read_write>, 1u
   store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
   ret
@@ -371,26 +371,26 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func():bool
-  %fn1 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = func my_func():bool
+  %fn2 = block
   ret true
 func_end
 
-%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn3 = block
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn4 = block
   %1:bool = call my_func
   %2:bool = var function read_write
   store %2:bool, %1:bool
-  branch %fn4
+  branch %fn5
 
-  %fn4 = if %1:bool [t: %fn5, f: %fn6, m: %fn7]
+  %fn5 = if %1:bool [t: %fn6, f: %fn7, m: %fn8]
     # true branch
-    %fn5 = block
+    %fn6 = block
     store %2:bool, false
-    branch %fn7
+    branch %fn8
 
   # if merge
-  %fn7 = block
+  %fn8 = block
   ret
 func_end
 
@@ -406,27 +406,27 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func():bool
-  %fn1 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = func my_func():bool
+  %fn2 = block
   ret true
 func_end
 
-%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn3 = block
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn4 = block
   %1:bool = call my_func
   %2:bool = var function read_write
   store %2:bool, %1:bool
-  branch %fn4
+  branch %fn5
 
-  %fn4 = if %1:bool [t: %fn5, f: %fn6, m: %fn7]
+  %fn5 = if %1:bool [t: %fn6, f: %fn7, m: %fn8]
     # true branch
     # false branch
-    %fn6 = block
+    %fn7 = block
     store %2:bool, true
-    branch %fn7
+    branch %fn8
 
   # if merge
-  %fn7 = block
+  %fn8 = block
   ret
 func_end
 
@@ -568,13 +568,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, u32, read_write> = shiftl %1:ref<private, u32, read_write>, 1u
   store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
   ret
@@ -610,13 +610,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ref<private, u32, read_write> = shiftr %1:ref<private, u32, read_write>, 1u
   store %1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
   ret
@@ -636,32 +636,32 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func():f32
-  %fn1 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = func my_func():f32
+  %fn2 = block
   ret 0.0f
 func_end
 
-%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn3 = block
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn4 = block
   %1:f32 = call my_func
   %2:bool = lt %1:f32, 2.0f
   %3:bool = var function read_write
   store %3:bool, %2:bool
-  branch %fn4
+  branch %fn5
 
-  %fn4 = if %2:bool [t: %fn5, f: %fn6, m: %fn7]
+  %fn5 = if %2:bool [t: %fn6, f: %fn7, m: %fn8]
     # true branch
-    %fn5 = block
+    %fn6 = block
     %4:f32 = call my_func
     %5:f32 = call my_func
     %6:f32 = mul 2.29999995231628417969f, %5:f32
     %7:f32 = div %4:f32, %6:f32
     %8:bool = gt 2.5f, %7:f32
     store %3:bool, %8:bool
-    branch %fn7
+    branch %fn8
 
   # if merge
-  %fn7 = block
+  %fn8 = block
   ret
 func_end
 
@@ -678,13 +678,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound_WithConstEval) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func my_func():bool
-  %fn1 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = func my_func():bool
+  %fn2 = block
   ret true
 func_end
 
-%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn3 = block
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn4 = block
   %1:bool = call my_func, false
   ret
 func_end

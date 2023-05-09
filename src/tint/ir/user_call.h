@@ -25,11 +25,10 @@ namespace tint::ir {
 class UserCall : public utils::Castable<UserCall, Call> {
   public:
     /// Constructor
-    /// @param id the instruction id
     /// @param type the result type
     /// @param name the function name
     /// @param args the function arguments
-    UserCall(uint32_t id, const type::Type* type, Symbol name, utils::VectorRef<Value*> args);
+    UserCall(const type::Type* type, Symbol name, utils::VectorRef<Value*> args);
     UserCall(const UserCall& inst) = delete;
     UserCall(UserCall&& inst) = delete;
     ~UserCall() override;

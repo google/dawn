@@ -33,7 +33,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 
 
@@ -49,7 +49,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, u32, read_write> = var private read_write
 store %1:ref<private, u32, read_write>, 2u
 
@@ -67,8 +67,8 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
   %1:ref<function, u32, read_write> = var function read_write
   ret
 func_end
@@ -86,8 +86,8 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m),
-              R"(%fn0 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn1 = block
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
   %1:ref<function, u32, read_write> = var function read_write
   store %1:ref<function, u32, read_write>, 2u
   ret

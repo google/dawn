@@ -47,12 +47,11 @@ class Binary : public utils::Castable<Binary, Instruction> {
     };
 
     /// Constructor
-    /// @param id the instruction id
     /// @param kind the kind of binary instruction
     /// @param type the result type
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    Binary(uint32_t id, Kind kind, const type::Type* type, Value* lhs, Value* rhs);
+    Binary(Kind kind, const type::Type* type, Value* lhs, Value* rhs);
     Binary(const Binary& inst) = delete;
     Binary(Binary&& inst) = delete;
     ~Binary() override;

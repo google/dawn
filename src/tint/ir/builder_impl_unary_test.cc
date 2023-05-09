@@ -90,13 +90,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, i32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ptr<private, i32, read_write> = addr_of %1:ref<private, i32, read_write>
   ret
 func_end
@@ -116,13 +116,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
     ASSERT_TRUE(r) << Error();
     auto m = r.Move();
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
+    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
 %1:ref<private, i32, read_write> = var private read_write
 
 
 
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn3 = block
   %2:ptr<private, i32, read_write> = addr_of %1:ref<private, i32, read_write>
   %3:i32 = indirection %2:ptr<private, i32, read_write>
   ret

@@ -16,14 +16,14 @@
 #define SRC_TINT_IR_DISASSEMBLER_H_
 
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/unary.h"
+#include "src/tint/utils/hashmap.h"
+#include "src/tint/utils/hashset.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
@@ -49,7 +49,9 @@ class Disassembler {
 
   private:
     utils::StringStream& Indent();
-    size_t GetIdForNode(const FlowNode* node);
+
+    size_t IdOf(const FlowNode* node);
+    std::string_view IdOf(const Value* node);
 
     void Walk(const FlowNode* node);
     void EmitInstruction(const Instruction* inst);
@@ -60,10 +62,10 @@ class Disassembler {
 
     const Module& mod_;
     utils::StringStream out_;
-    std::unordered_set<const FlowNode*> visited_;
-    std::unordered_set<const FlowNode*> stop_nodes_;
-    std::unordered_map<const FlowNode*, size_t> flow_node_to_id_;
-    size_t next_node_id_ = 0;
+    utils::Hashset<const FlowNode*, 32> visited_;
+    utils::Hashset<const FlowNode*, 32> stop_nodes_;
+    utils::Hashmap<const FlowNode*, size_t, 32> flow_node_ids_;
+    utils::Hashmap<const Value*, std::string, 32> value_ids_;
     uint32_t indent_size_ = 0;
     bool in_function_ = false;
 };
