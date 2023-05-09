@@ -1420,7 +1420,7 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat2x2) {
 
     std::string expected =
         "let s = (1.0f / determinant(m2x2f1));\n"
-        "let x_1 : mat2x2<f32> = mat2x2<f32>(vec2f((s * m2x2f1[1u][1u]), (-(s) * "
+        "let x_1 : mat2x2f = mat2x2f(vec2f((s * m2x2f1[1u][1u]), (-(s) * "
         "m2x2f1[0u][1u])), vec2f((-(s) * m2x2f1[1u][0u]), (s * m2x2f1[0u][0u])));";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
@@ -1441,7 +1441,7 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat3x3) {
 
     std::string expected =
         "let s = (1.0f / determinant(m3x3f1));\n"
-        "let x_1 : mat3x3<f32> = (s * mat3x3<f32>(vec3f(((m3x3f1[1u][1u] * m3x3f1[2u][2u]) - "
+        "let x_1 : mat3x3f = (s * mat3x3f(vec3f(((m3x3f1[1u][1u] * m3x3f1[2u][2u]) - "
         "(m3x3f1[1u][2u] * m3x3f1[2u][1u])), ((m3x3f1[0u][2u] * m3x3f1[2u][1u]) - (m3x3f1[0u][1u] "
         "* m3x3f1[2u][2u])), ((m3x3f1[0u][1u] * m3x3f1[1u][2u]) - (m3x3f1[0u][2u] * "
         "m3x3f1[1u][1u]))), vec3f(((m3x3f1[1u][2u] * m3x3f1[2u][0u]) - (m3x3f1[1u][0u] * "
@@ -1470,7 +1470,7 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat4x4) {
 
     std::string expected =
         "let s = (1.0f / determinant(m4x4f1));\n"
-        "let x_1 : mat4x4<f32> = (s * mat4x4<f32>(vec4f((((m4x4f1[1u][1u] * ((m4x4f1[2u][2u] * "
+        "let x_1 : mat4x4f = (s * mat4x4f(vec4f((((m4x4f1[1u][1u] * ((m4x4f1[2u][2u] * "
         "m4x4f1[3u][3u]) - (m4x4f1[2u][3u] * m4x4f1[3u][2u]))) - (m4x4f1[1u][2u] * "
         "((m4x4f1[2u][1u] * m4x4f1[3u][3u]) - (m4x4f1[2u][3u] * m4x4f1[3u][1u])))) + "
         "(m4x4f1[1u][3u] * ((m4x4f1[2u][1u] * m4x4f1[3u][2u]) - (m4x4f1[2u][2u] * "
@@ -1551,10 +1551,10 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_MultipleInScope) {
 
     std::string expected =
         "let s = (1.0f / determinant(m2x2f1));\n"
-        "let x_1 : mat2x2<f32> = mat2x2<f32>(vec2f((s * m2x2f1[1u][1u]), (-(s) * "
+        "let x_1 : mat2x2f = mat2x2f(vec2f((s * m2x2f1[1u][1u]), (-(s) * "
         "m2x2f1[0u][1u])), vec2f((-(s) * m2x2f1[1u][0u]), (s * m2x2f1[0u][0u])));\n"
         "let s_1 = (1.0f / determinant(m2x2f1));\n"
-        "let x_2 : mat2x2<f32> = mat2x2<f32>(vec2f((s_1 * m2x2f1[1u][1u]), (-(s_1) * "
+        "let x_2 : mat2x2f = mat2x2f(vec2f((s_1 * m2x2f1[1u][1u]), (-(s_1) * "
         "m2x2f1[0u][1u])), vec2f((-(s_1) * m2x2f1[1u][0u]), (s_1 * m2x2f1[0u][0u])));";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;

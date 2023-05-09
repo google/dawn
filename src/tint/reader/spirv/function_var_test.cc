@@ -260,11 +260,10 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MatrixInitializer) {
     EXPECT_TRUE(fe.EmitFunctionVariables());
 
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("var x_200 : mat3x2<f32> = mat3x2<f32>("
-                          "vec2f(1.5f, 2.0f), "
-                          "vec2f(2.0f, 3.0f), "
-                          "vec2f(3.0f, 4.0f));"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("var x_200 : mat3x2f = mat3x2f("
+                                                                  "vec2f(1.5f, 2.0f), "
+                                                                  "vec2f(2.0f, 3.0f), "
+                                                                  "vec2f(3.0f, 4.0f));"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer) {

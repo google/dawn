@@ -1,4 +1,4 @@
-alias Arr = array<mat4x4<f32>, 2u>;
+alias Arr = array<mat4x4f, 2u>;
 
 struct strided_arr {
   @size(16)
@@ -9,7 +9,7 @@ alias Arr_1 = array<strided_arr, 4u>;
 
 struct LeftOver {
   /* @offset(0) */
-  worldViewProjection : mat4x4<f32>,
+  worldViewProjection : mat4x4f,
   /* @offset(64) */
   time : f32,
   /* @offset(80) */
@@ -45,7 +45,7 @@ fn main_1() {
   let x_55 : f32 = p.y;
   let x_57 : f32 = x_14.time;
   p.y = (x_55 + sin((x_57 + 4.0f)));
-  let x_69 : mat4x4<f32> = x_14.worldViewProjection;
+  let x_69 : mat4x4f = x_14.worldViewProjection;
   let x_70 : vec3f = p;
   gl_Position = (x_69 * vec4f(x_70.x, x_70.y, x_70.z, 1.0f));
   let x_83 : vec2f = uv;

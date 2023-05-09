@@ -741,7 +741,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : mat2x2<f32> = (x_1 * x_2);"));
+                HasSubstr("let x_10 : mat2x2f = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
@@ -798,7 +798,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : mat2x2<f32> = (x_1 * x_2);"));
+                HasSubstr("let x_10 : mat2x2f = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, Dot) {
@@ -838,7 +838,7 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr("let x_3 : mat2x3<f32> = mat2x3<f32>("
+    EXPECT_THAT(got, HasSubstr("let x_3 : mat2x3f = mat2x3f("
                                "vec3f((x_2.x * x_1.x), (x_2.x * x_1.y), (x_2.x * x_1.z)), "
                                "vec3f((x_2.y * x_1.x), (x_2.y * x_1.y), (x_2.y * x_1.z)));"))
         << got;
@@ -920,7 +920,7 @@ TEST_F(SpvUnaryArithTest, Transpose_2x2) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    const auto* expected = "let x_2 : mat2x2<f32> = transpose(x_1);";
+    const auto* expected = "let x_2 : mat2x2f = transpose(x_1);";
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr(expected)) << got;
@@ -942,7 +942,7 @@ TEST_F(SpvUnaryArithTest, Transpose_2x3) {
     // Note, in the AST dump mat_2_3 means 2 rows and 3 columns.
     // So the column vectors have 2 elements.
     // That is,   %m3v2float is __mat_2_3f32.
-    const auto* expected = "let x_2 : mat3x2<f32> = transpose(x_1);";
+    const auto* expected = "let x_2 : mat3x2f = transpose(x_1);";
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr(expected)) << got;
@@ -961,7 +961,7 @@ TEST_F(SpvUnaryArithTest, Transpose_3x2) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    const auto* expected = "let x_2 : mat2x3<f32> = transpose(x_1);";
+    const auto* expected = "let x_2 : mat2x3f = transpose(x_1);";
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr(expected)) << got;

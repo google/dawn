@@ -182,7 +182,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_11 : mat2x2<f32> = mat2x2<f32>();"));
+                HasSubstr("let x_11 : mat2x2f = mat2x2f();"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {

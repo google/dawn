@@ -10,7 +10,7 @@ var<private> x_GLF_color : vec4f;
 fn main_1() {
   var f : f32;
   var v : vec4f;
-  f = determinant(mat3x3<f32>(vec3f(1.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f), vec3f(0.0f, 0.0f, 1.0f)));
+  f = determinant(mat3x3f(vec3f(1.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f), vec3f(0.0f, 0.0f, 1.0f)));
   let x_33 : f32 = f;
   let x_35 : f32 = f;
   let x_37 : f32 = f;

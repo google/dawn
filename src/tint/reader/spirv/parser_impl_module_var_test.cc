@@ -1082,7 +1082,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixInitializer) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2f = mat3x2f("
                                       "vec2f(1.5f, 2.0f), "
                                       "vec2f(2.0f, 3.0f), "
                                       "vec2f(3.0f, 4.0f));"));
@@ -1097,7 +1097,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>();"));
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2f = mat3x2f();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
@@ -1109,7 +1109,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>();"));
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2f = mat3x2f();"));
 
     // This example module emits ok, but is not valid SPIR-V in the first place.
     p->DeliberatelyInvalidSpirv();
@@ -1290,7 +1290,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   /* @offset(0) */
-  field0 : mat3x2<f32>,
+  field0 : mat3x2f,
 }
 
 @group(0) @binding(0) var<storage, read_write> myvar : S;
@@ -1321,7 +1321,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   /* @offset(0) */
-  field0 : mat3x2<f32>,
+  field0 : mat3x2f,
 }
 
 @group(0) @binding(0) var<storage, read_write> myvar : S;
@@ -1353,7 +1353,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   /* @offset(0) */
   @stride(64) @internal(disable_validation__ignore_stride)
-  field0 : mat3x2<f32>,
+  field0 : mat3x2f,
 }
 
 @group(0) @binding(0) var<storage, read_write> myvar : S;
@@ -4254,7 +4254,7 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenMatrix) {
     EXPECT_TRUE(p->error().empty());
 
     const auto got = test::ToString(p->program());
-    const std::string expected = R"(var<private> x_1 : mat2x4<f32>;
+    const std::string expected = R"(var<private> x_1 : mat2x4f;
 
 var<private> x_2 : vec4f;
 
@@ -4380,7 +4380,7 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenNested) {
     EXPECT_TRUE(p->error().empty());
 
     const auto got = test::ToString(p->program());
-    const std::string expected = R"(var<private> x_1 : array<mat2x4<f32>, 2u>;
+    const std::string expected = R"(var<private> x_1 : array<mat2x4f, 2u>;
 
 var<private> x_2 : vec4f;
 
@@ -4502,7 +4502,7 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenMatrix) {
     EXPECT_TRUE(p->error().empty());
 
     const auto got = test::ToString(p->program());
-    const std::string expected = R"(var<private> x_1 : mat2x4<f32>;
+    const std::string expected = R"(var<private> x_1 : mat2x4f;
 
 var<private> x_2 : vec4f;
 

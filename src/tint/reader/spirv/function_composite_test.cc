@@ -115,11 +115,10 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : mat3x2<f32> = mat3x2<f32>("
-                          "vec2f(50.0f, 60.0f), "
-                          "vec2f(60.0f, 50.0f), "
-                          "vec2f(70.0f, 70.0f));"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : mat3x2f = mat3x2f("
+                                                                  "vec2f(50.0f, 60.0f), "
+                                                                  "vec2f(60.0f, 50.0f), "
+                                                                  "vec2f(70.0f, 70.0f));"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Array) {
@@ -490,9 +489,9 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body_str = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : mat3x2<f32> = x_1;
+    EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : mat3x2f = x_1;
 x_2_1[2u] = vec2f(50.0f, 60.0f);
-let x_2 : mat3x2<f32> = x_2_1;
+let x_2 : mat3x2f = x_2_1;
 )")) << body_str;
 }
 
@@ -535,9 +534,9 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body_str = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : mat3x2<f32> = x_1;
+    EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : mat3x2f = x_1;
 x_2_1[2u] = vec2f(50.0f, 60.0f);
-let x_2 : mat3x2<f32> = x_2_1;
+let x_2 : mat3x2f = x_2_1;
 return;
 )")) << body_str;
 }

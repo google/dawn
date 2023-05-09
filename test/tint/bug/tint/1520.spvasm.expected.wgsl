@@ -8,7 +8,7 @@ struct UniformBuffer {
   /* @offset(48) */
   ucolorGreen_S1_c0 : vec4f,
   /* @offset(64) */
-  umatrix_S1 : mat3x3<f32>,
+  umatrix_S1 : mat3x3f,
 }
 
 @binding(0) @group(0) var<uniform> x_4 : UniformBuffer;
