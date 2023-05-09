@@ -56,6 +56,8 @@ class BindGroupBase : public ApiObjectBase {
     const ityp::span<uint32_t, uint64_t>& GetUnverifiedBufferSizes() const;
     const std::vector<Ref<ExternalTextureBase>>& GetBoundExternalTextures() const;
 
+    void ForEachUnverifiedBufferBindingIndex(std::function<void(BindingIndex, uint32_t)> fn) const;
+
   protected:
     // To save memory, the size of a bind group is dynamically determined and the bind group is
     // placement-allocated into memory big enough to hold the bind group with its

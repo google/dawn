@@ -14,6 +14,7 @@
 
 #include "dawn/native/CommandBufferStateTracker.h"
 
+#include <limits>
 #include <optional>
 #include <type_traits>
 #include <utility>
@@ -573,22 +574,40 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
                 requiredBGL, mLastPipelineLayout, currentBGL, mBindgroups[i],
                 static_cast<uint32_t>(i));
 
-            // TODO(dawn:563): Report which buffer bindings are failing. This requires the ability
-            // to look up the binding index from the packed index.
             std::optional<uint32_t> packedIndex = FindFirstUndersizedBuffer(
                 mBindgroups[i]->GetUnverifiedBufferSizes(), (*mMinBufferSizes)[i]);
             if (packedIndex.has_value()) {
+                // Find the binding index for this packed index.
+                BindingIndex bindingIndex{std::numeric_limits<uint32_t>::max()};
+                mBindgroups[i]->ForEachUnverifiedBufferBindingIndex(
+                    [&](BindingIndex candidateBindingIndex, uint32_t candidatePackedIndex) {
+                        if (candidatePackedIndex == *packedIndex) {
+                            bindingIndex = candidateBindingIndex;
+                        }
+                    });
+                ASSERT(static_cast<uint32_t>(bindingIndex) != std::numeric_limits<uint32_t>::max());
+
+                const auto& bindingInfo = mBindgroups[i]->GetLayout()->GetBindingInfo(bindingIndex);
+                const BufferBinding& bufferBinding =
+                    mBindgroups[i]->GetBindingAsBufferBinding(bindingIndex);
+
+                BindingNumber bindingNumber = bindingInfo.binding;
+                const BufferBase* buffer = bufferBinding.buffer;
+
                 uint64_t bufferSize =
                     mBindgroups[i]->GetUnverifiedBufferSizes()[packedIndex.value()];
                 uint64_t minBufferSize = (*mMinBufferSizes)[i][packedIndex.value()];
+
                 return DAWN_VALIDATION_ERROR(
-                    "Binding sizes are too small for %s set at group index %u. A bound buffer "
-                    "contained %u bytes, but the current pipeline (%s) requires a buffer which is "
-                    "at least %u bytes. (Note that uniform buffer bindings must be a multiple of "
-                    "16 bytes, and as a result may be larger than the associated data in the "
-                    "shader source.)",
-                    mBindgroups[i], static_cast<uint32_t>(i), bufferSize, mLastPipeline,
-                    minBufferSize);
+                    "%s bound with size %u at group %u, binding %u is too small. The pipeline (%s) "
+                    "requires a buffer binding which is at least %u bytes.%s",
+                    buffer, bufferSize, static_cast<uint32_t>(i),
+                    static_cast<uint32_t>(bindingNumber), mLastPipeline, minBufferSize,
+                    (bindingInfo.buffer.type == wgpu::BufferBindingType::Uniform
+                         ? " This binding is a uniform buffer binding. It is padded to a multiple "
+                           "of 16 bytes, and as a result may be larger than the associated data in "
+                           "the shader source."
+                         : ""));
             }
         }
 
