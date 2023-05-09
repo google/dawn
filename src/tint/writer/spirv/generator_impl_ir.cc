@@ -88,7 +88,10 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     // Emit the function name.
     module_.PushDebug(spv::Op::OpName, {id, Operand(func->name.Name())});
 
-    // TODO(jrprice): Emit OpEntryPoint and OpExecutionMode declarations if needed.
+    // Emit OpEntryPoint and OpExecutionMode declarations if needed.
+    if (func->pipeline_stage != ir::Function::PipelineStage::kUndefined) {
+        EmitEntryPoint(func, id);
+    }
 
     // Get the ID for the return type.
     auto return_type_id = Type(func->return_type);
@@ -122,6 +125,37 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
 
     // Add the function to the module.
     module_.PushFunction(current_function_);
+}
+
+void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
+    SpvExecutionModel stage;
+    switch (func->pipeline_stage) {
+        case ir::Function::PipelineStage::kCompute: {
+            stage = SpvExecutionModelGLCompute;
+            module_.PushExecutionMode(
+                spv::Op::OpExecutionMode,
+                {id, U32Operand(SpvExecutionModeLocalSize), func->workgroup_size->at(0),
+                 func->workgroup_size->at(1), func->workgroup_size->at(2)});
+            break;
+        }
+        case ir::Function::PipelineStage::kFragment: {
+            stage = SpvExecutionModelFragment;
+            module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                      {id, U32Operand(SpvExecutionModeOriginUpperLeft)});
+            // TODO(jrprice): Add DepthReplacing execution mode if FragDepth is used.
+            break;
+        }
+        case ir::Function::PipelineStage::kVertex: {
+            stage = SpvExecutionModelVertex;
+            break;
+        }
+        case ir::Function::PipelineStage::kUndefined:
+            TINT_ICE(Writer, diagnostics_) << "undefined pipeline stage for entry point";
+            return;
+    }
+
+    // TODO(jrprice): Add the interface list of all referenced global variables.
+    module_.PushEntryPoint(spv::Op::OpEntryPoint, {U32Operand(stage), id, func->name.Name()});
 }
 
 }  // namespace tint::writer::spirv
