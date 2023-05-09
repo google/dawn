@@ -50,6 +50,48 @@ DXGI_FORMAT DXGIIndexFormat(wgpu::IndexFormat format) {
     }
 }
 
+class VertexBufferTracker {
+  public:
+    explicit VertexBufferTracker(CommandRecordingContext* commandContext)
+        : mCommandContext(commandContext) {}
+
+    ~VertexBufferTracker() {
+        mD3D11Buffers = {};
+        mStrides = {};
+        mOffsets = {};
+        mCommandContext->GetD3D11DeviceContext()->IASetVertexBuffers(
+            0, kMaxVertexBuffers, mD3D11Buffers.data(), mStrides.data(), mOffsets.data());
+    }
+
+    void OnSetVertexBuffer(VertexBufferSlot slot, ID3D11Buffer* buffer, uint64_t offset) {
+        mD3D11Buffers[slot] = buffer;
+        mOffsets[slot] = offset;
+    }
+
+    void Apply(const RenderPipeline* renderPipeline) {
+        ASSERT(renderPipeline != nullptr);
+
+        // If the vertex state has changed, we need to update the strides.
+        if (mLastAppliedRenderPipeline != renderPipeline) {
+            mLastAppliedRenderPipeline = renderPipeline;
+            for (VertexBufferSlot slot :
+                 IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
+                mStrides[slot] = renderPipeline->GetVertexBuffer(slot).arrayStride;
+            }
+        }
+
+        mCommandContext->GetD3D11DeviceContext()->IASetVertexBuffers(
+            0, kMaxVertexBuffers, mD3D11Buffers.data(), mStrides.data(), mOffsets.data());
+    }
+
+  private:
+    CommandRecordingContext* const mCommandContext;
+    const RenderPipeline* mLastAppliedRenderPipeline = nullptr;
+    ityp::array<VertexBufferSlot, ID3D11Buffer*, kMaxVertexBuffers> mD3D11Buffers = {};
+    ityp::array<VertexBufferSlot, UINT, kMaxVertexBuffers> mStrides = {};
+    ityp::array<VertexBufferSlot, UINT, kMaxVertexBuffers> mOffsets = {};
+};
+
 }  // namespace
 
 // Create CommandBuffer
@@ -437,6 +479,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
     RenderPipeline* lastPipeline = nullptr;
     BindGroupTracker bindGroupTracker(commandContext);
+    VertexBufferTracker vertexBufferTracker(commandContext);
     std::array<float, 4> blendColor = {0.0f, 0.0f, 0.0f, 0.0f};
     uint32_t stencilReference = 0;
 
@@ -446,6 +489,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
                 DAWN_TRY(bindGroupTracker.Apply());
+                vertexBufferTracker.Apply(lastPipeline);
                 DAWN_TRY(RecordFirstIndexOffset(lastPipeline, commandContext, draw->firstVertex,
                                                 draw->firstInstance));
                 commandContext->GetD3D11DeviceContext()->DrawInstanced(
@@ -458,6 +502,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
                 DAWN_TRY(bindGroupTracker.Apply());
+                vertexBufferTracker.Apply(lastPipeline);
                 DAWN_TRY(RecordFirstIndexOffset(lastPipeline, commandContext, draw->baseVertex,
                                                 draw->firstInstance));
                 commandContext->GetD3D11DeviceContext()->DrawIndexedInstanced(
@@ -474,6 +519,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 ASSERT(indirectBuffer != nullptr);
 
                 DAWN_TRY(bindGroupTracker.Apply());
+                vertexBufferTracker.Apply(lastPipeline);
 
                 if (lastPipeline->GetUsesVertexOrInstanceIndex()) {
                     // Copy StartVertexLocation and StartInstanceLocation into the uniform buffer
@@ -499,6 +545,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 ASSERT(indirectBuffer != nullptr);
 
                 DAWN_TRY(bindGroupTracker.Apply());
+                vertexBufferTracker.Apply(lastPipeline);
 
                 if (lastPipeline->GetUsesVertexOrInstanceIndex()) {
                     // Copy StartVertexLocation and StartInstanceLocation into the uniform buffer
@@ -555,17 +602,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
             case Command::SetVertexBuffer: {
                 SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
-                ASSERT(lastPipeline);
-                const VertexBufferInfo& info = lastPipeline->GetVertexBuffer(cmd->slot);
-
-                // TODO(dawn:1705): should we set vertex back to nullptr after the draw call?
-                UINT slot = static_cast<uint8_t>(cmd->slot);
                 ID3D11Buffer* buffer = ToBackend(cmd->buffer)->GetD3D11Buffer();
-                UINT arrayStride = info.arrayStride;
-                UINT offset = cmd->offset;
-                commandContext->GetD3D11DeviceContext()->IASetVertexBuffers(slot, 1, &buffer,
-                                                                            &arrayStride, &offset);
-
+                vertexBufferTracker.OnSetVertexBuffer(cmd->slot, buffer, cmd->offset);
                 break;
             }
 

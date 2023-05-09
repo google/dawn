@@ -1122,8 +1122,6 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
 
 // Test the buffer will be lazily initialized correctly when its first use is in SetVertexBuffer.
 TEST_P(BufferZeroInitTest, SetVertexBuffer) {
-    // TODO(dawn:1799): Figure this out.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     // Bind the whole buffer as a vertex buffer.
     {
         constexpr uint64_t kVertexBufferOffset = 0u;
