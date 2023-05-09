@@ -1,6 +1,6 @@
 struct S {
   /* @offset(0) */
-  a : vec4<f32>,
+  a : vec4f,
   /* @offset(16) */
   b : i32,
 }

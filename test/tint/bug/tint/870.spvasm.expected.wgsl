@@ -2,9 +2,9 @@ alias Arr = array<i32, 6u>;
 
 struct sspp962805860buildInformationS {
   /* @offset(0) */
-  footprint : vec4<f32>,
+  footprint : vec4f,
   /* @offset(16) */
-  offset : vec4<f32>,
+  offset : vec4f,
   /* @offset(32) */
   essence : i32,
   /* @offset(36) */

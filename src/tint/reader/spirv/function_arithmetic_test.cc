@@ -81,22 +81,22 @@ std::string Preamble() {
 // Returns the AST dump for a given SPIR-V assembly constant.
 std::string AstFor(std::string assembly) {
     if (assembly == "v2uint_10_20") {
-        return "vec2<u32>(10u, 20u)";
+        return "vec2u(10u, 20u)";
     }
     if (assembly == "v2uint_20_10") {
-        return "vec2<u32>(20u, 10u)";
+        return "vec2u(20u, 10u)";
     }
     if (assembly == "v2int_30_40") {
-        return "vec2<i32>(30i, 40i)";
+        return "vec2i(30i, 40i)";
     }
     if (assembly == "v2int_40_30") {
-        return "vec2<i32>(40i, 30i)";
+        return "vec2i(40i, 30i)";
     }
     if (assembly == "cast_int_v2uint_10_20") {
-        return "bitcast<vec2<i32>>(vec2<u32>(10u, 20u))";
+        return "bitcast<vec2i>(vec2u(10u, 20u))";
     }
     if (assembly == "cast_uint_v2int_40_30") {
-        return "bitcast<vec2<u32>>(vec2<i32>(40i, 30i))";
+        return "bitcast<vec2u>(vec2i(40i, 30i))";
     }
     if (assembly == "v2float_50_60") {
         return "v2float_50_60";
@@ -190,7 +190,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<i32> = -(vec2<i32>(30i, 40i));"));
+                HasSubstr("let x_1 : vec2i = -(vec2i(30i, 40i));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
@@ -207,7 +207,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<i32> = -(bitcast<vec2<i32>>(vec2<u32>(10u, 20u)));"));
+                HasSubstr("let x_1 : vec2i = -(bitcast<vec2i>(vec2u(10u, 20u)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
@@ -224,7 +224,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(-(vec2<i32>(30i, 40i)));"));
+                HasSubstr("let x_1 : vec2u = bitcast<vec2u>(-(vec2i(30i, 40i)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
@@ -242,8 +242,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(
         test::ToString(p->program(), ast_body),
-        HasSubstr(
-            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>(-(bitcast<vec2<i32>>(vec2<u32>(10u, 20u))));)"));
+        HasSubstr(R"(let x_1 : vec2u = bitcast<vec2u>(-(bitcast<vec2i>(vec2u(10u, 20u))));)"));
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
@@ -276,7 +275,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = -(v2float_50_60);"));
+                HasSubstr("let x_1 : vec2f = -(v2float_50_60);"));
 }
 
 struct BinaryData {
@@ -366,11 +365,11 @@ INSTANTIATE_TEST_SUITE_P(
         // Both uint
         BinaryData{"uint", "uint_10", "OpIAdd", "uint_20", "u32", "10u", "+", "20u"},  // Both int
         BinaryData{"int", "int_30", "OpIAdd", "int_40", "i32", "30i", "+", "40i"},  // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpIAdd", "v2uint_20_10", "vec2<u32>",
+        BinaryData{"v2uint", "v2uint_10_20", "OpIAdd", "v2uint_20_10", "vec2u",
                    AstFor("v2uint_10_20"), "+", AstFor("v2uint_20_10")},
         // Both v2int
-        BinaryData{"v2int", "v2int_30_40", "OpIAdd", "v2int_40_30", "vec2<i32>",
-                   AstFor("v2int_30_40"), "+", AstFor("v2int_40_30")}));
+        BinaryData{"v2int", "v2int_30_40", "OpIAdd", "v2int_40_30", "vec2i", AstFor("v2int_30_40"),
+                   "+", AstFor("v2int_40_30")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_IAdd_MixedSignedness,
@@ -388,13 +387,12 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryDataGeneral{"int", "uint_20", "OpIAdd", "uint_10", "i32",
                           "bitcast<i32>((20u + 10u))"},
         // Mixed, returning v2uint
-        BinaryDataGeneral{
-            "v2uint", "v2int_30_40", "OpIAdd", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) + bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+        BinaryDataGeneral{"v2uint", "v2int_30_40", "OpIAdd", "v2uint_10_20", "vec2u",
+                          R"(bitcast<vec2u>((vec2i(30i, 40i) + bitcast<vec2i>(vec2u(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
-            "v2int", "v2uint_10_20", "OpIAdd", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) + bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
+            "v2int", "v2uint_10_20", "OpIAdd", "v2int_40_30", "vec2i",
+            R"(bitcast<vec2i>((vec2u(10u, 20u) + bitcast<vec2u>(vec2i(40i, 30i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FAdd,
                          SpvBinaryArithTest,
@@ -403,7 +401,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FAdd,
                              BinaryData{"float", "float_50", "OpFAdd", "float_60", "f32", "50.0f",
                                         "+", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFAdd", "v2float_60_50",
-                                        "vec2<f32>", AstFor("v2float_50_60"), "+",
+                                        "vec2f", AstFor("v2float_50_60"), "+",
                                         AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -413,11 +411,11 @@ INSTANTIATE_TEST_SUITE_P(
         // Both uint
         BinaryData{"uint", "uint_10", "OpISub", "uint_20", "u32", "10u", "-", "20u"},  // Both int
         BinaryData{"int", "int_30", "OpISub", "int_40", "i32", "30i", "-", "40i"},  // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpISub", "v2uint_20_10", "vec2<u32>",
+        BinaryData{"v2uint", "v2uint_10_20", "OpISub", "v2uint_20_10", "vec2u",
                    AstFor("v2uint_10_20"), "-", AstFor("v2uint_20_10")},
         // Both v2int
-        BinaryData{"v2int", "v2int_30_40", "OpISub", "v2int_40_30", "vec2<i32>",
-                   AstFor("v2int_30_40"), "-", AstFor("v2int_40_30")}));
+        BinaryData{"v2int", "v2int_30_40", "OpISub", "v2int_40_30", "vec2i", AstFor("v2int_30_40"),
+                   "-", AstFor("v2int_40_30")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ISub_MixedSignedness,
@@ -435,13 +433,12 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryDataGeneral{"int", "uint_20", "OpISub", "uint_10", "i32",
                           "bitcast<i32>((20u - 10u))"},
         // Mixed, returning v2uint
-        BinaryDataGeneral{
-            "v2uint", "v2int_30_40", "OpISub", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) - bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+        BinaryDataGeneral{"v2uint", "v2int_30_40", "OpISub", "v2uint_10_20", "vec2u",
+                          R"(bitcast<vec2u>((vec2i(30i, 40i) - bitcast<vec2i>(vec2u(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
-            "v2int", "v2uint_10_20", "OpISub", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) - bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
+            "v2int", "v2uint_10_20", "OpISub", "v2int_40_30", "vec2i",
+            R"(bitcast<vec2i>((vec2u(10u, 20u) - bitcast<vec2u>(vec2i(40i, 30i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FSub,
                          SpvBinaryArithTest,
@@ -450,7 +447,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FSub,
                              BinaryData{"float", "float_50", "OpFSub", "float_60", "f32", "50.0f",
                                         "-", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFSub", "v2float_60_50",
-                                        "vec2<f32>", AstFor("v2float_50_60"), "-",
+                                        "vec2f", AstFor("v2float_50_60"), "-",
                                         AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -460,11 +457,11 @@ INSTANTIATE_TEST_SUITE_P(
         // Both uint
         BinaryData{"uint", "uint_10", "OpIMul", "uint_20", "u32", "10u", "*", "20u"},  // Both int
         BinaryData{"int", "int_30", "OpIMul", "int_40", "i32", "30i", "*", "40i"},  // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpIMul", "v2uint_20_10", "vec2<u32>",
+        BinaryData{"v2uint", "v2uint_10_20", "OpIMul", "v2uint_20_10", "vec2u",
                    AstFor("v2uint_10_20"), "*", AstFor("v2uint_20_10")},
         // Both v2int
-        BinaryData{"v2int", "v2int_30_40", "OpIMul", "v2int_40_30", "vec2<i32>",
-                   AstFor("v2int_30_40"), "*", AstFor("v2int_40_30")}));
+        BinaryData{"v2int", "v2int_30_40", "OpIMul", "v2int_40_30", "vec2i", AstFor("v2int_30_40"),
+                   "*", AstFor("v2int_40_30")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_IMul_MixedSignedness,
@@ -482,13 +479,12 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryDataGeneral{"int", "uint_20", "OpIMul", "uint_10", "i32",
                           "bitcast<i32>((20u * 10u))"},
         // Mixed, returning v2uint
-        BinaryDataGeneral{
-            "v2uint", "v2int_30_40", "OpIMul", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) * bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+        BinaryDataGeneral{"v2uint", "v2int_30_40", "OpIMul", "v2uint_10_20", "vec2u",
+                          R"(bitcast<vec2u>((vec2i(30i, 40i) * bitcast<vec2i>(vec2u(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
-            "v2int", "v2uint_10_20", "OpIMul", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) * bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
+            "v2int", "v2uint_10_20", "OpIMul", "v2int_40_30", "vec2i",
+            R"(bitcast<vec2i>((vec2u(10u, 20u) * bitcast<vec2u>(vec2i(40i, 30i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FMul,
                          SpvBinaryArithTest,
@@ -497,7 +493,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FMul,
                              BinaryData{"float", "float_50", "OpFMul", "float_60", "f32", "50.0f",
                                         "*", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFMul", "v2float_60_50",
-                                        "vec2<f32>", AstFor("v2float_50_60"), "*",
+                                        "vec2f", AstFor("v2float_50_60"), "*",
                                         AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_UDiv,
@@ -506,18 +502,17 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_UDiv,
                              // Both uint
                              BinaryData{"uint", "uint_10", "OpUDiv", "uint_20", "u32", "10u", "/",
                                         "20u"},  // Both v2uint
-                             BinaryData{"v2uint", "v2uint_10_20", "OpUDiv", "v2uint_20_10",
-                                        "vec2<u32>", AstFor("v2uint_10_20"), "/",
-                                        AstFor("v2uint_20_10")}));
+                             BinaryData{"v2uint", "v2uint_10_20", "OpUDiv", "v2uint_20_10", "vec2u",
+                                        AstFor("v2uint_10_20"), "/", AstFor("v2uint_20_10")}));
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_SDiv,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Both int
-        BinaryData{"int", "int_30", "OpSDiv", "int_40", "i32", "30i", "/", "40i"},  // Both v2int
-        BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2int_40_30", "vec2<i32>",
-                   AstFor("v2int_30_40"), "/", AstFor("v2int_40_30")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_SDiv,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Both int
+                             BinaryData{"int", "int_30", "OpSDiv", "int_40", "i32", "30i", "/",
+                                        "40i"},  // Both v2int
+                             BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2int_40_30", "vec2i",
+                                        AstFor("v2int_30_40"), "/", AstFor("v2int_40_30")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_SDiv_MixedSignednessOperands,
@@ -528,11 +523,11 @@ INSTANTIATE_TEST_SUITE_P(
         // Mixed, returning int, first arg uint
         BinaryData{"int", "uint_10", "OpSDiv", "int_30", "i32", "bitcast<i32>(10u)", "/",
                    "30i"},  // Mixed, returning v2int, first arg v2uint
-        BinaryData{"v2int", "v2uint_10_20", "OpSDiv", "v2int_30_40", "vec2<i32>",
+        BinaryData{"v2int", "v2uint_10_20", "OpSDiv", "v2int_30_40", "vec2i",
                    AstFor("cast_int_v2uint_10_20"), "/", AstFor("v2int_30_40")},
         // Mixed, returning v2int, second arg v2uint
-        BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2uint_10_20", "vec2<i32>",
-                   AstFor("v2int_30_40"), "/", AstFor("cast_int_v2uint_10_20")}));
+        BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2uint_10_20", "vec2i", AstFor("v2int_30_40"),
+                   "/", AstFor("cast_int_v2uint_10_20")}));
 
 TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
     // The WGSL signed division operator expects both operands to be signed
@@ -574,8 +569,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(
         test::ToString(p->program(), ast_body),
-        HasSubstr(
-            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30i, 40i) / vec2<i32>(40i, 30i)));)"));
+        HasSubstr(R"(let x_1 : vec2u = bitcast<vec2u>((vec2i(30i, 40i) / vec2i(40i, 30i)));)"));
 }
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FDiv,
@@ -585,7 +579,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FDiv,
                              BinaryData{"float", "float_50", "OpFDiv", "float_60", "f32", "50.0f",
                                         "/", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFDiv", "v2float_60_50",
-                                        "vec2<f32>", AstFor("v2float_50_60"), "/",
+                                        "vec2f", AstFor("v2float_50_60"), "/",
                                         AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_UMod,
@@ -594,21 +588,20 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_UMod,
                              // Both uint
                              BinaryData{"uint", "uint_10", "OpUMod", "uint_20", "u32", "10u", "%",
                                         "20u"},  // Both v2uint
-                             BinaryData{"v2uint", "v2uint_10_20", "OpUMod", "v2uint_20_10",
-                                        "vec2<u32>", AstFor("v2uint_10_20"), "%",
-                                        AstFor("v2uint_20_10")}));
+                             BinaryData{"v2uint", "v2uint_10_20", "OpUMod", "v2uint_20_10", "vec2u",
+                                        AstFor("v2uint_10_20"), "%", AstFor("v2uint_20_10")}));
 
 // Currently WGSL is missing a mapping for OpSRem
 // https://github.com/gpuweb/gpuweb/issues/702
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_SMod,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Both int
-        BinaryData{"int", "int_30", "OpSMod", "int_40", "i32", "30i", "%", "40i"},  // Both v2int
-        BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2int_40_30", "vec2<i32>",
-                   AstFor("v2int_30_40"), "%", AstFor("v2int_40_30")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_SMod,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Both int
+                             BinaryData{"int", "int_30", "OpSMod", "int_40", "i32", "30i", "%",
+                                        "40i"},  // Both v2int
+                             BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2int_40_30", "vec2i",
+                                        AstFor("v2int_30_40"), "%", AstFor("v2int_40_30")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_SMod_MixedSignednessOperands,
@@ -619,11 +612,11 @@ INSTANTIATE_TEST_SUITE_P(
         // Mixed, returning int, first arg uint
         BinaryData{"int", "uint_10", "OpSMod", "int_30", "i32", "bitcast<i32>(10u)", "%",
                    "30i"},  // Mixed, returning v2int, first arg v2uint
-        BinaryData{"v2int", "v2uint_10_20", "OpSMod", "v2int_30_40", "vec2<i32>",
+        BinaryData{"v2int", "v2uint_10_20", "OpSMod", "v2int_30_40", "vec2i",
                    AstFor("cast_int_v2uint_10_20"), "%", AstFor("v2int_30_40")},
         // Mixed, returning v2int, second arg v2uint
-        BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2uint_10_20", "vec2<i32>",
-                   AstFor("v2int_30_40"), "%", AstFor("cast_int_v2uint_10_20")}));
+        BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2uint_10_20", "vec2i", AstFor("v2int_30_40"),
+                   "%", AstFor("cast_int_v2uint_10_20")}));
 
 TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
     // The WGSL signed modulus operator expects both operands to be signed
@@ -665,8 +658,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(
         test::ToString(p->program(), ast_body),
-        HasSubstr(
-            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30i, 40i) % vec2<i32>(40i, 30i)));)"));
+        HasSubstr(R"(let x_1 : vec2u = bitcast<vec2u>((vec2i(30i, 40i) % vec2i(40i, 30i)));)"));
 }
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FRem,
@@ -676,7 +668,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FRem,
                              BinaryData{"float", "float_50", "OpFRem", "float_60", "f32", "50.0f",
                                         "%", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFRem", "v2float_60_50",
-                                        "vec2<f32>", AstFor("v2float_50_60"), "%",
+                                        "vec2f", AstFor("v2float_50_60"), "%",
                                         AstFor("v2float_60_50")}));
 
 TEST_F(SpvBinaryArithTestBasic, FMod_Scalar) {
@@ -710,7 +702,7 @@ TEST_F(SpvBinaryArithTestBasic, FMod_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = (v2float_50_60 - (v2float_60_50 * "
+                HasSubstr("let x_1 : vec2f = (v2float_50_60 - (v2float_60_50 * "
                           "floor((v2float_50_60 / v2float_60_50))));"));
 }
 
@@ -730,7 +722,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
+                HasSubstr("let x_10 : vec2f = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
@@ -768,7 +760,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
+                HasSubstr("let x_10 : vec2f = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
@@ -787,7 +779,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
+                HasSubstr("let x_10 : vec2f = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
@@ -847,8 +839,8 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr("let x_3 : mat2x3<f32> = mat2x3<f32>("
-                               "vec3<f32>((x_2.x * x_1.x), (x_2.x * x_1.y), (x_2.x * x_1.z)), "
-                               "vec3<f32>((x_2.y * x_1.x), (x_2.y * x_1.y), (x_2.y * x_1.z)));"))
+                               "vec3f((x_2.x * x_1.x), (x_2.x * x_1.y), (x_2.x * x_1.z)), "
+                               "vec3f((x_2.y * x_1.x), (x_2.y * x_1.y), (x_2.y * x_1.z)));"))
         << got;
 }
 
@@ -912,9 +904,8 @@ INSTANTIATE_TEST_SUITE_P(
                                        BuiltinData{"OpDPdyCoarse", "dpdyCoarse"},
                                        BuiltinData{"OpFwidthCoarse", "fwidthCoarse"}),
                      ::testing::Values(ArgAndTypeData{"float", "float_50", "f32"},
-                                       ArgAndTypeData{"v2float", "v2float_50_60", "vec2<f32>"},
-                                       ArgAndTypeData{"v3float", "v3float_50_60_70",
-                                                      "vec3<f32>"})));
+                                       ArgAndTypeData{"v2float", "v2float_50_60", "vec2f"},
+                                       ArgAndTypeData{"v3float", "v3float_50_60_70", "vec3f"})));
 
 TEST_F(SpvUnaryArithTest, Transpose_2x2) {
     const auto assembly = Preamble() + R"(

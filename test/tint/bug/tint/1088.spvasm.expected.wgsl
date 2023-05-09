@@ -18,25 +18,25 @@ struct LeftOver {
   test : Arr_1,
 }
 
-var<private> position_1 : vec3<f32>;
+var<private> position_1 : vec3f;
 
 @group(2) @binding(2) var<uniform> x_14 : LeftOver;
 
-var<private> vUV : vec2<f32>;
+var<private> vUV : vec2f;
 
-var<private> uv : vec2<f32>;
+var<private> uv : vec2f;
 
-var<private> normal : vec3<f32>;
+var<private> normal : vec3f;
 
-var<private> gl_Position : vec4<f32>;
+var<private> gl_Position : vec4f;
 
 fn main_1() {
-  var q : vec4<f32>;
-  var p : vec3<f32>;
-  let x_13 : vec3<f32> = position_1;
-  q = vec4<f32>(x_13.x, x_13.y, x_13.z, 1.0f);
-  let x_21 : vec4<f32> = q;
-  p = vec3<f32>(x_21.x, x_21.y, x_21.z);
+  var q : vec4f;
+  var p : vec3f;
+  let x_13 : vec3f = position_1;
+  q = vec4f(x_13.x, x_13.y, x_13.z, 1.0f);
+  let x_21 : vec4f = q;
+  p = vec3f(x_21.x, x_21.y, x_21.z);
   let x_27 : f32 = p.x;
   let x_41 : f32 = x_14.test[0i].el;
   let x_45 : f32 = position_1.y;
@@ -46,9 +46,9 @@ fn main_1() {
   let x_57 : f32 = x_14.time;
   p.y = (x_55 + sin((x_57 + 4.0f)));
   let x_69 : mat4x4<f32> = x_14.worldViewProjection;
-  let x_70 : vec3<f32> = p;
-  gl_Position = (x_69 * vec4<f32>(x_70.x, x_70.y, x_70.z, 1.0f));
-  let x_83 : vec2<f32> = uv;
+  let x_70 : vec3f = p;
+  gl_Position = (x_69 * vec4f(x_70.x, x_70.y, x_70.z, 1.0f));
+  let x_83 : vec2f = uv;
   vUV = x_83;
   let x_87 : f32 = gl_Position.y;
   gl_Position.y = (x_87 * -1.0f);
@@ -57,13 +57,13 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>,
+  gl_Position : vec4f,
   @location(0)
-  vUV_1 : vec2<f32>,
+  vUV_1 : vec2f,
 }
 
 @vertex
-fn main(@location(0) position_1_param : vec3<f32>, @location(2) uv_param : vec2<f32>, @location(1) normal_param : vec3<f32>) -> main_out {
+fn main(@location(0) position_1_param : vec3f, @location(2) uv_param : vec2f, @location(1) normal_param : vec3f) -> main_out {
   position_1 = position_1_param;
   uv = uv_param;
   normal = normal_param;

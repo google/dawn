@@ -122,7 +122,7 @@ OpFunctionEnd)";
     EXPECT_THAT(program_ast, HasSubstr(R"(
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>,
+  x_2_1 : vec4f,
 }
 )")) << program_ast;
 

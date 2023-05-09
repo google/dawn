@@ -498,7 +498,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Matrix) {
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("myvar[2u] = vec4<f32>(42.0f, 42.0f, 42.0f, 42.0f);"));
+                HasSubstr("myvar[2u] = vec4f(42.0f, 42.0f, 42.0f, 42.0f);"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Array) {
@@ -530,7 +530,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Array) {
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("myvar[2u] = vec4<f32>(42.0f, 42.0f, 42.0f, 42.0f);"));
+                HasSubstr("myvar[2u] = vec4f(42.0f, 42.0f, 42.0f, 42.0f);"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct) {
@@ -801,7 +801,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
     auto p = parser(test::Assemble(assembly));
     ASSERT_TRUE(p->BuildAndParseInternalModule());
     const auto got = test::ToString(p->program());
-    const std::string expected = R"(fn x_200(x_1 : ptr<private, vec2<u32>>) {
+    const std::string expected = R"(fn x_200(x_1 : ptr<private, vec2u>) {
   let x_3 : u32 = (*(x_1)).x;
   return;
 }

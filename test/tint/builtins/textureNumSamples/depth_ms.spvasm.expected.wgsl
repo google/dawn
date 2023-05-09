@@ -1,6 +1,6 @@
 @group(1) @binding(0) var arg_0 : texture_depth_multisampled_2d;
 
-var<private> tint_symbol_1 : vec4<f32> = vec4<f32>();
+var<private> tint_symbol_1 : vec4f = vec4f();
 
 fn textureNumSamples_a3c8a0() {
   var res : i32 = 0i;
@@ -9,20 +9,20 @@ fn textureNumSamples_a3c8a0() {
   return;
 }
 
-fn tint_symbol_2(tint_symbol : vec4<f32>) {
+fn tint_symbol_2(tint_symbol : vec4f) {
   tint_symbol_1 = tint_symbol;
   return;
 }
 
 fn vertex_main_1() {
   textureNumSamples_a3c8a0();
-  tint_symbol_2(vec4<f32>());
+  tint_symbol_2(vec4f());
   return;
 }
 
 struct vertex_main_out {
   @builtin(position)
-  tint_symbol_1_1 : vec4<f32>,
+  tint_symbol_1_1 : vec4f,
 }
 
 @vertex

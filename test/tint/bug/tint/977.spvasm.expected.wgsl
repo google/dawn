@@ -28,7 +28,7 @@ struct Uniforms {
   sizeB : i32,
 }
 
-var<private> gl_GlobalInvocationID : vec3<u32>;
+var<private> gl_GlobalInvocationID : vec3u;
 
 @group(0) @binding(2) var<storage, read_write> resultMatrix : ResultMatrix;
 
@@ -76,7 +76,7 @@ fn main_1() {
 }
 
 @compute @workgroup_size(1i, 1i, 1i)
-fn main(@builtin(global_invocation_id) gl_GlobalInvocationID_param : vec3<u32>) {
+fn main(@builtin(global_invocation_id) gl_GlobalInvocationID_param : vec3u) {
   gl_GlobalInvocationID = gl_GlobalInvocationID_param;
   main_1();
 }

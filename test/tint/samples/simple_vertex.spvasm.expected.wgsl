@@ -1,13 +1,13 @@
-var<private> gl_Position : vec4<f32>;
+var<private> gl_Position : vec4f;
 
 fn main_1() {
-  gl_Position = vec4<f32>(0.0f, 0.0f, 0.0f, 0.0f);
+  gl_Position = vec4f(0.0f, 0.0f, 0.0f, 0.0f);
   return;
 }
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>,
+  gl_Position : vec4f,
 }
 
 @vertex

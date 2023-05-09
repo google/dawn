@@ -586,7 +586,7 @@ class ParserImpl : Reader {
         uint32_t position_member_index = 0;
         /// The member index for the PointSize builtin within the struct.
         uint32_t pointsize_member_index = 0;
-        /// The ID for the member type, which should map to vec4<f32>.
+        /// The ID for the member type, which should map to vec4f.
         uint32_t position_member_type_id = 0;
         /// The ID of the type of a pointer to the struct in the Output storage
         /// class class.
@@ -863,7 +863,7 @@ class ParserImpl : Reader {
     // Bookkeeping for the gl_Position builtin.
     // In Vulkan SPIR-V, it's the 0 member of the gl_PerVertex structure.
     // But in WGSL we make a module-scope variable:
-    //    [[position]] var<in> gl_Position : vec4<f32>;
+    //    [[position]] var<in> gl_Position : vec4f;
     // The builtin variable was detected if and only if the struct_id is non-zero.
     BuiltInPositionInfo builtin_position_;
 

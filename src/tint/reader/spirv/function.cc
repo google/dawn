@@ -4047,8 +4047,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
                     builder_.MemberAccessor(
                         builder_.Call("refract",
                                       utils::Vector{
-                                          builder_.vec2<tint::f32>(incident.expr, 0_f),
-                                          builder_.vec2<tint::f32>(normal.expr, 0_f),
+                                          builder_.Call("vec2f", incident.expr, 0_f),
+                                          builder_.Call("vec2f", normal.expr, 0_f),
                                           eta.expr,
                                       }),
                         "x"),
@@ -4137,8 +4137,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450MatrixInverse(
 
             // s * d, -s * b, -s * c, s * a
             auto* r = pb.mat2x2<f32>(  //
-                pb.vec2<f32>(pb.Mul(s, d), pb.Mul(neg(s), b)),
-                pb.vec2<f32>(pb.Mul(neg(s), c), pb.Mul(s, a)));
+                pb.Call("vec2f", pb.Mul(s, d), pb.Mul(neg(s), b)),
+                pb.Call("vec2f", pb.Mul(neg(s), c), pb.Mul(s, a)));
             return {mat.type, r};
         }
 
@@ -4158,27 +4158,27 @@ TypedExpression FunctionEmitter::EmitGlslStd450MatrixInverse(
 
             auto r = pb.Mul(s,               //
                             pb.mat3x3<f32>(  //
-                                pb.vec3<f32>(
-                                    // e * i - f * h
-                                    sub_mul2(e, i, f, h),
-                                    // c * h - b * i
-                                    sub_mul2(c, h, b, i),
-                                    // b * f - c * e
-                                    sub_mul2(b, f, c, e)),
-                                pb.vec3<f32>(
-                                    // f * g - d * i
-                                    sub_mul2(f, g, d, i),
-                                    // a * i - c * g
-                                    sub_mul2(a, i, c, g),
-                                    // c * d - a * f
-                                    sub_mul2(c, d, a, f)),
-                                pb.vec3<f32>(
-                                    // d * h - e * g
-                                    sub_mul2(d, h, e, g),
-                                    // b * g - a * h
-                                    sub_mul2(b, g, a, h),
-                                    // a * e - b * d
-                                    sub_mul2(a, e, b, d))));
+                                pb.Call("vec3f",
+                                        // e * i - f * h
+                                        sub_mul2(e, i, f, h),
+                                        // c * h - b * i
+                                        sub_mul2(c, h, b, i),
+                                        // b * f - c * e
+                                        sub_mul2(b, f, c, e)),
+                                pb.Call("vec3f",
+                                        // f * g - d * i
+                                        sub_mul2(f, g, d, i),
+                                        // a * i - c * g
+                                        sub_mul2(a, i, c, g),
+                                        // c * d - a * f
+                                        sub_mul2(c, d, a, f)),
+                                pb.Call("vec3f",
+                                        // d * h - e * g
+                                        sub_mul2(d, h, e, g),
+                                        // b * g - a * h
+                                        sub_mul2(b, g, a, h),
+                                        // a * e - b * d
+                                        sub_mul2(a, e, b, d))));
             return {mat.type, r};
         }
 
@@ -4236,42 +4236,42 @@ TypedExpression FunctionEmitter::EmitGlslStd450MatrixInverse(
 
             auto r = pb.Mul(s,               //
                             pb.mat4x4<f32>(  //
-                                pb.vec4<f32>(
-                                    // f * kplo - g * jpln + h * jokn
-                                    sub_add_mul3(f, kplo, g, jpln, h, jokn),
-                                    // -b * kplo + c * jpln - d * jokn
-                                    add_sub_mul3(neg(b), kplo, c, jpln, d, jokn),
-                                    // b * gpho - c * fphn + d * fogn
-                                    sub_add_mul3(b, gpho, c, fphn, d, fogn),
-                                    // -b * glhk + c * flhj - d * fkgj
-                                    add_sub_mul3(neg(b), glhk, c, flhj, d, fkgj)),
-                                pb.vec4<f32>(
-                                    // -e * kplo + g * iplm - h * iokm
-                                    add_sub_mul3(neg(e), kplo, g, iplm, h, iokm),
-                                    // a * kplo - c * iplm + d * iokm
-                                    sub_add_mul3(a, kplo, c, iplm, d, iokm),
-                                    // -a * gpho + c * ephm - d * eogm
-                                    add_sub_mul3(neg(a), gpho, c, ephm, d, eogm),
-                                    // a * glhk - c * elhi + d * ekgi
-                                    sub_add_mul3(a, glhk, c, elhi, d, ekgi)),
-                                pb.vec4<f32>(
-                                    // e * jpln - f * iplm + h * injm
-                                    sub_add_mul3(e, jpln, f, iplm, h, injm),
-                                    // -a * jpln + b * iplm - d * injm
-                                    add_sub_mul3(neg(a), jpln, b, iplm, d, injm),
-                                    // a * fphn - b * ephm + d * enfm
-                                    sub_add_mul3(a, fphn, b, ephm, d, enfm),
-                                    // -a * flhj + b * elhi - d * ejfi
-                                    add_sub_mul3(neg(a), flhj, b, elhi, d, ejfi)),
-                                pb.vec4<f32>(
-                                    // -e * jokn + f * iokm - g * injm
-                                    add_sub_mul3(neg(e), jokn, f, iokm, g, injm),
-                                    // a * jokn - b * iokm + c * injm
-                                    sub_add_mul3(a, jokn, b, iokm, c, injm),
-                                    // -a * fogn + b * eogm - c * enfm
-                                    add_sub_mul3(neg(a), fogn, b, eogm, c, enfm),
-                                    // a * fkgj - b * ekgi + c * ejfi
-                                    sub_add_mul3(a, fkgj, b, ekgi, c, ejfi))));
+                                pb.Call("vec4f",
+                                        // f * kplo - g * jpln + h * jokn
+                                        sub_add_mul3(f, kplo, g, jpln, h, jokn),
+                                        // -b * kplo + c * jpln - d * jokn
+                                        add_sub_mul3(neg(b), kplo, c, jpln, d, jokn),
+                                        // b * gpho - c * fphn + d * fogn
+                                        sub_add_mul3(b, gpho, c, fphn, d, fogn),
+                                        // -b * glhk + c * flhj - d * fkgj
+                                        add_sub_mul3(neg(b), glhk, c, flhj, d, fkgj)),
+                                pb.Call("vec4f",
+                                        // -e * kplo + g * iplm - h * iokm
+                                        add_sub_mul3(neg(e), kplo, g, iplm, h, iokm),
+                                        // a * kplo - c * iplm + d * iokm
+                                        sub_add_mul3(a, kplo, c, iplm, d, iokm),
+                                        // -a * gpho + c * ephm - d * eogm
+                                        add_sub_mul3(neg(a), gpho, c, ephm, d, eogm),
+                                        // a * glhk - c * elhi + d * ekgi
+                                        sub_add_mul3(a, glhk, c, elhi, d, ekgi)),
+                                pb.Call("vec4f",
+                                        // e * jpln - f * iplm + h * injm
+                                        sub_add_mul3(e, jpln, f, iplm, h, injm),
+                                        // -a * jpln + b * iplm - d * injm
+                                        add_sub_mul3(neg(a), jpln, b, iplm, d, injm),
+                                        // a * fphn - b * ephm + d * enfm
+                                        sub_add_mul3(a, fphn, b, ephm, d, enfm),
+                                        // -a * flhj + b * elhi - d * ejfi
+                                        add_sub_mul3(neg(a), flhj, b, elhi, d, ejfi)),
+                                pb.Call("vec4f",
+                                        // -e * jokn + f * iokm - g * injm
+                                        add_sub_mul3(neg(e), jokn, f, iokm, g, injm),
+                                        // a * jokn - b * iokm + c * injm
+                                        sub_add_mul3(a, jokn, b, iokm, c, injm),
+                                        // -a * fogn + b * eogm - c * enfm
+                                        add_sub_mul3(neg(a), fogn, b, eogm, c, enfm),
+                                        // a * fkgj - b * ekgi + c * ejfi
+                                        sub_add_mul3(a, fkgj, b, ekgi, c, ejfi))));
             return {mat.type, r};
         }
     }

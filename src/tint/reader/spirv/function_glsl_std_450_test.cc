@@ -282,8 +282,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func + "(v2f1);"))
-        << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2f = " + GetParam().wgsl_func + "(v2f1);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
@@ -315,7 +314,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func + "(v2f1, v2f2);"))
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2f = " + GetParam().wgsl_func + "(v2f1, v2f2);"))
         << body;
 }
 
@@ -351,7 +350,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body,
-                HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func + "(v2f1, v2f2, v2f3);"))
+                HasSubstr("let x_1 : vec2f = " + GetParam().wgsl_func + "(v2f1, v2f2, v2f3);"))
         << body;
 }
 
@@ -385,7 +384,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func + "(v2f1, v2i1);"))
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2f = " + GetParam().wgsl_func + "(v2f1, v2i1);"))
         << body;
 }
 
@@ -403,7 +402,7 @@ TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec3<f32> = " + GetParam().wgsl_func + "(v3f1, v3f2);"))
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec3f = " + GetParam().wgsl_func + "(v3f1, v3f2);"))
         << body;
 }
 
@@ -542,8 +541,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func + "(v2i1);"))
-        << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2i = " + GetParam().wgsl_func + "(v2i1);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_UnsignedArg) {
@@ -560,8 +558,8 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_Unsigne
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func +
-                                "(bitcast<vec2<i32>>(v2u1));"))
+    EXPECT_THAT(body,
+                HasSubstr("let x_1 : vec2i = " + GetParam().wgsl_func + "(bitcast<vec2i>(v2u1));"))
         << body;
 }
 
@@ -579,8 +577,8 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_Unsigne
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(" + GetParam().wgsl_func +
-                                "(v2i1));"))
+    EXPECT_THAT(body,
+                HasSubstr("let x_1 : vec2u = bitcast<vec2u>(" + GetParam().wgsl_func + "(v2i1));"))
         << body;
 }
 
@@ -615,7 +613,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func + "(v2i1, v2i2);"))
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2i = " + GetParam().wgsl_func + "(v2i1, v2i2);"))
         << body;
 }
 
@@ -652,7 +650,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body,
-                HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func + "(v2i1, v2i2, v2i3);"))
+                HasSubstr("let x_1 : vec2i = " + GetParam().wgsl_func + "(v2i1, v2i2, v2i3);"))
         << body;
 }
 
@@ -707,8 +705,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_Uinting, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func + "(v2u1);"))
-        << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2u = " + GetParam().wgsl_func + "(v2u1);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
@@ -741,7 +738,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func + "(v2u1, v2u2);"))
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2u = " + GetParam().wgsl_func + "(v2u1, v2u2);"))
         << body;
 }
 
@@ -777,7 +774,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body,
-                HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func + "(v2u1, v2u2, v2u3);"))
+                HasSubstr("let x_1 : vec2u = " + GetParam().wgsl_func + "(v2u1, v2u2, v2u3);"))
         << body;
 }
 
@@ -828,7 +825,7 @@ TEST_F(SpvParserTest, Normalize_Vector2) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = normalize(v2f1);")) << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2f = normalize(v2f1);")) << body;
 }
 
 TEST_F(SpvParserTest, Normalize_Vector3) {
@@ -844,7 +841,7 @@ TEST_F(SpvParserTest, Normalize_Vector3) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec3<f32> = normalize(v3f1);")) << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec3f = normalize(v3f1);")) << body;
 }
 
 TEST_F(SpvParserTest, Normalize_Vector4) {
@@ -860,7 +857,7 @@ TEST_F(SpvParserTest, Normalize_Vector4) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec4<f32> = normalize(v4f1);")) << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec4f = normalize(v4f1);")) << body;
 }
 
 // Check that we convert signedness of operands and result type.
@@ -880,9 +877,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SAbs) {
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body, HasSubstr(R"(let x_1 : u32 = bitcast<u32>(abs(bitcast<i32>(u1)));)")) << body;
-    EXPECT_THAT(
-        body,
-        HasSubstr(R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(abs(bitcast<vec2<i32>>(v2u1)));)"))
+    EXPECT_THAT(body, HasSubstr(R"(let x_2 : vec2u = bitcast<vec2u>(abs(bitcast<vec2i>(v2u1)));)"))
         << body;
 }
 
@@ -906,7 +901,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMax) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(max(bitcast<vec2<i32>>(v2u1), bitcast<vec2<i32>>(v2u2)));)"))
+            R"(let x_2 : vec2u = bitcast<vec2u>(max(bitcast<vec2i>(v2u1), bitcast<vec2i>(v2u2)));)"))
         << body;
 }
 
@@ -930,7 +925,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMin) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(min(bitcast<vec2<i32>>(v2u1), bitcast<vec2<i32>>(v2u2)));)"))
+            R"(let x_2 : vec2u = bitcast<vec2u>(min(bitcast<vec2i>(v2u1), bitcast<vec2i>(v2u2)));)"))
         << body;
 }
 
@@ -955,7 +950,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SClamp) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(clamp(bitcast<vec2<i32>>(v2u1), v2i2, bitcast<vec2<i32>>(v2u3)));)"))
+            R"(let x_2 : vec2u = bitcast<vec2u>(clamp(bitcast<vec2i>(v2u1), v2i2, bitcast<vec2i>(v2u3)));)"))
         << body;
 }
 
@@ -979,7 +974,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMax) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(max(bitcast<vec2<u32>>(v2i1), bitcast<vec2<u32>>(v2i2)));)"))
+            R"(let x_2 : vec2i = bitcast<vec2i>(max(bitcast<vec2u>(v2i1), bitcast<vec2u>(v2i2)));)"))
         << body;
 }
 
@@ -1003,7 +998,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMin) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(min(bitcast<vec2<u32>>(v2i1), bitcast<vec2<u32>>(v2i2)));)"))
+            R"(let x_2 : vec2i = bitcast<vec2i>(min(bitcast<vec2u>(v2i1), bitcast<vec2u>(v2i2)));)"))
         << body;
 }
 
@@ -1028,7 +1023,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(clamp(bitcast<vec2<u32>>(v2i1), v2u2, bitcast<vec2<u32>>(v2i3)));)"))
+            R"(let x_2 : vec2i = bitcast<vec2i>(clamp(bitcast<vec2u>(v2i1), v2u2, bitcast<vec2u>(v2i3)));)"))
         << body;
 }
 
@@ -1054,9 +1049,9 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_FindILsb) {
     const auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body, HasSubstr(R"(
 let x_1 : u32 = bitcast<u32>(firstTrailingBit(i1));
-let x_2 : vec2<u32> = bitcast<vec2<u32>>(firstTrailingBit(v2i1));
+let x_2 : vec2u = bitcast<vec2u>(firstTrailingBit(v2i1));
 let x_3 : i32 = bitcast<i32>(firstTrailingBit(u1));
-let x_4 : vec2<i32> = bitcast<vec2<i32>>(firstTrailingBit(v2u1));)"))
+let x_4 : vec2i = bitcast<vec2i>(firstTrailingBit(v2u1));)"))
         << body;
 }
 
@@ -1100,13 +1095,13 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_FindSMsb) {
     const auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body, HasSubstr(R"(
 let x_1 : i32 = firstLeadingBit(i1);
-let x_2 : vec2<i32> = firstLeadingBit(v2i1);
+let x_2 : vec2i = firstLeadingBit(v2i1);
 let x_3 : u32 = bitcast<u32>(firstLeadingBit(i1));
-let x_4 : vec2<u32> = bitcast<vec2<u32>>(firstLeadingBit(v2i1));
+let x_4 : vec2u = bitcast<vec2u>(firstLeadingBit(v2i1));
 let x_5 : i32 = firstLeadingBit(bitcast<i32>(u1));
-let x_6 : vec2<i32> = firstLeadingBit(bitcast<vec2<i32>>(v2u1));
+let x_6 : vec2i = firstLeadingBit(bitcast<vec2i>(v2u1));
 let x_7 : u32 = bitcast<u32>(firstLeadingBit(bitcast<i32>(u1)));
-let x_8 : vec2<u32> = bitcast<vec2<u32>>(firstLeadingBit(bitcast<vec2<i32>>(v2u1)));
+let x_8 : vec2u = bitcast<vec2u>(firstLeadingBit(bitcast<vec2i>(v2u1)));
 )")) << body;
 }
 
@@ -1150,13 +1145,13 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_FindUMsb) {
     const auto body = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body, HasSubstr(R"(
 let x_1 : i32 = bitcast<i32>(firstLeadingBit(bitcast<u32>(i1)));
-let x_2 : vec2<i32> = bitcast<vec2<i32>>(firstLeadingBit(bitcast<vec2<u32>>(v2i1)));
+let x_2 : vec2i = bitcast<vec2i>(firstLeadingBit(bitcast<vec2u>(v2i1)));
 let x_3 : u32 = firstLeadingBit(bitcast<u32>(i1));
-let x_4 : vec2<u32> = firstLeadingBit(bitcast<vec2<u32>>(v2i1));
+let x_4 : vec2u = firstLeadingBit(bitcast<vec2u>(v2i1));
 let x_5 : i32 = bitcast<i32>(firstLeadingBit(u1));
-let x_6 : vec2<i32> = bitcast<vec2<i32>>(firstLeadingBit(v2u1));
+let x_6 : vec2i = bitcast<vec2i>(firstLeadingBit(v2u1));
 let x_7 : u32 = firstLeadingBit(u1);
-let x_8 : vec2<u32> = firstLeadingBit(v2u1);
+let x_8 : vec2u = firstLeadingBit(v2u1);
 )")) << body;
 }
 
@@ -1219,10 +1214,10 @@ TEST_P(SpvParserTest_GlslStd450_DataUnpacking, Valid) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : " +
-                                std::string(param.vec_size == 2 ? "vec2<f32>" : "vec4<f32>") +
+    EXPECT_THAT(body,
+                HasSubstr("let x_1 : " + std::string(param.vec_size == 2 ? "vec2f" : "vec4f") +
 
-                                +" = " + param.wgsl_func + "(u1);"))
+                          +" = " + param.wgsl_func + "(u1);"))
         << body;
 }
 
@@ -1247,8 +1242,7 @@ TEST_F(SpvParserTest, GlslStd450_Refract_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    const auto* expected =
-        R"(let x_1 : f32 = refract(vec2<f32>(f1, 0.0f), vec2<f32>(f2, 0.0f), f3).x;)";
+    const auto* expected = R"(let x_1 : f32 = refract(vec2f(f1, 0.0f), vec2f(f2, 0.0f), f3).x;)";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1265,7 +1259,7 @@ TEST_F(SpvParserTest, GlslStd450_Refract_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    const auto* expected = R"(let x_1 : vec2<f32> = refract(v2f1, v2f2, f3);)";
+    const auto* expected = R"(let x_1 : vec2f = refract(v2f1, v2f2, f3);)";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1304,7 +1298,7 @@ TEST_F(SpvParserTest, GlslStd450_FaceForward_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    const auto* expected = R"(let x_1 : vec2<f32> = faceForward(v2f1, v2f2, v2f3);)";
+    const auto* expected = R"(let x_1 : vec2f = faceForward(v2f1, v2f2, v2f3);)";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1346,9 +1340,9 @@ TEST_F(SpvParserTest, GlslStd450_Reflect_Vector) {
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
     const auto* expected = R"(
-let x_98 : vec2<f32> = (v2f1 + v2f1);
-let x_99 : vec2<f32> = (v2f2 + v2f2);
-let x_1 : vec2<f32> = reflect(x_98, x_99);
+let x_98 : vec2f = (v2f1 + v2f1);
+let x_99 : vec2f = (v2f2 + v2f2);
+let x_1 : vec2f = reflect(x_98, x_99);
 )";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
@@ -1384,7 +1378,7 @@ TEST_F(SpvParserTest, GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    const auto* expected = "let x_1 : vec2<f32> = ldexp(v2f1, vec2<i32>(v2u1));";
+    const auto* expected = "let x_1 : vec2f = ldexp(v2f1, vec2i(v2u1));";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1426,8 +1420,8 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat2x2) {
 
     std::string expected =
         "let s = (1.0f / determinant(m2x2f1));\n"
-        "let x_1 : mat2x2<f32> = mat2x2<f32>(vec2<f32>((s * m2x2f1[1u][1u]), (-(s) * "
-        "m2x2f1[0u][1u])), vec2<f32>((-(s) * m2x2f1[1u][0u]), (s * m2x2f1[0u][0u])));";
+        "let x_1 : mat2x2<f32> = mat2x2<f32>(vec2f((s * m2x2f1[1u][1u]), (-(s) * "
+        "m2x2f1[0u][1u])), vec2f((-(s) * m2x2f1[1u][0u]), (s * m2x2f1[0u][0u])));";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1447,13 +1441,13 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat3x3) {
 
     std::string expected =
         "let s = (1.0f / determinant(m3x3f1));\n"
-        "let x_1 : mat3x3<f32> = (s * mat3x3<f32>(vec3<f32>(((m3x3f1[1u][1u] * m3x3f1[2u][2u]) - "
+        "let x_1 : mat3x3<f32> = (s * mat3x3<f32>(vec3f(((m3x3f1[1u][1u] * m3x3f1[2u][2u]) - "
         "(m3x3f1[1u][2u] * m3x3f1[2u][1u])), ((m3x3f1[0u][2u] * m3x3f1[2u][1u]) - (m3x3f1[0u][1u] "
         "* m3x3f1[2u][2u])), ((m3x3f1[0u][1u] * m3x3f1[1u][2u]) - (m3x3f1[0u][2u] * "
-        "m3x3f1[1u][1u]))), vec3<f32>(((m3x3f1[1u][2u] * m3x3f1[2u][0u]) - (m3x3f1[1u][0u] * "
+        "m3x3f1[1u][1u]))), vec3f(((m3x3f1[1u][2u] * m3x3f1[2u][0u]) - (m3x3f1[1u][0u] * "
         "m3x3f1[2u][2u])), ((m3x3f1[0u][0u] * m3x3f1[2u][2u]) - (m3x3f1[0u][2u] * "
         "m3x3f1[2u][0u])), ((m3x3f1[0u][2u] * m3x3f1[1u][0u]) - (m3x3f1[0u][0u] * "
-        "m3x3f1[1u][2u]))), vec3<f32>(((m3x3f1[1u][0u] * m3x3f1[2u][1u]) - (m3x3f1[1u][1u] * "
+        "m3x3f1[1u][2u]))), vec3f(((m3x3f1[1u][0u] * m3x3f1[2u][1u]) - (m3x3f1[1u][1u] * "
         "m3x3f1[2u][0u])), ((m3x3f1[0u][1u] * m3x3f1[2u][0u]) - (m3x3f1[0u][0u] * "
         "m3x3f1[2u][1u])), ((m3x3f1[0u][0u] * m3x3f1[1u][1u]) - (m3x3f1[0u][1u] * "
         "m3x3f1[1u][0u])))));";
@@ -1476,7 +1470,7 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat4x4) {
 
     std::string expected =
         "let s = (1.0f / determinant(m4x4f1));\n"
-        "let x_1 : mat4x4<f32> = (s * mat4x4<f32>(vec4<f32>((((m4x4f1[1u][1u] * ((m4x4f1[2u][2u] * "
+        "let x_1 : mat4x4<f32> = (s * mat4x4<f32>(vec4f((((m4x4f1[1u][1u] * ((m4x4f1[2u][2u] * "
         "m4x4f1[3u][3u]) - (m4x4f1[2u][3u] * m4x4f1[3u][2u]))) - (m4x4f1[1u][2u] * "
         "((m4x4f1[2u][1u] * m4x4f1[3u][3u]) - (m4x4f1[2u][3u] * m4x4f1[3u][1u])))) + "
         "(m4x4f1[1u][3u] * ((m4x4f1[2u][1u] * m4x4f1[3u][2u]) - (m4x4f1[2u][2u] * "
@@ -1491,7 +1485,7 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat4x4) {
         "((m4x4f1[1u][2u] * m4x4f1[2u][3u]) - (m4x4f1[1u][3u] * m4x4f1[2u][2u]))) + "
         "(m4x4f1[0u][2u] * ((m4x4f1[1u][1u] * m4x4f1[2u][3u]) - (m4x4f1[1u][3u] * "
         "m4x4f1[2u][1u])))) - (m4x4f1[0u][3u] * ((m4x4f1[1u][1u] * m4x4f1[2u][2u]) - "
-        "(m4x4f1[1u][2u] * m4x4f1[2u][1u]))))), vec4<f32>((((-(m4x4f1[1u][0u]) * ((m4x4f1[2u][2u] "
+        "(m4x4f1[1u][2u] * m4x4f1[2u][1u]))))), vec4f((((-(m4x4f1[1u][0u]) * ((m4x4f1[2u][2u] "
         "* m4x4f1[3u][3u]) - (m4x4f1[2u][3u] * m4x4f1[3u][2u]))) + (m4x4f1[1u][2u] * "
         "((m4x4f1[2u][0u] * m4x4f1[3u][3u]) - (m4x4f1[2u][3u] * m4x4f1[3u][0u])))) - "
         "(m4x4f1[1u][3u] * ((m4x4f1[2u][0u] * m4x4f1[3u][2u]) - (m4x4f1[2u][2u] * "
@@ -1506,7 +1500,7 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat4x4) {
         "((m4x4f1[1u][2u] * m4x4f1[2u][3u]) - (m4x4f1[1u][3u] * m4x4f1[2u][2u]))) - "
         "(m4x4f1[0u][2u] * ((m4x4f1[1u][0u] * m4x4f1[2u][3u]) - (m4x4f1[1u][3u] * "
         "m4x4f1[2u][0u])))) + (m4x4f1[0u][3u] * ((m4x4f1[1u][0u] * m4x4f1[2u][2u]) - "
-        "(m4x4f1[1u][2u] * m4x4f1[2u][0u]))))), vec4<f32>((((m4x4f1[1u][0u] * ((m4x4f1[2u][1u] * "
+        "(m4x4f1[1u][2u] * m4x4f1[2u][0u]))))), vec4f((((m4x4f1[1u][0u] * ((m4x4f1[2u][1u] * "
         "m4x4f1[3u][3u]) - (m4x4f1[2u][3u] * m4x4f1[3u][1u]))) - (m4x4f1[1u][1u] * "
         "((m4x4f1[2u][0u] * m4x4f1[3u][3u]) - (m4x4f1[2u][3u] * m4x4f1[3u][0u])))) + "
         "(m4x4f1[1u][3u] * ((m4x4f1[2u][0u] * m4x4f1[3u][1u]) - (m4x4f1[2u][1u] * "
@@ -1521,7 +1515,7 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_mat4x4) {
         "((m4x4f1[1u][1u] * m4x4f1[2u][3u]) - (m4x4f1[1u][3u] * m4x4f1[2u][1u]))) + "
         "(m4x4f1[0u][1u] * ((m4x4f1[1u][0u] * m4x4f1[2u][3u]) - (m4x4f1[1u][3u] * "
         "m4x4f1[2u][0u])))) - (m4x4f1[0u][3u] * ((m4x4f1[1u][0u] * m4x4f1[2u][1u]) - "
-        "(m4x4f1[1u][1u] * m4x4f1[2u][0u]))))), vec4<f32>((((-(m4x4f1[1u][0u]) * ((m4x4f1[2u][1u] "
+        "(m4x4f1[1u][1u] * m4x4f1[2u][0u]))))), vec4f((((-(m4x4f1[1u][0u]) * ((m4x4f1[2u][1u] "
         "* m4x4f1[3u][2u]) - (m4x4f1[2u][2u] * m4x4f1[3u][1u]))) + (m4x4f1[1u][1u] * "
         "((m4x4f1[2u][0u] * m4x4f1[3u][2u]) - (m4x4f1[2u][2u] * m4x4f1[3u][0u])))) - "
         "(m4x4f1[1u][2u] * ((m4x4f1[2u][0u] * m4x4f1[3u][1u]) - (m4x4f1[2u][1u] * "
@@ -1557,11 +1551,11 @@ TEST_F(SpvParserTest, GlslStd450_MatrixInverse_MultipleInScope) {
 
     std::string expected =
         "let s = (1.0f / determinant(m2x2f1));\n"
-        "let x_1 : mat2x2<f32> = mat2x2<f32>(vec2<f32>((s * m2x2f1[1u][1u]), (-(s) * "
-        "m2x2f1[0u][1u])), vec2<f32>((-(s) * m2x2f1[1u][0u]), (s * m2x2f1[0u][0u])));\n"
+        "let x_1 : mat2x2<f32> = mat2x2<f32>(vec2f((s * m2x2f1[1u][1u]), (-(s) * "
+        "m2x2f1[0u][1u])), vec2f((-(s) * m2x2f1[1u][0u]), (s * m2x2f1[0u][0u])));\n"
         "let s_1 = (1.0f / determinant(m2x2f1));\n"
-        "let x_2 : mat2x2<f32> = mat2x2<f32>(vec2<f32>((s_1 * m2x2f1[1u][1u]), (-(s_1) * "
-        "m2x2f1[0u][1u])), vec2<f32>((-(s_1) * m2x2f1[1u][0u]), (s_1 * m2x2f1[0u][0u])));";
+        "let x_2 : mat2x2<f32> = mat2x2<f32>(vec2f((s_1 * m2x2f1[1u][1u]), (-(s_1) * "
+        "m2x2f1[0u][1u])), vec2f((-(s_1) * m2x2f1[1u][0u]), (s_1 * m2x2f1[0u][0u])));";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }

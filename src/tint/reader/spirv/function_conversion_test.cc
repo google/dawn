@@ -100,7 +100,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = bitcast<vec2<f32>>(vec2<u32>(10u, 20u));"));
+                HasSubstr("let x_1 : vec2f = bitcast<vec2f>(vec2u(10u, 20u));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_BadArg) {
@@ -245,7 +245,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = vec2<f32>(x_30);"));
+                HasSubstr("let x_1 : vec2f = vec2f(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
@@ -263,7 +263,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = vec2<f32>(bitcast<vec2<i32>>(x_30));"));
+                HasSubstr("let x_1 : vec2f = vec2f(bitcast<vec2i>(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_BadArgType) {
@@ -348,7 +348,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = vec2<f32>(bitcast<vec2<u32>>(x_30));"));
+                HasSubstr("let x_1 : vec2f = vec2f(bitcast<vec2u>(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
@@ -366,7 +366,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = vec2<f32>(x_30);"));
+                HasSubstr("let x_1 : vec2f = vec2f(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_BadArgType) {
@@ -451,7 +451,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<i32> = vec2<i32>(x_30);"));
+                HasSubstr("let x_1 : vec2i = vec2i(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
@@ -469,7 +469,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(vec2<i32>(x_30));"));
+                HasSubstr("let x_1 : vec2u = bitcast<vec2u>(vec2i(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_BadArgType) {
@@ -568,7 +568,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<u32> = vec2<u32>(x_30);"));
+                HasSubstr("let x_1 : vec2u = vec2u(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_HoistedValue) {

@@ -96,9 +96,9 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr(R"(let x_1 : vec2<u32> = vec2<u32>(10u, 20u);
-let x_2 : vec2<i32> = vec2<i32>(30i, 40i);
-let x_3 : vec2<f32> = vec2<f32>(50.0f, 60.0f);
+                HasSubstr(R"(let x_1 : vec2u = vec2u(10u, 20u);
+let x_2 : vec2i = vec2i(30i, 40i);
+let x_3 : vec2f = vec2f(50.0f, 60.0f);
 )"));
 }
 
@@ -117,9 +117,9 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr("let x_1 : mat3x2<f32> = mat3x2<f32>("
-                          "vec2<f32>(50.0f, 60.0f), "
-                          "vec2<f32>(60.0f, 50.0f), "
-                          "vec2<f32>(70.0f, 70.0f));"));
+                          "vec2f(50.0f, 60.0f), "
+                          "vec2f(60.0f, 50.0f), "
+                          "vec2f(70.0f, 70.0f));"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Array) {
@@ -153,7 +153,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : S = S(vec2<f32>(50.0f, 60.0f), 5u, 30i);"));
+                HasSubstr("let x_1 : S = S(vec2f(50.0f, 60.0f), 5u, 30i);"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, ConstantComposite_Struct_NoDeduplication) {
@@ -201,7 +201,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : f32 = vec2<f32>(50.0f, 60.0f).y;"));
+                HasSubstr("let x_1 : f32 = vec2f(50.0f, 60.0f).y;"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
@@ -238,8 +238,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_2 : vec2<f32> = x_1[2u];"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_2 : vec2f = x_1[2u];"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
@@ -448,9 +447,9 @@ TEST_F(SpvParserTest_CompositeInsert, Vector) {
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     const auto* expected =
-        R"(var x_1_1 : vec2<f32> = vec2<f32>(50.0f, 60.0f);
+        R"(var x_1_1 : vec2f = vec2f(50.0f, 60.0f);
 x_1_1.y = 70.0f;
-let x_1 : vec2<f32> = x_1_1;
+let x_1 : vec2f = x_1_1;
 return;
 )";
     EXPECT_EQ(got, expected);
@@ -492,7 +491,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix) {
     auto ast_body = fe.ast_body();
     auto body_str = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : mat3x2<f32> = x_1;
-x_2_1[2u] = vec2<f32>(50.0f, 60.0f);
+x_2_1[2u] = vec2f(50.0f, 60.0f);
 let x_2 : mat3x2<f32> = x_2_1;
 )")) << body_str;
 }
@@ -537,7 +536,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
     auto ast_body = fe.ast_body();
     auto body_str = test::ToString(p->program(), ast_body);
     EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : mat3x2<f32> = x_1;
-x_2_1[2u] = vec2<f32>(50.0f, 60.0f);
+x_2_1[2u] = vec2f(50.0f, 60.0f);
 let x_2 : mat3x2<f32> = x_2_1;
 return;
 )")) << body_str;
@@ -782,7 +781,7 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec4<u32> = vec4<u32>(x_2.y, x_2.x, x_1.y, x_1.x);"));
+                HasSubstr("let x_10 : vec4u = vec4u(x_2.y, x_2.x, x_1.y, x_1.x);"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
@@ -799,12 +798,11 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec4<u32> = vec4<u32>("
-                          "vec2<u32>(4u, 3u).y, "
-                          "vec2<u32>(4u, 3u).x, "
-                          "vec2<u32>(3u, 4u).y, "
-                          "vec2<u32>(3u, 4u).x);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_10 : vec4u = vec4u("
+                                                                  "vec2u(4u, 3u).y, "
+                                                                  "vec2u(4u, 3u).x, "
+                                                                  "vec2u(3u, 4u).y, "
+                                                                  "vec2u(3u, 4u).x);"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
@@ -823,7 +821,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec2<u32> = vec2<u32>(0u, x_1.y);"));
+                HasSubstr("let x_10 : vec2u = vec2u(0u, x_1.y);"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_MixedInputOperandSizes) {
@@ -845,7 +843,7 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_MixedInputOperandSizes
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec2<u32> = vec2<u32>(x_1.y, x_3.z);"));
+                HasSubstr("let x_10 : vec2u = vec2u(x_1.y, x_3.z);"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, IndexTooBig_IsError) {
@@ -926,9 +924,9 @@ TEST_F(SpvParserTest_VectorInsertDynamic, Sample) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr(R"(var x_10_1 : vec2<u32> = x_1;
+    EXPECT_THAT(got, HasSubstr(R"(var x_10_1 : vec2u = x_1;
 x_10_1[x_3] = x_2;
-let x_10 : vec2<u32> = x_10_1;
+let x_10 : vec2u = x_10_1;
 )")) << got
      << assembly;
 }

@@ -104,9 +104,9 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr(R"(let x_14 : vec2<bool> = vec2<bool>();
-let x_11 : vec2<u32> = vec2<u32>();
-let x_12 : vec2<i32> = vec2<i32>();
-let x_13 : vec2<f32> = vec2<f32>();
+let x_11 : vec2u = vec2u();
+let x_12 : vec2i = vec2i();
+let x_13 : vec2f = vec2f();
 )"));
 }
 
@@ -158,10 +158,9 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr(R"(let x_11 : vec2<u32> = vec2<u32>();
-let x_12 : vec2<i32> = vec2<i32>();
-let x_13 : vec2<f32> = vec2<f32>();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_11 : vec2u = vec2u();
+let x_12 : vec2i = vec2i();
+let x_13 : vec2f = vec2f();
 )"));
 }
 
