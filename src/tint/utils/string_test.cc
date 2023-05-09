@@ -47,6 +47,15 @@ TEST(StringTest, HasPrefix) {
     EXPECT_FALSE(HasPrefix("abc", "b"));
 }
 
+TEST(StringTest, HasSuffix) {
+    EXPECT_TRUE(HasSuffix("abc", "c"));
+    EXPECT_TRUE(HasSuffix("abc", "bc"));
+    EXPECT_TRUE(HasSuffix("abc", "abc"));
+    EXPECT_FALSE(HasSuffix("abc", "1abc"));
+    EXPECT_FALSE(HasSuffix("abc", "ac"));
+    EXPECT_FALSE(HasSuffix("abc", "b"));
+}
+
 TEST(StringTest, Distance) {
     EXPECT_EQ(Distance("hello world", "hello world"), 0u);
     EXPECT_EQ(Distance("hello world", "helloworld"), 1u);
@@ -73,6 +82,75 @@ Possible values: 'hello world', 'Hello World')");
         SuggestAlternatives("hello world", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Possible values: 'foobar', 'something else')");
     }
+}
+
+TEST(StringTest, TrimLeft) {
+    EXPECT_EQ(TrimLeft("hello world", [](char) { return false; }), "hello world");
+    EXPECT_EQ(TrimLeft("hello world", [](char c) { return c == 'h'; }), "ello world");
+    EXPECT_EQ(TrimLeft("hello world", [](char c) { return c == 'h' || c == 'e'; }), "llo world");
+    EXPECT_EQ(TrimLeft("hello world", [](char c) { return c == 'e'; }), "hello world");
+    EXPECT_EQ(TrimLeft("hello world", [](char) { return true; }), "");
+    EXPECT_EQ(TrimLeft("", [](char) { return false; }), "");
+    EXPECT_EQ(TrimLeft("", [](char) { return true; }), "");
+}
+
+TEST(StringTest, TrimRight) {
+    EXPECT_EQ(TrimRight("hello world", [](char) { return false; }), "hello world");
+    EXPECT_EQ(TrimRight("hello world", [](char c) { return c == 'd'; }), "hello worl");
+    EXPECT_EQ(TrimRight("hello world", [](char c) { return c == 'd' || c == 'l'; }), "hello wor");
+    EXPECT_EQ(TrimRight("hello world", [](char c) { return c == 'l'; }), "hello world");
+    EXPECT_EQ(TrimRight("hello world", [](char) { return true; }), "");
+    EXPECT_EQ(TrimRight("", [](char) { return false; }), "");
+    EXPECT_EQ(TrimRight("", [](char) { return true; }), "");
+}
+
+TEST(StringTest, TrimPrefix) {
+    EXPECT_EQ(TrimPrefix("abc", "a"), "bc");
+    EXPECT_EQ(TrimPrefix("abc", "ab"), "c");
+    EXPECT_EQ(TrimPrefix("abc", "abc"), "");
+    EXPECT_EQ(TrimPrefix("abc", "abc1"), "abc");
+    EXPECT_EQ(TrimPrefix("abc", "ac"), "abc");
+    EXPECT_EQ(TrimPrefix("abc", "b"), "abc");
+    EXPECT_EQ(TrimPrefix("abc", "c"), "abc");
+}
+
+TEST(StringTest, TrimSuffix) {
+    EXPECT_EQ(TrimSuffix("abc", "c"), "ab");
+    EXPECT_EQ(TrimSuffix("abc", "bc"), "a");
+    EXPECT_EQ(TrimSuffix("abc", "abc"), "");
+    EXPECT_EQ(TrimSuffix("abc", "1abc"), "abc");
+    EXPECT_EQ(TrimSuffix("abc", "ac"), "abc");
+    EXPECT_EQ(TrimSuffix("abc", "b"), "abc");
+    EXPECT_EQ(TrimSuffix("abc", "a"), "abc");
+}
+
+TEST(StringTest, Trim) {
+    EXPECT_EQ(Trim("hello world", [](char) { return false; }), "hello world");
+    EXPECT_EQ(Trim("hello world", [](char c) { return c == 'h'; }), "ello world");
+    EXPECT_EQ(Trim("hello world", [](char c) { return c == 'd'; }), "hello worl");
+    EXPECT_EQ(Trim("hello world", [](char c) { return c == 'h' || c == 'd'; }), "ello worl");
+    EXPECT_EQ(Trim("hello world", [](char) { return true; }), "");
+    EXPECT_EQ(Trim("", [](char) { return false; }), "");
+    EXPECT_EQ(Trim("", [](char) { return true; }), "");
+}
+
+TEST(StringTest, IsSpace) {
+    EXPECT_FALSE(IsSpace('a'));
+    EXPECT_FALSE(IsSpace('z'));
+    EXPECT_FALSE(IsSpace('\0'));
+    EXPECT_TRUE(IsSpace(' '));
+    EXPECT_TRUE(IsSpace('\f'));
+    EXPECT_TRUE(IsSpace('\n'));
+    EXPECT_TRUE(IsSpace('\r'));
+    EXPECT_TRUE(IsSpace('\t'));
+    EXPECT_TRUE(IsSpace('\v'));
+}
+
+TEST(StringTest, TrimSpace) {
+    EXPECT_EQ(TrimSpace("hello world"), "hello world");
+    EXPECT_EQ(TrimSpace(" \t hello world\v\f"), "hello world");
+    EXPECT_EQ(TrimSpace("hello \t world"), "hello \t world");
+    EXPECT_EQ(TrimSpace(""), "");
 }
 
 }  // namespace
