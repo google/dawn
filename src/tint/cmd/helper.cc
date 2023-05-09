@@ -22,6 +22,8 @@
 #include "spirv-tools/libspirv.hpp"
 #endif
 
+#include "src/tint/utils/string.h"
+
 namespace tint::cmd {
 namespace {
 
@@ -34,12 +36,11 @@ enum class InputFormat {
 
 InputFormat InputFormatFromFilename(const std::string& filename) {
     auto input_format = InputFormat::kUnknown;
-
-    if (filename.size() > 5 && filename.substr(filename.size() - 5) == ".wgsl") {
+    if (utils::HasSuffix(filename, ".wgsl")) {
         input_format = InputFormat::kWgsl;
-    } else if (filename.size() > 4 && filename.substr(filename.size() - 4) == ".spv") {
+    } else if (utils::HasSuffix(filename, ".spv")) {
         input_format = InputFormat::kSpirvBin;
-    } else if (filename.size() > 7 && filename.substr(filename.size() - 7) == ".spvasm") {
+    } else if (utils::HasSuffix(filename, ".spvasm")) {
         input_format = InputFormat::kSpirvAsm;
     }
     return input_format;

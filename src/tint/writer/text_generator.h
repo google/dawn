@@ -114,12 +114,6 @@ class TextGenerator {
     /// underscores.
     std::string StructName(const type::Struct* s);
 
-    /// @param str the string
-    /// @param suffix the suffix to remove
-    /// @return returns str without the provided trailing suffix string. If str
-    /// doesn't end with suffix, str is returned unchanged.
-    std::string TrimSuffix(std::string str, const std::string& suffix);
-
   protected:
     /// LineWriter is a helper that acts as a string buffer, who's content is
     /// emitted to the TextBuffer as a single line on destruction.

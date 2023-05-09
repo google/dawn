@@ -2253,7 +2253,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 out << cond_buf.str() << "; ";
 
                 if (!cont_buf.lines.empty()) {
-                    out << TrimSuffix(cont_buf.lines[0].content, ";");
+                    out << utils::TrimSuffix(cont_buf.lines[0].content, ";");
                 }
             }
             out << " {";

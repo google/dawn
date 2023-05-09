@@ -39,15 +39,6 @@ std::string TextGenerator::StructName(const type::Struct* s) {
     return name;
 }
 
-std::string TextGenerator::TrimSuffix(std::string str, const std::string& suffix) {
-    if (str.size() >= suffix.size()) {
-        if (str.substr(str.size() - suffix.size(), suffix.size()) == suffix) {
-            return str.substr(0, str.size() - suffix.size());
-        }
-    }
-    return str;
-}
-
 TextGenerator::LineWriter::LineWriter(TextBuffer* buf) : buffer(buf) {}
 
 TextGenerator::LineWriter::LineWriter(LineWriter&& other) {

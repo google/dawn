@@ -205,47 +205,34 @@ Format parse_format(const std::string& fmt) {
     return Format::kUnknown;
 }
 
-#if TINT_BUILD_SPV_WRITER || TINT_BUILD_WGSL_WRITER || TINT_BUILD_MSL_WRITER || \
-    TINT_BUILD_HLSL_WRITER
-/// @param input input string
-/// @param suffix potential suffix string
-/// @returns true if input ends with the given suffix.
-bool ends_with(const std::string& input, const std::string& suffix) {
-    const auto input_len = input.size();
-    const auto suffix_len = suffix.size();
-    // Avoid integer overflow.
-    return (input_len >= suffix_len) && (input_len - suffix_len == input.rfind(suffix));
-}
-#endif
-
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
 Format infer_format(const std::string& filename) {
     (void)filename;
 
 #if TINT_BUILD_SPV_WRITER
-    if (ends_with(filename, ".spv")) {
+    if (tint::utils::HasSuffix(filename, ".spv")) {
         return Format::kSpirv;
     }
-    if (ends_with(filename, ".spvasm")) {
+    if (tint::utils::HasSuffix(filename, ".spvasm")) {
         return Format::kSpvAsm;
     }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
-    if (ends_with(filename, ".wgsl")) {
+    if (tint::utils::HasSuffix(filename, ".wgsl")) {
         return Format::kWgsl;
     }
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
-    if (ends_with(filename, ".metal")) {
+    if (tint::utils::HasSuffix(filename, ".metal")) {
         return Format::kMsl;
     }
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
-    if (ends_with(filename, ".hlsl")) {
+    if (tint::utils::HasSuffix(filename, ".hlsl")) {
         return Format::kHlsl;
     }
 #endif  // TINT_BUILD_HLSL_WRITER

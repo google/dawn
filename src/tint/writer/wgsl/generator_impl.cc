@@ -818,14 +818,14 @@ void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 case 0:  // No initializer
                     break;
                 case 1:  // Single line initializer statement
-                    out << TrimSuffix(init_buf.lines[0].content, ";");
+                    out << utils::TrimSuffix(init_buf.lines[0].content, ";");
                     break;
                 default:  // Block initializer statement
                     for (size_t i = 1; i < init_buf.lines.size(); i++) {
                         // Indent all by the first line
                         init_buf.lines[i].indent += current_buffer_->current_indent;
                     }
-                    out << TrimSuffix(init_buf.String(), "\n");
+                    out << utils::TrimSuffix(init_buf.String(), "\n");
                     break;
             }
 
@@ -841,14 +841,14 @@ void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 case 0:  // No continuing
                     break;
                 case 1:  // Single line continuing statement
-                    out << TrimSuffix(cont_buf.lines[0].content, ";");
+                    out << utils::TrimSuffix(cont_buf.lines[0].content, ";");
                     break;
                 default:  // Block continuing statement
                     for (size_t i = 1; i < cont_buf.lines.size(); i++) {
                         // Indent all by the first line
                         cont_buf.lines[i].indent += current_buffer_->current_indent;
                     }
-                    out << TrimSuffix(cont_buf.String(), "\n");
+                    out << utils::TrimSuffix(cont_buf.String(), "\n");
                     break;
             }
         }
