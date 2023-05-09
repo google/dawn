@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/generator_impl_ir.h"
 
 #include "spirv/unified1/spirv.h"
+#include "src/tint/ir/block.h"
+#include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/bool.h"
@@ -150,12 +152,11 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     // Create a function that we will add instructions to.
     // TODO(jrprice): Add the parameter declarations when they are supported in the IR.
     auto entry_block = module_.NextId();
-    Function current_function_(decl, entry_block, {});
+    current_function_ = Function(decl, entry_block, {});
+    TINT_DEFER(current_function_ = Function());
 
-    // TODO(jrprice): Emit the body of the function.
-
-    // TODO(jrprice): Remove this when we start emitting OpReturn for branches to the terminator.
-    current_function_.push_inst(spv::Op::OpReturn, {});
+    // Emit the body of the function.
+    EmitBlock(func->start_target);
 
     // Add the function to the module.
     module_.PushFunction(current_function_);
@@ -190,6 +191,28 @@ void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
 
     // TODO(jrprice): Add the interface list of all referenced global variables.
     module_.PushEntryPoint(spv::Op::OpEntryPoint, {U32Operand(stage), id, func->name.Name()});
+}
+
+void GeneratorImplIr::EmitBlock(const ir::Block* block) {
+    // Emit the instructions.
+    for (auto* inst : block->instructions) {
+        auto result = Switch(inst,  //
+                             [&](Default) {
+                                 TINT_ICE(Writer, diagnostics_)
+                                     << "unimplemented instruction: " << inst->TypeInfo().name;
+                                 return 0u;
+                             });
+        instructions_.Add(inst, result);
+    }
+
+    // Handle the branch at the end of the block.
+    Switch(
+        block->branch.target,
+        [&](const ir::FunctionTerminator*) {
+            // TODO(jrprice): Handle the return value, which will be a branch argument.
+            current_function_.push_inst(spv::Op::OpReturn, {});
+        },
+        [&](Default) { TINT_ICE(Writer, diagnostics_) << "unimplemented branch target"; });
 }
 
 }  // namespace tint::writer::spirv

@@ -23,10 +23,12 @@
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/vector.h"
 #include "src/tint/writer/spirv/binary_writer.h"
+#include "src/tint/writer/spirv/function.h"
 #include "src/tint/writer/spirv/module.h"
 
 // Forward declarations
 namespace tint::ir {
+class Block;
 class Function;
 class Module;
 }  // namespace tint::ir
@@ -75,6 +77,10 @@ class GeneratorImplIr {
     /// @param func the function to emit entry point declarations for
     /// @param id the result ID of the function declaration
     void EmitEntryPoint(const ir::Function* func, uint32_t id);
+
+    /// Emit a block.
+    /// @param block the block to emit
+    void EmitBlock(const ir::Block* block);
 
   private:
     const ir::Module* ir_;
@@ -134,6 +140,12 @@ class GeneratorImplIr {
 
     /// The map of constants to their result IDs.
     utils::Hashmap<const ir::Constant*, uint32_t, 16, ConstantHasher, ConstantEquals> constants_;
+
+    /// The map of instructions to their result IDs.
+    utils::Hashmap<const ir::Instruction*, uint32_t, 8> instructions_;
+
+    /// The current function that is being emitted.
+    Function current_function_;
 
     bool zero_init_workgroup_memory_ = false;
 };
