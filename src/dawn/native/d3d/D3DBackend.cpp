@@ -21,11 +21,17 @@
 #include <utility>
 
 #include "dawn/common/Log.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/d3d/DeviceD3D.h"
 #include "dawn/native/d3d/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d/Forward.h"
+#include "dawn/native/d3d/PhysicalDeviceD3D.h"
 
 namespace dawn::native::d3d {
+
+Microsoft::WRL::ComPtr<IDXGIAdapter> GetDXGIAdapter(WGPUAdapter adapter) {
+    return ToBackend(FromAPI(adapter)->GetPhysicalDevice())->GetHardwareAdapter();
+}
 
 AdapterDiscoveryOptions::AdapterDiscoveryOptions(WGPUBackendType type,
                                                  Microsoft::WRL::ComPtr<IDXGIAdapter> adapter)

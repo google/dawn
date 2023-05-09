@@ -15,6 +15,7 @@
 #include "dawn/native/d3d/DeviceD3D.h"
 
 #include "dawn/native/d3d/BackendD3D.h"
+#include "dawn/native/d3d/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d/Forward.h"
 #include "dawn/native/d3d/PhysicalDeviceD3D.h"
 
@@ -25,7 +26,25 @@ Device::Device(AdapterBase* adapter,
                const TogglesState& deviceToggles)
     : DeviceBase(adapter, descriptor, deviceToggles) {}
 
-Device::~Device() = default;
+Device::~Device() {
+    Destroy();
+
+    // Close the handle here instead of in DestroyImpl. The handle is returned from
+    // ExternalImageDXGI, so it needs to live as long as the Device ref does, even if the device
+    // state is destroyed.
+    if (mFenceHandle != nullptr) {
+        ::CloseHandle(mFenceHandle);
+        mFenceHandle = nullptr;
+    }
+}
+
+void Device::DestroyImpl() {
+    while (!mExternalImageList.empty()) {
+        d3d::ExternalImageDXGIImpl* externalImage = mExternalImageList.head()->value();
+        // ExternalImageDXGIImpl::DestroyInternal() calls RemoveFromList().
+        externalImage->DestroyInternal();
+    }
+}
 
 ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
     const Surface* surface) const {
@@ -52,6 +71,20 @@ ComPtr<IDxcCompiler> Device::GetDxcCompiler() const {
 
 ComPtr<IDxcValidator> Device::GetDxcValidator() const {
     return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcValidator();
+}
+
+HANDLE Device::GetFenceHandle() const {
+    return mFenceHandle;
+}
+
+std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(
+    const ExternalImageDescriptorDXGISharedHandle* descriptor) {
+    std::unique_ptr<ExternalImageDXGIImpl> externalImage;
+    if (!ConsumedError(CreateExternalImageDXGIImplImpl(descriptor), &externalImage)) {
+        mExternalImageList.Append(externalImage.get());
+        return externalImage;
+    }
+    return {};
 }
 
 }  // namespace dawn::native::d3d

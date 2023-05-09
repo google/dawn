@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,34 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_D3D12_FENCED3D12_H_
-#define SRC_DAWN_NATIVE_D3D12_FENCED3D12_H_
+#ifndef SRC_DAWN_NATIVE_D3D11_FENCED3D11_H_
+#define SRC_DAWN_NATIVE_D3D11_FENCED3D11_H_
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/d3d/Fence.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "dawn/native/d3d/d3d_platform.h"
 
-namespace dawn::native::d3d12 {
+namespace dawn::native::d3d11 {
 
 class Fence : public d3d::Fence {
   public:
-    static ResultOrError<Ref<Fence>> CreateFromHandle(ID3D12Device* device,
+    static ResultOrError<Ref<Fence>> CreateFromHandle(ID3D11Device5* device,
                                                       HANDLE unownedHandle,
                                                       UINT64 fenceValue);
 
-    ID3D12Fence* GetD3D12Fence() const;
+    ID3D11Fence* GetD3D11Fence() const;
 
   private:
     using Base = d3d::Fence;
 
-    Fence(ComPtr<ID3D12Fence> d3d12Fence, UINT64 fenceValue, HANDLE sharedHandle);
+    Fence(ComPtr<ID3D11Fence> d3d11Fence, UINT64 fenceValue, HANDLE sharedHandle);
     ~Fence() override;
 
-    ComPtr<ID3D12Fence> mD3D12Fence;
+    ComPtr<ID3D11Fence> mD3D11Fence;
 };
 
-}  // namespace dawn::native::d3d12
+}  // namespace dawn::native::d3d11
 
-#endif  // SRC_DAWN_NATIVE_D3D12_FENCED3D12_H_
+#endif  // SRC_DAWN_NATIVE_D3D11_FENCED3D11_H_

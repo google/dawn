@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn Authors
+// Copyright 2023 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/d3d12/FenceD3D12.h"
+#include "dawn/native/d3d11/FenceD3D11.h"
 
 #include <utility>
 
@@ -21,33 +21,33 @@
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 
-namespace dawn::native::d3d12 {
+namespace dawn::native::d3d11 {
 
 // static
-ResultOrError<Ref<Fence>> Fence::CreateFromHandle(ID3D12Device* device,
+ResultOrError<Ref<Fence>> Fence::CreateFromHandle(ID3D11Device5* device,
                                                   HANDLE unownedHandle,
                                                   UINT64 fenceValue) {
     ASSERT(unownedHandle != nullptr);
     HANDLE ownedHandle = nullptr;
     if (!::DuplicateHandle(::GetCurrentProcess(), unownedHandle, ::GetCurrentProcess(),
                            &ownedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
-        return DAWN_DEVICE_LOST_ERROR("D3D12 fence dup handle");
+        return DAWN_DEVICE_LOST_ERROR("D3D11 fence dup handle");
     }
-    ComPtr<ID3D12Fence> d3d12Fence;
+    ComPtr<ID3D11Fence> d3d11Fence;
     DAWN_TRY_WITH_CLEANUP(
-        CheckHRESULT(device->OpenSharedHandle(ownedHandle, IID_PPV_ARGS(&d3d12Fence)),
-                     "D3D12 fence open handle"),
+        CheckHRESULT(device->OpenSharedFence(ownedHandle, IID_PPV_ARGS(&d3d11Fence)),
+                     "D3D11 fence open handle"),
         { ::CloseHandle(ownedHandle); });
-    return AcquireRef(new Fence(std::move(d3d12Fence), fenceValue, ownedHandle));
+    return AcquireRef(new Fence(std::move(d3d11Fence), fenceValue, ownedHandle));
 }
 
-Fence::Fence(ComPtr<ID3D12Fence> d3d12Fence, UINT64 fenceValue, HANDLE sharedHandle)
-    : Base(fenceValue, sharedHandle), mD3D12Fence(std::move(d3d12Fence)) {}
+Fence::Fence(ComPtr<ID3D11Fence> d3d11Fence, UINT64 fenceValue, HANDLE sharedHandle)
+    : Base(fenceValue, sharedHandle), mD3D11Fence(std::move(d3d11Fence)) {}
 
 Fence::~Fence() = default;
 
-ID3D12Fence* Fence::GetD3D12Fence() const {
-    return mD3D12Fence.Get();
+ID3D11Fence* Fence::GetD3D11Fence() const {
+    return mD3D11Fence.Get();
 }
 
-}  // namespace dawn::native::d3d12
+}  // namespace dawn::native::d3d11

@@ -51,12 +51,11 @@ class Device final : public d3d::Device {
 
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
     MaybeError ExecutePendingCommandContext();
-    HANDLE GetFenceHandle() const;
-    Ref<TextureBase> CreateD3D11ExternalTexture(const TextureDescriptor* descriptor,
-                                                ComPtr<ID3D11Resource> d3d11Texture,
-                                                std::vector<Ref<Fence>> waitFences,
-                                                bool isSwapChainTexture,
-                                                bool isInitialized);
+    Ref<TextureBase> CreateD3DExternalTexture(const TextureDescriptor* descriptor,
+                                              ComPtr<IUnknown> d3dTexture,
+                                              std::vector<Ref<d3d::Fence>> waitFences,
+                                              bool isSwapChainTexture,
+                                              bool isInitialized) override;
 
     ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
         CommandEncoder* encoder,
@@ -79,7 +78,9 @@ class Device final : public d3d::Device {
     uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const override;
     void SetLabelImpl() override;
 
-    std::unique_ptr<d3d::ExternalImageDXGIImpl> CreateExternalImageDXGIImpl(
+    ResultOrError<Ref<d3d::Fence>> CreateFence(
+        const d3d::ExternalImageDXGIFenceDescriptor* descriptor) override;
+    ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> CreateExternalImageDXGIImplImpl(
         const d3d::ExternalImageDescriptorDXGISharedHandle* descriptor) override;
 
   private:
@@ -127,7 +128,6 @@ class Device final : public d3d::Device {
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
     ComPtr<ID3D11Fence> mFence;
-    HANDLE mFenceHandle = nullptr;
     HANDLE mFenceEvent = nullptr;
 
     ComPtr<ID3D11Device> mD3d11Device;

@@ -12,30 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_D3D_FORWARD_H_
-#define SRC_DAWN_NATIVE_D3D_FORWARD_H_
+#include "dawn/native/d3d/Fence.h"
 
-#include "dawn/native/ToBackend.h"
+#include <utility>
+
+#include "dawn/common/Log.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/d3d/D3DError.h"
 
 namespace dawn::native::d3d {
 
-class PhysicalDevice;
-class Device;
-class SwapChain;
-class Texture;
+Fence::Fence(UINT64 fenceValue, HANDLE sharedHandle)
+    : mFenceValue(fenceValue), mSharedHandle(sharedHandle) {}
 
-struct D3DBackendTraits {
-    using DeviceType = Device;
-    using PhysicalDeviceType = PhysicalDevice;
-    using SwapChainType = SwapChain;
-    using TextureType = Texture;
-};
+Fence::~Fence() {
+    if (mSharedHandle != nullptr) {
+        ::CloseHandle(mSharedHandle);
+    }
+}
 
-template <typename T>
-auto ToBackend(T&& common) -> decltype(ToBackendBase<D3DBackendTraits>(common)) {
-    return ToBackendBase<D3DBackendTraits>(common);
+UINT64 Fence::GetFenceValue() const {
+    return mFenceValue;
 }
 
 }  // namespace dawn::native::d3d
-
-#endif  // SRC_DAWN_NATIVE_D3D_FORWARD_H_

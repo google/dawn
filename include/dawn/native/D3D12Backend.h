@@ -29,8 +29,6 @@ namespace dawn::native::d3d12 {
 
 class Device;
 
-DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);
-
 enum MemorySegment {
     Local,
     NonLocal,

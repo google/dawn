@@ -25,6 +25,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
+#include "dawn/native/d3d/d3d_platform.h"
 #include "dawn/webgpu_cpp.h"
 
 namespace dawn::native::d3d {
@@ -34,29 +35,32 @@ struct ExternalImageDXGIBeginAccessDescriptor;
 struct ExternalImageDXGIFenceDescriptor;
 struct ExternalImageDescriptorDXGISharedHandle;
 
+MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor);
+
 class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
   public:
-    ExternalImageDXGIImpl(Device* backendDevice, const TextureDescriptor* textureDescriptor);
-    virtual ~ExternalImageDXGIImpl();
+    ExternalImageDXGIImpl(Device* backendDevice,
+                          ComPtr<IUnknown> d3dResource,
+                          const TextureDescriptor* textureDescriptor);
+    ~ExternalImageDXGIImpl();
 
     ExternalImageDXGIImpl(const ExternalImageDXGIImpl&) = delete;
     ExternalImageDXGIImpl& operator=(const ExternalImageDXGIImpl&) = delete;
 
     bool IsValid() const;
 
-    virtual WGPUTexture BeginAccess(const ExternalImageDXGIBeginAccessDescriptor* descriptor) = 0;
-
-    virtual void EndAccess(WGPUTexture texture, ExternalImageDXGIFenceDescriptor* signalFence) = 0;
+    WGPUTexture BeginAccess(const ExternalImageDXGIBeginAccessDescriptor* descriptor);
+    void EndAccess(WGPUTexture texture, ExternalImageDXGIFenceDescriptor* signalFence);
 
     // This method should only be called by internal code. Don't call this from D3D12Backend side,
     // or without locking.
-    virtual void DestroyInternal();
+    void DestroyInternal();
 
   protected:
     [[nodiscard]] Mutex::AutoLock GetScopedDeviceLock() const;
 
     Ref<DeviceBase> mBackendDevice;
-
+    ComPtr<IUnknown> mD3DResource;
     wgpu::TextureUsage mUsage;
     wgpu::TextureUsage mUsageInternal = wgpu::TextureUsage::None;
     wgpu::TextureDimension mDimension;
