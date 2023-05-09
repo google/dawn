@@ -55,7 +55,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
         mAdapterType = wgpu::AdapterType::DiscreteGPU;
     }
 
-    // Convert the adapter's D3D11 driver version to a readable string like "24.21.13.9793".
+    // Convert the adapter's D3D driver version to a readable string like "24.21.13.9793".
     LARGE_INTEGER umdVersion;
     if (GetHardwareAdapter()->CheckInterfaceSupport(__uuidof(IDXGIDevice), &umdVersion) !=
         DXGI_ERROR_UNSUPPORTED) {
@@ -65,7 +65,18 @@ MaybeError PhysicalDevice::InitializeImpl() {
                           static_cast<uint16_t>((encodedVersion >> 32) & mask),
                           static_cast<uint16_t>((encodedVersion >> 16) & mask),
                           static_cast<uint16_t>(encodedVersion & mask)};
-        mDriverDescription = std::string("D3D11 driver version ") + mDriverVersion.ToString();
+        switch (GetBackendType()) {
+            case wgpu::BackendType::D3D11:
+                mDriverDescription =
+                    std::string("D3D11 driver version ") + mDriverVersion.ToString();
+                break;
+            case wgpu::BackendType::D3D12:
+                mDriverDescription =
+                    std::string("D3D12 driver version ") + mDriverVersion.ToString();
+                break;
+            default:
+                UNREACHABLE();
+        }
     }
 
     return {};
