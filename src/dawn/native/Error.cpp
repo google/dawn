@@ -36,10 +36,8 @@ wgpu::ErrorType ToWGPUErrorType(InternalErrorType type) {
             return wgpu::ErrorType::Validation;
         case InternalErrorType::OutOfMemory:
             return wgpu::ErrorType::OutOfMemory;
-
-        // There is no equivalent of Internal errors in the WebGPU API. Internal errors cause
-        // the device at the API level to be lost, so treat it like a DeviceLost error.
         case InternalErrorType::Internal:
+            return wgpu::ErrorType::Internal;
         case InternalErrorType::DeviceLost:
             return wgpu::ErrorType::DeviceLost;
 
