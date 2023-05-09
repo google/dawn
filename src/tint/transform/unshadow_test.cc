@@ -779,5 +779,25 @@ fn F() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(UnshadowTest, RenamedAbstractConstHasUsers) {
+    auto* src = R"(
+fn v() {
+  const v = 1;
+  let x = v;
+}
+)";
+
+    auto* expect = R"(
+fn v() {
+  const v_1 = 1;
+  let x = v_1;
+}
+)";
+
+    auto got = Run<Unshadow>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform
