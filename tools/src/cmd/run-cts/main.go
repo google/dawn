@@ -100,6 +100,31 @@ func (f *dawnNodeFlags) Set(value string) error {
 	return nil
 }
 
+// Consolidates all the delimiter separated flags with a given prefix into a single flag.
+// Example:
+// Given the flags: ["foo=a", "bar", "foo=b,c"]
+// GlobListFlags("foo=", ",") will transform the flags to: ["bar", "foo=a,b,c"]
+func (f *dawnNodeFlags) GlobListFlags(prefix string, delimiter string) {
+	list := []string{}
+	i := 0
+	for _, flag := range *f {
+		if strings.HasPrefix(flag, prefix) {
+			// Trim the prefix.
+			value := flag[len(prefix):]
+			// Extract the deliminated values.
+			list = append(list, strings.Split(value, delimiter)...)
+		} else {
+			(*f)[i] = flag
+			i++
+		}
+	}
+	(*f) = (*f)[:i]
+	if len(list) > 0 {
+		// Append back the consolidated flags.
+		f.Set(prefix + strings.Join(list, delimiter))
+	}
+}
+
 func makeCtx() context.Context {
 	ctx, cancel := context.WithCancel(context.Background())
 	sigs := make(chan os.Signal, 1)
@@ -223,20 +248,12 @@ func run() error {
 	}
 
 	// While running the CTS, always allow unsafe APIs so they can be tested.
-	disableDawnFeaturesFound := false
-	for i, flag := range flags {
-		if strings.HasPrefix(flag, "disable-dawn-features=") {
-			flags[i] = flag + ",disallow_unsafe_apis"
-			disableDawnFeaturesFound = true
-		}
-	}
-	if !disableDawnFeaturesFound {
-		flags = append(flags, "disable-dawn-features=disallow_unsafe_apis")
-	}
+	flags.Set("enable-dawn-features=allow_unsafe_apis")
 	if dumpShaders {
-		flags = append(flags, "enable-dawn-features=dump_shaders,disable_symbol_renaming")
 		verbose = true
+		flags.Set("enable-dawn-features=dump_shaders,disable_symbol_renaming")
 	}
+	flags.GlobListFlags("enable-dawn-features=", ",")
 
 	r := runner{
 		query:                query,
