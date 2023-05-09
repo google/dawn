@@ -1034,6 +1034,11 @@ uint32_t Builder::GenerateAccessorExpression(const ast::AccessorExpression* expr
         } else {
             break;
         }
+
+        // Stop traversing if we've hit a constant source expression.
+        if (builder_.Sem().GetVal(source)->ConstantValue()) {
+            break;
+        }
     }
 
     AccessorInfo info;
