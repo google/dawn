@@ -128,7 +128,7 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
 }
 
 void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
-    SpvExecutionModel stage;
+    SpvExecutionModel stage = SpvExecutionModelMax;
     switch (func->pipeline_stage) {
         case ir::Function::PipelineStage::kCompute: {
             stage = SpvExecutionModelGLCompute;
