@@ -169,11 +169,17 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                     }
                     case wgpu::BufferBindingType::Storage:
                     case kInternalStorageBufferBinding: {
-                        ASSERT(IsSubset(bindingInfo.visibility, wgpu::ShaderStage::Compute));
+                        ASSERT(IsSubset(bindingInfo.visibility,
+                                        wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
                         ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
                         DAWN_TRY_ASSIGN(
                             d3d11UAV, ToBackend(binding.buffer)
                                           ->CreateD3D11UnorderedAccessView1(offset, binding.size));
+                        if (bindingInfo.visibility & wgpu::ShaderStage::Fragment) {
+                            deviceContext1->OMSetRenderTargetsAndUnorderedAccessViews(
+                                D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
+                                bindingSlot, 1, d3d11UAV.GetAddressOf(), nullptr);
+                        }
                         if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
                             deviceContext1->CSSetUnorderedAccessViews(
                                 bindingSlot, 1, d3d11UAV.GetAddressOf(), nullptr);
@@ -279,9 +285,15 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                     }
                     case wgpu::BufferBindingType::Storage:
                     case kInternalStorageBufferBinding: {
-                        ASSERT(IsSubset(bindingInfo.visibility, wgpu::ShaderStage::Compute));
+                        ASSERT(IsSubset(bindingInfo.visibility,
+                                        wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
+                        ID3D11UnorderedAccessView* nullUAV = nullptr;
+                        if (bindingInfo.visibility & wgpu::ShaderStage::Fragment) {
+                            deviceContext1->OMSetRenderTargetsAndUnorderedAccessViews(
+                                D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
+                                bindingSlot, 1, &nullUAV, nullptr);
+                        }
                         if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
-                            ID3D11UnorderedAccessView* nullUAV = nullptr;
                             deviceContext1->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV,
                                                                       nullptr);
                         }
