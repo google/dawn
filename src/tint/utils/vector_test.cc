@@ -20,6 +20,7 @@
 #include "gmock/gmock.h"
 
 #include "src/tint/utils/bitcast.h"
+#include "src/tint/utils/predicates.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
@@ -1788,6 +1789,38 @@ TEST(TintVectorTest, Equality) {
     EXPECT_NE((Vector{2, 1}), (Vector{1, 2}));
 }
 
+TEST(TintVectorTest, Sort) {
+    Vector vec{1, 5, 3, 4, 2};
+    vec.Sort();
+    EXPECT_THAT(vec, testing::ElementsAre(1, 2, 3, 4, 5));
+}
+
+TEST(TintVectorTest, Any) {
+    Vector vec{1, 7, 5, 9};
+    EXPECT_TRUE(vec.Any(Eq(1)));
+    EXPECT_FALSE(vec.Any(Eq(2)));
+    EXPECT_FALSE(vec.Any(Eq(3)));
+    EXPECT_FALSE(vec.Any(Eq(4)));
+    EXPECT_TRUE(vec.Any(Eq(5)));
+    EXPECT_FALSE(vec.Any(Eq(6)));
+    EXPECT_TRUE(vec.Any(Eq(7)));
+    EXPECT_FALSE(vec.Any(Eq(8)));
+    EXPECT_TRUE(vec.Any(Eq(9)));
+}
+
+TEST(TintVectorTest, All) {
+    Vector vec{1, 7, 5, 9};
+    EXPECT_FALSE(vec.All(Ne(1)));
+    EXPECT_TRUE(vec.All(Ne(2)));
+    EXPECT_TRUE(vec.All(Ne(3)));
+    EXPECT_TRUE(vec.All(Ne(4)));
+    EXPECT_FALSE(vec.All(Ne(5)));
+    EXPECT_TRUE(vec.All(Ne(6)));
+    EXPECT_FALSE(vec.All(Ne(7)));
+    EXPECT_TRUE(vec.All(Ne(8)));
+    EXPECT_FALSE(vec.All(Ne(9)));
+}
+
 TEST(TintVectorTest, ostream) {
     utils::StringStream ss;
     ss << Vector{1, 2, 3};
@@ -2005,12 +2038,6 @@ TEST(TintVectorRefTest, Index) {
     EXPECT_EQ(vec_ref[1], "two");
 }
 
-TEST(TintVectorRefTest, Sort) {
-    Vector vec{1, 5, 3, 4, 2};
-    vec.Sort();
-    EXPECT_THAT(vec, testing::ElementsAre(1, 2, 3, 4, 5));
-}
-
 TEST(TintVectorRefTest, SortPredicate) {
     Vector vec{1, 5, 3, 4, 2};
     vec.Sort([](int a, int b) { return b < a; });
@@ -2072,6 +2099,7 @@ TEST(TintVectorRefTest, ostream) {
     ss << vec_ref;
     EXPECT_EQ(ss.str(), "[1, 2, 3]");
 }
+
 }  // namespace
 }  // namespace tint::utils
 

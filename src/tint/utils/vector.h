@@ -322,6 +322,20 @@ class Vector {
         Sort([](auto& a, auto& b) { return a < b; });
     }
 
+    /// @returns true if the predicate function returns true for any of the elements of the vector
+    /// @param pred a function-like with the signature `bool(T)`
+    template <typename PREDICATE>
+    bool Any(PREDICATE&& pred) const {
+        return std::any_of(begin(), end(), std::forward<PREDICATE>(pred));
+    }
+
+    /// @returns false if the predicate function returns false for any of the elements of the vector
+    /// @param pred a function-like with the signature `bool(T)`
+    template <typename PREDICATE>
+    bool All(PREDICATE&& pred) const {
+        return std::all_of(begin(), end(), std::forward<PREDICATE>(pred));
+    }
+
     /// @returns true if the vector is empty.
     bool IsEmpty() const { return impl_.slice.len == 0; }
 

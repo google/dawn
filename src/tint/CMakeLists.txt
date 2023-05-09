@@ -532,6 +532,7 @@ list(APPEND TINT_LIB_SRCS
   utils/hashset.h
   utils/map.h
   utils/math.h
+  utils/predicates.h
   utils/scoped_assignment.h
   utils/slice.h
   utils/string.cc
@@ -1030,6 +1031,7 @@ if(TINT_BUILD_TESTS)
     utils/hashset_test.cc
     utils/map_test.cc
     utils/math_test.cc
+    utils/predicates_test.cc
     utils/result_test.cc
     utils/reverse_test.cc
     utils/scoped_assignment_test.cc
