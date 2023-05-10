@@ -69,8 +69,7 @@ PhysicalDevice::PhysicalDevice(Backend* backend,
 PhysicalDevice::~PhysicalDevice() = default;
 
 bool PhysicalDevice::SupportsExternalImages() const {
-    // TODO(dawn:1724): Implement external images on D3D11.
-    return false;
+    return true;
 }
 
 bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
