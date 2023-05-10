@@ -1457,6 +1457,7 @@ if(TINT_BUILD_TESTS)
       ir/builder_impl_var_test.cc
       ir/constant_test.cc
       ir/discard_test.cc
+      ir/module_test.cc
       ir/store_test.cc
       ir/test_helper.h
       ir/unary_test.cc

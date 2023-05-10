@@ -781,6 +781,9 @@ void BuilderImpl::EmitVariable(const ast::Variable* var) {
             }
             // Store the declaration so we can get the instruction to store too
             scopes_.Set(v->name->symbol, val);
+
+            // Record the original name of the var
+            builder.ir.SetName(val, v->name->symbol.Name());
         },
         [&](const ast::Let* l) {
             // A `let` doesn't exist as a standalone item in the IR, it's just the result of the
@@ -792,6 +795,9 @@ void BuilderImpl::EmitVariable(const ast::Variable* var) {
 
             // Store the results of the initialization
             scopes_.Set(l->name->symbol, init.Get());
+
+            // Record the original name of the let
+            builder.ir.SetName(init.Get(), l->name->symbol.Name());
         },
         [&](const ast::Override*) {
             add_error(var->source,

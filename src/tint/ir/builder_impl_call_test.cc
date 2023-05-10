@@ -92,14 +92,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%1:ref<private, i32, read_write> = var private read_write
-store %1:ref<private, i32, read_write>, 1i
+%i:ref<private, i32, read_write> = var private read_write
+store %i:ref<private, i32, read_write>, 1i
 
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn3 = block
-  %2:f32 = convert i32, %1:ref<private, i32, read_write>
+  %tint_symbol:f32 = convert i32, %i:ref<private, i32, read_write>
   ret
 func_end
 
@@ -116,8 +116,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%1:ref<private, vec3<f32>, read_write> = var private read_write
-store %1:ref<private, vec3<f32>, read_write>, vec3<f32> 0.0f
+%i:ref<private, vec3<f32>, read_write> = var private read_write
+store %i:ref<private, vec3<f32>, read_write>, vec3<f32> 0.0f
 
 
 
@@ -135,14 +135,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%1:ref<private, f32, read_write> = var private read_write
-store %1:ref<private, f32, read_write>, 1.0f
+%i:ref<private, f32, read_write> = var private read_write
+store %i:ref<private, f32, read_write>, 1.0f
 
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn3 = block
-  %2:vec3<f32> = construct 2.0f, 3.0f, %1:ref<private, f32, read_write>
+  %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %i:ref<private, f32, read_write>
   ret
 func_end
 

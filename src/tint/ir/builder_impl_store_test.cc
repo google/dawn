@@ -37,13 +37,13 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Assign) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%1:ref<private, u32, read_write> = var private read_write
+%a:ref<private, u32, read_write> = var private read_write
 
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn3 = block
-  store %1:ref<private, u32, read_write>, 4u
+  store %a:ref<private, u32, read_write>, 4u
   ret
 func_end
 

@@ -94,7 +94,12 @@ size_t Disassembler::IdOf(const FlowNode* node) {
 
 std::string_view Disassembler::IdOf(const Value* value) {
     TINT_ASSERT(IR, value);
-    return value_ids_.GetOrCreate(value, [&] { return std::to_string(value_ids_.Count()); });
+    return value_ids_.GetOrCreate(value, [&] {
+        if (auto sym = mod_.NameOf(value)) {
+            return sym.Name();
+        }
+        return std::to_string(value_ids_.Count());
+    });
 }
 
 void Disassembler::Walk(const FlowNode* node) {

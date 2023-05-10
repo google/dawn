@@ -32,6 +32,15 @@ namespace tint::ir {
 
 /// Main module class for the IR.
 class Module {
+    /// Program Id required to create other components
+    ProgramID prog_id_;
+
+    /// Map of value to pre-declared identifier
+    utils::Hashmap<const Value*, Symbol, 32> value_to_id_;
+
+    /// Map of pre-declared identifier to value
+    utils::Hashmap<Symbol, const Value*, 32> id_to_value_;
+
   public:
     /// Constructor
     Module();
@@ -46,11 +55,15 @@ class Module {
     /// @returns a reference to this module
     Module& operator=(Module&& o);
 
-  private:
-    /// Program Id required to create other components
-    ProgramID prog_id_;
+    /// @param value the value
+    /// @return the name of the given value, or an invalid symbol if the value is not named.
+    Symbol NameOf(const Value* value) const;
 
-  public:
+    /// @param value the value to name.
+    /// @param name the desired name of the value. May be suffixed on collision.
+    /// @return the unique symbol of the given value.
+    Symbol SetName(const Value* value, std::string_view name);
+
     /// The flow node allocator
     utils::BlockAllocator<FlowNode> flow_nodes;
     /// The constant allocator

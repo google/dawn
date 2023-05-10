@@ -100,6 +100,9 @@ class Symbol {
     /// @returns true if the symbol is valid
     bool IsValid() const { return val_ != static_cast<uint32_t>(-1); }
 
+    /// @returns true if the symbol is valid
+    operator bool() const { return IsValid(); }
+
     /// @returns the value for the symbol
     uint32_t value() const { return val_; }
 
