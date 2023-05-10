@@ -664,6 +664,10 @@ source_set("white_box_tests_sources") {
     "white_box/QueryInternalShaderTests.cpp",
   ]
 
+  if (dawn_enable_d3d11) {
+    sources += [ "white_box/D3D11BufferTests.cpp" ]
+  }
+
   if (dawn_enable_d3d12) {
     sources += [
       "white_box/D3D12DescriptorHeapTests.cpp",

@@ -40,14 +40,19 @@ class Buffer final : public BufferBase {
     // Dawn API
     void SetLabelImpl() override;
 
-    ID3D11Buffer* GetD3D11Buffer() const { return mD3d11Buffer.Get(); }
+    ID3D11Buffer* GetD3D11ConstantBuffer() const { return mD3d11ConstantBuffer.Get(); }
+    ID3D11Buffer* GetD3D11NonConstantBuffer() const { return mD3d11NonConstantBuffer.Get(); }
+    // Mark the mD3d11NonConstantBuffer is mutated by shaders, if mD3d11ConstantBuffer exists,
+    // it will be synced with mD3d11NonConstantBuffer before binding it to the constant buffer slot.
+    void MarkMutated();
+    // Update content of the mD3d11ConstantBuffer from mD3d11NonConstantBuffer if needed.
+    void EnsureConstantBufferIsUpdated(CommandRecordingContext* commandContext);
     ResultOrError<ComPtr<ID3D11ShaderResourceView>> CreateD3D11ShaderResourceView(
         uint64_t offset,
         uint64_t size) const;
     ResultOrError<ComPtr<ID3D11UnorderedAccessView1>> CreateD3D11UnorderedAccessView1(
         uint64_t offset,
         uint64_t size) const;
-
     MaybeError Clear(CommandRecordingContext* commandContext,
                      uint8_t clearValue,
                      uint64_t offset,
@@ -116,9 +121,18 @@ class Buffer final : public BufferBase {
                              uint64_t bufferOffset,
                              const void* data,
                              size_t size);
-
-    // The buffer object can be used as vertex, index, uniform, storage, or indirect buffer.
-    ComPtr<ID3D11Buffer> mD3d11Buffer;
+    // Copy the buffer without checking if the buffer is initialized.
+    static MaybeError CopyInternal(CommandRecordingContext* commandContext,
+                                   Buffer* source,
+                                   uint64_t sourceOffset,
+                                   size_t size,
+                                   Buffer* destination,
+                                   uint64_t destinationOffset);
+    // The buffer object for constant buffer usage.
+    ComPtr<ID3D11Buffer> mD3d11ConstantBuffer;
+    // The buffer object for non-constant buffer usages(e.g. storage buffer, vertex buffer, etc.)
+    ComPtr<ID3D11Buffer> mD3d11NonConstantBuffer;
+    bool mConstantBufferIsUpdated = true;
     uint8_t* mMappedData = nullptr;
 };
 

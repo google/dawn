@@ -63,7 +63,7 @@ MaybeError CommandRecordingContext::Open(Device* device) {
 
         // Always bind the uniform buffer to the reserved slot for all pipelines.
         // This buffer will be updated with the correct values before each draw or dispatch call.
-        ID3D11Buffer* bufferPtr = mUniformBuffer->GetD3D11Buffer();
+        ID3D11Buffer* bufferPtr = mUniformBuffer->GetD3D11ConstantBuffer();
         mD3D11DeviceContext4->VSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot, 1,
                                                    &bufferPtr);
         mD3D11DeviceContext4->CSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot, 1,

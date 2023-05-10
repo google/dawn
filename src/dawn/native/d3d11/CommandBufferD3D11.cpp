@@ -358,7 +358,7 @@ MaybeError CommandBuffer::ExecuteComputePass(CommandRecordingContext* commandCon
                 }
 
                 commandContext->GetD3D11DeviceContext()->DispatchIndirect(
-                    indirectBuffer->GetD3D11Buffer(), dispatch->indirectOffset);
+                    indirectBuffer->GetD3D11NonConstantBuffer(), dispatch->indirectOffset);
 
                 break;
             }
@@ -533,7 +533,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 }
 
                 commandContext->GetD3D11DeviceContext()->DrawInstancedIndirect(
-                    indirectBuffer->GetD3D11Buffer(), draw->indirectOffset);
+                    indirectBuffer->GetD3D11NonConstantBuffer(), draw->indirectOffset);
 
                 break;
             }
@@ -559,7 +559,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 }
 
                 commandContext->GetD3D11DeviceContext()->DrawIndexedInstancedIndirect(
-                    indirectBuffer->GetD3D11Buffer(), draw->indirectOffset);
+                    indirectBuffer->GetD3D11NonConstantBuffer(), draw->indirectOffset);
 
                 break;
             }
@@ -594,7 +594,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 DXGI_FORMAT indexBufferFormat = DXGIIndexFormat(cmd->format);
 
                 commandContext->GetD3D11DeviceContext()->IASetIndexBuffer(
-                    ToBackend(cmd->buffer)->GetD3D11Buffer(), indexBufferFormat,
+                    ToBackend(cmd->buffer)->GetD3D11NonConstantBuffer(), indexBufferFormat,
                     indexBufferBaseOffset);
 
                 break;
@@ -602,7 +602,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
 
             case Command::SetVertexBuffer: {
                 SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
-                ID3D11Buffer* buffer = ToBackend(cmd->buffer)->GetD3D11Buffer();
+                ID3D11Buffer* buffer = ToBackend(cmd->buffer)->GetD3D11NonConstantBuffer();
                 vertexBufferTracker.OnSetVertexBuffer(cmd->slot, buffer, cmd->offset);
                 break;
             }
