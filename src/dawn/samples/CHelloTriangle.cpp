@@ -26,9 +26,9 @@ WGPURenderPipeline pipeline;
 WGPUTextureFormat swapChainFormat;
 
 void init() {
-    device = CreateCppDawnDevice().Release();
+    device = CreateCppDawnDevice().MoveToCHandle();
     queue = wgpuDeviceGetQueue(device);
-    swapchain = GetSwapChain().Release();
+    swapchain = GetSwapChain().MoveToCHandle();
     swapChainFormat = static_cast<WGPUTextureFormat>(GetPreferredSwapChainTextureFormat());
 
     const char* vs = R"(
@@ -42,13 +42,13 @@ void init() {
             );
             return vec4f(pos[VertexIndex], 0.0, 1.0);
         })";
-    WGPUShaderModule vsModule = utils::CreateShaderModule(device, vs).Release();
+    WGPUShaderModule vsModule = utils::CreateShaderModule(device, vs).MoveToCHandle();
 
     const char* fs = R"(
         @fragment fn main() -> @location(0) vec4f {
             return vec4f(1.0, 0.0, 0.0, 1.0);
         })";
-    WGPUShaderModule fsModule = utils::CreateShaderModule(device, fs).Release();
+    WGPUShaderModule fsModule = utils::CreateShaderModule(device, fs).MoveToCHandle();
 
     {
         WGPURenderPipelineDescriptor descriptor = {};

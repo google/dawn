@@ -136,7 +136,13 @@ namespace {{metadata.namespace}} {
         CType Get() const {
             return mHandle;
         }
+        // TODO(dawn:1639) Deprecate Release after uses have been removed.
         CType Release() {
+            CType result = mHandle;
+            mHandle = 0;
+            return result;
+        }
+        CType MoveToCHandle() {
             CType result = mHandle;
             mHandle = 0;
             return result;
