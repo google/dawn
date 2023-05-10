@@ -642,10 +642,6 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                         continue;
                     }
 
-                    if (attachment.storeOp != wgpu::StoreOp::Store) {
-                        continue;
-                    }
-
                     ASSERT(attachment.view->GetAspects() == Aspect::Color);
                     ASSERT(attachment.resolveTarget->GetAspects() == Aspect::Color);
 
