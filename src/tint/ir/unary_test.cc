@@ -33,7 +33,7 @@ TEST_F(IR_InstructionTest, CreateAddressOf) {
                             b.builder.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->GetKind(), Unary::Kind::kAddressOf);
+    EXPECT_EQ(inst->kind, Unary::Kind::kAddressOf);
 
     ASSERT_NE(inst->Type(), nullptr);
 
@@ -49,7 +49,7 @@ TEST_F(IR_InstructionTest, CreateComplement) {
         b.builder.Complement(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->GetKind(), Unary::Kind::kComplement);
+    EXPECT_EQ(inst->kind, Unary::Kind::kComplement);
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
     auto lhs = inst->Val()->As<Constant>()->value;
@@ -65,7 +65,7 @@ TEST_F(IR_InstructionTest, CreateIndirection) {
         b.builder.Indirection(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->GetKind(), Unary::Kind::kIndirection);
+    EXPECT_EQ(inst->kind, Unary::Kind::kIndirection);
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
     auto lhs = inst->Val()->As<Constant>()->value;
@@ -79,7 +79,7 @@ TEST_F(IR_InstructionTest, CreateNegation) {
         b.builder.Negation(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->GetKind(), Unary::Kind::kNegation);
+    EXPECT_EQ(inst->kind, Unary::Kind::kNegation);
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
     auto lhs = inst->Val()->As<Constant>()->value;
@@ -92,7 +92,7 @@ TEST_F(IR_InstructionTest, Unary_Usage) {
     const auto* inst =
         b.builder.Negation(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
 
-    EXPECT_EQ(inst->GetKind(), Unary::Kind::kNegation);
+    EXPECT_EQ(inst->kind, Unary::Kind::kNegation);
 
     ASSERT_NE(inst->Val(), nullptr);
     ASSERT_EQ(inst->Val()->Usage().Length(), 1u);

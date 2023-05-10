@@ -33,9 +33,9 @@ class Unary : public utils::Castable<Unary, Instruction> {
 
     /// Constructor
     /// @param kind the kind of unary instruction
-    /// @param type the result type
-    /// @param val the lhs of the instruction
-    Unary(Kind kind, const type::Type* type, Value* val);
+    /// @param result_type the result type
+    /// @param val the input value for the instruction
+    Unary(Kind kind, const type::Type* result_type, Value* val);
     Unary(const Unary& inst) = delete;
     Unary(Unary&& inst) = delete;
     ~Unary() override;
@@ -43,14 +43,19 @@ class Unary : public utils::Castable<Unary, Instruction> {
     Unary& operator=(const Unary& inst) = delete;
     Unary& operator=(Unary&& inst) = delete;
 
-    /// @returns the kind of instruction
-    Kind GetKind() const { return kind_; }
+    /// @returns the type of the value
+    const type::Type* Type() const override { return result_type; }
 
     /// @returns the value for the instruction
     const Value* Val() const { return val_; }
 
+    /// the kind of unary instruction
+    Kind kind = Kind::kAddressOf;
+
+    /// the result type of the instruction
+    const type::Type* result_type = nullptr;
+
   private:
-    Kind kind_;
     Value* val_ = nullptr;
 };
 

@@ -25,10 +25,10 @@ namespace tint::ir {
 class Builtin : public utils::Castable<Builtin, Call> {
   public:
     /// Constructor
-    /// @param type the result type
+    /// @param res_type the result type
     /// @param func the builtin function
     /// @param args the conversion arguments
-    Builtin(const type::Type* type, builtin::Function func, utils::VectorRef<Value*> args);
+    Builtin(const type::Type* res_type, builtin::Function func, utils::VectorRef<Value*> args);
     Builtin(const Builtin& inst) = delete;
     Builtin(Builtin&& inst) = delete;
     ~Builtin() override;

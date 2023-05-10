@@ -26,7 +26,7 @@ namespace tint::ir {
 class Var : public utils::Castable<Var, Instruction> {
   public:
     /// Constructor
-    /// @param type the type
+    /// @param type the type of the var
     /// @param address_space the address space of the var
     /// @param access the access mode of the var
     Var(const type::Type* type, builtin::AddressSpace address_space, builtin::Access access);
@@ -36,6 +36,12 @@ class Var : public utils::Castable<Var, Instruction> {
 
     Var& operator=(const Var& inst) = delete;
     Var& operator=(Var&& inst) = delete;
+
+    /// @returns the type of the var
+    const type::Type* Type() const override { return type; }
+
+    /// the result type of the instruction
+    const type::Type* type = nullptr;
 
     /// The variable address space
     builtin::AddressSpace address_space = builtin::AddressSpace::kUndefined;

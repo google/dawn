@@ -241,14 +241,14 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
 
     // Determine the opcode.
     spv::Op op = spv::Op::Max;
-    switch (binary->GetKind()) {
+    switch (binary->kind) {
         case ir::Binary::Kind::kAdd: {
             op = binary->Type()->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
             break;
         }
         default: {
             TINT_ICE(Writer, diagnostics_)
-                << "unimplemented binary instruction: " << static_cast<uint32_t>(binary->GetKind());
+                << "unimplemented binary instruction: " << static_cast<uint32_t>(binary->kind);
         }
     }
 

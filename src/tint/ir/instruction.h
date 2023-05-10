@@ -31,18 +31,9 @@ class Instruction : public utils::Castable<Instruction, Value> {
     Instruction& operator=(const Instruction& inst) = delete;
     Instruction& operator=(Instruction&& inst) = delete;
 
-    /// @returns the type of the value
-    const type::Type* Type() const override { return type; }
-
-    /// The instruction type
-    const type::Type* type = nullptr;
-
   protected:
     /// Constructor
     Instruction();
-    /// Constructor
-    /// @param type the result type
-    explicit Instruction(const type::Type* type);
 };
 
 }  // namespace tint::ir

@@ -20,8 +20,6 @@ namespace tint::ir {
 
 Instruction::Instruction() = default;
 
-Instruction::Instruction(const type::Type* ty) : type(ty) {}
-
 Instruction::~Instruction() = default;
 
 }  // namespace tint::ir

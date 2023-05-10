@@ -428,7 +428,7 @@ void Disassembler::EmitArgs(const Call* call) {
 void Disassembler::EmitBinary(const Binary* b) {
     EmitValue(b);
     out_ << " = ";
-    switch (b->GetKind()) {
+    switch (b->kind) {
         case Binary::Kind::kAdd:
             out_ << "add";
             break;
@@ -487,7 +487,7 @@ void Disassembler::EmitBinary(const Binary* b) {
 void Disassembler::EmitUnary(const Unary* u) {
     EmitValue(u);
     out_ << " = ";
-    switch (u->GetKind()) {
+    switch (u->kind) {
         case Unary::Kind::kAddressOf:
             out_ << "addr_of";
             break;

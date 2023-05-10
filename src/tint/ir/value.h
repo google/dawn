@@ -47,7 +47,7 @@ class Value : public utils::Castable<Value> {
     utils::VectorRef<const Instruction*> Usage() const { return uses_; }
 
     /// @returns the type of the value
-    virtual const type::Type* Type() const = 0;
+    virtual const type::Type* Type() const { return nullptr; }
 
   protected:
     /// Constructor
