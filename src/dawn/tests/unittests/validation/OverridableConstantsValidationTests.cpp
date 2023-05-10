@@ -25,7 +25,7 @@ class ComputePipelineOverridableConstantsValidationTest : public ValidationTest 
         std::vector<const char*> enabledToggles;
         std::vector<const char*> disabledToggles;
 
-        disabledToggles.push_back("disallow_unsafe_apis");
+        enabledToggles.push_back("allow_unsafe_apis");
 
         wgpu::DawnTogglesDescriptor deviceTogglesDesc;
         deviceTogglesDesc.enabledToggles = enabledToggles.data();
