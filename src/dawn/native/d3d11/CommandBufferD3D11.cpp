@@ -627,7 +627,42 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
         switch (type) {
             case Command::EndRenderPass: {
                 mCommands.NextCommand<EndRenderPassCmd>();
-                // TODO(dawn:1705): resolve MSAA
+                ID3D11DeviceContext* d3d11DeviceContext = commandContext->GetD3D11DeviceContext();
+                d3d11DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+
+                if (renderPass->attachmentState->GetSampleCount() <= 1) {
+                    return {};
+                }
+
+                // Resolve multisampled textures.
+                for (ColorAttachmentIndex i :
+                     IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+                    const auto& attachment = renderPass->colorAttachments[i];
+                    if (!attachment.resolveTarget.Get()) {
+                        continue;
+                    }
+
+                    if (attachment.storeOp != wgpu::StoreOp::Store) {
+                        continue;
+                    }
+
+                    ASSERT(attachment.view->GetAspects() == Aspect::Color);
+                    ASSERT(attachment.resolveTarget->GetAspects() == Aspect::Color);
+
+                    Texture* resolveTexture = ToBackend(attachment.resolveTarget->GetTexture());
+                    Texture* colorTexture = ToBackend(attachment.view->GetTexture());
+                    uint32_t dstSubresource = resolveTexture->GetSubresourceIndex(
+                        attachment.resolveTarget->GetBaseMipLevel(),
+                        attachment.resolveTarget->GetBaseArrayLayer(), Aspect::Color);
+                    uint32_t srcSubresource = colorTexture->GetSubresourceIndex(
+                        attachment.view->GetBaseMipLevel(), attachment.view->GetBaseArrayLayer(),
+                        Aspect::Color);
+                    d3d11DeviceContext->ResolveSubresource(
+                        resolveTexture->GetD3D11Resource(), dstSubresource,
+                        colorTexture->GetD3D11Resource(), srcSubresource,
+                        resolveTexture->GetD3D11Format());
+                }
+
                 return {};
             }
 

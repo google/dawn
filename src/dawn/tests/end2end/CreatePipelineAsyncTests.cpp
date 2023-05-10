@@ -955,6 +955,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
 }
 
 DAWN_INSTANTIATE_TEST(CreatePipelineAsyncTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
