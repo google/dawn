@@ -1111,7 +1111,7 @@ ComputePipelineBase* DeviceBase::APICreateComputePipeline(
                  utils::GetLabelForTrace(descriptor->label));
 
     Ref<ComputePipelineBase> result;
-    if (ConsumedError(CreateComputePipeline(descriptor), &result, InternalErrorType::Internal,
+    if (ConsumedError(CreateComputePipeline(descriptor), &result,
                       "calling %s.CreateComputePipeline(%s).", this, descriptor)) {
         return ComputePipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
@@ -1201,7 +1201,7 @@ RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
                  utils::GetLabelForTrace(descriptor->label));
 
     Ref<RenderPipelineBase> result;
-    if (ConsumedError(CreateRenderPipeline(descriptor), &result, InternalErrorType::Internal,
+    if (ConsumedError(CreateRenderPipeline(descriptor), &result,
                       "calling %s.CreateRenderPipeline(%s).", this, descriptor)) {
         return RenderPipelineBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     }
