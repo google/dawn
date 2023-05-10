@@ -37,7 +37,7 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Assign) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%a:ref<private, u32, read_write> = var private read_write
+%a:ref<private, u32, read_write> = var private, read_write
 
 
 

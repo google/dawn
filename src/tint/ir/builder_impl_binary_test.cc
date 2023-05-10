@@ -54,7 +54,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, u32, read_write> = var private read_write
+%v1:ref<private, u32, read_write> = var private, read_write
 
 
 
@@ -96,7 +96,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, u32, read_write> = var private read_write
+%v1:ref<private, u32, read_write> = var private, read_write
 
 
 
@@ -138,7 +138,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, u32, read_write> = var private read_write
+%v1:ref<private, u32, read_write> = var private, read_write
 
 
 
@@ -180,7 +180,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, u32, read_write> = var private read_write
+%v1:ref<private, u32, read_write> = var private, read_write
 
 
 
@@ -222,7 +222,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, u32, read_write> = var private read_write
+%v1:ref<private, u32, read_write> = var private, read_write
 
 
 
@@ -264,7 +264,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, bool, read_write> = var private read_write
+%v1:ref<private, bool, read_write> = var private, read_write
 
 
 
@@ -306,7 +306,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, bool, read_write> = var private read_write
+%v1:ref<private, bool, read_write> = var private, read_write
 
 
 
@@ -348,7 +348,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, u32, read_write> = var private read_write
+%v1:ref<private, u32, read_write> = var private, read_write
 
 
 
@@ -379,7 +379,7 @@ func_end
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn4 = block
   %1:bool = call my_func
-  %tint_symbol:bool = var function read_write
+  %tint_symbol:bool = var function, read_write
   store %tint_symbol:bool, %1:bool
   branch %fn5
 
@@ -414,7 +414,7 @@ func_end
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn4 = block
   %1:bool = call my_func
-  %tint_symbol:bool = var function read_write
+  %tint_symbol:bool = var function, read_write
   store %tint_symbol:bool, %1:bool
   branch %fn5
 
@@ -569,7 +569,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, u32, read_write> = var private read_write
+%v1:ref<private, u32, read_write> = var private, read_write
 
 
 
@@ -611,7 +611,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, u32, read_write> = var private read_write
+%v1:ref<private, u32, read_write> = var private, read_write
 
 
 
@@ -645,7 +645,7 @@ func_end
   %fn4 = block
   %1:f32 = call my_func
   %2:bool = lt %1:f32, 2.0f
-  %tint_symbol:bool = var function read_write
+  %tint_symbol:bool = var function, read_write
   store %tint_symbol:bool, %2:bool
   branch %fn5
 

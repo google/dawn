@@ -42,6 +42,9 @@ class Var : public utils::Castable<Var, Instruction> {
 
     /// The variable access mode
     builtin::Access access = builtin::Access::kUndefined;
+
+    /// The optional initializer
+    Value* initializer = nullptr;
 };
 
 }  // namespace tint::ir

@@ -91,7 +91,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, i32, read_write> = var private read_write
+%v1:ref<private, i32, read_write> = var private, read_write
 
 
 
@@ -117,7 +117,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
     auto m = r.Move();
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%v1:ref<private, i32, read_write> = var private read_write
+%v1:ref<private, i32, read_write> = var private, read_write
 
 
 

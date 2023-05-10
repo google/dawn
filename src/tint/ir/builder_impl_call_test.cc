@@ -92,8 +92,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%i:ref<private, i32, read_write> = var private read_write
-store %i:ref<private, i32, read_write>, 1i
+%i:ref<private, i32, read_write> = var private, read_write, 1i
 
 
 
@@ -116,8 +115,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%i:ref<private, vec3<f32>, read_write> = var private read_write
-store %i:ref<private, vec3<f32>, read_write>, vec3<f32> 0.0f
+%i:ref<private, vec3<f32>, read_write> = var private, read_write, vec3<f32> 0.0f
 
 
 
@@ -135,8 +133,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
     ASSERT_TRUE(r);
 
     EXPECT_EQ(Disassemble(m), R"(%fn1 = block
-%i:ref<private, f32, read_write> = var private read_write
-store %i:ref<private, f32, read_write>, 1.0f
+%i:ref<private, f32, read_write> = var private, read_write, 1.0f
 
 
 

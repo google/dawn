@@ -775,9 +775,7 @@ void BuilderImpl::EmitVariable(const ast::Variable* var) {
                 if (!init) {
                     return;
                 }
-
-                auto* store = builder.Store(val, init.Get());
-                current_flow_block->instructions.Push(store);
+                val->initializer = init.Get();
             }
             // Store the declaration so we can get the instruction to store too
             scopes_.Set(v->name->symbol, val);
