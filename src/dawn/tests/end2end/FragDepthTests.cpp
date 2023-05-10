@@ -80,6 +80,9 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     // TODO(dawn:1125): Add the shader transform to clamp the frag depth to the GL backend.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
+    // TODO(dawn:1805): Load ByteAddressBuffer in Pixel Shader doesn't work with NVIDIA on D3D11
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsNvidia());
+
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @vertex fn vs() -> @builtin(position) vec4f {
             return vec4f(0.0, 0.0, 0.5, 1.0);
@@ -224,6 +227,7 @@ TEST_P(FragDepthTests, RasterizationClipBeforeFS) {
 }
 
 DAWN_INSTANTIATE_TEST(FragDepthTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
