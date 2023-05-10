@@ -32,6 +32,7 @@ class Device;
 // Various kinds of memory that influence the result of the allocation. For example, to take
 // into account mappability and Vulkan's bufferImageGranularity.
 enum class MemoryKind {
+    LazilyAllocated,
     Linear,
     LinearMappable,
     Opaque,

@@ -265,6 +265,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 #endif  // DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
 
     EnableFeature(Feature::SurfaceCapabilities);
+    EnableFeature(Feature::TransientAttachments);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

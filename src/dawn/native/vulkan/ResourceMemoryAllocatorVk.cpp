@@ -258,7 +258,23 @@ int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements
             continue;
         }
 
-        // For non-mappable resources, favor device local memory.
+        // For non-mappable resources that can be lazily allocated, favor lazy
+        // allocation (note: this is a more important property than that of
+        // device local memory and hence is checked first).
+        bool currentLazilyAllocated =
+            info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
+        bool bestLazilyAllocated =
+            info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT;
+        if ((kind == MemoryKind::LazilyAllocated) &&
+            (currentLazilyAllocated != bestLazilyAllocated)) {
+            if (currentLazilyAllocated) {
+                bestType = static_cast<int>(i);
+            }
+            continue;
+        }
+
+        // For non-mappable, non-lazily-allocated resources, favor device local
+        // memory.
         bool currentDeviceLocal =
             info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
         bool bestDeviceLocal =

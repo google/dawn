@@ -494,8 +494,6 @@ VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& forma
         } else {
             flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         }
-        // TODO(1695): Check for TransientAttachment flag being present and
-        // convert it into the proper Vulkan flag.
     }
 
     // Choosing Vulkan image usages should not know about kReadOnlyRenderAttachment because that's
@@ -745,9 +743,11 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
             Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment)) &&
         GetDimension() == wgpu::TextureDimension::e2D &&
         (GetInternalUsage() & (wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment));
-    DAWN_TRY_ASSIGN(mMemoryAllocation,
-                    device->GetResourceMemoryAllocator()->Allocate(requirements, MemoryKind::Opaque,
-                                                                   forceDisableSubAllocation));
+    auto memoryKind = (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment)
+                          ? MemoryKind::LazilyAllocated
+                          : MemoryKind::Opaque;
+    DAWN_TRY_ASSIGN(mMemoryAllocation, device->GetResourceMemoryAllocator()->Allocate(
+                                           requirements, memoryKind, forceDisableSubAllocation));
 
     DAWN_TRY(CheckVkSuccess(
         device->fn.BindImageMemory(device->GetVkDevice(), mHandle,
