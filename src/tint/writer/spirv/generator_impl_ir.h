@@ -28,9 +28,11 @@
 
 // Forward declarations
 namespace tint::ir {
+class Binary;
 class Block;
 class Function;
 class Module;
+class Value;
 }  // namespace tint::ir
 namespace tint::type {
 class Type;
@@ -69,6 +71,11 @@ class GeneratorImplIr {
     /// @returns the result ID of the type
     uint32_t Type(const type::Type* ty);
 
+    /// Get the result ID of the value `value`, emitting its instruction if necessary.
+    /// @param value the value to get the ID for
+    /// @returns the result ID of the value
+    uint32_t Value(const ir::Value* value);
+
     /// Emit a function.
     /// @param func the function to emit
     void EmitFunction(const ir::Function* func);
@@ -81,6 +88,11 @@ class GeneratorImplIr {
     /// Emit a block.
     /// @param block the block to emit
     void EmitBlock(const ir::Block* block);
+
+    /// Emit a binary instruction.
+    /// @param binary the binary instruction to emit
+    /// @returns the result ID of the instruction
+    uint32_t EmitBinary(const ir::Binary* binary);
 
   private:
     const ir::Module* ir_;

@@ -15,6 +15,7 @@
 #include "src/tint/writer/spirv/generator_impl_ir.h"
 
 #include "spirv/unified1/spirv.h"
+#include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/module.h"
@@ -117,6 +118,24 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
     });
 }
 
+uint32_t GeneratorImplIr::Value(const ir::Value* value) {
+    return Switch(
+        value,  //
+        [&](const ir::Constant* constant) { return Constant(constant); },
+        [&](const ir::Instruction* inst) {
+            auto id = instructions_.Find(inst);
+            if (TINT_UNLIKELY(!id)) {
+                TINT_ICE(Writer, diagnostics_) << "missing instruction result";
+                return 0u;
+            }
+            return *id;
+        },
+        [&](Default) {
+            TINT_ICE(Writer, diagnostics_) << "unhandled value node: " << value->TypeInfo().name;
+            return 0u;
+        });
+}
+
 void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     // Make an ID for the function.
     auto id = module_.NextId();
@@ -196,12 +215,14 @@ void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
 void GeneratorImplIr::EmitBlock(const ir::Block* block) {
     // Emit the instructions.
     for (auto* inst : block->instructions) {
-        auto result = Switch(inst,  //
-                             [&](Default) {
-                                 TINT_ICE(Writer, diagnostics_)
-                                     << "unimplemented instruction: " << inst->TypeInfo().name;
-                                 return 0u;
-                             });
+        auto result = Switch(
+            inst,  //
+            [&](const ir::Binary* b) { return EmitBinary(b); },
+            [&](Default) {
+                TINT_ICE(Writer, diagnostics_)
+                    << "unimplemented instruction: " << inst->TypeInfo().name;
+                return 0u;
+            });
         instructions_.Add(inst, result);
     }
 
@@ -213,6 +234,29 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
             current_function_.push_inst(spv::Op::OpReturn, {});
         },
         [&](Default) { TINT_ICE(Writer, diagnostics_) << "unimplemented branch target"; });
+}
+
+uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
+    auto id = module_.NextId();
+
+    // Determine the opcode.
+    spv::Op op = spv::Op::Max;
+    switch (binary->GetKind()) {
+        case ir::Binary::Kind::kAdd: {
+            op = binary->Type()->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
+            break;
+        }
+        default: {
+            TINT_ICE(Writer, diagnostics_)
+                << "unimplemented binary instruction: " << static_cast<uint32_t>(binary->GetKind());
+        }
+    }
+
+    // Emit the instruction.
+    current_function_.push_inst(
+        op, {Type(binary->Type()), id, Value(binary->LHS()), Value(binary->RHS())});
+
+    return id;
 }
 
 }  // namespace tint::writer::spirv
