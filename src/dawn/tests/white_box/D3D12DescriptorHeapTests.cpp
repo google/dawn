@@ -1043,6 +1043,26 @@ TEST_P(D3D12DescriptorHeapTests, AllocateDeallocateMany) {
     }
 }
 
+// Verifies that gpu descriptor heap allocations are only valid during the serial they were created
+// on.
+TEST_P(D3D12DescriptorHeapTests, InvalidateAllocationAfterSerial) {
+    Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
+    ShaderVisibleDescriptorAllocator* gpuAllocator =
+        d3dDevice->GetViewShaderVisibleDescriptorAllocator();
+
+    GPUDescriptorHeapAllocation gpuHeapDescAllocation;
+
+    D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptor;
+    gpuAllocator->AllocateGPUDescriptors(1, d3dDevice->GetPendingCommandSerial(),
+                                         &baseCPUDescriptor, &gpuHeapDescAllocation);
+
+    EXPECT_TRUE(gpuAllocator->IsAllocationStillValid(gpuHeapDescAllocation));
+
+    EXPECT_TRUE(d3dDevice->NextSerial().IsSuccess());
+
+    EXPECT_FALSE(gpuAllocator->IsAllocationStillValid(gpuHeapDescAllocation));
+}
+
 DAWN_INSTANTIATE_TEST(D3D12DescriptorHeapTests,
                       D3D12Backend(),
                       D3D12Backend({"use_d3d12_small_shader_visible_heap"}));
