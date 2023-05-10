@@ -467,6 +467,25 @@ class PhysicalDevice : public PhysicalDeviceBase {
         }
 
         if (@available(macOS 10.15, iOS 14.0, *)) {
+            auto ShouldLeakCounterSets = [this]() {
+                // Intentionally leak counterSets to workaround an issue where the driver
+                // over-releases the handle if it is accessed more than once. It becomes a zombie.
+                // For more information, see crbug.com/1443658.
+                // Appears to occur on Intel prior to MacOS 11, and continuing on Intel Gen 7 after
+                // that OS version.
+                uint32_t vendorId = GetVendorId();
+                uint32_t deviceId = GetDeviceId();
+                if (gpu_info::IsIntelGen7(vendorId, deviceId)) {
+                    return true;
+                }
+                if (gpu_info::IsIntel(vendorId) && !IsMacOSVersionAtLeast(11)) {
+                    return true;
+                }
+                return false;
+            };
+            if (ShouldLeakCounterSets()) {
+                [[*mDevice counterSets] retain];
+            }
             if (IsGPUCounterSupported(
                     *mDevice, MTLCommonCounterSetStatistic,
                     {MTLCommonCounterVertexInvocations, MTLCommonCounterClipperInvocations,
