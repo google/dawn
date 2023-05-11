@@ -25,10 +25,12 @@
 
 namespace {
 std::unique_ptr<dawn::native::Instance> nativeInstance = nullptr;
-WGPUAdapter nullBackendAdapter = nullptr;
+wgpu::Adapter nullBackendAdapter = nullptr;
 }  // namespace
 
 void SetupNullBackend(const benchmark::State& state) {
+    dawnProcSetProcs(&dawn::native::GetProcs());
+
     if (!nativeInstance) {
         nativeInstance = std::make_unique<dawn::native::Instance>();
         nativeInstance->DiscoverDefaultAdapters();
@@ -39,7 +41,7 @@ void SetupNullBackend(const benchmark::State& state) {
             wgpu::AdapterProperties properties;
             a.GetProperties(&properties);
             if (properties.backendType == wgpu::BackendType::Null) {
-                nullBackendAdapter = a.Get();
+                nullBackendAdapter = wgpu::Adapter(a.Get());
             }
         }
     }
@@ -47,19 +49,16 @@ void SetupNullBackend(const benchmark::State& state) {
 }
 
 wgpu::Device CreateNullDevice(const wgpu::DeviceDescriptor& desc) {
-    dawnProcSetProcs(&dawn::native::GetProcs());
-
     wgpu::Device device;
 
-    wgpu::Adapter(nullBackendAdapter)
-        .RequestDevice(
-            &desc,
-            [](WGPURequestDeviceStatus status, WGPUDevice cDevice, char const* message,
-               void* userdata) {
-                ASSERT(status == WGPURequestDeviceStatus_Success);
-                *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
-            },
-            &device);
+    nullBackendAdapter.RequestDevice(
+        &desc,
+        [](WGPURequestDeviceStatus status, WGPUDevice cDevice, char const* message,
+           void* userdata) {
+            ASSERT(status == WGPURequestDeviceStatus_Success);
+            *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
+        },
+        &device);
     while (!device) {
         wgpuInstanceProcessEvents(nativeInstance->Get());
     }

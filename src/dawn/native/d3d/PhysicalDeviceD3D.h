@@ -27,8 +27,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
   public:
     PhysicalDevice(Backend* backend,
                    ComPtr<IDXGIAdapter3> hardwareAdapter,
-                   wgpu::BackendType backendType,
-                   const TogglesState& adapterToggles);
+                   wgpu::BackendType backendType);
     ~PhysicalDevice() override;
 
     IDXGIAdapter3* GetHardwareAdapter() const;

@@ -32,8 +32,7 @@ class Backend : public d3d::Backend {
 
   protected:
     ResultOrError<Ref<PhysicalDeviceBase>> CreatePhysicalDeviceFromIDXGIAdapter(
-        ComPtr<IDXGIAdapter> dxgiAdapter,
-        const TogglesState& adapterToggles) override;
+        ComPtr<IDXGIAdapter> dxgiAdapter) override;
 
   private:
     using Base = d3d::Backend;

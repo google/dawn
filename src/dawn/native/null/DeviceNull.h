@@ -175,7 +175,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
     // Create null adapter without providing toggles state for testing, only inherit instance's
     // toggles state
     explicit PhysicalDevice(InstanceBase* instance);
-    PhysicalDevice(InstanceBase* instance, const TogglesState& adapterToggles);
     ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation

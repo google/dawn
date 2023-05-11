@@ -32,11 +32,7 @@ namespace dawn::native::null {
 // Connect()
 
 PhysicalDevice::PhysicalDevice(InstanceBase* instance)
-    : PhysicalDevice(instance,
-                     TogglesState(ToggleStage::Adapter).InheritFrom(instance->GetTogglesState())) {}
-
-PhysicalDevice::PhysicalDevice(InstanceBase* instance, const TogglesState& adapterToggles)
-    : PhysicalDeviceBase(instance, wgpu::BackendType::Null, adapterToggles) {
+    : PhysicalDeviceBase(instance, wgpu::BackendType::Null) {
     mVendorId = 0;
     mDeviceId = 0;
     mName = "Null backend";
@@ -90,13 +86,11 @@ class Backend : public BackendConnection {
     explicit Backend(InstanceBase* instance)
         : BackendConnection(instance, wgpu::BackendType::Null) {}
 
-    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters(
-        const TogglesState& adapterToggles) override {
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters() override {
         // There is always a single Null adapter because it is purely CPU based and doesn't
         // depend on the system.
         std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
-        Ref<PhysicalDevice> physicalDevice =
-            AcquireRef(new PhysicalDevice(GetInstance(), adapterToggles));
+        Ref<PhysicalDevice> physicalDevice = AcquireRef(new PhysicalDevice(GetInstance()));
         physicalDevices.push_back(std::move(physicalDevice));
         return physicalDevices;
     }

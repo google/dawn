@@ -61,7 +61,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     void DiscoverDefaultAdapters();
     bool DiscoverAdapters(const AdapterDiscoveryOptionsBase* options);
 
-    const std::vector<Ref<AdapterBase>>& GetAdapters() const;
+    std::vector<Ref<AdapterBase>> GetAdapters() const;
 
     // Used to handle error that happen up to device creation.
     bool ConsumedError(MaybeError maybeError);
@@ -157,7 +157,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
     BlobCache mPassthroughBlobCache;
 
     std::vector<std::unique_ptr<BackendConnection>> mBackends;
-    std::vector<Ref<AdapterBase>> mAdapters;
+    std::vector<Ref<PhysicalDeviceBase>> mPhysicalDevices;
 
     TogglesState mToggles;
 

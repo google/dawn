@@ -29,7 +29,10 @@ struct SupportedLimits;
 
 class AdapterBase : public RefCounted {
   public:
-    AdapterBase(const Ref<PhysicalDeviceBase>& physicalDevice, FeatureLevel featureLevel);
+    AdapterBase(Ref<PhysicalDeviceBase> physicalDevice, FeatureLevel featureLevel);
+    AdapterBase(Ref<PhysicalDeviceBase> physicalDevice,
+                FeatureLevel featureLevel,
+                const TogglesState& adapterToggles);
     ~AdapterBase() override;
 
     // WebGPU API
@@ -42,6 +45,9 @@ class AdapterBase : public RefCounted {
                           WGPURequestDeviceCallback callback,
                           void* userdata);
     DeviceBase* APICreateDevice(const DeviceDescriptor* descriptor = nullptr);
+    ResultOrError<Ref<DeviceBase>> CreateDevice(const DeviceDescriptor* descriptor);
+
+    void SetUseTieredLimits(bool useTieredLimits);
 
     // Return the underlying PhysicalDevice.
     PhysicalDeviceBase* GetPhysicalDevice();
@@ -59,6 +65,9 @@ class AdapterBase : public RefCounted {
   private:
     Ref<PhysicalDeviceBase> mPhysicalDevice;
     FeatureLevel mFeatureLevel;
+    bool mUseTieredLimits = false;
+    // Adapter toggles state, currently only inherited from instance toggles state.
+    TogglesState mTogglesState;
 };
 
 }  // namespace dawn::native

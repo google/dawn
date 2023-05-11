@@ -89,11 +89,11 @@ std::vector<const char*> Adapter::GetSupportedFeatures() const {
 }
 
 bool Adapter::GetLimits(WGPUSupportedLimits* limits) const {
-    return mImpl->GetPhysicalDevice()->GetLimits(FromAPI(limits));
+    return mImpl->APIGetLimits(FromAPI(limits));
 }
 
 void Adapter::SetUseTieredLimits(bool useTieredLimits) {
-    mImpl->GetPhysicalDevice()->SetUseTieredLimits(useTieredLimits);
+    mImpl->SetUseTieredLimits(useTieredLimits);
 }
 
 bool Adapter::SupportsExternalImages() const {

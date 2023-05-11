@@ -75,16 +75,13 @@ class Backend : public BackendConnection {
 
     const PlatformFunctions* GetFunctions() const;
 
-    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters(
-        const TogglesState& adapterToggles) override;
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters() override;
     ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> DiscoverAdapters(
-        const AdapterDiscoveryOptionsBase* optionsBase,
-        const TogglesState& adapterToggles) override;
+        const AdapterDiscoveryOptionsBase* optionsBase) override;
 
   protected:
     virtual ResultOrError<Ref<PhysicalDeviceBase>> CreatePhysicalDeviceFromIDXGIAdapter(
-        ComPtr<IDXGIAdapter> dxgiAdapter,
-        const TogglesState& adapterToggles) = 0;
+        ComPtr<IDXGIAdapter> dxgiAdapter) = 0;
 
   private:
     // Acquiring DXC version information and store the result in mDxcVersionInfo. This function

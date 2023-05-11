@@ -61,10 +61,8 @@ MaybeError InitializeDebugLayerFilters(ComPtr<ID3D11Device> d3d11Device) {
 
 }  // namespace
 
-PhysicalDevice::PhysicalDevice(Backend* backend,
-                               ComPtr<IDXGIAdapter3> hardwareAdapter,
-                               const TogglesState& adapterToggles)
-    : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D11, adapterToggles) {}
+PhysicalDevice::PhysicalDevice(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
+    : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D11) {}
 
 PhysicalDevice::~PhysicalDevice() = default;
 

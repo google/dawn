@@ -53,10 +53,8 @@ uint32_t GetVendorIdFromVendors(const char* vendor) {
 
 }  // anonymous namespace
 
-PhysicalDevice::PhysicalDevice(InstanceBase* instance,
-                               wgpu::BackendType backendType,
-                               const TogglesState& adapterToggle)
-    : PhysicalDeviceBase(instance, backendType, adapterToggle) {}
+PhysicalDevice::PhysicalDevice(InstanceBase* instance, wgpu::BackendType backendType)
+    : PhysicalDeviceBase(instance, backendType) {}
 
 MaybeError PhysicalDevice::InitializeGLFunctions(void* (*getProc)(const char*)) {
     // Use getProc to populate the dispatch table

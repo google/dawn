@@ -29,8 +29,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
   public:
     PhysicalDevice(InstanceBase* instance,
                    VulkanInstance* vulkanInstance,
-                   VkPhysicalDevice physicalDevice,
-                   const TogglesState& adapterToggles);
+                   VkPhysicalDevice physicalDevice);
     ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation

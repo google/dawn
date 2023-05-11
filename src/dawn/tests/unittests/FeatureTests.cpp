@@ -26,18 +26,19 @@ class FeatureTests : public testing::Test {
         : testing::Test(),
           mInstanceBase(dawn::native::InstanceBase::Create()),
           mPhysicalDevice(mInstanceBase.Get()),
-          mUnsafePhysicalDeviceDisallow(
-              mInstanceBase.Get(),
+          mUnsafePhysicalDeviceDisallow(mInstanceBase.Get()),
+          mUnsafePhysicalDevice(mInstanceBase.Get()),
+          mAdapterBase(&mPhysicalDevice, dawn::native::FeatureLevel::Core),
+          mUnsafeAdapterBaseDisallow(
+              &mUnsafePhysicalDeviceDisallow,
+              dawn::native::FeatureLevel::Core,
               dawn::native::TogglesState(dawn::native::ToggleStage::Adapter)
                   .SetForTesting(dawn::native::Toggle::DisallowUnsafeAPIs, false, false)),
-          mUnsafePhysicalDevice(
-              mInstanceBase.Get(),
+          mUnsafeAdapterBase(
+              &mUnsafePhysicalDevice,
+              dawn::native::FeatureLevel::Core,
               dawn::native::TogglesState(dawn::native::ToggleStage::Adapter)
-                  .SetForTesting(dawn::native::Toggle::AllowUnsafeAPIs, true, true)),
-          mAdapterBase(&mPhysicalDevice, dawn::native::FeatureLevel::Core),
-          mUnsafeAdapterBaseDisallow(&mUnsafePhysicalDeviceDisallow,
-                                     dawn::native::FeatureLevel::Core),
-          mUnsafeAdapterBase(&mUnsafePhysicalDevice, dawn::native::FeatureLevel::Core) {}
+                  .SetForTesting(dawn::native::Toggle::AllowUnsafeAPIs, true, true)) {}
 
     std::vector<wgpu::FeatureName> GetAllFeatureNames() {
         std::vector<wgpu::FeatureName> allFeatureNames(kTotalFeaturesCount);
@@ -149,7 +150,7 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
             // AllowUnsafeAPIs or disables DisallowUnsafeApis, otherwise expect validation error.
             if (featuresInfo.GetFeatureInfo(featureName)->featureState ==
                 dawn::native::FeatureInfo::FeatureState::Experimental) {
-                ASSERT_EQ(nullptr, deviceBase);
+                ASSERT_EQ(nullptr, deviceBase) << i;
             } else {
                 // Requiring stable features should succeed.
                 ASSERT_NE(nullptr, deviceBase);

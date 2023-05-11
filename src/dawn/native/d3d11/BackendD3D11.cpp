@@ -42,12 +42,11 @@ const PlatformFunctions* Backend::GetFunctions() const {
 }
 
 ResultOrError<Ref<PhysicalDeviceBase>> Backend::CreatePhysicalDeviceFromIDXGIAdapter(
-    ComPtr<IDXGIAdapter> dxgiAdapter,
-    const TogglesState& adapterToggles) {
+    ComPtr<IDXGIAdapter> dxgiAdapter) {
     ComPtr<IDXGIAdapter3> dxgiAdapter3;
     DAWN_TRY(CheckHRESULT(dxgiAdapter.As(&dxgiAdapter3), "DXGIAdapter retrieval"));
     Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(this, std::move(dxgiAdapter3), adapterToggles));
+        AcquireRef(new PhysicalDevice(this, std::move(dxgiAdapter3)));
     DAWN_TRY(physicalDevice->Initialize());
 
     return {std::move(physicalDevice)};

@@ -23,9 +23,7 @@ namespace dawn::native::opengl {
 
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    PhysicalDevice(InstanceBase* instance,
-                   wgpu::BackendType backendType,
-                   const TogglesState& adapterToggle);
+    PhysicalDevice(InstanceBase* instance, wgpu::BackendType backendType);
 
     MaybeError InitializeGLFunctions(void* (*getProc)(const char*));
 

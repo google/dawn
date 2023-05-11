@@ -260,6 +260,8 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
 
         // Test creating device on the adapter with AllowUnsafeApis toggle enabled would succeed.
         {
+            deviceDescriptor.nextInChain = nullptr;
+
             wgpu::Device device = unsafeAdapter.CreateDevice(&deviceDescriptor);
             EXPECT_NE(device, nullptr);
 

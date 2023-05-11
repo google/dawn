@@ -263,13 +263,11 @@ class AdapterCreationTest : public ::testing::Test {
                 if (properties.compatibilityMode) {
                     continue;
                 }
-                swiftShaderAvailable =
-                    swiftShaderAvailable ||
+                swiftShaderAvailable |=
                     gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
-                discreteGPUAvailable = discreteGPUAvailable ||
-                                       properties.adapterType == wgpu::AdapterType::DiscreteGPU;
-                integratedGPUAvailable = integratedGPUAvailable ||
-                                         properties.adapterType == wgpu::AdapterType::IntegratedGPU;
+                discreteGPUAvailable |= properties.adapterType == wgpu::AdapterType::DiscreteGPU;
+                integratedGPUAvailable |=
+                    properties.adapterType == wgpu::AdapterType::IntegratedGPU;
             }
         }
 
@@ -322,7 +320,7 @@ TEST_F(AdapterCreationTest, NullGivesDefaultAdapter) {
     instance.RequestAdapter(nullptr, cb.Callback(), cb.MakeUserdata(this + 1));
 
     wgpu::Adapter adapter2 = wgpu::Adapter::Acquire(cAdapter);
-    EXPECT_EQ(adapter.Get(), adapter2.Get());
+    EXPECT_EQ(adapter2 != nullptr, anyAdapterAvailable);
 }
 
 // Test that requesting the fallback adapter returns SwiftShader.
