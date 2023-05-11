@@ -45,10 +45,18 @@ bool GeneratorImplIr::Generate() {
 
     // TODO(crbug.com/tint/1906): Emit variables.
     (void)zero_init_workgroup_memory_;
+    if (ir_->root_block) {
+        TINT_ICE(Writer, diagnostics_) << "root block is unimplemented";
+        return false;
+    }
 
     // Emit functions.
     for (auto* func : ir_->functions) {
         EmitFunction(func);
+    }
+
+    if (diagnostics_.contains_errors()) {
+        return false;
     }
 
     // Serialize the module into binary SPIR-V.
@@ -231,6 +239,9 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         block->branch.target,
         [&](const ir::FunctionTerminator*) {
             // TODO(jrprice): Handle the return value, which will be a branch argument.
+            if (!block->branch.args.IsEmpty()) {
+                TINT_ICE(Writer, diagnostics_) << "unimplemented return value";
+            }
             current_function_.push_inst(spv::Op::OpReturn, {});
         },
         [&](Default) { TINT_ICE(Writer, diagnostics_) << "unimplemented branch target"; });
