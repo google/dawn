@@ -261,7 +261,6 @@ crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:co
 ################################################################################
 # copyToTexture,canvas:color_space_conversion:* fail with swiftshader
 # The other tests about canvas and image bitmap fail with swiftshader on Linux
-# KEEP
 ################################################################################
 crbug.com/dawn/1599 [ webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
 
@@ -489,7 +488,6 @@ crbug.com/1424883 webgpu:api,operation,adapter,requestDevice:invalid: [ Failure 
 
 ################################################################################
 # maxBindingsPerBindGroup tests need to be updated for spec change
-# KEEP
 ################################################################################
 crbug.com/dawn/1767 webgpu:api,operation,adapter,requestDevice:default: [ Failure ]
 crbug.com/dawn/1767 webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxBindingsPerBindGroup" [ Failure ]
