@@ -29,8 +29,8 @@ struct expected_texture_overload_spirv {
 };
 
 expected_texture_overload_spirv expected_texture_overload(
-    ast::builtin::test::ValidTextureOverload overload) {
-    using ValidTextureOverload = ast::builtin::test::ValidTextureOverload;
+    ast::test::ValidTextureOverload overload) {
+    using ValidTextureOverload = ast::test::ValidTextureOverload;
     switch (overload) {
         case ValidTextureOverload::kDimensions1d:
             return {
@@ -3704,11 +3704,11 @@ OpImageWrite %10 %16 %22
             "<unmatched texture overload>"};
 }  // NOLINT - Ignore the length of this function
 
-using BuiltinTextureTest = TestParamHelper<ast::builtin::test::TextureOverloadCase>;
+using BuiltinTextureTest = TestParamHelper<ast::test::TextureOverloadCase>;
 
 INSTANTIATE_TEST_SUITE_P(BuiltinTextureTest,
                          BuiltinTextureTest,
-                         testing::ValuesIn(ast::builtin::test::TextureOverloadCase::ValidCases()));
+                         testing::ValuesIn(ast::test::TextureOverloadCase::ValidCases()));
 
 TEST_P(BuiltinTextureTest, Call) {
     auto param = GetParam();

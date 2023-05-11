@@ -31,8 +31,8 @@ struct ExpectedResult {
     std::string out;
 };
 
-ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverload overload) {
-    using ValidTextureOverload = ast::builtin::test::ValidTextureOverload;
+ExpectedResult expected_texture_overload(ast::test::ValidTextureOverload overload) {
+    using ValidTextureOverload = ast::test::ValidTextureOverload;
     switch (overload) {
         case ValidTextureOverload::kDimensions1d:
         case ValidTextureOverload::kDimensionsStorageWO1d:
@@ -363,8 +363,7 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
     return "<unmatched texture overload>";
 }  // NOLINT - Ignore the length of this function
 
-class HlslGeneratorBuiltinTextureTest
-    : public TestParamHelper<ast::builtin::test::TextureOverloadCase> {};
+class HlslGeneratorBuiltinTextureTest : public TestParamHelper<ast::test::TextureOverloadCase> {};
 
 TEST_P(HlslGeneratorBuiltinTextureTest, Call) {
     auto param = GetParam();
@@ -391,7 +390,7 @@ TEST_P(HlslGeneratorBuiltinTextureTest, Call) {
 
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorBuiltinTextureTest,
                          HlslGeneratorBuiltinTextureTest,
-                         testing::ValuesIn(ast::builtin::test::TextureOverloadCase::ValidCases()));
+                         testing::ValuesIn(ast::test::TextureOverloadCase::ValidCases()));
 
 }  // namespace
 }  // namespace tint::writer::hlsl

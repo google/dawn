@@ -2182,11 +2182,11 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                                          TextureTestParams{type::TextureDimension::k2dArray},
                                          TextureTestParams{type::TextureDimension::k3d}));
 
-using ResolverBuiltinTest_Texture = ResolverTestWithParam<ast::builtin::test::TextureOverloadCase>;
+using ResolverBuiltinTest_Texture = ResolverTestWithParam<ast::test::TextureOverloadCase>;
 
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          ResolverBuiltinTest_Texture,
-                         testing::ValuesIn(ast::builtin::test::TextureOverloadCase::ValidCases()));
+                         testing::ValuesIn(ast::test::TextureOverloadCase::ValidCases()));
 
 static std::string to_str(const std::string& function,
                           utils::VectorRef<const sem::Parameter*> params) {
@@ -2204,8 +2204,8 @@ static std::string to_str(const std::string& function,
     return out.str();
 }
 
-static const char* expected_texture_overload(ast::builtin::test::ValidTextureOverload overload) {
-    using ValidTextureOverload = ast::builtin::test::ValidTextureOverload;
+static const char* expected_texture_overload(ast::test::ValidTextureOverload overload) {
+    using ValidTextureOverload = ast::test::ValidTextureOverload;
     switch (overload) {
         case ValidTextureOverload::kDimensions1d:
         case ValidTextureOverload::kDimensions2d:
@@ -2491,13 +2491,13 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
         ASSERT_NE(vec, nullptr);
         EXPECT_EQ(vec->Width(), 4u);
         switch (param.texture_data_type) {
-            case ast::builtin::test::TextureDataType::kF32:
+            case ast::test::TextureDataType::kF32:
                 EXPECT_TRUE(vec->type()->Is<type::F32>());
                 break;
-            case ast::builtin::test::TextureDataType::kU32:
+            case ast::test::TextureDataType::kU32:
                 EXPECT_TRUE(vec->type()->Is<type::U32>());
                 break;
-            case ast::builtin::test::TextureDataType::kI32:
+            case ast::test::TextureDataType::kI32:
                 EXPECT_TRUE(vec->type()->Is<type::I32>());
                 break;
         }
@@ -2508,26 +2508,26 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
         EXPECT_TRUE(vec->type()->Is<type::F32>());
     } else {
         switch (param.texture_kind) {
-            case ast::builtin::test::TextureKind::kRegular:
-            case ast::builtin::test::TextureKind::kMultisampled:
-            case ast::builtin::test::TextureKind::kStorage: {
+            case ast::test::TextureKind::kRegular:
+            case ast::test::TextureKind::kMultisampled:
+            case ast::test::TextureKind::kStorage: {
                 auto* vec = TypeOf(call)->As<type::Vector>();
                 ASSERT_NE(vec, nullptr);
                 switch (param.texture_data_type) {
-                    case ast::builtin::test::TextureDataType::kF32:
+                    case ast::test::TextureDataType::kF32:
                         EXPECT_TRUE(vec->type()->Is<type::F32>());
                         break;
-                    case ast::builtin::test::TextureDataType::kU32:
+                    case ast::test::TextureDataType::kU32:
                         EXPECT_TRUE(vec->type()->Is<type::U32>());
                         break;
-                    case ast::builtin::test::TextureDataType::kI32:
+                    case ast::test::TextureDataType::kI32:
                         EXPECT_TRUE(vec->type()->Is<type::I32>());
                         break;
                 }
                 break;
             }
-            case ast::builtin::test::TextureKind::kDepth:
-            case ast::builtin::test::TextureKind::kDepthMultisampled: {
+            case ast::test::TextureKind::kDepth:
+            case ast::test::TextureKind::kDepthMultisampled: {
                 EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
                 break;
             }

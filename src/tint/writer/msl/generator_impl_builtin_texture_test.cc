@@ -20,8 +20,8 @@
 namespace tint::writer::msl {
 namespace {
 
-std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload overload) {
-    using ValidTextureOverload = ast::builtin::test::ValidTextureOverload;
+std::string expected_texture_overload(ast::test::ValidTextureOverload overload) {
+    using ValidTextureOverload = ast::test::ValidTextureOverload;
     switch (overload) {
         case ValidTextureOverload::kDimensions1d:
         case ValidTextureOverload::kDimensionsStorageWO1d:
@@ -268,8 +268,7 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
     return "<unmatched texture overload>";
 }  // NOLINT - Ignore the length of this function
 
-class MslGeneratorBuiltinTextureTest
-    : public TestParamHelper<ast::builtin::test::TextureOverloadCase> {};
+class MslGeneratorBuiltinTextureTest : public TestParamHelper<ast::test::TextureOverloadCase> {};
 
 TEST_P(MslGeneratorBuiltinTextureTest, Call) {
     auto param = GetParam();
@@ -295,7 +294,7 @@ TEST_P(MslGeneratorBuiltinTextureTest, Call) {
 
 INSTANTIATE_TEST_SUITE_P(MslGeneratorBuiltinTextureTest,
                          MslGeneratorBuiltinTextureTest,
-                         testing::ValuesIn(ast::builtin::test::TextureOverloadCase::ValidCases()));
+                         testing::ValuesIn(ast::test::TextureOverloadCase::ValidCases()));
 
 }  // namespace
 }  // namespace tint::writer::msl

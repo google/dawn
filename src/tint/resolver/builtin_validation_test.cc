@@ -196,10 +196,10 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsType) {
 
 namespace texture_constexpr_args {
 
-using TextureOverloadCase = ast::builtin::test::TextureOverloadCase;
-using ValidTextureOverload = ast::builtin::test::ValidTextureOverload;
-using TextureKind = ast::builtin::test::TextureKind;
-using TextureDataType = ast::builtin::test::TextureDataType;
+using TextureOverloadCase = ast::test::TextureOverloadCase;
+using ValidTextureOverload = ast::test::ValidTextureOverload;
+using TextureKind = ast::test::TextureKind;
+using TextureDataType = ast::test::TextureDataType;
 
 static std::vector<TextureOverloadCase> TextureCases(
     std::unordered_set<ValidTextureOverload> overloads) {

@@ -22,7 +22,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::ast::builtin::test {
+namespace tint::ast::test {
 namespace {
 
 utils::StringStream& operator<<(utils::StringStream& out, const TextureKind& kind) {
@@ -142,11 +142,11 @@ std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
 
 Type TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b) const {
     switch (texture_data_type) {
-        case builtin::test::TextureDataType::kF32:
+        case test::TextureDataType::kF32:
             return b->ty.f32();
-        case builtin::test::TextureDataType::kU32:
+        case test::TextureDataType::kU32:
             return b->ty.u32();
-        case builtin::test::TextureDataType::kI32:
+        case test::TextureDataType::kI32:
             return b->ty.i32();
     }
 
@@ -160,25 +160,25 @@ const Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) con
         b->Binding(0_a),
     };
     switch (texture_kind) {
-        case builtin::test::TextureKind::kRegular:
+        case test::TextureKind::kRegular:
             return b->GlobalVar(
                 kTextureName,
                 b->ty.sampled_texture(texture_dimension, BuildResultVectorComponentType(b)), attrs);
 
-        case builtin::test::TextureKind::kDepth:
+        case test::TextureKind::kDepth:
             return b->GlobalVar(kTextureName, b->ty.depth_texture(texture_dimension), attrs);
 
-        case builtin::test::TextureKind::kDepthMultisampled:
+        case test::TextureKind::kDepthMultisampled:
             return b->GlobalVar(kTextureName, b->ty.depth_multisampled_texture(texture_dimension),
                                 attrs);
 
-        case builtin::test::TextureKind::kMultisampled:
+        case test::TextureKind::kMultisampled:
             return b->GlobalVar(
                 kTextureName,
                 b->ty.multisampled_texture(texture_dimension, BuildResultVectorComponentType(b)),
                 attrs);
 
-        case builtin::test::TextureKind::kStorage: {
+        case test::TextureKind::kStorage: {
             auto st = b->ty.storage_texture(texture_dimension, texel_format, access);
             return b->GlobalVar(kTextureName, st, attrs);
         }
@@ -2554,4 +2554,4 @@ bool ReturnsVoid(ValidTextureOverload texture_overload) {
     }
 }
 
-}  // namespace tint::ast::builtin::test
+}  // namespace tint::ast::test

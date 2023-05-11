@@ -23,7 +23,7 @@
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
 
-namespace tint::ast::builtin::test {
+namespace tint::ast::test {
 
 /// The name of the texture global variable used by the tests.
 static constexpr const char* kTextureName = "Texture";
@@ -268,6 +268,6 @@ struct TextureOverloadCase {
 
 std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data);
 
-}  // namespace tint::ast::builtin::test
+}  // namespace tint::ast::test
 
 #endif  // SRC_TINT_AST_BUILTIN_TEXTURE_HELPER_TEST_H_
