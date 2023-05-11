@@ -543,6 +543,9 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
 
 // Test sampling from a cube map texture view that covers the last layer of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewCoveringLastLayer) {
+    // TODO(dawn:1812): the test fails with DXGI_ERROR_DEVICE_HUNG on Intel D3D11 driver.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
+
     constexpr uint32_t kTotalLayers = 10;
     constexpr uint32_t kBaseLayer = 4;
     TextureCubeMapTest(kTotalLayers, kBaseLayer, kTotalLayers - kBaseLayer, false);
@@ -699,6 +702,9 @@ TEST_P(TextureViewRenderingTest, Texture2DViewOnALevelOfRectangular2DTextureAsCo
 
 // Test rendering into a 2D texture view created on a layer of a 2D array texture.
 TEST_P(TextureViewRenderingTest, Texture2DViewOnALayerOf2DArrayTextureAsColorAttachment) {
+    // TODO(dawn:1812): the test fails with DXGI_ERROR_DEVICE_HUNG on Intel D3D11 driver.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
+
     constexpr uint32_t kMipLevels = 1;
     constexpr uint32_t kBaseLevel = 0;
     constexpr uint32_t kLayers = 10;
