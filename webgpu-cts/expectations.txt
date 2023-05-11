@@ -111,6 +111,7 @@ crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextur
 # KEEP
 ################################################################################
 crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
+crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
 
 ################################################################################
 # external_texture failures
