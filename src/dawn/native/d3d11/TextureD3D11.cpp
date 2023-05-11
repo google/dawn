@@ -877,6 +877,9 @@ ResultOrError<ComPtr<ID3D11UnorderedAccessView>> TextureView::CreateD3D11Unorder
             uavDesc.Texture1D.MipSlice = GetBaseMipLevel();
             break;
         case wgpu::TextureViewDimension::e2D:
+            uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+            uavDesc.Texture2D.MipSlice = GetBaseMipLevel();
+            break;
         case wgpu::TextureViewDimension::e2DArray:
             uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
             uavDesc.Texture2DArray.FirstArraySlice = GetBaseArrayLayer();

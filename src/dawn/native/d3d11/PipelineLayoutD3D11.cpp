@@ -34,7 +34,6 @@ MaybeError PipelineLayout::Initialize() {
     unsigned int samplerIndex = 0;
     unsigned int shaderResourceViewIndex = 0;
     unsigned int unorderedAccessViewIndex = 0;
-    unsigned int storageTextureIndex = 0;
 
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
         const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
@@ -70,7 +69,7 @@ MaybeError PipelineLayout::Initialize() {
                     break;
 
                 case BindingInfoType::StorageTexture:
-                    mIndexInfo[group][bindingIndex] = storageTextureIndex++;
+                    mIndexInfo[group][bindingIndex] = unorderedAccessViewIndex++;
                     break;
             }
         }

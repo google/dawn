@@ -246,7 +246,20 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
             }
 
             case BindingInfoType::StorageTexture: {
-                return DAWN_UNIMPLEMENTED_ERROR("Storage textures are not supported");
+                ASSERT(bindingInfo.storageTexture.access == wgpu::StorageTextureAccess::WriteOnly);
+                ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
+                TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
+                DAWN_TRY_ASSIGN(d3d11UAV, view->CreateD3D11UnorderedAccessView());
+                if (bindingInfo.visibility & wgpu::ShaderStage::Fragment) {
+                    deviceContext1->OMSetRenderTargetsAndUnorderedAccessViews(
+                        D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, bindingSlot,
+                        1, d3d11UAV.GetAddressOf(), nullptr);
+                }
+                if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
+                    deviceContext1->CSSetUnorderedAccessViews(bindingSlot, 1,
+                                                              d3d11UAV.GetAddressOf(), nullptr);
+                }
+                break;
             }
 
             case BindingInfoType::ExternalTexture: {
@@ -350,8 +363,16 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
             }
 
             case BindingInfoType::StorageTexture: {
-                // TODO(dawn:1798): Support storage textures.
-                UNREACHABLE();
+                ASSERT(bindingInfo.storageTexture.access == wgpu::StorageTextureAccess::WriteOnly);
+                ID3D11UnorderedAccessView* nullUAV = nullptr;
+                if (bindingInfo.visibility & wgpu::ShaderStage::Fragment) {
+                    deviceContext1->OMSetRenderTargetsAndUnorderedAccessViews(
+                        D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, bindingSlot,
+                        1, &nullUAV, nullptr);
+                }
+                if (bindingInfo.visibility & wgpu::ShaderStage::Compute) {
+                    deviceContext1->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV, nullptr);
+                }
                 break;
             }
 
