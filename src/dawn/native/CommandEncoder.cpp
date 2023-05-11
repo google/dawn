@@ -508,6 +508,9 @@ MaybeError ValidateComputePassDescriptor(const DeviceBase* device,
     if (descriptor->timestampWriteCount > 0) {
         DAWN_ASSERT(descriptor->timestampWrites != nullptr);
 
+        // Record the query set and query index used on compute passes for validating query
+        // index overwrite.
+        QueryAvailabilityMap usedQueries;
         // TODO(https://crbug.com/dawn/1452):
         // 1. Add an enum that's TimestampLocationMask and has bit values.
         // 2. Add a function with a switch that converts from one to the other.
@@ -515,14 +518,25 @@ MaybeError ValidateComputePassDescriptor(const DeviceBase* device,
         // 4. Use it here.
         std::unordered_set<wgpu::ComputePassTimestampLocation> writtenLocations;
         for (uint32_t i = 0; i < descriptor->timestampWriteCount; ++i) {
-            DAWN_ASSERT(descriptor->timestampWrites[i].querySet != nullptr);
-            DAWN_TRY_CONTEXT(ValidateTimestampQuery(device, descriptor->timestampWrites[i].querySet,
-                                                    descriptor->timestampWrites[i].queryIndex),
+            QuerySetBase* querySet = descriptor->timestampWrites[i].querySet;
+            DAWN_ASSERT(querySet != nullptr);
+            uint32_t queryIndex = descriptor->timestampWrites[i].queryIndex;
+            DAWN_TRY_CONTEXT(ValidateTimestampQuery(device, querySet, queryIndex),
                              "validating querySet and queryIndex of timestampWrites[%u].", i);
             DAWN_TRY_CONTEXT(ValidateTimestampLocationOnComputePass(
                                  descriptor->timestampWrites[i].location, writtenLocations),
                              "validating location of timestampWrites[%u].", i);
             writtenLocations.insert(descriptor->timestampWrites[i].location);
+
+            auto checkIt = usedQueries.find(querySet);
+            DAWN_INVALID_IF(checkIt != usedQueries.end() && checkIt->second[queryIndex],
+                            "Query index %u of %s is written to twice in a compute pass.",
+                            queryIndex, querySet);
+
+            // Gets the iterator for that querySet or create a new vector of bool set to
+            // false if the querySet wasn't registered.
+            auto addIt = usedQueries.emplace(querySet, querySet->GetQueryCount()).first;
+            addIt->second[queryIndex] = true;
         }
     }
 

@@ -385,13 +385,13 @@ TEST_F(TimestampQueryValidationTest, TimestampWritesOnComputePass) {
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
-    // Success to write timestamps to the same query index twice on same compute pass
+    // Fail to write timestamps to the same query index twice on same compute pass
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         EncodeComputePassWithTimestampWrites(
             encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
                       {querySet, 0, wgpu::ComputePassTimestampLocation::End}});
-        encoder.Finish();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // Success to write timestamps at same location of different compute pass

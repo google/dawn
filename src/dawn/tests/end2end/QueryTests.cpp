@@ -864,35 +864,12 @@ TEST_P(TimestampQueryTests, TimestampWritesQuerySetOnComputePass) {
 
 // Test timestampWrites with query index in compute pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnComputePass) {
-    constexpr uint32_t kQueryCount = 2;
+    // Set timestampWrites with different query indexes and locations, not need test write same
+    // query index due to it's not allowed on compute pass.
+    wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
 
-    // Set timestampWrites with different query indexes on same compute pass
-    {
-        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
-
-        TestTimestampWritesOnComputePass(
-            {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
-             {querySet, 1, wgpu::ComputePassTimestampLocation::End}});
-    }
-
-    // Set timestampWrites with same query index on same compute pass
-    {
-        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
-
-        TestTimestampWritesOnComputePass(
-            {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
-             {querySet, 0, wgpu::ComputePassTimestampLocation::End}});
-    }
-
-    // Set timestampWrites with same query indexes on different compute pass
-    {
-        wgpu::QuerySet querySet0 = CreateQuerySetForTimestamp(kQueryCount);
-        wgpu::QuerySet querySet1 = CreateQuerySetForTimestamp(kQueryCount);
-
-        TestTimestampWritesOnComputePass(
-            {{querySet0, 0, wgpu::ComputePassTimestampLocation::Beginning}},
-            {{querySet1, 0, wgpu::ComputePassTimestampLocation::End}});
-    }
+    TestTimestampWritesOnComputePass({{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
+                                      {querySet, 1, wgpu::ComputePassTimestampLocation::End}});
 }
 
 // Test timestampWrites with timestamp location in compute pass descriptor
