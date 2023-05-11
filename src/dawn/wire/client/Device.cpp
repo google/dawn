@@ -169,6 +169,7 @@ bool Device::OnPopErrorScopeCallback(uint64_t requestSerial,
         case WGPUErrorType_NoError:
         case WGPUErrorType_Validation:
         case WGPUErrorType_OutOfMemory:
+        case WGPUErrorType_Internal:
         case WGPUErrorType_Unknown:
         case WGPUErrorType_DeviceLost:
             break;

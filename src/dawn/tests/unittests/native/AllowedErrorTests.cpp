@@ -42,6 +42,7 @@ using ::testing::StrictMock;
 using ::testing::Test;
 
 static constexpr char kOomErrorMessage[] = "Out of memory error";
+static constexpr char kInternalErrorMessage[] = "Internal error";
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}
@@ -237,6 +238,56 @@ TEST_F(AllowedErrorTests, CreateRenderPipeline) {
     device.CreateRenderPipeline(ToCppAPI(&desc));
 }
 
+// Internal error from synchronously initializing a compute pipeline should not result in a device
+// loss.
+TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
+    Ref<ShaderModuleMock> csModule = ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());
+
+    ComputePipelineDescriptor desc = {};
+    desc.compute.module = csModule.Get();
+    desc.compute.entryPoint = "main";
+
+    Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*computePipelineMock.Get(), Initialize)
+        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+    EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
+        .WillOnce(Return(ByMove(std::move(computePipelineMock))));
+
+    // Expect the internal error.
+    EXPECT_CALL(mDeviceErrorCb,
+                Call(WGPUErrorType_Internal, HasSubstr(kInternalErrorMessage), this))
+        .Times(1);
+    device.CreateComputePipeline(ToCppAPI(&desc));
+
+    // Device lost should only happen due to destruction.
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
+}
+
+// Internal error from synchronously initializing a render pipeline should not result in a device
+// loss.
+TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
+    Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
+
+    RenderPipelineDescriptor desc = {};
+    desc.vertex.module = vsModule.Get();
+    desc.vertex.entryPoint = "main";
+
+    Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
+        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+    EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
+        .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
+
+    // Expect the internal error.
+    EXPECT_CALL(mDeviceErrorCb,
+                Call(WGPUErrorType_Internal, HasSubstr(kInternalErrorMessage), this))
+        .Times(1);
+    device.CreateRenderPipeline(ToCppAPI(&desc));
+
+    // Device lost should only happen due to destruction.
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
+}
+
 //
 // Exercise async APIs where OOM errors do NOT currently cause a device lost.
 //
@@ -284,6 +335,60 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
     MockCallback<wgpu::CreateRenderPipelineAsyncCallback> cb;
     EXPECT_CALL(
         cb, Call(WGPUCreatePipelineAsyncStatus_InternalError, _, HasSubstr(kOomErrorMessage), this))
+        .Times(1);
+
+    device.CreateRenderPipelineAsync(ToCppAPI(&desc), cb.Callback(), cb.MakeUserdata(this));
+    device.Tick();
+
+    // Device lost should only happen because of destruction.
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
+}
+
+// Internal error from asynchronously initializing a compute pipeline should not result in a device
+// loss.
+TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
+    Ref<ShaderModuleMock> csModule = ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());
+
+    ComputePipelineDescriptor desc = {};
+    desc.compute.module = csModule.Get();
+    desc.compute.entryPoint = "main";
+
+    Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*computePipelineMock.Get(), Initialize)
+        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+    EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
+        .WillOnce(Return(ByMove(std::move(computePipelineMock))));
+
+    MockCallback<wgpu::CreateComputePipelineAsyncCallback> cb;
+    EXPECT_CALL(cb, Call(WGPUCreatePipelineAsyncStatus_InternalError, _,
+                         HasSubstr(kInternalErrorMessage), this))
+        .Times(1);
+
+    device.CreateComputePipelineAsync(ToCppAPI(&desc), cb.Callback(), cb.MakeUserdata(this));
+    device.Tick();
+
+    // Device lost should only happen because of destruction.
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
+}
+
+// Internal error from asynchronously initializing a render pipeline should not result in a device
+// loss.
+TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
+    Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
+
+    RenderPipelineDescriptor desc = {};
+    desc.vertex.module = vsModule.Get();
+    desc.vertex.entryPoint = "main";
+
+    Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
+    EXPECT_CALL(*renderPipelineMock.Get(), Initialize)
+        .WillOnce(Return(ByMove(DAWN_INTERNAL_ERROR(kInternalErrorMessage))));
+    EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
+        .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
+
+    MockCallback<wgpu::CreateRenderPipelineAsyncCallback> cb;
+    EXPECT_CALL(cb, Call(WGPUCreatePipelineAsyncStatus_InternalError, _,
+                         HasSubstr(kInternalErrorMessage), this))
         .Times(1);
 
     device.CreateRenderPipelineAsync(ToCppAPI(&desc), cb.Callback(), cb.MakeUserdata(this));
