@@ -1903,7 +1903,7 @@
                 "name": "set vertex buffer",
                 "args": [
                     {"name": "slot", "type": "uint32_t"},
-                    {"name": "buffer", "type": "buffer"},
+                    {"name": "buffer", "type": "buffer", "optional": true},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
                     {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
                 ]
@@ -2114,7 +2114,7 @@
                 "name": "set vertex buffer",
                 "args": [
                     {"name": "slot", "type": "uint32_t"},
-                    {"name": "buffer", "type": "buffer"},
+                    {"name": "buffer", "type": "buffer", "optional": true},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
                     {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
                 ]
