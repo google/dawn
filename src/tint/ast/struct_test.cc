@@ -16,7 +16,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/test_helper.h"
-#include "src/tint/transform/add_block_attribute.h"
+#include "src/tint/ast/transform/add_block_attribute.h"
 
 namespace tint::ast {
 namespace {

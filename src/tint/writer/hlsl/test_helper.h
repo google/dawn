@@ -20,8 +20,8 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/tint/ast/transform/renamer.h"
 #include "src/tint/transform/manager.h"
-#include "src/tint/transform/renamer.h"
 #include "src/tint/writer/hlsl/generator.h"
 #include "src/tint/writer/hlsl/generator_impl.h"
 
