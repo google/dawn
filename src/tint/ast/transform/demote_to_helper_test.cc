@@ -18,7 +18,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using DemoteToHelperTest = TransformTest;
@@ -1202,4 +1202,4 @@ fn foo(@location(0) in : f32) {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

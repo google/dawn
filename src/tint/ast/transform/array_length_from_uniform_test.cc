@@ -20,7 +20,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/ast/transform/unshadow.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using ArrayLengthFromUniformTest = TransformTest;
@@ -99,9 +99,7 @@ fn main() {
 }
 )";
 
-    auto* expect =
-        "error: missing transform data for "
-        "tint::transform::ArrayLengthFromUniform";
+    auto* expect = "error: missing transform data for tint::ast::transform::ArrayLengthFromUniform";
 
     auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src);
 
@@ -515,4 +513,4 @@ struct SB {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

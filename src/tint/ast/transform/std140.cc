@@ -30,7 +30,7 @@
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/transform.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Std140);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Std140);
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -77,7 +77,7 @@ struct Hasher<DynamicIndex> {
 
 }  // namespace tint::utils
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct Std140::State {
@@ -1168,4 +1168,4 @@ Transform::ApplyResult Std140::Apply(const Program* src, const DataMap&, DataMap
     return State(src).Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

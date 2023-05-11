@@ -17,13 +17,13 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// A transform that extracts array and matrix values that are dynamically
 /// indexed to a temporary `var` local before performing the index. This
 /// transform is used by the SPIR-V writer as there is no SPIR-V instruction
 /// that can dynamically index a non-pointer composite.
-class VarForDynamicIndex : public Transform {
+class VarForDynamicIndex final : public utils::Castable<VarForDynamicIndex, Transform> {
   public:
     /// Constructor
     VarForDynamicIndex();
@@ -37,6 +37,6 @@ class VarForDynamicIndex : public Transform {
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_VAR_FOR_DYNAMIC_INDEX_H_

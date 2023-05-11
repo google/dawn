@@ -16,7 +16,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 static std::ostream& operator<<(std::ostream& out, Robustness::Action action) {
     switch (action) {
@@ -5496,4 +5496,4 @@ INSTANTIATE_TEST_SUITE_P(,
                                          Robustness::Action::kClamp,
                                          Robustness::Action::kPredicate));
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

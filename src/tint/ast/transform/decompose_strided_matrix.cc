@@ -25,9 +25,9 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeStridedMatrix);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DecomposeStridedMatrix);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 /// MatrixInfo describes a matrix member with a custom stride
@@ -205,4 +205,4 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

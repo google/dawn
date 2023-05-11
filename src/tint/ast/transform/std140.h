@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Std140 is a transform that forks types used in the uniform address space that contain
 /// `matNx2<f32>` matrices into `N`x`vec2<f32>` column vectors, and `matNxM<f16>` matrices into
@@ -44,6 +44,6 @@ class Std140 final : public utils::Castable<Std140, Transform> {
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_STD140_H_

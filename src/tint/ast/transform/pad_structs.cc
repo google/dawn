@@ -27,9 +27,9 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::PadStructs);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PadStructs);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -157,4 +157,4 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

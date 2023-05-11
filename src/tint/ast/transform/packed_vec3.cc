@@ -35,11 +35,11 @@
 #include "src/tint/utils/hashset.h"
 #include "src/tint/utils/vector.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::PackedVec3);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PackedVec3);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct PackedVec3::State {
@@ -518,4 +518,4 @@ Transform::ApplyResult PackedVec3::Apply(const Program* src, const DataMap&, Dat
     return State{src}.Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

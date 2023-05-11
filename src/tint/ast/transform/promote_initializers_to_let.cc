@@ -25,9 +25,9 @@
 #include "src/tint/type/struct.h"
 #include "src/tint/utils/hashset.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::PromoteInitializersToLet);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PromoteInitializersToLet);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 PromoteInitializersToLet::PromoteInitializersToLet() = default;
 
@@ -153,4 +153,4 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

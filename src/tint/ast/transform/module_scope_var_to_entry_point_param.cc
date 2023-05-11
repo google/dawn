@@ -28,9 +28,9 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/string.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::ModuleScopeVarToEntryPointParam);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ModuleScopeVarToEntryPointParam);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using StructMemberList = utils::Vector<const ast::StructMember*, 8>;
@@ -607,4 +607,4 @@ Transform::ApplyResult ModuleScopeVarToEntryPointParam::Apply(const Program* src
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

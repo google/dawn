@@ -25,11 +25,11 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform::Config);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform::Result);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform::Result);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -268,4 +268,4 @@ ArrayLengthFromUniform::Result::Result(std::unordered_set<uint32_t> used_size_in
 ArrayLengthFromUniform::Result::Result(const Result&) = default;
 ArrayLengthFromUniform::Result::~Result() = default;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

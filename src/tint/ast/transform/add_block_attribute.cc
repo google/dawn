@@ -22,10 +22,10 @@
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/hashset.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::AddBlockAttribute);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::AddBlockAttribute::BlockAttribute);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::AddBlockAttribute);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::AddBlockAttribute::BlockAttribute);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 AddBlockAttribute::AddBlockAttribute() = default;
 
@@ -114,4 +114,4 @@ const AddBlockAttribute::BlockAttribute* AddBlockAttribute::BlockAttribute::Clon
         ctx->dst->ID(), ctx->dst->AllocateNodeID());
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

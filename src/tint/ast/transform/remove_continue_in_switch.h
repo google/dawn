@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// This transform replaces continue statements in switch cases with setting a
 /// bool variable, and checking if the variable is set after the switch to
@@ -40,6 +40,6 @@ class RemoveContinueInSwitch final : public utils::Castable<RemoveContinueInSwit
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_

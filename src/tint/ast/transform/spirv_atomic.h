@@ -26,7 +26,7 @@ namespace tint {
 class CloneContext;
 }  // namespace tint
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// SpirvAtomic is a transform that replaces calls to stub functions created by the SPIR-V reader
 /// with calls to the WGSL atomic builtin. It also makes sure to replace variable declarations that
@@ -72,6 +72,6 @@ class SpirvAtomic final : public utils::Castable<SpirvAtomic, Transform> {
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_SPIRV_ATOMIC_H_

@@ -20,7 +20,7 @@
 #include "src/tint/ast/transform/transform.h"
 #include "src/tint/sem/binding_point.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// TruncateInterstageVariables is a transform that truncate interstage variables.
 /// It must be run after CanonicalizeEntryPointIO which guarantees all interstage variables of
@@ -126,6 +126,6 @@ class TruncateInterstageVariables final
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_TRUNCATE_INTERSTAGE_VARIABLES_H_

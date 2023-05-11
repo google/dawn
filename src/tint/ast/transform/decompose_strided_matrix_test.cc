@@ -26,7 +26,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using DecomposeStridedMatrixTest = TransformTest;
@@ -633,4 +633,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

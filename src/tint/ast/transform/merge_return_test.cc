@@ -18,7 +18,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using MergeReturnTest = TransformTest;
@@ -857,4 +857,4 @@ fn foo() -> i32 {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

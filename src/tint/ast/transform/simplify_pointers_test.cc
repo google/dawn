@@ -17,7 +17,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/ast/transform/unshadow.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using SimplifyPointersTest = TransformTest;
@@ -392,4 +392,4 @@ fn main() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

@@ -21,11 +21,11 @@
 #include "src/tint/switch.h"
 #include "src/tint/utils/scoped_assignment.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::MergeReturn);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MergeReturn);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -239,4 +239,4 @@ Transform::ApplyResult MergeReturn::Apply(const Program* src, const DataMap&, Da
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

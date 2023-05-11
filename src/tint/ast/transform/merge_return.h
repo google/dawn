@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Merge return statements into a single return at the end of the function.
 class MergeReturn final : public utils::Castable<MergeReturn, Transform> {
@@ -33,6 +33,6 @@ class MergeReturn final : public utils::Castable<MergeReturn, Transform> {
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_MERGE_RETURN_H_

@@ -20,7 +20,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using FirstIndexOffsetTest = TransformTest;
@@ -618,4 +618,4 @@ fn func(i : u32) -> u32 {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

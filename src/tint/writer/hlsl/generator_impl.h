@@ -161,23 +161,23 @@ class GeneratorImpl : public TextGenerator {
                               const sem::Call* call,
                               const sem::ValueConstructor* ctor);
     /// Handles generating a call expression to a
-    /// transform::DecomposeMemoryAccess::Intrinsic for a uniform buffer
+    /// ast::transform::DecomposeMemoryAccess::Intrinsic for a uniform buffer
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @param intrinsic the transform::DecomposeMemoryAccess::Intrinsic
+    /// @param intrinsic the ast::transform::DecomposeMemoryAccess::Intrinsic
     /// @returns true if the call expression is emitted
     bool EmitUniformBufferAccess(utils::StringStream& out,
                                  const ast::CallExpression* expr,
-                                 const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+                                 const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating a call expression to a
-    /// transform::DecomposeMemoryAccess::Intrinsic for a storage buffer
+    /// ast::transform::DecomposeMemoryAccess::Intrinsic for a storage buffer
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @param intrinsic the transform::DecomposeMemoryAccess::Intrinsic
+    /// @param intrinsic the ast::transform::DecomposeMemoryAccess::Intrinsic
     /// @returns true if the call expression is emitted
     bool EmitStorageBufferAccess(utils::StringStream& out,
                                  const ast::CallExpression* expr,
-                                 const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+                                 const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating a barrier intrinsic call
     /// @param out the output of the expression stream
     /// @param builtin the semantic information for the barrier builtin
@@ -190,13 +190,14 @@ class GeneratorImpl : public TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitStorageAtomicCall(utils::StringStream& out,
                                const ast::CallExpression* expr,
-                               const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+                               const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating the helper function for the atomic intrinsic function
     /// @param func the function
     /// @param intrinsic the atomic intrinsic
     /// @returns true if the function is emitted
-    bool EmitStorageAtomicIntrinsic(const ast::Function* func,
-                                    const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+    bool EmitStorageAtomicIntrinsic(
+        const ast::Function* func,
+        const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating an atomic intrinsic call for a workgroup variable
     /// @param out the output of the expression stream
     /// @param expr the call expression
@@ -528,8 +529,8 @@ class GeneratorImpl : public TextGenerator {
     };
 
     struct DMAIntrinsic {
-        transform::DecomposeMemoryAccess::Intrinsic::Op op;
-        transform::DecomposeMemoryAccess::Intrinsic::DataType type;
+        ast::transform::DecomposeMemoryAccess::Intrinsic::Op op;
+        ast::transform::DecomposeMemoryAccess::Intrinsic::DataType type;
         bool operator==(const DMAIntrinsic& rhs) const { return op == rhs.op && type == rhs.type; }
         /// Hasher is a std::hash function for DMAIntrinsic
         struct Hasher {

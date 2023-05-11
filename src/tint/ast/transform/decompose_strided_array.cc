@@ -28,9 +28,9 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeStridedArray);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DecomposeStridedArray);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using DecomposedArrays = std::unordered_map<const type::Array*, Symbol>;
@@ -175,4 +175,4 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

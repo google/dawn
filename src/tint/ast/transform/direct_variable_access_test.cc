@@ -20,7 +20,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/utils/string.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 /// @returns a DataMap with DirectVariableAccess::Config::transform_private enabled.
@@ -2710,4 +2710,4 @@ fn c() {
 }  // namespace complex_tests
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

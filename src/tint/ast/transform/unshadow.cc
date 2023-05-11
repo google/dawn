@@ -25,9 +25,9 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Unshadow);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Unshadow);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct Unshadow::State {
@@ -130,4 +130,4 @@ Transform::ApplyResult Unshadow::Apply(const Program* src, const DataMap&, DataM
     return State(src).Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

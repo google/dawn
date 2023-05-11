@@ -19,9 +19,9 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/module.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DisableUniformityAnalysis);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DisableUniformityAnalysis);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 DisableUniformityAnalysis::DisableUniformityAnalysis() = default;
 
@@ -43,4 +43,4 @@ Transform::ApplyResult DisableUniformityAnalysis::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

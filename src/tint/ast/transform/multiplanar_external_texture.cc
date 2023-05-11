@@ -24,12 +24,12 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/texture_dimension.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::MultiplanarExternalTexture);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::MultiplanarExternalTexture::NewBindingPoints);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture::NewBindingPoints);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -524,4 +524,4 @@ Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// A transform to be used by the MSL backend which will:
 /// * Replace `vec3<T>` types with an internal `__packed_vec3` type when they are used in
@@ -54,6 +54,6 @@ class PackedVec3 final : public utils::Castable<PackedVec3, Transform> {
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_PACKED_VEC3_H_

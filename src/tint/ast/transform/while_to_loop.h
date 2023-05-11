@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// WhileToLoop is a Transform that converts a while statement into a loop
 /// statement. This is required by the SPIR-V writer.
@@ -35,6 +35,6 @@ class WhileToLoop final : public utils::Castable<WhileToLoop, Transform> {
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_WHILE_TO_LOOP_H_

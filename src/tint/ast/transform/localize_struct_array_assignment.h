@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// This transforms replaces assignment to dynamically-indexed fixed-size arrays
 /// in structs on shader-local variables with code that copies the arrays to a
@@ -45,6 +45,6 @@ class LocalizeStructArrayAssignment final
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_LOCALIZE_STRUCT_ARRAY_ASSIGNMENT_H_

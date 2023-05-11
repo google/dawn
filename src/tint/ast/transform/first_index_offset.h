@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Adds firstVertex/Instance (injected via root constants) to
 /// vertex/instance index builtins.
@@ -113,6 +113,6 @@ class FirstIndexOffset final : public utils::Castable<FirstIndexOffset, Transfor
     uint32_t group_ = 0;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_FIRST_INDEX_OFFSET_H_

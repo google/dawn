@@ -19,7 +19,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Strip all but one entry point a module.
 ///
@@ -59,6 +59,6 @@ class SingleEntryPoint final : public utils::Castable<SingleEntryPoint, Transfor
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_SINGLE_ENTRY_POINT_H_

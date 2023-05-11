@@ -136,7 +136,7 @@ struct EntryPoint {
     PipelineStage stage;
     /// The workgroup size. If PipelineStage is kCompute and this holds no value, then the workgroup
     /// size is derived from an override-expression. In this situation you first need to run the
-    /// tint::transform::SubstituteOverride transform before using the inspector.
+    /// tint::ast::transform::SubstituteOverride transform before using the inspector.
     std::optional<WorkgroupSize> workgroup_size;
     /// List of the input variable accessed via this entry point.
     std::vector<StageVariable> input_variables;

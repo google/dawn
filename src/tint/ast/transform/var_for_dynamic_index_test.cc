@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using VarForDynamicIndexTest = TransformTest;
@@ -560,4 +560,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

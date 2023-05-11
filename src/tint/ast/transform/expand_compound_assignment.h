@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Converts compound assignment statements to regular assignment statements,
 /// hoisting the LHS expression if necessary.
@@ -54,6 +54,6 @@ class ExpandCompoundAssignment final : public utils::Castable<ExpandCompoundAssi
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_EXPAND_COMPOUND_ASSIGNMENT_H_

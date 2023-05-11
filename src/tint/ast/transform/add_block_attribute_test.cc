@@ -19,7 +19,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using AddBlockAttributeTest = TransformTest;
@@ -1022,4 +1022,4 @@ fn main() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

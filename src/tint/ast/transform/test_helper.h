@@ -25,7 +25,7 @@
 #include "src/tint/transform/manager.h"
 #include "src/tint/writer/wgsl/generator.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// @param program the program to get an output WGSL string from
 /// @returns the output program as a WGSL string, or an error string if the
@@ -103,7 +103,7 @@ class TransformTestBase : public BASE {
             return Output(std::move(program));
         }
 
-        Manager manager;
+        tint::transform::Manager manager;
         for (auto* transform_ptr : std::initializer_list<Transform*>{new TRANSFORMS()...}) {
             manager.append(std::unique_ptr<Transform>(transform_ptr));
         }
@@ -160,6 +160,6 @@ using TransformTest = TransformTestBase<testing::Test>;
 template <typename T>
 using TransformTestWithParam = TransformTestBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_TEST_HELPER_H_

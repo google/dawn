@@ -41,10 +41,10 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess::Intrinsic);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DecomposeMemoryAccess);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DecomposeMemoryAccess::Intrinsic);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -1001,7 +1001,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Offset);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::OffsetLiteral);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Offset);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::OffsetLiteral);

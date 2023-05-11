@@ -18,7 +18,7 @@
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/switch.h"
 
-namespace tint::transform::utils {
+namespace tint::ast::transform::utils {
 
 InsertionPoint GetInsertionPoint(CloneContext& ctx, const ast::Statement* stmt) {
     auto& sem = ctx.src->Sem();
@@ -55,4 +55,4 @@ InsertionPoint GetInsertionPoint(CloneContext& ctx, const ast::Statement* stmt) 
     return {};
 }
 
-}  // namespace tint::transform::utils
+}  // namespace tint::ast::transform::utils

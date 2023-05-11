@@ -16,7 +16,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using DecomposeMemoryAccessTest = TransformTest;
@@ -3962,4 +3962,4 @@ struct S {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

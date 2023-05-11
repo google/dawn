@@ -32,12 +32,12 @@
 #include "src/tint/switch.h"
 #include "src/tint/type/reference.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Robustness);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Robustness::Config);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct Robustness::State {
@@ -694,4 +694,4 @@ Transform::ApplyResult Robustness::Apply(const Program* src,
     return State{src, std::move(cfg)}.Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

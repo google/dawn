@@ -26,10 +26,10 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/unicode.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::TruncateInterstageVariables);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::TruncateInterstageVariables::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TruncateInterstageVariables);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TruncateInterstageVariables::Config);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -192,4 +192,4 @@ TruncateInterstageVariables::Config::~Config() = default;
 TruncateInterstageVariables::Config& TruncateInterstageVariables::Config::operator=(const Config&) =
     default;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

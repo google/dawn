@@ -18,7 +18,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using BindingRemapperTest = TransformTest;
@@ -344,7 +344,7 @@ fn f() {
 }
 )";
 
-    auto* expect = R"(error: missing transform data for tint::transform::BindingRemapper)";
+    auto* expect = R"(error: missing transform data for tint::ast::transform::BindingRemapper)";
 
     auto got = Run<BindingRemapper>(src);
 
@@ -352,4 +352,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

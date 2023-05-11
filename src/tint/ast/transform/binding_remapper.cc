@@ -24,10 +24,10 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/string.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::BindingRemapper);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::BindingRemapper::Remappings);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BindingRemapper);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BindingRemapper::Remappings);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 BindingRemapper::Remappings::Remappings(BindingPoints bp, AccessControls ac, bool may_collide)
     : binding_points(std::move(bp)),
@@ -161,4 +161,4 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

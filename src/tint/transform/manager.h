@@ -27,7 +27,7 @@ namespace tint::transform {
 /// The inner transforms will execute in the appended order.
 /// If any inner transform fails the manager will return immediately and
 /// the error can be retrieved with the Output's diagnostics.
-class Manager final : public tint::utils::Castable<Manager, Transform> {
+class Manager final : public tint::utils::Castable<Manager, ast::transform::Transform> {
   public:
     /// Constructor
     Manager();
@@ -47,10 +47,10 @@ class Manager final : public tint::utils::Castable<Manager, Transform> {
         transforms_.emplace_back(std::make_unique<T>(std::forward<ARGS>(args)...));
     }
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     std::vector<std::unique_ptr<Transform>> transforms_;

@@ -32,9 +32,9 @@ namespace tint::transform {
 Manager::Manager() = default;
 Manager::~Manager() = default;
 
-Transform::ApplyResult Manager::Apply(const Program* program,
-                                      const DataMap& inputs,
-                                      DataMap& outputs) const {
+ast::transform::Transform::ApplyResult Manager::Apply(const Program* program,
+                                                      const ast::transform::DataMap& inputs,
+                                                      ast::transform::DataMap& outputs) const {
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
     auto print_program = [&](const char* msg, const Transform* transform) {
         auto wgsl = Program::printer(program);

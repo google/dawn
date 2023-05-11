@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// DecomposeStridedMatrix transforms replaces matrix members of storage or
 /// uniform buffer structures, that have a stride attribute, into an array
@@ -41,6 +41,6 @@ class DecomposeStridedMatrix final : public utils::Castable<DecomposeStridedMatr
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_DECOMPOSE_STRIDED_MATRIX_H_

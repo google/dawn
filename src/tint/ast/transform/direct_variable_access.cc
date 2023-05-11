@@ -34,8 +34,8 @@
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DirectVariableAccess);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DirectVariableAccess::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DirectVariableAccess);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DirectVariableAccess::Config);
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -190,7 +190,7 @@ struct Hasher<AccessShape> {
 
 }  // namespace tint::utils
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// The PIMPL state for the DirectVariableAccess transform
 struct DirectVariableAccess::State {
@@ -1217,4 +1217,4 @@ Transform::ApplyResult DirectVariableAccess::Apply(const Program* program,
     return State(program, options).Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

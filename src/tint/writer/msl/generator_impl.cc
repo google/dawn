@@ -167,58 +167,58 @@ SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 
 SanitizedResult Sanitize(const Program* in, const Options& options) {
     transform::Manager manager;
-    transform::DataMap data;
+    ast::transform::DataMap data;
 
-    manager.Add<transform::DisableUniformityAnalysis>();
+    manager.Add<ast::transform::DisableUniformityAnalysis>();
 
     // ExpandCompoundAssignment must come before BuiltinPolyfill
-    manager.Add<transform::ExpandCompoundAssignment>();
+    manager.Add<ast::transform::ExpandCompoundAssignment>();
 
     // Build the configs for the internal CanonicalizeEntryPointIO transform.
-    auto entry_point_io_cfg = transform::CanonicalizeEntryPointIO::Config(
-        transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, options.fixed_sample_mask,
+    auto entry_point_io_cfg = ast::transform::CanonicalizeEntryPointIO::Config(
+        ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, options.fixed_sample_mask,
         options.emit_vertex_point_size);
 
-    manager.Add<transform::PreservePadding>();
+    manager.Add<ast::transform::PreservePadding>();
 
-    manager.Add<transform::Unshadow>();
+    manager.Add<ast::transform::Unshadow>();
 
-    manager.Add<transform::PromoteSideEffectsToDecl>();
+    manager.Add<ast::transform::PromoteSideEffectsToDecl>();
 
     if (!options.disable_robustness) {
         // Robustness must come after PromoteSideEffectsToDecl
         // Robustness must come before BuiltinPolyfill and CanonicalizeEntryPointIO
         // Robustness must come before ArrayLengthFromUniform
-        manager.Add<transform::Robustness>();
+        manager.Add<ast::transform::Robustness>();
     }
 
     {  // Builtin polyfills
-        transform::BuiltinPolyfill::Builtins polyfills;
-        polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
-        polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
+        ast::transform::BuiltinPolyfill::Builtins polyfills;
+        polyfills.acosh = ast::transform::BuiltinPolyfill::Level::kRangeCheck;
+        polyfills.atanh = ast::transform::BuiltinPolyfill::Level::kRangeCheck;
         polyfills.bitshift_modulo = true;  // crbug.com/tint/1543
         polyfills.clamp_int = true;
         polyfills.conv_f32_to_iu32 = true;
-        polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.extract_bits = ast::transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
-        polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.insert_bits = ast::transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.int_div_mod = true;
         polyfills.sign_int = true;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         polyfills.workgroup_uniform_load = true;
-        data.Add<transform::BuiltinPolyfill::Config>(polyfills);
-        manager.Add<transform::BuiltinPolyfill>();
+        data.Add<ast::transform::BuiltinPolyfill::Config>(polyfills);
+        manager.Add<ast::transform::BuiltinPolyfill>();
     }
 
     // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
         options.external_texture_options.bindings_map);
-    manager.Add<transform::MultiplanarExternalTexture>();
+    manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     // BindingRemapper must come after MultiplanarExternalTexture
-    manager.Add<transform::BindingRemapper>();
-    data.Add<transform::BindingRemapper::Remappings>(
+    manager.Add<ast::transform::BindingRemapper>();
+    data.Add<ast::transform::BindingRemapper::Remappings>(
         options.binding_remapper_options.binding_points,
         options.binding_remapper_options.access_controls,
         options.binding_remapper_options.allow_collisions);
@@ -226,36 +226,36 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
         // ZeroInitWorkgroupMemory may inject new builtin parameters.
-        manager.Add<transform::ZeroInitWorkgroupMemory>();
+        manager.Add<ast::transform::ZeroInitWorkgroupMemory>();
     }
 
     // CanonicalizeEntryPointIO must come after Robustness
-    manager.Add<transform::CanonicalizeEntryPointIO>();
-    data.Add<transform::CanonicalizeEntryPointIO::Config>(std::move(entry_point_io_cfg));
+    manager.Add<ast::transform::CanonicalizeEntryPointIO>();
+    data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(std::move(entry_point_io_cfg));
 
-    manager.Add<transform::PromoteInitializersToLet>();
+    manager.Add<ast::transform::PromoteInitializersToLet>();
 
     // DemoteToHelper must come after PromoteSideEffectsToDecl and ExpandCompoundAssignment.
     // TODO(crbug.com/tint/1752): This is only necessary for Metal versions older than 2.3.
-    manager.Add<transform::DemoteToHelper>();
+    manager.Add<ast::transform::DemoteToHelper>();
 
-    manager.Add<transform::VectorizeScalarMatrixInitializers>();
-    manager.Add<transform::RemovePhonies>();
-    manager.Add<transform::SimplifyPointers>();
+    manager.Add<ast::transform::VectorizeScalarMatrixInitializers>();
+    manager.Add<ast::transform::RemovePhonies>();
+    manager.Add<ast::transform::SimplifyPointers>();
 
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
-    manager.Add<transform::ArrayLengthFromUniform>();
+    manager.Add<ast::transform::ArrayLengthFromUniform>();
 
-    transform::ArrayLengthFromUniform::Config array_length_cfg(
+    ast::transform::ArrayLengthFromUniform::Config array_length_cfg(
         std::move(options.array_length_from_uniform.ubo_binding));
     array_length_cfg.bindpoint_to_size_index =
         std::move(options.array_length_from_uniform.bindpoint_to_size_index);
-    data.Add<transform::ArrayLengthFromUniform::Config>(array_length_cfg);
+    data.Add<ast::transform::ArrayLengthFromUniform::Config>(array_length_cfg);
 
     // PackedVec3 must come after ExpandCompoundAssignment.
-    manager.Add<transform::PackedVec3>();
-    manager.Add<transform::ModuleScopeVarToEntryPointParam>();
+    manager.Add<ast::transform::PackedVec3>();
+    manager.Add<ast::transform::ModuleScopeVarToEntryPointParam>();
 
     auto out = manager.Run(in, data);
 
@@ -264,7 +264,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     if (!result.program.IsValid()) {
         return result;
     }
-    if (auto* res = out.data.Get<transform::ArrayLengthFromUniform::Result>()) {
+    if (auto* res = out.data.Get<ast::transform::ArrayLengthFromUniform::Result>()) {
         result.used_array_length_from_uniform_indices = std::move(res->used_size_indices);
     }
     result.needs_storage_buffer_sizes = !result.used_array_length_from_uniform_indices.empty();

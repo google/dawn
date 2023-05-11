@@ -31,10 +31,10 @@
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/unique_vector.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::SpirvAtomic);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::SpirvAtomic::Stub);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SpirvAtomic);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SpirvAtomic::Stub);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -309,4 +309,4 @@ Transform::ApplyResult SpirvAtomic::Apply(const Program* src, const DataMap&, Da
     return State{src}.Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

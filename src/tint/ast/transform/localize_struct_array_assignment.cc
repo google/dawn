@@ -28,9 +28,9 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/scoped_assignment.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::LocalizeStructArrayAssignment);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::LocalizeStructArrayAssignment);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct LocalizeStructArrayAssignment::State {
@@ -222,4 +222,4 @@ Transform::ApplyResult LocalizeStructArrayAssignment::Apply(const Program* src,
     return State{src}.Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

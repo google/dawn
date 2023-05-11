@@ -625,7 +625,7 @@ TEST_F(EntryPointReturnTypeAttributeTest, DuplicateInternalAttribute) {
 
 namespace StructAndStructMemberTests {
 using StructAttributeTest = TestWithParams;
-using SpirvBlockAttribute = transform::AddBlockAttribute::BlockAttribute;
+using SpirvBlockAttribute = ast::transform::AddBlockAttribute::BlockAttribute;
 TEST_P(StructAttributeTest, IsValid) {
     auto& params = GetParam();
 

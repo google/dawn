@@ -20,7 +20,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/block_statement.h"
 
-namespace tint::transform::utils {
+namespace tint::ast::transform::utils {
 
 /// InsertionPoint is a pair of the block (`first`) within which, and the
 /// statement (`second`) before or after which to insert.
@@ -34,6 +34,6 @@ using InsertionPoint = std::pair<const sem::BlockStatement*, const ast::Statemen
 /// @return the insertion point
 InsertionPoint GetInsertionPoint(CloneContext& ctx, const ast::Statement* stmt);
 
-}  // namespace tint::transform::utils
+}  // namespace tint::ast::transform::utils
 
 #endif  // SRC_TINT_AST_TRANSFORM_UTILS_GET_INSERTION_POINT_H_

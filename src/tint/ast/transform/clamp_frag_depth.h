@@ -22,7 +22,7 @@ namespace tint {
 class CloneContext;
 }  // namespace tint
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Add clamping of the `@builtin(frag_depth)` output of fragment shaders using two push constants
 /// provided by the outside environment. For example the following code:
@@ -70,6 +70,6 @@ class ClampFragDepth final : public utils::Castable<ClampFragDepth, Transform> {
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_CLAMP_FRAG_DEPTH_H_

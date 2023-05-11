@@ -27,7 +27,7 @@
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Private implementation of HoistToDeclBefore transform
 struct HoistToDeclBefore::State {
@@ -440,4 +440,4 @@ bool HoistToDeclBefore::Prepare(const sem::ValueExpression* before_expr) {
     return state_->Prepare(before_expr);
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

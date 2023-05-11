@@ -44,11 +44,14 @@ namespace tint {
 
 class Program;
 
-namespace transform {
+namespace ast::transform {
 class DataMap;
-class Manager;
 class Transform;
 class VertexPulling;
+}  // namespace ast::transform
+
+namespace transform {
+class Manager;
 }  // namespace transform
 
 }  // namespace tint
@@ -118,10 +121,10 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
 
 RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                         const PipelineLayoutBase* layout);
-ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
+ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Transform* transform,
                                            const tint::Program* program,
-                                           const tint::transform::DataMap& inputs,
-                                           tint::transform::DataMap* outputs,
+                                           const tint::ast::transform::DataMap& inputs,
+                                           tint::ast::transform::DataMap* outputs,
                                            OwnedCompilationMessages* messages);
 
 // Mirrors wgpu::SamplerBindingLayout but instead stores a single boolean

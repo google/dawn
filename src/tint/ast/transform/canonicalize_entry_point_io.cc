@@ -28,10 +28,10 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO::Config);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 CanonicalizeEntryPointIO::CanonicalizeEntryPointIO() = default;
 CanonicalizeEntryPointIO::~CanonicalizeEntryPointIO() = default;
@@ -873,4 +873,4 @@ CanonicalizeEntryPointIO::Config::Config(ShaderStyle style,
 CanonicalizeEntryPointIO::Config::Config(const Config&) = default;
 CanonicalizeEntryPointIO::Config::~Config() = default;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

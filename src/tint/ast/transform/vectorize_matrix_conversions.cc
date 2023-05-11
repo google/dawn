@@ -26,9 +26,9 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::VectorizeMatrixConversions);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VectorizeMatrixConversions);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -146,4 +146,4 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

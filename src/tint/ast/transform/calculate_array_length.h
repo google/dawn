@@ -25,7 +25,7 @@ namespace tint {
 class CloneContext;
 }  // namespace tint
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// CalculateArrayLength is a transform used to replace calls to arrayLength()
 /// with a value calculated from the size of the storage buffer.
@@ -66,6 +66,6 @@ class CalculateArrayLength final : public utils::Castable<CalculateArrayLength, 
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_CALCULATE_ARRAY_LENGTH_H_

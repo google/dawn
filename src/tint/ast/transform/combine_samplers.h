@@ -21,7 +21,7 @@
 #include "src/tint/ast/transform/transform.h"
 #include "src/tint/sem/sampler_texture_pair.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// This transform converts all separate texture/sampler refences in a
 /// program into combined texture/samplers. This is required for GLSL,
@@ -62,7 +62,7 @@ class CombineSamplers final : public utils::Castable<CombineSamplers, Transform>
 
     /// The client-provided mapping from separate texture and sampler binding
     /// points to combined sampler binding point.
-    struct BindingInfo final : public utils::Castable<Data, transform::Data> {
+    struct BindingInfo final : public utils::Castable<BindingInfo, Data> {
         /// Constructor
         /// @param map the map of all (texture, sampler) -> (combined) pairs
         /// @param placeholder the binding point to use for placeholder samplers.
@@ -97,6 +97,6 @@ class CombineSamplers final : public utils::Castable<CombineSamplers, Transform>
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_COMBINE_SAMPLERS_H_

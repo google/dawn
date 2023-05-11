@@ -19,7 +19,7 @@
 #include "src/tint/ast/transform/direct_variable_access.h"
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using Level = BuiltinPolyfill::Level;
@@ -4030,4 +4030,4 @@ fn f(x : i32, y : u32, z : u32) {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

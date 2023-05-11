@@ -25,7 +25,7 @@ namespace tint {
 class CloneContext;
 }  // namespace tint
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// NumWorkgroupsFromUniform is a transform that implements the `num_workgroups`
 /// builtin by loading it from a uniform buffer.
@@ -52,7 +52,7 @@ class NumWorkgroupsFromUniform final : public utils::Castable<NumWorkgroupsFromU
     ~NumWorkgroupsFromUniform() override;
 
     /// Configuration options for the NumWorkgroupsFromUniform transform.
-    struct Config final : public utils::Castable<Data, transform::Data> {
+    struct Config final : public utils::Castable<Config, Data> {
         /// Constructor
         /// @param ubo_bp the binding point to use for the generated uniform buffer. If ubo_bp
         /// contains no value, a free binding point will be used to ensure the generated program is
@@ -78,6 +78,6 @@ class NumWorkgroupsFromUniform final : public utils::Castable<NumWorkgroupsFromU
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_NUM_WORKGROUPS_FROM_UNIFORM_H_

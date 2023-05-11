@@ -19,9 +19,9 @@
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::ForLoopToLoop);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ForLoopToLoop);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -82,4 +82,4 @@ Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, 
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

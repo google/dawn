@@ -29,12 +29,12 @@
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VertexPulling);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VertexPulling::Config);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -979,4 +979,4 @@ VertexBufferLayoutDescriptor& VertexBufferLayoutDescriptor::operator=(
 
 VertexBufferLayoutDescriptor::~VertexBufferLayoutDescriptor() = default;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

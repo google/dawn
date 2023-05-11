@@ -24,11 +24,11 @@
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/vector.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::PreservePadding);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PreservePadding);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 PreservePadding::PreservePadding() = default;
 
@@ -244,4 +244,4 @@ Transform::ApplyResult PreservePadding::Apply(const Program* program,
     return State(program).Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

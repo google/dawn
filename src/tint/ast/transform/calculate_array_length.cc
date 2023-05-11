@@ -32,12 +32,12 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::CalculateArrayLength);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::CalculateArrayLength::BufferSizeIntrinsic);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength::BufferSizeIntrinsic);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -245,4 +245,4 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

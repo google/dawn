@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// A transform that hoists expressions with side-effects to variable
 /// declarations before the statement of usage with the goal of ensuring
@@ -37,6 +37,6 @@ class PromoteSideEffectsToDecl final : public utils::Castable<PromoteSideEffects
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_PROMOTE_SIDE_EFFECTS_TO_DECL_H_

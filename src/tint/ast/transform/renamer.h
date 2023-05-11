@@ -20,7 +20,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Renamer is a Transform that renames all the symbols in a program.
 class Renamer final : public utils::Castable<Renamer, Transform> {
@@ -91,6 +91,6 @@ class Renamer final : public utils::Castable<Renamer, Transform> {
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_RENAMER_H_

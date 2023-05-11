@@ -27,7 +27,7 @@
 // transform on all shape of both f32 and f16 matricies and loop on all valid literal index when
 // required, please refer to std140_exhaustive_test.cc.
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using Std140Test = TransformTest;
@@ -197,4 +197,4 @@ TEST_F(Std140Test, EmptyModule) {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

@@ -24,10 +24,10 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::SubstituteOverride);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::SubstituteOverride::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SubstituteOverride);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SubstituteOverride::Config);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -128,4 +128,4 @@ SubstituteOverride::Config::~Config() = default;
 
 SubstituteOverride::Config& SubstituteOverride::Config::operator=(const Config&) = default;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

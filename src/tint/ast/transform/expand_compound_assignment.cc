@@ -25,11 +25,11 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/value_expression.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::ExpandCompoundAssignment);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ExpandCompoundAssignment);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -187,4 +187,4 @@ Transform::ApplyResult ExpandCompoundAssignment::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

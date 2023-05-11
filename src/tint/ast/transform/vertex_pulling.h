@@ -23,7 +23,7 @@
 #include "src/tint/ast/transform/transform.h"
 #include "src/tint/reflection.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Describes the format of data in a vertex buffer
 enum class VertexFormat {
@@ -182,6 +182,6 @@ class VertexPulling final : public utils::Castable<VertexPulling, Transform> {
     Config cfg_;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_VERTEX_PULLING_H_

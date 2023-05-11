@@ -49,77 +49,77 @@ namespace tint::writer::spirv {
 
 SanitizedResult Sanitize(const Program* in, const Options& options) {
     transform::Manager manager;
-    transform::DataMap data;
+    ast::transform::DataMap data;
 
     if (options.clamp_frag_depth) {
-        manager.Add<tint::transform::ClampFragDepth>();
+        manager.Add<tint::ast::transform::ClampFragDepth>();
     }
 
-    manager.Add<transform::DisableUniformityAnalysis>();
+    manager.Add<ast::transform::DisableUniformityAnalysis>();
 
     // ExpandCompoundAssignment must come before BuiltinPolyfill
-    manager.Add<transform::ExpandCompoundAssignment>();
+    manager.Add<ast::transform::ExpandCompoundAssignment>();
 
     // Must come before DirectVariableAccess
-    manager.Add<transform::PreservePadding>();
+    manager.Add<ast::transform::PreservePadding>();
 
     // Must come before DirectVariableAccess
-    manager.Add<transform::Unshadow>();
+    manager.Add<ast::transform::Unshadow>();
 
-    manager.Add<transform::RemoveUnreachableStatements>();
-    manager.Add<transform::PromoteSideEffectsToDecl>();
+    manager.Add<ast::transform::RemoveUnreachableStatements>();
+    manager.Add<ast::transform::PromoteSideEffectsToDecl>();
 
     // Required for arrayLength()
-    manager.Add<transform::SimplifyPointers>();
+    manager.Add<ast::transform::SimplifyPointers>();
 
-    manager.Add<transform::RemovePhonies>();
-    manager.Add<transform::VectorizeScalarMatrixInitializers>();
-    manager.Add<transform::VectorizeMatrixConversions>();
-    manager.Add<transform::WhileToLoop>();  // ZeroInitWorkgroupMemory
-    manager.Add<transform::MergeReturn>();
+    manager.Add<ast::transform::RemovePhonies>();
+    manager.Add<ast::transform::VectorizeScalarMatrixInitializers>();
+    manager.Add<ast::transform::VectorizeMatrixConversions>();
+    manager.Add<ast::transform::WhileToLoop>();  // ZeroInitWorkgroupMemory
+    manager.Add<ast::transform::MergeReturn>();
 
     if (!options.disable_robustness) {
         // Robustness must come after PromoteSideEffectsToDecl
         // Robustness must come before BuiltinPolyfill and CanonicalizeEntryPointIO
-        manager.Add<transform::Robustness>();
+        manager.Add<ast::transform::Robustness>();
     }
 
     // BindingRemapper must come before MultiplanarExternalTexture. Note, this is flipped to the
     // other generators which run Multiplanar first and then binding remapper.
-    manager.Add<transform::BindingRemapper>();
-    data.Add<transform::BindingRemapper::Remappings>(
+    manager.Add<ast::transform::BindingRemapper>();
+    data.Add<ast::transform::BindingRemapper::Remappings>(
         options.binding_remapper_options.binding_points,
         options.binding_remapper_options.access_controls,
         options.binding_remapper_options.allow_collisions);
 
     // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
         options.external_texture_options.bindings_map);
-    manager.Add<transform::MultiplanarExternalTexture>();
+    manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     {  // Builtin polyfills
         // BuiltinPolyfill must come before DirectVariableAccess, due to the use of pointer
         // parameter for workgroupUniformLoad()
-        transform::BuiltinPolyfill::Builtins polyfills;
-        polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
-        polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
+        ast::transform::BuiltinPolyfill::Builtins polyfills;
+        polyfills.acosh = ast::transform::BuiltinPolyfill::Level::kRangeCheck;
+        polyfills.atanh = ast::transform::BuiltinPolyfill::Level::kRangeCheck;
         polyfills.bgra8unorm = true;
         polyfills.bitshift_modulo = true;
         polyfills.clamp_int = true;
         polyfills.conv_f32_to_iu32 = true;
         polyfills.count_leading_zeros = true;
         polyfills.count_trailing_zeros = true;
-        polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.extract_bits = ast::transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
-        polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.insert_bits = ast::transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.int_div_mod = true;
         polyfills.saturate = true;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         polyfills.quantize_to_vec_f16 = true;  // crbug.com/tint/1741
         polyfills.workgroup_uniform_load = true;
-        data.Add<transform::BuiltinPolyfill::Config>(polyfills);
-        manager.Add<transform::BuiltinPolyfill>();  // Must come before DirectVariableAccess
+        data.Add<ast::transform::BuiltinPolyfill::Config>(polyfills);
+        manager.Add<ast::transform::BuiltinPolyfill>();  // Must come before DirectVariableAccess
     }
 
     bool disable_workgroup_init_in_sanitizer =
@@ -127,42 +127,42 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     if (!disable_workgroup_init_in_sanitizer) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
         // ZeroInitWorkgroupMemory may inject new builtin parameters.
-        manager.Add<transform::ZeroInitWorkgroupMemory>();
+        manager.Add<ast::transform::ZeroInitWorkgroupMemory>();
     }
 
     {
-        transform::DirectVariableAccess::Options opts;
+        ast::transform::DirectVariableAccess::Options opts;
         opts.transform_private = true;
         opts.transform_function = true;
-        data.Add<transform::DirectVariableAccess::Config>(opts);
-        manager.Add<transform::DirectVariableAccess>();
+        data.Add<ast::transform::DirectVariableAccess::Config>(opts);
+        manager.Add<ast::transform::DirectVariableAccess>();
     }
 
     // CanonicalizeEntryPointIO must come after Robustness
-    manager.Add<transform::CanonicalizeEntryPointIO>();
-    manager.Add<transform::AddEmptyEntryPoint>();
+    manager.Add<ast::transform::CanonicalizeEntryPointIO>();
+    manager.Add<ast::transform::AddEmptyEntryPoint>();
 
     // AddBlockAttribute must come after MultiplanarExternalTexture
-    manager.Add<transform::AddBlockAttribute>();
+    manager.Add<ast::transform::AddBlockAttribute>();
 
     // DemoteToHelper must come after CanonicalizeEntryPointIO, PromoteSideEffectsToDecl, and
     // ExpandCompoundAssignment.
     // TODO(crbug.com/tint/1752): Use SPV_EXT_demote_to_helper_invocation if available.
-    manager.Add<transform::DemoteToHelper>();
+    manager.Add<ast::transform::DemoteToHelper>();
 
     // Std140 must come after PromoteSideEffectsToDecl.
     // Std140 must come before VarForDynamicIndex and ForLoopToLoop.
-    manager.Add<transform::Std140>();
+    manager.Add<ast::transform::Std140>();
 
     // VarForDynamicIndex must come after Std140
-    manager.Add<transform::VarForDynamicIndex>();
+    manager.Add<ast::transform::VarForDynamicIndex>();
 
     // ForLoopToLoop must come after Std140, ZeroInitWorkgroupMemory
-    manager.Add<transform::ForLoopToLoop>();
+    manager.Add<ast::transform::ForLoopToLoop>();
 
-    data.Add<transform::CanonicalizeEntryPointIO::Config>(
-        transform::CanonicalizeEntryPointIO::Config(
-            transform::CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF,
+    data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
+        ast::transform::CanonicalizeEntryPointIO::Config(
+            ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF,
             options.emit_vertex_point_size));
 
     SanitizedResult result;

@@ -107,7 +107,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         }
 
         TransformBuilder tb(data, size);
-        tb.AddTransform<tint::transform::Robustness>();
+        tb.AddTransform<tint::ast::transform::Robustness>();
 
         CommonFuzzer fuzzer(InputFormat::kWGSL, target.output_format);
         fuzzer.SetTransformManager(tb.manager(), tb.data_map());

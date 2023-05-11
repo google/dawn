@@ -19,7 +19,9 @@
 #include "src/tint/ast/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/program_builder.h"
 
-namespace tint::transform {
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VarForDynamicIndex);
+
+namespace tint::ast::transform {
 
 VarForDynamicIndex::VarForDynamicIndex() = default;
 
@@ -75,4 +77,4 @@ Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

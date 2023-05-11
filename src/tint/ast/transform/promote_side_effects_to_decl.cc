@@ -33,9 +33,9 @@
 #include "src/tint/transform/manager.h"
 #include "src/tint/utils/scoped_assignment.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::PromoteSideEffectsToDecl);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PromoteSideEffectsToDecl);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 // Base state class for common members
@@ -674,10 +674,10 @@ PromoteSideEffectsToDecl::~PromoteSideEffectsToDecl() = default;
 Transform::ApplyResult PromoteSideEffectsToDecl::Apply(const Program* src,
                                                        const DataMap& inputs,
                                                        DataMap& outputs) const {
-    transform::Manager manager;
+    tint::transform::Manager manager;
     manager.Add<SimplifySideEffectStatements>();
     manager.Add<DecomposeSideEffects>();
     return manager.Apply(src, inputs, outputs);
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

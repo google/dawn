@@ -152,99 +152,99 @@ SanitizedResult Sanitize(const Program* in,
                          const Options& options,
                          const std::string& entry_point) {
     transform::Manager manager;
-    transform::DataMap data;
+    ast::transform::DataMap data;
 
-    manager.Add<transform::DisableUniformityAnalysis>();
+    manager.Add<ast::transform::DisableUniformityAnalysis>();
 
     // ExpandCompoundAssignment must come before BuiltinPolyfill
-    manager.Add<transform::ExpandCompoundAssignment>();
+    manager.Add<ast::transform::ExpandCompoundAssignment>();
 
     if (!entry_point.empty()) {
-        manager.Add<transform::SingleEntryPoint>();
-        data.Add<transform::SingleEntryPoint::Config>(entry_point);
+        manager.Add<ast::transform::SingleEntryPoint>();
+        data.Add<ast::transform::SingleEntryPoint::Config>(entry_point);
     }
-    manager.Add<transform::Renamer>();
-    data.Add<transform::Renamer::Config>(transform::Renamer::Target::kGlslKeywords,
-                                         /* preserve_unicode */ false);
+    manager.Add<ast::transform::Renamer>();
+    data.Add<ast::transform::Renamer::Config>(ast::transform::Renamer::Target::kGlslKeywords,
+                                              /* preserve_unicode */ false);
 
-    manager.Add<transform::PreservePadding>();  // Must come before DirectVariableAccess
+    manager.Add<ast::transform::PreservePadding>();  // Must come before DirectVariableAccess
 
-    manager.Add<transform::Unshadow>();  // Must come before DirectVariableAccess
+    manager.Add<ast::transform::Unshadow>();  // Must come before DirectVariableAccess
 
-    manager.Add<transform::PromoteSideEffectsToDecl>();
+    manager.Add<ast::transform::PromoteSideEffectsToDecl>();
 
     if (!options.disable_robustness) {
         // Robustness must come after PromoteSideEffectsToDecl
         // Robustness must come before BuiltinPolyfill and CanonicalizeEntryPointIO
-        manager.Add<transform::Robustness>();
+        manager.Add<ast::transform::Robustness>();
     }
 
     // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
         options.external_texture_options.bindings_map);
-    manager.Add<transform::MultiplanarExternalTexture>();
+    manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     {  // Builtin polyfills
-        transform::BuiltinPolyfill::Builtins polyfills;
-        polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
-        polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
+        ast::transform::BuiltinPolyfill::Builtins polyfills;
+        polyfills.acosh = ast::transform::BuiltinPolyfill::Level::kRangeCheck;
+        polyfills.atanh = ast::transform::BuiltinPolyfill::Level::kRangeCheck;
         polyfills.bgra8unorm = true;
         polyfills.bitshift_modulo = true;
         polyfills.conv_f32_to_iu32 = true;
         polyfills.count_leading_zeros = true;
         polyfills.count_trailing_zeros = true;
-        polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.extract_bits = ast::transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
-        polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.insert_bits = ast::transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.int_div_mod = true;
         polyfills.saturate = true;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         polyfills.workgroup_uniform_load = true;
-        data.Add<transform::BuiltinPolyfill::Config>(polyfills);
-        manager.Add<transform::BuiltinPolyfill>();  // Must come before DirectVariableAccess
+        data.Add<ast::transform::BuiltinPolyfill::Config>(polyfills);
+        manager.Add<ast::transform::BuiltinPolyfill>();  // Must come before DirectVariableAccess
     }
 
-    manager.Add<transform::DirectVariableAccess>();
+    manager.Add<ast::transform::DirectVariableAccess>();
 
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
         // ZeroInitWorkgroupMemory may inject new builtin parameters.
-        manager.Add<transform::ZeroInitWorkgroupMemory>();
+        manager.Add<ast::transform::ZeroInitWorkgroupMemory>();
     }
 
     // CanonicalizeEntryPointIO must come after Robustness
-    manager.Add<transform::CanonicalizeEntryPointIO>();
+    manager.Add<ast::transform::CanonicalizeEntryPointIO>();
 
     // PadStructs must come after CanonicalizeEntryPointIO
-    manager.Add<transform::PadStructs>();
+    manager.Add<ast::transform::PadStructs>();
 
     // DemoteToHelper must come after PromoteSideEffectsToDecl and ExpandCompoundAssignment.
-    manager.Add<transform::DemoteToHelper>();
+    manager.Add<ast::transform::DemoteToHelper>();
 
-    manager.Add<transform::RemovePhonies>();
+    manager.Add<ast::transform::RemovePhonies>();
 
-    data.Add<transform::CombineSamplers::BindingInfo>(options.binding_map,
-                                                      options.placeholder_binding_point);
-    manager.Add<transform::CombineSamplers>();
+    data.Add<ast::transform::CombineSamplers::BindingInfo>(options.binding_map,
+                                                           options.placeholder_binding_point);
+    manager.Add<ast::transform::CombineSamplers>();
 
-    data.Add<transform::BindingRemapper::Remappings>(
+    data.Add<ast::transform::BindingRemapper::Remappings>(
         options.binding_points, options.access_controls, options.allow_collisions);
-    manager.Add<transform::BindingRemapper>();
+    manager.Add<ast::transform::BindingRemapper>();
 
-    manager.Add<transform::PromoteInitializersToLet>();
-    manager.Add<transform::AddEmptyEntryPoint>();
-    manager.Add<transform::AddBlockAttribute>();
+    manager.Add<ast::transform::PromoteInitializersToLet>();
+    manager.Add<ast::transform::AddEmptyEntryPoint>();
+    manager.Add<ast::transform::AddBlockAttribute>();
 
     // Std140 must come after PromoteSideEffectsToDecl and before SimplifyPointers.
-    manager.Add<transform::Std140>();
+    manager.Add<ast::transform::Std140>();
 
-    manager.Add<transform::Texture1DTo2D>();
+    manager.Add<ast::transform::Texture1DTo2D>();
 
-    manager.Add<transform::SimplifyPointers>();
+    manager.Add<ast::transform::SimplifyPointers>();
 
-    data.Add<transform::CanonicalizeEntryPointIO::Config>(
-        transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
+    data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
+        ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
 
     auto out = manager.Run(in, data);
 
@@ -286,8 +286,9 @@ void GeneratorImpl::Generate() {
                 if (auto* arr = sem->Members().Back()->Type()->As<type::Array>()) {
                     has_rt_arr = arr->Count()->Is<type::RuntimeArrayCount>();
                 }
-                bool is_block = ast::HasAttribute<transform::AddBlockAttribute::BlockAttribute>(
-                    str->attributes);
+                bool is_block =
+                    ast::HasAttribute<ast::transform::AddBlockAttribute::BlockAttribute>(
+                        str->attributes);
                 if (!has_rt_arr && !is_block) {
                     EmitStructType(current_buffer_, sem);
                 }

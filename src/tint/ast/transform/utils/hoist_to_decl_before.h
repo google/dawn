@@ -21,7 +21,7 @@
 #include "src/tint/ast/transform/transform.h"
 #include "src/tint/sem/value_expression.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Utility class that can be used to hoist expressions before other
 /// expressions, possibly converting 'for-loop's to 'loop's and 'else-if's to
@@ -102,6 +102,6 @@ class HoistToDeclBefore {
     std::unique_ptr<State> state_;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_UTILS_HOIST_TO_DECL_BEFORE_H_

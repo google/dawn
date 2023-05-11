@@ -27,11 +27,11 @@
 #include "src/tint/switch.h"
 #include "src/tint/utils/unicode.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Data);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer::Data);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer::Config);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -1401,4 +1401,4 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

@@ -24,7 +24,7 @@
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/external_texture.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Within the MultiplanarExternalTexture transform, each instance of a
 /// texture_external binding is unpacked into two texture_2d<f32> bindings
@@ -52,7 +52,7 @@ class MultiplanarExternalTexture final
     /// NewBindingPoints is consumed by the MultiplanarExternalTexture transform.
     /// Data holds information about location of each texture_external binding and
     /// which binding slots it should expand into.
-    struct NewBindingPoints final : public utils::Castable<Data, transform::Data> {
+    struct NewBindingPoints final : public utils::Castable<NewBindingPoints, Data> {
         /// Constructor
         /// @param bm a map to the new binding slots to use.
         explicit NewBindingPoints(BindingsMap bm);
@@ -78,6 +78,6 @@ class MultiplanarExternalTexture final
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_MULTIPLANAR_EXTERNAL_TEXTURE_H_

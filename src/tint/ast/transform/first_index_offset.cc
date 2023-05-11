@@ -25,11 +25,11 @@
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::BindingPoint);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::Data);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::FirstIndexOffset);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::FirstIndexOffset::BindingPoint);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::FirstIndexOffset::Data);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 // Uniform buffer member names
@@ -166,4 +166,4 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

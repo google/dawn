@@ -25,10 +25,10 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::NumWorkgroupsFromUniform);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::NumWorkgroupsFromUniform::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform::Config);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -190,4 +190,4 @@ NumWorkgroupsFromUniform::Config::Config(std::optional<sem::BindingPoint> ubo_bp
 NumWorkgroupsFromUniform::Config::Config(const Config&) = default;
 NumWorkgroupsFromUniform::Config::~Config() = default;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

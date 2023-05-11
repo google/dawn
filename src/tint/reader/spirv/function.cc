@@ -5821,7 +5821,7 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
             std::move(params), ret_type,
             /* body */ nullptr,
             utils::Vector{
-                builder_.ASTNodes().Create<transform::SpirvAtomic::Stub>(
+                builder_.ASTNodes().Create<ast::transform::SpirvAtomic::Stub>(
                     builder_.ID(), builder_.AllocateNodeID(), builtin),
                 builder_.Disable(ast::DisabledValidation::kFunctionHasNoBody),
             });

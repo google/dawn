@@ -29,9 +29,9 @@
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/vector.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::ClampFragDepth);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ClampFragDepth);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct ClampFragDepth::State {
@@ -225,4 +225,4 @@ Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&,
     return State{src}.Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

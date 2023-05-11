@@ -28,11 +28,11 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DemoteToHelper);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DemoteToHelper);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 DemoteToHelper::DemoteToHelper() = default;
 
@@ -246,4 +246,4 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

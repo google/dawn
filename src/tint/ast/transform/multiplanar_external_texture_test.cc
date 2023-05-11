@@ -15,7 +15,7 @@
 #include "src/tint/ast/transform/multiplanar_external_texture.h"
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using MultiplanarExternalTextureTest = TransformTest;
@@ -77,7 +77,8 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
     auto* expect =
-        R"(error: missing new binding point data for tint::transform::MultiplanarExternalTexture)";
+        "error: missing new binding point data for "
+        "tint::ast::transform::MultiplanarExternalTexture";
 
     auto got = Run<MultiplanarExternalTexture>(src);
     EXPECT_EQ(expect, str(got));
@@ -1812,4 +1813,4 @@ alias ET = texture_external;
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

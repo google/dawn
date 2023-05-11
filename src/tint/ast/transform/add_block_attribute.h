@@ -20,7 +20,7 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// AddBlockAttribute is a transform that wrap the store type of a buffer into a struct if possible,
 /// then adds an `@internal(block)` attribute to the wrapper struct.
@@ -59,6 +59,6 @@ class AddBlockAttribute final : public utils::Castable<AddBlockAttribute, Transf
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_ADD_BLOCK_ATTRIBUTE_H_

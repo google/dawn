@@ -87,10 +87,11 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         }();
 
         transform::Manager transform_manager;
-        transform::DataMap transform_data;
-        transform_data.Add<transform::Renamer::Config>(transform::Renamer::Target::kHlslKeywords,
-                                                       /* preserve_unicode */ true);
-        transform_manager.Add<tint::transform::Renamer>();
+        ast::transform::DataMap transform_data;
+        transform_data.Add<ast::transform::Renamer::Config>(
+            ast::transform::Renamer::Target::kHlslKeywords,
+            /* preserve_unicode */ true);
+        transform_manager.Add<tint::ast::transform::Renamer>();
         auto result = transform_manager.Run(&sanitized_result.program, transform_data);
         [&]() {
             ASSERT_TRUE(result.program.IsValid()) << formatter.format(result.program.Diagnostics());

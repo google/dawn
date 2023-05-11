@@ -20,16 +20,16 @@
 namespace tint::fuzzers {
 
 /// ShuffleTransform reorders the module scope declarations into a random order
-class ShuffleTransform : public transform::Transform {
+class ShuffleTransform : public ast::transform::Transform {
   public:
     /// Constructor
     /// @param seed the random seed to use for the shuffling
     explicit ShuffleTransform(size_t seed);
 
-    /// @copydoc transform::Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const transform::DataMap& inputs,
-                      transform::DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     size_t seed_;

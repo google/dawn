@@ -21,7 +21,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/utils/string.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using Std140Test_F16 = TransformTest;
@@ -3593,4 +3593,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

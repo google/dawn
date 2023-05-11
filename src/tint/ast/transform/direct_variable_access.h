@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// DirectVariableAccess is a transform that allows usage of pointer parameters in the 'storage',
 /// 'uniform' and 'workgroup' address space, and passing of pointers to sub-objects. These pointers
@@ -49,7 +49,7 @@ class DirectVariableAccess final : public utils::Castable<DirectVariableAccess, 
 
     /// Config is consumed by the DirectVariableAccess transform.
     /// Config specifies the behavior of the transform.
-    struct Config final : public utils::Castable<Data, transform::Data> {
+    struct Config final : public utils::Castable<Config, Data> {
         /// Constructor
         /// @param options behavior of the transform
         explicit Config(const Options& options);
@@ -69,6 +69,6 @@ class DirectVariableAccess final : public utils::Castable<DirectVariableAccess, 
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_DIRECT_VARIABLE_ACCESS_H_

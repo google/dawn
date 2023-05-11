@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Add an empty entry point to the module, if no other entry points exist.
 class AddEmptyEntryPoint final : public utils::Castable<AddEmptyEntryPoint, Transform> {
@@ -33,6 +33,6 @@ class AddEmptyEntryPoint final : public utils::Castable<AddEmptyEntryPoint, Tran
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_ADD_EMPTY_ENTRY_POINT_H_

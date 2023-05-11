@@ -31,10 +31,10 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::BuiltinPolyfill);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::BuiltinPolyfill::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BuiltinPolyfill);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BuiltinPolyfill::Config);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// BinaryOpSignature is tuple of a binary op, LHS type and RHS type
 using BinaryOpSignature = std::tuple<ast::BinaryOp, const type::Type*, const type::Type*>;
@@ -1288,4 +1288,4 @@ BuiltinPolyfill::Config::Config(const Builtins& b) : builtins(b) {}
 BuiltinPolyfill::Config::Config(const Config&) = default;
 BuiltinPolyfill::Config::~Config() = default;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

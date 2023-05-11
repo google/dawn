@@ -29,9 +29,9 @@
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::RemoveContinueInSwitch);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::RemoveContinueInSwitch);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct RemoveContinueInSwitch::State {
@@ -130,4 +130,4 @@ Transform::ApplyResult RemoveContinueInSwitch::Apply(const Program* src,
     return state.Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

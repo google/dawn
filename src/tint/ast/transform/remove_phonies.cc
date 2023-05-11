@@ -28,9 +28,9 @@
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::RemovePhonies);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::RemovePhonies);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using SinkSignature = std::vector<const type::Type*>;
@@ -153,4 +153,4 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

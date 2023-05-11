@@ -21,7 +21,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/utils/string.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 enum class MatrixType { f32, f16 };
@@ -4887,4 +4887,4 @@ INSTANTIATE_TEST_SUITE_P(,
                          }));
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

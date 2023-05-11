@@ -234,7 +234,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     {
         // Run SubstituteOverride if required
 
-        transform::SubstituteOverride::Config cfg;
+        ast::transform::SubstituteOverride::Config cfg;
         inspector::Inspector inspector(&program);
         auto default_values = inspector.GetOverrideDefaultValues();
         for (const auto& [override_id, scalar] : default_values) {
@@ -248,11 +248,11 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
         }
 
         if (!cfg.map.empty()) {
-            transform::DataMap override_data;
-            override_data.Add<transform::SubstituteOverride::Config>(cfg);
+            ast::transform::DataMap override_data;
+            override_data.Add<ast::transform::SubstituteOverride::Config>(cfg);
 
             transform::Manager mgr;
-            mgr.append(std::make_unique<transform::SubstituteOverride>());
+            mgr.append(std::make_unique<ast::transform::SubstituteOverride>());
 
             auto out = mgr.Run(&program, override_data);
             if (!validate_program(out)) {

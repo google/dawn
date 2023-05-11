@@ -27,10 +27,10 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampler.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Transform);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Data);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 Data::Data() = default;
 Data::Data(const Data&) = default;
@@ -187,4 +187,4 @@ ast::Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     return ast::Type{};
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

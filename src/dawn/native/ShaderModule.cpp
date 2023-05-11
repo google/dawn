@@ -1012,12 +1012,12 @@ RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata
     return bufferSizes;
 }
 
-ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
+ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Transform* transform,
                                            const tint::Program* program,
-                                           const tint::transform::DataMap& inputs,
-                                           tint::transform::DataMap* outputs,
+                                           const tint::ast::transform::DataMap& inputs,
+                                           tint::ast::transform::DataMap* outputs,
                                            OwnedCompilationMessages* outMessages) {
-    tint::transform::Output output = transform->Run(program, inputs);
+    tint::ast::transform::Output output = transform->Run(program, inputs);
     if (outMessages != nullptr) {
         DAWN_TRY(outMessages->AddMessages(output.program.Diagnostics()));
     }

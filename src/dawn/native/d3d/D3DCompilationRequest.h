@@ -42,34 +42,34 @@ namespace dawn::native::d3d {
 
 enum class Compiler { FXC, DXC };
 
-#define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                                 \
-    X(const tint::Program*, inputProgram)                                                   \
-    X(std::string_view, entryPointName)                                                     \
-    X(SingleShaderStage, stage)                                                             \
-    X(uint32_t, shaderModel)                                                                \
-    X(uint32_t, compileFlags)                                                               \
-    X(Compiler, compiler)                                                                   \
-    X(uint64_t, compilerVersion)                                                            \
-    X(std::wstring_view, dxcShaderProfile)                                                  \
-    X(std::string_view, fxcShaderProfile)                                                   \
-    X(pD3DCompile, d3dCompile)                                                              \
-    X(IDxcLibrary*, dxcLibrary)                                                             \
-    X(IDxcCompiler*, dxcCompiler)                                                           \
-    X(uint32_t, firstIndexOffsetShaderRegister)                                             \
-    X(uint32_t, firstIndexOffsetRegisterSpace)                                              \
-    X(bool, usesNumWorkgroups)                                                              \
-    X(uint32_t, numWorkgroupsShaderRegister)                                                \
-    X(uint32_t, numWorkgroupsRegisterSpace)                                                 \
-    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                         \
-    X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                  \
-    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                \
-    X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(std::bitset<kMaxInterStageShaderVariables>, interstageLocations)                      \
-    X(LimitsForCompilationRequest, limits)                                                  \
-    X(bool, disableSymbolRenaming)                                                          \
-    X(bool, isRobustnessEnabled)                                                            \
-    X(bool, disableWorkgroupInit)                                                           \
-    X(bool, polyfillReflectVec2F32)                                                         \
+#define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                                      \
+    X(const tint::Program*, inputProgram)                                                        \
+    X(std::string_view, entryPointName)                                                          \
+    X(SingleShaderStage, stage)                                                                  \
+    X(uint32_t, shaderModel)                                                                     \
+    X(uint32_t, compileFlags)                                                                    \
+    X(Compiler, compiler)                                                                        \
+    X(uint64_t, compilerVersion)                                                                 \
+    X(std::wstring_view, dxcShaderProfile)                                                       \
+    X(std::string_view, fxcShaderProfile)                                                        \
+    X(pD3DCompile, d3dCompile)                                                                   \
+    X(IDxcLibrary*, dxcLibrary)                                                                  \
+    X(IDxcCompiler*, dxcCompiler)                                                                \
+    X(uint32_t, firstIndexOffsetShaderRegister)                                                  \
+    X(uint32_t, firstIndexOffsetRegisterSpace)                                                   \
+    X(bool, usesNumWorkgroups)                                                                   \
+    X(uint32_t, numWorkgroupsShaderRegister)                                                     \
+    X(uint32_t, numWorkgroupsRegisterSpace)                                                      \
+    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                              \
+    X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                       \
+    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                     \
+    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
+    X(std::bitset<kMaxInterStageShaderVariables>, interstageLocations)                           \
+    X(LimitsForCompilationRequest, limits)                                                       \
+    X(bool, disableSymbolRenaming)                                                               \
+    X(bool, isRobustnessEnabled)                                                                 \
+    X(bool, disableWorkgroupInit)                                                                \
+    X(bool, polyfillReflectVec2F32)                                                              \
     X(bool, dumpShaders)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \

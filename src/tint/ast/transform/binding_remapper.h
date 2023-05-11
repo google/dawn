@@ -21,7 +21,7 @@
 #include "src/tint/builtin/access.h"
 #include "src/tint/sem/binding_point.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// BindingPoint is an alias to sem::BindingPoint
 using BindingPoint = sem::BindingPoint;
@@ -38,7 +38,7 @@ class BindingRemapper final : public utils::Castable<BindingRemapper, Transform>
 
     /// Remappings is consumed by the BindingRemapper transform.
     /// Data holds information about shader usage and constant buffer offsets.
-    struct Remappings final : public utils::Castable<Data, transform::Data> {
+    struct Remappings final : public utils::Castable<Remappings, Data> {
         /// Constructor
         /// @param bp a map of new binding points
         /// @param ac a map of new access controls
@@ -73,6 +73,6 @@ class BindingRemapper final : public utils::Castable<BindingRemapper, Transform>
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_BINDING_REMAPPER_H_

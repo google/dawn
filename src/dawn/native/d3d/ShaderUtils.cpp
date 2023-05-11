@@ -144,36 +144,36 @@ ResultOrError<std::string> TranslateToHLSL(
     errorStream << "Tint HLSL failure:" << std::endl;
 
     tint::transform::Manager transformManager;
-    tint::transform::DataMap transformInputs;
+    tint::ast::transform::DataMap transformInputs;
 
     // Run before the renamer so that the entry point name matches `entryPointName` still.
-    transformManager.Add<tint::transform::SingleEntryPoint>();
-    transformInputs.Add<tint::transform::SingleEntryPoint::Config>(r.entryPointName.data());
+    transformManager.Add<tint::ast::transform::SingleEntryPoint>();
+    transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName.data());
 
     // Needs to run before all other transforms so that they can use builtin names safely.
-    transformManager.Add<tint::transform::Renamer>();
+    transformManager.Add<tint::ast::transform::Renamer>();
     if (r.disableSymbolRenaming) {
         // We still need to rename HLSL reserved keywords
-        transformInputs.Add<tint::transform::Renamer::Config>(
-            tint::transform::Renamer::Target::kHlslKeywords);
+        transformInputs.Add<tint::ast::transform::Renamer::Config>(
+            tint::ast::transform::Renamer::Target::kHlslKeywords);
     }
 
     if (r.stage == SingleShaderStage::Vertex) {
-        transformManager.Add<tint::transform::FirstIndexOffset>();
-        transformInputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(
+        transformManager.Add<tint::ast::transform::FirstIndexOffset>();
+        transformInputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(
             r.firstIndexOffsetShaderRegister, r.firstIndexOffsetRegisterSpace);
     }
 
     if (r.substituteOverrideConfig) {
         // This needs to run after SingleEntryPoint transform which removes unused overrides for
         // current entry point.
-        transformManager.Add<tint::transform::SubstituteOverride>();
-        transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+        transformManager.Add<tint::ast::transform::SubstituteOverride>();
+        transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
             std::move(r.substituteOverrideConfig).value());
     }
 
     tint::Program transformedProgram;
-    tint::transform::DataMap transformOutputs;
+    tint::ast::transform::DataMap transformOutputs;
     {
         TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "RunTransforms");
         DAWN_TRY_ASSIGN(transformedProgram,
@@ -181,7 +181,7 @@ ResultOrError<std::string> TranslateToHLSL(
                                       &transformOutputs, nullptr));
     }
 
-    if (auto* data = transformOutputs.Get<tint::transform::Renamer::Data>()) {
+    if (auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>()) {
         auto it = data->remappings.find(r.entryPointName.data());
         if (it != data->remappings.end()) {
             *remappedEntryPointName = it->second;
@@ -203,7 +203,7 @@ ResultOrError<std::string> TranslateToHLSL(
     }
 
     if (r.stage == SingleShaderStage::Vertex) {
-        if (auto* data = transformOutputs.Get<tint::transform::FirstIndexOffset::Data>()) {
+        if (auto* data = transformOutputs.Get<tint::ast::transform::FirstIndexOffset::Data>()) {
             *usesVertexOrInstanceIndex = data->has_vertex_or_instance_index;
         } else {
             return DAWN_VALIDATION_ERROR("Transform output missing first index offset data.");

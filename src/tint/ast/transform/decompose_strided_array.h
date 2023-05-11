@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// DecomposeStridedArray transforms replaces arrays with a non-default
 /// `@stride` attribute with an array of structure elements, where the
@@ -41,6 +41,6 @@ class DecomposeStridedArray final : public utils::Castable<DecomposeStridedArray
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_DECOMPOSE_STRIDED_ARRAY_H_

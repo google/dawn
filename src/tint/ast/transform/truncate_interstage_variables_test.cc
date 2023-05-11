@@ -18,7 +18,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using ::testing::ContainerEq;
@@ -43,8 +43,7 @@ fn f() -> ShaderIO {
 
     {
         auto* expect =
-            "error: missing transform data for "
-            "tint::transform::TruncateInterstageVariables";
+            "error: missing transform data for tint::ast::transform::TruncateInterstageVariables";
         auto got = Run<TruncateInterstageVariables>(src);
         EXPECT_EQ(expect, str(got));
     }
@@ -596,4 +595,4 @@ fn f(@builtin(vertex_index) vid : u32) -> tint_symbol {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

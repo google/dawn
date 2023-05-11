@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// This transform converts all 1D texture types and accesses to 2D.
 /// This is required for GLSL ES, which does not support 1D textures.
@@ -38,6 +38,6 @@ class Texture1DTo2D final : public utils::Castable<Texture1DTo2D, Transform> {
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_TEXTURE_1D_TO_2D_H_

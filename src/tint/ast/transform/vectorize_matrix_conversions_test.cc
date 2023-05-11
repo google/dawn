@@ -20,7 +20,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/utils/string.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using VectorizeMatrixConversionsTest = TransformTestWithParam<std::pair<uint32_t, uint32_t>>;
@@ -408,4 +408,4 @@ INSTANTIATE_TEST_SUITE_P(VectorizeMatrixConversionsTest,
                                          std::make_pair(4, 4)));
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

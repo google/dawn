@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// A transform that hoists array and structure initializers, and identifiers resolving to a
 /// 'const' array to a 'let' variable, declared just before the statement of usage.
@@ -39,6 +39,6 @@ class PromoteInitializersToLet final : public utils::Castable<PromoteInitializer
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_PROMOTE_INITIALIZERS_TO_LET_H_

@@ -26,7 +26,7 @@ namespace tint {
 class CloneContext;
 }  // namespace tint
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// ArrayLengthFromUniform is a transform that implements calls to arrayLength()
 /// by calculating the length from the total size of the storage buffer, which
@@ -60,7 +60,7 @@ class ArrayLengthFromUniform final : public utils::Castable<ArrayLengthFromUnifo
     ~ArrayLengthFromUniform() override;
 
     /// Configuration options for the ArrayLengthFromUniform transform.
-    struct Config final : public utils::Castable<Data, transform::Data> {
+    struct Config final : public utils::Castable<Config, Data> {
         /// Constructor
         /// @param ubo_bp the binding point to use for the generated uniform buffer.
         explicit Config(sem::BindingPoint ubo_bp);
@@ -85,7 +85,7 @@ class ArrayLengthFromUniform final : public utils::Castable<ArrayLengthFromUnifo
     /// Information produced about what the transform did.
     /// If there were no calls to the arrayLength() builtin, then no Result will
     /// be emitted.
-    struct Result final : public utils::Castable<Result, transform::Data> {
+    struct Result final : public utils::Castable<Result, Data> {
         /// Constructor
         /// @param used_size_indices Indices into the UBO that are statically used.
         explicit Result(std::unordered_set<uint32_t> used_size_indices);
@@ -109,6 +109,6 @@ class ArrayLengthFromUniform final : public utils::Castable<ArrayLengthFromUnifo
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_ARRAY_LENGTH_FROM_UNIFORM_H_

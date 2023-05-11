@@ -43,11 +43,11 @@ class ScopedTintICEHandler : public NonCopyable {
 tint::writer::ExternalTextureOptions BuildExternalTextureTransformBindings(
     const PipelineLayoutBase* layout);
 
-tint::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
+tint::ast::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
     BindGroupIndex pullingBufferBindingSet);
 
-tint::transform::SubstituteOverride::Config BuildSubstituteOverridesTransformConfig(
+tint::ast::transform::SubstituteOverride::Config BuildSubstituteOverridesTransformConfig(
     const ProgrammableStage& stage);
 
 }  // namespace dawn::native

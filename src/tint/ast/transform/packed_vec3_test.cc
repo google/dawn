@@ -26,7 +26,7 @@
 #include "src/tint/type/array.h"
 #include "src/tint/utils/string.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using PackedVec3Test = TransformTest;
@@ -8092,4 +8092,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

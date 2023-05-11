@@ -391,17 +391,17 @@ MaybeError ComputePipeline::Initialize() {
     tint::Program transformedProgram;
     const tint::Program* program;
     tint::transform::Manager transformManager;
-    tint::transform::DataMap transformInputs;
+    tint::ast::transform::DataMap transformInputs;
 
     if (!computeStage.metadata->overrides.empty()) {
-        transformManager.Add<tint::transform::SingleEntryPoint>();
-        transformInputs.Add<tint::transform::SingleEntryPoint::Config>(
+        transformManager.Add<tint::ast::transform::SingleEntryPoint>();
+        transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
             computeStage.entryPoint.c_str());
 
         // This needs to run after SingleEntryPoint transform which removes unused overrides for
         // current entry point.
-        transformManager.Add<tint::transform::SubstituteOverride>();
-        transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+        transformManager.Add<tint::ast::transform::SubstituteOverride>();
+        transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
             BuildSubstituteOverridesTransformConfig(computeStage));
     }
 

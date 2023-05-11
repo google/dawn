@@ -18,7 +18,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using VertexPullingTest = TransformTest;
@@ -2323,4 +2323,4 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

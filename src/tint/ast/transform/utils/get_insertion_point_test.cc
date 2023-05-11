@@ -22,7 +22,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using GetInsertionPointTest = ::testing::Test;
@@ -93,4 +93,4 @@ TEST_F(GetInsertionPointTest, ForLoopCont_Invalid) {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

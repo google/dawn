@@ -28,9 +28,9 @@
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::RemoveUnreachableStatements);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::RemoveUnreachableStatements);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 RemoveUnreachableStatements::RemoveUnreachableStatements() = default;
 
@@ -60,4 +60,4 @@ Transform::ApplyResult RemoveUnreachableStatements::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

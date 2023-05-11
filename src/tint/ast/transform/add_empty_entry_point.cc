@@ -18,11 +18,11 @@
 
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::AddEmptyEntryPoint);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::AddEmptyEntryPoint);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -60,4 +60,4 @@ Transform::ApplyResult AddEmptyEntryPoint::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

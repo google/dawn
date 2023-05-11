@@ -25,8 +25,8 @@
 
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::CombineSamplers);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::CombineSamplers::BindingInfo);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CombineSamplers);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CombineSamplers::BindingInfo);
 
 namespace {
 
@@ -37,7 +37,7 @@ bool IsGlobal(const tint::sem::VariablePair& pair) {
 
 }  // namespace
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -353,4 +353,4 @@ Transform::ApplyResult CombineSamplers::Apply(const Program* src,
     return State(src, binding_info).Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

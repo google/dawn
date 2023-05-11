@@ -23,11 +23,11 @@
 #include "src/tint/switch.h"
 #include "src/tint/type/texture_dimension.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Texture1DTo2D);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Texture1DTo2D);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -189,4 +189,4 @@ Transform::ApplyResult Texture1DTo2D::Apply(const Program* src, const DataMap&, 
     return State(src).Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

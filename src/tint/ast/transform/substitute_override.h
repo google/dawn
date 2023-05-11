@@ -23,7 +23,7 @@
 #include "src/tint/ast/transform/transform.h"
 #include "src/tint/reflection.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// A transform that replaces overrides with the constant values provided.
 ///
@@ -81,6 +81,6 @@ class SubstituteOverride final : public utils::Castable<SubstituteOverride, Tran
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_SUBSTITUTE_OVERRIDE_H_

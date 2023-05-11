@@ -57,12 +57,12 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     }
 
     transform::Manager manager;
-    manager.Add<transform::Unshadow>();
-    manager.Add<transform::SimplifyPointers>();
-    manager.Add<transform::DecomposeStridedMatrix>();
-    manager.Add<transform::DecomposeStridedArray>();
-    manager.Add<transform::RemoveUnreachableStatements>();
-    manager.Add<transform::SpirvAtomic>();
+    manager.Add<ast::transform::Unshadow>();
+    manager.Add<ast::transform::SimplifyPointers>();
+    manager.Add<ast::transform::DecomposeStridedMatrix>();
+    manager.Add<ast::transform::DecomposeStridedArray>();
+    manager.Add<ast::transform::RemoveUnreachableStatements>();
+    manager.Add<ast::transform::SpirvAtomic>();
     return manager.Run(&program).program;
 }
 

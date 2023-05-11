@@ -24,7 +24,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 class SpirvAtomicTest : public TransformTest {
@@ -1377,4 +1377,4 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

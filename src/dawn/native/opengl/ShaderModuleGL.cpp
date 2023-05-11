@@ -57,16 +57,16 @@ tint::writer::glsl::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
 
 using BindingMap = std::unordered_map<tint::writer::BindingPoint, tint::writer::BindingPoint>;
 
-#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                                 \
-    X(const tint::Program*, inputProgram)                                                   \
-    X(std::string, entryPointName)                                                          \
-    X(SingleShaderStage, stage)                                                             \
-    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                         \
-    X(BindingMap, glBindings)                                                               \
-    X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(LimitsForCompilationRequest, limits)                                                  \
-    X(opengl::OpenGLVersion::Standard, glVersionStandard)                                   \
-    X(uint32_t, glVersionMajor)                                                             \
+#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                                      \
+    X(const tint::Program*, inputProgram)                                                        \
+    X(std::string, entryPointName)                                                               \
+    X(SingleShaderStage, stage)                                                                  \
+    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                              \
+    X(BindingMap, glBindings)                                                                    \
+    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
+    X(LimitsForCompilationRequest, limits)                                                       \
+    X(opengl::OpenGLVersion::Standard, glVersionStandard)                                        \
+    X(uint32_t, glVersionMajor)                                                                  \
     X(uint32_t, glVersionMinor)
 
 DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
@@ -171,7 +171,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
         }
     }
 
-    std::optional<tint::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
@@ -195,15 +195,16 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
         compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
         [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
             tint::transform::Manager transformManager;
-            tint::transform::DataMap transformInputs;
+            tint::ast::transform::DataMap transformInputs;
 
             if (r.substituteOverrideConfig) {
-                transformManager.Add<tint::transform::SingleEntryPoint>();
-                transformInputs.Add<tint::transform::SingleEntryPoint::Config>(r.entryPointName);
+                transformManager.Add<tint::ast::transform::SingleEntryPoint>();
+                transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
+                    r.entryPointName);
                 // This needs to run after SingleEntryPoint transform which removes unused overrides
                 // for current entry point.
-                transformManager.Add<tint::transform::SubstituteOverride>();
-                transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+                transformManager.Add<tint::ast::transform::SubstituteOverride>();
+                transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
                     std::move(r.substituteOverrideConfig).value());
             }
 

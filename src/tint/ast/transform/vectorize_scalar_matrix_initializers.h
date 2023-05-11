@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// A transform that converts scalar matrix initializers to the vector form.
 class VectorizeScalarMatrixInitializers final
@@ -35,6 +35,6 @@ class VectorizeScalarMatrixInitializers final
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_VECTORIZE_SCALAR_MATRIX_INITIALIZERS_H_

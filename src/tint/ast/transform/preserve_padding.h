@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Decompose assignments of whole structure and array types to preserve padding bytes.
 ///
@@ -42,6 +42,6 @@ class PreservePadding final : public utils::Castable<PreservePadding, Transform>
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_PRESERVE_PADDING_H_

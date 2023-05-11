@@ -20,7 +20,7 @@ namespace tint::fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     TransformBuilder tb(data, size);
-    tb.AddTransform<transform::VertexPulling>();
+    tb.AddTransform<ast::transform::VertexPulling>();
 
     tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
     fuzzer.SetTransformManager(tb.manager(), tb.data_map());

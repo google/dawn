@@ -25,7 +25,7 @@ namespace tint {
 class CloneContext;
 }  // namespace tint
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// DecomposeMemoryAccess is a transform used to replace storage and uniform buffer accesses with a
 /// combination of load, store or atomic functions on primitive types.
@@ -129,6 +129,6 @@ class DecomposeMemoryAccess final : public utils::Castable<DecomposeMemoryAccess
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_DECOMPOSE_MEMORY_ACCESS_H_

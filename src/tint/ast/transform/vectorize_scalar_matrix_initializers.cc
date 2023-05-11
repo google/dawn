@@ -24,9 +24,9 @@
 #include "src/tint/type/abstract_numeric.h"
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::VectorizeScalarMatrixInitializers);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VectorizeScalarMatrixInitializers);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -143,4 +143,4 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

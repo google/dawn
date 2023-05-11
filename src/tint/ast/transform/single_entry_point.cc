@@ -22,10 +22,10 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::SingleEntryPoint);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::SingleEntryPoint::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SingleEntryPoint);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SingleEntryPoint::Config);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 SingleEntryPoint::SingleEntryPoint() = default;
 
@@ -136,4 +136,4 @@ SingleEntryPoint::Config::Config(const Config&) = default;
 SingleEntryPoint::Config::~Config() = default;
 SingleEntryPoint::Config& SingleEntryPoint::Config::operator=(const Config&) = default;
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

@@ -29,9 +29,9 @@
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/unique_vector.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::ZeroInitWorkgroupMemory);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ZeroInitWorkgroupMemory);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -480,4 +480,4 @@ Transform::ApplyResult ZeroInitWorkgroupMemory::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

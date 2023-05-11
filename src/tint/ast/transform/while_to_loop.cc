@@ -19,9 +19,9 @@
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::WhileToLoop);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::WhileToLoop);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -76,4 +76,4 @@ Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, Da
     return Program(std::move(b));
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

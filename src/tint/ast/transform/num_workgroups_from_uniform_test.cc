@@ -20,7 +20,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/ast/transform/unshadow.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using NumWorkgroupsFromUniformTest = TransformTest;
@@ -53,8 +53,7 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 )";
 
     auto* expect =
-        "error: missing transform data for "
-        "tint::transform::NumWorkgroupsFromUniform";
+        "error: missing transform data for tint::ast::transform::NumWorkgroupsFromUniform";
 
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
@@ -694,4 +693,4 @@ fn main3() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

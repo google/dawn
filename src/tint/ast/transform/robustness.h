@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// This transform is responsible for ensuring that all out of bounds accesses are prevented,
 /// either by conditioning the access (predication) or through clamping of the index to keep the
@@ -93,6 +93,6 @@ class Robustness final : public utils::Castable<Robustness, Transform> {
     struct State;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_ROBUSTNESS_H_

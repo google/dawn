@@ -27,9 +27,9 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::SimplifyPointers);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SimplifyPointers);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 namespace {
 
@@ -261,4 +261,4 @@ Transform::ApplyResult SimplifyPointers::Apply(const Program* src, const DataMap
     return State(src).Run();
 }
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

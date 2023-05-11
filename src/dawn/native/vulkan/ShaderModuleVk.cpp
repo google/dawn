@@ -163,19 +163,19 @@ void ShaderModule::DestroyImpl() {
 
 ShaderModule::~ShaderModule() = default;
 
-#define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                                \
-    X(SingleShaderStage, stage)                                                             \
-    X(const tint::Program*, inputProgram)                                                   \
-    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                \
-    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                         \
-    X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(LimitsForCompilationRequest, limits)                                                  \
-    X(std::string_view, entryPointName)                                                     \
-    X(bool, isRobustnessEnabled)                                                            \
-    X(bool, disableWorkgroupInit)                                                           \
-    X(bool, disableSymbolRenaming)                                                          \
-    X(bool, useZeroInitializeWorkgroupMemoryExtension)                                      \
-    X(bool, clampFragDepth)                                                                 \
+#define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                                     \
+    X(SingleShaderStage, stage)                                                                  \
+    X(const tint::Program*, inputProgram)                                                        \
+    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                     \
+    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                              \
+    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
+    X(LimitsForCompilationRequest, limits)                                                       \
+    X(std::string_view, entryPointName)                                                          \
+    X(bool, isRobustnessEnabled)                                                                 \
+    X(bool, disableWorkgroupInit)                                                                \
+    X(bool, disableSymbolRenaming)                                                               \
+    X(bool, useZeroInitializeWorkgroupMemoryExtension)                                           \
+    X(bool, clampFragDepth)                                                                      \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
@@ -244,7 +244,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         }
     }
 
-    std::optional<tint::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
@@ -273,29 +273,29 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         compilation, GetDevice(), std::move(req), CompiledSpirv::FromBlob,
         [](SpirvCompilationRequest r) -> ResultOrError<CompiledSpirv> {
             tint::transform::Manager transformManager;
-            tint::transform::DataMap transformInputs;
+            tint::ast::transform::DataMap transformInputs;
 
             // Many Vulkan drivers can't handle multi-entrypoint shader modules.
             // Run before the renamer so that the entry point name matches `entryPointName` still.
-            transformManager.append(std::make_unique<tint::transform::SingleEntryPoint>());
-            transformInputs.Add<tint::transform::SingleEntryPoint::Config>(
+            transformManager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
+            transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
                 std::string(r.entryPointName));
 
             // Needs to run before all other transforms so that they can use builtin names safely.
             if (!r.disableSymbolRenaming) {
-                transformManager.Add<tint::transform::Renamer>();
+                transformManager.Add<tint::ast::transform::Renamer>();
             }
 
             if (r.substituteOverrideConfig) {
                 // This needs to run after SingleEntryPoint transform which removes unused overrides
                 // for current entry point.
-                transformManager.Add<tint::transform::SubstituteOverride>();
-                transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+                transformManager.Add<tint::ast::transform::SubstituteOverride>();
+                transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
                     std::move(r.substituteOverrideConfig).value());
             }
 
             tint::Program program;
-            tint::transform::DataMap transformOutputs;
+            tint::ast::transform::DataMap transformOutputs;
             {
                 TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "RunTransforms");
                 DAWN_TRY_ASSIGN(program,
@@ -308,7 +308,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             if (r.disableSymbolRenaming) {
                 remappedEntryPoint = r.entryPointName;
             } else {
-                auto* data = transformOutputs.Get<tint::transform::Renamer::Data>();
+                auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>();
                 ASSERT(data != nullptr);
 
                 auto it = data->remappings.find(r.entryPointName.data());

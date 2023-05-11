@@ -21,7 +21,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -146,4 +146,4 @@ TEST_F(CreateASTTypeForTest, StorageReadWritePointer) {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

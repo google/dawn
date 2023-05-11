@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Disable uniformity analysis for the program.
 class DisableUniformityAnalysis final
@@ -34,6 +34,6 @@ class DisableUniformityAnalysis final
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_DISABLE_UNIFORMITY_ANALYSIS_H_

@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Implement demote-to-helper semantics for discard statements.
 ///
@@ -42,6 +42,6 @@ class DemoteToHelper final : public utils::Castable<DemoteToHelper, Transform> {
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_DEMOTE_TO_HELPER_H_

@@ -15,7 +15,7 @@
 #include "src/tint/ast/transform/texture_1d_to_2d.h"
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using Texture1DTo2DTest = TransformTest;
@@ -297,4 +297,4 @@ fn d() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

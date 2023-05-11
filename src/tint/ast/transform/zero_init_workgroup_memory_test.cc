@@ -18,7 +18,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using ZeroInitWorkgroupMemoryTest = TransformTest;
@@ -1387,4 +1387,4 @@ Was the SubstituteOverride transform run?)";
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

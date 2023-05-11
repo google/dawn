@@ -17,7 +17,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/ast/transform/unshadow.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using CanonicalizeEntryPointIOTest = TransformTest;
@@ -26,8 +26,7 @@ TEST_F(CanonicalizeEntryPointIOTest, Error_MissingTransformData) {
     auto* src = "";
 
     auto* expect =
-        "error: missing transform data for "
-        "tint::transform::CanonicalizeEntryPointIO";
+        "error: missing transform data for tint::ast::transform::CanonicalizeEntryPointIO";
 
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src);
 
@@ -3965,4 +3964,4 @@ fn main() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

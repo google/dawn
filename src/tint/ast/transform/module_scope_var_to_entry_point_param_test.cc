@@ -18,7 +18,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using ModuleScopeVarToEntryPointParamTest = TransformTest;
@@ -1369,4 +1369,4 @@ TEST_F(ModuleScopeVarToEntryPointParamTest, EmtpyModule) {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

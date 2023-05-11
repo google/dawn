@@ -3888,7 +3888,8 @@ bool Builder::GenerateStructType(const type::Struct* struct_type, const Operand&
 
     if (auto* sem_str = struct_type->As<sem::Struct>()) {
         auto* decl = sem_str->Declaration();
-        if (ast::HasAttribute<transform::AddBlockAttribute::BlockAttribute>(decl->attributes)) {
+        if (ast::HasAttribute<ast::transform::AddBlockAttribute::BlockAttribute>(
+                decl->attributes)) {
             module_.PushAnnot(spv::Op::OpDecorate,
                               {Operand(struct_id), U32Operand(SpvDecorationBlock)});
         }

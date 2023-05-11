@@ -18,7 +18,7 @@
 
 #include "src/tint/ast/transform/test_helper.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using SingleEntryPointTest = TransformTest;
@@ -26,7 +26,7 @@ using SingleEntryPointTest = TransformTest;
 TEST_F(SingleEntryPointTest, Error_MissingTransformData) {
     auto* src = "";
 
-    auto* expect = "error: missing transform data for tint::transform::SingleEntryPoint";
+    auto* expect = "error: missing transform data for tint::ast::transform::SingleEntryPoint";
 
     auto got = Run<SingleEntryPoint>(src);
 
@@ -632,4 +632,4 @@ fn main() {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

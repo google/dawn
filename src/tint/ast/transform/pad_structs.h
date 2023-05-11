@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// This transform turns all explicit alignment and sizing into padding
 /// members of structs. This is required for GLSL ES, since it not support
@@ -38,6 +38,6 @@ class PadStructs final : public utils::Castable<PadStructs, Transform> {
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_PAD_STRUCTS_H_

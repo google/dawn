@@ -25,7 +25,7 @@ namespace tint::writer {
 
 std::optional<Program> FlattenBindings(const Program* program) {
     // TODO(crbug.com/tint/1101): Make this more robust for multiple entry points.
-    tint::transform::BindingRemapper::BindingPoints binding_points;
+    tint::ast::transform::BindingRemapper::BindingPoints binding_points;
     uint32_t next_buffer_idx = 0;
     uint32_t next_sampler_idx = 0;
     uint32_t next_texture_idx = 0;
@@ -63,14 +63,14 @@ std::optional<Program> FlattenBindings(const Program* program) {
     }
 
     // Run the binding remapper transform.
-    tint::transform::Output transform_output;
+    tint::ast::transform::Output transform_output;
     if (!binding_points.empty()) {
         tint::transform::Manager manager;
-        tint::transform::DataMap inputs;
-        inputs.Add<tint::transform::BindingRemapper::Remappings>(
-            std::move(binding_points), tint::transform::BindingRemapper::AccessControls{},
+        tint::ast::transform::DataMap inputs;
+        inputs.Add<tint::ast::transform::BindingRemapper::Remappings>(
+            std::move(binding_points), tint::ast::transform::BindingRemapper::AccessControls{},
             /* mayCollide */ true);
-        manager.Add<tint::transform::BindingRemapper>();
+        manager.Add<tint::ast::transform::BindingRemapper>();
         transform_output = manager.Run(program, inputs);
         return std::move(transform_output.program);
     }

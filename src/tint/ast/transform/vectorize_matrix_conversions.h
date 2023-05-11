@@ -17,7 +17,7 @@
 
 #include "src/tint/ast/transform/transform.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// A transform that converts matrix conversions (between f32 and f16 matrices) to the vector form.
 class VectorizeMatrixConversions final
@@ -35,6 +35,6 @@ class VectorizeMatrixConversions final
                       DataMap& outputs) const override;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
 #endif  // SRC_TINT_AST_TRANSFORM_VECTORIZE_MATRIX_CONVERSIONS_H_

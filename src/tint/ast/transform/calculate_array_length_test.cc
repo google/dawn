@@ -18,7 +18,7 @@
 #include "src/tint/ast/transform/test_helper.h"
 #include "src/tint/ast/transform/unshadow.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 using CalculateArrayLengthTest = TransformTest;
@@ -548,4 +548,4 @@ struct SB2 {
 }
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

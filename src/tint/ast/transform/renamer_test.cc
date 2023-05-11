@@ -23,7 +23,7 @@
 #include "src/tint/builtin/builtin.h"
 #include "src/tint/builtin/texel_format.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 namespace {
 
 constexpr const char kUnicodeIdentifier[] =  // "𝖎𝖉𝖊𝖓𝖙𝖎𝖋𝖎𝖊𝖗123"
@@ -2057,4 +2057,4 @@ INSTANTIATE_TEST_SUITE_P(RenamerBuiltinIdentifierTest,
                          testing::ValuesIn(Identifiers()));
 
 }  // namespace
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

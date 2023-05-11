@@ -34,23 +34,24 @@
 namespace dawn::native::metal {
 namespace {
 
-using OptionalVertexPullingTransformConfig = std::optional<tint::transform::VertexPulling::Config>;
+using OptionalVertexPullingTransformConfig =
+    std::optional<tint::ast::transform::VertexPulling::Config>;
 
-#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                  \
-    X(SingleShaderStage, stage)                                                             \
-    X(const tint::Program*, inputProgram)                                                   \
-    X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                  \
-    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                \
-    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                         \
-    X(OptionalVertexPullingTransformConfig, vertexPullingTransformConfig)                   \
-    X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(LimitsForCompilationRequest, limits)                                                  \
-    X(std::string, entryPointName)                                                          \
-    X(uint32_t, sampleMask)                                                                 \
-    X(bool, emitVertexPointSize)                                                            \
-    X(bool, isRobustnessEnabled)                                                            \
-    X(bool, disableSymbolRenaming)                                                          \
-    X(bool, disableWorkgroupInit)                                                           \
+#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                       \
+    X(SingleShaderStage, stage)                                                                  \
+    X(const tint::Program*, inputProgram)                                                        \
+    X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                       \
+    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                     \
+    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                              \
+    X(OptionalVertexPullingTransformConfig, vertexPullingTransformConfig)                        \
+    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
+    X(LimitsForCompilationRequest, limits)                                                       \
+    X(std::string, entryPointName)                                                               \
+    X(uint32_t, sampleMask)                                                                      \
+    X(bool, emitVertexPointSize)                                                                 \
+    X(bool, isRobustnessEnabled)                                                                 \
+    X(bool, disableSymbolRenaming)                                                               \
+    X(bool, disableWorkgroupInit)                                                                \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
 
 DAWN_MAKE_CACHE_REQUEST(MslCompilationRequest, MSL_COMPILATION_REQUEST_MEMBERS);
@@ -152,7 +153,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         }
     }
 
-    std::optional<tint::transform::VertexPulling::Config> vertexPullingTransformConfig;
+    std::optional<tint::ast::transform::VertexPulling::Config> vertexPullingTransformConfig;
     if (stage == SingleShaderStage::Vertex &&
         device->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
         vertexPullingTransformConfig =
@@ -176,7 +177,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         }
     }
 
-    std::optional<tint::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
@@ -206,38 +207,38 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         mslCompilation, device, std::move(req), MslCompilation::FromBlob,
         [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
             tint::transform::Manager transformManager;
-            tint::transform::DataMap transformInputs;
+            tint::ast::transform::DataMap transformInputs;
 
             // We only remap bindings for the target entry point, so we need to strip all other
             // entry points to avoid generating invalid bindings for them.
             // Run before the renamer so that the entry point name matches `entryPointName` still.
-            transformManager.Add<tint::transform::SingleEntryPoint>();
-            transformInputs.Add<tint::transform::SingleEntryPoint::Config>(r.entryPointName);
+            transformManager.Add<tint::ast::transform::SingleEntryPoint>();
+            transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
 
             // Needs to run before all other transforms so that they can use builtin names safely.
-            transformManager.Add<tint::transform::Renamer>();
+            transformManager.Add<tint::ast::transform::Renamer>();
             if (r.disableSymbolRenaming) {
                 // We still need to rename MSL reserved keywords
-                transformInputs.Add<tint::transform::Renamer::Config>(
-                    tint::transform::Renamer::Target::kMslKeywords);
+                transformInputs.Add<tint::ast::transform::Renamer::Config>(
+                    tint::ast::transform::Renamer::Target::kMslKeywords);
             }
 
             if (r.vertexPullingTransformConfig) {
-                transformManager.Add<tint::transform::VertexPulling>();
-                transformInputs.Add<tint::transform::VertexPulling::Config>(
+                transformManager.Add<tint::ast::transform::VertexPulling>();
+                transformInputs.Add<tint::ast::transform::VertexPulling::Config>(
                     std::move(r.vertexPullingTransformConfig).value());
             }
 
             if (r.substituteOverrideConfig) {
                 // This needs to run after SingleEntryPoint transform which removes unused overrides
                 // for current entry point.
-                transformManager.Add<tint::transform::SubstituteOverride>();
-                transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+                transformManager.Add<tint::ast::transform::SubstituteOverride>();
+                transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
                     std::move(r.substituteOverrideConfig).value());
             }
 
             tint::Program program;
-            tint::transform::DataMap transformOutputs;
+            tint::ast::transform::DataMap transformOutputs;
             {
                 TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "RunTransforms");
                 DAWN_TRY_ASSIGN(program,
@@ -246,7 +247,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             }
 
             std::string remappedEntryPointName;
-            if (auto* data = transformOutputs.Get<tint::transform::Renamer::Data>()) {
+            if (auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>()) {
                 auto it = data->remappings.find(r.entryPointName);
                 if (it != data->remappings.end()) {
                     remappedEntryPointName = it->second;

@@ -67,17 +67,17 @@ void stream::Stream<tint::writer::ExternalTextureOptions>::Write(
 
 // static
 template <>
-void stream::Stream<tint::transform::VertexPulling::Config>::Write(
+void stream::Stream<tint::ast::transform::VertexPulling::Config>::Write(
     stream::Sink* sink,
-    const tint::transform::VertexPulling::Config& cfg) {
+    const tint::ast::transform::VertexPulling::Config& cfg) {
     StreamInTintObject(cfg, sink);
 }
 
 // static
 template <>
-void stream::Stream<tint::transform::SubstituteOverride::Config>::Write(
+void stream::Stream<tint::ast::transform::SubstituteOverride::Config>::Write(
     stream::Sink* sink,
-    const tint::transform::SubstituteOverride::Config& cfg) {
+    const tint::ast::transform::SubstituteOverride::Config& cfg) {
     StreamInTintObject(cfg, sink);
 }
 
@@ -89,17 +89,17 @@ void stream::Stream<tint::OverrideId>::Write(stream::Sink* sink, const tint::Ove
 
 // static
 template <>
-void stream::Stream<tint::transform::VertexBufferLayoutDescriptor>::Write(
+void stream::Stream<tint::ast::transform::VertexBufferLayoutDescriptor>::Write(
     stream::Sink* sink,
-    const tint::transform::VertexBufferLayoutDescriptor& layout) {
+    const tint::ast::transform::VertexBufferLayoutDescriptor& layout) {
     StreamInTintObject(layout, sink);
 }
 
 // static
 template <>
-void stream::Stream<tint::transform::VertexAttributeDescriptor>::Write(
+void stream::Stream<tint::ast::transform::VertexAttributeDescriptor>::Write(
     stream::Sink* sink,
-    const tint::transform::VertexAttributeDescriptor& attrib) {
+    const tint::ast::transform::VertexAttributeDescriptor& attrib) {
     StreamInTintObject(attrib, sink);
 }
 
