@@ -33,6 +33,11 @@
       "Bucket": "try",
       "Builder": "mac-dawn-rel"
     },
+    "Mac-Exp": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "dawn-try-mac-intel-exp"
+    },
     "Linux": {
       "Project": "chromium",
       "Bucket": "try",
