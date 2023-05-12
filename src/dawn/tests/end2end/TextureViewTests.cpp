@@ -747,6 +747,9 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALevelOf2DTextureAsColorAtt
 
 // Test rendering into a 1-layer 2D array texture view created on a layer of a 2D array texture.
 TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALayerOf2DArrayTextureAsColorAttachment) {
+    // TODO(dawn:1812): the test fails with DXGI_ERROR_DEVICE_HUNG on Intel D3D11 driver.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
+
     constexpr uint32_t kMipLevels = 1;
     constexpr uint32_t kBaseLevel = 0;
     constexpr uint32_t kLayers = 10;
