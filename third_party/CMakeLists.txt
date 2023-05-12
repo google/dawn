@@ -15,6 +15,27 @@
 # Don't build testing in third_party dependencies
 set(BUILD_TESTING OFF)
 
+# fetch_dawn_dependencies.py is an alternative to using depot_tools
+# It is particularly interesting when building dawn as a subdirectory in
+# a parent project that does not want to use depot_tools.
+if (${DAWN_FETCH_DEPENDENCIES})
+    find_package(PythonInterp 3 REQUIRED)
+
+    set(EXTRA_FETCH_ARGS)
+    if (NOT TARGET gmock AND ${TINT_BUILD_TESTS})
+        list(APPEND EXTRA_FETCH_ARGS --use-test-deps)
+    endif()
+
+    message(STATUS "Running fetch_dawn_dependencies:")
+    execute_process(
+        COMMAND
+            ${PYTHON_EXECUTABLE}
+            "${PROJECT_SOURCE_DIR}/tools/fetch_dawn_dependencies.py"
+            --directory ${PROJECT_SOURCE_DIR}
+            ${EXTRA_FETCH_ARGS}
+    )
+endif ()
+
 if (NOT TARGET SPIRV-Headers)
     set(SPIRV_HEADERS_SKIP_EXAMPLES ON CACHE BOOL "" FORCE)
     set(SPIRV_HEADERS_SKIP_INSTALL ON CACHE BOOL "" FORCE)
