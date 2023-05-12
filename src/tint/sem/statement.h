@@ -133,7 +133,7 @@ class Statement : public utils::Castable<Statement, Node> {
 
 /// CompoundStatement is the base class of statements that can hold other
 /// statements.
-class CompoundStatement : public utils::Castable<Statement, Statement> {
+class CompoundStatement : public utils::Castable<CompoundStatement, Statement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this statement
