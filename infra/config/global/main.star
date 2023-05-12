@@ -350,6 +350,7 @@ def dawn_standalone_builder(name, clang, debug, cpu, fuzzer = False):
             cq_group = "Dawn-CQ",
             builder = "dawn:try/" + name,
         )
+
         # These builders run fine unbranched on branch CLs, so add them to the
         # branch groups as well.
         for milestone in ACTIVE_MILESTONES.keys():
@@ -358,8 +359,10 @@ def dawn_standalone_builder(name, clang, debug, cpu, fuzzer = False):
                 builder = "dawn:try/" + name,
             )
 
-def _add_branch_verifiers(builder_name, includable_only = False):
-  for milestone, details in ACTIVE_MILESTONES.items():
+def _add_branch_verifiers(builder_name, os, includable_only = False):
+    for milestone, details in ACTIVE_MILESTONES.items():
+        if os not in details.platforms:
+            continue
         luci.cq_tryjob_verifier(
             cq_group = "Dawn-CQ-" + milestone,
             builder = "{}:try/{}".format(details.chromium_project, builder_name),
@@ -385,7 +388,7 @@ def chromium_dawn_tryjob(os):
         cq_group = "Dawn-CQ",
         builder = "chromium:try/" + os + "-dawn-rel",
     )
-    _add_branch_verifiers(_os_to_branch_builder[os])
+    _add_branch_verifiers(_os_to_branch_builder[os], os)
 
 luci.gitiles_poller(
     name = "primary-poller",
@@ -444,7 +447,7 @@ luci.cq_tryjob_verifier(
     builder = "chromium:try/dawn-try-win10-x86-rel",
     includable_only = True,
 )
-_add_branch_verifiers("dawn-win10-x86-deps-rel", includable_only = True)
+_add_branch_verifiers("dawn-win10-x86-deps-rel", "win", includable_only = True)
 
 # Views
 
