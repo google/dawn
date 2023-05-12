@@ -1,7 +1,11 @@
 data/webgpu/shader/execution/case-cache/binary/f16_logical.json
-data/webgpu/shader/execution/case-cache/binary/f32_arithmetic.json
+data/webgpu/shader/execution/case-cache/binary/f32_addition.json
 data/webgpu/shader/execution/case-cache/binary/f32_logical.json
+data/webgpu/shader/execution/case-cache/binary/f32_division.json
 data/webgpu/shader/execution/case-cache/binary/f32_matrix_arithmetic.json
+data/webgpu/shader/execution/case-cache/binary/f32_multiplication.json
+data/webgpu/shader/execution/case-cache/binary/f32_remainder.json
+data/webgpu/shader/execution/case-cache/binary/f32_subtraction.json
 data/webgpu/shader/execution/case-cache/binary/i32_arithmetic.json
 data/webgpu/shader/execution/case-cache/binary/i32_comparison.json
 data/webgpu/shader/execution/case-cache/binary/u32_arithmetic.json
@@ -14,6 +18,7 @@ data/webgpu/shader/execution/case-cache/asinh.json
 data/webgpu/shader/execution/case-cache/atan.json
 data/webgpu/shader/execution/case-cache/atan2.json
 data/webgpu/shader/execution/case-cache/atanh.json
+data/webgpu/shader/execution/case-cache/bitcast.json
 data/webgpu/shader/execution/case-cache/ceil.json
 data/webgpu/shader/execution/case-cache/clamp.json
 data/webgpu/shader/execution/case-cache/cos.json
