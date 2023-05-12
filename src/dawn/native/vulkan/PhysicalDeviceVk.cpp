@@ -233,10 +233,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::ChromiumExperimentalDp4a);
     }
 
-    // unclippedDepth=true translates to depthClipEnable=false, depthClamp=true
-    if (mDeviceInfo.features.depthClamp == VK_TRUE &&
-        mDeviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
-        mDeviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE) {
+    // unclippedDepth=true translates to depthClamp=true, which implicitly disables clipping.
+    if (mDeviceInfo.features.depthClamp == VK_TRUE) {
         EnableFeature(Feature::DepthClipControl);
     }
 

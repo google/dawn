@@ -503,14 +503,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (HasFeature(Feature::DepthClipControl)) {
-        const VulkanDeviceInfo& deviceInfo = ToBackend(GetPhysicalDevice())->GetDeviceInfo();
-        ASSERT(deviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
-               deviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE);
-
         usedKnobs.features.depthClamp = VK_TRUE;
-        usedKnobs.depthClipEnableFeatures.depthClipEnable = VK_TRUE;
-        featuresChain.Add(&usedKnobs.depthClipEnableFeatures,
-                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT);
     }
 
     // TODO(dawn:1510, tint:1473): After implementing a transform to handle the pipeline input /
