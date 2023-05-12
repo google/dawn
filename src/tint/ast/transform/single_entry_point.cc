@@ -45,7 +45,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
     }
 
     // Find the target entry point.
-    const ast::Function* entry_point = nullptr;
+    const Function* entry_point = nullptr;
     for (auto* f : src->AST().Functions()) {
         if (!f->IsEntryPoint()) {
             continue;
@@ -69,7 +69,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
     for (auto* decl : src->AST().GlobalDeclarations()) {
         Switch(
             decl,  //
-            [&](const ast::TypeDecl* ty) {
+            [&](const TypeDecl* ty) {
                 // Strip aliases that reference unused override declarations.
                 if (auto* arr = sem.Get(ty)->As<type::Array>()) {
                     auto* refs = sem.TransitivelyReferencedOverrides(arr);
@@ -85,9 +85,9 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
                 // TODO(jrprice): Strip other unused types.
                 b.AST().AddTypeDecl(ctx.Clone(ty));
             },
-            [&](const ast::Override* override) {
+            [&](const Override* override) {
                 if (referenced_vars.Contains(sem.Get(override))) {
-                    if (!ast::HasAttribute<ast::IdAttribute>(override->attributes)) {
+                    if (!HasAttribute<IdAttribute>(override->attributes)) {
                         // If the override doesn't already have an @id() attribute, add one
                         // so that its allocated ID so that it won't be affected by other
                         // stripped away overrides
@@ -98,26 +98,24 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
                     b.AST().AddGlobalVariable(ctx.Clone(override));
                 }
             },
-            [&](const ast::Var* var) {
+            [&](const Var* var) {
                 if (referenced_vars.Contains(sem.Get<sem::GlobalVariable>(var))) {
                     b.AST().AddGlobalVariable(ctx.Clone(var));
                 }
             },
-            [&](const ast::Const* c) {
+            [&](const Const* c) {
                 // Always keep 'const' declarations, as these can be used by attributes and array
                 // sizes, which are not tracked as transitively used by functions. They also don't
                 // typically get emitted by the backend unless they're actually used.
                 b.AST().AddGlobalVariable(ctx.Clone(c));
             },
-            [&](const ast::Function* func) {
+            [&](const Function* func) {
                 if (sem.Get(func)->HasAncestorEntryPoint(entry_point->name->symbol)) {
                     b.AST().AddFunction(ctx.Clone(func));
                 }
             },
-            [&](const ast::Enable* ext) { b.AST().AddEnable(ctx.Clone(ext)); },
-            [&](const ast::DiagnosticDirective* d) {
-                b.AST().AddDiagnosticDirective(ctx.Clone(d));
-            },
+            [&](const Enable* ext) { b.AST().AddEnable(ctx.Clone(ext)); },
+            [&](const DiagnosticDirective* d) { b.AST().AddDiagnosticDirective(ctx.Clone(d)); },
             [&](Default) {
                 TINT_UNREACHABLE(Transform, b.Diagnostics())
                     << "unhandled global declaration: " << decl->TypeInfo().name;

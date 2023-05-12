@@ -37,7 +37,7 @@ struct HoistToDeclBefore::State {
 
     /// @copydoc HoistToDeclBefore::Add()
     bool Add(const sem::ValueExpression* before_expr,
-             const ast::Expression* expr,
+             const Expression* expr,
              VariableKind kind,
              const char* decl_name) {
         auto name = b.Symbols().New(decl_name);
@@ -85,8 +85,8 @@ struct HoistToDeclBefore::State {
         return true;
     }
 
-    /// @copydoc HoistToDeclBefore::InsertBefore(const sem::Statement*, const ast::Statement*)
-    bool InsertBefore(const sem::Statement* before_stmt, const ast::Statement* stmt) {
+    /// @copydoc HoistToDeclBefore::InsertBefore(const sem::Statement*, const Statement*)
+    bool InsertBefore(const sem::Statement* before_stmt, const Statement* stmt) {
         if (stmt) {
             auto builder = [stmt] { return stmt; };
             return InsertBeforeImpl(before_stmt, std::move(builder));
@@ -99,8 +99,8 @@ struct HoistToDeclBefore::State {
         return InsertBeforeImpl(before_stmt, std::move(builder));
     }
 
-    /// @copydoc HoistToDeclBefore::Replace(const sem::Statement* what, const ast::Statement* with)
-    bool Replace(const sem::Statement* what, const ast::Statement* with) {
+    /// @copydoc HoistToDeclBefore::Replace(const sem::Statement* what, const Statement* with)
+    bool Replace(const sem::Statement* what, const Statement* with) {
         auto builder = [with] { return with; };
         return Replace(what, std::move(builder));
     }
@@ -145,7 +145,7 @@ struct HoistToDeclBefore::State {
     utils::Hashmap<const sem::WhileStatement*, LoopInfo, 4> while_loops;
 
     /// 'else if' statements that need to be decomposed to 'else {if}'
-    utils::Hashmap<const ast::IfStatement*, ElseIfInfo, 4> else_ifs;
+    utils::Hashmap<const IfStatement*, ElseIfInfo, 4> else_ifs;
 
     template <size_t N>
     static auto Build(const utils::Vector<StmtBuilder, N>& builders) {
@@ -181,7 +181,7 @@ struct HoistToDeclBefore::State {
     /// automatically called.
     /// @warning the returned reference is invalid if this is called a second time, or the
     /// #else_ifs map is mutated.
-    auto ElseIf(const ast::IfStatement* else_if) {
+    auto ElseIf(const IfStatement* else_if) {
         if (else_ifs.IsEmpty()) {
             RegisterElseIfTransform();
         }
@@ -190,7 +190,7 @@ struct HoistToDeclBefore::State {
 
     /// Registers the handler for transforming for-loops based on the content of the #for_loops map.
     void RegisterForLoopTransform() const {
-        ctx.ReplaceAll([&](const ast::ForLoopStatement* stmt) -> const ast::Statement* {
+        ctx.ReplaceAll([&](const ForLoopStatement* stmt) -> const Statement* {
             auto& sem = ctx.src->Sem();
 
             if (auto* fl = sem.Get(stmt)) {
@@ -205,9 +205,9 @@ struct HoistToDeclBefore::State {
                     if (auto* cond = for_loop->condition) {
                         // !condition
                         auto* not_cond =
-                            b.create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, ctx.Clone(cond));
+                            b.create<UnaryOpExpression>(UnaryOp::kNot, ctx.Clone(cond));
                         // { break; }
-                        auto* break_body = b.Block(b.create<ast::BreakStatement>());
+                        auto* break_body = b.Block(b.create<BreakStatement>());
                         // if (!condition) { break; }
                         body_stmts.Push(b.If(not_cond, break_body));
                     }
@@ -215,7 +215,7 @@ struct HoistToDeclBefore::State {
                     body_stmts.Push(ctx.Clone(for_loop->body));
 
                     // Create the continuing block if there was one.
-                    const ast::BlockStatement* continuing = nullptr;
+                    const BlockStatement* continuing = nullptr;
                     if (auto* cont = for_loop->continuing) {
                         // Continuing block starts with any let declarations used by
                         // the continuing.
@@ -249,7 +249,7 @@ struct HoistToDeclBefore::State {
     /// map.
     void RegisterWhileLoopTransform() const {
         // At least one while needs to be transformed into a loop.
-        ctx.ReplaceAll([&](const ast::WhileStatement* stmt) -> const ast::Statement* {
+        ctx.ReplaceAll([&](const WhileStatement* stmt) -> const Statement* {
             auto& sem = ctx.src->Sem();
 
             if (auto* w = sem.Get(stmt)) {
@@ -274,7 +274,7 @@ struct HoistToDeclBefore::State {
                     // Next emit the body
                     body_stmts.Push(ctx.Clone(while_loop->body));
 
-                    const ast::BlockStatement* continuing = nullptr;
+                    const BlockStatement* continuing = nullptr;
 
                     auto* body = b.Block(body_stmts);
                     auto* loop = b.Loop(body, continuing);
@@ -289,7 +289,7 @@ struct HoistToDeclBefore::State {
     /// map.
     void RegisterElseIfTransform() const {
         // Decompose 'else-if' statements into 'else { if }' blocks.
-        ctx.ReplaceAll([&](const ast::IfStatement* stmt) -> const ast::Statement* {
+        ctx.ReplaceAll([&](const IfStatement* stmt) -> const Statement* {
             if (auto info = else_ifs.Find(stmt)) {
                 // Build the else block's body statements, starting with let decls for the
                 // conditional expression.
@@ -412,14 +412,13 @@ HoistToDeclBefore::HoistToDeclBefore(CloneContext& ctx) : state_(std::make_uniqu
 HoistToDeclBefore::~HoistToDeclBefore() {}
 
 bool HoistToDeclBefore::Add(const sem::ValueExpression* before_expr,
-                            const ast::Expression* expr,
+                            const Expression* expr,
                             VariableKind kind,
                             const char* decl_name) {
     return state_->Add(before_expr, expr, kind, decl_name);
 }
 
-bool HoistToDeclBefore::InsertBefore(const sem::Statement* before_stmt,
-                                     const ast::Statement* stmt) {
+bool HoistToDeclBefore::InsertBefore(const sem::Statement* before_stmt, const Statement* stmt) {
     return state_->InsertBefore(before_stmt, stmt);
 }
 
@@ -428,7 +427,7 @@ bool HoistToDeclBefore::InsertBefore(const sem::Statement* before_stmt,
     return state_->InsertBefore(before_stmt, builder);
 }
 
-bool HoistToDeclBefore::Replace(const sem::Statement* what, const ast::Statement* with) {
+bool HoistToDeclBefore::Replace(const sem::Statement* what, const Statement* with) {
     return state_->Replace(what, with);
 }
 

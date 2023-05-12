@@ -36,7 +36,7 @@ class HoistToDeclBefore {
     ~HoistToDeclBefore();
 
     /// StmtBuilder is a builder of an AST statement
-    using StmtBuilder = std::function<const ast::Statement*()>;
+    using StmtBuilder = std::function<const Statement*()>;
 
     /// VariableKind is either a var, let or const
     enum class VariableKind {
@@ -53,7 +53,7 @@ class HoistToDeclBefore {
     /// @param decl_name optional name to use for the variable/constant name
     /// @return true on success
     bool Add(const sem::ValueExpression* before_expr,
-             const ast::Expression* expr,
+             const Expression* expr,
              VariableKind kind,
              const char* decl_name = "");
 
@@ -64,7 +64,7 @@ class HoistToDeclBefore {
     /// @param before_stmt statement to insert @p stmt before
     /// @param stmt statement to insert
     /// @return true on success
-    bool InsertBefore(const sem::Statement* before_stmt, const ast::Statement* stmt);
+    bool InsertBefore(const sem::Statement* before_stmt, const Statement* stmt);
 
     /// Inserts the returned statement of @p builder before @p before_stmt, possibly converting
     /// 'for-loop's to 'loop's if necessary.
@@ -81,7 +81,7 @@ class HoistToDeclBefore {
     /// @param what the statement to replace
     /// @param with the replacement statement
     /// @return true on success
-    bool Replace(const sem::Statement* what, const ast::Statement* with);
+    bool Replace(const sem::Statement* what, const Statement* with);
 
     /// Replaces the statement @p what with the statement returned by @p stmt, possibly converting
     /// 'for-loop's to 'loop's if necessary.

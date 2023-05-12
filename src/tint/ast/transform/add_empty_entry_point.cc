@@ -52,7 +52,7 @@ Transform::ApplyResult AddEmptyEntryPoint::Apply(const Program* src,
 
     b.Func(b.Symbols().New("unused_entry_point"), {}, b.ty.void_(), {},
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 

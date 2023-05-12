@@ -1265,10 +1265,10 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
     }
 
     // Identifiers that need to keep their symbols preserved.
-    utils::Hashset<const ast::Identifier*, 16> preserved_identifiers;
+    utils::Hashset<const Identifier*, 16> preserved_identifiers;
 
     for (auto* node : src->ASTNodes().Objects()) {
-        auto preserve_if_builtin_type = [&](const ast::Identifier* ident) {
+        auto preserve_if_builtin_type = [&](const Identifier* ident) {
             if (!global_decls.Contains(ident->symbol)) {
                 preserved_identifiers.Add(ident);
             }
@@ -1276,7 +1276,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
 
         Switch(
             node,
-            [&](const ast::MemberAccessorExpression* accessor) {
+            [&](const MemberAccessorExpression* accessor) {
                 auto* sem = src->Sem().Get(accessor)->UnwrapLoad();
                 if (sem->Is<sem::Swizzle>()) {
                     preserved_identifiers.Add(accessor->member);
@@ -1288,19 +1288,19 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
                     }
                 }
             },
-            [&](const ast::DiagnosticAttribute* diagnostic) {
+            [&](const DiagnosticAttribute* diagnostic) {
                 if (auto* category = diagnostic->control.rule_name->category) {
                     preserved_identifiers.Add(category);
                 }
                 preserved_identifiers.Add(diagnostic->control.rule_name->name);
             },
-            [&](const ast::DiagnosticDirective* diagnostic) {
+            [&](const DiagnosticDirective* diagnostic) {
                 if (auto* category = diagnostic->control.rule_name->category) {
                     preserved_identifiers.Add(category);
                 }
                 preserved_identifiers.Add(diagnostic->control.rule_name->name);
             },
-            [&](const ast::IdentifierExpression* expr) {
+            [&](const IdentifierExpression* expr) {
                 Switch(
                     src->Sem().Get(expr),  //
                     [&](const sem::BuiltinEnumExpressionBase*) {
@@ -1310,7 +1310,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
                         preserve_if_builtin_type(expr->identifier);
                     });
             },
-            [&](const ast::CallExpression* call) {
+            [&](const CallExpression* call) {
                 Switch(
                     src->Sem().Get(call)->UnwrapMaterialize()->As<sem::Call>()->Target(),
                     [&](const sem::Builtin*) {
@@ -1372,7 +1372,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
     ProgramBuilder b;
     CloneContext ctx{&b, src, /* auto_clone_symbols */ false};
 
-    ctx.ReplaceAll([&](const ast::Identifier* ident) -> const ast::Identifier* {
+    ctx.ReplaceAll([&](const Identifier* ident) -> const Identifier* {
         const auto symbol = ident->symbol;
         if (preserved_identifiers.Contains(ident) || !should_rename(symbol)) {
             return nullptr;  // Preserve symbol
@@ -1382,12 +1382,12 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
         auto replacement = remappings.GetOrCreate(symbol, [&] { return b.Symbols().New(); });
 
         // Reconstruct the identifier
-        if (auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>()) {
+        if (auto* tmpl_ident = ident->As<TemplatedIdentifier>()) {
             auto args = ctx.Clone(tmpl_ident->arguments);
-            return ctx.dst->create<ast::TemplatedIdentifier>(ctx.Clone(ident->source), replacement,
-                                                             std::move(args), utils::Empty);
+            return ctx.dst->create<TemplatedIdentifier>(ctx.Clone(ident->source), replacement,
+                                                        std::move(args), utils::Empty);
         }
-        return ctx.dst->create<ast::Identifier>(ctx.Clone(ident->source), replacement);
+        return ctx.dst->create<Identifier>(ctx.Clone(ident->source), replacement);
     });
 
     ctx.Clone();

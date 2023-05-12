@@ -94,7 +94,7 @@ struct PackedVec3::State {
     /// Create a `__packed_vec3` type with the same element type as `ty`.
     /// @param ty a three-element vector type
     /// @returns the new AST type
-    ast::Type MakePackedVec3(const type::Type* ty) {
+    Type MakePackedVec3(const type::Type* ty) {
         auto* vec = ty->As<type::Vector>();
         TINT_ASSERT(Transform, vec != nullptr && vec->Width() == 3);
         return b.ty(builtin::Builtin::kPackedVec3, CreateASTTypeFor(ctx, vec->type()));
@@ -109,10 +109,10 @@ struct PackedVec3::State {
     /// @param ty the type to rewrite
     /// @param array_element `true` if this is being called for the element of an array
     /// @returns the new AST type, or nullptr if rewriting was not necessary
-    ast::Type RewriteType(const type::Type* ty, bool array_element = false) {
+    Type RewriteType(const type::Type* ty, bool array_element = false) {
         return Switch(
             ty,
-            [&](const type::Vector* vec) -> ast::Type {
+            [&](const type::Vector* vec) -> Type {
                 if (IsVec3(vec)) {
                     if (array_element) {
                         // Create a struct with a single `__packed_vec3` member.
@@ -134,7 +134,7 @@ struct PackedVec3::State {
                 }
                 return {};
             },
-            [&](const type::Matrix* mat) -> ast::Type {
+            [&](const type::Matrix* mat) -> Type {
                 // Rewrite the matrix as an array of columns that use the aligned wrapper struct.
                 auto new_col_type = RewriteType(mat->ColumnType(), /* array_element */ true);
                 if (new_col_type) {
@@ -142,11 +142,11 @@ struct PackedVec3::State {
                 }
                 return {};
             },
-            [&](const type::Array* arr) -> ast::Type {
+            [&](const type::Array* arr) -> Type {
                 // Rewrite the array with the modified element type.
                 auto new_type = RewriteType(arr->ElemType(), /* array_element */ true);
                 if (new_type) {
-                    utils::Vector<const ast::Attribute*, 1> attrs;
+                    utils::Vector<const Attribute*, 1> attrs;
                     if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                         return b.ty.array(new_type, std::move(attrs));
                     } else if (auto count = arr->ConstantCount()) {
@@ -159,21 +159,21 @@ struct PackedVec3::State {
                 }
                 return {};
             },
-            [&](const type::Struct* str) -> ast::Type {
+            [&](const type::Struct* str) -> Type {
                 if (ContainsVec3(str)) {
                     auto name = rewritten_structs.GetOrCreate(str, [&]() {
-                        utils::Vector<const ast::StructMember*, 4> members;
+                        utils::Vector<const StructMember*, 4> members;
                         for (auto* member : str->Members()) {
                             // If the member type contains a vec3, rewrite it.
                             auto new_type = RewriteType(member->Type());
                             if (new_type) {
                                 // Copy the member attributes.
                                 bool needs_align = true;
-                                utils::Vector<const ast::Attribute*, 4> attributes;
+                                utils::Vector<const Attribute*, 4> attributes;
                                 if (auto* sem_mem = member->As<sem::StructMember>()) {
                                     for (auto* attr : sem_mem->Declaration()->attributes) {
-                                        if (attr->IsAnyOf<ast::StructMemberAlignAttribute,
-                                                          ast::StructMemberOffsetAttribute>()) {
+                                        if (attr->IsAnyOf<StructMemberAlignAttribute,
+                                                          StructMemberOffsetAttribute>()) {
                                             needs_align = false;
                                         }
                                         attributes.Push(ctx.Clone(attr));
@@ -219,12 +219,12 @@ struct PackedVec3::State {
     Symbol MakePackUnpackHelper(
         const char* name_prefix,
         const type::Type* ty,
-        const std::function<const ast::Expression*(const ast::Expression*, const type::Type*)>&
+        const std::function<const Expression*(const Expression*, const type::Type*)>&
             pack_or_unpack_element,
-        const std::function<ast::Type()>& in_type,
-        const std::function<ast::Type()>& out_type) {
+        const std::function<Type()>& in_type,
+        const std::function<Type()>& out_type) {
         // Allocate a variable to hold the return value of the function.
-        utils::Vector<const ast::Statement*, 4> statements;
+        utils::Vector<const Statement*, 4> statements;
         statements.Push(b.Decl(b.Var("result", out_type())));
 
         // Helper that generates a loop to copy and pack/unpack elements of an array to the result:
@@ -256,7 +256,7 @@ struct PackedVec3::State {
             [&](const type::Struct* str) {
                 // Copy the struct members over one at a time, packing/unpacking as necessary.
                 for (auto* member : str->Members()) {
-                    const ast::Expression* element =
+                    const Expression* element =
                         b.MemberAccessor("in", b.Ident(ctx.Clone(member->Name())));
                     if (ContainsVec3(member->Type())) {
                         element = pack_or_unpack_element(element, member->Type());
@@ -280,16 +280,16 @@ struct PackedVec3::State {
     /// @param expr the composite value expression to unpack
     /// @param ty the unpacked type
     /// @returns an expression that holds the unpacked value
-    const ast::Expression* UnpackComposite(const ast::Expression* expr, const type::Type* ty) {
+    const Expression* UnpackComposite(const Expression* expr, const type::Type* ty) {
         auto helper = unpack_helpers.GetOrCreate(ty, [&]() {
             return MakePackUnpackHelper(
                 "tint_unpack_vec3_in_composite", ty,
-                [&](const ast::Expression* element,
-                    const type::Type* element_type) -> const ast::Expression* {
+                [&](const Expression* element,
+                    const type::Type* element_type) -> const Expression* {
                     if (element_type->Is<type::Vector>()) {
                         // Unpack a `__packed_vec3` by casting it to a regular vec3.
                         // If it is an array element, extract the vector from the wrapper struct.
-                        if (element->Is<ast::IndexAccessorExpression>()) {
+                        if (element->Is<IndexAccessorExpression>()) {
                             element = b.MemberAccessor(element, kStructMemberName);
                         }
                         return b.Call(CreateASTTypeFor(ctx, element_type), element);
@@ -308,17 +308,17 @@ struct PackedVec3::State {
     /// @param expr the composite value expression to pack
     /// @param ty the unpacked type
     /// @returns an expression that holds the packed value
-    const ast::Expression* PackComposite(const ast::Expression* expr, const type::Type* ty) {
+    const Expression* PackComposite(const Expression* expr, const type::Type* ty) {
         auto helper = pack_helpers.GetOrCreate(ty, [&]() {
             return MakePackUnpackHelper(
                 "tint_pack_vec3_in_composite", ty,
-                [&](const ast::Expression* element,
-                    const type::Type* element_type) -> const ast::Expression* {
+                [&](const Expression* element,
+                    const type::Type* element_type) -> const Expression* {
                     if (element_type->Is<type::Vector>()) {
                         // Pack a vector element by casting it to a packed_vec3.
                         // If it is an array element, construct a wrapper struct.
                         auto* packed = b.Call(MakePackedVec3(element_type), element);
-                        if (element->Is<ast::IndexAccessorExpression>()) {
+                        if (element->Is<IndexAccessorExpression>()) {
                             packed = b.Call(RewriteType(element_type, true), packed);
                         }
                         return packed;
@@ -400,7 +400,7 @@ struct PackedVec3::State {
                 },
                 [&](const sem::Statement* stmt) {
                     // Pack the RHS of assignment statements that are writing to packed types.
-                    if (auto* assign = stmt->Declaration()->As<ast::AssignmentStatement>()) {
+                    if (auto* assign = stmt->Declaration()->As<AssignmentStatement>()) {
                         auto* lhs = sem.GetVal(assign->lhs);
                         auto* rhs = sem.GetVal(assign->rhs);
                         if (!ContainsVec3(rhs->Type()) ||
@@ -463,7 +463,7 @@ struct PackedVec3::State {
         for (auto* expr : to_unpack_sorted) {
             TINT_ASSERT(Transform, ContainsVec3(expr->Type()));
             auto* packed = ctx.Clone(expr->Declaration());
-            const ast::Expression* unpacked = nullptr;
+            const Expression* unpacked = nullptr;
             if (IsVec3(expr->Type())) {
                 if (expr->UnwrapLoad()->Is<sem::IndexAccessorExpression>()) {
                     // If we are unpacking a vec3 from an array element, extract the vector from the
@@ -484,7 +484,7 @@ struct PackedVec3::State {
         for (auto* expr : to_pack_sorted) {
             TINT_ASSERT(Transform, ContainsVec3(expr->Type()));
             auto* unpacked = ctx.Clone(expr->Declaration());
-            const ast::Expression* packed = nullptr;
+            const Expression* packed = nullptr;
             if (IsVec3(expr->Type())) {
                 // Cast the regular vec3 to a packed vector type.
                 packed = b.Call(MakePackedVec3(expr->Type()), unpacked);

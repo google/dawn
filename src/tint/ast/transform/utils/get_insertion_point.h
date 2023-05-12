@@ -24,7 +24,7 @@ namespace tint::ast::transform::utils {
 
 /// InsertionPoint is a pair of the block (`first`) within which, and the
 /// statement (`second`) before or after which to insert.
-using InsertionPoint = std::pair<const sem::BlockStatement*, const ast::Statement*>;
+using InsertionPoint = std::pair<const sem::BlockStatement*, const Statement*>;
 
 /// For the input statement, returns the block and statement within that
 /// block to insert before/after. If `stmt` is a for-loop continue statement,
@@ -32,7 +32,7 @@ using InsertionPoint = std::pair<const sem::BlockStatement*, const ast::Statemen
 /// @param ctx the clone context
 /// @param stmt the statement to insert before or after
 /// @return the insertion point
-InsertionPoint GetInsertionPoint(CloneContext& ctx, const ast::Statement* stmt);
+InsertionPoint GetInsertionPoint(CloneContext& ctx, const Statement* stmt);
 
 }  // namespace tint::ast::transform::utils
 

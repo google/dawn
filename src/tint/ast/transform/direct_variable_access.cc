@@ -450,19 +450,19 @@ struct DirectVariableAccess::State {
 
                 Switch(
                     variable->Declaration(),
-                    [&](const ast::Var*) {
+                    [&](const Var*) {
                         if (variable->AddressSpace() != builtin::AddressSpace::kHandle) {
                             // Start a new access chain for the non-handle 'var' access
                             create_new_chain();
                         }
                     },
-                    [&](const ast::Parameter*) {
+                    [&](const Parameter*) {
                         if (variable->Type()->Is<type::Pointer>()) {
                             // Start a new access chain for the pointer parameter access
                             create_new_chain();
                         }
                     },
-                    [&](const ast::Let*) {
+                    [&](const Let*) {
                         if (variable->Type()->Is<type::Pointer>()) {
                             // variable is a pointer-let.
                             auto* init = sem.GetVal(variable->Declaration()->initializer);
@@ -494,11 +494,10 @@ struct DirectVariableAccess::State {
                 }
             },
             [&](const sem::ValueExpression* e) {
-                if (auto* unary = e->Declaration()->As<ast::UnaryOpExpression>()) {
+                if (auto* unary = e->Declaration()->As<UnaryOpExpression>()) {
                     // Unary op.
                     // If this is a '&' or '*', simply move the chain to the unary op expression.
-                    if (unary->op == ast::UnaryOp::kAddressOf ||
-                        unary->op == ast::UnaryOp::kIndirection) {
+                    if (unary->op == UnaryOp::kAddressOf || unary->op == UnaryOp::kIndirection) {
                         take_chain(sem.GetVal(unary->expr));
                     }
                 }
@@ -529,7 +528,7 @@ struct DirectVariableAccess::State {
 
             if (auto* idx_variable_user = idx->UnwrapMaterialize()->As<sem::VariableUser>()) {
                 auto* idx_variable = idx_variable_user->Variable();
-                if (idx_variable->Declaration()->IsAnyOf<ast::Let, ast::Parameter>()) {
+                if (idx_variable->Declaration()->IsAnyOf<Let, Parameter>()) {
                     // Dynamic index is an immutable variable
                     continue;  // Hoisting not required.
                 }
@@ -557,7 +556,7 @@ struct DirectVariableAccess::State {
     /// * Casts the resulting expression to a u32 if @p cast_to_u32 is true, and the expression type
     ///   isn't implicitly usable as a u32. This is to help feed the expression into a
     ///   `array<u32, N>` argument passed to a callee variant function.
-    const ast::Expression* BuildDynamicIndex(const sem::ValueExpression* idx, bool cast_to_u32) {
+    const Expression* BuildDynamicIndex(const sem::ValueExpression* idx, bool cast_to_u32) {
         if (auto* val = idx->ConstantValue()) {
             // Expression evaluated to a constant value. Just emit that constant.
             return b.Expr(val->ValueAs<AInt>());
@@ -808,7 +807,7 @@ struct DirectVariableAccess::State {
             // many variant functions, keep a record of the last created variant, and explicitly add
             // this to the module if it isn't the last. We'll return the last created variant,
             // taking the place of the original function.
-            const ast::Function* pending_variant = nullptr;
+            const Function* pending_variant = nullptr;
 
             // For each variant of fn...
             for (auto variant_it : fn_info->SortedVariants()) {
@@ -827,7 +826,7 @@ struct DirectVariableAccess::State {
                 // Pointer parameters in the 'uniform', 'storage' or 'workgroup' address space are
                 // either replaced with an array of dynamic indices, or are dropped (if there are no
                 // dynamic indices).
-                utils::Vector<const ast::Parameter*, 8> params;
+                utils::Vector<const Parameter*, 8> params;
                 for (auto* param : fn->Parameters()) {
                     if (auto incoming_shape = variant_sig.Find(param)) {
                         auto& symbols = *variant.ptr_param_symbols.Find(param);
@@ -856,8 +855,8 @@ struct DirectVariableAccess::State {
                 auto attrs = ctx.Clone(fn->Declaration()->attributes);
                 auto ret_attrs = ctx.Clone(fn->Declaration()->return_type_attributes);
                 pending_variant =
-                    b.create<ast::Function>(b.Ident(variant.name), std::move(params), ret_ty, body,
-                                            std::move(attrs), std::move(ret_attrs));
+                    b.create<Function>(b.Ident(variant.name), std::move(params), ret_ty, body,
+                                       std::move(attrs), std::move(ret_attrs));
             }
 
             return pending_variant;
@@ -877,7 +876,7 @@ struct DirectVariableAccess::State {
             }
 
             // Build the new call expressions's arguments.
-            utils::Vector<const ast::Expression*, 8> new_args;
+            utils::Vector<const Expression*, 8> new_args;
             for (size_t arg_idx = 0; arg_idx < call->Arguments().Length(); arg_idx++) {
                 auto* arg = call->Arguments()[arg_idx];
                 auto* param = call->Target()->Parameters()[arg_idx];
@@ -915,7 +914,7 @@ struct DirectVariableAccess::State {
                 // Get or create the dynamic indices array.
                 if (auto dyn_idx_arr_ty = DynamicIndexArrayType(full_indices)) {
                     // Build an array of dynamic indices to pass as the replacement for the pointer.
-                    utils::Vector<const ast::Expression*, 8> dyn_idx_args;
+                    utils::Vector<const Expression*, 8> dyn_idx_args;
                     if (auto* root_param = chain->root.variable->As<sem::Parameter>()) {
                         // Access chain originates from a pointer parameter.
                         if (auto incoming_chain =
@@ -985,7 +984,7 @@ struct DirectVariableAccess::State {
     ///   let.
     void TransformAccessChainExpressions() {
         // Register a custom handler for all non-function call expressions
-        ctx.ReplaceAll([this](const ast::Expression* ast_expr) -> const ast::Expression* {
+        ctx.ReplaceAll([this](const Expression* ast_expr) -> const Expression* {
             if (!clone_state->current_variant) {
                 // Expression does not belong to a function variant.
                 return nullptr;  // Just clone the expression.
@@ -1065,7 +1064,7 @@ struct DirectVariableAccess::State {
 
     /// @returns the type alias used to hold the dynamic indices for @p shape, declaring a new alias
     /// if this is the first call for the given shape.
-    ast::Type DynamicIndexArrayType(const AccessShape& shape) {
+    Type DynamicIndexArrayType(const AccessShape& shape) {
         auto name = dynamic_index_array_aliases.GetOrCreate(shape, [&] {
             // Count the number of dynamic indices
             uint32_t num_dyn_indices = shape.NumDynamicIndices();
@@ -1076,7 +1075,7 @@ struct DirectVariableAccess::State {
             b.Alias(symbol, b.ty.array(b.ty.u32(), u32(num_dyn_indices)));
             return symbol;
         });
-        return name.IsValid() ? b.ty(name) : ast::Type{};
+        return name.IsValid() ? b.ty(name) : Type{};
     }
 
     /// @returns a name describing the given shape
@@ -1113,7 +1112,7 @@ struct DirectVariableAccess::State {
     /// Builds an expresion to the root of an access, returning the new expression.
     /// @param root the AccessRoot
     /// @param deref if true, the returned expression will always be a reference type.
-    const ast::Expression* BuildAccessRootExpr(const AccessRoot& root, bool deref) {
+    const Expression* BuildAccessRootExpr(const AccessRoot& root, bool deref) {
         if (auto* param = root.variable->As<sem::Parameter>()) {
             if (auto symbols = clone_state->current_variant->ptr_param_symbols.Find(param)) {
                 if (deref) {
@@ -1123,7 +1122,7 @@ struct DirectVariableAccess::State {
             }
         }
 
-        const ast::Expression* expr = b.Expr(ctx.Clone(root.variable->Declaration()->name->symbol));
+        const Expression* expr = b.Expr(ctx.Clone(root.variable->Declaration()->name->symbol));
         if (deref) {
             if (root.variable->Type()->Is<type::Pointer>()) {
                 expr = b.Deref(expr);
@@ -1137,10 +1136,9 @@ struct DirectVariableAccess::State {
     /// @param expr the input expression
     /// @param access the access to perform on the current expression
     /// @param dynamic_index a function that obtains the i'th dynamic index
-    const ast::Expression* BuildAccessExpr(
-        const ast::Expression* expr,
-        const AccessOp& access,
-        std::function<const ast::Expression*(size_t)> dynamic_index) {
+    const Expression* BuildAccessExpr(const Expression* expr,
+                                      const AccessOp& access,
+                                      std::function<const Expression*(size_t)> dynamic_index) {
         if (auto* dyn_idx = std::get_if<DynamicIndex>(&access)) {
             /// The access uses a dynamic (runtime-expression) index.
             auto* idx = dynamic_index(dyn_idx->slot);

@@ -61,7 +61,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
 
     std::unordered_map<const type::Matrix*, Symbol> scalar_inits;
 
-    ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
+    ctx.ReplaceAll([&](const CallExpression* expr) -> const CallExpression* {
         auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* ty_init = call->Target()->As<sem::ValueConstructor>();
         if (!ty_init) {
@@ -91,9 +91,9 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
         // Constructs a matrix using vector columns, with the elements constructed using the
         // 'element(uint32_t c, uint32_t r)' callback.
         auto build_mat = [&](auto&& element) {
-            utils::Vector<const ast::Expression*, 4> columns;
+            utils::Vector<const Expression*, 4> columns;
             for (uint32_t c = 0; c < mat_type->columns(); c++) {
-                utils::Vector<const ast::Expression*, 4> row_values;
+                utils::Vector<const Expression*, 4> row_values;
                 for (uint32_t r = 0; r < mat_type->rows(); r++) {
                     row_values.Push(element(c, r));
                 }

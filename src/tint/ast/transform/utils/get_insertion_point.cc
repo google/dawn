@@ -20,10 +20,10 @@
 
 namespace tint::ast::transform::utils {
 
-InsertionPoint GetInsertionPoint(CloneContext& ctx, const ast::Statement* stmt) {
+InsertionPoint GetInsertionPoint(CloneContext& ctx, const Statement* stmt) {
     auto& sem = ctx.src->Sem();
     auto& diag = ctx.dst->Diagnostics();
-    using RetType = std::pair<const sem::BlockStatement*, const ast::Statement*>;
+    using RetType = std::pair<const sem::BlockStatement*, const Statement*>;
 
     if (auto* sem_stmt = sem.Get(stmt)) {
         auto* parent = sem_stmt->Parent();

@@ -35,7 +35,7 @@ class DecomposeMemoryAccess final : public utils::Castable<DecomposeMemoryAccess
     /// transforms this into calls to
     /// `[RW]ByteAddressBuffer.Load[N]()` or `[RW]ByteAddressBuffer.Store[N]()`,
     /// with a possible cast.
-    class Intrinsic final : public utils::Castable<Intrinsic, ast::InternalAttribute> {
+    class Intrinsic final : public utils::Castable<Intrinsic, InternalAttribute> {
       public:
         /// Intrinsic op
         enum class Op {
@@ -82,11 +82,11 @@ class DecomposeMemoryAccess final : public utils::Castable<DecomposeMemoryAccess
         /// @param address_space the address space of the buffer
         /// @param buffer the storage or uniform buffer identifier
         Intrinsic(ProgramID pid,
-                  ast::NodeID nid,
+                  NodeID nid,
                   Op o,
                   DataType type,
                   builtin::AddressSpace address_space,
-                  const ast::IdentifierExpression* buffer);
+                  const IdentifierExpression* buffer);
         /// Destructor
         ~Intrinsic() override;
 
@@ -103,7 +103,7 @@ class DecomposeMemoryAccess final : public utils::Castable<DecomposeMemoryAccess
         bool IsAtomic() const;
 
         /// @return the buffer that this intrinsic operates on
-        const ast::IdentifierExpression* Buffer() const;
+        const IdentifierExpression* Buffer() const;
 
         /// The op of the intrinsic
         const Op op;

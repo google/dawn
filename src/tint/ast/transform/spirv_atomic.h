@@ -41,12 +41,12 @@ class SpirvAtomic final : public utils::Castable<SpirvAtomic, Transform> {
 
     /// Stub is an attribute applied to stub SPIR-V reader generated functions that need to be
     /// translated to an atomic builtin.
-    class Stub final : public utils::Castable<Stub, ast::InternalAttribute> {
+    class Stub final : public utils::Castable<Stub, InternalAttribute> {
       public:
         /// @param pid the identifier of the program that owns this node
         /// @param nid the unique node identifier
         /// @param builtin the atomic builtin this stub represents
-        Stub(ProgramID pid, ast::NodeID nid, builtin::Function builtin);
+        Stub(ProgramID pid, NodeID nid, builtin::Function builtin);
         /// Destructor
         ~Stub() override;
 

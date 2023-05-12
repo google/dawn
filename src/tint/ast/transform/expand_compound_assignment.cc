@@ -35,7 +35,7 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (node->IsAnyOf<ast::CompoundAssignmentStatement, ast::IncrementDecrementStatement>()) {
+        if (node->IsAnyOf<CompoundAssignmentStatement, IncrementDecrementStatement>()) {
             return true;
         }
     }
@@ -58,17 +58,14 @@ struct ExpandCompoundAssignment::State {
     /// @param lhs the lhs expression from the source statement
     /// @param rhs the rhs expression in the destination module
     /// @param op the binary operator
-    void Expand(const ast::Statement* stmt,
-                const ast::Expression* lhs,
-                const ast::Expression* rhs,
-                ast::BinaryOp op) {
+    void Expand(const Statement* stmt, const Expression* lhs, const Expression* rhs, BinaryOp op) {
         // Helper function to create the new LHS expression. This will be called
         // twice when building the non-compound assignment statement, so must
         // not produce expressions that cause side effects.
-        std::function<const ast::Expression*()> new_lhs;
+        std::function<const Expression*()> new_lhs;
 
         // Helper function to create a variable that is a pointer to `expr`.
-        auto hoist_pointer_to = [&](const ast::Expression* expr) {
+        auto hoist_pointer_to = [&](const Expression* expr) {
             auto name = b.Sym();
             auto* ptr = b.AddressOf(ctx.Clone(expr));
             auto* decl = b.Decl(b.Let(name, ptr));
@@ -77,7 +74,7 @@ struct ExpandCompoundAssignment::State {
         };
 
         // Helper function to hoist `expr` to a let declaration.
-        auto hoist_expr_to_let = [&](const ast::Expression* expr) {
+        auto hoist_expr_to_let = [&](const Expression* expr) {
             auto name = b.Sym();
             auto* decl = b.Decl(b.Let(name, ctx.Clone(expr)));
             hoist_to_decl_before.InsertBefore(ctx.src->Sem().Get(stmt), decl);
@@ -85,7 +82,7 @@ struct ExpandCompoundAssignment::State {
         };
 
         // Helper function that returns `true` if the type of `expr` is a vector.
-        auto is_vec = [&](const ast::Expression* expr) {
+        auto is_vec = [&](const Expression* expr) {
             if (auto* val_expr = ctx.src->Sem().GetVal(expr)) {
                 return val_expr->Type()->UnwrapRef()->Is<type::Vector>();
             }
@@ -96,10 +93,10 @@ struct ExpandCompoundAssignment::State {
         // LHS that we can evaluate twice.
         // We need to special case compound assignments to vector components since
         // we cannot take the address of a vector component.
-        auto* index_accessor = lhs->As<ast::IndexAccessorExpression>();
-        auto* member_accessor = lhs->As<ast::MemberAccessorExpression>();
-        if (lhs->Is<ast::IdentifierExpression>() ||
-            (member_accessor && member_accessor->object->Is<ast::IdentifierExpression>())) {
+        auto* index_accessor = lhs->As<IndexAccessorExpression>();
+        auto* member_accessor = lhs->As<MemberAccessorExpression>();
+        if (lhs->Is<IdentifierExpression>() ||
+            (member_accessor && member_accessor->object->Is<IdentifierExpression>())) {
             // This is the simple case with no side effects, so we can just use the
             // original LHS expression directly.
             // Before:
@@ -144,7 +141,7 @@ struct ExpandCompoundAssignment::State {
         }
 
         // Replace the statement with a regular assignment statement.
-        auto* value = b.create<ast::BinaryExpression>(op, new_lhs(), rhs);
+        auto* value = b.create<BinaryExpression>(op, new_lhs(), rhs);
         ctx.Replace(stmt, b.Assign(new_lhs(), value));
     }
 
@@ -174,11 +171,11 @@ Transform::ApplyResult ExpandCompoundAssignment::Apply(const Program* src,
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     State state(ctx);
     for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* assign = node->As<ast::CompoundAssignmentStatement>()) {
+        if (auto* assign = node->As<CompoundAssignmentStatement>()) {
             state.Expand(assign, assign->lhs, ctx.Clone(assign->rhs), assign->op);
-        } else if (auto* inc_dec = node->As<ast::IncrementDecrementStatement>()) {
+        } else if (auto* inc_dec = node->As<IncrementDecrementStatement>()) {
             // For increment/decrement statements, `i++` becomes `i = i + 1`.
-            auto op = inc_dec->increment ? ast::BinaryOp::kAdd : ast::BinaryOp::kSubtract;
+            auto op = inc_dec->increment ? BinaryOp::kAdd : BinaryOp::kSubtract;
             state.Expand(inc_dec, inc_dec->lhs, ctx.dst->Expr(1_a), op);
         }
     }

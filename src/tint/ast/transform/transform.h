@@ -181,11 +181,11 @@ class Transform : public utils::Castable<Transform> {
                               const DataMap& inputs,
                               DataMap& outputs) const = 0;
 
-    /// CreateASTTypeFor constructs new ast::Type that reconstructs the semantic type `ty`.
+    /// CreateASTTypeFor constructs new Type that reconstructs the semantic type `ty`.
     /// @param ctx the clone context
     /// @param ty the semantic type to reconstruct
-    /// @returns an ast::Type that when resolved, will produce the semantic type `ty`.
-    static ast::Type CreateASTTypeFor(CloneContext& ctx, const type::Type* ty);
+    /// @returns an Type that when resolved, will produce the semantic type `ty`.
+    static Type CreateASTTypeFor(CloneContext& ctx, const type::Type* ty);
 
   protected:
     /// Removes the statement `stmt` from the transformed program.
@@ -193,7 +193,7 @@ class Transform : public utils::Castable<Transform> {
     /// continuing of for-loops.
     /// @param ctx the clone context
     /// @param stmt the statement to remove when the program is cloned
-    static void RemoveStatement(CloneContext& ctx, const ast::Statement* stmt);
+    static void RemoveStatement(CloneContext& ctx, const Statement* stmt);
 };
 
 }  // namespace tint::ast::transform

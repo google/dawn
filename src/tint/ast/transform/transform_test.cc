@@ -32,7 +32,7 @@ struct CreateASTTypeForTest : public testing::Test, public Transform {
         return SkipTransform;
     }
 
-    ast::Type create(std::function<type::Type*(ProgramBuilder&)> create_sem_type) {
+    Type create(std::function<type::Type*(ProgramBuilder&)> create_sem_type) {
         ProgramBuilder sem_type_builder;
         auto* sem_type = create_sem_type(sem_type_builder);
         Program program(std::move(sem_type_builder));
@@ -44,9 +44,7 @@ struct CreateASTTypeForTest : public testing::Test, public Transform {
 };
 
 TEST_F(CreateASTTypeForTest, Basic) {
-    auto check = [&](ast::Type ty, const char* expect) {
-        ast::CheckIdentifier(ty->identifier, expect);
-    };
+    auto check = [&](Type ty, const char* expect) { CheckIdentifier(ty->identifier, expect); };
 
     check(create([](ProgramBuilder& b) { return b.create<type::I32>(); }), "i32");
     check(create([](ProgramBuilder& b) { return b.create<type::U32>(); }), "u32");
@@ -61,14 +59,14 @@ TEST_F(CreateASTTypeForTest, Matrix) {
         return b.create<type::Matrix>(column_type, 3u);
     });
 
-    ast::CheckIdentifier(mat, ast::Template("mat3x2", "f32"));
+    CheckIdentifier(mat, Template("mat3x2", "f32"));
 }
 
 TEST_F(CreateASTTypeForTest, Vector) {
     auto vec =
         create([](ProgramBuilder& b) { return b.create<type::Vector>(b.create<type::F32>(), 2u); });
 
-    ast::CheckIdentifier(vec, ast::Template("vec2", "f32"));
+    CheckIdentifier(vec, Template("vec2", "f32"));
 }
 
 TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
@@ -77,8 +75,8 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
                                      4u, 4u, 32u, 32u);
     });
 
-    ast::CheckIdentifier(arr, ast::Template("array", "f32", 2_u));
-    auto* tmpl_attr = arr->identifier->As<ast::TemplatedIdentifier>();
+    CheckIdentifier(arr, Template("array", "f32", 2_u));
+    auto* tmpl_attr = arr->identifier->As<TemplatedIdentifier>();
     ASSERT_NE(tmpl_attr, nullptr);
     EXPECT_TRUE(tmpl_attr->attributes.IsEmpty());
 }
@@ -88,12 +86,12 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
         return b.create<type::Array>(b.create<type::F32>(), b.create<type::ConstantArrayCount>(2u),
                                      4u, 4u, 64u, 32u);
     });
-    ast::CheckIdentifier(arr, ast::Template("array", "f32", 2_u));
-    auto* tmpl_attr = arr->identifier->As<ast::TemplatedIdentifier>();
+    CheckIdentifier(arr, Template("array", "f32", 2_u));
+    auto* tmpl_attr = arr->identifier->As<TemplatedIdentifier>();
     ASSERT_NE(tmpl_attr, nullptr);
     ASSERT_EQ(tmpl_attr->attributes.Length(), 1u);
-    ASSERT_TRUE(tmpl_attr->attributes[0]->Is<ast::StrideAttribute>());
-    ASSERT_EQ(tmpl_attr->attributes[0]->As<ast::StrideAttribute>()->stride, 64u);
+    ASSERT_TRUE(tmpl_attr->attributes[0]->Is<StrideAttribute>());
+    ASSERT_EQ(tmpl_attr->attributes[0]->As<StrideAttribute>()->stride, 64u);
 }
 
 // crbug.com/tint/1764
@@ -114,7 +112,7 @@ TEST_F(CreateASTTypeForTest, AliasedArrayWithComplexOverrideLength) {
 
     CloneContext ctx(&ast_type_builder, &program, false);
     auto ast_ty = CreateASTTypeFor(ctx, arr_ty);
-    ast::CheckIdentifier(ast_ty, "A");
+    CheckIdentifier(ast_ty, "A");
 }
 
 TEST_F(CreateASTTypeForTest, Struct) {
@@ -124,7 +122,7 @@ TEST_F(CreateASTTypeForTest, Struct) {
                                      4u /* size */, 4u /* size_no_padding */);
     });
 
-    ast::CheckIdentifier(str, "S");
+    CheckIdentifier(str, "S");
 }
 
 TEST_F(CreateASTTypeForTest, PrivatePointer) {
@@ -133,7 +131,7 @@ TEST_F(CreateASTTypeForTest, PrivatePointer) {
                                        builtin::Access::kReadWrite);
     });
 
-    ast::CheckIdentifier(ptr, ast::Template("ptr", "private", "i32"));
+    CheckIdentifier(ptr, Template("ptr", "private", "i32"));
 }
 
 TEST_F(CreateASTTypeForTest, StorageReadWritePointer) {
@@ -142,7 +140,7 @@ TEST_F(CreateASTTypeForTest, StorageReadWritePointer) {
                                        builtin::Access::kReadWrite);
     });
 
-    ast::CheckIdentifier(ptr, ast::Template("ptr", "storage", "i32", "read_write"));
+    CheckIdentifier(ptr, Template("ptr", "storage", "i32", "read_write"));
 }
 
 }  // namespace

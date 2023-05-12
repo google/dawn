@@ -85,9 +85,8 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
     b.GlobalVar(flag, builtin::AddressSpace::kPrivate, b.Expr(false));
 
     // Replace all discard statements with a statement that marks the invocation as discarded.
-    ctx.ReplaceAll([&](const ast::DiscardStatement*) -> const ast::Statement* {
-        return b.Assign(flag, b.Expr(true));
-    });
+    ctx.ReplaceAll(
+        [&](const DiscardStatement*) -> const Statement* { return b.Assign(flag, b.Expr(true)); });
 
     // Insert a conditional discard at the end of each entry point that does not end with a return.
     for (auto* func : functions_to_process) {
@@ -111,7 +110,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
             node,
 
             // Mask assignments to storage buffer variables.
-            [&](const ast::AssignmentStatement* assign) {
+            [&](const AssignmentStatement* assign) {
                 // Skip writes in functions that are not called from shaders that discard.
                 auto* func = sem.Get(assign)->Function();
                 if (functions_to_process.count(func) == 0) {
@@ -119,7 +118,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                 }
 
                 // Skip phony assignments.
-                if (assign->lhs->Is<ast::PhonyExpression>()) {
+                if (assign->lhs->Is<PhonyExpression>()) {
                     return;
                 }
 
@@ -144,7 +143,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
             },
 
             // Mask builtins that write to host-visible memory.
-            [&](const ast::CallExpression* call) {
+            [&](const CallExpression* call) {
                 auto* sem_call = sem.Get<sem::Call>(call);
                 auto* stmt = sem_call ? sem_call->Stmt() : nullptr;
                 auto* func = stmt ? stmt->Function() : nullptr;
@@ -161,7 +160,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                 } else if (builtin->IsAtomic() &&
                            builtin->Type() != builtin::Function::kAtomicLoad) {
                     // A call to an atomic builtin can be a statement or an expression.
-                    if (auto* call_stmt = stmt->Declaration()->As<ast::CallStatement>();
+                    if (auto* call_stmt = stmt->Declaration()->As<CallStatement>();
                         call_stmt && call_stmt->expr == call) {
                         // This call is a statement.
                         // Wrap it inside a conditional block.
@@ -178,8 +177,8 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                         //   }
                         //   let y = x + tmp;
                         auto result = b.Sym();
-                        ast::Type result_ty;
-                        const ast::Statement* masked_call = nullptr;
+                        Type result_ty;
+                        const Statement* masked_call = nullptr;
                         if (builtin->Type() == builtin::Function::kAtomicCompareExchangeWeak) {
                             // Special case for atomicCompareExchangeWeak as we cannot name its
                             // result type. We have to declare an equivalent struct and copy the
@@ -232,7 +231,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
             },
 
             // Insert a conditional discard before all return statements in entry points.
-            [&](const ast::ReturnStatement* ret) {
+            [&](const ReturnStatement* ret) {
                 auto* func = sem.Get(ret)->Function();
                 if (func->Declaration()->IsEntryPoint() && functions_to_process.count(func)) {
                     auto* discard = b.If(flag, b.Block(b.Discard()));

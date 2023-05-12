@@ -81,22 +81,22 @@ struct ArrayLengthFromUniform::State {
         // Determine the size of the buffer size array.
         uint32_t max_buffer_size_index = 0;
 
-        IterateArrayLengthOnStorageVar([&](const ast::CallExpression*, const sem::VariableUser*,
-                                           const sem::GlobalVariable* var) {
-            if (auto binding = var->BindingPoint()) {
-                auto idx_itr = cfg->bindpoint_to_size_index.find(*binding);
-                if (idx_itr == cfg->bindpoint_to_size_index.end()) {
-                    return;
+        IterateArrayLengthOnStorageVar(
+            [&](const CallExpression*, const sem::VariableUser*, const sem::GlobalVariable* var) {
+                if (auto binding = var->BindingPoint()) {
+                    auto idx_itr = cfg->bindpoint_to_size_index.find(*binding);
+                    if (idx_itr == cfg->bindpoint_to_size_index.end()) {
+                        return;
+                    }
+                    if (idx_itr->second > max_buffer_size_index) {
+                        max_buffer_size_index = idx_itr->second;
+                    }
                 }
-                if (idx_itr->second > max_buffer_size_index) {
-                    max_buffer_size_index = idx_itr->second;
-                }
-            }
-        });
+            });
 
         // Get (or create, on first call) the uniform buffer that will receive the
         // size of each storage buffer in the module.
-        const ast::Variable* buffer_size_ubo = nullptr;
+        const Variable* buffer_size_ubo = nullptr;
         auto get_ubo = [&]() {
             if (!buffer_size_ubo) {
                 // Emit an array<vec4<u32>, N>, where N is 1/4 number of elements.
@@ -118,7 +118,7 @@ struct ArrayLengthFromUniform::State {
 
         std::unordered_set<uint32_t> used_size_indices;
 
-        IterateArrayLengthOnStorageVar([&](const ast::CallExpression* call_expr,
+        IterateArrayLengthOnStorageVar([&](const CallExpression* call_expr,
                                            const sem::VariableUser* storage_buffer_sem,
                                            const sem::GlobalVariable* var) {
             auto binding = var->BindingPoint();
@@ -144,7 +144,7 @@ struct ArrayLengthFromUniform::State {
             //                total_storage_buffer_size - array_offset
             // array_length = ----------------------------------------
             //                             array_stride
-            const ast::Expression* total_size = total_storage_buffer_size;
+            const Expression* total_size = total_storage_buffer_size;
             auto* storage_buffer_type = storage_buffer_sem->Type()->UnwrapRef();
             const type::Array* array_type = nullptr;
             if (auto* str = storage_buffer_type->As<type::Struct>()) {
@@ -186,9 +186,9 @@ struct ArrayLengthFromUniform::State {
 
     /// Iterate over all arrayLength() builtins that operate on
     /// storage buffer variables.
-    /// @param functor of type void(const ast::CallExpression*, const
+    /// @param functor of type void(const CallExpression*, const
     /// sem::VariableUser, const sem::GlobalVariable*). It takes in an
-    /// ast::CallExpression of the arrayLength call expression node, a
+    /// CallExpression of the arrayLength call expression node, a
     /// sem::VariableUser of the used storage buffer variable, and the
     /// sem::GlobalVariable for the storage buffer.
     template <typename F>
@@ -197,7 +197,7 @@ struct ArrayLengthFromUniform::State {
 
         // Find all calls to the arrayLength() builtin.
         for (auto* node : src->ASTNodes().Objects()) {
-            auto* call_expr = node->As<ast::CallExpression>();
+            auto* call_expr = node->As<CallExpression>();
             if (!call_expr) {
                 continue;
             }
@@ -208,7 +208,7 @@ struct ArrayLengthFromUniform::State {
                 continue;
             }
 
-            if (auto* call_stmt = call->Stmt()->Declaration()->As<ast::CallStatement>()) {
+            if (auto* call_stmt = call->Stmt()->Declaration()->As<CallStatement>()) {
                 if (call_stmt->expr == call_expr) {
                     // arrayLength() is used as a statement.
                     // The argument expression must be side-effect free, so just drop the statement.
@@ -222,15 +222,15 @@ struct ArrayLengthFromUniform::State {
             // call has one of two forms:
             //   arrayLength(&struct_var.array_member)
             //   arrayLength(&array_var)
-            auto* param = call_expr->args[0]->As<ast::UnaryOpExpression>();
-            if (TINT_UNLIKELY(!param || param->op != ast::UnaryOp::kAddressOf)) {
+            auto* param = call_expr->args[0]->As<UnaryOpExpression>();
+            if (TINT_UNLIKELY(!param || param->op != UnaryOp::kAddressOf)) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "expected form of arrayLength argument to be &array_var or "
                        "&struct_var.array_member";
                 break;
             }
             auto* storage_buffer_expr = param->expr;
-            if (auto* accessor = param->expr->As<ast::MemberAccessorExpression>()) {
+            if (auto* accessor = param->expr->As<MemberAccessorExpression>()) {
                 storage_buffer_expr = accessor->object;
             }
             auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);

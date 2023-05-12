@@ -32,7 +32,7 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->AST().GlobalVariables()) {
-        if (node->Is<ast::Override>()) {
+        if (node->Is<Override>()) {
             return true;
         }
     }
@@ -61,12 +61,12 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
         return SkipTransform;
     }
 
-    ctx.ReplaceAll([&](const ast::Override* w) -> const ast::Const* {
+    ctx.ReplaceAll([&](const Override* w) -> const Const* {
         auto* sem = ctx.src->Sem().Get(w);
 
         auto source = ctx.Clone(w->source);
         auto sym = ctx.Clone(w->name->symbol);
-        ast::Type ty = w->type ? ctx.Clone(w->type) : ast::Type{};
+        Type ty = w->type ? ctx.Clone(w->type) : Type{};
 
         // No replacement provided, just clone the override node as a const.
         auto iter = data->map.find(sem->OverrideId());
@@ -102,7 +102,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
     // If the object is not materialized, and the 'override' variable is turned to a 'const', the
     // resulting type of the index may change. See: crbug.com/tint/1697.
     ctx.ReplaceAll(
-        [&](const ast::IndexAccessorExpression* expr) -> const ast::IndexAccessorExpression* {
+        [&](const IndexAccessorExpression* expr) -> const IndexAccessorExpression* {
             if (auto* sem = src->Sem().Get(expr)) {
                 if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
                     if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&

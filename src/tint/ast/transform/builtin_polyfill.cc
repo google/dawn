@@ -37,7 +37,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BuiltinPolyfill::Config);
 namespace tint::ast::transform {
 
 /// BinaryOpSignature is tuple of a binary op, LHS type and RHS type
-using BinaryOpSignature = std::tuple<ast::BinaryOp, const type::Type*, const type::Type*>;
+using BinaryOpSignature = std::tuple<BinaryOp, const type::Type*, const type::Type*>;
 
 /// PIMPL state for the transform
 struct BuiltinPolyfill::State {
@@ -60,16 +60,16 @@ struct BuiltinPolyfill::State {
         for (auto* node : src->ASTNodes().Objects()) {
             Switch(
                 node,  //
-                [&](const ast::CallExpression* expr) { Call(expr); },
-                [&](const ast::BinaryExpression* bin_op) {
+                [&](const CallExpression* expr) { Call(expr); },
+                [&](const BinaryExpression* bin_op) {
                     if (auto* s = src->Sem().Get(bin_op);
                         !s || s->Stage() == sem::EvaluationStage::kConstant ||
                         s->Stage() == sem::EvaluationStage::kNotEvaluated) {
                         return;  // Don't polyfill @const expressions
                     }
                     switch (bin_op->op) {
-                        case ast::BinaryOp::kShiftLeft:
-                        case ast::BinaryOp::kShiftRight: {
+                        case BinaryOp::kShiftLeft:
+                        case BinaryOp::kShiftRight: {
                             if (cfg.builtins.bitshift_modulo) {
                                 ctx.Replace(bin_op,
                                             [this, bin_op] { return BitshiftModulo(bin_op); });
@@ -77,7 +77,7 @@ struct BuiltinPolyfill::State {
                             }
                             break;
                         }
-                        case ast::BinaryOp::kDivide: {
+                        case BinaryOp::kDivide: {
                             if (cfg.builtins.int_div_mod) {
                                 auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
                                 if (lhs_ty->is_integer_scalar_or_vector()) {
@@ -88,7 +88,7 @@ struct BuiltinPolyfill::State {
                             }
                             break;
                         }
-                        case ast::BinaryOp::kModulo: {
+                        case BinaryOp::kModulo: {
                             if (cfg.builtins.int_div_mod) {
                                 auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
                                 if (lhs_ty->is_integer_scalar_or_vector()) {
@@ -111,7 +111,7 @@ struct BuiltinPolyfill::State {
                             break;
                     }
                 },
-                [&](const ast::Expression* expr) {
+                [&](const Expression* expr) {
                     if (cfg.builtins.bgra8unorm) {
                         if (auto* ty_expr = src->Sem().Get<sem::TypeExpression>(expr)) {
                             if (auto* tex = ty_expr->Type()->As<type::StorageTexture>()) {
@@ -170,15 +170,15 @@ struct BuiltinPolyfill::State {
         auto name = b.Symbols().New("tint_acosh");
         uint32_t width = WidthOf(ty);
 
-        auto V = [&](AFloat value) -> const ast::Expression* {
-            const ast::Expression* expr = b.Expr(value);
+        auto V = [&](AFloat value) -> const Expression* {
+            const Expression* expr = b.Expr(value);
             if (width == 1) {
                 return expr;
             }
             return b.Call(T(ty), expr);
         };
 
-        utils::Vector<const ast::Statement*, 4> body;
+        utils::Vector<const Statement*, 4> body;
         switch (cfg.builtins.acosh) {
             case Level::kFull:
                 // return log(x + sqrt(x*x - 1));
@@ -224,15 +224,15 @@ struct BuiltinPolyfill::State {
         auto name = b.Symbols().New("tint_atanh");
         uint32_t width = WidthOf(ty);
 
-        auto V = [&](AFloat value) -> const ast::Expression* {
-            const ast::Expression* expr = b.Expr(value);
+        auto V = [&](AFloat value) -> const Expression* {
+            const Expression* expr = b.Expr(value);
             if (width == 1) {
                 return expr;
             }
             return b.Call(T(ty), expr);
         };
 
-        utils::Vector<const ast::Statement*, 1> body;
+        utils::Vector<const Statement*, 1> body;
         switch (cfg.builtins.atanh) {
             case Level::kFull:
                 // return log((1+x) / (1-x)) * 0.5
@@ -290,7 +290,7 @@ struct BuiltinPolyfill::State {
             }
             return b.ty.vec<u32>(width);
         };
-        auto V = [&](uint32_t value) -> const ast::Expression* {
+        auto V = [&](uint32_t value) -> const Expression* {
             return ScalarOrVector(width, u32(value));
         };
         b.Func(
@@ -348,10 +348,10 @@ struct BuiltinPolyfill::State {
             }
             return b.ty.vec<u32>(width);
         };
-        auto V = [&](uint32_t value) -> const ast::Expression* {
+        auto V = [&](uint32_t value) -> const Expression* {
             return ScalarOrVector(width, u32(value));
         };
-        auto B = [&](const ast::Expression* value) -> const ast::Expression* {
+        auto B = [&](const Expression* value) -> const Expression* {
             if (width == 1) {
                 return b.Call<bool>(value);
             }
@@ -402,14 +402,14 @@ struct BuiltinPolyfill::State {
 
         constexpr uint32_t W = 32u;  // 32-bit
 
-        auto vecN_u32 = [&](const ast::Expression* value) -> const ast::Expression* {
+        auto vecN_u32 = [&](const Expression* value) -> const Expression* {
             if (width == 1) {
                 return value;
             }
             return b.Call(b.ty.vec<u32>(width), value);
         };
 
-        utils::Vector<const ast::Statement*, 8> body{
+        utils::Vector<const Statement*, 8> body{
             b.Decl(b.Let("s", b.Call("min", "offset", u32(W)))),
             b.Decl(b.Let("e", b.Call("min", u32(W), b.Add("s", "count")))),
         };
@@ -465,17 +465,17 @@ struct BuiltinPolyfill::State {
             }
             return b.ty.vec<u32>(width);
         };
-        auto V = [&](uint32_t value) -> const ast::Expression* {
+        auto V = [&](uint32_t value) -> const Expression* {
             return ScalarOrVector(width, u32(value));
         };
-        auto B = [&](const ast::Expression* value) -> const ast::Expression* {
+        auto B = [&](const Expression* value) -> const Expression* {
             if (width == 1) {
                 return b.Call<bool>(value);
             }
             return b.Call(b.ty.vec<bool>(width), value);
         };
 
-        const ast::Expression* x = nullptr;
+        const Expression* x = nullptr;
         if (ty->is_unsigned_integer_scalar_or_vector()) {
             x = b.Expr("v");
         } else {
@@ -537,10 +537,10 @@ struct BuiltinPolyfill::State {
             }
             return b.ty.vec<u32>(width);
         };
-        auto V = [&](uint32_t value) -> const ast::Expression* {
+        auto V = [&](uint32_t value) -> const Expression* {
             return ScalarOrVector(width, u32(value));
         };
-        auto B = [&](const ast::Expression* value) -> const ast::Expression* {
+        auto B = [&](const Expression* value) -> const Expression* {
             if (width == 1) {
                 return b.Call<bool>(value);
             }
@@ -599,8 +599,8 @@ struct BuiltinPolyfill::State {
 
         constexpr uint32_t W = 32u;  // 32-bit
 
-        auto V = [&](auto value) -> const ast::Expression* {
-            const ast::Expression* expr = b.Expr(value);
+        auto V = [&](auto value) -> const Expression* {
+            const Expression* expr = b.Expr(value);
             if (!ty->is_unsigned_integer_scalar_or_vector()) {
                 expr = b.Call<i32>(expr);
             }
@@ -609,7 +609,7 @@ struct BuiltinPolyfill::State {
             }
             return expr;
         };
-        auto U = [&](auto value) -> const ast::Expression* {
+        auto U = [&](auto value) -> const Expression* {
             if (width == 1) {
                 return b.Expr(value);
             }
@@ -638,7 +638,7 @@ struct BuiltinPolyfill::State {
         //          return ((select(T(), n << offset, offset < 32u) & mask) | (v & ~(mask)));
         //      }
 
-        utils::Vector<const ast::Statement*, 8> body;
+        utils::Vector<const Statement*, 8> body;
 
         switch (cfg.builtins.insert_bits) {
             case Level::kFull:
@@ -788,7 +788,7 @@ struct BuiltinPolyfill::State {
     /// @return the polyfill function name
     Symbol quantizeToF16(const type::Vector* vec) {
         auto name = b.Symbols().New("tint_quantizeToF16");
-        utils::Vector<const ast::Expression*, 4> args;
+        utils::Vector<const Expression*, 4> args;
         for (uint32_t i = 0; i < vec->Width(); i++) {
             args.Push(b.Call("quantizeToF16", b.IndexAccessor("v", u32(i))));
         }
@@ -880,29 +880,29 @@ struct BuiltinPolyfill::State {
     /// the RHS is modulo the bit-width of the LHS.
     /// @param bin_op the original BinaryExpression
     /// @return the polyfill value for bitshift operation
-    const ast::Expression* BitshiftModulo(const ast::BinaryExpression* bin_op) {
+    const Expression* BitshiftModulo(const BinaryExpression* bin_op) {
         auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
         auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
         auto* lhs_el_ty = type::Type::DeepestElementOf(lhs_ty);
-        const ast::Expression* mask = b.Expr(AInt(lhs_el_ty->Size() * 8 - 1));
+        const Expression* mask = b.Expr(AInt(lhs_el_ty->Size() * 8 - 1));
         if (rhs_ty->Is<type::Vector>()) {
             mask = b.Call(CreateASTTypeFor(ctx, rhs_ty), mask);
         }
         auto* lhs = ctx.Clone(bin_op->lhs);
         auto* rhs = b.And(ctx.Clone(bin_op->rhs), mask);
-        return b.create<ast::BinaryExpression>(ctx.Clone(bin_op->source), bin_op->op, lhs, rhs);
+        return b.create<BinaryExpression>(ctx.Clone(bin_op->source), bin_op->op, lhs, rhs);
     }
 
     /// Builds the polyfill inline expression for a integer divide or modulo, preventing DBZs and
     /// integer overflows.
     /// @param bin_op the original BinaryExpression
     /// @return the polyfill divide or modulo
-    const ast::Expression* IntDivMod(const ast::BinaryExpression* bin_op) {
+    const Expression* IntDivMod(const BinaryExpression* bin_op) {
         auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
         auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
         BinaryOpSignature sig{bin_op->op, lhs_ty, rhs_ty};
         auto fn = binary_op_polyfills.GetOrCreate(sig, [&] {
-            const bool is_div = bin_op->op == ast::BinaryOp::kDivide;
+            const bool is_div = bin_op->op == BinaryOp::kDivide;
 
             uint32_t lhs_width = 1;
             uint32_t rhs_width = 1;
@@ -914,7 +914,7 @@ struct BuiltinPolyfill::State {
             const char* lhs = "lhs";
             const char* rhs = "rhs";
 
-            utils::Vector<const ast::Statement*, 4> body;
+            utils::Vector<const Statement*, 4> body;
 
             if (lhs_width < width) {
                 // lhs is scalar, rhs is vector. Convert lhs to vector.
@@ -934,8 +934,8 @@ struct BuiltinPolyfill::State {
             if (lhs_ty->is_signed_integer_scalar_or_vector()) {
                 const auto bits = lhs_el_ty->Size() * 8;
                 auto min_int = AInt(AInt::kLowestValue >> (AInt::kNumBits - bits));
-                const ast::Expression* lhs_is_min = b.Equal(lhs, ScalarOrVector(width, min_int));
-                const ast::Expression* rhs_is_minus_one = b.Equal(rhs, ScalarOrVector(width, -1_a));
+                const Expression* lhs_is_min = b.Equal(lhs, ScalarOrVector(width, min_int));
+                const Expression* rhs_is_minus_one = b.Equal(rhs, ScalarOrVector(width, -1_a));
                 // use_one = rhs_is_zero | ((lhs == MIN_INT) & (rhs == -1))
                 auto* use_one = b.Or(rhs_is_zero, b.And(lhs_is_min, rhs_is_minus_one));
 
@@ -992,7 +992,7 @@ struct BuiltinPolyfill::State {
     /// Builds the polyfill inline expression for a precise float modulo, as defined in the spec.
     /// @param bin_op the original BinaryExpression
     /// @return the polyfill divide or modulo
-    const ast::Expression* PreciseFloatMod(const ast::BinaryExpression* bin_op) {
+    const Expression* PreciseFloatMod(const BinaryExpression* bin_op) {
         auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
         auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
         BinaryOpSignature sig{bin_op->op, lhs_ty, rhs_ty};
@@ -1007,7 +1007,7 @@ struct BuiltinPolyfill::State {
             const char* lhs = "lhs";
             const char* rhs = "rhs";
 
-            utils::Vector<const ast::Statement*, 4> body;
+            utils::Vector<const Statement*, 4> body;
 
             if (lhs_width < width) {
                 // lhs is scalar, rhs is vector. Convert lhs to vector.
@@ -1042,7 +1042,7 @@ struct BuiltinPolyfill::State {
     }
 
     /// @returns the AST type for the given sem type
-    ast::Type T(const type::Type* ty) { return CreateASTTypeFor(ctx, ty); }
+    Type T(const type::Type* ty) { return CreateASTTypeFor(ctx, ty); }
 
     /// @returns 1 if `ty` is not a vector, otherwise the vector width
     uint32_t WidthOf(const type::Type* ty) const {
@@ -1055,7 +1055,7 @@ struct BuiltinPolyfill::State {
     /// @returns a scalar or vector with the given width, with each element with
     /// the given value.
     template <typename T>
-    const ast::Expression* ScalarOrVector(uint32_t width, T value) {
+    const Expression* ScalarOrVector(uint32_t width, T value) {
         if (width == 1) {
             return b.Expr(value);
         }
@@ -1063,7 +1063,7 @@ struct BuiltinPolyfill::State {
     }
 
     template <typename To>
-    const ast::Expression* CastScalarOrVector(uint32_t width, const ast::Expression* e) {
+    const Expression* CastScalarOrVector(uint32_t width, const Expression* e) {
         if (width == 1) {
             return b.Call(b.ty.Of<To>(), e);
         }
@@ -1071,7 +1071,7 @@ struct BuiltinPolyfill::State {
     }
 
     /// Examines the call expression @p expr, applying any necessary polyfill transforms
-    void Call(const ast::CallExpression* expr) {
+    void Call(const CallExpression* expr) {
         auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         if (!call || call->Stage() == sem::EvaluationStage::kConstant ||
             call->Stage() == sem::EvaluationStage::kNotEvaluated) {
@@ -1207,7 +1207,7 @@ struct BuiltinPolyfill::State {
                                     size_t value_idx = static_cast<size_t>(
                                         sig.IndexOf(sem::ParameterUsage::kValue));
                                     ctx.Replace(expr, [this, expr, value_idx] {
-                                        utils::Vector<const ast::Expression*, 3> args;
+                                        utils::Vector<const Expression*, 3> args;
                                         for (auto* arg : expr->args) {
                                             arg = ctx.Clone(arg);
                                             if (args.Length() == value_idx) {  // value

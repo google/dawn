@@ -38,7 +38,7 @@ constexpr char kFirstInstanceName[] = "first_instance_index";
 
 bool ShouldRun(const Program* program) {
     for (auto* fn : program->AST().Functions()) {
-        if (fn->PipelineStage() == ast::PipelineStage::kVertex) {
+        if (fn->PipelineStage() == PipelineStage::kVertex) {
             return true;
         }
     }
@@ -86,9 +86,9 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
     // Traverse the AST scanning for builtin accesses via variables (includes
     // parameters) or structure member accesses.
     for (auto* node : ctx.src->ASTNodes().Objects()) {
-        if (auto* var = node->As<ast::Variable>()) {
+        if (auto* var = node->As<Variable>()) {
             for (auto* attr : var->attributes) {
-                if (auto* builtin_attr = attr->As<ast::BuiltinAttribute>()) {
+                if (auto* builtin_attr = attr->As<BuiltinAttribute>()) {
                     builtin::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
                     if (builtin == builtin::BuiltinValue::kVertexIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
@@ -103,9 +103,9 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
                 }
             }
         }
-        if (auto* member = node->As<ast::StructMember>()) {
+        if (auto* member = node->As<StructMember>()) {
             for (auto* attr : member->attributes) {
-                if (auto* builtin_attr = attr->As<ast::BuiltinAttribute>()) {
+                if (auto* builtin_attr = attr->As<BuiltinAttribute>()) {
                     builtin::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
                     if (builtin == builtin::BuiltinValue::kVertexIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
@@ -124,7 +124,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
 
     if (has_vertex_or_instance_index) {
         // Add uniform buffer members and calculate byte offsets
-        utils::Vector<const ast::StructMember*, 8> members;
+        utils::Vector<const StructMember*, 8> members;
         members.Push(b.Member(kFirstVertexName, b.ty.u32()));
         members.Push(b.Member(kFirstInstanceName, b.ty.u32()));
         auto* struct_ = b.Structure(b.Sym(), std::move(members));
@@ -138,7 +138,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
                     });
 
         // Fix up all references to the builtins with the offsets
-        ctx.ReplaceAll([=, &ctx](const ast::Expression* expr) -> const ast::Expression* {
+        ctx.ReplaceAll([=, &ctx](const Expression* expr) -> const Expression* {
             if (auto* sem = ctx.src->Sem().GetVal(expr)) {
                 if (auto* user = sem->UnwrapLoad()->As<sem::VariableUser>()) {
                     auto it = builtin_vars.find(user->Variable());

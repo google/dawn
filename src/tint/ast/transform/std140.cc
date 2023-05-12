@@ -102,7 +102,7 @@ struct Std140::State {
 
         // Finally, replace all expression chains that used the authored types with those that
         // correctly use the forked types.
-        ctx.ReplaceAll([&](const ast::Expression* expr) -> const ast::Expression* {
+        ctx.ReplaceAll([&](const Expression* expr) -> const Expression* {
             if (auto access = AccessChainFor(expr)) {
                 if (!access->std140_mat_idx.has_value()) {
                     // loading a std140 type, which is not a whole or partial decomposed matrix
@@ -230,7 +230,7 @@ struct Std140::State {
 
     // Map of structure member in src of a matrix type, to list of decomposed column
     // members in ctx.dst.
-    utils::Hashmap<const type::StructMember*, utils::Vector<const ast::StructMember*, 4>, 8>
+    utils::Hashmap<const type::StructMember*, utils::Vector<const StructMember*, 4>, 8>
         std140_mat_members;
 
     /// Describes a matrix that has been forked to a std140-structure holding the decomposed column
@@ -284,7 +284,7 @@ struct Std140::State {
             if (str && str->UsedAs(builtin::AddressSpace::kUniform)) {
                 // Should this uniform buffer be forked for std140 usage?
                 bool fork_std140 = false;
-                utils::Vector<const ast::StructMember*, 8> members;
+                utils::Vector<const StructMember*, 8> members;
                 for (auto* member : str->Members()) {
                     if (auto* mat = member->Type()->As<type::Matrix>()) {
                         // Is this member a matrix that needs decomposition for std140-layout?
@@ -335,8 +335,8 @@ struct Std140::State {
                     // Create a new forked structure, and insert it just under the original
                     // structure.
                     auto name = b.Symbols().New(str->Name().Name() + "_std140");
-                    auto* std140 = b.create<ast::Struct>(b.Ident(name), std::move(members),
-                                                         ctx.Clone(str->Declaration()->attributes));
+                    auto* std140 = b.create<Struct>(b.Ident(name), std::move(members),
+                                                    ctx.Clone(str->Declaration()->attributes));
                     ctx.InsertAfter(src->AST().GlobalDeclarations(), global, std140);
                     std140_structs.Add(str, name);
                 }
@@ -349,7 +349,7 @@ struct Std140::State {
     /// Populates the #std140_uniforms set.
     void ReplaceUniformVarTypes() {
         for (auto* global : src->AST().GlobalVariables()) {
-            if (auto* var = global->As<ast::Var>()) {
+            if (auto* var = global->As<Var>()) {
                 auto* v = sem.Get(var);
                 if (v->AddressSpace() == builtin::AddressSpace::kUniform) {
                     if (auto std140_ty = Std140Type(v->Type()->UnwrapRef())) {
@@ -367,9 +367,7 @@ struct Std140::State {
     /// @param str the structure that will hold the uniquely named member.
     /// @param unsuffixed the common name prefix to use for the new members.
     /// @param count the number of members that need to be created.
-    std::string PrefixForUniqueNames(const ast::Struct* str,
-                                     Symbol unsuffixed,
-                                     uint32_t count) const {
+    std::string PrefixForUniqueNames(const Struct* str, Symbol unsuffixed, uint32_t count) const {
         auto prefix = unsuffixed.Name();
         // Keep on inserting '_' between the unsuffixed name and the suffix numbers until the name
         // is unique.
@@ -400,14 +398,14 @@ struct Std140::State {
     ///          If the semantic type is not split for std140-layout, then nullptr is returned.
     /// @note will construct new std140 structures to hold decomposed matrices, populating
     ///       #std140_mats.
-    ast::Type Std140Type(const type::Type* ty) {
+    Type Std140Type(const type::Type* ty) {
         return Switch(
             ty,  //
             [&](const type::Struct* str) {
                 if (auto std140 = std140_structs.Find(str)) {
                     return b.ty(*std140);
                 }
-                return ast::Type{};
+                return Type{};
             },
             [&](const type::Matrix* mat) {
                 if (MatrixNeedsDecomposing(mat)) {
@@ -426,13 +424,13 @@ struct Std140::State {
                     });
                     return b.ty(std140_mat.name);
                 }
-                return ast::Type{};
+                return Type{};
             },
             [&](const type::Array* arr) {
                 if (auto std140 = Std140Type(arr->ElemType())) {
-                    utils::Vector<const ast::Attribute*, 1> attrs;
+                    utils::Vector<const Attribute*, 1> attrs;
                     if (!arr->IsStrideImplicit()) {
-                        attrs.Push(b.create<ast::StrideAttribute>(arr->Stride()));
+                        attrs.Push(b.create<StrideAttribute>(arr->Stride()));
                     }
                     auto count = arr->ConstantCount();
                     if (TINT_UNLIKELY(!count)) {
@@ -446,7 +444,7 @@ struct Std140::State {
                     }
                     return b.ty.array(std140, b.Expr(u32(count.value())), std::move(attrs));
                 }
-                return ast::Type{};
+                return Type{};
             });
     }
 
@@ -455,7 +453,7 @@ struct Std140::State {
     /// @param align the alignment in bytes of the matrix.
     /// @param size the size in bytes of the matrix.
     /// @returns a vector of decomposed matrix column vectors as structure members (in ctx.dst).
-    utils::Vector<const ast::StructMember*, 4> DecomposedMatrixStructMembers(
+    utils::Vector<const StructMember*, 4> DecomposedMatrixStructMembers(
         const type::Matrix* mat,
         const std::string& name_prefix,
         uint32_t align,
@@ -463,9 +461,9 @@ struct Std140::State {
         // Replace the member with column vectors.
         const auto num_columns = mat->columns();
         // Build a struct member for each column of the matrix
-        utils::Vector<const ast::StructMember*, 4> out;
+        utils::Vector<const StructMember*, 4> out;
         for (uint32_t i = 0; i < num_columns; i++) {
-            utils::Vector<const ast::Attribute*, 1> attributes;
+            utils::Vector<const Attribute*, 1> attributes;
             if ((i == 0) && mat->Align() != align) {
                 // The matrix was @align() annotated with a larger alignment
                 // than the natural alignment for the matrix. This extra padding
@@ -493,7 +491,7 @@ struct Std140::State {
     /// Walks the @p ast_expr, constructing and returning an AccessChain.
     /// @returns an AccessChain if the expression is an access to a std140-forked uniform buffer,
     ///          otherwise returns a std::nullopt.
-    std::optional<AccessChain> AccessChainFor(const ast::Expression* ast_expr) {
+    std::optional<AccessChain> AccessChainFor(const Expression* ast_expr) {
         auto* expr = sem.GetVal(ast_expr);
         if (!expr) {
             return std::nullopt;
@@ -576,10 +574,10 @@ struct Std140::State {
                 [&](const sem::ValueExpression* e) {
                     // Walk past indirection and address-of unary ops.
                     return Switch(e->Declaration(),  //
-                                  [&](const ast::UnaryOpExpression* u) {
+                                  [&](const UnaryOpExpression* u) {
                                       switch (u->op) {
-                                          case ast::UnaryOp::kAddressOf:
-                                          case ast::UnaryOp::kIndirection:
+                                          case UnaryOp::kAddressOf:
+                                          case UnaryOp::kIndirection:
                                               expr = sem.GetVal(u->expr);
                                               return Action::kContinue;
                                           default:
@@ -660,8 +658,8 @@ struct Std140::State {
     /// Generates and returns an expression that loads the value from a std140 uniform buffer,
     /// converting the final result to a non-std140 type.
     /// @param chain the access chain from a uniform buffer to the value to load.
-    const ast::Expression* LoadWithConvert(const AccessChain& chain) {
-        const ast::Expression* expr = nullptr;
+    const Expression* LoadWithConvert(const AccessChain& chain) {
+        const Expression* expr = nullptr;
         const type::Type* ty = nullptr;
         auto dynamic_index = [&](size_t idx) {
             return ctx.Clone(chain.dynamic_indices[idx]->Declaration());
@@ -678,7 +676,7 @@ struct Std140::State {
     /// std140-forked type to the type @p ty. If @p expr is not a std140-forked type, then Convert()
     /// will simply return @p expr.
     /// @returns the converted value expression.
-    const ast::Expression* Convert(const type::Type* ty, const ast::Expression* expr) {
+    const Expression* Convert(const type::Type* ty, const Expression* expr) {
         // Get an existing, or create a new function for converting the std140 type to ty.
         auto fn = conv_fns.GetOrCreate(ty, [&] {
             auto std140_ty = Std140Type(ty);
@@ -690,20 +688,20 @@ struct Std140::State {
             // The converter function takes a single argument of the std140 type.
             auto* param = b.Param("val", std140_ty);
 
-            utils::Vector<const ast::Statement*, 3> stmts;
+            utils::Vector<const Statement*, 3> stmts;
 
             Switch(
                 ty,  //
                 [&](const type::Struct* str) {
                     // Convert each of the structure members using either a converter function
                     // call, or by reassembling a std140 matrix from column vector members.
-                    utils::Vector<const ast::Expression*, 8> args;
+                    utils::Vector<const Expression*, 8> args;
                     for (auto* member : str->Members()) {
                         if (auto col_members = std140_mat_members.Find(member)) {
                             // std140 decomposed matrix. Reassemble.
                             auto mat_ty = CreateASTTypeFor(ctx, member->Type());
                             auto mat_args =
-                                utils::Transform(*col_members, [&](const ast::StructMember* m) {
+                                utils::Transform(*col_members, [&](const StructMember* m) {
                                     return b.MemberAccessor(param, m->name->symbol);
                                 });
                             args.Push(b.Call(mat_ty, std::move(mat_args)));
@@ -719,7 +717,7 @@ struct Std140::State {
                     // Reassemble a std140 matrix from the structure of column vector members.
                     auto std140_mat = std140_mats.Get(mat);
                     if (TINT_LIKELY(std140_mat)) {
-                        utils::Vector<const ast::Expression*, 8> args;
+                        utils::Vector<const Expression*, 8> args;
                         // std140 decomposed matrix. Reassemble.
                         auto mat_ty = CreateASTTypeFor(ctx, mat);
                         auto mat_args = utils::Transform(std140_mat->columns, [&](Symbol name) {
@@ -782,7 +780,7 @@ struct Std140::State {
     /// @param access the access chain from the uniform buffer to either the whole matrix or part of
     ///        the matrix (column, column-swizzle, or element).
     /// @returns the loaded value expression.
-    const ast::Expression* LoadMatrixWithFn(const AccessChain& access) {
+    const Expression* LoadMatrixWithFn(const AccessChain& access) {
         // Get an existing, or create a new function for loading the uniform buffer value.
         // This function is keyed off the uniform buffer variable and the access chain.
         auto fn = load_fns.GetOrCreate(LoadFnKey{access.var, access.indices}, [&] {
@@ -810,14 +808,14 @@ struct Std140::State {
     ///               column-swizzle, or element).
     /// @note The matrix column must be statically indexed to use this method.
     /// @returns the loaded value expression.
-    const ast::Expression* LoadSubMatrixInline(const AccessChain& chain) {
+    const Expression* LoadSubMatrixInline(const AccessChain& chain) {
         // Method for generating dynamic index expressions.
         // As this is inline, we can just clone the expression.
         auto dynamic_index = [&](size_t idx) {
             return ctx.Clone(chain.dynamic_indices[idx]->Declaration());
         };
 
-        const ast::Expression* expr = nullptr;
+        const Expression* expr = nullptr;
         const type::Type* ty = nullptr;
 
         // Build the expression up to, but not including the matrix member
@@ -891,7 +889,7 @@ struct Std140::State {
         std::string name = "load";
 
         // The switch cases
-        utils::Vector<const ast::CaseStatement*, 4> cases;
+        utils::Vector<const CaseStatement*, 4> cases;
 
         // The function return type.
         const type::Type* ret_ty = nullptr;
@@ -899,7 +897,7 @@ struct Std140::State {
         // Build switch() cases for each column of the matrix
         auto num_columns = chain.std140_mat_ty->columns();
         for (uint32_t column_idx = 0; column_idx < num_columns; column_idx++) {
-            const ast::Expression* expr = nullptr;
+            const Expression* expr = nullptr;
             const type::Type* ty = nullptr;
 
             // Build the expression up to, but not including the matrix
@@ -991,7 +989,7 @@ struct Std140::State {
             return b.Expr(dynamic_index_params[idx]->name->symbol);
         };
 
-        const ast::Expression* expr = nullptr;
+        const Expression* expr = nullptr;
         const type::Type* ty = nullptr;
         std::string name = "load";
 
@@ -1005,13 +1003,13 @@ struct Std140::State {
             name += "_" + access_name;
         }
 
-        utils::Vector<const ast::Statement*, 2> stmts;
+        utils::Vector<const Statement*, 2> stmts;
 
         // Create a temporary pointer to the structure that holds the matrix columns
         auto* let = b.Let("s", b.AddressOf(expr));
         stmts.Push(b.Decl(let));
 
-        utils::Vector<const ast::MemberAccessorExpression*, 4> columns;
+        utils::Vector<const MemberAccessorExpression*, 4> columns;
         if (auto* str = tint::As<type::Struct>(ty)) {
             // Structure member matrix. The columns are decomposed into the structure.
             auto mat_member_idx = std::get<u32>(chain.indices[std140_mat_idx]);
@@ -1053,7 +1051,7 @@ struct Std140::State {
     /// Return type of BuildAccessExpr()
     struct ExprTypeName {
         /// The new, post-access expression
-        const ast::Expression* expr;
+        const Expression* expr;
         /// The type of #expr
         const type::Type* type;
         /// A name segment which can be used to build sensible names for helper functions
@@ -1067,11 +1065,11 @@ struct Std140::State {
     /// @param dynamic_index a function that obtains the i'th dynamic index
     /// @returns a ExprTypeName which holds the new expression, new type and a name segment which
     ///          can be used for creating helper function names.
-    ExprTypeName BuildAccessExpr(const ast::Expression* lhs,
+    ExprTypeName BuildAccessExpr(const Expression* lhs,
                                  const type::Type* ty,
                                  const AccessChain& chain,
                                  size_t index,
-                                 std::function<const ast::Expression*(size_t)> dynamic_index) {
+                                 std::function<const Expression*(size_t)> dynamic_index) {
         auto& access = chain.indices[index];
 
         if (std::get_if<UniformVariable>(&access)) {

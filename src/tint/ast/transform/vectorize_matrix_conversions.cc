@@ -70,7 +70,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
 
     std::unordered_map<HelperFunctionKey, Symbol> matrix_convs;
 
-    ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
+    ctx.ReplaceAll([&](const CallExpression* expr) -> const CallExpression* {
         auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* ty_conv = call->Target()->As<sem::ValueConversion>();
         if (!ty_conv) {
@@ -102,7 +102,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
         }
 
         auto build_vectorized_conversion_expression = [&](auto&& src_expression_builder) {
-            utils::Vector<const ast::Expression*, 4> columns;
+            utils::Vector<const Expression*, 4> columns;
             for (uint32_t c = 0; c < dst_type->columns(); c++) {
                 auto* src_matrix_expr = src_expression_builder();
                 auto* src_column_expr = b.IndexAccessor(src_matrix_expr, b.Expr(tint::AInt(c)));

@@ -85,18 +85,18 @@ struct Texture1DTo2D::State {
             return SkipTransform;
         }
 
-        auto create_var = [&](const ast::Variable* v, ast::Type type) -> const ast::Variable* {
-            if (v->As<ast::Parameter>()) {
+        auto create_var = [&](const Variable* v, Type type) -> const Variable* {
+            if (v->As<Parameter>()) {
                 return ctx.dst->Param(ctx.Clone(v->name->symbol), type, ctx.Clone(v->attributes));
             } else {
                 return ctx.dst->Var(ctx.Clone(v->name->symbol), type, ctx.Clone(v->attributes));
             }
         };
 
-        ctx.ReplaceAll([&](const ast::Variable* v) -> const ast::Variable* {
-            const ast::Variable* r = Switch(
+        ctx.ReplaceAll([&](const Variable* v) -> const Variable* {
+            const Variable* r = Switch(
                 sem.Get(v)->Type()->UnwrapRef(),
-                [&](const type::SampledTexture* tex) -> const ast::Variable* {
+                [&](const type::SampledTexture* tex) -> const Variable* {
                     if (tex->dim() == type::TextureDimension::k1d) {
                         auto type = ctx.dst->ty.sampled_texture(type::TextureDimension::k2d,
                                                                 CreateASTTypeFor(ctx, tex->type()));
@@ -105,7 +105,7 @@ struct Texture1DTo2D::State {
                         return nullptr;
                     }
                 },
-                [&](const type::StorageTexture* storage_tex) -> const ast::Variable* {
+                [&](const type::StorageTexture* storage_tex) -> const Variable* {
                     if (storage_tex->dim() == type::TextureDimension::k1d) {
                         auto type = ctx.dst->ty.storage_texture(type::TextureDimension::k2d,
                                                                 storage_tex->texel_format(),
@@ -119,7 +119,7 @@ struct Texture1DTo2D::State {
             return r;
         });
 
-        ctx.ReplaceAll([&](const ast::CallExpression* c) -> const ast::Expression* {
+        ctx.ReplaceAll([&](const CallExpression* c) -> const Expression* {
             auto* call = sem.Get(c)->UnwrapMaterialize()->As<sem::Call>();
             if (!call) {
                 return nullptr;
@@ -141,7 +141,7 @@ struct Texture1DTo2D::State {
             if (builtin->Type() == builtin::Function::kTextureDimensions) {
                 // If this textureDimensions() call is in a CallStatement, we can leave it
                 // unmodified since the return value will be dropped on the floor anyway.
-                if (call->Stmt()->Declaration()->Is<ast::CallStatement>()) {
+                if (call->Stmt()->Declaration()->Is<CallStatement>()) {
                     return nullptr;
                 }
                 auto* new_call = ctx.CloneWithoutTransform(c);
@@ -153,14 +153,14 @@ struct Texture1DTo2D::State {
                 return nullptr;
             }
 
-            utils::Vector<const ast::Expression*, 8> args;
+            utils::Vector<const Expression*, 8> args;
             int index = 0;
             for (auto* arg : c->args) {
                 if (index == coords_index) {
                     auto* ctype = call->Arguments()[static_cast<size_t>(coords_index)]->Type();
                     auto* coords = c->args[static_cast<size_t>(coords_index)];
 
-                    const ast::LiteralExpression* half = nullptr;
+                    const LiteralExpression* half = nullptr;
                     if (ctype->is_integer_scalar()) {
                         half = ctx.dst->Expr(0_a);
                     } else {

@@ -90,7 +90,7 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
         }
     }
 
-    for (auto* var : src->AST().Globals<ast::Var>()) {
+    for (auto* var : src->AST().Globals<Var>()) {
         if (var->HasBindingPoint()) {
             auto* global_sem = src->Sem().Get<sem::GlobalVariable>(var);
 
@@ -109,8 +109,8 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
                 auto* new_group = b.Group(AInt(to.group));
                 auto* new_binding = b.Binding(AInt(to.binding));
 
-                auto* old_group = ast::GetAttribute<ast::GroupAttribute>(var->attributes);
-                auto* old_binding = ast::GetAttribute<ast::BindingAttribute>(var->attributes);
+                auto* old_group = GetAttribute<GroupAttribute>(var->attributes);
+                auto* old_binding = GetAttribute<BindingAttribute>(var->attributes);
 
                 ctx.Replace(old_group, new_group);
                 ctx.Replace(old_binding, new_binding);
@@ -139,19 +139,19 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
                 auto* ty = sem->Type()->UnwrapRef();
                 auto inner_ty = CreateASTTypeFor(ctx, ty);
                 auto* new_var =
-                    b.create<ast::Var>(ctx.Clone(var->source),                  // source
-                                       b.Ident(ctx.Clone(var->name->symbol)),   // name
-                                       inner_ty,                                // type
-                                       ctx.Clone(var->declared_address_space),  // address space
-                                       b.Expr(access),                          // access
-                                       ctx.Clone(var->initializer),             // initializer
-                                       ctx.Clone(var->attributes));             // attributes
+                    b.create<Var>(ctx.Clone(var->source),                  // source
+                                  b.Ident(ctx.Clone(var->name->symbol)),   // name
+                                  inner_ty,                                // type
+                                  ctx.Clone(var->declared_address_space),  // address space
+                                  b.Expr(access),                          // access
+                                  ctx.Clone(var->initializer),             // initializer
+                                  ctx.Clone(var->attributes));             // attributes
                 ctx.Replace(var, new_var);
             }
 
             // Add `DisableValidationAttribute`s if required
             if (add_collision_attr.count(bp)) {
-                auto* attribute = b.Disable(ast::DisabledValidation::kBindingPointCollision);
+                auto* attribute = b.Disable(DisabledValidation::kBindingPointCollision);
                 ctx.InsertBefore(var->attributes, *var->attributes.begin(), attribute);
             }
         }

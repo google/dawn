@@ -38,7 +38,7 @@ struct MatrixInfo {
     const type::Matrix* matrix = nullptr;
 
     /// @returns the identifier of an array that holds an vector column for each row of the matrix.
-    ast::Type array(ProgramBuilder* b) const {
+    Type array(ProgramBuilder* b) const {
         return b->ty.array(b->ty.vec<f32>(matrix->rows()), u32(matrix->columns()),
                            utils::Vector{
                                b->Stride(stride),
@@ -72,7 +72,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     // and populate the `decomposed` map with the members that have been replaced.
     utils::Hashmap<const type::StructMember*, MatrixInfo, 8> decomposed;
     for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* str = node->As<ast::Struct>()) {
+        if (auto* str = node->As<Struct>()) {
             auto* str_ty = src->Sem().Get(str);
             if (!str_ty->UsedAs(builtin::AddressSpace::kUniform) &&
                 !str_ty->UsedAs(builtin::AddressSpace::kStorage)) {
@@ -83,8 +83,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                 if (!matrix) {
                     continue;
                 }
-                auto* attr =
-                    ast::GetAttribute<ast::StrideAttribute>(member->Declaration()->attributes);
+                auto* attr = GetAttribute<StrideAttribute>(member->Declaration()->attributes);
                 if (!attr) {
                     continue;
                 }
@@ -111,17 +110,16 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     // preserve these without calling conversion functions.
     // Example:
     //   ssbo.mat[2] -> ssbo.mat[2]
-    ctx.ReplaceAll(
-        [&](const ast::IndexAccessorExpression* expr) -> const ast::IndexAccessorExpression* {
-            if (auto* access = src->Sem().Get<sem::StructMemberAccess>(expr->object)) {
-                if (decomposed.Contains(access->Member())) {
-                    auto* obj = ctx.CloneWithoutTransform(expr->object);
-                    auto* idx = ctx.Clone(expr->index);
-                    return b.IndexAccessor(obj, idx);
-                }
+    ctx.ReplaceAll([&](const IndexAccessorExpression* expr) -> const IndexAccessorExpression* {
+        if (auto* access = src->Sem().Get<sem::StructMemberAccess>(expr->object)) {
+            if (decomposed.Contains(access->Member())) {
+                auto* obj = ctx.CloneWithoutTransform(expr->object);
+                auto* idx = ctx.Clone(expr->index);
+                return b.IndexAccessor(obj, idx);
             }
-            return nullptr;
-        });
+        }
+        return nullptr;
+    });
 
     // For all struct member accesses to the matrix on the LHS of an assignment,
     // we need to convert the matrix to the array before assigning to the
@@ -129,7 +127,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     // Example:
     //   ssbo.mat = mat_to_arr(m)
     std::unordered_map<MatrixInfo, Symbol, MatrixInfo::Hasher> mat_to_arr;
-    ctx.ReplaceAll([&](const ast::AssignmentStatement* stmt) -> const ast::Statement* {
+    ctx.ReplaceAll([&](const AssignmentStatement* stmt) -> const Statement* {
         if (auto* access = src->Sem().Get<sem::StructMemberAccess>(stmt->lhs)) {
             if (auto info = decomposed.Find(access->Member())) {
                 auto fn = utils::GetOrCreate(mat_to_arr, *info, [&] {
@@ -142,7 +140,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                     auto array = [&] { return info->array(ctx.dst); };
 
                     auto mat = b.Sym("m");
-                    utils::Vector<const ast::Expression*, 4> columns;
+                    utils::Vector<const Expression*, 4> columns;
                     for (uint32_t i = 0; i < static_cast<uint32_t>(info->matrix->columns()); i++) {
                         columns.Push(b.IndexAccessor(mat, u32(i)));
                     }
@@ -168,7 +166,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     // matrix type. Example:
     //   m = arr_to_mat(ssbo.mat)
     std::unordered_map<MatrixInfo, Symbol, MatrixInfo::Hasher> arr_to_mat;
-    ctx.ReplaceAll([&](const ast::MemberAccessorExpression* expr) -> const ast::Expression* {
+    ctx.ReplaceAll([&](const MemberAccessorExpression* expr) -> const Expression* {
         if (auto* access = src->Sem().Get(expr)->UnwrapLoad()->As<sem::StructMemberAccess>()) {
             if (auto info = decomposed.Find(access->Member())) {
                 auto fn = utils::GetOrCreate(arr_to_mat, *info, [&] {
@@ -181,7 +179,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                     auto array = [&] { return info->array(ctx.dst); };
 
                     auto arr = b.Sym("arr");
-                    utils::Vector<const ast::Expression*, 4> columns;
+                    utils::Vector<const Expression*, 4> columns;
                     for (uint32_t i = 0; i < static_cast<uint32_t>(info->matrix->columns()); i++) {
                         columns.Push(b.IndexAccessor(arr, u32(i)));
                     }

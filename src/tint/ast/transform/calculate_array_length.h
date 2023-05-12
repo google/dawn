@@ -37,12 +37,12 @@ class CalculateArrayLength final : public utils::Castable<CalculateArrayLength, 
     /// BufferSizeIntrinsic is an InternalAttribute that's applied to intrinsic
     /// functions used to obtain the runtime size of a storage buffer.
     class BufferSizeIntrinsic final
-        : public utils::Castable<BufferSizeIntrinsic, ast::InternalAttribute> {
+        : public utils::Castable<BufferSizeIntrinsic, InternalAttribute> {
       public:
         /// Constructor
         /// @param program_id the identifier of the program that owns this node
         /// @param nid the unique node identifier
-        BufferSizeIntrinsic(ProgramID program_id, ast::NodeID nid);
+        BufferSizeIntrinsic(ProgramID program_id, NodeID nid);
         /// Destructor
         ~BufferSizeIntrinsic() override;
 

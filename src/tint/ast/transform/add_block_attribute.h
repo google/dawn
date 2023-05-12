@@ -28,12 +28,12 @@ class AddBlockAttribute final : public utils::Castable<AddBlockAttribute, Transf
   public:
     /// BlockAttribute is an InternalAttribute that is used to decorate a
     // structure that is used as a buffer in SPIR-V or GLSL.
-    class BlockAttribute final : public utils::Castable<BlockAttribute, ast::InternalAttribute> {
+    class BlockAttribute final : public utils::Castable<BlockAttribute, InternalAttribute> {
       public:
         /// Constructor
         /// @param program_id the identifier of the program that owns this node
         /// @param nid the unique node identifier
-        BlockAttribute(ProgramID program_id, ast::NodeID nid);
+        BlockAttribute(ProgramID program_id, NodeID nid);
         /// Destructor
         ~BlockAttribute() override;
 

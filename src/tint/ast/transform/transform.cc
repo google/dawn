@@ -60,23 +60,23 @@ Output Transform::Run(const Program* src, const DataMap& data /* = {} */) const 
     return output;
 }
 
-void Transform::RemoveStatement(CloneContext& ctx, const ast::Statement* stmt) {
+void Transform::RemoveStatement(CloneContext& ctx, const Statement* stmt) {
     auto* sem = ctx.src->Sem().Get(stmt);
     if (auto* block = tint::As<sem::BlockStatement>(sem->Parent())) {
         ctx.Remove(block->Declaration()->statements, stmt);
         return;
     }
     if (TINT_LIKELY(tint::Is<sem::ForLoopStatement>(sem->Parent()))) {
-        ctx.Replace(stmt, static_cast<ast::Expression*>(nullptr));
+        ctx.Replace(stmt, static_cast<Expression*>(nullptr));
         return;
     }
     TINT_ICE(Transform, ctx.dst->Diagnostics())
         << "unable to remove statement from parent of type " << sem->TypeInfo().name;
 }
 
-ast::Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
+Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     if (ty->Is<type::Void>()) {
-        return ast::Type{};
+        return Type{};
     }
     if (ty->Is<type::I32>()) {
         return ctx.dst->ty.i32();
@@ -108,9 +108,9 @@ ast::Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     }
     if (auto* a = ty->As<type::Array>()) {
         auto el = CreateASTTypeFor(ctx, a->ElemType());
-        utils::Vector<const ast::Attribute*, 1> attrs;
+        utils::Vector<const Attribute*, 1> attrs;
         if (!a->IsStrideImplicit()) {
-            attrs.Push(ctx.dst->create<ast::StrideAttribute>(a->Stride()));
+            attrs.Push(ctx.dst->create<StrideAttribute>(a->Stride()));
         }
         if (a->Count()->Is<type::RuntimeArrayCount>()) {
             return ctx.dst->ty.array(el, std::move(attrs));
@@ -125,7 +125,7 @@ ast::Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
             // See crbug.com/tint/1764.
             // Look for a type alias for this array.
             for (auto* type_decl : ctx.src->AST().TypeDecls()) {
-                if (auto* alias = type_decl->As<ast::Alias>()) {
+                if (auto* alias = type_decl->As<Alias>()) {
                     if (ty == ctx.src->Sem().Get(alias)) {
                         // Alias found. Use the alias name to ensure types compare equal.
                         return ctx.dst->ty(ctx.Clone(alias->name->symbol));
@@ -184,7 +184,7 @@ ast::Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     }
     TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
         << "Unhandled type: " << ty->TypeInfo().name;
-    return ast::Type{};
+    return Type{};
 }
 
 }  // namespace tint::ast::transform

@@ -101,7 +101,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateDefaultStridedArray) {
                b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor("arr", 1_i))),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -145,7 +145,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateStridedArray) {
                b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor("arr", 1_i))),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -195,7 +195,7 @@ TEST_F(DecomposeStridedArrayTest, ReadUniformStridedArray) {
                b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i))),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -253,7 +253,7 @@ TEST_F(DecomposeStridedArrayTest, ReadUniformDefaultStridedArray) {
                          b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 2_i))),
         },
         utils::Vector{
-            b.Stage(ast::PipelineStage::kCompute),
+            b.Stage(PipelineStage::kCompute),
             b.WorkgroupSize(1_i),
         });
 
@@ -303,7 +303,7 @@ TEST_F(DecomposeStridedArrayTest, ReadStorageStridedArray) {
                b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i))),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -357,7 +357,7 @@ TEST_F(DecomposeStridedArrayTest, ReadStorageDefaultStridedArray) {
                b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i))),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -410,7 +410,7 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageStridedArray) {
                b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5_f),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -472,7 +472,7 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageDefaultStridedArray) {
                b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5_f),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -531,7 +531,7 @@ TEST_F(DecomposeStridedArrayTest, ReadWriteViaPointerLets) {
                b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), 5_f),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -593,7 +593,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateAliasedStridedArray) {
                b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5_f),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -696,7 +696,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateNestedStridedArray) {
                         5_f),
            },
            utils::Vector{
-               b.Stage(ast::PipelineStage::kCompute),
+               b.Stage(PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 

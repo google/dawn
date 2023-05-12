@@ -53,14 +53,14 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
     for (auto* node : src->ASTNodes().Objects()) {
         Switch(
             node,
-            [&](const ast::AssignmentStatement* stmt) {
-                if (stmt->lhs->Is<ast::PhonyExpression>()) {
+            [&](const AssignmentStatement* stmt) {
+                if (stmt->lhs->Is<PhonyExpression>()) {
                     made_changes = true;
 
-                    std::vector<const ast::Expression*> side_effects;
-                    if (!ast::TraverseExpressions(
-                            stmt->rhs, b.Diagnostics(), [&](const ast::CallExpression* expr) {
-                                // ast::CallExpression may map to a function or builtin call
+                    std::vector<const Expression*> side_effects;
+                    if (!TraverseExpressions(
+                            stmt->rhs, b.Diagnostics(), [&](const CallExpression* expr) {
+                                // CallExpression may map to a function or builtin call
                                 // (both may have side-effects), or a value constructor or value
                                 // conversion (both do not have side effects).
                                 auto* call = sem.Get<sem::Call>(expr);
@@ -68,14 +68,14 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                                     // Semantic node must be a Materialize, in which case the
                                     // expression was creation-time (compile time), so could not
                                     // have side effects. Just skip.
-                                    return ast::TraverseAction::Skip;
+                                    return TraverseAction::Skip;
                                 }
                                 if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>() &&
                                     call->HasSideEffects()) {
                                     side_effects.push_back(expr);
-                                    return ast::TraverseAction::Skip;
+                                    return TraverseAction::Skip;
                                 }
-                                return ast::TraverseAction::Descend;
+                                return TraverseAction::Descend;
                             })) {
                         return;
                     }
@@ -88,12 +88,12 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                     }
 
                     if (side_effects.size() == 1) {
-                        if (auto* call_expr = side_effects[0]->As<ast::CallExpression>()) {
+                        if (auto* call_expr = side_effects[0]->As<CallExpression>()) {
                             // Phony assignment with single call side effect.
                             auto* call = sem.Get(call_expr)->Unwrap()->As<sem::Call>();
                             if (call->Target()->MustUse()) {
                                 // Replace phony assignment assignment to uniquely named let.
-                                ctx.Replace<ast::Statement>(stmt, [&, call_expr] {  //
+                                ctx.Replace<Statement>(stmt, [&, call_expr] {  //
                                     auto name = b.Symbols().New("tint_phony");
                                     auto* rhs = ctx.Clone(call_expr);
                                     return b.Decl(b.Let(name, rhs));
@@ -118,7 +118,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                         }
                         auto sink = sinks.GetOrCreate(sig, [&] {
                             auto name = b.Symbols().New("phony_sink");
-                            utils::Vector<const ast::Parameter*, 8> params;
+                            utils::Vector<const Parameter*, 8> params;
                             for (auto* ty : sig) {
                                 auto ast_ty = CreateASTTypeFor(ctx, ty);
                                 params.Push(b.Param("p" + std::to_string(params.Length()), ast_ty));
@@ -126,7 +126,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                             b.Func(name, params, b.ty.void_(), {});
                             return name;
                         });
-                        utils::Vector<const ast::Expression*, 8> args;
+                        utils::Vector<const Expression*, 8> args;
                         for (auto* arg : side_effects) {
                             args.Push(ctx.Clone(arg));
                         }
@@ -134,7 +134,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                     });
                 }
             },
-            [&](const ast::CallStatement* stmt) {
+            [&](const CallStatement* stmt) {
                 // Remove call statements to const value-returning functions.
                 // TODO(crbug.com/tint/1637): Remove if `stmt->expr` has no side-effects.
                 auto* sem_expr = sem.Get(stmt->expr);

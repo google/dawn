@@ -45,7 +45,7 @@ struct RemoveContinueInSwitch::State {
         bool made_changes = false;
 
         for (auto* node : src->ASTNodes().Objects()) {
-            auto* cont = node->As<ast::ContinueStatement>();
+            auto* cont = node->As<ContinueStatement>();
             if (!cont) {
                 continue;
             }
@@ -103,12 +103,12 @@ struct RemoveContinueInSwitch::State {
     const sem::Info& sem = src->Sem();
 
     // Map of switch statement to 'tint_continue' variable.
-    std::unordered_map<const ast::SwitchStatement*, Symbol> switch_to_cont_var_name;
+    std::unordered_map<const SwitchStatement*, Symbol> switch_to_cont_var_name;
 
     // If `cont` is within a switch statement within a loop, returns a pointer to
     // that switch statement.
-    static const ast::SwitchStatement* GetParentSwitchInLoop(const sem::Info& sem,
-                                                             const ast::ContinueStatement* cont) {
+    static const SwitchStatement* GetParentSwitchInLoop(const sem::Info& sem,
+                                                        const ContinueStatement* cont) {
         // Find whether first parent is a switch or a loop
         auto* sem_stmt = sem.Get(cont);
         auto* sem_parent = sem_stmt->FindFirstParent<sem::SwitchStatement, sem::LoopBlockStatement,
@@ -116,7 +116,7 @@ struct RemoveContinueInSwitch::State {
         if (!sem_parent) {
             return nullptr;
         }
-        return sem_parent->Declaration()->As<ast::SwitchStatement>();
+        return sem_parent->Declaration()->As<SwitchStatement>();
     }
 };
 

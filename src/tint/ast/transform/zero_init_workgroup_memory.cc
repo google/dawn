@@ -36,7 +36,7 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* global : program->AST().GlobalVariables()) {
-        if (auto* var = global->As<ast::Var>()) {
+        if (auto* var = global->As<Var>()) {
             auto* v = program->Sem().Get(var);
             if (v->AddressSpace() == builtin::AddressSpace::kWorkgroup) {
                 return true;
@@ -48,7 +48,7 @@ bool ShouldRun(const Program* program) {
 
 }  // namespace
 
-using StatementList = utils::Vector<const ast::Statement*, 8>;
+using StatementList = utils::Vector<const Statement*, 8>;
 
 /// PIMPL state for the transform
 struct ZeroInitWorkgroupMemory::State {
@@ -132,10 +132,10 @@ struct ZeroInitWorkgroupMemory::State {
     /// Run inserts the workgroup memory zero-initialization logic at the top of
     /// the given function
     /// @param fn a compute shader entry point function
-    void Run(const ast::Function* fn) {
+    void Run(const Function* fn) {
         auto& sem = ctx.src->Sem();
 
-        CalculateWorkgroupSize(ast::GetAttribute<ast::WorkgroupAttribute>(fn->attributes));
+        CalculateWorkgroupSize(GetAttribute<WorkgroupAttribute>(fn->attributes));
 
         // Generate a list of statements to zero initialize each of the
         // workgroup storage variables used by `fn`. This will populate #statements.
@@ -160,7 +160,7 @@ struct ZeroInitWorkgroupMemory::State {
         // parameter
         std::function<const ast::Expression*()> local_index;
         for (auto* param : fn->params) {
-            if (auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
+            if (auto* builtin_attr = GetAttribute<BuiltinAttribute>(param->attributes)) {
                 auto builtin = sem.Get(builtin_attr)->Value();
                 if (builtin == builtin::BuiltinValue::kLocalInvocationIndex) {
                     local_index = [=] { return b.Expr(ctx.Clone(param->name->symbol)); };
@@ -231,8 +231,8 @@ struct ZeroInitWorkgroupMemory::State {
                 //  }
                 auto idx = b.Symbols().New("idx");
                 auto* init = b.Decl(b.Var(idx, b.ty.u32(), local_index()));
-                auto* cond = b.create<ast::BinaryExpression>(ast::BinaryOp::kLessThan, b.Expr(idx),
-                                                             b.Expr(u32(num_iterations)));
+                auto* cond = b.create<BinaryExpression>(BinaryOp::kLessThan, b.Expr(idx),
+                                                        b.Expr(u32(num_iterations)));
                 auto* cont = b.Assign(
                     idx, b.Add(idx, workgroup_size_const ? b.Expr(u32(workgroup_size_const))
                                                          : workgroup_size_expr()));
@@ -251,8 +251,8 @@ struct ZeroInitWorkgroupMemory::State {
                 //  if (local_index < num_iterations) {
                 //    ...
                 //  }
-                auto* cond = b.create<ast::BinaryExpression>(
-                    ast::BinaryOp::kLessThan, local_index(), b.Expr(u32(num_iterations)));
+                auto* cond = b.create<BinaryExpression>(BinaryOp::kLessThan, local_index(),
+                                                        b.Expr(u32(num_iterations)));
                 auto block = DeclareArrayIndices(num_iterations, array_indices,
                                                  [&] { return b.Expr(local_index()); });
                 for (auto& s : stmts) {
@@ -382,8 +382,8 @@ struct ZeroInitWorkgroupMemory::State {
         for (auto index : array_indices) {
             auto name = array_index_names.at(index);
             auto* mod = (num_iterations > index.modulo)
-                            ? b.create<ast::BinaryExpression>(ast::BinaryOp::kModulo, iteration(),
-                                                              b.Expr(u32(index.modulo)))
+                            ? b.create<BinaryExpression>(BinaryOp::kModulo, iteration(),
+                                                         b.Expr(u32(index.modulo)))
                             : iteration();
             auto* div = (index.division != 1u) ? b.Div(mod, u32(index.division)) : mod;
             auto* decl = b.Decl(b.Let(name, b.ty.u32(), div));
@@ -395,7 +395,7 @@ struct ZeroInitWorkgroupMemory::State {
     /// CalculateWorkgroupSize initializes the members #workgroup_size_const and
     /// #workgroup_size_expr with the linear workgroup size.
     /// @param attr the workgroup attribute applied to the entry point function
-    void CalculateWorkgroupSize(const ast::WorkgroupAttribute* attr) {
+    void CalculateWorkgroupSize(const WorkgroupAttribute* attr) {
         bool is_signed = false;
         workgroup_size_const = 1u;
         workgroup_size_expr = nullptr;
@@ -471,7 +471,7 @@ Transform::ApplyResult ZeroInitWorkgroupMemory::Apply(const Program* src,
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     for (auto* fn : src->AST().Functions()) {
-        if (fn->PipelineStage() == ast::PipelineStage::kCompute) {
+        if (fn->PipelineStage() == PipelineStage::kCompute) {
             State{ctx}.Run(fn);
         }
     }

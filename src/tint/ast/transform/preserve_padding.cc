@@ -44,13 +44,13 @@ struct PreservePadding::State {
     /// @returns the ApplyResult
     ApplyResult Run() {
         // Gather a list of assignments that need to be transformed.
-        std::unordered_set<const ast::AssignmentStatement*> assignments_to_transform;
+        std::unordered_set<const AssignmentStatement*> assignments_to_transform;
         for (auto* node : ctx.src->ASTNodes().Objects()) {
             Switch(
                 node,  //
-                [&](const ast::AssignmentStatement* assign) {
+                [&](const AssignmentStatement* assign) {
                     auto* ty = sem.GetVal(assign->lhs)->Type();
-                    if (assign->lhs->Is<ast::PhonyExpression>()) {
+                    if (assign->lhs->Is<PhonyExpression>()) {
                         // Ignore phony assignment.
                         return;
                     }
@@ -65,7 +65,7 @@ struct PreservePadding::State {
                         assignments_to_transform.insert(assign);
                     }
                 },
-                [&](const ast::Enable* enable) {
+                [&](const Enable* enable) {
                     // Check if the full pointer parameters extension is already enabled.
                     if (enable->HasExtension(
                             builtin::Extension::kChromiumExperimentalFullPtrParameters)) {
@@ -78,7 +78,7 @@ struct PreservePadding::State {
         }
 
         // Replace all assignments that include padding with decomposed versions.
-        ctx.ReplaceAll([&](const ast::AssignmentStatement* assign) -> const ast::Statement* {
+        ctx.ReplaceAll([&](const AssignmentStatement* assign) -> const Statement* {
             if (!assignments_to_transform.count(assign)) {
                 return nullptr;
             }
@@ -96,9 +96,9 @@ struct PreservePadding::State {
     /// @param lhs the lhs expression (in the destination program)
     /// @param rhs the rhs expression (in the destination program)
     /// @returns the statement that performs the assignment
-    const ast::Statement* MakeAssignment(const type::Type* ty,
-                                         const ast::Expression* lhs,
-                                         const ast::Expression* rhs) {
+    const Statement* MakeAssignment(const type::Type* ty,
+                                    const Expression* lhs,
+                                    const Expression* rhs) {
         if (!HasPadding(ty)) {
             // No padding - use a regular assignment.
             return b.Assign(lhs, rhs);
@@ -120,7 +120,7 @@ struct PreservePadding::State {
             EnableExtension();
             auto helper = helpers.GetOrCreate(ty, [&]() {
                 auto helper_name = b.Symbols().New("assign_and_preserve_padding");
-                utils::Vector<const ast::Parameter*, 2> params = {
+                utils::Vector<const Parameter*, 2> params = {
                     b.Param(kDestParamName,
                             b.ty.pointer(CreateASTTypeFor(ctx, ty), builtin::AddressSpace::kStorage,
                                          builtin::Access::kReadWrite)),
@@ -137,7 +137,7 @@ struct PreservePadding::State {
             [&](const type::Array* arr) {
                 // Call a helper function that uses a loop to assigns each element separately.
                 return call_helper([&]() {
-                    utils::Vector<const ast::Statement*, 8> body;
+                    utils::Vector<const Statement*, 8> body;
                     auto* idx = b.Var("i", b.Expr(0_u));
                     body.Push(
                         b.For(b.Decl(idx), b.LessThan(idx, u32(arr->ConstantCount().value())),
@@ -151,7 +151,7 @@ struct PreservePadding::State {
             [&](const type::Matrix* mat) {
                 // Call a helper function that assigns each column separately.
                 return call_helper([&]() {
-                    utils::Vector<const ast::Statement*, 4> body;
+                    utils::Vector<const Statement*, 4> body;
                     for (uint32_t i = 0; i < mat->columns(); i++) {
                         body.Push(MakeAssignment(mat->ColumnType(),
                                                  b.IndexAccessor(b.Deref(kDestParamName), u32(i)),
@@ -163,7 +163,7 @@ struct PreservePadding::State {
             [&](const type::Struct* str) {
                 // Call a helper function that assigns each member separately.
                 return call_helper([&]() {
-                    utils::Vector<const ast::Statement*, 8> body;
+                    utils::Vector<const Statement*, 8> body;
                     for (auto member : str->Members()) {
                         auto name = member->Name().Name();
                         body.Push(MakeAssignment(member->Type(),

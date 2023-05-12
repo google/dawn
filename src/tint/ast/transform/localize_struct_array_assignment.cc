@@ -43,14 +43,14 @@ struct LocalizeStructArrayAssignment::State {
     ApplyResult Run() {
         struct Shared {
             bool process_nested_nodes = false;
-            utils::Vector<const ast::Statement*, 4> insert_before_stmts;
-            utils::Vector<const ast::Statement*, 4> insert_after_stmts;
+            utils::Vector<const Statement*, 4> insert_before_stmts;
+            utils::Vector<const Statement*, 4> insert_after_stmts;
         } s;
 
         bool made_changes = false;
 
         for (auto* node : ctx.src->ASTNodes().Objects()) {
-            if (auto* assign_stmt = node->As<ast::AssignmentStatement>()) {
+            if (auto* assign_stmt = node->As<AssignmentStatement>()) {
                 // Process if it's an assignment statement to a dynamically indexed array
                 // within a struct on a function or private storage variable. This
                 // specific use-case is what FXC fails to compile with:
@@ -70,7 +70,7 @@ struct LocalizeStructArrayAssignment::State {
                     // Reset shared state for this assignment statement
                     s = Shared{};
 
-                    const ast::Expression* new_lhs = nullptr;
+                    const Expression* new_lhs = nullptr;
                     {
                         TINT_SCOPED_ASSIGNMENT(s.process_nested_nodes, true);
                         new_lhs = ctx.Clone(assign_stmt->lhs);
@@ -98,53 +98,52 @@ struct LocalizeStructArrayAssignment::State {
             return SkipTransform;
         }
 
-        ctx.ReplaceAll(
-            [&](const ast::IndexAccessorExpression* index_access) -> const ast::Expression* {
-                if (!s.process_nested_nodes) {
-                    return nullptr;
+        ctx.ReplaceAll([&](const IndexAccessorExpression* index_access) -> const Expression* {
+            if (!s.process_nested_nodes) {
+                return nullptr;
+            }
+
+            // Indexing a member access expr?
+            auto* mem_access = index_access->object->As<MemberAccessorExpression>();
+            if (!mem_access) {
+                return nullptr;
+            }
+
+            // Process any nested IndexAccessorExpressions
+            mem_access = ctx.Clone(mem_access);
+
+            // Store the address of the member access into a let as we need to read
+            // the value twice e.g. let tint_symbol = &(s.a1);
+            auto mem_access_ptr = b.Sym();
+            s.insert_before_stmts.Push(b.Decl(b.Let(mem_access_ptr, b.AddressOf(mem_access))));
+
+            // Disable further transforms when cloning
+            TINT_SCOPED_ASSIGNMENT(s.process_nested_nodes, false);
+
+            // Copy entire array out of struct into local temp var
+            // e.g. var tint_symbol_1 = *(tint_symbol);
+            auto tmp_var = b.Sym();
+            s.insert_before_stmts.Push(b.Decl(b.Var(tmp_var, b.Deref(mem_access_ptr))));
+
+            // Replace input index_access with a clone of itself, but with its
+            // .object replaced by the new temp var. This is returned from this
+            // function to modify the original assignment statement. e.g.
+            // tint_symbol_1[uniforms.i]
+            auto* new_index_access = b.IndexAccessor(tmp_var, ctx.Clone(index_access->index));
+
+            // Assign temp var back to array
+            // e.g. *(tint_symbol) = tint_symbol_1;
+            auto* assign_rhs_to_temp = b.Assign(b.Deref(mem_access_ptr), tmp_var);
+            {
+                utils::Vector<const Statement*, 8> stmts{assign_rhs_to_temp};
+                for (auto* stmt : s.insert_after_stmts) {
+                    stmts.Push(stmt);
                 }
+                s.insert_after_stmts = std::move(stmts);
+            }
 
-                // Indexing a member access expr?
-                auto* mem_access = index_access->object->As<ast::MemberAccessorExpression>();
-                if (!mem_access) {
-                    return nullptr;
-                }
-
-                // Process any nested IndexAccessorExpressions
-                mem_access = ctx.Clone(mem_access);
-
-                // Store the address of the member access into a let as we need to read
-                // the value twice e.g. let tint_symbol = &(s.a1);
-                auto mem_access_ptr = b.Sym();
-                s.insert_before_stmts.Push(b.Decl(b.Let(mem_access_ptr, b.AddressOf(mem_access))));
-
-                // Disable further transforms when cloning
-                TINT_SCOPED_ASSIGNMENT(s.process_nested_nodes, false);
-
-                // Copy entire array out of struct into local temp var
-                // e.g. var tint_symbol_1 = *(tint_symbol);
-                auto tmp_var = b.Sym();
-                s.insert_before_stmts.Push(b.Decl(b.Var(tmp_var, b.Deref(mem_access_ptr))));
-
-                // Replace input index_access with a clone of itself, but with its
-                // .object replaced by the new temp var. This is returned from this
-                // function to modify the original assignment statement. e.g.
-                // tint_symbol_1[uniforms.i]
-                auto* new_index_access = b.IndexAccessor(tmp_var, ctx.Clone(index_access->index));
-
-                // Assign temp var back to array
-                // e.g. *(tint_symbol) = tint_symbol_1;
-                auto* assign_rhs_to_temp = b.Assign(b.Deref(mem_access_ptr), tmp_var);
-                {
-                    utils::Vector<const ast::Statement*, 8> stmts{assign_rhs_to_temp};
-                    for (auto* stmt : s.insert_after_stmts) {
-                        stmts.Push(stmt);
-                    }
-                    s.insert_after_stmts = std::move(stmts);
-                }
-
-                return new_index_access;
-            });
+            return new_index_access;
+        });
 
         ctx.Clone();
         return Program(std::move(b));
@@ -160,24 +159,23 @@ struct LocalizeStructArrayAssignment::State {
 
     /// Returns true if `expr` contains an index accessor expression to a
     /// structure member of array type.
-    bool ContainsStructArrayIndex(const ast::Expression* expr) {
+    bool ContainsStructArrayIndex(const Expression* expr) {
         bool result = false;
-        ast::TraverseExpressions(
-            expr, b.Diagnostics(), [&](const ast::IndexAccessorExpression* ia) {
-                // Indexing using a runtime value?
-                auto* idx_sem = src->Sem().GetVal(ia->index);
-                if (!idx_sem->ConstantValue()) {
-                    // Indexing a member access expr?
-                    if (auto* ma = ia->object->As<ast::MemberAccessorExpression>()) {
-                        // That accesses an array?
-                        if (src->TypeOf(ma)->UnwrapRef()->Is<type::Array>()) {
-                            result = true;
-                            return ast::TraverseAction::Stop;
-                        }
+        TraverseExpressions(expr, b.Diagnostics(), [&](const IndexAccessorExpression* ia) {
+            // Indexing using a runtime value?
+            auto* idx_sem = src->Sem().GetVal(ia->index);
+            if (!idx_sem->ConstantValue()) {
+                // Indexing a member access expr?
+                if (auto* ma = ia->object->As<MemberAccessorExpression>()) {
+                    // That accesses an array?
+                    if (src->TypeOf(ma)->UnwrapRef()->Is<type::Array>()) {
+                        result = true;
+                        return TraverseAction::Stop;
                     }
                 }
-                return ast::TraverseAction::Descend;
-            });
+            }
+            return TraverseAction::Descend;
+        });
 
         return result;
     }
@@ -186,7 +184,7 @@ struct LocalizeStructArrayAssignment::State {
     // of the assignment statement.
     // See https://www.w3.org/TR/WGSL/#originating-variable-section
     std::pair<const type::Type*, builtin::AddressSpace> GetOriginatingTypeAndAddressSpace(
-        const ast::AssignmentStatement* assign_stmt) {
+        const AssignmentStatement* assign_stmt) {
         auto* root_ident = src->Sem().GetVal(assign_stmt->lhs)->RootIdentifier();
         if (TINT_UNLIKELY(!root_ident)) {
             TINT_ICE(Transform, b.Diagnostics())

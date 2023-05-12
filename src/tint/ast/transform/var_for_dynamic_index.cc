@@ -37,7 +37,7 @@ Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
 
     // Extracts array and matrix values that are dynamically indexed to a
     // temporary `var` local that is then indexed.
-    auto dynamic_index_to_var = [&](const ast::IndexAccessorExpression* access_expr) {
+    auto dynamic_index_to_var = [&](const IndexAccessorExpression* access_expr) {
         auto* index_expr = access_expr->index;
         auto* object_expr = access_expr->object;
         auto& sem = src->Sem();
@@ -62,7 +62,7 @@ Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
 
     bool index_accessor_found = false;
     for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* access_expr = node->As<ast::IndexAccessorExpression>()) {
+        if (auto* access_expr = node->As<IndexAccessorExpression>()) {
             if (!dynamic_index_to_var(access_expr)) {
                 return Program(std::move(b));
             }

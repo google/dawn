@@ -26,7 +26,7 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (node->Is<ast::ForLoopStatement>()) {
+        if (node->Is<ForLoopStatement>()) {
             return true;
         }
     }
@@ -47,8 +47,8 @@ Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, 
     ProgramBuilder b;
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
-    ctx.ReplaceAll([&](const ast::ForLoopStatement* for_loop) -> const ast::Statement* {
-        utils::Vector<const ast::Statement*, 8> stmts;
+    ctx.ReplaceAll([&](const ForLoopStatement* for_loop) -> const Statement* {
+        utils::Vector<const Statement*, 8> stmts;
         if (auto* cond = for_loop->condition) {
             // !condition
             auto* not_cond = b.Not(ctx.Clone(cond));
@@ -63,7 +63,7 @@ Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, 
             stmts.Push(ctx.Clone(stmt));
         }
 
-        const ast::BlockStatement* continuing = nullptr;
+        const BlockStatement* continuing = nullptr;
         if (auto* cont = for_loop->continuing) {
             continuing = b.Block(ctx.Clone(cont));
         }

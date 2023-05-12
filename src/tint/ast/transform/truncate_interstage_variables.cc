@@ -74,7 +74,7 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
             continue;
         }
 
-        if (func_ast->PipelineStage() != ast::PipelineStage::kVertex) {
+        if (func_ast->PipelineStage() != PipelineStage::kVertex) {
             // Currently only vertex stage could have interstage output variables that need
             // truncated.
             continue;
@@ -118,8 +118,8 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
             old_shader_io_structs_to_new_struct_and_truncate_functions.GetOrCreate(str, [&] {
                 auto new_struct_sym = b.Symbols().New();
 
-                utils::Vector<const ast::StructMember*, 20> truncated_members;
-                utils::Vector<const ast::Expression*, 20> initializer_exprs;
+                utils::Vector<const StructMember*, 20> truncated_members;
+                utils::Vector<const Expression*, 20> initializer_exprs;
 
                 for (auto* member : str->Members()) {
                     if (omit_members.Contains(member)) {
@@ -155,7 +155,7 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
 
     // Replace return statements with new truncated shader IO struct
     ctx.ReplaceAll(
-        [&](const ast::ReturnStatement* return_statement) -> const ast::ReturnStatement* {
+        [&](const ReturnStatement* return_statement) -> const ReturnStatement* {
             auto* return_sem = sem.Get(return_statement);
             if (auto mapping_fn_sym =
                     entry_point_functions_to_truncate_functions.Find(return_sem->Function())) {
@@ -168,11 +168,11 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
     // Remove IO attributes from old shader IO struct which is not used as entry point output
     // anymore.
     for (auto it : old_shader_io_structs_to_new_struct_and_truncate_functions) {
-        const ast::Struct* struct_ty = it.key->Declaration();
+        const Struct* struct_ty = it.key->Declaration();
         for (auto* member : struct_ty->members) {
             for (auto* attr : member->attributes) {
-                if (attr->IsAnyOf<ast::BuiltinAttribute, ast::LocationAttribute,
-                                  ast::InterpolateAttribute, ast::InvariantAttribute>()) {
+                if (attr->IsAnyOf<BuiltinAttribute, LocationAttribute, InterpolateAttribute,
+                                  InvariantAttribute>()) {
                     ctx.Remove(member->attributes, attr);
                 }
             }

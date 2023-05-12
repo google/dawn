@@ -143,7 +143,7 @@ struct MultiplanarExternalTexture::State {
 
             // Replace the original texture_external binding with a texture_2d<f32> binding.
             auto cloned_attributes = ctx.Clone(global->attributes);
-            const ast::Expression* cloned_initializer = ctx.Clone(global->initializer);
+            const Expression* cloned_initializer = ctx.Clone(global->initializer);
 
             auto* replacement =
                 b.Var(syms.plane_0, b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32()),
@@ -153,7 +153,7 @@ struct MultiplanarExternalTexture::State {
 
         // We must update all the texture_external parameters for user declared functions.
         for (auto* fn : ctx.src->AST().Functions()) {
-            for (const ast::Variable* param : fn->params) {
+            for (const Variable* param : fn->params) {
                 if (auto* sem_var = sem.Get(param)) {
                     if (!sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
                         continue;
@@ -184,7 +184,7 @@ struct MultiplanarExternalTexture::State {
 
         // Transform the external texture builtin calls into calls to the external texture
         // functions.
-        ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
+        ctx.ReplaceAll([&](const CallExpression* expr) -> const CallExpression* {
             auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>();
             auto* builtin = call->Target()->As<sem::Builtin>();
 
@@ -305,10 +305,10 @@ struct MultiplanarExternalTexture::State {
     /// @param call_type determines which function body to generate
     /// @returns a statement list that makes of the body of the chosen function
     auto buildTextureBuiltinBody(builtin::Function call_type) {
-        utils::Vector<const ast::Statement*, 16> stmts;
-        const ast::CallExpression* single_plane_call = nullptr;
-        const ast::CallExpression* plane_0_call = nullptr;
-        const ast::CallExpression* plane_1_call = nullptr;
+        utils::Vector<const Statement*, 16> stmts;
+        const CallExpression* single_plane_call = nullptr;
+        const CallExpression* plane_0_call = nullptr;
+        const CallExpression* plane_1_call = nullptr;
         switch (call_type) {
             case builtin::Function::kTextureSampleBaseClampToEdge:
                 stmts.Push(b.Decl(b.Let(
@@ -395,9 +395,9 @@ struct MultiplanarExternalTexture::State {
     /// @param expr the call expression being transformed
     /// @param syms the expanded symbols to be used in the new call
     /// @returns a call expression to textureSampleExternal
-    const ast::CallExpression* createTextureSampleBaseClampToEdge(const ast::CallExpression* expr,
-                                                                  NewBindingSymbols syms) {
-        const ast::Expression* plane_0_binding_param = ctx.Clone(expr->args[0]);
+    const CallExpression* createTextureSampleBaseClampToEdge(const CallExpression* expr,
+                                                             NewBindingSymbols syms) {
+        const Expression* plane_0_binding_param = ctx.Clone(expr->args[0]);
 
         if (TINT_UNLIKELY(expr->args.Length() != 3)) {
             TINT_ICE(Transform, b.Diagnostics())
@@ -443,7 +443,7 @@ struct MultiplanarExternalTexture::State {
     /// @param call the call expression being transformed
     /// @param syms the expanded symbols to be used in the new call
     /// @returns a call expression to textureLoadExternal
-    const ast::CallExpression* createTextureLoad(const sem::Call* call, NewBindingSymbols syms) {
+    const CallExpression* createTextureLoad(const sem::Call* call, NewBindingSymbols syms) {
         if (TINT_UNLIKELY(call->Arguments().Length() != 2)) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "expected textureLoad call with a texture_external to have 2 arguments, found "

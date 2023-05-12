@@ -30,12 +30,12 @@ namespace tint::ast::transform {
 namespace {
 
 /// Returns `true` if `stmt` has the behavior `behavior`.
-bool HasBehavior(const Program* program, const ast::Statement* stmt, sem::Behavior behavior) {
+bool HasBehavior(const Program* program, const Statement* stmt, sem::Behavior behavior) {
     return program->Sem().Get(stmt)->Behaviors().Contains(behavior);
 }
 
 /// Returns `true` if `func` needs to be transformed.
-bool NeedsTransform(const Program* program, const ast::Function* func) {
+bool NeedsTransform(const Program* program, const Function* func) {
     // Entry points and intrinsic declarations never need transforming.
     if (func->IsEntryPoint() || func->body == nullptr) {
         return false;
@@ -49,7 +49,7 @@ bool NeedsTransform(const Program* program, const ast::Function* func) {
         if (HasBehavior(program, s, sem::Behavior::kReturn)) {
             // If this statement is itself a return, it will be the only exit point,
             // so no need to apply the transform to the function.
-            if (s->Is<ast::ReturnStatement>()) {
+            if (s->Is<ReturnStatement>()) {
                 return false;
             } else {
                 // Apply the transform in all other cases.
@@ -78,7 +78,7 @@ class State {
     ProgramBuilder& b;
 
     /// The function.
-    const ast::Function* function;
+    const Function* function;
 
     /// The symbol for the return flag variable.
     Symbol flag;
@@ -92,32 +92,32 @@ class State {
   public:
     /// Constructor
     /// @param context the clone context
-    State(CloneContext& context, const ast::Function* func)
+    State(CloneContext& context, const Function* func)
         : ctx(context), b(*ctx.dst), function(func) {}
 
     /// Process a statement (recursively).
-    void ProcessStatement(const ast::Statement* stmt) {
+    void ProcessStatement(const Statement* stmt) {
         if (stmt == nullptr || !HasBehavior(ctx.src, stmt, sem::Behavior::kReturn)) {
             return;
         }
 
         Switch(
-            stmt, [&](const ast::BlockStatement* block) { ProcessBlock(block); },
-            [&](const ast::CaseStatement* c) { ProcessStatement(c->body); },
-            [&](const ast::ForLoopStatement* f) {
+            stmt, [&](const BlockStatement* block) { ProcessBlock(block); },
+            [&](const CaseStatement* c) { ProcessStatement(c->body); },
+            [&](const ForLoopStatement* f) {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 ProcessStatement(f->body);
             },
-            [&](const ast::IfStatement* i) {
+            [&](const IfStatement* i) {
                 ProcessStatement(i->body);
                 ProcessStatement(i->else_statement);
             },
-            [&](const ast::LoopStatement* l) {
+            [&](const LoopStatement* l) {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 ProcessStatement(l->body);
             },
-            [&](const ast::ReturnStatement* r) {
-                utils::Vector<const ast::Statement*, 3> stmts;
+            [&](const ReturnStatement* r) {
+                utils::Vector<const Statement*, 3> stmts;
                 // Set the return flag to signal that we have hit a return.
                 stmts.Push(b.Assign(b.Expr(flag), true));
                 if (r->value) {
@@ -130,25 +130,25 @@ class State {
                 }
                 ctx.Replace(r, b.Block(std::move(stmts)));
             },
-            [&](const ast::SwitchStatement* s) {
+            [&](const SwitchStatement* s) {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 for (auto* c : s->body) {
                     ProcessStatement(c);
                 }
             },
-            [&](const ast::WhileStatement* w) {
+            [&](const WhileStatement* w) {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 ProcessStatement(w->body);
             },
             [&](Default) { TINT_ICE(Transform, b.Diagnostics()) << "unhandled statement type"; });
     }
 
-    void ProcessBlock(const ast::BlockStatement* block) {
+    void ProcessBlock(const BlockStatement* block) {
         // We will rebuild the contents of the block statement.
         // We may introduce conditionals around statements that follow a statement with the
         // `Return` behavior, so build a stack of statement lists that represent the new
         // (potentially nested) conditional blocks.
-        utils::Vector<utils::Vector<const ast::Statement*, 8>, 8> new_stmts({{}});
+        utils::Vector<utils::Vector<const Statement*, 8>, 8> new_stmts({{}});
 
         // Insert variables for the return flag and return value at the top of the function.
         if (block == function->body) {
@@ -173,8 +173,7 @@ class State {
                 if (is_in_loop_or_switch) {
                     // We're in a loop/switch, and so we would have inserted a `break`.
                     // If we've just come out of a loop/switch statement, we need to `break` again.
-                    if (s->IsAnyOf<ast::LoopStatement, ast::ForLoopStatement,
-                                   ast::SwitchStatement>()) {
+                    if (s->IsAnyOf<LoopStatement, ForLoopStatement, SwitchStatement>()) {
                         // If the loop only has the 'Return' behavior, we can just unconditionally
                         // break. Otherwise check the return flag.
                         if (HasBehavior(ctx.src, s, sem::Behavior::kNext)) {
@@ -194,7 +193,7 @@ class State {
 
         // Descend the stack of new block statements, wrapping them in conditionals.
         while (new_stmts.Length() > 1) {
-            const ast::IfStatement* i = nullptr;
+            const IfStatement* i = nullptr;
             if (new_stmts.Back().Length() > 0) {
                 i = b.If(b.Not(b.Expr(flag)), b.Block(new_stmts.Back()));
             }

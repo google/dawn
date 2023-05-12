@@ -41,7 +41,7 @@ struct PointerOp {
     /// Zero: no pointer op on `expr`
     int indirections = 0;
     /// The expression being operated on
-    const ast::Expression* expr = nullptr;
+    const Expression* expr = nullptr;
 };
 
 }  // namespace
@@ -64,29 +64,29 @@ struct SimplifyPointers::State {
     /// expression. The function-like argument `cb` is called for each found.
     /// @param expr the expression to traverse
     /// @param cb a function-like object with the signature
-    /// `void(const ast::Expression*)`, which is called for each array index
+    /// `void(const Expression*)`, which is called for each array index
     /// expression
     template <typename F>
-    static void CollectSavedArrayIndices(const ast::Expression* expr, F&& cb) {
-        if (auto* a = expr->As<ast::IndexAccessorExpression>()) {
+    static void CollectSavedArrayIndices(const Expression* expr, F&& cb) {
+        if (auto* a = expr->As<IndexAccessorExpression>()) {
             CollectSavedArrayIndices(a->object, cb);
-            if (!a->index->Is<ast::LiteralExpression>()) {
+            if (!a->index->Is<LiteralExpression>()) {
                 cb(a->index);
             }
             return;
         }
 
-        if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
+        if (auto* m = expr->As<MemberAccessorExpression>()) {
             CollectSavedArrayIndices(m->object, cb);
             return;
         }
 
-        if (auto* u = expr->As<ast::UnaryOpExpression>()) {
+        if (auto* u = expr->As<UnaryOpExpression>()) {
             CollectSavedArrayIndices(u->expr, cb);
             return;
         }
 
-        // Note: Other ast::Expression types can be safely ignored as they cannot be
+        // Note: Other Expression types can be safely ignored as they cannot be
         // used to generate a reference or pointer.
         // See https://gpuweb.github.io/gpuweb/wgsl/#forming-references-and-pointers
     }
@@ -95,16 +95,16 @@ struct SimplifyPointers::State {
     /// indirection ops into a PointerOp.
     /// @param in the expression to walk
     /// @returns the reduced PointerOp
-    PointerOp Reduce(const ast::Expression* in) const {
+    PointerOp Reduce(const Expression* in) const {
         PointerOp op{0, in};
         while (true) {
-            if (auto* unary = op.expr->As<ast::UnaryOpExpression>()) {
+            if (auto* unary = op.expr->As<UnaryOpExpression>()) {
                 switch (unary->op) {
-                    case ast::UnaryOp::kIndirection:
+                    case UnaryOp::kIndirection:
                         op.indirections++;
                         op.expr = unary->expr;
                         continue;
-                    case ast::UnaryOp::kAddressOf:
+                    case UnaryOp::kAddressOf:
                         op.indirections--;
                         op.expr = unary->expr;
                         continue;
@@ -114,8 +114,8 @@ struct SimplifyPointers::State {
             }
             if (auto* user = ctx.src->Sem().Get<sem::VariableUser>(op.expr)) {
                 auto* var = user->Variable();
-                if (var->Is<sem::LocalVariable>() &&       //
-                    var->Declaration()->Is<ast::Let>() &&  //
+                if (var->Is<sem::LocalVariable>() &&  //
+                    var->Declaration()->Is<Let>() &&  //
                     var->Type()->Is<type::Pointer>()) {
                     op.expr = var->Declaration()->initializer;
                     continue;
@@ -129,7 +129,7 @@ struct SimplifyPointers::State {
     /// @returns the new program or SkipTransform if the transform is not required
     ApplyResult Run() {
         // A map of saved expressions to their saved variable name
-        utils::Hashmap<const ast::Expression*, Symbol, 8> saved_vars;
+        utils::Hashmap<const Expression*, Symbol, 8> saved_vars;
 
         bool needs_transform = false;
         for (auto* ty : ctx.src->Types()) {
@@ -146,8 +146,8 @@ struct SimplifyPointers::State {
         for (auto* node : ctx.src->ASTNodes().Objects()) {
             Switch(
                 node,  //
-                [&](const ast::VariableDeclStatement* let) {
-                    if (!let->variable->Is<ast::Let>()) {
+                [&](const VariableDeclStatement* let) {
+                    if (!let->variable->Is<Let>()) {
                         return;  // Not a `let` declaration. Ignore.
                     }
 
@@ -160,9 +160,9 @@ struct SimplifyPointers::State {
 
                     // Scan the initializer expression for array index expressions that need
                     // to be hoist to temporary "saved" variables.
-                    utils::Vector<const ast::VariableDeclStatement*, 8> saved;
+                    utils::Vector<const VariableDeclStatement*, 8> saved;
                     CollectSavedArrayIndices(
-                        var->Declaration()->initializer, [&](const ast::Expression* idx_expr) {
+                        var->Declaration()->initializer, [&](const Expression* idx_expr) {
                             // We have a sub-expression that needs to be saved.
                             // Create a new variable
                             auto saved_name = ctx.dst->Symbols().New(
@@ -205,8 +205,8 @@ struct SimplifyPointers::State {
                     // need for the original declaration to exist. Remove it.
                     RemoveStatement(ctx, let);
                 },
-                [&](const ast::UnaryOpExpression* op) {
-                    if (op->op == ast::UnaryOp::kAddressOf) {
+                [&](const UnaryOpExpression* op) {
+                    if (op->op == UnaryOp::kAddressOf) {
                         // Transform can be skipped if no address-of operator is used, as there
                         // will be no pointers that can be inlined.
                         needs_transform = true;
@@ -218,7 +218,7 @@ struct SimplifyPointers::State {
             return SkipTransform;
         }
 
-        // Register the ast::Expression transform handler.
+        // Register the Expression transform handler.
         // This performs two different transformations:
         // * Identifiers that resolve to the pointer-typed `let` declarations are
         // replaced with the recursively inlined initializer expression for the
@@ -226,7 +226,7 @@ struct SimplifyPointers::State {
         // * Sub-expressions inside the pointer-typed `let` initializer expression
         // that have been hoisted to a saved variable are replaced with the saved
         // variable identifier.
-        ctx.ReplaceAll([&](const ast::Expression* expr) -> const ast::Expression* {
+        ctx.ReplaceAll([&](const Expression* expr) -> const Expression* {
             // Look to see if we need to swap this Expression with a saved variable.
             if (auto saved_var = saved_vars.Find(expr)) {
                 return ctx.dst->Expr(*saved_var);

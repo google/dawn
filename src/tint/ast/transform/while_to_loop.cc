@@ -26,7 +26,7 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (node->Is<ast::WhileStatement>()) {
+        if (node->Is<WhileStatement>()) {
             return true;
         }
     }
@@ -47,8 +47,8 @@ Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, Da
     ProgramBuilder b;
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
-    ctx.ReplaceAll([&](const ast::WhileStatement* w) -> const ast::Statement* {
-        utils::Vector<const ast::Statement*, 16> stmts;
+    ctx.ReplaceAll([&](const WhileStatement* w) -> const Statement* {
+        utils::Vector<const Statement*, 16> stmts;
         auto* cond = w->condition;
 
         // !condition
@@ -64,7 +64,7 @@ Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, Da
             stmts.Push(ctx.Clone(stmt));
         }
 
-        const ast::BlockStatement* continuing = nullptr;
+        const BlockStatement* continuing = nullptr;
 
         auto* body = b.Block(stmts);
         auto* loop = b.Loop(body, continuing);

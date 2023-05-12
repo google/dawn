@@ -58,7 +58,7 @@ struct Robustness::State {
         for (auto* node : ctx.src->ASTNodes().Objects()) {
             Switch(
                 node,  //
-                [&](const ast::IndexAccessorExpression* e) {
+                [&](const IndexAccessorExpression* e) {
                     // obj[idx]
                     // Array, matrix and vector indexing may require robustness transformation.
                     auto* expr = sem.Get(e)->Unwrap()->As<sem::IndexAccessorExpression>();
@@ -73,7 +73,7 @@ struct Robustness::State {
                             break;
                     }
                 },
-                [&](const ast::IdentifierExpression* e) {
+                [&](const IdentifierExpression* e) {
                     // Identifiers may resolve to pointer lets, which may be predicated.
                     // Inspect.
                     if (auto* user = sem.Get<sem::VariableUser>(e)) {
@@ -86,42 +86,42 @@ struct Robustness::State {
                         }
                     }
                 },
-                [&](const ast::AccessorExpression* e) {
+                [&](const AccessorExpression* e) {
                     // obj.member
                     // Propagate the predication from the object to this expression.
                     if (auto pred = predicates.Get(e->object)) {
                         predicates.Add(e, *pred);
                     }
                 },
-                [&](const ast::UnaryOpExpression* e) {
+                [&](const UnaryOpExpression* e) {
                     // Includes address-of, or indirection
                     // Propagate the predication from the inner expression to this expression.
                     if (auto pred = predicates.Get(e->expr)) {
                         predicates.Add(e, *pred);
                     }
                 },
-                [&](const ast::AssignmentStatement* s) {
+                [&](const AssignmentStatement* s) {
                     if (auto pred = predicates.Get(s->lhs)) {
                         // Assignment target is predicated
                         // Replace statement with condition on the predicate
                         ctx.Replace(s, b.If(*pred, b.Block(ctx.Clone(s))));
                     }
                 },
-                [&](const ast::CompoundAssignmentStatement* s) {
+                [&](const CompoundAssignmentStatement* s) {
                     if (auto pred = predicates.Get(s->lhs)) {
                         // Assignment expression is predicated
                         // Replace statement with condition on the predicate
                         ctx.Replace(s, b.If(*pred, b.Block(ctx.Clone(s))));
                     }
                 },
-                [&](const ast::IncrementDecrementStatement* s) {
+                [&](const IncrementDecrementStatement* s) {
                     if (auto pred = predicates.Get(s->lhs)) {
                         // Assignment expression is predicated
                         // Replace statement with condition on the predicate
                         ctx.Replace(s, b.If(*pred, b.Block(ctx.Clone(s))));
                     }
                 },
-                [&](const ast::CallExpression* e) {
+                [&](const CallExpression* e) {
                     if (auto* call = sem.Get<sem::Call>(e)) {
                         Switch(
                             call->Target(),  //
@@ -163,7 +163,7 @@ struct Robustness::State {
             //     predicated_expr = expr;
             //   }
             //
-            if (auto* expr = node->As<ast::Expression>()) {
+            if (auto* expr = node->As<Expression>()) {
                 if (auto pred = predicates.Get(expr)) {
                     // Expression is predicated
                     auto* sem_expr = sem.GetVal(expr);
@@ -202,15 +202,15 @@ struct Robustness::State {
     /// Alias to the source program's semantic info
     const sem::Info& sem = ctx.src->Sem();
     /// Map of expression to predicate condition
-    utils::Hashmap<const ast::Expression*, Symbol, 32> predicates{};
+    utils::Hashmap<const Expression*, Symbol, 32> predicates{};
 
     /// @return the `u32` typed expression that represents the maximum indexable value for the index
     /// accessor @p expr, or nullptr if there is no robustness limit for this expression.
-    const ast::Expression* DynamicLimitFor(const sem::IndexAccessorExpression* expr) {
+    const Expression* DynamicLimitFor(const sem::IndexAccessorExpression* expr) {
         auto* obj_type = expr->Object()->Type();
         return Switch(
             obj_type->UnwrapRef(),  //
-            [&](const type::Vector* vec) -> const ast::Expression* {
+            [&](const type::Vector* vec) -> const Expression* {
                 if (expr->Index()->ConstantValue() || expr->Index()->Is<sem::Swizzle>()) {
                     // Index and size is constant.
                     // Validation will have rejected any OOB accesses.
@@ -218,7 +218,7 @@ struct Robustness::State {
                 }
                 return b.Expr(u32(vec->Width() - 1u));
             },
-            [&](const type::Matrix* mat) -> const ast::Expression* {
+            [&](const type::Matrix* mat) -> const Expression* {
                 if (expr->Index()->ConstantValue()) {
                     // Index and size is constant.
                     // Validation will have rejected any OOB accesses.
@@ -226,7 +226,7 @@ struct Robustness::State {
                 }
                 return b.Expr(u32(mat->columns() - 1u));
             },
-            [&](const type::Array* arr) -> const ast::Expression* {
+            [&](const type::Array* arr) -> const Expression* {
                 if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                     // Size is unknown until runtime.
                     // Must clamp, even if the index is constant.
@@ -248,7 +248,7 @@ struct Robustness::State {
                                           type::Array::kErrExpectedConstantCount);
                 return nullptr;
             },
-            [&](Default) -> const ast::Expression* {
+            [&](Default) -> const Expression* {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "unhandled object type in robustness of array index: "
                     << obj_type->UnwrapRef()->FriendlyName();
@@ -350,7 +350,7 @@ struct Robustness::State {
     /// Applies predication to the non-texture builtin call, if required.
     void MaybePredicateNonTextureBuiltin(const sem::Call* call, const sem::Builtin* builtin) {
         // Gather the predications for the builtin arguments
-        const ast::Expression* predicate = nullptr;
+        const Expression* predicate = nullptr;
         for (auto* arg : call->Declaration()->args) {
             if (auto pred = predicates.Get(arg)) {
                 predicate = And(predicate, b.Expr(*pred));
@@ -393,7 +393,7 @@ struct Robustness::State {
         auto* texture_arg = expr->args[static_cast<size_t>(texture_arg_idx)];
 
         // Build the builtin predicate from the arguments
-        const ast::Expression* predicate = nullptr;
+        const Expression* predicate = nullptr;
 
         Symbol level_idx, num_levels;
         if (level_arg_idx >= 0) {
@@ -554,7 +554,7 @@ struct Robustness::State {
     }
 
     /// @returns a bitwise and of the two expressions, or the other expression if one is null.
-    const ast::Expression* And(const ast::Expression* lhs, const ast::Expression* rhs) {
+    const Expression* And(const Expression* lhs, const Expression* rhs) {
         if (lhs && rhs) {
             return b.And(lhs, rhs);
         }
@@ -568,11 +568,11 @@ struct Robustness::State {
     /// predicate.
     /// @param else_stmt - the statement to execute for the predication failure
     void PredicateCall(const sem::Call* call,
-                       const ast::Expression* predicate,
-                       const ast::BlockStatement* else_stmt = nullptr) {
+                       const Expression* predicate,
+                       const BlockStatement* else_stmt = nullptr) {
         auto* expr = call->Declaration();
         auto* stmt = call->Stmt();
-        auto* call_stmt = stmt->Declaration()->As<ast::CallStatement>();
+        auto* call_stmt = stmt->Declaration()->As<CallStatement>();
         if (call_stmt && call_stmt->expr == expr) {
             // Wrap the statement in an if-statement with the predicate condition.
             hoist.Replace(stmt, b.If(predicate, b.Block(ctx.Clone(stmt->Declaration())),
@@ -646,7 +646,7 @@ struct Robustness::State {
     }
 
     /// @returns a scalar or vector type with the element type @p scalar and width @p width
-    ast::Type ScalarOrVecTy(ast::Type scalar, uint32_t width) const {
+    Type ScalarOrVecTy(Type scalar, uint32_t width) const {
         if (width > 1) {
             return b.ty.vec(scalar, width);
         }
@@ -655,7 +655,7 @@ struct Robustness::State {
 
     /// @returns a vector constructed with the scalar expression @p scalar if @p width > 1,
     /// otherwise returns @p scalar.
-    const ast::Expression* ScalarOrVec(const ast::Expression* scalar, uint32_t width) {
+    const Expression* ScalarOrVec(const Expression* scalar, uint32_t width) {
         if (width > 1) {
             return b.Call(b.ty.vec<Infer>(width), scalar);
         }
@@ -664,13 +664,13 @@ struct Robustness::State {
 
     /// @returns @p val cast to a `vecN<i32>`, where `N` is @p width, or cast to i32 if @p width
     /// is 1.
-    const ast::CallExpression* CastToSigned(const ast::Expression* val, uint32_t width) {
+    const CallExpression* CastToSigned(const Expression* val, uint32_t width) {
         return b.Call(ScalarOrVecTy(b.ty.i32(), width), val);
     }
 
     /// @returns @p val cast to a `vecN<u32>`, where `N` is @p width, or cast to u32 if @p width
     /// is 1.
-    const ast::CallExpression* CastToUnsigned(const ast::Expression* val, uint32_t width) {
+    const CallExpression* CastToUnsigned(const Expression* val, uint32_t width) {
         return b.Call(ScalarOrVecTy(b.ty.u32(), width), val);
     }
 };

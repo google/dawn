@@ -628,7 +628,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont) {
     ProgramBuilder b;
     b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
-    auto* cont = b.CompoundAssign("a", b.Expr(1_i), ast::BinaryOp::kAdd);
+    auto* cont = b.CompoundAssign("a", b.Expr(1_i), BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
@@ -637,7 +637,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* before_stmt = ctx.src->Sem().Get(cont->As<ast::Statement>());
+    auto* before_stmt = ctx.src->Sem().Get(cont->As<Statement>());
     auto* new_stmt = ctx.dst->CallStmt(ctx.dst->Call("foo"));
     hoistToDeclBefore.InsertBefore(before_stmt, new_stmt);
 
@@ -679,7 +679,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont_Function) {
     ProgramBuilder b;
     b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
-    auto* cont = b.CompoundAssign("a", b.Expr(1_i), ast::BinaryOp::kAdd);
+    auto* cont = b.CompoundAssign("a", b.Expr(1_i), BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
@@ -688,7 +688,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont_Function) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* before_stmt = ctx.src->Sem().Get(cont->As<ast::Statement>());
+    auto* before_stmt = ctx.src->Sem().Get(cont->As<Statement>());
     hoistToDeclBefore.InsertBefore(before_stmt,
                                    [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
@@ -1048,7 +1048,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont) {
     ProgramBuilder b;
     b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
-    auto* cont = b.CompoundAssign("a", b.Expr(1_i), ast::BinaryOp::kAdd);
+    auto* cont = b.CompoundAssign("a", b.Expr(1_i), BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
@@ -1057,7 +1057,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* target_stmt = ctx.src->Sem().Get(cont->As<ast::Statement>());
+    auto* target_stmt = ctx.src->Sem().Get(cont->As<Statement>());
     auto* new_stmt = ctx.dst->CallStmt(ctx.dst->Call("foo"));
     hoistToDeclBefore.Replace(target_stmt, new_stmt);
 
@@ -1098,7 +1098,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont_Function) {
     ProgramBuilder b;
     b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
-    auto* cont = b.CompoundAssign("a", b.Expr(1_i), ast::BinaryOp::kAdd);
+    auto* cont = b.CompoundAssign("a", b.Expr(1_i), BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
@@ -1107,7 +1107,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont_Function) {
     CloneContext ctx(&cloned_b, &original);
 
     HoistToDeclBefore hoistToDeclBefore(ctx);
-    auto* target_stmt = ctx.src->Sem().Get(cont->As<ast::Statement>());
+    auto* target_stmt = ctx.src->Sem().Get(cont->As<Statement>());
     hoistToDeclBefore.Replace(target_stmt, [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
     ctx.Clone();

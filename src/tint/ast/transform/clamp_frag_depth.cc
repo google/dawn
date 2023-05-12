@@ -51,7 +51,7 @@ struct ClampFragDepth::State {
     Transform::ApplyResult Run() {
         // Abort on any use of push constants in the module.
         for (auto* global : src->AST().GlobalVariables()) {
-            if (auto* var = global->As<ast::Var>()) {
+            if (auto* var = global->As<Var>()) {
                 auto* v = src->Sem().Get(var);
                 if (TINT_UNLIKELY(v->AddressSpace() == builtin::AddressSpace::kPushConstant)) {
                     TINT_ICE(Transform, b.Diagnostics())
@@ -101,14 +101,14 @@ struct ClampFragDepth::State {
 
         // Map of io struct to helper function to return the structure with the depth clamping
         // applied.
-        utils::Hashmap<const ast::Struct*, Symbol, 4u> io_structs_clamp_helpers;
+        utils::Hashmap<const Struct*, Symbol, 4u> io_structs_clamp_helpers;
 
         // Register a callback that will be called for each visted AST function.
         // This call wraps the cloning of the function's statements, and will assign to
         // `returns_frag_depth_as_value` or `returns_frag_depth_as_struct_helper` if the function's
         // return value requires depth clamping.
-        ctx.ReplaceAll([&](const ast::Function* fn) {
-            if (fn->PipelineStage() != ast::PipelineStage::kFragment) {
+        ctx.ReplaceAll([&](const Function* fn) {
+            if (fn->PipelineStage() != PipelineStage::kFragment) {
                 return ctx.CloneWithoutTransform(fn);
             }
 
@@ -129,9 +129,9 @@ struct ClampFragDepth::State {
                     auto fn_sym =
                         b.Symbols().New("clamp_frag_depth_" + struct_ty->name->symbol.Name());
 
-                    utils::Vector<const ast::Expression*, 8u> initializer_args;
+                    utils::Vector<const Expression*, 8u> initializer_args;
                     for (auto* member : struct_ty->members) {
-                        const ast::Expression* arg =
+                        const Expression* arg =
                             b.MemberAccessor("s", ctx.Clone(member->name->symbol));
                         if (ContainsFragDepth(member->attributes)) {
                             arg = b.Call(base_fn_sym, arg);
@@ -154,7 +154,7 @@ struct ClampFragDepth::State {
         });
 
         // Replace the return statements `return expr` with `return clamp_frag_depth(expr)`.
-        ctx.ReplaceAll([&](const ast::ReturnStatement* stmt) -> const ast::ReturnStatement* {
+        ctx.ReplaceAll([&](const ReturnStatement* stmt) -> const ReturnStatement* {
             if (returns_frag_depth_as_value) {
                 return b.Return(stmt->source, b.Call(base_fn_sym, ctx.Clone(stmt->value)));
             }
@@ -173,7 +173,7 @@ struct ClampFragDepth::State {
     /// @returns true if the transform should run
     bool ShouldRun() {
         for (auto* fn : src->AST().Functions()) {
-            if (fn->PipelineStage() == ast::PipelineStage::kFragment &&
+            if (fn->PipelineStage() == PipelineStage::kFragment &&
                 (ReturnsFragDepthAsValue(fn) || ReturnsFragDepthInStruct(fn))) {
                 return true;
             }
@@ -183,9 +183,9 @@ struct ClampFragDepth::State {
     }
     /// @param attrs the attributes to examine
     /// @returns true if @p attrs contains a `@builtin(frag_depth)` attribute
-    bool ContainsFragDepth(utils::VectorRef<const ast::Attribute*> attrs) {
+    bool ContainsFragDepth(utils::VectorRef<const Attribute*> attrs) {
         for (auto* attribute : attrs) {
-            if (auto* builtin_attr = attribute->As<ast::BuiltinAttribute>()) {
+            if (auto* builtin_attr = attribute->As<BuiltinAttribute>()) {
                 auto builtin = sem.Get(builtin_attr)->Value();
                 if (builtin == builtin::BuiltinValue::kFragDepth) {
                     return true;
@@ -198,14 +198,14 @@ struct ClampFragDepth::State {
 
     /// @param fn the function to examine
     /// @returns true if @p fn has a return type with a `@builtin(frag_depth)` attribute
-    bool ReturnsFragDepthAsValue(const ast::Function* fn) {
+    bool ReturnsFragDepthAsValue(const Function* fn) {
         return ContainsFragDepth(fn->return_type_attributes);
     }
 
     /// @param fn the function to examine
     /// @returns true if @p fn has a return structure with a `@builtin(frag_depth)` attribute on one
     /// of the members
-    bool ReturnsFragDepthInStruct(const ast::Function* fn) {
+    bool ReturnsFragDepthInStruct(const Function* fn) {
         if (auto* struct_ty = sem.Get(fn)->ReturnType()->As<sem::Struct>()) {
             for (auto* member : struct_ty->Members()) {
                 if (ContainsFragDepth(member->Declaration()->attributes)) {

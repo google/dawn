@@ -33,8 +33,8 @@ namespace tint::ast::transform {
 
 namespace {
 
-void CreatePadding(utils::Vector<const ast::StructMember*, 8>* new_members,
-                   utils::Hashset<const ast::StructMember*, 8>* padding_members,
+void CreatePadding(utils::Vector<const StructMember*, 8>* new_members,
+                   utils::Hashset<const StructMember*, 8>* padding_members,
                    ProgramBuilder* b,
                    uint32_t bytes) {
     const size_t count = bytes / 4u;
@@ -59,17 +59,17 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     auto& sem = src->Sem();
 
-    std::unordered_map<const ast::Struct*, const ast::Struct*> replaced_structs;
-    utils::Hashset<const ast::StructMember*, 8> padding_members;
+    std::unordered_map<const Struct*, const Struct*> replaced_structs;
+    utils::Hashset<const StructMember*, 8> padding_members;
 
-    ctx.ReplaceAll([&](const ast::Struct* ast_str) -> const ast::Struct* {
+    ctx.ReplaceAll([&](const Struct* ast_str) -> const Struct* {
         auto* str = sem.Get(ast_str);
         if (!str || !str->IsHostShareable()) {
             return nullptr;
         }
         uint32_t offset = 0;
         bool has_runtime_sized_array = false;
-        utils::Vector<const ast::StructMember*, 8> new_members;
+        utils::Vector<const StructMember*, 8> new_members;
         for (auto* mem : str->Members()) {
             auto name = mem->Name().Name();
 
@@ -104,19 +104,18 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
             CreatePadding(&new_members, &padding_members, ctx.dst, struct_size - offset);
         }
 
-        utils::Vector<const ast::Attribute*, 1> struct_attribs;
+        utils::Vector<const Attribute*, 1> struct_attribs;
         if (!padding_members.IsEmpty()) {
-            struct_attribs =
-                utils::Vector{b.Disable(ast::DisabledValidation::kIgnoreStructMemberLimit)};
+            struct_attribs = utils::Vector{b.Disable(DisabledValidation::kIgnoreStructMemberLimit)};
         }
 
-        auto* new_struct = b.create<ast::Struct>(ctx.Clone(ast_str->name), std::move(new_members),
-                                                 std::move(struct_attribs));
+        auto* new_struct = b.create<Struct>(ctx.Clone(ast_str->name), std::move(new_members),
+                                            std::move(struct_attribs));
         replaced_structs[ast_str] = new_struct;
         return new_struct;
     });
 
-    ctx.ReplaceAll([&](const ast::CallExpression* ast_call) -> const ast::CallExpression* {
+    ctx.ReplaceAll([&](const CallExpression* ast_call) -> const CallExpression* {
         if (ast_call->args.Length() == 0) {
             return nullptr;
         }
@@ -139,7 +138,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
             return nullptr;
         }
 
-        utils::Vector<const ast::Expression*, 8> new_args;
+        utils::Vector<const Expression*, 8> new_args;
 
         auto* arg = ast_call->args.begin();
         for (auto* member : new_struct->members) {

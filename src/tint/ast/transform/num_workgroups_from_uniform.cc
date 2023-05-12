@@ -33,7 +33,7 @@ namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* attr = node->As<ast::BuiltinAttribute>()) {
+        if (auto* attr = node->As<BuiltinAttribute>()) {
             if (program->Sem().Get(attr)->Value() == builtin::BuiltinValue::kNumWorkgroups) {
                 return true;
             }
@@ -86,7 +86,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     std::unordered_set<Accessor, Accessor::Hasher> to_replace;
     for (auto* func : src->AST().Functions()) {
         // num_workgroups is only valid for compute stages.
-        if (func->PipelineStage() != ast::PipelineStage::kCompute) {
+        if (func->PipelineStage() != PipelineStage::kCompute) {
             continue;
         }
 
@@ -126,7 +126,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
 
     // Get (or create, on first call) the uniform buffer that will receive the
     // number of workgroups.
-    const ast::Variable* num_workgroups_ubo = nullptr;
+    const Variable* num_workgroups_ubo = nullptr;
     auto get_ubo = [&]() {
         if (!num_workgroups_ubo) {
             auto* num_workgroups_struct =
@@ -166,11 +166,11 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     // Now replace all the places where the builtins are accessed with the value
     // loaded from the uniform buffer.
     for (auto* node : src->ASTNodes().Objects()) {
-        auto* accessor = node->As<ast::MemberAccessorExpression>();
+        auto* accessor = node->As<MemberAccessorExpression>();
         if (!accessor) {
             continue;
         }
-        auto* ident = accessor->object->As<ast::IdentifierExpression>();
+        auto* ident = accessor->object->As<IdentifierExpression>();
         if (!ident) {
             continue;
         }

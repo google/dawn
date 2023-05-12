@@ -69,7 +69,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
             }
         }
 
-        if (auto* src_var_decl = expr->Stmt()->Declaration()->As<ast::VariableDeclStatement>()) {
+        if (auto* src_var_decl = expr->Stmt()->Declaration()->As<VariableDeclStatement>()) {
             if (src_var_decl->variable->initializer == expr->Declaration()) {
                 // This statement is just a variable declaration with the initializer as the
                 // initializer value. This is what we're attempting to transform to, and so
@@ -84,7 +84,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     // A list of expressions that should be hoisted.
     utils::Vector<const sem::ValueExpression*, 32> to_hoist;
     // A set of expressions that are constant, which _may_ need to be hoisted.
-    utils::Hashset<const ast::Expression*, 32> const_chains;
+    utils::Hashset<const Expression*, 32> const_chains;
 
     // Walk the AST nodes. This order guarantees that leaf-expressions are visited first.
     for (auto* node : src->ASTNodes().Objects()) {
@@ -104,12 +104,10 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
                 // visit leaf-expressions first, this means the content of const_chains only
                 // contains the outer-most constant expressions.
                 auto* expr = sem->Declaration();
-                bool ok = ast::TraverseExpressions(
-                    expr, b.Diagnostics(), [&](const ast::Expression* child) {
-                        const_chains.Remove(child);
-                        return child == expr ? ast::TraverseAction::Descend
-                                             : ast::TraverseAction::Skip;
-                    });
+                bool ok = TraverseExpressions(expr, b.Diagnostics(), [&](const Expression* child) {
+                    const_chains.Remove(child);
+                    return child == expr ? TraverseAction::Descend : TraverseAction::Skip;
+                });
                 if (!ok) {
                     return Program(std::move(b));
                 }

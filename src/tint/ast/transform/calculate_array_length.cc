@@ -57,7 +57,7 @@ bool ShouldRun(const Program* program) {
 /// ArrayUsage describes a runtime array usage.
 /// It is used as a key by the array_length_by_usage map.
 struct ArrayUsage {
-    ast::BlockStatement const* const block;
+    BlockStatement const* const block;
     sem::Variable const* const buffer;
     bool operator==(const ArrayUsage& rhs) const {
         return block == rhs.block && buffer == rhs.buffer;
@@ -71,7 +71,7 @@ struct ArrayUsage {
 
 }  // namespace
 
-CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(ProgramID pid, ast::NodeID nid)
+CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(ProgramID pid, NodeID nid)
     : Base(pid, nid, utils::Empty) {}
 CalculateArrayLength::BufferSizeIntrinsic::~BufferSizeIntrinsic() = default;
 std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
@@ -106,7 +106,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
         return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
             auto name = b.Sym();
             auto type = CreateASTTypeFor(ctx, buffer_type);
-            auto* disable_validation = b.Disable(ast::DisabledValidation::kFunctionParameter);
+            auto* disable_validation = b.Disable(DisabledValidation::kFunctionParameter);
             b.Func(
                 name,
                 utils::Vector{
@@ -128,13 +128,13 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
 
     // Find all the arrayLength() calls...
     for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* call_expr = node->As<ast::CallExpression>()) {
+        if (auto* call_expr = node->As<CallExpression>()) {
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                 if (builtin->Type() == builtin::Function::kArrayLength) {
                     // We're dealing with an arrayLength() call
 
-                    if (auto* call_stmt = call->Stmt()->Declaration()->As<ast::CallStatement>()) {
+                    if (auto* call_stmt = call->Stmt()->Declaration()->As<CallStatement>()) {
                         if (call_stmt->expr == call_expr) {
                             // arrayLength() is used as a statement.
                             // The argument expression must be side-effect free, so just drop the
@@ -151,13 +151,13 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                     //   arrayLength(&struct_var.array_member)
                     //   arrayLength(&array_var)
                     auto* arg = call_expr->args[0];
-                    auto* address_of = arg->As<ast::UnaryOpExpression>();
-                    if (TINT_UNLIKELY(!address_of || address_of->op != ast::UnaryOp::kAddressOf)) {
+                    auto* address_of = arg->As<UnaryOpExpression>();
+                    if (TINT_UNLIKELY(!address_of || address_of->op != UnaryOp::kAddressOf)) {
                         TINT_ICE(Transform, b.Diagnostics())
                             << "arrayLength() expected address-of, got " << arg->TypeInfo().name;
                     }
                     auto* storage_buffer_expr = address_of->expr;
-                    if (auto* accessor = storage_buffer_expr->As<ast::MemberAccessorExpression>()) {
+                    if (auto* accessor = storage_buffer_expr->As<MemberAccessorExpression>()) {
                         storage_buffer_expr = accessor->object;
                     }
                     auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
@@ -199,8 +199,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                             // array_length = ----------------------------------------
                             //                             array_stride
                             auto name = b.Sym();
-                            const ast::Expression* total_size =
-                                b.Expr(buffer_size_result->variable);
+                            const Expression* total_size = b.Expr(buffer_size_result->variable);
 
                             const type::Array* array_type = Switch(
                                 storage_buffer_type->StoreType(),

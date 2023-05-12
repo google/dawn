@@ -50,29 +50,27 @@ struct Unshadow::State {
         // Maps a variable to its new name.
         utils::Hashmap<const sem::Variable*, Symbol, 8> renamed_to;
 
-        auto rename = [&](const sem::Variable* v) -> const ast::Variable* {
+        auto rename = [&](const sem::Variable* v) -> const Variable* {
             auto* decl = v->Declaration();
             auto name = decl->name->symbol.Name();
             auto symbol = b.Symbols().New(name);
             renamed_to.Add(v, symbol);
 
             auto source = ctx.Clone(decl->source);
-            auto type = decl->type ? ctx.Clone(decl->type) : ast::Type{};
+            auto type = decl->type ? ctx.Clone(decl->type) : Type{};
             auto* initializer = ctx.Clone(decl->initializer);
             auto attributes = ctx.Clone(decl->attributes);
             return Switch(
                 decl,  //
-                [&](const ast::Var* var) {
+                [&](const Var* var) {
                     return b.Var(source, symbol, type, var->declared_address_space,
                                  var->declared_access, initializer, attributes);
                 },
-                [&](const ast::Let*) {
-                    return b.Let(source, symbol, type, initializer, attributes);
-                },
-                [&](const ast::Const*) {
+                [&](const Let*) { return b.Let(source, symbol, type, initializer, attributes); },
+                [&](const Const*) {
                     return b.Const(source, symbol, type, initializer, attributes);
                 },
-                [&](const ast::Parameter*) {  //
+                [&](const Parameter*) {  //
                     return b.Param(source, symbol, type, attributes);
                 },
                 [&](Default) {
@@ -105,17 +103,16 @@ struct Unshadow::State {
             return SkipTransform;
         }
 
-        ctx.ReplaceAll(
-            [&](const ast::IdentifierExpression* ident) -> const tint::ast::IdentifierExpression* {
-                if (auto* sem_ident = sem.GetVal(ident)) {
-                    if (auto* user = sem_ident->Unwrap()->As<sem::VariableUser>()) {
-                        if (auto renamed = renamed_to.Find(user->Variable())) {
-                            return b.Expr(*renamed);
-                        }
+        ctx.ReplaceAll([&](const IdentifierExpression* ident) -> const IdentifierExpression* {
+            if (auto* sem_ident = sem.GetVal(ident)) {
+                if (auto* user = sem_ident->Unwrap()->As<sem::VariableUser>()) {
+                    if (auto renamed = renamed_to.Find(user->Variable())) {
+                        return b.Expr(*renamed);
                     }
                 }
-                return nullptr;
-            });
+            }
+            return nullptr;
+        });
 
         ctx.Clone();
         return Program(std::move(b));
