@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math"
 	"net/http"
 	"os"
 	"os/exec"
@@ -42,6 +41,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cov"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/git"
+	"dawn.googlesource.com/dawn/tools/src/progressbar"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 )
@@ -911,7 +911,7 @@ func (r *runner) streamResults(ctx context.Context, wg *sync.WaitGroup, results 
 	// Helper function for printing a progress bar.
 	lastStatusUpdate, animFrame := time.Now(), 0
 	updateProgress := func() {
-		fmt.Fprint(r.stdout, ansiProgressBar(animFrame, numTests, numByExpectedStatus))
+		drawProgressBar(r.stdout, animFrame, numTests, numByExpectedStatus)
 		animFrame++
 		lastStatusUpdate = time.Now()
 	}
@@ -971,7 +971,7 @@ func (r *runner) streamResults(ctx context.Context, wg *sync.WaitGroup, results 
 			covTree.Add(SplitCTSQuery(res.testcase), res.coverage)
 		}
 	}
-	fmt.Fprint(r.stdout, ansiProgressBar(animFrame, numTests, numByExpectedStatus))
+	drawProgressBar(r.stdout, animFrame, numTests, numByExpectedStatus)
 
 	// All done. Print final stats.
 	fmt.Fprintf(r.stdout, "\nCompleted in %v\n", timeTaken)
@@ -1099,6 +1099,14 @@ var statusColor = map[status]string{
 	skip:    cyan,
 	timeout: yellow,
 	fail:    red,
+}
+
+var pbStatusColor = map[status]progressbar.Color{
+	pass:    progressbar.Green,
+	warn:    progressbar.Yellow,
+	skip:    progressbar.Cyan,
+	timeout: progressbar.Yellow,
+	fail:    progressbar.Red,
 }
 
 // expectedStatus is a test status, along with a boolean to indicate whether the
@@ -1274,69 +1282,26 @@ func alignRight(val interface{}, width int) string {
 	return strings.Repeat(" ", padding) + s
 }
 
-// ansiProgressBar returns a string with an ANSI-colored progress bar, providing
-// realtime information about the status of the CTS run.
+// drawProgressBar draws an ANSI-colored progress bar, providing realtime
+// information about the status of the CTS run.
 // Note: We'll want to skip this if !isatty or if we're running on windows.
-func ansiProgressBar(animFrame int, numTests int, numByExpectedStatus map[expectedStatus]int) string {
-	const barWidth = 50
-
-	animSymbols := []rune{'⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'}
-	blockSymbols := []rune{'▏', '▎', '▍', '▌', '▋', '▊', '▉'}
-
-	numBlocksPrinted := 0
-
-	buf := &strings.Builder{}
-	fmt.Fprint(buf, string(animSymbols[animFrame%len(animSymbols)]), " [")
-	animFrame++
-
-	numFinished := 0
-
+func drawProgressBar(out io.Writer, animFrame int, numTests int, numByExpectedStatus map[expectedStatus]int) {
+	bar := progressbar.Status{Total: numTests}
 	for _, status := range statuses {
 		for _, expected := range []bool{true, false} {
-			color := statusColor[status]
-			if expected {
-				color += bold
+			if num := numByExpectedStatus[expectedStatus{status, expected}]; num > 0 {
+				bar.Segments = append(bar.Segments,
+					progressbar.Segment{
+						Count:       num,
+						Color:       pbStatusColor[status],
+						Bold:        expected,
+						Transparent: expected,
+					})
 			}
-
-			num := numByExpectedStatus[expectedStatus{status, expected}]
-			numFinished += num
-			statusFrac := float64(num) / float64(numTests)
-			fNumBlocks := barWidth * statusFrac
-			fmt.Fprint(buf, color)
-			numBlocks := int(math.Ceil(fNumBlocks))
-			if expected {
-				if numBlocks > 1 {
-					fmt.Fprint(buf, strings.Repeat(string("░"), numBlocks))
-				}
-			} else {
-				if numBlocks > 1 {
-					fmt.Fprint(buf, strings.Repeat(string("▉"), numBlocks))
-				}
-				if numBlocks > 0 {
-					frac := fNumBlocks - math.Floor(fNumBlocks)
-					symbol := blockSymbols[int(math.Round(frac*float64(len(blockSymbols)-1)))]
-					fmt.Fprint(buf, string(symbol))
-				}
-			}
-			numBlocksPrinted += numBlocks
 		}
 	}
-
-	if barWidth > numBlocksPrinted {
-		fmt.Fprint(buf, strings.Repeat(string(" "), barWidth-numBlocksPrinted))
-	}
-	fmt.Fprint(buf, ansiReset)
-	fmt.Fprint(buf, "] ", percentage(numFinished, numTests))
-
-	if colors {
-		// move cursor to start of line so the bar is overridden
-		fmt.Fprint(buf, positionLeft)
-	} else {
-		// cannot move cursor, so newline
-		fmt.Fprintln(buf)
-	}
-
-	return buf.String()
+	const width = 50
+	bar.Draw(out, width, colors, animFrame)
 }
 
 // testcaseStatus is a pair of testcase name and result status
