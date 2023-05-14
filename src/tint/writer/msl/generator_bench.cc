@@ -53,7 +53,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
     }
 }
 
-TINT_BENCHMARK_WGSL_PROGRAMS(GenerateMSL);
+TINT_BENCHMARK_PROGRAMS(GenerateMSL);
 
 }  // namespace
 }  // namespace tint::writer::msl

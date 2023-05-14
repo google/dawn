@@ -34,7 +34,7 @@ void GenerateHLSL(benchmark::State& state, std::string input_name) {
     }
 }
 
-TINT_BENCHMARK_WGSL_PROGRAMS(GenerateHLSL);
+TINT_BENCHMARK_PROGRAMS(GenerateHLSL);
 
 }  // namespace
 }  // namespace tint::writer::hlsl

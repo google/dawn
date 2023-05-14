@@ -89,12 +89,30 @@ bool FindBenchmarkInputDir() {
 }  // namespace
 
 std::variant<tint::Source::File, Error> LoadInputFile(std::string name) {
-    auto path = (kInputFileDir / name).string();
-    auto data = ReadFile<uint8_t>(path);
-    if (auto* buf = std::get_if<std::vector<uint8_t>>(&data)) {
-        return tint::Source::File(path, std::string(buf->begin(), buf->end()));
+    auto path = std::filesystem::path(name).is_absolute() ? name : (kInputFileDir / name).string();
+    if (utils::HasSuffix(path, ".wgsl")) {
+        auto data = ReadFile<uint8_t>(path);
+        if (auto* buf = std::get_if<std::vector<uint8_t>>(&data)) {
+            return tint::Source::File(path, std::string(buf->begin(), buf->end()));
+        }
+        return std::get<Error>(data);
     }
-    return std::get<Error>(data);
+    if (utils::HasSuffix(path, ".spv")) {
+        auto spirv = ReadFile<uint32_t>(path);
+        if (auto* buf = std::get_if<std::vector<uint32_t>>(&spirv)) {
+            auto program = tint::reader::spirv::Parse(*buf, {});
+            if (!program.IsValid()) {
+                return Error{program.Diagnostics().str()};
+            }
+            auto result = tint::writer::wgsl::Generate(&program, {});
+            if (!result.success) {
+                return Error{result.error};
+            }
+            return tint::Source::File(path, result.wgsl);
+        }
+        return std::get<Error>(spirv);
+    }
+    return Error{"unsupported file extension: '" + name + "'"};
 }
 
 std::variant<ProgramAndFile, Error> LoadProgram(std::string name) {

@@ -34,7 +34,7 @@ void ParseWGSL(benchmark::State& state, std::string input_name) {
     }
 }
 
-TINT_BENCHMARK_WGSL_PROGRAMS(ParseWGSL);
+TINT_BENCHMARK_PROGRAMS(ParseWGSL);
 
 }  // namespace
 }  // namespace tint::reader::wgsl

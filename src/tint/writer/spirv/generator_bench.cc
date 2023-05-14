@@ -34,7 +34,7 @@ void GenerateSPIRV(benchmark::State& state, std::string input_name) {
     }
 }
 
-TINT_BENCHMARK_WGSL_PROGRAMS(GenerateSPIRV);
+TINT_BENCHMARK_PROGRAMS(GenerateSPIRV);
 
 }  // namespace
 }  // namespace tint::writer::spirv

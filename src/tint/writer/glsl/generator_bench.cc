@@ -45,7 +45,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
     }
 }
 
-TINT_BENCHMARK_WGSL_PROGRAMS(GenerateGLSL);
+TINT_BENCHMARK_PROGRAMS(GenerateGLSL);
 
 }  // namespace
 }  // namespace tint::writer::glsl

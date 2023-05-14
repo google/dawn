@@ -40,7 +40,8 @@ struct ProgramAndFile {
 };
 
 /// LoadInputFile attempts to load a benchmark input file with the given file
-/// name.
+/// name. Accepts files with the .wgsl and .spv extension.
+/// SPIR-V files are automatically converted to WGSL.
 /// @param name the file name
 /// @returns either the loaded Source::File or an Error
 std::variant<Source::File, Error> LoadInputFile(std::string name);
@@ -51,20 +52,21 @@ std::variant<Source::File, Error> LoadInputFile(std::string name);
 /// @returns either the loaded Program or an Error
 std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
 
-// If TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAM_HEADER is defined, include that to
-// declare the TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS() macro, which appends
-// external programs to the TINT_BENCHMARK_WGSL_PROGRAMS() list.
-#ifdef TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAM_HEADER
-#include TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAM_HEADER
+// If TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER is defined, include that to
+// declare the TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS() and TINT_BENCHMARK_EXTERNAL_SPV_PROGRAMS()
+// macros, which appends external programs to the TINT_BENCHMARK_WGSL_PROGRAMS() and
+// TINT_BENCHMARK_SPV_PROGRAMS() list.
+#ifdef TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER
+#include TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER
 #else
 #define TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS(x)
+#define TINT_BENCHMARK_EXTERNAL_SPV_PROGRAMS(x)
 #endif
 
 /// Declares a benchmark with the given function and WGSL file name
 #define TINT_BENCHMARK_WGSL_PROGRAM(FUNC, WGSL_NAME) BENCHMARK_CAPTURE(FUNC, WGSL_NAME, WGSL_NAME);
 
-/// Declares a set of benchmarks for the given function using a list of WGSL
-/// files in `<tint>/test/benchmark`.
+/// Declares a set of benchmarks for the given function using a list of WGSL files.
 #define TINT_BENCHMARK_WGSL_PROGRAMS(FUNC)                                   \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "animometer.wgsl");                    \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "atan2-const-eval.wgsl");              \
@@ -80,6 +82,14 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-fragment.wgsl"); \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-vertex.wgsl");   \
     TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS(FUNC)
+
+/// Declares a set of benchmarks for the given function using a list of SPIR-V files.
+#define TINT_BENCHMARK_SPV_PROGRAMS(FUNC) TINT_BENCHMARK_EXTERNAL_SPV_PROGRAMS(FUNC)
+
+/// Declares a set of benchmarks for the given function using a list of WGSL and SPIR-V files.
+#define TINT_BENCHMARK_PROGRAMS(FUNC)  \
+    TINT_BENCHMARK_WGSL_PROGRAMS(FUNC) \
+    TINT_BENCHMARK_SPV_PROGRAMS(FUNC)
 
 }  // namespace tint::bench
 
