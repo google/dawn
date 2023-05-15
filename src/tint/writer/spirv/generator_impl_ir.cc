@@ -26,6 +26,7 @@
 #include "src/tint/type/i32.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
 #include "src/tint/writer/spirv/module.h"
 
@@ -118,6 +119,9 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
             },
             [&](const type::F16*) {
                 module_.PushType(spv::Op::OpTypeFloat, {id, 16u});
+            },
+            [&](const type::Vector* vec) {
+                module_.PushType(spv::Op::OpTypeVector, {id, Type(vec->type()), vec->Width()});
             },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled type: " << ty->FriendlyName();
