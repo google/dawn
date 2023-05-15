@@ -27,6 +27,43 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/match"
 )
 
+// Glob returns all the strings that match the given filepath glob
+func Glob(str string) ([]string, error) {
+	abs, err := filepath.Abs(str)
+	if err != nil {
+		return nil, err
+	}
+	root, glob := "", ""
+	// Look for rightmost directory delimiter that's left of a wildcard. Use
+	// that to split the 'root' from the match 'glob'.
+	for i, c := range abs {
+		switch c {
+		case '/':
+			root, glob = abs[:i], abs[i+1:]
+		case '*', '?':
+			test, err := match.New(glob)
+			if err != nil {
+				return nil, err
+			}
+			files, err := Scan(root, Config{Paths: searchRules{
+				func(path string, cond bool) bool { return test(path) },
+			}})
+			if err != nil {
+				return nil, err
+			}
+			for i, f := range files {
+				files[i] = filepath.Join(root, f) // rel -> abs
+			}
+			return files, nil
+		}
+	}
+	// No wildcard found. Does the file exist at 'str'?
+	if s, err := os.Stat(str); err != nil && !s.IsDir() {
+		return []string{str}, nil
+	}
+	return []string{}, nil
+}
+
 // Scan walks all files and subdirectories from root, returning those
 // that Config.shouldExamine() returns true for.
 func Scan(root string, cfg Config) ([]string, error) {
@@ -155,12 +192,15 @@ func (l *searchRules) UnmarshalJSON(body []byte) error {
 				tests[i] = test
 			}
 			*l = append(*l, func(path string, cond bool) bool {
+				if cond {
+					return true
+				}
 				for _, test := range tests {
 					if test(path) {
 						return true
 					}
 				}
-				return cond
+				return false
 			})
 		case len(rule.Exclude) > 0:
 			tests := make([]match.Test, len(rule.Exclude))
@@ -172,12 +212,15 @@ func (l *searchRules) UnmarshalJSON(body []byte) error {
 				tests[i] = test
 			}
 			*l = append(*l, func(path string, cond bool) bool {
+				if !cond {
+					return false
+				}
 				for _, test := range tests {
 					if test(path) {
 						return false
 					}
 				}
-				return cond
+				return true
 			})
 		}
 	}
