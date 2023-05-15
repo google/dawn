@@ -19,21 +19,21 @@
 
     "commands": {
         "buffer map async": [
-            { "name": "buffer id", "type": "ObjectId" },
+            { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "mode", "type": "map mode" },
             { "name": "offset", "type": "uint64_t"},
             { "name": "size", "type": "uint64_t"}
         ],
         "buffer update mapped data": [
-            { "name": "buffer id", "type": "ObjectId" },
+            { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
             { "name": "write data update info length", "type": "uint64_t" },
             { "name": "write data update info", "type": "uint8_t", "annotation": "const*", "length": "write data update info length", "skip_serialize": true},
             { "name": "offset", "type": "uint64_t"},
             { "name": "size", "type": "uint64_t"}
         ],
         "device create buffer": [
-            { "name": "device id", "type": "ObjectId" },
+            { "name": "device id", "type": "ObjectId", "id_type": "device" },
             { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
             { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" },
             { "name": "read handle create info length", "type": "uint64_t" },
@@ -42,19 +42,19 @@
             { "name": "write handle create info", "type": "uint8_t", "annotation": "const*", "length": "write handle create info length", "skip_serialize": true}
         ],
         "device create compute pipeline async": [
-            { "name": "device id", "type": "ObjectId" },
+            { "name": "device id", "type": "ObjectId", "id_type": "device"},
             { "name": "request serial", "type": "uint64_t" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "compute pipeline"},
             { "name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"}
         ],
         "device create render pipeline async": [
-            { "name": "device id", "type": "ObjectId" },
+            { "name": "device id", "type": "ObjectId", "id_type": "device" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "render pipeline"},
             { "name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
         ],
         "device pop error scope": [
-            { "name": "device id", "type": "ObjectId" },
+            { "name": "device id", "type": "ObjectId", "id_type": "device" },
             { "name": "request serial", "type": "uint64_t" }
         ],
         "destroy object": [
@@ -62,19 +62,19 @@
             { "name": "object id", "type": "ObjectId" }
         ],
         "queue on submitted work done": [
-            { "name": "queue id", "type": "ObjectId" },
+            { "name": "queue id", "type": "ObjectId", "id_type": "queue" },
             { "name": "signal value", "type": "uint64_t" },
             { "name": "request serial", "type": "uint64_t" }
         ],
         "queue write buffer": [
-            {"name": "queue id", "type": "ObjectId" },
-            {"name": "buffer id", "type": "ObjectId" },
+            {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
+            {"name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
             {"name": "buffer offset", "type": "uint64_t"},
             {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
             {"name": "size", "type": "uint64_t"}
         ],
         "queue write texture": [
-            {"name": "queue id", "type": "ObjectId" },
+            {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
             {"name": "destination", "type": "image copy texture", "annotation": "const*"},
             {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "data size", "wire_is_data_only": true},
             {"name": "data size", "type": "uint64_t"},
@@ -82,17 +82,17 @@
             {"name": "writeSize", "type": "extent 3D", "annotation": "const*"}
         ],
         "shader module get compilation info": [
-            { "name": "shader module id", "type": "ObjectId" },
+            { "name": "shader module id", "type": "ObjectId", "id_type": "shader module" },
             { "name": "request serial", "type": "uint64_t" }
         ],
         "instance request adapter": [
-            { "name": "instance id", "type": "ObjectId" },
+            { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "adapter object handle", "type": "ObjectHandle", "handle_type": "adapter"},
             { "name": "options", "type": "request adapter options", "annotation": "const*" }
         ],
         "adapter request device": [
-            { "name": "adapter id", "type": "ObjectId" },
+            { "name": "adapter id", "type": "ObjectId", "id_type": "adapter" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "device object handle", "type": "ObjectHandle", "handle_type": "device"},
             { "name": "descriptor", "type": "device descriptor", "annotation": "const*" }

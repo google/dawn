@@ -175,6 +175,8 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader) {
       "lpmfuzz/DawnLPMFuzzer.cpp",
       "lpmfuzz/DawnLPMFuzzer.h",
       "lpmfuzz/DawnLPMFuzzerAndVulkanBackend.cpp",
+      "lpmfuzz/DawnLPMObjectStore.cpp",
+      "lpmfuzz/DawnLPMObjectStore.h",
     ]
 
     deps = [

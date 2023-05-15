@@ -30,6 +30,7 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn/wire/ChunkedCommandSerializer.h"
 #include "dawn/wire/WireClient.h"
+#include "dawn/wire/WireResult.h"
 #include "dawn/wire/WireServer.h"
 #include "testing/libfuzzer/libfuzzer_exports.h"
 
@@ -106,14 +107,14 @@ int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::na
         dawn::wire::ChunkedCommandSerializer(mCommandBuffer);
     mCommandBuffer->SetHandler(wireServer.get());
 
-    dawn::wire::SerializedData(program, mSerializer);
+    dawn::wire::WireResult result = dawn::wire::SerializedData(program, mSerializer);
 
     mCommandBuffer->Flush();
 
     // Note: Deleting the server will release all created objects.
     // Deleted devices will wait for idle on destruction.
     wireServer = nullptr;
-    return 0;
+    return result == dawn::wire::WireResult::FatalError;
 }
 
 }  // namespace DawnLPMFuzzer

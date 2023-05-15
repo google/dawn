@@ -12,8 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <stdint.h>
+
 namespace DawnLPMFuzzer {
 
+
 static constexpr int kInstanceObjectId = 1;
+static constexpr uint32_t kInvalidObjectId = {{ cmd_records["lpm_info"]["invalid object id"] }};
+
+{% for type in by_category["object"] %}
+    {% if type.name.get() in cmd_records["lpm_info"]["limits"] %}
+        static constexpr int k{{ type.name.CamelCase() }}Limit = {{ cmd_records["lpm_info"]["limits"][type.name.get()] }};
+    {% else %}
+        static constexpr int k{{ type.name.CamelCase() }}Limit = {{ cmd_records["lpm_info"]["limits"]["default"] }};
+    {% endif %}
+{% endfor %}
 
 } // namespace DawnLPMFuzzer

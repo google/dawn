@@ -17,6 +17,25 @@ package fuzzing;
 
 import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
 
+
+// These are hardcoded limits for Dawn Object allocations based on type to help
+// guide the fuzzer towards reusing existing objects.
+{% for type in by_category["object"] %}
+    {% set type_key = type.name.canonical_case() %}
+    enum {{ type.name.CamelCase() }}Id {
+        {% if type_key in cmd_records["lpm_info"]["limits"] %}
+            {% for n in range(cmd_records["lpm_info"]["limits"][type_key]) %}
+                {{ type.name.SNAKE_CASE() }}_{{ loop.index }} = {{ loop.index }};
+            {% endfor %}
+        {% else %}
+            {% for n in range(cmd_records["lpm_info"]["limits"]["default"]) %}
+                {{ type.name.SNAKE_CASE() }}_{{ loop.index }} = {{ loop.index }};
+            {% endfor %}
+        {% endif %}
+        INVALID_{{ type.name.SNAKE_CASE() }} = {{ cmd_records["lpm_info"]["invalid object id"] }};
+    };
+{% endfor %}
+
 {% for type in by_category["enum"] %}
     enum {{as_cppType(type.name)}} {
         {% for value in type.values %}
@@ -38,7 +57,9 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
 {% macro lift_string_proto_member(member, count) -%}
     required string {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
     {% set count.value = count.value + 1 %}
+
 {%- endmacro %}
+
 
 {% macro lift_float_array_proto_member(member, count) -%}
     repeated float {{ as_varName(member.name) }} = {{ count.value }};
@@ -46,15 +67,23 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
 {%- endmacro %}
 
 
+{% macro lift_object_member(member, count) %}
+    {{ member.type.name.CamelCase() }}Id {{ as_protobufNameLPM(member.name) }}
+{% endmacro %}
+
+
+{% macro lift_objectid_member(member, count) %}
+    {{ member.id_type.name.CamelCase() }}Id {{ as_protobufNameLPM(member.name) }}
+{% endmacro %}
+
+
 {% macro lift_varlength_proto_member(member, count) -%}
     {% if member.type in by_category["object"] %}
-        repeated uint32 {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        repeated {{ lift_object_member(member, count) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
     {% elif member.type.name.get() == "object id" %}
-        repeated uint32 {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        repeated {{ lift_objectid_member(member, count) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
-    {% elif member.type.name.get() == "uint8_t" %}
-        // Skip over byte arrays in protobuf, handled by DawnSerializer
     {% else %}
         repeated {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
@@ -73,10 +102,10 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
         required {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
     {% elif member.type in by_category["object"] %}
-        required uint32 {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        required {{ lift_object_member(member, count) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
     {% elif member.type.name.get() == "ObjectId" %}
-        required uint32 {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+        required {{ lift_objectid_member(member, count) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
     {% elif member.type.name.get() == "ObjectHandle" %}
         // Skips object handles while lifting dawn.json to protobuf because
@@ -105,7 +134,7 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
     {% else %}
         // There shouldn't be any other pass-by-pointer types in
         // dawn*.json, if any are added we would like to know at compile time
-        {{ unreachable_code }}
+        {{ unreachable_code() }}
     {% endif %}
 {% endmacro %}
 

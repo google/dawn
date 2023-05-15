@@ -18,6 +18,7 @@
 #include "dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.pb.h"
 #include "dawn/wire/ChunkedCommandSerializer.h"
 #include "dawn/wire/WireCmd_autogen.h"
+#include "dawn/wire/WireResult.h"
 
 namespace dawn::wire {
 
@@ -38,7 +39,7 @@ class DawnLPMObjectIdProvider : public ObjectIdProvider {
 
 };
 
-void SerializedData(const fuzzing::Program& program,
+WireResult SerializedData(const fuzzing::Program& program,
                        dawn::wire::ChunkedCommandSerializer serializer);
 
 }  // namespace dawn::wire
