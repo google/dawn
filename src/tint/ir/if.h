@@ -30,7 +30,8 @@ namespace tint::ir {
 class If : public utils::Castable<If, FlowNode> {
   public:
     /// Constructor
-    If();
+    /// @param cond the if condition
+    explicit If(Value* cond);
     ~If() override;
 
     /// The true branch block

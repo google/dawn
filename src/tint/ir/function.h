@@ -62,7 +62,9 @@ class Function : public utils::Castable<Function, FlowNode> {
     };
 
     /// Constructor
-    Function();
+    /// @param n the function name
+    /// @param rt the function return type
+    Function(Symbol n, type::Type* rt);
     ~Function() override;
 
     /// The function name

@@ -65,20 +65,24 @@ class Builder {
     FunctionTerminator* CreateFunctionTerminator();
 
     /// Creates a function flow node
+    /// @param name the function name
+    /// @param return_type the function return type
     /// @returns the flow node
-    Function* CreateFunction();
+    Function* CreateFunction(Symbol name, type::Type* return_type);
 
     /// Creates an if flow node
+    /// @param condition the if condition
     /// @returns the flow node
-    If* CreateIf();
+    If* CreateIf(Value* condition);
 
     /// Creates a loop flow node
     /// @returns the flow node
     Loop* CreateLoop();
 
     /// Creates a switch flow node
+    /// @param condition the switch condition
     /// @returns the flow node
-    Switch* CreateSwitch();
+    Switch* CreateSwitch(Value* condition);
 
     /// Creates a case flow node for the given case branch.
     /// @param s the switch to create the case into

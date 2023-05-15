@@ -47,8 +47,10 @@ FunctionTerminator* Builder::CreateFunctionTerminator() {
     return ir.flow_nodes.Create<FunctionTerminator>();
 }
 
-Function* Builder::CreateFunction() {
-    auto* ir_func = ir.flow_nodes.Create<Function>();
+Function* Builder::CreateFunction(Symbol name, type::Type* return_type) {
+    TINT_ASSERT(IR, return_type);
+
+    auto* ir_func = ir.flow_nodes.Create<Function>(name, return_type);
     ir_func->start_target = CreateBlock();
     ir_func->end_target = CreateFunctionTerminator();
 
@@ -58,8 +60,10 @@ Function* Builder::CreateFunction() {
     return ir_func;
 }
 
-If* Builder::CreateIf() {
-    auto* ir_if = ir.flow_nodes.Create<If>();
+If* Builder::CreateIf(Value* condition) {
+    TINT_ASSERT(IR, condition);
+
+    auto* ir_if = ir.flow_nodes.Create<If>(condition);
     ir_if->true_.target = CreateBlock();
     ir_if->false_.target = CreateBlock();
     ir_if->merge.target = CreateBlock();
@@ -83,8 +87,8 @@ Loop* Builder::CreateLoop() {
     return ir_loop;
 }
 
-Switch* Builder::CreateSwitch() {
-    auto* ir_switch = ir.flow_nodes.Create<Switch>();
+Switch* Builder::CreateSwitch(Value* condition) {
+    auto* ir_switch = ir.flow_nodes.Create<Switch>(condition);
     ir_switch->merge.target = CreateBlock();
     return ir_switch;
 }

@@ -18,7 +18,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Function);
 
 namespace tint::ir {
 
-Function::Function() : Base() {}
+Function::Function(Symbol n, type::Type* rt) : Base(), name(n), return_type(rt) {}
 
 Function::~Function() = default;
 

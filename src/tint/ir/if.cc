@@ -18,7 +18,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::If);
 
 namespace tint::ir {
 
-If::If() : Base() {}
+If::If(Value* cond) : Base(), condition(cond) {}
 
 If::~If() = default;
 

@@ -44,7 +44,8 @@ class Switch : public utils::Castable<Switch, FlowNode> {
     };
 
     /// Constructor
-    Switch();
+    /// @param cond the condition
+    explicit Switch(Value* cond);
     ~Switch() override;
 
     /// The switch merge target
