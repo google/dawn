@@ -20,9 +20,7 @@
 
 namespace tint::ir {
 
-Builder::Builder() {}
-
-Builder::Builder(Module&& mod) : ir(std::move(mod)) {}
+Builder::Builder(Module& mod) : ir(mod) {}
 
 Builder::~Builder() = default;
 

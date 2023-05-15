@@ -26,9 +26,14 @@ namespace tint::writer::spirv {
 
 /// Base helper class for testing the SPIR-V generator implementation.
 template <typename BASE>
-class SpvGeneratorTestHelperBase : public ir::Builder, public BASE {
+class SpvGeneratorTestHelperBase : public BASE {
   public:
-    SpvGeneratorTestHelperBase() : generator_(&ir, false) {}
+    SpvGeneratorTestHelperBase() : generator_(&mod, false) {}
+
+    /// The test module
+    ir::Module mod;
+    /// The test builder
+    ir::Builder b{mod};
 
   protected:
     /// The SPIR-V generator.

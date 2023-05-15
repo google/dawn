@@ -18,8 +18,8 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, Type_Bool) {
-    generator_.Constant(Constant(true));
-    generator_.Constant(Constant(false));
+    generator_.Constant(b.Constant(true));
+    generator_.Constant(b.Constant(false));
     EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeBool
 %1 = OpConstantTrue %2
 %3 = OpConstantFalse %2
@@ -27,8 +27,8 @@ TEST_F(SpvGeneratorImplTest, Type_Bool) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_I32) {
-    generator_.Constant(Constant(i32(42)));
-    generator_.Constant(Constant(i32(-1)));
+    generator_.Constant(b.Constant(i32(42)));
+    generator_.Constant(b.Constant(i32(-1)));
     EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeInt 32 1
 %1 = OpConstant %2 42
 %3 = OpConstant %2 -1
@@ -36,8 +36,8 @@ TEST_F(SpvGeneratorImplTest, Constant_I32) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_U32) {
-    generator_.Constant(Constant(u32(42)));
-    generator_.Constant(Constant(u32(4000000000)));
+    generator_.Constant(b.Constant(u32(42)));
+    generator_.Constant(b.Constant(u32(4000000000)));
     EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeInt 32 0
 %1 = OpConstant %2 42
 %3 = OpConstant %2 4000000000
@@ -45,8 +45,8 @@ TEST_F(SpvGeneratorImplTest, Constant_U32) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_F32) {
-    generator_.Constant(Constant(f32(42)));
-    generator_.Constant(Constant(f32(-1)));
+    generator_.Constant(b.Constant(f32(42)));
+    generator_.Constant(b.Constant(f32(-1)));
     EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeFloat 32
 %1 = OpConstant %2 42
 %3 = OpConstant %2 -1
@@ -54,8 +54,8 @@ TEST_F(SpvGeneratorImplTest, Constant_F32) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_F16) {
-    generator_.Constant(Constant(f16(42)));
-    generator_.Constant(Constant(f16(-1)));
+    generator_.Constant(b.Constant(f16(42)));
+    generator_.Constant(b.Constant(f16(-1)));
     EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeFloat 16
 %1 = OpConstant %2 0x1.5p+5
 %3 = OpConstant %2 -0x1p+0
@@ -64,9 +64,9 @@ TEST_F(SpvGeneratorImplTest, Constant_F16) {
 
 // Test that we do not emit the same constant more than once.
 TEST_F(SpvGeneratorImplTest, Constant_Deduplicate) {
-    generator_.Constant(Constant(i32(42)));
-    generator_.Constant(Constant(i32(42)));
-    generator_.Constant(Constant(i32(42)));
+    generator_.Constant(b.Constant(i32(42)));
+    generator_.Constant(b.Constant(i32(42)));
+    generator_.Constant(b.Constant(i32(42)));
     EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeInt 32 1
 %1 = OpConstant %2 42
 )");

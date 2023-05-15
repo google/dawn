@@ -209,8 +209,10 @@ class BuilderImpl {
     /// The stack of flow control blocks.
     utils::Vector<FlowNode*, 8> flow_stack;
 
+    /// The IR module being built
+    Module mod;
     /// The IR builder being used by the impl.
-    Builder builder;
+    Builder builder{mod};
 
     /// The current flow block for expressions
     Block* current_flow_block = nullptr;

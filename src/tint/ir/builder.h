@@ -50,10 +50,8 @@ namespace tint::ir {
 class Builder {
   public:
     /// Constructor
-    Builder();
-    /// Constructor
     /// @param mod the ir::Module to wrap with this builder
-    explicit Builder(Module&& mod);
+    explicit Builder(Module& mod);
     /// Destructor
     ~Builder();
 
@@ -363,7 +361,7 @@ class Builder {
     ir::Block* CreateRootBlockIfNeeded();
 
     /// The IR module.
-    Module ir;
+    Module& ir;
 };
 
 }  // namespace tint::ir
