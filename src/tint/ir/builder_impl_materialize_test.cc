@@ -31,11 +31,10 @@ TEST_F(IR_BuilderImplTest, EmitExpression_MaterializedCall) {
 
     Func("test_function", {}, ty.f32(), expr, utils::Empty);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn1 = func test_function():f32
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func test_function():f32
   %fn2 = block
   ret 2.0f
 func_end

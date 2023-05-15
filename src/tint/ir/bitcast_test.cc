@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ir/builder.h"
+#include "src/tint/ir/constant.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/test_helper.h"
 
@@ -23,9 +25,8 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, Bitcast) {
-    auto& b = CreateEmptyBuilder();
-    const auto* inst =
-        b.builder.Bitcast(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
+    Builder b;
+    const auto* inst = b.Bitcast(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<ir::Bitcast>());
     ASSERT_NE(inst->Type(), nullptr);
@@ -38,9 +39,8 @@ TEST_F(IR_InstructionTest, Bitcast) {
 }
 
 TEST_F(IR_InstructionTest, Bitcast_Usage) {
-    auto& b = CreateEmptyBuilder();
-    const auto* inst =
-        b.builder.Bitcast(b.builder.ir.types.Get<type::I32>(), b.builder.Constant(4_i));
+    Builder b;
+    const auto* inst = b.Bitcast(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_EQ(inst->args.Length(), 1u);
     ASSERT_NE(inst->args[0], nullptr);

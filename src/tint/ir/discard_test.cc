@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/test_helper.h"
 
@@ -21,9 +22,9 @@ namespace {
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, Discard) {
-    auto& b = CreateEmptyBuilder();
+    Builder b;
 
-    const auto* inst = b.builder.Discard();
+    const auto* inst = b.Discard();
     ASSERT_TRUE(inst->Is<ir::Discard>());
 }
 

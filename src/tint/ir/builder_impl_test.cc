@@ -1,4 +1,4 @@
-// Copyright 2022 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,37 @@
 #include "src/tint/ast/case_selector.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/constant/scalar.h"
+#include "src/tint/ir/block.h"
+#include "src/tint/ir/function_terminator.h"
+#include "src/tint/ir/if.h"
+#include "src/tint/ir/loop.h"
+#include "src/tint/ir/switch.h"
 
 namespace tint::ir {
 namespace {
+
+/// Looks for the flow node with the given type T.
+/// If no flow node is found, then nullptr is returned.
+/// If multiple flow nodes are found with the type T, then an error is raised and the first is
+/// returned.
+template <typename T>
+const T* FindSingleFlowNode(const Module& mod) {
+    const T* found = nullptr;
+    size_t count = 0;
+    for (auto* node : mod.flow_nodes.Objects()) {
+        if (auto* as = node->As<T>()) {
+            count++;
+            if (!found) {
+                found = as;
+            }
+        }
+    }
+    if (count > 1) {
+        ADD_FAILURE() << "FindSingleFlowNode() found " << count << " nodes of type "
+                      << utils::TypeInfo::Of<T>().name;
+    }
+    return found;
+}
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -28,21 +56,21 @@ using IR_BuilderImplTest = TestHelper;
 
 TEST_F(IR_BuilderImplTest, Func) {
     Func("f", utils::Empty, ty.void_(), utils::Empty);
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
 
-    ASSERT_EQ(0u, m.entry_points.Length());
-    ASSERT_EQ(1u, m.functions.Length());
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* f = m.functions[0];
+    ASSERT_EQ(0u, m->entry_points.Length());
+    ASSERT_EQ(1u, m->functions.Length());
+
+    auto* f = m->functions[0];
     ASSERT_NE(f->start_target, nullptr);
     ASSERT_NE(f->end_target, nullptr);
 
     EXPECT_EQ(1u, f->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, f->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"(%fn1 = func f():void
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func f():void
   %fn2 = block
   ret
 func_end
@@ -53,33 +81,28 @@ func_end
 TEST_F(IR_BuilderImplTest, EntryPoint) {
     Func("f", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
 
-    ASSERT_EQ(1u, m.entry_points.Length());
-    EXPECT_EQ(m.functions[0], m.entry_points[0]);
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    ASSERT_EQ(1u, m->entry_points.Length());
+    EXPECT_EQ(m->functions[0], m->entry_points[0]);
 }
 
 TEST_F(IR_BuilderImplTest, IfStatement) {
     auto* ast_if = If(true, Block(), Else(Block()));
     WrapInFunction(ast_if);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    ASSERT_NE(ir_if, nullptr);
-    EXPECT_TRUE(ir_if->Is<ir::If>());
-
-    auto* flow = ir_if->As<ir::If>();
+    auto* flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(flow->true_.target, nullptr);
     ASSERT_NE(flow->false_.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(1u, flow->true_.target->inbound_branches.Length());
@@ -88,7 +111,7 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -114,21 +137,16 @@ TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(ast_if);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    ASSERT_NE(ir_if, nullptr);
-    EXPECT_TRUE(ir_if->Is<ir::If>());
-
-    auto* flow = ir_if->As<ir::If>();
+    auto* flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(flow->true_.target, nullptr);
     ASSERT_NE(flow->false_.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(1u, flow->true_.target->inbound_branches.Length());
@@ -137,7 +155,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -162,21 +180,16 @@ TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
     auto* ast_if = If(true, Block(), Else(Block(Return())));
     WrapInFunction(ast_if);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    ASSERT_NE(ir_if, nullptr);
-    EXPECT_TRUE(ir_if->Is<ir::If>());
-
-    auto* flow = ir_if->As<ir::If>();
+    auto* flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(flow->true_.target, nullptr);
     ASSERT_NE(flow->false_.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(1u, flow->true_.target->inbound_branches.Length());
@@ -185,7 +198,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -210,21 +223,16 @@ TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
     auto* ast_if = If(true, Block(Return()), Else(Block(Return())));
     WrapInFunction(ast_if);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    ASSERT_NE(ir_if, nullptr);
-    EXPECT_TRUE(ir_if->Is<ir::If>());
-
-    auto* flow = ir_if->As<ir::If>();
+    auto* flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(flow->true_.target, nullptr);
     ASSERT_NE(flow->false_.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(1u, flow->true_.target->inbound_branches.Length());
@@ -233,7 +241,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -255,29 +263,21 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
     auto* ast_if = If(true, Block(ast_loop));
     WrapInFunction(ast_if);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    ASSERT_NE(ir_if, nullptr);
-    EXPECT_TRUE(ir_if->Is<ir::If>());
-
-    auto* if_flow = ir_if->As<ir::If>();
+    auto* if_flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(if_flow->true_.target, nullptr);
     ASSERT_NE(if_flow->false_.target, nullptr);
     ASSERT_NE(if_flow->merge.target, nullptr);
 
-    auto* ir_loop = FlowNodeForAstNode(ast_loop);
-    ASSERT_NE(ir_loop, nullptr);
-    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
-
-    auto* loop_flow = ir_loop->As<ir::Loop>();
+    auto* loop_flow = FindSingleFlowNode<ir::Loop>(m.Get());
+    ASSERT_NE(loop_flow, nullptr);
     ASSERT_NE(loop_flow->start.target, nullptr);
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -312,21 +312,16 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
     auto* ast_loop = Loop(Block(Break()));
     WrapInFunction(ast_loop);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_loop = FlowNodeForAstNode(ast_loop);
-    ASSERT_NE(ir_loop, nullptr);
-    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
-
-    auto* flow = ir_loop->As<ir::Loop>();
+    auto* flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(flow->start.target, nullptr);
     ASSERT_NE(flow->continuing.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(2u, flow->start.target->inbound_branches.Length());
@@ -335,7 +330,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -358,30 +353,21 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_loop = FlowNodeForAstNode(ast_loop);
-    ASSERT_NE(ir_loop, nullptr);
-    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
-
-    auto* loop_flow = ir_loop->As<ir::Loop>();
+    auto* loop_flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(loop_flow->start.target, nullptr);
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    ASSERT_NE(ir_if, nullptr);
-    ASSERT_TRUE(ir_if->Is<ir::If>());
-
-    auto* if_flow = ir_if->As<ir::If>();
+    auto* if_flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(if_flow->true_.target, nullptr);
     ASSERT_NE(if_flow->false_.target, nullptr);
     ASSERT_NE(if_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, loop_flow->inbound_branches.Length());
     EXPECT_EQ(2u, loop_flow->start.target->inbound_branches.Length());
@@ -394,7 +380,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -434,30 +420,21 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
     auto* ast_loop = Loop(Block(), Block(ast_break_if));
     WrapInFunction(ast_loop);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_loop = FlowNodeForAstNode(ast_loop);
-    ASSERT_NE(ir_loop, nullptr);
-    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
-
-    auto* loop_flow = ir_loop->As<ir::Loop>();
+    auto* loop_flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(loop_flow->start.target, nullptr);
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    auto* ir_break_if = FlowNodeForAstNode(ast_break_if);
-    ASSERT_NE(ir_break_if, nullptr);
-    ASSERT_TRUE(ir_break_if->Is<ir::If>());
-
-    auto* break_if_flow = ir_break_if->As<ir::If>();
+    auto* break_if_flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(break_if_flow->true_.target, nullptr);
     ASSERT_NE(break_if_flow->false_.target, nullptr);
     ASSERT_NE(break_if_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, loop_flow->inbound_branches.Length());
     EXPECT_EQ(2u, loop_flow->start.target->inbound_branches.Length());
@@ -470,7 +447,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -510,30 +487,21 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_loop = FlowNodeForAstNode(ast_loop);
-    ASSERT_NE(ir_loop, nullptr);
-    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
-
-    auto* loop_flow = ir_loop->As<ir::Loop>();
+    auto* loop_flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(loop_flow->start.target, nullptr);
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    ASSERT_NE(ir_if, nullptr);
-    ASSERT_TRUE(ir_if->Is<ir::If>());
-
-    auto* if_flow = ir_if->As<ir::If>();
+    auto* if_flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(if_flow->true_.target, nullptr);
     ASSERT_NE(if_flow->false_.target, nullptr);
     ASSERT_NE(if_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, loop_flow->inbound_branches.Length());
     EXPECT_EQ(2u, loop_flow->start.target->inbound_branches.Length());
@@ -546,7 +514,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -581,21 +549,16 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
     auto* ast_loop = Loop(Block(Return(), Continue()));
     WrapInFunction(ast_loop, If(true, Block(Return())));
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_loop = FlowNodeForAstNode(ast_loop);
-    ASSERT_NE(ir_loop, nullptr);
-    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
-
-    auto* loop_flow = ir_loop->As<ir::Loop>();
+    auto* loop_flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(loop_flow->start.target, nullptr);
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, loop_flow->inbound_branches.Length());
     EXPECT_EQ(2u, loop_flow->start.target->inbound_branches.Length());
@@ -604,7 +567,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -631,33 +594,21 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(Block(ast_loop, ast_if));
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_loop = FlowNodeForAstNode(ast_loop);
-    ASSERT_NE(ir_loop, nullptr);
-    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
-
-    auto* loop_flow = ir_loop->As<ir::Loop>();
+    auto* loop_flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(loop_flow->start.target, nullptr);
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    EXPECT_EQ(ir_if, nullptr);
-
-    auto* ir_break_if = FlowNodeForAstNode(ast_break_if);
-    ASSERT_NE(ir_break_if, nullptr);
-    EXPECT_TRUE(ir_break_if->Is<ir::If>());
-
-    auto* break_if_flow = ir_break_if->As<ir::If>();
+    auto* break_if_flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(break_if_flow->true_.target, nullptr);
     ASSERT_NE(break_if_flow->false_.target, nullptr);
     ASSERT_NE(break_if_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, loop_flow->inbound_branches.Length());
     EXPECT_EQ(2u, loop_flow->start.target->inbound_branches.Length());
@@ -667,7 +618,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     // This is 1 because only the loop branch happens. The subsequent if return is dead code.
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -686,30 +637,21 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_loop = FlowNodeForAstNode(ast_loop);
-    ASSERT_NE(ir_loop, nullptr);
-    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
-
-    auto* loop_flow = ir_loop->As<ir::Loop>();
+    auto* loop_flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(loop_flow->start.target, nullptr);
     ASSERT_NE(loop_flow->continuing.target, nullptr);
     ASSERT_NE(loop_flow->merge.target, nullptr);
 
-    auto* ir_if = FlowNodeForAstNode(ast_if);
-    ASSERT_NE(ir_if, nullptr);
-    ASSERT_TRUE(ir_if->Is<ir::If>());
-
-    auto* if_flow = ir_if->As<ir::If>();
+    auto* if_flow = FindSingleFlowNode<ir::If>(m.Get());
     ASSERT_NE(if_flow->true_.target, nullptr);
     ASSERT_NE(if_flow->false_.target, nullptr);
     ASSERT_NE(if_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, loop_flow->inbound_branches.Length());
     EXPECT_EQ(2u, loop_flow->start.target->inbound_branches.Length());
@@ -722,7 +664,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -763,76 +705,68 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 
     WrapInFunction(ast_loop_a);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_loop_a = FlowNodeForAstNode(ast_loop_a);
-    ASSERT_NE(ir_loop_a, nullptr);
-    EXPECT_TRUE(ir_loop_a->Is<ir::Loop>());
-    auto* loop_flow_a = ir_loop_a->As<ir::Loop>();
+    ASSERT_EQ(1u, m->functions.Length());
+
+    auto block_exit = [&](const ir::FlowNode* node) -> const ir::FlowNode* {
+        if (auto* block = As<ir::Block>(node)) {
+            return block->branch.target;
+        }
+        return nullptr;
+    };
+
+    auto* loop_flow_a = As<ir::Loop>(m->functions[0]->start_target->branch.target);
+    ASSERT_NE(loop_flow_a, nullptr);
     ASSERT_NE(loop_flow_a->start.target, nullptr);
     ASSERT_NE(loop_flow_a->continuing.target, nullptr);
     ASSERT_NE(loop_flow_a->merge.target, nullptr);
 
-    auto* ir_loop_b = FlowNodeForAstNode(ast_loop_b);
-    ASSERT_NE(ir_loop_b, nullptr);
-    EXPECT_TRUE(ir_loop_b->Is<ir::Loop>());
-    auto* loop_flow_b = ir_loop_b->As<ir::Loop>();
+    auto* loop_flow_b = As<ir::Loop>(block_exit(loop_flow_a->start.target));
+    ASSERT_NE(loop_flow_b, nullptr);
     ASSERT_NE(loop_flow_b->start.target, nullptr);
     ASSERT_NE(loop_flow_b->continuing.target, nullptr);
     ASSERT_NE(loop_flow_b->merge.target, nullptr);
 
-    auto* ir_loop_c = FlowNodeForAstNode(ast_loop_c);
-    ASSERT_NE(ir_loop_c, nullptr);
-    EXPECT_TRUE(ir_loop_c->Is<ir::Loop>());
-    auto* loop_flow_c = ir_loop_c->As<ir::Loop>();
-    ASSERT_NE(loop_flow_c->start.target, nullptr);
-    ASSERT_NE(loop_flow_c->continuing.target, nullptr);
-    ASSERT_NE(loop_flow_c->merge.target, nullptr);
-
-    auto* ir_loop_d = FlowNodeForAstNode(ast_loop_d);
-    ASSERT_NE(ir_loop_d, nullptr);
-    EXPECT_TRUE(ir_loop_d->Is<ir::Loop>());
-    auto* loop_flow_d = ir_loop_d->As<ir::Loop>();
-    ASSERT_NE(loop_flow_d->start.target, nullptr);
-    ASSERT_NE(loop_flow_d->continuing.target, nullptr);
-    ASSERT_NE(loop_flow_d->merge.target, nullptr);
-
-    auto* ir_if_a = FlowNodeForAstNode(ast_if_a);
-    ASSERT_NE(ir_if_a, nullptr);
-    EXPECT_TRUE(ir_if_a->Is<ir::If>());
-    auto* if_flow_a = ir_if_a->As<ir::If>();
+    auto* if_flow_a = As<ir::If>(block_exit(loop_flow_b->start.target));
+    ASSERT_NE(if_flow_a, nullptr);
     ASSERT_NE(if_flow_a->true_.target, nullptr);
     ASSERT_NE(if_flow_a->false_.target, nullptr);
     ASSERT_NE(if_flow_a->merge.target, nullptr);
 
-    auto* ir_if_b = FlowNodeForAstNode(ast_if_b);
-    ASSERT_NE(ir_if_b, nullptr);
-    EXPECT_TRUE(ir_if_b->Is<ir::If>());
-    auto* if_flow_b = ir_if_b->As<ir::If>();
+    auto* if_flow_b = As<ir::If>(block_exit(if_flow_a->merge.target));
+    ASSERT_NE(if_flow_b, nullptr);
     ASSERT_NE(if_flow_b->true_.target, nullptr);
     ASSERT_NE(if_flow_b->false_.target, nullptr);
     ASSERT_NE(if_flow_b->merge.target, nullptr);
 
-    auto* ir_if_c = FlowNodeForAstNode(ast_if_c);
-    ASSERT_NE(ir_if_c, nullptr);
-    EXPECT_TRUE(ir_if_c->Is<ir::If>());
-    auto* if_flow_c = ir_if_c->As<ir::If>();
+    auto* loop_flow_c = As<ir::Loop>(block_exit(loop_flow_b->continuing.target));
+    ASSERT_NE(loop_flow_c, nullptr);
+    ASSERT_NE(loop_flow_c->start.target, nullptr);
+    ASSERT_NE(loop_flow_c->continuing.target, nullptr);
+    ASSERT_NE(loop_flow_c->merge.target, nullptr);
+
+    auto* loop_flow_d = As<ir::Loop>(block_exit(loop_flow_c->merge.target));
+    ASSERT_NE(loop_flow_d, nullptr);
+    ASSERT_NE(loop_flow_d->start.target, nullptr);
+    ASSERT_NE(loop_flow_d->continuing.target, nullptr);
+    ASSERT_NE(loop_flow_d->merge.target, nullptr);
+
+    auto* if_flow_c = As<ir::If>(block_exit(loop_flow_d->continuing.target));
+    ASSERT_NE(if_flow_c, nullptr);
     ASSERT_NE(if_flow_c->true_.target, nullptr);
     ASSERT_NE(if_flow_c->false_.target, nullptr);
     ASSERT_NE(if_flow_c->merge.target, nullptr);
 
-    auto* ir_if_d = FlowNodeForAstNode(ast_if_d);
-    ASSERT_NE(ir_if_d, nullptr);
-    EXPECT_TRUE(ir_if_d->Is<ir::If>());
-    auto* if_flow_d = ir_if_d->As<ir::If>();
+    auto* if_flow_d = As<ir::If>(block_exit(loop_flow_b->merge.target));
+    ASSERT_NE(if_flow_d, nullptr);
     ASSERT_NE(if_flow_d->true_.target, nullptr);
     ASSERT_NE(if_flow_d->false_.target, nullptr);
     ASSERT_NE(if_flow_d->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, loop_flow_a->inbound_branches.Length());
     EXPECT_EQ(2u, loop_flow_a->start.target->inbound_branches.Length());
@@ -869,7 +803,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
     EXPECT_EQ(1u, func->start_target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -982,15 +916,10 @@ TEST_F(IR_BuilderImplTest, While) {
     auto* ast_while = While(false, Block());
     WrapInFunction(ast_while);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_while = FlowNodeForAstNode(ast_while);
-    ASSERT_NE(ir_while, nullptr);
-    ASSERT_TRUE(ir_while->Is<ir::Loop>());
-
-    auto* flow = ir_while->As<ir::Loop>();
+    auto* flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(flow->start.target, nullptr);
     ASSERT_NE(flow->continuing.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
@@ -1002,8 +931,8 @@ TEST_F(IR_BuilderImplTest, While) {
     ASSERT_NE(if_flow->false_.target, nullptr);
     ASSERT_NE(if_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
     EXPECT_EQ(1u, flow->inbound_branches.Length());
@@ -1014,7 +943,7 @@ TEST_F(IR_BuilderImplTest, While) {
     EXPECT_EQ(1u, if_flow->false_.target->inbound_branches.Length());
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -1053,15 +982,10 @@ TEST_F(IR_BuilderImplTest, While_Return) {
     auto* ast_while = While(true, Block(Return()));
     WrapInFunction(ast_while);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_while = FlowNodeForAstNode(ast_while);
-    ASSERT_NE(ir_while, nullptr);
-    ASSERT_TRUE(ir_while->Is<ir::Loop>());
-
-    auto* flow = ir_while->As<ir::Loop>();
+    auto* flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(flow->start.target, nullptr);
     ASSERT_NE(flow->continuing.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
@@ -1073,8 +997,8 @@ TEST_F(IR_BuilderImplTest, While_Return) {
     ASSERT_NE(if_flow->false_.target, nullptr);
     ASSERT_NE(if_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
     EXPECT_EQ(1u, flow->inbound_branches.Length());
@@ -1085,7 +1009,7 @@ TEST_F(IR_BuilderImplTest, While_Return) {
     EXPECT_EQ(1u, if_flow->false_.target->inbound_branches.Length());
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -1132,15 +1056,10 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     auto* ast_for = For(Decl(Var("i", ty.i32())), LessThan("i", 10_a), Increment("i"), Block());
     WrapInFunction(ast_for);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_for = FlowNodeForAstNode(ast_for);
-    ASSERT_NE(ir_for, nullptr);
-    ASSERT_TRUE(ir_for->Is<ir::Loop>());
-
-    auto* flow = ir_for->As<ir::Loop>();
+    auto* flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(flow->start.target, nullptr);
     ASSERT_NE(flow->continuing.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
@@ -1152,8 +1071,8 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     ASSERT_NE(if_flow->false_.target, nullptr);
     ASSERT_NE(if_flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
     EXPECT_EQ(1u, flow->inbound_branches.Length());
@@ -1164,28 +1083,23 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     EXPECT_EQ(1u, if_flow->false_.target->inbound_branches.Length());
     EXPECT_EQ(1u, if_flow->merge.target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m), R"()");
+    EXPECT_EQ(Disassemble(m.Get()), R"()");
 }
 
 TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
     auto* ast_for = For(nullptr, nullptr, nullptr, Block(Break()));
     WrapInFunction(ast_for);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_for = FlowNodeForAstNode(ast_for);
-    ASSERT_NE(ir_for, nullptr);
-    ASSERT_TRUE(ir_for->Is<ir::Loop>());
-
-    auto* flow = ir_for->As<ir::Loop>();
+    auto* flow = FindSingleFlowNode<ir::Loop>(m.Get());
     ASSERT_NE(flow->start.target, nullptr);
     ASSERT_NE(flow->continuing.target, nullptr);
     ASSERT_NE(flow->merge.target, nullptr);
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     EXPECT_EQ(1u, flow->inbound_branches.Length());
     EXPECT_EQ(2u, flow->start.target->inbound_branches.Length());
@@ -1193,7 +1107,7 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
     EXPECT_EQ(1u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -1218,20 +1132,15 @@ TEST_F(IR_BuilderImplTest, Switch) {
 
     WrapInFunction(ast_switch);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_switch = FlowNodeForAstNode(ast_switch);
-    ASSERT_NE(ir_switch, nullptr);
-    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
-
-    auto* flow = ir_switch->As<ir::Switch>();
+    auto* flow = FindSingleFlowNode<ir::Switch>(m.Get());
     ASSERT_NE(flow->merge.target, nullptr);
     ASSERT_EQ(3u, flow->cases.Length());
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
     ASSERT_TRUE(flow->cases[0].selectors[0].val->value->Is<constant::Scalar<tint::i32>>());
@@ -1253,7 +1162,7 @@ TEST_F(IR_BuilderImplTest, Switch) {
     EXPECT_EQ(3u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -1287,20 +1196,15 @@ TEST_F(IR_BuilderImplTest, Switch_MultiSelector) {
 
     WrapInFunction(ast_switch);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_switch = FlowNodeForAstNode(ast_switch);
-    ASSERT_NE(ir_switch, nullptr);
-    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
-
-    auto* flow = ir_switch->As<ir::Switch>();
+    auto* flow = FindSingleFlowNode<ir::Switch>(m.Get());
     ASSERT_NE(flow->merge.target, nullptr);
     ASSERT_EQ(1u, flow->cases.Length());
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     ASSERT_EQ(3u, flow->cases[0].selectors.Length());
     ASSERT_TRUE(flow->cases[0].selectors[0].val->value->Is<constant::Scalar<tint::i32>>());
@@ -1318,7 +1222,7 @@ TEST_F(IR_BuilderImplTest, Switch_MultiSelector) {
     EXPECT_EQ(1u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -1340,20 +1244,15 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
     auto* ast_switch = Switch(1_i, utils::Vector{DefaultCase(Block())});
     WrapInFunction(ast_switch);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_switch = FlowNodeForAstNode(ast_switch);
-    ASSERT_NE(ir_switch, nullptr);
-    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
-
-    auto* flow = ir_switch->As<ir::Switch>();
+    auto* flow = FindSingleFlowNode<ir::Switch>(m.Get());
     ASSERT_NE(flow->merge.target, nullptr);
     ASSERT_EQ(1u, flow->cases.Length());
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
     EXPECT_TRUE(flow->cases[0].selectors[0].IsDefault());
@@ -1363,7 +1262,7 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
     EXPECT_EQ(1u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -1387,20 +1286,15 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
                                                  DefaultCase(Block())});
     WrapInFunction(ast_switch);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* ir_switch = FlowNodeForAstNode(ast_switch);
-    ASSERT_NE(ir_switch, nullptr);
-    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
-
-    auto* flow = ir_switch->As<ir::Switch>();
+    auto* flow = FindSingleFlowNode<ir::Switch>(m.Get());
     ASSERT_NE(flow->merge.target, nullptr);
     ASSERT_EQ(2u, flow->cases.Length());
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
     ASSERT_TRUE(flow->cases[0].selectors[0].val->value->Is<constant::Scalar<tint::i32>>());
@@ -1417,7 +1311,7 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
     // This is 1 because the if is dead-code eliminated and the return doesn't happen.
     EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3
@@ -1446,22 +1340,17 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(ast_switch, ast_if);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    ASSERT_EQ(FlowNodeForAstNode(ast_if), nullptr);
+    ASSERT_EQ(FindSingleFlowNode<ir::If>(m.Get()), nullptr);
 
-    auto* ir_switch = FlowNodeForAstNode(ast_switch);
-    ASSERT_NE(ir_switch, nullptr);
-    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
-
-    auto* flow = ir_switch->As<ir::Switch>();
+    auto* flow = FindSingleFlowNode<ir::Switch>(m.Get());
     ASSERT_NE(flow->merge.target, nullptr);
     ASSERT_EQ(2u, flow->cases.Length());
 
-    ASSERT_EQ(1u, m.functions.Length());
-    auto* func = m.functions[0];
+    ASSERT_EQ(1u, m->functions.Length());
+    auto* func = m->functions[0];
 
     ASSERT_EQ(1u, flow->cases[0].selectors.Length());
     ASSERT_TRUE(flow->cases[0].selectors[0].val->value->Is<constant::Scalar<tint::i32>>());
@@ -1477,7 +1366,7 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
     EXPECT_EQ(0u, flow->merge.target->inbound_branches.Length());
     EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   branch %fn3

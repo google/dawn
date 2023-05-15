@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ir/builder.h"
 #include "src/tint/ir/test_helper.h"
 #include "src/tint/ir/value.h"
 
@@ -23,11 +24,11 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_ConstantTest = TestHelper;
 
 TEST_F(IR_ConstantTest, f32) {
-    auto& b = CreateEmptyBuilder();
+    Builder b;
 
     utils::StringStream str;
 
-    auto* c = b.builder.Constant(1.2_f);
+    auto* c = b.Constant(1.2_f);
     EXPECT_EQ(1.2_f, c->value->As<constant::Scalar<f32>>()->ValueAs<f32>());
 
     EXPECT_TRUE(c->value->Is<constant::Scalar<f32>>());
@@ -38,11 +39,11 @@ TEST_F(IR_ConstantTest, f32) {
 }
 
 TEST_F(IR_ConstantTest, f16) {
-    auto& b = CreateEmptyBuilder();
+    Builder b;
 
     utils::StringStream str;
 
-    auto* c = b.builder.Constant(1.1_h);
+    auto* c = b.Constant(1.1_h);
     EXPECT_EQ(1.1_h, c->value->As<constant::Scalar<f16>>()->ValueAs<f16>());
 
     EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
@@ -53,11 +54,11 @@ TEST_F(IR_ConstantTest, f16) {
 }
 
 TEST_F(IR_ConstantTest, i32) {
-    auto& b = CreateEmptyBuilder();
+    Builder b;
 
     utils::StringStream str;
 
-    auto* c = b.builder.Constant(1_i);
+    auto* c = b.Constant(1_i);
     EXPECT_EQ(1_i, c->value->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
@@ -68,11 +69,11 @@ TEST_F(IR_ConstantTest, i32) {
 }
 
 TEST_F(IR_ConstantTest, u32) {
-    auto& b = CreateEmptyBuilder();
+    Builder b;
 
     utils::StringStream str;
 
-    auto* c = b.builder.Constant(2_u);
+    auto* c = b.Constant(2_u);
     EXPECT_EQ(2_u, c->value->As<constant::Scalar<u32>>()->ValueAs<u32>());
 
     EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());
@@ -83,18 +84,18 @@ TEST_F(IR_ConstantTest, u32) {
 }
 
 TEST_F(IR_ConstantTest, bool) {
-    auto& b = CreateEmptyBuilder();
+    Builder b;
 
     {
         utils::StringStream str;
 
-        auto* c = b.builder.Constant(false);
+        auto* c = b.Constant(false);
         EXPECT_FALSE(c->value->As<constant::Scalar<bool>>()->ValueAs<bool>());
     }
 
     {
         utils::StringStream str;
-        auto c = b.builder.Constant(true);
+        auto c = b.Constant(true);
         EXPECT_TRUE(c->value->As<constant::Scalar<bool>>()->ValueAs<bool>());
 
         EXPECT_FALSE(c->value->Is<constant::Scalar<f32>>());

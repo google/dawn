@@ -31,6 +31,7 @@
 #include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/discard_statement.h"
+#include "src/tint/ast/enable.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/function.h"
@@ -182,10 +183,10 @@ ResultType BuilderImpl::Build() {
                 EmitVariable(var);
             },
             [&](const ast::Function* func) { EmitFunction(func); },
-            // [&](const ast::Enable*) {
-            // TODO(dsinclair): Implement? I think these need to be passed along so further stages
-            // know what is enabled.
-            // },
+            [&](const ast::Enable*) {
+                // TODO(dsinclair): Implement? I think these need to be passed along so further
+                // stages know what is enabled.
+            },
             [&](const ast::ConstAssert*) {
                 // Evaluated by the resolver, drop from the IR.
             },

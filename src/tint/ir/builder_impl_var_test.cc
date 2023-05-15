@@ -29,11 +29,10 @@ using IR_BuilderImplTest = TestHelper;
 TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
 %a:ref<private, u32, read_write> = var private, read_write
 
 
@@ -45,11 +44,10 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
     auto* expr = Expr(2_u);
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate, expr);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
 %a:ref<private, u32, read_write> = var private, read_write, 2u
 
 
@@ -61,11 +59,10 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction);
     WrapInFunction(a);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   %a:ref<function, u32, read_write> = var function, read_write
@@ -80,11 +77,10 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction, expr);
     WrapInFunction(a);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m),
+    EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
   %fn2 = block
   %a:ref<function, u32, read_write> = var function, read_write, 2u

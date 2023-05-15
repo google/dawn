@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/test_helper.h"
 
@@ -23,12 +24,12 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, CreateStore) {
-    auto& b = CreateEmptyBuilder();
+    Builder b;
 
     // TODO(dsinclair): This is wrong, but we don't have anything correct to store too at the
     // moment.
-    auto* to = b.builder.Discard();
-    const auto* inst = b.builder.Store(to, b.builder.Constant(4_i));
+    auto* to = b.Discard();
+    const auto* inst = b.Store(to, b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Store>());
     ASSERT_EQ(inst->to, to);
@@ -40,10 +41,10 @@ TEST_F(IR_InstructionTest, CreateStore) {
 }
 
 TEST_F(IR_InstructionTest, Store_Usage) {
-    auto& b = CreateEmptyBuilder();
+    Builder b;
 
-    auto* to = b.builder.Discard();
-    const auto* inst = b.builder.Store(to, b.builder.Constant(4_i));
+    auto* to = b.Discard();
+    const auto* inst = b.Store(to, b.Constant(4_i));
 
     ASSERT_NE(inst->to, nullptr);
     ASSERT_EQ(inst->to->Usage().Length(), 1u);

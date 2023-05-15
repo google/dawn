@@ -32,11 +32,10 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Assign) {
     auto* expr = Assign("a", 4_u);
     WrapInFunction(expr);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
 %a:ref<private, u32, read_write> = var private, read_write
 
 

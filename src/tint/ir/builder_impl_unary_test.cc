@@ -31,16 +31,21 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Not) {
     auto* expr = Not(Call("my_func"));
     WrapInFunction(expr);
 
-    auto& b = CreateBuilder();
-    InjectFlowBlock();
-    auto r = b.EmitExpression(expr);
-    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
-    ASSERT_TRUE(r);
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    Disassembler d(b.builder.ir);
-    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1:bool = call my_func
-%2:bool = eq %1:bool, false
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():bool
+  %fn2 = block
+  ret false
+func_end
+
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn4 = block
+  %1:bool = call my_func
+  %tint_symbol:bool = eq %1:bool, false
+  ret
+func_end
+
 )");
 }
 
@@ -49,16 +54,21 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Complement) {
     auto* expr = Complement(Call("my_func"));
     WrapInFunction(expr);
 
-    auto& b = CreateBuilder();
-    InjectFlowBlock();
-    auto r = b.EmitExpression(expr);
-    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
-    ASSERT_TRUE(r);
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    Disassembler d(b.builder.ir);
-    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1:u32 = call my_func
-%2:u32 = complement %1:u32
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():u32
+  %fn2 = block
+  ret 1u
+func_end
+
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn4 = block
+  %1:u32 = call my_func
+  %tint_symbol:u32 = complement %1:u32
+  ret
+func_end
+
 )");
 }
 
@@ -67,16 +77,21 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Negation) {
     auto* expr = Negation(Call("my_func"));
     WrapInFunction(expr);
 
-    auto& b = CreateBuilder();
-    InjectFlowBlock();
-    auto r = b.EmitExpression(expr);
-    ASSERT_THAT(b.Diagnostics(), testing::IsEmpty());
-    ASSERT_TRUE(r);
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    Disassembler d(b.builder.ir);
-    d.EmitBlockInstructions(b.current_flow_block->As<ir::Block>());
-    EXPECT_EQ(d.AsString(), R"(%1:i32 = call my_func
-%2:i32 = negation %1:i32
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():i32
+  %fn2 = block
+  ret 1i
+func_end
+
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn4 = block
+  %1:i32 = call my_func
+  %tint_symbol:i32 = negation %1:i32
+  ret
+func_end
+
 )");
 }
 
@@ -86,11 +101,10 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
     auto* expr = Decl(Let("v2", AddressOf("v1")));
     WrapInFunction(expr);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
 %v1:ref<private, i32, read_write> = var private, read_write
 
 
@@ -112,11 +126,10 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
     };
     WrapInFunction(stmts);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn1 = block
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
 %v1:ref<private, i32, read_write> = var private, read_write
 
 
