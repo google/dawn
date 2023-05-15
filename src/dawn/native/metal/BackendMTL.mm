@@ -475,6 +475,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
                 if (gpu_info::IsIntelGen7(vendorId, deviceId)) {
                     return true;
                 }
+                if (gpu_info::IsIntelGen11(vendorId, deviceId)) {
+                    return true;
+                }
                 if (gpu_info::IsIntel(vendorId) && !IsMacOSVersionAtLeast(11)) {
                     return true;
                 }
