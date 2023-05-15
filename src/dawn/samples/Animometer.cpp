@@ -190,7 +190,8 @@ int main(int argc, const char* argv[]) {
         frameCount++;
         frame();
         if (frameCount % 60 == 0) {
-            printf("FPS: %lf\n", static_cast<double>(frameCount) / timer->GetElapsedTime());
+            printf("FPS: %lf\n", 60.0 / timer->GetElapsedTime());
+            timer->Start();
         }
     }
 }
