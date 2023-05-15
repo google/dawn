@@ -9,7 +9,7 @@ Dawn uses Chromium's continuous integration (CI) infrastructure to continually r
 For additional information on GPU testing in Chromium, please see [[chromium/src]//docs/gpu/gpu_testing_bot_details.md](https://chromium.googlesource.com/chromium/src.git/+/main/docs/gpu/gpu_testing_bot_details.md).
 
 ## Dawn CI/Try Builders
-Dawn builders are specified in [[dawn]//infra/config/global/cr-buildbucket.cfg](../infra/config/global/cr-buildbucket.cfg). This file contains a few mixins such as `clang`, `no_clang`, `x64`, `x86`, `debug`, `release` which are used to specify the bot dimensions and build properties (builder_mixins.recipe.properties). At the time of writing, we have the following builders:
+Dawn builders are specified in [[dawn]//infra/config/global/cr-buildbucket.cfg](../../infra/config/global/generated/cr-buildbucket.cfg). This file contains a few mixins such as `clang`, `no_clang`, `x64`, `x86`, `debug`, `release` which are used to specify the bot dimensions and build properties (builder_mixins.recipe.properties). At the time of writing, we have the following builders:
   - [dawn/try/presubmit](https://ci.chromium.org/p/dawn/builders/try/presubmit)
   - [dawn/try/linux-clang-dbg-x64](https://ci.chromium.org/p/dawn/builders/try/linux-clang-dbg-x64)
   - [dawn/try/linux-clang-dbg-x86](https://ci.chromium.org/p/dawn/builders/try/linux-clang-dbg-x86)
@@ -23,16 +23,16 @@ Dawn builders are specified in [[dawn]//infra/config/global/cr-buildbucket.cfg](
 
 There are additional `chromium/try` builders, but those are described later in this document.
 
-These bots are defined in both buckets luci.dawn.ci and luci.dawn.try, though their ACL permissions differ. luci.dawn.ci bots will be scheduled regularly based on [[dawn]//infra/config/global/luci-scheduler.cfg](../infra/config/global/luci-scheduler.cfg). luci.dawn.try bots will be triggered on the CQ based on [[dawn]//infra/config/global/commit-queue.cfg](../infra/config/global/commit-queue.cfg).
+These bots are defined in both buckets luci.dawn.ci and luci.dawn.try, though their ACL permissions differ. luci.dawn.ci bots will be scheduled regularly based on [[dawn]//infra/config/global/luci-scheduler.cfg](../../infra/config/global/generated/luci-scheduler.cfg). luci.dawn.try bots will be triggered on the CQ based on [[dawn]//infra/config/global/commit-queue.cfg](../../infra/config/global/generated/commit-queue.cfg).
 
 One particular note is `buckets.swarming.builder_defaults.recipe.name: "dawn"` which specifies these use the [`dawn.py`](https://source.chromium.org/search/?q=file:recipes/dawn.py) build recipe.
 
-Build status for both CI and Try builders can be seen at this [console](https://ci.chromium.org/p/dawn) which is generated from [[dawn]//infra/config/global/luci-milo.cfg](../infra/config/global/luci-milo.cfg).
+Build status for both CI and Try builders can be seen at this [console](https://ci.chromium.org/p/dawn) which is generated from [[dawn]//infra/config/global/luci-milo.cfg](../../infra/config/global/generated/luci-milo.cfg).
 
 ## Dawn Build Recipe
 The [`dawn.py`](https://cs.chromium.org/search/?q=file:recipes/dawn.py) build recipe is simple and intended only for testing compilation and unit tests. It does the following:
   1. Checks out Dawn standalone and dependencies
-  2. Builds based on the `builder_mixins.recipe.properties` coming from the builder config in [[dawn]//infra/config/global/cr-buildbucket.cfg](../infra/config/global/cr-buildbucket.cfg).
+  2. Builds based on the `builder_mixins.recipe.properties` coming from the builder config in [[dawn]//infra/config/global/cr-buildbucket.cfg](../../infra/config/global/generated/cr-buildbucket.cfg).
   3. Runs the `dawn_unittests` on that same bot.
 
 ## Dawn Chromium-Based CI Waterfall Bots
@@ -48,7 +48,7 @@ The Builder and Tester bots are additionally configured at [[chromium/tools/buil
 Finally, builds on these waterfall bots are automatically scheduled based on the configuration in [[chromium/src]//infra/config/buckets/ci.star](https://source.chromium.org/search?q=file:ci.star%20%22Dawn%20Linux%20x64%20Builder%22). Note that the Tester bots are `triggered_by` the Builder bots.
 
 ## Dawn Chromium-Based Tryjobs
-[[dawn]//infra/config/global/commit-queue.cfg](../infra/config/global/commit-queue.cfg) declares additional tryjob builders which are defined in the Chromium workspace. The reason for this separation is that jobs sent to these bots rely on the Chromium infrastructure for doing builds and triggering jobs on bots with GPU hardware in swarming.
+[[dawn]//infra/config/global/commit-queue.cfg](../../infra/config/global/generated/commit-queue.cfg) declares additional tryjob builders which are defined in the Chromium workspace. The reason for this separation is that jobs sent to these bots rely on the Chromium infrastructure for doing builds and triggering jobs on bots with GPU hardware in swarming.
 
 At the time of writing, the bots for Dawn CLs are:
   - [chromium/try/linux-dawn-rel](https://ci.chromium.org/p/chromium/builders/try/linux-dawn-rel)

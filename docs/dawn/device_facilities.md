@@ -9,11 +9,11 @@ Example of backend facilities are GPU memory allocators or the backing API funct
 
 ### Error Handling
 
-Dawn (dawn_native) uses the [Error.h](../src/dawn/native/Error.h) error handling to robustly handle errors.
+Dawn (dawn_native) uses the [Error.h](../../src/dawn/native/Error.h) error handling to robustly handle errors.
 With `DAWN_TRY` errors bubble up all the way to, and are "consumed" by the entry-point that was called by the application.
 Error consumption uses `Device::ConsumeError` that expose them via the WebGPU "error scopes" and can also influence the device lifecycle by notifying of a device loss, or triggering a device loss..
 
-See [Error.h](../src/dawn/native/Error.h) for more information about using errors.
+See [Error.h](../../src/dawn/native/Error.h) for more information about using errors.
 
 ### Device Lifecycle
 
@@ -26,7 +26,7 @@ The device lifecycle is a bit more complicated than other objects in Dawn for mu
  - A device can become "disconnected" when a TDR or hot-unplug happens.
    In this case, destruction of the device doesn't need to wait on GPU commands to finish because they just disappeared.
 
-There is a state machine `State` defined in [Device.h](../src/dawn/native/Device.h) that controls all of the above.
+There is a state machine `State` defined in [Device.h](../../src/dawn/native/Device.h) that controls all of the above.
 The most common state is `Alive` when there are potentially GPU commands executing.
 
 Initialization of a device looks like the following:
@@ -62,7 +62,7 @@ Toggles can be queried using `DeviceBase::IsToggleEnabled`:
 bool useRenderPass = device->IsToggleEnabled(Toggle::UseD3D12RenderPass);
 ```
 
-Toggles are defined in a table in [Toggles.cpp](../src/dawn/native/Toggles.cpp) that also includes their name and description.
+Toggles are defined in a table in [Toggles.cpp](../../src/dawn/native/Toggles.cpp) that also includes their name and description.
 The name can be used to require enabling of a toggle or, at the contrary, require the disabling of a toogle.
 This is particularly useful in tests so that the two sides of a code path can be tested (for example using D3D12 render passes and not).
 

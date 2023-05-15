@@ -11,7 +11,7 @@ use_dawn = true           # Required to build Dawn
 use_cfi_icall=false       # Required because Dawn dynamically loads function pointers, and we don't sanitize them yet.
 ```
 
-A Chromium checkout is required for the highest optimization flags. It is possible to build and run `dawn_perf_tests` from a standalone Dawn checkout as well, only using GN arg `is_debug=false`. For more information on building, please see [building.md](./building.md).
+A Chromium checkout is required for the highest optimization flags. It is possible to build and run `dawn_perf_tests` from a standalone Dawn checkout as well, only using GN arg `is_debug=false`. For more information on building, please see [building.md](../building.md).
 
 ### Terminology
 

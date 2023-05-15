@@ -7,7 +7,7 @@ Requirements:
 
 ## Building Tint with coverage generation enabled
 
-Follow the steps [to build Tint with CMake](../README.md), but include the additional `-DDAWN_EMIT_COVERAGE=1` CMake flag.
+Follow the steps [to build Tint with CMake](../building.md), but include the additional `-DDAWN_EMIT_COVERAGE=1` CMake flag.
 
 ## Generate coverage information
 

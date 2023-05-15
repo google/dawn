@@ -2,11 +2,11 @@
 
 Dawn relies on a lot of code generation to produce boilerplate code, especially webgpu.h-related code. They start by reading some JSON files (and sometimes XML too), process the data into an in-memory representation that's then used by some [Jinja2](https://jinja.palletsprojects.com/) templates to generate the code. This is similar to the model/view separation in Web development.
 
-Generators are based on [generator_lib.py](../generator/generator_lib.py) which provides facilities for integrating in build systems and using Jinja2. Templates can be found in [`generator/templates`](../generator/templates) and the generated files are in `out/<Debug/Release/foo>/gen/src` when building Dawn in standalone. Generated files can also be found in [Chromium's code search](https://source.chromium.org/chromium/chromium/src/+/main:out/Debug/gen/third_party/dawn/src/).
+Generators are based on [generator_lib.py](../../generator/generator_lib.py) which provides facilities for integrating in build systems and using Jinja2. Templates can be found in [`generator/templates`](../../generator/templates) and the generated files are in `out/<Debug/Release/foo>/gen/src` when building Dawn in standalone. Generated files can also be found in [Chromium's code search](https://source.chromium.org/chromium/chromium/src/+/main:out/Debug/gen/third_party/dawn/src/).
 
 ## Dawn "JSON API" generators
 
-Most of the code generation is done from [`dawn.json`](../dawn.json) which is a JSON description of the WebGPU API with extra annotation used by some of the generators. The code for all the "Dawn JSON" generators is in [`dawn_json_generator.py`](../generator/dawn_json_generator.py) (with templates in the regular template dir).
+Most of the code generation is done from [`dawn.json`](../../dawn.json) which is a JSON description of the WebGPU API with extra annotation used by some of the generators. The code for all the "Dawn JSON" generators is in [`dawn_json_generator.py`](../../generator/dawn_json_generator.py) (with templates in the regular template dir).
 
 At this time it is used to generate:
 
@@ -89,7 +89,7 @@ A **record** is a list of **record members**, each of which is a dictionary with
 
 ## Dawn "wire" generators
 
-The generator for the pieces of dawn_wire need additional data which is found in [`dawn_wire_json`](../dawn_wire.json). Examples of pieces that are generated are:
+The generator for the pieces of dawn_wire need additional data which is found in [`dawn_wire_json`](../../dawn_wire.json). Examples of pieces that are generated are:
 
  - `WireCmd.cpp/.h` the most important piece: the meat of the serialization / deserialization code for WebGPU structures and commands
  - `ServerHandlers/Doers.cpp` that does the complete handling of all regular WebGPU methods in the server
@@ -112,7 +112,7 @@ The schema of `dawn_wire.json` is a dictionary with the following keys:
 
 ## OpenGL loader generator
 
-The code to load OpenGL entrypoints from a `GetProcAddress` function is generated from [`gl.xml`](../third_party/khronos/gl.xml) and the [list of extensions](../src/dawn/native/opengl/supported_extensions.json) it supports.
+The code to load OpenGL entrypoints from a `GetProcAddress` function is generated from [`gl.xml`](../../third_party/khronos/gl.xml) and the [list of extensions](../../src/dawn/native/opengl/supported_extensions.json) it supports.
 
 
 ## Dawn lpmfuzz generator
