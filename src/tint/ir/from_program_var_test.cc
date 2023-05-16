@@ -32,9 +32,9 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
-%a:ref<private, u32, read_write> = var private, read_write
-
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
+  %a:ref<private, u32, read_write> = var private, read_write
+}
 
 
 )");
@@ -47,9 +47,9 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
-%a:ref<private, u32, read_write> = var private, read_write, 2u
-
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
+  %a:ref<private, u32, read_write> = var private, read_write, 2u
+}
 
 
 )");
@@ -63,11 +63,11 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
-  %a:ref<function, u32, read_write> = var function, read_write
-  ret
-func_end
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn2 = block {
+    %a:ref<function, u32, read_write> = var function, read_write
+  } -> %func_end # return
+} %func_end
 
 )");
 }
@@ -81,11 +81,11 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
-  %a:ref<function, u32, read_write> = var function, read_write, 2u
-  ret
-func_end
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn2 = block {
+    %a:ref<function, u32, read_write> = var function, read_write, 2u
+  } -> %func_end # return
+} %func_end
 
 )");
 }

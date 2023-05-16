@@ -138,13 +138,14 @@ void Disassembler::Walk(const FlowNode* node) {
 
                 out_ << "]";
             }
-            out_ << std::endl;
+            out_ << " {" << std::endl;
 
             {
                 ScopedIndent func_indent(indent_size_);
                 ScopedStopNode scope(stop_nodes_, f->end_target);
                 Walk(f->start_target);
             }
+            out_ << "} ";
             Walk(f->end_target);
         },
         [&](const ir::Block* b) {
@@ -153,16 +154,23 @@ void Disassembler::Walk(const FlowNode* node) {
                 return;
             }
 
-            Indent() << "%fn" << IdOf(b) << " = block" << std::endl;
-            EmitBlockInstructions(b);
+            Indent() << "%fn" << IdOf(b) << " = block {" << std::endl;
+            {
+                ScopedIndent si(indent_size_);
+                EmitBlockInstructions(b);
+            }
+            Indent() << "}";
 
+            std::string suffix = "";
             if (b->branch.target->Is<FunctionTerminator>()) {
-                Indent() << "ret";
+                out_ << " -> %func_end";
+                suffix = "return";
             } else if (b->branch.target->Is<RootTerminator>()) {
                 // Nothing to do
             } else {
-                Indent() << "branch "
-                         << "%fn" << IdOf(b->branch.target);
+                out_ << " -> "
+                     << "%fn" << IdOf(b->branch.target);
+                suffix = "branch";
             }
             if (!b->branch.args.IsEmpty()) {
                 out_ << " ";
@@ -172,6 +180,9 @@ void Disassembler::Walk(const FlowNode* node) {
                     }
                     EmitValue(v);
                 }
+            }
+            if (!suffix.empty()) {
+                out_ << " # " << suffix;
             }
             out_ << std::endl;
 
@@ -294,7 +305,7 @@ void Disassembler::Walk(const FlowNode* node) {
         },
         [&](const ir::FunctionTerminator*) {
             TINT_ASSERT(IR, in_function_);
-            Indent() << "func_end" << std::endl << std::endl;
+            Indent() << "%func_end" << std::endl << std::endl;
         },
         [&](const ir::RootTerminator*) {
             TINT_ASSERT(IR, !in_function_);

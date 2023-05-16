@@ -34,17 +34,17 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Not) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():bool
-  %fn2 = block
-  ret false
-func_end
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():bool {
+  %fn2 = block {
+  } -> %func_end false # return
+} %func_end
 
-%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn4 = block
-  %1:bool = call my_func
-  %tint_symbol:bool = eq %1:bool, false
-  ret
-func_end
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn4 = block {
+    %1:bool = call my_func
+    %tint_symbol:bool = eq %1:bool, false
+  } -> %func_end # return
+} %func_end
 
 )");
 }
@@ -57,17 +57,17 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Complement) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():u32
-  %fn2 = block
-  ret 1u
-func_end
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():u32 {
+  %fn2 = block {
+  } -> %func_end 1u # return
+} %func_end
 
-%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn4 = block
-  %1:u32 = call my_func
-  %tint_symbol:u32 = complement %1:u32
-  ret
-func_end
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn4 = block {
+    %1:u32 = call my_func
+    %tint_symbol:u32 = complement %1:u32
+  } -> %func_end # return
+} %func_end
 
 )");
 }
@@ -80,17 +80,17 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Negation) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():i32
-  %fn2 = block
-  ret 1i
-func_end
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():i32 {
+  %fn2 = block {
+  } -> %func_end 1i # return
+} %func_end
 
-%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn4 = block
-  %1:i32 = call my_func
-  %tint_symbol:i32 = negation %1:i32
-  ret
-func_end
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn4 = block {
+    %1:i32 = call my_func
+    %tint_symbol:i32 = negation %1:i32
+  } -> %func_end # return
+} %func_end
 
 )");
 }
@@ -104,16 +104,16 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
-%v1:ref<private, i32, read_write> = var private, read_write
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
+  %v1:ref<private, i32, read_write> = var private, read_write
+}
 
 
-
-%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn3 = block
-  %v2:ptr<private, i32, read_write> = addr_of %v1:ref<private, i32, read_write>
-  ret
-func_end
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn3 = block {
+    %v2:ptr<private, i32, read_write> = addr_of %v1:ref<private, i32, read_write>
+  } -> %func_end # return
+} %func_end
 
 )");
 }
@@ -129,17 +129,17 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block
-%v1:ref<private, i32, read_write> = var private, read_write
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
+  %v1:ref<private, i32, read_write> = var private, read_write
+}
 
 
-
-%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn3 = block
-  %v3:ptr<private, i32, read_write> = addr_of %v1:ref<private, i32, read_write>
-  %v2:i32 = indirection %v3:ptr<private, i32, read_write>
-  ret
-func_end
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn3 = block {
+    %v3:ptr<private, i32, read_write> = addr_of %v1:ref<private, i32, read_write>
+    %v2:i32 = indirection %v3:ptr<private, i32, read_write>
+  } -> %func_end # return
+} %func_end
 
 )");
 }
