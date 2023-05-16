@@ -183,6 +183,19 @@ MaybeError RenderPipeline::Initialize() {
     DAWN_TRY(InitializeShaders());
     DAWN_TRY(InitializeDepthStencilState());
 
+    // RTVs and UAVs share the same resoure slots. Make sure here we are not going to run out of
+    // slots.
+    uint32_t colorAttachments =
+        static_cast<uint8_t>(GetHighestBitIndexPlusOne(GetColorAttachmentsMask()));
+    uint32_t unusedUAVs = ToBackend(GetLayout())->GetUnusedUAVBindingCount();
+    uint32_t usedUAVs = ToBackend(GetLayout())->GetTotalUAVBindingCount() - unusedUAVs;
+    // TODO(dawn:1814): Move the validation to the frontend, if we eventually regard it as a compat
+    // restriction.
+    DAWN_INVALID_IF(colorAttachments > unusedUAVs,
+                    "The pipeline uses up to color attachment %u, but there are only %u remaining "
+                    "slots because the pipeline uses %u UAVs",
+                    colorAttachments, unusedUAVs, usedUAVs);
+
     SetLabelImpl();
     return {};
 }

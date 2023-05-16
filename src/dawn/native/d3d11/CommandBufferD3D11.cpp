@@ -32,6 +32,7 @@
 #include "dawn/native/d3d11/ComputePipelineD3D11.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
+#include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "dawn/native/d3d11/RenderPipelineD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
@@ -415,6 +416,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
     ityp::array<ColorAttachmentIndex, ID3D11RenderTargetView*, kMaxColorAttachments>
         d3d11RenderTargetViewPtrs = {};
     ColorAttachmentIndex attachmentCount(uint8_t(0));
+    // TODO(dawn:1815): Shrink the sparse attachments to accommodate more UAVs.
     for (ColorAttachmentIndex i :
          IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
         TextureView* colorTextureView = ToBackend(renderPass->colorAttachments[i].view.Get());

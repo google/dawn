@@ -25,15 +25,23 @@ ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
     Device* device,
     const PipelineLayoutDescriptor* descriptor) {
     Ref<PipelineLayout> pipelineLayout = AcquireRef(new PipelineLayout(device, descriptor));
-    DAWN_TRY(pipelineLayout->Initialize());
+    DAWN_TRY(pipelineLayout->Initialize(device));
     return pipelineLayout;
 }
 
-MaybeError PipelineLayout::Initialize() {
+MaybeError PipelineLayout::Initialize(Device* device) {
     unsigned int constantBufferIndex = 0;
     unsigned int samplerIndex = 0;
     unsigned int shaderResourceViewIndex = 0;
-    unsigned int unorderedAccessViewIndex = 0;
+    // For d3d11 pixel shaders, the render targets and unordered-access views share the same
+    // resource slots when being written out. So we assign UAV binding index decreasingly here.
+    // https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-omsetrendertargetsandunorderedaccessviews
+    // TODO(dawn:1818): Support testing on both FL11_0 and FL11_1.
+    uint32_t unorderedAccessViewIndex =
+        device->GetD3D11Device()->GetFeatureLevel() == D3D_FEATURE_LEVEL_11_1
+            ? D3D11_1_UAV_SLOT_COUNT
+            : D3D11_PS_CS_UAV_REGISTER_COUNT;
+    mTotalUAVBindingCount = unorderedAccessViewIndex;
 
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
         const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
@@ -49,7 +57,7 @@ MaybeError PipelineLayout::Initialize() {
                             break;
                         case wgpu::BufferBindingType::Storage:
                         case kInternalStorageBufferBinding:
-                            mIndexInfo[group][bindingIndex] = unorderedAccessViewIndex++;
+                            mIndexInfo[group][bindingIndex] = --unorderedAccessViewIndex;
                             break;
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                             mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
@@ -69,11 +77,12 @@ MaybeError PipelineLayout::Initialize() {
                     break;
 
                 case BindingInfoType::StorageTexture:
-                    mIndexInfo[group][bindingIndex] = unorderedAccessViewIndex++;
+                    mIndexInfo[group][bindingIndex] = --unorderedAccessViewIndex;
                     break;
             }
         }
     }
+    mUnusedUAVBindingCount = unorderedAccessViewIndex;
 
     return {};
 }

@@ -28,7 +28,9 @@ class Device;
 
 // For D3D11, uniform buffers, samplers, sampled textures, and storage buffers are bind to
 // different kind of slots. The number of slots for each type is limited by the D3D11 spec.
-// So we need to pack the bindings by type into the slots tightly.
+// So we need to pack the bindings by type into the slots tightly. UAV slots are a little
+// different. They are assigned to storage buffers and textures decreasingly from the end,
+// as color attachments also use them increasingly from the begin.
 // And D3D11 uses SM 5.0 which doesn't support spaces(binding groups). so we need to flatten
 // the binding groups into a single array.
 class PipelineLayout final : public PipelineLayoutBase {
@@ -46,14 +48,20 @@ class PipelineLayout final : public PipelineLayoutBase {
         ityp::array<BindGroupIndex, ityp::vector<BindingIndex, uint32_t>, kMaxBindGroups>;
     const BindingIndexInfo& GetBindingIndexInfo() const;
 
+    uint32_t GetUnusedUAVBindingCount() const { return mUnusedUAVBindingCount; }
+    uint32_t GetTotalUAVBindingCount() const { return mTotalUAVBindingCount; }
+
   private:
     using PipelineLayoutBase::PipelineLayoutBase;
 
     ~PipelineLayout() override = default;
 
-    MaybeError Initialize();
+    MaybeError Initialize(Device* device);
 
     BindingIndexInfo mIndexInfo;
+
+    uint32_t mUnusedUAVBindingCount = 0u;
+    uint32_t mTotalUAVBindingCount = 0u;
 };
 
 }  // namespace dawn::native::d3d11
