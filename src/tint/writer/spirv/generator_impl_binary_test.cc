@@ -21,7 +21,7 @@ namespace {
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_I32) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
-    func->start_target->branch.target = func->end_target;
+    b.Branch(func->start_target, func->end_target);
 
     func->start_target->instructions.Push(
         b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(2_i)));
@@ -43,7 +43,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_U32) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
-    func->start_target->branch.target = func->end_target;
+    b.Branch(func->start_target, func->end_target);
 
     func->start_target->instructions.Push(
         b.Add(mod.types.Get<type::U32>(), b.Constant(1_u), b.Constant(2_u)));
@@ -65,7 +65,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_F32) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
-    func->start_target->branch.target = func->end_target;
+    b.Branch(func->start_target, func->end_target);
 
     func->start_target->instructions.Push(
         b.Add(mod.types.Get<type::F32>(), b.Constant(1_f), b.Constant(2_f)));
@@ -87,7 +87,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_Chain) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
-    func->start_target->branch.target = func->end_target;
+    b.Branch(func->start_target, func->end_target);
 
     auto* a = b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(2_i));
     func->start_target->instructions.Push(a);

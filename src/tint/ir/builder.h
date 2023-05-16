@@ -94,7 +94,7 @@ class Builder {
     /// @param from the block to branch from
     /// @param to the node to branch too
     /// @param args arguments to the branch
-    void Branch(Block* from, FlowNode* to, utils::VectorRef<Value*> args);
+    void Branch(Block* from, FlowNode* to, utils::VectorRef<Value*> args = {});
 
     /// Creates a constant::Value
     /// @param args the arguments
