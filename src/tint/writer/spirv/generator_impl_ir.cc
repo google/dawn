@@ -68,31 +68,41 @@ bool GeneratorImplIr::Generate() {
 }
 
 uint32_t GeneratorImplIr::Constant(const ir::Constant* constant) {
+    return Constant(constant->value);
+}
+
+uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {
     return constants_.GetOrCreate(constant, [&]() {
         auto id = module_.NextId();
         auto* ty = constant->Type();
-        auto* value = constant->value;
         Switch(
             ty,  //
             [&](const type::Bool*) {
                 module_.PushType(
-                    value->ValueAs<bool>() ? spv::Op::OpConstantTrue : spv::Op::OpConstantFalse,
+                    constant->ValueAs<bool>() ? spv::Op::OpConstantTrue : spv::Op::OpConstantFalse,
                     {Type(ty), id});
             },
             [&](const type::I32*) {
-                module_.PushType(spv::Op::OpConstant, {Type(ty), id, value->ValueAs<u32>()});
+                module_.PushType(spv::Op::OpConstant, {Type(ty), id, constant->ValueAs<u32>()});
             },
             [&](const type::U32*) {
                 module_.PushType(spv::Op::OpConstant,
-                                 {Type(ty), id, U32Operand(value->ValueAs<i32>())});
+                                 {Type(ty), id, U32Operand(constant->ValueAs<i32>())});
             },
             [&](const type::F32*) {
-                module_.PushType(spv::Op::OpConstant, {Type(ty), id, value->ValueAs<f32>()});
+                module_.PushType(spv::Op::OpConstant, {Type(ty), id, constant->ValueAs<f32>()});
             },
             [&](const type::F16*) {
                 module_.PushType(
                     spv::Op::OpConstant,
-                    {Type(ty), id, U32Operand(value->ValueAs<f16>().BitsRepresentation())});
+                    {Type(ty), id, U32Operand(constant->ValueAs<f16>().BitsRepresentation())});
+            },
+            [&](const type::Vector* vec) {
+                OperandList operands = {Type(ty), id};
+                for (uint32_t i = 0; i < vec->Width(); i++) {
+                    operands.push_back(Constant(constant->Index(i)));
+                }
+                module_.PushType(spv::Op::OpConstantComposite, operands);
             },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled constant type: " << ty->FriendlyName();

@@ -95,6 +95,11 @@ class GeneratorImplIr {
     uint32_t EmitBinary(const ir::Binary* binary);
 
   private:
+    /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
+    /// @param constant the constant to get the ID for
+    /// @returns the result ID of the constant
+    uint32_t Constant(const constant::Value* constant);
+
     const ir::Module* ir_;
     spirv::Module module_;
     BinaryWriter writer_;
@@ -125,22 +130,22 @@ class GeneratorImplIr {
         }
     };
 
-    /// ConstantHasher provides a hash function for an ir::Constant pointer, hashing the value
+    /// ConstantHasher provides a hash function for a constant::Value pointer, hashing the value
     /// instead of the pointer itself.
     struct ConstantHasher {
-        /// @param c the ir::Constant pointer to create a hash for
+        /// @param c the constant::Value pointer to create a hash for
         /// @return the hash value
-        inline std::size_t operator()(const ir::Constant* c) const { return c->value->Hash(); }
+        inline std::size_t operator()(const constant::Value* c) const { return c->Hash(); }
     };
 
-    /// ConstantEquals provides an equality function for two ir::Constant pointers, comparing their
-    /// values instead of the pointers.
+    /// ConstantEquals provides an equality function for two constant::Value pointers, comparing
+    /// their values instead of the pointers.
     struct ConstantEquals {
-        /// @param a the first ir::Constant pointer to compare
-        /// @param b the second ir::Constant pointer to compare
+        /// @param a the first constant::Value pointer to compare
+        /// @param b the second constant::Value pointer to compare
         /// @return the hash value
-        inline bool operator()(const ir::Constant* a, const ir::Constant* b) const {
-            return a->value->Equal(b->value);
+        inline bool operator()(const constant::Value* a, const constant::Value* b) const {
+            return a->Equal(b);
         }
     };
 
@@ -151,7 +156,7 @@ class GeneratorImplIr {
     utils::Hashmap<FunctionType, uint32_t, 8, FunctionType::Hasher> function_types_;
 
     /// The map of constants to their result IDs.
-    utils::Hashmap<const ir::Constant*, uint32_t, 16, ConstantHasher, ConstantEquals> constants_;
+    utils::Hashmap<const constant::Value*, uint32_t, 16, ConstantHasher, ConstantEquals> constants_;
 
     /// The map of instructions to their result IDs.
     utils::Hashmap<const ir::Instruction*, uint32_t, 8> instructions_;
