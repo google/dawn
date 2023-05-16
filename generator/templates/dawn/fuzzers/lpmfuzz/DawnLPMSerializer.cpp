@@ -16,6 +16,7 @@
 #include "dawn/fuzzers/lpmfuzz/DawnLPMFuzzer.h"
 #include "dawn/fuzzers/lpmfuzz/DawnLPMObjectStore.h"
 #include "dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.h"
+#include "dawn/fuzzers/lpmfuzz/DawnLPMSerializerCustom.h"
 #include "dawn/webgpu.h"
 #include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/ObjectHandle.h"
@@ -231,7 +232,7 @@ namespace dawn::wire {
 
 WireResult SerializedData(const fuzzing::Program& program, dawn::wire::ChunkedCommandSerializer serializer) {
     DawnLPMObjectIdProvider provider;
-    PerObjectType<DawnLPMObjectStore> objectStores, &objectStoresRef = objectStores;
+    PerObjectType<DawnLPMObjectStore> objectStores;
 
     // Allocate a scoped buffer allocation
     const size_t kMaxSerializeBufferSize = 65536;
@@ -249,13 +250,14 @@ WireResult SerializedData(const fuzzing::Program& program, dawn::wire::ChunkedCo
                 {{ name }}Cmd *cmd = nullptr;
                 WIRE_TRY(serializeBuffer.Next(&cmd));
 
-                WIRE_TRY({{name}}ProtoConvert(command.{{ command.name.concatcase() }}(), cmd, &serializeBuffer, objectStoresRef));
+                WIRE_TRY({{name}}ProtoConvert(command.{{ command.name.concatcase() }}(), cmd, &serializeBuffer, objectStores));
 
                 serializer.SerializeCommand(*cmd, provider);
                 break;
             }
             {% endfor %}
             default: {
+                GetCustomSerializedData(command, serializer, objectStores, provider);
                 break;
             }
         }

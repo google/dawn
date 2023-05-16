@@ -19,6 +19,8 @@
 
 namespace dawn::wire {
 
+    constexpr uint32_t kObjectTypes = {{len(by_category["object"])}};
+
     enum class ObjectType : uint32_t {
         {% for type in by_category["object"] %}
             {{type.name.CamelCase()}},
