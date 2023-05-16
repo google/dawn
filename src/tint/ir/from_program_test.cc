@@ -482,6 +482,50 @@ func_end
 )");
 }
 
+TEST_F(IR_BuilderImplTest, Loop_Continuing_Body_Scope) {
+    auto* a = Decl(Let("a", Expr(true)));
+    auto* ast_break_if = BreakIf("a");
+    auto* ast_loop = Loop(Block(a), Block(ast_break_if));
+    WrapInFunction(ast_loop);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
+  %fn2 = block
+  branch %fn3
+
+  %fn3 = loop [s: %fn4, c: %fn5, m: %fn6]
+    # loop start
+    %fn4 = block
+    branch %fn5
+
+    # loop continuing
+    %fn5 = block
+    branch %fn7
+
+    %fn7 = if true [t: %fn8, f: %fn9, m: %fn10]
+      # true branch
+      %fn8 = block
+      branch %fn6
+
+      # false branch
+      %fn9 = block
+      branch %fn10
+
+    # if merge
+    %fn10 = block
+    branch %fn4
+
+  # loop merge
+  %fn6 = block
+  ret
+func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     auto* ast_if = If(true, Block(Return()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));

@@ -409,7 +409,6 @@ class Impl {
         if (!rhs) {
             return;
         }
-
         auto* ty = lhs.Get()->Type();
         Binary* inst = nullptr;
         switch (stmt->op) {
@@ -523,7 +522,12 @@ class Impl {
             FlowStackScope scope(this, loop_node);
 
             current_flow_block_ = loop_node->start.target->As<Block>();
-            EmitBlock(stmt->body);
+
+            // The loop doesn't use EmitBlock because it needs the scope stack to not get popped
+            // until after the continuing block.
+            scopes_.Push();
+            TINT_DEFER(scopes_.Pop());
+            EmitStatements(stmt->body->statements);
 
             // The current block didn't `break`, `return` or `continue`, go to the continuing block.
             BranchToIfNeeded(loop_node->continuing.target);
@@ -782,9 +786,14 @@ class Impl {
             [&](const ast::BinaryExpression* b) { return EmitBinary(b); },
             [&](const ast::BitcastExpression* b) { return EmitBitcast(b); },
             [&](const ast::CallExpression* c) { return EmitCall(c); },
-            [&](const ast::IdentifierExpression* i) {
+            [&](const ast::IdentifierExpression* i) -> utils::Result<Value*> {
                 auto* v = scopes_.Get(i->identifier->symbol);
-                return utils::Result<Value*>{v};
+                if (TINT_UNLIKELY(!v)) {
+                    add_error(expr->source,
+                              "unable to find identifier " + i->identifier->symbol.Name());
+                    return utils::Failure;
+                }
+                return {v};
             },
             [&](const ast::LiteralExpression* l) { return EmitLiteral(l); },
             // [&](const ast::MemberAccessorExpression* m) {
