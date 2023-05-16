@@ -313,8 +313,8 @@ struct BufferAccess {
 
 /// Store describes a single storage or uniform buffer write
 struct Store {
-    const AssignmentStatement* assignment;       // The AST assignment statement
-    BufferAccess target;                         // The target for the write
+    const AssignmentStatement* assignment;  // The AST assignment statement
+    BufferAccess target;                    // The target for the write
 };
 
 }  // namespace

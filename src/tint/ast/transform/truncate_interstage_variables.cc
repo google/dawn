@@ -154,16 +154,15 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
     }
 
     // Replace return statements with new truncated shader IO struct
-    ctx.ReplaceAll(
-        [&](const ReturnStatement* return_statement) -> const ReturnStatement* {
-            auto* return_sem = sem.Get(return_statement);
-            if (auto mapping_fn_sym =
-                    entry_point_functions_to_truncate_functions.Find(return_sem->Function())) {
-                return b.Return(return_statement->source,
-                                b.Call(*mapping_fn_sym, ctx.Clone(return_statement->value)));
-            }
-            return nullptr;
-        });
+    ctx.ReplaceAll([&](const ReturnStatement* return_statement) -> const ReturnStatement* {
+        auto* return_sem = sem.Get(return_statement);
+        if (auto mapping_fn_sym =
+                entry_point_functions_to_truncate_functions.Find(return_sem->Function())) {
+            return b.Return(return_statement->source,
+                            b.Call(*mapping_fn_sym, ctx.Clone(return_statement->value)));
+        }
+        return nullptr;
+    });
 
     // Remove IO attributes from old shader IO struct which is not used as entry point output
     // anymore.

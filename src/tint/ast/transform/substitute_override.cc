@@ -101,20 +101,19 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
     // Ensure that objects that are indexed with an override-expression are materialized.
     // If the object is not materialized, and the 'override' variable is turned to a 'const', the
     // resulting type of the index may change. See: crbug.com/tint/1697.
-    ctx.ReplaceAll(
-        [&](const IndexAccessorExpression* expr) -> const IndexAccessorExpression* {
-            if (auto* sem = src->Sem().Get(expr)) {
-                if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
-                    if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
-                        access->Index()->Stage() == sem::EvaluationStage::kOverride) {
-                        auto* obj = b.Call(builtin::str(builtin::Function::kTintMaterialize),
-                                           ctx.Clone(expr->object));
-                        return b.IndexAccessor(obj, ctx.Clone(expr->index));
-                    }
+    ctx.ReplaceAll([&](const IndexAccessorExpression* expr) -> const IndexAccessorExpression* {
+        if (auto* sem = src->Sem().Get(expr)) {
+            if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
+                if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
+                    access->Index()->Stage() == sem::EvaluationStage::kOverride) {
+                    auto* obj = b.Call(builtin::str(builtin::Function::kTintMaterialize),
+                                       ctx.Clone(expr->object));
+                    return b.IndexAccessor(obj, ctx.Clone(expr->index));
                 }
             }
-            return nullptr;
-        });
+        }
+        return nullptr;
+    });
 
     ctx.Clone();
     return Program(std::move(b));
