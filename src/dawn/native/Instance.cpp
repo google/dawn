@@ -186,7 +186,7 @@ MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
 
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
-    SetPlatform(mDefaultPlatform.get());
+    SetPlatform(dawnDesc != nullptr ? dawnDesc->platform : mDefaultPlatform.get());
 
     return {};
 }

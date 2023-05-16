@@ -373,20 +373,25 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
     }
 }
 
-std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDiscoverAdapters() {
+std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDiscoverAdapters(
+    dawn::platform::Platform* platform) {
     // Create an instance with toggle AllowUnsafeAPIs enabled, which would be inherited to
     // adapter and device toggles and allow us to test unsafe apis (including experimental
     // features).
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
-    WGPUDawnTogglesDescriptor instanceToggles = {};
-    instanceToggles.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
+    wgpu::DawnTogglesDescriptor instanceToggles;
     instanceToggles.enabledTogglesCount = 1;
     instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
-    WGPUInstanceDescriptor instanceDesc = {};
-    instanceDesc.nextInChain = &instanceToggles.chain;
+    wgpu::DawnInstanceDescriptor dawnInstanceDesc;
+    dawnInstanceDesc.platform = platform;
+    dawnInstanceDesc.nextInChain = &instanceToggles;
 
-    auto instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
+    wgpu::InstanceDescriptor instanceDesc;
+    instanceDesc.nextInChain = &dawnInstanceDesc;
+
+    auto instance = std::make_unique<dawn::native::Instance>(
+        reinterpret_cast<const WGPUInstanceDescriptor*>(&instanceDesc));
     instance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
     instance->SetBackendValidationLevel(mBackendValidationLevel);
     instance->EnableAdapterBlocklist(false);
@@ -1096,6 +1101,9 @@ void DawnTestBase::TearDown() {
         EXPECT_EQ(mLastWarningCount,
                   dawn::native::GetDeprecationWarningCountForTesting(device.Get()));
     }
+
+    // Unsets the platform since we are cleaning the per-test platform up with the test case.
+    dawn::native::FromAPI(gTestEnv->GetInstance()->Get())->SetPlatformForTesting(nullptr);
 }
 
 void DawnTestBase::DestroyDevice(wgpu::Device device) {

@@ -183,11 +183,12 @@ class DawnTestEnvironment : public testing::Environment {
     bool RunSuppressedTests() const;
 
   protected:
+    std::unique_ptr<dawn::native::Instance> CreateInstanceAndDiscoverAdapters(
+        dawn::platform::Platform* platform = nullptr);
     std::unique_ptr<dawn::native::Instance> mInstance;
 
   private:
     void ParseArgs(int argc, char** argv);
-    std::unique_ptr<dawn::native::Instance> CreateInstanceAndDiscoverAdapters();
     void SelectPreferredAdapterProperties(const dawn::native::Instance* instance);
     void PrintTestConfigurationAndAdapterInfo(dawn::native::Instance* instance) const;
 

@@ -965,6 +965,11 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'include/dawn/' + api + '_cpp_print.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
 
+            renders.append(
+                FileRender('api_cpp_chained_struct.h',
+                           'include/dawn/' + api + '_cpp_chained_struct.h',
+                           [RENDER_PARAMS_BASE, params_dawn]))
+
         if 'proc' in targets:
             renders.append(
                 FileRender('dawn_proc.c', 'src/dawn/' + prefix + '_proc.c',

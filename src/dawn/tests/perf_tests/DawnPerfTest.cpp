@@ -122,10 +122,9 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
 DawnPerfTestEnvironment::~DawnPerfTestEnvironment() = default;
 
 void DawnPerfTestEnvironment::SetUp() {
-    DawnTestEnvironment::SetUp();
-
     mPlatform = std::make_unique<DawnPerfTestPlatform>();
-    mInstance->SetPlatform(mPlatform.get());
+    mInstance = CreateInstanceAndDiscoverAdapters(mPlatform.get());
+    ASSERT(mInstance);
 
     // Begin writing the trace event array.
     if (mTraceFile != nullptr) {

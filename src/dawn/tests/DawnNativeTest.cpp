@@ -49,19 +49,21 @@ void DawnNativeTest::SetUp() {
     // adapter and device toggles and allow us to test unsafe apis (including experimental
     // features).
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
-    WGPUDawnTogglesDescriptor instanceToggles = {};
-    instanceToggles.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
+    wgpu::DawnTogglesDescriptor instanceToggles;
     instanceToggles.enabledTogglesCount = 1;
     instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
-    WGPUInstanceDescriptor instanceDesc = {};
-    instanceDesc.nextInChain = &instanceToggles.chain;
-
-    instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
-    instance->EnableAdapterBlocklist(false);
     platform = CreateTestPlatform();
-    dawn::native::FromAPI(instance->Get())->SetPlatformForTesting(platform.get());
+    wgpu::DawnInstanceDescriptor dawnInstanceDesc;
+    dawnInstanceDesc.platform = platform.get();
+    dawnInstanceDesc.nextInChain = &instanceToggles;
 
+    wgpu::InstanceDescriptor instanceDesc;
+    instanceDesc.nextInChain = &dawnInstanceDesc;
+
+    instance = std::make_unique<dawn::native::Instance>(
+        reinterpret_cast<const WGPUInstanceDescriptor*>(&instanceDesc));
+    instance->EnableAdapterBlocklist(false);
     instance->DiscoverDefaultAdapters();
 
     std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();

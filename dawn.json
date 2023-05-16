@@ -1531,16 +1531,6 @@
         "extensible": "in",
         "members": []
     },
-    "dawn instance descriptor": {
-        "tags": ["dawn", "native"],
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["instance descriptor"],
-        "members": [
-            {"name": "additional runtime search paths count", "type": "uint32_t", "default": 0},
-            {"name": "additional runtime search paths", "type": "char", "annotation": "const*const*", "length": "additional runtime search paths count"}
-        ]
-    },
     "vertex attribute": {
         "category": "structure",
         "extensible": false,

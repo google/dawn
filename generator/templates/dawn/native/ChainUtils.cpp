@@ -23,21 +23,6 @@
 namespace {{native_namespace}} {
 
 {% set namespace = metadata.namespace %}
-{% for value in types["s type"].values %}
-    {% if value.valid %}
-        {% set const_qualifier = "const " if types[value.name.get()].chained == "in" else "" %}
-        {% set chained_struct_type = "ChainedStruct" if types[value.name.get()].chained == "in" else "ChainedStructOut" %}
-        void FindInChain({{const_qualifier}}{{chained_struct_type}}* chain, {{const_qualifier}}{{as_cppEnum(value.name)}}** out) {
-            for (; chain; chain = chain->nextInChain) {
-                if (chain->sType == {{namespace}}::SType::{{as_cppEnum(value.name)}}) {
-                    *out = static_cast<{{const_qualifier}}{{as_cppEnum(value.name)}}*>(chain);
-                    break;
-                }
-            }
-        }
-    {% endif %}
-{% endfor %}
-
 MaybeError ValidateSTypes(const ChainedStruct* chain,
                           std::vector<std::vector<{{namespace}}::SType>> oneOfConstraints) {
     std::unordered_set<{{namespace}}::SType> allSTypes;

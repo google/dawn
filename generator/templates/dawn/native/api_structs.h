@@ -44,15 +44,8 @@ namespace {{native_namespace}} {
     {%- endif -%}
 {%- endmacro %}
 
-    struct ChainedStruct {
-        ChainedStruct const * nextInChain = nullptr;
-        {{namespace}}::SType sType = {{namespace}}::SType::Invalid;
-    };
-
-    struct ChainedStructOut {
-        ChainedStructOut * nextInChain = nullptr;
-        {{namespace}}::SType sType = {{namespace}}::SType::Invalid;
-    };
+    using {{namespace}}::ChainedStruct;
+    using {{namespace}}::ChainedStructOut;
 
     {% for type in by_category["structure"] %}
         {% if type.chained %}
