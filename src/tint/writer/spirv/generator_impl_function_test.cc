@@ -46,9 +46,8 @@ TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
 }
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Compute) {
-    auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>());
-    func->pipeline_stage = ir::Function::PipelineStage::kCompute;
-    func->workgroup_size = {32, 4, 1};
+    auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>(),
+                                  ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
     b.Branch(func->start_target, func->end_target);
 
     generator_.EmitFunction(func);
@@ -65,8 +64,8 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Fragment) {
-    auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>());
-    func->pipeline_stage = ir::Function::PipelineStage::kFragment;
+    auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>(),
+                                  ir::Function::PipelineStage::kFragment);
     b.Branch(func->start_target, func->end_target);
 
     generator_.EmitFunction(func);
@@ -83,8 +82,8 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Vertex) {
-    auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>());
-    func->pipeline_stage = ir::Function::PipelineStage::kVertex;
+    auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>(),
+                                  ir::Function::PipelineStage::kVertex);
     b.Branch(func->start_target, func->end_target);
 
     generator_.EmitFunction(func);
@@ -100,18 +99,16 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Multiple) {
-    auto* f1 = b.CreateFunction(mod.symbols.Register("main1"), mod.types.Get<type::Void>());
-    f1->pipeline_stage = ir::Function::PipelineStage::kCompute;
-    f1->workgroup_size = {32, 4, 1};
+    auto* f1 = b.CreateFunction(mod.symbols.Register("main1"), mod.types.Get<type::Void>(),
+                                ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
     b.Branch(f1->start_target, f1->end_target);
 
-    auto* f2 = b.CreateFunction(mod.symbols.Register("main2"), mod.types.Get<type::Void>());
-    f2->pipeline_stage = ir::Function::PipelineStage::kCompute;
-    f2->workgroup_size = {8, 2, 16};
+    auto* f2 = b.CreateFunction(mod.symbols.Register("main2"), mod.types.Get<type::Void>(),
+                                ir::Function::PipelineStage::kCompute, {{8, 2, 16}});
     b.Branch(f2->start_target, f2->end_target);
 
-    auto* f3 = b.CreateFunction(mod.symbols.Register("main3"), mod.types.Get<type::Void>());
-    f3->pipeline_stage = ir::Function::PipelineStage::kFragment;
+    auto* f3 = b.CreateFunction(mod.symbols.Register("main3"), mod.types.Get<type::Void>(),
+                                ir::Function::PipelineStage::kFragment);
     b.Branch(f3->start_target, f3->end_target);
 
     generator_.EmitFunction(f1);

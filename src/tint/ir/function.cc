@@ -18,7 +18,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Function);
 
 namespace tint::ir {
 
-Function::Function(Symbol n, type::Type* rt) : Base(), name(n), return_type(rt) {}
+Function::Function(Symbol n,
+                   type::Type* rt,
+                   PipelineStage stage,
+                   std::optional<std::array<uint32_t, 3>> wg_size)
+    : Base(), name(n), pipeline_stage(stage), workgroup_size(wg_size), return_type(rt) {}
 
 Function::~Function() = default;
 

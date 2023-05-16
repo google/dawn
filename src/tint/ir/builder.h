@@ -67,8 +67,13 @@ class Builder {
     /// Creates a function flow node
     /// @param name the function name
     /// @param return_type the function return type
+    /// @param stage the function stage
+    /// @param wg_size the workgroup_size
     /// @returns the flow node
-    Function* CreateFunction(Symbol name, type::Type* return_type);
+    Function* CreateFunction(Symbol name,
+                             type::Type* return_type,
+                             Function::PipelineStage stage = Function::PipelineStage::kUndefined,
+                             std::optional<std::array<uint32_t, 3>> wg_size = {});
 
     /// Creates an if flow node
     /// @param condition the if condition

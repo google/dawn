@@ -47,10 +47,13 @@ FunctionTerminator* Builder::CreateFunctionTerminator() {
     return ir.flow_nodes.Create<FunctionTerminator>();
 }
 
-Function* Builder::CreateFunction(Symbol name, type::Type* return_type) {
+Function* Builder::CreateFunction(Symbol name,
+                                  type::Type* return_type,
+                                  Function::PipelineStage stage,
+                                  std::optional<std::array<uint32_t, 3>> wg_size) {
     TINT_ASSERT(IR, return_type);
 
-    auto* ir_func = ir.flow_nodes.Create<Function>(name, return_type);
+    auto* ir_func = ir.flow_nodes.Create<Function>(name, return_type, stage, wg_size);
     ir_func->start_target = CreateBlock();
     ir_func->end_target = CreateFunctionTerminator();
 
