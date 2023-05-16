@@ -3,7 +3,7 @@ module dawn.googlesource.com/dawn
 go 1.18
 
 require (
-	github.com/andygrunwald/go-gerrit v0.0.0-20220427111355-d3e91fbf2db5
+	github.com/andygrunwald/go-gerrit v0.0.0-20230508072829-423d372345aa
 	github.com/ben-clayton/webidlparser v0.0.0-20210923100217-8ba896ded094
 	github.com/fatih/color v1.13.0
 	github.com/google/go-cmp v0.5.9

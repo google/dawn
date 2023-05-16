@@ -125,17 +125,12 @@
         {
             "label": "push",
             "type": "shell",
-            "command": "git",
-            "args": [
-                "push",
-                "origin",
-                "HEAD:refs/for/main"
-            ],
+            "command": "./tools/push-to-gerrit",
             "options": {
                 "cwd": "${workspaceRoot}"
             },
             "problemMatcher": [],
-        }
+        },
     ],
     "inputs": [
         {

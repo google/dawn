@@ -35,11 +35,11 @@ var (
 
 func main() {
 	flag.ErrHelp = errors.New("benchdiff is a tool to compare two benchmark results")
-	flag.Parse()
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, "benchdiff <benchmark-a> <benchmark-b>")
 		flag.PrintDefaults()
 	}
+	flag.Parse()
 
 	args := flag.Args()
 	if len(args) < 2 {

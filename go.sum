@@ -8,6 +8,8 @@ cloud.google.com/go/longrunning v0.4.1 h1:v+yFJOfKC3yZdY6ZUI933pIYdhyhV8S3NpWrXW
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/andygrunwald/go-gerrit v0.0.0-20220427111355-d3e91fbf2db5 h1:HBlTlvyq4siv4ZK41DebGIX11/9gFBqUF8G64AePjyQ=
 github.com/andygrunwald/go-gerrit v0.0.0-20220427111355-d3e91fbf2db5/go.mod h1:aqcjwEnmLLSalFNYR0p2ttnEXOVVRctIzsUMHbEcruU=
+github.com/andygrunwald/go-gerrit v0.0.0-20230508072829-423d372345aa h1:bGSzPoUh/2eduqGEk54TCoB4v81MVi6Hr3+fYQwFrBM=
+github.com/andygrunwald/go-gerrit v0.0.0-20230508072829-423d372345aa/go.mod h1:SeP12EkHZxEVjuJ2HZET304NBtHGG2X6w2Gzd0QXAZw=
 github.com/ben-clayton/webidlparser v0.0.0-20210923100217-8ba896ded094 h1:CTVJdI6oUCRNucMEmoh3c2U88DesoPtefsxKhoZ1WuQ=
 github.com/ben-clayton/webidlparser v0.0.0-20210923100217-8ba896ded094/go.mod h1:bV550SPlMos7UhMprxlm14XTBTpKHSUZ8Q4Id5qQuyw=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

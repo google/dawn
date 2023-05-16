@@ -116,7 +116,7 @@ func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Opt
 		if err != nil {
 			return nil, err
 		}
-		*ps, err = gerrit.LatestPatchest(strconv.Itoa(ps.Change))
+		*ps, err = gerrit.LatestPatchset(strconv.Itoa(ps.Change))
 		if err != nil {
 			err := fmt.Errorf("failed to find latest patchset of change %v: %w",
 				ps.Change, err)
@@ -288,7 +288,7 @@ func LatestCTSRoll(g *gerrit.Gerrit) (gerrit.ChangeInfo, error) {
 
 // LatestPatchset returns the most recent patchset for the given change.
 func LatestPatchset(g *gerrit.Gerrit, change int) (gerrit.Patchset, error) {
-	ps, err := g.LatestPatchest(strconv.Itoa(change))
+	ps, err := g.LatestPatchset(strconv.Itoa(change))
 	if err != nil {
 		err := fmt.Errorf("failed to find latest patchset of change %v: %w",
 			ps.Change, err)

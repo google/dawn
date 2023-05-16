@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"strings"
 
+	"dawn.googlesource.com/dawn/tools/src/container"
 	"github.com/andygrunwald/go-gerrit"
 )
 
@@ -55,8 +56,8 @@ type Patchset struct {
 // ChangeInfo is an alias to gerrit.ChangeInfo
 type ChangeInfo = gerrit.ChangeInfo
 
-// LatestPatchest returns the latest Patchset from the ChangeInfo
-func LatestPatchest(change *ChangeInfo) Patchset {
+// LatestPatchset returns the latest Patchset from the ChangeInfo
+func LatestPatchset(change *ChangeInfo) Patchset {
 	u, _ := url.Parse(change.URL)
 	ps := Patchset{
 		Host:     u.Host,
@@ -198,11 +199,11 @@ func (g *Gerrit) EditFiles(changeID, newCommitMsg string, files map[string]strin
 		return Patchset{}, g.maybeWrapError(err)
 	}
 
-	return g.LatestPatchest(changeID)
+	return g.LatestPatchset(changeID)
 }
 
-// LatestPatchest returns the latest patchset for the change.
-func (g *Gerrit) LatestPatchest(changeID string) (Patchset, error) {
+// LatestPatchset returns the latest patchset for the change.
+func (g *Gerrit) LatestPatchset(changeID string) (Patchset, error) {
 	change, _, err := g.client.Changes.GetChange(changeID, &gerrit.ChangeOptions{
 		AdditionalFields: []string{"CURRENT_REVISION"},
 	})
@@ -216,6 +217,17 @@ func (g *Gerrit) LatestPatchest(changeID string) (Patchset, error) {
 		Patchset: change.Revisions[change.CurrentRevision].Number,
 	}
 	return ps, nil
+}
+
+// AddHashtags adds the given hashtags to the change
+func (g *Gerrit) AddHashtags(changeID string, tags container.Set[string]) error {
+	_, resp, err := g.client.Changes.SetHashtags(changeID, &gerrit.HashtagsInput{
+		Add: tags.List(),
+	})
+	if err != nil && resp.StatusCode != 409 { // 409: already ready
+		return g.maybeWrapError(err)
+	}
+	return nil
 }
 
 // CommentSide is an enumerator for specifying which side code-comments should
