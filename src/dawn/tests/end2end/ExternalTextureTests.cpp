@@ -996,6 +996,7 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
 }
 
 DAWN_INSTANTIATE_TEST(ExternalTextureTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
