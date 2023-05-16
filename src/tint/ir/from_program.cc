@@ -261,8 +261,6 @@ class Impl {
         ast_to_flow_[ast_func] = ir_func;
 
         if (ast_func->IsEntryPoint()) {
-            builder_.ir.entry_points.Push(ir_func);
-
             switch (ast_func->PipelineStage()) {
                 case ast::PipelineStage::kVertex:
                     ir_func->pipeline_stage = Function::PipelineStage::kVertex;

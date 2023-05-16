@@ -75,8 +75,6 @@ class Module {
 
     /// List of functions in the program
     utils::Vector<Function*, 8> functions;
-    /// List of indexes into the functions list for the entry points
-    utils::Vector<Function*, 8> entry_points;
 
     /// The block containing module level declarations, if any exist.
     Block* root_block = nullptr;
