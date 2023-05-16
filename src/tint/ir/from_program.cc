@@ -88,7 +88,7 @@ namespace tint::ir {
 
 namespace {
 
-using ResultType = utils::Result<Module>;
+using ResultType = utils::Result<Module, diag::List>;
 
 bool IsBranched(const Block* b) {
     return b->branch.target != nullptr;
@@ -109,74 +109,51 @@ bool IsConnected(const FlowNode* b) {
     return false;
 }
 
+/// Impl is the private-implementation of FromProgram().
 class Impl {
   public:
-    explicit Impl(const Program* program)
-        : program_(program),
-          clone_ctx_{
-              type::CloneContext{{&program->Symbols()}, {&builder.ir.symbols, &builder.ir.types}},
-              {&builder.ir.constants}} {}
+    /// Constructor
+    /// @param program the program to convert to IR
+    explicit Impl(const Program* program) : program_(program) {}
 
-    ResultType Build() {
-        auto* sem = program_->Sem().Module();
-
-        for (auto* decl : sem->DependencyOrderedDeclarations()) {
-            tint::Switch(
-                decl,  //
-                [&](const ast::Struct*) {
-                    // Will be encoded into the `type::Struct` when used. We will then hoist all
-                    // used structs up to module scope when converting IR.
-                },
-                [&](const ast::Alias*) {
-                    // Folded away and doesn't appear in the IR.
-                },
-                [&](const ast::Variable* var) {
-                    // Setup the current flow node to be the root block for the module. The builder
-                    // will handle creating it if it doesn't exist already.
-                    TINT_SCOPED_ASSIGNMENT(current_flow_block, builder.CreateRootBlockIfNeeded());
-                    EmitVariable(var);
-                },
-                [&](const ast::Function* func) { EmitFunction(func); },
-                [&](const ast::Enable*) {
-                    // TODO(dsinclair): Implement? I think these need to be passed along so further
-                    // stages know what is enabled.
-                },
-                [&](const ast::ConstAssert*) {
-                    // Evaluated by the resolver, drop from the IR.
-                },
-                [&](Default) {
-                    add_error(decl->source, "unknown type: " + std::string(decl->TypeInfo().name));
-                });
-        }
-        if (!diagnostics_.empty()) {
-            return utils::Failure;
-        }
-
-        return ResultType{std::move(mod)};
-    }
-
-    /// @returns the diagnostics
-    diag::List Diagnostics() const { return diagnostics_; }
+    /// Builds an IR module from the program passed to the constructor.
+    /// @return the IR module or an error.
+    ResultType Build() { return EmitModule(); }
 
   private:
     enum class ControlFlags { kNone, kExcludeSwitch };
 
-    /// The stack of flow control blocks.
-    utils::Vector<FlowNode*, 8> flow_stack;
+    // The input Program
+    const Program* program_ = nullptr;
 
     /// The IR module being built
     Module mod;
 
     /// The IR builder being used by the impl.
-    Builder builder{mod};
+    Builder builder_{mod};
 
-    /// The current flow block for expressions
-    Block* current_flow_block = nullptr;
+    // The clone context used to clone data from #program_
+    constant::CloneContext clone_ctx_{
+        /* type_ctx */ type::CloneContext{
+            /* src */ {&program_->Symbols()},
+            /* dst */ {&builder_.ir.symbols, &builder_.ir.types},
+        },
+        /* dst */ {&builder_.ir.constants},
+    };
 
-    const Program* program_ = nullptr;
+    /// The stack of flow control blocks.
+    utils::Vector<FlowNode*, 8> flow_stack_;
+
+    /// The current flow block for expressions.
+    Block* current_flow_block_ = nullptr;
+
+    /// The current function being processed.
     Function* current_function_ = nullptr;
+
+    /// The current stack of scopes being processed.
     ScopeStack<Symbol, Value*> scopes_;
-    constant::CloneContext clone_ctx_;
+
+    /// The diagnostic that have been raised.
     diag::List diagnostics_;
 
     /// Map from ast nodes to flow nodes, used to retrieve the flow node for a given AST node.
@@ -185,9 +162,9 @@ class Impl {
 
     class FlowStackScope {
       public:
-        FlowStackScope(Impl* impl, FlowNode* node) : impl_(impl) { impl_->flow_stack.Push(node); }
+        FlowStackScope(Impl* impl, FlowNode* node) : impl_(impl) { impl_->flow_stack_.Push(node); }
 
-        ~FlowStackScope() { impl_->flow_stack.Pop(); }
+        ~FlowStackScope() { impl_->flow_stack_.Pop(); }
 
       private:
         Impl* impl_;
@@ -198,22 +175,22 @@ class Impl {
     }
 
     void BranchTo(FlowNode* node, utils::VectorRef<Value*> args = {}) {
-        TINT_ASSERT(IR, current_flow_block);
-        TINT_ASSERT(IR, !IsBranched(current_flow_block));
+        TINT_ASSERT(IR, current_flow_block_);
+        TINT_ASSERT(IR, !IsBranched(current_flow_block_));
 
-        builder.Branch(current_flow_block, node, args);
-        current_flow_block = nullptr;
+        builder_.Branch(current_flow_block_, node, args);
+        current_flow_block_ = nullptr;
     }
 
     void BranchToIfNeeded(FlowNode* node) {
-        if (!current_flow_block || IsBranched(current_flow_block)) {
+        if (!current_flow_block_ || IsBranched(current_flow_block_)) {
             return;
         }
         BranchTo(node);
     }
 
     FlowNode* FindEnclosingControl(ControlFlags flags) {
-        for (auto it = flow_stack.rbegin(); it != flow_stack.rend(); ++it) {
+        for (auto it = flow_stack_.rbegin(); it != flow_stack_.rend(); ++it) {
             if ((*it)->Is<Loop>()) {
                 return *it;
             }
@@ -231,21 +208,60 @@ class Impl {
         return clone_ctx_.type_ctx.dst.st->Register(sym.Name());
     }
 
+    ResultType EmitModule() {
+        auto* sem = program_->Sem().Module();
+
+        for (auto* decl : sem->DependencyOrderedDeclarations()) {
+            tint::Switch(
+                decl,  //
+                [&](const ast::Struct*) {
+                    // Will be encoded into the `type::Struct` when used. We will then hoist all
+                    // used structs up to module scope when converting IR.
+                },
+                [&](const ast::Alias*) {
+                    // Folded away and doesn't appear in the IR.
+                },
+                [&](const ast::Variable* var) {
+                    // Setup the current flow node to be the root block for the module. The builder
+                    // will handle creating it if it doesn't exist already.
+                    TINT_SCOPED_ASSIGNMENT(current_flow_block_, builder_.CreateRootBlockIfNeeded());
+                    EmitVariable(var);
+                },
+                [&](const ast::Function* func) { EmitFunction(func); },
+                [&](const ast::Enable*) {
+                    // TODO(dsinclair): Implement? I think these need to be passed along so further
+                    // stages know what is enabled.
+                },
+                [&](const ast::ConstAssert*) {
+                    // Evaluated by the resolver, drop from the IR.
+                },
+                [&](Default) {
+                    add_error(decl->source, "unknown type: " + std::string(decl->TypeInfo().name));
+                });
+        }
+
+        if (diagnostics_.contains_errors()) {
+            return ResultType(std::move(diagnostics_));
+        }
+
+        return ResultType{std::move(mod)};
+    }
+
     void EmitFunction(const ast::Function* ast_func) {
         // The flow stack should have been emptied when the previous function finished building.
-        TINT_ASSERT(IR, flow_stack.IsEmpty());
+        TINT_ASSERT(IR, flow_stack_.IsEmpty());
 
         const auto* sem = program_->Sem().Get(ast_func);
 
-        auto* ir_func = builder.CreateFunction(CloneSymbol(ast_func->name->symbol),
-                                               sem->ReturnType()->Clone(clone_ctx_.type_ctx));
+        auto* ir_func = builder_.CreateFunction(CloneSymbol(ast_func->name->symbol),
+                                                sem->ReturnType()->Clone(clone_ctx_.type_ctx));
         current_function_ = ir_func;
-        builder.ir.functions.Push(ir_func);
+        builder_.ir.functions.Push(ir_func);
 
         ast_to_flow_[ast_func] = ir_func;
 
         if (ast_func->IsEntryPoint()) {
-            builder.ir.entry_points.Push(ir_func);
+            builder_.ir.entry_points.Push(ir_func);
 
             switch (ast_func->PipelineStage()) {
                 case ast::PipelineStage::kVertex:
@@ -316,7 +332,7 @@ class Impl {
         {
             FlowStackScope scope(this, ir_func);
 
-            current_flow_block = ir_func->start_target;
+            current_flow_block_ = ir_func->start_target;
             EmitBlock(ast_func->body);
 
             // TODO(dsinclair): Store return type and attributes
@@ -327,8 +343,8 @@ class Impl {
             BranchToIfNeeded(current_function_->end_target);
         }
 
-        TINT_ASSERT(IR, flow_stack.IsEmpty());
-        current_flow_block = nullptr;
+        TINT_ASSERT(IR, flow_stack_.IsEmpty());
+        current_flow_block_ = nullptr;
         current_function_ = nullptr;
     }
 
@@ -338,7 +354,7 @@ class Impl {
 
             // If the current flow block has a branch target then the rest of the statements in this
             // block are dead code. Skip them.
-            if (!current_flow_block || IsBranched(current_flow_block)) {
+            if (!current_flow_block_ || IsBranched(current_flow_block_)) {
                 break;
             }
         }
@@ -381,8 +397,8 @@ class Impl {
         if (!rhs) {
             return;
         }
-        auto store = builder.Store(lhs.Get(), rhs.Get());
-        current_flow_block->instructions.Push(store);
+        auto store = builder_.Store(lhs.Get(), rhs.Get());
+        current_flow_block_->instructions.Push(store);
     }
 
     void EmitCompoundAssignment(const ast::CompoundAssignmentStatement* stmt) {
@@ -400,34 +416,34 @@ class Impl {
         Binary* inst = nullptr;
         switch (stmt->op) {
             case ast::BinaryOp::kAnd:
-                inst = builder.And(ty, lhs.Get(), rhs.Get());
+                inst = builder_.And(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kOr:
-                inst = builder.Or(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Or(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kXor:
-                inst = builder.Xor(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Xor(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kShiftLeft:
-                inst = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
+                inst = builder_.ShiftLeft(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kShiftRight:
-                inst = builder.ShiftRight(ty, lhs.Get(), rhs.Get());
+                inst = builder_.ShiftRight(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kAdd:
-                inst = builder.Add(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Add(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kSubtract:
-                inst = builder.Subtract(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Subtract(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kMultiply:
-                inst = builder.Multiply(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Multiply(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kDivide:
-                inst = builder.Divide(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Divide(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kModulo:
-                inst = builder.Modulo(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Modulo(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kLessThanEqual:
             case ast::BinaryOp::kGreaterThanEqual:
@@ -443,10 +459,10 @@ class Impl {
                 TINT_ICE(IR, diagnostics_) << "missing binary operand type";
                 return;
         }
-        current_flow_block->instructions.Push(inst);
+        current_flow_block_->instructions.Push(inst);
 
-        auto store = builder.Store(lhs.Get(), inst);
-        current_flow_block->instructions.Push(store);
+        auto store = builder_.Store(lhs.Get(), inst);
+        current_flow_block_->instructions.Push(store);
     }
 
     void EmitBlock(const ast::BlockStatement* block) {
@@ -465,7 +481,7 @@ class Impl {
         if (!reg) {
             return;
         }
-        auto* if_node = builder.CreateIf(reg.Get());
+        auto* if_node = builder_.CreateIf(reg.Get());
 
         BranchTo(if_node);
 
@@ -474,13 +490,13 @@ class Impl {
         {
             FlowStackScope scope(this, if_node);
 
-            current_flow_block = if_node->true_.target->As<Block>();
+            current_flow_block_ = if_node->true_.target->As<Block>();
             EmitBlock(stmt->body);
 
             // If the true branch did not execute control flow, then go to the merge target
             BranchToIfNeeded(if_node->merge.target);
 
-            current_flow_block = if_node->false_.target->As<Block>();
+            current_flow_block_ = if_node->false_.target->As<Block>();
             if (stmt->else_statement) {
                 EmitStatement(stmt->else_statement);
             }
@@ -488,18 +504,18 @@ class Impl {
             // If the false branch did not execute control flow, then go to the merge target
             BranchToIfNeeded(if_node->merge.target);
         }
-        current_flow_block = nullptr;
+        current_flow_block_ = nullptr;
 
         // If both branches went somewhere, then they both returned, continued or broke. So, there
         // is no need for the if merge-block and there is nothing to branch to the merge block
         // anyway.
         if (IsConnected(if_node->merge.target)) {
-            current_flow_block = if_node->merge.target->As<Block>();
+            current_flow_block_ = if_node->merge.target->As<Block>();
         }
     }
 
     void EmitLoop(const ast::LoopStatement* stmt) {
-        auto* loop_node = builder.CreateLoop();
+        auto* loop_node = builder_.CreateLoop();
 
         BranchTo(loop_node);
 
@@ -508,13 +524,13 @@ class Impl {
         {
             FlowStackScope scope(this, loop_node);
 
-            current_flow_block = loop_node->start.target->As<Block>();
+            current_flow_block_ = loop_node->start.target->As<Block>();
             EmitBlock(stmt->body);
 
             // The current block didn't `break`, `return` or `continue`, go to the continuing block.
             BranchToIfNeeded(loop_node->continuing.target);
 
-            current_flow_block = loop_node->continuing.target->As<Block>();
+            current_flow_block_ = loop_node->continuing.target->As<Block>();
             if (stmt->continuing) {
                 EmitBlock(stmt->continuing);
             }
@@ -525,18 +541,18 @@ class Impl {
 
         // The loop merge can get disconnected if the loop returns directly, or the continuing
         // target branches, eventually, to the merge, but nothing branched to the continuing target.
-        current_flow_block = loop_node->merge.target->As<Block>();
+        current_flow_block_ = loop_node->merge.target->As<Block>();
         if (!IsConnected(loop_node->merge.target)) {
-            current_flow_block = nullptr;
+            current_flow_block_ = nullptr;
         }
     }
 
     void EmitWhile(const ast::WhileStatement* stmt) {
-        auto* loop_node = builder.CreateLoop();
+        auto* loop_node = builder_.CreateLoop();
         // Continue is always empty, just go back to the start
         TINT_ASSERT(IR, loop_node->continuing.target->Is<Block>());
-        builder.Branch(loop_node->continuing.target->As<Block>(), loop_node->start.target,
-                       utils::Empty);
+        builder_.Branch(loop_node->continuing.target->As<Block>(), loop_node->start.target,
+                        utils::Empty);
 
         BranchTo(loop_node);
 
@@ -545,7 +561,7 @@ class Impl {
         {
             FlowStackScope scope(this, loop_node);
 
-            current_flow_block = loop_node->start.target->As<Block>();
+            current_flow_block_ = loop_node->start.target->As<Block>();
 
             // Emit the while condition into the start target of the loop
             auto reg = EmitExpression(stmt->condition);
@@ -554,31 +570,32 @@ class Impl {
             }
 
             // Create an `if (cond) {} else {break;}` control flow
-            auto* if_node = builder.CreateIf(reg.Get());
+            auto* if_node = builder_.CreateIf(reg.Get());
             TINT_ASSERT(IR, if_node->true_.target->Is<Block>());
-            builder.Branch(if_node->true_.target->As<Block>(), if_node->merge.target, utils::Empty);
+            builder_.Branch(if_node->true_.target->As<Block>(), if_node->merge.target,
+                            utils::Empty);
 
             TINT_ASSERT(IR, if_node->false_.target->Is<Block>());
-            builder.Branch(if_node->false_.target->As<Block>(), loop_node->merge.target,
-                           utils::Empty);
+            builder_.Branch(if_node->false_.target->As<Block>(), loop_node->merge.target,
+                            utils::Empty);
 
             BranchTo(if_node);
 
-            current_flow_block = if_node->merge.target->As<Block>();
+            current_flow_block_ = if_node->merge.target->As<Block>();
             EmitBlock(stmt->body);
 
             BranchToIfNeeded(loop_node->continuing.target);
         }
         // The while loop always has a path to the merge target as the break statement comes before
         // anything inside the loop.
-        current_flow_block = loop_node->merge.target->As<Block>();
+        current_flow_block_ = loop_node->merge.target->As<Block>();
     }
 
     void EmitForLoop(const ast::ForLoopStatement* stmt) {
-        auto* loop_node = builder.CreateLoop();
+        auto* loop_node = builder_.CreateLoop();
         TINT_ASSERT(IR, loop_node->continuing.target->Is<Block>());
-        builder.Branch(loop_node->continuing.target->As<Block>(), loop_node->start.target,
-                       utils::Empty);
+        builder_.Branch(loop_node->continuing.target->As<Block>(), loop_node->start.target,
+                        utils::Empty);
 
         // Make sure the initializer ends up in a contained scope
         scopes_.Push();
@@ -596,7 +613,7 @@ class Impl {
         {
             FlowStackScope scope(this, loop_node);
 
-            current_flow_block = loop_node->start.target->As<Block>();
+            current_flow_block_ = loop_node->start.target->As<Block>();
 
             if (stmt->condition) {
                 // Emit the condition into the target target of the loop
@@ -606,31 +623,31 @@ class Impl {
                 }
 
                 // Create an `if (cond) {} else {break;}` control flow
-                auto* if_node = builder.CreateIf(reg.Get());
+                auto* if_node = builder_.CreateIf(reg.Get());
                 TINT_ASSERT(IR, if_node->true_.target->Is<Block>());
-                builder.Branch(if_node->true_.target->As<Block>(), if_node->merge.target,
-                               utils::Empty);
+                builder_.Branch(if_node->true_.target->As<Block>(), if_node->merge.target,
+                                utils::Empty);
 
                 TINT_ASSERT(IR, if_node->false_.target->Is<Block>());
-                builder.Branch(if_node->false_.target->As<Block>(), loop_node->merge.target,
-                               utils::Empty);
+                builder_.Branch(if_node->false_.target->As<Block>(), loop_node->merge.target,
+                                utils::Empty);
 
                 BranchTo(if_node);
-                current_flow_block = if_node->merge.target->As<Block>();
+                current_flow_block_ = if_node->merge.target->As<Block>();
             }
 
             EmitBlock(stmt->body);
             BranchToIfNeeded(loop_node->continuing.target);
 
             if (stmt->continuing) {
-                current_flow_block = loop_node->continuing.target->As<Block>();
+                current_flow_block_ = loop_node->continuing.target->As<Block>();
                 EmitStatement(stmt->continuing);
             }
         }
 
         // The while loop always has a path to the merge target as the break statement comes before
         // anything inside the loop.
-        current_flow_block = loop_node->merge.target->As<Block>();
+        current_flow_block_ = loop_node->merge.target->As<Block>();
     }
 
     void EmitSwitch(const ast::SwitchStatement* stmt) {
@@ -639,7 +656,7 @@ class Impl {
         if (!reg) {
             return;
         }
-        auto* switch_node = builder.CreateSwitch(reg.Get());
+        auto* switch_node = builder_.CreateSwitch(reg.Get());
 
         BranchTo(switch_node);
 
@@ -655,20 +672,20 @@ class Impl {
                     if (selector->IsDefault()) {
                         selectors.Push({nullptr});
                     } else {
-                        selectors.Push({builder.Constant(selector->Value()->Clone(clone_ctx_))});
+                        selectors.Push({builder_.Constant(selector->Value()->Clone(clone_ctx_))});
                     }
                 }
 
-                current_flow_block = builder.CreateCase(switch_node, selectors);
+                current_flow_block_ = builder_.CreateCase(switch_node, selectors);
                 EmitBlock(c->Body()->Declaration());
 
                 BranchToIfNeeded(switch_node->merge.target);
             }
         }
-        current_flow_block = nullptr;
+        current_flow_block_ = nullptr;
 
         if (IsConnected(switch_node->merge.target)) {
-            current_flow_block = switch_node->merge.target->As<Block>();
+            current_flow_block_ = switch_node->merge.target->As<Block>();
         }
     }
 
@@ -714,8 +731,8 @@ class Impl {
     // terminating discard that would probably make sense as a FlowNode but would then require
     // figuring out the multi-level exit that is triggered.
     void EmitDiscard(const ast::DiscardStatement*) {
-        auto* inst = builder.Discard();
-        current_flow_block->instructions.Push(inst);
+        auto* inst = builder_.Discard();
+        current_flow_block_->instructions.Push(inst);
     }
 
     void EmitBreakIf(const ast::BreakIfStatement* stmt) {
@@ -724,7 +741,7 @@ class Impl {
         if (!reg) {
             return;
         }
-        auto* if_node = builder.CreateIf(reg.Get());
+        auto* if_node = builder_.CreateIf(reg.Get());
 
         BranchTo(if_node);
 
@@ -736,13 +753,13 @@ class Impl {
 
         auto* loop = current_control->As<Loop>();
 
-        current_flow_block = if_node->true_.target->As<Block>();
+        current_flow_block_ = if_node->true_.target->As<Block>();
         BranchTo(loop->merge.target);
 
-        current_flow_block = if_node->false_.target->As<Block>();
+        current_flow_block_ = if_node->false_.target->As<Block>();
         BranchTo(if_node->merge.target);
 
-        current_flow_block = if_node->merge.target->As<Block>();
+        current_flow_block_ = if_node->merge.target->As<Block>();
 
         // The `break-if` has to be the last item in the continuing block. The false branch of the
         // `break-if` will always take us back to the start of the loop.
@@ -754,7 +771,7 @@ class Impl {
         if (auto* sem = program_->Sem().Get(expr)->As<sem::ValueExpression>()) {
             if (auto* v = sem->ConstantValue()) {
                 if (auto* cv = v->Clone(clone_ctx_)) {
-                    return builder.Constant(cv);
+                    return builder_.Constant(cv);
                 }
             }
         }
@@ -793,8 +810,8 @@ class Impl {
             var,
             [&](const ast::Var* v) {
                 auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
-                auto* val = builder.Declare(ty, sem->AddressSpace(), sem->Access());
-                current_flow_block->instructions.Push(val);
+                auto* val = builder_.Declare(ty, sem->AddressSpace(), sem->Access());
+                current_flow_block_->instructions.Push(val);
 
                 if (v->initializer) {
                     auto init = EmitExpression(v->initializer);
@@ -807,7 +824,7 @@ class Impl {
                 scopes_.Set(v->name->symbol, val);
 
                 // Record the original name of the var
-                builder.ir.SetName(val, v->name->symbol.Name());
+                builder_.ir.SetName(val, v->name->symbol.Name());
             },
             [&](const ast::Let* l) {
                 // A `let` doesn't exist as a standalone item in the IR, it's just the result of the
@@ -821,7 +838,7 @@ class Impl {
                 scopes_.Set(l->name->symbol, init.Get());
 
                 // Record the original name of the let
-                builder.ir.SetName(init.Get(), l->name->symbol.Name());
+                builder_.ir.SetName(init.Get(), l->name->symbol.Name());
             },
             [&](const ast::Override*) {
                 add_error(var->source,
@@ -854,23 +871,23 @@ class Impl {
         Instruction* inst = nullptr;
         switch (expr->op) {
             case ast::UnaryOp::kAddressOf:
-                inst = builder.AddressOf(ty, val.Get());
+                inst = builder_.AddressOf(ty, val.Get());
                 break;
             case ast::UnaryOp::kComplement:
-                inst = builder.Complement(ty, val.Get());
+                inst = builder_.Complement(ty, val.Get());
                 break;
             case ast::UnaryOp::kIndirection:
-                inst = builder.Indirection(ty, val.Get());
+                inst = builder_.Indirection(ty, val.Get());
                 break;
             case ast::UnaryOp::kNegation:
-                inst = builder.Negation(ty, val.Get());
+                inst = builder_.Negation(ty, val.Get());
                 break;
             case ast::UnaryOp::kNot:
-                inst = builder.Not(ty, val.Get());
+                inst = builder_.Not(ty, val.Get());
                 break;
         }
 
-        current_flow_block->instructions.Push(inst);
+        current_flow_block_->instructions.Push(inst);
         return inst;
     }
 
@@ -894,15 +911,15 @@ class Impl {
         }
 
         // Generate a variable to store the short-circut into
-        auto* ty = builder.ir.types.Get<type::Bool>();
+        auto* ty = builder_.ir.types.Get<type::Bool>();
         auto* result_var =
-            builder.Declare(ty, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
-        current_flow_block->instructions.Push(result_var);
+            builder_.Declare(ty, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+        current_flow_block_->instructions.Push(result_var);
 
-        auto* lhs_store = builder.Store(result_var, lhs.Get());
-        current_flow_block->instructions.Push(lhs_store);
+        auto* lhs_store = builder_.Store(result_var, lhs.Get());
+        current_flow_block_->instructions.Push(lhs_store);
 
-        auto* if_node = builder.CreateIf(lhs.Get());
+        auto* if_node = builder_.CreateIf(lhs.Get());
         BranchTo(if_node);
 
         utils::Result<Value*> rhs;
@@ -912,21 +929,21 @@ class Impl {
             // If this is an `&&` then we only evaluate the RHS expression in the true block.
             // If this is an `||` then we only evaluate the RHS expression in the false block.
             if (expr->op == ast::BinaryOp::kLogicalAnd) {
-                current_flow_block = if_node->true_.target->As<Block>();
+                current_flow_block_ = if_node->true_.target->As<Block>();
             } else {
-                current_flow_block = if_node->false_.target->As<Block>();
+                current_flow_block_ = if_node->false_.target->As<Block>();
             }
 
             rhs = EmitExpression(expr->rhs);
             if (!rhs) {
                 return utils::Failure;
             }
-            auto* rhs_store = builder.Store(result_var, rhs.Get());
-            current_flow_block->instructions.Push(rhs_store);
+            auto* rhs_store = builder_.Store(result_var, rhs.Get());
+            current_flow_block_->instructions.Push(rhs_store);
 
             BranchTo(if_node->merge.target);
         }
-        current_flow_block = if_node->merge.target->As<Block>();
+        current_flow_block_ = if_node->merge.target->As<Block>();
 
         return result_var;
     }
@@ -952,52 +969,52 @@ class Impl {
         Binary* inst = nullptr;
         switch (expr->op) {
             case ast::BinaryOp::kAnd:
-                inst = builder.And(ty, lhs.Get(), rhs.Get());
+                inst = builder_.And(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kOr:
-                inst = builder.Or(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Or(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kXor:
-                inst = builder.Xor(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Xor(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kEqual:
-                inst = builder.Equal(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Equal(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kNotEqual:
-                inst = builder.NotEqual(ty, lhs.Get(), rhs.Get());
+                inst = builder_.NotEqual(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kLessThan:
-                inst = builder.LessThan(ty, lhs.Get(), rhs.Get());
+                inst = builder_.LessThan(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kGreaterThan:
-                inst = builder.GreaterThan(ty, lhs.Get(), rhs.Get());
+                inst = builder_.GreaterThan(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kLessThanEqual:
-                inst = builder.LessThanEqual(ty, lhs.Get(), rhs.Get());
+                inst = builder_.LessThanEqual(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kGreaterThanEqual:
-                inst = builder.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
+                inst = builder_.GreaterThanEqual(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kShiftLeft:
-                inst = builder.ShiftLeft(ty, lhs.Get(), rhs.Get());
+                inst = builder_.ShiftLeft(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kShiftRight:
-                inst = builder.ShiftRight(ty, lhs.Get(), rhs.Get());
+                inst = builder_.ShiftRight(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kAdd:
-                inst = builder.Add(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Add(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kSubtract:
-                inst = builder.Subtract(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Subtract(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kMultiply:
-                inst = builder.Multiply(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Multiply(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kDivide:
-                inst = builder.Divide(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Divide(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kModulo:
-                inst = builder.Modulo(ty, lhs.Get(), rhs.Get());
+                inst = builder_.Modulo(ty, lhs.Get(), rhs.Get());
                 break;
             case ast::BinaryOp::kLogicalAnd:
             case ast::BinaryOp::kLogicalOr:
@@ -1008,7 +1025,7 @@ class Impl {
                 return utils::Failure;
         }
 
-        current_flow_block->instructions.Push(inst);
+        current_flow_block_->instructions.Push(inst);
         return inst;
     }
 
@@ -1020,9 +1037,9 @@ class Impl {
 
         auto* sem = program_->Sem().Get(expr);
         auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
-        auto* inst = builder.Bitcast(ty, val.Get());
+        auto* inst = builder_.Bitcast(ty, val.Get());
 
-        current_flow_block->instructions.Push(inst);
+        current_flow_block_->instructions.Push(inst);
         return inst;
     }
 
@@ -1038,7 +1055,7 @@ class Impl {
                                                 std::string(expr->TypeInfo().name));
                     return utils::Failure;
                 }
-                return builder.Constant(cv);
+                return builder_.Constant(cv);
             }
         }
 
@@ -1068,24 +1085,24 @@ class Impl {
 
         // If this is a builtin function, emit the specific builtin value
         if (auto* b = sem->Target()->As<sem::Builtin>()) {
-            inst = builder.Builtin(ty, b->Type(), args);
+            inst = builder_.Builtin(ty, b->Type(), args);
         } else if (sem->Target()->As<sem::ValueConstructor>()) {
-            inst = builder.Construct(ty, std::move(args));
+            inst = builder_.Construct(ty, std::move(args));
         } else if (auto* conv = sem->Target()->As<sem::ValueConversion>()) {
             auto* from = conv->Source()->Clone(clone_ctx_.type_ctx);
-            inst = builder.Convert(ty, from, std::move(args));
+            inst = builder_.Convert(ty, from, std::move(args));
         } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
             TINT_UNIMPLEMENTED(IR, diagnostics_) << "missing templated ident support";
             return utils::Failure;
         } else {
             // Not a builtin and not a templated call, so this is a user function.
             auto name = CloneSymbol(expr->target->identifier->symbol);
-            inst = builder.UserCall(ty, name, std::move(args));
+            inst = builder_.UserCall(ty, name, std::move(args));
         }
         if (inst == nullptr) {
             return utils::Failure;
         }
-        current_flow_block->instructions.Push(inst);
+        current_flow_block_->instructions.Push(inst);
         return inst;
     }
 
@@ -1103,7 +1120,7 @@ class Impl {
                       "failed to get constant value for node " + std::string(lit->TypeInfo().name));
             return utils::Failure;
         }
-        return builder.Constant(cv);
+        return builder_.Constant(cv);
     }
 
     //    void EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
@@ -1178,7 +1195,7 @@ utils::Result<Module, std::string> FromProgram(const Program* program) {
     Impl b(program);
     auto r = b.Build();
     if (!r) {
-        return b.Diagnostics().str();
+        return r.Failure().str();
     }
 
     return r.Move();
