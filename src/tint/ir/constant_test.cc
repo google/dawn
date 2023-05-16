@@ -24,7 +24,8 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_ConstantTest = TestHelper;
 
 TEST_F(IR_ConstantTest, f32) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     utils::StringStream str;
 
@@ -39,7 +40,8 @@ TEST_F(IR_ConstantTest, f32) {
 }
 
 TEST_F(IR_ConstantTest, f16) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     utils::StringStream str;
 
@@ -54,7 +56,8 @@ TEST_F(IR_ConstantTest, f16) {
 }
 
 TEST_F(IR_ConstantTest, i32) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     utils::StringStream str;
 
@@ -69,7 +72,8 @@ TEST_F(IR_ConstantTest, i32) {
 }
 
 TEST_F(IR_ConstantTest, u32) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     utils::StringStream str;
 
@@ -84,7 +88,8 @@ TEST_F(IR_ConstantTest, u32) {
 }
 
 TEST_F(IR_ConstantTest, bool) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     {
         utils::StringStream str;

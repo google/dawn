@@ -22,7 +22,8 @@ namespace {
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, Discard) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Discard();
     ASSERT_TRUE(inst->Is<ir::Discard>());

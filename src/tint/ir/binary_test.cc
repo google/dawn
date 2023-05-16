@@ -24,7 +24,8 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, CreateAnd) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.And(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -45,7 +46,8 @@ TEST_F(IR_InstructionTest, CreateAnd) {
 }
 
 TEST_F(IR_InstructionTest, CreateOr) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Or(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -64,7 +66,8 @@ TEST_F(IR_InstructionTest, CreateOr) {
 }
 
 TEST_F(IR_InstructionTest, CreateXor) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Xor(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -83,7 +86,8 @@ TEST_F(IR_InstructionTest, CreateXor) {
 }
 
 TEST_F(IR_InstructionTest, CreateEqual) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Equal(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -102,7 +106,8 @@ TEST_F(IR_InstructionTest, CreateEqual) {
 }
 
 TEST_F(IR_InstructionTest, CreateNotEqual) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.NotEqual(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -121,7 +126,8 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
 }
 
 TEST_F(IR_InstructionTest, CreateLessThan) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.LessThan(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -140,7 +146,8 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
 }
 
 TEST_F(IR_InstructionTest, CreateGreaterThan) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst =
         b.GreaterThan(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
@@ -160,7 +167,8 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
 }
 
 TEST_F(IR_InstructionTest, CreateLessThanEqual) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst =
         b.LessThanEqual(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
@@ -180,7 +188,8 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
 }
 
 TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst =
         b.GreaterThanEqual(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
@@ -200,7 +209,8 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
 }
 
 TEST_F(IR_InstructionTest, CreateNot) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
     const auto* inst = b.Not(b.ir.types.Get<type::Bool>(), b.Constant(true));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -218,7 +228,8 @@ TEST_F(IR_InstructionTest, CreateNot) {
 }
 
 TEST_F(IR_InstructionTest, CreateShiftLeft) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.ShiftLeft(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -237,7 +248,8 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
 }
 
 TEST_F(IR_InstructionTest, CreateShiftRight) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.ShiftRight(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -256,7 +268,8 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
 }
 
 TEST_F(IR_InstructionTest, CreateAdd) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Add(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -275,7 +288,8 @@ TEST_F(IR_InstructionTest, CreateAdd) {
 }
 
 TEST_F(IR_InstructionTest, CreateSubtract) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Subtract(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -294,7 +308,8 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
 }
 
 TEST_F(IR_InstructionTest, CreateMultiply) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Multiply(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -313,7 +328,8 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
 }
 
 TEST_F(IR_InstructionTest, CreateDivide) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Divide(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -332,7 +348,8 @@ TEST_F(IR_InstructionTest, CreateDivide) {
 }
 
 TEST_F(IR_InstructionTest, CreateModulo) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     const auto* inst = b.Modulo(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
@@ -351,7 +368,8 @@ TEST_F(IR_InstructionTest, CreateModulo) {
 }
 
 TEST_F(IR_InstructionTest, Binary_Usage) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
     const auto* inst = b.And(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     EXPECT_EQ(inst->kind, Binary::Kind::kAnd);
@@ -366,7 +384,8 @@ TEST_F(IR_InstructionTest, Binary_Usage) {
 }
 
 TEST_F(IR_InstructionTest, Binary_Usage_DuplicateValue) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
     auto val = b.Constant(4_i);
     const auto* inst = b.And(b.ir.types.Get<type::I32>(), val, val);
 

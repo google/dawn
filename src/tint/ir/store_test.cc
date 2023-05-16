@@ -24,7 +24,8 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, CreateStore) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     // TODO(dsinclair): This is wrong, but we don't have anything correct to store too at the
     // moment.
@@ -41,7 +42,8 @@ TEST_F(IR_InstructionTest, CreateStore) {
 }
 
 TEST_F(IR_InstructionTest, Store_Usage) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     auto* to = b.Discard();
     const auto* inst = b.Store(to, b.Constant(4_i));

@@ -25,7 +25,8 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, Bitcast) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
     const auto* inst = b.Bitcast(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<ir::Bitcast>());
@@ -39,7 +40,8 @@ TEST_F(IR_InstructionTest, Bitcast) {
 }
 
 TEST_F(IR_InstructionTest, Bitcast_Usage) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
     const auto* inst = b.Bitcast(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_EQ(inst->args.Length(), 1u);

@@ -61,7 +61,7 @@ TEST_F(SpvGeneratorImplTest, Type_F16) {
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec2i) {
-    auto* vec = ir.types.Get<type::Vector>(ir.types.Get<type::I32>(), 2u);
+    auto* vec = b.ir.types.Get<type::Vector>(b.ir.types.Get<type::I32>(), 2u);
     auto id = generator_.Type(vec);
     EXPECT_EQ(id, 1u);
     EXPECT_EQ(DumpTypes(),
@@ -70,7 +70,7 @@ TEST_F(SpvGeneratorImplTest, Type_Vec2i) {
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec3u) {
-    auto* vec = ir.types.Get<type::Vector>(ir.types.Get<type::U32>(), 3u);
+    auto* vec = b.ir.types.Get<type::Vector>(b.ir.types.Get<type::U32>(), 3u);
     auto id = generator_.Type(vec);
     EXPECT_EQ(id, 1u);
     EXPECT_EQ(DumpTypes(),
@@ -79,7 +79,7 @@ TEST_F(SpvGeneratorImplTest, Type_Vec3u) {
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec4f) {
-    auto* vec = ir.types.Get<type::Vector>(ir.types.Get<type::F32>(), 4u);
+    auto* vec = b.ir.types.Get<type::Vector>(b.ir.types.Get<type::F32>(), 4u);
     auto id = generator_.Type(vec);
     EXPECT_EQ(id, 1u);
     EXPECT_EQ(DumpTypes(),
@@ -88,7 +88,7 @@ TEST_F(SpvGeneratorImplTest, Type_Vec4f) {
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec4h) {
-    auto* vec = ir.types.Get<type::Vector>(ir.types.Get<type::F16>(), 2u);
+    auto* vec = b.ir.types.Get<type::Vector>(b.ir.types.Get<type::F16>(), 2u);
     auto id = generator_.Type(vec);
     EXPECT_EQ(id, 1u);
     EXPECT_EQ(DumpTypes(),
@@ -97,7 +97,7 @@ TEST_F(SpvGeneratorImplTest, Type_Vec4h) {
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec4Bool) {
-    auto* vec = ir.types.Get<type::Vector>(ir.types.Get<type::Bool>(), 4u);
+    auto* vec = b.ir.types.Get<type::Vector>(b.ir.types.Get<type::Bool>(), 4u);
     auto id = generator_.Type(vec);
     EXPECT_EQ(id, 1u);
     EXPECT_EQ(DumpTypes(),

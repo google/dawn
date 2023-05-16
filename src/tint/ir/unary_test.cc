@@ -24,7 +24,8 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_InstructionTest = TestHelper;
 
 TEST_F(IR_InstructionTest, CreateAddressOf) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     // TODO(dsinclair): This would be better as an identifier, but works for now.
     const auto* inst = b.AddressOf(
@@ -44,7 +45,8 @@ TEST_F(IR_InstructionTest, CreateAddressOf) {
 }
 
 TEST_F(IR_InstructionTest, CreateComplement) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
     const auto* inst = b.Complement(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
@@ -57,7 +59,8 @@ TEST_F(IR_InstructionTest, CreateComplement) {
 }
 
 TEST_F(IR_InstructionTest, CreateIndirection) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
 
     // TODO(dsinclair): This would be better as an identifier, but works for now.
     const auto* inst = b.Indirection(b.ir.types.Get<type::I32>(), b.Constant(4_i));
@@ -72,7 +75,8 @@ TEST_F(IR_InstructionTest, CreateIndirection) {
 }
 
 TEST_F(IR_InstructionTest, CreateNegation) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
     const auto* inst = b.Negation(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
@@ -85,7 +89,8 @@ TEST_F(IR_InstructionTest, CreateNegation) {
 }
 
 TEST_F(IR_InstructionTest, Unary_Usage) {
-    Builder b;
+    Module mod;
+    Builder b{mod};
     const auto* inst = b.Negation(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     EXPECT_EQ(inst->kind, Unary::Kind::kNegation);
