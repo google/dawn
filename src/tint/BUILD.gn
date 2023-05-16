@@ -1123,6 +1123,8 @@ libtint_source_set("libtint_ir_builder_src") {
   sources = [
     "ir/from_program.cc",
     "ir/from_program.h",
+    "ir/to_program.cc",
+    "ir/to_program.h",
   ]
   deps = [
     ":libtint_ast_src",
@@ -2162,6 +2164,7 @@ if (tint_build_unittests) {
       "ir/module_test.cc",
       "ir/store_test.cc",
       "ir/test_helper.h",
+      "ir/to_program_roundtrip_test.cc",
       "ir/unary_test.cc",
     ]
 

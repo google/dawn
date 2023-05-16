@@ -754,6 +754,8 @@ if(${TINT_BUILD_IR})
     ir/store.h
     ir/switch.cc
     ir/switch.h
+    ir/to_program.cc
+    ir/to_program.h
     ir/unary.cc
     ir/unary.h
     ir/user_call.cc
@@ -1461,6 +1463,13 @@ if(TINT_BUILD_TESTS)
       ir/unary_test.cc
     )
   endif()
+
+  if (${TINT_BUILD_IR} AND ${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
+    list(APPEND TINT_TEST_SRCS
+      ir/to_program_roundtrip_test.cc
+    )
+  endif()
+
 
   if (${TINT_BUILD_FUZZERS})
     list(APPEND TINT_TEST_SRCS
