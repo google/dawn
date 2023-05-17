@@ -280,6 +280,13 @@ crbug.com/dawn/1599 [ webgpu-adapter-swiftshader win10 ] webgpu:web_platform,cop
 
 ################################################################################
 # Untriaged canvas issues, potentially colorspace related.
+# Separated from below since it needs a KEEP comment.
+# KEEP
+crbug.com/dawn/0000 [ apple ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
+################################################################################
+
+################################################################################
+# Untriaged canvas issues, potentially colorspace related.
 ################################################################################
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
