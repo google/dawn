@@ -505,18 +505,20 @@ libtint_source_set("libtint_ast_transform_src") {
   ]
 }
 
-libtint_source_set("libtint_ir_transform_src") {
-  sources = [
-    "ir/transform/add_empty_entry_point.cc",
-    "ir/transform/add_empty_entry_point.h",
-  ]
-  deps = [
-    ":libtint_builtins_src",
-    ":libtint_ir_src",
-    ":libtint_symbols_src",
-    ":libtint_type_src",
-    ":libtint_utils_src",
-  ]
+if (tint_build_ir) {
+  libtint_source_set("libtint_ir_transform_src") {
+    sources = [
+      "ir/transform/add_empty_entry_point.cc",
+      "ir/transform/add_empty_entry_point.h",
+    ]
+    deps = [
+      ":libtint_builtins_src",
+      ":libtint_ir_src",
+      ":libtint_symbols_src",
+      ":libtint_type_src",
+      ":libtint_utils_src",
+    ]
+  }
 }
 
 libtint_source_set("libtint_ast_hdrs") {
@@ -1770,17 +1772,19 @@ if (tint_build_unittests) {
     ]
   }
 
-  tint_unittests_source_set("tint_unittests_ir_transform_src") {
-    sources = [
-      "ir/transform/add_empty_entry_point_test.cc",
-      "ir/transform/test_helper.h",
-    ]
+  if (tint_build_ir) {
+    tint_unittests_source_set("tint_unittests_ir_transform_src") {
+      sources = [
+        "ir/transform/add_empty_entry_point_test.cc",
+        "ir/transform/test_helper.h",
+      ]
 
-    deps = [
-      ":libtint_ir_src",
-      ":libtint_ir_transform_src",
-      ":libtint_transform_manager_src",
-    ]
+      deps = [
+        ":libtint_ir_src",
+        ":libtint_ir_transform_src",
+        ":libtint_transform_manager_src",
+      ]
+    }
   }
 
   tint_unittests_source_set("tint_unittests_utils_src") {
