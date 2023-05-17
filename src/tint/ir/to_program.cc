@@ -183,6 +183,7 @@ class State {
         return Switch(
             val,  //
             [&](const ir::Constant* c) { return ConstExpr(c); },
+            [&](const ir::Var* v) { return VarExpr(v); },
             [&](Default) {
                 TINT_UNIMPLEMENTED(IR, b.Diagnostics())
                     << "unhandled case in Switch(): " << val->TypeInfo().name;
@@ -204,6 +205,8 @@ class State {
                 return nullptr;
             });
     }
+
+    const ast::Expression* VarExpr(const ir::Var* v) { return b.Expr(NameOf(v)); }
 
     const ast::Type Type(const type::Type* ty) {
         return Switch(

@@ -67,10 +67,28 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, FunctionScopeVar_i32) {
+    Test(R"(
+fn f() {
+  var i : i32;
+}
+)");
+}
+
 TEST_F(IRToProgramRoundtripTest, FunctionScopeVar_i32_InitLiteral) {
     Test(R"(
 fn f() {
   var i : i32 = 42i;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, FunctionScopeVar_Chained) {
+    Test(R"(
+fn f() {
+  var a : i32 = 42i;
+  var b : i32 = a;
+  var c : i32 = b;
 }
 )");
 }
