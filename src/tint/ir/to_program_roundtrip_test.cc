@@ -40,6 +40,13 @@ class IRToProgramRoundtripTest : public TestHelper {
         ASSERT_TRUE(ir_module);
 
         auto output_program = ToProgram(ir_module.Get());
+        if (!output_program.IsValid()) {
+            tint::ir::Disassembler d{ir_module.Get()};
+            FAIL() << output_program.Diagnostics().str() << std::endl
+                   << "IR:" << std::endl
+                   << d.Disassemble();
+        }
+
         ASSERT_TRUE(output_program.IsValid()) << output_program.Diagnostics().str();
 
         auto output = writer::wgsl::Generate(&output_program, {});
@@ -75,6 +82,14 @@ fn f() {
 )",
          R"(
 fn f() {
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, SingleFunction_Return_i32) {
+    Test(R"(
+fn f() -> i32 {
+  return 42i;
 }
 )");
 }
@@ -127,14 +142,23 @@ fn f() {
 
 TEST_F(IRToProgramRoundtripTest, If_Return) {
     Test(R"(
-fn a() {
-}
-
 fn f() {
   var cond : bool = true;
   if (cond) {
     return;
   }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, If_Return_i32) {
+    Test(R"(
+fn f() -> i32 {
+  var cond : bool = true;
+  if (cond) {
+    return 42i;
+  }
+  return 10i;
 }
 )");
 }
@@ -158,7 +182,20 @@ fn f() {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, If_Return_Else_Return) {
+TEST_F(IRToProgramRoundtripTest, If_Return_f32_Else_Return_f32) {
+    Test(R"(
+fn f() -> f32 {
+  var cond : bool = true;
+  if (cond) {
+    return 1.0f;
+  } else {
+    return 2.0f;
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, If_Return_u32_Else_CallFn) {
     Test(R"(
 fn a() {
 }
@@ -166,13 +203,15 @@ fn a() {
 fn b() {
 }
 
-fn f() {
+fn f() -> u32 {
   var cond : bool = true;
   if (cond) {
-    return;
+    return 1u;
   } else {
-    return;
+    a();
   }
+  b();
+  return 2u;
 }
 )");
 }
@@ -196,6 +235,7 @@ fn f() {
   } else if (cond_b) {
     b();
   }
+  c();
 }
 )");
 }
