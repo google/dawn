@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_WRITER_SPIRV_GENERATOR_IMPL_IR_H_
-#define SRC_TINT_WRITER_SPIRV_GENERATOR_IMPL_IR_H_
+#ifndef SRC_TINT_WRITER_SPIRV_IR_GENERATOR_IMPL_IR_H_
+#define SRC_TINT_WRITER_SPIRV_IR_GENERATOR_IMPL_IR_H_
 
 #include <vector>
 
@@ -182,4 +182,4 @@ class GeneratorImplIr {
 
 }  // namespace tint::writer::spirv
 
-#endif  // SRC_TINT_WRITER_SPIRV_GENERATOR_IMPL_IR_H_
+#endif  // SRC_TINT_WRITER_SPIRV_IR_GENERATOR_IMPL_IR_H_

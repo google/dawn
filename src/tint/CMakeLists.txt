@@ -656,8 +656,8 @@ if(${TINT_BUILD_SPV_WRITER})
 
   if(${TINT_BUILD_IR})
     list(APPEND TINT_LIB_SRCS
-      writer/spirv/generator_impl_ir.cc
-      writer/spirv/generator_impl_ir.h
+      writer/spirv/ir/generator_impl_ir.cc
+      writer/spirv/ir/generator_impl_ir.h
     )
   endif()
 endif()
@@ -1240,13 +1240,13 @@ if(TINT_BUILD_TESTS)
 
     if(${TINT_BUILD_IR})
       list(APPEND TINT_TEST_SRCS
-        writer/spirv/generator_impl_binary_test.cc
-        writer/spirv/generator_impl_constant_test.cc
-        writer/spirv/generator_impl_function_test.cc
-        writer/spirv/generator_impl_if_test.cc
-        writer/spirv/generator_impl_ir_test.cc
-        writer/spirv/generator_impl_type_test.cc
-        writer/spirv/test_helper_ir.h
+        writer/spirv/ir/generator_impl_ir_binary_test.cc
+        writer/spirv/ir/generator_impl_ir_constant_test.cc
+        writer/spirv/ir/generator_impl_ir_function_test.cc
+        writer/spirv/ir/generator_impl_ir_if_test.cc
+        writer/spirv/ir/generator_impl_ir_test.cc
+        writer/spirv/ir/generator_impl_ir_type_test.cc
+        writer/spirv/ir/test_helper_ir.h
       )
     endif()
   endif()

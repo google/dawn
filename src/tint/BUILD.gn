@@ -1028,8 +1028,8 @@ libtint_source_set("libtint_spv_writer_src") {
 
   if (tint_build_ir) {
     sources += [
-      "writer/spirv/generator_impl_ir.cc",
-      "writer/spirv/generator_impl_ir.h",
+      "writer/spirv/ir/generator_impl_ir.cc",
+      "writer/spirv/ir/generator_impl_ir.h",
     ]
     deps += [
       ":libtint_ir_builder_src",
@@ -1939,12 +1939,13 @@ if (tint_build_unittests) {
 
     if (tint_build_ir) {
       sources += [
-        "writer/spirv/generator_impl_binary_test.cc",
-        "writer/spirv/generator_impl_constant_test.cc",
-        "writer/spirv/generator_impl_function_test.cc",
-        "writer/spirv/generator_impl_if_test.cc",
-        "writer/spirv/generator_impl_ir_test.cc",
-        "writer/spirv/generator_impl_type_test.cc",
+        "writer/spirv/ir/generator_impl_ir_binary_test.cc",
+        "writer/spirv/ir/generator_impl_ir_constant_test.cc",
+        "writer/spirv/ir/generator_impl_ir_function_test.cc",
+        "writer/spirv/ir/generator_impl_ir_if_test.cc",
+        "writer/spirv/ir/generator_impl_ir_test.cc",
+        "writer/spirv/ir/generator_impl_ir_type_test.cc",
+        "writer/spirv/ir/test_helper_ir.h",
       ]
       deps += [ ":libtint_ir_src" ]
     }

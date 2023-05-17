@@ -19,7 +19,7 @@
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/void.h"
-#include "src/tint/writer/spirv/test_helper_ir.h"
+#include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 namespace tint::writer::spirv {
 namespace {

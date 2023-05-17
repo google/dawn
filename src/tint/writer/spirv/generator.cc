@@ -18,9 +18,9 @@
 
 #include "src/tint/writer/spirv/generator_impl.h"
 #if TINT_BUILD_IR
-#include "src/tint/ir/from_program.h"                 // nogncheck
-#include "src/tint/writer/spirv/generator_impl_ir.h"  // nogncheck
-#endif                                                // TINT_BUILD_IR
+#include "src/tint/ir/from_program.h"                    // nogncheck
+#include "src/tint/writer/spirv/ir/generator_impl_ir.h"  // nogncheck
+#endif                                                   // TINT_BUILD_IR
 
 namespace tint::writer::spirv {
 

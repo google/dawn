@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/spirv/generator_impl_ir.h"
+#include "src/tint/writer/spirv/ir/generator_impl_ir.h"
 
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/binary.h"

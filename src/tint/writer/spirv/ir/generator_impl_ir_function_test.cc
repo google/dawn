@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/spirv/test_helper_ir.h"
+#include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 namespace tint::writer::spirv {
 namespace {
