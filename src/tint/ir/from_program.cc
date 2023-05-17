@@ -41,6 +41,7 @@
 #include "src/tint/ast/identifier.h"
 #include "src/tint/ast/identifier_expression.h"
 #include "src/tint/ast/if_statement.h"
+#include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/invariant_attribute.h"
 #include "src/tint/ast/let.h"
@@ -83,6 +84,8 @@
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/scoped_assignment.h"
+
+using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::ir {
 
@@ -376,6 +379,7 @@ class Impl {
             [&](const ast::ReturnStatement* r) { EmitReturn(r); },
             [&](const ast::SwitchStatement* s) { EmitSwitch(s); },
             [&](const ast::VariableDeclStatement* v) { EmitVariable(v->variable); },
+            [&](const ast::IncrementDecrementStatement* i) { EmitIncrementDecrement(i); },
             [&](const ast::ConstAssert*) {
                 // Not emitted
             },
@@ -396,6 +400,28 @@ class Impl {
             return;
         }
         auto store = builder_.Store(lhs.Get(), rhs.Get());
+        current_flow_block_->instructions.Push(store);
+    }
+
+    void EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
+        auto lhs = EmitExpression(stmt->lhs);
+        if (!lhs) {
+            return;
+        }
+
+        auto* ty = lhs.Get()->Type();
+        auto* rhs = ty->UnwrapRef()->is_signed_integer_scalar() ? builder_.Constant(1_i)
+                                                                : builder_.Constant(1_u);
+
+        Binary* inst = nullptr;
+        if (stmt->increment) {
+            inst = builder_.Add(ty, lhs.Get(), rhs);
+        } else {
+            inst = builder_.Subtract(ty, lhs.Get(), rhs);
+        }
+        current_flow_block_->instructions.Push(inst);
+
+        auto store = builder_.Store(lhs.Get(), inst);
         current_flow_block_->instructions.Push(store);
     }
 

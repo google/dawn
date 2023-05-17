@@ -49,6 +49,29 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Increment) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
+    auto* expr = Increment("v1");
+    WrapInFunction(expr);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
+  %v1:ref<private, u32, read_write> = var private, read_write
+}
+
+
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn3 = block {
+    %2:ref<private, u32, read_write> = add %v1:ref<private, u32, read_write>, 1u
+    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+  } -> %func_end # return
+} %func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kAdd);
@@ -89,6 +112,29 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
   %fn4 = block {
     %1:u32 = call my_func
     %tint_symbol:u32 = sub %1:u32, 4u
+  } -> %func_end # return
+} %func_end
+
+)");
+}
+
+TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Decrement) {
+    GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.i32());
+    auto* expr = Decrement("v1");
+    WrapInFunction(expr);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
+  %v1:ref<private, i32, read_write> = var private, read_write
+}
+
+
+%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn3 = block {
+    %2:ref<private, i32, read_write> = sub %v1:ref<private, i32, read_write>, 1i
+    store %v1:ref<private, i32, read_write>, %2:ref<private, i32, read_write>
   } -> %func_end # return
 } %func_end
 
