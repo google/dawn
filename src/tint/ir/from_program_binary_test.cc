@@ -64,8 +64,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Increment) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = add %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = add %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 
@@ -87,8 +88,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = add %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = add %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 
@@ -133,8 +135,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Decrement) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, i32, read_write> = sub %v1:ptr<private, i32, read_write>, 1u
-    store %v1:ptr<private, i32, read_write>, %2:ptr<private, i32, read_write>
+    %2:i32 = load %v1:ptr<private, i32, read_write>
+    %3:i32 = sub %2:i32, 1i
+    store %v1:ptr<private, i32, read_write>, %3:i32
   } -> %func_end # return
 } %func_end
 
@@ -156,8 +159,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = sub %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = sub %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 
@@ -202,8 +206,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = mul %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = mul %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 
@@ -248,8 +253,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = div %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = div %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 
@@ -294,8 +300,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = mod %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = mod %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 
@@ -340,8 +347,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, bool, read_write> = and %v1:ptr<private, bool, read_write>, false
-    store %v1:ptr<private, bool, read_write>, %2:ptr<private, bool, read_write>
+    %2:bool = load %v1:ptr<private, bool, read_write>
+    %3:bool = and %2:bool, false
+    store %v1:ptr<private, bool, read_write>, %3:bool
   } -> %func_end # return
 } %func_end
 
@@ -386,8 +394,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, bool, read_write> = or %v1:ptr<private, bool, read_write>, false
-    store %v1:ptr<private, bool, read_write>, %2:ptr<private, bool, read_write>
+    %2:bool = load %v1:ptr<private, bool, read_write>
+    %3:bool = or %2:bool, false
+    store %v1:ptr<private, bool, read_write>, %3:bool
   } -> %func_end # return
 } %func_end
 
@@ -432,8 +441,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = xor %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = xor %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 
@@ -712,8 +722,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = shiftl %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = shiftl %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 
@@ -758,8 +769,9 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ptr<private, u32, read_write> = shiftr %v1:ptr<private, u32, read_write>, 1u
-    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
+    %2:u32 = load %v1:ptr<private, u32, read_write>
+    %3:u32 = shiftr %2:u32, 1u
+    store %v1:ptr<private, u32, read_write>, %3:u32
   } -> %func_end # return
 } %func_end
 

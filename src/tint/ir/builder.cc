@@ -17,6 +17,8 @@
 #include <utility>
 
 #include "src/tint/constant/scalar.h"
+#include "src/tint/type/pointer.h"
+#include "src/tint/type/reference.h"
 
 namespace tint::ir {
 
@@ -225,6 +227,12 @@ ir::Builtin* Builder::Builtin(const type::Type* type,
                               builtin::Function func,
                               utils::VectorRef<Value*> args) {
     return ir.values.Create<ir::Builtin>(type, func, args);
+}
+
+ir::Load* Builder::Load(Value* from) {
+    auto* ptr = from->Type()->As<type::Pointer>();
+    TINT_ASSERT(IR, ptr);
+    return ir.values.Create<ir::Load>(ptr->StoreType(), from);
 }
 
 ir::Store* Builder::Store(Value* to, Value* from) {

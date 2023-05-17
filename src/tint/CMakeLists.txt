@@ -748,6 +748,8 @@ if(${TINT_BUILD_IR})
     ir/if.h
     ir/instruction.cc
     ir/instruction.h
+    ir/load.cc
+    ir/load.h
     ir/loop.cc
     ir/loop.h
     ir/module.cc
@@ -1467,6 +1469,7 @@ if(TINT_BUILD_TESTS)
       ir/from_program_test.cc
       ir/from_program_unary_test.cc
       ir/from_program_var_test.cc
+      ir/load_test.cc
       ir/module_test.cc
       ir/store_test.cc
       ir/test_helper.h

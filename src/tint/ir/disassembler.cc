@@ -27,6 +27,7 @@
 #include "src/tint/ir/discard.h"
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/root_terminator.h"
 #include "src/tint/ir/store.h"
@@ -431,6 +432,11 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitValue(c);
             out_ << " = convert " << c->FromType()->FriendlyName() << ", ";
             EmitArgs(c);
+        },
+        [&](const ir::Load* l) {
+            EmitValue(l);
+            out_ << " = load ";
+            EmitValue(l->from);
         },
         [&](const ir::Store* s) {
             out_ << "store ";

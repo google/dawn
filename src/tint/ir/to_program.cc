@@ -23,6 +23,7 @@
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction.h"
+#include "src/tint/ir/load.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/user_call.h"
@@ -123,11 +124,13 @@ class State {
 
                 [&](const ir::Block* block) {
                     for (auto* inst : block->instructions) {
-                        auto* stmt = Stmt(inst);
+                        auto stmt = Stmt(inst);
                         if (TINT_UNLIKELY(!stmt)) {
                             return kError;
                         }
-                        stmts.Push(stmt);
+                        if (auto* s = stmt.Get()) {
+                            stmts.Push(s);
+                        }
                     }
                     branch = &block->branch;
                     return kContinue;
@@ -239,8 +242,11 @@ class State {
     const ir::FlowNode* NextNonEmptyNode(const ir::FlowNode* node) {
         while (node) {
             if (auto* block = node->As<ir::Block>()) {
-                if (block->instructions.Length() > 0) {
-                    return node;
+                for (auto* inst : block->instructions) {
+                    // Load instructions will be inlined, so ignore them.
+                    if (!inst->Is<ir::Load>()) {
+                        return node;
+                    }
                 }
                 node = block->branch.target;
             } else {
@@ -250,15 +256,16 @@ class State {
         return nullptr;
     }
 
-    const ast::Statement* Stmt(const ir::Instruction* inst) {
-        return Switch(
+    utils::Result<const ast::Statement*> Stmt(const ir::Instruction* inst) {
+        return Switch<utils::Result<const ast::Statement*>>(
             inst,                                            //
             [&](const ir::Call* i) { return CallStmt(i); },  //
             [&](const ir::Var* i) { return Var(i); },        //
-            [&](const ir::Store* i) { return Store(i); },    //
+            [&](const ir::Load*) { return nullptr; },
+            [&](const ir::Store* i) { return Store(i); },  //
             [&](Default) {
                 UNHANDLED_CASE(inst);
-                return nullptr;
+                return utils::Failure;
             });
     }
 
@@ -318,6 +325,7 @@ class State {
         return Switch(
             val,  //
             [&](const ir::Constant* c) { return ConstExpr(c); },
+            [&](const ir::Load* l) { return LoadExpr(l); },
             [&](const ir::Var* v) { return VarExpr(v); },
             [&](Default) {
                 UNHANDLED_CASE(val);
@@ -338,6 +346,8 @@ class State {
                 return nullptr;
             });
     }
+
+    const ast::Expression* LoadExpr(const ir::Load* l) { return Expr(l->from); }
 
     const ast::Expression* VarExpr(const ir::Var* v) { return b.Expr(NameOf(v)); }
 

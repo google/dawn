@@ -28,6 +28,7 @@
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/root_terminator.h"
@@ -338,7 +339,12 @@ class Builder {
                          builtin::Function func,
                          utils::VectorRef<Value*> args);
 
-    /// Creates an store instruction
+    /// Creates a load instruction
+    /// @param from the expression being loaded from
+    /// @returns the instruction
+    ir::Load* Load(Value* from);
+
+    /// Creates a store instruction
     /// @param to the expression being stored too
     /// @param from the expression being stored
     /// @returns the instruction

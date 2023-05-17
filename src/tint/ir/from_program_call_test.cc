@@ -106,7 +106,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %tint_symbol:f32 = convert i32, %i:ptr<private, i32, read_write>
+    %2:i32 = load %i:ptr<private, i32, read_write>
+    %tint_symbol:f32 = convert i32, %2:i32
   } -> %func_end # return
 } %func_end
 
@@ -143,7 +144,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %i:ptr<private, f32, read_write>
+    %2:f32 = load %i:ptr<private, f32, read_write>
+    %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %2:f32
   } -> %func_end # return
 } %func_end
 
