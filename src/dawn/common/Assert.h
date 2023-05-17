@@ -41,11 +41,11 @@
 // expect of an assert and in release it tries to give hints to make the compiler generate better
 // code.
 #if defined(DAWN_ENABLE_ASSERTS)
-#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)  \
-    do {                                                          \
-        if (!(condition)) {                                       \
-            HandleAssertionFailure(file, func, line, #condition); \
-        }                                                         \
+#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)        \
+    do {                                                                \
+        if (!(condition)) {                                             \
+            dawn::HandleAssertionFailure(file, func, line, #condition); \
+        }                                                               \
     } while (DAWN_ASSERT_LOOP_CONDITION)
 #else
 #if DAWN_COMPILER_IS(MSVC)
@@ -72,9 +72,13 @@
 #define UNREACHABLE DAWN_UNREACHABLE
 #endif
 
+namespace dawn {
+
 void HandleAssertionFailure(const char* file,
                             const char* function,
                             int line,
                             const char* condition);
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_ASSERT_H_

@@ -117,5 +117,5 @@ TEST_F(WireInjectInstanceTests, ReclaimInstanceReservation) {
     }
 }
 
-}  // namespace
+}  // anonymous namespace
 }  // namespace dawn::wire

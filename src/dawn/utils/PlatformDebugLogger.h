@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_UTILS_PLATFORMDEBUGLOGGER_H_
 #define SRC_DAWN_UTILS_PLATFORMDEBUGLOGGER_H_
 
-namespace utils {
+namespace dawn::utils {
 
 class PlatformDebugLogger {
   public:
@@ -24,6 +24,6 @@ class PlatformDebugLogger {
 
 PlatformDebugLogger* CreatePlatformDebugLogger();
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_PLATFORMDEBUGLOGGER_H_

@@ -19,7 +19,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 // https://github.com/gpuweb/gpuweb/issues/108
 // Vulkan, Metal, and D3D11 have the same standard multisample pattern. D3D12 is the same as
 // D3D11 but it was left out of the documentation.
@@ -32,14 +34,12 @@ static constexpr std::array<std::array<float, 2>, 4> kSamplePositions = {
      {0.875 * 2 - 1, 1 - 0.375 * 2},
      {0.125 * 2 - 1, 1 - 0.625 * 2},
      {0.625 * 2 - 1, 1 - 0.875 * 2}}};
-}  // anonymous namespace
 
 class MultisampledSamplingTest : public DawnTest {
   protected:
     static constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::R8Unorm;
     static constexpr wgpu::TextureFormat kDepthFormat = wgpu::TextureFormat::Depth32Float;
 
-    static constexpr wgpu::TextureFormat kDepthOutFormat = wgpu::TextureFormat::R32Float;
     static constexpr uint32_t kSampleCount = 4;
 
     // Render pipeline for drawing to a multisampled color and depth attachment.
@@ -264,3 +264,6 @@ DAWN_INSTANTIATE_TEST(MultisampledSamplingTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

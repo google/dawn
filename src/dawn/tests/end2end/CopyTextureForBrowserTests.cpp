@@ -22,7 +22,9 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 static constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
 
 // Set default texture size to single line texture for color conversion tests.
@@ -148,7 +150,6 @@ static constexpr std::array<ColorSpaceInfo, kSupportedColorSpaceCount> ColorSpac
     }
     //
 }};
-}  // anonymous namespace
 
 template <typename Parent>
 class CopyTextureForBrowserTests : public Parent {
@@ -1225,3 +1226,6 @@ DAWN_INSTANTIATE_TEST_P(CopyTextureForBrowser_ColorSpace,
                                                       wgpu::AlphaMode::Unpremultiplied}),
                         std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied,
                                                       wgpu::AlphaMode::Unpremultiplied}));
+
+}  // anonymous namespace
+}  // namespace dawn

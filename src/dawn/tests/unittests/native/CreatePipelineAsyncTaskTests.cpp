@@ -187,5 +187,5 @@ TEST_F(CreatePipelineAsyncTaskTests, LongAsyncTaskFinishesBeforeDeviceIsDropped)
     EXPECT_TRUE(done);
 }
 
-}  // namespace
+}  // anonymous namespace
 }  // namespace dawn::native

@@ -13,6 +13,8 @@
 
 #include "dawn/common/Assert.h"
 
+namespace dawn {
+
 // Simple LinkedList type. (See the Q&A section to understand how this
 // differs from std::list).
 //
@@ -246,5 +248,7 @@ template <typename T>
 LinkedListIterator<T> end(LinkedList<T>& l) {
     return LinkedListIterator<T>(l.tail()->next());
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_LINKEDLIST_H_

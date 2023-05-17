@@ -25,6 +25,7 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 enum class TextureComponentType {
@@ -32,8 +33,6 @@ enum class TextureComponentType {
     Sint,
     Uint,
 };
-
-}
 
 // An expectation for float buffer content that can correctly compare different NaN values and
 // supports a basic tolerance for comparison of finite values.
@@ -843,8 +842,8 @@ TEST_P(TextureFormatTest, RG11B10Ufloat) {
         // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY and NaN isn't handled
         // correctly by swiftshader
         if ((IsVulkan() && IsSwiftshader()) || IsANGLE()) {
-            dawn::WarningLog() << "Skip Rendering test because Swiftshader doesn't render INFINITY "
-                                  "and NaN correctly for RG11B10Ufloat texture format.";
+            WarningLog() << "Skip Rendering test because Swiftshader doesn't render INFINITY "
+                            "and NaN correctly for RG11B10Ufloat texture format.";
         } else {
             DoFormatRenderingTest(
                 {wgpu::TextureFormat::RG11B10Ufloat, 4, TextureComponentType::Float, 4},
@@ -907,3 +906,6 @@ DAWN_INSTANTIATE_TEST(TextureFormatTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -15,6 +15,7 @@
 #include "dawn/tests/unittests/wire/WireTest.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::Return;
@@ -179,4 +180,5 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     FlushClient();
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

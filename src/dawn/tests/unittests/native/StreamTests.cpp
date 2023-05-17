@@ -31,23 +31,28 @@
 #include "tint/tint.h"
 
 namespace dawn::native::stream {
+namespace {
 
 // Testing classes with mock serializing implemented for testing.
 class A {
   public:
-    MOCK_METHOD(void, WriteMock, (stream::Sink*, const A&), (const));
+    MOCK_METHOD(void, WriteMock, (Sink*, const A&), (const));
 };
-template <>
-void stream::Stream<A>::Write(stream::Sink* s, const A& t) {
-    t.WriteMock(s, t);
-}
 
 struct Nested {
     A a1;
     A a2;
 };
+
+}  // anonymous namespace
+
 template <>
-void stream::Stream<Nested>::Write(stream::Sink* s, const Nested& t) {
+void Stream<A>::Write(Sink* s, const A& t) {
+    t.WriteMock(s, t);
+}
+
+template <>
+void Stream<Nested>::Write(Sink* s, const Nested& t) {
     StreamIn(s, t.a1);
     StreamIn(s, t.a2);
 }
@@ -96,7 +101,7 @@ TEST(SerializeTests, StreamInIterable) {
     constexpr size_t kIterableSize = 100;
 
     std::vector<A> vec(kIterableSize);
-    auto iterable = stream::Iterable(vec.data(), kIterableSize);
+    auto iterable = Iterable(vec.data(), kIterableSize);
 
     // Expect write to be called for each element
     for (const auto& a : vec) {
@@ -483,6 +488,5 @@ REGISTER_TYPED_TEST_SUITE_P(StreamParameterizedTests,
                             DeserializeEmpty);
 INSTANTIATE_TYPED_TEST_SUITE_P(DawnUnittests, StreamParameterizedTests, StreamValueTestTypes, );
 
-}  // namespace
-
+}  // anonymous namespace
 }  // namespace dawn::native::stream

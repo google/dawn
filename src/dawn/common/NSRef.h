@@ -23,6 +23,8 @@
 #error "NSRef can only be used in Objective C/C++ code."
 #endif
 
+namespace dawn {
+
 // This file contains smart pointers that automatically reference and release Objective C objects
 // and prototocals in a manner very similar to Ref<>. Note that NSRef<> and NSPRef's constructor add
 // a reference to the object by default, so the pattern to get a reference for a newly created
@@ -107,5 +109,7 @@ NSPRef<T> AcquireNSPRef(T pointee) {
     ref.Acquire(pointee);
     return ref;
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_NSREF_H_

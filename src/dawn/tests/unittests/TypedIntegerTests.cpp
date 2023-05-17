@@ -18,6 +18,9 @@
 #include "dawn/common/UnderlyingType.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 class TypedIntegerTest : public testing::Test {
   protected:
     using Unsigned = TypedInteger<struct UnsignedT, uint32_t>;
@@ -233,3 +236,6 @@ TEST_F(TypedIntegerTest, NegationOverflow) {
 }
 
 #endif  // defined(DAWN_ENABLE_ASSERTS)
+
+}  // anonymous namespace
+}  // namespace dawn

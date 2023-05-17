@@ -20,6 +20,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 using ::testing::NiceMock;
@@ -97,7 +98,7 @@ static constexpr std::string_view kFragmentShaderBindGroup01Uniform = R"(
 
 class PipelineCachingTests : public DawnTest {
   protected:
-    std::unique_ptr<dawn::platform::Platform> CreateTestPlatform() override {
+    std::unique_ptr<platform::Platform> CreateTestPlatform() override {
         return std::make_unique<DawnCachingMockPlatform>(&mMockCache);
     }
 
@@ -647,4 +648,5 @@ DAWN_INSTANTIATE_TEST(SinglePipelineCachingTests,
                       OpenGLESBackend(),
                       VulkanBackend());
 
-}  // namespace
+}  // anonymous namespace
+}  // namespace dawn

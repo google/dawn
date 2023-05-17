@@ -19,6 +19,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 // Primitive topology tests work by drawing the following vertices with all the different primitive
 // topology states:
 // -------------------------------------
@@ -304,3 +307,6 @@ DAWN_INSTANTIATE_TEST(PrimitiveTopologyTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

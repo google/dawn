@@ -164,8 +164,8 @@ class Stream<T, std::enable_if_t<std::is_enum_v<T>>> {
 
 // Stream specialization for TypedInteger.
 template <typename Tag, typename Integer>
-class Stream<::detail::TypedIntegerImpl<Tag, Integer>> {
-    using T = ::detail::TypedIntegerImpl<Tag, Integer>;
+class Stream<::dawn::detail::TypedIntegerImpl<Tag, Integer>> {
+    using T = ::dawn::detail::TypedIntegerImpl<Tag, Integer>;
 
   public:
     static void Write(Sink* s, const T& t) { StreamIn(s, static_cast<Integer>(t)); }

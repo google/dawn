@@ -21,6 +21,8 @@
 
 #include "dawn/common/Platform.h"
 
+namespace dawn {
+
 const char* GetPathSeparator();
 // Returns a pair of the environment variable's value, and a boolean indicating whether the variable
 // was present.
@@ -54,5 +56,7 @@ class ScopedEnvironmentVar {
     std::pair<std::string, bool> mOriginalValue;
     bool mIsSet = false;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_SYSTEMUTILS_H_

@@ -16,6 +16,9 @@
 
 #include "dawn/common/WindowsUtils.h"
 
+namespace dawn {
+namespace {
+
 TEST(WindowsUtilsTests, WCharToUTF8) {
     // Test the empty string
     ASSERT_EQ("", WCharToUTF8(L""));
@@ -49,3 +52,6 @@ TEST(WindowsUtilsTests, UTF8ToWStr) {
     // Test three-byte utf8 codepoint
     ASSERT_EQ(L"\x1050", UTF8ToWStr("\xe1\x81\x90"));
 }
+
+}  // anonymous namespace
+}  // namespace dawn

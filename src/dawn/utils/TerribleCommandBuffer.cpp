@@ -16,7 +16,7 @@
 
 #include "dawn/common/Assert.h"
 
-namespace utils {
+namespace dawn::utils {
 
 TerribleCommandBuffer::TerribleCommandBuffer() {}
 
@@ -54,4 +54,4 @@ bool TerribleCommandBuffer::Flush() {
     return success;
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

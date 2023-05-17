@@ -16,6 +16,7 @@
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 
+namespace dawn {
 namespace {
 
 class TextureSubresourceTest : public ValidationTest {
@@ -133,3 +134,4 @@ TEST_F(TextureSubresourceTest, ArrayLayersTest) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn

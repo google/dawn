@@ -22,6 +22,9 @@
 #include "dawn/utils/WGPUHelpers.h"
 #include "gmock/gmock.h"
 
+namespace dawn {
+namespace {
+
 using testing::_;
 using testing::Exactly;
 using testing::MockCallback;
@@ -540,3 +543,6 @@ DAWN_INSTANTIATE_TEST(DeviceLostTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

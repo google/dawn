@@ -17,8 +17,12 @@
 
 #include <string>
 
+namespace dawn {
+
 std::string WCharToUTF8(const wchar_t* input);
 
 std::wstring UTF8ToWStr(const char* input);
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_WINDOWSUTILS_H_

@@ -22,6 +22,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 constexpr unsigned int kNumDraws = 2000;
@@ -194,8 +195,6 @@ std::ostream& operator<<(std::ostream& ostream, const DrawCallParamForTest& test
 
     return ostream;
 }
-
-}  // anonymous namespace
 
 // DrawCallPerf is an uber-benchmark with supports many parameterizations.
 // The specific parameterizations we care about are explicitly instantiated at the bottom
@@ -650,3 +649,6 @@ DAWN_INSTANTIATE_TEST_P(
         MakeParam(BindGroup::Dynamic,
                   UniformData::Dynamic),  // Update per-draw data: Dynamic bind groups
     });
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -24,16 +24,16 @@
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/UnderlyingType.h"
 
-namespace ityp {
+namespace dawn::ityp {
 
 // ityp::array is a helper class that wraps std::array with the restriction that
 // indices must be a particular type |Index|. Dawn uses multiple flat maps of
 // index-->data, and this class helps ensure an indices cannot be passed interchangably
 // to a flat map of a different type.
 template <typename Index, typename Value, size_t Size>
-class array : private std::array<Value, Size> {
+class array : private ::std::array<Value, Size> {
     using I = UnderlyingType<Index>;
-    using Base = std::array<Value, Size>;
+    using Base = ::std::array<Value, Size>;
 
     static_assert(Size <= std::numeric_limits<I>::max());
 
@@ -85,6 +85,6 @@ class array : private std::array<Value, Size> {
     using Base::front;
 };
 
-}  // namespace ityp
+}  // namespace dawn::ityp
 
 #endif  // SRC_DAWN_COMMON_ITYP_ARRAY_H_

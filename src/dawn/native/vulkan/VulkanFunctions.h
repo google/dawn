@@ -20,7 +20,9 @@
 
 #include "dawn/native/Error.h"
 
+namespace dawn {
 class DynamicLib;
+}  // namespace dawn
 
 namespace dawn::native::vulkan {
 

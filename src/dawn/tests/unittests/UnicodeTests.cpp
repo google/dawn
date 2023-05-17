@@ -15,6 +15,9 @@
 #include "dawn/native/ShaderModule.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 
+namespace dawn {
+namespace {
+
 class CountUTF16CodeUnitsFromUTF8StringTest : public ValidationTest {};
 
 TEST_F(CountUTF16CodeUnitsFromUTF8StringTest, ValidUnicodeString) {
@@ -40,8 +43,8 @@ TEST_F(CountUTF16CodeUnitsFromUTF8StringTest, ValidUnicodeString) {
     }};
 
     for (const TestCase& testCase : kTestCases) {
-        dawn::native::ResultOrError<uint64_t> resultOrError =
-            dawn::native::CountUTF16CodeUnitsFromUTF8String(std::string_view(testCase.u8String));
+        native::ResultOrError<uint64_t> resultOrError =
+            native::CountUTF16CodeUnitsFromUTF8String(std::string_view(testCase.u8String));
         ASSERT_TRUE(resultOrError.IsSuccess());
         ASSERT_EQ(testCase.lengthInUTF16, resultOrError.AcquireSuccess());
     }
@@ -65,9 +68,12 @@ TEST_F(CountUTF16CodeUnitsFromUTF8StringTest, InvalidUnicodeString) {
     }};
 
     for (const char* testCase : kTestCases) {
-        dawn::native::ResultOrError<uint64_t> resultOrError =
-            dawn::native::CountUTF16CodeUnitsFromUTF8String(std::string_view(testCase));
+        native::ResultOrError<uint64_t> resultOrError =
+            native::CountUTF16CodeUnitsFromUTF8String(std::string_view(testCase));
         ASSERT_TRUE(resultOrError.IsError());
         std::ignore = resultOrError.AcquireError();
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -18,6 +18,9 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class PipelineLayoutTests : public DawnTest {};
 
 // Test creating a PipelineLayout with multiple BGLs where the first BGL uses the max number of
@@ -149,3 +152,6 @@ DAWN_INSTANTIATE_TEST(PipelineLayoutTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

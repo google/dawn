@@ -22,6 +22,9 @@
 
 #include "GLFW/glfw3.h"
 
+namespace dawn {
+namespace {
+
 class SwapChainValidationTests : public DawnTest {
   public:
     void SetUp() override {
@@ -30,7 +33,7 @@ class SwapChainValidationTests : public DawnTest {
         DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
         glfwSetErrorCallback([](int code, const char* message) {
-            dawn::ErrorLog() << "GLFW error " << code << " " << message;
+            ErrorLog() << "GLFW error " << code << " " << message;
         });
         DAWN_TEST_UNSUPPORTED_IF(!glfwInit());
 
@@ -338,3 +341,6 @@ TEST_P(SwapChainValidationTests, CreateSwapChainFailsAfterDevLost) {
 }
 
 DAWN_INSTANTIATE_TEST(SwapChainValidationTests, MetalBackend(), NullBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

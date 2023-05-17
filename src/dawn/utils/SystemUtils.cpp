@@ -24,7 +24,7 @@
 #error "Unsupported platform."
 #endif
 
-namespace utils {
+namespace dawn::utils {
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 void USleep(unsigned int usecs) {
@@ -38,4 +38,4 @@ void USleep(unsigned int usecs) {
 #error "Implement USleep for your platform."
 #endif
 
-}  // namespace utils
+}  // namespace dawn::utils

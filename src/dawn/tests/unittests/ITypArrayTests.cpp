@@ -17,6 +17,9 @@
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_array.h"
 
+namespace dawn {
+namespace {
+
 class ITypArrayTest : public testing::Test {
   protected:
     using Key = TypedInteger<struct KeyT, uint32_t>;
@@ -89,3 +92,6 @@ TEST_F(ITypArrayTest, BeginEndFrontBackData) {
     ASSERT_EQ(&constArr.back(), &constArr[Key(9)]);
     ASSERT_EQ(constArr.data(), &constArr[Key(0)]);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

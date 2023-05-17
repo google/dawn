@@ -17,6 +17,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr wgpu::TextureFormat kDepthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
 constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
 constexpr uint32_t kRTWidth = 4;
@@ -319,3 +322,6 @@ DAWN_INSTANTIATE_TEST(VertexOnlyRenderPipelineTest,
                       OpenGLESBackend({"use_placeholder_fragment_in_vertex_only_pipeline"}),
                       VulkanBackend(),
                       VulkanBackend({"use_placeholder_fragment_in_vertex_only_pipeline"}));
+
+}  // anonymous namespace
+}  // namespace dawn

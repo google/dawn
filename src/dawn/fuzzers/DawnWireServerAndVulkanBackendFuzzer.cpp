@@ -30,7 +30,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 
-            return gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
+            return dawn::gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
         },
         true /* supportsErrorInjection */);
 }

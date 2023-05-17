@@ -16,7 +16,9 @@
 
 #include "dawn/common/GPUInfo.h"
 
+namespace dawn {
 namespace {
+
 const PCIVendorID vendorID = 0x8086;
 // Intel D3D12
 const gpu_info::DriverVersion version1 = {20, 19, 15, 5107};
@@ -27,8 +29,6 @@ const gpu_info::DriverVersion version4 = {27, 20, 101, 2003};
 const gpu_info::DriverVersion version5 = {100, 9466};
 const gpu_info::DriverVersion version6 = {101, 3222};
 const gpu_info::DriverVersion version7 = {101, 3790};
-
-}  // anonymous namespace
 
 TEST(GPUInfo, CompareWindowsDriverVersion) {
     EXPECT_EQ(gpu_info::CompareWindowsDriverVersion(vendorID, version1, version2), -1);
@@ -41,3 +41,6 @@ TEST(GPUInfo, CompareWindowsDriverVersion) {
     EXPECT_EQ(gpu_info::CompareWindowsDriverVersion(vendorID, version3, version6), -1);
     EXPECT_EQ(gpu_info::CompareWindowsDriverVersion(vendorID, version4, version7), -1);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

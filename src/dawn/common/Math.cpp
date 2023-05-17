@@ -25,6 +25,8 @@
 #include <intrin.h>
 #endif
 
+namespace dawn {
+
 uint32_t ScanForward(uint32_t bits) {
     ASSERT(bits != 0);
 #if DAWN_COMPILER_IS(MSVC)
@@ -162,3 +164,5 @@ uint64_t RoundUp(uint64_t n, uint64_t m) {
     ASSERT(m <= std::numeric_limits<uint64_t>::max() - n);
     return ((n + m - 1) / m) * m;
 }
+
+}  // namespace dawn

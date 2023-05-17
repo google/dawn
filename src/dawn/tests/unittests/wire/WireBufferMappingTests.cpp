@@ -20,14 +20,13 @@
 #include "dawn/wire/WireClient.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::InvokeWithoutArgs;
 using testing::Mock;
 using testing::Return;
 using testing::StrictMock;
-
-namespace {
 
 // Mock class to add expectations on the wire calling callbacks
 class MockBufferMapCallback {
@@ -39,8 +38,6 @@ std::unique_ptr<StrictMock<MockBufferMapCallback>> mockBufferMapCallback;
 void ToMockBufferMapCallback(WGPUBufferMapAsyncStatus status, void* userdata) {
     mockBufferMapCallback->Call(status, userdata);
 }
-
-}  // anonymous namespace
 
 class WireBufferMappingTests : public WireTest {
   public:
@@ -937,4 +934,5 @@ TEST_F(WireBufferMappingWriteTests, MapInsideCallbackBeforeDestruction) {
     wgpuBufferRelease(buffer);
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

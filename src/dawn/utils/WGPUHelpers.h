@@ -23,7 +23,7 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/webgpu_cpp.h"
 
-namespace utils {
+namespace dawn::utils {
 
 enum Expectation { Success, Failure };
 
@@ -89,7 +89,7 @@ struct BasicRenderPass {
     uint32_t height;
     wgpu::Texture color;
     wgpu::TextureFormat colorFormat;
-    utils::ComboRenderPassDescriptor renderPassInfo;
+    dawn::utils::ComboRenderPassDescriptor renderPassInfo;
 };
 BasicRenderPass CreateBasicRenderPass(
     const wgpu::Device& device,
@@ -107,7 +107,7 @@ extern wgpu::ExternalTextureBindingLayout kExternalTextureBindingLayout;
 
 // Helpers to make creating bind group layouts look nicer:
 //
-//   utils::MakeBindGroupLayout(device, {
+//   dawn::utils::MakeBindGroupLayout(device, {
 //       {0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform},
 //       {1, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
 //       {3, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}
@@ -148,7 +148,7 @@ wgpu::BindGroupLayout MakeBindGroupLayout(
 
 // Helpers to make creating bind groups look nicer:
 //
-//   utils::MakeBindGroup(device, layout, {
+//   dawn::utils::MakeBindGroup(device, layout, {
 //       {0, mySampler},
 //       {1, myBuffer, offset, size},
 //       {3, myTextureView}
@@ -192,6 +192,6 @@ struct ColorSpaceConversionInfo {
 
 ColorSpaceConversionInfo GetYUVBT709ToRGBSRGBColorSpaceConversionInfo();
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_WGPUHELPERS_H_

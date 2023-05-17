@@ -19,6 +19,8 @@
 
 #include "dawn/common/RefBase.h"
 
+namespace dawn {
+
 template <typename T>
 struct CoreFoundationRefTraits {
     static constexpr T kNullValue = nullptr;
@@ -38,5 +40,7 @@ CFRef<T> AcquireCFRef(T pointee) {
     ref.Acquire(pointee);
     return ref;
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_COREFOUNDATIONREF_H_

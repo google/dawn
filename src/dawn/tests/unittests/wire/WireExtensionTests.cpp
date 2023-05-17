@@ -15,6 +15,7 @@
 #include "dawn/tests/unittests/wire/WireTest.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::Invoke;
@@ -244,4 +245,5 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     FlushClient();
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

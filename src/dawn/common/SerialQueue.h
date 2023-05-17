@@ -20,6 +20,8 @@
 
 #include "dawn/common/SerialStorage.h"
 
+namespace dawn {
+
 template <typename Serial, typename Value>
 class SerialQueue;
 
@@ -82,5 +84,7 @@ void SerialQueue<Serial, Value>::Enqueue(std::vector<Value>&& values, Serial ser
     DAWN_ASSERT(this->Empty() || this->mStorage.back().first <= serial);
     this->mStorage.emplace_back(serial, std::move(values));
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_SERIALQUEUE_H_

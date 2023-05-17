@@ -17,11 +17,11 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 using RequestDP4aExtension = bool;
 DAWN_TEST_PARAM_STRUCT(ExperimentalDP4aTestsParams, RequestDP4aExtension);
-
-}  // anonymous namespace
 
 class ExperimentalDP4aTests : public DawnTestWithParams<ExperimentalDP4aTestsParams> {
   protected:
@@ -136,3 +136,6 @@ DAWN_INSTANTIATE_TEST_P(ExperimentalDP4aTests,
                             VulkanBackend(),
                         },
                         {true, false});
+
+}  // anonymous namespace
+}  // namespace dawn

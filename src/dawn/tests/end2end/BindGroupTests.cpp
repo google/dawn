@@ -22,6 +22,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr static uint32_t kRTSize = 8;
 
 class BindGroupTests : public DawnTest {
@@ -1330,8 +1333,8 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
 // This is a regression test for crbug.com/dawn/355 which tests that destruction of a bind group
 // that holds the last reference to its bind group layout does not result in a use-after-free. In
 // the bug, the destructor of BindGroupBase, when destroying member mLayout,
-// Ref<BindGroupLayoutBase> assigns to Ref::mPointee, AFTER calling Release(). After the BGL is
-// destroyed, the storage for |mPointee| has been freed.
+// Ref<BindGroupLayoutBase> assigns to Ref::mPointee, AFTER calling Release(). After the BGL
+// is destroyed, the storage for |mPointee| has been freed.
 TEST_P(BindGroupTests, LastReferenceToBindGroupLayout) {
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = sizeof(float);
@@ -1513,3 +1516,6 @@ DAWN_INSTANTIATE_TEST(BindGroupTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // namespace
+}  // namespace dawn

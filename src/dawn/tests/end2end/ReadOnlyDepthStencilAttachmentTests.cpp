@@ -19,12 +19,13 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr static uint32_t kSize = 4;
 
-namespace {
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(ReadOnlyDepthStencilAttachmentTestsParams, TextureFormat);
-}  // namespace
 
 class ReadOnlyDepthStencilAttachmentTests
     : public DawnTestWithParams<ReadOnlyDepthStencilAttachmentTestsParams> {
@@ -353,3 +354,6 @@ DAWN_INSTANTIATE_TEST_P(ReadOnlyStencilAttachmentTests,
                          MetalBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));
+
+}  // anonymous namespace
+}  // namespace dawn

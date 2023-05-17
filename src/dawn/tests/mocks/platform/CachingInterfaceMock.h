@@ -39,8 +39,8 @@
 // Hit / Add help readability, and enforce the args are passed correctly in the expected order.
 #define EXPECT_CACHE_STATS(cache, HitN, AddN, statement)                    \
     do {                                                                    \
-        using Hit = TypedInteger<struct HitT, size_t>;                      \
-        using Add = TypedInteger<struct AddT, size_t>;                      \
+        using Hit = dawn::TypedInteger<struct HitT, size_t>;                \
+        using Add = dawn::TypedInteger<struct AddT, size_t>;                \
         static_assert(std::is_same_v<decltype(HitN), Hit>);                 \
         static_assert(std::is_same_v<decltype(AddN), Add>);                 \
         FlushWire();                                                        \

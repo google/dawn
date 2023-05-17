@@ -21,6 +21,8 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/UnderlyingType.h"
 
+namespace dawn {
+
 // TypedInteger is helper class that provides additional type safety in Debug.
 //  - Integers of different (Tag, BaseIntegerType) may not be used interoperably
 //  - Allows casts only to the underlying type.
@@ -31,8 +33,8 @@
 // typedef of the underlying type.
 //
 // Example:
-//     using UintA = TypedInteger<struct TypeA, uint32_t>;
-//     using UintB = TypedInteger<struct TypeB, uint32_t>;
+//     using UintA = dawn::TypedInteger<struct TypeA, uint32_t>;
+//     using UintB = dawn::TypedInteger<struct TypeB, uint32_t>;
 //
 //  in Release:
 //     using UintA = uint32_t;
@@ -208,23 +210,24 @@ class alignas(T) TypedIntegerImpl {
 };
 
 }  // namespace detail
+}  // namespace dawn
 
 namespace std {
 
 template <typename Tag, typename T>
-class numeric_limits<detail::TypedIntegerImpl<Tag, T>> : public numeric_limits<T> {
+class numeric_limits<dawn::detail::TypedIntegerImpl<Tag, T>> : public numeric_limits<T> {
   public:
-    static detail::TypedIntegerImpl<Tag, T> max() noexcept {
-        return detail::TypedIntegerImpl<Tag, T>(std::numeric_limits<T>::max());
+    static dawn::detail::TypedIntegerImpl<Tag, T> max() noexcept {
+        return dawn::detail::TypedIntegerImpl<Tag, T>(std::numeric_limits<T>::max());
     }
-    static detail::TypedIntegerImpl<Tag, T> min() noexcept {
-        return detail::TypedIntegerImpl<Tag, T>(std::numeric_limits<T>::min());
+    static dawn::detail::TypedIntegerImpl<Tag, T> min() noexcept {
+        return dawn::detail::TypedIntegerImpl<Tag, T>(std::numeric_limits<T>::min());
     }
 };
 
 }  // namespace std
 
-namespace ityp {
+namespace dawn::ityp {
 
 // These helpers below are provided since the default arithmetic operators for small integer
 // types like uint8_t and uint16_t return integers, not their same type. To avoid lots of
@@ -232,17 +235,19 @@ namespace ityp {
 // ityp::Sub(a, b) instead.
 
 template <typename Tag, typename T>
-constexpr ::detail::TypedIntegerImpl<Tag, T> Add(::detail::TypedIntegerImpl<Tag, T> lhs,
-                                                 ::detail::TypedIntegerImpl<Tag, T> rhs) {
-    return ::detail::TypedIntegerImpl<Tag, T>(
-        static_cast<T>(::detail::TypedIntegerImpl<Tag, T>::AddImpl(lhs, rhs)));
+constexpr ::dawn::detail::TypedIntegerImpl<Tag, T> Add(
+    ::dawn::detail::TypedIntegerImpl<Tag, T> lhs,
+    ::dawn::detail::TypedIntegerImpl<Tag, T> rhs) {
+    return ::dawn::detail::TypedIntegerImpl<Tag, T>(
+        static_cast<T>(::dawn::detail::TypedIntegerImpl<Tag, T>::AddImpl(lhs, rhs)));
 }
 
 template <typename Tag, typename T>
-constexpr ::detail::TypedIntegerImpl<Tag, T> Sub(::detail::TypedIntegerImpl<Tag, T> lhs,
-                                                 ::detail::TypedIntegerImpl<Tag, T> rhs) {
-    return ::detail::TypedIntegerImpl<Tag, T>(
-        static_cast<T>(::detail::TypedIntegerImpl<Tag, T>::SubImpl(lhs, rhs)));
+constexpr ::dawn::detail::TypedIntegerImpl<Tag, T> Sub(
+    ::dawn::detail::TypedIntegerImpl<Tag, T> lhs,
+    ::dawn::detail::TypedIntegerImpl<Tag, T> rhs) {
+    return ::dawn::detail::TypedIntegerImpl<Tag, T>(
+        static_cast<T>(::dawn::detail::TypedIntegerImpl<Tag, T>::SubImpl(lhs, rhs)));
 }
 
 template <typename T>
@@ -255,6 +260,6 @@ constexpr std::enable_if_t<std::is_integral<T>::value, T> Sub(T lhs, T rhs) {
     return static_cast<T>(lhs - rhs);
 }
 
-}  // namespace ityp
+}  // namespace dawn::ityp
 
 #endif  // SRC_DAWN_COMMON_TYPEDINTEGER_H_

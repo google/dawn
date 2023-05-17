@@ -21,7 +21,7 @@
 
 #include "dawn/common/Assert.h"
 
-namespace gpu_info {
+namespace dawn::gpu_info {
 
 namespace {
 
@@ -151,4 +151,4 @@ std::string GetArchitectureName(PCIVendorID vendorId, PCIDeviceID deviceId) {
     return "";
 }
 
-}  // namespace gpu_info
+}  // namespace dawn::gpu_info

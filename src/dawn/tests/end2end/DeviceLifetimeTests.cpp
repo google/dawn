@@ -17,6 +17,9 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class DeviceLifetimeTests : public DawnTest {};
 
 // Test that the device can be dropped before its queue.
@@ -557,3 +560,6 @@ DAWN_INSTANTIATE_TEST(DeviceLifetimeTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

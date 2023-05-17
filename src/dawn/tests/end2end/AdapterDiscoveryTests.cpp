@@ -47,6 +47,7 @@
 
 #include <gtest/gtest.h>
 
+namespace dawn {
 namespace {
 
 using testing::_;
@@ -58,9 +59,9 @@ class AdapterDiscoveryTests : public ::testing::Test {};
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
 // Test only discovering the SwiftShader adapter
 TEST(AdapterDiscoveryTests, OnlySwiftShader) {
-    dawn::native::Instance instance;
+    native::Instance instance;
 
-    dawn::native::vulkan::AdapterDiscoveryOptions options;
+    native::vulkan::AdapterDiscoveryOptions options;
     options.forceSwiftShader = true;
     instance.DiscoverAdapters(&options);
 
@@ -78,9 +79,9 @@ TEST(AdapterDiscoveryTests, OnlySwiftShader) {
 
 // Test discovering only Vulkan adapters
 TEST(AdapterDiscoveryTests, OnlyVulkan) {
-    dawn::native::Instance instance;
+    native::Instance instance;
 
-    dawn::native::vulkan::AdapterDiscoveryOptions options;
+    native::vulkan::AdapterDiscoveryOptions options;
     instance.DiscoverAdapters(&options);
 
     const auto& adapters = instance.GetAdapters();
@@ -96,9 +97,9 @@ TEST(AdapterDiscoveryTests, OnlyVulkan) {
 #if defined(DAWN_ENABLE_BACKEND_D3D11)
 // Test discovering only D3D11 adapters
 TEST(AdapterDiscoveryTests, OnlyD3D11) {
-    dawn::native::Instance instance;
+    native::Instance instance;
 
-    dawn::native::d3d11::AdapterDiscoveryOptions options;
+    native::d3d11::AdapterDiscoveryOptions options;
     instance.DiscoverAdapters(&options);
 
     const auto& adapters = instance.GetAdapters();
@@ -124,9 +125,9 @@ TEST(AdapterDiscoveryTests, MatchingDXGIAdapterD3D11) {
             break;  // No more adapters to enumerate.
         }
 
-        dawn::native::Instance instance;
+        native::Instance instance;
 
-        dawn::native::d3d11::AdapterDiscoveryOptions options;
+        native::d3d11::AdapterDiscoveryOptions options;
         options.dxgiAdapter = std::move(dxgiAdapter);
         instance.DiscoverAdapters(&options);
 
@@ -144,9 +145,9 @@ TEST(AdapterDiscoveryTests, MatchingDXGIAdapterD3D11) {
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
 // Test discovering only D3D12 adapters
 TEST(AdapterDiscoveryTests, OnlyD3D12) {
-    dawn::native::Instance instance;
+    native::Instance instance;
 
-    dawn::native::d3d12::AdapterDiscoveryOptions options;
+    native::d3d12::AdapterDiscoveryOptions options;
     instance.DiscoverAdapters(&options);
 
     const auto& adapters = instance.GetAdapters();
@@ -172,9 +173,9 @@ TEST(AdapterDiscoveryTests, MatchingDXGIAdapterD3D12) {
             break;  // No more adapters to enumerate.
         }
 
-        dawn::native::Instance instance;
+        native::Instance instance;
 
-        dawn::native::d3d12::AdapterDiscoveryOptions options;
+        native::d3d12::AdapterDiscoveryOptions options;
         options.dxgiAdapter = std::move(dxgiAdapter);
         instance.DiscoverAdapters(&options);
 
@@ -192,9 +193,9 @@ TEST(AdapterDiscoveryTests, MatchingDXGIAdapterD3D12) {
 #if defined(DAWN_ENABLE_BACKEND_METAL)
 // Test discovering only Metal adapters
 TEST(AdapterDiscoveryTests, OnlyMetal) {
-    dawn::native::Instance instance;
+    native::Instance instance;
 
-    dawn::native::metal::AdapterDiscoveryOptions options;
+    native::metal::AdapterDiscoveryOptions options;
     instance.DiscoverAdapters(&options);
 
     const auto& adapters = instance.GetAdapters();
@@ -211,10 +212,10 @@ TEST(AdapterDiscoveryTests, OnlyMetal) {
 // Test discovering the Metal backend, then the Vulkan backend
 // does not duplicate adapters.
 TEST(AdapterDiscoveryTests, OneBackendThenTheOther) {
-    dawn::native::Instance instance;
+    native::Instance instance;
     uint32_t metalAdapterCount = 0;
     {
-        dawn::native::metal::AdapterDiscoveryOptions options;
+        native::metal::AdapterDiscoveryOptions options;
         instance.DiscoverAdapters(&options);
 
         const auto& adapters = instance.GetAdapters();
@@ -227,7 +228,7 @@ TEST(AdapterDiscoveryTests, OneBackendThenTheOther) {
         }
     }
     {
-        dawn::native::vulkan::AdapterDiscoveryOptions options;
+        native::vulkan::AdapterDiscoveryOptions options;
         instance.DiscoverAdapters(&options);
 
         uint32_t metalAdapterCount2 = 0;
@@ -445,3 +446,4 @@ TEST_F(AdapterCreationTest, GetInstance) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn

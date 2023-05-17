@@ -26,6 +26,9 @@
 #include "dawn/common/Assert.h"
 #include "dawn/native/D3D12Backend.h"
 
+namespace dawn {
+namespace {
+
 using Microsoft::WRL::ComPtr;
 
 class PlatformTextureWin : public VideoViewsTestBackend::PlatformTexture {
@@ -45,7 +48,7 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
 
         // Create the D3D11 device/contexts that will be used in subsequent tests
         ComPtr<IDXGIAdapter> dxgiAdapter =
-            dawn::native::d3d::GetDXGIAdapter(wgpuDeviceGetAdapter(device));
+            native::d3d::GetDXGIAdapter(wgpuDeviceGetAdapter(device));
 
         ComPtr<ID3D11Device> d3d11Device;
         D3D_FEATURE_LEVEL d3dFeatureLevel;
@@ -161,22 +164,22 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         ASSERT(hr == S_OK);
 
         // Open the DX11 texture in Dawn from the shared handle and return it as a WebGPU texture.
-        dawn::native::d3d::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
+        native::d3d::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
         externalImageDesc.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
         externalImageDesc.sharedHandle = sharedHandle;
 
-        std::unique_ptr<dawn::native::d3d::ExternalImageDXGI> externalImage =
-            dawn::native::d3d::ExternalImageDXGI::Create(mWGPUDevice, &externalImageDesc);
+        std::unique_ptr<native::d3d::ExternalImageDXGI> externalImage =
+            native::d3d::ExternalImageDXGI::Create(mWGPUDevice, &externalImageDesc);
 
         // Handle is no longer needed once resources are created.
         ::CloseHandle(sharedHandle);
 
-        dawn::native::d3d::ExternalImageDXGIFenceDescriptor fenceDesc;
+        native::d3d::ExternalImageDXGIFenceDescriptor fenceDesc;
         fenceDesc.fenceHandle = fenceSharedHandle;
         fenceDesc.fenceValue = 1;
 
-        dawn::native::d3d::ExternalImageDXGIBeginAccessDescriptor externalAccessDesc;
+        native::d3d::ExternalImageDXGIBeginAccessDescriptor externalAccessDesc;
         externalAccessDesc.isInitialized = true;
         externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(textureDesc.usage);
         externalAccessDesc.waitFences = {};
@@ -196,6 +199,8 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
     ComPtr<ID3D11Device> mD3d11Device;
 };
 
+}  // anonymous namespace
+
 // static
 BackendTestConfig VideoViewsTestBackend::Backend() {
     return D3D12Backend();
@@ -204,3 +209,5 @@ BackendTestConfig VideoViewsTestBackend::Backend() {
 std::unique_ptr<VideoViewsTestBackend> VideoViewsTestBackend::Create() {
     return std::make_unique<VideoViewsTestBackendWin>();
 }
+
+}  // namespace dawn

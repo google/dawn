@@ -20,6 +20,9 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class QueueTests : public DawnTest {};
 
 // Test that GetQueue always returns the same object.
@@ -789,3 +792,6 @@ DAWN_INSTANTIATE_TEST(QueueWriteTextureTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

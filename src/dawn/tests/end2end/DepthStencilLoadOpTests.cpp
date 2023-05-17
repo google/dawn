@@ -19,6 +19,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 using Format = wgpu::TextureFormat;
@@ -420,4 +421,5 @@ DAWN_INSTANTIATE_TEST_P(DepthTextureClearTwiceTest,
                          wgpu::TextureFormat::Depth24PlusStencil8},
                         {true, false});
 
-}  // namespace
+}  // anonymous namespace
+}  // namespace dawn

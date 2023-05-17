@@ -16,7 +16,7 @@
 
 #include "dawn/utils/WGPUHelpers.h"
 
-namespace utils {
+namespace dawn::utils {
 
 ComboVertexState::ComboVertexState() {
     vertexBufferCount = 0;
@@ -146,4 +146,4 @@ void ComboRenderPipelineDescriptor::DisableDepthStencil() {
     this->depthStencil = nullptr;
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

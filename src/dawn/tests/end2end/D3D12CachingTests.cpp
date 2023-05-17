@@ -21,9 +21,10 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 using ::testing::NiceMock;
-}  // namespace
 
 class D3D12CachingTests : public DawnTest {
   protected:
@@ -33,7 +34,7 @@ class D3D12CachingTests : public DawnTest {
         DAWN_SKIP_TEST_IF_BASE(true, "suppressed", "TODO(dawn:1341)");
     }
 
-    std::unique_ptr<dawn::platform::Platform> CreateTestPlatform() override {
+    std::unique_ptr<platform::Platform> CreateTestPlatform() override {
         return std::make_unique<DawnCachingMockPlatform>(&mMockCache);
     }
 
@@ -181,3 +182,6 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPoints) {
 }
 
 DAWN_INSTANTIATE_TEST(D3D12CachingTests, D3D12Backend());
+
+}  // anonymous namespace
+}  // namespace dawn

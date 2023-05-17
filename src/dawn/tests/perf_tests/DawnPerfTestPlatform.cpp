@@ -44,7 +44,7 @@ static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::GPUWork) == 3
 }  // anonymous namespace
 
 DawnPerfTestPlatform::DawnPerfTestPlatform()
-    : dawn::platform::Platform(), mTimer(utils::CreateTimer()) {}
+    : dawn::platform::Platform(), mTimer(dawn::utils::CreateTimer()) {}
 
 DawnPerfTestPlatform::~DawnPerfTestPlatform() = default;
 
@@ -112,8 +112,8 @@ uint64_t DawnPerfTestPlatform::AddTraceEvent(char phase,
     buffer->emplace_back(phase, info->category, name, id, timestamp);
 
     size_t hash = 0;
-    HashCombine(&hash, buffer->size());
-    HashCombine(&hash, std::this_thread::get_id());
+    dawn::HashCombine(&hash, buffer->size());
+    dawn::HashCombine(&hash, std::this_thread::get_id());
     return static_cast<uint64_t>(hash);
 }
 

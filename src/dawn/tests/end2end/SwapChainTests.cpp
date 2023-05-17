@@ -23,6 +23,9 @@
 
 #include "GLFW/glfw3.h"
 
+namespace dawn {
+namespace {
+
 class SwapChainTests : public DawnTest {
   public:
     void SetUp() override {
@@ -30,7 +33,7 @@ class SwapChainTests : public DawnTest {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
         glfwSetErrorCallback([](int code, const char* message) {
-            dawn::ErrorLog() << "GLFW error " << code << " " << message;
+            ErrorLog() << "GLFW error " << code << " " << message;
         });
 
         // GLFW can fail to start in headless environments, in which SwapChainTests are
@@ -397,3 +400,6 @@ DAWN_INSTANTIATE_TEST(SwapChainWithAdditionalUsageTests,
                       MetalBackend(),
                       NullBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

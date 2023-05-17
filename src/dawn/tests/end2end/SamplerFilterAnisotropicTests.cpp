@@ -21,16 +21,17 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr static unsigned int kRTSize = 16;
 
-namespace {
 // MipLevel colors, ordering from base level to high level
 // each mipmap of the texture is having a different color
 // so we can check if the sampler anisotropic filtering is fetching
 // from the correct miplevel
 const std::array<utils::RGBA8, 3> colors = {utils::RGBA8::kRed, utils::RGBA8::kGreen,
                                             utils::RGBA8::kBlue};
-}  // namespace
 
 class SamplerFilterAnisotropicTest : public DawnTest {
   protected:
@@ -293,3 +294,6 @@ DAWN_INSTANTIATE_TEST(SamplerFilterAnisotropicTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

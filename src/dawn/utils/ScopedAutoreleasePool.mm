@@ -16,7 +16,7 @@
 
 #import <Foundation/Foundation.h>
 
-namespace utils {
+namespace dawn::utils {
 
 ScopedAutoreleasePool::ScopedAutoreleasePool() : mPool([[NSAutoreleasePool alloc] init]) {}
 
@@ -40,4 +40,4 @@ ScopedAutoreleasePool& ScopedAutoreleasePool::operator=(ScopedAutoreleasePool&& 
     return *this;
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

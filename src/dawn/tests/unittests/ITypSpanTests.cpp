@@ -19,6 +19,9 @@
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_span.h"
 
+namespace dawn {
+namespace {
+
 class ITypSpanTest : public testing::Test {
   protected:
     using Key = TypedInteger<struct KeyT, size_t>;
@@ -79,3 +82,6 @@ TEST_F(ITypSpanTest, BeginEndFrontBackData) {
     ASSERT_EQ(&constSpan.back(), &constSpan[Key(9)]);
     ASSERT_EQ(constSpan.data(), &constSpan[Key(0)]);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

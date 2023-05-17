@@ -19,6 +19,9 @@
 #include "dawn/common/Math.h"
 #include "dawn/native/DawnNative.h"
 
+namespace dawn {
+namespace {
+
 class BufferAllocatedSizeTests : public DawnTest {
   protected:
     wgpu::Buffer CreateBuffer(wgpu::BufferUsage usage, uint64_t size) {
@@ -53,7 +56,7 @@ TEST_P(BufferAllocatedSizeTests, UniformUsage) {
     {
         const uint32_t bufferSize = kMinBufferSize;
         wgpu::Buffer buffer = CreateBuffer(wgpu::BufferUsage::Uniform, bufferSize);
-        EXPECT_EQ(dawn::native::GetAllocatedSizeForTesting(buffer.Get()),
+        EXPECT_EQ(native::GetAllocatedSizeForTesting(buffer.Get()),
                   Align(bufferSize, requiredBufferAlignment));
     }
 
@@ -63,7 +66,7 @@ TEST_P(BufferAllocatedSizeTests, UniformUsage) {
         const uint32_t bufferSize = std::max(1u + requiredBufferAlignment, kMinBufferSize);
         wgpu::Buffer buffer =
             CreateBuffer(wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage, bufferSize);
-        EXPECT_EQ(dawn::native::GetAllocatedSizeForTesting(buffer.Get()),
+        EXPECT_EQ(native::GetAllocatedSizeForTesting(buffer.Get()),
                   Align(bufferSize, requiredBufferAlignment));
     }
 
@@ -72,7 +75,7 @@ TEST_P(BufferAllocatedSizeTests, UniformUsage) {
         const uint32_t bufferSize = kMinBufferSize;
         wgpu::Buffer buffer =
             CreateBuffer(wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage, bufferSize);
-        EXPECT_EQ(dawn::native::GetAllocatedSizeForTesting(buffer.Get()),
+        EXPECT_EQ(native::GetAllocatedSizeForTesting(buffer.Get()),
                   Align(bufferSize, requiredBufferAlignment));
     }
 }
@@ -83,3 +86,6 @@ DAWN_INSTANTIATE_TEST(BufferAllocatedSizeTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -18,6 +18,9 @@
 
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ComputeSharedMemoryTests : public DawnTest {
   public:
     static constexpr uint32_t kInstances = 11;
@@ -204,3 +207,6 @@ DAWN_INSTANTIATE_TEST(ComputeSharedMemoryTests,
                       OpenGLESBackend(),
                       VulkanBackend(),
                       VulkanBackend({}, {"use_vulkan_zero_initialize_workgroup_memory_extension"}));
+
+}  // anonymous namespace
+}  // namespace dawn

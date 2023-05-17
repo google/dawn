@@ -21,7 +21,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 // Helper for describing bindings throughout the tests
 struct BindingDescriptor {
     uint32_t group;
@@ -146,7 +148,6 @@ std::vector<BindingDescriptor> CombineBindings(
     }
     return result;
 }
-}  // namespace
 
 class MinBufferSizeTestsBase : public ValidationTest {
   public:
@@ -623,3 +624,6 @@ TEST_F(MinBufferSizePipelineCreationTests, NonStructVec3) {
         }
     });
 }
+
+}  // anonymous namespace
+}  // namespace dawn

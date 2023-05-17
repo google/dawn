@@ -25,7 +25,7 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-namespace utils {
+namespace dawn::utils {
 
 const RGBA8 RGBA8::kZero = RGBA8(0, 0, 0, 0);
 const RGBA8 RGBA8::kBlack = RGBA8(0, 0, 0, 255);
@@ -41,8 +41,8 @@ std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
 }
 
 uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width) {
-    const uint32_t bytesPerBlock = utils::GetTexelBlockSizeInBytes(format);
-    const uint32_t blockWidth = utils::GetTextureFormatBlockWidth(format);
+    const uint32_t bytesPerBlock = dawn::utils::GetTexelBlockSizeInBytes(format);
+    const uint32_t blockWidth = dawn::utils::GetTextureFormatBlockWidth(format);
     ASSERT(width % blockWidth == 0);
     return Align(bytesPerBlock * (width / blockWidth), kTextureBytesPerRowAlignment);
 }
@@ -53,7 +53,7 @@ TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(wgpu::TextureFor
                                                                 wgpu::TextureDimension dimension,
                                                                 uint32_t rowsPerImage) {
     // Compressed texture formats not supported in this function yet.
-    ASSERT(utils::GetTextureFormatBlockWidth(format) == 1);
+    ASSERT(dawn::utils::GetTextureFormatBlockWidth(format) == 1);
 
     TextureDataCopyLayout layout;
 
@@ -79,7 +79,7 @@ TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(wgpu::TextureFor
     layout.byteLength =
         RequiredBytesInCopy(layout.bytesPerRow, appliedRowsPerImage, layout.mipSize, format);
 
-    const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
+    const uint32_t bytesPerTexel = dawn::utils::GetTexelBlockSizeInBytes(format);
     layout.texelBlocksPerRow = layout.bytesPerRow / bytesPerTexel;
     layout.texelBlocksPerImage = layout.bytesPerImage / bytesPerTexel;
     layout.texelBlockCount = layout.byteLength / bytesPerTexel;
@@ -91,9 +91,9 @@ uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
                              uint64_t rowsPerImage,
                              wgpu::Extent3D copyExtent,
                              wgpu::TextureFormat textureFormat) {
-    uint32_t blockSize = utils::GetTexelBlockSizeInBytes(textureFormat);
-    uint32_t blockWidth = utils::GetTextureFormatBlockWidth(textureFormat);
-    uint32_t blockHeight = utils::GetTextureFormatBlockHeight(textureFormat);
+    uint32_t blockSize = dawn::utils::GetTexelBlockSizeInBytes(textureFormat);
+    uint32_t blockWidth = dawn::utils::GetTextureFormatBlockWidth(textureFormat);
+    uint32_t blockHeight = dawn::utils::GetTextureFormatBlockHeight(textureFormat);
     ASSERT(copyExtent.width % blockWidth == 0);
     uint32_t widthInBlocks = copyExtent.width / blockWidth;
     ASSERT(copyExtent.height % blockHeight == 0);
@@ -127,7 +127,7 @@ uint64_t GetTexelCountInCopyRegion(uint64_t bytesPerRow,
                                    wgpu::Extent3D copyExtent,
                                    wgpu::TextureFormat textureFormat) {
     return RequiredBytesInCopy(bytesPerRow, rowsPerImage, copyExtent, textureFormat) /
-           utils::GetTexelBlockSizeInBytes(textureFormat);
+           dawn::utils::GetTexelBlockSizeInBytes(textureFormat);
 }
 
 void UnalignDynamicUploader(wgpu::Device device) {
@@ -139,9 +139,10 @@ void UnalignDynamicUploader(wgpu::Device device) {
     descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+    wgpu::ImageCopyTexture imageCopyTexture =
+        dawn::utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
     wgpu::TextureDataLayout textureDataLayout =
-        utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
+        dawn::utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
     wgpu::Extent3D copyExtent = {1, 1, 1};
 
     // WriteTexture with exactly 1 byte of data.
@@ -210,4 +211,4 @@ void RunInParallel(uint32_t numThreads,
     }
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

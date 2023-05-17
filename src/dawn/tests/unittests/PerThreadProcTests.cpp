@@ -23,17 +23,20 @@
 #include "dawn/native/null/DeviceNull.h"
 #include "dawn/webgpu_cpp.h"
 
+namespace dawn {
+namespace {
+
 class PerThreadProcTests : public testing::Test {
   public:
     PerThreadProcTests()
-        : mNativeInstance(dawn::native::InstanceBase::Create()),
-          mAdapterBase(AcquireRef(new dawn::native::null::PhysicalDevice(mNativeInstance.Get())),
-                       dawn::native::FeatureLevel::Core) {}
+        : mNativeInstance(native::InstanceBase::Create()),
+          mAdapterBase(AcquireRef(new native::null::PhysicalDevice(mNativeInstance.Get())),
+                       native::FeatureLevel::Core) {}
     ~PerThreadProcTests() override = default;
 
   protected:
-    Ref<dawn::native::InstanceBase> mNativeInstance;
-    dawn::native::AdapterBase mAdapterBase;
+    Ref<native::InstanceBase> mNativeInstance;
+    native::AdapterBase mAdapterBase;
 };
 
 // Test that procs can be set per thread. This test overrides deviceCreateBuffer with a placeholder
@@ -64,7 +67,7 @@ TEST_F(PerThreadProcTests, DispatchesPerThread) {
         wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(mAdapterBase.APICreateDevice()));
 
     std::thread threadA([&]() {
-        DawnProcTable procs = dawn::native::GetProcs();
+        DawnProcTable procs = native::GetProcs();
         procs.deviceCreateBuffer = [](WGPUDevice device,
                                       WGPUBufferDescriptor const* descriptor) -> WGPUBuffer {
             EXPECT_EQ(std::this_thread::get_id(), threadIdA);
@@ -85,7 +88,7 @@ TEST_F(PerThreadProcTests, DispatchesPerThread) {
     });
 
     std::thread threadB([&]() {
-        DawnProcTable procs = dawn::native::GetProcs();
+        DawnProcTable procs = native::GetProcs();
         procs.deviceCreateBuffer = [](WGPUDevice device,
                                       WGPUBufferDescriptor const* bufferDesc) -> WGPUBuffer {
             EXPECT_EQ(std::this_thread::get_id(), threadIdB);
@@ -117,3 +120,6 @@ TEST_F(PerThreadProcTests, DispatchesPerThread) {
 
     dawnProcSetProcs(nullptr);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

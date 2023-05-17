@@ -18,6 +18,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr uint32_t kRTSize = 400;
 
 class IndexFormatTest : public DawnTest {
@@ -493,3 +496,6 @@ DAWN_INSTANTIATE_TEST(LineStripPrimitiveRestartTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

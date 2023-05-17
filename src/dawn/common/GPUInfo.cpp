@@ -21,7 +21,7 @@
 
 #include "dawn/common/Assert.h"
 
-namespace gpu_info {
+namespace dawn::gpu_info {
 namespace {
 // Intel
 // Referenced from the following Mesa source code:
@@ -105,4 +105,4 @@ bool IsSkylake(PCIDeviceID deviceId) {
     return std::find(Skylake.cbegin(), Skylake.cend(), deviceId) != Skylake.cend();
 }
 
-}  // namespace gpu_info
+}  // namespace dawn::gpu_info

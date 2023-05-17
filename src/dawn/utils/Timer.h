@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_UTILS_TIMER_H_
 #define SRC_DAWN_UTILS_TIMER_H_
 
-namespace utils {
+namespace dawn::utils {
 
 class Timer {
   public:
@@ -35,6 +35,6 @@ class Timer {
 
 Timer* CreateTimer();
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_TIMER_H_

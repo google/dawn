@@ -19,13 +19,15 @@
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr static wgpu::Extent3D kCopySize = {1, 1};
 constexpr static uint64_t kOffset = 0;
 constexpr static uint64_t kBytesPerRow = 256;
 constexpr static wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 constexpr static uint32_t kBytesPerBlock = 4;
 
-namespace {
 enum class Type { B2TCopy, T2BCopy };
 
 std::ostream& operator<<(std::ostream& o, Type copyType) {
@@ -48,7 +50,6 @@ DAWN_TEST_PARAM_STRUCT(RequiredBufferSizeInCopyTestsParams,
                        TextureDimension,
                        CopyDepth,
                        ExtraRowsPerImage);
-}  // namespace
 
 // Tests in this file are used to expose an error on D3D12 about required minimum buffer size.
 // See detailed bug reports at crbug.com/dawn/1278, 1288, 1289.
@@ -205,3 +206,6 @@ DAWN_INSTANTIATE_TEST_P(
     {wgpu::TextureDimension::e3D, wgpu::TextureDimension::e2D},
     {2u, 1u},
     {1u, 0u});
+
+}  // anonymous namespace
+}  // namespace dawn

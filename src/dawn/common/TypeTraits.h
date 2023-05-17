@@ -17,6 +17,8 @@
 
 #include <type_traits>
 
+namespace dawn {
+
 template <typename LHS, typename RHS = LHS, typename T = void>
 struct HasEqualityOperator {
     static constexpr const bool value = false;
@@ -42,5 +44,7 @@ struct IsCString {
 
     static constexpr const bool value = Eval();
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_TYPETRAITS_H_

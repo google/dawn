@@ -19,7 +19,7 @@
 
 #include "dawn/common/Compiler.h"
 
-namespace utils {
+namespace dawn::utils {
 
 /**
  * ScopedAutoreleasePool is a scoped class which initializes an NSAutoreleasePool on
@@ -36,7 +36,7 @@ namespace utils {
  * frame loop. Ex.)
  *   void frame() {
  *     // Any protocol objects will be reclaimed when this object falls out of scope.
- *     utils::ScopedAutoreleasePool pool;
+ *     dawn::utils::ScopedAutoreleasePool pool;
  *
  *     // do rendering ...
  *   }
@@ -56,6 +56,6 @@ class [[nodiscard]] ScopedAutoreleasePool {
     void* mPool = nullptr;
 };
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_SCOPEDAUTORELEASEPOOL_H_

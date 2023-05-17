@@ -21,6 +21,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class D3D11BufferTests : public DawnTest {
   protected:
     void SetUp() override {
@@ -38,8 +41,7 @@ class D3D11BufferTests : public DawnTest {
     }
 
     ID3D11Device* GetD3D11Device() {
-        return dawn::native::d3d11::ToBackend(dawn::native::FromAPI((device.Get())))
-            ->GetD3D11Device();
+        return native::d3d11::ToBackend(native::FromAPI((device.Get())))->GetD3D11Device();
     }
 
     template <typename T>
@@ -94,8 +96,8 @@ TEST_P(D3D11BufferTests, CreateUniformBuffer) {
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -104,8 +106,8 @@ TEST_P(D3D11BufferTests, CreateUniformBuffer) {
         wgpu::BufferUsage usage =
             wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -113,8 +115,8 @@ TEST_P(D3D11BufferTests, CreateUniformBuffer) {
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Vertex;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -122,8 +124,8 @@ TEST_P(D3D11BufferTests, CreateUniformBuffer) {
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Index;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -131,8 +133,8 @@ TEST_P(D3D11BufferTests, CreateUniformBuffer) {
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Indirect;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -140,8 +142,8 @@ TEST_P(D3D11BufferTests, CreateUniformBuffer) {
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -149,8 +151,8 @@ TEST_P(D3D11BufferTests, CreateUniformBuffer) {
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Storage;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_EQ(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -164,8 +166,8 @@ TEST_P(D3D11BufferTests, WriteUniformBuffer) {
         wgpu::BufferUsage usage =
             wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buffer = CreateBuffer(data.size(), usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -180,8 +182,8 @@ TEST_P(D3D11BufferTests, WriteUniformBuffer) {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Vertex |
                                   wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buffer = CreateBuffer(data.size(), usage);
-        dawn::native::d3d11::Buffer* d3d11Buffer =
-            dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+        native::d3d11::Buffer* d3d11Buffer =
+            native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
         EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
         EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -203,8 +205,7 @@ TEST_P(D3D11BufferTests, WriteUniformBufferWithComputeShader) {
     wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
                               wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer buffer = CreateBuffer(bufferSize, usage);
-    dawn::native::d3d11::Buffer* d3d11Buffer =
-        dawn::native::d3d11::ToBackend(dawn::native::FromAPI(buffer.Get()));
+    native::d3d11::Buffer* d3d11Buffer = native::d3d11::ToBackend(native::FromAPI(buffer.Get()));
 
     EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
     EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
@@ -310,3 +311,6 @@ TEST_P(D3D11BufferTests, WriteUniformBufferWithComputeShader) {
 }
 
 DAWN_INSTANTIATE_TEST(D3D11BufferTests, D3D11Backend());
+
+}  // anonymous namespace
+}  // namespace dawn

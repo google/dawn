@@ -20,7 +20,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/webgpu_cpp.h"
 
-namespace utils {
+namespace dawn::utils {
 
 // Primarily used by tests to easily set up the vertex buffer state portion of a RenderPipeline.
 class ComboVertexState {
@@ -59,6 +59,6 @@ class ComboRenderPipelineDescriptor : public wgpu::RenderPipelineDescriptor {
     wgpu::DepthStencilState cDepthStencil;
 };
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_COMBORENDERPIPELINEDESCRIPTOR_H_

@@ -18,6 +18,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class IndexBufferValidationTest : public ValidationTest {
   protected:
     wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format,
@@ -302,3 +305,6 @@ TEST_F(IndexBufferValidationTest, OffsetAlignment) {
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -369,8 +369,6 @@ constexpr uint32_t kCheckValues[] = {1,  2,  3,  4,   5,   6,   7,    8,     // 
                                      15, 31, 63, 127, 257, 511, 1023, 2047,  // misalignments
                                      17, 33, 65, 129, 257, 513, 1025, 2049};
 
-}  // namespace
-
 class CopySplitTest : public testing::TestWithParam<wgpu::TextureDimension> {
   protected:
     void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
@@ -526,4 +524,5 @@ INSTANTIATE_TEST_SUITE_P(,
                          CopySplitTest,
                          testing::Values(wgpu::TextureDimension::e2D, wgpu::TextureDimension::e3D));
 
+}  // anonymous namespace
 }  // namespace dawn::native::d3d12

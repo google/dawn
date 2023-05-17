@@ -20,7 +20,7 @@
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/UnderlyingType.h"
 
-namespace ityp {
+namespace dawn::ityp {
 
 // ityp::span is a helper class that wraps an unowned packed array of type |Value|.
 // It stores the size and pointer to first element. It has the restriction that
@@ -82,6 +82,6 @@ class span {
     Index mSize;
 };
 
-}  // namespace ityp
+}  // namespace dawn::ityp
 
 #endif  // SRC_DAWN_COMMON_ITYP_SPAN_H_

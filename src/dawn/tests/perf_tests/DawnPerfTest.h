@@ -20,7 +20,7 @@
 
 #include "dawn/tests/DawnTest.h"
 
-namespace utils {
+namespace dawn::utils {
 class Timer;
 }
 
@@ -108,7 +108,7 @@ class DawnPerfTestBase {
     unsigned int mStepsToRun = 0;
     unsigned int mNumStepsPerformed = 0;
     double mCpuTime;
-    std::unique_ptr<utils::Timer> mTimer;
+    std::unique_ptr<dawn::utils::Timer> mTimer;
 };
 
 template <typename Params = AdapterTestParam>

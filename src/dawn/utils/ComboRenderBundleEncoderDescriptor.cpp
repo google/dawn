@@ -16,7 +16,7 @@
 
 #include "dawn/utils/WGPUHelpers.h"
 
-namespace utils {
+namespace dawn::utils {
 
 ComboRenderBundleEncoderDescriptor::ComboRenderBundleEncoderDescriptor() {
     wgpu::RenderBundleEncoderDescriptor* descriptor = this;
@@ -25,4 +25,4 @@ ComboRenderBundleEncoderDescriptor::ComboRenderBundleEncoderDescriptor() {
     descriptor->colorFormats = &cColorFormats[0];
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

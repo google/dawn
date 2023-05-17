@@ -17,7 +17,7 @@
 
 #include "dawn/wire/Wire.h"
 
-namespace utils {
+namespace dawn::utils {
 
 class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
   public:
@@ -37,6 +37,6 @@ class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
     char mBuffer[1000000];
 };
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_TERRIBLECOMMANDBUFFER_H_

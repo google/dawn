@@ -30,7 +30,7 @@
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 
-namespace utils {
+namespace dawn::utils {
 
 namespace {
 
@@ -95,8 +95,8 @@ class WireHelperDirect : public WireHelper {
 class WireHelperProxy : public WireHelper {
   public:
     explicit WireHelperProxy(const char* wireTraceDir, const DawnProcTable& procs) {
-        mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
-        mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
+        mC2sBuf = std::make_unique<dawn::utils::TerribleCommandBuffer>();
+        mS2cBuf = std::make_unique<dawn::utils::TerribleCommandBuffer>();
 
         dawn::wire::WireServerDescriptor serverDesc = {};
         serverDesc.procs = &procs;
@@ -138,8 +138,8 @@ class WireHelperProxy : public WireHelper {
     bool FlushServer() override { return mS2cBuf->Flush(); }
 
   private:
-    std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
-    std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
+    std::unique_ptr<dawn::utils::TerribleCommandBuffer> mC2sBuf;
+    std::unique_ptr<dawn::utils::TerribleCommandBuffer> mS2cBuf;
     std::unique_ptr<WireServerTraceLayer> mWireServerTraceLayer;
     std::unique_ptr<dawn::wire::WireServer> mWireServer;
     std::unique_ptr<dawn::wire::WireClient> mWireClient;
@@ -161,4 +161,4 @@ WireHelper::~WireHelper() {
     dawnProcSetProcs(nullptr);
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

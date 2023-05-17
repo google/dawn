@@ -18,6 +18,7 @@
 #include "dawn/wire/WireServer.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::Mock;
 
@@ -115,4 +116,5 @@ TEST_F(WireInjectSwapChainTests, ReclaimSwapChainReservation) {
     }
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

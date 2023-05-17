@@ -24,7 +24,7 @@
 
 #include "dawn/platform/DawnPlatform.h"
 
-namespace utils {
+namespace dawn::utils {
 class Timer;
 }
 
@@ -80,7 +80,7 @@ class DawnPerfTestPlatform : public dawn::platform::Platform {
                            unsigned char flags) override;
 
     bool mRecordTraceEvents = false;
-    std::unique_ptr<utils::Timer> mTimer;
+    std::unique_ptr<dawn::utils::Timer> mTimer;
 
     // Trace event record.
     // Each uses their own trace event buffer, but the PerfTestPlatform owns all of them in

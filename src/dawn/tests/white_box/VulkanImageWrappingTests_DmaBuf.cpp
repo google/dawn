@@ -82,7 +82,7 @@ class ExternalTextureDmaBuf : public VulkanImageWrappingTestBackend::ExternalTex
 class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBackend {
   public:
     explicit VulkanImageWrappingTestBackendDmaBuf(const wgpu::Device& device) {
-        mDeviceVk = dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get()));
+        mDeviceVk = native::vulkan::ToBackend(native::FromAPI(device.Get()));
     }
 
     ~VulkanImageWrappingTestBackendDmaBuf() {
@@ -139,7 +139,7 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
         descriptorDmaBuf.drmModifier = textureDmaBuf->drmModifier;
 
         return wgpu::Texture::Acquire(
-            dawn::native::vulkan::WrapVulkanImage(device.Get(), &descriptorDmaBuf));
+            native::vulkan::WrapVulkanImage(device.Get(), &descriptorDmaBuf));
     }
 
     bool ExportImage(const wgpu::Texture& texture,
@@ -196,7 +196,7 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
     }
 
     gbm_device* mGbmDevice = nullptr;
-    dawn::native::vulkan::Device* mDeviceVk;
+    native::vulkan::Device* mDeviceVk;
 };
 
 // static

@@ -17,7 +17,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 class ExternalTextureTest : public ValidationTest {
   public:
     wgpu::TextureDescriptor CreateTextureDescriptor(
@@ -641,4 +643,5 @@ TEST_F(ExternalTextureTest, SubmitExternalTextureWithDestroyedPlane) {
     }
 }
 
-}  // namespace
+}  // anonymous namespace
+}  // namespace dawn

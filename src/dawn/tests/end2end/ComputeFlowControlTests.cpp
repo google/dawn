@@ -18,6 +18,9 @@
 
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 // Tests flow control in WGSL shaders. This helps to identify bugs either in Tint's WGSL
 // compilation, or driver shader compilation.
 class ComputeFlowControlTests : public DawnTest {
@@ -506,3 +509,6 @@ DAWN_INSTANTIATE_TEST(ComputeFlowControlTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

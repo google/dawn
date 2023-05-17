@@ -41,14 +41,14 @@ void initBuffers() {
         1,
         2,
     };
-    indexBuffer =
-        utils::CreateBufferFromData(device, indexData, sizeof(indexData), wgpu::BufferUsage::Index);
+    indexBuffer = dawn::utils::CreateBufferFromData(device, indexData, sizeof(indexData),
+                                                    wgpu::BufferUsage::Index);
 
     static const float vertexData[12] = {
         0.0f, 0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData),
-                                               wgpu::BufferUsage::Vertex);
+    vertexBuffer = dawn::utils::CreateBufferFromData(device, vertexData, sizeof(vertexData),
+                                                     wgpu::BufferUsage::Vertex);
 }
 
 void initTextures() {
@@ -71,11 +71,12 @@ void initTextures() {
         data[i] = static_cast<uint8_t>(i % 253);
     }
 
-    wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
+    wgpu::Buffer stagingBuffer = dawn::utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
     wgpu::ImageCopyBuffer imageCopyBuffer =
-        utils::CreateImageCopyBuffer(stagingBuffer, 0, 4 * 1024);
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+        dawn::utils::CreateImageCopyBuffer(stagingBuffer, 0, 4 * 1024);
+    wgpu::ImageCopyTexture imageCopyTexture =
+        dawn::utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {1024, 1024, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -94,13 +95,13 @@ void init() {
     initBuffers();
     initTextures();
 
-    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+    wgpu::ShaderModule vsModule = dawn::utils::CreateShaderModule(device, R"(
         @vertex fn main(@location(0) pos : vec4f)
                             -> @builtin(position) vec4f {
             return pos;
         })");
 
-    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+    wgpu::ShaderModule fsModule = dawn::utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var mySampler: sampler;
         @group(0) @binding(1) var myTexture : texture_2d<f32>;
 
@@ -109,18 +110,18 @@ void init() {
             return textureSample(myTexture, mySampler, FragCoord.xy / vec2f(640.0, 480.0));
         })");
 
-    auto bgl = utils::MakeBindGroupLayout(
+    auto bgl = dawn::utils::MakeBindGroupLayout(
         device, {
                     {0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float},
                 });
 
-    wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout pl = dawn::utils::MakeBasicPipelineLayout(device, &bgl);
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 
-    utils::ComboRenderPipelineDescriptor descriptor;
-    descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    dawn::utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.layout = dawn::utils::MakeBasicPipelineLayout(device, &bgl);
     descriptor.vertex.module = vsModule;
     descriptor.vertex.bufferCount = 1;
     descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
@@ -134,7 +135,7 @@ void init() {
 
     wgpu::TextureView view = texture.CreateView();
 
-    bindGroup = utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, view}});
+    bindGroup = dawn::utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, view}});
 }
 
 struct {
@@ -149,7 +150,7 @@ void frame() {
     }
 
     wgpu::TextureView backbufferView = swapchain.GetCurrentTextureView();
-    utils::ComboRenderPassDescriptor renderPass({backbufferView}, depthStencilView);
+    dawn::utils::ComboRenderPassDescriptor renderPass({backbufferView}, depthStencilView);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
@@ -175,9 +176,9 @@ int main(int argc, const char* argv[]) {
     init();
 
     while (!ShouldQuit()) {
-        utils::ScopedAutoreleasePool pool;
+        dawn::utils::ScopedAutoreleasePool pool;
         ProcessEvents();
         frame();
-        utils::USleep(16000);
+        dawn::utils::USleep(16000);
     }
 }

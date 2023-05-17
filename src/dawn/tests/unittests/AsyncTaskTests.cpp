@@ -14,7 +14,7 @@
 
 //
 // AsyncTaskTests:
-//     Simple tests for dawn::native::AsyncTask and dawn::native::AsnycTaskManager.
+//     Simple tests for native::AsyncTask and native::AsnycTaskManager.
 
 #include <memory>
 #include <mutex>
@@ -27,6 +27,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
 namespace {
 
 struct SimpleTaskResult {
@@ -61,22 +62,20 @@ void DoTask(ConcurrentTaskResultQueue* resultQueue, uint32_t id) {
     resultQueue->AddResult(std::move(result));
 }
 
-}  // anonymous namespace
-
 class AsyncTaskTest : public testing::Test {};
 
 // Emulate the basic usage of worker thread pool in Create*PipelineAsync().
 TEST_F(AsyncTaskTest, Basic) {
-    dawn::platform::Platform platform;
-    std::unique_ptr<dawn::platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
+    platform::Platform platform;
+    std::unique_ptr<platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
 
-    dawn::native::AsyncTaskManager taskManager(pool.get());
+    native::AsyncTaskManager taskManager(pool.get());
     ConcurrentTaskResultQueue taskResultQueue;
 
     constexpr size_t kTaskCount = 4u;
     std::set<uint32_t> idset;
     for (uint32_t i = 0; i < kTaskCount; ++i) {
-        dawn::native::AsyncTask asyncTask([&taskResultQueue, i] { DoTask(&taskResultQueue, i); });
+        native::AsyncTask asyncTask([&taskResultQueue, i] { DoTask(&taskResultQueue, i); });
         taskManager.PostTask(std::move(asyncTask));
         idset.insert(i);
     }
@@ -90,3 +89,6 @@ TEST_F(AsyncTaskTest, Basic) {
     }
     ASSERT_TRUE(idset.empty());
 }
+
+}  // anonymous namespace
+}  // namespace dawn

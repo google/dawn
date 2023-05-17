@@ -19,6 +19,8 @@
 
 #include "dawn/common/RefBase.h"
 
+namespace dawn {
+
 template <typename T>
 struct IOKitRefTraits {
     static constexpr T kNullValue = IO_OBJECT_NULL;
@@ -38,5 +40,7 @@ IORef<T> AcquireIORef(T pointee) {
     ref.Acquire(pointee);
     return ref;
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_IOKITREF_H_

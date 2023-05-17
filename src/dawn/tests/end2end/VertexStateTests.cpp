@@ -20,6 +20,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 using wgpu::VertexFormat;
 using wgpu::VertexStepMode;
 
@@ -698,3 +701,6 @@ DAWN_INSTANTIATE_TEST(OptionalVertexStateTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -22,6 +22,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 // Helper for replacing all occurrences of substr in str with replacement
@@ -594,9 +595,9 @@ fn main() {
 })";
 
     // https://www.w3.org/TR/WGSL/#alignment-and-size
-    // Structure size: roundUp(AlignOf(S), OffsetOf(S, L) + SizeOf(S, L))
+    // Structure size: RoundUp(AlignOf(S), OffsetOf(S, L) + SizeOf(S, L))
     // https://www.w3.org/TR/WGSL/#storage-class-constraints
-    // RequiredAlignOf(S, uniform): roundUp(16, max(AlignOf(T0), ..., AlignOf(TN)))
+    // RequiredAlignOf(S, uniform): RoundUp(16, max(AlignOf(T0), ..., AlignOf(TN)))
     uint32_t dataAlign = isUniform ? std::max(size_t(16u), field.GetAlign()) : field.GetAlign();
 
     // https://www.w3.org/TR/WGSL/#structure-layout-rules
@@ -1152,4 +1153,5 @@ INSTANTIATE_TEST_SUITE_P(,
                          DawnTestBase::PrintToStringParamName("ComputeLayoutMemoryBufferTests"));
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ComputeLayoutMemoryBufferTests);
 
-}  // namespace
+}  // anonymous namespace
+}  // namespace dawn

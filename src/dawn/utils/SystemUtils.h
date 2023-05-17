@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_UTILS_SYSTEMUTILS_H_
 #define SRC_DAWN_UTILS_SYSTEMUTILS_H_
 
-namespace utils {
+namespace dawn::utils {
 
 void USleep(unsigned int usecs);
 }

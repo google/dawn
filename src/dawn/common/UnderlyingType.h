@@ -17,6 +17,8 @@
 
 #include <type_traits>
 
+namespace dawn {
+
 // UnderlyingType is similar to std::underlying_type_t. It is a passthrough for already
 // integer types which simplifies getting the underlying primitive type for an arbitrary
 // template parameter. It includes a specialization for detail::TypedIntegerImpl which yields
@@ -47,5 +49,7 @@ struct UnderlyingTypeImpl<TypedIntegerImpl<Tag, I>> {
 
 template <typename T>
 using UnderlyingType = typename detail::UnderlyingTypeImpl<T>::type;
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_UNDERLYINGTYPE_H_

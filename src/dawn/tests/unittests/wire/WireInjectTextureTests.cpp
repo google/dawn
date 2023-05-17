@@ -18,6 +18,7 @@
 #include "dawn/wire/WireServer.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::Mock;
 using testing::Return;
@@ -181,4 +182,5 @@ TEST_F(WireInjectTextureTests, ReservedTextureReflection) {
     ASSERT_EQ(desc.sampleCount, wgpuTextureGetSampleCount(texture));
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

@@ -18,6 +18,9 @@
 #include "dawn/common/ityp_bitset.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 // This is ANGLE's BitSetIterator_unittests.cpp file.
 
 class BitSetIteratorTest : public testing::Test {
@@ -218,3 +221,6 @@ TEST_F(ITypBitsetIteratorTest, NonLValueBitset) {
 
     EXPECT_EQ((mStateBits & otherBits).count(), seenBits.size());
 }
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -18,6 +18,9 @@
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class SetViewportTest : public ValidationTest {
   protected:
     void TestViewportCall(bool success,
@@ -256,3 +259,6 @@ TEST_F(SetStencilReferenceTest, AllBitsAllowed) {
     }
     encoder.Finish();
 }
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -23,6 +23,9 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 // The helper struct to configure the copies between buffers and textures.
 struct CopyConfig {
     wgpu::TextureDescriptor textureDescriptor;
@@ -34,10 +37,8 @@ struct CopyConfig {
     uint32_t rowsPerImage = wgpu::kCopyStrideUndefined;
 };
 
-namespace {
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(CompressedTextureFormatTestParams, TextureFormat);
-}  // namespace
 
 class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureFormatTestParams> {
   protected:
@@ -1324,3 +1325,6 @@ DAWN_INSTANTIATE_TEST_P(CompressedTextureWriteTextureTest,
                          OpenGLESBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kCompressedFormats.begin(),
                                                          utils::kCompressedFormats.end()));
+
+}  // anonymous namespace
+}  // namespace dawn

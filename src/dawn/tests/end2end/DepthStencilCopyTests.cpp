@@ -25,7 +25,9 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(DepthStencilCopyTestParams, TextureFormat);
 
@@ -38,7 +40,6 @@ constexpr std::array<wgpu::TextureFormat, 3> kValidDepthCopyTextureFormats = {
 constexpr std::array<wgpu::TextureFormat, 1> kValidDepthCopyFromBufferFormats = {
     wgpu::TextureFormat::Depth16Unorm,
 };
-}  // namespace
 
 class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestParams> {
   protected:
@@ -1093,3 +1094,6 @@ DAWN_INSTANTIATE_TEST_P(
     std::vector<wgpu::TextureFormat>{wgpu::TextureFormat::Depth16Unorm,
                                      wgpu::TextureFormat::Depth32FloatStencil8,
                                      wgpu::TextureFormat::Depth24Plus});
+
+}  // anonymous namespace
+}  // namespace dawn

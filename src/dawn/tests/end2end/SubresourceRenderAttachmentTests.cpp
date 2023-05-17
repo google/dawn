@@ -19,6 +19,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 // Test that rendering to a subresource of a texture works.
 class SubresourceRenderAttachmentTest : public DawnTest {
     constexpr static uint32_t kRTSize = 2;
@@ -178,3 +181,6 @@ DAWN_INSTANTIATE_TEST(SubresourceRenderAttachmentTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

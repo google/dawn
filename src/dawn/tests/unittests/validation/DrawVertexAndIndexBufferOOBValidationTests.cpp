@@ -19,7 +19,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 constexpr uint32_t kRTSize = 4;
 constexpr uint32_t kFloat32x2Stride = 2 * sizeof(float);
 constexpr uint32_t kFloat32x4Stride = 4 * sizeof(float);
@@ -1005,3 +1007,4 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, SetBufferMultipleTime) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn

@@ -25,14 +25,14 @@
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/native/MetalBackend.h"
 
+namespace dawn {
 namespace {
+
 void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {
     CFNumberRef number(CFNumberCreate(nullptr, kCFNumberSInt32Type, &value));
     CFDictionaryAddValue(dictionary, key, number);
     CFRelease(number);
 }
-
-}  // anonymous namespace
 
 class PlatformTextureIOSurface : public VideoViewsTestBackend::PlatformTexture {
   public:
@@ -158,14 +158,14 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;
         textureDesc.nextInChain = &internalDesc;
 
-        dawn::native::metal::ExternalImageDescriptorIOSurface descriptor = {};
+        native::metal::ExternalImageDescriptorIOSurface descriptor = {};
         descriptor.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
         descriptor.isInitialized = true;
         descriptor.ioSurface = surface;
 
         return std::make_unique<PlatformTextureIOSurface>(
-            wgpu::Texture::Acquire(dawn::native::metal::WrapIOSurface(mWGPUDevice, &descriptor)),
+            wgpu::Texture::Acquire(native::metal::WrapIOSurface(mWGPUDevice, &descriptor)),
             surface);
     }
 
@@ -174,6 +174,8 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
 
     WGPUDevice mWGPUDevice = nullptr;
 };
+
+}  // anonymous namespace
 
 // static
 BackendTestConfig VideoViewsTestBackend::Backend() {
@@ -184,3 +186,5 @@ BackendTestConfig VideoViewsTestBackend::Backend() {
 std::unique_ptr<VideoViewsTestBackend> VideoViewsTestBackend::Create() {
     return std::make_unique<VideoViewsTestBackendIOSurface>();
 }
+
+}  // namespace dawn

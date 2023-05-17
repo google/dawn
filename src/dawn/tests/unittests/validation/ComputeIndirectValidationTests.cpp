@@ -17,6 +17,9 @@
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ComputeIndirectValidationTest : public ValidationTest {
   protected:
     void SetUp() override {
@@ -95,3 +98,6 @@ TEST_F(ComputeIndirectValidationTest, IndirectUsage) {
     // Error case: using a buffer with the vertex usage is an error.
     TestIndirectOffset(utils::Expectation::Failure, {1, 2, 3}, 0, wgpu::BufferUsage::Vertex);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

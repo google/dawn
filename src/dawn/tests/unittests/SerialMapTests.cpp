@@ -19,6 +19,9 @@
 #include "dawn/common/TypedInteger.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 using TestSerialMap = SerialMap<uint64_t, int>;
 
 // A number of basic tests for SerialMap that are difficult to split from one another
@@ -183,3 +186,6 @@ TEST(SerialMap, TypedInteger) {
     }
     ASSERT_TRUE(expectedValues.empty());
 }
+
+}  // anonymous namespace
+}  // namespace dawn

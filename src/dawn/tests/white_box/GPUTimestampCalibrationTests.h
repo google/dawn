@@ -17,6 +17,8 @@
 
 #include <memory>
 
+namespace dawn {
+
 class GPUTimestampCalibrationTestBackend {
   public:
     static std::unique_ptr<GPUTimestampCalibrationTestBackend> Create(const wgpu::Device& device);
@@ -26,5 +28,7 @@ class GPUTimestampCalibrationTestBackend {
     virtual void GetTimestampCalibration(uint64_t* gpuTimestamp, uint64_t* cpuTimestamp) = 0;
     virtual float GetTimestampPeriod() const = 0;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_TESTS_WHITE_BOX_GPUTIMESTAMPCALIBRATIONTESTS_H_

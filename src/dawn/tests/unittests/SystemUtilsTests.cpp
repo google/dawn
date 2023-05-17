@@ -19,6 +19,9 @@
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 using ::testing::_;
 using ::testing::Pair;
 
@@ -116,3 +119,6 @@ TEST(SystemUtilsTests, ScopedEnvironmentVarRestoresNotSet) {
     }
     EXPECT_THAT(GetEnvironmentVar("ScopedEnvironmentVarForTest"), Pair("", false));
 }
+
+}  // anonymous namespace
+}  // namespace dawn

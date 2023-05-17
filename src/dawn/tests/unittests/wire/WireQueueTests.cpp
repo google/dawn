@@ -18,6 +18,7 @@
 #include "dawn/wire/WireClient.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::InvokeWithoutArgs;
@@ -197,4 +198,5 @@ TEST_F(WireQueueTests, DeviceThenDefaultQueueReleased) {
 // since it is always destructed after the test TearDown, and we cannot create a new queue obj
 // with wgpuDeviceGetQueue
 
+}  // anonymous namespace
 }  // namespace dawn::wire

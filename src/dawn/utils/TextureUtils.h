@@ -21,7 +21,7 @@
 
 #include "dawn/common/Assert.h"
 
-namespace utils {
+namespace dawn::utils {
 static constexpr std::array<wgpu::TextureFormat, 94> kAllTextureFormats = {
     wgpu::TextureFormat::R8Unorm,
     wgpu::TextureFormat::R8Snorm,
@@ -242,6 +242,6 @@ const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat);
 uint32_t GetWGSLRenderableColorTextureComponentCount(wgpu::TextureFormat textureFormat);
 
 wgpu::TextureDimension ViewDimensionToTextureDimension(const wgpu::TextureViewDimension dimension);
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_TEXTUREUTILS_H_

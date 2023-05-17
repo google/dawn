@@ -18,14 +18,13 @@
 #include "dawn/wire/WireClient.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::InvokeWithoutArgs;
 using testing::Mock;
 using testing::Return;
 using testing::StrictMock;
-
-namespace {
 
 // Mock class to add expectations on the wire calling callbacks
 class MockCompilationInfoCallback {
@@ -43,8 +42,6 @@ void ToMockGetCompilationInfoCallback(WGPUCompilationInfoRequestStatus status,
                                       void* userdata) {
     mockCompilationInfoCallback->Call(status, info, userdata);
 }
-
-}  // anonymous namespace
 
 class WireShaderModuleTests : public WireTest {
   public:
@@ -239,4 +236,5 @@ TEST_F(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDestruction)
     wgpuShaderModuleRelease(shaderModule);
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

@@ -22,6 +22,8 @@
 #include "dawn/common/Math.h"
 #include "dawn/common/UnderlyingType.h"
 
+namespace dawn {
+
 // This is ANGLE's BitSetIterator class with a customizable return type.
 // Types have been updated to be more specific.
 // TODO(crbug.com/dawn/306): it could be optimized, in particular when N <= 64
@@ -130,5 +132,7 @@ template <size_t N>
 BitSetIterator<N, uint32_t> IterateBitSet(const std::bitset<N>& bitset) {
     return BitSetIterator<N, uint32_t>(bitset);
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_BITSETITERATOR_H_

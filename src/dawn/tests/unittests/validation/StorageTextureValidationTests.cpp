@@ -20,6 +20,9 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class StorageTextureValidationTests : public ValidationTest {
   protected:
     void SetUp() override {
@@ -269,7 +272,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
 
 class BGRA8UnormStorageTextureInShaderValidationTests : public StorageTextureValidationTests {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
         descriptor.requiredFeatures = requiredFeatures;
@@ -427,7 +430,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroupLayout) {
 
 class BGRA8UnormStorageBindGroupLayoutTest : public StorageTextureValidationTests {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
         descriptor.requiredFeatures = requiredFeatures;
@@ -857,3 +860,6 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComput
         encoder.Finish();
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

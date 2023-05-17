@@ -18,6 +18,9 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr static std::initializer_list<uint32_t> kSentinelData{0, 0, 0};
 
 class ComputeDispatchTests : public DawnTest {
@@ -319,3 +322,6 @@ DAWN_INSTANTIATE_TEST(ComputeDispatchTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

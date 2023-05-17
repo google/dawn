@@ -21,6 +21,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 class RenderPassDescriptorValidationTest : public ValidationTest {
@@ -1529,3 +1530,4 @@ TEST_F(RenderPassDescriptorValidationTest, RenderPassColorAttachmentBytesPerSamp
 // TODO(cwallez@chromium.org): Constraints on attachment aliasing?
 
 }  // anonymous namespace
+}  // namespace dawn

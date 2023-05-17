@@ -24,6 +24,7 @@
 #include "dawn/utils/TerribleCommandBuffer.h"
 #include "dawn/wire/WireClient.h"
 
+namespace dawn {
 namespace {
 
 // dawn_wire and dawn_native contain duplicated code for the handling of GetProcAddress
@@ -55,28 +56,28 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
   public:
     GetProcAddressTests()
         : testing::TestWithParam<DawnFlavor>(),
-          mNativeInstance(dawn::native::InstanceBase::Create()),
-          mAdapterBase(AcquireRef(new dawn::native::null::PhysicalDevice(mNativeInstance.Get())),
-                       dawn::native::FeatureLevel::Core) {}
+          mNativeInstance(native::InstanceBase::Create()),
+          mAdapterBase(AcquireRef(new native::null::PhysicalDevice(mNativeInstance.Get())),
+                       native::FeatureLevel::Core) {}
 
     void SetUp() override {
         switch (GetParam()) {
             case DawnFlavor::Native: {
                 mDevice = wgpu::Device::Acquire(
                     reinterpret_cast<WGPUDevice>(mAdapterBase.APICreateDevice()));
-                mProcs = dawn::native::GetProcs();
+                mProcs = native::GetProcs();
                 break;
             }
 
             case DawnFlavor::Wire: {
                 mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
 
-                dawn::wire::WireClientDescriptor clientDesc = {};
+                wire::WireClientDescriptor clientDesc = {};
                 clientDesc.serializer = mC2sBuf.get();
-                mWireClient = std::make_unique<dawn::wire::WireClient>(clientDesc);
+                mWireClient = std::make_unique<wire::WireClient>(clientDesc);
 
                 mDevice = wgpu::Device::Acquire(mWireClient->ReserveDevice().device);
-                mProcs = dawn::wire::client::GetProcs();
+                mProcs = wire::client::GetProcs();
                 break;
             }
 
@@ -94,11 +95,11 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
     }
 
   protected:
-    Ref<dawn::native::InstanceBase> mNativeInstance;
-    dawn::native::AdapterBase mAdapterBase;
+    Ref<native::InstanceBase> mNativeInstance;
+    native::AdapterBase mAdapterBase;
 
     std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
-    std::unique_ptr<dawn::wire::WireClient> mWireClient;
+    std::unique_ptr<wire::WireClient> mWireClient;
 
     wgpu::Device mDevice;
     DawnProcTable mProcs;
@@ -159,16 +160,18 @@ INSTANTIATE_TEST_SUITE_P(,
                          testing::PrintToStringParamName());
 
 TEST(GetProcAddressInternalTests, CheckDawnNativeProcMapOrder) {
-    std::vector<const char*> names = dawn::native::GetProcMapNamesForTesting();
+    std::vector<const char*> names = native::GetProcMapNamesForTesting();
     for (size_t i = 1; i < names.size(); i++) {
         ASSERT_LT(std::string(names[i - 1]), std::string(names[i]));
     }
 }
 
 TEST(GetProcAddressInternalTests, CheckDawnWireClientProcMapOrder) {
-    std::vector<const char*> names = dawn::wire::client::GetProcMapNamesForTesting();
+    std::vector<const char*> names = wire::client::GetProcMapNamesForTesting();
     for (size_t i = 1; i < names.size(); i++) {
         ASSERT_LT(std::string(names[i - 1]), std::string(names[i]));
     }
 }
+
 }  // anonymous namespace
+}  // namespace dawn

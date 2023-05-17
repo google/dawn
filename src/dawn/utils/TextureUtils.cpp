@@ -14,7 +14,7 @@
 
 #include "dawn/utils/TextureUtils.h"
 
-namespace utils {
+namespace dawn::utils {
 bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format) {
     switch (format) {
         case wgpu::TextureFormat::R32Uint:
@@ -740,4 +740,4 @@ wgpu::TextureDimension ViewDimensionToTextureDimension(const wgpu::TextureViewDi
     }
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

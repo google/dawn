@@ -25,6 +25,8 @@
 
 #include "dawn/common/Assert.h"
 
+namespace dawn {
+
 // The following are not valid for 0
 uint32_t ScanForward(uint32_t bits);
 uint32_t Log2(uint32_t value);
@@ -124,5 +126,7 @@ constexpr bool IsSubset(T1 subset, T2 set) {
     T2 bitsAlsoInSet = subset & set;
     return bitsAlsoInSet == subset;
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_MATH_H_

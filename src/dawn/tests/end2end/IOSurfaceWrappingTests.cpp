@@ -26,6 +26,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {
@@ -96,16 +97,14 @@ class IOSurfaceTestBase : public DawnTest {
     wgpu::Texture WrapIOSurface(const wgpu::TextureDescriptor* descriptor,
                                 IOSurfaceRef ioSurface,
                                 bool isInitialized = true) {
-        dawn::native::metal::ExternalImageDescriptorIOSurface externDesc;
+        native::metal::ExternalImageDescriptorIOSurface externDesc;
         externDesc.cTextureDescriptor = reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
         externDesc.ioSurface = ioSurface;
         externDesc.isInitialized = isInitialized;
-        WGPUTexture texture = dawn::native::metal::WrapIOSurface(device.Get(), &externDesc);
+        WGPUTexture texture = native::metal::WrapIOSurface(device.Get(), &externDesc);
         return wgpu::Texture::Acquire(texture);
     }
 };
-
-}  // anonymous namespace
 
 // A small fixture used to initialize default data for the IOSurface validation tests.
 // These tests are skipped if the harness is using the wire.
@@ -369,7 +368,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         queue.Submit(1, &commands);
 
         // Wait for the commands touching the IOSurface to be scheduled
-        dawn::native::metal::WaitForCommandsToBeScheduled(device.Get());
+        native::metal::WaitForCommandsToBeScheduled(device.Get());
 
         // Check the correct data was written
         IOSurfaceLock(ioSurface, kIOSurfaceLockReadOnly, nullptr);
@@ -481,8 +480,8 @@ TEST_P(IOSurfaceUsageTests, UninitializedTextureIsCleared) {
     wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), false);
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 0, 0, 0), ioSurfaceTexture, 0, 0);
 
-    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
-    dawn::native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
+    native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
+    native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
     EXPECT_TRUE(endAccessDesc.isInitialized);
 }
 
@@ -517,8 +516,8 @@ TEST_P(IOSurfaceUsageTests, UninitializedOnEndAccess) {
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
-    dawn::native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
+    native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
+    native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
     EXPECT_FALSE(endAccessDesc.isInitialized);
 }
 
@@ -548,14 +547,14 @@ TEST_P(IOSurfaceUsageTests, WriteThenConcurrentReadThenWrite) {
     textureDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
 
     // Wrap ioSurface
-    dawn::native::metal::ExternalImageDescriptorIOSurface writeExternDesc;
+    native::metal::ExternalImageDescriptorIOSurface writeExternDesc;
     writeExternDesc.cTextureDescriptor =
         reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
     writeExternDesc.ioSurface = ioSurface.get();
     writeExternDesc.isInitialized = true;
 
-    wgpu::Texture writeTexture = wgpu::Texture::Acquire(
-        dawn::native::metal::WrapIOSurface(writeDevice.Get(), &writeExternDesc));
+    wgpu::Texture writeTexture =
+        wgpu::Texture::Acquire(native::metal::WrapIOSurface(writeDevice.Get(), &writeExternDesc));
 
     // Clear the texture to green.
     {
@@ -568,11 +567,11 @@ TEST_P(IOSurfaceUsageTests, WriteThenConcurrentReadThenWrite) {
     }
 
     // End access.
-    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endWriteAccessDesc;
-    dawn::native::metal::IOSurfaceEndAccess(writeTexture.Get(), &endWriteAccessDesc);
+    native::metal::ExternalImageIOSurfaceEndAccessDescriptor endWriteAccessDesc;
+    native::metal::IOSurfaceEndAccess(writeTexture.Get(), &endWriteAccessDesc);
     EXPECT_TRUE(endWriteAccessDesc.isInitialized);
 
-    dawn::native::metal::ExternalImageDescriptorIOSurface externDesc;
+    native::metal::ExternalImageDescriptorIOSurface externDesc;
     externDesc.cTextureDescriptor = reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
     externDesc.ioSurface = ioSurface.get();
     externDesc.isInitialized = true;
@@ -581,28 +580,28 @@ TEST_P(IOSurfaceUsageTests, WriteThenConcurrentReadThenWrite) {
 
     // Wrap on two separate devices to read it.
     wgpu::Texture readTexture1 =
-        wgpu::Texture::Acquire(dawn::native::metal::WrapIOSurface(readDevice1.Get(), &externDesc));
+        wgpu::Texture::Acquire(native::metal::WrapIOSurface(readDevice1.Get(), &externDesc));
     wgpu::Texture readTexture2 =
-        wgpu::Texture::Acquire(dawn::native::metal::WrapIOSurface(readDevice2.Get(), &externDesc));
+        wgpu::Texture::Acquire(native::metal::WrapIOSurface(readDevice2.Get(), &externDesc));
 
     // Expect the texture to be green
     EXPECT_TEXTURE_EQ(readDevice1, utils::RGBA8(0, 255, 0, 255), readTexture1, {0, 0});
     EXPECT_TEXTURE_EQ(readDevice2, utils::RGBA8(0, 255, 0, 255), readTexture2, {0, 0});
 
     // End access on both read textures.
-    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endReadAccessDesc1;
-    dawn::native::metal::IOSurfaceEndAccess(readTexture1.Get(), &endReadAccessDesc1);
+    native::metal::ExternalImageIOSurfaceEndAccessDescriptor endReadAccessDesc1;
+    native::metal::IOSurfaceEndAccess(readTexture1.Get(), &endReadAccessDesc1);
     EXPECT_TRUE(endReadAccessDesc1.isInitialized);
 
-    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endReadAccessDesc2;
-    dawn::native::metal::IOSurfaceEndAccess(readTexture2.Get(), &endReadAccessDesc2);
+    native::metal::ExternalImageIOSurfaceEndAccessDescriptor endReadAccessDesc2;
+    native::metal::IOSurfaceEndAccess(readTexture2.Get(), &endReadAccessDesc2);
     EXPECT_TRUE(endReadAccessDesc2.isInitialized);
 
     // Import again for writing. It should not race with the previous reads.
     writeExternDesc.waitEvents = {endReadAccessDesc1, endReadAccessDesc2};
     writeExternDesc.isInitialized = true;
-    writeTexture = wgpu::Texture::Acquire(
-        dawn::native::metal::WrapIOSurface(writeDevice.Get(), &writeExternDesc));
+    writeTexture =
+        wgpu::Texture::Acquire(native::metal::WrapIOSurface(writeDevice.Get(), &writeExternDesc));
 
     // Clear the texture to blue.
     {
@@ -615,7 +614,7 @@ TEST_P(IOSurfaceUsageTests, WriteThenConcurrentReadThenWrite) {
     }
     // Finally, expect the contents to be blue now.
     EXPECT_TEXTURE_EQ(writeDevice, utils::RGBA8(0, 0, 255, 255), writeTexture, {0, 0});
-    dawn::native::metal::IOSurfaceEndAccess(writeTexture.Get(), &endWriteAccessDesc);
+    native::metal::IOSurfaceEndAccess(writeTexture.Get(), &endWriteAccessDesc);
     EXPECT_TRUE(endWriteAccessDesc.isInitialized);
 }
 
@@ -662,8 +661,8 @@ TEST_P(IOSurfaceMultithreadTests, UninitializedTexturesAreCleared_OnMultipleThre
         wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), false);
         EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 0, 0, 0), ioSurfaceTexture, 0, 0);
 
-        dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
-        dawn::native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
+        native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
+        native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
         EXPECT_TRUE(endAccessDesc.isInitialized);
     });
 }
@@ -683,3 +682,6 @@ DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend());
 DAWN_INSTANTIATE_TEST(IOSurfaceTransientAttachmentValidationTests, MetalBackend());
 DAWN_INSTANTIATE_TEST(IOSurfaceUsageTests, MetalBackend());
 DAWN_INSTANTIATE_TEST(IOSurfaceMultithreadTests, MetalBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

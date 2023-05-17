@@ -22,6 +22,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class BindGroupValidationTest : public ValidationTest {
   public:
     wgpu::Texture CreateTexture(wgpu::TextureUsage usage,
@@ -79,7 +82,7 @@ class BindGroupValidationTest : public ValidationTest {
         return desc;
     }
 
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
@@ -3070,3 +3073,6 @@ TEST_F(SamplerTypeBindingTest, SamplerAndBindGroupMatches) {
         utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler()}});
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

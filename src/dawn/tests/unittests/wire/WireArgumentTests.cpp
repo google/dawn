@@ -19,6 +19,7 @@
 #include "dawn/tests/unittests/wire/WireTest.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::Return;
@@ -369,4 +370,5 @@ TEST_F(WireArgumentTests, DISABLED_NullptrInArray) {
     FlushClient();
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

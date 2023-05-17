@@ -18,6 +18,8 @@
 
 #include "dawn/common/windows_with_undefs.h"
 
+namespace dawn {
+
 std::string WCharToUTF8(const wchar_t* input) {
     // The -1 argument asks WideCharToMultiByte to use the null terminator to know the size of
     // input. It will return a size that includes the null terminator.
@@ -41,3 +43,5 @@ std::wstring UTF8ToWStr(const char* input) {
 
     return result;
 }
+
+}  // namespace dawn

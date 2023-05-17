@@ -20,7 +20,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(DepthStencilSamplingTestParams, TextureFormat);
 
@@ -39,8 +41,6 @@ const std::vector<float> kNormalizedTextureValues = {0.0, 0.3, 0.4, 0.5, 1.0};
 
 // Test the limits, and some values in between.
 const std::vector<uint32_t> kStencilValues = {0, 1, 38, 255};
-
-}  // anonymous namespace
 
 class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingTestParams> {
   protected:
@@ -938,3 +938,6 @@ DAWN_INSTANTIATE_TEST_P(StencilSamplingTest,
                          OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));
+
+}  // anonymous namespace
+}  // namespace dawn

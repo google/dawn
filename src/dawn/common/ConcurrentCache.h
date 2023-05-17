@@ -21,6 +21,8 @@
 
 #include "dawn/common/NonCopyable.h"
 
+namespace dawn {
+
 template <typename T>
 class ConcurrentCache : public NonMovable {
   public:
@@ -50,5 +52,7 @@ class ConcurrentCache : public NonMovable {
     std::mutex mMutex;
     std::unordered_set<T*, typename T::HashFunc, typename T::EqualityFunc> mCache;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_CONCURRENTCACHE_H_

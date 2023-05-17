@@ -19,6 +19,7 @@
 #include "dawn/wire/WireClient.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::Exactly;
@@ -28,11 +29,7 @@ using testing::Return;
 using testing::Sequence;
 using testing::StrEq;
 
-namespace {
-
 class WireDisconnectTests : public WireTest {};
-
-}  // anonymous namespace
 
 // Test that commands are not received if the client disconnects.
 TEST_F(WireDisconnectTests, CommandsAfterDisconnect) {
@@ -183,4 +180,5 @@ TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
     DefaultApiDeviceWasReleased();
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

@@ -18,6 +18,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class DrawIndirectValidationTest : public ValidationTest {
   protected:
     void SetUp() override {
@@ -160,3 +163,6 @@ TEST_F(DrawIndirectValidationTest, IndirectUsage) {
     TestIndirectOffset(utils::Expectation::Failure, {1, 2, 3, 4, 5}, 0, true,
                        wgpu::BufferUsage::Vertex);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

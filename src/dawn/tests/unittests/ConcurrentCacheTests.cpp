@@ -21,7 +21,9 @@
 #include "dawn/utils/SystemUtils.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
 namespace {
+
 class SimpleCachedObject {
   public:
     explicit SimpleCachedObject(size_t value) : mValue(value) {}
@@ -42,16 +44,14 @@ class SimpleCachedObject {
     size_t mValue;
 };
 
-}  // anonymous namespace
-
 class ConcurrentCacheTest : public testing::Test {
   public:
     ConcurrentCacheTest() : mPool(mPlatform.CreateWorkerTaskPool()), mTaskManager(mPool.get()) {}
 
   protected:
-    dawn::platform::Platform mPlatform;
-    std::unique_ptr<dawn::platform::WorkerTaskPool> mPool;
-    dawn::native::AsyncTaskManager mTaskManager;
+    platform::Platform mPlatform;
+    std::unique_ptr<platform::WorkerTaskPool> mPool;
+    native::AsyncTaskManager mTaskManager;
     ConcurrentCache<SimpleCachedObject> mCache;
 };
 
@@ -65,10 +65,10 @@ TEST_F(ConcurrentCacheTest, InsertAtSameTime) {
     std::pair<SimpleCachedObject*, bool> anotherInsertOutput = {};
 
     ConcurrentCache<SimpleCachedObject>* cachePtr = &mCache;
-    dawn::native::AsyncTask asyncTask1([&insertOutput, cachePtr, &cachedObject] {
+    native::AsyncTask asyncTask1([&insertOutput, cachePtr, &cachedObject] {
         insertOutput = cachePtr->Insert(&cachedObject);
     });
-    dawn::native::AsyncTask asyncTask2([&anotherInsertOutput, cachePtr, &anotherCachedObject] {
+    native::AsyncTask asyncTask2([&anotherInsertOutput, cachePtr, &anotherCachedObject] {
         anotherInsertOutput = cachePtr->Insert(&anotherCachedObject);
     });
     mTaskManager.PostTask(std::move(asyncTask1));
@@ -87,12 +87,12 @@ TEST_F(ConcurrentCacheTest, EraseAfterInsertion) {
 
     std::pair<SimpleCachedObject*, bool> insertOutput = {};
     ConcurrentCache<SimpleCachedObject>* cachePtr = &mCache;
-    dawn::native::AsyncTask insertTask([&insertOutput, cachePtr, &cachedObject] {
+    native::AsyncTask insertTask([&insertOutput, cachePtr, &cachedObject] {
         insertOutput = cachePtr->Insert(&cachedObject);
     });
 
     size_t erasedObjectCount = 0;
-    dawn::native::AsyncTask eraseTask([&erasedObjectCount, cachePtr, &cachedObject] {
+    native::AsyncTask eraseTask([&erasedObjectCount, cachePtr, &cachedObject] {
         while (cachePtr->Find(&cachedObject) == nullptr) {
             utils::USleep(100);
         }
@@ -108,3 +108,6 @@ TEST_F(ConcurrentCacheTest, EraseAfterInsertion) {
     ASSERT_TRUE(insertOutput.second);
     ASSERT_EQ(1u, erasedObjectCount);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -18,6 +18,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 constexpr uint32_t kRTSize = 16;
@@ -25,8 +26,6 @@ constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 
 using RequireShaderF16Feature = bool;
 DAWN_TEST_PARAM_STRUCT(ShaderF16TestsParams, RequireShaderF16Feature);
-
-}  // anonymous namespace
 
 class ShaderF16Tests : public DawnTestWithParams<ShaderF16TestsParams> {
   public:
@@ -451,3 +450,6 @@ DAWN_INSTANTIATE_TEST_P(ShaderF16Tests,
                             OpenGLESBackend(),
                         },
                         {true, false});
+
+}  // anonymous namespace
+}  // namespace dawn

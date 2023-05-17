@@ -21,6 +21,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr uint32_t kRTSize = 1;
 
 enum class DrawMode {
@@ -39,12 +42,14 @@ bool IsIndirectDraw(DrawMode mode) {
     return mode == DrawMode::NonIndexedIndirect || mode == DrawMode::IndexedIndirect;
 }
 
-namespace dawn {
+}  // anonymous namespace
+
 template <>
 struct IsDawnBitmask<CheckIndex> {
     static constexpr bool enable = true;
 };
-}  // namespace dawn
+
+namespace {
 
 class FirstIndexOffsetTests : public DawnTest {
   public:
@@ -328,3 +333,6 @@ DAWN_INSTANTIATE_TEST(FirstIndexOffsetTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

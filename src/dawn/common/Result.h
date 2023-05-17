@@ -24,6 +24,8 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/Compiler.h"
 
+namespace dawn {
+
 // Result<T, E> is the following sum type (Haskell notation):
 //
 //      data Result T E = Success T | Error E | Empty
@@ -510,5 +512,7 @@ std::unique_ptr<E> Result<T, E>::AcquireError() {
     mType = Acquired;
     return std::move(mError);
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_RESULT_H_

@@ -17,6 +17,8 @@
 
 #include <cstddef>
 
+namespace dawn {
+
 class PlacementAllocated {
   public:
     // Delete the default new operator so this can only be created with placement new.
@@ -38,5 +40,7 @@ class PlacementAllocated {
         // Otherwise it triggers C4291 warning in MSVC
     }
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_PLACEMENTALLOCATED_H_

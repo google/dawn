@@ -19,6 +19,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 class ResourceUsageTrackingTest : public ValidationTest {
@@ -1683,3 +1684,4 @@ TEST_F(ResourceUsageTrackingTest, IndirectBufferWithReadOrWriteStorage) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn

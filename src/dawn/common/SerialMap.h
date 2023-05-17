@@ -21,6 +21,8 @@
 
 #include "dawn/common/SerialStorage.h"
 
+namespace dawn {
+
 template <typename Serial, typename Value>
 class SerialMap;
 
@@ -73,5 +75,7 @@ void SerialMap<Serial, Value>::Enqueue(std::vector<Value>&& values, Serial seria
         Enqueue(std::move(value), serial);
     }
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_SERIALMAP_H_

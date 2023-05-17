@@ -21,6 +21,7 @@
 
 #include "dawn/common/Assert.h"
 
+namespace dawn {
 namespace detail {
 
 template <typename T>
@@ -80,5 +81,7 @@ bool RangesOverlap(T x0, T x1, T y0, T y1) {
         static_assert(std::is_integral_v<T>, "Unsupported type");
     }
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_NUMERIC_H_

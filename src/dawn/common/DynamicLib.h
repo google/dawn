@@ -20,6 +20,8 @@
 
 #include "dawn/common/Assert.h"
 
+namespace dawn {
+
 class DynamicLib {
   public:
     DynamicLib() = default;
@@ -50,5 +52,7 @@ class DynamicLib {
   private:
     void* mHandle = nullptr;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_DYNAMICLIB_H_

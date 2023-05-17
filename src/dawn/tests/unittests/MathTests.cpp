@@ -30,11 +30,13 @@ enum class TestEnum {
 }  // namespace wgpu
 
 namespace dawn {
+
 template <>
 struct IsDawnBitmask<wgpu::TestEnum> {
     static constexpr bool enable = true;
 };
-}  // namespace dawn
+
+namespace {
 
 // Tests for ScanForward
 TEST(Math, ScanForward) {
@@ -355,3 +357,6 @@ TEST(Math, IsSubset) {
     ASSERT_FALSE(IsSubset(wgpu::TestEnum::C, wgpu::TestEnum::A | wgpu::TestEnum::B));
     ASSERT_FALSE(IsSubset(wgpu::TestEnum::A | wgpu::TestEnum::C, wgpu::TestEnum::A));
 }
+
+}  // anonymous namespace
+}  // namespace dawn

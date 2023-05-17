@@ -21,7 +21,6 @@
 #include "dawn/tests/DawnNativeTest.h"
 
 namespace dawn::native {
-
 namespace {
 
 class ObjectContentHasherTests : public DawnNativeTest {};
@@ -77,5 +76,4 @@ TEST(ObjectContentHasherTests, HashCombine) {
 }
 
 }  // namespace
-
 }  // namespace dawn::native

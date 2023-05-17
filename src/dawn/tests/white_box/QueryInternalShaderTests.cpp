@@ -20,19 +20,20 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 void EncodeConvertTimestampsToNanoseconds(wgpu::CommandEncoder encoder,
                                           wgpu::Buffer timestamps,
                                           wgpu::Buffer availability,
                                           wgpu::Buffer params) {
-    ASSERT_TRUE(dawn::native::EncodeConvertTimestampsToNanoseconds(
-                    dawn::native::FromAPI(encoder.Get()), dawn::native::FromAPI(timestamps.Get()),
-                    dawn::native::FromAPI(availability.Get()), dawn::native::FromAPI(params.Get()))
+    ASSERT_TRUE(native::EncodeConvertTimestampsToNanoseconds(
+                    native::FromAPI(encoder.Get()), native::FromAPI(timestamps.Get()),
+                    native::FromAPI(availability.Get()), native::FromAPI(params.Get()))
                     .IsSuccess());
 }
 
-class InternalShaderExpectation : public detail::Expectation {
+class InternalShaderExpectation : public ::detail::Expectation {
   public:
     ~InternalShaderExpectation() override = default;
 
@@ -77,8 +78,6 @@ class InternalShaderExpectation : public detail::Expectation {
   private:
     std::vector<uint64_t> mExpected;
 };
-
-}  // anonymous namespace
 
 constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
 
@@ -167,7 +166,7 @@ class QueryInternalShaderTests : public DawnTest {
                                         kQueryCount * sizeof(uint32_t), wgpu::BufferUsage::Storage);
 
         // The params uniform buffer
-        dawn::native::TimestampParams params(firstQuery, queryCount, destinationOffset, period);
+        native::TimestampParams params(firstQuery, queryCount, destinationOffset, period);
         wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
                                                                 wgpu::BufferUsage::Uniform);
 
@@ -231,3 +230,6 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
 }
 
 DAWN_INSTANTIATE_TEST(QueryInternalShaderTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

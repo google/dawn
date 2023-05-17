@@ -13,6 +13,8 @@
 
 #include "dawn/common/Compiler.h"
 
+namespace dawn {
+
 // This allocator can be used with STL containers to provide a stack buffer
 // from which to allocate memory and overflows onto the heap. This stack buffer
 // would be allocated on the stack and allows us to avoid heap operations in
@@ -234,5 +236,7 @@ class StackVector
     StackVector(StackVector&& rhs) = delete;
     StackVector& operator=(StackVector&& rhs) = delete;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_STACKCONTAINER_H_

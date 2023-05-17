@@ -18,6 +18,8 @@
 
 #import <Foundation/NSProcessInfo.h>
 
+namespace dawn {
+
 void GetMacOSVersion(int32_t* majorVersion, int32_t* minorVersion) {
     NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
     ASSERT(majorVersion != nullptr);
@@ -31,3 +33,5 @@ bool IsMacOSVersionAtLeast(uint32_t majorVersion, uint32_t minorVersion) {
     return
         [NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:{majorVersion, minorVersion, 0}];
 }
+
+}  // namespace dawn

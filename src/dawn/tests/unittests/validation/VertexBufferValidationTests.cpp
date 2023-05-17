@@ -20,6 +20,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class VertexBufferValidationTest : public ValidationTest {
   protected:
     void SetUp() override {
@@ -1041,3 +1044,6 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertexMultipleAttributes) {
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
+
+}  // anonymous namespace
+}  // namespace dawn

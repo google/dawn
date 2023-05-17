@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_COMMON_NONCOPYABLE_H_
 #define SRC_DAWN_COMMON_NONCOPYABLE_H_
 
+namespace dawn {
+
 // A base class to make a class non-copyable.
 class NonCopyable {
   protected:
@@ -39,5 +41,7 @@ class NonMovable : NonCopyable {
     NonMovable(NonMovable&&) = delete;
     void operator=(NonMovable&&) = delete;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_NONCOPYABLE_H_

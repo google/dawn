@@ -33,6 +33,8 @@
 
 #include <array>
 
+namespace dawn {
+
 #if DAWN_PLATFORM_IS(WINDOWS)
 const char* GetPathSeparator() {
     return "\\";
@@ -228,3 +230,5 @@ bool ScopedEnvironmentVar::Set(const char* variableName, const char* value) {
     mIsSet = SetEnvironmentVar(variableName, value);
     return mIsSet;
 }
+
+}  // namespace dawn

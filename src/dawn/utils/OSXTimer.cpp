@@ -18,7 +18,7 @@
 
 #include "dawn/utils/Timer.h"
 
-namespace utils {
+namespace dawn::utils {
 
 class OSXTimer : public Timer {
   public:
@@ -71,4 +71,4 @@ Timer* CreateTimer() {
     return new OSXTimer();
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

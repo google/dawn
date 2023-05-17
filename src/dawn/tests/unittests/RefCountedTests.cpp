@@ -18,6 +18,9 @@
 #include "dawn/common/RefCounted.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 class RCTest : public RefCounted {
   public:
     RCTest() : RefCounted() {}
@@ -396,3 +399,6 @@ TEST(Ref, InitializeInto) {
     ref = nullptr;
     EXPECT_TRUE(deleted);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

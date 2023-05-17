@@ -15,13 +15,14 @@
 #include "dawn/common/Mutex.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
 namespace {
+
 #if defined(DAWN_ENABLE_ASSERTS)
 constexpr bool kAssertEnabled = true;
 #else
 constexpr bool kAssertEnabled = false;
 #endif
-}  // namespace
 
 class MutexTest : public ::testing::Test {
   protected:
@@ -32,7 +33,7 @@ class MutexTest : public ::testing::Test {
         }
     }
 
-    dawn::Mutex mMutex;
+    Mutex mMutex;
 };
 
 // Simple Lock() then Unlock() test.
@@ -46,7 +47,7 @@ TEST_F(MutexTest, SimpleLockUnlock) {
 // Test AutoLock automatically locks the mutex and unlocks it when out of scope.
 TEST_F(MutexTest, AutoLock) {
     {
-        dawn::Mutex::AutoLock autoLock(&mMutex);
+        Mutex::AutoLock autoLock(&mMutex);
         EXPECT_TRUE(mMutex.IsLockedByCurrentThread());
     }
     EXPECT_FALSE(mMutex.IsLockedByCurrentThread());
@@ -54,10 +55,10 @@ TEST_F(MutexTest, AutoLock) {
 
 // Test AutoLockAndHoldRef will keep the mutex alive
 TEST_F(MutexTest, AutoLockAndHoldRef) {
-    auto* mutex = new dawn::Mutex();
+    auto* mutex = new Mutex();
     EXPECT_EQ(mutex->GetRefCountForTesting(), 1u);
     {
-        dawn::Mutex::AutoLockAndHoldRef autoLock(mutex);
+        Mutex::AutoLockAndHoldRef autoLock(mutex);
         EXPECT_TRUE(mutex->IsLockedByCurrentThread());
         EXPECT_EQ(mutex->GetRefCountForTesting(), 2u);
 
@@ -85,13 +86,16 @@ TEST_F(MutexDeathTest, DoubleLockCalls) {
 TEST_F(MutexDeathTest, LockThenAutoLock) {
     mMutex.Lock();
     EXPECT_TRUE(mMutex.IsLockedByCurrentThread());
-    ASSERT_DEATH({ dawn::Mutex::AutoLock autoLock(&mMutex); }, "");
+    ASSERT_DEATH({ Mutex::AutoLock autoLock(&mMutex); }, "");
     mMutex.Unlock();
 }
 
 // Use AutoLock then call Lock() should cause assertion failure.
 TEST_F(MutexDeathTest, AutoLockThenLock) {
-    dawn::Mutex::AutoLock autoLock(&mMutex);
+    Mutex::AutoLock autoLock(&mMutex);
     EXPECT_TRUE(mMutex.IsLockedByCurrentThread());
     ASSERT_DEATH({ mMutex.Lock(); }, "");
 }
+
+}  // anonymous namespace
+}  // namespace dawn

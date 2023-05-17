@@ -21,6 +21,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 using FeatureName = wgpu::FeatureName;
@@ -81,8 +82,6 @@ class ExpectBetweenTimestamps : public ::detail::Expectation {
     uint64_t mMaxValue;
     float mErrorToleranceRatio;
 };
-
-}  // anonymous namespace
 
 class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalibrationTestParams> {
   protected:
@@ -305,3 +304,6 @@ DAWN_INSTANTIATE_TEST_P(
      MetalBackend({}, {"disable_timestamp_query_conversion"})},
     {wgpu::FeatureName::TimestampQuery, wgpu::FeatureName::TimestampQueryInsidePasses},
     {EncoderType::NonPass, EncoderType::ComputePass, EncoderType::RenderPass});
+
+}  // anonymous namespace
+}  // namespace dawn

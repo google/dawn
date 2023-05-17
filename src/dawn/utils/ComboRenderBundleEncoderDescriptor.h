@@ -20,7 +20,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/webgpu_cpp.h"
 
-namespace utils {
+namespace dawn::utils {
 
 class ComboRenderBundleEncoderDescriptor : public wgpu::RenderBundleEncoderDescriptor {
   public:
@@ -29,6 +29,6 @@ class ComboRenderBundleEncoderDescriptor : public wgpu::RenderBundleEncoderDescr
     std::array<wgpu::TextureFormat, kMaxColorAttachments> cColorFormats;
 };
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_COMBORENDERBUNDLEENCODERDESCRIPTOR_H_

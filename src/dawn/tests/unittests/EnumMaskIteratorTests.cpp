@@ -34,7 +34,7 @@ struct EnumBitmaskSize<TestAspect> {
 namespace dawn {
 
 template <>
-struct IsDawnBitmask<dawn::native::TestAspect> {
+struct IsDawnBitmask<native::TestAspect> {
     static constexpr bool enable = true;
 };
 

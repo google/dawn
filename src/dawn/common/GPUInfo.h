@@ -20,7 +20,7 @@
 #include "dawn/common/GPUInfo_autogen.h"
 #include "dawn/common/StackContainer.h"
 
-namespace gpu_info {
+namespace dawn::gpu_info {
 
 // Four uint16 fields could cover almost all driver version schemas:
 // D3D12: AA.BB.CCC.DDDD
@@ -61,5 +61,5 @@ int CompareIntelMesaDriverVersion(const DriverVersion& version1, const DriverVer
 // Intel architectures
 bool IsSkylake(PCIDeviceID deviceId);
 
-}  // namespace gpu_info
+}  // namespace dawn::gpu_info
 #endif  // SRC_DAWN_COMMON_GPUINFO_H_

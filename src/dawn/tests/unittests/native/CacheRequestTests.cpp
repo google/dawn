@@ -22,7 +22,6 @@
 #include "dawn/tests/mocks/platform/CachingInterfaceMock.h"
 
 namespace dawn::native {
-
 namespace {
 
 using ::testing::_;
@@ -304,6 +303,5 @@ TEST_F(CacheRequestTests, CacheHitError) {
     EXPECT_FALSE(result.IsCached());
 }
 
-}  // namespace
-
+}  // anonymous namespace
 }  // namespace dawn::native

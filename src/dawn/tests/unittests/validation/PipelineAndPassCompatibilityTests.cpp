@@ -18,12 +18,13 @@
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 
+namespace dawn {
+namespace {
+
 constexpr static uint32_t kSize = 4;
 // Note that format Depth24PlusStencil8 has both depth and stencil aspects, so parameters
 // depthReadOnly and stencilReadOnly should be the same in render pass and render bundle.
 wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth24PlusStencil8;
-
-namespace {
 
 class RenderPipelineAndPassCompatibilityTests : public ValidationTest {
   public:
@@ -179,3 +180,4 @@ TEST_F(RenderPipelineAndPassCompatibilityTests,
 //   - pipeline and pass compatibility tests for compute.
 
 }  // anonymous namespace
+}  // namespace dawn

@@ -22,6 +22,8 @@
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_bitset.h"
 
+namespace dawn {
+
 // Wrapper around std::hash to make it a templated function instead of a functor. It is marginally
 // nicer, and avoids adding to the std namespace to add hashing of other types.
 template <typename T>
@@ -88,12 +90,14 @@ size_t Hash(const std::bitset<N>& value) {
 }
 #endif
 
+}  // namespace dawn
+
 namespace std {
 template <typename Index, size_t N>
-struct hash<ityp::bitset<Index, N>> {
+struct hash<dawn::ityp::bitset<Index, N>> {
   public:
-    size_t operator()(const ityp::bitset<Index, N>& value) const {
-        return Hash(static_cast<const std::bitset<N>&>(value));
+    size_t operator()(const dawn::ityp::bitset<Index, N>& value) const {
+        return dawn::Hash(static_cast<const std::bitset<N>&>(value));
     }
 };
 }  // namespace std

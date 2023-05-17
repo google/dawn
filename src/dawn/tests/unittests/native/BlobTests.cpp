@@ -20,7 +20,6 @@
 #include "gtest/gtest.h"
 
 namespace dawn::native {
-
 namespace {
 
 // Test that a blob starts empty.
@@ -220,5 +219,4 @@ TEST(BlobTests, AlignTo) {
 }
 
 }  // namespace
-
 }  // namespace dawn::native

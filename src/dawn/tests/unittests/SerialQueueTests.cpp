@@ -19,6 +19,9 @@
 #include "dawn/common/TypedInteger.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 using TestSerialQueue = SerialQueue<uint64_t, int>;
 
 // A number of basic tests for SerialQueue that are difficult to split from one another
@@ -175,3 +178,6 @@ TEST(SerialQueue, TypedInteger) {
     }
     ASSERT_TRUE(expectedValues.empty());
 }
+
+}  // anonymous namespace
+}  // namespace dawn

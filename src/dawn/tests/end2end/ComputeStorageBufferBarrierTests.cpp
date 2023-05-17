@@ -17,6 +17,9 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ComputeStorageBufferBarrierTests : public DawnTest {
   protected:
     static constexpr uint32_t kNumValues = 100;
@@ -415,3 +418,6 @@ DAWN_INSTANTIATE_TEST(ComputeStorageBufferBarrierTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

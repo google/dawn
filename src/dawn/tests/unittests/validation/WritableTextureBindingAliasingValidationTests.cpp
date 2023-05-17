@@ -22,7 +22,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 using BindingDescriptorGroups = std::vector<std::vector<utils::BindingInitializationHelper>>;
 
 struct TestSet {
@@ -96,8 +98,6 @@ const char* kVertexShader = R"(
     return vec4<f32>();
 }
 )";
-
-}  // namespace
 
 class WritableTextureBindingAliasingValidationTests : public ValidationTest {
   public:
@@ -530,3 +530,6 @@ TEST_F(WritableTextureBindingAliasingValidationTests, SetBindGroupLazyAspect) {
         commandEncoder.Finish();
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

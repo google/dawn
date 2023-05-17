@@ -17,7 +17,7 @@
 
 #include "dawn/utils/Timer.h"
 
-namespace utils {
+namespace dawn::utils {
 
 namespace {
 
@@ -68,4 +68,4 @@ Timer* CreateTimer() {
     return new PosixTimer();
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

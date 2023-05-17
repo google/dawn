@@ -22,6 +22,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 // Vertex format tests all work the same way: the test will render a triangle.
 // Each test will set up a vertex buffer, and the vertex shader will check that
 // the vertex content is the same as what we expected. On success it outputs green,
@@ -33,7 +36,7 @@ constexpr uint32_t kVertexNum = 3;
 std::vector<uint16_t> Float32ToFloat16(std::vector<float> data) {
     std::vector<uint16_t> expectedData;
     for (auto& element : data) {
-        expectedData.push_back(Float32ToFloat16(element));
+        expectedData.push_back(dawn::Float32ToFloat16(element));
     }
     return expectedData;
 }
@@ -835,3 +838,6 @@ DAWN_INSTANTIATE_TEST(VertexFormatTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

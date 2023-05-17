@@ -22,6 +22,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr uint32_t kRTSize = 400;
 constexpr uint32_t kBindingSize = 8;
 
@@ -586,3 +589,6 @@ DAWN_INSTANTIATE_TEST_P(ClampedOOBDynamicBufferOffsetTests,
                         {wgpu::BufferUsage::Uniform, wgpu::BufferUsage::Storage},
                         {false, true},
                         {false, true});
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -23,6 +23,8 @@
 
 #include "dawn/common/Assert.h"
 
+namespace dawn {
+
 static constexpr size_t kPayloadBits = 1;
 static constexpr uint64_t kPayloadMask = (uint64_t(1) << kPayloadBits) - 1;
 static constexpr uint64_t kRefCountIncrement = (uint64_t(1) << kPayloadBits);
@@ -121,3 +123,5 @@ void RefCounted::DeleteThis() {
 void RefCounted::LockAndDeleteThis() {
     DeleteThis();
 }
+
+}  // namespace dawn

@@ -18,6 +18,7 @@
 #include "dawn/wire/WireServer.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::Exactly;
@@ -274,4 +275,5 @@ TEST_F(WireInjectDeviceTests, ReclaimDeviceReservation) {
     }
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

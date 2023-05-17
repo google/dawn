@@ -1044,17 +1044,18 @@ class DestroyObjectRegressionTests : public DawnNativeTest {};
 // CommandEncoder, that destroying the device still works as expected (and does not cause
 // double-free).
 TEST_F(DestroyObjectRegressionTests, LastRefInCommandRenderPipeline) {
-    ::utils::BasicRenderPass pass = ::utils::CreateBasicRenderPass(device, 1, 1);
+    ::dawn::utils::BasicRenderPass pass = ::dawn::utils::CreateBasicRenderPass(device, 1, 1);
 
-    ::utils::ComboRenderPassDescriptor passDesc{};
+    ::dawn::utils::ComboRenderPassDescriptor passDesc{};
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder renderEncoder = encoder.BeginRenderPass(&pass.renderPassInfo);
 
-    ::utils::ComboRenderPipelineDescriptor pipelineDesc;
+    ::dawn::utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
-    pipelineDesc.vertex.module = ::utils::CreateShaderModule(device, kVertexShader.data());
+    pipelineDesc.vertex.module = ::dawn::utils::CreateShaderModule(device, kVertexShader.data());
     pipelineDesc.vertex.entryPoint = "main";
-    pipelineDesc.cFragment.module = ::utils::CreateShaderModule(device, kFragmentShader.data());
+    pipelineDesc.cFragment.module =
+        ::dawn::utils::CreateShaderModule(device, kFragmentShader.data());
     pipelineDesc.cFragment.entryPoint = "main";
     renderEncoder.SetPipeline(device.CreateRenderPipeline(&pipelineDesc));
 
@@ -1069,12 +1070,12 @@ TEST_F(DestroyObjectRegressionTests, LastRefInCommandComputePipeline) {
     wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
-    pipelineDesc.compute.module = ::utils::CreateShaderModule(device, kComputeShader.data());
+    pipelineDesc.compute.module = ::dawn::utils::CreateShaderModule(device, kComputeShader.data());
     pipelineDesc.compute.entryPoint = "main";
     computeEncoder.SetPipeline(device.CreateComputePipeline(&pipelineDesc));
 
     device.Destroy();
 }
 
-}  // namespace
+}  // anonymous namespace
 }  // namespace dawn::native

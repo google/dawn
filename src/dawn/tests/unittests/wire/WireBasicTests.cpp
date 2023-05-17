@@ -15,6 +15,7 @@
 #include "dawn/tests/unittests/wire/WireTest.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::Return;
 
@@ -79,4 +80,5 @@ TEST_F(WireBasicTests, ReleaseCalledOnRefCount0) {
     FlushClient();
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

@@ -14,6 +14,8 @@
 
 #include "dawn/common/Result.h"
 
+namespace dawn {
+
 // Implementation details of the tagged pointer Results
 namespace detail {
 
@@ -28,3 +30,4 @@ PayloadType GetPayloadType(intptr_t payload) {
 }
 
 }  // namespace detail
+}  // namespace dawn

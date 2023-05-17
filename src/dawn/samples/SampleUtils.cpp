@@ -102,15 +102,15 @@ static GLFWwindow* window = nullptr;
 
 static dawn::wire::WireServer* wireServer = nullptr;
 static dawn::wire::WireClient* wireClient = nullptr;
-static utils::TerribleCommandBuffer* c2sBuf = nullptr;
-static utils::TerribleCommandBuffer* s2cBuf = nullptr;
+static dawn::utils::TerribleCommandBuffer* c2sBuf = nullptr;
+static dawn::utils::TerribleCommandBuffer* s2cBuf = nullptr;
 
 static constexpr uint32_t kWidth = 640;
 static constexpr uint32_t kHeight = 480;
 
 wgpu::Device CreateCppDawnDevice() {
-    ScopedEnvironmentVar angleDefaultPlatform;
-    if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {
+    dawn::ScopedEnvironmentVar angleDefaultPlatform;
+    if (dawn::GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {
         angleDefaultPlatform.Set("ANGLE_DEFAULT_PLATFORM", "swiftshader");
     }
 
@@ -194,8 +194,8 @@ wgpu::Device CreateCppDawnDevice() {
             break;
 
         case CmdBufType::Terrible: {
-            c2sBuf = new utils::TerribleCommandBuffer();
-            s2cBuf = new utils::TerribleCommandBuffer();
+            c2sBuf = new dawn::utils::TerribleCommandBuffer();
+            s2cBuf = new dawn::utils::TerribleCommandBuffer();
 
             dawn::wire::WireServerDescriptor serverDesc = {};
             serverDesc.procs = &backendProcs;

@@ -18,6 +18,8 @@
 
 #include "dawn/common/Platform.h"
 
+namespace dawn {
+
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "dawn/common/windows_with_undefs.h"
 #if DAWN_PLATFORM_IS(WINUWP)
@@ -106,3 +108,5 @@ void* DynamicLib::GetProc(const std::string& procName, std::string* error) const
 
     return proc;
 }
+
+}  // namespace dawn

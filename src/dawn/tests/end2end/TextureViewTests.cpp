@@ -24,11 +24,13 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr static unsigned int kRTSize = 64;
 constexpr wgpu::TextureFormat kDefaultFormat = wgpu::TextureFormat::RGBA8Unorm;
 constexpr uint32_t kBytesPerTexel = 4;
 
-namespace {
 wgpu::Texture Create2DTexture(wgpu::Device device,
                               uint32_t width,
                               uint32_t height,
@@ -91,7 +93,6 @@ wgpu::ShaderModule CreateDefaultVertexShaderModule(wgpu::Device device) {
             }
         )");
 }
-}  // anonymous namespace
 
 class TextureViewSamplingTest : public DawnTest {
   protected:
@@ -1143,3 +1144,6 @@ DAWN_INSTANTIATE_TEST(TextureView1DTest,
                       VulkanBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

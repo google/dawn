@@ -19,6 +19,9 @@
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_bitset.h"
 
+namespace dawn {
+namespace {
+
 class ITypBitsetTest : public testing::Test {
   protected:
     using Key = TypedInteger<struct KeyT, size_t>;
@@ -207,3 +210,6 @@ TEST_F(ITypBitsetTest, GetHighestBitIndexPlusOne) {
     EXPECT_EQ(40u, static_cast<size_t>(GetHighestBitIndexPlusOne(Bitset40(0xF000000000))));
     EXPECT_EQ(40u, static_cast<size_t>(GetHighestBitIndexPlusOne(Bitset40(0xFFFFFFFFFF))));
 }
+
+}  // anonymous namespace
+}  // namespace dawn

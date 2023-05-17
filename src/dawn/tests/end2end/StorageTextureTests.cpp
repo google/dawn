@@ -24,13 +24,14 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 bool OpenGLESSupportsStorageTexture(wgpu::TextureFormat format) {
     // TODO(crbug.com/dawn/595): 32-bit RG* formats are unsupported on OpenGL ES.
     return format != wgpu::TextureFormat::RG32Float && format != wgpu::TextureFormat::RG32Sint &&
            format != wgpu::TextureFormat::RG32Uint;
 }
-}  // namespace
 
 class StorageTextureTests : public DawnTest {
   public:
@@ -1014,3 +1015,6 @@ DAWN_INSTANTIATE_TEST(StorageTextureZeroInitTests,
                       OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
+
+}  // anonymous namespace
+}  // namespace dawn

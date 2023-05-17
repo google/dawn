@@ -19,11 +19,11 @@
 // of ObjectiveC calls, when they cannot be converted to ObjectiveC++ because they are used on
 // multiple platforms.
 
-namespace utils {
+namespace dawn::utils {
 
 // The returned CALayer is autoreleased.
 void* CreatePlaceholderCALayer();
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_OBJCUTILS_H_

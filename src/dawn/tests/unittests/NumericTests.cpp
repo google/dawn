@@ -15,8 +15,11 @@
 #include "dawn/common/Numeric.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 // Tests for RangesOverlap
-TEST(Numeric, RangesOverlap) {
+TEST(Numeric, angesOverlap) {
     // Range contains only one number
     ASSERT_EQ(true, RangesOverlap(0, 0, 0, 0));
     ASSERT_EQ(false, RangesOverlap(0, 0, 1, 1));
@@ -57,3 +60,6 @@ TEST(Numeric, RangesOverlap) {
     ASSERT_EQ(true, RangesOverlap(-9, 12, 4, 16));
     ASSERT_EQ(false, RangesOverlap(-9, -3, -2, 0));
 }
+
+}  // anonymous namespace
+}  // namespace dawn

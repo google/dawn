@@ -25,6 +25,7 @@
 
 namespace dawn::native {
 namespace {
+
 using ::testing::Test;
 
 class DeviceAsyncTaskTests : public DawnMockTest {};
@@ -46,5 +47,5 @@ TEST_F(DeviceAsyncTaskTests, LongAsyncTaskFinishesBeforeDeviceIsDropped) {
     EXPECT_TRUE(done.load());
 }
 
-}  // namespace
+}  // anonymous namespace
 }  // namespace dawn::native

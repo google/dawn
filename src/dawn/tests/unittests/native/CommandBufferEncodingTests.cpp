@@ -22,6 +22,7 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn::native {
+namespace {
 
 class CommandBufferEncodingTests : public DawnNativeTest {
   protected:
@@ -309,4 +310,5 @@ TEST_F(CommandBufferEncodingTests, StateNotLeakedAfterRestore) {
     EXPECT_FALSE(stateTracker->HasPipeline());
 }
 
+}  // anonymous namespace
 }  // namespace dawn::native

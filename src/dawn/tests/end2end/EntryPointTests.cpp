@@ -17,6 +17,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class EntryPointTests : public DawnTest {};
 
 // Test creating a render pipeline from two entryPoints in the same module.
@@ -149,3 +152,6 @@ DAWN_INSTANTIATE_TEST(EntryPointTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -16,10 +16,10 @@
 
 #include <QuartzCore/CALayer.h>
 
-namespace utils {
+namespace dawn::utils {
 
 void* CreatePlaceholderCALayer() {
     return [CALayer layer];
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

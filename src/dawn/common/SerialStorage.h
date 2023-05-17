@@ -20,6 +20,8 @@
 
 #include "dawn/common/Assert.h"
 
+namespace dawn {
+
 template <typename T>
 struct SerialStorageTraits {};
 
@@ -314,5 +316,7 @@ const typename SerialStorage<Derived>::Value& SerialStorage<Derived>::ConstItera
     }
     return *mSerialIterator;
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_SERIALSTORAGE_H_

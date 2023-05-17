@@ -17,6 +17,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 class QueueSubmitValidationTest : public ValidationTest {};
@@ -363,3 +364,4 @@ TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeTextures) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn

@@ -468,5 +468,5 @@ TEST_F(AllowedErrorTests, InjectError) {
     EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
-}  // namespace
+}  // anonymous namespace
 }  // namespace dawn::native

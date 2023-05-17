@@ -18,6 +18,7 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 wgpu::Texture Create2DTexture(wgpu::Device device,
@@ -275,7 +276,6 @@ class CopyExternalTextureForBrowserTests_Basic
         EXPECT_TEXTURE_EQ(expected.data(), dstTexture, dstOrigin, copySize);
     }
 };
-}  // anonymous namespace
 
 TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
@@ -386,3 +386,6 @@ DAWN_INSTANTIATE_TEST_P(
                            CopyRect::BottomRight, CopyRect::FullSize}),
     std::vector<ScaleType>({ScaleType::UpScale, ScaleType::DownScale, ScaleType::NoScale}),
     std::vector<FlipY>({false, true}));
+
+}  // anonymous namespace
+}  // namespace dawn

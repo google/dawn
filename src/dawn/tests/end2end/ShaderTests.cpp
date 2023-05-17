@@ -20,6 +20,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ShaderTests : public DawnTest {
   public:
     wgpu::Buffer CreateBuffer(const uint32_t count) {
@@ -1467,3 +1470,6 @@ DAWN_INSTANTIATE_TEST(ShaderTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

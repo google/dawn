@@ -52,7 +52,7 @@ class ExternalSemaphoreOpaqueFD : public VulkanImageWrappingTestBackend::Externa
 
 class ExternalTextureOpaqueFD : public VulkanImageWrappingTestBackend::ExternalTexture {
   public:
-    ExternalTextureOpaqueFD(dawn::native::vulkan::Device* device,
+    ExternalTextureOpaqueFD(native::vulkan::Device* device,
                             int fd,
                             VkDeviceMemory allocation,
                             VkImage handle,
@@ -80,7 +80,7 @@ class ExternalTextureOpaqueFD : public VulkanImageWrappingTestBackend::ExternalT
     int Dup() const { return dup(mFd); }
 
   private:
-    dawn::native::vulkan::Device* mDevice;
+    native::vulkan::Device* mDevice;
     int mFd = -1;
     VkDeviceMemory mAllocation = VK_NULL_HANDLE;
     VkImage mHandle = VK_NULL_HANDLE;
@@ -93,7 +93,7 @@ class ExternalTextureOpaqueFD : public VulkanImageWrappingTestBackend::ExternalT
 class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBackend {
   public:
     explicit VulkanImageWrappingTestBackendOpaqueFD(const wgpu::Device& device) : mDevice(device) {
-        mDeviceVk = dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get()));
+        mDeviceVk = native::vulkan::ToBackend(native::FromAPI(device.Get()));
     }
 
     bool SupportsTestParams(const TestParams& params) const override {
@@ -156,7 +156,7 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
         }
 
         return wgpu::Texture::Acquire(
-            dawn::native::vulkan::WrapVulkanImage(device.Get(), &descriptorOpaqueFD));
+            native::vulkan::WrapVulkanImage(device.Get(), &descriptorOpaqueFD));
     }
 
     bool ExportImage(const wgpu::Texture& texture,
@@ -175,7 +175,7 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
 
   private:
     // Creates a VkImage with external memory
-    ::VkResult CreateImage(dawn::native::vulkan::Device* deviceVk,
+    ::VkResult CreateImage(native::vulkan::Device* deviceVk,
                            uint32_t width,
                            uint32_t height,
                            VkFormat format,
@@ -209,7 +209,7 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
     }
 
     // Allocates memory for an image
-    ::VkResult AllocateMemory(dawn::native::vulkan::Device* deviceVk,
+    ::VkResult AllocateMemory(native::vulkan::Device* deviceVk,
                               VkImage handle,
                               VkDeviceMemory* allocation,
                               VkDeviceSize* allocationSize,
@@ -249,14 +249,12 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
     }
 
     // Binds memory to an image
-    ::VkResult BindMemory(dawn::native::vulkan::Device* deviceVk,
-                          VkImage handle,
-                          VkDeviceMemory memory) {
+    ::VkResult BindMemory(native::vulkan::Device* deviceVk, VkImage handle, VkDeviceMemory memory) {
         return deviceVk->fn.BindImageMemory(deviceVk->GetVkDevice(), handle, memory, 0);
     }
 
     // Extracts a file descriptor representing memory on a device
-    int GetMemoryFd(dawn::native::vulkan::Device* deviceVk, VkDeviceMemory memory) {
+    int GetMemoryFd(native::vulkan::Device* deviceVk, VkDeviceMemory memory) {
         VkMemoryGetFdInfoKHR getFdInfo;
         getFdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
         getFdInfo.pNext = nullptr;
@@ -271,7 +269,7 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
     }
 
     // Prepares and exports memory for an image on a given device
-    void CreateBindExportImage(dawn::native::vulkan::Device* deviceVk,
+    void CreateBindExportImage(native::vulkan::Device* deviceVk,
                                uint32_t width,
                                uint32_t height,
                                VkFormat format,
@@ -282,7 +280,7 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
                                int* memoryFd) {}
 
     wgpu::Device mDevice;
-    dawn::native::vulkan::Device* mDeviceVk;
+    native::vulkan::Device* mDeviceVk;
 };
 
 // static

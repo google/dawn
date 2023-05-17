@@ -18,7 +18,9 @@
 #include "dawn/tests/perf_tests/DawnPerfTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 constexpr uint32_t kTileSize = 32u;
 
 const std::string& kMatMulFloatHeader = R"(
@@ -378,8 +380,6 @@ using DimInner = uint32_t;
 using DimBOuter = uint32_t;
 DAWN_TEST_PARAM_STRUCT(ShaderRobustnessParams, MatMulMethod, DimAOuter, DimInner, DimBOuter);
 
-}  // namespace
-
 // Test the execution time of matrix multiplication (A [dimAOuter, dimInner] * B [dimInner,
 // dimBOuter]) on the GPU and see the difference between robustness on and off.
 class ShaderRobustnessPerf : public DawnPerfTestWithParams<ShaderRobustnessParams> {
@@ -508,3 +508,6 @@ DAWN_INSTANTIATE_TEST_P(ShaderRobustnessPerf,
                         {512u},
                         {512u},
                         {512u});
+
+}  // anonymous namespace
+}  // namespace dawn

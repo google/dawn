@@ -22,7 +22,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 // Helper for describing bindings throughout the tests
 struct BindingDescriptor {
     utils::BindingInitializationHelper binding;
@@ -107,8 +109,6 @@ std::string CreateFragmentShaderWithBindings(const BindingDescriptorGroups& bind
     return GenerateBindingString(bindingsGroups) + "@fragment fn main() {\n" +
            GenerateReferenceString(bindingsGroups, wgpu::ShaderStage::Fragment) + "}";
 }
-
-}  // namespace
 
 class WritableBufferBindingAliasingValidationTests : public ValidationTest {
   public:
@@ -635,3 +635,6 @@ TEST_F(WritableBufferBindingAliasingValidationTests, SetBindGroupLazyAspectDynam
         commandEncoder.Finish();
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

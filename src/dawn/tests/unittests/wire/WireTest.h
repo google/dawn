@@ -103,7 +103,7 @@ class MemoryTransferService;
 }  // namespace server
 }  // namespace dawn::wire
 
-namespace utils {
+namespace dawn::utils {
 class TerribleCommandBuffer;
 }
 
@@ -140,8 +140,8 @@ class WireTest : public testing::Test {
 
     std::unique_ptr<dawn::wire::WireServer> mWireServer;
     std::unique_ptr<dawn::wire::WireClient> mWireClient;
-    std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
-    std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
+    std::unique_ptr<dawn::utils::TerribleCommandBuffer> mS2cBuf;
+    std::unique_ptr<dawn::utils::TerribleCommandBuffer> mC2sBuf;
 };
 
 #endif  // SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_

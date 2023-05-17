@@ -22,6 +22,9 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr static unsigned int kRTSize = 2;
 
 enum class QuadAngle { Flat, TiltedX };
@@ -396,3 +399,6 @@ DAWN_INSTANTIATE_TEST(DepthBiasTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

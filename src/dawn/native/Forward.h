@@ -17,8 +17,10 @@
 
 #include <cstdint>
 
+namespace dawn {
 template <typename T>
 class Ref;
+}  // namespace dawn
 
 namespace dawn::native {
 

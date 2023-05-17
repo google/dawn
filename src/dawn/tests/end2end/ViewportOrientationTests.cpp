@@ -17,6 +17,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ViewportOrientationTests : public DawnTest {};
 
 // Test that the pixel in viewport coordinate (-1, -1) matches texel (0, 0)
@@ -65,3 +68,6 @@ DAWN_INSTANTIATE_TEST(ViewportOrientationTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -17,12 +17,15 @@
 #include "dawn/common/Constants.h"
 #include "dawn/native/Limits.h"
 
+namespace dawn {
+namespace {
+
 // Test |GetDefaultLimits| returns the default.
 TEST(Limits, GetDefaultLimits) {
-    dawn::native::Limits limits = {};
+    native::Limits limits = {};
     EXPECT_NE(limits.maxBindGroups, 4u);
 
-    dawn::native::GetDefaultLimits(&limits);
+    native::GetDefaultLimits(&limits);
 
     EXPECT_EQ(limits.maxBindGroups, 4u);
 }
@@ -30,11 +33,11 @@ TEST(Limits, GetDefaultLimits) {
 // Test |ReifyDefaultLimits| populates the default if
 // values are undefined.
 TEST(Limits, ReifyDefaultLimits_PopulatesDefault) {
-    dawn::native::Limits limits;
+    native::Limits limits;
     limits.maxComputeWorkgroupStorageSize = wgpu::kLimitU32Undefined;
     limits.maxStorageBufferBindingSize = wgpu::kLimitU64Undefined;
 
-    dawn::native::Limits reified = dawn::native::ReifyDefaultLimits(limits);
+    native::Limits reified = native::ReifyDefaultLimits(limits);
     EXPECT_EQ(reified.maxComputeWorkgroupStorageSize, 16384u);
     EXPECT_EQ(reified.maxStorageBufferBindingSize, 134217728ul);
 }
@@ -42,11 +45,11 @@ TEST(Limits, ReifyDefaultLimits_PopulatesDefault) {
 // Test |ReifyDefaultLimits| clamps to the default if
 // values are worse than the default.
 TEST(Limits, ReifyDefaultLimits_Clamps) {
-    dawn::native::Limits limits;
+    native::Limits limits;
     limits.maxStorageBuffersPerShaderStage = 4;
     limits.minUniformBufferOffsetAlignment = 512;
 
-    dawn::native::Limits reified = dawn::native::ReifyDefaultLimits(limits);
+    native::Limits reified = native::ReifyDefaultLimits(limits);
     EXPECT_EQ(reified.maxStorageBuffersPerShaderStage, 8u);
     EXPECT_EQ(reified.minUniformBufferOffsetAlignment, 256u);
 }
@@ -55,19 +58,19 @@ TEST(Limits, ReifyDefaultLimits_Clamps) {
 // than supported.
 TEST(Limits, ValidateLimits) {
     // Start with the default for supported.
-    dawn::native::Limits defaults;
-    dawn::native::GetDefaultLimits(&defaults);
+    native::Limits defaults;
+    native::GetDefaultLimits(&defaults);
 
     // Test supported == required is valid.
     {
-        dawn::native::Limits required = defaults;
+        native::Limits required = defaults;
         EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
     // Test supported == required is valid, when they are not default.
     {
-        dawn::native::Limits supported = defaults;
-        dawn::native::Limits required = defaults;
+        native::Limits supported = defaults;
+        native::Limits required = defaults;
         supported.maxBindGroups += 1;
         required.maxBindGroups += 1;
         EXPECT_TRUE(ValidateLimits(supported, required).IsSuccess());
@@ -75,47 +78,47 @@ TEST(Limits, ValidateLimits) {
 
     // Test that default-initialized (all undefined) is valid.
     {
-        dawn::native::Limits required = {};
+        native::Limits required = {};
         EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
     // Test that better than supported is invalid for "maximum" limits.
     {
-        dawn::native::Limits required = {};
+        native::Limits required = {};
         required.maxTextureDimension3D = defaults.maxTextureDimension3D + 1;
-        dawn::native::MaybeError err = ValidateLimits(defaults, required);
+        native::MaybeError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
 
     // Test that worse than supported is valid for "maximum" limits.
     {
-        dawn::native::Limits required = {};
+        native::Limits required = {};
         required.maxComputeWorkgroupSizeX = defaults.maxComputeWorkgroupSizeX - 1;
         EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
     // Test that better than min is invalid for "alignment" limits.
     {
-        dawn::native::Limits required = {};
+        native::Limits required = {};
         required.minUniformBufferOffsetAlignment = defaults.minUniformBufferOffsetAlignment / 2;
-        dawn::native::MaybeError err = ValidateLimits(defaults, required);
+        native::MaybeError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
 
     // Test that worse than min and a power of two is valid for "alignment" limits.
     {
-        dawn::native::Limits required = {};
+        native::Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 2;
         EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
     // Test that worse than min and not a power of two is invalid for "alignment" limits.
     {
-        dawn::native::Limits required = {};
+        native::Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 3;
-        dawn::native::MaybeError err = ValidateLimits(defaults, required);
+        native::MaybeError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -123,46 +126,46 @@ TEST(Limits, ValidateLimits) {
 
 // Test that |ApplyLimitTiers| degrades limits to the next best tier.
 TEST(Limits, ApplyLimitTiers) {
-    auto SetLimitsStorageBufferBindingSizeTier2 = [](dawn::native::Limits* limits) {
+    auto SetLimitsStorageBufferBindingSizeTier2 = [](native::Limits* limits) {
         // Tier 2 of maxStorageBufferBindingSize is 1GB
         limits->maxStorageBufferBindingSize = 1073741824;
         // Also set the maxBufferSize to be large enough, as ApplyLimitTiers ensures tired
         // maxStorageBufferBindingSize no larger than tiered maxBufferSize.
         limits->maxBufferSize = 2147483648;
     };
-    dawn::native::Limits limitsStorageBufferBindingSizeTier2;
-    dawn::native::GetDefaultLimits(&limitsStorageBufferBindingSizeTier2);
+    native::Limits limitsStorageBufferBindingSizeTier2;
+    native::GetDefaultLimits(&limitsStorageBufferBindingSizeTier2);
     SetLimitsStorageBufferBindingSizeTier2(&limitsStorageBufferBindingSizeTier2);
 
-    auto SetLimitsStorageBufferBindingSizeTier3 = [](dawn::native::Limits* limits) {
+    auto SetLimitsStorageBufferBindingSizeTier3 = [](native::Limits* limits) {
         // Tier 3 of maxStorageBufferBindingSize is 2GB-4
         limits->maxStorageBufferBindingSize = 2147483644;
         // Also set the maxBufferSize to be large enough, as ApplyLimitTiers ensures tired
         // maxStorageBufferBindingSize no larger than tiered maxBufferSize.
         limits->maxBufferSize = 2147483648;
     };
-    dawn::native::Limits limitsStorageBufferBindingSizeTier3;
-    dawn::native::GetDefaultLimits(&limitsStorageBufferBindingSizeTier3);
+    native::Limits limitsStorageBufferBindingSizeTier3;
+    native::GetDefaultLimits(&limitsStorageBufferBindingSizeTier3);
     SetLimitsStorageBufferBindingSizeTier3(&limitsStorageBufferBindingSizeTier3);
 
-    auto SetLimitsComputeWorkgroupStorageSizeTier1 = [](dawn::native::Limits* limits) {
+    auto SetLimitsComputeWorkgroupStorageSizeTier1 = [](native::Limits* limits) {
         limits->maxComputeWorkgroupStorageSize = 16384;
     };
-    dawn::native::Limits limitsComputeWorkgroupStorageSizeTier1;
-    dawn::native::GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier1);
+    native::Limits limitsComputeWorkgroupStorageSizeTier1;
+    native::GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier1);
     SetLimitsComputeWorkgroupStorageSizeTier1(&limitsComputeWorkgroupStorageSizeTier1);
 
-    auto SetLimitsComputeWorkgroupStorageSizeTier3 = [](dawn::native::Limits* limits) {
+    auto SetLimitsComputeWorkgroupStorageSizeTier3 = [](native::Limits* limits) {
         limits->maxComputeWorkgroupStorageSize = 65536;
     };
-    dawn::native::Limits limitsComputeWorkgroupStorageSizeTier3;
-    dawn::native::GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier3);
+    native::Limits limitsComputeWorkgroupStorageSizeTier3;
+    native::GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier3);
     SetLimitsComputeWorkgroupStorageSizeTier3(&limitsComputeWorkgroupStorageSizeTier3);
 
     // Test that applying tiers to limits that are exactly
     // equal to a tier returns the same values.
     {
-        dawn::native::Limits limits = limitsStorageBufferBindingSizeTier2;
+        native::Limits limits = limitsStorageBufferBindingSizeTier2;
         EXPECT_EQ(ApplyLimitTiers(limits), limits);
 
         limits = limitsStorageBufferBindingSizeTier3;
@@ -171,7 +174,7 @@ TEST(Limits, ApplyLimitTiers) {
 
     // Test all limits slightly worse than tier 3.
     {
-        dawn::native::Limits limits = limitsStorageBufferBindingSizeTier3;
+        native::Limits limits = limitsStorageBufferBindingSizeTier3;
         limits.maxStorageBufferBindingSize -= 1;
         EXPECT_EQ(ApplyLimitTiers(limits), limitsStorageBufferBindingSizeTier2);
     }
@@ -179,28 +182,28 @@ TEST(Limits, ApplyLimitTiers) {
     // Test that limits may match one tier exactly and be degraded in another tier.
     // Degrading to one tier does not affect the other tier.
     {
-        dawn::native::Limits limits = limitsComputeWorkgroupStorageSizeTier3;
+        native::Limits limits = limitsComputeWorkgroupStorageSizeTier3;
         // Set tier 3 and change one limit to be insufficent.
         SetLimitsStorageBufferBindingSizeTier3(&limits);
         limits.maxStorageBufferBindingSize -= 1;
 
-        dawn::native::Limits tiered = ApplyLimitTiers(limits);
+        native::Limits tiered = ApplyLimitTiers(limits);
 
         // Check that |tiered| has the limits of memorySize tier 2
-        dawn::native::Limits tieredWithMemorySizeTier2 = tiered;
+        native::Limits tieredWithMemorySizeTier2 = tiered;
         SetLimitsStorageBufferBindingSizeTier2(&tieredWithMemorySizeTier2);
         EXPECT_EQ(tiered, tieredWithMemorySizeTier2);
 
         // Check that |tiered| has the limits of bindingSpace tier 3
-        dawn::native::Limits tieredWithBindingSpaceTier3 = tiered;
+        native::Limits tieredWithBindingSpaceTier3 = tiered;
         SetLimitsComputeWorkgroupStorageSizeTier3(&tieredWithBindingSpaceTier3);
         EXPECT_EQ(tiered, tieredWithBindingSpaceTier3);
     }
 
     // Test that limits may be simultaneously degraded in two tiers independently.
     {
-        dawn::native::Limits limits;
-        dawn::native::GetDefaultLimits(&limits);
+        native::Limits limits;
+        native::GetDefaultLimits(&limits);
         SetLimitsComputeWorkgroupStorageSizeTier3(&limits);
         SetLimitsStorageBufferBindingSizeTier3(&limits);
         limits.maxComputeWorkgroupStorageSize =
@@ -208,9 +211,9 @@ TEST(Limits, ApplyLimitTiers) {
         limits.maxStorageBufferBindingSize =
             limitsStorageBufferBindingSizeTier2.maxStorageBufferBindingSize + 1;
 
-        dawn::native::Limits tiered = ApplyLimitTiers(limits);
+        native::Limits tiered = ApplyLimitTiers(limits);
 
-        dawn::native::Limits expected = tiered;
+        native::Limits expected = tiered;
         SetLimitsComputeWorkgroupStorageSizeTier1(&expected);
         SetLimitsStorageBufferBindingSizeTier2(&expected);
         EXPECT_EQ(tiered, expected);
@@ -221,8 +224,8 @@ TEST(Limits, ApplyLimitTiers) {
 // maxBufferSize restriction.
 TEST(Limits, TieredMaxStorageBufferBindingSizeNoLargerThanMaxBufferSize) {
     // Start with the default for supported.
-    dawn::native::Limits defaults;
-    dawn::native::GetDefaultLimits(&defaults);
+    native::Limits defaults;
+    native::GetDefaultLimits(&defaults);
 
     // Test reported maxStorageBufferBindingSize around 128MB, 1GB, 2GB-4 and 4GB-4.
     constexpr uint64_t storageSizeTier1 = 134217728ull;   // 128MB
@@ -248,11 +251,11 @@ TEST(Limits, TieredMaxStorageBufferBindingSizeNoLargerThanMaxBufferSize) {
     for (uint64_t reportedMaxStorageBufferBindingSizes :
          possibleReportedMaxStorageBufferBindingSizes) {
         for (uint64_t reportedMaxBufferSizes : possibleReportedMaxBufferSizes) {
-            dawn::native::Limits limits = defaults;
+            native::Limits limits = defaults;
             limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSizes;
             limits.maxBufferSize = reportedMaxBufferSizes;
 
-            dawn::native::Limits tiered = ApplyLimitTiers(limits);
+            native::Limits tiered = ApplyLimitTiers(limits);
 
             EXPECT_LE(tiered.maxStorageBufferBindingSize, tiered.maxBufferSize);
         }
@@ -263,8 +266,8 @@ TEST(Limits, TieredMaxStorageBufferBindingSizeNoLargerThanMaxBufferSize) {
 // maxBufferSize restriction.
 TEST(Limits, TieredMaxUniformBufferBindingSizeNoLargerThanMaxBufferSize) {
     // Start with the default for supported.
-    dawn::native::Limits defaults;
-    dawn::native::GetDefaultLimits(&defaults);
+    native::Limits defaults;
+    native::GetDefaultLimits(&defaults);
 
     // Test reported maxStorageBufferBindingSize around 64KB, and a large 1GB.
     constexpr uint64_t uniformSizeTier1 = 65536ull;       // 64KB
@@ -286,11 +289,11 @@ TEST(Limits, TieredMaxUniformBufferBindingSizeNoLargerThanMaxBufferSize) {
     for (uint64_t reportedMaxUniformBufferBindingSizes :
          possibleReportedMaxUniformBufferBindingSizes) {
         for (uint64_t reportedMaxBufferSizes : possibleReportedMaxBufferSizes) {
-            dawn::native::Limits limits = defaults;
+            native::Limits limits = defaults;
             limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSizes;
             limits.maxBufferSize = reportedMaxBufferSizes;
 
-            dawn::native::Limits tiered = ApplyLimitTiers(limits);
+            native::Limits tiered = ApplyLimitTiers(limits);
 
             EXPECT_LE(tiered.maxUniformBufferBindingSize, tiered.maxBufferSize);
         }
@@ -300,12 +303,12 @@ TEST(Limits, TieredMaxUniformBufferBindingSizeNoLargerThanMaxBufferSize) {
 // Test |NormalizeLimits| works to enforce restriction of limits.
 TEST(Limits, NormalizeLimits) {
     // Start with the default for supported.
-    dawn::native::Limits defaults;
-    dawn::native::GetDefaultLimits(&defaults);
+    native::Limits defaults;
+    native::GetDefaultLimits(&defaults);
 
     // Test specific limit values are clamped to internal Dawn constants.
     {
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxVertexBufferArrayStride = kMaxVertexBufferArrayStride + 1;
         limits.maxColorAttachments = uint32_t(kMaxColorAttachments) + 1;
         limits.maxBindGroups = kMaxBindGroups + 1;
@@ -338,7 +341,7 @@ TEST(Limits, NormalizeLimits) {
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
         constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize;
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
         limits.maxBufferSize = reportedMaxBufferSize;
 
@@ -350,7 +353,7 @@ TEST(Limits, NormalizeLimits) {
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
         constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize - 1;
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
         limits.maxBufferSize = reportedMaxBufferSize;
 
@@ -363,7 +366,7 @@ TEST(Limits, NormalizeLimits) {
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
         constexpr uint64_t reportedMaxStorageBufferBindingSize = reportedMaxBufferSize + 1;
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
         limits.maxBufferSize = reportedMaxBufferSize;
 
@@ -377,7 +380,7 @@ TEST(Limits, NormalizeLimits) {
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
         constexpr uint64_t reportedMaxStorageBufferBindingSize = 4294967295;
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxStorageBufferBindingSize = reportedMaxStorageBufferBindingSize;
         limits.maxBufferSize = reportedMaxBufferSize;
 
@@ -392,7 +395,7 @@ TEST(Limits, NormalizeLimits) {
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
         constexpr uint64_t reportedMaxUniformBufferBindingSize = reportedMaxBufferSize - 1;
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSize;
         limits.maxBufferSize = reportedMaxBufferSize;
 
@@ -404,7 +407,7 @@ TEST(Limits, NormalizeLimits) {
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
         constexpr uint64_t reportedMaxUniformBufferBindingSize = reportedMaxBufferSize;
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSize;
         limits.maxBufferSize = reportedMaxBufferSize;
 
@@ -417,7 +420,7 @@ TEST(Limits, NormalizeLimits) {
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
         constexpr uint64_t reportedMaxUniformBufferBindingSize = reportedMaxBufferSize + 1;
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSize;
         limits.maxBufferSize = reportedMaxBufferSize;
 
@@ -431,7 +434,7 @@ TEST(Limits, NormalizeLimits) {
     {
         constexpr uint64_t reportedMaxBufferSize = 2147483648;
         constexpr uint64_t reportedMaxUniformBufferBindingSize = 4294967295;
-        dawn::native::Limits limits = defaults;
+        native::Limits limits = defaults;
         limits.maxUniformBufferBindingSize = reportedMaxUniformBufferBindingSize;
         limits.maxBufferSize = reportedMaxBufferSize;
 
@@ -441,3 +444,6 @@ TEST(Limits, NormalizeLimits) {
         EXPECT_EQ(limits.maxUniformBufferBindingSize, reportedMaxBufferSize);
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

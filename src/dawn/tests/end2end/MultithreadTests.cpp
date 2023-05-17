@@ -32,7 +32,9 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
+
 template <typename Step>
 class LockStep {
   public:
@@ -1343,8 +1345,6 @@ TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
     });
 }
 
-}  // namespace
-
 DAWN_INSTANTIATE_TEST(MultithreadTests,
                       D3D12Backend(),
                       MetalBackend(),
@@ -1393,3 +1393,6 @@ DAWN_INSTANTIATE_TEST(MultithreadTimestampQueryTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

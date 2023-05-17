@@ -18,6 +18,9 @@
 
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ComputeCopyStorageBufferTests : public DawnTest {
   public:
     static constexpr int kInstances = 4;
@@ -151,3 +154,6 @@ DAWN_INSTANTIATE_TEST(ComputeCopyStorageBufferTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

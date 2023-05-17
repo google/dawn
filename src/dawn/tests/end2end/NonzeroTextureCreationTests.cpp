@@ -22,6 +22,7 @@
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 using Format = wgpu::TextureFormat;
@@ -258,8 +259,6 @@ class NonzeroDepthStencilTextureCreationTests : public NonzeroTextureCreationTes
 class NonzeroStencilTextureCreationTests : public NonzeroTextureCreationTests {};
 class NonzeroMultisampledTextureCreationTests : public NonzeroTextureCreationTests {};
 
-}  // anonymous namespace
-
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
     Run();
@@ -455,3 +454,6 @@ DAWN_INSTANTIATE_TEST_P(
     {0u},  // mip
     {4u}   // sample count
 );
+
+}  // anonymous namespace
+}  // namespace dawn

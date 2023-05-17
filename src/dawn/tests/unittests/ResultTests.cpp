@@ -20,6 +20,7 @@
 #include "dawn/common/Result.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
 namespace {
 
 template <typename T, typename E>
@@ -384,3 +385,4 @@ TEST(ResultGeneric, ReturningSuccess) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn

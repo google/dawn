@@ -22,7 +22,7 @@
 #include "dawn/common/StackContainer.h"
 #include "dawn/common/UnderlyingType.h"
 
-namespace ityp {
+namespace dawn::ityp {
 
 template <typename Index, typename Value, size_t StaticCapacity>
 class stack_vec : private StackVector<Value, StaticCapacity> {
@@ -72,6 +72,6 @@ class stack_vec : private StackVector<Value, StaticCapacity> {
     Index size() const { return Index(static_cast<I>(this->container().size())); }
 };
 
-}  // namespace ityp
+}  // namespace dawn::ityp
 
 #endif  // SRC_DAWN_COMMON_ITYP_STACK_VEC_H_

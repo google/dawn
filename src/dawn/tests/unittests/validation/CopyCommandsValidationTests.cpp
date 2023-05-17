@@ -22,6 +22,9 @@
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class CopyCommandTest : public ValidationTest {
   protected:
     wgpu::Buffer CreateBuffer(uint64_t size, wgpu::BufferUsage usage) {
@@ -420,7 +423,7 @@ TEST_F(CopyCommandTest_B2B, CopyWithinSameBuffer) {
 
 class CopyCommandTest_B2T : public CopyCommandTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
@@ -1028,7 +1031,7 @@ TEST_F(CopyCommandTest_B2T, RequiredBytesInCopyOverflow) {
 
 class CopyCommandTest_T2B : public CopyCommandTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
@@ -1665,7 +1668,7 @@ TEST_F(CopyCommandTest_T2B, RequiredBytesInCopyOverflow) {
 
 class CopyCommandTest_T2T : public CopyCommandTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
@@ -2144,7 +2147,7 @@ TEST_F(CopyCommandTest_T2T, CopyWithinSameTexture) {
 
 class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[3] = {wgpu::FeatureName::TextureCompressionBC,
                                                  wgpu::FeatureName::TextureCompressionETC2,
@@ -2652,3 +2655,6 @@ TEST_F(CopyCommandTest_ClearBuffer, BuffersInErrorState) {
     encoder.ClearBuffer(errorBuffer, 0, 4);
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
+
+}  // anonymous namespace
+}  // namespace dawn

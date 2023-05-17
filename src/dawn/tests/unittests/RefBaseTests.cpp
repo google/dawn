@@ -18,7 +18,9 @@
 #include "dawn/common/RefBase.h"
 #include "gmock/gmock.h"
 
+namespace dawn {
 namespace {
+
 using Id = uint32_t;
 
 enum class Action {
@@ -98,7 +100,6 @@ struct RefTrackerTraits {
 constexpr RefTracker RefTrackerTraits::kNullValue;
 
 using Ref = RefBase<RefTracker, RefTrackerTraits>;
-}  // namespace
 
 TEST(RefBase, Acquire) {
     Events events;
@@ -301,3 +302,6 @@ TEST(RefBase, TCopyAssignmentAlternate) {
                                              Event{Action::kAssign, 2, 1},  // copy tracker1
                                              Event{Action::kMarker, 30}));
 }
+
+}  // anonymous namespace
+}  // namespace dawn

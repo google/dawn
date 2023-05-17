@@ -18,6 +18,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 constexpr uint32_t kRTSize = 4;
 const utils::RGBA8 kColors[2] = {utils::RGBA8::kGreen, utils::RGBA8::kBlue};
 
@@ -200,3 +203,6 @@ DAWN_INSTANTIATE_TEST(RenderBundleTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

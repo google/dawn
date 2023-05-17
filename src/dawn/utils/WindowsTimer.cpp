@@ -16,7 +16,7 @@
 
 #include "dawn/utils/Timer.h"
 
-namespace utils {
+namespace dawn::utils {
 
 class WindowsTimer : public Timer {
   public:
@@ -85,4 +85,4 @@ Timer* CreateTimer() {
     return new WindowsTimer();
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

@@ -17,6 +17,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ClipSpaceTest : public DawnTest {
   protected:
     wgpu::RenderPipeline CreatePipelineForTest() {
@@ -99,3 +102,6 @@ DAWN_INSTANTIATE_TEST(ClipSpaceTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

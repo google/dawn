@@ -14,7 +14,7 @@
 
 #include "dawn/utils/PlatformDebugLogger.h"
 
-namespace utils {
+namespace dawn::utils {
 
 class EmptyDebugLogger : public PlatformDebugLogger {
   public:
@@ -26,4 +26,4 @@ PlatformDebugLogger* CreatePlatformDebugLogger() {
     return new EmptyDebugLogger();
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

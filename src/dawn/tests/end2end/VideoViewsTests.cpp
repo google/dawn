@@ -18,6 +18,8 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+
 VideoViewsTestBackend::PlatformTexture::PlatformTexture(wgpu::Texture&& texture)
     : wgpuTexture(texture) {}
 VideoViewsTestBackend::PlatformTexture::~PlatformTexture() = default;
@@ -217,6 +219,8 @@ TEST_P(VideoViewsTests, CreateVideoTextureWithoutInitializedData) {
     ASSERT_NE(platformTexture.get(), nullptr);
     mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
 }
+
+namespace {
 
 // Samples the luminance (Y) plane from an imported NV12 texture into a single channel of an RGBA
 // output attachment and checks for the expected pixel value in the rendered quad.
@@ -486,3 +490,6 @@ TEST_P(VideoViewsTests, NV12SampleYUVtoRGBMultipleSamplers) {
 }
 
 DAWN_INSTANTIATE_TEST(VideoViewsTests, VideoViewsTestBackend::Backend());
+
+}  // anonymous namespace
+}  // namespace dawn

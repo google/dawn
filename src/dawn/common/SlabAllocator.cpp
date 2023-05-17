@@ -22,6 +22,8 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
 
+namespace dawn {
+
 // IndexLinkNode
 
 SlabAllocatorImpl::IndexLinkNode::IndexLinkNode(Index index, Index nextIndex)
@@ -241,3 +243,5 @@ void SlabAllocatorImpl::GetNewSlab() {
 
     mAvailableSlabs.Prepend(new (alignedPtr) Slab(allocation, node));
 }
+
+}  // namespace dawn

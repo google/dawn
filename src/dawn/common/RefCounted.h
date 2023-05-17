@@ -20,6 +20,8 @@
 
 #include "dawn/common/RefBase.h"
 
+namespace dawn {
+
 class RefCount {
   public:
     // Create a refcount with a payload. The refcount starts initially at one.
@@ -87,5 +89,7 @@ Ref<T> AcquireRef(T* pointee) {
     ref.Acquire(pointee);
     return ref;
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_REFCOUNTED_H_

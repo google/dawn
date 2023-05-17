@@ -26,6 +26,7 @@
 #include "dawn/utils/WGPUHelpers.h"
 #include "gtest/gtest.h"
 
+namespace dawn::native {
 namespace {
 
 using testing::Contains;
@@ -426,3 +427,4 @@ TEST_F(DeviceCreationTest, RequestDeviceFailure) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn::native

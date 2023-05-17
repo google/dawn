@@ -17,6 +17,9 @@
 #include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class DebugMarkerValidationTest : public ValidationTest {};
 
 // Correct usage of debug markers should succeed in render pass.
@@ -253,3 +256,6 @@ TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoderIndependent) {
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
+
+}  // anonymous namespace
+}  // namespace dawn

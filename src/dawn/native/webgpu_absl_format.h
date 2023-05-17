@@ -19,7 +19,7 @@
 #include "dawn/native/dawn_platform.h"
 #include "dawn/native/webgpu_absl_format_autogen.h"
 
-namespace ityp {
+namespace dawn::ityp {
 template <typename Index, typename Value>
 class span;
 }

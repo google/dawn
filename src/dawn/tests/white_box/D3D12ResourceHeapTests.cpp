@@ -19,6 +19,7 @@
 #include "dawn/tests/DawnTest.h"
 
 namespace dawn::native::d3d12 {
+namespace {
 
 class D3D12ResourceHeapTests : public DawnTest {
   protected:
@@ -105,4 +106,5 @@ TEST_P(D3D12ResourceHeapTests, AlignUBO) {
 
 DAWN_INSTANTIATE_TEST(D3D12ResourceHeapTests, D3D12Backend());
 
+}  // anonymous namespace
 }  // namespace dawn::native::d3d12

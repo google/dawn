@@ -18,6 +18,9 @@
 #include "dawn/common/ityp_vector.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 class ITypVectorTest : public testing::Test {
   protected:
     using Key = TypedInteger<struct KeyT, uint32_t>;
@@ -179,3 +182,6 @@ TEST_F(ITypVectorTest, BeginEndFrontBackData) {
     ASSERT_EQ(&constVec.back(), &constVec[Key(9)]);
     ASSERT_EQ(constVec.data(), &constVec[Key(0)]);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

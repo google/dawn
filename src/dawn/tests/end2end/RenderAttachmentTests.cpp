@@ -17,6 +17,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class RenderAttachmentTest : public DawnTest {};
 
 // Test that it is ok to have more fragment outputs than color attachments.
@@ -83,3 +86,6 @@ DAWN_INSTANTIATE_TEST(RenderAttachmentTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

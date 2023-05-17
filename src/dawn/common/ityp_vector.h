@@ -22,7 +22,7 @@
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/UnderlyingType.h"
 
-namespace ityp {
+namespace dawn::ityp {
 
 // ityp::vector is a helper class that wraps std::vector with the restriction that
 // indices must be a particular type |Index|.
@@ -94,6 +94,6 @@ class vector : public std::vector<Value> {
     void reserve(Index size) { Base::reserve(static_cast<I>(size)); }
 };
 
-}  // namespace ityp
+}  // namespace dawn::ityp
 
 #endif  // SRC_DAWN_COMMON_ITYP_VECTOR_H_

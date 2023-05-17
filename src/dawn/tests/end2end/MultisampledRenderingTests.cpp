@@ -20,6 +20,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class MultisampledRenderingTest : public DawnTest {
   protected:
     void SetUp() override {
@@ -1217,3 +1220,6 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingWithTransientAttachmentTest,
                       MetalBackend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend({"always_resolve_into_zero_level_and_layer",
                                     "emulate_store_and_msaa_resolve"}));
+
+}  // anonymous namespace
+}  // namespace dawn

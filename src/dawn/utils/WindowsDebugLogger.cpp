@@ -20,7 +20,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/windows_with_undefs.h"
 
-namespace utils {
+namespace dawn::utils {
 
 class WindowsDebugLogger : public PlatformDebugLogger {
   public:
@@ -107,4 +107,4 @@ PlatformDebugLogger* CreatePlatformDebugLogger() {
     return new WindowsDebugLogger();
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

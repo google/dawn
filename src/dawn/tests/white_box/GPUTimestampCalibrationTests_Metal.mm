@@ -17,6 +17,9 @@
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/tests/white_box/GPUTimestampCalibrationTests.h"
 
+namespace dawn {
+namespace {
+
 class GPUTimestampCalibrationTestsMetal : public GPUTimestampCalibrationTestBackend {
   public:
     explicit GPUTimestampCalibrationTestsMetal(const wgpu::Device& device) {
@@ -44,8 +47,12 @@ class GPUTimestampCalibrationTestsMetal : public GPUTimestampCalibrationTestBack
     dawn::native::metal::Device* mBackendDevice;
 };
 
+}  // anonymous namespace
+
 // static
 std::unique_ptr<GPUTimestampCalibrationTestBackend> GPUTimestampCalibrationTestBackend::Create(
     const wgpu::Device& device) {
     return std::make_unique<GPUTimestampCalibrationTestsMetal>(device);
 }
+
+}  // namespace dawn

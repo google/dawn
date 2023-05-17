@@ -19,6 +19,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ObjectCachingTest : public DawnTest {};
 
 // Test that BindGroupLayouts are correctly deduplicated.
@@ -451,3 +454,6 @@ DAWN_INSTANTIATE_TEST(ObjectCachingTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

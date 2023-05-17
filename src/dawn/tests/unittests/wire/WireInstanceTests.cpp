@@ -296,5 +296,5 @@ TEST_F(WireInstanceTests, RequestAdapterWireDisconnectBeforeCallback) {
     GetWireClient()->Disconnect();
 }
 
-}  // namespace
+}  // anonymous namespace
 }  // namespace dawn::wire

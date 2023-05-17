@@ -19,6 +19,7 @@
 #include "dawn/common/SlabAllocator.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
 namespace {
 
 struct Foo : public PlacementAllocated {
@@ -30,8 +31,6 @@ struct Foo : public PlacementAllocated {
 struct alignas(256) AlignedFoo : public Foo {
     using Foo::Foo;
 };
-
-}  // namespace
 
 // Test that a slab allocator of a single object works.
 TEST(SlabAllocatorTests, Single) {
@@ -179,3 +178,6 @@ TEST(SlabAllocatorTests, AllocateDeallocateMany) {
         allocator.Deallocate(object);
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

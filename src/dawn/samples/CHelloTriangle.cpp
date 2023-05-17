@@ -42,13 +42,13 @@ void init() {
             );
             return vec4f(pos[VertexIndex], 0.0, 1.0);
         })";
-    WGPUShaderModule vsModule = utils::CreateShaderModule(device, vs).MoveToCHandle();
+    WGPUShaderModule vsModule = dawn::utils::CreateShaderModule(device, vs).MoveToCHandle();
 
     const char* fs = R"(
         @fragment fn main() -> @location(0) vec4f {
             return vec4f(1.0, 0.0, 0.0, 1.0);
         })";
-    WGPUShaderModule fsModule = utils::CreateShaderModule(device, fs).MoveToCHandle();
+    WGPUShaderModule fsModule = dawn::utils::CreateShaderModule(device, fs).MoveToCHandle();
 
     {
         WGPURenderPipelineDescriptor descriptor = {};
@@ -142,9 +142,9 @@ int main(int argc, const char* argv[]) {
     init();
 
     while (!ShouldQuit()) {
-        utils::ScopedAutoreleasePool pool;
+        dawn::utils::ScopedAutoreleasePool pool;
         ProcessEvents();
         frame();
-        utils::USleep(16000);
+        dawn::utils::USleep(16000);
     }
 }

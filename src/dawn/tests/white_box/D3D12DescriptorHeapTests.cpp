@@ -27,6 +27,7 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn::native::d3d12 {
+namespace {
 
 constexpr uint32_t kRTSize = 4;
 
@@ -110,7 +111,7 @@ class PlaceholderStagingDescriptorAllocator {
                      D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER) {}
 
     CPUDescriptorHeapAllocation AllocateCPUDescriptors() {
-        dawn::native::ResultOrError<CPUDescriptorHeapAllocation> result =
+        native::ResultOrError<CPUDescriptorHeapAllocation> result =
             mAllocator.AllocateCPUDescriptors();
         return (result.IsSuccess()) ? result.AcquireSuccess() : CPUDescriptorHeapAllocation{};
     }
@@ -123,8 +124,8 @@ class PlaceholderStagingDescriptorAllocator {
 
 // Verify the shader visible view heaps switch over within a single submit.
 TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeap) {
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 
@@ -223,8 +224,8 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
 // Verify shader-visible heaps can be recycled for multiple submits.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
     // Use small heaps to count only pool-allocated switches.
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     ShaderVisibleDescriptorAllocator* allocator =
         mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
@@ -265,8 +266,8 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
 // Verify shader-visible heaps do not recycle in a pending submit.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingSubmit) {
     // Use small heaps to count only pool-allocated switches.
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     constexpr uint32_t kNumOfSwitches = 5;
 
@@ -297,8 +298,8 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingSubmit) {
 // once no longer pending.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
     // Use small heaps to count only pool-allocated switches.
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     constexpr uint32_t kNumOfSwitches = 5;
 
@@ -432,8 +433,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
     // draws, the result is the arithmetic sum of the sequence after the framebuffer is blended
     // by accumulation. By checking for this sum, we ensure each bindgroup was encoded
     // correctly.
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     utils::BasicRenderPass renderPass =
         MakeRenderPass(kRTSize, kRTSize, wgpu::TextureFormat::R16Float);
@@ -506,8 +507,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
 // The first descriptor's memory will be reused when the second submit encodes |heapSize|
 // descriptors.
 TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     // TODO(crbug.com/dawn/742): Test output is wrong with D3D12 + WARP.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
@@ -594,8 +595,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
 // Shader-visible heaps should switch out once then re-encode the first descriptor at a new
 // offset in the heap.
 TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOOverflow) {
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
@@ -655,8 +656,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOOverflow) {
 // Shader-visible heaps should switch out once then re-encode the
 // first descriptor at the same offset in the heap.
 TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
@@ -735,8 +736,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
 // Verify encoding many sampler and ubo worth of bindgroups.
 // Shader-visible heaps should switch out |kNumOfViewHeaps| times.
 TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
-    DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
-        dawn::native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     // Create a solid filled texture.
     wgpu::TextureDescriptor descriptor;
@@ -1067,4 +1068,5 @@ DAWN_INSTANTIATE_TEST(D3D12DescriptorHeapTests,
                       D3D12Backend(),
                       D3D12Backend({"use_d3d12_small_shader_visible_heap"}));
 
+}  // anonymous namespace
 }  // namespace dawn::native::d3d12

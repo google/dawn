@@ -18,6 +18,7 @@
 #include "dawn/wire/WireClient.h"
 
 namespace dawn::wire {
+namespace {
 
 using testing::_;
 using testing::DoAll;
@@ -26,8 +27,6 @@ using testing::Return;
 using testing::SaveArg;
 using testing::StrEq;
 using testing::StrictMock;
-
-namespace {
 
 // Mock classes to add expectations on the wire calling callbacks
 class MockDeviceErrorCallback {
@@ -69,8 +68,6 @@ std::unique_ptr<StrictMock<MockDeviceLostCallback>> mockDeviceLostCallback;
 void ToMockDeviceLostCallback(WGPUDeviceLostReason reason, const char* message, void* userdata) {
     mockDeviceLostCallback->Call(reason, message, userdata);
 }
-
-}  // anonymous namespace
 
 class WireErrorCallbackTests : public WireTest {
   public:
@@ -386,4 +383,5 @@ TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
     FlushServer();
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

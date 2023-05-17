@@ -48,8 +48,8 @@ void WireTest::SetUp() {
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(_, _, _)).Times(Exactly(1));
     SetupIgnoredCallExpectations();
 
-    mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
-    mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>(mWireServer.get());
+    mS2cBuf = std::make_unique<dawn::utils::TerribleCommandBuffer>();
+    mC2sBuf = std::make_unique<dawn::utils::TerribleCommandBuffer>(mWireServer.get());
 
     dawn::wire::WireServerDescriptor serverDesc = {};
     serverDesc.procs = &mockProcs;

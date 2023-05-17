@@ -18,6 +18,8 @@
 #include <cstddef>
 #include <new>
 
+namespace dawn {
+
 template <typename T>
 T* AllocNoThrow(size_t count) {
 #if defined(ADDRESS_SANITIZER) || defined(MEMORY_SANITIZER)
@@ -29,5 +31,7 @@ T* AllocNoThrow(size_t count) {
 #endif
     return new (std::nothrow) T[count];
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_ALLOC_H_

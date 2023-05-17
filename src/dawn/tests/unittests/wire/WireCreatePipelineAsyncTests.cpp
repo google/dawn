@@ -67,8 +67,6 @@ void ToMockCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus statu
     mockCreateRenderPipelineAsyncCallback->Call(status, pipeline, message, userdata);
 }
 
-}  // anonymous namespace
-
 class WireCreatePipelineAsyncTest : public WireTest {
   public:
     void SetUp() override {
@@ -376,4 +374,5 @@ TEST_F(WireCreatePipelineAsyncTest, DeviceDeletedBeforeCallback) {
     DefaultApiDeviceWasReleased();
 }
 
+}  // anonymous namespace
 }  // namespace dawn::wire

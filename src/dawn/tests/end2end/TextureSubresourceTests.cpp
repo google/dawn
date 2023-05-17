@@ -17,6 +17,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class TextureSubresourceTest : public DawnTest {
   public:
     static constexpr uint32_t kSize = 4u;
@@ -194,3 +197,6 @@ DAWN_INSTANTIATE_TEST(TextureSubresourceTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

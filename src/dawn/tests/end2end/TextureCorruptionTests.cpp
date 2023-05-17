@@ -20,12 +20,14 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 // 2D array textures with particular dimensions may corrupt on some devices. This test creates some
 // 2d-array textures with different dimensions, and test them one by one. For each sub-test, the
 // tested texture is written via different methods, then read back from the texture and verify the
 // data.
 
-namespace {
 enum class WriteType {
     ClearTexture,
     WriteTexture,    // Write the tested texture via writeTexture API
@@ -84,8 +86,6 @@ DAWN_TEST_PARAM_STRUCT(TextureCorruptionTestsParams,
                        MipLevelCount,
                        SampleCount,
                        WriteType);
-
-}  // namespace
 
 class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsParams> {
   protected:
@@ -461,3 +461,6 @@ DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_WriteType,
                         {WriteType::ClearTexture, WriteType::WriteTexture, WriteType::B2TCopy,
                          WriteType::RenderConstant, WriteType::RenderFromTextureSample,
                          WriteType::RenderFromTextureLoad});
+
+}  // anonymous namespace
+}  // namespace dawn

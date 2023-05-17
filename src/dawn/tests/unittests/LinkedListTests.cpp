@@ -10,6 +10,9 @@
 #include "dawn/common/LinkedList.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
+namespace {
+
 class Node : public LinkNode<Node> {
   public:
     explicit Node(int id) : id_(id) {}
@@ -456,3 +459,6 @@ TEST(LinkedList, RangeBasedEndIsEnd) {
     LinkedList<Node> list;
     EXPECT_EQ(list.end(), *end(list));
 }
+
+}  // anonymous namespace
+}  // namespace dawn

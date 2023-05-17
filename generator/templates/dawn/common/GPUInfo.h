@@ -21,7 +21,7 @@
 using PCIVendorID = uint32_t;
 using PCIDeviceID = uint32_t;
 
-namespace gpu_info {
+namespace dawn::gpu_info {
 
 // Vendor IDs
 {% for vendor in vendors %}
@@ -51,5 +51,5 @@ namespace gpu_info {
 std::string GetVendorName(PCIVendorID vendorId);
 std::string GetArchitectureName(PCIVendorID vendorId, PCIDeviceID deviceId);
 
-} // namespace gpu_info
+} // namespace dawn::gpu_info
 #endif  // SRC_DAWN_COMMON_GPUINFO_AUTOGEN_H_

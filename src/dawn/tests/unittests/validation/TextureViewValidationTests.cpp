@@ -16,6 +16,7 @@
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 
+namespace dawn {
 namespace {
 
 class TextureViewValidationTest : public ValidationTest {};
@@ -916,7 +917,7 @@ TEST_F(TextureViewValidationTest, AspectMustExist) {
 
 class D32S8TextureViewValidationTests : public ValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
@@ -961,3 +962,4 @@ TEST_F(D32S8TextureViewValidationTests, TextureViewFormatCompatibility) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn

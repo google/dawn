@@ -16,7 +16,7 @@
 
 #include "dawn/common/Compiler.h"
 
-namespace utils {
+namespace dawn::utils {
 
 ScopedAutoreleasePool::ScopedAutoreleasePool() : mPool(nullptr) {
     DAWN_UNUSED(mPool);
@@ -30,4 +30,4 @@ ScopedAutoreleasePool& ScopedAutoreleasePool::operator=(ScopedAutoreleasePool&& 
     return *this;
 }
 
-}  // namespace utils
+}  // namespace dawn::utils

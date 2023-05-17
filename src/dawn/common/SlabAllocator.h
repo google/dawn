@@ -22,6 +22,8 @@
 #include "dawn/common/Numeric.h"
 #include "dawn/common/PlacementAllocated.h"
 
+namespace dawn {
+
 // The SlabAllocator allocates objects out of one or more fixed-size contiguous "slabs" of memory.
 // This makes it very quick to allocate and deallocate fixed-size objects because the allocator only
 // needs to index an offset into pre-allocated memory. It is similar to a pool-allocator that
@@ -178,5 +180,7 @@ class SlabAllocator : public SlabAllocatorImpl {
 
     void Deallocate(T* object) { SlabAllocatorImpl::Deallocate(object); }
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_SLABALLOCATOR_H_

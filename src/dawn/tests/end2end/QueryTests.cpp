@@ -18,6 +18,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 // Clear the content of the result buffer into 0xFFFFFFFF.
 constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
 constexpr static uint64_t kZero = 0u;
@@ -1283,3 +1286,6 @@ DAWN_INSTANTIATE_TEST(TimestampQueryInsidePassesTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

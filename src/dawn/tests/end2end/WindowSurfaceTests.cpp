@@ -40,17 +40,20 @@
 
 #include "GLFW/glfw3native.h"
 
+namespace dawn {
+namespace {
+
 // Test for wgpu::Surface creation that only need an instance (no devices) and don't need all the
 // complexity of DawnTest.
 class WindowSurfaceInstanceTests : public testing::Test {
   public:
     void SetUp() override {
         glfwSetErrorCallback([](int code, const char* message) {
-            dawn::ErrorLog() << "GLFW error " << code << " " << message;
+            ErrorLog() << "GLFW error " << code << " " << message;
         });
         DAWN_TEST_UNSUPPORTED_IF(!glfwInit());
 
-        dawnProcSetProcs(&dawn::native::GetProcs());
+        dawnProcSetProcs(&native::GetProcs());
 
         mInstance = wgpu::CreateInstance();
     }
@@ -64,7 +67,7 @@ class WindowSurfaceInstanceTests : public testing::Test {
 
     void AssertSurfaceCreation(const wgpu::SurfaceDescriptor* descriptor, bool succeeds) {
         wgpu::Surface surface = mInstance.CreateSurface(descriptor);
-        ASSERT_EQ(dawn::native::CheckIsErrorForTesting(surface.Get()), !succeeds);
+        ASSERT_EQ(native::CheckIsErrorForTesting(surface.Get()), !succeeds);
     }
 
     GLFWwindow* CreateWindow() {
@@ -248,3 +251,6 @@ TEST_F(WindowSurfaceInstanceTests, MetalSurfacesAreInvalid) {
 }
 
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -17,6 +17,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class ScissorTest : public DawnTest {
   protected:
     wgpu::RenderPipeline CreateQuadPipeline(wgpu::TextureFormat format) {
@@ -158,3 +161,6 @@ DAWN_INSTANTIATE_TEST(ScissorTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -23,7 +23,7 @@
 
 struct DawnProcTable;
 
-namespace utils {
+namespace dawn::utils {
 
 class WireHelper {
   public:
@@ -45,6 +45,6 @@ std::unique_ptr<WireHelper> CreateWireHelper(const DawnProcTable& procs,
                                              bool useWire,
                                              const char* wireTraceDir = nullptr);
 
-}  // namespace utils
+}  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_WIREHELPER_H_

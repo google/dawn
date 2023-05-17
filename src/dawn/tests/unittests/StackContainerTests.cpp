@@ -12,6 +12,7 @@
 #include "dawn/common/StackContainer.h"
 #include "gtest/gtest.h"
 
+namespace dawn {
 namespace {
 
 class Placeholder : public RefCounted {
@@ -23,8 +24,6 @@ class Placeholder : public RefCounted {
 
     int* const mAlive;
 };
-
-}  // namespace
 
 TEST(StackContainer, Vector) {
     const int stack_size = 3;
@@ -94,8 +93,6 @@ TEST(StackContainer, VectorDoubleDelete) {
     // Shouldn't crash at exit.
 }
 
-namespace {
-
 template <size_t alignment>
 class AlignedData {
   public:
@@ -105,8 +102,6 @@ class AlignedData {
     AlignedData& operator=(const AlignedData&) = default;
     alignas(alignment) char data_[alignment];
 };
-
-}  // anonymous namespace
 
 #define EXPECT_ALIGNED(ptr, align) EXPECT_EQ(0u, reinterpret_cast<uintptr_t>(ptr) & (align - 1))
 
@@ -133,8 +128,12 @@ TEST(StackContainer, BufferAlignment) {
 #endif
 }
 
+}  // anonymous namespace
+
 template class StackVector<int, 2>;
 template class StackVector<Ref<Placeholder>, 2>;
+
+namespace {
 
 template <typename T, size_t size>
 void CheckStackVectorElements(const StackVector<T, size>& vec, std::initializer_list<T> expected) {
@@ -165,3 +164,6 @@ TEST(StackContainer, Iteration) {
     vect->resize(1);
     CheckStackVectorElements(vect, {8});
 }
+
+}  // anonymous namespace
+}  // namespace dawn
