@@ -739,6 +739,9 @@ DawnTestBase::~DawnTestBase() {
     // Check that all devices were destructed.
     EXPECT_EQ(gTestEnv->GetInstance()->GetDeviceCountForTesting(), 0u);
 
+    // Unsets the platform since we are cleaning the per-test platform up with the test case.
+    dawn::native::FromAPI(gTestEnv->GetInstance()->Get())->SetPlatformForTesting(nullptr);
+
     gCurrentTest = nullptr;
 }
 
@@ -1113,9 +1116,6 @@ void DawnTestBase::TearDown() {
         EXPECT_EQ(mLastWarningCount,
                   dawn::native::GetDeprecationWarningCountForTesting(device.Get()));
     }
-
-    // Unsets the platform since we are cleaning the per-test platform up with the test case.
-    dawn::native::FromAPI(gTestEnv->GetInstance()->Get())->SetPlatformForTesting(nullptr);
 }
 
 void DawnTestBase::DestroyDevice(wgpu::Device device) {
