@@ -59,6 +59,7 @@
 #include "src/tint/ast/var.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/while_statement.h"
+#include "src/tint/ir/block_param.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
@@ -944,28 +945,34 @@ class Impl {
             return utils::Failure;
         }
 
-        // Generate a variable to store the short-circut into
-        auto* ty = builder_.ir.types.Get<type::Reference>(builder_.ir.types.Get<type::Bool>(),
-                                                          builtin::AddressSpace::kFunction,
-                                                          builtin::Access::kReadWrite);
-        auto* result_var = builder_.Declare(ty);
-        current_flow_block_->instructions.Push(result_var);
-
-        auto* lhs_store = builder_.Store(result_var, lhs.Get());
-        current_flow_block_->instructions.Push(lhs_store);
-
         auto* if_node = builder_.CreateIf(lhs.Get());
         BranchTo(if_node);
+
+        auto* result = builder_.BlockParam(builder_.ir.types.Get<type::Bool>());
+        if_node->merge.target->As<Block>()->params.Push(result);
 
         utils::Result<Value*> rhs;
         {
             FlowStackScope scope(this, if_node);
 
+            utils::Vector<Value*, 1> alt_args;
+            alt_args.Push(lhs.Get());
+
             // If this is an `&&` then we only evaluate the RHS expression in the true block.
             // If this is an `||` then we only evaluate the RHS expression in the false block.
             if (expr->op == ast::BinaryOp::kLogicalAnd) {
+                // If the lhs is false, then that is the result we want to pass to the merge block
+                // as our argument
+                current_flow_block_ = if_node->false_.target->As<Block>();
+                BranchTo(if_node->merge.target, std::move(alt_args));
+
                 current_flow_block_ = if_node->true_.target->As<Block>();
             } else {
+                // If the lhs is true, then that is the result we want to pass to the merge block
+                // as our argument
+                current_flow_block_ = if_node->true_.target->As<Block>();
+                BranchTo(if_node->merge.target, std::move(alt_args));
+
                 current_flow_block_ = if_node->false_.target->As<Block>();
             }
 
@@ -973,14 +980,14 @@ class Impl {
             if (!rhs) {
                 return utils::Failure;
             }
-            auto* rhs_store = builder_.Store(result_var, rhs.Get());
-            current_flow_block_->instructions.Push(rhs_store);
+            utils::Vector<Value*, 1> args;
+            args.Push(rhs.Get());
 
-            BranchTo(if_node->merge.target);
+            BranchTo(if_node->merge.target, std::move(args));
         }
         current_flow_block_ = if_node->merge.target->As<Block>();
 
-        return result_var;
+        return result;
     }
 
     utils::Result<Value*> EmitBinary(const ast::BinaryExpression* expr) {

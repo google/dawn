@@ -154,7 +154,19 @@ void Disassembler::Walk(const FlowNode* node) {
                 return;
             }
 
-            Indent() << "%fn" << IdOf(b) << " = block {" << std::endl;
+            Indent() << "%fn" << IdOf(b) << " = block";
+            if (!b->params.IsEmpty()) {
+                out_ << " (";
+                for (auto* p : b->params) {
+                    if (p != b->params.Front()) {
+                        out_ << ", ";
+                    }
+                    EmitValue(p);
+                }
+                out_ << ")";
+            }
+
+            out_ << " {" << std::endl;
             {
                 ScopedIndent si(indent_size_);
                 EmitBlockInstructions(b);
@@ -248,7 +260,20 @@ void Disassembler::Walk(const FlowNode* node) {
         [&](const ir::If* i) {
             Indent() << "%fn" << IdOf(i) << " = if ";
             EmitValue(i->condition);
-            out_ << " [t: %fn" << IdOf(i->true_.target) << ", f: %fn" << IdOf(i->false_.target);
+
+            bool has_true = !i->true_.target->IsDead();
+            bool has_false = !i->false_.target->IsDead();
+
+            out_ << " [";
+            if (has_true) {
+                out_ << "t: %fn" << IdOf(i->true_.target);
+            }
+            if (has_false) {
+                if (has_true) {
+                    out_ << ", ";
+                }
+                out_ << "f: %fn" << IdOf(i->false_.target);
+            }
             if (i->merge.target->IsConnected()) {
                 out_ << ", m: %fn" << IdOf(i->merge.target);
             }
@@ -258,10 +283,12 @@ void Disassembler::Walk(const FlowNode* node) {
                 ScopedIndent if_indent(indent_size_);
                 ScopedStopNode scope(stop_nodes_, i->merge.target);
 
-                Indent() << "# true branch" << std::endl;
-                Walk(i->true_.target);
+                if (has_true) {
+                    Indent() << "# true branch" << std::endl;
+                    Walk(i->true_.target);
+                }
 
-                if (!i->false_.target->IsDead()) {
+                if (has_false) {
                     Indent() << "# false branch" << std::endl;
                     Walk(i->false_.target);
                 }
@@ -373,7 +400,11 @@ void Disassembler::EmitValue(const Value* val) {
             if (i->Type() != nullptr) {
                 out_ << ":" << i->Type()->FriendlyName();
             }
-        });
+        },
+        [&](const ir::BlockParam* p) {
+            out_ << "%" << IdOf(p) << ":" << p->Type()->FriendlyName();
+        },
+        [&](Default) { out_ << "Unknown value: " << val->TypeInfo().name; });
 }
 
 void Disassembler::EmitInstruction(const Instruction* inst) {

@@ -243,4 +243,8 @@ ir::Var* Builder::Declare(const type::Type* type) {
     return ir.instructions.Create<ir::Var>(type);
 }
 
+ir::BlockParam* Builder::BlockParam(const type::Type* type) {
+    return ir.values.Create<ir::BlockParam>(type);
+}
+
 }  // namespace tint::ir

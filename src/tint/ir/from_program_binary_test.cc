@@ -442,7 +442,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
     Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(true)});
-    auto* expr = LogicalAnd(Call("my_func"), false);
+    auto* expr = If(LogicalAnd(Call("my_func"), false), Block());
     WrapInFunction(expr);
 
     auto m = Build();
@@ -456,18 +456,32 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn4 = block {
     %1:bool = call my_func
-    %tint_symbol:ref<function, bool, read_write> = var
-    store %tint_symbol:ref<function, bool, read_write>, %1:bool
   } -> %fn5 # branch
 
   %fn5 = if %1:bool [t: %fn6, f: %fn7, m: %fn8]
     # true branch
     %fn6 = block {
-      store %tint_symbol:ref<function, bool, read_write>, false
-    } -> %fn8 # branch
+    } -> %fn8 false # branch
+
+    # false branch
+    %fn7 = block {
+    } -> %fn8 %1:bool # branch
 
   # if merge
-  %fn8 = block {
+  %fn8 = block (%2:bool) {
+  } -> %fn9 # branch
+
+  %fn9 = if %2:bool [t: %fn10, f: %fn11, m: %fn12]
+    # true branch
+    %fn10 = block {
+    } -> %fn12 # branch
+
+    # false branch
+    %fn11 = block {
+    } -> %fn12 # branch
+
+  # if merge
+  %fn12 = block {
   } -> %func_end # return
 } %func_end
 
@@ -476,7 +490,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 
 TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
     Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(true)});
-    auto* expr = LogicalOr(Call("my_func"), true);
+    auto* expr = If(LogicalOr(Call("my_func"), true), Block());
     WrapInFunction(expr);
 
     auto m = Build();
@@ -490,19 +504,32 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn4 = block {
     %1:bool = call my_func
-    %tint_symbol:ref<function, bool, read_write> = var
-    store %tint_symbol:ref<function, bool, read_write>, %1:bool
   } -> %fn5 # branch
 
   %fn5 = if %1:bool [t: %fn6, f: %fn7, m: %fn8]
     # true branch
+    %fn6 = block {
+    } -> %fn8 %1:bool # branch
+
     # false branch
     %fn7 = block {
-      store %tint_symbol:ref<function, bool, read_write>, true
-    } -> %fn8 # branch
+    } -> %fn8 true # branch
 
   # if merge
-  %fn8 = block {
+  %fn8 = block (%2:bool) {
+  } -> %fn9 # branch
+
+  %fn9 = if %2:bool [t: %fn10, f: %fn11, m: %fn12]
+    # true branch
+    %fn10 = block {
+    } -> %fn12 # branch
+
+    # false branch
+    %fn11 = block {
+    } -> %fn12 # branch
+
+  # if merge
+  %fn12 = block {
   } -> %func_end # return
 } %func_end
 
@@ -758,23 +785,24 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
   %fn4 = block {
     %1:f32 = call my_func
     %2:bool = lt %1:f32, 2.0f
-    %tint_symbol:ref<function, bool, read_write> = var
-    store %tint_symbol:ref<function, bool, read_write>, %2:bool
   } -> %fn5 # branch
 
   %fn5 = if %2:bool [t: %fn6, f: %fn7, m: %fn8]
     # true branch
     %fn6 = block {
+      %3:f32 = call my_func
       %4:f32 = call my_func
-      %5:f32 = call my_func
-      %6:f32 = mul 2.29999995231628417969f, %5:f32
-      %7:f32 = div %4:f32, %6:f32
-      %8:bool = gt 2.5f, %7:f32
-      store %tint_symbol:ref<function, bool, read_write>, %8:bool
-    } -> %fn8 # branch
+      %5:f32 = mul 2.29999995231628417969f, %4:f32
+      %6:f32 = div %3:f32, %5:f32
+      %7:bool = gt 2.5f, %6:f32
+    } -> %fn8 %7:bool # branch
+
+    # false branch
+    %fn7 = block {
+    } -> %fn8 %2:bool # branch
 
   # if merge
-  %fn8 = block {
+  %fn8 = block (%tint_symbol:bool) {
   } -> %func_end # return
 } %func_end
 

@@ -716,6 +716,8 @@ if(${TINT_BUILD_IR})
     ir/bitcast.h
     ir/block.cc
     ir/block.h
+    ir/block_param.cc
+    ir/block_param.h
     ir/builder.cc
     ir/builder.h
     ir/builtin.cc

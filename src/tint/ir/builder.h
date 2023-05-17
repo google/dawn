@@ -361,6 +361,11 @@ class Builder {
     /// @returns the instruction
     ir::Var* Declare(const type::Type* type);
 
+    /// Creates a new `BlockParam`
+    /// @param type the parameter type
+    /// @returns the value
+    ir::BlockParam* BlockParam(const type::Type* type);
+
     /// Retrieves the root block for the module, creating if necessary
     /// @returns the root block
     ir::Block* CreateRootBlockIfNeeded();

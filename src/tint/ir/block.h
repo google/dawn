@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_IR_BLOCK_H_
 #define SRC_TINT_IR_BLOCK_H_
 
+#include "src/tint/ir/block_param.h"
 #include "src/tint/ir/branch.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/instruction.h"
@@ -40,6 +41,9 @@ class Block : public utils::Castable<Block, FlowNode> {
 
     /// The instructions in the block
     utils::Vector<const Instruction*, 16> instructions;
+
+    /// The parameters passed into the block
+    utils::Vector<const BlockParam*, 0> params;
 };
 
 }  // namespace tint::ir
