@@ -60,6 +60,9 @@ struct InternalPipelineStore {
 
     Ref<RenderPipelineBase> blitRG8ToDepth16UnormPipeline;
 
+    Ref<ComputePipelineBase> blitDepth16UnormToBufferComputePipeline;
+    Ref<ComputePipelineBase> blitDepth32FloatToBufferComputePipeline;
+
     struct BlitR8ToStencilPipelines {
         Ref<RenderPipelineBase> clearPipeline;
         std::array<Ref<RenderPipelineBase>, 8> setStencilPipelines;

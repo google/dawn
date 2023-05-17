@@ -592,6 +592,13 @@ TextureBase::TextureBase(DeviceBase* device,
             AddInternalUsage(wgpu::TextureUsage::RenderAttachment);
         }
     }
+    if (mFormat.HasDepth() &&
+        (device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy) ||
+         device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy))) {
+        if (mInternalUsage & wgpu::TextureUsage::CopySrc) {
+            AddInternalUsage(wgpu::TextureUsage::TextureBinding);
+        }
+    }
 }
 
 TextureBase::~TextureBase() = default;

@@ -24,6 +24,7 @@
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
+#include "dawn/native/UsageValidationMode.h"
 
 #include "dawn/native/dawn_platform.h"
 

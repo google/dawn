@@ -59,6 +59,11 @@ class CommandEncoder final : public ApiObjectBase {
                                BufferBase* destination,
                                uint64_t destinationOffset,
                                uint64_t size);
+    void InternalCopyBufferToBufferWithAllocatedSize(BufferBase* source,
+                                                     uint64_t sourceOffset,
+                                                     BufferBase* destination,
+                                                     uint64_t destinationOffset,
+                                                     uint64_t size);
     void APICopyBufferToTexture(const ImageCopyBuffer* source,
                                 const ImageCopyTexture* destination,
                                 const Extent3D* copySize);

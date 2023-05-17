@@ -27,6 +27,8 @@
 
 namespace dawn::native {
 
+enum class BufferSizeType { Size, AllocatedSize };
+
 class QuerySetBase;
 struct SyncScopeResourceUsage;
 struct TexelBlockInfo;
@@ -76,7 +78,8 @@ MaybeError ValidateImageCopyTexture(DeviceBase const* device,
 
 MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
                                         uint64_t offset,
-                                        uint64_t size);
+                                        uint64_t size,
+                                        BufferSizeType checkBufferSizeType = BufferSizeType::Size);
 
 bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length);
 

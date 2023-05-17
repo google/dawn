@@ -203,6 +203,8 @@ source_set("sources") {
     "BindingInfo.h",
     "BlitBufferToDepthStencil.cpp",
     "BlitBufferToDepthStencil.h",
+    "BlitDepthStencilToBuffer.cpp",
+    "BlitDepthStencilToBuffer.h",
     "BlitDepthToDepth.cpp",
     "BlitDepthToDepth.h",
     "Blob.cpp",

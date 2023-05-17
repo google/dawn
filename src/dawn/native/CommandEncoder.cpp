@@ -23,6 +23,7 @@
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BlitBufferToDepthStencil.h"
+#include "dawn/native/BlitDepthStencilToBuffer.h"
 #include "dawn/native/BlitDepthToDepth.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils_autogen.h"
@@ -1159,6 +1160,55 @@ void CommandEncoder::APICopyBufferToBuffer(BufferBase* source,
         destination, destinationOffset, size);
 }
 
+// The internal version of APICopyBufferToBuffer which validates against mAllocatedSize instead of
+// mSize of buffers.
+void CommandEncoder::InternalCopyBufferToBufferWithAllocatedSize(BufferBase* source,
+                                                                 uint64_t sourceOffset,
+                                                                 BufferBase* destination,
+                                                                 uint64_t destinationOffset,
+                                                                 uint64_t size) {
+    mEncodingContext.TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeError {
+            if (GetDevice()->IsValidationEnabled()) {
+                DAWN_TRY(GetDevice()->ValidateObject(source));
+                DAWN_TRY(GetDevice()->ValidateObject(destination));
+
+                DAWN_INVALID_IF(source == destination,
+                                "Source and destination are the same buffer (%s).", source);
+
+                DAWN_TRY_CONTEXT(ValidateCopySizeFitsInBuffer(source, sourceOffset, size,
+                                                              BufferSizeType::AllocatedSize),
+                                 "validating source %s copy size against allocated size.", source);
+                DAWN_TRY_CONTEXT(ValidateCopySizeFitsInBuffer(destination, destinationOffset, size,
+                                                              BufferSizeType::AllocatedSize),
+                                 "validating destination %s copy size against allocated size.",
+                                 destination);
+                DAWN_TRY(ValidateB2BCopyAlignment(size, sourceOffset, destinationOffset));
+
+                DAWN_TRY_CONTEXT(ValidateCanUseAs(source, wgpu::BufferUsage::CopySrc),
+                                 "validating source %s usage.", source);
+                DAWN_TRY_CONTEXT(ValidateCanUseAs(destination, wgpu::BufferUsage::CopyDst),
+                                 "validating destination %s usage.", destination);
+            }
+
+            mTopLevelBuffers.insert(source);
+            mTopLevelBuffers.insert(destination);
+
+            CopyBufferToBufferCmd* copy =
+                allocator->Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
+            copy->source = source;
+            copy->sourceOffset = sourceOffset;
+            copy->destination = destination;
+            copy->destinationOffset = destinationOffset;
+            copy->size = size;
+
+            return {};
+        },
+        "encoding internal %s.CopyBufferToBuffer(%s, %u, %s, %u, %u).", this, source, sourceOffset,
+        destination, destinationOffset, size);
+}
+
 void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
                                             const ImageCopyTexture* destination,
                                             const Extent3D* copySize) {
@@ -1285,6 +1335,35 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
 
             TextureDataLayout dstLayout = destination->layout;
             ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, *copySize);
+
+            auto format = source->texture->GetFormat();
+            auto aspect = ConvertAspect(format, source->aspect);
+            if (aspect == Aspect::Depth) {
+                if ((format.format == wgpu::TextureFormat::Depth16Unorm &&
+                     GetDevice()->IsToggleEnabled(
+                         Toggle::UseBlitForDepth16UnormTextureToBufferCopy)) ||
+                    (format.format == wgpu::TextureFormat::Depth32Float &&
+                     GetDevice()->IsToggleEnabled(
+                         Toggle::UseBlitForDepth32FloatTextureToBufferCopy))) {
+                    TextureCopy src;
+                    src.texture = source->texture;
+                    src.origin = source->origin;
+                    src.mipLevel = source->mipLevel;
+                    src.aspect = aspect;
+
+                    BufferCopy dst;
+                    dst.buffer = destination->buffer;
+                    dst.bytesPerRow = destination->layout.bytesPerRow;
+                    dst.rowsPerImage = destination->layout.rowsPerImage;
+                    dst.offset = destination->layout.offset;
+                    DAWN_TRY_CONTEXT(BlitDepthToBuffer(GetDevice(), this, src, dst, *copySize),
+                                     "copying depth aspect from %s to %s using blit workaround.",
+                                     src.texture.Get(), destination->buffer);
+
+                    return {};
+                }
+            }
+            // TODO(crbug.com/dawn/1782): implement emulation for stencil
 
             CopyTextureToBufferCmd* t2b =
                 allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
