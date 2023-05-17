@@ -768,6 +768,8 @@ if(${TINT_BUILD_IR})
     ir/value.h
     ir/var.cc
     ir/var.h
+    ir/transform/add_empty_entry_point.cc
+    ir/transform/add_empty_entry_point.h
     ir/transform/transform.cc
     ir/transform/transform.h
   )

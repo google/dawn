@@ -41,14 +41,15 @@ Result Generate(const Program* program, const Options& options) {
 #if TINT_BUILD_IR
     if (options.use_tint_ir) {
         // Convert the AST program to an IR module.
-        auto ir = ir::FromProgram(program);
-        if (!ir) {
-            result.error = "IR converter: " + ir.Failure();
+        auto converted = ir::FromProgram(program);
+        if (!converted) {
+            result.error = "IR converter: " + converted.Failure();
             return result;
         }
 
         // Generate the SPIR-V code.
-        auto impl = std::make_unique<GeneratorImplIr>(&ir.Get(), zero_initialize_workgroup_memory);
+        auto ir = converted.Move();
+        auto impl = std::make_unique<GeneratorImplIr>(&ir, zero_initialize_workgroup_memory);
         result.success = impl->Generate();
         result.error = impl->Diagnostics().str();
         result.spirv = std::move(impl->Result());

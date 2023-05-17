@@ -19,7 +19,9 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/switch.h"
+#include "src/tint/transform/manager.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -28,14 +30,32 @@
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
+#include "src/tint/writer/spirv/generator.h"
 #include "src/tint/writer/spirv/module.h"
 
 namespace tint::writer::spirv {
 
-GeneratorImplIr::GeneratorImplIr(const ir::Module* module, bool zero_init_workgroup_mem)
+namespace {
+
+void Sanitize(ir::Module* module) {
+    transform::Manager manager;
+    transform::DataMap data;
+
+    manager.Add<ir::transform::AddEmptyEntryPoint>();
+
+    transform::DataMap outputs;
+    manager.Run(module, data, outputs);
+}
+
+}  // namespace
+
+GeneratorImplIr::GeneratorImplIr(ir::Module* module, bool zero_init_workgroup_mem)
     : ir_(module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
 bool GeneratorImplIr::Generate() {
+    // Run the IR transformations to prepare for SPIR-V emission.
+    Sanitize(ir_);
+
     // TODO(crbug.com/tint/1906): Check supported extensions.
 
     module_.PushCapability(SpvCapabilityShader);

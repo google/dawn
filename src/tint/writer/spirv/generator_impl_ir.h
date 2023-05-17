@@ -47,7 +47,7 @@ class GeneratorImplIr {
     /// @param module the Tint IR module to generate
     /// @param zero_init_workgroup_memory `true` to initialize all the variables in the Workgroup
     ///                                   storage class with OpConstantNull
-    GeneratorImplIr(const ir::Module* module, bool zero_init_workgroup_memory);
+    GeneratorImplIr(ir::Module* module, bool zero_init_workgroup_memory);
 
     /// @returns true on successful generation; false otherwise
     bool Generate();
@@ -100,7 +100,7 @@ class GeneratorImplIr {
     /// @returns the result ID of the constant
     uint32_t Constant(const constant::Value* constant);
 
-    const ir::Module* ir_;
+    ir::Module* ir_;
     spirv::Module module_;
     BinaryWriter writer_;
     diag::List diagnostics_;

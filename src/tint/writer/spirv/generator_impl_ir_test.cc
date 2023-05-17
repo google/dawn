@@ -14,15 +14,17 @@
 
 #include "src/tint/writer/spirv/test_helper_ir.h"
 
+#include "gmock/gmock.h"
+
 namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, ModuleHeader) {
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     auto got = Disassemble(generator_.Result());
-    EXPECT_EQ(got, R"(OpCapability Shader
+    EXPECT_THAT(got, testing::StartsWith(R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
-)");
+)"));
 }
 
 }  // namespace
