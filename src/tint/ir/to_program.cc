@@ -19,6 +19,7 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/constant.h"
+#include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/module.h"
@@ -67,55 +68,75 @@ class State {
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
         utils::Vector<const ast::Parameter*, 1> params{};
         ast::Type ret_ty;
-        auto* body = Block(fn->start_target);
+        auto* body = FlowNodeGraph(fn->start_target, fn->end_target);
         utils::Vector<const ast::Attribute*, 1> attrs{};
         utils::Vector<const ast::Attribute*, 1> ret_attrs{};
         b.Func(name, std::move(params), ret_ty, body, std::move(attrs), std::move(ret_attrs));
     }
 
-    const ast::BlockStatement* Block(const ir::Block* block) {
+    const ast::BlockStatement* FlowNodeGraph(const ir::FlowNode* node,
+                                             const ir::FlowNode* stop_at) {
         // TODO(crbug.com/tint/1902): Check if the block is dead
-        utils::Vector<const ast::Statement*, decltype(ir::Block::instructions)::static_length>
+        utils::Vector<const ast::Statement*,
+                      decltype(ast::BlockStatement::statements)::static_length>
             stmts;
-        for (auto* inst : block->instructions) {
-            auto* stmt = Stmt(inst);
-            if (!stmt) {
+        while (node != stop_at) {
+            if (!node) {
                 return nullptr;
             }
-            stmts.Push(stmt);
+            node = Switch(
+                node,  //
+                [&](const ir::Block* block) -> const ir::FlowNode* {
+                    for (auto* inst : block->instructions) {
+                        if (auto* stmt = Stmt(inst); TINT_LIKELY(stmt)) {
+                            stmts.Push(stmt);
+                        } else {
+                            return nullptr;
+                        }
+                    }
+                    return block->branch.target;
+                },
+                [&](const ir::If* if_) -> const ir::FlowNode* {
+                    if (auto* stmt = If(if_); TINT_LIKELY(stmt)) {
+                        stmts.Push(stmt);
+                        return if_->merge.target;
+                    }
+                    return nullptr;
+                },
+                [&](Default) {
+                    TINT_UNIMPLEMENTED(IR, b.Diagnostics())
+                        << "unhandled case in Switch(): " << node->TypeInfo().name;
+                    return nullptr;
+                });
         }
+
         return b.Block(std::move(stmts));
     }
 
-    const ast::Statement* FlowNode(const ir::FlowNode* node) {
-        // TODO(crbug.com/tint/1902): Check the node is connected
-        return Switch(
-            node,  //
-            [&](const ir::If* i) {
-                auto* cond = Expr(i->condition);
-                auto* t = Branch(i->true_);
-                if (auto* f = Branch(i->false_)) {
-                    return b.If(cond, t, b.Else(f));
-                }
-                // TODO(crbug.com/tint/1902): Emit merge block
-                return b.If(cond, t);
-            },
-            [&](Default) {
-                TINT_UNIMPLEMENTED(IR, b.Diagnostics())
-                    << "unhandled case in Switch(): " << node->TypeInfo().name;
-                return nullptr;
-            });
+    const ast::IfStatement* If(const ir::If* i) {
+        auto* cond = Expr(i->condition);
+        auto* t = FlowNodeGraph(i->true_.target, i->merge.target);
+        if (!IsEmpty(i->false_.target, i->merge.target)) {
+            // TODO(crbug.com/tint/1902): Merge if else
+            auto* f = FlowNodeGraph(i->false_.target, i->merge.target);
+            return b.If(cond, t, b.Else(f));
+        }
+        return b.If(cond, t);
     }
 
-    const ast::BlockStatement* Branch(const ir::Branch& branch) {
-        auto* stmt = FlowNode(branch.target);
-        if (!stmt) {
-            return nullptr;
+    /// @return true if there are no instructions between @p node and and @p stop_at
+    bool IsEmpty(const ir::FlowNode* node, const ir::FlowNode* stop_at) {
+        while (node != stop_at) {
+            if (auto* block = node->As<ir::Block>()) {
+                if (block->instructions.Length() > 0) {
+                    return false;
+                }
+                node = block->branch.target;
+            } else {
+                return false;
+            }
         }
-        if (auto* block = stmt->As<ast::BlockStatement>()) {
-            return block;
-        }
-        return b.Block(stmt);
+        return true;
     }
 
     const ast::Statement* Stmt(const ir::Instruction* inst) {

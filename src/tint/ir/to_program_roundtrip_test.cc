@@ -67,6 +67,9 @@ fn f() {
 )");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Function-scope var
+////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, FunctionScopeVar_i32) {
     Test(R"(
 fn f() {
@@ -93,5 +96,85 @@ fn f() {
 )");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// If
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, If_CallFn) {
+    Test(R"(
+fn a() {
+}
+
+fn f() {
+  var cond : bool = true;
+  if (cond) {
+    a();
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, If_CallFn_Else_CallFn) {
+    Test(R"(
+fn a() {
+}
+
+fn b() {
+}
+
+fn f() {
+  var cond : bool = true;
+  if (cond) {
+    a();
+  } else {
+    b();
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, If_CallFn_ElseIf_CallFn) {
+    Test(R"(
+fn a() {
+}
+
+fn b() {
+}
+
+fn c() {
+}
+
+fn f() {
+  var cond_a : bool = true;
+  var cond_b : bool = true;
+  if (cond_a) {
+    a();
+  } else if (cond_b) {
+    b();
+  }
+}
+)",
+         R"(
+fn a() {
+}
+
+fn b() {
+}
+
+fn c() {
+}
+
+fn f() {
+  var cond_a : bool = true;
+  var cond_b : bool = true;
+  if (cond_a) {
+    a();
+  } else {
+    if (cond_b) {
+      b();
+    }
+  }
+}
+)");
+}
 }  // namespace
 }  // namespace tint::ir
