@@ -271,6 +271,10 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
             op = binary->Type()->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
             break;
         }
+        case ir::Binary::Kind::kSubtract: {
+            op = binary->Type()->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
+            break;
+        }
         default: {
             TINT_ICE(Writer, diagnostics_)
                 << "unimplemented binary instruction: " << static_cast<uint32_t>(binary->kind);
