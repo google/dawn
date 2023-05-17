@@ -42,7 +42,7 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Assign) {
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    store %a:ptr<private, u32, read_write>, 4u
+    store %a, 4u
   } -> %func_end # return
 } %func_end
 

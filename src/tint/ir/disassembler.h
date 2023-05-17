@@ -55,6 +55,7 @@ class Disassembler {
 
     void Walk(const FlowNode* node);
     void EmitInstruction(const Instruction* inst);
+    void EmitValueWithType(const Value* val);
     void EmitValue(const Value* val);
     void EmitArgs(const Call* call);
     void EmitBinary(const Binary* b);
