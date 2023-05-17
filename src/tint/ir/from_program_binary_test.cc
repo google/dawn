@@ -58,14 +58,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Increment) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = add %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = add %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -81,14 +81,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = add %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = add %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -127,14 +127,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Decrement) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, i32, read_write> = var
+  %v1:ptr<private, i32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, i32, read_write> = sub %v1:ref<private, i32, read_write>, 1i
-    store %v1:ref<private, i32, read_write>, %2:ref<private, i32, read_write>
+    %2:ptr<private, i32, read_write> = sub %v1:ptr<private, i32, read_write>, 1u
+    store %v1:ptr<private, i32, read_write>, %2:ptr<private, i32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -150,14 +150,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = sub %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = sub %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -196,14 +196,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = mul %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = mul %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -242,14 +242,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = div %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = div %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -288,14 +288,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = mod %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = mod %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -334,14 +334,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, bool, read_write> = var
+  %v1:ptr<private, bool, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, bool, read_write> = and %v1:ref<private, bool, read_write>, false
-    store %v1:ref<private, bool, read_write>, %2:ref<private, bool, read_write>
+    %2:ptr<private, bool, read_write> = and %v1:ptr<private, bool, read_write>, false
+    store %v1:ptr<private, bool, read_write>, %2:ptr<private, bool, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -380,14 +380,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, bool, read_write> = var
+  %v1:ptr<private, bool, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, bool, read_write> = or %v1:ref<private, bool, read_write>, false
-    store %v1:ref<private, bool, read_write>, %2:ref<private, bool, read_write>
+    %2:ptr<private, bool, read_write> = or %v1:ptr<private, bool, read_write>, false
+    store %v1:ptr<private, bool, read_write>, %2:ptr<private, bool, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -426,14 +426,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = xor %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = xor %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -706,14 +706,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = shiftl %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = shiftl %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -752,14 +752,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var
+  %v1:ptr<private, u32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %2:ref<private, u32, read_write> = shiftr %v1:ref<private, u32, read_write>, 1u
-    store %v1:ref<private, u32, read_write>, %2:ref<private, u32, read_write>
+    %2:ptr<private, u32, read_write> = shiftr %v1:ptr<private, u32, read_write>, 1u
+    store %v1:ptr<private, u32, read_write>, %2:ptr<private, u32, read_write>
   } -> %func_end # return
 } %func_end
 

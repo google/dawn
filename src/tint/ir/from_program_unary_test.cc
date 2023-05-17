@@ -105,13 +105,12 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, i32, read_write> = var
+  %v2:ptr<private, i32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %v2:ptr<private, i32, read_write> = addr_of %v1:ref<private, i32, read_write>
   } -> %func_end # return
 } %func_end
 
@@ -122,7 +121,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.i32());
     utils::Vector stmts = {
         Decl(Let("v3", AddressOf("v1"))),
-        Decl(Let("v2", Deref("v3"))),
+        Assign(Deref("v3"), 42_i),
     };
     WrapInFunction(stmts);
 
@@ -130,14 +129,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, i32, read_write> = var
+  %v3:ptr<private, i32, read_write> = var
 }
 
 
 %fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn3 = block {
-    %v3:ptr<private, i32, read_write> = addr_of %v1:ref<private, i32, read_write>
-    %v2:i32 = indirection %v3:ptr<private, i32, read_write>
+    store %v3:ptr<private, i32, read_write>, 42i
   } -> %func_end # return
 } %func_end
 

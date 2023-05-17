@@ -272,12 +272,12 @@ class State {
 
     const ast::VariableDeclStatement* Var(const ir::Var* var) {
         Symbol name = NameOf(var);
-        auto* ptr = var->Type()->As<type::Reference>();
+        auto* ptr = var->Type()->As<type::Pointer>();
         if (!ptr) {
             Err("Incorrect type for var");
             return nullptr;
         }
-        auto ty = Type(ptr);
+        auto ty = Type(ptr->StoreType());
         const ast::Expression* init = nullptr;
         if (var->initializer) {
             init = Expr(var->initializer);
@@ -432,7 +432,10 @@ class State {
                                   : builtin::Access::kUndefined;
                 return b.ty.pointer(el.Get(), address_space, access);
             },
-            [&](const type::Reference* r) { return Type(r->StoreType()); },
+            [&](const type::Reference*) -> utils::Result<ast::Type> {
+                TINT_ICE(IR, b.Diagnostics()) << "reference types should never appear in the IR";
+                return ast::Type{};
+            },
             [&](Default) {
                 UNHANDLED_CASE(ty);
                 return ast::Type{};

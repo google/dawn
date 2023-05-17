@@ -530,14 +530,8 @@ void Disassembler::EmitUnary(const Unary* u) {
     EmitValue(u);
     out_ << " = ";
     switch (u->kind) {
-        case Unary::Kind::kAddressOf:
-            out_ << "addr_of";
-            break;
         case Unary::Kind::kComplement:
             out_ << "complement";
-            break;
-        case Unary::Kind::kIndirection:
-            out_ << "indirection";
             break;
         case Unary::Kind::kNegation:
             out_ << "negation";

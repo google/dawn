@@ -185,16 +185,8 @@ Unary* Builder::CreateUnary(Unary::Kind kind, const type::Type* type, Value* val
     return ir.values.Create<ir::Unary>(kind, type, val);
 }
 
-Unary* Builder::AddressOf(const type::Type* type, Value* val) {
-    return CreateUnary(Unary::Kind::kAddressOf, type, val);
-}
-
 Unary* Builder::Complement(const type::Type* type, Value* val) {
     return CreateUnary(Unary::Kind::kComplement, type, val);
-}
-
-Unary* Builder::Indirection(const type::Type* type, Value* val) {
-    return CreateUnary(Unary::Kind::kIndirection, type, val);
 }
 
 Unary* Builder::Negation(const type::Type* type, Value* val) {

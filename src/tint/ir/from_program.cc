@@ -82,6 +82,7 @@
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/switch.h"
+#include "src/tint/type/pointer.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/void.h"
 #include "src/tint/utils/defer.h"
@@ -853,7 +854,11 @@ class Impl {
         return tint::Switch(  //
             var,
             [&](const ast::Var* v) {
-                auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
+                auto* ref = sem->Type()->As<type::Reference>();
+                auto* ty = builder_.ir.types.Get<type::Pointer>(
+                    ref->StoreType()->Clone(clone_ctx_.type_ctx), ref->AddressSpace(),
+                    ref->Access());
+
                 auto* val = builder_.Declare(ty);
                 current_flow_block_->instructions.Push(val);
 
@@ -915,13 +920,11 @@ class Impl {
         Instruction* inst = nullptr;
         switch (expr->op) {
             case ast::UnaryOp::kAddressOf:
-                inst = builder_.AddressOf(ty, val.Get());
-                break;
+            case ast::UnaryOp::kIndirection:
+                // 'address-of' and 'indirection' just fold away and we propagate the pointer.
+                return val;
             case ast::UnaryOp::kComplement:
                 inst = builder_.Complement(ty, val.Get());
-                break;
-            case ast::UnaryOp::kIndirection:
-                inst = builder_.Indirection(ty, val.Get());
                 break;
             case ast::UnaryOp::kNegation:
                 inst = builder_.Negation(ty, val.Get());

@@ -279,23 +279,11 @@ class Builder {
     /// @returns the operation
     Unary* CreateUnary(Unary::Kind kind, const type::Type* type, Value* val);
 
-    /// Creates an AddressOf operation
-    /// @param type the result type of the expression
-    /// @param val the value
-    /// @returns the operation
-    Unary* AddressOf(const type::Type* type, Value* val);
-
     /// Creates a Complement operation
     /// @param type the result type of the expression
     /// @param val the value
     /// @returns the operation
     Unary* Complement(const type::Type* type, Value* val);
-
-    /// Creates an Indirection operation
-    /// @param type the result type of the expression
-    /// @param val the value
-    /// @returns the operation
-    Unary* Indirection(const type::Type* type, Value* val);
 
     /// Creates a Negation operation
     /// @param type the result type of the expression

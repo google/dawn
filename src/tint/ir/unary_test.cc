@@ -23,27 +23,6 @@ using namespace tint::number_suffixes;  // NOLINT
 
 using IR_InstructionTest = TestHelper;
 
-TEST_F(IR_InstructionTest, CreateAddressOf) {
-    Module mod;
-    Builder b{mod};
-
-    // TODO(dsinclair): This would be better as an identifier, but works for now.
-    const auto* inst = b.AddressOf(
-        b.ir.types.Get<type::Pointer>(b.ir.types.Get<type::I32>(), builtin::AddressSpace::kPrivate,
-                                      builtin::Access::kReadWrite),
-        b.Constant(4_i));
-
-    ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->kind, Unary::Kind::kAddressOf);
-
-    ASSERT_NE(inst->Type(), nullptr);
-
-    ASSERT_TRUE(inst->Val()->Is<Constant>());
-    auto lhs = inst->Val()->As<Constant>()->value;
-    ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-}
-
 TEST_F(IR_InstructionTest, CreateComplement) {
     Module mod;
     Builder b{mod};
@@ -51,22 +30,6 @@ TEST_F(IR_InstructionTest, CreateComplement) {
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->kind, Unary::Kind::kComplement);
-
-    ASSERT_TRUE(inst->Val()->Is<Constant>());
-    auto lhs = inst->Val()->As<Constant>()->value;
-    ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
-}
-
-TEST_F(IR_InstructionTest, CreateIndirection) {
-    Module mod;
-    Builder b{mod};
-
-    // TODO(dsinclair): This would be better as an identifier, but works for now.
-    const auto* inst = b.Indirection(b.ir.types.Get<type::I32>(), b.Constant(4_i));
-
-    ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->kind, Unary::Kind::kIndirection);
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
     auto lhs = inst->Val()->As<Constant>()->value;

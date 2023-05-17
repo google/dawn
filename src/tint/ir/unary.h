@@ -25,9 +25,7 @@ class Unary : public utils::Castable<Unary, Instruction> {
   public:
     /// The kind of instruction.
     enum class Kind {
-        kAddressOf,
         kComplement,
-        kIndirection,
         kNegation,
     };
 
@@ -50,7 +48,7 @@ class Unary : public utils::Castable<Unary, Instruction> {
     const Value* Val() const { return val_; }
 
     /// the kind of unary instruction
-    Kind kind = Kind::kAddressOf;
+    Kind kind = Kind::kNegation;
 
     /// the result type of the instruction
     const type::Type* result_type = nullptr;
