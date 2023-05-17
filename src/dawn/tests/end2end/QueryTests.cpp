@@ -1115,6 +1115,9 @@ TEST_P(TimestampQueryTests, ResolveTwiceToSameBuffer) {
 // Test calling WriteTimestamp many times into separate query sets.
 // Regression test for crbug.com/dawn/1603.
 TEST_P(TimestampQueryTests, ManyWriteTimestampDistinctQuerySets) {
+    // TODO(crbug.com/dawn/1829): Avoid OOM on Apple GPUs.
+    DAWN_SUPPRESS_TEST_IF(IsApple());
+
     constexpr uint32_t kQueryCount = 100;
     // Write timestamp with a different query sets many times
     for (uint32_t i = 0; i < kQueryCount; ++i) {

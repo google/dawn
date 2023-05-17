@@ -933,6 +933,10 @@ TEST_P(DepthStencilCopyTests_RegressionDawn1083, Run) {
     DAWN_SUPPRESS_TEST_IF(IsAMD() && IsMetal() &&
                           GetParam().mTextureFormat == wgpu::TextureFormat::Depth32FloatStencil8);
 
+    // TODO(crbug.com/dawn/1828): depth16unorm broken on Apple GPUs.
+    DAWN_SUPPRESS_TEST_IF(IsApple() &&
+                          GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm);
+
     uint32_t mipLevelCount = 3;
     uint32_t arrayLayerCount = 3;
     wgpu::TextureDescriptor texDesc = {};
