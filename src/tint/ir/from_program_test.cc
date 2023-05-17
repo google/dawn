@@ -1427,5 +1427,27 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, Emit_Phony) {
+    Func("b", utils::Empty, ty.i32(), Return(1_i));
+    WrapInFunction(Ignore(Call("b")));
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%fn1 = func b():i32 {
+  %fn2 = block {
+  } -> %func_end 1i # return
+} %func_end
+
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
+  %fn4 = block {
+    %1:i32 = call b
+  } -> %func_end # return
+} %func_end
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir

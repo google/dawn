@@ -48,6 +48,7 @@
 #include "src/tint/ast/literal_expression.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/override.h"
+#include "src/tint/ast/phony_expression.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/statement.h"
 #include "src/tint/ast/struct.h"
@@ -338,7 +339,6 @@ class Impl {
             current_flow_block_ = ir_func->start_target;
             EmitBlock(ast_func->body);
 
-            // TODO(dsinclair): Store return type and attributes
             // TODO(dsinclair): Store parameters
 
             // If the branch target has already been set then a `return` was called. Only set in the
@@ -392,6 +392,16 @@ class Impl {
     }
 
     void EmitAssignment(const ast::AssignmentStatement* stmt) {
+        // If assigning to a phony, just generate the RHS and we're done. Note that, because this
+        // isn't used, a subsequent transform could remove it due to it being dead code. This could
+        // then change the interface for the program (i.e. a global var no longer used). If that
+        // happens we have to either fix this to store to a phony value, or make sure we pull the
+        // interface before doing the dead code elimination.
+        if (stmt->lhs->Is<ast::PhonyExpression>()) {
+            (void)EmitExpression(stmt->rhs);
+            return;
+        }
+
         auto lhs = EmitExpression(stmt->lhs);
         if (!lhs) {
             return;
@@ -827,10 +837,9 @@ class Impl {
             // [&](const ast::MemberAccessorExpression* m) {
             // TODO(dsinclair): Implement
             // },
-            // [&](const ast::PhonyExpression*) {
-            // TODO(dsinclair): Implement. The call may have side effects so has to be made.
-            // },
             [&](const ast::UnaryOpExpression* u) { return EmitUnary(u); },
+            // Note, ast::PhonyExpression is explicitly not handled here as it should never get into
+            // this method. The assignment statement should have filtered it out already.
             [&](Default) {
                 add_error(expr->source,
                           "unknown expression type: " + std::string(expr->TypeInfo().name));
