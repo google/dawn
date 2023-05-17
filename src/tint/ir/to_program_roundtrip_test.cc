@@ -60,8 +60,20 @@ TEST_F(IRToProgramRoundtripTest, EmptyModule) {
     Test("");
 }
 
-TEST_F(IRToProgramRoundtripTest, EmptySingleFunction) {
+TEST_F(IRToProgramRoundtripTest, SingleFunction_Empty) {
     Test(R"(
+fn f() {
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, SingleFunction_Return) {
+    Test(R"(
+fn f() {
+  return;
+}
+)",
+         R"(
 fn f() {
 }
 )");
@@ -113,6 +125,20 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, If_Return) {
+    Test(R"(
+fn a() {
+}
+
+fn f() {
+  var cond : bool = true;
+  if (cond) {
+    return;
+  }
+}
+)");
+}
+
 TEST_F(IRToProgramRoundtripTest, If_CallFn_Else_CallFn) {
     Test(R"(
 fn a() {
@@ -127,6 +153,25 @@ fn f() {
     a();
   } else {
     b();
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, If_Return_Else_Return) {
+    Test(R"(
+fn a() {
+}
+
+fn b() {
+}
+
+fn f() {
+  var cond : bool = true;
+  if (cond) {
+    return;
+  } else {
+    return;
   }
 }
 )");

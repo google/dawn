@@ -41,6 +41,10 @@
 #include "src/tint/utils/transform.h"
 #include "src/tint/utils/vector.h"
 
+#define UNHANDLED_CASE(object_ptr)          \
+    TINT_UNIMPLEMENTED(IR, b.Diagnostics()) \
+        << "unhandled case in Switch(): " << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
+
 namespace tint::ir {
 
 namespace {
@@ -81,33 +85,43 @@ class State {
                       decltype(ast::BlockStatement::statements)::static_length>
             stmts;
         while (node != stop_at) {
-            if (!node) {
-                return nullptr;
-            }
-            node = Switch(
+            enum Status { kContinue, kStop, kError };
+            Status status = Switch(
                 node,  //
-                [&](const ir::Block* block) -> const ir::FlowNode* {
+                [&](const ir::Block* block) {
                     for (auto* inst : block->instructions) {
                         if (auto* stmt = Stmt(inst); TINT_LIKELY(stmt)) {
                             stmts.Push(stmt);
                         } else {
-                            return nullptr;
+                            return kError;
                         }
                     }
-                    return block->branch.target;
+                    node = block->branch.target;
+                    return kContinue;
                 },
-                [&](const ir::If* if_) -> const ir::FlowNode* {
+                [&](const ir::If* if_) {
                     if (auto* stmt = If(if_); TINT_LIKELY(stmt)) {
                         stmts.Push(stmt);
-                        return if_->merge.target;
+                        node = if_->merge.target;
+                        return node->inbound_branches.IsEmpty() ? kStop : kContinue;
                     }
-                    return nullptr;
+                    return kError;
+                },
+                [&](const ir::FunctionTerminator*) {
+                    stmts.Push(b.Return());
+                    return kStop;
                 },
                 [&](Default) {
-                    TINT_UNIMPLEMENTED(IR, b.Diagnostics())
-                        << "unhandled case in Switch(): " << node->TypeInfo().name;
-                    return nullptr;
+                    UNHANDLED_CASE(node);
+                    return kError;
                 });
+
+            if (TINT_UNLIKELY(status == kError)) {
+                return nullptr;
+            }
+            if (status == kStop) {
+                break;
+            }
         }
 
         return b.Block(std::move(stmts));
@@ -178,8 +192,7 @@ class State {
             [&](const ir::Var* i) { return Var(i); },        //
             [&](const ir::Store* i) { return Store(i); },
             [&](Default) {
-                TINT_UNIMPLEMENTED(IR, b.Diagnostics())
-                    << "unhandled case in Switch(): " << inst->TypeInfo().name;
+                UNHANDLED_CASE(inst);
                 return nullptr;
             });
     }
@@ -226,8 +239,7 @@ class State {
             call,  //
             [&](const ir::UserCall* c) { return b.Call(Sym(c->name), std::move(args)); },
             [&](Default) {
-                TINT_UNIMPLEMENTED(IR, b.Diagnostics())
-                    << "unhandled case in Switch(): " << call->TypeInfo().name;
+                UNHANDLED_CASE(call);
                 return nullptr;
             });
     }
@@ -238,8 +250,7 @@ class State {
             [&](const ir::Constant* c) { return ConstExpr(c); },
             [&](const ir::Var* v) { return VarExpr(v); },
             [&](Default) {
-                TINT_UNIMPLEMENTED(IR, b.Diagnostics())
-                    << "unhandled case in Switch(): " << val->TypeInfo().name;
+                UNHANDLED_CASE(val);
                 return nullptr;
             });
     }
@@ -253,8 +264,7 @@ class State {
             [&](const type::F16*) { return b.Expr(c->value->ValueAs<f16>()); },
             [&](const type::Bool*) { return b.Expr(c->value->ValueAs<bool>()); },
             [&](Default) {
-                TINT_UNIMPLEMENTED(IR, b.Diagnostics())
-                    << "unhandled case in Switch(): " << c->TypeInfo().name;
+                UNHANDLED_CASE(c);
                 return nullptr;
             });
     }
@@ -327,7 +337,7 @@ class State {
             },
             [&](const type::Reference* r) { return Type(r->StoreType()); },
             [&](Default) {
-                TINT_UNREACHABLE(IR, b.Diagnostics()) << "unhandled type: " << ty->TypeInfo().name;
+                UNHANDLED_CASE(ty);
                 return ast::Type{};
             });
     }
