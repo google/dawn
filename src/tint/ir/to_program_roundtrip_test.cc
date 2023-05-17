@@ -152,28 +152,6 @@ fn f() {
     b();
   }
 }
-)",
-         R"(
-fn a() {
-}
-
-fn b() {
-}
-
-fn c() {
-}
-
-fn f() {
-  var cond_a : bool = true;
-  var cond_b : bool = true;
-  if (cond_a) {
-    a();
-  } else {
-    if (cond_b) {
-      b();
-    }
-  }
-}
 )");
 }
 }  // namespace

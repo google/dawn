@@ -116,10 +116,27 @@ class State {
     const ast::IfStatement* If(const ir::If* i) {
         auto* cond = Expr(i->condition);
         auto* t = FlowNodeGraph(i->true_.target, i->merge.target);
+        if (!t) {
+            return nullptr;
+        }
         if (!IsEmpty(i->false_.target, i->merge.target)) {
-            // TODO(crbug.com/tint/1902): Merge if else
-            auto* f = FlowNodeGraph(i->false_.target, i->merge.target);
-            return b.If(cond, t, b.Else(f));
+            // If the else target is an if flow node with the same merge target as this if, then
+            // emit an 'else if' instead of a block statement for the else.
+            if (auto* else_if = As<ir::If>(NextNonEmptyNode(i->false_.target));
+                else_if &&
+                NextNonEmptyNode(i->merge.target) == NextNonEmptyNode(else_if->merge.target)) {
+                auto* f = If(else_if);
+                if (!f) {
+                    return nullptr;
+                }
+                return b.If(cond, t, b.Else(f));
+            } else {
+                auto* f = FlowNodeGraph(i->false_.target, i->merge.target);
+                if (!f) {
+                    return nullptr;
+                }
+                return b.If(cond, t, b.Else(f));
+            }
         }
         return b.If(cond, t);
     }
@@ -137,6 +154,21 @@ class State {
             }
         }
         return true;
+    }
+
+    /// @return the next flow node that isn't an empty block
+    const ir::FlowNode* NextNonEmptyNode(const ir::FlowNode* node) {
+        while (node) {
+            if (auto* block = node->As<ir::Block>()) {
+                if (block->instructions.Length() > 0) {
+                    return node;
+                }
+                node = block->branch.target;
+            } else {
+                return node;
+            }
+        }
+        return nullptr;
     }
 
     const ast::Statement* Stmt(const ir::Instruction* inst) {
