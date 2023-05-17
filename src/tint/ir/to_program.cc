@@ -14,6 +14,7 @@
 
 #include "src/tint/ir/to_program.h"
 
+#include <string>
 #include <utility>
 
 #include "src/tint/ir/block.h"
@@ -271,7 +272,12 @@ class State {
 
     const ast::VariableDeclStatement* Var(const ir::Var* var) {
         Symbol name = NameOf(var);
-        auto ty = Type(var->Type());
+        auto* ptr = var->Type()->As<type::Reference>();
+        if (!ptr) {
+            Err("Incorrect type for var");
+            return nullptr;
+        }
+        auto ty = Type(ptr);
         const ast::Expression* init = nullptr;
         if (var->initializer) {
             init = Expr(var->initializer);
@@ -279,13 +285,13 @@ class State {
                 return nullptr;
             }
         }
-        switch (var->address_space) {
+        switch (ptr->AddressSpace()) {
             case builtin::AddressSpace::kFunction:
                 return b.Decl(b.Var(name, ty.Get(), init));
             case builtin::AddressSpace::kStorage:
-                return b.Decl(b.Var(name, ty.Get(), init, var->access, var->address_space));
+                return b.Decl(b.Var(name, ty.Get(), init, ptr->Access(), ptr->AddressSpace()));
             default:
-                return b.Decl(b.Var(name, ty.Get(), init, var->address_space));
+                return b.Decl(b.Var(name, ty.Get(), init, ptr->AddressSpace()));
         }
     }
 
@@ -445,7 +451,7 @@ class State {
 
     Symbol Sym(const Symbol& s) { return b.Symbols().Register(s.NameView()); }
 
-    // void Err(std::string str) { b.Diagnostics().add_error(diag::System::IR, std::move(str)); }
+    void Err(std::string str) { b.Diagnostics().add_error(diag::System::IR, std::move(str)); }
 };
 
 }  // namespace

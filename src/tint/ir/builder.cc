@@ -239,10 +239,8 @@ ir::Store* Builder::Store(Value* to, Value* from) {
     return ir.instructions.Create<ir::Store>(to, from);
 }
 
-ir::Var* Builder::Declare(const type::Type* type,
-                          builtin::AddressSpace address_space,
-                          builtin::Access access) {
-    return ir.instructions.Create<ir::Var>(type, address_space, access);
+ir::Var* Builder::Declare(const type::Type* type) {
+    return ir.instructions.Create<ir::Var>(type);
 }
 
 }  // namespace tint::ir

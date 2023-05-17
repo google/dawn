@@ -105,7 +105,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, i32, read_write> = var private, read_write
+  %v1:ref<private, i32, read_write> = var
 }
 
 
@@ -130,7 +130,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, i32, read_write> = var private, read_write
+  %v1:ref<private, i32, read_write> = var
 }
 
 

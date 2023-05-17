@@ -25,23 +25,20 @@ using IR_ModuleTest = TestHelper;
 
 TEST_F(IR_ModuleTest, NameOfUnnamed) {
     Module mod;
-    auto* v = mod.values.Create<ir::Var>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
+    auto* v = mod.values.Create<ir::Var>(mod.types.Get<type::I32>());
     EXPECT_FALSE(mod.NameOf(v).IsValid());
 }
 
 TEST_F(IR_ModuleTest, SetName) {
     Module mod;
-    auto* v = mod.values.Create<ir::Var>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
+    auto* v = mod.values.Create<ir::Var>(mod.types.Get<type::I32>());
     EXPECT_EQ(mod.SetName(v, "a").Name(), "a");
     EXPECT_EQ(mod.NameOf(v).Name(), "a");
 }
 
 TEST_F(IR_ModuleTest, SetNameRename) {
     Module mod;
-    auto* v = mod.values.Create<ir::Var>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
+    auto* v = mod.values.Create<ir::Var>(mod.types.Get<type::I32>());
     EXPECT_EQ(mod.SetName(v, "a").Name(), "a");
     EXPECT_EQ(mod.SetName(v, "b").Name(), "b");
     EXPECT_EQ(mod.NameOf(v).Name(), "b");
@@ -49,12 +46,9 @@ TEST_F(IR_ModuleTest, SetNameRename) {
 
 TEST_F(IR_ModuleTest, SetNameCollision) {
     Module mod;
-    auto* a = mod.values.Create<ir::Var>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
-    auto* b = mod.values.Create<ir::Var>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
-    auto* c = mod.values.Create<ir::Var>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
+    auto* a = mod.values.Create<ir::Var>(mod.types.Get<type::I32>());
+    auto* b = mod.values.Create<ir::Var>(mod.types.Get<type::I32>());
+    auto* c = mod.values.Create<ir::Var>(mod.types.Get<type::I32>());
     EXPECT_EQ(mod.SetName(a, "x").Name(), "x");
     EXPECT_EQ(mod.SetName(b, "x_1").Name(), "x_1");
     EXPECT_EQ(mod.SetName(c, "x").Name(), "x_2");

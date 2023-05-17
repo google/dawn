@@ -358,12 +358,8 @@ class Builder {
 
     /// Creates a new `var` declaration
     /// @param type the var type
-    /// @param address_space the address space
-    /// @param access the access mode
     /// @returns the instruction
-    ir::Var* Declare(const type::Type* type,
-                     builtin::AddressSpace address_space,
-                     builtin::Access access);
+    ir::Var* Declare(const type::Type* type);
 
     /// Retrieves the root block for the module, creating if necessary
     /// @returns the root block

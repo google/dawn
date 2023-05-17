@@ -80,6 +80,7 @@
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/switch.h"
+#include "src/tint/type/reference.h"
 #include "src/tint/type/void.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/result.h"
@@ -843,7 +844,7 @@ class Impl {
             var,
             [&](const ast::Var* v) {
                 auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
-                auto* val = builder_.Declare(ty, sem->AddressSpace(), sem->Access());
+                auto* val = builder_.Declare(ty);
                 current_flow_block_->instructions.Push(val);
 
                 if (v->initializer) {
@@ -944,9 +945,10 @@ class Impl {
         }
 
         // Generate a variable to store the short-circut into
-        auto* ty = builder_.ir.types.Get<type::Bool>();
-        auto* result_var =
-            builder_.Declare(ty, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+        auto* ty = builder_.ir.types.Get<type::Reference>(builder_.ir.types.Get<type::Bool>(),
+                                                          builtin::AddressSpace::kFunction,
+                                                          builtin::Access::kReadWrite);
+        auto* result_var = builder_.Declare(ty);
         current_flow_block_->instructions.Push(result_var);
 
         auto* lhs_store = builder_.Store(result_var, lhs.Get());

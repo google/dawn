@@ -58,7 +58,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Increment) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -81,7 +81,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -127,7 +127,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Decrement) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, i32, read_write> = var private, read_write
+  %v1:ref<private, i32, read_write> = var
 }
 
 
@@ -150,7 +150,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -196,7 +196,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -242,7 +242,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -288,7 +288,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -334,7 +334,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, bool, read_write> = var private, read_write
+  %v1:ref<private, bool, read_write> = var
 }
 
 
@@ -380,7 +380,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, bool, read_write> = var private, read_write
+  %v1:ref<private, bool, read_write> = var
 }
 
 
@@ -426,7 +426,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -456,14 +456,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn4 = block {
     %1:bool = call my_func
-    %tint_symbol:bool = var function, read_write
-    store %tint_symbol:bool, %1:bool
+    %tint_symbol:ref<function, bool, read_write> = var
+    store %tint_symbol:ref<function, bool, read_write>, %1:bool
   } -> %fn5 # branch
 
   %fn5 = if %1:bool [t: %fn6, f: %fn7, m: %fn8]
     # true branch
     %fn6 = block {
-      store %tint_symbol:bool, false
+      store %tint_symbol:ref<function, bool, read_write>, false
     } -> %fn8 # branch
 
   # if merge
@@ -490,15 +490,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn4 = block {
     %1:bool = call my_func
-    %tint_symbol:bool = var function, read_write
-    store %tint_symbol:bool, %1:bool
+    %tint_symbol:ref<function, bool, read_write> = var
+    store %tint_symbol:ref<function, bool, read_write>, %1:bool
   } -> %fn5 # branch
 
   %fn5 = if %1:bool [t: %fn6, f: %fn7, m: %fn8]
     # true branch
     # false branch
     %fn7 = block {
-      store %tint_symbol:bool, true
+      store %tint_symbol:ref<function, bool, read_write>, true
     } -> %fn8 # branch
 
   # if merge
@@ -679,7 +679,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -725,7 +725,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %v1:ref<private, u32, read_write> = var private, read_write
+  %v1:ref<private, u32, read_write> = var
 }
 
 
@@ -758,8 +758,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
   %fn4 = block {
     %1:f32 = call my_func
     %2:bool = lt %1:f32, 2.0f
-    %tint_symbol:bool = var function, read_write
-    store %tint_symbol:bool, %2:bool
+    %tint_symbol:ref<function, bool, read_write> = var
+    store %tint_symbol:ref<function, bool, read_write>, %2:bool
   } -> %fn5 # branch
 
   %fn5 = if %2:bool [t: %fn6, f: %fn7, m: %fn8]
@@ -770,7 +770,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
       %6:f32 = mul 2.29999995231628417969f, %5:f32
       %7:f32 = div %4:f32, %6:f32
       %8:bool = gt 2.5f, %7:f32
-      store %tint_symbol:bool, %8:bool
+      store %tint_symbol:ref<function, bool, read_write>, %8:bool
     } -> %fn8 # branch
 
   # if merge

@@ -33,7 +33,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %a:ref<private, u32, read_write> = var private, read_write
+  %a:ref<private, u32, read_write> = var
 }
 
 
@@ -48,7 +48,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
-  %a:ref<private, u32, read_write> = var private, read_write, 2u
+  %a:ref<private, u32, read_write> = var, 2u
 }
 
 
@@ -65,7 +65,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn2 = block {
-    %a:ref<function, u32, read_write> = var function, read_write
+    %a:ref<function, u32, read_write> = var
   } -> %func_end # return
 } %func_end
 
@@ -83,7 +83,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn2 = block {
-    %a:ref<function, u32, read_write> = var function, read_write, 2u
+    %a:ref<function, u32, read_write> = var, 2u
   } -> %func_end # return
 } %func_end
 
