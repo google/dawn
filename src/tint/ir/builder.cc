@@ -114,7 +114,7 @@ void Builder::Branch(Block* from, FlowNode* to, utils::VectorRef<Value*> args) {
 }
 
 Binary* Builder::CreateBinary(Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs) {
-    return ir.instructions.Create<ir::Binary>(kind, type, lhs, rhs);
+    return ir.values.Create<ir::Binary>(kind, type, lhs, rhs);
 }
 
 Binary* Builder::And(const type::Type* type, Value* lhs, Value* rhs) {
@@ -182,7 +182,7 @@ Binary* Builder::Modulo(const type::Type* type, Value* lhs, Value* rhs) {
 }
 
 Unary* Builder::CreateUnary(Unary::Kind kind, const type::Type* type, Value* val) {
-    return ir.instructions.Create<ir::Unary>(kind, type, val);
+    return ir.values.Create<ir::Unary>(kind, type, val);
 }
 
 Unary* Builder::AddressOf(const type::Type* type, Value* val) {
@@ -206,41 +206,41 @@ Binary* Builder::Not(const type::Type* type, Value* val) {
 }
 
 ir::Bitcast* Builder::Bitcast(const type::Type* type, Value* val) {
-    return ir.instructions.Create<ir::Bitcast>(type, val);
+    return ir.values.Create<ir::Bitcast>(type, val);
 }
 
 ir::Discard* Builder::Discard() {
-    return ir.instructions.Create<ir::Discard>();
+    return ir.values.Create<ir::Discard>();
 }
 
 ir::UserCall* Builder::UserCall(const type::Type* type,
                                 Symbol name,
                                 utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::UserCall>(type, name, std::move(args));
+    return ir.values.Create<ir::UserCall>(type, name, std::move(args));
 }
 
 ir::Convert* Builder::Convert(const type::Type* to,
                               const type::Type* from,
                               utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Convert>(to, from, std::move(args));
+    return ir.values.Create<ir::Convert>(to, from, std::move(args));
 }
 
 ir::Construct* Builder::Construct(const type::Type* to, utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Construct>(to, std::move(args));
+    return ir.values.Create<ir::Construct>(to, std::move(args));
 }
 
 ir::Builtin* Builder::Builtin(const type::Type* type,
                               builtin::Function func,
                               utils::VectorRef<Value*> args) {
-    return ir.instructions.Create<ir::Builtin>(type, func, args);
+    return ir.values.Create<ir::Builtin>(type, func, args);
 }
 
 ir::Store* Builder::Store(Value* to, Value* from) {
-    return ir.instructions.Create<ir::Store>(to, from);
+    return ir.values.Create<ir::Store>(to, from);
 }
 
 ir::Var* Builder::Declare(const type::Type* type) {
-    return ir.instructions.Create<ir::Var>(type);
+    return ir.values.Create<ir::Var>(type);
 }
 
 ir::BlockParam* Builder::BlockParam(const type::Type* type) {

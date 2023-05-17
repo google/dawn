@@ -70,8 +70,6 @@ class Module {
     utils::BlockAllocator<constant::Value> constants;
     /// The value allocator
     utils::BlockAllocator<Value> values;
-    /// The instruction allocator
-    utils::BlockAllocator<Instruction> instructions;
 
     /// List of functions in the program
     utils::Vector<Function*, 8> functions;
