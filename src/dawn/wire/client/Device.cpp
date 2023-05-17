@@ -23,8 +23,13 @@
 
 namespace dawn::wire::client {
 
-Device::Device(const ObjectBaseParams& params)
+Device::Device(const ObjectBaseParams& params, const WGPUDeviceDescriptor* descriptor)
     : ObjectBase(params), mIsAlive(std::make_shared<bool>()) {
+    if (descriptor && descriptor->deviceLostCallback) {
+        mDeviceLostCallback = descriptor->deviceLostCallback;
+        mDeviceLostUserdata = descriptor->deviceLostUserdata;
+    }
+
 #if defined(DAWN_ENABLE_ASSERTS)
     mErrorCallback = [](WGPUErrorType, char const*, void*) {
         static bool calledOnce = false;
@@ -36,15 +41,17 @@ Device::Device(const ObjectBaseParams& params)
         }
     };
 
-    mDeviceLostCallback = [](WGPUDeviceLostReason, char const*, void*) {
-        static bool calledOnce = false;
-        if (!calledOnce) {
-            calledOnce = true;
-            dawn::WarningLog() << "No Dawn device lost callback was set. This is probably not "
-                                  "intended. If you really want to ignore device lost "
-                                  "and suppress this message, set the callback to null.";
-        }
-    };
+    if (!mDeviceLostCallback) {
+        mDeviceLostCallback = [](WGPUDeviceLostReason, char const*, void*) {
+            static bool calledOnce = false;
+            if (!calledOnce) {
+                calledOnce = true;
+                dawn::WarningLog() << "No Dawn device lost callback was set. This is probably not "
+                                      "intended. If you really want to ignore device lost "
+                                      "and suppress this message, set the callback to null.";
+            }
+        };
+    }
 #endif  // DAWN_ENABLE_ASSERTS
 }
 

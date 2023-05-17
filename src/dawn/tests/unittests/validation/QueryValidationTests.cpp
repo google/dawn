@@ -273,8 +273,8 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
 
 class TimestampQueryValidationTest : public QuerySetValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
-        wgpu::DeviceDescriptor descriptor;
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TimestampQuery};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeaturesCount = 1;
@@ -566,8 +566,8 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnCommandEncoder) {
 
 class TimestampQueryInsidePassesValidationTest : public QuerySetValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
-        wgpu::DeviceDescriptor descriptor;
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
         // The timestamp query feature must be supported if the timestamp query inside passes
         // feature is supported. Enable timestamp query for validating queries overwrite inside and
         // outside of the passes.
@@ -709,11 +709,11 @@ TEST_F(TimestampQueryInsidePassesValidationTest, WriteTimestampOnRenderPassEncod
 
 class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
         // Create a device with pipeline statistic query feature required. Note that Pipeline
         // statistic query is an unsafe API, while AllowUnsafeApis instance toggle is enabled
         // when ValidationTest creating testing instance, so we can test it.
-        wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::PipelineStatisticsQuery};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeaturesCount = 1;

@@ -111,11 +111,14 @@ ValidationTest::ValidationTest() {
         UNREACHABLE();
     };
 
-    procs.adapterRequestDevice = [](WGPUAdapter adapter, const WGPUDeviceDescriptor*,
+    procs.adapterRequestDevice = [](WGPUAdapter adapter, const WGPUDeviceDescriptor* descriptor,
                                     WGPURequestDeviceCallback callback, void* userdata) {
         ASSERT(gCurrentTest);
+        wgpu::DeviceDescriptor deviceDesc =
+            *(reinterpret_cast<const wgpu::DeviceDescriptor*>(descriptor));
         WGPUDevice cDevice = gCurrentTest->CreateTestDevice(
-            dawn::native::Adapter(reinterpret_cast<dawn::native::AdapterBase*>(adapter)));
+            dawn::native::Adapter(reinterpret_cast<dawn::native::AdapterBase*>(adapter)),
+            deviceDesc);
         ASSERT(cDevice != nullptr);
         gCurrentTest->mLastCreatedBackendDevice = cDevice;
         callback(WGPURequestDeviceStatus_Success, cDevice, nullptr, userdata);
@@ -160,11 +163,14 @@ void ValidationTest::SetUp() {
     FlushWire();
     ASSERT(adapter);
 
-    device = RequestDeviceSync(wgpu::DeviceDescriptor{});
+    wgpu::DeviceDescriptor deviceDescriptor = {};
+    deviceDescriptor.deviceLostCallback = ValidationTest::OnDeviceLost;
+    deviceDescriptor.deviceLostUserdata = this;
+
+    device = RequestDeviceSync(deviceDescriptor);
     backendDevice = mLastCreatedBackendDevice;
 
     device.SetUncapturedErrorCallback(ValidationTest::OnDeviceError, this);
-    device.SetDeviceLostCallback(ValidationTest::OnDeviceLost, this);
 }
 
 ValidationTest::~ValidationTest() {
@@ -281,7 +287,8 @@ dawn::native::Adapter& ValidationTest::GetBackendAdapter() {
     return mBackendAdapter;
 }
 
-WGPUDevice ValidationTest::CreateTestDevice(dawn::native::Adapter dawnAdapter) {
+WGPUDevice ValidationTest::CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                            wgpu::DeviceDescriptor deviceDescriptor) {
     std::vector<const char*> enabledToggles;
     std::vector<const char*> disabledToggles;
 
@@ -293,7 +300,6 @@ WGPUDevice ValidationTest::CreateTestDevice(dawn::native::Adapter dawnAdapter) {
         disabledToggles.push_back(toggle.c_str());
     }
 
-    wgpu::DeviceDescriptor deviceDescriptor;
     wgpu::DawnTogglesDescriptor deviceTogglesDesc;
     deviceDescriptor.nextInChain = &deviceTogglesDesc;
 

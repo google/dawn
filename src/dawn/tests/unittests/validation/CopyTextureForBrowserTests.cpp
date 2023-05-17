@@ -101,8 +101,8 @@ class CopyTextureForBrowserTest : public ValidationTest {
 
 class CopyTextureForBrowserInternalUsageTest : public CopyTextureForBrowserTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
-        wgpu::DeviceDescriptor descriptor;
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName feature = wgpu::FeatureName::DawnInternalUsages;
         descriptor.requiredFeatures = &feature;
         descriptor.requiredFeaturesCount = 1;
@@ -142,8 +142,8 @@ class CopyExternalTextureForBrowserTest : public ValidationTest {
 
 class CopyExternalTextureForBrowserInternalUsageTest : public CopyExternalTextureForBrowserTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
-        wgpu::DeviceDescriptor descriptor;
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName feature = wgpu::FeatureName::DawnInternalUsages;
         descriptor.requiredFeatures = &feature;
         descriptor.requiredFeaturesCount = 1;

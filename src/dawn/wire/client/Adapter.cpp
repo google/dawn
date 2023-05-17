@@ -71,7 +71,7 @@ void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
         return;
     }
 
-    Device* device = client->Make<Device>();
+    Device* device = client->Make<Device>(descriptor);
     uint64_t serial = mRequestDeviceRequests.Add({callback, device->GetWireId(), userdata});
 
     AdapterRequestDeviceCmd cmd;

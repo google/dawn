@@ -28,10 +28,10 @@ class UnsafeAPIValidationTest : public ValidationTest {
   protected:
     // UnsafeAPIValidationTest create the device with the AllowUnsafeAPIs toggle explicitly
     // disabled, which overrides the inheritance.
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
         // Disable the AllowUnsafeAPIs toggles in device toggles descriptor to override the
         // inheritance and create a device disallowing unsafe apis.
-        wgpu::DeviceDescriptor descriptor;
         wgpu::DawnTogglesDescriptor deviceTogglesDesc;
         descriptor.nextInChain = &deviceTogglesDesc;
         const char* toggle = "allow_unsafe_apis";

@@ -21,7 +21,8 @@
 
 class ComputePipelineOverridableConstantsValidationTest : public ValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor deviceDescriptor) override {
         std::vector<const char*> enabledToggles;
         std::vector<const char*> disabledToggles;
 
@@ -35,7 +36,6 @@ class ComputePipelineOverridableConstantsValidationTest : public ValidationTest 
 
         const wgpu::FeatureName requiredFeatures[] = {wgpu::FeatureName::ShaderF16};
 
-        wgpu::DeviceDescriptor deviceDescriptor;
         deviceDescriptor.nextInChain = &deviceTogglesDesc;
         deviceDescriptor.requiredFeatures = requiredFeatures;
         deviceDescriptor.requiredFeaturesCount = 1;
