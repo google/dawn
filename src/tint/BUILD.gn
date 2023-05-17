@@ -359,10 +359,7 @@ libtint_source_set("libtint_transform_src") {
     "transform/transform.cc",
     "transform/transform.h",
   ]
-  deps = [
-    ":libtint_program_src",
-    ":libtint_utils_src",
-  ]
+  deps = [ ":libtint_utils_src" ]
 }
 
 libtint_source_set("libtint_ast_transform_base_src") {
@@ -370,11 +367,11 @@ libtint_source_set("libtint_ast_transform_base_src") {
     "ast/transform/transform.cc",
     "ast/transform/transform.h",
   ]
-  public_deps = [ ":libtint_transform_src" ]
   deps = [
     ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_sem_src",
+    ":libtint_transform_src",
     ":libtint_type_src",
     ":libtint_utils_src",
   ]
@@ -387,7 +384,10 @@ libtint_source_set("libtint_transform_manager_src") {
   ]
   deps = [
     ":libtint_ast_transform_base_src",
+    ":libtint_ir_builder_src",
+    ":libtint_ir_src",
     ":libtint_program_src",
+    ":libtint_transform_src",
   ]
 }
 
@@ -492,9 +492,9 @@ libtint_source_set("libtint_ast_transform_src") {
     "ast/transform/zero_init_workgroup_memory.cc",
     "ast/transform/zero_init_workgroup_memory.h",
   ]
-  public_deps = [ ":libtint_ast_transform_base_src" ]
   deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_base_src",
     ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_sem_src",
@@ -1225,6 +1225,8 @@ libtint_source_set("libtint_ir_src") {
     "ir/store.h",
     "ir/switch.cc",
     "ir/switch.h",
+    "ir/transform/transform.cc",
+    "ir/transform/transform.h",
     "ir/unary.cc",
     "ir/unary.h",
     "ir/user_call.cc",
@@ -1239,6 +1241,7 @@ libtint_source_set("libtint_ir_src") {
     ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_symbols_src",
+    ":libtint_transform_src",
     ":libtint_type_src",
     ":libtint_utils_src",
   ]
@@ -1247,6 +1250,7 @@ libtint_source_set("libtint_ir_src") {
 source_set("libtint") {
   public_deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_base_src",
     ":libtint_ast_transform_src",
     ":libtint_constant_src",
     ":libtint_initializer_src",
@@ -1738,6 +1742,7 @@ if (tint_build_unittests) {
     ]
 
     deps = [
+      ":libtint_ast_transform_base_src",
       ":libtint_ast_transform_src",
       ":libtint_builtins_src",
       ":libtint_transform_manager_src",
@@ -2183,12 +2188,23 @@ if (tint_build_unittests) {
       "clone_context_test.cc",
       "program_builder_test.cc",
       "program_test.cc",
+      "transform/manager_test.cc",
     ]
 
     deps = [
+      ":libtint_ast_transform_base_src",
+      ":libtint_program_src",
+      ":libtint_transform_manager_src",
       ":libtint_unittests_ast_helper",
       ":tint_unittests_ast_src",
     ]
+
+    if (tint_build_ir) {
+      deps += [
+        ":libtint_ir_builder_src",
+        ":libtint_ir_src",
+      ]
+    }
   }
 
   tint_unittests_source_set("tint_unittests_ir_src") {

@@ -19,7 +19,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/program.h"
 #include "src/tint/utils/castable.h"
 
 namespace tint::transform {

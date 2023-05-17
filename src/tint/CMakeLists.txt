@@ -768,6 +768,8 @@ if(${TINT_BUILD_IR})
     ir/value.h
     ir/var.cc
     ir/var.h
+    ir/transform/transform.cc
+    ir/transform/transform.h
   )
 endif()
 
@@ -998,6 +1000,7 @@ if(TINT_BUILD_TESTS)
     symbol_test.cc
     test_main.cc
     ast/transform/transform_test.cc
+    transform/manager_test.cc
     type/array_test.cc
     type/atomic_test.cc
     type/bool_test.cc

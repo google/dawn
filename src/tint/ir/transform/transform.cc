@@ -12,24 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/transform/transform.h"
+#include "src/tint/ir/transform/transform.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::Transform);
 
-namespace tint::transform {
-
-Data::Data() = default;
-Data::Data(const Data&) = default;
-Data::~Data() = default;
-Data& Data::operator=(const Data&) = default;
-
-DataMap::DataMap() = default;
-DataMap::DataMap(DataMap&&) = default;
-DataMap::~DataMap() = default;
-DataMap& DataMap::operator=(DataMap&&) = default;
+namespace tint::ir::transform {
 
 Transform::Transform() = default;
 Transform::~Transform() = default;
 
-}  // namespace tint::transform
+}  // namespace tint::ir::transform

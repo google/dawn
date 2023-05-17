@@ -19,7 +19,15 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/program.h"
 #include "src/tint/transform/transform.h"
+
+#if TINT_BUILD_IR
+// Forward declarations
+namespace tint::ir {
+class Module;
+}  // namespace tint::ir
+#endif  // TINT_BUILD_IR
 
 namespace tint::transform {
 
@@ -54,8 +62,19 @@ class Manager {
     /// @returns the transformed program
     Program Run(const Program* program, const DataMap& inputs, DataMap& outputs) const;
 
+#if TINT_BUILD_IR
+    /// Runs the transforms on @p module
+    /// @param module the module to transform
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const;
+#endif  // TINT_BUILD_IR
+
   private:
     std::vector<std::unique_ptr<Transform>> transforms_;
+
+    template <typename OUTPUT, typename INPUT>
+    OUTPUT RunTransforms(INPUT in, const DataMap& inputs, DataMap& outputs) const;
 };
 
 }  // namespace tint::transform
