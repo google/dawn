@@ -27,10 +27,8 @@ dawn_json_generator("cpp_gen") {
 }
 
 source_set("cpp") {
-  deps = [
-    ":cpp_gen",
-    "${dawn_root}/include/dawn:cpp_headers",
-  ]
+  public_deps = [ "${dawn_root}/include/dawn:cpp_headers" ]
+  deps = [ ":cpp_gen" ]
   sources = get_target_outputs(":cpp_gen")
 }
 
