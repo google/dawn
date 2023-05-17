@@ -18,6 +18,7 @@
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/function_terminator.h"
+#include "src/tint/ir/if.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/switch.h"
@@ -178,6 +179,10 @@ uint32_t GeneratorImplIr::Value(const ir::Value* value) {
         });
 }
 
+uint32_t GeneratorImplIr::Label(const ir::Block* block) {
+    return block_labels_.GetOrCreate(block, [&]() { return module_.NextId(); });
+}
+
 void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     // Make an ID for the function.
     auto id = module_.NextId();
@@ -255,6 +260,12 @@ void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
 }
 
 void GeneratorImplIr::EmitBlock(const ir::Block* block) {
+    // Emit the label.
+    // Skip if this is the function's entry block, as it will be emitted by the function object.
+    if (!current_function_.instructions().empty()) {
+        current_function_.push_inst(spv::Op::OpLabel, {Label(block)});
+    }
+
     // Emit the instructions.
     for (auto* inst : block->instructions) {
         auto result = Switch(
@@ -271,6 +282,8 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
     // Handle the branch at the end of the block.
     Switch(
         block->branch.target,
+        [&](const ir::Block* b) { current_function_.push_inst(spv::Op::OpBranch, {Label(b)}); },
+        [&](const ir::If* i) { EmitIf(i); },
         [&](const ir::FunctionTerminator*) {
             // TODO(jrprice): Handle the return value, which will be a branch argument.
             if (!block->branch.args.IsEmpty()) {
@@ -278,7 +291,52 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
             }
             current_function_.push_inst(spv::Op::OpReturn, {});
         },
-        [&](Default) { TINT_ICE(Writer, diagnostics_) << "unimplemented branch target"; });
+        [&](Default) {
+            if (!block->branch.target) {
+                // A block may not have an outward branch (e.g. an unreachable merge block).
+                current_function_.push_inst(spv::Op::OpUnreachable, {});
+            } else {
+                TINT_ICE(Writer, diagnostics_)
+                    << "unimplemented branch target: " << block->branch.target->TypeInfo().name;
+            }
+        });
+}
+
+void GeneratorImplIr::EmitIf(const ir::If* i) {
+    auto* merge_block = i->merge.target->As<ir::Block>();
+    auto* true_block = i->true_.target->As<ir::Block>();
+    auto* false_block = i->false_.target->As<ir::Block>();
+
+    // Generate labels for the blocks. We emit the true or false block if it:
+    // 1. contains instructions, or
+    // 2. branches somewhere other then the merge target.
+    // Otherwise we skip them and branch straight to the merge block.
+    uint32_t merge_label = Label(merge_block);
+    uint32_t true_label = merge_label;
+    uint32_t false_label = merge_label;
+    if (!true_block->instructions.IsEmpty() || true_block->branch.target != merge_block) {
+        true_label = Label(true_block);
+    }
+    if (!false_block->instructions.IsEmpty() || false_block->branch.target != merge_block) {
+        false_label = Label(false_block);
+    }
+
+    // Emit the OpSelectionMerge and OpBranchConditional instructions.
+    current_function_.push_inst(spv::Op::OpSelectionMerge,
+                                {merge_label, U32Operand(SpvSelectionControlMaskNone)});
+    current_function_.push_inst(spv::Op::OpBranchConditional,
+                                {Value(i->condition), true_label, false_label});
+
+    // Emit the `true` and `false` blocks, if they're not being skipped.
+    if (true_label != merge_label) {
+        EmitBlock(true_block);
+    }
+    if (false_label != merge_label) {
+        EmitBlock(false_block);
+    }
+
+    // Emit the merge block.
+    EmitBlock(merge_block);
 }
 
 uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {

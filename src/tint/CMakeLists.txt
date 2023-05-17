@@ -1241,6 +1241,7 @@ if(TINT_BUILD_TESTS)
         writer/spirv/generator_impl_binary_test.cc
         writer/spirv/generator_impl_constant_test.cc
         writer/spirv/generator_impl_function_test.cc
+        writer/spirv/generator_impl_if_test.cc
         writer/spirv/generator_impl_ir_test.cc
         writer/spirv/generator_impl_type_test.cc
         writer/spirv/test_helper_ir.h

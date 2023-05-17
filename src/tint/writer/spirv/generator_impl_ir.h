@@ -30,6 +30,7 @@
 namespace tint::ir {
 class Binary;
 class Block;
+class If;
 class Function;
 class Module;
 class Value;
@@ -76,6 +77,11 @@ class GeneratorImplIr {
     /// @returns the result ID of the value
     uint32_t Value(const ir::Value* value);
 
+    /// Get the ID of the label for `block`.
+    /// @param block the block to get the label ID for
+    /// @returns the ID of the block's label
+    uint32_t Label(const ir::Block* block);
+
     /// Emit a function.
     /// @param func the function to emit
     void EmitFunction(const ir::Function* func);
@@ -88,6 +94,10 @@ class GeneratorImplIr {
     /// Emit a block.
     /// @param block the block to emit
     void EmitBlock(const ir::Block* block);
+
+    /// Emit an `if` flow node.
+    /// @param i the if node to emit
+    void EmitIf(const ir::If* i);
 
     /// Emit a binary instruction.
     /// @param binary the binary instruction to emit
@@ -160,6 +170,9 @@ class GeneratorImplIr {
 
     /// The map of instructions to their result IDs.
     utils::Hashmap<const ir::Instruction*, uint32_t, 8> instructions_;
+
+    /// The map of blocks to the IDs of their label instructions.
+    utils::Hashmap<const ir::Block*, uint32_t, 8> block_labels_;
 
     /// The current function that is being emitted.
     Function current_function_;
