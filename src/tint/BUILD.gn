@@ -356,6 +356,43 @@ libtint_source_set("libtint_inspector_src") {
 
 libtint_source_set("libtint_transform_src") {
   sources = [
+    "transform/transform.cc",
+    "transform/transform.h",
+  ]
+  deps = [
+    ":libtint_program_src",
+    ":libtint_utils_src",
+  ]
+}
+
+libtint_source_set("libtint_ast_transform_base_src") {
+  sources = [
+    "ast/transform/transform.cc",
+    "ast/transform/transform.h",
+  ]
+  public_deps = [ ":libtint_transform_src" ]
+  deps = [
+    ":libtint_builtins_src",
+    ":libtint_program_src",
+    ":libtint_sem_src",
+    ":libtint_type_src",
+    ":libtint_utils_src",
+  ]
+}
+
+libtint_source_set("libtint_transform_manager_src") {
+  sources = [
+    "transform/manager.cc",
+    "transform/manager.h",
+  ]
+  deps = [
+    ":libtint_ast_transform_base_src",
+    ":libtint_program_src",
+  ]
+}
+
+libtint_source_set("libtint_ast_transform_src") {
+  sources = [
     "ast/transform/add_block_attribute.cc",
     "ast/transform/add_block_attribute.h",
     "ast/transform/add_empty_entry_point.cc",
@@ -434,8 +471,6 @@ libtint_source_set("libtint_transform_src") {
     "ast/transform/substitute_override.h",
     "ast/transform/texture_1d_to_2d.cc",
     "ast/transform/texture_1d_to_2d.h",
-    "ast/transform/transform.cc",
-    "ast/transform/transform.h",
     "ast/transform/truncate_interstage_variables.cc",
     "ast/transform/truncate_interstage_variables.h",
     "ast/transform/unshadow.cc",
@@ -456,15 +491,15 @@ libtint_source_set("libtint_transform_src") {
     "ast/transform/while_to_loop.h",
     "ast/transform/zero_init_workgroup_memory.cc",
     "ast/transform/zero_init_workgroup_memory.h",
-    "transform/manager.cc",
-    "transform/manager.h",
   ]
+  public_deps = [ ":libtint_ast_transform_base_src" ]
   deps = [
     ":libtint_ast_src",
     ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_symbols_src",
+    ":libtint_transform_manager_src",
     ":libtint_type_src",
     ":libtint_utils_src",
   ]
@@ -860,10 +895,7 @@ libtint_source_set("libtint_reader_src") {
     "reader/reader.h",
   ]
 
-  public_deps = [
-    ":libtint_program_src",
-    ":libtint_transform_src",
-  ]
+  public_deps = [ ":libtint_program_src" ]
 }
 
 libtint_source_set("libtint_spv_reader_src") {
@@ -892,11 +924,13 @@ libtint_source_set("libtint_spv_reader_src") {
 
   deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_src",
     ":libtint_builtins_src",
     ":libtint_program_src",
     ":libtint_reader_src",
     ":libtint_sem_src",
     ":libtint_symbols_src",
+    ":libtint_transform_manager_src",
     ":libtint_type_src",
     ":libtint_utils_src",
     "${tint_spirv_tools_dir}/:spvtools_opt",
@@ -932,11 +966,12 @@ libtint_source_set("libtint_writer_src") {
 
   deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_src",
     ":libtint_builtins_src",
     ":libtint_inspector_src",
     ":libtint_program_src",
     ":libtint_sem_src",
-    ":libtint_transform_src",
+    ":libtint_transform_manager_src",
     ":libtint_type_src",
     ":libtint_utils_src",
   ]
@@ -965,12 +1000,13 @@ libtint_source_set("libtint_spv_writer_src") {
 
   deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_src",
     ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_symbols_src",
-    ":libtint_transform_src",
+    ":libtint_transform_manager_src",
     ":libtint_type_src",
     ":libtint_utils_src",
     ":libtint_writer_src",
@@ -1044,12 +1080,13 @@ libtint_source_set("libtint_msl_writer_src") {
 
   deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_src",
     ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_symbols_src",
-    ":libtint_transform_src",
+    ":libtint_transform_manager_src",
     ":libtint_type_src",
     ":libtint_utils_src",
     ":libtint_writer_src",
@@ -1066,12 +1103,13 @@ libtint_source_set("libtint_hlsl_writer_src") {
 
   deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_src",
     ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_symbols_src",
-    ":libtint_transform_src",
+    ":libtint_transform_manager_src",
     ":libtint_type_src",
     ":libtint_utils_src",
     ":libtint_writer_src",
@@ -1088,12 +1126,13 @@ libtint_source_set("libtint_glsl_writer_src") {
 
   deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_src",
     ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_symbols_src",
-    ":libtint_transform_src",
+    ":libtint_transform_manager_src",
     ":libtint_type_src",
     ":libtint_utils_src",
     ":libtint_writer_src",
@@ -1206,13 +1245,13 @@ libtint_source_set("libtint_ir_src") {
 source_set("libtint") {
   public_deps = [
     ":libtint_ast_src",
+    ":libtint_ast_transform_src",
     ":libtint_constant_src",
     ":libtint_initializer_src",
     ":libtint_inspector_src",
     ":libtint_program_src",
     ":libtint_sem_src",
     ":libtint_symbols_src",
-    ":libtint_transform_src",
     ":libtint_type_src",
     ":libtint_utils_src",
     ":libtint_writer_src",
@@ -1470,8 +1509,8 @@ if (tint_build_unittests) {
     ]
     deps = [
       ":libtint_ast_src",
+      ":libtint_ast_transform_src",
       ":libtint_builtins_src",
-      ":libtint_transform_src",
       ":libtint_unittests_ast_helper",
       ":libtint_utils_src",
     ]
@@ -1587,8 +1626,8 @@ if (tint_build_unittests) {
       "resolver/variable_validation_test.cc",
     ]
     deps = [
+      ":libtint_ast_transform_src",
       ":libtint_builtins_src",
-      ":libtint_transform_src",
       ":libtint_utils_src",
       ":tint_unittests_ast_src",
     ]
@@ -1638,7 +1677,7 @@ if (tint_build_unittests) {
     deps = [ ":libtint_builtins_src" ]
   }
 
-  tint_unittests_source_set("tint_unittests_transform_src") {
+  tint_unittests_source_set("tint_unittests_ast_transform_src") {
     sources = [
       "ast/transform/add_block_attribute_test.cc",
       "ast/transform/add_empty_entry_point_test.cc",
@@ -1697,8 +1736,9 @@ if (tint_build_unittests) {
     ]
 
     deps = [
+      ":libtint_ast_transform_src",
       ":libtint_builtins_src",
-      ":libtint_transform_src",
+      ":libtint_transform_manager_src",
       ":libtint_unittests_ast_helper",
       ":libtint_utils_src",
       ":libtint_wgsl_reader_src",
@@ -2071,8 +2111,9 @@ if (tint_build_unittests) {
     ]
 
     deps = [
+      ":libtint_ast_transform_src",
       ":libtint_hlsl_writer_src",
-      ":libtint_transform_src",
+      ":libtint_transform_manager_src",
       ":libtint_utils_src",
       ":tint_unittests_ast_src",
     ]
@@ -2115,9 +2156,10 @@ if (tint_build_unittests) {
     ]
 
     deps = [
+      ":libtint_ast_transform_src",
       ":libtint_glsl_writer_src",
       ":libtint_symbols_src",
-      ":libtint_transform_src",
+      ":libtint_transform_manager_src",
       ":libtint_utils_src",
       ":tint_unittests_ast_src",
     ]
@@ -2192,6 +2234,7 @@ if (tint_build_unittests) {
       ":libtint_wgsl_reader_src",
       ":libtint_wgsl_writer_src",
       ":tint_unittests_ast_src",
+      ":tint_unittests_ast_transform_src",
       ":tint_unittests_builtins_src",
       ":tint_unittests_cmd_src",
       ":tint_unittests_constant_src",
@@ -2201,7 +2244,6 @@ if (tint_build_unittests) {
       ":tint_unittests_resolver_src",
       ":tint_unittests_sem_src",
       ":tint_unittests_symbols_src",
-      ":tint_unittests_transform_src",
       ":tint_unittests_type_src",
       ":tint_unittests_utils_src",
       ":tint_unittests_writer_src",

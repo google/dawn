@@ -167,7 +167,7 @@ SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 
 SanitizedResult Sanitize(const Program* in, const Options& options) {
     transform::Manager manager;
-    ast::transform::DataMap data;
+    transform::DataMap data;
 
     manager.Add<ast::transform::DisableUniformityAnalysis>();
 
@@ -257,14 +257,13 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<ast::transform::PackedVec3>();
     manager.Add<ast::transform::ModuleScopeVarToEntryPointParam>();
 
-    auto out = manager.Run(in, data);
-
     SanitizedResult result;
-    result.program = std::move(out.program);
+    transform::DataMap outputs;
+    result.program = manager.Run(in, data, outputs);
     if (!result.program.IsValid()) {
         return result;
     }
-    if (auto* res = out.data.Get<ast::transform::ArrayLengthFromUniform::Result>()) {
+    if (auto* res = outputs.Get<ast::transform::ArrayLengthFromUniform::Result>()) {
         result.used_array_length_from_uniform_indices = std::move(res->used_size_indices);
     }
     result.needs_storage_buffer_sizes = !result.used_array_length_from_uniform_indices.empty();

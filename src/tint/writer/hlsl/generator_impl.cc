@@ -167,7 +167,7 @@ SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 
 SanitizedResult Sanitize(const Program* in, const Options& options) {
     transform::Manager manager;
-    ast::transform::DataMap data;
+    transform::DataMap data;
 
     manager.Add<ast::transform::DisableUniformityAnalysis>();
 
@@ -305,11 +305,10 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<ast::transform::NumWorkgroupsFromUniform::Config>(options.root_constant_binding_point);
 
-    auto out = manager.Run(in, data);
-
     SanitizedResult result;
-    result.program = std::move(out.program);
-    if (auto* res = out.data.Get<ast::transform::ArrayLengthFromUniform::Result>()) {
+    transform::DataMap outputs;
+    result.program = manager.Run(in, data, outputs);
+    if (auto* res = outputs.Get<ast::transform::ArrayLengthFromUniform::Result>()) {
         result.used_array_length_from_uniform_indices = std::move(res->used_size_indices);
     }
     return result;

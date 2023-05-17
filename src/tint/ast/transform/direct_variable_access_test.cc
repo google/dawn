@@ -23,22 +23,22 @@
 namespace tint::ast::transform {
 namespace {
 
-/// @returns a DataMap with DirectVariableAccess::Config::transform_private enabled.
-static DataMap EnablePrivate() {
+/// @returns a Transform::DataMap with DirectVariableAccess::Config::transform_private enabled.
+static Transform::DataMap EnablePrivate() {
     DirectVariableAccess::Options opts;
     opts.transform_private = true;
 
-    DataMap inputs;
+    Transform::DataMap inputs;
     inputs.Add<DirectVariableAccess::Config>(opts);
     return inputs;
 }
 
-/// @returns a DataMap with DirectVariableAccess::Config::transform_function enabled.
-static DataMap EnableFunction() {
+/// @returns a Transform::DataMap with DirectVariableAccess::Config::transform_function enabled.
+static Transform::DataMap EnableFunction() {
     DirectVariableAccess::Options opts;
     opts.transform_function = true;
 
-    DataMap inputs;
+    Transform::DataMap inputs;
     inputs.Add<DirectVariableAccess::Config>(opts);
     return inputs;
 }

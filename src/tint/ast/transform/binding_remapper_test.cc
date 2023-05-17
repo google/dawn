@@ -26,7 +26,7 @@ using BindingRemapperTest = TransformTest;
 TEST_F(BindingRemapperTest, ShouldRunEmptyRemappings) {
     auto* src = R"()";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
                                           BindingRemapper::AccessControls{});
 
@@ -36,7 +36,7 @@ TEST_F(BindingRemapperTest, ShouldRunEmptyRemappings) {
 TEST_F(BindingRemapperTest, ShouldRunBindingPointRemappings) {
     auto* src = R"()";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(
         BindingRemapper::BindingPoints{
             {{2, 1}, {1, 2}},
@@ -49,7 +49,7 @@ TEST_F(BindingRemapperTest, ShouldRunBindingPointRemappings) {
 TEST_F(BindingRemapperTest, ShouldRunAccessControlRemappings) {
     auto* src = R"()";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
                                           BindingRemapper::AccessControls{
                                               {{2, 1}, builtin::Access::kWrite},
@@ -75,7 +75,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
                                           BindingRemapper::AccessControls{});
     auto got = Run<BindingRemapper>(src, data);
@@ -112,7 +112,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(
         BindingRemapper::BindingPoints{
             {{2, 1}, {1, 2}},  // Remap
@@ -158,7 +158,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(
         BindingRemapper::BindingPoints{},
         BindingRemapper::AccessControls{
@@ -200,7 +200,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(
         BindingRemapper::BindingPoints{
             {{2, 1}, {4, 5}},
@@ -254,7 +254,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(
         BindingRemapper::BindingPoints{
             {{2, 1}, {1, 1}},
@@ -316,7 +316,7 @@ fn f2() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BindingRemapper::Remappings>(
         BindingRemapper::BindingPoints{
             {{2, 1}, {1, 1}},

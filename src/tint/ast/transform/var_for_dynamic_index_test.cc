@@ -49,7 +49,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -73,7 +73,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -105,7 +105,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -138,7 +138,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -171,7 +171,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -204,7 +204,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -237,7 +237,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -277,7 +277,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -311,7 +311,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -364,7 +364,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -398,7 +398,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -451,7 +451,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -467,7 +467,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -483,7 +483,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -501,7 +501,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -519,7 +519,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -537,7 +537,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -553,7 +553,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));

@@ -947,32 +947,30 @@ int main(int argc, const char** argv) {
         /// Returns true on success, false on error (program will immediately exit)
         std::function<bool(tint::inspector::Inspector& inspector,
                            tint::transform::Manager& manager,
-                           tint::ast::transform::DataMap& inputs)>
+                           tint::transform::DataMap& inputs)>
             make;
     };
     std::vector<TransformFactory> transforms = {
         {"first_index_offset",
-         [](tint::inspector::Inspector&, tint::transform::Manager& m,
-            tint::ast::transform::DataMap& i) {
+         [](tint::inspector::Inspector&, tint::transform::Manager& m, tint::transform::DataMap& i) {
              i.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(0, 0);
              m.Add<tint::ast::transform::FirstIndexOffset>();
              return true;
          }},
         {"renamer",
-         [](tint::inspector::Inspector&, tint::transform::Manager& m,
-            tint::ast::transform::DataMap&) {
+         [](tint::inspector::Inspector&, tint::transform::Manager& m, tint::transform::DataMap&) {
              m.Add<tint::ast::transform::Renamer>();
              return true;
          }},
         {"robustness",
          [&](tint::inspector::Inspector&, tint::transform::Manager&,
-             tint::ast::transform::DataMap&) {  // enabled via writer option
+             tint::transform::DataMap&) {  // enabled via writer option
              options.enable_robustness = true;
              return true;
          }},
         {"substitute_override",
          [&](tint::inspector::Inspector& inspector, tint::transform::Manager& m,
-             tint::ast::transform::DataMap& i) {
+             tint::transform::DataMap& i) {
              tint::ast::transform::SubstituteOverride::Config cfg;
 
              std::unordered_map<tint::OverrideId, double> values;
@@ -1098,7 +1096,7 @@ int main(int argc, const char** argv) {
     }
 
     tint::transform::Manager transform_manager;
-    tint::ast::transform::DataMap transform_inputs;
+    tint::transform::DataMap transform_inputs;
 
     // Renaming must always come first
     switch (options.format) {
@@ -1173,14 +1171,15 @@ int main(int argc, const char** argv) {
         transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
     }
 
-    auto out = transform_manager.Run(program.get(), std::move(transform_inputs));
-    if (!out.program.IsValid()) {
-        tint::cmd::PrintWGSL(std::cerr, out.program);
-        diag_formatter.format(out.program.Diagnostics(), diag_printer.get());
+    tint::transform::DataMap outputs;
+    auto out = transform_manager.Run(program.get(), std::move(transform_inputs), outputs);
+    if (!out.IsValid()) {
+        tint::cmd::PrintWGSL(std::cerr, out);
+        diag_formatter.format(out.Diagnostics(), diag_printer.get());
         return 1;
     }
 
-    *program = std::move(out.program);
+    *program = std::move(out);
 
     bool success = false;
     switch (options.format) {

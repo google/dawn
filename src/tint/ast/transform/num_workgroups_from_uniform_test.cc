@@ -28,7 +28,7 @@ using NumWorkgroupsFromUniformTest = TransformTest;
 TEST_F(NumWorkgroupsFromUniformTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     EXPECT_FALSE(ShouldRun<NumWorkgroupsFromUniform>(src, data));
 }
@@ -40,7 +40,7 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     EXPECT_TRUE(ShouldRun<NumWorkgroupsFromUniform>(src, data));
 }
@@ -55,7 +55,7 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
     auto* expect =
         "error: missing transform data for tint::ast::transform::NumWorkgroupsFromUniform";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -90,7 +90,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -134,7 +134,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -178,7 +178,7 @@ struct Builtins {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -233,7 +233,7 @@ fn main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -289,7 +289,7 @@ struct Builtins {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -388,7 +388,7 @@ fn main3() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -429,7 +429,7 @@ fn main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -530,7 +530,7 @@ fn main3() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     // Make binding point unspecified.
     data.Add<NumWorkgroupsFromUniform::Config>(std::nullopt);
@@ -684,7 +684,7 @@ fn main3() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     // Make binding point unspecified.
     data.Add<NumWorkgroupsFromUniform::Config>(std::nullopt);

@@ -28,8 +28,8 @@ class ShuffleTransform : public ast::transform::Transform {
 
     /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const ast::transform::DataMap& inputs,
-                      ast::transform::DataMap& outputs) const override;
+                      const transform::DataMap& inputs,
+                      transform::DataMap& outputs) const override;
 
   private:
     size_t seed_;

@@ -27,7 +27,7 @@ class Renamer final : public utils::Castable<Renamer, Transform> {
   public:
     /// Data is outputted by the Renamer transform.
     /// Data holds information about shader usage and constant buffer offsets.
-    struct Data final : public utils::Castable<Data, transform::Data> {
+    struct Data final : public utils::Castable<Data, tint::transform::Data> {
         /// Remappings is a map of old symbol name to new symbol name
         using Remappings = std::unordered_map<std::string, std::string>;
 
@@ -59,7 +59,7 @@ class Renamer final : public utils::Castable<Renamer, Transform> {
 
     /// Optional configuration options for the transform.
     /// If omitted, then the renamer will use Target::kAll.
-    struct Config final : public utils::Castable<Config, transform::Data> {
+    struct Config final : public utils::Castable<Config, tint::transform::Data> {
         /// Constructor
         /// @param tgt the targets to rename
         /// @param keep_unicode if false, symbols with non-ascii code-points are

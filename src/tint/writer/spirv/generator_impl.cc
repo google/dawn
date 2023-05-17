@@ -49,7 +49,7 @@ namespace tint::writer::spirv {
 
 SanitizedResult Sanitize(const Program* in, const Options& options) {
     transform::Manager manager;
-    ast::transform::DataMap data;
+    transform::DataMap data;
 
     if (options.clamp_frag_depth) {
         manager.Add<tint::ast::transform::ClampFragDepth>();
@@ -166,7 +166,8 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
             options.emit_vertex_point_size));
 
     SanitizedResult result;
-    result.program = std::move(manager.Run(in, data).program);
+    transform::DataMap outputs;
+    result.program = manager.Run(in, data, outputs);
     return result;
 }
 

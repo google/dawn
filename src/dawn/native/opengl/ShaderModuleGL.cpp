@@ -195,7 +195,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
         compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
         [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
             tint::transform::Manager transformManager;
-            tint::ast::transform::DataMap transformInputs;
+            tint::transform::DataMap transformInputs;
 
             if (r.substituteOverrideConfig) {
                 transformManager.Add<tint::ast::transform::SingleEntryPoint>();

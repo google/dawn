@@ -672,7 +672,7 @@ Transform::ApplyResult PromoteSideEffectsToDecl::Apply(const Program* src,
     tint::transform::Manager manager;
     manager.Add<SimplifySideEffectStatements>();
     manager.Add<DecomposeSideEffects>();
-    return manager.Apply(src, inputs, outputs);
+    return manager.Run(src, inputs, outputs);
 }
 
 }  // namespace tint::ast::transform

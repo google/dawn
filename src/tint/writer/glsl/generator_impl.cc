@@ -152,7 +152,7 @@ SanitizedResult Sanitize(const Program* in,
                          const Options& options,
                          const std::string& entry_point) {
     transform::Manager manager;
-    ast::transform::DataMap data;
+    transform::DataMap data;
 
     manager.Add<ast::transform::DisableUniformityAnalysis>();
 
@@ -246,10 +246,9 @@ SanitizedResult Sanitize(const Program* in,
     data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
         ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
 
-    auto out = manager.Run(in, data);
-
     SanitizedResult result;
-    result.program = std::move(out.program);
+    transform::DataMap outputs;
+    result.program = manager.Run(in, data, outputs);
     return result;
 }
 

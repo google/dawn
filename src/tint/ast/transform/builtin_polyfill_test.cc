@@ -41,10 +41,10 @@ TEST_F(BuiltinPolyfillTest, EmptyModule) {
 ////////////////////////////////////////////////////////////////////////////////
 // acosh
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillAcosh(Level level) {
+Transform::DataMap polyfillAcosh(Level level) {
     BuiltinPolyfill::Builtins builtins;
     builtins.acosh = level;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -172,10 +172,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // asinh
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillSinh() {
+Transform::DataMap polyfillSinh() {
     BuiltinPolyfill::Builtins builtins;
     builtins.asinh = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -253,10 +253,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // atanh
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillAtanh(Level level) {
+Transform::DataMap polyfillAtanh(Level level) {
     BuiltinPolyfill::Builtins builtins;
     builtins.atanh = level;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -384,10 +384,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // bgra8unorm
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillBgra8unorm() {
+Transform::DataMap polyfillBgra8unorm() {
     BuiltinPolyfill::Builtins builtins;
     builtins.bgra8unorm = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -505,7 +505,7 @@ fn f(coords : vec2<i32>, value : vec4<f32>) {
     BuiltinPolyfill::Builtins builtins;
     builtins.atanh = BuiltinPolyfill::Level::kFull;
     builtins.bgra8unorm = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
 
     auto got = Run<BuiltinPolyfill>(src, std::move(data));
@@ -516,10 +516,10 @@ fn f(coords : vec2<i32>, value : vec4<f32>) {
 ////////////////////////////////////////////////////////////////////////////////
 // bitshiftModulo
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillBitshiftModulo() {
+Transform::DataMap polyfillBitshiftModulo() {
     BuiltinPolyfill::Builtins builtins;
     builtins.bitshift_modulo = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -655,10 +655,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // clampInteger
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillClampInteger() {
+Transform::DataMap polyfillClampInteger() {
     BuiltinPolyfill::Builtins builtins;
     builtins.clamp_int = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -818,10 +818,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // conv_f32_to_iu32
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillConvF32ToIU32() {
+Transform::DataMap polyfillConvF32ToIU32() {
     BuiltinPolyfill::Builtins builtins;
     builtins.conv_f32_to_iu32 = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -969,10 +969,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // countLeadingZeros
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillCountLeadingZeros() {
+Transform::DataMap polyfillCountLeadingZeros() {
     BuiltinPolyfill::Builtins builtins;
     builtins.count_leading_zeros = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -1142,10 +1142,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // countTrailingZeros
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillCountTrailingZeros() {
+Transform::DataMap polyfillCountTrailingZeros() {
     BuiltinPolyfill::Builtins builtins;
     builtins.count_trailing_zeros = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -1315,10 +1315,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // extractBits
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillExtractBits(Level level) {
+Transform::DataMap polyfillExtractBits(Level level) {
     BuiltinPolyfill::Builtins builtins;
     builtins.extract_bits = level;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -1570,10 +1570,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // firstLeadingBit
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillFirstLeadingBit() {
+Transform::DataMap polyfillFirstLeadingBit() {
     BuiltinPolyfill::Builtins builtins;
     builtins.first_leading_bit = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -1743,10 +1743,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // firstTrailingBit
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillFirstTrailingBit() {
+Transform::DataMap polyfillFirstTrailingBit() {
     BuiltinPolyfill::Builtins builtins;
     builtins.first_trailing_bit = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -1916,10 +1916,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // insertBits
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillInsertBits(Level level) {
+Transform::DataMap polyfillInsertBits(Level level) {
     BuiltinPolyfill::Builtins builtins;
     builtins.insert_bits = level;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -2159,10 +2159,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // precise_float_mod
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillPreciseFloatMod() {
+Transform::DataMap polyfillPreciseFloatMod() {
     BuiltinPolyfill::Builtins builtins;
     builtins.precise_float_mod = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -2385,10 +2385,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // int_div_mod
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillIntDivMod() {
+Transform::DataMap polyfillIntDivMod() {
     BuiltinPolyfill::Builtins builtins;
     builtins.int_div_mod = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -3199,10 +3199,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // reflect for vec2<f32>
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillReflectVec2F32() {
+Transform::DataMap polyfillReflectVec2F32() {
     BuiltinPolyfill::Builtins builtins;
     builtins.reflect_vec2_f32 = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -3370,10 +3370,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // saturate
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillSaturate() {
+Transform::DataMap polyfillSaturate() {
     BuiltinPolyfill::Builtins builtins;
     builtins.saturate = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -3507,10 +3507,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // sign_int
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillSignInt() {
+Transform::DataMap polyfillSignInt() {
     BuiltinPolyfill::Builtins builtins;
     builtins.sign_int = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -3600,10 +3600,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // textureSampleBaseClampToEdge
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillTextureSampleBaseClampToEdge_2d_f32() {
+Transform::DataMap polyfillTextureSampleBaseClampToEdge_2d_f32() {
     BuiltinPolyfill::Builtins builtins;
     builtins.texture_sample_base_clamp_to_edge_2d_f32 = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -3671,18 +3671,18 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // workgroupUniformLoad
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillWorkgroupUniformLoad() {
+Transform::DataMap polyfillWorkgroupUniformLoad() {
     BuiltinPolyfill::Builtins builtins;
     builtins.workgroup_uniform_load = true;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
 
     return data;
 }
 
-DataMap polyfillWorkgroupUniformLoadWithDirectVariableAccess() {
-    DataMap data;
+Transform::DataMap polyfillWorkgroupUniformLoadWithDirectVariableAccess() {
+    Transform::DataMap data;
 
     BuiltinPolyfill::Builtins builtins;
     builtins.workgroup_uniform_load = true;
@@ -3893,10 +3893,10 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // quantizeToF16
 ////////////////////////////////////////////////////////////////////////////////
-DataMap polyfillQuantizeToF16_2d_f32() {
+Transform::DataMap polyfillQuantizeToF16_2d_f32() {
     BuiltinPolyfill::Builtins builtins;
     builtins.quantize_to_vec_f16 = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
     return data;
 }
@@ -4021,7 +4021,7 @@ fn f(x : i32, y : u32, z : u32) {
     BuiltinPolyfill::Builtins builtins;
     builtins.bitshift_modulo = true;
     builtins.int_div_mod = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<BuiltinPolyfill::Config>(builtins);
 
     auto got = Run<BuiltinPolyfill>(src, std::move(data));

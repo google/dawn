@@ -391,7 +391,7 @@ MaybeError ComputePipeline::Initialize() {
     tint::Program transformedProgram;
     const tint::Program* program;
     tint::transform::Manager transformManager;
-    tint::ast::transform::DataMap transformInputs;
+    tint::transform::DataMap transformInputs;
 
     if (!computeStage.metadata->overrides.empty()) {
         transformManager.Add<tint::ast::transform::SingleEntryPoint>();

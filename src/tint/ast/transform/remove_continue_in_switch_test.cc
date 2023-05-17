@@ -101,7 +101,7 @@ TEST_F(RemoveContinueInSwitchTest, EmptyModule) {
     auto* src = "";
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -163,7 +163,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -247,7 +247,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -332,7 +332,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -423,7 +423,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -501,7 +501,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -553,7 +553,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -607,7 +607,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));

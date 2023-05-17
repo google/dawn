@@ -48,7 +48,7 @@ fn comp_main() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -82,7 +82,7 @@ fn frag_main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -117,7 +117,7 @@ fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) 
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -154,7 +154,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -189,7 +189,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -224,7 +224,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 alias myf32 = f32;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -277,7 +277,7 @@ fn frag_main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -330,7 +330,7 @@ struct FragLocations {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -384,7 +384,7 @@ fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) 
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -438,7 +438,7 @@ struct FragLocations {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -494,7 +494,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -550,7 +550,7 @@ struct FragLocations {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -579,7 +579,7 @@ fn frag_main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -613,7 +613,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -647,7 +647,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -702,7 +702,7 @@ fn frag_main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -757,7 +757,7 @@ struct FragOutput {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -817,7 +817,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -877,7 +877,7 @@ struct FragOutput {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -937,7 +937,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -997,7 +997,7 @@ struct FragOutput {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1063,7 +1063,7 @@ fn frag_main2() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1129,7 +1129,7 @@ struct FragmentInput {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1201,7 +1201,7 @@ fn frag_main2(tint_symbol_2 : tint_symbol_3) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1273,7 +1273,7 @@ struct FragmentInput {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1345,7 +1345,7 @@ fn frag_main2(tint_symbol_2 : tint_symbol_3) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1417,7 +1417,7 @@ struct FragmentInput {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1484,7 +1484,7 @@ fn frag_main1(tint_symbol : tint_symbol_1) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1551,7 +1551,7 @@ struct FragmentInput {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1637,7 +1637,7 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1723,7 +1723,7 @@ struct FragmentOutput {
 alias myf32 = f32;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1814,7 +1814,7 @@ fn frag_main(tint_symbol_1 : tint_symbol_2) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -1905,7 +1905,7 @@ struct FragmentIn {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2035,7 +2035,7 @@ fn frag_main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2165,7 +2165,7 @@ struct FragmentInterface {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2229,7 +2229,7 @@ fn main2() -> tint_symbol_1 {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2293,7 +2293,7 @@ struct VertexOut {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2360,7 +2360,7 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2427,7 +2427,7 @@ struct FragmentOutput {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2531,7 +2531,7 @@ fn frag_main(tint_symbol_1 : tint_symbol_2) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2635,7 +2635,7 @@ struct FragmentInputExtra {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2664,7 +2664,7 @@ fn tint_symbol_1(tint_symbol : tint_symbol_2) {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2696,7 +2696,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2730,7 +2730,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2764,7 +2764,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2801,7 +2801,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2853,7 +2853,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2905,7 +2905,7 @@ struct Output {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -2955,7 +2955,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -3005,7 +3005,7 @@ struct Output {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -3094,7 +3094,7 @@ fn comp_main1() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -3144,7 +3144,7 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -3176,7 +3176,7 @@ fn vert_main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3214,7 +3214,7 @@ fn vert_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3255,7 +3255,7 @@ fn vert_main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3296,7 +3296,7 @@ struct VertOut {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3342,7 +3342,7 @@ fn vert_main() -> tint_symbol {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3388,7 +3388,7 @@ struct VertOut {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3466,7 +3466,7 @@ fn vert_main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3544,7 +3544,7 @@ struct VertOut {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3620,7 +3620,7 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3696,7 +3696,7 @@ struct VertOut {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3772,7 +3772,7 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3848,7 +3848,7 @@ struct VertOut {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl,
                                                0xFFFFFFFF, true);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
@@ -3884,7 +3884,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -3919,7 +3919,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 
@@ -3956,7 +3956,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
 

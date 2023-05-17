@@ -63,7 +63,7 @@ class CommonFuzzer {
 
     /// @param tm manager for transforms to run
     /// @param inputs data for transforms to run
-    void SetTransformManager(transform::Manager* tm, ast::transform::DataMap* inputs) {
+    void SetTransformManager(transform::Manager* tm, transform::DataMap* inputs) {
         assert((!tm || inputs) && "DataMap must be !nullptr if Manager !nullptr");
         transform_manager_ = tm;
         transform_inputs_ = inputs;
@@ -121,7 +121,7 @@ class CommonFuzzer {
     InputFormat input_;
     OutputFormat output_;
     transform::Manager* transform_manager_ = nullptr;
-    ast::transform::DataMap* transform_inputs_ = nullptr;
+    transform::DataMap* transform_inputs_ = nullptr;
     bool dump_input_ = false;
     tint::diag::List diagnostics_;
     bool enforce_validity = false;

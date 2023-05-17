@@ -28,19 +28,8 @@
 #include "src/tint/type/sampler.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Transform);
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Data);
 
 namespace tint::ast::transform {
-
-Data::Data() = default;
-Data::Data(const Data&) = default;
-Data::~Data() = default;
-Data& Data::operator=(const Data&) = default;
-
-DataMap::DataMap() = default;
-DataMap::DataMap(DataMap&&) = default;
-DataMap::~DataMap() = default;
-DataMap& DataMap::operator=(DataMap&&) = default;
 
 Output::Output() = default;
 Output::Output(Program&& p) : program(std::move(p)) {}

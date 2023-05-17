@@ -57,13 +57,14 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     }
 
     transform::Manager manager;
+    transform::DataMap outputs;
     manager.Add<ast::transform::Unshadow>();
     manager.Add<ast::transform::SimplifyPointers>();
     manager.Add<ast::transform::DecomposeStridedMatrix>();
     manager.Add<ast::transform::DecomposeStridedArray>();
     manager.Add<ast::transform::RemoveUnreachableStatements>();
     manager.Add<ast::transform::SpirvAtomic>();
-    return manager.Run(&program).program;
+    return manager.Run(&program, {}, outputs);
 }
 
 }  // namespace tint::reader::spirv

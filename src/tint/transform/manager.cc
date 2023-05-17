@@ -14,6 +14,9 @@
 
 #include "src/tint/transform/manager.h"
 
+#include "src/tint/ast/transform/transform.h"
+#include "src/tint/program_builder.h"
+
 /// If set to 1 then the transform::Manager will dump the WGSL of the program
 /// before and after each transform. Helpful for debugging bad output.
 #define TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM 0
@@ -25,16 +28,14 @@
 #define TINT_IF_PRINT_PROGRAM(x)
 #endif  // TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Manager);
-
 namespace tint::transform {
 
 Manager::Manager() = default;
 Manager::~Manager() = default;
 
-ast::transform::Transform::ApplyResult Manager::Apply(const Program* program,
-                                                      const ast::transform::DataMap& inputs,
-                                                      ast::transform::DataMap& outputs) const {
+Program Manager::Run(const Program* program,
+                     const transform::DataMap& inputs,
+                     transform::DataMap& outputs) const {
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
     auto print_program = [&](const char* msg, const Transform* transform) {
         auto wgsl = Program::printer(program);
@@ -56,25 +57,38 @@ ast::transform::Transform::ApplyResult Manager::Apply(const Program* program,
     TINT_IF_PRINT_PROGRAM(print_program("Input of", this));
 
     for (const auto& transform : transforms_) {
-        if (auto result = transform->Apply(program, inputs, outputs)) {
-            output.emplace(std::move(result.value()));
-            program = &output.value();
+        if (auto* ast_transform = transform->As<ast::transform::Transform>()) {
+            if (auto result = ast_transform->Apply(program, inputs, outputs)) {
+                output.emplace(std::move(result.value()));
+                program = &output.value();
 
-            if (!program->IsValid()) {
-                TINT_IF_PRINT_PROGRAM(print_program("Invalid output of", transform.get()));
-                break;
+                if (!program->IsValid()) {
+                    TINT_IF_PRINT_PROGRAM(print_program("Invalid output of", transform.get()));
+                    break;
+                }
+
+                TINT_IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
+            } else {
+                TINT_IF_PRINT_PROGRAM(std::cout << "Skipped " << transform->TypeInfo().name
+                                                << std::endl);
             }
-
-            TINT_IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
         } else {
-            TINT_IF_PRINT_PROGRAM(std::cout << "Skipped " << transform->TypeInfo().name
-                                            << std::endl);
+            ProgramBuilder b;
+            TINT_ICE(Transform, b.Diagnostics()) << "unhandled transform type";
+            return Program(std::move(b));
         }
     }
 
     TINT_IF_PRINT_PROGRAM(print_program("Final output of", this));
 
-    return output;
+    if (!output) {
+        ProgramBuilder b;
+        CloneContext ctx{&b, program, /* auto_clone_symbols */ true};
+        ctx.Clone();
+        output = Program(std::move(b));
+    }
+
+    return std::move(output.value());
 }
 
 }  // namespace tint::transform

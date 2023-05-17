@@ -63,16 +63,15 @@ std::optional<Program> FlattenBindings(const Program* program) {
     }
 
     // Run the binding remapper transform.
-    tint::ast::transform::Output transform_output;
     if (!binding_points.empty()) {
         tint::transform::Manager manager;
-        tint::ast::transform::DataMap inputs;
+        tint::transform::DataMap inputs;
+        tint::transform::DataMap outputs;
         inputs.Add<tint::ast::transform::BindingRemapper::Remappings>(
             std::move(binding_points), tint::ast::transform::BindingRemapper::AccessControls{},
             /* mayCollide */ true);
         manager.Add<tint::ast::transform::BindingRemapper>();
-        transform_output = manager.Run(program, inputs);
-        return std::move(transform_output.program);
+        return manager.Run(program, inputs, outputs);
     }
 
     return {};

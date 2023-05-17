@@ -207,7 +207,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         mslCompilation, device, std::move(req), MslCompilation::FromBlob,
         [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
             tint::transform::Manager transformManager;
-            tint::ast::transform::DataMap transformInputs;
+            tint::transform::DataMap transformInputs;
 
             // We only remap bindings for the target entry point, so we need to strip all other
             // entry points to avoid generating invalid bindings for them.
@@ -238,7 +238,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             }
 
             tint::Program program;
-            tint::ast::transform::DataMap transformOutputs;
+            tint::transform::DataMap transformOutputs;
             {
                 TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "RunTransforms");
                 DAWN_TRY_ASSIGN(program,

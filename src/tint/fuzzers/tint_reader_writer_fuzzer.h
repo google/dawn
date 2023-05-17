@@ -38,7 +38,7 @@ class ReaderWriterFuzzer : public CommonFuzzer {
     /// invoked.
     /// @param tm manager for transforms to run
     /// @param inputs data for transforms to run
-    void SetTransformManager(transform::Manager* tm, ast::transform::DataMap* inputs) {
+    void SetTransformManager(transform::Manager* tm, transform::DataMap* inputs) {
         tm_set_ = true;
         CommonFuzzer::SetTransformManager(tm, inputs);
     }

@@ -24,8 +24,8 @@ namespace tint::fuzzers {
 ShuffleTransform::ShuffleTransform(size_t seed) : seed_(seed) {}
 
 ast::transform::Transform::ApplyResult ShuffleTransform::Apply(const Program* src,
-                                                               const ast::transform::DataMap&,
-                                                               ast::transform::DataMap&) const {
+                                                               const transform::DataMap&,
+                                                               transform::DataMap&) const {
     ProgramBuilder b;
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 

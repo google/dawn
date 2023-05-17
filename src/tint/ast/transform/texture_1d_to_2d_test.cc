@@ -23,7 +23,7 @@ using Texture1DTo2DTest = TransformTest;
 TEST_F(Texture1DTo2DTest, EmptyModule) {
     auto* src = "";
 
-    DataMap data;
+    Transform::DataMap data;
     EXPECT_FALSE(ShouldRun<Texture1DTo2D>(src, data));
 }
 
@@ -39,7 +39,7 @@ TEST_F(Texture1DTo2DTest, Global1DDecl) {
 @group(0) @binding(1) var s : sampler;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -65,7 +65,7 @@ fn main() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -87,7 +87,7 @@ fn main() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -109,7 +109,7 @@ fn main() -> u32 {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -131,7 +131,7 @@ fn main() -> u32 {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -153,7 +153,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -167,7 +167,7 @@ TEST_F(Texture1DTo2DTest, GlobalStorage1DDecl) {
 @group(0) @binding(0) var t : texture_storage_2d<r32float, write>;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -184,7 +184,7 @@ fn main() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     EXPECT_FALSE(ShouldRun<Texture1DTo2D>(src, data));
 }
 
@@ -193,7 +193,7 @@ TEST_F(Texture1DTo2DTest, PrivateIntNoop) {
 var<private> i : i32;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     EXPECT_FALSE(ShouldRun<Texture1DTo2D>(src, data));
 }
 
@@ -202,7 +202,7 @@ TEST_F(Texture1DTo2DTest, GlobalMatrixNoop) {
 @group(0) @binding(0) var<uniform> m : mat2x2<f32>;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     EXPECT_FALSE(ShouldRun<Texture1DTo2D>(src, data));
 }
 
@@ -234,7 +234,7 @@ fn main() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -265,7 +265,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -290,7 +290,7 @@ fn d() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));

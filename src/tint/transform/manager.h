@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/ast/transform/transform.h"
+#include "src/tint/transform/transform.h"
 
 namespace tint::transform {
 
@@ -27,11 +27,11 @@ namespace tint::transform {
 /// The inner transforms will execute in the appended order.
 /// If any inner transform fails the manager will return immediately and
 /// the error can be retrieved with the Output's diagnostics.
-class Manager final : public tint::utils::Castable<Manager, ast::transform::Transform> {
+class Manager {
   public:
     /// Constructor
     Manager();
-    ~Manager() override;
+    ~Manager();
 
     /// Add pass to the manager
     /// @param transform the transform to append
@@ -47,10 +47,12 @@ class Manager final : public tint::utils::Castable<Manager, ast::transform::Tran
         transforms_.emplace_back(std::make_unique<T>(std::forward<ARGS>(args)...));
     }
 
-    /// @copydoc ast::transform::Transform::Apply
-    ApplyResult Apply(const Program* program,
-                      const ast::transform::DataMap& inputs,
-                      ast::transform::DataMap& outputs) const override;
+    /// Runs the transforms on @p program, returning the transformed clone of @p program.
+    /// @param program the source program to transform
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    /// @returns the transformed program
+    Program Run(const Program* program, const DataMap& inputs, DataMap& outputs) const;
 
   private:
     std::vector<std::unique_ptr<Transform>> transforms_;

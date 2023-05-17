@@ -144,7 +144,7 @@ ResultOrError<std::string> TranslateToHLSL(
     errorStream << "Tint HLSL failure:" << std::endl;
 
     tint::transform::Manager transformManager;
-    tint::ast::transform::DataMap transformInputs;
+    tint::transform::DataMap transformInputs;
 
     // Run before the renamer so that the entry point name matches `entryPointName` still.
     transformManager.Add<tint::ast::transform::SingleEntryPoint>();
@@ -173,7 +173,7 @@ ResultOrError<std::string> TranslateToHLSL(
     }
 
     tint::Program transformedProgram;
-    tint::ast::transform::DataMap transformOutputs;
+    tint::transform::DataMap transformOutputs;
     {
         TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "RunTransforms");
         DAWN_TRY_ASSIGN(transformedProgram,

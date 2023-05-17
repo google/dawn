@@ -51,7 +51,7 @@ fn f() -> ShaderIO {
     {
         // Empty interstage_locations: truncate all interstage variables, should run
         TruncateInterstageVariables::Config cfg;
-        DataMap data;
+        Transform::DataMap data;
         data.Add<TruncateInterstageVariables::Config>(cfg);
         EXPECT_TRUE(ShouldRun<TruncateInterstageVariables>(src, data));
     }
@@ -61,7 +61,7 @@ fn f() -> ShaderIO {
         TruncateInterstageVariables::Config cfg;
         cfg.interstage_locations[0] = true;
         cfg.interstage_locations[2] = true;
-        DataMap data;
+        Transform::DataMap data;
         data.Add<TruncateInterstageVariables::Config>(cfg);
         EXPECT_FALSE(ShouldRun<TruncateInterstageVariables>(src, data));
     }
@@ -70,7 +70,7 @@ fn f() -> ShaderIO {
         // Partial interstage_locations are marked: should run
         TruncateInterstageVariables::Config cfg;
         cfg.interstage_locations[2] = true;
-        DataMap data;
+        Transform::DataMap data;
         data.Add<TruncateInterstageVariables::Config>(cfg);
         EXPECT_TRUE(ShouldRun<TruncateInterstageVariables>(src, data));
     }
@@ -91,7 +91,7 @@ fn f(io: ShaderIO) -> @location(1) vec4<f32> {
     TruncateInterstageVariables::Config cfg;
     cfg.interstage_locations[2] = true;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<TruncateInterstageVariables::Config>(cfg);
 
     EXPECT_FALSE(ShouldRun<TruncateInterstageVariables>(src, data));
@@ -109,7 +109,7 @@ fn f() -> @builtin(position) vec4<f32> {
 
     TruncateInterstageVariables::Config cfg;
     cfg.interstage_locations[0] = true;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<TruncateInterstageVariables::Config>(cfg);
 
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
@@ -169,7 +169,7 @@ fn f() -> tint_symbol {
     // fragment has input at @location(1)
     cfg.interstage_locations[1] = true;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<TruncateInterstageVariables::Config>(cfg);
 
     auto got = Run<TruncateInterstageVariables>(src, data);
@@ -226,7 +226,7 @@ fn f() -> tint_symbol {
     // fragment has input at @location(3)
     cfg.interstage_locations[3] = true;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<TruncateInterstageVariables::Config>(cfg);
 
     auto got = Run<TruncateInterstageVariables>(src, data);
@@ -279,7 +279,7 @@ fn f() -> tint_symbol {
 )";
 
         TruncateInterstageVariables::Config cfg;
-        DataMap data;
+        Transform::DataMap data;
         data.Add<TruncateInterstageVariables::Config>(cfg);
 
         auto got = Run<TruncateInterstageVariables>(src, data);
@@ -349,7 +349,7 @@ fn f() -> tint_symbol {
         cfg.interstage_locations[3] = true;
         cfg.interstage_locations[5] = true;
 
-        DataMap data;
+        Transform::DataMap data;
         data.Add<TruncateInterstageVariables::Config>(cfg);
 
         auto got = Run<TruncateInterstageVariables>(src, data);
@@ -426,7 +426,7 @@ fn f2() -> tint_symbol {
     // fragment has input at @location(3)
     cfg.interstage_locations[3] = true;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<TruncateInterstageVariables::Config>(cfg);
 
     auto got = Run<TruncateInterstageVariables>(src, data);
@@ -521,7 +521,7 @@ fn f2() -> tint_symbol_1 {
     // fragment has input at @location(3)
     cfg.interstage_locations[3] = true;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<TruncateInterstageVariables::Config>(cfg);
 
     auto got = Run<TruncateInterstageVariables>(src, data);
@@ -586,7 +586,7 @@ fn f(@builtin(vertex_index) vid : u32) -> tint_symbol {
     // fragment has input at @location(3)
     cfg.interstage_locations[3] = true;
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<TruncateInterstageVariables::Config>(cfg);
 
     auto got = Run<TruncateInterstageVariables>(src, data);

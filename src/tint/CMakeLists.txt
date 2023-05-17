@@ -452,6 +452,8 @@ list(APPEND TINT_LIB_SRCS
   ast/transform/zero_init_workgroup_memory.h
   transform/manager.cc
   transform/manager.h
+  transform/transform.cc
+  transform/transform.h
   type/abstract_float.cc
   type/abstract_float.h
   type/abstract_int.cc

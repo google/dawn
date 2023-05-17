@@ -1012,21 +1012,21 @@ RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata
     return bufferSizes;
 }
 
-ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Transform* transform,
+ResultOrError<tint::Program> RunTransforms(tint::transform::Manager* transformManager,
                                            const tint::Program* program,
-                                           const tint::ast::transform::DataMap& inputs,
-                                           tint::ast::transform::DataMap* outputs,
+                                           const tint::transform::DataMap& inputs,
+                                           tint::transform::DataMap* outputs,
                                            OwnedCompilationMessages* outMessages) {
-    tint::ast::transform::Output output = transform->Run(program, inputs);
+    tint::transform::DataMap transform_outputs;
+    tint::Program result = transformManager->Run(program, inputs, transform_outputs);
     if (outMessages != nullptr) {
-        DAWN_TRY(outMessages->AddMessages(output.program.Diagnostics()));
+        DAWN_TRY(outMessages->AddMessages(result.Diagnostics()));
     }
-    DAWN_INVALID_IF(!output.program.IsValid(), "Tint program failure: %s\n",
-                    output.program.Diagnostics().str());
+    DAWN_INVALID_IF(!result.IsValid(), "Tint program failure: %s\n", result.Diagnostics().str());
     if (outputs != nullptr) {
-        *outputs = std::move(output.data);
+        *outputs = std::move(transform_outputs);
     }
-    return std::move(output.program);
+    return std::move(result);
 }
 
 MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,

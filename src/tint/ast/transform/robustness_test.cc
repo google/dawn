@@ -32,7 +32,7 @@ static std::ostream& operator<<(std::ostream& out, Robustness::Action action) {
 
 namespace {
 
-DataMap Config(Robustness::Action action) {
+Transform::DataMap Config(Robustness::Action action) {
     Robustness::Config cfg;
     cfg.value_action = action;
     cfg.texture_action = action;
@@ -42,7 +42,7 @@ DataMap Config(Robustness::Action action) {
     cfg.storage_action = action;
     cfg.uniform_action = action;
     cfg.workgroup_action = action;
-    DataMap data;
+    Transform::DataMap data;
     data.Add<Robustness::Config>(cfg);
     return data;
 }

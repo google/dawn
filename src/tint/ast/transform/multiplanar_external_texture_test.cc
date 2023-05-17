@@ -23,7 +23,7 @@ using MultiplanarExternalTextureTest = TransformTest;
 TEST_F(MultiplanarExternalTextureTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
 
@@ -35,7 +35,7 @@ TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureAlias) {
 alias ET = texture_external;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
 
@@ -46,7 +46,7 @@ TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureGlobal) {
 @group(0) @binding(0) var ext_tex : texture_external;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
 
@@ -58,7 +58,7 @@ TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureParam) {
 fn f(ext_tex : texture_external) {}
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
 
@@ -98,7 +98,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     auto* expect = R"(error: missing new binding points for texture_external at binding {0,1})";
 
-    DataMap data;
+    Transform::DataMap data;
     // This bindings map specifies 0,0 as the location of the texture_external,
     // which is incorrect.
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
@@ -156,7 +156,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -212,7 +212,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -296,7 +296,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -380,7 +380,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var s : sampler;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -475,7 +475,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -570,7 +570,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -670,7 +670,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -770,7 +770,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(1) var ext_tex : texture_2d<f32>;
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -878,7 +878,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 1}, {{0, 4}, {0, 5}}},
         {{0, 2}, {{0, 6}, {0, 7}}},
@@ -974,7 +974,7 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 2}, {0, 3}}},
     });
@@ -1067,7 +1067,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 
 @group(0) @binding(1) var smp : sampler;
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 2}, {0, 3}}},
     });
@@ -1160,7 +1160,7 @@ fn main() {
   f(smp, ext_tex, ext_tex_plane_1, ext_tex_params);
 }
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 2}, {0, 3}}},
     });
@@ -1262,7 +1262,7 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp, ext_tex2, ext_tex_plane_1_1, ext_tex_params_1);
 }
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 3}, {0, 4}}},
         {{0, 2}, {{0, 5}, {0, 6}}},
@@ -1366,7 +1366,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 
 
 @group(0) @binding(2) var ext_tex2 : texture_2d<f32>;
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 3}, {0, 4}}},
         {{0, 2}, {{0, 5}, {0, 6}}},
@@ -1468,7 +1468,7 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 2}, {0, 3}}},
     });
@@ -1569,7 +1569,7 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 2}, {0, 3}}},
     });
@@ -1613,7 +1613,7 @@ fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_param
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
         MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
@@ -1708,7 +1708,7 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 2}, {0, 3}}},
     });
@@ -1804,7 +1804,7 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 
 alias ET = texture_external;
 )";
-    DataMap data;
+    Transform::DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
         {{0, 0}, {{0, 2}, {0, 3}}},
     });

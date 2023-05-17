@@ -205,10 +205,10 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     diagnostics_ = program.Diagnostics();
 
     auto validate_program = [&](auto& out) {
-        if (!out.program.IsValid()) {
+        if (!out.IsValid()) {
             // Transforms can produce error messages for bad input.
             // Catch ICEs and errors from non transform systems.
-            for (const auto& diag : out.program.Diagnostics()) {
+            for (const auto& diag : out.Diagnostics()) {
                 if (diag.severity > diag::Severity::Error ||
                     diag.system != diag::System::Transform) {
                     VALIDITY_ERROR(program.Diagnostics(),
@@ -219,13 +219,14 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
             return 0;
         }
 
-        program = std::move(out.program);
+        program = std::move(out);
         RunInspector(&program);
         return 1;
     };
 
     if (transform_manager_) {
-        auto out = transform_manager_->Run(&program, *transform_inputs_);
+        transform::DataMap outputs;
+        auto out = transform_manager_->Run(&program, *transform_inputs_, outputs);
         if (!validate_program(out)) {
             return 0;
         }
@@ -248,13 +249,14 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
         }
 
         if (!cfg.map.empty()) {
-            ast::transform::DataMap override_data;
+            transform::DataMap override_data;
             override_data.Add<ast::transform::SubstituteOverride::Config>(cfg);
 
             transform::Manager mgr;
             mgr.append(std::make_unique<ast::transform::SubstituteOverride>());
 
-            auto out = mgr.Run(&program, override_data);
+            transform::DataMap outputs;
+            auto out = mgr.Run(&program, override_data, outputs);
             if (!validate_program(out)) {
                 return 0;
             }

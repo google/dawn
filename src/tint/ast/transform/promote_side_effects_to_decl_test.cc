@@ -25,7 +25,7 @@ TEST_F(PromoteSideEffectsToDeclTest, EmptyModule) {
     auto* src = "";
     auto* expect = "";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -44,7 +44,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -81,7 +81,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -111,7 +111,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -142,7 +142,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -176,7 +176,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -211,7 +211,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -248,7 +248,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -278,7 +278,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -306,7 +306,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -338,7 +338,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -370,7 +370,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -401,7 +401,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -433,7 +433,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -467,7 +467,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -489,7 +489,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -532,7 +532,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -566,7 +566,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -608,7 +608,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -645,7 +645,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -679,7 +679,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -716,7 +716,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -757,7 +757,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -789,7 +789,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -820,7 +820,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -861,7 +861,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -900,7 +900,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -944,7 +944,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -998,7 +998,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1037,7 +1037,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1077,7 +1077,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1137,7 +1137,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1168,7 +1168,7 @@ fn f() -> i32 {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1205,7 +1205,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1238,7 +1238,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1271,7 +1271,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1302,7 +1302,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1347,7 +1347,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1384,7 +1384,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1429,7 +1429,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1468,7 +1468,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1509,7 +1509,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1548,7 +1548,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1585,7 +1585,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1628,7 +1628,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1685,7 +1685,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1732,7 +1732,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1779,7 +1779,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1818,7 +1818,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1859,7 +1859,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1906,7 +1906,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1946,7 +1946,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1984,7 +1984,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2031,7 +2031,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2079,7 +2079,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2113,7 +2113,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2146,7 +2146,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2190,7 +2190,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2232,7 +2232,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2279,7 +2279,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2342,7 +2342,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2384,7 +2384,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2427,7 +2427,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2492,7 +2492,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2517,7 +2517,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2555,7 +2555,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2593,7 +2593,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2634,7 +2634,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2680,7 +2680,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2712,7 +2712,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2747,7 +2747,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2778,7 +2778,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2805,7 +2805,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2835,7 +2835,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2866,7 +2866,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2898,7 +2898,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2933,7 +2933,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2963,7 +2963,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2995,7 +2995,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3027,7 +3027,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3069,7 +3069,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3099,7 +3099,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3132,7 +3132,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3161,7 +3161,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3200,7 +3200,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3264,7 +3264,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3295,7 +3295,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3325,7 +3325,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3355,7 +3355,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3385,7 +3385,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3417,7 +3417,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3450,7 +3450,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3484,7 +3484,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3515,7 +3515,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3547,7 +3547,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3580,7 +3580,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3614,7 +3614,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3651,7 +3651,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3688,7 +3688,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3724,7 +3724,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3760,7 +3760,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3806,7 +3806,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3824,7 +3824,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3873,7 +3873,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3922,7 +3922,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3970,7 +3970,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4018,7 +4018,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4079,7 +4079,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4127,7 +4127,7 @@ fn m() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    Transform::DataMap data;
     auto got = Run<PromoteSideEffectsToDecl>(src, data);
 
     EXPECT_EQ(expect, str(got));
