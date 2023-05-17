@@ -205,11 +205,6 @@ void Instance::EnableAdapterBlocklist(bool enable) {
     mImpl->EnableAdapterBlocklist(enable);
 }
 
-// TODO(dawn:1374) Deprecate this once it is passed via the descriptor.
-void Instance::SetPlatform(dawn::platform::Platform* platform) {
-    mImpl->SetPlatform(platform);
-}
-
 uint64_t Instance::GetDeviceCountForTesting() const {
     return mImpl->GetDeviceCountForTesting();
 }
