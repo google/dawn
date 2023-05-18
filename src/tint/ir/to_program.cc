@@ -26,6 +26,7 @@
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/store.h"
+#include "src/tint/ir/switch.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/program_builder.h"
@@ -117,9 +118,11 @@ class State {
         ir::Branch root_branch{start_node, {}};
         const ir::Branch* branch = &root_branch;
 
+        // TODO(crbug.com/tint/1902): Handle block arguments.
+
         while (branch->target != stop_at) {
             enum Status { kContinue, kStop, kError };
-            Status status = Switch(
+            Status status = tint::Switch(
                 branch->target,
 
                 [&](const ir::Block* block) {
@@ -146,32 +149,24 @@ class State {
                     return branch->target->inbound_branches.IsEmpty() ? kStop : kContinue;
                 },
 
+                [&](const ir::Switch* switch_) {
+                    auto* stmt = Switch(switch_);
+                    if (TINT_UNLIKELY(!stmt)) {
+                        return kError;
+                    }
+                    stmts.Push(stmt);
+                    branch = &switch_->merge;
+                    return branch->target->inbound_branches.IsEmpty() ? kStop : kContinue;
+                },
+
                 [&](const ir::FunctionTerminator*) {
-                    if (branch->args.IsEmpty()) {
-                        // Branch to function terminator has no arguments.
-                        // If this block is nested withing some control flow, then we must emit a
-                        // 'return' statement, otherwise we've just naturally reached the end of the
-                        // function where the 'return' is redundant.
-                        if (nesting_depth_ > 1) {
-                            stmts.Push(b.Return());
-                        }
-                        return kStop;
-                    }
-
-                    // Branch to function terminator has arguments - this is the return value.
-                    if (branch->args.Length() != 1) {
-                        TINT_ICE(IR, b.Diagnostics())
-                            << "expected 1 value for function terminator (return value), got "
-                            << branch->args.Length();
+                    auto res = FunctionTerminator(branch);
+                    if (TINT_UNLIKELY(!res)) {
                         return kError;
                     }
-
-                    auto* val = Expr(branch->args.Front());
-                    if (TINT_UNLIKELY(!val)) {
-                        return kError;
+                    if (auto* stmt = res.Get()) {
+                        stmts.Push(stmt);
                     }
-
-                    stmts.Push(b.Return(val));
                     return kStop;
                 },
 
@@ -223,6 +218,76 @@ class State {
         return b.If(cond, t);
     }
 
+    const ast::SwitchStatement* Switch(const ir::Switch* s) {
+        SCOPED_NESTING();
+
+        auto* cond = Expr(s->condition);
+        if (!cond) {
+            return nullptr;
+        }
+
+        auto cases = utils::Transform(
+            s->cases,  //
+            [&](const ir::Switch::Case& c) -> const tint::ast::CaseStatement* {
+                SCOPED_NESTING();
+                auto* body = FlowNodeGraph(c.start.target, s->merge.target);
+                if (!body) {
+                    return nullptr;
+                }
+
+                auto selectors = utils::Transform(
+                    c.selectors,  //
+                    [&](const ir::Switch::CaseSelector& cs) -> const ast::CaseSelector* {
+                        if (cs.IsDefault()) {
+                            return b.DefaultCaseSelector();
+                        }
+                        auto* expr = Expr(cs.val);
+                        if (!expr) {
+                            return nullptr;
+                        }
+                        return b.CaseSelector(expr);
+                    });
+                if (selectors.Any(utils::IsNull)) {
+                    return nullptr;
+                }
+
+                return b.Case(std::move(selectors), body);
+            });
+        if (cases.Any(utils::IsNull)) {
+            return nullptr;
+        }
+
+        return b.Switch(cond, std::move(cases));
+    }
+
+    utils::Result<const ast::ReturnStatement*> FunctionTerminator(const ir::Branch* branch) {
+        if (branch->args.IsEmpty()) {
+            // Branch to function terminator has no arguments.
+            // If this block is nested withing some control flow, then we must emit a
+            // 'return' statement, otherwise we've just naturally reached the end of the
+            // function where the 'return' is redundant.
+            if (nesting_depth_ > 1) {
+                return b.Return();
+            }
+            return nullptr;
+        }
+
+        // Branch to function terminator has arguments - this is the return value.
+        if (branch->args.Length() != 1) {
+            TINT_ICE(IR, b.Diagnostics())
+                << "expected 1 value for function terminator (return value), got "
+                << branch->args.Length();
+            return utils::Failure;
+        }
+
+        auto* val = Expr(branch->args.Front());
+        if (TINT_UNLIKELY(!val)) {
+            return utils::Failure;
+        }
+
+        return b.Return(val);
+    }
+
     /// @return true if there are no instructions between @p node and and @p stop_at
     bool IsEmpty(const ir::FlowNode* node, const ir::FlowNode* stop_at) {
         while (node != stop_at) {
@@ -257,7 +322,7 @@ class State {
     }
 
     utils::Result<const ast::Statement*> Stmt(const ir::Instruction* inst) {
-        return Switch<utils::Result<const ast::Statement*>>(
+        return tint::Switch<utils::Result<const ast::Statement*>>(
             inst,                                            //
             [&](const ir::Call* i) { return CallStmt(i); },  //
             [&](const ir::Var* i) { return Var(i); },        //
@@ -312,7 +377,7 @@ class State {
         if (args.Any(utils::IsNull)) {
             return nullptr;
         }
-        return Switch(
+        return tint::Switch(
             call,  //
             [&](const ir::UserCall* c) { return b.Call(Sym(c->name), std::move(args)); },
             [&](Default) {
@@ -322,7 +387,7 @@ class State {
     }
 
     const ast::Expression* Expr(const ir::Value* val) {
-        return Switch(
+        return tint::Switch(
             val,  //
             [&](const ir::Constant* c) { return ConstExpr(c); },
             [&](const ir::Load* l) { return LoadExpr(l); },
@@ -334,7 +399,7 @@ class State {
     }
 
     const ast::Expression* ConstExpr(const ir::Constant* c) {
-        return Switch(
+        return tint::Switch(
             c->Type(),  //
             [&](const type::I32*) { return b.Expr(c->value->ValueAs<i32>()); },
             [&](const type::U32*) { return b.Expr(c->value->ValueAs<u32>()); },
@@ -352,7 +417,7 @@ class State {
     const ast::Expression* VarExpr(const ir::Var* v) { return b.Expr(NameOf(v)); }
 
     utils::Result<ast::Type> Type(const type::Type* ty) {
-        return Switch<utils::Result<ast::Type>>(
+        return tint::Switch<utils::Result<ast::Type>>(
             ty,                                              //
             [&](const type::Void*) { return ast::Type{}; },  //
             [&](const type::I32*) { return b.ty.i32(); },    //

@@ -239,5 +239,130 @@ fn f() {
 }
 )");
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Switch
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, Switch_Default) {
+    Test(R"(
+fn a() {
+}
+
+fn f() {
+  var v : i32 = 42i;
+  switch(v) {
+    default: {
+      a();
+    }
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Switch_3_Cases) {
+    Test(R"(
+fn a() {
+}
+
+fn b() {
+}
+
+fn c() {
+}
+
+fn f() {
+  var v : i32 = 42i;
+  switch(v) {
+    case 0i: {
+      a();
+    }
+    case 1i, default: {
+      b();
+    }
+    case 2i: {
+      c();
+    }
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Switch_3_Cases_AllReturn) {
+    Test(R"(
+fn a() {
+}
+
+fn f() {
+  var v : i32 = 42i;
+  switch(v) {
+    case 0i: {
+      return;
+    }
+    case 1i, default: {
+      return;
+    }
+    case 2i: {
+      return;
+    }
+  }
+  a();
+}
+)",
+         R"(
+fn a() {
+}
+
+fn f() {
+  var v : i32 = 42i;
+  switch(v) {
+    case 0i: {
+      return;
+    }
+    case 1i, default: {
+      return;
+    }
+    case 2i: {
+      return;
+    }
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Switch_Nested) {
+    Test(R"(
+fn a() {
+}
+
+fn b() {
+}
+
+fn c() {
+}
+
+fn f() {
+  var v1 : i32 = 42i;
+  var v2 : i32 = 24i;
+  switch(v1) {
+    case 0i: {
+      a();
+    }
+    case 1i, default: {
+      switch(v2) {
+        case 0i: {
+        }
+        case 1i, default: {
+          return;
+        }
+      }
+    }
+    case 2i: {
+      c();
+    }
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir
