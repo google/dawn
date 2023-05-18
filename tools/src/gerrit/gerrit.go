@@ -122,15 +122,39 @@ func New(url string, cred Credentials) (*Gerrit, error) {
 	return &Gerrit{client, cred.Username != ""}, nil
 }
 
+// QueryExtraData holds extra data to query for with QueryChangesWith()
+type QueryExtraData struct {
+	Labels           bool
+	Messages         bool
+	CurrentRevision  bool
+	DetailedAccounts bool
+}
+
 // QueryChanges returns the changes that match the given query strings.
 // See: https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
-func (g *Gerrit) QueryChanges(querys ...string) (changes []gerrit.ChangeInfo, query string, err error) {
+func (g *Gerrit) QueryChangesWith(extras QueryExtraData, queries ...string) (changes []gerrit.ChangeInfo, query string, err error) {
 	changes = []gerrit.ChangeInfo{}
-	query = strings.Join(querys, "+")
+	query = strings.Join(queries, "+")
+
+	changeOpts := gerrit.ChangeOptions{}
+	if extras.Labels {
+		changeOpts.AdditionalFields = append(changeOpts.AdditionalFields, "LABELS")
+	}
+	if extras.Messages {
+		changeOpts.AdditionalFields = append(changeOpts.AdditionalFields, "MESSAGES")
+	}
+	if extras.CurrentRevision {
+		changeOpts.AdditionalFields = append(changeOpts.AdditionalFields, "CURRENT_REVISION")
+	}
+	if extras.DetailedAccounts {
+		changeOpts.AdditionalFields = append(changeOpts.AdditionalFields, "DETAILED_ACCOUNTS")
+	}
+
 	for {
 		batch, _, err := g.client.Changes.QueryChanges(&gerrit.QueryChangeOptions{
-			QueryOptions: gerrit.QueryOptions{Query: []string{query}},
-			Skip:         len(changes),
+			QueryOptions:  gerrit.QueryOptions{Query: []string{query}},
+			Skip:          len(changes),
+			ChangeOptions: changeOpts,
 		})
 		if err != nil {
 			return nil, "", g.maybeWrapError(err)
@@ -142,6 +166,23 @@ func (g *Gerrit) QueryChanges(querys ...string) (changes []gerrit.ChangeInfo, qu
 		}
 	}
 	return changes, query, nil
+}
+
+// QueryChanges returns the changes that match the given query strings.
+// See: https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
+func (g *Gerrit) QueryChanges(queries ...string) (changes []gerrit.ChangeInfo, query string, err error) {
+	return g.QueryChangesWith(QueryExtraData{}, queries...)
+}
+
+func (g *Gerrit) AddLabel(changeID, revisionID, message, label string, value int) error {
+	_, _, err := g.client.Changes.SetReview(changeID, revisionID, &gerrit.ReviewInput{
+		Message: message,
+		Labels:  map[string]string{label: fmt.Sprint(value)},
+	})
+	if err != nil {
+		return g.maybeWrapError(err)
+	}
+	return nil
 }
 
 // Abandon abandons the change with the given changeID.
