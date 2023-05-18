@@ -187,7 +187,7 @@ func (s Status) Draw(out io.Writer, width int, ansiColors bool, animFrame int) {
 				fmt.Fprint(buf, strings.Repeat(string("▉"), numBlocks-1))
 			}
 			if numBlocks > 0 {
-				frac := fNumBlocks - math.Floor(fNumBlocks)
+				frac := fNumBlocks - float64(numBlocks-1)
 				symbol := blockSymbols[int(math.Round(frac*float64(len(blockSymbols)-1)))]
 				fmt.Fprint(buf, string(symbol))
 			}
