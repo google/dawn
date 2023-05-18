@@ -67,7 +67,7 @@ int DawnWireServerFuzzer::Initialize(int* argc, char*** argv) {
     // resulting in ASAN false positives. We work around this by explicitly loading the loader
     // without unloading it here.
 #if DAWN_PLATFORM_IS(WINDOWS) && defined(ADDRESS_SANITIZER)
-    sVulkanLoader.Open(GetExecutableDirectory().value_or("") + "vulkan-1.dll");
+    sVulkanLoader.Open(dawn::GetExecutableDirectory().value_or("") + "vulkan-1.dll");
 #endif
 
     sInstance->DiscoverDefaultAdapters();
