@@ -139,6 +139,15 @@ crbug.com/dawn/1830 [ mac apple dawn-backend-validation ] webgpu:api,validation,
 crbug.com/dawn/1828 [ mac apple ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";* [ Failure ]
 
 ################################################################################
+# Apple GPUs need a workaround to clamp frag_depth
+# KEEP
+################################################################################
+crbug.com/dawn/1616 [ mac apple ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";* [ Failure ]
+crbug.com/dawn/1616 [ mac apple ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";* [ Failure ]
+crbug.com/dawn/1616 [ mac apple ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float";* [ Failure ]
+crbug.com/dawn/1616 [ mac apple ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";* [ Failure ]
+
+################################################################################
 # depth_clip_clamp failures
 ################################################################################
 crbug.com/dawn/1125 [ mac intel ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";unclippedDepth="_undef_";writeDepth=true;multisampled=false [ Failure ]
