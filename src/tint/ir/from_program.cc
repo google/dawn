@@ -146,7 +146,7 @@ class Impl {
             /* src */ {&program_->Symbols()},
             /* dst */ {&builder_.ir.symbols, &builder_.ir.types},
         },
-        /* dst */ {&builder_.ir.constants},
+        /* dst */ {&builder_.ir.constants_arena},
     };
 
     /// The stack of flow control blocks.

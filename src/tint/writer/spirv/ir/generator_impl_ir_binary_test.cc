@@ -155,10 +155,10 @@ TEST_F(SpvGeneratorImplTest, Binary_Sub_Vec2i) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
     b.Branch(func->start_target, func->end_target);
 
-    auto* lhs = mod.constants.Create<constant::Composite>(
+    auto* lhs = mod.constants_arena.Create<constant::Composite>(
         mod.types.Get<type::Vector>(mod.types.Get<type::I32>(), 2u),
         utils::Vector{b.Constant(42_i)->value, b.Constant(-1_i)->value}, false, false);
-    auto* rhs = mod.constants.Create<constant::Composite>(
+    auto* rhs = mod.constants_arena.Create<constant::Composite>(
         mod.types.Get<type::Vector>(mod.types.Get<type::I32>(), 2u),
         utils::Vector{b.Constant(0_i)->value, b.Constant(-43_i)->value}, false, false);
     func->start_target->instructions.Push(
@@ -189,12 +189,12 @@ TEST_F(SpvGeneratorImplTest, Binary_Sub_Vec4f) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
     b.Branch(func->start_target, func->end_target);
 
-    auto* lhs = mod.constants.Create<constant::Composite>(
+    auto* lhs = mod.constants_arena.Create<constant::Composite>(
         mod.types.Get<type::Vector>(mod.types.Get<type::F32>(), 4u),
         utils::Vector{b.Constant(42_f)->value, b.Constant(-1_f)->value, b.Constant(0_f)->value,
                       b.Constant(1.25_f)->value},
         false, false);
-    auto* rhs = mod.constants.Create<constant::Composite>(
+    auto* rhs = mod.constants_arena.Create<constant::Composite>(
         mod.types.Get<type::Vector>(mod.types.Get<type::F32>(), 4u),
         utils::Vector{b.Constant(0_f)->value, b.Constant(1.25_f)->value, b.Constant(-42_f)->value,
                       b.Constant(1_f)->value},

@@ -110,14 +110,14 @@ class Builder {
     template <typename T, typename... ARGS>
     utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Value>, const T>* create(
         ARGS&&... args) {
-        return ir.constants.Create<T>(std::forward<ARGS>(args)...);
+        return ir.constants_arena.Create<T>(std::forward<ARGS>(args)...);
     }
 
     /// Creates a new ir::Constant
     /// @param val the constant value
     /// @returns the new constant
     ir::Constant* Constant(const constant::Value* val) {
-        return ir.values.Create<ir::Constant>(val);
+        return ir.constants.GetOrCreate(val, [&]() { return ir.values.Create<ir::Constant>(val); });
     }
 
     /// Creates a ir::Constant for an i32 Scalar

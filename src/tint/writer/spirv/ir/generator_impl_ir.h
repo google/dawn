@@ -157,25 +157,6 @@ class GeneratorImplIr {
         }
     };
 
-    /// ConstantHasher provides a hash function for a constant::Value pointer, hashing the value
-    /// instead of the pointer itself.
-    struct ConstantHasher {
-        /// @param c the constant::Value pointer to create a hash for
-        /// @return the hash value
-        inline std::size_t operator()(const constant::Value* c) const { return c->Hash(); }
-    };
-
-    /// ConstantEquals provides an equality function for two constant::Value pointers, comparing
-    /// their values instead of the pointers.
-    struct ConstantEquals {
-        /// @param a the first constant::Value pointer to compare
-        /// @param b the second constant::Value pointer to compare
-        /// @return the hash value
-        inline bool operator()(const constant::Value* a, const constant::Value* b) const {
-            return a->Equal(b);
-        }
-    };
-
     /// The map of types to their result IDs.
     utils::Hashmap<const type::Type*, uint32_t, 8> types_;
 
@@ -183,7 +164,7 @@ class GeneratorImplIr {
     utils::Hashmap<FunctionType, uint32_t, 8, FunctionType::Hasher> function_types_;
 
     /// The map of constants to their result IDs.
-    utils::Hashmap<const constant::Value*, uint32_t, 16, ConstantHasher, ConstantEquals> constants_;
+    utils::Hashmap<const constant::Value*, uint32_t, 16> constants_;
 
     /// The map of instructions to their result IDs.
     utils::Hashmap<const ir::Instruction*, uint32_t, 8> instructions_;
