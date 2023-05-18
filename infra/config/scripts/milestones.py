@@ -103,6 +103,7 @@ def add_milestone(milestones, milestone_num, branch):
             'linux',
             'mac',
             'win',
+            'android',
         ],
     }
 

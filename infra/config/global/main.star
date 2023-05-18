@@ -355,9 +355,11 @@ def dawn_standalone_builder(name, clang, debug, cpu, fuzzer = False):
                 builder = "dawn:try/" + name,
             )
 
-def _add_branch_verifiers(builder_name, os, includable_only = False):
+def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_only = False):
     for milestone, details in ACTIVE_MILESTONES.items():
         if os not in details.platforms:
+            continue
+        if min_milestone != None and int(milestone[1:]) < min_milestone:
             continue
         luci.cq_tryjob_verifier(
             cq_group = "Dawn-CQ-" + milestone,
@@ -367,24 +369,47 @@ def _add_branch_verifiers(builder_name, os, includable_only = False):
 
 # We use the DEPS version for branches because ToT builders do not make sense on
 # branches and the DEPS versions already exist.
-_os_to_branch_builder = {
+_os_arch_to_branch_builder = {
     "linux": "dawn-linux-x64-deps-rel",
     "mac": "dawn-mac-x64-deps-rel",
     "win": "dawn-win10-x64-deps-rel",
+    "android-arm": "dawn-android-arm-deps-rel",
+    "android-arm64": "dawn-android-arm64-deps-rel",
 }
 
-def chromium_dawn_tryjob(os):
+# The earliest milestone that the builder is relevant for
+_os_arch_to_min_milestone = {
+    "linux": 112,
+    "mac": 112,
+    "win": 112,
+    "android-arm": 112,
+    "android-arm64": 115,
+}
+
+def chromium_dawn_tryjob(os, arch = None):
     """Adds a tryjob that tests against Chromium
 
     Args:
       os: string for the OS, should be one or linux|mac|win
+      arch: string for the arch, or None
     """
 
-    luci.cq_tryjob_verifier(
-        cq_group = "Dawn-CQ",
-        builder = "chromium:try/" + os + "-dawn-rel",
-    )
-    _add_branch_verifiers(_os_to_branch_builder[os], os)
+    if arch:
+        luci.cq_tryjob_verifier(
+            cq_group = "Dawn-CQ",
+            builder = "chromium:try/{os}-dawn-{arch}-rel".format(os = os, arch = arch),
+        )
+        _add_branch_verifiers(
+            _os_arch_to_branch_builder["{os}-{arch}".format(os = os, arch = arch)],
+            os,
+            _os_arch_to_min_milestone["{os}-{arch}".format(os = os, arch = arch)],
+        )
+    else:
+        luci.cq_tryjob_verifier(
+            cq_group = "Dawn-CQ",
+            builder = "chromium:try/{}-dawn-rel".format(os),
+        )
+        _add_branch_verifiers(_os_arch_to_branch_builder[os], os)
 
 luci.gitiles_poller(
     name = "primary-poller",
@@ -437,6 +462,8 @@ dawn_standalone_builder("cron-linux-clang-rel-x64", True, False, "x64", True)
 chromium_dawn_tryjob("linux")
 chromium_dawn_tryjob("mac")
 chromium_dawn_tryjob("win")
+chromium_dawn_tryjob("android", "arm")
+chromium_dawn_tryjob("android", "arm64")
 
 luci.cq_tryjob_verifier(
     cq_group = "Dawn-CQ",

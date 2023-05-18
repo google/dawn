@@ -5,7 +5,8 @@
         "ref": "refs/heads/chromium/5615",
         "platforms": [
             "mac",
-            "win"
+            "win",
+            "android"
         ]
     },
     "113": {
@@ -15,7 +16,8 @@
         "platforms": [
             "linux",
             "mac",
-            "win"
+            "win",
+            "android"
         ]
     },
     "114": {
@@ -25,7 +27,8 @@
         "platforms": [
             "linux",
             "mac",
-            "win"
+            "win",
+            "android"
         ]
     }
 }
