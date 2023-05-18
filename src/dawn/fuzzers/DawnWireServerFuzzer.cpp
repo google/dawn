@@ -51,7 +51,7 @@ class DevNull : public dawn::wire::CommandSerializer {
 std::unique_ptr<dawn::native::Instance> sInstance;
 static bool (*sAdapterSupported)(const dawn::native::Adapter&) = nullptr;
 #if DAWN_PLATFORM_IS(WINDOWS) && defined(ADDRESS_SANITIZER)
-static DynamicLib sVulkanLoader;
+static dawn::DynamicLib sVulkanLoader;
 #endif
 
 }  // namespace
