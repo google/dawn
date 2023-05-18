@@ -19,6 +19,7 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/load.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
@@ -296,6 +297,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         auto result = Switch(
             inst,  //
             [&](const ir::Binary* b) { return EmitBinary(b); },
+            [&](const ir::Load* l) { return EmitLoad(l); },
             [&](const ir::Store* s) {
                 EmitStore(s);
                 return 0u;
@@ -393,6 +395,12 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
     current_function_.push_inst(
         op, {Type(binary->Type()), id, Value(binary->LHS()), Value(binary->RHS())});
 
+    return id;
+}
+
+uint32_t GeneratorImplIr::EmitLoad(const ir::Load* load) {
+    auto id = module_.NextId();
+    current_function_.push_inst(spv::Op::OpLoad, {Type(load->Type()), id, Value(load->from)});
     return id;
 }
 

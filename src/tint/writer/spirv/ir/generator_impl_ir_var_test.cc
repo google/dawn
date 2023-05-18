@@ -138,6 +138,32 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, FunctionVar_Load) {
+    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    b.Branch(func->start_target, func->end_target);
+
+    auto* store_ty = mod.types.Get<type::I32>();
+    auto* ty = mod.types.Get<type::Pointer>(store_ty, builtin::AddressSpace::kFunction,
+                                            builtin::Access::kReadWrite);
+    auto* v = b.Declare(ty);
+    func->start_target->instructions.Push(v);
+    func->start_target->instructions.Push(b.Load(v));
+
+    generator_.EmitFunction(func);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+%2 = OpTypeVoid
+%3 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpTypePointer Function %7
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+%5 = OpVariable %6 Function
+%8 = OpLoad %7 %5
+OpReturn
+OpFunctionEnd
+)");
+}
+
 TEST_F(SpvGeneratorImplTest, FunctionVar_Store) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
     b.Branch(func->start_target, func->end_target);
