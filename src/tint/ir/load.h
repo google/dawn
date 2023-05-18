@@ -35,13 +35,14 @@ class Load : public utils::Castable<Load, Instruction> {
     Load& operator=(Load&& inst) = delete;
 
     /// @returns the type of the value
-    const type::Type* Type() const override { return result_type; }
+    const type::Type* Type() const override { return result_type_; }
 
-    /// the result type of the instruction
-    const type::Type* result_type = nullptr;
+    /// @returns the avlue being loaded from
+    Value* From() const { return from_; }
 
-    /// the value being loaded
-    Value* from = nullptr;
+  private:
+    const type::Type* result_type_;
+    Value* from_;
 };
 
 }  // namespace tint::ir

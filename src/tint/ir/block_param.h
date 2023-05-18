@@ -34,10 +34,11 @@ class BlockParam : public utils::Castable<BlockParam, Value> {
     BlockParam& operator=(BlockParam&& inst) = delete;
 
     /// @returns the type of the var
-    const type::Type* Type() const override { return type; }
+    const type::Type* Type() const override { return type_; }
 
+  private:
     /// the result type of the instruction
-    const type::Type* type = nullptr;
+    const type::Type* type_;
 };
 
 }  // namespace tint::ir

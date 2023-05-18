@@ -91,14 +91,14 @@ class State {
     const ast::Function* Fn(const Function* fn) {
         SCOPED_NESTING();
 
-        auto name = Sym(fn->name);
+        auto name = Sym(fn->Name());
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
         utils::Vector<const ast::Parameter*, 1> params{};
-        auto ret_ty = Type(fn->return_type);
+        auto ret_ty = Type(fn->ReturnType());
         if (!ret_ty) {
             return nullptr;
         }
-        auto* body = FlowNodeGraph(fn->start_target);
+        auto* body = FlowNodeGraph(fn->StartTarget());
         if (!body) {
             return nullptr;
         }
@@ -126,7 +126,7 @@ class State {
                 branch->target,
 
                 [&](const ir::Block* block) {
-                    for (auto* inst : block->instructions) {
+                    for (const auto* inst : block->Instructions()) {
                         auto stmt = Stmt(inst);
                         if (TINT_UNLIKELY(!stmt)) {
                             return kError;
@@ -135,7 +135,7 @@ class State {
                             stmts.Push(s);
                         }
                     }
-                    branch = &block->branch;
+                    branch = &block->Branch();
                     return kContinue;
                 },
 
@@ -145,8 +145,8 @@ class State {
                         return kError;
                     }
                     stmts.Push(stmt);
-                    branch = &if_->merge;
-                    return branch->target->inbound_branches.IsEmpty() ? kStop : kContinue;
+                    branch = &if_->Merge();
+                    return branch->target->InboundBranches().IsEmpty() ? kStop : kContinue;
                 },
 
                 [&](const ir::Switch* switch_) {
@@ -155,8 +155,8 @@ class State {
                         return kError;
                     }
                     stmts.Push(stmt);
-                    branch = &switch_->merge;
-                    return branch->target->inbound_branches.IsEmpty() ? kStop : kContinue;
+                    branch = &switch_->Merge();
+                    return branch->target->InboundBranches().IsEmpty() ? kStop : kContinue;
                 },
 
                 [&](const ir::FunctionTerminator*) {
@@ -189,25 +189,25 @@ class State {
     const ast::IfStatement* If(const ir::If* i) {
         SCOPED_NESTING();
 
-        auto* cond = Expr(i->condition);
-        auto* t = FlowNodeGraph(i->true_.target, i->merge.target);
+        auto* cond = Expr(i->Condition());
+        auto* t = FlowNodeGraph(i->True().target, i->Merge().target);
         if (TINT_UNLIKELY(!t)) {
             return nullptr;
         }
 
-        if (!IsEmpty(i->false_.target, i->merge.target)) {
-            // If the else target is an if flow node with the same merge target as this if, then
+        if (!IsEmpty(i->False().target, i->Merge().target)) {
+            // If the else target is an if flow node with the same Merge().target as this if, then
             // emit an 'else if' instead of a block statement for the else.
-            if (auto* else_if = As<ir::If>(NextNonEmptyNode(i->false_.target));
+            if (auto* else_if = As<ir::If>(NextNonEmptyNode(i->False().target));
                 else_if &&
-                NextNonEmptyNode(i->merge.target) == NextNonEmptyNode(else_if->merge.target)) {
+                NextNonEmptyNode(i->Merge().target) == NextNonEmptyNode(else_if->Merge().target)) {
                 auto* f = If(else_if);
                 if (!f) {
                     return nullptr;
                 }
                 return b.If(cond, t, b.Else(f));
             } else {
-                auto* f = FlowNodeGraph(i->false_.target, i->merge.target);
+                auto* f = FlowNodeGraph(i->False().target, i->Merge().target);
                 if (!f) {
                     return nullptr;
                 }
@@ -221,16 +221,16 @@ class State {
     const ast::SwitchStatement* Switch(const ir::Switch* s) {
         SCOPED_NESTING();
 
-        auto* cond = Expr(s->condition);
+        auto* cond = Expr(s->Condition());
         if (!cond) {
             return nullptr;
         }
 
-        auto cases = utils::Transform(
-            s->cases,  //
+        auto cases = utils::Transform<1>(
+            s->Cases(),  //
             [&](const ir::Switch::Case& c) -> const tint::ast::CaseStatement* {
                 SCOPED_NESTING();
-                auto* body = FlowNodeGraph(c.start.target, s->merge.target);
+                auto* body = FlowNodeGraph(c.start.target, s->Merge().target);
                 if (!body) {
                     return nullptr;
                 }
@@ -292,10 +292,10 @@ class State {
     bool IsEmpty(const ir::FlowNode* node, const ir::FlowNode* stop_at) {
         while (node != stop_at) {
             if (auto* block = node->As<ir::Block>()) {
-                if (block->instructions.Length() > 0) {
+                if (!block->Instructions().IsEmpty()) {
                     return false;
                 }
-                node = block->branch.target;
+                node = block->Branch().target;
             } else {
                 return false;
             }
@@ -307,13 +307,13 @@ class State {
     const ir::FlowNode* NextNonEmptyNode(const ir::FlowNode* node) {
         while (node) {
             if (auto* block = node->As<ir::Block>()) {
-                for (auto* inst : block->instructions) {
+                for (const auto* inst : block->Instructions()) {
                     // Load instructions will be inlined, so ignore them.
                     if (!inst->Is<ir::Load>()) {
                         return node;
                     }
                 }
-                node = block->branch.target;
+                node = block->Branch().target;
             } else {
                 return node;
             }
@@ -351,8 +351,8 @@ class State {
         }
         auto ty = Type(ptr->StoreType());
         const ast::Expression* init = nullptr;
-        if (var->initializer) {
-            init = Expr(var->initializer);
+        if (var->Initializer()) {
+            init = Expr(var->Initializer());
             if (!init) {
                 return nullptr;
             }
@@ -368,18 +368,19 @@ class State {
     }
 
     const ast::AssignmentStatement* Store(const ir::Store* store) {
-        auto* expr = Expr(store->from);
-        return b.Assign(NameOf(store->to), expr);
+        auto* expr = Expr(store->From());
+        return b.Assign(NameOf(store->To()), expr);
     }
 
     const ast::CallExpression* Call(const ir::Call* call) {
-        auto args = utils::Transform(call->args, [&](const ir::Value* arg) { return Expr(arg); });
+        auto args =
+            utils::Transform<2>(call->Args(), [&](const ir::Value* arg) { return Expr(arg); });
         if (args.Any(utils::IsNull)) {
             return nullptr;
         }
         return tint::Switch(
             call,  //
-            [&](const ir::UserCall* c) { return b.Call(Sym(c->name), std::move(args)); },
+            [&](const ir::UserCall* c) { return b.Call(Sym(c->Name()), std::move(args)); },
             [&](Default) {
                 UNHANDLED_CASE(call);
                 return nullptr;
@@ -401,18 +402,18 @@ class State {
     const ast::Expression* ConstExpr(const ir::Constant* c) {
         return tint::Switch(
             c->Type(),  //
-            [&](const type::I32*) { return b.Expr(c->value->ValueAs<i32>()); },
-            [&](const type::U32*) { return b.Expr(c->value->ValueAs<u32>()); },
-            [&](const type::F32*) { return b.Expr(c->value->ValueAs<f32>()); },
-            [&](const type::F16*) { return b.Expr(c->value->ValueAs<f16>()); },
-            [&](const type::Bool*) { return b.Expr(c->value->ValueAs<bool>()); },
+            [&](const type::I32*) { return b.Expr(c->Value()->ValueAs<i32>()); },
+            [&](const type::U32*) { return b.Expr(c->Value()->ValueAs<u32>()); },
+            [&](const type::F32*) { return b.Expr(c->Value()->ValueAs<f32>()); },
+            [&](const type::F16*) { return b.Expr(c->Value()->ValueAs<f16>()); },
+            [&](const type::Bool*) { return b.Expr(c->Value()->ValueAs<bool>()); },
             [&](Default) {
                 UNHANDLED_CASE(c);
                 return nullptr;
             });
     }
 
-    const ast::Expression* LoadExpr(const ir::Load* l) { return Expr(l->from); }
+    const ast::Expression* LoadExpr(const ir::Load* l) { return Expr(l->From()); }
 
     const ast::Expression* VarExpr(const ir::Var* v) { return b.Expr(NameOf(v)); }
 

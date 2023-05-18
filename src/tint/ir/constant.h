@@ -26,13 +26,21 @@ class Constant : public utils::Castable<Constant, Value> {
     /// Constructor
     /// @param val the value stored in the constant
     explicit Constant(const constant::Value* val);
+    Constant(const Constant&) = delete;
+    Constant(Constant&&) = delete;
     ~Constant() override;
 
-    /// @returns the type of the constant
-    const type::Type* Type() const override { return value->Type(); }
+    Constant& operator=(const Constant&) = delete;
+    Constant& operator=(Constant&&) = delete;
 
-    /// The constants value
-    const constant::Value* const value;
+    /// @returns the constants value
+    const constant::Value* Value() const { return value_; }
+
+    /// @returns the type of the constant
+    const type::Type* Type() const override { return value_->Type(); }
+
+  private:
+    const constant::Value* const value_;
 };
 
 }  // namespace tint::ir

@@ -32,17 +32,36 @@ class If : public utils::Castable<If, FlowNode> {
     /// Constructor
     /// @param cond the if condition
     explicit If(Value* cond);
+    If(const If&) = delete;
+    If(If&&) = delete;
     ~If() override;
 
-    /// The true branch block
+    If& operator=(const If&) = delete;
+    If& operator=(If&&) = delete;
+
+    /// @returns the if condition
+    const Value* Condition() const { return condition_; }
+
+    /// @returns the true branch block
+    const Branch& True() const { return true_; }
+    /// @returns the true branch block
+    Branch& True() { return true_; }
+
+    /// @returns the false branch block
+    const Branch& False() const { return false_; }
+    /// @returns the false branch block
+    Branch& False() { return false_; }
+
+    /// @returns the merge branch block
+    const Branch& Merge() const { return merge_; }
+    /// @returns the merge branch block
+    Branch& Merge() { return merge_; }
+
+  private:
     Branch true_ = {};
-    /// The false branch block
     Branch false_ = {};
-    /// An block to converge the true/false branches. The block always exists, but there maybe no
-    /// branches into it. (e.g. if both branches `return`)
-    Branch merge = {};
-    /// Value holding the condition result
-    const Value* condition = nullptr;
+    Branch merge_ = {};
+    Value* condition_;
 };
 
 }  // namespace tint::ir

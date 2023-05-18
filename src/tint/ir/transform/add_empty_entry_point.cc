@@ -29,7 +29,7 @@ AddEmptyEntryPoint::~AddEmptyEntryPoint() = default;
 
 void AddEmptyEntryPoint::Run(ir::Module* ir, const DataMap&, DataMap&) const {
     for (auto* func : ir->functions) {
-        if (func->pipeline_stage != Function::PipelineStage::kUndefined) {
+        if (func->Stage() != Function::PipelineStage::kUndefined) {
             return;
         }
     }
@@ -38,7 +38,7 @@ void AddEmptyEntryPoint::Run(ir::Module* ir, const DataMap&, DataMap&) const {
     auto* ep =
         builder.CreateFunction(ir->symbols.New("unused_entry_point"), ir->types.Get<type::Void>(),
                                Function::PipelineStage::kCompute, std::array{1u, 1u, 1u});
-    builder.Branch(ep->start_target, ep->end_target);
+    ep->StartTarget()->BranchTo(ep->EndTarget());
     ir->functions.Push(ep);
 }
 

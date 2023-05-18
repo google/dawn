@@ -26,16 +26,32 @@ class Loop : public utils::Castable<Loop, FlowNode> {
   public:
     /// Constructor
     Loop();
+    Loop(const Loop&) = delete;
+    Loop(Loop&&) = delete;
     ~Loop() override;
 
-    /// The start block is the first block in a loop.
-    Branch start = {};
-    /// The continue target of the block.
-    Branch continuing = {};
-    /// The loop merge target. If the `loop` does a `return` then this block may not actually
-    /// end up in the control flow. We need it if the loop does a `break` we know where to break
-    /// too.
-    Branch merge = {};
+    Loop& operator=(const Loop&) = delete;
+    Loop& operator=(Loop&&) = delete;
+
+    /// @returns the switch start branch
+    const Branch& Start() const { return start_; }
+    /// @returns the switch start branch
+    Branch& Start() { return start_; }
+
+    /// @returns the switch continuing branch
+    const Branch& Continuing() const { return continuing_; }
+    /// @returns the switch continuing branch
+    Branch& Continuing() { return continuing_; }
+
+    /// @returns the switch merge branch
+    const Branch& Merge() const { return merge_; }
+    /// @returns the switch merge branch
+    Branch& Merge() { return merge_; }
+
+  private:
+    Branch start_ = {};
+    Branch continuing_ = {};
+    Branch merge_ = {};
 };
 
 }  // namespace tint::ir

@@ -60,81 +60,81 @@ std::string Debug::AsDotGraph(const Module* mod) {
                 if (node_to_name.count(b) == 0) {
                     out << name_for(b) << R"( [label="block"])" << std::endl;
                 }
-                out << name_for(b) << " -> " << name_for(b->branch.target);
+                out << name_for(b) << " -> " << name_for(b->Branch().target);
 
                 // Dashed lines to merge blocks
-                if (merge_nodes.count(b->branch.target) != 0) {
+                if (merge_nodes.count(b->Branch().target) != 0) {
                     out << " [style=dashed]";
                 }
 
                 out << std::endl;
-                Graph(b->branch.target);
+                Graph(b->Branch().target);
             },
             [&](const ir::Switch* s) {
                 out << name_for(s) << R"( [label="switch"])" << std::endl;
-                out << name_for(s->merge.target) << R"( [label="switch merge"])" << std::endl;
-                merge_nodes.insert(s->merge.target);
+                out << name_for(s->Merge().target) << R"( [label="switch merge"])" << std::endl;
+                merge_nodes.insert(s->Merge().target);
 
                 size_t i = 0;
-                for (const auto& c : s->cases) {
-                    out << name_for(c.start.target)
+                for (const auto& c : s->Cases()) {
+                    out << name_for(c.Start().target)
                         << R"( [label="case )" + std::to_string(i++) + R"("])" << std::endl;
                 }
                 out << name_for(s) << " -> {";
-                for (const auto& c : s->cases) {
-                    if (&c != &(s->cases[0])) {
+                for (const auto& c : s->Cases()) {
+                    if (&c != &(s->Cases().Front())) {
                         out << ", ";
                     }
-                    out << name_for(c.start.target);
+                    out << name_for(c.Start().target);
                 }
                 out << "}" << std::endl;
 
-                for (const auto& c : s->cases) {
-                    Graph(c.start.target);
+                for (const auto& c : s->Cases()) {
+                    Graph(c.Start().target);
                 }
-                Graph(s->merge.target);
+                Graph(s->Merge().target);
             },
             [&](const ir::If* i) {
                 out << name_for(i) << R"( [label="if"])" << std::endl;
-                out << name_for(i->true_.target) << R"( [label="true"])" << std::endl;
-                out << name_for(i->false_.target) << R"( [label="false"])" << std::endl;
-                out << name_for(i->merge.target) << R"( [label="if merge"])" << std::endl;
-                merge_nodes.insert(i->merge.target);
+                out << name_for(i->True().target) << R"( [label="true"])" << std::endl;
+                out << name_for(i->False().target) << R"( [label="false"])" << std::endl;
+                out << name_for(i->Merge().target) << R"( [label="if merge"])" << std::endl;
+                merge_nodes.insert(i->Merge().target);
 
                 out << name_for(i) << " -> {";
-                out << name_for(i->true_.target) << ", " << name_for(i->false_.target);
+                out << name_for(i->True().target) << ", " << name_for(i->False().target);
                 out << "}" << std::endl;
 
                 // Subgraph if true/false branches so they draw on the same line
                 out << "subgraph sub_" << name_for(i) << " {" << std::endl;
                 out << R"(rank="same")" << std::endl;
-                out << name_for(i->true_.target) << std::endl;
-                out << name_for(i->false_.target) << std::endl;
+                out << name_for(i->True().target) << std::endl;
+                out << name_for(i->False().target) << std::endl;
                 out << "}" << std::endl;
 
-                Graph(i->true_.target);
-                Graph(i->false_.target);
-                Graph(i->merge.target);
+                Graph(i->True().target);
+                Graph(i->False().target);
+                Graph(i->Merge().target);
             },
             [&](const ir::Loop* l) {
                 out << name_for(l) << R"( [label="loop"])" << std::endl;
-                out << name_for(l->start.target) << R"( [label="start"])" << std::endl;
-                out << name_for(l->continuing.target) << R"( [label="continuing"])" << std::endl;
-                out << name_for(l->merge.target) << R"( [label="loop merge"])" << std::endl;
-                merge_nodes.insert(l->merge.target);
+                out << name_for(l->Start().target) << R"( [label="start"])" << std::endl;
+                out << name_for(l->Continuing().target) << R"( [label="continuing"])" << std::endl;
+                out << name_for(l->Merge().target) << R"( [label="loop merge"])" << std::endl;
+                merge_nodes.insert(l->Merge().target);
 
                 // Subgraph the continuing and merge so they get drawn on the same line
                 out << "subgraph sub_" << name_for(l) << " {" << std::endl;
                 out << R"(rank="same")" << std::endl;
-                out << name_for(l->continuing.target) << std::endl;
-                out << name_for(l->merge.target) << std::endl;
+                out << name_for(l->Continuing().target) << std::endl;
+                out << name_for(l->Merge().target) << std::endl;
                 out << "}" << std::endl;
 
-                out << name_for(l) << " -> " << name_for(l->start.target) << std::endl;
+                out << name_for(l) << " -> " << name_for(l->Start().target) << std::endl;
 
-                Graph(l->start.target);
-                Graph(l->continuing.target);
-                Graph(l->merge.target);
+                Graph(l->Start().target);
+                Graph(l->Continuing().target);
+                Graph(l->Merge().target);
             },
             [&](const ir::FunctionTerminator*) {
                 // Already done
@@ -145,10 +145,10 @@ std::string Debug::AsDotGraph(const Module* mod) {
     for (const auto* func : mod->functions) {
         // Cluster each function to label and draw a box around it.
         out << "subgraph cluster_" << name_for(func) << " {" << std::endl;
-        out << R"(label=")" << func->name.Name() << R"(")" << std::endl;
-        out << name_for(func->start_target) << R"( [label="start"])" << std::endl;
-        out << name_for(func->end_target) << R"( [label="end"])" << std::endl;
-        Graph(func->start_target);
+        out << R"(label=")" << func->Name().Name() << R"(")" << std::endl;
+        out << name_for(func->StartTarget()) << R"( [label="start"])" << std::endl;
+        out << name_for(func->EndTarget()) << R"( [label="end"])" << std::endl;
+        Graph(func->StartTarget());
         out << "}" << std::endl;
     }
     out << "}";

@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(SpvGeneratorImplTest, Function_Empty) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
-    b.Branch(func->start_target, func->end_target);
+    func->StartTarget()->BranchTo(func->EndTarget());
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -35,7 +35,7 @@ OpFunctionEnd
 // Test that we do not emit the same function type more than once.
 TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
-    b.Branch(func->start_target, func->end_target);
+    func->StartTarget()->BranchTo(func->EndTarget());
 
     generator_.EmitFunction(func);
     generator_.EmitFunction(func);
@@ -48,7 +48,7 @@ TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Compute) {
     auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>(),
                                   ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
-    b.Branch(func->start_target, func->end_target);
+    func->StartTarget()->BranchTo(func->EndTarget());
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint GLCompute %1 "main"
@@ -66,7 +66,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Fragment) {
     auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>(),
                                   ir::Function::PipelineStage::kFragment);
-    b.Branch(func->start_target, func->end_target);
+    func->StartTarget()->BranchTo(func->EndTarget());
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint Fragment %1 "main"
@@ -84,7 +84,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Vertex) {
     auto* func = b.CreateFunction(mod.symbols.Register("main"), mod.types.Get<type::Void>(),
                                   ir::Function::PipelineStage::kVertex);
-    b.Branch(func->start_target, func->end_target);
+    func->StartTarget()->BranchTo(func->EndTarget());
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint Vertex %1 "main"
@@ -101,15 +101,15 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Multiple) {
     auto* f1 = b.CreateFunction(mod.symbols.Register("main1"), mod.types.Get<type::Void>(),
                                 ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
-    b.Branch(f1->start_target, f1->end_target);
+    f1->StartTarget()->BranchTo(f1->EndTarget());
 
     auto* f2 = b.CreateFunction(mod.symbols.Register("main2"), mod.types.Get<type::Void>(),
                                 ir::Function::PipelineStage::kCompute, {{8, 2, 16}});
-    b.Branch(f2->start_target, f2->end_target);
+    f2->StartTarget()->BranchTo(f2->EndTarget());
 
     auto* f3 = b.CreateFunction(mod.symbols.Register("main3"), mod.types.Get<type::Void>(),
                                 ir::Function::PipelineStage::kFragment);
-    b.Branch(f3->start_target, f3->end_target);
+    f3->StartTarget()->BranchTo(f3->EndTarget());
 
     generator_.EmitFunction(f1);
     generator_.EmitFunction(f2);

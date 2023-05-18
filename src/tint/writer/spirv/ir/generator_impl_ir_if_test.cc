@@ -23,11 +23,11 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
 
     auto* i = b.CreateIf(b.Constant(true));
-    b.Branch(i->true_.target->As<ir::Block>(), i->merge.target);
-    b.Branch(i->false_.target->As<ir::Block>(), i->merge.target);
-    b.Branch(i->merge.target->As<ir::Block>(), func->end_target);
+    i->True().target->As<ir::Block>()->BranchTo(i->Merge().target);
+    i->False().target->As<ir::Block>()->BranchTo(i->Merge().target);
+    i->Merge().target->As<ir::Block>()->BranchTo(func->EndTarget());
 
-    b.Branch(func->start_target, i);
+    func->StartTarget()->BranchTo(i);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -49,15 +49,15 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
 
     auto* i = b.CreateIf(b.Constant(true));
-    b.Branch(i->false_.target->As<ir::Block>(), i->merge.target);
-    b.Branch(i->merge.target->As<ir::Block>(), func->end_target);
+    i->False().target->As<ir::Block>()->BranchTo(i->Merge().target);
+    i->Merge().target->As<ir::Block>()->BranchTo(func->EndTarget());
 
-    auto* true_block = i->true_.target->As<ir::Block>();
-    true_block->instructions.Push(
-        b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(1_i)));
-    b.Branch(true_block, i->merge.target);
+    auto* true_block = i->True().target->As<ir::Block>();
+    true_block->SetInstructions(
+        utils::Vector{b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(1_i))});
+    true_block->BranchTo(i->Merge().target);
 
-    b.Branch(func->start_target, i);
+    func->StartTarget()->BranchTo(i);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -84,15 +84,15 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
 
     auto* i = b.CreateIf(b.Constant(true));
-    b.Branch(i->true_.target->As<ir::Block>(), i->merge.target);
-    b.Branch(i->merge.target->As<ir::Block>(), func->end_target);
+    i->True().target->As<ir::Block>()->BranchTo(i->Merge().target);
+    i->Merge().target->As<ir::Block>()->BranchTo(func->EndTarget());
 
-    auto* false_block = i->false_.target->As<ir::Block>();
-    false_block->instructions.Push(
-        b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(1_i)));
-    b.Branch(false_block, i->merge.target);
+    auto* false_block = i->False().target->As<ir::Block>();
+    false_block->SetInstructions(
+        utils::Vector{b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(1_i))});
+    false_block->BranchTo(i->Merge().target);
 
-    b.Branch(func->start_target, i);
+    func->StartTarget()->BranchTo(i);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -119,11 +119,11 @@ TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
     auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
 
     auto* i = b.CreateIf(b.Constant(true));
-    b.Branch(i->true_.target->As<ir::Block>(), func->end_target);
-    b.Branch(i->false_.target->As<ir::Block>(), func->end_target);
-    i->merge.target->As<ir::Block>()->branch.target = nullptr;
+    i->True().target->As<ir::Block>()->BranchTo(func->EndTarget());
+    i->False().target->As<ir::Block>()->BranchTo(func->EndTarget());
+    i->Merge().target->As<ir::Block>()->BranchTo(nullptr);
 
-    b.Branch(func->start_target, i);
+    func->StartTarget()->BranchTo(i);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

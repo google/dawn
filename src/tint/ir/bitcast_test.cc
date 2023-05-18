@@ -32,9 +32,10 @@ TEST_F(IR_InstructionTest, Bitcast) {
     ASSERT_TRUE(inst->Is<ir::Bitcast>());
     ASSERT_NE(inst->Type(), nullptr);
 
-    ASSERT_EQ(inst->args.Length(), 1u);
-    ASSERT_TRUE(inst->args[0]->Is<Constant>());
-    auto val = inst->args[0]->As<Constant>()->value;
+    const auto args = inst->Args();
+    ASSERT_EQ(args.Length(), 1u);
+    ASSERT_TRUE(args[0]->Is<Constant>());
+    auto val = args[0]->As<Constant>()->Value();
     ASSERT_TRUE(val->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, val->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -44,10 +45,11 @@ TEST_F(IR_InstructionTest, Bitcast_Usage) {
     Builder b{mod};
     const auto* inst = b.Bitcast(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
-    ASSERT_EQ(inst->args.Length(), 1u);
-    ASSERT_NE(inst->args[0], nullptr);
-    ASSERT_EQ(inst->args[0]->Usage().Length(), 1u);
-    EXPECT_EQ(inst->args[0]->Usage()[0], inst);
+    const auto args = inst->Args();
+    ASSERT_EQ(args.Length(), 1u);
+    ASSERT_NE(args[0], nullptr);
+    ASSERT_EQ(args[0]->Usage().Length(), 1u);
+    EXPECT_EQ(args[0]->Usage()[0], inst);
 }
 
 }  // namespace

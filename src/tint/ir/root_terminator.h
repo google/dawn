@@ -25,7 +25,12 @@ class RootTerminator : public utils::Castable<RootTerminator, FlowNode> {
   public:
     /// Constructor
     RootTerminator();
+    RootTerminator(const RootTerminator&) = delete;
+    RootTerminator(RootTerminator&&) = delete;
     ~RootTerminator() override;
+
+    RootTerminator& operator=(const RootTerminator&) = delete;
+    RootTerminator& operator=(RootTerminator&&) = delete;
 };
 
 }  // namespace tint::ir

@@ -98,12 +98,6 @@ class Builder {
     /// @returns the start block for the case flow node
     Block* CreateCase(Switch* s, utils::VectorRef<Switch::CaseSelector> selectors);
 
-    /// Branches the given block to the given flow node.
-    /// @param from the block to branch from
-    /// @param to the node to branch too
-    /// @param args arguments to the branch
-    void Branch(Block* from, FlowNode* to, utils::VectorRef<Value*> args = {});
-
     /// Creates a constant::Value
     /// @param args the arguments
     /// @returns the new constant value
@@ -161,7 +155,7 @@ class Builder {
     /// @param lhs the left-hand-side of the operation
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
-    Binary* CreateBinary(Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs);
+    Binary* CreateBinary(enum Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an And operation
     /// @param type the result type of the expression
@@ -280,7 +274,7 @@ class Builder {
     /// @param type the result type of the binary expression
     /// @param val the value of the operation
     /// @returns the operation
-    Unary* CreateUnary(Unary::Kind kind, const type::Type* type, Value* val);
+    Unary* CreateUnary(enum Unary::Kind kind, const type::Type* type, Value* val);
 
     /// Creates a Complement operation
     /// @param type the result type of the expression

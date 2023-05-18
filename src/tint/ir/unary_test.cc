@@ -29,10 +29,10 @@ TEST_F(IR_InstructionTest, CreateComplement) {
     const auto* inst = b.Complement(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->kind, Unary::Kind::kComplement);
+    EXPECT_EQ(inst->Kind(), Unary::Kind::kComplement);
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
-    auto lhs = inst->Val()->As<Constant>()->value;
+    auto lhs = inst->Val()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -43,10 +43,10 @@ TEST_F(IR_InstructionTest, CreateNegation) {
     const auto* inst = b.Negation(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
-    EXPECT_EQ(inst->kind, Unary::Kind::kNegation);
+    EXPECT_EQ(inst->Kind(), Unary::Kind::kNegation);
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
-    auto lhs = inst->Val()->As<Constant>()->value;
+    auto lhs = inst->Val()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -56,7 +56,7 @@ TEST_F(IR_InstructionTest, Unary_Usage) {
     Builder b{mod};
     const auto* inst = b.Negation(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
-    EXPECT_EQ(inst->kind, Unary::Kind::kNegation);
+    EXPECT_EQ(inst->Kind(), Unary::Kind::kNegation);
 
     ASSERT_NE(inst->Val(), nullptr);
     ASSERT_EQ(inst->Val()->Usage().Length(), 1u);

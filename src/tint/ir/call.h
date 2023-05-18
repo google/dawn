@@ -31,13 +31,10 @@ class Call : public utils::Castable<Call, Instruction> {
     Call& operator=(Call&& inst) = delete;
 
     /// @returns the type of the value
-    const type::Type* Type() const override { return result_type; }
+    const type::Type* Type() const override { return result_type_; }
 
-    /// The instruction type
-    const type::Type* result_type = nullptr;
-
-    /// The constructor arguments
-    utils::Vector<Value*, 1> args;
+    /// @returns the call arguments
+    utils::VectorRef<Value*> Args() const { return args_; }
 
   protected:
     /// Constructor
@@ -46,6 +43,10 @@ class Call : public utils::Castable<Call, Instruction> {
     /// @param result_type the result type
     /// @param args the constructor arguments
     Call(const type::Type* result_type, utils::VectorRef<Value*> args);
+
+  private:
+    const type::Type* result_type_;
+    utils::Vector<Value*, 1> args_;
 };
 
 }  // namespace tint::ir

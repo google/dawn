@@ -1476,6 +1476,7 @@ if(TINT_BUILD_TESTS)
       ir/module_test.cc
       ir/store_test.cc
       ir/test_helper.h
+      ir/transform/add_empty_entry_point_test.cc
       ir/unary_test.cc
     )
   endif()

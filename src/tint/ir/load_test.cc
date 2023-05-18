@@ -33,12 +33,12 @@ TEST_F(IR_InstructionTest, CreateLoad) {
     const auto* inst = b.Load(var);
 
     ASSERT_TRUE(inst->Is<Load>());
-    ASSERT_EQ(inst->from, var);
+    ASSERT_EQ(inst->From(), var);
 
     EXPECT_EQ(inst->Type(), store_type);
 
-    ASSERT_TRUE(inst->from->Is<ir::Var>());
-    EXPECT_EQ(inst->from, var);
+    ASSERT_TRUE(inst->From()->Is<ir::Var>());
+    EXPECT_EQ(inst->From(), var);
 }
 
 TEST_F(IR_InstructionTest, Load_Usage) {
@@ -50,9 +50,9 @@ TEST_F(IR_InstructionTest, Load_Usage) {
         store_type, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite));
     const auto* inst = b.Load(var);
 
-    ASSERT_NE(inst->from, nullptr);
-    ASSERT_EQ(inst->from->Usage().Length(), 1u);
-    EXPECT_EQ(inst->from->Usage()[0], inst);
+    ASSERT_NE(inst->From(), nullptr);
+    ASSERT_EQ(inst->From()->Usage().Length(), 1u);
+    EXPECT_EQ(inst->From()->Usage()[0], inst);
 }
 
 }  // namespace

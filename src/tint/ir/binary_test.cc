@@ -30,17 +30,16 @@ TEST_F(IR_InstructionTest, CreateAnd) {
     const auto* inst = b.And(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kAnd);
-    ASSERT_NE(inst->result_type, nullptr);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
     ASSERT_NE(inst->Type(), nullptr);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -52,15 +51,15 @@ TEST_F(IR_InstructionTest, CreateOr) {
     const auto* inst = b.Or(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kOr);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kOr);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -72,15 +71,15 @@ TEST_F(IR_InstructionTest, CreateXor) {
     const auto* inst = b.Xor(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kXor);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kXor);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -92,15 +91,15 @@ TEST_F(IR_InstructionTest, CreateEqual) {
     const auto* inst = b.Equal(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kEqual);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kEqual);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -112,15 +111,15 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
     const auto* inst = b.NotEqual(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kNotEqual);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kNotEqual);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -132,15 +131,15 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
     const auto* inst = b.LessThan(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kLessThan);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kLessThan);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -153,15 +152,15 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
         b.GreaterThan(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kGreaterThan);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kGreaterThan);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -174,15 +173,15 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
         b.LessThanEqual(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kLessThanEqual);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kLessThanEqual);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -195,15 +194,15 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
         b.GreaterThanEqual(b.ir.types.Get<type::Bool>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kGreaterThanEqual);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kGreaterThanEqual);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -214,15 +213,15 @@ TEST_F(IR_InstructionTest, CreateNot) {
     const auto* inst = b.Not(b.ir.types.Get<type::Bool>(), b.Constant(true));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kEqual);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kEqual);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<bool>>());
     EXPECT_TRUE(lhs->As<constant::Scalar<bool>>()->ValueAs<bool>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<bool>>());
     EXPECT_FALSE(rhs->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
@@ -234,15 +233,15 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
     const auto* inst = b.ShiftLeft(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kShiftLeft);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kShiftLeft);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -254,15 +253,15 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
     const auto* inst = b.ShiftRight(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kShiftRight);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kShiftRight);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -274,15 +273,15 @@ TEST_F(IR_InstructionTest, CreateAdd) {
     const auto* inst = b.Add(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kAdd);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kAdd);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -294,15 +293,15 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
     const auto* inst = b.Subtract(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kSubtract);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kSubtract);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -314,15 +313,15 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
     const auto* inst = b.Multiply(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kMultiply);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kMultiply);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -334,15 +333,15 @@ TEST_F(IR_InstructionTest, CreateDivide) {
     const auto* inst = b.Divide(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kDivide);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kDivide);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -354,15 +353,15 @@ TEST_F(IR_InstructionTest, CreateModulo) {
     const auto* inst = b.Modulo(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->kind, Binary::Kind::kModulo);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kModulo);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->value;
+    auto lhs = inst->LHS()->As<Constant>()->Value();
     ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 
     ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->value;
+    auto rhs = inst->RHS()->As<Constant>()->Value();
     ASSERT_TRUE(rhs->Is<constant::Scalar<i32>>());
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
@@ -372,7 +371,7 @@ TEST_F(IR_InstructionTest, Binary_Usage) {
     Builder b{mod};
     const auto* inst = b.And(b.ir.types.Get<type::I32>(), b.Constant(4_i), b.Constant(2_i));
 
-    EXPECT_EQ(inst->kind, Binary::Kind::kAnd);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
 
     ASSERT_NE(inst->LHS(), nullptr);
     ASSERT_EQ(inst->LHS()->Usage().Length(), 1u);
@@ -389,7 +388,7 @@ TEST_F(IR_InstructionTest, Binary_Usage_DuplicateValue) {
     auto val = b.Constant(4_i);
     const auto* inst = b.And(b.ir.types.Get<type::I32>(), val, val);
 
-    EXPECT_EQ(inst->kind, Binary::Kind::kAnd);
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
     ASSERT_EQ(inst->LHS(), inst->RHS());
 
     ASSERT_NE(inst->LHS(), nullptr);

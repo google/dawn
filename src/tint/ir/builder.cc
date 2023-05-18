@@ -32,7 +32,7 @@ ir::Block* Builder::CreateRootBlockIfNeeded() {
 
         // Everything in the module scope must have been const-eval's, so everything will go into a
         // single block. So, we can create the root terminator for the root-block now.
-        ir.root_block->branch.target = CreateRootTerminator();
+        ir.root_block->BranchTo(CreateRootTerminator());
     }
     return ir.root_block;
 }
@@ -56,11 +56,11 @@ Function* Builder::CreateFunction(Symbol name,
     TINT_ASSERT(IR, return_type);
 
     auto* ir_func = ir.flow_nodes.Create<Function>(name, return_type, stage, wg_size);
-    ir_func->start_target = CreateBlock();
-    ir_func->end_target = CreateFunctionTerminator();
+    ir_func->SetStartTarget(CreateBlock());
+    ir_func->SetEndTarget(CreateFunctionTerminator());
 
-    // Function is always branching into the start target
-    ir_func->start_target->inbound_branches.Push(ir_func);
+    // Function is always branching into the Start().target
+    ir_func->StartTarget()->AddInboundBranch(ir_func);
 
     return ir_func;
 }
@@ -69,53 +69,48 @@ If* Builder::CreateIf(Value* condition) {
     TINT_ASSERT(IR, condition);
 
     auto* ir_if = ir.flow_nodes.Create<If>(condition);
-    ir_if->true_.target = CreateBlock();
-    ir_if->false_.target = CreateBlock();
-    ir_if->merge.target = CreateBlock();
+    ir_if->True().target = CreateBlock();
+    ir_if->False().target = CreateBlock();
+    ir_if->Merge().target = CreateBlock();
 
     // An if always branches to both the true and false block.
-    ir_if->true_.target->inbound_branches.Push(ir_if);
-    ir_if->false_.target->inbound_branches.Push(ir_if);
+    ir_if->True().target->AddInboundBranch(ir_if);
+    ir_if->False().target->AddInboundBranch(ir_if);
 
     return ir_if;
 }
 
 Loop* Builder::CreateLoop() {
     auto* ir_loop = ir.flow_nodes.Create<Loop>();
-    ir_loop->start.target = CreateBlock();
-    ir_loop->continuing.target = CreateBlock();
-    ir_loop->merge.target = CreateBlock();
+    ir_loop->Start().target = CreateBlock();
+    ir_loop->Continuing().target = CreateBlock();
+    ir_loop->Merge().target = CreateBlock();
 
     // A loop always branches to the start block.
-    ir_loop->start.target->inbound_branches.Push(ir_loop);
+    ir_loop->Start().target->AddInboundBranch(ir_loop);
 
     return ir_loop;
 }
 
 Switch* Builder::CreateSwitch(Value* condition) {
     auto* ir_switch = ir.flow_nodes.Create<Switch>(condition);
-    ir_switch->merge.target = CreateBlock();
+    ir_switch->Merge().target = CreateBlock();
     return ir_switch;
 }
 
 Block* Builder::CreateCase(Switch* s, utils::VectorRef<Switch::CaseSelector> selectors) {
-    s->cases.Push(Switch::Case{selectors, {CreateBlock(), utils::Empty}});
+    s->Cases().Push(Switch::Case{selectors, {CreateBlock(), utils::Empty}});
 
-    Block* b = s->cases.Back().start.target->As<Block>();
+    Block* b = s->Cases().Back().Start().target->As<Block>();
     // Switch branches into the case block
-    b->inbound_branches.Push(s);
+    b->AddInboundBranch(s);
     return b;
 }
 
-void Builder::Branch(Block* from, FlowNode* to, utils::VectorRef<Value*> args) {
-    TINT_ASSERT(IR, from);
-    TINT_ASSERT(IR, to);
-    from->branch.target = to;
-    from->branch.args = args;
-    to->inbound_branches.Push(from);
-}
-
-Binary* Builder::CreateBinary(Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs) {
+Binary* Builder::CreateBinary(enum Binary::Kind kind,
+                              const type::Type* type,
+                              Value* lhs,
+                              Value* rhs) {
     return ir.values.Create<ir::Binary>(kind, type, lhs, rhs);
 }
 
@@ -183,7 +178,7 @@ Binary* Builder::Modulo(const type::Type* type, Value* lhs, Value* rhs) {
     return CreateBinary(Binary::Kind::kModulo, type, lhs, rhs);
 }
 
-Unary* Builder::CreateUnary(Unary::Kind kind, const type::Type* type, Value* val) {
+Unary* Builder::CreateUnary(enum Unary::Kind kind, const type::Type* type, Value* val) {
     return ir.values.Create<ir::Unary>(kind, type, val);
 }
 

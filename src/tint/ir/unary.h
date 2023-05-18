@@ -33,7 +33,7 @@ class Unary : public utils::Castable<Unary, Instruction> {
     /// @param kind the kind of unary instruction
     /// @param result_type the result type
     /// @param val the input value for the instruction
-    Unary(Kind kind, const type::Type* result_type, Value* val);
+    Unary(enum Kind kind, const type::Type* result_type, Value* val);
     Unary(const Unary& inst) = delete;
     Unary(Unary&& inst) = delete;
     ~Unary() override;
@@ -42,19 +42,18 @@ class Unary : public utils::Castable<Unary, Instruction> {
     Unary& operator=(Unary&& inst) = delete;
 
     /// @returns the type of the value
-    const type::Type* Type() const override { return result_type; }
+    const type::Type* Type() const override { return result_type_; }
 
     /// @returns the value for the instruction
     const Value* Val() const { return val_; }
 
-    /// the kind of unary instruction
-    Kind kind = Kind::kNegation;
-
-    /// the result type of the instruction
-    const type::Type* result_type = nullptr;
+    /// @returns the kind of unary instruction
+    enum Kind Kind() const { return kind_; }
 
   private:
-    Value* val_ = nullptr;
+    enum Kind kind_;
+    const type::Type* result_type_;
+    Value* val_;
 };
 
 }  // namespace tint::ir

@@ -25,17 +25,19 @@
 namespace tint::ir {
 namespace {
 
-Value* GlobalVarInitializer(const Module& m) {
-    if (m.root_block->instructions.Length() == 0u) {
+const Value* GlobalVarInitializer(const Module& m) {
+    const auto instr = m.root_block->Instructions();
+
+    if (instr.Length() == 0u) {
         ADD_FAILURE() << "m.root_block has no instruction";
         return nullptr;
     }
-    auto* var = m.root_block->instructions[0]->As<ir::Var>();
+    auto* var = instr[0]->As<ir::Var>();
     if (!var) {
         ADD_FAILURE() << "m.root_block.instructions[0] was not a var";
         return nullptr;
     }
-    return var->initializer;
+    return var->Initializer();
 }
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -51,7 +53,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_True) {
 
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->value;
+    auto* val = init->As<Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<bool>>());
     EXPECT_TRUE(val->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
@@ -65,7 +67,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_False) {
 
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->value;
+    auto* val = init->As<Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<bool>>());
     EXPECT_FALSE(val->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
@@ -79,18 +81,19 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* var_a = m.Get().root_block->instructions[0]->As<ir::Var>();
+    auto instr = m.Get().root_block->Instructions();
+    auto* var_a = instr[0]->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = m.Get().root_block->instructions[1]->As<ir::Var>();
+    auto* var_b = instr[1]->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = m.Get().root_block->instructions[2]->As<ir::Var>();
+    auto* var_c = instr[2]->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
-    auto* var_d = m.Get().root_block->instructions[3]->As<ir::Var>();
+    auto* var_d = instr[3]->As<ir::Var>();
     ASSERT_NE(var_d, nullptr);
 
-    ASSERT_EQ(var_a->initializer, var_c->initializer);
-    ASSERT_EQ(var_b->initializer, var_d->initializer);
-    ASSERT_NE(var_a->initializer, var_b->initializer);
+    ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
+    ASSERT_EQ(var_b->Initializer(), var_d->Initializer());
+    ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
@@ -102,7 +105,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F32) {
 
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->value;
+    auto* val = init->As<Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<f32>>());
     EXPECT_EQ(1.2_f, val->As<constant::Scalar<f32>>()->ValueAs<f32>());
 }
@@ -115,15 +118,16 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F32_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* var_a = m.Get().root_block->instructions[0]->As<ir::Var>();
+    auto instr = m.Get().root_block->Instructions();
+    auto* var_a = instr[0]->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = m.Get().root_block->instructions[1]->As<ir::Var>();
+    auto* var_b = instr[1]->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = m.Get().root_block->instructions[2]->As<ir::Var>();
+    auto* var_c = instr[2]->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
-    ASSERT_EQ(var_a->initializer, var_c->initializer);
-    ASSERT_NE(var_a->initializer, var_b->initializer);
+    ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
+    ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
@@ -136,7 +140,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F16) {
 
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->value;
+    auto* val = init->As<Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<f16>>());
     EXPECT_EQ(1.2_h, val->As<constant::Scalar<f16>>()->ValueAs<f32>());
 }
@@ -150,15 +154,16 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F16_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* var_a = m.Get().root_block->instructions[0]->As<ir::Var>();
+    auto instr = m.Get().root_block->Instructions();
+    auto* var_a = instr[0]->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = m.Get().root_block->instructions[1]->As<ir::Var>();
+    auto* var_b = instr[1]->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = m.Get().root_block->instructions[2]->As<ir::Var>();
+    auto* var_c = instr[2]->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
-    ASSERT_EQ(var_a->initializer, var_c->initializer);
-    ASSERT_NE(var_a->initializer, var_b->initializer);
+    ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
+    ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_I32) {
@@ -170,7 +175,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_I32) {
 
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->value;
+    auto* val = init->As<Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<i32>>());
     EXPECT_EQ(-2_i, val->As<constant::Scalar<i32>>()->ValueAs<f32>());
 }
@@ -183,15 +188,16 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_I32_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* var_a = m.Get().root_block->instructions[0]->As<ir::Var>();
+    auto instr = m.Get().root_block->Instructions();
+    auto* var_a = instr[0]->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = m.Get().root_block->instructions[1]->As<ir::Var>();
+    auto* var_b = instr[1]->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = m.Get().root_block->instructions[2]->As<ir::Var>();
+    auto* var_c = instr[2]->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
-    ASSERT_EQ(var_a->initializer, var_c->initializer);
-    ASSERT_NE(var_a->initializer, var_b->initializer);
+    ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
+    ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
 TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
@@ -203,7 +209,7 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_U32) {
 
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->value;
+    auto* val = init->As<Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<u32>>());
     EXPECT_EQ(2_u, val->As<constant::Scalar<u32>>()->ValueAs<f32>());
 }
@@ -216,15 +222,16 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_U32_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto* var_a = m.Get().root_block->instructions[0]->As<ir::Var>();
+    auto instr = m.Get().root_block->Instructions();
+    auto* var_a = instr[0]->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = m.Get().root_block->instructions[1]->As<ir::Var>();
+    auto* var_b = instr[1]->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = m.Get().root_block->instructions[2]->As<ir::Var>();
+    auto* var_c = instr[2]->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
-    ASSERT_EQ(var_a->initializer, var_c->initializer);
-    ASSERT_NE(var_a->initializer, var_b->initializer);
+    ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
+    ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
 }  // namespace

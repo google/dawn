@@ -36,13 +36,17 @@ class Var : public utils::Castable<Var, Instruction> {
     Var& operator=(Var&& inst) = delete;
 
     /// @returns the type of the var
-    const type::Type* Type() const override { return type; }
+    const type::Type* Type() const override { return type_; }
 
-    /// the result type of the instruction
-    const type::Type* type = nullptr;
+    /// Sets the var initializer
+    /// @param initializer the initializer
+    void SetInitializer(Value* initializer);
+    /// @returns the initializer
+    const Value* Initializer() const { return initializer_; }
 
-    /// The optional initializer
-    Value* initializer = nullptr;
+  private:
+    const type::Type* type_;
+    Value* initializer_ = nullptr;
 };
 
 }  // namespace tint::ir

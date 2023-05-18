@@ -34,10 +34,11 @@ class FunctionParam : public utils::Castable<FunctionParam, Value> {
     FunctionParam& operator=(FunctionParam&& inst) = delete;
 
     /// @returns the type of the var
-    const type::Type* Type() const override { return type; }
+    const type::Type* Type() const override { return type_; }
 
+  private:
     /// The type of the parameter
-    const type::Type* type;
+    const type::Type* type_;
 };
 
 }  // namespace tint::ir

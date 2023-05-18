@@ -22,4 +22,13 @@ Block::Block() : Base() {}
 
 Block::~Block() = default;
 
+void Block::BranchTo(FlowNode* to, utils::VectorRef<Value*> args) {
+    TINT_ASSERT(IR, to);
+    branch_.target = to;
+    branch_.args = args;
+    if (to) {
+        to->AddInboundBranch(this);
+    }
+}
+
 }  // namespace tint::ir

@@ -110,7 +110,7 @@ bool GeneratorImplIr::Generate() {
 }
 
 uint32_t GeneratorImplIr::Constant(const ir::Constant* constant) {
-    return Constant(constant->value);
+    return Constant(constant->Value());
 }
 
 uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {
@@ -214,15 +214,15 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     auto id = module_.NextId();
 
     // Emit the function name.
-    module_.PushDebug(spv::Op::OpName, {id, Operand(func->name.Name())});
+    module_.PushDebug(spv::Op::OpName, {id, Operand(func->Name().Name())});
 
     // Emit OpEntryPoint and OpExecutionMode declarations if needed.
-    if (func->pipeline_stage != ir::Function::PipelineStage::kUndefined) {
+    if (func->Stage() != ir::Function::PipelineStage::kUndefined) {
         EmitEntryPoint(func, id);
     }
 
     // Get the ID for the return type.
-    auto return_type_id = Type(func->return_type);
+    auto return_type_id = Type(func->ReturnType());
 
     // Get the ID for the function type (creating it if needed).
     // TODO(jrprice): Add the parameter types when they are supported in the IR.
@@ -248,7 +248,7 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     TINT_DEFER(current_function_ = Function());
 
     // Emit the body of the function.
-    EmitBlock(func->start_target);
+    EmitBlock(func->StartTarget());
 
     // Add the function to the module.
     module_.PushFunction(current_function_);
@@ -256,13 +256,13 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
 
 void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
     SpvExecutionModel stage = SpvExecutionModelMax;
-    switch (func->pipeline_stage) {
+    switch (func->Stage()) {
         case ir::Function::PipelineStage::kCompute: {
             stage = SpvExecutionModelGLCompute;
             module_.PushExecutionMode(
                 spv::Op::OpExecutionMode,
-                {id, U32Operand(SpvExecutionModeLocalSize), func->workgroup_size->at(0),
-                 func->workgroup_size->at(1), func->workgroup_size->at(2)});
+                {id, U32Operand(SpvExecutionModeLocalSize), func->WorkgroupSize()->at(0),
+                 func->WorkgroupSize()->at(1), func->WorkgroupSize()->at(2)});
             break;
         }
         case ir::Function::PipelineStage::kFragment: {
@@ -282,7 +282,7 @@ void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
     }
 
     // TODO(jrprice): Add the interface list of all referenced global variables.
-    module_.PushEntryPoint(spv::Op::OpEntryPoint, {U32Operand(stage), id, func->name.Name()});
+    module_.PushEntryPoint(spv::Op::OpEntryPoint, {U32Operand(stage), id, func->Name().Name()});
 }
 
 void GeneratorImplIr::EmitBlock(const ir::Block* block) {
@@ -293,7 +293,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
     }
 
     // Emit the instructions.
-    for (auto* inst : block->instructions) {
+    for (const auto* inst : block->Instructions()) {
         auto result = Switch(
             inst,  //
             [&](const ir::Binary* b) { return EmitBinary(b); },
@@ -313,43 +313,43 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
 
     // Handle the branch at the end of the block.
     Switch(
-        block->branch.target,
+        block->Branch().target,
         [&](const ir::Block* b) { current_function_.push_inst(spv::Op::OpBranch, {Label(b)}); },
         [&](const ir::If* i) { EmitIf(i); },
         [&](const ir::FunctionTerminator*) {
             // TODO(jrprice): Handle the return value, which will be a branch argument.
-            if (!block->branch.args.IsEmpty()) {
+            if (!block->Branch().args.IsEmpty()) {
                 TINT_ICE(Writer, diagnostics_) << "unimplemented return value";
             }
             current_function_.push_inst(spv::Op::OpReturn, {});
         },
         [&](Default) {
-            if (!block->branch.target) {
+            if (!block->Branch().target) {
                 // A block may not have an outward branch (e.g. an unreachable merge block).
                 current_function_.push_inst(spv::Op::OpUnreachable, {});
             } else {
                 TINT_ICE(Writer, diagnostics_)
-                    << "unimplemented branch target: " << block->branch.target->TypeInfo().name;
+                    << "unimplemented branch target: " << block->Branch().target->TypeInfo().name;
             }
         });
 }
 
 void GeneratorImplIr::EmitIf(const ir::If* i) {
-    auto* merge_block = i->merge.target->As<ir::Block>();
-    auto* true_block = i->true_.target->As<ir::Block>();
-    auto* false_block = i->false_.target->As<ir::Block>();
+    auto* merge_block = i->Merge().target->As<ir::Block>();
+    auto* true_block = i->True().target->As<ir::Block>();
+    auto* false_block = i->False().target->As<ir::Block>();
 
     // Generate labels for the blocks. We emit the true or false block if it:
     // 1. contains instructions, or
-    // 2. branches somewhere other then the merge target.
+    // 2. branches somewhere other then the Merge().target.
     // Otherwise we skip them and branch straight to the merge block.
     uint32_t merge_label = Label(merge_block);
     uint32_t true_label = merge_label;
     uint32_t false_label = merge_label;
-    if (!true_block->instructions.IsEmpty() || true_block->branch.target != merge_block) {
+    if (!true_block->Instructions().IsEmpty() || true_block->Branch().target != merge_block) {
         true_label = Label(true_block);
     }
-    if (!false_block->instructions.IsEmpty() || false_block->branch.target != merge_block) {
+    if (!false_block->Instructions().IsEmpty() || false_block->Branch().target != merge_block) {
         false_label = Label(false_block);
     }
 
@@ -357,7 +357,7 @@ void GeneratorImplIr::EmitIf(const ir::If* i) {
     current_function_.push_inst(spv::Op::OpSelectionMerge,
                                 {merge_label, U32Operand(SpvSelectionControlMaskNone)});
     current_function_.push_inst(spv::Op::OpBranchConditional,
-                                {Value(i->condition), true_label, false_label});
+                                {Value(i->Condition()), true_label, false_label});
 
     // Emit the `true` and `false` blocks, if they're not being skipped.
     if (true_label != merge_label) {
@@ -376,7 +376,7 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
 
     // Determine the opcode.
     spv::Op op = spv::Op::Max;
-    switch (binary->kind) {
+    switch (binary->Kind()) {
         case ir::Binary::Kind::kAdd: {
             op = binary->Type()->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
             break;
@@ -387,7 +387,7 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
         }
         default: {
             TINT_ICE(Writer, diagnostics_)
-                << "unimplemented binary instruction: " << static_cast<uint32_t>(binary->kind);
+                << "unimplemented binary instruction: " << static_cast<uint32_t>(binary->Kind());
         }
     }
 
@@ -400,12 +400,12 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
 
 uint32_t GeneratorImplIr::EmitLoad(const ir::Load* load) {
     auto id = module_.NextId();
-    current_function_.push_inst(spv::Op::OpLoad, {Type(load->Type()), id, Value(load->from)});
+    current_function_.push_inst(spv::Op::OpLoad, {Type(load->Type()), id, Value(load->From())});
     return id;
 }
 
 void GeneratorImplIr::EmitStore(const ir::Store* store) {
-    current_function_.push_inst(spv::Op::OpStore, {Value(store->to), Value(store->from)});
+    current_function_.push_inst(spv::Op::OpStore, {Value(store->To()), Value(store->From())});
 }
 
 uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
@@ -417,8 +417,8 @@ uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
     if (ptr->AddressSpace() == builtin::AddressSpace::kFunction) {
         TINT_ASSERT(Writer, current_function_);
         current_function_.push_var({ty, id, U32Operand(SpvStorageClassFunction)});
-        if (var->initializer) {
-            current_function_.push_inst(spv::Op::OpStore, {id, Value(var->initializer)});
+        if (var->Initializer()) {
+            current_function_.push_inst(spv::Op::OpStore, {id, Value(var->Initializer())});
         }
     } else {
         TINT_ICE(Writer, diagnostics_)

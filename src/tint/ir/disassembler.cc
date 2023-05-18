@@ -81,7 +81,7 @@ utils::StringStream& Disassembler::Indent() {
 }
 
 void Disassembler::EmitBlockInstructions(const Block* b) {
-    for (const auto* inst : b->instructions) {
+    for (const auto* inst : b->Instructions()) {
         Indent();
         EmitInstruction(inst);
         out_ << std::endl;
@@ -114,31 +114,31 @@ void Disassembler::Walk(const FlowNode* node) {
         [&](const ir::Function* f) {
             TINT_SCOPED_ASSIGNMENT(in_function_, true);
 
-            Indent() << "%fn" << IdOf(f) << " = func " << f->name.Name() << "(";
-            for (auto* p : f->params) {
-                if (p != f->params.Front()) {
+            Indent() << "%fn" << IdOf(f) << " = func " << f->Name().Name() << "(";
+            for (auto* p : f->Params()) {
+                if (p != f->Params().Front()) {
                     out_ << ", ";
                 }
-                out_ << "%" << IdOf(p) << ":" << p->type->FriendlyName();
+                out_ << "%" << IdOf(p) << ":" << p->Type()->FriendlyName();
             }
-            out_ << "):" << f->return_type->FriendlyName();
+            out_ << "):" << f->ReturnType()->FriendlyName();
 
-            if (f->pipeline_stage != Function::PipelineStage::kUndefined) {
-                out_ << " [@" << f->pipeline_stage;
+            if (f->Stage() != Function::PipelineStage::kUndefined) {
+                out_ << " [@" << f->Stage();
 
-                if (f->workgroup_size) {
-                    auto arr = f->workgroup_size.value();
+                if (f->WorkgroupSize()) {
+                    auto arr = f->WorkgroupSize().value();
                     out_ << " @workgroup_size(" << arr[0] << ", " << arr[1] << ", " << arr[2]
                          << ")";
                 }
 
-                if (!f->return_attributes.IsEmpty()) {
+                if (!f->ReturnAttributes().IsEmpty()) {
                     out_ << " ra:";
 
-                    for (auto attr : f->return_attributes) {
+                    for (auto attr : f->ReturnAttributes()) {
                         out_ << " @" << attr;
                         if (attr == Function::ReturnAttribute::kLocation) {
-                            out_ << "(" << f->return_location.value() << ")";
+                            out_ << "(" << f->ReturnLocation().value() << ")";
                         }
                     }
                 }
@@ -149,23 +149,23 @@ void Disassembler::Walk(const FlowNode* node) {
 
             {
                 ScopedIndent func_indent(indent_size_);
-                ScopedStopNode scope(stop_nodes_, f->end_target);
-                Walk(f->start_target);
+                ScopedStopNode scope(stop_nodes_, f->EndTarget());
+                Walk(f->StartTarget());
             }
             out_ << "} ";
-            Walk(f->end_target);
+            Walk(f->EndTarget());
         },
         [&](const ir::Block* b) {
             // If this block is dead, nothing to do
-            if (b->IsDead()) {
+            if (!b->HasBranchTarget()) {
                 return;
             }
 
             Indent() << "%fn" << IdOf(b) << " = block";
-            if (!b->params.IsEmpty()) {
+            if (!b->Params().IsEmpty()) {
                 out_ << " (";
-                for (auto* p : b->params) {
-                    if (p != b->params.Front()) {
+                for (const auto* p : b->Params()) {
+                    if (p != b->Params().Front()) {
                         out_ << ", ";
                     }
                     EmitValue(p);
@@ -181,20 +181,20 @@ void Disassembler::Walk(const FlowNode* node) {
             Indent() << "}";
 
             std::string suffix = "";
-            if (b->branch.target->Is<FunctionTerminator>()) {
+            if (b->Branch().target->Is<FunctionTerminator>()) {
                 out_ << " -> %func_end";
                 suffix = "return";
-            } else if (b->branch.target->Is<RootTerminator>()) {
+            } else if (b->Branch().target->Is<RootTerminator>()) {
                 // Nothing to do
             } else {
                 out_ << " -> "
-                     << "%fn" << IdOf(b->branch.target);
+                     << "%fn" << IdOf(b->Branch().target);
                 suffix = "branch";
             }
-            if (!b->branch.args.IsEmpty()) {
+            if (!b->Branch().args.IsEmpty()) {
                 out_ << " ";
-                for (const auto* v : b->branch.args) {
-                    if (v != b->branch.args.Front()) {
+                for (const auto* v : b->Branch().args) {
+                    if (v != b->Branch().args.Front()) {
                         out_ << ", ";
                     }
                     EmitValue(v);
@@ -205,18 +205,18 @@ void Disassembler::Walk(const FlowNode* node) {
             }
             out_ << std::endl;
 
-            if (!b->branch.target->Is<FunctionTerminator>()) {
+            if (!b->Branch().target->Is<FunctionTerminator>()) {
                 out_ << std::endl;
             }
 
-            Walk(b->branch.target);
+            Walk(b->Branch().target);
         },
         [&](const ir::Switch* s) {
             Indent() << "%fn" << IdOf(s) << " = switch ";
-            EmitValue(s->condition);
+            EmitValue(s->Condition());
             out_ << " [";
-            for (const auto& c : s->cases) {
-                if (&c != &s->cases.Front()) {
+            for (const auto& c : s->Cases()) {
+                if (&c != &s->Cases().Front()) {
                     out_ << ", ";
                 }
                 out_ << "c: (";
@@ -231,17 +231,17 @@ void Disassembler::Walk(const FlowNode* node) {
                         EmitValue(selector.val);
                     }
                 }
-                out_ << ", %fn" << IdOf(c.start.target) << ")";
+                out_ << ", %fn" << IdOf(c.Start().target) << ")";
             }
-            if (s->merge.target->IsConnected()) {
-                out_ << ", m: %fn" << IdOf(s->merge.target);
+            if (s->Merge().target->IsConnected()) {
+                out_ << ", m: %fn" << IdOf(s->Merge().target);
             }
             out_ << "]" << std::endl;
 
             {
                 ScopedIndent switch_indent(indent_size_);
-                ScopedStopNode scope(stop_nodes_, s->merge.target);
-                for (const auto& c : s->cases) {
+                ScopedStopNode scope(stop_nodes_, s->Merge().target);
+                for (const auto& c : s->Cases()) {
                     Indent() << "# case ";
                     for (const auto& selector : c.selectors) {
                         if (&selector != &c.selectors.Front()) {
@@ -255,86 +255,86 @@ void Disassembler::Walk(const FlowNode* node) {
                         }
                     }
                     out_ << std::endl;
-                    Walk(c.start.target);
+                    Walk(c.Start().target);
                 }
             }
 
-            if (s->merge.target->IsConnected()) {
+            if (s->Merge().target->IsConnected()) {
                 Indent() << "# switch merge" << std::endl;
-                Walk(s->merge.target);
+                Walk(s->Merge().target);
             }
         },
         [&](const ir::If* i) {
             Indent() << "%fn" << IdOf(i) << " = if ";
-            EmitValue(i->condition);
+            EmitValue(i->Condition());
 
-            bool has_true = !i->true_.target->IsDead();
-            bool has_false = !i->false_.target->IsDead();
+            bool has_true = i->True().target->HasBranchTarget();
+            bool has_false = i->False().target->HasBranchTarget();
 
             out_ << " [";
             if (has_true) {
-                out_ << "t: %fn" << IdOf(i->true_.target);
+                out_ << "t: %fn" << IdOf(i->True().target);
             }
             if (has_false) {
                 if (has_true) {
                     out_ << ", ";
                 }
-                out_ << "f: %fn" << IdOf(i->false_.target);
+                out_ << "f: %fn" << IdOf(i->False().target);
             }
-            if (i->merge.target->IsConnected()) {
-                out_ << ", m: %fn" << IdOf(i->merge.target);
+            if (i->Merge().target->IsConnected()) {
+                out_ << ", m: %fn" << IdOf(i->Merge().target);
             }
             out_ << "]" << std::endl;
 
             {
                 ScopedIndent if_indent(indent_size_);
-                ScopedStopNode scope(stop_nodes_, i->merge.target);
+                ScopedStopNode scope(stop_nodes_, i->Merge().target);
 
                 if (has_true) {
                     Indent() << "# true branch" << std::endl;
-                    Walk(i->true_.target);
+                    Walk(i->True().target);
                 }
 
                 if (has_false) {
                     Indent() << "# false branch" << std::endl;
-                    Walk(i->false_.target);
+                    Walk(i->False().target);
                 }
             }
 
-            if (i->merge.target->IsConnected()) {
+            if (i->Merge().target->IsConnected()) {
                 Indent() << "# if merge" << std::endl;
-                Walk(i->merge.target);
+                Walk(i->Merge().target);
             }
         },
         [&](const ir::Loop* l) {
-            Indent() << "%fn" << IdOf(l) << " = loop [s: %fn" << IdOf(l->start.target);
+            Indent() << "%fn" << IdOf(l) << " = loop [s: %fn" << IdOf(l->Start().target);
 
-            if (l->continuing.target->IsConnected()) {
-                out_ << ", c: %fn" << IdOf(l->continuing.target);
+            if (l->Continuing().target->IsConnected()) {
+                out_ << ", c: %fn" << IdOf(l->Continuing().target);
             }
-            if (l->merge.target->IsConnected()) {
-                out_ << ", m: %fn" << IdOf(l->merge.target);
+            if (l->Merge().target->IsConnected()) {
+                out_ << ", m: %fn" << IdOf(l->Merge().target);
             }
             out_ << "]" << std::endl;
 
             {
-                ScopedStopNode loop_scope(stop_nodes_, l->merge.target);
+                ScopedStopNode loop_scope(stop_nodes_, l->Merge().target);
                 ScopedIndent loop_indent(indent_size_);
                 {
-                    ScopedStopNode inner_scope(stop_nodes_, l->continuing.target);
+                    ScopedStopNode inner_scope(stop_nodes_, l->Continuing().target);
                     Indent() << "# loop start" << std::endl;
-                    Walk(l->start.target);
+                    Walk(l->Start().target);
                 }
 
-                if (l->continuing.target->IsConnected()) {
+                if (l->Continuing().target->IsConnected()) {
                     Indent() << "# loop continuing" << std::endl;
-                    Walk(l->continuing.target);
+                    Walk(l->Continuing().target);
                 }
             }
 
-            if (l->merge.target->IsConnected()) {
+            if (l->Merge().target->IsConnected()) {
                 Indent() << "# loop merge" << std::endl;
-                Walk(l->merge.target);
+                Walk(l->Merge().target);
             }
         },
         [&](const ir::FunctionTerminator*) {
@@ -407,7 +407,7 @@ void Disassembler::EmitValue(const Value* val) {
                         }
                     });
             };
-            emit(constant->value);
+            emit(constant->Value());
         },
         [&](const ir::Instruction* i) { out_ << "%" << IdOf(i); },
         [&](const ir::BlockParam* p) {
@@ -445,18 +445,18 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
         [&](const ir::Load* l) {
             EmitValueWithType(l);
             out_ << " = load ";
-            EmitValue(l->from);
+            EmitValue(l->From());
         },
         [&](const ir::Store* s) {
             out_ << "store ";
-            EmitValue(s->to);
+            EmitValue(s->To());
             out_ << ", ";
-            EmitValue(s->from);
+            EmitValue(s->From());
         },
         [&](const ir::UserCall* uc) {
             EmitValueWithType(uc);
-            out_ << " = call " << uc->name.Name();
-            if (uc->args.Length() > 0) {
+            out_ << " = call " << uc->Name().Name();
+            if (!uc->Args().IsEmpty()) {
                 out_ << ", ";
             }
             EmitArgs(uc);
@@ -464,16 +464,16 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
         [&](const ir::Var* v) {
             EmitValueWithType(v);
             out_ << " = var";
-            if (v->initializer) {
+            if (v->Initializer()) {
                 out_ << ", ";
-                EmitValue(v->initializer);
+                EmitValue(v->Initializer());
             }
         });
 }
 
 void Disassembler::EmitArgs(const Call* call) {
     bool first = true;
-    for (const auto* arg : call->args) {
+    for (const auto* arg : call->Args()) {
         if (!first) {
             out_ << ", ";
         }
@@ -485,7 +485,7 @@ void Disassembler::EmitArgs(const Call* call) {
 void Disassembler::EmitBinary(const Binary* b) {
     EmitValueWithType(b);
     out_ << " = ";
-    switch (b->kind) {
+    switch (b->Kind()) {
         case Binary::Kind::kAdd:
             out_ << "add";
             break;
@@ -544,7 +544,7 @@ void Disassembler::EmitBinary(const Binary* b) {
 void Disassembler::EmitUnary(const Unary* u) {
     EmitValueWithType(u);
     out_ << " = ";
-    switch (u->kind) {
+    switch (u->Kind()) {
         case Unary::Kind::kComplement:
             out_ << "complement";
             break;

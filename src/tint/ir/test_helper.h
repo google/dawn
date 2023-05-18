@@ -33,7 +33,6 @@ template <typename BASE>
 class TestHelperBase : public BASE, public ProgramBuilder {
   public:
     TestHelperBase() = default;
-
     ~TestHelperBase() override = default;
 
     /// Build the module, cleaning up the program before returning.

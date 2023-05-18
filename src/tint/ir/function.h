@@ -17,6 +17,7 @@
 
 #include <array>
 #include <optional>
+#include <utility>
 
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/function_param.h"
@@ -71,32 +72,81 @@ class Function : public utils::Castable<Function, FlowNode> {
              type::Type* rt,
              PipelineStage stage = PipelineStage::kUndefined,
              std::optional<std::array<uint32_t, 3>> wg_size = {});
+    Function(Function&&) = delete;
+    Function(const Function&) = delete;
     ~Function() override;
 
-    /// The function name
-    Symbol name;
+    Function& operator=(Function&&) = delete;
+    Function& operator=(const Function&) = delete;
 
-    /// The pipeline stage for the function, `kUndefined` if the function is not an entry point
-    PipelineStage pipeline_stage = PipelineStage::kUndefined;
+    /// @returns the function name
+    Symbol Name() const { return name_; }
 
-    /// If this is a `compute` entry point, holds the workgroup size information
-    std::optional<std::array<uint32_t, 3>> workgroup_size;
+    /// Sets the function stage
+    /// @param stage the stage to set
+    void SetStage(PipelineStage stage) { pipeline_stage_ = stage; }
 
-    /// The function return type
-    const type::Type* return_type = nullptr;
-    /// The function return attributes if any
-    utils::Vector<ReturnAttribute, 1> return_attributes;
-    /// If the return attribute is `kLocation` this stores the location value.
-    std::optional<uint32_t> return_location;
+    /// @returns the function pipeline stage
+    PipelineStage Stage() const { return pipeline_stage_; }
 
-    /// The parameters to the function
-    utils::Vector<FunctionParam*, 1> params;
+    /// Sets the workgroup size
+    /// @param x the x size
+    /// @param y the y size
+    /// @param z the z size
+    void SetWorkgroupSize(uint32_t x, uint32_t y, uint32_t z) { workgroup_size_ = {x, y, z}; }
 
-    /// The start target is the first block in a function.
-    Block* start_target = nullptr;
-    /// The end target is the end of the function. It is used as the branch target if a return is
-    /// encountered in the function.
-    FunctionTerminator* end_target = nullptr;
+    /// @returns the workgroup size information
+    std::optional<std::array<uint32_t, 3>> WorkgroupSize() const { return workgroup_size_; }
+
+    /// @returns the return type for the function
+    const type::Type* ReturnType() const { return return_type_; }
+
+    /// Sets the return attributes
+    /// @param attrs the attributes to set
+    void SetReturnAttributes(utils::VectorRef<ReturnAttribute> attrs) {
+        return_attributes_ = std::move(attrs);
+    }
+    /// @returns the return attributes
+    utils::VectorRef<ReturnAttribute> ReturnAttributes() const { return return_attributes_; }
+
+    /// Sets the return location
+    /// @param loc the location to set
+    void SetReturnLocation(std::optional<uint32_t> loc) { return_location_ = loc; }
+    /// @returns the return location
+    std::optional<uint32_t> ReturnLocation() const { return return_location_; }
+
+    /// Sets the function parameters
+    /// @param params the function paramters
+    void SetParams(utils::VectorRef<FunctionParam*> params) { params_ = std::move(params); }
+
+    /// @returns the function parameters
+    utils::VectorRef<FunctionParam*> Params() const { return params_; }
+
+    /// Sets the start target for the function
+    /// @param target the start target
+    void SetStartTarget(Block* target) { start_target_ = target; }
+    /// @returns the function start target
+    Block* StartTarget() const { return start_target_; }
+
+    /// Sets the end target for the function
+    /// @param target the end target
+    void SetEndTarget(FunctionTerminator* target) { end_target_ = target; }
+    /// @returns the function end target
+    FunctionTerminator* EndTarget() const { return end_target_; }
+
+  private:
+    Symbol name_;
+    const type::Type* return_type_;
+    PipelineStage pipeline_stage_;
+    std::optional<std::array<uint32_t, 3>> workgroup_size_;
+
+    utils::Vector<ReturnAttribute, 1> return_attributes_;
+    std::optional<uint32_t> return_location_;
+
+    utils::Vector<FunctionParam*, 1> params_;
+
+    Block* start_target_ = nullptr;
+    FunctionTerminator* end_target_ = nullptr;
 };
 
 utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value);

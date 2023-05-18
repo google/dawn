@@ -34,10 +34,15 @@ class Store : public utils::Castable<Store, Instruction> {
     Store& operator=(const Store& inst) = delete;
     Store& operator=(Store&& inst) = delete;
 
-    /// the value being stored to
-    Value* to = nullptr;
-    /// the value being stored
-    Value* from = nullptr;
+    /// @returns the value being stored too
+    Value* To() const { return to_; }
+
+    /// @returns the value being stored
+    Value* From() const { return from_; }
+
+  private:
+    Value* to_;
+    Value* from_;
 };
 
 }  // namespace tint::ir

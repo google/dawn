@@ -51,7 +51,7 @@ class Binary : public utils::Castable<Binary, Instruction> {
     /// @param type the result type
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    Binary(Kind kind, const type::Type* type, Value* lhs, Value* rhs);
+    Binary(enum Kind kind, const type::Type* type, Value* lhs, Value* rhs);
     Binary(const Binary& inst) = delete;
     Binary(Binary&& inst) = delete;
     ~Binary() override;
@@ -59,8 +59,11 @@ class Binary : public utils::Castable<Binary, Instruction> {
     Binary& operator=(const Binary& inst) = delete;
     Binary& operator=(Binary&& inst) = delete;
 
+    /// @returns the kind of the binary instruction
+    enum Kind Kind() const { return kind_; }
+
     /// @returns the type of the value
-    const type::Type* Type() const override { return result_type; }
+    const type::Type* Type() const override { return result_type_; }
 
     /// @returns the left-hand-side value for the instruction
     const Value* LHS() const { return lhs_; }
@@ -68,15 +71,11 @@ class Binary : public utils::Castable<Binary, Instruction> {
     /// @returns the right-hand-side value for the instruction
     const Value* RHS() const { return rhs_; }
 
-    /// the kind of binary instruction
-    Kind kind = Kind::kAdd;
-
-    /// the result type of the instruction
-    const type::Type* result_type = nullptr;
-
   private:
-    Value* lhs_ = nullptr;
-    Value* rhs_ = nullptr;
+    enum Kind kind_;
+    const type::Type* result_type_;
+    Value* lhs_;
+    Value* rhs_;
 };
 
 }  // namespace tint::ir

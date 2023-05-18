@@ -52,7 +52,7 @@ class IR_AddFunction final : public ir::transform::Transform {
         ir::Builder builder(*mod);
         auto* func =
             builder.CreateFunction(mod->symbols.New("ir_func"), mod->types.Get<type::Void>());
-        builder.Branch(func->start_target, func->end_target);
+        func->StartTarget()->BranchTo(func->EndTarget());
         mod->functions.Push(func);
     }
 };
@@ -70,7 +70,7 @@ ir::Module MakeIR() {
     ir::Builder builder(mod);
     auto* func =
         builder.CreateFunction(builder.ir.symbols.New("main"), builder.ir.types.Get<type::Void>());
-    builder.Branch(func->start_target, func->end_target);
+    func->StartTarget()->BranchTo(func->EndTarget());
     builder.ir.functions.Push(func);
     return mod;
 }
@@ -102,9 +102,10 @@ TEST_F(TransformManagerTest, IR_MutateInPlace) {
     manager.Add<IR_AddFunction>();
 
     manager.Run(&ir, {}, outputs);
+
     ASSERT_EQ(ir.functions.Length(), 2u);
-    EXPECT_EQ(ir.functions[0]->name.Name(), "main");
-    EXPECT_EQ(ir.functions[1]->name.Name(), "ir_func");
+    EXPECT_EQ(ir.functions[0]->Name().Name(), "main");
+    EXPECT_EQ(ir.functions[1]->Name().Name(), "ir_func");
 }
 
 TEST_F(TransformManagerTest, AST_MixedTransforms_AST_Before_IR) {
@@ -149,9 +150,9 @@ TEST_F(TransformManagerTest, IR_MixedTransforms_AST_Before_IR) {
 
     manager.Run(&ir, {}, outputs);
     ASSERT_EQ(ir.functions.Length(), 3u);
-    EXPECT_EQ(ir.functions[0]->name.Name(), "ast_func");
-    EXPECT_EQ(ir.functions[1]->name.Name(), "main");
-    EXPECT_EQ(ir.functions[2]->name.Name(), "ir_func");
+    EXPECT_EQ(ir.functions[0]->Name().Name(), "ast_func");
+    EXPECT_EQ(ir.functions[1]->Name().Name(), "main");
+    EXPECT_EQ(ir.functions[2]->Name().Name(), "ir_func");
 }
 
 TEST_F(TransformManagerTest, IR_MixedTransforms_IR_Before_AST) {
@@ -164,9 +165,9 @@ TEST_F(TransformManagerTest, IR_MixedTransforms_IR_Before_AST) {
 
     manager.Run(&ir, {}, outputs);
     ASSERT_EQ(ir.functions.Length(), 3u);
-    EXPECT_EQ(ir.functions[0]->name.Name(), "ast_func");
-    EXPECT_EQ(ir.functions[1]->name.Name(), "main");
-    EXPECT_EQ(ir.functions[2]->name.Name(), "ir_func");
+    EXPECT_EQ(ir.functions[0]->Name().Name(), "ast_func");
+    EXPECT_EQ(ir.functions[1]->Name().Name(), "main");
+    EXPECT_EQ(ir.functions[2]->Name().Name(), "ir_func");
 }
 #endif  // TINT_BUILD_IR
 
