@@ -297,6 +297,9 @@ class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTest
 };
 
 TEST_P(ReadOnlyStencilAttachmentTests, SampleFromAttachment) {
+    // TODO(dawn:1827): sampling from stencil attachment fails on D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     wgpu::Texture colorTexture =
         CreateTexture(wgpu::TextureFormat::RGBA8Unorm,
                       wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
@@ -345,13 +348,15 @@ TEST_P(ReadOnlyStencilAttachmentTests, NotSampleFromAttachment) {
 }
 
 DAWN_INSTANTIATE_TEST_P(ReadOnlyDepthAttachmentTests,
-                        {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
-                         MetalBackend(), VulkanBackend()},
+                        {D3D11Backend(), D3D12Backend(),
+                         D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
+                         VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kDepthFormats.begin(),
                                                          utils::kDepthFormats.end()));
 DAWN_INSTANTIATE_TEST_P(ReadOnlyStencilAttachmentTests,
-                        {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
-                         MetalBackend(), VulkanBackend()},
+                        {D3D11Backend(), D3D12Backend(),
+                         D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
+                         VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));
 

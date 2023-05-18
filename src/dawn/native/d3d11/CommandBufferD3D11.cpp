@@ -440,7 +440,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
         TextureView* depthStencilTextureView =
             ToBackend(renderPass->depthStencilAttachment.view.Get());
         DAWN_TRY_ASSIGN(d3d11DepthStencilView,
-                        depthStencilTextureView->CreateD3D11DepthStencilView(false, false));
+                        depthStencilTextureView->CreateD3D11DepthStencilView(
+                            attachmentInfo->depthReadOnly, attachmentInfo->stencilReadOnly));
         UINT clearFlags = 0;
         if (attachmentFormat.HasDepth() &&
             renderPass->depthStencilAttachment.depthLoadOp == wgpu::LoadOp::Clear) {
@@ -658,7 +659,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                     d3d11DeviceContext->ResolveSubresource(
                         resolveTexture->GetD3D11Resource(), dstSubresource,
                         colorTexture->GetD3D11Resource(), srcSubresource,
-                        resolveTexture->GetD3D11Format());
+                        d3d::DXGITextureFormat(attachment.resolveTarget->GetFormat().format));
                 }
 
                 return {};

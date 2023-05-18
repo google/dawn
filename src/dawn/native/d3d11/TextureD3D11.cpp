@@ -183,7 +183,11 @@ T Texture::GetD3D11TextureDesc() const {
     }
 
     desc.MipLevels = static_cast<UINT16>(GetNumMipLevels());
-    desc.Format = GetD3D11Format();
+    // To sample from a depth or stencil texture, we need to create a typeless texture.
+    bool needsTypelessFormat =
+        GetFormat().HasDepthOrStencil() && (GetUsage() & wgpu::TextureUsage::TextureBinding);
+    desc.Format = needsTypelessFormat ? d3d::DXGITypelessTextureFormat(GetFormat().format)
+                                      : d3d::DXGITextureFormat(GetFormat().format);
     desc.Usage = mIsStaging ? D3D11_USAGE_STAGING : D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11TextureBindFlags(GetInternalUsage(), GetFormat());
     constexpr UINT kCPUReadWriteFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
@@ -281,10 +285,6 @@ void Texture::DestroyImpl() {
     mD3d11Resource = nullptr;
 }
 
-DXGI_FORMAT Texture::GetD3D11Format() const {
-    return d3d::DXGITextureFormat(GetFormat().format);
-}
-
 ID3D11Resource* Texture::GetD3D11Resource() const {
     return mD3d11Resource.Get();
 }
@@ -333,7 +333,7 @@ D3D11_DEPTH_STENCIL_VIEW_DESC Texture::GetDSVDescriptor(const SubresourceRange& 
                                                         bool stencilReadOnly) const {
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 
-    dsvDesc.Format = GetD3D11Format();
+    dsvDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
     dsvDesc.Flags = 0;
     if (depthReadOnly && range.aspects & Aspect::Depth) {
         dsvDesc.Flags |= D3D11_DSV_READ_ONLY_DEPTH;
@@ -699,14 +699,10 @@ Ref<TextureView> TextureView::Create(TextureBase* texture,
 
 TextureView::~TextureView() = default;
 
-DXGI_FORMAT TextureView::GetD3D11Format() const {
-    return d3d::DXGITextureFormat(GetFormat().format);
-}
-
 ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderResourceView() const {
     Device* device = ToBackend(GetDevice());
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-    srvDesc.Format = GetD3D11Format();
+    srvDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
 
     const Format& textureFormat = GetTexture()->GetFormat();
     // TODO(dawn:1705): share below code with D3D12?
@@ -868,7 +864,7 @@ ResultOrError<ComPtr<ID3D11DepthStencilView>> TextureView::CreateD3D11DepthStenc
 ResultOrError<ComPtr<ID3D11UnorderedAccessView>> TextureView::CreateD3D11UnorderedAccessView()
     const {
     D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
-    uavDesc.Format = GetD3D11Format();
+    uavDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
 
     ASSERT(!GetTexture()->IsMultisampledTexture());
     switch (GetDimension()) {
