@@ -79,6 +79,57 @@ TEST_F(IR_BuilderImplTest, Func) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, Func_WithParam) {
+    Func("f", utils::Vector{Param("a", ty.u32())}, ty.u32(), utils::Vector{Return("a")});
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    ASSERT_EQ(1u, m->functions.Length());
+
+    auto* f = m->functions[0];
+    ASSERT_NE(f->start_target, nullptr);
+    ASSERT_NE(f->end_target, nullptr);
+
+    EXPECT_EQ(1u, f->start_target->inbound_branches.Length());
+    EXPECT_EQ(1u, f->end_target->inbound_branches.Length());
+
+    EXPECT_EQ(m->functions[0]->pipeline_stage, Function::PipelineStage::kUndefined);
+
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func f(%a:u32):u32 {
+  %fn2 = block {
+  } -> %func_end %a # return
+} %func_end
+
+)");
+}
+
+TEST_F(IR_BuilderImplTest, Func_WithMultipleParam) {
+    Func("f", utils::Vector{Param("a", ty.u32()), Param("b", ty.i32()), Param("c", ty.bool_())},
+         ty.void_(), utils::Empty);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    ASSERT_EQ(1u, m->functions.Length());
+
+    auto* f = m->functions[0];
+    ASSERT_NE(f->start_target, nullptr);
+    ASSERT_NE(f->end_target, nullptr);
+
+    EXPECT_EQ(1u, f->start_target->inbound_branches.Length());
+    EXPECT_EQ(1u, f->end_target->inbound_branches.Length());
+
+    EXPECT_EQ(m->functions[0]->pipeline_stage, Function::PipelineStage::kUndefined);
+
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func f(%a:u32, %b:i32, %c:bool):void {
+  %fn2 = block {
+  } -> %func_end # return
+} %func_end
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, EntryPoint) {
     Func("f", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});

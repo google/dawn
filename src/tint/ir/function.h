@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "src/tint/ir/flow_node.h"
+#include "src/tint/ir/function_param.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/type.h"
 
@@ -87,6 +88,9 @@ class Function : public utils::Castable<Function, FlowNode> {
     utils::Vector<ReturnAttribute, 1> return_attributes;
     /// If the return attribute is `kLocation` this stores the location value.
     std::optional<uint32_t> return_location;
+
+    /// The parameters to the function
+    utils::Vector<FunctionParam*, 1> params;
 
     /// The start target is the first block in a function.
     Block* start_target = nullptr;

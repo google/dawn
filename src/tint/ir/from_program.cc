@@ -335,13 +335,26 @@ class Impl {
         }
         ir_func->return_location = sem->ReturnLocation();
 
+        scopes_.Push();
+        TINT_DEFER(scopes_.Pop());
+
+        utils::Vector<FunctionParam*, 1> params;
+        for (auto* p : ast_func->params) {
+            const auto* param_sem = program_->Sem().Get(p);
+            auto* ty = param_sem->Type()->Clone(clone_ctx_.type_ctx);
+            auto* param = builder_.FunctionParam(ty);
+
+            scopes_.Set(p->name->symbol, param);
+            builder_.ir.SetName(param, p->name->symbol.NameView());
+            params.Push(param);
+        }
+        ir_func->params = std::move(params);
+
         {
             FlowStackScope scope(this, ir_func);
 
             current_flow_block_ = ir_func->start_target;
             EmitBlock(ast_func->body);
-
-            // TODO(dsinclair): Store parameters
 
             // If the branch target has already been set then a `return` was called. Only set in the
             // case where `return` wasn't called.

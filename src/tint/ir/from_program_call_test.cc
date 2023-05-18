@@ -77,14 +77,14 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():void {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func(%p:f32):void {
   %fn2 = block {
   } -> %func_end # return
 } %func_end
 
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
   %fn4 = block {
-    %1:void = call my_func, 6.0f
+    %2:void = call my_func, 6.0f
   } -> %func_end # return
 } %func_end
 

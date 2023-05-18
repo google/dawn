@@ -742,6 +742,8 @@ if(${TINT_BUILD_IR})
     ir/flow_node.h
     ir/function.cc
     ir/function.h
+    ir/function_param.cc
+    ir/function_param.h
     ir/function_terminator.cc
     ir/function_terminator.h
     ir/if.cc

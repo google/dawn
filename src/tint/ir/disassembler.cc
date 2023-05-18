@@ -114,8 +114,14 @@ void Disassembler::Walk(const FlowNode* node) {
         [&](const ir::Function* f) {
             TINT_SCOPED_ASSIGNMENT(in_function_, true);
 
-            Indent() << "%fn" << IdOf(f) << " = func " << f->name.Name()
-                     << "():" << f->return_type->FriendlyName();
+            Indent() << "%fn" << IdOf(f) << " = func " << f->name.Name() << "(";
+            for (auto* p : f->params) {
+                if (p != f->params.Front()) {
+                    out_ << ", ";
+                }
+                out_ << "%" << IdOf(p) << ":" << p->type->FriendlyName();
+            }
+            out_ << "):" << f->return_type->FriendlyName();
 
             if (f->pipeline_stage != Function::PipelineStage::kUndefined) {
                 out_ << " [@" << f->pipeline_stage;
@@ -407,6 +413,7 @@ void Disassembler::EmitValue(const Value* val) {
         [&](const ir::BlockParam* p) {
             out_ << "%" << IdOf(p) << ":" << p->Type()->FriendlyName();
         },
+        [&](const ir::FunctionParam* p) { out_ << "%" << IdOf(p); },
         [&](Default) { out_ << "Unknown value: " << val->TypeInfo().name; });
 }
 

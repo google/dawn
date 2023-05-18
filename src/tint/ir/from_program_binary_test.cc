@@ -830,7 +830,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound_WithConstEval) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():bool {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func(%p:bool):bool {
   %fn2 = block {
   } -> %func_end true # return
 } %func_end
