@@ -43,6 +43,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_RG11B10UfloatRenderable:
         case WGPUFeatureName_BGRA8UnormStorage:
         case WGPUFeatureName_TransientAttachments:
+        case WGPUFeatureName_Float32Filterable:
             return true;
     }
 

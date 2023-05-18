@@ -255,6 +255,24 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::BGRA8UnormStorage);
     }
 
+    // 32 bit float channel formats.
+    VkFormatProperties r32Properties;
+    VkFormatProperties rg32Properties;
+    VkFormatProperties rgba32Properties;
+    mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
+        mVkPhysicalDevice, VK_FORMAT_R32_SFLOAT, &r32Properties);
+    mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
+        mVkPhysicalDevice, VK_FORMAT_R32G32_SFLOAT, &rg32Properties);
+    mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
+        mVkPhysicalDevice, VK_FORMAT_R32G32B32A32_SFLOAT, &rgba32Properties);
+    if ((r32Properties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) &&
+        (rg32Properties.optimalTilingFeatures &
+         VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT) &&
+        (rgba32Properties.optimalTilingFeatures &
+         VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
+        EnableFeature(Feature::Float32Filterable);
+    }
+
 #if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(CHROMEOS)
     // TODO(chromium:1258986): Precisely enable the feature by querying the device's format
     // features.

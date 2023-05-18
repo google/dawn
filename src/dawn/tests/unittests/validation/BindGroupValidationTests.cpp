@@ -90,6 +90,29 @@ class BindGroupValidationTest : public ValidationTest {
         return dawnAdapter.CreateDevice(&descriptor);
     }
 
+    void DoTextureSampleTypeTest(bool success,
+                                 wgpu::TextureFormat format,
+                                 wgpu::TextureSampleType sampleType,
+                                 wgpu::TextureAspect aspect = wgpu::TextureAspect::All) {
+        wgpu::BindGroupLayout layout =
+            utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment, sampleType}});
+
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {4, 4, 1};
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
+        descriptor.format = format;
+
+        wgpu::TextureViewDescriptor viewDescriptor;
+        viewDescriptor.aspect = aspect;
+        wgpu::TextureView view = device.CreateTexture(&descriptor).CreateView(&viewDescriptor);
+
+        if (success) {
+            utils::MakeBindGroup(device, layout, {{0, view}});
+        } else {
+            ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
+        }
+    }
+
     wgpu::Buffer mUBO;
     wgpu::Buffer mSSBO;
     wgpu::Sampler mSampler;
@@ -468,126 +491,153 @@ TEST_F(BindGroupValidationTest, StorageTextureUsage) {
 
 // Check that a texture must have the correct sample type
 TEST_F(BindGroupValidationTest, TextureSampleType) {
-    auto DoTest = [this](bool success, wgpu::TextureFormat format,
-                         wgpu::TextureSampleType sampleType,
-                         wgpu::TextureAspect aspect = wgpu::TextureAspect::All) {
-        wgpu::BindGroupLayout layout =
-            utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment, sampleType}});
+    // Test that RGBA8Unorm is only compatible with float/unfilterable-float.
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Float);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::RGBA8Unorm,
+                            wgpu::TextureSampleType::UnfilterableFloat);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Depth);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Uint);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Sint);
 
-        wgpu::TextureDescriptor descriptor;
-        descriptor.size = {4, 4, 1};
-        descriptor.usage = wgpu::TextureUsage::TextureBinding;
-        descriptor.format = format;
-
-        wgpu::TextureViewDescriptor viewDescriptor;
-        viewDescriptor.aspect = aspect;
-        wgpu::TextureView view = device.CreateTexture(&descriptor).CreateView(&viewDescriptor);
-
-        if (success) {
-            utils::MakeBindGroup(device, layout, {{0, view}});
-        } else {
-            ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
-        }
-    };
-
-    // Test that RGBA8Unorm is only compatible with float/unfilterable-float
-    DoTest(true, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Float);
-    DoTest(true, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::UnfilterableFloat);
-    DoTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Depth);
-    DoTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Uint);
-    DoTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Sint);
-
-    // Test that R32Float is only compatible with unfilterable-float
-    DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Float);
-    DoTest(true, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::UnfilterableFloat);
-    DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Depth);
-    DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Uint);
-    DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Sint);
+    // Test that float32 formats are only compatible with unfilterable-float (without the
+    // float32-filterable feature enabled).
+    for (const auto f32Format : {wgpu::TextureFormat::R32Float, wgpu::TextureFormat::RG32Float,
+                                 wgpu::TextureFormat::RGBA32Float}) {
+        DoTextureSampleTypeTest(false, f32Format, wgpu::TextureSampleType::Float);
+        DoTextureSampleTypeTest(true, f32Format, wgpu::TextureSampleType::UnfilterableFloat);
+        DoTextureSampleTypeTest(false, f32Format, wgpu::TextureSampleType::Depth);
+        DoTextureSampleTypeTest(false, f32Format, wgpu::TextureSampleType::Uint);
+        DoTextureSampleTypeTest(false, f32Format, wgpu::TextureSampleType::Sint);
+    }
 
     // Test that Depth16Unorm is only compatible with depth/unfilterable-float.
-    DoTest(false, wgpu::TextureFormat::Depth16Unorm, wgpu::TextureSampleType::Float);
-    DoTest(true, wgpu::TextureFormat::Depth16Unorm, wgpu::TextureSampleType::UnfilterableFloat);
-    DoTest(true, wgpu::TextureFormat::Depth16Unorm, wgpu::TextureSampleType::Depth);
-    DoTest(false, wgpu::TextureFormat::Depth16Unorm, wgpu::TextureSampleType::Uint);
-    DoTest(false, wgpu::TextureFormat::Depth16Unorm, wgpu::TextureSampleType::Sint);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth16Unorm,
+                            wgpu::TextureSampleType::Float);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth16Unorm,
+                            wgpu::TextureSampleType::UnfilterableFloat);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth16Unorm,
+                            wgpu::TextureSampleType::Depth);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth16Unorm,
+                            wgpu::TextureSampleType::Uint);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth16Unorm,
+                            wgpu::TextureSampleType::Sint);
 
     // Test that Depth24Plus is only compatible with depth/unfilterable-float.
-    DoTest(false, wgpu::TextureFormat::Depth24Plus, wgpu::TextureSampleType::Float);
-    DoTest(true, wgpu::TextureFormat::Depth24Plus, wgpu::TextureSampleType::UnfilterableFloat);
-    DoTest(true, wgpu::TextureFormat::Depth24Plus, wgpu::TextureSampleType::Depth);
-    DoTest(false, wgpu::TextureFormat::Depth24Plus, wgpu::TextureSampleType::Uint);
-    DoTest(false, wgpu::TextureFormat::Depth24Plus, wgpu::TextureSampleType::Sint);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24Plus,
+                            wgpu::TextureSampleType::Float);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth24Plus,
+                            wgpu::TextureSampleType::UnfilterableFloat);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth24Plus, wgpu::TextureSampleType::Depth);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24Plus, wgpu::TextureSampleType::Uint);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24Plus, wgpu::TextureSampleType::Sint);
 
     // Test that Depth24PlusStencil8 with depth aspect is only compatible with
     // depth/unfilterable-float.
-    DoTest(false, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureSampleType::Float,
-           wgpu::TextureAspect::DepthOnly);
-    DoTest(true, wgpu::TextureFormat::Depth24PlusStencil8,
-           wgpu::TextureSampleType::UnfilterableFloat, wgpu::TextureAspect::DepthOnly);
-    DoTest(true, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureSampleType::Depth,
-           wgpu::TextureAspect::DepthOnly);
-    DoTest(false, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureSampleType::Uint,
-           wgpu::TextureAspect::DepthOnly);
-    DoTest(false, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureSampleType::Sint,
-           wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::Float, wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::UnfilterableFloat,
+                            wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::Depth, wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::Uint, wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::Sint, wgpu::TextureAspect::DepthOnly);
 
     // Test that Depth24PlusStencil8 with stencil aspect is only compatible with uint.
-    DoTest(false, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureSampleType::Float,
-           wgpu::TextureAspect::StencilOnly);
-    DoTest(false, wgpu::TextureFormat::Depth24PlusStencil8,
-           wgpu::TextureSampleType::UnfilterableFloat, wgpu::TextureAspect::StencilOnly);
-    DoTest(false, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureSampleType::Depth,
-           wgpu::TextureAspect::StencilOnly);
-    DoTest(true, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureSampleType::Uint,
-           wgpu::TextureAspect::StencilOnly);
-    DoTest(false, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureSampleType::Sint,
-           wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::Float, wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::UnfilterableFloat,
+                            wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::Depth, wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::Uint, wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth24PlusStencil8,
+                            wgpu::TextureSampleType::Sint, wgpu::TextureAspect::StencilOnly);
 
     // Test that Depth32Float is only compatible with depth/unfilterable-float.
-    DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Float);
-    DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::UnfilterableFloat);
-    DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Depth);
-    DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Uint);
-    DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Sint);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32Float,
+                            wgpu::TextureSampleType::Float);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth32Float,
+                            wgpu::TextureSampleType::UnfilterableFloat);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth32Float,
+                            wgpu::TextureSampleType::Depth);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32Float,
+                            wgpu::TextureSampleType::Uint);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32Float,
+                            wgpu::TextureSampleType::Sint);
 
     // Test that Depth32FloatStencil8 with depth aspect is only compatible with
     // depth/unfilterable-float.
-    DoTest(false, wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureSampleType::Float,
-           wgpu::TextureAspect::DepthOnly);
-    DoTest(true, wgpu::TextureFormat::Depth32FloatStencil8,
-           wgpu::TextureSampleType::UnfilterableFloat, wgpu::TextureAspect::DepthOnly);
-    DoTest(true, wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureSampleType::Depth,
-           wgpu::TextureAspect::DepthOnly);
-    DoTest(false, wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureSampleType::Uint,
-           wgpu::TextureAspect::DepthOnly);
-    DoTest(false, wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureSampleType::Sint,
-           wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::Float, wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::UnfilterableFloat,
+                            wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::Depth, wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::Uint, wgpu::TextureAspect::DepthOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::Sint, wgpu::TextureAspect::DepthOnly);
 
     // Test that Depth32FloatStencil8 with stencil aspect is only compatible with uint.
-    DoTest(false, wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureSampleType::Float,
-           wgpu::TextureAspect::StencilOnly);
-    DoTest(false, wgpu::TextureFormat::Depth32FloatStencil8,
-           wgpu::TextureSampleType::UnfilterableFloat, wgpu::TextureAspect::StencilOnly);
-    DoTest(false, wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureSampleType::Depth,
-           wgpu::TextureAspect::StencilOnly);
-    DoTest(true, wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureSampleType::Uint,
-           wgpu::TextureAspect::StencilOnly);
-    DoTest(false, wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureSampleType::Sint,
-           wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::Float, wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::UnfilterableFloat,
+                            wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::Depth, wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::Uint, wgpu::TextureAspect::StencilOnly);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::Depth32FloatStencil8,
+                            wgpu::TextureSampleType::Sint, wgpu::TextureAspect::StencilOnly);
 
-    // Test that RG8Uint is only compatible with uint
-    DoTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Float);
-    DoTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::UnfilterableFloat);
-    DoTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Depth);
-    DoTest(true, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Uint);
-    DoTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Sint);
+    // Test that RG8Uint is only compatible with uint.
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Float);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::RG8Uint,
+                            wgpu::TextureSampleType::UnfilterableFloat);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Depth);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Uint);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Sint);
 
-    // Test that R16Sint is only compatible with sint
-    DoTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Float);
-    DoTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::UnfilterableFloat);
-    DoTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Depth);
-    DoTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Uint);
-    DoTest(true, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Sint);
+    // Test that R16Sint is only compatible with sint.
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Float);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::R16Sint,
+                            wgpu::TextureSampleType::UnfilterableFloat);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Depth);
+    DoTextureSampleTypeTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Uint);
+    DoTextureSampleTypeTest(true, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Sint);
+}
+
+class BindGroupValidationTest_Float32Filterable : public BindGroupValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Float32Filterable};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Checks that float32 texture formats have the correct sample type when float32-filterable feature
+// enabled.
+TEST_F(BindGroupValidationTest_Float32Filterable, TextureSampleType) {
+    // With the feature enabled, float32 formats should be compatible with both float and
+    // unfilterable-float.
+    for (const auto f32Format : {wgpu::TextureFormat::R32Float, wgpu::TextureFormat::RG32Float,
+                                 wgpu::TextureFormat::RGBA32Float}) {
+        DoTextureSampleTypeTest(true, f32Format, wgpu::TextureSampleType::Float);
+        DoTextureSampleTypeTest(true, f32Format, wgpu::TextureSampleType::UnfilterableFloat);
+        DoTextureSampleTypeTest(false, f32Format, wgpu::TextureSampleType::Depth);
+        DoTextureSampleTypeTest(false, f32Format, wgpu::TextureSampleType::Uint);
+        DoTextureSampleTypeTest(false, f32Format, wgpu::TextureSampleType::Sint);
+    }
 }
 
 // Test which depth-stencil formats are allowed to be sampled (all).

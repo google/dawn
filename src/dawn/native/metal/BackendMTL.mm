@@ -435,10 +435,15 @@ class PhysicalDevice : public PhysicalDeviceBase {
     MaybeError InitializeImpl() override { return {}; }
 
     void InitializeSupportedFeaturesImpl() override {
-        // Check compressed texture format with deprecated MTLFeatureSet way.
+        // Check texture formats with deprecated MTLFeatureSet way.
 #if DAWN_PLATFORM_IS(MACOS)
         if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
             EnableFeature(Feature::TextureCompressionBC);
+        }
+        if (@available(macOS 10.14, *)) {
+            if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1]) {
+                EnableFeature(Feature::Float32Filterable);
+            }
         }
 #endif
 #if DAWN_PLATFORM_IS(IOS)
@@ -450,10 +455,13 @@ class PhysicalDevice : public PhysicalDeviceBase {
         }
 #endif
 
-        // Check compressed texture format with MTLGPUFamily
+        // Check texture formats with MTLGPUFamily
         if (@available(macOS 10.15, iOS 13.0, *)) {
             if ([*mDevice supportsFamily:MTLGPUFamilyMac1]) {
                 EnableFeature(Feature::TextureCompressionBC);
+            }
+            if ([*mDevice supportsFamily:MTLGPUFamilyMac2]) {
+                EnableFeature(Feature::Float32Filterable);
             }
             if ([*mDevice supportsFamily:MTLGPUFamilyApple2]) {
                 EnableFeature(Feature::TextureCompressionETC2);
@@ -625,7 +633,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
             }
         }
 
-#if TARGET_OS_OSX
+#if DAWN_PLATFORM_IS(MACOS)
         if (@available(macOS 10.14, *)) {
             if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1]) {
                 return MTLGPUFamily::Mac2;
@@ -634,7 +642,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
             return MTLGPUFamily::Mac1;
         }
-#elif TARGET_OS_IOS
+#elif DAWN_PLATFORM_IS(IOS)
         if (@available(iOS 10.11, *)) {
             if ([*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily4_v1]) {
                 return MTLGPUFamily::Apple4;

@@ -82,6 +82,11 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
     {Feature::BGRA8UnormStorage,
      {"bgra8unorm-storage", "Allows the STORAGE usage on textures with format \"bgra8unorm\".",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1591", FeatureInfo::FeatureState::Stable}},
+    {Feature::Float32Filterable,
+     {"float32-filterable",
+      "Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be filtered.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1664",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::DawnInternalUsages,
      {"dawn-internal-usages",
       "Add internal usages to resources to affect how the texture is allocated, but not "
@@ -160,6 +165,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::SurfaceCapabilities;
         case wgpu::FeatureName::TransientAttachments:
             return Feature::TransientAttachments;
+        case wgpu::FeatureName::Float32Filterable:
+            return Feature::Float32Filterable;
     }
     return Feature::InvalidEnum;
 }
@@ -204,6 +211,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::SurfaceCapabilities;
         case Feature::TransientAttachments:
             return wgpu::FeatureName::TransientAttachments;
+        case Feature::Float32Filterable:
+            return wgpu::FeatureName::Float32Filterable;
 
         case Feature::EnumCount:
             break;

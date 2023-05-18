@@ -124,6 +124,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::RG11B10UfloatRenderable);
     EnableFeature(Feature::DepthClipControl);
     EnableFeature(Feature::SurfaceCapabilities);
+    EnableFeature(Feature::Float32Filterable);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);

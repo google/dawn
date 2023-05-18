@@ -1441,6 +1441,7 @@
             {"value": 9, "name": "shader f16"},
             {"value": 10, "name": "RG11B10 ufloat renderable"},
             {"value": 11, "name": "BGRA8 unorm storage"},
+            {"value": 12, "name": "float32 filterable"},
             {"value": 1001, "name": "dawn shader float 16", "tags": ["dawn"]},
             {"value": 1002, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]},
