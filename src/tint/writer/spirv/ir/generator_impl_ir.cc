@@ -20,6 +20,7 @@
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/store.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
@@ -295,6 +296,10 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         auto result = Switch(
             inst,  //
             [&](const ir::Binary* b) { return EmitBinary(b); },
+            [&](const ir::Store* s) {
+                EmitStore(s);
+                return 0u;
+            },
             [&](const ir::Var* v) { return EmitVar(v); },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
@@ -389,6 +394,10 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
         op, {Type(binary->Type()), id, Value(binary->LHS()), Value(binary->RHS())});
 
     return id;
+}
+
+void GeneratorImplIr::EmitStore(const ir::Store* store) {
+    current_function_.push_inst(spv::Op::OpStore, {Value(store->to), Value(store->from)});
 }
 
 uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {

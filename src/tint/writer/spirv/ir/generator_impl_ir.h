@@ -33,6 +33,7 @@ class Block;
 class If;
 class Function;
 class Module;
+class Store;
 class Value;
 class Var;
 }  // namespace tint::ir
@@ -104,6 +105,10 @@ class GeneratorImplIr {
     /// @param binary the binary instruction to emit
     /// @returns the result ID of the instruction
     uint32_t EmitBinary(const ir::Binary* binary);
+
+    /// Emit a store instruction.
+    /// @param store the store instruction to emit
+    void EmitStore(const ir::Store* store);
 
     /// Emit a var instruction.
     /// @param var the var instruction to emit
