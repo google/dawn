@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "dawn/common/Assert.h"
+#include "dawn/common/SystemUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/dawn_platform.h"
@@ -29,6 +31,11 @@ std::unique_ptr<ErrorData> ErrorData::Create(InternalErrorType type,
                                              int line) {
     std::unique_ptr<ErrorData> error = std::make_unique<ErrorData>(type, message);
     error->AppendBacktrace(file, function, line);
+
+    auto [var, present] = GetEnvironmentVar("DAWN_DEBUG_BREAK_ON_ERROR");
+    if (present && !var.empty() && var != "0") {
+        BreakPoint();
+    }
     return error;
 }
 
