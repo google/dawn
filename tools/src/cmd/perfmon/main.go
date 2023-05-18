@@ -863,6 +863,11 @@ func (e env) findGerritChangeToBenchmark() (*gerrit.ChangeInfo, error) {
 		}
 
 		canBenchmark := func() bool {
+			// Don't benchmark changes on non-main branches
+			if change.Branch != "main" {
+				return false
+			}
+
 			// Is the change from a Googler, reviewed by a Googler or is from a allow-listed external developer?
 			if !(strings.HasSuffix(current.Commit.Committer.Email, "@google.com") ||
 				strings.HasSuffix(change.Labels["Code-Review"].Approved.Email, "@google.com") ||
@@ -1045,6 +1050,7 @@ func createOrOpenGitRepo(g *git.Git, filepath string, cfg GitConfig) (*git.Repos
 		repo, err = g.Clone(filepath, cfg.URL, &git.CloneOptions{
 			Branch:      cfg.Branch,
 			Credentials: cfg.Credentials,
+			Timeout:     time.Minute * 30,
 		})
 	}
 	if err != nil {

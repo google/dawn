@@ -472,8 +472,11 @@ func (g Git) run(dir string, env []string, timeout time.Duration, args ...string
 		fmt.Println(string(out))
 	}
 	if err != nil {
-		return string(out), fmt.Errorf("%v> %v %v failed:\n  %w\n%v",
-			dir, g.exe, strings.Join(args, " "), err, string(out))
+		msg := fmt.Sprintf("%v> %v %v failed:", dir, g.exe, strings.Join(args, " "))
+		if err := ctx.Err(); err != nil {
+			msg += "\n" + err.Error()
+		}
+		return string(out), fmt.Errorf("%s\n  %w\n%v", msg, err, string(out))
 	}
 	return strings.TrimSpace(string(out)), nil
 }
