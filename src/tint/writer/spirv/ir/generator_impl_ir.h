@@ -34,6 +34,7 @@ class If;
 class Function;
 class Module;
 class Value;
+class Var;
 }  // namespace tint::ir
 namespace tint::type {
 class Type;
@@ -103,6 +104,11 @@ class GeneratorImplIr {
     /// @param binary the binary instruction to emit
     /// @returns the result ID of the instruction
     uint32_t EmitBinary(const ir::Binary* binary);
+
+    /// Emit a var instruction.
+    /// @param var the var instruction to emit
+    /// @returns the result ID of the instruction
+    uint32_t EmitVar(const ir::Var* var);
 
   private:
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.

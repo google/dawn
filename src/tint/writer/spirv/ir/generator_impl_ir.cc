@@ -21,12 +21,14 @@
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
+#include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/pointer.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
@@ -46,6 +48,23 @@ void Sanitize(ir::Module* module) {
 
     transform::DataMap outputs;
     manager.Run(module, data, outputs);
+}
+
+SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
+    switch (addrspace) {
+        case builtin::AddressSpace::kFunction:
+            return SpvStorageClassFunction;
+        case builtin::AddressSpace::kPrivate:
+            return SpvStorageClassPrivate;
+        case builtin::AddressSpace::kStorage:
+            return SpvStorageClassStorageBuffer;
+        case builtin::AddressSpace::kUniform:
+            return SpvStorageClassUniform;
+        case builtin::AddressSpace::kWorkgroup:
+            return SpvStorageClassWorkgroup;
+        default:
+            return SpvStorageClassMax;
+    }
 }
 
 }  // namespace
@@ -153,6 +172,11 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
             },
             [&](const type::Vector* vec) {
                 module_.PushType(spv::Op::OpTypeVector, {id, Type(vec->type()), vec->Width()});
+            },
+            [&](const type::Pointer* ptr) {
+                module_.PushType(
+                    spv::Op::OpTypePointer,
+                    {id, U32Operand(StorageClass(ptr->AddressSpace())), Type(ptr->StoreType())});
             },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled type: " << ty->FriendlyName();
@@ -271,6 +295,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         auto result = Switch(
             inst,  //
             [&](const ir::Binary* b) { return EmitBinary(b); },
+            [&](const ir::Var* v) { return EmitVar(v); },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "unimplemented instruction: " << inst->TypeInfo().name;
@@ -362,6 +387,32 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
     // Emit the instruction.
     current_function_.push_inst(
         op, {Type(binary->Type()), id, Value(binary->LHS()), Value(binary->RHS())});
+
+    return id;
+}
+
+uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
+    auto id = module_.NextId();
+    auto* ptr = var->Type()->As<type::Pointer>();
+    TINT_ASSERT(Writer, ptr);
+    auto ty = Type(ptr);
+
+    if (ptr->AddressSpace() == builtin::AddressSpace::kFunction) {
+        TINT_ASSERT(Writer, current_function_);
+        current_function_.push_var({ty, id, U32Operand(SpvStorageClassFunction)});
+        if (var->initializer) {
+            current_function_.push_inst(spv::Op::OpStore, {id, Value(var->initializer)});
+        }
+    } else {
+        TINT_ICE(Writer, diagnostics_)
+            << "unimplemented variable address space " << ptr->AddressSpace();
+        return 0u;
+    }
+
+    // Set the name if present.
+    if (auto name = ir_->NameOf(var)) {
+        module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
+    }
 
     return id;
 }
