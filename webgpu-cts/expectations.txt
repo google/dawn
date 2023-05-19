@@ -107,13 +107,6 @@ crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextur
 crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
 
 ################################################################################
-# Large and slow tests on intel-gen-9 win10
-# KEEP
-################################################################################
-crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
-crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
-
-################################################################################
 # external_texture failures
 # KEEP
 ################################################################################
@@ -128,19 +121,16 @@ crbug.com/dawn/0000 webgpu:util,texture,texel_data:unorm_texel_data_in_shader:fo
 
 ################################################################################
 # ETC2 failures on Apple GPUS
-# KEEP
 ################################################################################
 crbug.com/dawn/1830 [ mac apple dawn-backend-validation ] webgpu:api,validation,createView:format:textureFormatFeature="texture-compression-etc2";viewFormatFeature="texture-compression-etc2" [ Failure ]
 
 ################################################################################
 # depth16unorm failures on Apple GPUs
-# KEEP
 ################################################################################
 crbug.com/dawn/1828 [ mac apple ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth16unorm";* [ Failure ]
 
 ################################################################################
 # Apple GPUs need a workaround to clamp frag_depth
-# KEEP
 ################################################################################
 crbug.com/dawn/1616 [ mac apple ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";* [ Failure ]
 crbug.com/dawn/1616 [ mac apple ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";* [ Failure ]
@@ -289,14 +279,8 @@ crbug.com/dawn/1599 [ webgpu-adapter-swiftshader win10 ] webgpu:web_platform,cop
 
 ################################################################################
 # Untriaged canvas issues, potentially colorspace related.
-# Separated from below since it needs a KEEP comment.
-# KEEP
+################################################################################
 crbug.com/dawn/0000 [ apple ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="transferToImageBitmap" [ Failure ]
-################################################################################
-
-################################################################################
-# Untriaged canvas issues, potentially colorspace related.
-################################################################################
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
@@ -532,13 +516,6 @@ crbug.com/1421045 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_chec
 # GPUDeviceLostReason test needs to be updated for spec change
 ################################################################################
 crbug.com/1424883 webgpu:api,operation,adapter,requestDevice:invalid: [ Failure ]
-
-################################################################################
-# These tests are slow enough that they fail often on a lot of configurations,
-# especially code-coverage builders.
-# KEEP
-################################################################################
-crbug.com/dawn/1783 webgpu:shader,execution,expression,binary,* [ Slow ]
 
 ################################################################################
 # untriaged failures
