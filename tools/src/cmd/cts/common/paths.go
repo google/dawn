@@ -26,6 +26,10 @@ const (
 	// expectations.txt file.
 	RelativeExpectationsPath = "webgpu-cts/expectations.txt"
 
+	// RelativeSlowExpectationsPath is the dawn-root relative path to the
+	// slow_tests.txt file.
+	RelativeSlowExpectationsPath = "webgpu-cts/slow_tests.txt"
+
 	// RelativeTestListPath is the dawn-root relative path to the
 	// test_list.txt file.
 	RelativeTestListPath = "third_party/gn/webgpu-cts/test_list.txt"
@@ -35,6 +39,16 @@ const (
 // file. Returns an empty string if the file cannot be found.
 func DefaultExpectationsPath() string {
 	path := filepath.Join(fileutils.DawnRoot(), RelativeExpectationsPath)
+	if _, err := os.Stat(path); err != nil {
+		return ""
+	}
+	return path
+}
+
+// DefaultSlowExpectationsPath returns the default path to the slow_tests.txt
+// file. Returns an empty string if the file cannot be found.
+func DefaultSlowExpectationsPath() string {
+	path := filepath.Join(fileutils.DawnRoot(), RelativeSlowExpectationsPath)
 	if _, err := os.Stat(path); err != nil {
 		return ""
 	}

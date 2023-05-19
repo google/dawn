@@ -23,6 +23,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
+	"github.com/google/go-cmp/cmp"
 )
 
 func (c Content) tagsCollide(a, b container.Set[string]) bool {
@@ -70,6 +71,23 @@ func (c Content) Validate() Diagnostics {
 						})
 					}
 				}
+			}
+		}
+	}
+	return out
+}
+
+// ValidateSlowTests checks that the expectations are only [ Slow ]
+func (c Content) ValidateSlowTests() Diagnostics {
+	var out Diagnostics
+	for _, chunk := range c.Chunks {
+		for _, ex := range chunk.Expectations {
+			if !cmp.Equal(ex.Status, []string{"Slow"}) {
+				out = append(out, Diagnostic{
+					Severity: Error,
+					Line:     ex.Line,
+					Message:  fmt.Sprintf("slow test expectation for %v must be %v but was %v", ex.Query, []string{"Slow"}, ex.Status),
+				})
 			}
 		}
 	}

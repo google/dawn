@@ -31,6 +31,7 @@ func init() {
 type cmd struct {
 	flags struct {
 		expectations string // expectations file path
+		slow string         // slow test expectations file path
 	}
 }
 
@@ -44,17 +45,33 @@ func (cmd) Desc() string {
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	defaultExpectations := common.DefaultExpectationsPath()
-	flag.StringVar(&c.flags.expectations, "expectations", defaultExpectations, "path to CTS expectations file to update")
+	slowExpectations := common.DefaultSlowExpectationsPath()
+	flag.StringVar(&c.flags.expectations, "expectations", defaultExpectations, "path to CTS expectations file to validate")
+	flag.StringVar(&c.flags.slow, "slow", slowExpectations, "path to CTS slow expectations file to validate")
 	return nil, nil
 }
 
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
-	ex, err := expectations.Load(c.flags.expectations)
+	// Load expectations.txt
+	content, err := expectations.Load(c.flags.expectations)
 	if err != nil {
 		return err
 	}
-	diags := ex.Validate()
+	diags := content.Validate()
 
+	// Print any diagnostics
+	diags.Print(os.Stdout, c.flags.expectations)
+	if numErrs := diags.NumErrors(); numErrs > 0 {
+		return fmt.Errorf("%v errors found", numErrs)
+	}
+
+	// Load slow_tests.txt
+	content, err = expectations.Load(c.flags.slow)
+	if err != nil {
+		return err
+	}
+
+	diags = content.ValidateSlowTests()
 	// Print any diagnostics
 	diags.Print(os.Stdout, c.flags.expectations)
 	if numErrs := diags.NumErrors(); numErrs > 0 {
