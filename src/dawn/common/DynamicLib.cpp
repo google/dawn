@@ -18,8 +18,6 @@
 
 #include "dawn/common/Platform.h"
 
-namespace dawn {
-
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "dawn/common/windows_with_undefs.h"
 #if DAWN_PLATFORM_IS(WINUWP)
@@ -30,6 +28,8 @@ namespace dawn {
 #else
 #error "Unsupported platform for DynamicLib"
 #endif
+
+namespace dawn {
 
 DynamicLib::~DynamicLib() {
     Close();
