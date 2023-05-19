@@ -767,7 +767,11 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 auto endIt =
                     querySet->GetQueryAvailability().begin() + cmd->firstQuery + cmd->queryCount;
                 bool hasUnavailableQueries = std::find(startIt, endIt, false) != endIt;
-                if (hasUnavailableQueries) {
+                // Workaround for resolving overlapping queries to a same buffer on Intel Gen12 GPUs
+                // due to Mesa driver issue.
+                // See http://crbug.com/dawn/1823 for more information.
+                bool clearNeeded = device->IsToggleEnabled(Toggle::ClearBufferBeforeResolveQueries);
+                if (hasUnavailableQueries || clearNeeded) {
                     destination->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
                     device->fn.CmdFillBuffer(commands, destination->GetHandle(),
                                              cmd->destinationOffset,

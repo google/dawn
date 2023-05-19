@@ -485,6 +485,19 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
         }
     }
 
+    if (IsIntelMesa() && (gpu_info::IsIntelGen12LP(GetVendorId(), GetDeviceId()) ||
+                          gpu_info::IsIntelGen12HP(GetVendorId(), GetDeviceId()))) {
+        // Intel Mesa driver has a bug where vkCmdCopyQueryPoolResults fails to write overlapping
+        // queries to a same buffer after the buffer is accessed by a compute shader with correct
+        // resource barriers, which may caused by flush and memory coherency issue on Intel Gen12
+        // GPUs. Workaround for it to clear the buffer before vkCmdCopyQueryPoolResults.
+        // TODO(crbug.com/dawn/1823): Remove the workaround when the bug is fixed in Mesa driver.
+        const gpu_info::DriverVersion kBuggyDriverVersion = {21, 2, 0, 0};
+        if (gpu_info::CompareIntelMesaDriverVersion(GetDriverVersion(), kBuggyDriverVersion) >= 0) {
+            deviceToggles->Default(Toggle::ClearBufferBeforeResolveQueries, true);
+        }
+    }
+
     // The environment can request to various options for depth-stencil formats that could be
     // unavailable. Override the decision if it is not applicable.
     bool supportsD32s8 = IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT);

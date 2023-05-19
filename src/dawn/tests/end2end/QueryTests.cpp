@@ -1091,10 +1091,6 @@ TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
 // Test resolving a query set twice into the same destination buffer with potentially overlapping
 // ranges
 TEST_P(TimestampQueryTests, ResolveTwiceToSameBuffer) {
-    // TODO(dawn:1546): Intel D3D driver regression on Gen12 GPUs. The compute shader in two
-    // ResolveQuerySet execute wrong.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsIntelGen12());
-
     constexpr uint32_t kQueryCount = kMinCount + 2;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);

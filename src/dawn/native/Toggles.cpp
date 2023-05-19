@@ -251,6 +251,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"disable_timestamp_query_conversion",
       "Resolve timestamp queries into ticks instead of nanoseconds.", "https://crbug.com/dawn/1305",
       ToggleStage::Device}},
+    {Toggle::ClearBufferBeforeResolveQueries,
+     {"clear_buffer_before_resolve_queries",
+      "clear destination buffer to zero before resolving queries. This toggle is enabled on Intel "
+      "Gen12 GPUs due to driver issue.",
+      "https://crbug.com/dawn/1823", ToggleStage::Device}},
     {Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension,
      {"use_vulkan_zero_initialize_workgroup_memory_extension",
       "Initialize workgroup memory with OpConstantNull on Vulkan when the Vulkan extension "
