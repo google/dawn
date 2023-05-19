@@ -54,7 +54,7 @@
             {"name": "compatible surface", "type": "surface", "optional": true},
             {"name": "power preference", "type": "power preference", "default": "undefined"},
             {"name": "force fallback adapter", "type": "bool", "default": "false"},
-            {"name": "compatibility mode", "type": "bool", "default": "false"}
+            {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
         ]
     },
     "request adapter status": {
@@ -142,7 +142,7 @@
             {"name": "driver description", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "adapter type", "type": "adapter type"},
             {"name": "backend type", "type": "backend type"},
-            {"name": "compatibility mode", "type": "bool", "default": "false"}
+            {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
         ]
     },
     "adapter type": {
@@ -1228,6 +1228,7 @@
             },
             {
                 "name": "get supported surface usage",
+                "tags": ["dawn"],
                 "returns": "texture usage",
                 "args": [
                     {"name": "surface", "type": "surface"}
@@ -1449,7 +1450,7 @@
             {"value": 1005, "name": "chromium experimental dp4a", "tags": ["dawn"]},
             {"value": 1006, "name": "timestamp query inside passes", "tags": ["dawn"]},
             {"value": 1007, "name": "implicit device synchronization", "tags": ["dawn", "native"]},
-            {"value": 1008, "name": "surface capabilities", "tags": ["dawn", "native"]},
+            {"value": 1008, "name": "surface capabilities", "tags": ["dawn"]},
             {"value": 1009, "name": "transient attachments", "tags": ["dawn"]}
         ]
     },
@@ -2404,7 +2405,8 @@
         "chain roots": ["shader module descriptor"],
         "members": [
             {"name": "source", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr", "optional": true, "tags": ["dawn", "emscripten"]},
-            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr", "optional": true}
+            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr", "optional": true, "tags": ["dawn", "emscripten"]},
+            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr", "tags": ["upstream"]}
         ]
     },
     "dawn shader module SPIRV options descriptor": {
