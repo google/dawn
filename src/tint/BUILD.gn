@@ -384,11 +384,16 @@ libtint_source_set("libtint_transform_manager_src") {
   ]
   deps = [
     ":libtint_ast_transform_base_src",
-    ":libtint_ir_builder_src",
-    ":libtint_ir_src",
     ":libtint_program_src",
     ":libtint_transform_src",
   ]
+
+  if (tint_build_ir) {
+    deps += [
+      ":libtint_ir_builder_src",
+      ":libtint_ir_src",
+    ]
+  }
 }
 
 libtint_source_set("libtint_ast_transform_src") {
@@ -1175,97 +1180,99 @@ libtint_source_set("libtint_syntax_tree_writer_src") {
   ]
 }
 
-libtint_source_set("libtint_ir_builder_src") {
-  sources = [
-    "ir/from_program.cc",
-    "ir/from_program.h",
-    "ir/to_program.cc",
-    "ir/to_program.h",
-  ]
-  deps = [
-    ":libtint_ast_src",
-    ":libtint_constant_src",
-    ":libtint_ir_src",
-    ":libtint_program_src",
-    ":libtint_sem_src",
-    ":libtint_symbols_src",
-    ":libtint_type_src",
-    ":libtint_utils_src",
-  ]
-}
+if (tint_build_ir) {
+  libtint_source_set("libtint_ir_builder_src") {
+    sources = [
+      "ir/from_program.cc",
+      "ir/from_program.h",
+      "ir/to_program.cc",
+      "ir/to_program.h",
+    ]
+    deps = [
+      ":libtint_ast_src",
+      ":libtint_constant_src",
+      ":libtint_ir_src",
+      ":libtint_program_src",
+      ":libtint_sem_src",
+      ":libtint_symbols_src",
+      ":libtint_type_src",
+      ":libtint_utils_src",
+    ]
+  }
 
-libtint_source_set("libtint_ir_src") {
-  sources = [
-    "ir/binary.cc",
-    "ir/binary.h",
-    "ir/bitcast.cc",
-    "ir/bitcast.h",
-    "ir/block.cc",
-    "ir/block.h",
-    "ir/block_param.cc",
-    "ir/block_param.h",
-    "ir/builder.cc",
-    "ir/builder.h",
-    "ir/builtin.cc",
-    "ir/builtin.h",
-    "ir/call.cc",
-    "ir/call.h",
-    "ir/constant.cc",
-    "ir/constant.h",
-    "ir/construct.cc",
-    "ir/construct.h",
-    "ir/convert.cc",
-    "ir/convert.h",
-    "ir/debug.cc",
-    "ir/debug.h",
-    "ir/disassembler.cc",
-    "ir/disassembler.h",
-    "ir/discard.cc",
-    "ir/discard.h",
-    "ir/flow_node.cc",
-    "ir/flow_node.h",
-    "ir/function.cc",
-    "ir/function.h",
-    "ir/function_param.cc",
-    "ir/function_param.h",
-    "ir/function_terminator.cc",
-    "ir/function_terminator.h",
-    "ir/if.cc",
-    "ir/if.h",
-    "ir/instruction.cc",
-    "ir/instruction.h",
-    "ir/load.cc",
-    "ir/load.h",
-    "ir/loop.cc",
-    "ir/loop.h",
-    "ir/module.cc",
-    "ir/module.h",
-    "ir/root_terminator.cc",
-    "ir/root_terminator.h",
-    "ir/store.cc",
-    "ir/store.h",
-    "ir/switch.cc",
-    "ir/switch.h",
-    "ir/transform/transform.cc",
-    "ir/transform/transform.h",
-    "ir/unary.cc",
-    "ir/unary.h",
-    "ir/user_call.cc",
-    "ir/user_call.h",
-    "ir/value.cc",
-    "ir/value.h",
-    "ir/var.cc",
-    "ir/var.h",
-  ]
+  libtint_source_set("libtint_ir_src") {
+    sources = [
+      "ir/binary.cc",
+      "ir/binary.h",
+      "ir/bitcast.cc",
+      "ir/bitcast.h",
+      "ir/block.cc",
+      "ir/block.h",
+      "ir/block_param.cc",
+      "ir/block_param.h",
+      "ir/builder.cc",
+      "ir/builder.h",
+      "ir/builtin.cc",
+      "ir/builtin.h",
+      "ir/call.cc",
+      "ir/call.h",
+      "ir/constant.cc",
+      "ir/constant.h",
+      "ir/construct.cc",
+      "ir/construct.h",
+      "ir/convert.cc",
+      "ir/convert.h",
+      "ir/debug.cc",
+      "ir/debug.h",
+      "ir/disassembler.cc",
+      "ir/disassembler.h",
+      "ir/discard.cc",
+      "ir/discard.h",
+      "ir/flow_node.cc",
+      "ir/flow_node.h",
+      "ir/function.cc",
+      "ir/function.h",
+      "ir/function_param.cc",
+      "ir/function_param.h",
+      "ir/function_terminator.cc",
+      "ir/function_terminator.h",
+      "ir/if.cc",
+      "ir/if.h",
+      "ir/instruction.cc",
+      "ir/instruction.h",
+      "ir/load.cc",
+      "ir/load.h",
+      "ir/loop.cc",
+      "ir/loop.h",
+      "ir/module.cc",
+      "ir/module.h",
+      "ir/root_terminator.cc",
+      "ir/root_terminator.h",
+      "ir/store.cc",
+      "ir/store.h",
+      "ir/switch.cc",
+      "ir/switch.h",
+      "ir/transform/transform.cc",
+      "ir/transform/transform.h",
+      "ir/unary.cc",
+      "ir/unary.h",
+      "ir/user_call.cc",
+      "ir/user_call.h",
+      "ir/value.cc",
+      "ir/value.h",
+      "ir/var.cc",
+      "ir/var.h",
+    ]
 
-  deps = [
-    ":libtint_builtins_src",
-    ":libtint_constant_src",
-    ":libtint_symbols_src",
-    ":libtint_transform_src",
-    ":libtint_type_src",
-    ":libtint_utils_src",
-  ]
+    deps = [
+      ":libtint_builtins_src",
+      ":libtint_constant_src",
+      ":libtint_symbols_src",
+      ":libtint_transform_src",
+      ":libtint_type_src",
+      ":libtint_utils_src",
+    ]
+  }
 }
 
 source_set("libtint") {
@@ -2246,33 +2253,35 @@ if (tint_build_unittests) {
     }
   }
 
-  tint_unittests_source_set("tint_unittests_ir_src") {
-    sources = [
-      "ir/binary_test.cc",
-      "ir/bitcast_test.cc",
-      "ir/constant_test.cc",
-      "ir/discard_test.cc",
-      "ir/from_program_binary_test.cc",
-      "ir/from_program_call_test.cc",
-      "ir/from_program_literal_test.cc",
-      "ir/from_program_materialize_test.cc",
-      "ir/from_program_store_test.cc",
-      "ir/from_program_test.cc",
-      "ir/from_program_unary_test.cc",
-      "ir/from_program_var_test.cc",
-      "ir/load_test.cc",
-      "ir/module_test.cc",
-      "ir/store_test.cc",
-      "ir/test_helper.h",
-      "ir/to_program_roundtrip_test.cc",
-      "ir/transform/add_empty_entry_point_test.cc",
-      "ir/unary_test.cc",
-    ]
+  if (tint_build_ir) {
+    tint_unittests_source_set("tint_unittests_ir_src") {
+      sources = [
+        "ir/binary_test.cc",
+        "ir/bitcast_test.cc",
+        "ir/constant_test.cc",
+        "ir/discard_test.cc",
+        "ir/from_program_binary_test.cc",
+        "ir/from_program_call_test.cc",
+        "ir/from_program_literal_test.cc",
+        "ir/from_program_materialize_test.cc",
+        "ir/from_program_store_test.cc",
+        "ir/from_program_test.cc",
+        "ir/from_program_unary_test.cc",
+        "ir/from_program_var_test.cc",
+        "ir/load_test.cc",
+        "ir/module_test.cc",
+        "ir/store_test.cc",
+        "ir/test_helper.h",
+        "ir/to_program_roundtrip_test.cc",
+        "ir/transform/add_empty_entry_point_test.cc",
+        "ir/unary_test.cc",
+      ]
 
-    deps = [
-      ":libtint_ir_builder_src",
-      ":libtint_ir_src",
-    ]
+      deps = [
+        ":libtint_ir_builder_src",
+        ":libtint_ir_src",
+      ]
+    }
   }
 
   if (build_with_chromium) {
