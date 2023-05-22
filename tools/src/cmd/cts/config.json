@@ -38,11 +38,6 @@
       "Bucket": "try",
       "Builder": "dawn-try-mac-arm64-rel"
     },
-    "Mac-Exp": {
-      "Project": "chromium",
-      "Bucket": "try",
-      "Builder": "dawn-try-mac-intel-exp"
-    },
     "Linux": {
       "Project": "chromium",
       "Bucket": "try",
