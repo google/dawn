@@ -4,31 +4,32 @@ This repository contains the implementation of Dawn, which is itself composed of
 
 ## Directory structure
 
-- [`dawn.json`](../dawn.json): contains a description of the native WebGPU in JSON form. It is the data model that's used by the code generators.
-- [`dawn_wire.json`](../dawn_wire.json): contains additional information used to generate `dawn_wire` files, such as commands in addition to regular WebGPU commands.
-- [`examples`](../examples): a small collection of samples using the native WebGPU API. They were mostly used when bringing up Dawn for the first time, and to test the `WGPUSwapChain` object.
-- [`generator`](../generator): directory containg the code generators and their templates. Generators are based on Jinja2 and parse data-models from JSON files.
-    - [`dawn_json_generator.py`](../generator/dawn_json_generator.py): the main code generator that outputs the WebGPU headers, C++ wrapper, client-server implementation, etc.
-    - [`templates`](../generator/templates): Jinja2 templates for the generator, with subdirectories for groups of templates that are all used in the same library.
-- [`infra`](../infra): configuration file for the commit-queue infrastructure.
-- [`scripts`](../scripts): contains a grab-bag of files that are used for building Dawn, in testing, etc.
-- [`src`](../src):
-  - [`dawn`](../src/dawn): root directory for Dawn code
-      - [`common`](../src/dawn/common): helper code that is allowed to be used by Dawn's core libraries, `dawn_native` and `dawn_wire`. Also allowed for use in all other Dawn targets.
-      - [`fuzzers`](../src/dawn/fuzzers): various fuzzers for Dawn that are running in [Clusterfuzz](https://google.github.io/clusterfuzz/).
-      - [`native`](../src/dawn/native): code for the implementation of WebGPU on top of graphics APIs. Files in this folder are the "frontend" while subdirectories are "backends".
+- [`dawn.json`](../../dawn.json): contains a description of the native WebGPU in JSON form. It is the data model that's used by the code generators.
+- [`dawn_wire.json`](../../dawn_wire.json): contains additional information used to generate `dawn_wire` files, such as commands in addition to regular WebGPU commands.
+- [`generator`](../../generator): directory containg the code generators and their templates. Generators are based on Jinja2 and parse data-models from JSON files.
+    - [`dawn_json_generator.py`](../../generator/dawn_json_generator.py): the main code generator that outputs the WebGPU headers, C++ wrapper, client-server implementation, etc.
+    - [`templates`](../../generator/templates): Jinja2 templates for the generator, with subdirectories for groups of templates that are all used in the same library.
+- [`include`](../../include):
+    - [`dawn`](../../include/dawn): public headers with subdirectories for each library. Note that some headers are auto-generated and not present directly in the directory.
+- [`infra`](../../infra): configuration file for the commit-queue infrastructure.
+- [`scripts`](../../scripts): contains a grab-bag of files that are used for building Dawn, in testing, etc.
+- [`src`](../../src):
+  - [`dawn`](../../src/dawn): root directory for Dawn code
+      - [`common`](../../src/dawn/common): helper code that is allowed to be used by Dawn's core libraries, `dawn_native` and `dawn_wire`. Also allowed for use in all other Dawn targets.
+      - [`fuzzers`](../../src/dawn/fuzzers): various fuzzers for Dawn that are running in [Clusterfuzz](https://google.github.io/clusterfuzz/).
+      - [`native`](../../src/dawn/native): code for the implementation of WebGPU on top of graphics APIs. Files in this folder are the "frontend" while subdirectories are "backends".
          - `<backend>`: code for the implementation of the backend on a specific graphics API, for example `d3d12`, `metal` or `vulkan`.
-      - [`tests`](../src/dawn/tests):
-        - [`end2end`](../src/dawn/tests/end2end): tests for the execution of the WebGPU API and require a GPU to run.
-        - [`perf_tests`](../src/dawn/tests/perf_tests): benchmarks for various aspects of Dawn.
-        - [`unittests`](../src/dawn/tests/unittests): code unittests of internal classes, but also by extension WebGPU API tests that don't require a GPU to run.
-          - [`validation`](../src/dawn/tests/unittests/validation): WebGPU validation tests not using the GPU (frontend tests)
-        - [`white_box`](../src/dawn/tests/white_box): tests using the GPU that need to access the internals of `dawn_native` or `dawn_wire`.
-      - [`wire`](../src/dawn/wire): code for an implementation of WebGPU as a client-server architecture.
-      - [`utils`](../src/dawn/utils): helper code to use Dawn used by tests and samples but disallowed for `dawn_native` and `dawn_wire`.
-      - [`platform`](../src/dawn/platform): definition of interfaces for dependency injection in `dawn_native` or `dawn_wire`.
-  - [`include`](../src/include): public headers with subdirectories for each library. Note that some headers are auto-generated and not present directly in the directory.
-- [`third_party`](../third_party): directory where dependencies live as well as their buildfiles.
+      - [`samples`](../../src/dawn/samples): a small collection of samples using the native WebGPU API. They were mostly used when bringing up Dawn for the first time, and to test the `WGPUSwapChain` object.
+      - [`tests`](../../src/dawn/tests):
+        - [`end2end`](../../src/dawn/tests/end2end): tests for the execution of the WebGPU API and require a GPU to run.
+        - [`perf_tests`](../../src/dawn/tests/perf_tests): benchmarks for various aspects of Dawn.
+        - [`unittests`](../../src/dawn/tests/unittests): code unittests of internal classes, but also by extension WebGPU API tests that don't require a GPU to run.
+          - [`validation`](../../src/dawn/tests/unittests/validation): WebGPU validation tests not using the GPU (frontend tests)
+        - [`white_box`](../../src/dawn/tests/white_box): tests using the GPU that need to access the internals of `dawn_native` or `dawn_wire`.
+      - [`wire`](../../src/dawn/wire): code for an implementation of WebGPU as a client-server architecture.
+      - [`utils`](../../src/dawn/utils): helper code to use Dawn used by tests and samples but disallowed for `dawn_native` and `dawn_wire`.
+      - [`platform`](../../src/dawn/platform): definition of interfaces for dependency injection in `dawn_native` or `dawn_wire`.
+- [`third_party`](../../third_party): directory where dependencies live as well as their buildfiles.
 
 ## Dawn Native (`dawn_native`)
 
