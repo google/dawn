@@ -34,12 +34,7 @@ class Unary : public utils::Castable<Unary, Instruction> {
     /// @param result_type the result type
     /// @param val the input value for the instruction
     Unary(enum Kind kind, const type::Type* result_type, Value* val);
-    Unary(const Unary& inst) = delete;
-    Unary(Unary&& inst) = delete;
     ~Unary() override;
-
-    Unary& operator=(const Unary& inst) = delete;
-    Unary& operator=(Unary&& inst) = delete;
 
     /// @returns the type of the value
     const type::Type* Type() const override { return result_type_; }

@@ -27,12 +27,7 @@ class Load : public utils::Castable<Load, Instruction> {
     /// @param type the result type
     /// @param from the value being loaded from
     Load(const type::Type* type, Value* from);
-    Load(const Load& inst) = delete;
-    Load(Load&& inst) = delete;
     ~Load() override;
-
-    Load& operator=(const Load& inst) = delete;
-    Load& operator=(Load&& inst) = delete;
 
     /// @returns the type of the value
     const type::Type* Type() const override { return result_type_; }

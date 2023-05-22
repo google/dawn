@@ -26,12 +26,7 @@ class Discard : public utils::Castable<Discard, Call> {
   public:
     /// Constructor
     Discard();
-    Discard(const Discard& inst) = delete;
-    Discard(Discard&& inst) = delete;
     ~Discard() override;
-
-    Discard& operator=(const Discard& inst) = delete;
-    Discard& operator=(Discard&& inst) = delete;
 };
 
 }  // namespace tint::ir

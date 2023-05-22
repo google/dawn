@@ -23,13 +23,8 @@ namespace tint::ir {
 /// An instruction in the IR.
 class Instruction : public utils::Castable<Instruction, Value> {
   public:
-    Instruction(const Instruction& inst) = delete;
-    Instruction(Instruction&& inst) = delete;
     /// Destructor
     ~Instruction() override;
-
-    Instruction& operator=(const Instruction& inst) = delete;
-    Instruction& operator=(Instruction&& inst) = delete;
 
   protected:
     /// Constructor

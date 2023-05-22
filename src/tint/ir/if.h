@@ -32,12 +32,7 @@ class If : public utils::Castable<If, FlowNode> {
     /// Constructor
     /// @param cond the if condition
     explicit If(Value* cond);
-    If(const If&) = delete;
-    If(If&&) = delete;
     ~If() override;
-
-    If& operator=(const If&) = delete;
-    If& operator=(If&&) = delete;
 
     /// @returns the if condition
     const Value* Condition() const { return condition_; }

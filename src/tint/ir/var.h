@@ -28,12 +28,7 @@ class Var : public utils::Castable<Var, Instruction> {
     /// Constructor
     /// @param type the type of the var
     explicit Var(const type::Type* type);
-    Var(const Var& inst) = delete;
-    Var(Var&& inst) = delete;
     ~Var() override;
-
-    Var& operator=(const Var& inst) = delete;
-    Var& operator=(Var&& inst) = delete;
 
     /// @returns the type of the var
     const type::Type* Type() const override { return type_; }

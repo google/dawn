@@ -26,12 +26,7 @@ class FunctionParam : public utils::Castable<FunctionParam, Value> {
     /// Constructor
     /// @param type the type of the var
     explicit FunctionParam(const type::Type* type);
-    FunctionParam(const FunctionParam& inst) = delete;
-    FunctionParam(FunctionParam&& inst) = delete;
     ~FunctionParam() override;
-
-    FunctionParam& operator=(const FunctionParam& inst) = delete;
-    FunctionParam& operator=(FunctionParam&& inst) = delete;
 
     /// @returns the type of the var
     const type::Type* Type() const override { return type_; }

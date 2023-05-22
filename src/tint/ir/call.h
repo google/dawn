@@ -23,12 +23,7 @@ namespace tint::ir {
 /// A Call instruction in the IR.
 class Call : public utils::Castable<Call, Instruction> {
   public:
-    Call(const Call& inst) = delete;
-    Call(Call&& inst) = delete;
     ~Call() override;
-
-    Call& operator=(const Call& inst) = delete;
-    Call& operator=(Call&& inst) = delete;
 
     /// @returns the type of the value
     const type::Type* Type() const override { return result_type_; }

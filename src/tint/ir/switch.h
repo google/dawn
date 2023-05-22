@@ -51,12 +51,7 @@ class Switch : public utils::Castable<Switch, FlowNode> {
     /// Constructor
     /// @param cond the condition
     explicit Switch(Value* cond);
-    Switch(const Switch&) = delete;
-    Switch(Switch&&) = delete;
     ~Switch() override;
-
-    Switch& operator=(const Switch&) = delete;
-    Switch& operator=(Switch&&) = delete;
 
     /// @returns the switch merge branch
     const Branch& Merge() const { return merge_; }

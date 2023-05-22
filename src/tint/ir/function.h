@@ -72,12 +72,7 @@ class Function : public utils::Castable<Function, FlowNode> {
              type::Type* rt,
              PipelineStage stage = PipelineStage::kUndefined,
              std::optional<std::array<uint32_t, 3>> wg_size = {});
-    Function(Function&&) = delete;
-    Function(const Function&) = delete;
     ~Function() override;
-
-    Function& operator=(Function&&) = delete;
-    Function& operator=(const Function&) = delete;
 
     /// @returns the function name
     Symbol Name() const { return name_; }

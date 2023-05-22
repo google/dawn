@@ -52,12 +52,7 @@ class Binary : public utils::Castable<Binary, Instruction> {
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
     Binary(enum Kind kind, const type::Type* type, Value* lhs, Value* rhs);
-    Binary(const Binary& inst) = delete;
-    Binary(Binary&& inst) = delete;
     ~Binary() override;
-
-    Binary& operator=(const Binary& inst) = delete;
-    Binary& operator=(Binary&& inst) = delete;
 
     /// @returns the kind of the binary instruction
     enum Kind Kind() const { return kind_; }

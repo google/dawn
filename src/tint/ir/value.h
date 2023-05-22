@@ -32,12 +32,6 @@ class Value : public utils::Castable<Value> {
     /// Destructor
     ~Value() override;
 
-    Value(const Value&) = delete;
-    Value(Value&&) = delete;
-
-    Value& operator=(const Value&) = delete;
-    Value& operator=(Value&&) = delete;
-
     /// Adds an instruction which uses this value.
     /// @param inst the instruction
     void AddUsage(const Instruction* inst) { uses_.Add(inst); }

@@ -26,12 +26,7 @@ class Constant : public utils::Castable<Constant, Value> {
     /// Constructor
     /// @param val the value stored in the constant
     explicit Constant(const constant::Value* val);
-    Constant(const Constant&) = delete;
-    Constant(Constant&&) = delete;
     ~Constant() override;
-
-    Constant& operator=(const Constant&) = delete;
-    Constant& operator=(Constant&&) = delete;
 
     /// @returns the constants value
     const constant::Value* Value() const { return value_; }

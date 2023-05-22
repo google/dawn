@@ -32,12 +32,7 @@ class Block : public utils::Castable<Block, FlowNode> {
   public:
     /// Constructor
     Block();
-    Block(const Block&) = delete;
-    Block(Block&&) = delete;
     ~Block() override;
-
-    Block& operator=(const Block&) = delete;
-    Block& operator=(Block&&) = delete;
 
     /// Sets the blocks branch target to the given node.
     /// @param to the node to branch too

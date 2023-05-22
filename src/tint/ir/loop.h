@@ -26,12 +26,7 @@ class Loop : public utils::Castable<Loop, FlowNode> {
   public:
     /// Constructor
     Loop();
-    Loop(const Loop&) = delete;
-    Loop(Loop&&) = delete;
     ~Loop() override;
-
-    Loop& operator=(const Loop&) = delete;
-    Loop& operator=(Loop&&) = delete;
 
     /// @returns the switch start branch
     const Branch& Start() const { return start_; }

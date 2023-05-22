@@ -27,12 +27,7 @@ class Bitcast : public utils::Castable<Bitcast, Call> {
     /// @param type the result type
     /// @param val the value being bitcast
     Bitcast(const type::Type* type, Value* val);
-    Bitcast(const Bitcast& inst) = delete;
-    Bitcast(Bitcast&& inst) = delete;
     ~Bitcast() override;
-
-    Bitcast& operator=(const Bitcast& inst) = delete;
-    Bitcast& operator=(Bitcast&& inst) = delete;
 };
 
 }  // namespace tint::ir
