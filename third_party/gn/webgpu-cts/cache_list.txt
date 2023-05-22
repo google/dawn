@@ -2,7 +2,11 @@ data/webgpu/shader/execution/case-cache/binary/f16_logical.json
 data/webgpu/shader/execution/case-cache/binary/f32_addition.json
 data/webgpu/shader/execution/case-cache/binary/f32_logical.json
 data/webgpu/shader/execution/case-cache/binary/f32_division.json
-data/webgpu/shader/execution/case-cache/binary/f32_matrix_arithmetic.json
+data/webgpu/shader/execution/case-cache/binary/f32_matrix_addition.json
+data/webgpu/shader/execution/case-cache/binary/f32_matrix_matrix_multiplication.json
+data/webgpu/shader/execution/case-cache/binary/f32_matrix_scalar_multiplication.json
+data/webgpu/shader/execution/case-cache/binary/f32_matrix_subtraction.json
+data/webgpu/shader/execution/case-cache/binary/f32_matrix_vector_multiplication.json
 data/webgpu/shader/execution/case-cache/binary/f32_multiplication.json
 data/webgpu/shader/execution/case-cache/binary/f32_remainder.json
 data/webgpu/shader/execution/case-cache/binary/f32_subtraction.json
