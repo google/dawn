@@ -819,15 +819,9 @@ def as_formatType(typ):
 
 def c_methods(params, typ):
     return typ.methods + [
-        x for x in [
-            Method(Name('reference'), params['types']['void'], [], False,
-                   {'tags': ['dawn', 'emscripten']}),
-            Method(Name('release'), params['types']['void'], [], False,
-                   {'tags': ['dawn', 'emscripten']}),
-        ] if item_is_enabled(params['enabled_tags'], x.json_data)
-        and not item_is_disabled(params['disabled_tags'], x.json_data)
+        Method(Name('reference'), params['types']['void'], [], False, {}),
+        Method(Name('release'), params['types']['void'], [], False, {}),
     ]
-
 
 def get_c_methods_sorted_by_name(api_params):
     unsorted = [(as_MethodSuffix(typ.name, method.name), typ, method) \
