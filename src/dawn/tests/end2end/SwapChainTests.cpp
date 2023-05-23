@@ -219,11 +219,6 @@ TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
 
 // Test switching devices on the same adapter.
 TEST_P(SwapChainTests, SwitchingDevice) {
-    // The Vulkan Validation Layers incorrectly disallow gracefully passing a swapchain between two
-    // VkDevices using "vkSwapchainCreateInfoKHR::oldSwapchain".
-    // See https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/2256
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
-
     wgpu::Device device2 = CreateDevice();
 
     for (int i = 0; i < 3; i++) {
