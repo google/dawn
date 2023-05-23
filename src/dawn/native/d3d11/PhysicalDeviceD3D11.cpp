@@ -71,7 +71,15 @@ bool PhysicalDevice::SupportsExternalImages() const {
 }
 
 bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
-    return featureLevel == FeatureLevel::Compatibility;
+    // TODO(dawn:1820): compare D3D11 feature levels with Dawn feature levels.
+    switch (featureLevel) {
+        case FeatureLevel::Core: {
+            return mFeatureLevel >= D3D_FEATURE_LEVEL_11_1;
+        }
+        case FeatureLevel::Compatibility: {
+            return true;
+        }
+    }
 }
 
 const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
