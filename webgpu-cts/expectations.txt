@@ -453,6 +453,12 @@ crbug.com/tint/1943 [ win10 ] webgpu:shader,execution,memory_model,barrier:workg
 crbug.com/1421045 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,* [ Skip ]
 
 ################################################################################
+# Flaky multisampled sample_mask tests on Mac AMD
+# KEEP
+################################################################################
+crbug.com/dawn/1843 [ mac amd-0x67ef ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ RetryOnFailure ]
+
+################################################################################
 # GPUDeviceLostReason test needs to be updated for spec change
 ################################################################################
 crbug.com/1424883 webgpu:api,operation,adapter,requestDevice:invalid: [ Failure ]
@@ -463,17 +469,6 @@ crbug.com/1424883 webgpu:api,operation,adapter,requestDevice:invalid: [ Failure 
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
 
 # New flakes. Please triage:
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=12 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=13 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=13 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=15 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=15 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=2 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=3 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=4 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=6 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=6 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=8 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="one-minus-constant";dstFactor="one-minus-src";operation="reverse-subtract" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="one-minus-dst-alpha";dstFactor="constant";operation="add" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="one-minus-src";dstFactor="one-minus-dst";operation="subtract" [ RetryOnFailure ]
@@ -573,10 +568,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,o
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=false;sampleCount=1;rasterizationMask=1 [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=1;rasterizationMask=1 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=1;rasterizationMask=1 [ Failure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=3 [ Failure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=8 [ Failure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=9 [ Failure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation ventura ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=9 [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 ubuntu ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
