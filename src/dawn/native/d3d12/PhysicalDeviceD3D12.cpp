@@ -307,8 +307,9 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     // Max number of "constants" where each constant is a 16-byte float4
     limits->v1.maxUniformBufferBindingSize = D3D12_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16;
-    // D3D12 has no documented limit on the size of a storage buffer binding.
-    limits->v1.maxStorageBufferBindingSize = kAssumedMaxBufferSize;
+    // D3D12 limit of number of texels in a buffer == (1 << 27)
+    limits->v1.maxStorageBufferBindingSize = uint64_t(1)
+                                             << D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP;
     // D3D12 has no documented limit on the buffer size.
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
 
