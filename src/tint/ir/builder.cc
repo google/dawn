@@ -45,6 +45,13 @@ FunctionTerminator* Builder::CreateFunctionTerminator() {
     return ir.flow_nodes.Create<FunctionTerminator>();
 }
 
+Function* Builder::CreateFunction(std::string_view name,
+                                  type::Type* return_type,
+                                  Function::PipelineStage stage,
+                                  std::optional<std::array<uint32_t, 3>> wg_size) {
+    return CreateFunction(ir.symbols.Register(name), return_type, stage, wg_size);
+}
+
 Function* Builder::CreateFunction(Symbol name,
                                   type::Type* return_type,
                                   Function::PipelineStage stage,

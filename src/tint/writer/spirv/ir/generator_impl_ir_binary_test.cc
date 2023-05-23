@@ -20,7 +20,7 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_I32) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(2_i)),
                       b.Branch(func->EndTarget())});
@@ -41,7 +41,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_U32) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Add(mod.types.Get<type::U32>(), b.Constant(1_u), b.Constant(2_u)),
                       b.Branch(func->EndTarget())});
@@ -62,7 +62,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_F32) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Add(mod.types.Get<type::F32>(), b.Constant(1_f), b.Constant(2_f)),
                       b.Branch(func->EndTarget())});
@@ -83,7 +83,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_I32) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Subtract(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(2_i)),
                       b.Branch(func->EndTarget())});
@@ -104,7 +104,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_U32) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Subtract(mod.types.Get<type::U32>(), b.Constant(1_u), b.Constant(2_u)),
                       b.Branch(func->EndTarget())});
@@ -125,7 +125,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_F32) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Subtract(mod.types.Get<type::F32>(), b.Constant(1_f), b.Constant(2_f)),
                       b.Branch(func->EndTarget())});
@@ -146,7 +146,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_Vec2i) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     auto* lhs = mod.constants_arena.Create<constant::Composite>(
         mod.types.Get<type::Vector>(mod.types.Get<type::I32>(), 2u),
         utils::Vector{b.Constant(42_i)->Value(), b.Constant(-1_i)->Value()}, false, false);
@@ -179,7 +179,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_Vec4f) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     auto* lhs = mod.constants_arena.Create<constant::Composite>(
         mod.types.Get<type::Vector>(mod.types.Get<type::F32>(), 4u),
         utils::Vector{b.Constant(42_f)->Value(), b.Constant(-1_f)->Value(),
@@ -218,7 +218,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Chain) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
     auto* a = b.Subtract(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(2_i));
     func->StartTarget()->SetInstructions(
         utils::Vector{a, b.Add(mod.types.Get<type::I32>(), a, a), b.Branch(func->EndTarget())});

@@ -21,7 +21,7 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_NoInit) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
 
     auto* ty = mod.types.Get<type::Pointer>(
         mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
@@ -42,7 +42,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_WithInit) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
 
     auto* ty = mod.types.Get<type::Pointer>(
         mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
@@ -68,7 +68,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_Name) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
 
     auto* ty = mod.types.Get<type::Pointer>(
         mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
@@ -92,7 +92,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_DeclInsideBlock) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
 
     auto* ty = mod.types.Get<type::Pointer>(
         mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
@@ -132,7 +132,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_Load) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
 
     auto* store_ty = mod.types.Get<type::I32>();
     auto* ty = mod.types.Get<type::Pointer>(store_ty, builtin::AddressSpace::kFunction,
@@ -156,7 +156,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_Store) {
-    auto* func = b.CreateFunction(mod.symbols.Register("foo"), mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
 
     auto* ty = mod.types.Get<type::Pointer>(
         mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
