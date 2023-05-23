@@ -755,7 +755,6 @@ TEST_F(CompressedTextureFormatsValidationTests, TextureUsage) {
     wgpu::TextureUsage invalidUsages[] = {
         wgpu::TextureUsage::RenderAttachment,
         wgpu::TextureUsage::StorageBinding,
-        wgpu::TextureUsage::Present,
     };
     for (wgpu::TextureFormat format : utils::kCompressedFormats) {
         for (wgpu::TextureUsage usage : invalidUsages) {

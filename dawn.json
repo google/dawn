@@ -2820,8 +2820,7 @@
             {"value": 4, "name": "texture binding"},
             {"value": 8, "name": "storage binding"},
             {"value": 16, "name": "render attachment"},
-            {"value": 32, "name": "present", "tags": ["dawn"]},
-            {"value": 64, "name": "transient attachment", "tags": ["dawn"]}
+            {"value": 32, "name": "transient attachment", "tags": ["dawn"]}
         ]
     },
     "texture view descriptor": {

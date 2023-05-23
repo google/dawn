@@ -601,10 +601,10 @@ TEST_F(StorageTextureValidationTests, StorageTextureBindingTypeInBindGroup) {
 // created with the texture usage wgpu::TextureUsage::StorageBinding.
 TEST_F(StorageTextureValidationTests, StorageTextureUsageInBindGroup) {
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Float;
-    constexpr std::array<wgpu::TextureUsage, 6> kTextureUsages = {
-        wgpu::TextureUsage::CopySrc,          wgpu::TextureUsage::CopyDst,
-        wgpu::TextureUsage::TextureBinding,   wgpu::TextureUsage::StorageBinding,
-        wgpu::TextureUsage::RenderAttachment, wgpu::TextureUsage::Present};
+    constexpr std::array<wgpu::TextureUsage, 5> kTextureUsages = {
+        wgpu::TextureUsage::CopySrc, wgpu::TextureUsage::CopyDst,
+        wgpu::TextureUsage::TextureBinding, wgpu::TextureUsage::StorageBinding,
+        wgpu::TextureUsage::RenderAttachment};
 
     for (wgpu::StorageTextureAccess storageBindingType : kSupportedStorageTextureAccess) {
         // Create a bind group layout.
