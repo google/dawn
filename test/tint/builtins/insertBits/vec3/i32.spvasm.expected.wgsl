@@ -1,13 +1,13 @@
 fn f_1() {
-  var v : vec3i = vec3i();
-  var n : vec3i = vec3i();
-  var offset_1 : u32 = 0u;
-  var count : u32 = 0u;
-  let x_18 : vec3i = v;
-  let x_19 : vec3i = n;
-  let x_20 : u32 = offset_1;
-  let x_21 : u32 = count;
-  let x_16 : vec3i = insertBits(x_18, x_19, x_20, x_21);
+  var v = vec3i();
+  var n = vec3i();
+  var offset_1 = 0u;
+  var count = 0u;
+  let x_18 = v;
+  let x_19 = n;
+  let x_20 = offset_1;
+  let x_21 = count;
+  let x_16 = insertBits(x_18, x_19, x_20, x_21);
   return;
 }
 

@@ -11,11 +11,11 @@ struct SB_RW {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW_atomic;
 
 fn atomicAnd_85a8d9() {
-  var arg_1 : u32 = 0u;
-  var res : u32 = 0u;
+  var arg_1 = 0u;
+  var res = 0u;
   arg_1 = 1u;
-  let x_18 : u32 = arg_1;
-  let x_13 : u32 = atomicAnd(&(sb_rw.arg_0), x_18);
+  let x_18 = arg_1;
+  let x_13 = atomicAnd(&(sb_rw.arg_0), x_18);
   res = x_13;
   return;
 }

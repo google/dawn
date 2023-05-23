@@ -1610,16 +1610,15 @@ const ast::Var* ParserImpl::MakeVar(uint32_t id,
         return nullptr;
     }
 
+    // Use type inference if there is an initializer.
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return builder_.Var(Source{}, sym, storage_type->Build(builder_), address_space, access,
-                        initializer, std::move(attrs.list));
+    return builder_.Var(Source{}, sym, initializer ? ast::Type{} : storage_type->Build(builder_),
+                        address_space, access, initializer, std::move(attrs.list));
 }
 
-const ast::Let* ParserImpl::MakeLet(uint32_t id,
-                                    const Type* type,
-                                    const ast::Expression* initializer) {
+const ast::Let* ParserImpl::MakeLet(uint32_t id, const ast::Expression* initializer) {
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return builder_.Let(Source{}, sym, type->Build(builder_), initializer, utils::Empty);
+    return builder_.Let(Source{}, sym, initializer, utils::Empty);
 }
 
 const ast::Override* ParserImpl::MakeOverride(uint32_t id,

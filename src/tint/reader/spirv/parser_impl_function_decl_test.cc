@@ -377,12 +377,12 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
 }
 
 fn branch() -> u32 {
-  let leaf_result : u32 = leaf();
+  let leaf_result = leaf();
   return leaf_result;
 }
 
 fn root() {
-  let branch_result : u32 = branch();
+  let branch_result = branch();
   return;
 }
 )")) << program_ast;

@@ -1,10 +1,10 @@
 @group(1) @binding(0) var arg_0 : texture_depth_multisampled_2d;
 
-var<private> tint_symbol_1 : vec4f = vec4f();
+var<private> tint_symbol_1 = vec4f();
 
 fn textureNumSamples_a3c8a0() {
-  var res : i32 = 0i;
-  let x_16 : i32 = i32(textureNumSamples(arg_0));
+  var res = 0i;
+  let x_16 = i32(textureNumSamples(arg_0));
   res = x_16;
   return;
 }

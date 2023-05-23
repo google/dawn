@@ -11,8 +11,8 @@ struct SB_RW {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW_atomic;
 
 fn atomicMax_51b9be() {
-  var res : u32 = 0u;
-  let x_9 : u32 = atomicMax(&(sb_rw.arg_0), 1u);
+  var res = 0u;
+  let x_9 = atomicMax(&(sb_rw.arg_0), 1u);
   res = x_9;
   return;
 }

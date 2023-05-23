@@ -20,7 +20,7 @@ struct x_B4_BuildInformation {
 
 fn main_1() {
   var orientation : array<i32, 6u>;
-  let x_23 : Arr = sspp962805860buildInformation.passthru.orientation;
+  let x_23 = sspp962805860buildInformation.passthru.orientation;
   orientation[0i] = x_23[0u];
   orientation[1i] = x_23[1u];
   orientation[2i] = x_23[2u];

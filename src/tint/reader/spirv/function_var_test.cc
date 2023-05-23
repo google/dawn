@@ -181,11 +181,11 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarInitializers) {
     EXPECT_TRUE(fe.EmitFunctionVariables());
 
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : bool = true;
-var b : bool = false;
-var c : i32 = -1i;
-var d : u32 = 1u;
-var e : f32 = 1.5f;
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a = true;
+var b = false;
+var c = -1i;
+var d = 1u;
+var e = 1.5f;
 )"));
 }
 
@@ -210,10 +210,10 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarNullInitializers) {
     EXPECT_TRUE(fe.EmitFunctionVariables());
 
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : bool = false;
-var b : i32 = 0i;
-var c : u32 = 0u;
-var d : f32 = 0.0f;
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a = false;
+var b = 0i;
+var c = 0u;
+var d = 0.0f;
 )"));
 }
 
@@ -235,7 +235,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_VectorInitializer) {
 
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("var x_200 : vec2f = vec2f(1.5f, 2.0f);"));
+                HasSubstr("var x_200 = vec2f(1.5f, 2.0f);"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MatrixInitializer) {
@@ -260,7 +260,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MatrixInitializer) {
     EXPECT_TRUE(fe.EmitFunctionVariables());
 
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("var x_200 : mat3x2f = mat3x2f("
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("var x_200 = mat3x2f("
                                                                   "vec2f(1.5f, 2.0f), "
                                                                   "vec2f(2.0f, 3.0f), "
                                                                   "vec2f(3.0f, 4.0f));"));
@@ -284,7 +284,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer) {
 
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>(1u, 2u);"));
+                HasSubstr("var x_200 = array<u32, 2u>(1u, 2u);"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias) {
@@ -311,7 +311,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias) {
 
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
-    const char* expect = "var x_200 : Arr = Arr(1u, 2u);\n";
+    const char* expect = "var x_200 = Arr(1u, 2u);\n";
     EXPECT_EQ(expect, got);
 }
 
@@ -332,8 +332,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Null) {
     EXPECT_TRUE(fe.EmitFunctionVariables());
 
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>();"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("var x_200 = array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
@@ -360,7 +359,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias_Nu
 
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("var x_200 : Arr = @stride(16) array<u32, 2u>();"));
+                HasSubstr("var x_200 = @stride(16) array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer) {
@@ -382,7 +381,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer) {
 
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("var x_200 : S = S(1u, 1.5f, array<u32, 2u>(1u, 2u));"));
+                HasSubstr("var x_200 = S(1u, 1.5f, array<u32, 2u>(1u, 2u));"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
@@ -404,7 +403,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
 
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("var x_200 : S = S(0u, 0.0f, array<u32, 2u>());"));
+                HasSubstr("var x_200 = S(0u, 0.0f, array<u32, 2u>());"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_Decorate_RelaxedPrecision) {
@@ -556,7 +555,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_CombinatorialValue_Immediate_Used
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var x_25 : u32;
-let x_2 : u32 = (1u + 1u);
+let x_2 = (1u + 1u);
 x_25 = 1u;
 x_25 = x_2;
 x_25 = x_2;
@@ -601,7 +600,7 @@ TEST_F(SpvParserFunctionVarTest,
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var x_25 : u32;
-let x_2 : u32 = (1u + 1u);
+let x_2 = (1u + 1u);
 x_25 = 1u;
 loop {
 
@@ -740,10 +739,10 @@ TEST_F(SpvParserFunctionVarTest,
     // a const definition.
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
-    auto* expect = R"(let x_1 : u32 = 1u;
+    auto* expect = R"(let x_1 = 1u;
 if (true) {
 }
-let x_3 : u32 = x_1;
+let x_3 = x_1;
 x_200 = x_3;
 return;
 )";
@@ -801,10 +800,10 @@ TEST_F(SpvParserFunctionVarTest,
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(if (true) {
-  let x_1 : u32 = 1u;
+  let x_1 = 1u;
   if (true) {
   }
-  let x_3 : u32 = x_1;
+  let x_3 = x_1;
   x_200 = x_3;
 }
 return;
@@ -857,14 +856,14 @@ TEST_F(SpvParserFunctionVarTest,
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(if (true) {
-  let x_1 : u32 = 1u;
+  let x_1 = 1u;
   switch(1u) {
     case 0u: {
     }
     default: {
     }
   }
-  let x_3 : u32 = x_1;
+  let x_3 = x_1;
   x_200 = x_3;
 }
 return;
@@ -911,8 +910,8 @@ TEST_F(SpvParserFunctionVarTest,
     // a const definition.
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
-    auto* expect = R"(let x_1 : u32 = 1u;
-let x_2 : u32 = x_1;
+    auto* expect = R"(let x_1 = 1u;
+let x_2 = x_1;
 if (true) {
 }
 return;
@@ -1015,8 +1014,8 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_SingleBlockLoopIndex) {
     auto* expect = R"(loop {
   var x_2 : u32;
   var x_3 : u32;
-  let x_101 : bool = x_7;
-  let x_102 : bool = x_8;
+  let x_101 = x_7;
+  let x_102 = x_8;
   x_2 = 0u;
   x_3 = 1u;
   if (x_101) {
@@ -1088,8 +1087,8 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_MultiBlockLoopIndex) {
     auto* expect = R"(loop {
   var x_2 : u32;
   var x_3 : u32;
-  let x_101 : bool = x_7;
-  let x_102 : bool = x_8;
+  let x_101 = x_7;
+  let x_102 = x_8;
   x_2 = 0u;
   x_3 = 1u;
   if (x_101) {
@@ -1164,7 +1163,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuin
 
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
-    auto* expect = R"(let x_101 : bool = x_17;
+    auto* expect = R"(let x_101 = x_17;
 loop {
   var x_2 : u32;
   var x_5 : u32;
@@ -1182,7 +1181,7 @@ loop {
 
     continuing {
       x_7 = (x_4 + x_6);
-      let x_8 : u32 = x_5;
+      let x_8 = x_5;
       x_2 = x_4;
       x_5 = x_7;
     }
@@ -1244,8 +1243,8 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromElseAndThen) {
 
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
-    auto* expect = R"(let x_101 : bool = x_7;
-let x_102 : bool = x_8;
+    auto* expect = R"(let x_101 = x_7;
+let x_102 = x_8;
 loop {
   var x_2 : u32;
   if (x_101) {
@@ -1317,8 +1316,8 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromHeaderAndThen) {
 
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
-    auto* expect = R"(let x_101 : bool = x_7;
-let x_102 : bool = x_8;
+    auto* expect = R"(let x_101 = x_7;
+let x_102 = x_8;
 loop {
   var x_2 : u32;
   if (x_101) {
@@ -1380,13 +1379,13 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_UseInPhiCountsAsUse) {
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var x_101 : bool;
-let x_11 : bool = (true & true);
-let x_12 : bool = !(x_11);
+let x_11 = (true & true);
+let x_12 = !(x_11);
 x_101 = x_11;
 if (true) {
   x_101 = x_12;
 }
-let x_102 : bool = x_101;
+let x_102 = x_101;
 return;
 )";
     EXPECT_EQ(expect, got);
@@ -1532,7 +1531,7 @@ loop {
     x_101 = x_999;
   }
 }
-let x_1000 : bool = x_101;
+let x_1000 = x_101;
 return;
 )";
     EXPECT_EQ(expect, got);
@@ -1698,7 +1697,7 @@ loop {
     x_101 = x_999;
   }
 }
-let x_1000 : bool = x_101;
+let x_1000 = x_101;
 return;
 )";
     EXPECT_EQ(expect, got);
@@ -1737,7 +1736,7 @@ if (true) {
 } else {
   return;
 }
-let x_201 : vec2i = x_200;
+let x_201 = x_200;
 return;
 )";
     auto ast_body = fe.ast_body();
@@ -1780,7 +1779,7 @@ if (true) {
 } else {
   return;
 }
-let x_201 : vec2i = x_200;
+let x_201 = x_200;
 return;
 )";
     EXPECT_EQ(got, expected) << got;

@@ -1,8 +1,8 @@
 fn main_1() {
-  var i : i32 = 0i;
+  var i = 0i;
   i = 123i;
-  let x_10 : i32 = i;
-  let x_12 : i32 = (x_10 + 1i);
+  let x_10 = i;
+  let x_12 = (x_10 + 1i);
   return;
 }
 

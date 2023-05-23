@@ -11,8 +11,8 @@ struct SB_RW {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW_atomic;
 
 fn atomicOr_8d96a0() {
-  var res : i32 = 0i;
-  let x_9 : i32 = atomicOr(&(sb_rw.arg_0), 1i);
+  var res = 0i;
+  let x_9 = atomicOr(&(sb_rw.arg_0), 1i);
   res = x_9;
   return;
 }

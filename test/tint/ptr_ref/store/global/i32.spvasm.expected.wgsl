@@ -1,4 +1,4 @@
-var<private> I : i32 = 0i;
+var<private> I = 0i;
 
 fn main_1() {
   I = 123i;

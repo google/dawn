@@ -122,7 +122,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : i32 = -(30i);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = -(30i);"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
@@ -139,7 +139,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : i32 = -(bitcast<i32>(10u));"));
+                HasSubstr("let x_1 = -(bitcast<i32>(10u));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
@@ -156,7 +156,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : u32 = bitcast<u32>(-(30i));"));
+                HasSubstr("let x_1 = bitcast<u32>(-(30i));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
@@ -173,7 +173,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : u32 = bitcast<u32>(-(bitcast<i32>(10u)));"));
+                HasSubstr("let x_1 = bitcast<u32>(-(bitcast<i32>(10u)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
@@ -189,8 +189,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2i = -(vec2i(30i, 40i));"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = -(vec2i(30i, 40i));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
@@ -207,7 +206,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2i = -(bitcast<vec2i>(vec2u(10u, 20u)));"));
+                HasSubstr("let x_1 = -(bitcast<vec2i>(vec2u(10u, 20u)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
@@ -224,7 +223,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2u = bitcast<vec2u>(-(vec2i(30i, 40i)));"));
+                HasSubstr("let x_1 = bitcast<vec2u>(-(vec2i(30i, 40i)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
@@ -240,9 +239,8 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(
-        test::ToString(p->program(), ast_body),
-        HasSubstr(R"(let x_1 : vec2u = bitcast<vec2u>(-(bitcast<vec2i>(vec2u(10u, 20u))));)"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr(R"(let x_1 = bitcast<vec2u>(-(bitcast<vec2i>(vec2u(10u, 20u))));)"));
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
@@ -258,7 +256,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : f32 = -(50.0f);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = -(50.0f);"));
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Vector) {
@@ -274,8 +272,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2f = -(v2float_50_60);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = -(v2float_50_60);"));
 }
 
 struct BinaryData {
@@ -313,8 +310,8 @@ TEST_P(SpvBinaryArithTest, EmitExpression) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     utils::StringStream ss;
-    ss << "let x_1 : " << GetParam().ast_type << " = (" << GetParam().ast_lhs << " "
-       << GetParam().ast_op << " " << GetParam().ast_rhs << ");";
+    ss << "let x_1 = (" << GetParam().ast_lhs << " " << GetParam().ast_op << " "
+       << GetParam().ast_rhs << ");";
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr(ss.str())) << "got:\n" << got << assembly;
@@ -352,7 +349,7 @@ TEST_P(SpvBinaryArithGeneralTest, EmitExpression) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     utils::StringStream ss;
-    ss << "let x_1 : " << GetParam().wgsl_type << " = " << GetParam().expected << ";";
+    ss << "let x_1 = " << GetParam().expected << ";";
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr(ss.str())) << "got:\n" << got << assembly;
@@ -547,7 +544,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : u32 = bitcast<u32>((30i / 40i));"));
+                HasSubstr("let x_1 = bitcast<u32>((30i / 40i));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
@@ -567,9 +564,8 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(
-        test::ToString(p->program(), ast_body),
-        HasSubstr(R"(let x_1 : vec2u = bitcast<vec2u>((vec2i(30i, 40i) / vec2i(40i, 30i)));)"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr(R"(let x_1 = bitcast<vec2u>((vec2i(30i, 40i) / vec2i(40i, 30i)));)"));
 }
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FDiv,
@@ -636,7 +632,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : u32 = bitcast<u32>((30i % 40i));"));
+                HasSubstr("let x_1 = bitcast<u32>((30i % 40i));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
@@ -656,9 +652,8 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(
-        test::ToString(p->program(), ast_body),
-        HasSubstr(R"(let x_1 : vec2u = bitcast<vec2u>((vec2i(30i, 40i) % vec2i(40i, 30i)));)"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr(R"(let x_1 = bitcast<vec2u>((vec2i(30i, 40i) % vec2i(40i, 30i)));)"));
 }
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FRem,
@@ -685,7 +680,7 @@ TEST_F(SpvBinaryArithTestBasic, FMod_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : f32 = (50.0f - (60.0f * floor((50.0f / 60.0f))));"));
+                HasSubstr("let x_1 = (50.0f - (60.0f * floor((50.0f / 60.0f))));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, FMod_Vector) {
@@ -702,7 +697,7 @@ TEST_F(SpvBinaryArithTestBasic, FMod_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2f = (v2float_50_60 - (v2float_60_50 * "
+                HasSubstr("let x_1 = (v2float_50_60 - (v2float_60_50 * "
                           "floor((v2float_50_60 / v2float_60_50))));"));
 }
 
@@ -721,8 +716,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec2f = (x_1 * x_2);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_10 = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
@@ -740,8 +734,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : mat2x2f = (x_1 * x_2);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_10 = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
@@ -759,8 +752,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec2f = (x_1 * x_2);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_10 = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
@@ -778,8 +770,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : vec2f = (x_1 * x_2);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_10 = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
@@ -797,8 +788,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_10 : mat2x2f = (x_1 * x_2);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_10 = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, Dot) {
@@ -816,8 +806,7 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_3 : f32 = dot(x_1, x_2);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_3 = dot(x_1, x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
@@ -838,7 +827,7 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr("let x_3 : mat2x3f = mat2x3f("
+    EXPECT_THAT(got, HasSubstr("let x_3 = mat2x3f("
                                "vec3f((x_2.x * x_1.x), (x_2.x * x_1.y), (x_2.x * x_1.z)), "
                                "vec3f((x_2.y * x_1.x), (x_2.y * x_1.y), (x_2.y * x_1.z)));"))
         << got;
@@ -888,7 +877,7 @@ TEST_P(SpvBinaryDerivativeTest, Derivatives) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_2 : " + arg.ast_type + " = " + builtin.wgsl + "(x_1);"));
+                HasSubstr("let x_2 = " + builtin.wgsl + "(x_1);"));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -920,7 +909,7 @@ TEST_F(SpvUnaryArithTest, Transpose_2x2) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    const auto* expected = "let x_2 : mat2x2f = transpose(x_1);";
+    const auto* expected = "let x_2 = transpose(x_1);";
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr(expected)) << got;
@@ -942,7 +931,7 @@ TEST_F(SpvUnaryArithTest, Transpose_2x3) {
     // Note, in the AST dump mat_2_3 means 2 rows and 3 columns.
     // So the column vectors have 2 elements.
     // That is,   %m3v2float is __mat_2_3f32.
-    const auto* expected = "let x_2 : mat3x2f = transpose(x_1);";
+    const auto* expected = "let x_2 = transpose(x_1);";
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr(expected)) << got;
@@ -961,7 +950,7 @@ TEST_F(SpvUnaryArithTest, Transpose_3x2) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    const auto* expected = "let x_2 : mat2x3f = transpose(x_1);";
+    const auto* expected = "let x_2 = transpose(x_1);";
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
     EXPECT_THAT(got, HasSubstr(expected)) << got;

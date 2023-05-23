@@ -2844,7 +2844,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     const std::string guard_name = block_info.flow_guard_name;
     if (!guard_name.empty()) {
         // Declare the guard variable just before the "if", initialized to true.
-        auto* guard_var = builder_.Var(guard_name, builder_.ty.bool_(), MakeTrue(Source{}));
+        auto* guard_var = builder_.Var(guard_name, MakeTrue(Source{}));
         auto* guard_decl = create<ast::VariableDeclStatement>(Source{}, guard_var);
         AddStatement(guard_decl);
     }
@@ -3448,7 +3448,7 @@ bool FunctionEmitter::EmitConstDefinition(const spvtools::opt::Instruction& inst
 
     expr = AddressOfIfNeeded(expr, &inst);
     expr.type = RemapPointerProperties(expr.type, inst.result_id());
-    auto* let = parser_impl_.MakeLet(inst.result_id(), expr.type, expr.expr);
+    auto* let = parser_impl_.MakeLet(inst.result_id(), expr.expr);
     if (!let) {
         return false;
     }
@@ -6212,7 +6212,7 @@ bool FunctionEmitter::MakeVectorInsertDynamic(const spvtools::opt::Instruction& 
     //   variable with the %src_vector contents, then write the component,
     //   and then make a let-declaration that reads the value out:
     //
-    //    var temp : type = src_vector;
+    //    var temp = src_vector;
     //    temp[index] = component;
     //    let result : type = temp;
     //
@@ -6238,8 +6238,7 @@ bool FunctionEmitter::MakeVectorInsertDynamic(const spvtools::opt::Instruction& 
         // API in parser_impl_.
         var_name = namer_.MakeDerivedName(original_value_name);
 
-        auto* temp_var = builder_.Var(var_name, type->Build(builder_),
-                                      builtin::AddressSpace::kUndefined, src_vector.expr);
+        auto* temp_var = builder_.Var(var_name, builtin::AddressSpace::kUndefined, src_vector.expr);
 
         AddStatement(builder_.Decl({}, temp_var));
     }
@@ -6278,7 +6277,7 @@ bool FunctionEmitter::MakeCompositeInsert(const spvtools::opt::Instruction& inst
     //   variable with the %composite contents, then write the component,
     //   and then make a let-declaration that reads the value out:
     //
-    //    var temp : type = composite;
+    //    var temp = composite;
     //    temp[index].x = object;
     //    let result : type = temp;
     //
@@ -6308,8 +6307,8 @@ bool FunctionEmitter::MakeCompositeInsert(const spvtools::opt::Instruction& inst
         // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
         // API in parser_impl_.
         var_name = namer_.MakeDerivedName(original_value_name);
-        auto* temp_var = builder_.Var(var_name, type->Build(builder_),
-                                      builtin::AddressSpace::kUndefined, src_composite.expr);
+        auto* temp_var =
+            builder_.Var(var_name, builtin::AddressSpace::kUndefined, src_composite.expr);
         AddStatement(builder_.Decl({}, temp_var));
     }
 

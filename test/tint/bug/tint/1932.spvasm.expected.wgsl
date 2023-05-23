@@ -1,8 +1,8 @@
 const x_22 = vec2f(2.0f, 2.0f);
 
 fn main_1() {
-  let distance_1 : vec2f = x_22;
-  let x_10 : f32 = distance(distance_1, x_22);
+  let distance_1 = x_22;
+  let x_10 = distance(distance_1, x_22);
   return;
 }
 

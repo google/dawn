@@ -136,7 +136,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
         f50 = fe.ast_body();
     }
     auto program = p->program();
-    EXPECT_THAT(test::ToString(program, f100), HasSubstr("let x_1 : u32 = x_50();\nreturn;"));
+    EXPECT_THAT(test::ToString(program, f100), HasSubstr("let x_1 = x_50();\nreturn;"));
     EXPECT_THAT(test::ToString(program, f50), HasSubstr("return 42u;"));
 }
 
@@ -178,7 +178,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
     }
     auto program = p->program();
     EXPECT_EQ(test::ToString(program, f100), R"(var x_10 : u32;
-let x_1 : u32 = x_50();
+let x_1 = x_50();
 x_10 = x_1;
 x_10 = x_1;
 return;
@@ -217,7 +217,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
 }
 
 fn x_100_1() {
-  let x_1 : u32 = x_50(42u, 84u);
+  let x_1 = x_50(42u, 84u);
   return;
 }
 

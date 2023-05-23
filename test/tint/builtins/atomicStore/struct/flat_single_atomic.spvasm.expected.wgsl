@@ -30,7 +30,7 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
 }
 
 fn compute_main_1() {
-  let x_35 : u32 = local_invocation_index_1;
+  let x_35 = local_invocation_index_1;
   compute_main_inner(x_35);
   return;
 }

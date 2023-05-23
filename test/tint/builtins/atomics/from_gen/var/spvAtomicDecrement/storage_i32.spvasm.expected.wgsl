@@ -11,10 +11,10 @@ struct SB_RW {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW_atomic;
 
 fn atomicAdd_d32fe4() {
-  var arg_1 : i32 = 0i;
-  var res : i32 = 0i;
+  var arg_1 = 0i;
+  var res = 0i;
   arg_1 = 1i;
-  let x_13 : i32 = atomicSub(&(sb_rw.arg_0), 1i);
+  let x_13 = atomicSub(&(sb_rw.arg_0), 1i);
   res = x_13;
   return;
 }

@@ -446,10 +446,9 @@ class ParserImpl : Reader {
 
     /// Creates an AST 'let' node for a SPIR-V ID, including any attached decorations,.
     /// @param id the SPIR-V result ID
-    /// @param type the type of the variable
     /// @param initializer the variable initializer
     /// @returns the AST 'let' node
-    const ast::Let* MakeLet(uint32_t id, const Type* type, const ast::Expression* initializer);
+    const ast::Let* MakeLet(uint32_t id, const ast::Expression* initializer);
 
     /// Creates an AST 'override' node for a SPIR-V ID, including any attached decorations.
     /// @param id the SPIR-V result ID

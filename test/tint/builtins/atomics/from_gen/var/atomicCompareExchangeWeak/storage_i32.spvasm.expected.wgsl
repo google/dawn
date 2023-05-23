@@ -18,15 +18,15 @@ struct x__atomic_compare_exchange_resulti32 {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW_atomic;
 
 fn atomicCompareExchangeWeak_1bd40a() {
-  var arg_1 : i32 = 0i;
-  var arg_2 : i32 = 0i;
-  var res : x__atomic_compare_exchange_resulti32 = x__atomic_compare_exchange_resulti32(0i, false);
+  var arg_1 = 0i;
+  var arg_2 = 0i;
+  var res = x__atomic_compare_exchange_resulti32(0i, false);
   arg_1 = 1i;
   arg_2 = 1i;
-  let x_23 : i32 = arg_2;
-  let x_24 : i32 = arg_1;
+  let x_23 = arg_2;
+  let x_24 = arg_1;
   let old_value_1 = atomicCompareExchangeWeak(&(sb_rw.arg_0), x_24, x_23).old_value;
-  let x_25 : i32 = old_value_1;
+  let x_25 = old_value_1;
   res = x__atomic_compare_exchange_resulti32(x_25, (x_25 == x_23));
   return;
 }

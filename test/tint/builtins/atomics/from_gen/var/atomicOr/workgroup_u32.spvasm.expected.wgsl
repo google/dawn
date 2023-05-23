@@ -3,11 +3,11 @@ var<private> local_invocation_index_1 : u32;
 var<workgroup> arg_0 : atomic<u32>;
 
 fn atomicOr_5e3d61() {
-  var arg_1 : u32 = 0u;
-  var res : u32 = 0u;
+  var arg_1 = 0u;
+  var res = 0u;
   arg_1 = 1u;
-  let x_18 : u32 = arg_1;
-  let x_14 : u32 = atomicOr(&(arg_0), x_18);
+  let x_18 = arg_1;
+  let x_14 = atomicOr(&(arg_0), x_18);
   res = x_14;
   return;
 }
@@ -20,7 +20,7 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
 }
 
 fn compute_main_1() {
-  let x_32 : u32 = local_invocation_index_1;
+  let x_32 = local_invocation_index_1;
   compute_main_inner(x_32);
   return;
 }

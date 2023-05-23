@@ -19,7 +19,7 @@ fn mat2x2_stride_16_to_arr(m : mat2x2<f32>) -> array<strided_arr, 2u> {
 }
 
 fn f_1() {
-  let x_15 : mat2x2f = arr_to_mat2x2_stride_16(ssbo.m);
+  let x_15 = arr_to_mat2x2_stride_16(ssbo.m);
   ssbo.m = mat2x2_stride_16_to_arr(x_15);
   return;
 }

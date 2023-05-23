@@ -1,10 +1,10 @@
 @group(1) @binding(0) var arg_0 : texture_depth_multisampled_2d;
 
-var<private> tint_symbol_1 : vec4f = vec4f();
+var<private> tint_symbol_1 = vec4f();
 
 fn textureDimensions_f60bdb() {
-  var res : vec2i = vec2i();
-  let x_16 : vec2i = vec2i(textureDimensions(arg_0));
+  var res = vec2i();
+  let x_16 = vec2i(textureDimensions(arg_0));
   res = x_16;
   return;
 }

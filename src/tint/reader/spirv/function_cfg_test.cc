@@ -7192,7 +7192,7 @@ TEST_F(SpvParserCFGTest, EmitBody_IfBreak_FromThen_ForwardWithinThen) {
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var_1 = 1u;
-var guard10 : bool = true;
+var guard10 = true;
 if (false) {
   var_1 = 2u;
   if (true) {
@@ -7249,7 +7249,7 @@ TEST_F(SpvParserCFGTest, EmitBody_IfBreak_FromElse_ForwardWithinElse) {
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var_1 = 1u;
-var guard10 : bool = true;
+var guard10 = true;
 if (false) {
   var_1 = 2u;
   guard10 = false;
@@ -7320,7 +7320,7 @@ TEST_F(SpvParserCFGTest, EmitBody_IfBreak_FromThenWithForward_FromElseWithForwar
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var_1 = 1u;
-var guard10 : bool = true;
+var guard10 = true;
 if (false) {
   var_1 = 2u;
   if (true) {

@@ -5,18 +5,18 @@ var<private> local_invocation_index_1 : u32;
 var<workgroup> wg : array<atomic<u32>, 4u>;
 
 fn compute_main_inner(local_invocation_index_2 : u32) {
-  var idx : u32 = 0u;
+  var idx = 0u;
   idx = local_invocation_index_2;
   loop {
-    let x_21 : u32 = idx;
+    let x_21 = idx;
     if (!((x_21 < 4u))) {
       break;
     }
-    let x_26 : u32 = idx;
+    let x_26 = idx;
     atomicStore(&(wg[x_26]), 0u);
 
     continuing {
-      let x_33 : u32 = idx;
+      let x_33 = idx;
       idx = (x_33 + 1u);
     }
   }
@@ -26,7 +26,7 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
 }
 
 fn compute_main_1() {
-  let x_47 : u32 = local_invocation_index_1;
+  let x_47 = local_invocation_index_1;
   compute_main_inner(x_47);
   return;
 }

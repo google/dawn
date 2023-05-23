@@ -6,11 +6,11 @@ const x_17 = vec2i(0i, 0i);
 
 fn main_1() {
   var srcValue : vec4u;
-  let x_18 : vec4u = textureLoad(Src, x_17, 0i);
+  let x_18 = textureLoad(Src, x_17, 0i);
   srcValue = x_18;
-  let x_22 : u32 = srcValue.x;
+  let x_22 = srcValue.x;
   srcValue.x = (x_22 + bitcast<u32>(1i));
-  let x_27 : vec4u = srcValue;
+  let x_27 = srcValue;
   textureStore(Dst, x_17, x_27);
   return;
 }

@@ -11,9 +11,9 @@ struct SB_RW {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW_atomic;
 
 fn atomicStore_cdc29e() {
-  var arg_1 : u32 = 0u;
+  var arg_1 = 0u;
   arg_1 = 1u;
-  let x_18 : u32 = arg_1;
+  let x_18 = arg_1;
   atomicStore(&(sb_rw.arg_0), x_18);
   return;
 }

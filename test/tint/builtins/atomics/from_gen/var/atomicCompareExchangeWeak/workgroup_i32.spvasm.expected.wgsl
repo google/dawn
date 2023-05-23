@@ -10,15 +10,15 @@ var<private> local_invocation_index_1 : u32;
 var<workgroup> arg_0 : atomic<i32>;
 
 fn atomicCompareExchangeWeak_e88938() {
-  var arg_1 : i32 = 0i;
-  var arg_2 : i32 = 0i;
-  var res : x__atomic_compare_exchange_resulti32 = x__atomic_compare_exchange_resulti32(0i, false);
+  var arg_1 = 0i;
+  var arg_2 = 0i;
+  var res = x__atomic_compare_exchange_resulti32(0i, false);
   arg_1 = 1i;
   arg_2 = 1i;
-  let x_22 : i32 = arg_2;
-  let x_23 : i32 = arg_1;
+  let x_22 = arg_2;
+  let x_23 = arg_1;
   let old_value_1 = atomicCompareExchangeWeak(&(arg_0), x_23, x_22).old_value;
-  let x_24 : i32 = old_value_1;
+  let x_24 = old_value_1;
   res = x__atomic_compare_exchange_resulti32(x_24, (x_24 == x_22));
   return;
 }
@@ -31,7 +31,7 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
 }
 
 fn compute_main_1() {
-  let x_41 : u32 = local_invocation_index_1;
+  let x_41 = local_invocation_index_1;
   compute_main_inner(x_41);
   return;
 }

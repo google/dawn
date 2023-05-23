@@ -159,7 +159,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_LoadBool) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_2 : bool = x_1;"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_2 = x_1;"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_LoadScalar) {
@@ -181,8 +181,9 @@ TEST_F(SpvParserMemoryTest, EmitStatement_LoadScalar) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_2 : u32 = x_1;
-let x_3 : u32 = x_1;
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"( x_1 = 42u;
+let x_2 = x_1;
+let x_3 = x_1;
 )"));
 }
 
@@ -206,7 +207,8 @@ TEST_F(SpvParserMemoryTest, EmitStatement_UseLoadedScalarTwice) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_2 : u32 = x_1;
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"( x_1 = 42u;
+let x_2 = x_1;
 x_1 = x_2;
 x_1 = x_2;
 )"));
@@ -802,7 +804,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
     ASSERT_TRUE(p->BuildAndParseInternalModule());
     const auto got = test::ToString(p->program());
     const std::string expected = R"(fn x_200(x_1 : ptr<private, vec2u>) {
-  let x_3 : u32 = (*(x_1)).x;
+  let x_3 = (*(x_1)).x;
   return;
 }
 
@@ -846,7 +848,7 @@ OpExecutionMode %main OriginUpperLeft
     const auto got = test::ToString(p->program());
     const std::string expected = R"(fn main_1() {
   var x_1 : u32;
-  let x_2 : ptr<function, u32> = &(x_1);
+  let x_2 = &(x_1);
   return;
 }
 
@@ -1018,11 +1020,11 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_Us
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32, read_write> = &(myvar.field0);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 = &(myvar.field0);
 *(x_1) = 0u;
 *(x_1) = 0u;
-let x_2 : ptr<storage, u32, read_write> = &(myvar.field1[1u]);
-let x_3 : u32 = *(x_2);
+let x_2 = &(myvar.field1[1u]);
+let x_3 = *(x_2);
 *(x_2) = 0u;
 )"));
 }
@@ -1054,11 +1056,11 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_Us
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32, read> = &(myvar.field0);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 = &(myvar.field0);
 *(x_1) = 0u;
 *(x_1) = 0u;
-let x_2 : ptr<storage, u32, read> = &(myvar.field1[1u]);
-let x_3 : u32 = *(x_2);
+let x_2 = &(myvar.field1[1u]);
+let x_3 = *(x_2);
 *(x_2) = 0u;
 )")) << got
      << assembly;
@@ -1093,11 +1095,11 @@ TEST_F(SpvParserMemoryTest, StorageBuffer_ThroughAccessChain_NonCascaded_UsedTwi
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32, read_write> = &(myvar.field0);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 = &(myvar.field0);
 *(x_1) = 0u;
 *(x_1) = 0u;
-let x_2 : ptr<storage, u32, read_write> = &(myvar.field1[1u]);
-let x_3 : u32 = *(x_2);
+let x_2 = &(myvar.field1[1u]);
+let x_3 = *(x_2);
 *(x_2) = 0u;
 )")) << got;
 }
@@ -1133,11 +1135,11 @@ TEST_F(SpvParserMemoryTest, StorageBuffer_ThroughAccessChain_NonCascaded_UsedTwi
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32, read> = &(myvar.field0);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 = &(myvar.field0);
 *(x_1) = 0u;
 *(x_1) = 0u;
-let x_2 : ptr<storage, u32, read> = &(myvar.field1[1u]);
-let x_3 : u32 = *(x_2);
+let x_2 = &(myvar.field1[1u]);
+let x_3 = *(x_2);
 *(x_2) = 0u;
 )")) << got;
 }
@@ -1216,8 +1218,7 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr(R"(let x_2 : ptr<storage, u32, read_write> = &(myvar.field1[1u]);
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_2 = &(myvar.field1[1u]);
 *(x_2) = 0u;
 )")) << p->error();
 
@@ -1275,7 +1276,7 @@ TEST_F(SpvParserMemoryTest, ArrayLength_FromVar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body_str = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body_str, HasSubstr("let x_1 : u32 = arrayLength(&(myvar.rtarr));")) << body_str;
+    EXPECT_THAT(body_str, HasSubstr("let x_1 = arrayLength(&(myvar.rtarr));")) << body_str;
 }
 
 TEST_F(SpvParserMemoryTest, ArrayLength_FromCopyObject) {
@@ -1295,8 +1296,8 @@ TEST_F(SpvParserMemoryTest, ArrayLength_FromCopyObject) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body_str = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body_str, HasSubstr(R"(let x_2 : ptr<storage, S, read_write> = &(myvar);
-let x_1 : u32 = arrayLength(&((*(x_2)).rtarr));
+    EXPECT_THAT(body_str, HasSubstr(R"(let x_2 = &(myvar);
+let x_1 = arrayLength(&((*(x_2)).rtarr));
 )")) << body_str;
 
     p->SkipDumpingPending("crbug.com/tint/1041 track access mode in spirv-reader parser type");
@@ -1319,7 +1320,7 @@ TEST_F(SpvParserMemoryTest, ArrayLength_FromAccessChain) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body_str = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body_str, HasSubstr("let x_1 : u32 = arrayLength(&(myvar.rtarr));")) << body_str;
+    EXPECT_THAT(body_str, HasSubstr("let x_1 = arrayLength(&(myvar.rtarr));")) << body_str;
 }
 
 std::string InvalidPointerPreamble() {
