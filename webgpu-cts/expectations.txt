@@ -90,23 +90,6 @@ crbug.com/1344876 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToT
 crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
 
 ################################################################################
-# copyToTexture failures with incorrect values on Mac Intel
-# KEEP
-################################################################################
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg16float";dstFormat="rg16float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r32float";dstFormat="r32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg16float";dstFormat="rg16float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="2d" [ Failure ]
-crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
-
-################################################################################
 # external_texture failures
 # KEEP
 ################################################################################
@@ -284,13 +267,6 @@ crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shad
 crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 
 ################################################################################
-# webgpu:shader,execution,memory_model
-# Flakes / slow tests
-# KEEP
-################################################################################
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
-
-################################################################################
 # shader validation failures
 ################################################################################
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
@@ -463,6 +439,12 @@ crbug.com/dawn/1706 [ intel-0x9bc5 win10 ] webgpu:api,operation,command_buffer,q
 crbug.com/dawn/1706 [ intel-0x9bc5 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,scissor:writeMask=0;renderMode="render-bundle";bufferOffset="non-zero";querySetOffset="zero" [ Failure ]
 crbug.com/dawn/1706 [ intel-0x9bc5 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,scissor:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="non-zero" [ Failure ]
 crbug.com/dawn/1706 [ intel-0x9bc5 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,scissor:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero" [ Failure ]
+
+################################################################################
+# workgroup_barrier memType="non_atomic_storage" fails on Windows
+################################################################################
+crbug.com/tint/1943 [ win10 ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_load_store:memType="non_atomic_storage" [ Failure ]
+crbug.com/tint/1943 [ win10 ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_store_load:memType="non_atomic_storage" [ Failure ]
 
 ################################################################################
 # Skipped due to device creation failures
