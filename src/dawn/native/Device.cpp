@@ -266,6 +266,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     mState = State::Alive;
 
     DAWN_TRY_ASSIGN(mEmptyBindGroupLayout, CreateEmptyBindGroupLayout());
+    DAWN_TRY_ASSIGN(mEmptyPipelineLayout, CreateEmptyPipelineLayout());
 
     // If placeholder fragment shader module is needed, initialize it
     if (IsToggleEnabled(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline)) {
@@ -481,6 +482,7 @@ void DeviceBase::Destroy() {
     // Destroy() via APIGetQueue.
     mDynamicUploader = nullptr;
     mEmptyBindGroupLayout = nullptr;
+    mEmptyPipelineLayout = nullptr;
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
 
@@ -850,9 +852,22 @@ ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateEmptyBindGroupLayout()
     return GetOrCreateBindGroupLayout(&desc);
 }
 
+ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreateEmptyPipelineLayout() {
+    PipelineLayoutDescriptor desc = {};
+    desc.bindGroupLayoutCount = 0;
+    desc.bindGroupLayouts = nullptr;
+
+    return GetOrCreatePipelineLayout(&desc);
+}
+
 BindGroupLayoutBase* DeviceBase::GetEmptyBindGroupLayout() {
     ASSERT(mEmptyBindGroupLayout != nullptr);
     return mEmptyBindGroupLayout.Get();
+}
+
+PipelineLayoutBase* DeviceBase::GetEmptyPipelineLayout() {
+    ASSERT(mEmptyPipelineLayout != nullptr);
+    return mEmptyPipelineLayout.Get();
 }
 
 Ref<ComputePipelineBase> DeviceBase::GetCachedComputePipeline(

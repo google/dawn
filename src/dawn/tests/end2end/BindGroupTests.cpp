@@ -705,6 +705,91 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 
+// Test that the same renderpass can use 3 more pipelines
+TEST_P(BindGroupTests, ThreePipelinesInSameRenderpass) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    // Create a bind group layout which uses a single dynamic uniform buffer.
+    wgpu::BindGroupLayout uniformLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, true}});
+
+    // Pipeline0 uses 2 bind groups, 'bindGroup00' and 'bindGroup01', respectively accommodated with
+    // 'color00' and 'color01'.
+    wgpu::RenderPipeline pipeline0 = MakeTestPipeline(
+        renderPass, {wgpu::BufferBindingType::Uniform, wgpu::BufferBindingType::Uniform},
+        {uniformLayout, uniformLayout});
+
+    // Pipeline1 uses 'bindGroup1', accommodated with 'color1'.
+    wgpu::RenderPipeline pipeline1 =
+        MakeTestPipeline(renderPass, {wgpu::BufferBindingType::Uniform}, {uniformLayout});
+
+    // Pipeline2 uses 'bindGroup2', accommodated with 'color2'.
+    wgpu::RenderPipeline pipeline2 =
+        MakeTestPipeline(renderPass, {wgpu::BufferBindingType::Uniform}, {uniformLayout});
+
+    // Sum up to (1, 1, 1, 1)
+    std::array<float, 4> color00 = {1, 0, 0, 0.5};
+    std::array<float, 4> color01 = {0, 1, 0, 0.5};
+    std::array<float, 4> color1 = {0, 0, 0.2, 0};
+    std::array<float, 4> color2 = {0, 0, 0.8, 0};
+
+    std::vector<uint8_t> data(sizeof(color00));
+    memcpy(data.data(), color00.data(), sizeof(color00));
+    wgpu::Buffer uniformBuffer00 =
+        utils::CreateBufferFromData(device, data.data(), data.size(), wgpu::BufferUsage::Uniform);
+    wgpu::BindGroup bindGroup00 =
+        utils::MakeBindGroup(device, uniformLayout, {{0, uniformBuffer00, 0, 4 * sizeof(float)}});
+
+    memcpy(data.data(), color01.data(), sizeof(color01));
+    wgpu::Buffer uniformBuffer01 =
+        utils::CreateBufferFromData(device, data.data(), data.size(), wgpu::BufferUsage::Uniform);
+    wgpu::BindGroup bindGroup01 =
+        utils::MakeBindGroup(device, uniformLayout, {{0, uniformBuffer01, 0, 4 * sizeof(float)}});
+
+    memcpy(data.data(), color1.data(), sizeof(color1));
+    wgpu::Buffer uniformBuffer1 =
+        utils::CreateBufferFromData(device, data.data(), data.size(), wgpu::BufferUsage::Uniform);
+    wgpu::BindGroup bindGroup1 =
+        utils::MakeBindGroup(device, uniformLayout, {{0, uniformBuffer1, 0, 4 * sizeof(float)}});
+
+    memcpy(data.data(), color2.data(), sizeof(color2));
+    wgpu::Buffer uniformBuffer2 =
+        utils::CreateBufferFromData(device, data.data(), data.size(), wgpu::BufferUsage::Uniform);
+    wgpu::BindGroup bindGroup2 =
+        utils::MakeBindGroup(device, uniformLayout, {{0, uniformBuffer2, 0, 4 * sizeof(float)}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+    uint32_t dynamicOffset = 0;
+
+    pass.SetPipeline(pipeline0);
+    pass.SetBindGroup(0, bindGroup00, 1, &dynamicOffset);
+    pass.SetBindGroup(1, bindGroup01, 1, &dynamicOffset);
+    pass.Draw(3);
+
+    pass.SetBindGroup(0, bindGroup1, 1, &dynamicOffset);
+    pass.SetPipeline(pipeline1);
+    pass.Draw(3);
+
+    pass.SetBindGroup(0, bindGroup2, 1, &dynamicOffset);
+    pass.SetPipeline(pipeline2);
+    pass.Draw(3);
+
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    utils::RGBA8 filled(255, 255, 255, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
+    uint32_t min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
+}
+
 // Test that bind groups set for one pipeline are still set when the pipeline changes.
 TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);

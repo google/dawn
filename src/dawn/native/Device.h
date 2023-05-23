@@ -197,6 +197,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
     BindGroupLayoutBase* GetEmptyBindGroupLayout();
+    PipelineLayoutBase* GetEmptyPipelineLayout();
 
     void UncacheComputePipeline(ComputePipelineBase* obj);
 
@@ -506,6 +507,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     void FlushCallbackTaskQueue();
 
     ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
+    ResultOrError<Ref<PipelineLayoutBase>> CreateEmptyPipelineLayout();
 
     Ref<ComputePipelineBase> GetCachedComputePipeline(
         ComputePipelineBase* uninitializedComputePipeline);
@@ -588,6 +590,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     std::unique_ptr<Caches> mCaches;
 
     Ref<BindGroupLayoutBase> mEmptyBindGroupLayout;
+    Ref<PipelineLayoutBase> mEmptyPipelineLayout;
 
     Ref<TextureViewBase> mExternalTexturePlaceholderView;
 

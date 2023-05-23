@@ -37,10 +37,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
     // resource slots when being written out. So we assign UAV binding index decreasingly here.
     // https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-omsetrendertargetsandunorderedaccessviews
     // TODO(dawn:1818): Support testing on both FL11_0 and FL11_1.
-    uint32_t unorderedAccessViewIndex =
-        device->GetD3D11Device()->GetFeatureLevel() == D3D_FEATURE_LEVEL_11_1
-            ? D3D11_1_UAV_SLOT_COUNT
-            : D3D11_PS_CS_UAV_REGISTER_COUNT;
+    uint32_t unorderedAccessViewIndex = device->GetUAVSlotCount();
     mTotalUAVBindingCount = unorderedAccessViewIndex;
 
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
@@ -58,6 +55,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                         case wgpu::BufferBindingType::Storage:
                         case kInternalStorageBufferBinding:
                             mIndexInfo[group][bindingIndex] = --unorderedAccessViewIndex;
+                            mUAVBindGroups.set(group);
                             break;
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                             mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
@@ -78,6 +76,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
 
                 case BindingInfoType::StorageTexture:
                     mIndexInfo[group][bindingIndex] = --unorderedAccessViewIndex;
+                    mUAVBindGroups.set(group);
                     break;
             }
         }
@@ -89,6 +88,10 @@ MaybeError PipelineLayout::Initialize(Device* device) {
 
 const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo() const {
     return mIndexInfo;
+}
+
+const BindGroupLayoutMask& PipelineLayout::GetUAVBindGroupLayoutsMask() const {
+    return mUAVBindGroups;
 }
 
 }  // namespace dawn::native::d3d11

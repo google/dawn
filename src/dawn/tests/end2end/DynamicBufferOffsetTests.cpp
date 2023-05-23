@@ -297,6 +297,101 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsComputePipeline) {
                                mMinUniformBufferOffsetAlignment, expectedData.size());
 }
 
+// Test basic inherit on render pipeline
+TEST_P(DynamicBufferOffsetTests, BasicInheritRenderPipeline) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+            @vertex
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0, 0.0),
+                    vec2f(-1.0, 1.0),
+                    vec2f( 0.0, 1.0));
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
+            })");
+
+    // Construct fragment shader source
+    std::ostringstream fs;
+    fs << R"(
+            struct Buf {
+                value : vec2u
+            }
+
+            @group(0) @binding(0) var<uniform> uBufferNotDynamic : Buf;
+            @group(0) @binding(1) var<storage, read_write> sBufferNotDynamic : Buf;
+            @group(1) @binding(3) var<uniform> uBuffer : Buf;
+            @group(1) @binding(4) var<storage, read_write> sBuffer : Buf;
+
+            @fragment fn main() -> @location(0) vec4f {
+                sBufferNotDynamic.value = uBufferNotDynamic.value.xy;
+                sBuffer.value = uBuffer.value.xy + uBufferNotDynamic.value.xy;
+                return vec4f(f32(uBuffer.value.x) / 255.0, f32(uBuffer.value.y) / 255.0,
+                                      1.0, 1.0);
+            }
+        )";
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fs.str().c_str());
+
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::BindGroupLayout bindGroupLayouts[2];
+    bindGroupLayouts[0] = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                  wgpu::BufferBindingType::Uniform},
+                 {1, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                  wgpu::BufferBindingType::Storage}});
+    bindGroupLayouts[1] = utils::MakeBindGroupLayout(
+        device, {{3, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                  wgpu::BufferBindingType::Uniform, true},
+                 {4, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                  wgpu::BufferBindingType::Storage, true}});
+
+    wgpu::BindGroup bindGroups[2];
+    bindGroups[0] = utils::MakeBindGroup(device, bindGroupLayouts[0],
+                                         {
+                                             {0, mUniformBuffers[0], 0, kBindingSize},
+                                             {1, mStorageBuffers[0], 0, kBindingSize},
+                                         });
+    bindGroups[1] = utils::MakeBindGroup(
+        device, bindGroupLayouts[1],
+        {{3, mUniformBuffers[1], 0, kBindingSize}, {4, mStorageBuffers[1], 0, kBindingSize}});
+
+    wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+    pipelineLayoutDescriptor.bindGroupLayoutCount = 2;
+    pipelineLayoutDescriptor.bindGroupLayouts = bindGroupLayouts;
+    pipelineDescriptor.layout = device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+
+    wgpu::RenderPipeline pipeline0 = device.CreateRenderPipeline(&pipelineDescriptor);
+    wgpu::RenderPipeline pipeline1 = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    std::array<uint32_t, 2> offsets0 = {0, 0};
+    std::array<uint32_t, 2> offsets1 = {mMinUniformBufferOffsetAlignment,
+                                        mMinUniformBufferOffsetAlignment};
+    wgpu::RenderPassEncoder renderPassEncoder =
+        commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
+    renderPassEncoder.SetPipeline(pipeline0);
+    renderPassEncoder.SetBindGroup(0, bindGroups[0]);
+    renderPassEncoder.SetBindGroup(1, bindGroups[1], offsets0.size(), offsets0.data());
+    renderPassEncoder.Draw(3);
+    renderPassEncoder.SetPipeline(pipeline1);
+    // bind group 0 should be inherited and still available.
+    renderPassEncoder.SetBindGroup(1, bindGroups[1], offsets1.size(), offsets1.data());
+    renderPassEncoder.Draw(3);
+    renderPassEncoder.End();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<uint32_t> expectedData = {6, 8};
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(5, 6, 255, 255), renderPass.color, 0, 0);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffers[1],
+                               mMinUniformBufferOffsetAlignment, expectedData.size());
+}
+
 // Test inherit dynamic offsets on render pipeline
 TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
     // Using default pipeline and setting dynamic offsets
@@ -576,6 +671,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
 }
 
 DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

@@ -41,6 +41,7 @@ class CommandRecordingContext {
     ID3D11DeviceContext4* GetD3D11DeviceContext4() const;
     ID3DUserDefinedAnnotation* GetD3DUserDefinedAnnotation() const;
     Buffer* GetUniformBuffer() const;
+    Device* GetDevice() const;
 
   private:
     bool mIsOpen = false;
@@ -50,6 +51,7 @@ class CommandRecordingContext {
     ComPtr<ID3DUserDefinedAnnotation> mD3D11UserDefinedAnnotation;
     // The uniform buffer for built in variables.
     Ref<Buffer> mUniformBuffer;
+    Ref<Device> mDevice;
 };
 
 }  // namespace dawn::native::d3d11

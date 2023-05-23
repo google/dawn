@@ -83,6 +83,8 @@ class Device final : public d3d::Device {
     ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> CreateExternalImageDXGIImplImpl(
         const d3d::ExternalImageDescriptorDXGISharedHandle* descriptor) override;
 
+    uint32_t GetUAVSlotCount() const;
+
   private:
     using Base = d3d::Device;
     using Base::Base;

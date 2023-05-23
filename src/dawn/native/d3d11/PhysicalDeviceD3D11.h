@@ -37,6 +37,8 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     const DeviceInfo& GetDeviceInfo() const;
     ResultOrError<ComPtr<ID3D11Device>> CreateD3D11Device();
 
+    uint32_t GetUAVSlotCount() const { return mUAVSlotCount; }
+
   private:
     using Base = d3d::PhysicalDevice;
 
@@ -57,6 +59,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     ComPtr<ID3D11Device> mD3d11Device;
     D3D_FEATURE_LEVEL mFeatureLevel;
     DeviceInfo mDeviceInfo = {};
+    uint32_t mUAVSlotCount;
 };
 
 }  // namespace dawn::native::d3d11

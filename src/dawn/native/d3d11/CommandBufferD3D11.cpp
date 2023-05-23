@@ -322,7 +322,7 @@ MaybeError CommandBuffer::Execute() {
 
 MaybeError CommandBuffer::ExecuteComputePass(CommandRecordingContext* commandContext) {
     ComputePipeline* lastPipeline = nullptr;
-    BindGroupTracker bindGroupTracker(commandContext);
+    BindGroupTracker bindGroupTracker(commandContext, /*isRenderPass=*/false);
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
@@ -481,7 +481,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
     d3d11DeviceContext1->RSSetScissorRects(1, &scissor);
 
     RenderPipeline* lastPipeline = nullptr;
-    BindGroupTracker bindGroupTracker(commandContext);
+    BindGroupTracker bindGroupTracker(commandContext, /*isRenderPass=*/true);
     VertexBufferTracker vertexBufferTracker(commandContext);
     std::array<float, 4> blendColor = {0.0f, 0.0f, 0.0f, 0.0f};
     uint32_t stencilReference = 0;

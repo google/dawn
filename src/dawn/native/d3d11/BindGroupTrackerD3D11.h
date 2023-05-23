@@ -24,9 +24,9 @@ class CommandRecordingContext;
 
 // We need convert WebGPU bind slot to d3d11 bind slot according a map in PipelineLayout, so we
 // cannot inherit BindGroupTrackerGroups.
-class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/false, uint64_t> {
+class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/true, uint64_t> {
   public:
-    explicit BindGroupTracker(CommandRecordingContext* commandContext);
+    BindGroupTracker(CommandRecordingContext* commandContext, bool isRenderPass);
     ~BindGroupTracker();
     MaybeError Apply();
 
@@ -35,6 +35,8 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/fa
     void UnApplyBindGroup(BindGroupIndex index);
 
     CommandRecordingContext* const mCommandContext;
+    const bool mIsRenderPass;
+    const wgpu::ShaderStage mVisibleStages;
 };
 
 }  // namespace dawn::native::d3d11

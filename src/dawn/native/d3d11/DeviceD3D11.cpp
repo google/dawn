@@ -468,4 +468,8 @@ Ref<TextureBase> Device::CreateD3DExternalTexture(const TextureDescriptor* descr
     return {dawnTexture};
 }
 
+uint32_t Device::GetUAVSlotCount() const {
+    return ToBackend(GetPhysicalDevice())->GetUAVSlotCount();
+}
+
 }  // namespace dawn::native::d3d11

@@ -30,6 +30,7 @@ namespace dawn::native::d3d11 {
 MaybeError CommandRecordingContext::Open(Device* device) {
     ASSERT(!IsOpen());
     ASSERT(device);
+    mDevice = device;
 
     if (!mD3D11DeviceContext4) {
         ID3D11Device* d3d11Device = device->GetD3D11Device();
@@ -106,11 +107,17 @@ Buffer* CommandRecordingContext::GetUniformBuffer() const {
     return mUniformBuffer.Get();
 }
 
+Device* CommandRecordingContext::GetDevice() const {
+    ASSERT(mDevice.Get());
+    return mDevice.Get();
+}
+
 void CommandRecordingContext::Release() {
     if (mIsOpen) {
         mIsOpen = false;
         mNeedsSubmit = false;
         mUniformBuffer = nullptr;
+        mDevice = nullptr;
         ID3D11Buffer* nullBuffer = nullptr;
         mD3D11DeviceContext4->VSSetConstantBuffers(PipelineLayout::kReservedConstantBufferSlot, 1,
                                                    &nullBuffer);
