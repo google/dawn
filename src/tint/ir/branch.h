@@ -15,20 +15,35 @@
 #ifndef SRC_TINT_IR_BRANCH_H_
 #define SRC_TINT_IR_BRANCH_H_
 
-#include "src/tint/ir/flow_node.h"
+#include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/utils/castable.h"
+
+// Forward declarations
+namespace tint::ir {
+class FlowNode;
+}  // namespace tint::ir
 
 namespace tint::ir {
 
-/// A information on a branch to another block
-struct Branch {
-    /// The block being branched too.
-    FlowNode* target = nullptr;
+/// A branch instruction. A branch is a walk terminating jump.
+class Branch : public utils::Castable<Branch, Instruction> {
+  public:
+    /// Constructor
+    /// @param to the block to branch too
+    /// @param args the branch arguments
+    explicit Branch(FlowNode* to, utils::VectorRef<Value*> args = {});
+    ~Branch() override;
 
-    /// The arguments provided for that branch. These arguments could be the
-    /// return value in the case of a branch to the function terminator, or they could
-    /// be the basic block arguments passed into the block.
-    utils::Vector<Value*, 2> args;
+    /// @returns the block being branched too.
+    const FlowNode* To() const { return to_; }
+
+    /// @returns the branch arguments
+    utils::VectorRef<Value*> Args() const { return args_; }
+
+  private:
+    FlowNode* to_;
+    utils::Vector<Value*, 2> args_;
 };
 
 }  // namespace tint::ir

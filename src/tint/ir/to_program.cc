@@ -23,6 +23,7 @@
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction.h"
+#include "src/tint/ir/jump.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/store.h"
@@ -108,25 +109,26 @@ class State {
                       std::move(ret_attrs));
     }
 
-    const ast::BlockStatement* FlowNodeGraph(ir::FlowNode* start_node,
-                                             ir::FlowNode* stop_at = nullptr) {
+    const ast::BlockStatement* FlowNodeGraph(const ir::Block* start_node) {
         // TODO(crbug.com/tint/1902): Check if the block is dead
         utils::Vector<const ast::Statement*,
                       decltype(ast::BlockStatement::statements)::static_length>
             stmts;
 
-        ir::Branch root_branch{start_node, {}};
-        const ir::Branch* branch = &root_branch;
+        const ir::FlowNode* block = start_node;
 
         // TODO(crbug.com/tint/1902): Handle block arguments.
 
-        while (branch->target != stop_at) {
-            enum Status { kContinue, kStop, kError };
-            Status status = tint::Switch(
-                branch->target,
+        while (block) {
+            TINT_ASSERT(IR, block->HasBranchTarget());
 
-                [&](const ir::Block* block) {
-                    for (const auto* inst : block->Instructions()) {
+            enum Status { kContinue, kStop, kError };
+
+            Status status = tint::Switch(
+                block,
+
+                [&](const ir::Block* blk) {
+                    for (auto* inst : blk->Instructions()) {
                         auto stmt = Stmt(inst);
                         if (TINT_UNLIKELY(!stmt)) {
                             return kError;
@@ -135,43 +137,27 @@ class State {
                             stmts.Push(s);
                         }
                     }
-                    branch = &block->Branch();
-                    return kContinue;
-                },
-
-                [&](const ir::If* if_) {
-                    auto* stmt = If(if_);
-                    if (TINT_UNLIKELY(!stmt)) {
-                        return kError;
-                    }
-                    stmts.Push(stmt);
-                    branch = &if_->Merge();
-                    return branch->target->InboundBranches().IsEmpty() ? kStop : kContinue;
-                },
-
-                [&](const ir::Switch* switch_) {
-                    auto* stmt = Switch(switch_);
-                    if (TINT_UNLIKELY(!stmt)) {
-                        return kError;
-                    }
-                    stmts.Push(stmt);
-                    branch = &switch_->Merge();
-                    return branch->target->InboundBranches().IsEmpty() ? kStop : kContinue;
-                },
-
-                [&](const ir::FunctionTerminator*) {
-                    auto res = FunctionTerminator(branch);
-                    if (TINT_UNLIKELY(!res)) {
-                        return kError;
-                    }
-                    if (auto* stmt = res.Get()) {
-                        stmts.Push(stmt);
+                    if (blk->Branch()->Is<Jump>() && blk->Branch()->To()->Is<Block>()) {
+                        block = blk->Branch()->To()->As<Block>();
+                        return kContinue;
+                    } else if (auto* if_ = blk->Branch()->As<ir::If>()) {
+                        if (if_->Merge()->HasBranchTarget()) {
+                            block = if_->Merge();
+                            return kContinue;
+                        }
+                    } else if (auto* switch_ = blk->Branch()->As<ir::Switch>()) {
+                        if (switch_->Merge()->HasBranchTarget()) {
+                            block = switch_->Merge();
+                            return kContinue;
+                        }
                     }
                     return kStop;
                 },
 
+                [&](const ir::FunctionTerminator*) { return kStop; },
+
                 [&](Default) {
-                    UNHANDLED_CASE(branch->target);
+                    UNHANDLED_CASE(block);
                     return kError;
                 });
 
@@ -188,26 +174,24 @@ class State {
 
     const ast::IfStatement* If(const ir::If* i) {
         SCOPED_NESTING();
-
         auto* cond = Expr(i->Condition());
-        auto* t = FlowNodeGraph(i->True().target, i->Merge().target);
+        auto* t = FlowNodeGraph(i->True());
         if (TINT_UNLIKELY(!t)) {
             return nullptr;
         }
 
-        if (!IsEmpty(i->False().target, i->Merge().target)) {
-            // If the else target is an if flow node with the same Merge().target as this if, then
-            // emit an 'else if' instead of a block statement for the else.
-            if (auto* else_if = As<ir::If>(NextNonEmptyNode(i->False().target));
-                else_if &&
-                NextNonEmptyNode(i->Merge().target) == NextNonEmptyNode(else_if->Merge().target)) {
-                auto* f = If(else_if);
+        if (!IsEmpty(i->False(), i->Merge())) {
+            // If the else target is an `if` which has a merge target that just bounces to the outer
+            // if merge target then emit an 'else if' instead of a block statement for the else.
+            if (auto* inst = i->False()->Instructions().Front()->As<ir::If>();
+                inst && inst->Merge()->IsTrampoline(i->Merge())) {
+                auto* f = If(inst);
                 if (!f) {
                     return nullptr;
                 }
                 return b.If(cond, t, b.Else(f));
             } else {
-                auto* f = FlowNodeGraph(i->False().target, i->Merge().target);
+                auto* f = FlowNodeGraph(i->False());
                 if (!f) {
                     return nullptr;
                 }
@@ -226,11 +210,11 @@ class State {
             return nullptr;
         }
 
-        auto cases = utils::Transform<1>(
+        auto cases = utils::Transform<2>(
             s->Cases(),  //
-            [&](const ir::Switch::Case& c) -> const tint::ast::CaseStatement* {
+            [&](const ir::Switch::Case c) -> const tint::ast::CaseStatement* {
                 SCOPED_NESTING();
-                auto* body = FlowNodeGraph(c.start.target, s->Merge().target);
+                auto* body = FlowNodeGraph(c.start);
                 if (!body) {
                     return nullptr;
                 }
@@ -261,26 +245,27 @@ class State {
     }
 
     utils::Result<const ast::ReturnStatement*> FunctionTerminator(const ir::Branch* branch) {
-        if (branch->args.IsEmpty()) {
+        if (branch->Args().IsEmpty()) {
             // Branch to function terminator has no arguments.
-            // If this block is nested withing some control flow, then we must emit a
-            // 'return' statement, otherwise we've just naturally reached the end of the
-            // function where the 'return' is redundant.
+            // If this block is nested withing some control flow, then we must
+            // emit a 'return' statement, otherwise we've just naturally reached
+            // the end of the function where the 'return' is redundant.
             if (nesting_depth_ > 1) {
                 return b.Return();
             }
             return nullptr;
         }
 
-        // Branch to function terminator has arguments - this is the return value.
-        if (branch->args.Length() != 1) {
-            TINT_ICE(IR, b.Diagnostics())
-                << "expected 1 value for function terminator (return value), got "
-                << branch->args.Length();
+        // Branch to function terminator has arguments - this is the return
+        // value.
+        if (branch->Args().Length() != 1) {
+            TINT_ICE(IR, b.Diagnostics()) << "expected 1 value for function "
+                                             "terminator (return value), got "
+                                          << branch->Args().Length();
             return utils::Failure;
         }
 
-        auto* val = Expr(branch->args.Front());
+        auto* val = Expr(branch->Args().Front());
         if (TINT_UNLIKELY(!val)) {
             return utils::Failure;
         }
@@ -289,36 +274,16 @@ class State {
     }
 
     /// @return true if there are no instructions between @p node and and @p stop_at
-    bool IsEmpty(const ir::FlowNode* node, const ir::FlowNode* stop_at) {
-        while (node != stop_at) {
-            if (auto* block = node->As<ir::Block>()) {
-                if (!block->Instructions().IsEmpty()) {
-                    return false;
-                }
-                node = block->Branch().target;
-            } else {
-                return false;
-            }
+    bool IsEmpty(const ir::Block* node, const ir::FlowNode* stop_at) {
+        if (node->Instructions().IsEmpty()) {
+            return true;
         }
-        return true;
-    }
-
-    /// @return the next flow node that isn't an empty block
-    const ir::FlowNode* NextNonEmptyNode(const ir::FlowNode* node) {
-        while (node) {
-            if (auto* block = node->As<ir::Block>()) {
-                for (const auto* inst : block->Instructions()) {
-                    // Load instructions will be inlined, so ignore them.
-                    if (!inst->Is<ir::Load>()) {
-                        return node;
-                    }
-                }
-                node = block->Branch().target;
-            } else {
-                return node;
-            }
+        if (auto* br = node->Instructions().Front()->As<Branch>()) {
+            return br->To() == stop_at;
         }
-        return nullptr;
+        // TODO(dsinclair): This should possibly walk over Jump instructions that
+        // just jump to empty blocks if we want to be comprehensive.
+        return false;
     }
 
     utils::Result<const ast::Statement*> Stmt(const ir::Instruction* inst) {
@@ -328,6 +293,14 @@ class State {
             [&](const ir::Var* i) { return Var(i); },        //
             [&](const ir::Load*) { return nullptr; },
             [&](const ir::Store* i) { return Store(i); },  //
+            [&](const ir::If* if_) { return If(if_); },
+            [&](const ir::Switch* switch_) { return Switch(switch_); },
+            [&](const ir::Branch* branch) {
+                if (branch->To()->Is<ir::FunctionTerminator>()) {
+                    return utils::Result<const ast::Statement*>{FunctionTerminator(branch)};
+                }
+                return utils::Result<const ast::Statement*>{nullptr};
+            },
             [&](Default) {
                 UNHANDLED_CASE(inst);
                 return utils::Failure;

@@ -30,6 +30,7 @@
 #include "src/tint/ir/function_param.h"
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/jump.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
@@ -350,6 +351,18 @@ class Builder {
     /// @param type the var type
     /// @returns the instruction
     ir::Var* Declare(const type::Type* type);
+
+    /// Creates a branch declaration
+    /// @param to the node being branched too
+    /// @param args the branch arguments
+    /// @returns the instruction
+    ir::Branch* Branch(FlowNode* to, utils::VectorRef<Value*> args = {});
+
+    /// Creates a jump declaration
+    /// @param to the node being branched too
+    /// @param args the branch arguments
+    /// @returns the instruction
+    ir::Jump* Jump(FlowNode* to, utils::VectorRef<Value*> args = {});
 
     /// Creates a new `BlockParam`
     /// @param type the parameter type

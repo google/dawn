@@ -30,6 +30,7 @@
 namespace tint::ir {
 class Binary;
 class Block;
+class Branch;
 class If;
 class Function;
 class Load;
@@ -120,6 +121,10 @@ class GeneratorImplIr {
     /// @param var the var instruction to emit
     /// @returns the result ID of the instruction
     uint32_t EmitVar(const ir::Var* var);
+
+    /// Emit a branch instruction.
+    /// @param b the branch instruction to emit
+    void EmitBranch(const ir::Branch* b);
 
   private:
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.

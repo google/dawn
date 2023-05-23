@@ -17,36 +17,38 @@
 
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/branch.h"
-#include "src/tint/ir/flow_node.h"
 
 namespace tint::ir {
 
 /// Flow node describing a loop.
-class Loop : public utils::Castable<Loop, FlowNode> {
+class Loop : public utils::Castable<Loop, Branch> {
   public:
     /// Constructor
-    Loop();
+    /// @param s the start block
+    /// @param c the continuing block
+    /// @param m the merge block
+    Loop(Block* s, Block* c, Block* m);
     ~Loop() override;
 
     /// @returns the switch start branch
-    const Branch& Start() const { return start_; }
+    const Block* Start() const { return start_; }
     /// @returns the switch start branch
-    Branch& Start() { return start_; }
+    Block* Start() { return start_; }
 
     /// @returns the switch continuing branch
-    const Branch& Continuing() const { return continuing_; }
+    const Block* Continuing() const { return continuing_; }
     /// @returns the switch continuing branch
-    Branch& Continuing() { return continuing_; }
+    Block* Continuing() { return continuing_; }
 
     /// @returns the switch merge branch
-    const Branch& Merge() const { return merge_; }
+    const Block* Merge() const { return merge_; }
     /// @returns the switch merge branch
-    Branch& Merge() { return merge_; }
+    Block* Merge() { return merge_; }
 
   private:
-    Branch start_ = {};
-    Branch continuing_ = {};
-    Branch merge_ = {};
+    Block* start_ = nullptr;
+    Block* continuing_ = nullptr;
+    Block* merge_ = nullptr;
 };
 
 }  // namespace tint::ir

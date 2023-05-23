@@ -52,7 +52,7 @@ class IR_AddFunction final : public ir::transform::Transform {
         ir::Builder builder(*mod);
         auto* func =
             builder.CreateFunction(mod->symbols.New("ir_func"), mod->types.Get<type::Void>());
-        func->StartTarget()->BranchTo(func->EndTarget());
+        func->StartTarget()->SetInstructions(utils::Vector{builder.Branch(func->EndTarget())});
         mod->functions.Push(func);
     }
 };
@@ -70,7 +70,7 @@ ir::Module MakeIR() {
     ir::Builder builder(mod);
     auto* func =
         builder.CreateFunction(builder.ir.symbols.New("main"), builder.ir.types.Get<type::Void>());
-    func->StartTarget()->BranchTo(func->EndTarget());
+    func->StartTarget()->SetInstructions(utils::Vector{builder.Branch(func->EndTarget())});
     builder.ir.functions.Push(func);
     return mod;
 }

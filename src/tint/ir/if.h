@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_IR_IF_H_
 #define SRC_TINT_IR_IF_H_
 
+#include "src/tint/ir/block.h"
 #include "src/tint/ir/branch.h"
-#include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/value.h"
 
 // Forward declarations
@@ -26,37 +26,42 @@ class Block;
 
 namespace tint::ir {
 
-/// A flow node representing an if statement.
-class If : public utils::Castable<If, FlowNode> {
+/// An if instruction
+class If : public utils::Castable<If, Branch> {
   public:
     /// Constructor
     /// @param cond the if condition
-    explicit If(Value* cond);
+    /// @param t the true block
+    /// @param f the false block
+    /// @param m the merge block
+    explicit If(Value* cond, Block* t, Block* f, Block* m);
     ~If() override;
 
     /// @returns the if condition
     const Value* Condition() const { return condition_; }
+    /// @returns the if condition
+    Value* Condition() { return condition_; }
 
     /// @returns the true branch block
-    const Branch& True() const { return true_; }
+    const Block* True() const { return true_; }
     /// @returns the true branch block
-    Branch& True() { return true_; }
+    Block* True() { return true_; }
 
     /// @returns the false branch block
-    const Branch& False() const { return false_; }
+    const Block* False() const { return false_; }
     /// @returns the false branch block
-    Branch& False() { return false_; }
+    Block* False() { return false_; }
 
     /// @returns the merge branch block
-    const Branch& Merge() const { return merge_; }
+    const Block* Merge() const { return merge_; }
     /// @returns the merge branch block
-    Branch& Merge() { return merge_; }
+    Block* Merge() { return merge_; }
 
   private:
-    Branch true_ = {};
-    Branch false_ = {};
-    Branch merge_ = {};
-    Value* condition_;
+    Value* condition_ = nullptr;
+    Block* true_ = nullptr;
+    Block* false_ = nullptr;
+    Block* merge_ = nullptr;
 };
 
 }  // namespace tint::ir

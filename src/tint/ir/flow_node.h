@@ -18,6 +18,11 @@
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/vector.h"
 
+// Forward Declarations
+namespace tint::ir {
+class Branch;
+}  // namespace tint::ir
+
 namespace tint::ir {
 
 /// Base class for flow nodes
@@ -26,17 +31,17 @@ class FlowNode : public utils::Castable<FlowNode> {
     ~FlowNode() override;
 
     /// @returns true if this node has inbound branches and branches out
-    bool IsConnected() const { return HasBranchTarget() && !inbound_branches_.IsEmpty(); }
+    bool IsConnected() const { return HasBranchTarget(); }
 
     /// @returns true if the node has a branch target
     virtual bool HasBranchTarget() const { return false; }
 
     /// @returns the inbound branch list for the flow node
-    utils::VectorRef<FlowNode*> InboundBranches() const { return inbound_branches_; }
+    utils::VectorRef<Branch*> InboundBranches() const { return inbound_branches_; }
 
     /// Adds the given node to the inbound branches
     /// @param node the node to add
-    void AddInboundBranch(FlowNode* node) { inbound_branches_.Push(node); }
+    void AddInboundBranch(Branch* node) { inbound_branches_.Push(node); }
 
   protected:
     /// Constructor
@@ -48,7 +53,7 @@ class FlowNode : public utils::Castable<FlowNode> {
     ///   - Node is a start node
     ///   - Node is a merge target outside control flow (e.g. an if that returns in both branches)
     ///   - Node is a continue target outside control flow (e.g. a loop that returns)
-    utils::Vector<FlowNode*, 2> inbound_branches_;
+    utils::Vector<Branch*, 2> inbound_branches_;
 };
 
 }  // namespace tint::ir

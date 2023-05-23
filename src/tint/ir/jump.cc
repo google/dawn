@@ -1,4 +1,4 @@
-// Copyright 2022 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/loop.h"
+#include "src/tint/ir/jump.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Loop);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::Jump);
 
 namespace tint::ir {
 
-Loop::Loop(Block* s, Block* c, Block* m) : Base(s), start_(s), continuing_(c), merge_(m) {
-    TINT_ASSERT(IR, start_);
-    TINT_ASSERT(IR, continuing_);
-    TINT_ASSERT(IR, merge_);
-}
+Jump::Jump(FlowNode* to, utils::VectorRef<Value*> args) : Base(to, args) {}
 
-Loop::~Loop() = default;
+Jump::~Jump() = default;
 
 }  // namespace tint::ir

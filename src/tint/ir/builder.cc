@@ -29,10 +29,6 @@ Builder::~Builder() = default;
 ir::Block* Builder::CreateRootBlockIfNeeded() {
     if (!ir.root_block) {
         ir.root_block = CreateBlock();
-
-        // Everything in the module scope must have been const-eval's, so everything will go into a
-        // single block. So, we can create the root terminator for the root-block now.
-        ir.root_block->BranchTo(CreateRootTerminator());
     }
     return ir.root_block;
 }
@@ -59,50 +55,26 @@ Function* Builder::CreateFunction(Symbol name,
     ir_func->SetStartTarget(CreateBlock());
     ir_func->SetEndTarget(CreateFunctionTerminator());
 
-    // Function is always branching into the Start().target
-    ir_func->StartTarget()->AddInboundBranch(ir_func);
-
     return ir_func;
 }
 
 If* Builder::CreateIf(Value* condition) {
     TINT_ASSERT(IR, condition);
-
-    auto* ir_if = ir.flow_nodes.Create<If>(condition);
-    ir_if->True().target = CreateBlock();
-    ir_if->False().target = CreateBlock();
-    ir_if->Merge().target = CreateBlock();
-
-    // An if always branches to both the true and false block.
-    ir_if->True().target->AddInboundBranch(ir_if);
-    ir_if->False().target->AddInboundBranch(ir_if);
-
-    return ir_if;
+    return ir.values.Create<If>(condition, CreateBlock(), CreateBlock(), CreateBlock());
 }
 
 Loop* Builder::CreateLoop() {
-    auto* ir_loop = ir.flow_nodes.Create<Loop>();
-    ir_loop->Start().target = CreateBlock();
-    ir_loop->Continuing().target = CreateBlock();
-    ir_loop->Merge().target = CreateBlock();
-
-    // A loop always branches to the start block.
-    ir_loop->Start().target->AddInboundBranch(ir_loop);
-
-    return ir_loop;
+    return ir.values.Create<Loop>(CreateBlock(), CreateBlock(), CreateBlock());
 }
 
 Switch* Builder::CreateSwitch(Value* condition) {
-    auto* ir_switch = ir.flow_nodes.Create<Switch>(condition);
-    ir_switch->Merge().target = CreateBlock();
-    return ir_switch;
+    return ir.values.Create<Switch>(condition, CreateBlock());
 }
 
 Block* Builder::CreateCase(Switch* s, utils::VectorRef<Switch::CaseSelector> selectors) {
-    s->Cases().Push(Switch::Case{selectors, {CreateBlock(), utils::Empty}});
+    s->Cases().Push(Switch::Case{std::move(selectors), CreateBlock()});
 
-    Block* b = s->Cases().Back().Start().target->As<Block>();
-    // Switch branches into the case block
+    Block* b = s->Cases().Back().Start();
     b->AddInboundBranch(s);
     return b;
 }
@@ -236,6 +208,14 @@ ir::Store* Builder::Store(Value* to, Value* from) {
 
 ir::Var* Builder::Declare(const type::Type* type) {
     return ir.values.Create<ir::Var>(type);
+}
+
+ir::Branch* Builder::Branch(FlowNode* to, utils::VectorRef<Value*> args) {
+    return ir.values.Create<ir::Branch>(to, args);
+}
+
+ir::Jump* Builder::Jump(FlowNode* to, utils::VectorRef<Value*> args) {
+    return ir.values.Create<ir::Jump>(to, args);
 }
 
 ir::BlockParam* Builder::BlockParam(const type::Type* type) {

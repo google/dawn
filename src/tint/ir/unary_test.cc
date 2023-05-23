@@ -26,7 +26,7 @@ using IR_InstructionTest = TestHelper;
 TEST_F(IR_InstructionTest, CreateComplement) {
     Module mod;
     Builder b{mod};
-    const auto* inst = b.Complement(b.ir.types.Get<type::I32>(), b.Constant(4_i));
+    auto* inst = b.Complement(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Kind(), Unary::Kind::kComplement);
@@ -40,7 +40,7 @@ TEST_F(IR_InstructionTest, CreateComplement) {
 TEST_F(IR_InstructionTest, CreateNegation) {
     Module mod;
     Builder b{mod};
-    const auto* inst = b.Negation(b.ir.types.Get<type::I32>(), b.Constant(4_i));
+    auto* inst = b.Negation(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Kind(), Unary::Kind::kNegation);
@@ -54,7 +54,7 @@ TEST_F(IR_InstructionTest, CreateNegation) {
 TEST_F(IR_InstructionTest, Unary_Usage) {
     Module mod;
     Builder b{mod};
-    const auto* inst = b.Negation(b.ir.types.Get<type::I32>(), b.Constant(4_i));
+    auto* inst = b.Negation(b.ir.types.Get<type::I32>(), b.Constant(4_i));
 
     EXPECT_EQ(inst->Kind(), Unary::Kind::kNegation);
 

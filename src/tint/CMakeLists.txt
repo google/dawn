@@ -718,6 +718,8 @@ if(${TINT_BUILD_IR})
     ir/block.h
     ir/block_param.cc
     ir/block_param.h
+    ir/branch.cc
+    ir/branch.h
     ir/builder.cc
     ir/builder.h
     ir/builtin.cc
@@ -750,6 +752,8 @@ if(${TINT_BUILD_IR})
     ir/if.h
     ir/instruction.cc
     ir/instruction.h
+    ir/jump.cc
+    ir/jump.h
     ir/load.cc
     ir/load.h
     ir/loop.cc

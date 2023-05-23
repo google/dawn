@@ -292,8 +292,15 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         current_function_.push_inst(spv::Op::OpLabel, {Label(block)});
     }
 
+    // If there are no instructions in the block, it's a dead end, so we shouldn't be able to get
+    // here to begin with.
+    if (block->Instructions().IsEmpty()) {
+        current_function_.push_inst(spv::Op::OpUnreachable, {});
+        return;
+    }
+
     // Emit the instructions.
-    for (const auto* inst : block->Instructions()) {
+    for (auto* inst : block->Instructions()) {
         auto result = Switch(
             inst,  //
             [&](const ir::Binary* b) { return EmitBinary(b); },
@@ -303,6 +310,14 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
                 return 0u;
             },
             [&](const ir::Var* v) { return EmitVar(v); },
+            [&](const ir::If* i) {
+                EmitIf(i);
+                return 0u;
+            },
+            [&](const ir::Branch* b) {
+                EmitBranch(b);
+                return 0u;
+            },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "unimplemented instruction: " << inst->TypeInfo().name;
@@ -310,46 +325,42 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
             });
         instructions_.Add(inst, result);
     }
+}
 
-    // Handle the branch at the end of the block.
+void GeneratorImplIr::EmitBranch(const ir::Branch* b) {
     Switch(
-        block->Branch().target,
-        [&](const ir::Block* b) { current_function_.push_inst(spv::Op::OpBranch, {Label(b)}); },
-        [&](const ir::If* i) { EmitIf(i); },
+        b->To(),
+        [&](const ir::Block* blk) { current_function_.push_inst(spv::Op::OpBranch, {Label(blk)}); },
         [&](const ir::FunctionTerminator*) {
             // TODO(jrprice): Handle the return value, which will be a branch argument.
-            if (!block->Branch().args.IsEmpty()) {
+            if (!b->Args().IsEmpty()) {
                 TINT_ICE(Writer, diagnostics_) << "unimplemented return value";
             }
             current_function_.push_inst(spv::Op::OpReturn, {});
         },
         [&](Default) {
-            if (!block->Branch().target) {
-                // A block may not have an outward branch (e.g. an unreachable merge block).
-                current_function_.push_inst(spv::Op::OpUnreachable, {});
-            } else {
-                TINT_ICE(Writer, diagnostics_)
-                    << "unimplemented branch target: " << block->Branch().target->TypeInfo().name;
-            }
+            // A block may not have an outward branch (e.g. an unreachable merge
+            // block).
+            current_function_.push_inst(spv::Op::OpUnreachable, {});
         });
 }
 
 void GeneratorImplIr::EmitIf(const ir::If* i) {
-    auto* merge_block = i->Merge().target->As<ir::Block>();
-    auto* true_block = i->True().target->As<ir::Block>();
-    auto* false_block = i->False().target->As<ir::Block>();
+    auto* merge_block = i->Merge();
+    auto* true_block = i->True();
+    auto* false_block = i->False();
 
     // Generate labels for the blocks. We emit the true or false block if it:
-    // 1. contains instructions, or
-    // 2. branches somewhere other then the Merge().target.
+    // 1. contains instructions other then the branch, or
+    // 2. branches somewhere other then the Merge().
     // Otherwise we skip them and branch straight to the merge block.
     uint32_t merge_label = Label(merge_block);
     uint32_t true_label = merge_label;
     uint32_t false_label = merge_label;
-    if (!true_block->Instructions().IsEmpty() || true_block->Branch().target != merge_block) {
+    if (true_block->Instructions().Length() > 1 || true_block->Branch()->To() != merge_block) {
         true_label = Label(true_block);
     }
-    if (!false_block->Instructions().IsEmpty() || false_block->Branch().target != merge_block) {
+    if (false_block->Instructions().Length() > 1 || false_block->Branch()->To() != merge_block) {
         false_label = Label(false_block);
     }
 

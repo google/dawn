@@ -38,7 +38,7 @@ void AddEmptyEntryPoint::Run(ir::Module* ir, const DataMap&, DataMap&) const {
     auto* ep =
         builder.CreateFunction(ir->symbols.New("unused_entry_point"), ir->types.Get<type::Void>(),
                                Function::PipelineStage::kCompute, std::array{1u, 1u, 1u});
-    ep->StartTarget()->BranchTo(ep->EndTarget());
+    ep->StartTarget()->SetInstructions(utils::Vector{builder.Branch(ep->EndTarget())});
     ir->functions.Push(ep);
 }
 

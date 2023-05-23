@@ -98,19 +98,15 @@ namespace {
 
 using ResultType = utils::Result<Module, diag::List>;
 
-bool IsConnected(const FlowNode* b) {
+// For an `if` and `switch` block, the merge has a registered incoming branch instruction of the
+// `if` and `switch. So, to determine if the merge is connected to any of the branches that happend
+// in the `if` or `switch` we need a `count` value that is larger then 1.
+bool IsConnected(const FlowNode* b, uint32_t count) {
     // Function is always connected as it's the start.
     if (b->Is<ir::Function>()) {
         return true;
     }
-
-    for (auto* parent : b->InboundBranches()) {
-        if (IsConnected(parent)) {
-            return true;
-        }
-    }
-    // Getting here means all the incoming branches are disconnected.
-    return false;
+    return b->InboundBranches().Length() > count;
 }
 
 /// Impl is the private-implementation of FromProgram().
@@ -145,8 +141,8 @@ class Impl {
         /* dst */ {&builder_.ir.constants_arena},
     };
 
-    /// The stack of flow control blocks.
-    utils::Vector<FlowNode*, 8> flow_stack_;
+    /// The stack of control blocks.
+    utils::Vector<Branch*, 8> control_stack_;
 
     /// The current flow block for expressions.
     Block* current_flow_block_ = nullptr;
@@ -160,15 +156,11 @@ class Impl {
     /// The diagnostic that have been raised.
     diag::List diagnostics_;
 
-    /// Map from ast nodes to flow nodes, used to retrieve the flow node for a given AST node.
-    /// Used for testing purposes.
-    std::unordered_map<const ast::Node*, const FlowNode*> ast_to_flow_;
-
-    class FlowStackScope {
+    class ControlStackScope {
       public:
-        FlowStackScope(Impl* impl, FlowNode* node) : impl_(impl) { impl_->flow_stack_.Push(node); }
+        ControlStackScope(Impl* impl, Branch* b) : impl_(impl) { impl_->control_stack_.Push(b); }
 
-        ~FlowStackScope() { impl_->flow_stack_.Pop(); }
+        ~ControlStackScope() { impl_->control_stack_.Pop(); }
 
       private:
         Impl* impl_;
@@ -178,11 +170,25 @@ class Impl {
         diagnostics_.add_error(tint::diag::System::IR, err, s);
     }
 
+    void JumpTo(FlowNode* node, utils::VectorRef<Value*> args = {}) {
+        TINT_ASSERT(IR, current_flow_block_);
+        TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
+
+        current_flow_block_->Instructions().Push(builder_.Jump(node, args));
+        current_flow_block_ = nullptr;
+    }
+    void JumpToIfNeeded(FlowNode* node) {
+        if (!current_flow_block_ || current_flow_block_->HasBranchTarget()) {
+            return;
+        }
+        JumpTo(node);
+    }
+
     void BranchTo(FlowNode* node, utils::VectorRef<Value*> args = {}) {
         TINT_ASSERT(IR, current_flow_block_);
         TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
 
-        current_flow_block_->BranchTo(node, args);
+        current_flow_block_->Instructions().Push(builder_.Branch(node, args));
         current_flow_block_ = nullptr;
     }
 
@@ -193,8 +199,8 @@ class Impl {
         BranchTo(node);
     }
 
-    FlowNode* FindEnclosingControl(ControlFlags flags) {
-        for (auto it = flow_stack_.rbegin(); it != flow_stack_.rend(); ++it) {
+    Branch* FindEnclosingControl(ControlFlags flags) {
+        for (auto it = control_stack_.rbegin(); it != control_stack_.rend(); ++it) {
             if ((*it)->Is<Loop>()) {
                 return *it;
             }
@@ -244,6 +250,11 @@ class Impl {
                 });
         }
 
+        // Add the root terminator if needed
+        if (mod.root_block) {
+            mod.root_block->Instructions().Push(builder_.Branch(builder_.CreateRootTerminator()));
+        }
+
         if (diagnostics_.contains_errors()) {
             return ResultType(std::move(diagnostics_));
         }
@@ -253,7 +264,7 @@ class Impl {
 
     void EmitFunction(const ast::Function* ast_func) {
         // The flow stack should have been emptied when the previous function finished building.
-        TINT_ASSERT(IR, flow_stack_.IsEmpty());
+        TINT_ASSERT(IR, control_stack_.IsEmpty());
 
         const auto* sem = program_->Sem().Get(ast_func);
 
@@ -261,8 +272,6 @@ class Impl {
                                                 sem->ReturnType()->Clone(clone_ctx_.type_ctx));
         current_function_ = ir_func;
         builder_.ir.functions.Push(ir_func);
-
-        ast_to_flow_[ast_func] = ir_func;
 
         if (ast_func->IsEntryPoint()) {
             switch (ast_func->PipelineStage()) {
@@ -343,17 +352,15 @@ class Impl {
         ir_func->SetParams(params);
 
         {
-            FlowStackScope scope(this, ir_func);
-
             current_flow_block_ = ir_func->StartTarget();
             EmitBlock(ast_func->body);
 
-            // If the branch target has already been set then a `return` was called. Only set in the
-            // case where `return` wasn't called.
-            BranchToIfNeeded(current_function_->EndTarget());
+            // If the branch target has already been set then a `return` was called. Only set in
+            // the case where `return` wasn't called.
+            JumpToIfNeeded(current_function_->EndTarget());
         }
 
-        TINT_ASSERT(IR, flow_stack_.IsEmpty());
+        TINT_ASSERT(IR, control_stack_.IsEmpty());
         current_flow_block_ = nullptr;
         current_function_ = nullptr;
     }
@@ -362,8 +369,8 @@ class Impl {
         for (auto* s : stmts) {
             EmitStatement(s);
 
-            // If the current flow block has a branch target then the rest of the statements in this
-            // block are dead code. Skip them.
+            // If the current flow block has a branch target then the rest of the statements in
+            // this block are dead code. Skip them.
             if (!current_flow_block_ || current_flow_block_->HasBranchTarget()) {
                 break;
             }
@@ -399,11 +406,11 @@ class Impl {
     }
 
     void EmitAssignment(const ast::AssignmentStatement* stmt) {
-        // If assigning to a phony, just generate the RHS and we're done. Note that, because this
-        // isn't used, a subsequent transform could remove it due to it being dead code. This could
-        // then change the interface for the program (i.e. a global var no longer used). If that
-        // happens we have to either fix this to store to a phony value, or make sure we pull the
-        // interface before doing the dead code elimination.
+        // If assigning to a phony, just generate the RHS and we're done. Note that, because
+        // this isn't used, a subsequent transform could remove it due to it being dead code.
+        // This could then change the interface for the program (i.e. a global var no longer
+        // used). If that happens we have to either fix this to store to a phony value, or make
+        // sure we pull the interface before doing the dead code elimination.
         if (stmt->lhs->Is<ast::PhonyExpression>()) {
             (void)EmitExpression(stmt->rhs);
             return;
@@ -523,8 +530,8 @@ class Impl {
         TINT_DEFER(scopes_.Pop());
 
         // Note, this doesn't need to emit a Block as the current block flow node should be
-        // sufficient as the blocks all get flattened. Each flow control node will inject the basic
-        // blocks it requires.
+        // sufficient as the blocks all get flattened. Each flow control node will inject the
+        // basic blocks it requires.
         EmitStatements(block->statements);
     }
 
@@ -534,50 +541,43 @@ class Impl {
         if (!reg) {
             return;
         }
-        auto* if_node = builder_.CreateIf(reg.Get());
-
-        BranchTo(if_node);
-
-        ast_to_flow_[stmt] = if_node;
+        auto* if_inst = builder_.CreateIf(reg.Get());
+        current_flow_block_->Instructions().Push(if_inst);
 
         {
-            FlowStackScope scope(this, if_node);
+            ControlStackScope scope(this, if_inst);
 
-            current_flow_block_ = if_node->True().target->As<Block>();
+            current_flow_block_ = if_inst->True();
             EmitBlock(stmt->body);
 
             // If the true branch did not execute control flow, then go to the Merge().target
-            BranchToIfNeeded(if_node->Merge().target);
+            BranchToIfNeeded(if_inst->Merge());
 
-            current_flow_block_ = if_node->False().target->As<Block>();
+            current_flow_block_ = if_inst->False();
             if (stmt->else_statement) {
                 EmitStatement(stmt->else_statement);
             }
 
             // If the false branch did not execute control flow, then go to the Merge().target
-            BranchToIfNeeded(if_node->Merge().target);
+            BranchToIfNeeded(if_inst->Merge());
         }
         current_flow_block_ = nullptr;
 
-        // If both branches went somewhere, then they both returned, continued or broke. So, there
-        // is no need for the if merge-block and there is nothing to branch to the merge block
-        // anyway.
-        if (IsConnected(if_node->Merge().target)) {
-            current_flow_block_ = if_node->Merge().target->As<Block>();
+        // If both branches went somewhere, then they both returned, continued or broke. So,
+        // there is no need for the if merge-block and there is nothing to branch to the merge
+        // block anyway.
+        if (IsConnected(if_inst->Merge(), 1)) {
+            current_flow_block_ = if_inst->Merge();
         }
     }
 
     void EmitLoop(const ast::LoopStatement* stmt) {
-        auto* loop_node = builder_.CreateLoop();
-
-        BranchTo(loop_node);
-
-        ast_to_flow_[stmt] = loop_node;
+        auto* loop_inst = builder_.CreateLoop();
+        current_flow_block_->Instructions().Push(loop_inst);
 
         {
-            FlowStackScope scope(this, loop_node);
-
-            current_flow_block_ = loop_node->Start().target->As<Block>();
+            ControlStackScope scope(this, loop_inst);
+            current_flow_block_ = loop_inst->Start();
 
             // The loop doesn't use EmitBlock because it needs the scope stack to not get popped
             // until after the continuing block.
@@ -585,41 +585,39 @@ class Impl {
             TINT_DEFER(scopes_.Pop());
             EmitStatements(stmt->body->statements);
 
-            // The current block didn't `break`, `return` or `continue`, go to the continuing block.
-            BranchToIfNeeded(loop_node->Continuing().target);
+            // The current block didn't `break`, `return` or `continue`, go to the continuing
+            // block.
+            JumpToIfNeeded(loop_inst->Continuing());
 
-            current_flow_block_ = loop_node->Continuing().target->As<Block>();
+            current_flow_block_ = loop_inst->Continuing();
             if (stmt->continuing) {
                 EmitBlock(stmt->continuing);
             }
 
             // Branch back to the start node if the continue target didn't branch out already
-            BranchToIfNeeded(loop_node->Start().target);
+            BranchToIfNeeded(loop_inst->Start());
         }
 
         // The loop merge can get disconnected if the loop returns directly, or the continuing
         // target branches, eventually, to the merge, but nothing branched to the
         // Continuing().target.
-        current_flow_block_ = loop_node->Merge().target->As<Block>();
-        if (!IsConnected(loop_node->Merge().target)) {
+        current_flow_block_ = loop_inst->Merge();
+        if (!IsConnected(loop_inst->Merge(), 0)) {
             current_flow_block_ = nullptr;
         }
     }
 
     void EmitWhile(const ast::WhileStatement* stmt) {
-        auto* loop_node = builder_.CreateLoop();
+        auto* loop_inst = builder_.CreateLoop();
+        current_flow_block_->Instructions().Push(loop_inst);
+
         // Continue is always empty, just go back to the start
-        TINT_ASSERT(IR, loop_node->Continuing().target->Is<Block>());
-        loop_node->Continuing().target->As<Block>()->BranchTo(loop_node->Start().target);
-
-        BranchTo(loop_node);
-
-        ast_to_flow_[stmt] = loop_node;
+        loop_inst->Continuing()->Instructions().Push(builder_.Branch(loop_inst->Start()));
 
         {
-            FlowStackScope scope(this, loop_node);
+            ControlStackScope scope(this, loop_inst);
 
-            current_flow_block_ = loop_node->Start().target->As<Block>();
+            current_flow_block_ = loop_inst->Start();
 
             // Emit the while condition into the Start().target of the loop
             auto reg = EmitExpression(stmt->condition);
@@ -628,25 +626,26 @@ class Impl {
             }
 
             // Create an `if (cond) {} else {break;}` control flow
-            auto* if_node = builder_.CreateIf(reg.Get());
-            if_node->True().target->As<Block>()->BranchTo(if_node->Merge().target);
-            if_node->False().target->As<Block>()->BranchTo(loop_node->Merge().target);
+            auto* if_inst = builder_.CreateIf(reg.Get());
+            if_inst->True()->Instructions().Push(builder_.Branch(if_inst->Merge()));
+            if_inst->False()->Instructions().Push(builder_.Branch(loop_inst->Merge()));
+            current_flow_block_->Instructions().Push(if_inst);
 
-            BranchTo(if_node);
-
-            current_flow_block_ = if_node->Merge().target->As<Block>();
+            current_flow_block_ = if_inst->Merge();
             EmitBlock(stmt->body);
 
-            BranchToIfNeeded(loop_node->Continuing().target);
+            JumpToIfNeeded(loop_inst->Continuing());
         }
         // The while loop always has a path to the Merge().target as the break statement comes
         // before anything inside the loop.
-        current_flow_block_ = loop_node->Merge().target->As<Block>();
+        current_flow_block_ = loop_inst->Merge();
     }
 
     void EmitForLoop(const ast::ForLoopStatement* stmt) {
-        auto* loop_node = builder_.CreateLoop();
-        loop_node->Continuing().target->As<Block>()->BranchTo(loop_node->Start().target);
+        auto* loop_inst = builder_.CreateLoop();
+        current_flow_block_->Instructions().Push(loop_inst);
+
+        loop_inst->Continuing()->Instructions().Push(builder_.Branch(loop_inst->Start()));
 
         // Make sure the initializer ends up in a contained scope
         scopes_.Push();
@@ -657,14 +656,10 @@ class Impl {
             EmitStatement(stmt->initializer);
         }
 
-        BranchTo(loop_node);
-
-        ast_to_flow_[stmt] = loop_node;
-
         {
-            FlowStackScope scope(this, loop_node);
+            ControlStackScope scope(this, loop_inst);
 
-            current_flow_block_ = loop_node->Start().target->As<Block>();
+            current_flow_block_ = loop_inst->Start();
 
             if (stmt->condition) {
                 // Emit the condition into the target target of the loop
@@ -674,26 +669,26 @@ class Impl {
                 }
 
                 // Create an `if (cond) {} else {break;}` control flow
-                auto* if_node = builder_.CreateIf(reg.Get());
-                if_node->True().target->As<Block>()->BranchTo(if_node->Merge().target);
-                if_node->False().target->As<Block>()->BranchTo(loop_node->Merge().target);
+                auto* if_inst = builder_.CreateIf(reg.Get());
+                if_inst->True()->Instructions().Push(builder_.Branch(if_inst->Merge()));
+                if_inst->False()->Instructions().Push(builder_.Branch(loop_inst->Merge()));
+                current_flow_block_->Instructions().Push(if_inst);
 
-                BranchTo(if_node);
-                current_flow_block_ = if_node->Merge().target->As<Block>();
+                current_flow_block_ = if_inst->Merge();
             }
 
             EmitBlock(stmt->body);
-            BranchToIfNeeded(loop_node->Continuing().target);
+            JumpToIfNeeded(loop_inst->Continuing());
 
             if (stmt->continuing) {
-                current_flow_block_ = loop_node->Continuing().target->As<Block>();
+                current_flow_block_ = loop_inst->Continuing();
                 EmitStatement(stmt->continuing);
             }
         }
 
         // The while loop always has a path to the Merge().target as the break statement comes
         // before anything inside the loop.
-        current_flow_block_ = loop_node->Merge().target->As<Block>();
+        current_flow_block_ = loop_inst->Merge();
     }
 
     void EmitSwitch(const ast::SwitchStatement* stmt) {
@@ -702,14 +697,11 @@ class Impl {
         if (!reg) {
             return;
         }
-        auto* switch_node = builder_.CreateSwitch(reg.Get());
-
-        BranchTo(switch_node);
-
-        ast_to_flow_[stmt] = switch_node;
+        auto* switch_inst = builder_.CreateSwitch(reg.Get());
+        current_flow_block_->Instructions().Push(switch_inst);
 
         {
-            FlowStackScope scope(this, switch_node);
+            ControlStackScope scope(this, switch_inst);
 
             const auto* sem = program_->Sem().Get(stmt);
             for (const auto* c : sem->Cases()) {
@@ -722,16 +714,16 @@ class Impl {
                     }
                 }
 
-                current_flow_block_ = builder_.CreateCase(switch_node, selectors);
+                current_flow_block_ = builder_.CreateCase(switch_inst, selectors);
                 EmitBlock(c->Body()->Declaration());
 
-                BranchToIfNeeded(switch_node->Merge().target);
+                BranchToIfNeeded(switch_inst->Merge());
             }
         }
         current_flow_block_ = nullptr;
 
-        if (IsConnected(switch_node->Merge().target)) {
-            current_flow_block_ = switch_node->Merge().target->As<Block>();
+        if (IsConnected(switch_inst->Merge(), 1)) {
+            current_flow_block_ = switch_inst->Merge();
         }
     }
 
@@ -753,9 +745,9 @@ class Impl {
         TINT_ASSERT(IR, current_control);
 
         if (auto* c = current_control->As<Loop>()) {
-            BranchTo(c->Merge().target);
+            BranchTo(c->Merge());
         } else if (auto* s = current_control->As<Switch>()) {
-            BranchTo(s->Merge().target);
+            BranchTo(s->Merge());
         } else {
             TINT_UNREACHABLE(IR, diagnostics_);
         }
@@ -766,14 +758,14 @@ class Impl {
         TINT_ASSERT(IR, current_control);
 
         if (auto* c = current_control->As<Loop>()) {
-            BranchTo(c->Continuing().target);
+            BranchTo(c->Continuing());
         } else {
             TINT_UNREACHABLE(IR, diagnostics_);
         }
     }
 
-    // Discard is being treated as an instruction. The semantics in WGSL is demote_to_helper, so the
-    // code has to continue as before it just predicates writes. If WGSL grows some kind of
+    // Discard is being treated as an instruction. The semantics in WGSL is demote_to_helper, so
+    // the code has to continue as before it just predicates writes. If WGSL grows some kind of
     // terminating discard that would probably make sense as a FlowNode but would then require
     // figuring out the multi-level exit that is triggered.
     void EmitDiscard(const ast::DiscardStatement*) {
@@ -787,11 +779,8 @@ class Impl {
         if (!reg) {
             return;
         }
-        auto* if_node = builder_.CreateIf(reg.Get());
-
-        BranchTo(if_node);
-
-        ast_to_flow_[stmt] = if_node;
+        auto* if_inst = builder_.CreateIf(reg.Get());
+        current_flow_block_->Instructions().Push(if_inst);
 
         auto* current_control = FindEnclosingControl(ControlFlags::kExcludeSwitch);
         TINT_ASSERT(IR, current_control);
@@ -799,17 +788,17 @@ class Impl {
 
         auto* loop = current_control->As<Loop>();
 
-        current_flow_block_ = if_node->True().target->As<Block>();
-        BranchTo(loop->Merge().target);
+        current_flow_block_ = if_inst->True();
+        BranchTo(loop->Merge());
 
-        current_flow_block_ = if_node->False().target->As<Block>();
-        BranchTo(if_node->Merge().target);
+        current_flow_block_ = if_inst->False();
+        BranchTo(if_inst->Merge());
 
-        current_flow_block_ = if_node->Merge().target->As<Block>();
+        current_flow_block_ = if_inst->Merge();
 
-        // The `break-if` has to be the last item in the continuing block. The false branch of the
-        // `break-if` will always take us back to the start of the loop.
-        BranchTo(loop->Start().target);
+        // The `break-if` has to be the last item in the continuing block. The false branch of
+        // the `break-if` will always take us back to the start of the loop.
+        BranchTo(loop->Start());
     }
 
     utils::Result<Value*> EmitExpression(const ast::Expression* expr) {
@@ -845,8 +834,8 @@ class Impl {
             // TODO(dsinclair): Implement
             // },
             [&](const ast::UnaryOpExpression* u) { return EmitUnary(u); },
-            // Note, ast::PhonyExpression is explicitly not handled here as it should never get into
-            // this method. The assignment statement should have filtered it out already.
+            // Note, ast::PhonyExpression is explicitly not handled here as it should never get
+            // into this method. The assignment statement should have filtered it out already.
             [&](Default) {
                 add_error(expr->source,
                           "unknown expression type: " + std::string(expr->TypeInfo().name));
@@ -891,8 +880,8 @@ class Impl {
                 builder_.ir.SetName(val, v->name->symbol.Name());
             },
             [&](const ast::Let* l) {
-                // A `let` doesn't exist as a standalone item in the IR, it's just the result of the
-                // initializer.
+                // A `let` doesn't exist as a standalone item in the IR, it's just the result of
+                // the initializer.
                 auto init = EmitExpression(l->initializer);
                 if (!init) {
                     return;
@@ -911,12 +900,12 @@ class Impl {
             },
             [&](const ast::Const*) {
                 // Skip. This should be handled by const-eval already, so the const will be a
-                // `constant::` value at the usage sites. Can just ignore the `const` variable as it
-                // should never be used.
+                // `constant::` value at the usage sites. Can just ignore the `const` variable
+                // as it should never be used.
                 //
-                // TODO(dsinclair): Probably want to store the const variable somewhere and then in
-                // identifier expression log an error if we ever see a const identifier. Add this
-                // when identifiers and variables are supported.
+                // TODO(dsinclair): Probably want to store the const variable somewhere and then
+                // in identifier expression log an error if we ever see a const identifier. Add
+                // this when identifiers and variables are supported.
             },
             [&](Default) {
                 add_error(var->source, "unknown variable: " + std::string(var->TypeInfo().name));
@@ -953,8 +942,8 @@ class Impl {
         return inst;
     }
 
-    // A short-circut needs special treatment. The short-circuit is decomposed into the relevant if
-    // statements and declarations.
+    // A short-circut needs special treatment. The short-circuit is decomposed into the relevant
+    // if statements and declarations.
     utils::Result<Value*> EmitShortCircuit(const ast::BinaryExpression* expr) {
         switch (expr->op) {
             case ast::BinaryOp::kLogicalAnd:
@@ -972,15 +961,15 @@ class Impl {
             return utils::Failure;
         }
 
-        auto* if_node = builder_.CreateIf(lhs.Get());
-        BranchTo(if_node);
+        auto* if_inst = builder_.CreateIf(lhs.Get());
+        current_flow_block_->Instructions().Push(if_inst);
 
         auto* result = builder_.BlockParam(builder_.ir.types.Get<type::Bool>());
-        if_node->Merge().target->As<Block>()->SetParams(utils::Vector{result});
+        if_inst->Merge()->SetParams(utils::Vector{result});
 
         utils::Result<Value*> rhs;
         {
-            FlowStackScope scope(this, if_node);
+            ControlStackScope scope(this, if_inst);
 
             utils::Vector<Value*, 1> alt_args;
             alt_args.Push(lhs.Get());
@@ -988,19 +977,19 @@ class Impl {
             // If this is an `&&` then we only evaluate the RHS expression in the true block.
             // If this is an `||` then we only evaluate the RHS expression in the false block.
             if (expr->op == ast::BinaryOp::kLogicalAnd) {
-                // If the lhs is false, then that is the result we want to pass to the merge block
-                // as our argument
-                current_flow_block_ = if_node->False().target->As<Block>();
-                BranchTo(if_node->Merge().target, std::move(alt_args));
+                // If the lhs is false, then that is the result we want to pass to the merge
+                // block as our argument
+                current_flow_block_ = if_inst->False();
+                BranchTo(if_inst->Merge(), std::move(alt_args));
 
-                current_flow_block_ = if_node->True().target->As<Block>();
+                current_flow_block_ = if_inst->True();
             } else {
-                // If the lhs is true, then that is the result we want to pass to the merge block
-                // as our argument
-                current_flow_block_ = if_node->True().target->As<Block>();
-                BranchTo(if_node->Merge().target, std::move(alt_args));
+                // If the lhs is true, then that is the result we want to pass to the merge
+                // block as our argument
+                current_flow_block_ = if_inst->True();
+                BranchTo(if_inst->Merge(), std::move(alt_args));
 
-                current_flow_block_ = if_node->False().target->As<Block>();
+                current_flow_block_ = if_inst->False();
             }
 
             rhs = EmitExpression(expr->rhs);
@@ -1010,9 +999,9 @@ class Impl {
             utils::Vector<Value*, 1> args;
             args.Push(rhs.Get());
 
-            BranchTo(if_node->Merge().target, std::move(args));
+            BranchTo(if_inst->Merge(), std::move(args));
         }
-        current_flow_block_ = if_node->Merge().target->As<Block>();
+        current_flow_block_ = if_inst->Merge();
 
         return result;
     }
@@ -1191,67 +1180,6 @@ class Impl {
         }
         return builder_.Constant(cv);
     }
-
-    //    void EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
-    //        for (auto* attr : attrs) {
-    //            EmitAttribute(attr);
-    //        }
-    //    }
-    //
-    //    void EmitAttribute(const ast::Attribute* attr) {
-    //        tint::Switch(  //
-    //            attr,
-    //            [&](const ast::WorkgroupAttribute* wg) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::StageAttribute* s) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::BindingAttribute* b) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::GroupAttribute* g) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::LocationAttribute* l) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::BuiltinAttribute* b) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::InterpolateAttribute* i) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::InvariantAttribute* i) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::MustUseAttribute* i) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::IdAttribute*) {
-    //                add_error(attr->source,
-    //                          "found an `Id` attribute. The SubstituteOverrides transform "
-    //                          "must be run before converting to IR");
-    //            },
-    //            [&](const ast::StructMemberSizeAttribute*) {
-    //                TINT_ICE(IR, diagnostics_)
-    //                    << "StructMemberSizeAttribute encountered during IR conversion";
-    //            },
-    //            [&](const ast::StructMemberAlignAttribute*) {
-    //                TINT_ICE(IR, diagnostics_)
-    //                    << "StructMemberAlignAttribute encountered during IR conversion";
-    //            },
-    //            [&](const ast::StrideAttribute* s) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](const ast::InternalAttribute *i) {
-    //              // TODO(dsinclair): Implement
-    //            },
-    //            [&](Default) {
-    //                add_error(attr->source, "unknown attribute: " +
-    //                std::string(attr->TypeInfo().name));
-    //            });
-    //    }
 };
 
 }  // namespace

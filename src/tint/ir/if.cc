@@ -18,7 +18,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::If);
 
 namespace tint::ir {
 
-If::If(Value* cond) : Base(), condition_(cond) {}
+If::If(Value* cond, Block* t, Block* f, Block* m)
+    : Base(m), condition_(cond), true_(t), false_(f), merge_(m) {
+    TINT_ASSERT(IR, true_);
+    TINT_ASSERT(IR, false_);
+    TINT_ASSERT(IR, merge_);
+
+    condition_->AddUsage(this);
+    true_->AddInboundBranch(this);
+    false_->AddInboundBranch(this);
+}
 
 If::~If() = default;
 

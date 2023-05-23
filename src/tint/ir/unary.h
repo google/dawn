@@ -41,6 +41,8 @@ class Unary : public utils::Castable<Unary, Instruction> {
 
     /// @returns the value for the instruction
     const Value* Val() const { return val_; }
+    /// @returns the value for the instruction
+    Value* Val() { return val_; }
 
     /// @returns the kind of unary instruction
     enum Kind Kind() const { return kind_; }

@@ -1,4 +1,4 @@
-// Copyright 2022 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/loop.h"
+#include "src/tint/ir/branch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Loop);
+#include <utility>
+
+#include "src/tint/ir/flow_node.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::ir::Branch);
 
 namespace tint::ir {
 
-Loop::Loop(Block* s, Block* c, Block* m) : Base(s), start_(s), continuing_(c), merge_(m) {
-    TINT_ASSERT(IR, start_);
-    TINT_ASSERT(IR, continuing_);
-    TINT_ASSERT(IR, merge_);
+Branch::Branch(FlowNode* to, utils::VectorRef<Value*> args) : to_(to), args_(std::move(args)) {
+    TINT_ASSERT(IR, to_);
+    to_->AddInboundBranch(this);
+    for (auto* arg : args) {
+        arg->AddUsage(this);
+    }
 }
 
-Loop::~Loop() = default;
+Branch::~Branch() = default;
 
 }  // namespace tint::ir

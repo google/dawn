@@ -37,14 +37,17 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Assign) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = block {
   %a:ptr<private, u32, read_write> = var
+  br %fn2  # root_end
 }
 
+%fn2 = root_terminator
 
-%fn2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] {
-  %fn3 = block {
-    store %a, 4u
-  } -> %func_end # return
-} %func_end
+%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn4
+%fn4 = block {
+  store %a, 4u
+  jmp %fn5  # return
+}
+%fn5 = func_terminator
 
 )");
 }
