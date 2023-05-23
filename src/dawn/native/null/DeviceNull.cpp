@@ -458,11 +458,11 @@ MaybeError SwapChain::PresentImpl() {
     return {};
 }
 
-ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
+ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
     TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
     mTexture = AcquireRef(
         new Texture(GetDevice(), &textureDesc, TextureBase::TextureState::OwnedInternal));
-    return mTexture->CreateView();
+    return mTexture;
 }
 
 void SwapChain::DetachFromSurfaceImpl() {

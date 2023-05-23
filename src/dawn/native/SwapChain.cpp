@@ -31,7 +31,7 @@ class ErrorSwapChain final : public SwapChainBase {
     explicit ErrorSwapChain(DeviceBase* device) : SwapChainBase(device, ObjectBase::kError) {}
 
   private:
-    ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override { UNREACHABLE(); }
+    ResultOrError<Ref<TextureBase>> GetCurrentTextureImpl() override { UNREACHABLE(); }
     MaybeError PresentImpl() override { UNREACHABLE(); }
     void DetachFromSurfaceImpl() override { UNREACHABLE(); }
 };
@@ -113,9 +113,8 @@ SwapChainBase::SwapChainBase(DeviceBase* device,
 }
 
 SwapChainBase::~SwapChainBase() {
-    if (mCurrentTextureView != nullptr) {
-        ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
-               TextureBase::TextureState::Destroyed);
+    if (mCurrentTexture != nullptr) {
+        ASSERT(mCurrentTexture->GetTextureState() == TextureBase::TextureState::Destroyed);
     }
 
     ASSERT(!mAttached);
@@ -164,30 +163,32 @@ TextureViewBase* SwapChainBase::APIGetCurrentTextureView() {
     return result.Detach();
 }
 
-ResultOrError<Ref<TextureViewBase>> SwapChainBase::GetCurrentTextureView() {
-    DAWN_TRY(ValidateGetCurrentTextureView());
+ResultOrError<Ref<TextureBase>> SwapChainBase::GetCurrentTexture() {
+    DAWN_TRY(ValidateGetCurrentTexture());
 
-    if (mCurrentTextureView != nullptr) {
-        // Calling GetCurrentTextureView always returns a new reference.
-        return mCurrentTextureView;
+    if (mCurrentTexture != nullptr) {
+        // Calling GetCurrentTexture always returns a new reference.
+        return mCurrentTexture;
     }
 
-    DAWN_TRY_ASSIGN(mCurrentTextureView, GetCurrentTextureViewImpl());
+    DAWN_TRY_ASSIGN(mCurrentTexture, GetCurrentTextureImpl());
 
-    // Check that the return texture view matches exactly what was given for this descriptor.
-    ASSERT(mCurrentTextureView->GetTexture()->GetFormat().format == mFormat);
-    ASSERT(IsSubset(mUsage, mCurrentTextureView->GetTexture()->GetUsage()));
-    ASSERT(mCurrentTextureView->GetLevelCount() == 1);
-    ASSERT(mCurrentTextureView->GetLayerCount() == 1);
-    ASSERT(mCurrentTextureView->GetDimension() == wgpu::TextureViewDimension::e2D);
-    ASSERT(mCurrentTextureView->GetTexture()
-               ->GetMipLevelSingleSubresourceVirtualSize(mCurrentTextureView->GetBaseMipLevel())
-               .width == mWidth);
-    ASSERT(mCurrentTextureView->GetTexture()
-               ->GetMipLevelSingleSubresourceVirtualSize(mCurrentTextureView->GetBaseMipLevel())
-               .height == mHeight);
+    // Check that the return texture matches exactly what was given for this descriptor.
+    ASSERT(mCurrentTexture->GetFormat().format == mFormat);
+    ASSERT(IsSubset(mUsage, mCurrentTexture->GetUsage()));
+    ASSERT(mCurrentTexture->GetDimension() == wgpu::TextureDimension::e2D);
+    ASSERT(mCurrentTexture->GetWidth() == mWidth);
+    ASSERT(mCurrentTexture->GetHeight() == mHeight);
+    ASSERT(mCurrentTexture->GetNumMipLevels() == 1);
+    ASSERT(mCurrentTexture->GetArrayLayers() == 1);
 
-    return mCurrentTextureView;
+    return mCurrentTexture;
+}
+
+ResultOrError<Ref<TextureViewBase>> SwapChainBase::GetCurrentTextureView() {
+    Ref<TextureBase> currentTexture;
+    DAWN_TRY_ASSIGN(currentTexture, GetCurrentTexture());
+    return currentTexture->CreateView();
 }
 
 void SwapChainBase::APIPresent() {
@@ -199,9 +200,8 @@ void SwapChainBase::APIPresent() {
         return;
     }
 
-    ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
-           TextureBase::TextureState::Destroyed);
-    mCurrentTextureView = nullptr;
+    ASSERT(mCurrentTexture->GetTextureState() == TextureBase::TextureState::Destroyed);
+    mCurrentTexture = nullptr;
 }
 
 uint32_t SwapChainBase::GetWidth() const {
@@ -242,18 +242,18 @@ MaybeError SwapChainBase::ValidatePresent() const {
 
     DAWN_INVALID_IF(!mAttached, "Cannot call Present called on detached %s.", this);
 
-    DAWN_INVALID_IF(
-        mCurrentTextureView == nullptr,
-        "GetCurrentTextureView was not called on %s this frame prior to calling Present.", this);
+    DAWN_INVALID_IF(mCurrentTexture == nullptr,
+                    "GetCurrentTexture was not called on %s this frame prior to calling Present.",
+                    this);
 
     return {};
 }
 
-MaybeError SwapChainBase::ValidateGetCurrentTextureView() const {
+MaybeError SwapChainBase::ValidateGetCurrentTexture() const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
-    DAWN_INVALID_IF(!mAttached, "Cannot call GetCurrentTextureView on detached %s.", this);
+    DAWN_INVALID_IF(!mAttached, "Cannot call GetCurrentTexture on detached %s.", this);
 
     return {};
 }

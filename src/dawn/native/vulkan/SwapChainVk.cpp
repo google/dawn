@@ -613,11 +613,11 @@ MaybeError SwapChain::PresentImpl() {
     }
 }
 
-ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
-    return GetCurrentTextureViewInternal();
+ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
+    return GetCurrentTextureInternal();
 }
 
-ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewInternal(bool isReentrant) {
+ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureInternal(bool isReentrant) {
     Device* device = ToBackend(GetDevice());
 
     // Transiently create a semaphore that will be signaled when the presentation engine is done
@@ -664,7 +664,7 @@ ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewInternal(boo
 
             // Re-initialize the VkSwapchain and try getting the texture again.
             DAWN_TRY(Initialize(this));
-            return GetCurrentTextureViewInternal(true);
+            return GetCurrentTextureInternal(true);
         }
 
         // TODO(crbug.com/dawn/269): Allow losing the surface at Dawn's API level?
@@ -684,14 +684,14 @@ ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewInternal(boo
 
     // In the happy path we can use the swapchain image directly.
     if (!mConfig.needsBlit) {
-        return mTexture->CreateView();
+        return mTexture;
     }
 
     // The blit texture always perfectly matches what the user requested for the swapchain.
     // We need to add the Vulkan TRANSFER_SRC flag for the vkCmdBlitImage call.
     TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
     DAWN_TRY_ASSIGN(mBlitTexture, Texture::Create(device, &desc, VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
-    return mBlitTexture->CreateView();
+    return mBlitTexture;
 }
 
 void SwapChain::DetachFromSurfaceImpl() {

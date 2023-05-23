@@ -29,7 +29,7 @@ class SwapChainMock : public SwapChainBase {
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
 
-    MOCK_METHOD(ResultOrError<Ref<TextureViewBase>>, GetCurrentTextureViewImpl, (), (override));
+    MOCK_METHOD(ResultOrError<Ref<TextureBase>>, GetCurrentTextureImpl, (), (override));
     MOCK_METHOD(MaybeError, PresentImpl, (), (override));
     MOCK_METHOD(void, DetachFromSurfaceImpl, (), (override));
 };

@@ -89,7 +89,7 @@ MaybeError SwapChain::PresentImpl() {
     return {};
 }
 
-ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
+ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
     Device* device = ToBackend(GetDevice());
 
     // Synchronously wait until previous operations on the next swapchain buffer are finished.
@@ -103,7 +103,7 @@ ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
     TextureDescriptor descriptor = GetSwapChainBaseTextureDescriptor(this);
     DAWN_TRY_ASSIGN(mApiTexture,
                     Texture::Create(ToBackend(GetDevice()), &descriptor, mBuffers[mCurrentBuffer]));
-    return mApiTexture->CreateView();
+    return mApiTexture;
 }
 
 MaybeError SwapChain::DetachAndWaitForDeallocation() {

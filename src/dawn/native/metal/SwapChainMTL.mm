@@ -91,7 +91,7 @@ MaybeError SwapChain::PresentImpl() {
     return {};
 }
 
-ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
+ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
     ASSERT(mCurrentDrawable == nullptr);
     mCurrentDrawable = [*mLayer nextDrawable];
 
@@ -99,7 +99,7 @@ ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
 
     mTexture =
         Texture::CreateWrapping(ToBackend(GetDevice()), &textureDesc, [*mCurrentDrawable texture]);
-    return mTexture->CreateView();
+    return mTexture;
 }
 
 void SwapChain::DetachFromSurfaceImpl() {
