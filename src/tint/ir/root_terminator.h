@@ -15,13 +15,12 @@
 #ifndef SRC_TINT_IR_ROOT_TERMINATOR_H_
 #define SRC_TINT_IR_ROOT_TERMINATOR_H_
 
-#include "src/tint/ir/flow_node.h"
+#include "src/tint/ir/block.h"
 
 namespace tint::ir {
 
-/// Flow node used as the end of a function. Must only be used as the `end_target` in a function
-/// flow node. There are no instructions and no branches from this node.
-class RootTerminator : public utils::Castable<RootTerminator, FlowNode> {
+/// Block used as the end of a root block. There are no instructions in this block.
+class RootTerminator : public utils::Castable<RootTerminator, Block> {
   public:
     /// Constructor
     RootTerminator();

@@ -153,6 +153,15 @@ void Disassembler::Walk() {
                 out_ << " -> %fn" << IdOf(f->StartTarget()) << std::endl;
                 walk_list_.push_back(f->StartTarget());
             },
+            [&](const ir::FunctionTerminator* t) {
+                TINT_ASSERT(IR, in_function_);
+                Indent() << "%fn" << IdOf(t) << " = func_terminator" << std::endl << std::endl;
+                in_function_ = false;
+            },
+            [&](const ir::RootTerminator* t) {
+                TINT_ASSERT(IR, !in_function_);
+                Indent() << "%fn" << IdOf(t) << " = root_terminator" << std::endl << std::endl;
+            },
             [&](const ir::Block* b) {
                 // If this block is dead, nothing to do
                 if (!b->HasBranchTarget()) {
@@ -183,15 +192,6 @@ void Disassembler::Walk() {
                 }
 
                 walk_list_.push_back(b->Branch()->To());
-            },
-            [&](const ir::FunctionTerminator* t) {
-                TINT_ASSERT(IR, in_function_);
-                Indent() << "%fn" << IdOf(t) << " = func_terminator" << std::endl << std::endl;
-                in_function_ = false;
-            },
-            [&](const ir::RootTerminator* t) {
-                TINT_ASSERT(IR, !in_function_);
-                Indent() << "%fn" << IdOf(t) << " = root_terminator" << std::endl << std::endl;
             });
     }
 }

@@ -56,6 +56,9 @@ std::string Debug::AsDotGraph(const Module* mod) {
 
         tint::Switch(
             node,
+            [&](const ir::FunctionTerminator*) {
+                // Already done
+            },
             [&](const ir::Block* b) {
                 if (node_to_name.count(b) == 0) {
                     out << name_for(b) << R"( [label="block"])" << std::endl;
@@ -69,9 +72,6 @@ std::string Debug::AsDotGraph(const Module* mod) {
 
                 out << std::endl;
                 Graph(b->Branch()->To());
-            },
-            [&](const ir::FunctionTerminator*) {
-                // Already done
             });
     };
 

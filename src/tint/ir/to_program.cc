@@ -126,6 +126,8 @@ class State {
             Status status = tint::Switch(
                 block,
 
+                [&](const ir::FunctionTerminator*) { return kStop; },
+
                 [&](const ir::Block* blk) {
                     for (auto* inst : blk->Instructions()) {
                         auto stmt = Stmt(inst);
@@ -149,8 +151,6 @@ class State {
                     }
                     return kStop;
                 },
-
-                [&](const ir::FunctionTerminator*) { return kStop; },
 
                 [&](Default) {
                     UNHANDLED_CASE(block);
