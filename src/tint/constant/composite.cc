@@ -28,7 +28,7 @@ Composite::Composite(const type::Type* t,
 
 Composite::~Composite() = default;
 
-Composite* Composite::Clone(CloneContext& ctx) const {
+const Composite* Composite::Clone(CloneContext& ctx) const {
     auto* ty = type->Clone(ctx.type_ctx);
     utils::Vector<const constant::Value*, 4> els;
     for (const auto* el : elements) {

@@ -80,7 +80,7 @@ class Value : public utils::Castable<Value, Node> {
     /// Clones the constant into the provided context
     /// @param ctx the clone context
     /// @returns the cloned node
-    virtual Value* Clone(CloneContext& ctx) const = 0;
+    virtual const Value* Clone(CloneContext& ctx) const = 0;
 
   protected:
     /// @returns the value, if this is of a scalar value or abstract numeric, otherwise

@@ -57,7 +57,7 @@ class Splat : public utils::Castable<Splat, Value> {
     /// Clones the constant into the provided context
     /// @param ctx the clone context
     /// @returns the cloned node
-    Splat* Clone(CloneContext& ctx) const override;
+    const Splat* Clone(CloneContext& ctx) const override;
 
     /// The type of the splat element
     type::Type const* const type;

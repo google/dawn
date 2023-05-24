@@ -61,7 +61,7 @@ class Scalar : public utils::Castable<Scalar<T>, Value> {
     /// Clones the constant into the provided context
     /// @param ctx the clone context
     /// @returns the cloned node
-    Scalar* Clone(CloneContext& ctx) const override {
+    const Scalar* Clone(CloneContext& ctx) const override {
         auto* ty = type->Clone(ctx.type_ctx);
         return ctx.dst.constants->Create<Scalar<T>>(ty, value);
     }

@@ -61,7 +61,7 @@ class Composite : public utils::Castable<Composite, Value> {
     /// Clones the constant into the provided context
     /// @param ctx the clone context
     /// @returns the cloned node
-    Composite* Clone(CloneContext& ctx) const override;
+    const Composite* Clone(CloneContext& ctx) const override;
 
     /// The composite type
     type::Type const* const type;
