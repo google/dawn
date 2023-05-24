@@ -35,19 +35,19 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func():f32 -> %fn2 {
-  %fn2 = block {
-    br %fn3 0.0f  # return
+    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func my_func():f32 -> %fn1 {
+  %fn1 = block {
+    br %fn2 0.0f  # return
   }
-  %fn3 = func_terminator
+  %fn2 = func_terminator
 }
-%fn4 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn5 {
-  %fn5 = block {
-    %1:f32 = call my_func
-    %tint_symbol:f32 = bitcast %1
-    br %fn6  # return
+%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+  %fn3 = block {
+    %3:f32 = call my_func
+    %tint_symbol:f32 = bitcast %3
+    br %fn4  # return
   }
-  %fn6 = func_terminator
+  %fn4 = func_terminator
 }
 )");
 }
@@ -62,12 +62,12 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Discard) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func test_function():void [@fragment] -> %fn2 {
-  %fn2 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func test_function():void [@fragment] -> %fn1 {
+  %fn1 = block {
     discard
-    br %fn3  # return
+    br %fn2  # return
   }
-  %fn3 = func_terminator
+  %fn2 = func_terminator
 }
 )");
 }
@@ -80,18 +80,18 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func my_func(%p:f32):void -> %fn2 {
-  %fn2 = block {
-    br %fn3  # return
+    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func my_func(%p:f32):void -> %fn1 {
+  %fn1 = block {
+    br %fn2  # return
   }
-  %fn3 = func_terminator
+  %fn2 = func_terminator
 }
-%fn4 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn5 {
-  %fn5 = block {
-    %2:void = call my_func, 6.0f
-    br %fn6  # return
+%3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+  %fn3 = block {
+    %4:void = call my_func, 6.0f
+    br %fn4  # return
   }
-  %fn6 = func_terminator
+  %fn4 = func_terminator
 }
 )");
 }
@@ -112,13 +112,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
 
 %fn2 = root_terminator
 
-%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn4 {
-  %fn4 = block {
-    %2:i32 = load %i
-    %tint_symbol:f32 = convert i32, %2
-    br %fn5  # return
+%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+  %fn3 = block {
+    %3:i32 = load %i
+    %tint_symbol:f32 = convert i32, %3
+    br %fn4  # return
   }
-  %fn5 = func_terminator
+  %fn4 = func_terminator
 }
 )");
 }
@@ -157,13 +157,13 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
 
 %fn2 = root_terminator
 
-%fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn4 {
-  %fn4 = block {
-    %2:f32 = load %i
-    %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %2
-    br %fn5  # return
+%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+  %fn3 = block {
+    %3:f32 = load %i
+    %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %3
+    br %fn4  # return
   }
-  %fn5 = func_terminator
+  %fn4 = func_terminator
 }
 )");
 }

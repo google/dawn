@@ -58,7 +58,7 @@ Function* Builder::CreateFunction(Symbol name,
                                   std::optional<std::array<uint32_t, 3>> wg_size) {
     TINT_ASSERT(IR, return_type);
 
-    auto* ir_func = ir.flow_nodes.Create<Function>(name, return_type, stage, wg_size);
+    auto* ir_func = ir.values.Create<Function>(name, return_type, stage, wg_size);
     ir_func->SetStartTarget(CreateBlock());
     ir_func->SetEndTarget(CreateFunctionTerminator());
 

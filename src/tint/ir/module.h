@@ -19,6 +19,7 @@
 
 #include "src/tint/constant/value.h"
 #include "src/tint/ir/constant.h"
+#include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"

@@ -151,7 +151,7 @@ void Disassembler::Walk(const Block* blk) {
 void Disassembler::EmitFunction(const Function* func) {
     in_function_ = true;
 
-    Indent() << "%fn" << IdOf(func) << " = func " << func->Name().Name() << "(";
+    Indent() << "%" << IdOf(func) << " = func " << func->Name().Name() << "(";
     for (auto* p : func->Params()) {
         if (p != func->Params().Front()) {
             out_ << ", ";

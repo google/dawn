@@ -78,7 +78,7 @@ std::string Debug::AsDotGraph(const Module* mod) {
     out << "digraph G {" << std::endl;
     for (const auto* func : mod->functions) {
         // Cluster each function to label and draw a box around it.
-        out << "subgraph cluster_" << name_for(func) << " {" << std::endl;
+        out << "subgraph cluster_" << func->Name().Name() << " {" << std::endl;
         out << R"(label=")" << func->Name().Name() << R"(")" << std::endl;
         out << name_for(func->StartTarget()) << R"( [label="start"])" << std::endl;
         out << name_for(func->EndTarget()) << R"( [label="end"])" << std::endl;

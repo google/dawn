@@ -34,11 +34,11 @@ TEST_F(IR_BuilderImplTest, EmitExpression_MaterializedCall) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func test_function():f32 -> %fn2 {
-  %fn2 = block {
-    br %fn3 2.0f  # return
+    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func test_function():f32 -> %fn1 {
+  %fn1 = block {
+    br %fn2 2.0f  # return
   }
-  %fn3 = func_terminator
+  %fn2 = func_terminator
 }
 )");
 }
