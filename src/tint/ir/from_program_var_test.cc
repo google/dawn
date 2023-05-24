@@ -70,7 +70,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn2
 %fn2 = block {
   %a:ptr<function, u32, read_write> = var
-  jmp %fn3  # return
+  br %fn3  # return
 }
 %fn3 = func_terminator
 
@@ -89,7 +89,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
               R"(%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn2
 %fn2 = block {
   %a:ptr<function, u32, read_write> = var, 2u
-  jmp %fn3  # return
+  br %fn3  # return
 }
 %fn3 = func_terminator
 

@@ -27,7 +27,6 @@
 #include "src/tint/ir/discard.h"
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
-#include "src/tint/ir/jump.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/root_terminator.h"
@@ -406,18 +405,8 @@ void Disassembler::EmitSwitch(const Switch* s) {
 }
 
 void Disassembler::EmitBranch(const Branch* b) {
-    if (b->Is<Jump>()) {
-        out_ << "jmp ";
-
-        // Stuff the thing we're jumping too into the front of the walk list so it will be emitted
-        // next.
-        walk_list_.push_front(b->To());
-    } else {
-        out_ << "br ";
-    }
-
     std::string suffix = "";
-    out_ << "%fn" << IdOf(b->To());
+    out_ << "br %fn" << IdOf(b->To());
     if (b->To()->Is<FunctionTerminator>()) {
         suffix = "return";
     } else if (b->To()->Is<RootTerminator>()) {

@@ -45,7 +45,7 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Assign) {
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn4
 %fn4 = block {
   store %a, 4u
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 

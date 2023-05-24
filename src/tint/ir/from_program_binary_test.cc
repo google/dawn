@@ -44,7 +44,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = add %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -71,7 +71,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Increment) {
   %2:u32 = load %v1
   %3:u32 = add %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -98,7 +98,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
   %2:u32 = load %v1
   %3:u32 = add %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -123,7 +123,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = sub %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -150,7 +150,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Decrement) {
   %2:i32 = load %v1
   %3:i32 = sub %2, 1i
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -177,7 +177,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
   %2:u32 = load %v1
   %3:u32 = sub %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -202,7 +202,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = mul %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -229,7 +229,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
   %2:u32 = load %v1
   %3:u32 = mul %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -254,7 +254,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = div %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -281,7 +281,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
   %2:u32 = load %v1
   %3:u32 = div %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -306,7 +306,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = mod %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -333,7 +333,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
   %2:u32 = load %v1
   %3:u32 = mod %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -358,7 +358,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = and %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -385,7 +385,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
   %2:bool = load %v1
   %3:bool = and %2, false
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -410,7 +410,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = or %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -437,7 +437,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
   %2:bool = load %v1
   %3:bool = or %2, false
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -462,7 +462,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = xor %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -489,7 +489,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
   %2:u32 = load %v1
   %3:u32 = xor %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -537,7 +537,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 }
 
 %fn11 = block {
-  jmp %fn12  # return
+  br %fn12  # return
 }
 %fn12 = func_terminator
 
@@ -585,7 +585,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
 }
 
 %fn11 = block {
-  jmp %fn12  # return
+  br %fn12  # return
 }
 %fn12 = func_terminator
 
@@ -610,7 +610,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:bool = eq %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -635,7 +635,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:bool = neq %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -660,7 +660,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:bool = lt %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -685,7 +685,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:bool = gt %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -710,7 +710,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:bool = lte %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -735,7 +735,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:bool = gte %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -760,7 +760,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = shiftl %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -787,7 +787,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
   %2:u32 = load %v1
   %3:u32 = shiftl %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -812,7 +812,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = shiftr %1, 4u
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -839,7 +839,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
   %2:u32 = load %v1
   %3:u32 = shiftr %2, 1u
   store %v1, %3
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -883,7 +883,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
 }
 
 %fn8 = block (%tint_symbol:bool) {
-  jmp %fn9  # return
+  br %fn9  # return
 }
 %fn9 = func_terminator
 
@@ -908,7 +908,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound_WithConstEval) {
 %fn4 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn5
 %fn5 = block {
   %tint_symbol:bool = call my_func, false
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 

@@ -221,10 +221,6 @@ ir::Branch* Builder::Branch(FlowNode* to, utils::VectorRef<Value*> args) {
     return ir.values.Create<ir::Branch>(to, args);
 }
 
-ir::Jump* Builder::Jump(FlowNode* to, utils::VectorRef<Value*> args) {
-    return ir.values.Create<ir::Jump>(to, args);
-}
-
 ir::BlockParam* Builder::BlockParam(const type::Type* type) {
     return ir.values.Create<ir::BlockParam>(type);
 }

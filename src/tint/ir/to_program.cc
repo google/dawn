@@ -23,7 +23,6 @@
 #include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction.h"
-#include "src/tint/ir/jump.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/store.h"
@@ -137,10 +136,7 @@ class State {
                             stmts.Push(s);
                         }
                     }
-                    if (blk->Branch()->Is<Jump>() && blk->Branch()->To()->Is<Block>()) {
-                        block = blk->Branch()->To()->As<Block>();
-                        return kContinue;
-                    } else if (auto* if_ = blk->Branch()->As<ir::If>()) {
+                    if (auto* if_ = blk->Branch()->As<ir::If>()) {
                         if (if_->Merge()->HasBranchTarget()) {
                             block = if_->Merge();
                             return kContinue;

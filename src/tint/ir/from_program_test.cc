@@ -72,7 +72,7 @@ TEST_F(IR_BuilderImplTest, Func) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func f():void -> %fn2
 %fn2 = block {
-  jmp %fn3  # return
+  br %fn3  # return
 }
 %fn3 = func_terminator
 
@@ -123,7 +123,7 @@ TEST_F(IR_BuilderImplTest, Func_WithMultipleParam) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%fn1 = func f(%a:u32, %b:i32, %c:bool):void -> %fn2
 %fn2 = block {
-  jmp %fn3  # return
+  br %fn3  # return
 }
 %fn3 = func_terminator
 
@@ -173,7 +173,7 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
 }
 
 %fn5 = block {
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -212,7 +212,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
 }
 
 %fn5 = block {
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -251,7 +251,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
   br %fn6  # return
 }
 %fn5 = block {
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -323,10 +323,8 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
 }
 
 %fn5 = block {
-  jmp %fn9  # return
+  br %fn9  # return
 }
-%fn9 = func_terminator
-
 %fn6 = block {
   br %fn8
 }
@@ -338,6 +336,8 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
 %fn8 = block {
   br %fn5
 }
+
+%fn9 = func_terminator
 
 )");
 }
@@ -375,7 +375,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
 }
 
 %fn5 = block {
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -421,10 +421,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
 }
 
 %fn5 = block {
-  jmp %fn9  # return
+  br %fn9  # return
 }
-%fn9 = func_terminator
-
 %fn6 = block {
   br %fn5
 }
@@ -436,6 +434,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
 %fn8 = block {
   br %fn4
 }
+
+%fn9 = func_terminator
 
 )");
 }
@@ -470,7 +470,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
 }
 
 %fn3 = block {
-  jmp %fn4
+  br %fn4
 }
 
 %fn4 = block {
@@ -478,10 +478,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
 }
 
 %fn5 = block {
-  jmp %fn9  # return
+  br %fn9  # return
 }
-%fn9 = func_terminator
-
 %fn6 = block {
   br %fn5
 }
@@ -493,6 +491,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
 %fn8 = block {
   br %fn3
 }
+
+%fn9 = func_terminator
 
 )");
 }
@@ -514,7 +514,7 @@ TEST_F(IR_BuilderImplTest, Loop_Continuing_Body_Scope) {
 }
 
 %fn3 = block {
-  jmp %fn4
+  br %fn4
 }
 
 %fn4 = block {
@@ -522,10 +522,8 @@ TEST_F(IR_BuilderImplTest, Loop_Continuing_Body_Scope) {
 }
 
 %fn5 = block {
-  jmp %fn9  # return
+  br %fn9  # return
 }
-%fn9 = func_terminator
-
 %fn6 = block {
   br %fn5
 }
@@ -537,6 +535,8 @@ TEST_F(IR_BuilderImplTest, Loop_Continuing_Body_Scope) {
 %fn8 = block {
   br %fn3
 }
+
+%fn9 = func_terminator
 
 )");
 }
@@ -696,7 +696,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
 }
 
 %fn12 = block {
-  jmp %fn6  # return
+  br %fn6  # return
 }
 )");
 }
@@ -739,10 +739,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
 }
 
 %fn5 = block {
-  jmp %fn8  # return
+  br %fn8  # return
 }
-%fn8 = func_terminator
-
 %fn6 = block {
   br %fn5
 }
@@ -750,6 +748,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
 %fn7 = block {
   br %fn5
 }
+
+%fn8 = func_terminator
 
 )");
 }
@@ -786,10 +786,8 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 }
 
 %fn5 = block {
-  jmp %fn9  # return
+  br %fn9  # return
 }
-%fn9 = func_terminator
-
 %fn6 = block {
   if true [t: %fn10, f: %fn11, m: %fn12]
 }
@@ -801,6 +799,8 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 %fn8 = block {
   if true [t: %fn16, f: %fn17, m: %fn18]
 }
+
+%fn9 = func_terminator
 
 %fn10 = block {
   br %fn8
@@ -835,7 +835,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 }
 
 %fn18 = block {
-  jmp %fn4
+  br %fn4
 }
 
 %fn19 = block {
@@ -847,11 +847,11 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 }
 
 %fn21 = block {
-  jmp %fn7
+  br %fn7
 }
 
 %fn22 = block {
-  jmp %fn23
+  br %fn23
 }
 
 %fn23 = block {
@@ -917,10 +917,8 @@ TEST_F(IR_BuilderImplTest, While) {
 }
 
 %fn5 = block {
-  jmp %fn9  # return
+  br %fn9  # return
 }
-%fn9 = func_terminator
-
 %fn6 = block {
   br %fn8
 }
@@ -930,8 +928,10 @@ TEST_F(IR_BuilderImplTest, While) {
 }
 
 %fn8 = block {
-  jmp %fn4
+  br %fn4
 }
+
+%fn9 = func_terminator
 
 )");
 }
@@ -976,10 +976,8 @@ TEST_F(IR_BuilderImplTest, While_Return) {
 }
 
 %fn5 = block {
-  jmp %fn9  # return
+  br %fn9  # return
 }
-%fn9 = func_terminator
-
 %fn6 = block {
   br %fn8
 }
@@ -991,6 +989,8 @@ TEST_F(IR_BuilderImplTest, While_Return) {
 %fn8 = block {
   br %fn9  # return
 }
+%fn9 = func_terminator
+
 )");
 }
 
@@ -1068,7 +1068,7 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
 }
 
 %fn5 = block {
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -1132,7 +1132,7 @@ TEST_F(IR_BuilderImplTest, Switch) {
 }
 
 %fn6 = block {
-  jmp %fn7  # return
+  br %fn7  # return
 }
 %fn7 = func_terminator
 
@@ -1184,7 +1184,7 @@ TEST_F(IR_BuilderImplTest, Switch_MultiSelector) {
 }
 
 %fn4 = block {
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -1224,7 +1224,7 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
 }
 
 %fn4 = block {
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -1277,7 +1277,7 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
 }
 
 %fn5 = block {
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -1351,7 +1351,7 @@ TEST_F(IR_BuilderImplTest, Emit_Phony) {
 %fn4 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn5
 %fn5 = block {
   %1:i32 = call b
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 

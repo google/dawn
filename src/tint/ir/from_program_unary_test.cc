@@ -44,7 +44,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Not) {
 %fn5 = block {
   %1:bool = call my_func
   %tint_symbol:bool = eq %1, false
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -69,7 +69,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Complement) {
 %fn5 = block {
   %1:u32 = call my_func
   %tint_symbol:u32 = complement %1
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -94,7 +94,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Negation) {
 %fn5 = block {
   %1:i32 = call my_func
   %tint_symbol:i32 = negation %1
-  jmp %fn6  # return
+  br %fn6  # return
 }
 %fn6 = func_terminator
 
@@ -119,7 +119,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
 
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn4
 %fn4 = block {
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 
@@ -147,7 +147,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
 %fn3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn4
 %fn4 = block {
   store %v3, 42i
-  jmp %fn5  # return
+  br %fn5  # return
 }
 %fn5 = func_terminator
 

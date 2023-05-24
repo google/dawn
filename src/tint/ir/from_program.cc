@@ -170,20 +170,6 @@ class Impl {
         diagnostics_.add_error(tint::diag::System::IR, err, s);
     }
 
-    void JumpTo(FlowNode* node, utils::VectorRef<Value*> args = {}) {
-        TINT_ASSERT(IR, current_flow_block_);
-        TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
-
-        current_flow_block_->Instructions().Push(builder_.Jump(node, args));
-        current_flow_block_ = nullptr;
-    }
-    void JumpToIfNeeded(FlowNode* node) {
-        if (!current_flow_block_ || current_flow_block_->HasBranchTarget()) {
-            return;
-        }
-        JumpTo(node);
-    }
-
     void BranchTo(FlowNode* node, utils::VectorRef<Value*> args = {}) {
         TINT_ASSERT(IR, current_flow_block_);
         TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
@@ -357,7 +343,7 @@ class Impl {
 
             // If the branch target has already been set then a `return` was called. Only set in
             // the case where `return` wasn't called.
-            JumpToIfNeeded(current_function_->EndTarget());
+            BranchToIfNeeded(current_function_->EndTarget());
         }
 
         TINT_ASSERT(IR, control_stack_.IsEmpty());
@@ -587,7 +573,7 @@ class Impl {
 
             // The current block didn't `break`, `return` or `continue`, go to the continuing
             // block.
-            JumpToIfNeeded(loop_inst->Continuing());
+            BranchToIfNeeded(loop_inst->Continuing());
 
             current_flow_block_ = loop_inst->Continuing();
             if (stmt->continuing) {
@@ -634,7 +620,7 @@ class Impl {
             current_flow_block_ = if_inst->Merge();
             EmitBlock(stmt->body);
 
-            JumpToIfNeeded(loop_inst->Continuing());
+            BranchToIfNeeded(loop_inst->Continuing());
         }
         // The while loop always has a path to the Merge().target as the break statement comes
         // before anything inside the loop.
@@ -678,7 +664,7 @@ class Impl {
             }
 
             EmitBlock(stmt->body);
-            JumpToIfNeeded(loop_inst->Continuing());
+            BranchToIfNeeded(loop_inst->Continuing());
 
             if (stmt->continuing) {
                 current_flow_block_ = loop_inst->Continuing();
