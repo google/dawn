@@ -51,6 +51,15 @@ func (c Content) Validate() Diagnostics {
 	var out Diagnostics
 	for _, chunk := range c.Chunks {
 		for _, ex := range chunk.Expectations {
+			for _, status := range ex.Status {
+				if status == "Slow" {
+					out = append(out, Diagnostic{
+						Severity: Error,
+						Line:     ex.Line,
+						Message:  fmt.Sprintf("\"Slow\" expectation is not valid here. Use slow_tests.txt instead."),
+					})
+				}
+			}
 			glob, err := tree.Glob(query.Parse(ex.Query))
 			if err != nil {
 				out = append(out, Diagnostic{

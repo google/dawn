@@ -116,6 +116,19 @@ crbug.com/a/123 [ os-a ] a:b,c:d,* [ Failure ]
 				},
 			},
 		},
+		{ //////////////////////////////////////////////////////////////////////
+			name: "slow invalid",
+			expectations: `
+crbug.com/a/123 a:b,c:d,* [ Slow ]
+`,
+			diagnostics: expectations.Diagnostics{
+				{
+					Line:     8,
+					Severity: expectations.Error,
+					Message:  "\"Slow\" expectation is not valid here. Use slow_tests.txt instead.",
+				},
+			},
+		},
 	} {
 		ex, err := expectations.Parse("expectations.txt", header+test.expectations)
 		if err != nil {
