@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/spirv/ir/generator_impl_ir.h"
 
+#include <utility>
+
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
@@ -191,17 +193,13 @@ uint32_t GeneratorImplIr::Value(const ir::Value* value) {
     return Switch(
         value,  //
         [&](const ir::Constant* constant) { return Constant(constant); },
-        [&](const ir::Instruction* inst) {
-            auto id = instructions_.Find(inst);
+        [&](const ir::Value*) {
+            auto id = values_.Find(value);
             if (TINT_UNLIKELY(!id)) {
-                TINT_ICE(Writer, diagnostics_) << "missing instruction result";
+                TINT_ICE(Writer, diagnostics_) << "missing result ID for value";
                 return 0u;
             }
             return *id;
-        },
-        [&](Default) {
-            TINT_ICE(Writer, diagnostics_) << "unhandled value node: " << value->TypeInfo().name;
-            return 0u;
         });
 }
 
@@ -224,9 +222,22 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     // Get the ID for the return type.
     auto return_type_id = Type(func->ReturnType());
 
-    // Get the ID for the function type (creating it if needed).
-    // TODO(jrprice): Add the parameter types when they are supported in the IR.
     FunctionType function_type{return_type_id, {}};
+    InstructionList params;
+
+    // Generate function parameter declarations and add their type IDs to the function signature.
+    for (auto* param : func->Params()) {
+        auto param_type_id = Type(param->Type());
+        auto param_id = module_.NextId();
+        params.push_back(Instruction(spv::Op::OpFunctionParameter, {param_type_id, param_id}));
+        values_.Add(param, param_id);
+        function_type.param_type_ids.Push(param_type_id);
+        if (auto name = ir_->NameOf(param)) {
+            module_.PushDebug(spv::Op::OpName, {param_id, Operand(name.Name())});
+        }
+    }
+
+    // Get the ID for the function type (creating it if needed).
     auto function_type_id = function_types_.GetOrCreate(function_type, [&]() {
         auto func_ty_id = module_.NextId();
         OperandList operands = {func_ty_id, return_type_id};
@@ -242,9 +253,8 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
                     {return_type_id, id, U32Operand(SpvFunctionControlMaskNone), function_type_id}};
 
     // Create a function that we will add instructions to.
-    // TODO(jrprice): Add the parameter declarations when they are supported in the IR.
     auto entry_block = module_.NextId();
-    current_function_ = Function(decl, entry_block, {});
+    current_function_ = Function(decl, entry_block, std::move(params));
     TINT_DEFER(current_function_ = Function());
 
     // Emit the body of the function.
@@ -323,7 +333,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
                     << "unimplemented instruction: " << inst->TypeInfo().name;
                 return 0u;
             });
-        instructions_.Add(inst, result);
+        values_.Add(inst, result);
     }
 }
 

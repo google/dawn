@@ -171,8 +171,8 @@ class GeneratorImplIr {
     /// The map of constants to their result IDs.
     utils::Hashmap<const constant::Value*, uint32_t, 16> constants_;
 
-    /// The map of instructions to their result IDs.
-    utils::Hashmap<const ir::Instruction*, uint32_t, 8> instructions_;
+    /// The map of non-constant values to their result IDs.
+    utils::Hashmap<const ir::Value*, uint32_t, 8> values_;
 
     /// The map of blocks to the IDs of their label instructions.
     utils::Hashmap<const ir::Block*, uint32_t, 8> block_labels_;
