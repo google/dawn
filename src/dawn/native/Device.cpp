@@ -1434,6 +1434,10 @@ bool DeviceBase::IsRobustnessEnabled() const {
     return !IsToggleEnabled(Toggle::DisableRobustness);
 }
 
+bool DeviceBase::IsCompatibilityMode() const {
+    return mAdapter->GetFeatureLevel() == FeatureLevel::Compatibility;
+}
+
 bool DeviceBase::AllowUnsafeAPIs() const {
     // TODO(dawn:1685) Currently allows if either toggle are set accordingly.
     return IsToggleEnabled(Toggle::AllowUnsafeAPIs) || !IsToggleEnabled(Toggle::DisallowUnsafeAPIs);

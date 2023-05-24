@@ -20,6 +20,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/EnumMaskIterator.h"
@@ -178,7 +179,8 @@ MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
     return {};
 }
 
-MaybeError ValidateTextureViewDimensionCompatibility(const TextureBase* texture,
+MaybeError ValidateTextureViewDimensionCompatibility(const DeviceBase* device,
+                                                     const TextureBase* texture,
                                                      const TextureViewDescriptor* descriptor) {
     DAWN_INVALID_IF(!IsArrayLayerValidForTextureViewDimension(descriptor->dimension,
                                                               descriptor->arrayLayerCount),
@@ -207,8 +209,11 @@ MaybeError ValidateTextureViewDimensionCompatibility(const TextureBase* texture,
                 "(%u) and height (%u) are not equal.",
                 descriptor->dimension, texture, texture->GetSize().width,
                 texture->GetSize().height);
+            DAWN_INVALID_IF(descriptor->dimension == wgpu::TextureViewDimension::CubeArray &&
+                                device->IsCompatibilityMode(),
+                            "A %s texture view for %s is not supported in compatibility mode",
+                            descriptor->dimension, texture);
             break;
-
         case wgpu::TextureViewDimension::e1D:
         case wgpu::TextureViewDimension::e2D:
         case wgpu::TextureViewDimension::e2DArray:
@@ -436,7 +441,7 @@ MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
         descriptor->baseMipLevel, descriptor->mipLevelCount, texture->GetNumMipLevels());
 
     DAWN_TRY(ValidateCanViewTextureAs(device, texture, *viewFormat, descriptor->aspect));
-    DAWN_TRY(ValidateTextureViewDimensionCompatibility(texture, descriptor));
+    DAWN_TRY(ValidateTextureViewDimensionCompatibility(device, texture, descriptor));
 
     return {};
 }

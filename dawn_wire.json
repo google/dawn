@@ -89,7 +89,7 @@
             { "name": "instance id", "type": "ObjectId", "id_type": "instance" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "adapter object handle", "type": "ObjectHandle", "handle_type": "adapter"},
-            { "name": "options", "type": "request adapter options", "annotation": "const*" }
+            { "name": "options", "type": "request adapter options", "annotation": "const*", "optional": true }
         ],
         "adapter request device": [
             { "name": "adapter id", "type": "ObjectId", "id_type": "adapter" },

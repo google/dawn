@@ -319,7 +319,7 @@ class TextureViewSamplingTest : public DawnTest {
                             uint32_t textureViewLayerCount,
                             bool isCubeMapArray) {
         // TODO(crbug.com/dawn/1300): OpenGLES does not support cube map arrays.
-        DAWN_TEST_UNSUPPORTED_IF(isCubeMapArray && IsOpenGLES());
+        DAWN_TEST_UNSUPPORTED_IF(isCubeMapArray && IsCompatibilityMode());
 
         constexpr uint32_t kMipLevels = 1u;
         InitTexture(textureArrayLayers, kMipLevels);

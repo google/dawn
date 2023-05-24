@@ -258,6 +258,7 @@ class DawnTestBase {
     bool IsImplicitDeviceSyncEnabled() const;
     bool IsBackendValidationEnabled() const;
     bool IsFullBackendValidationEnabled() const;
+    bool IsCompatibilityMode() const;
     bool RunSuppressedTests() const;
 
     bool IsDXC() const;
@@ -283,11 +284,14 @@ class DawnTestBase {
 
     struct PrintToStringParamName {
         explicit PrintToStringParamName(const char* test);
-        std::string SanitizeParamName(std::string paramName, size_t index) const;
+        std::string SanitizeParamName(std::string paramName,
+                                      const wgpu::AdapterProperties& properties,
+                                      size_t index) const;
 
         template <class ParamType>
         std::string operator()(const ::testing::TestParamInfo<ParamType>& info) const {
-            return SanitizeParamName(::testing::PrintToStringParamName()(info), info.index);
+            return SanitizeParamName(::testing::PrintToStringParamName()(info),
+                                     info.param.adapterProperties, info.index);
         }
 
         std::string mTest;

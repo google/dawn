@@ -327,6 +327,7 @@ dawn_test("dawn_unittests") {
     "unittests/validation/BindGroupValidationTests.cpp",
     "unittests/validation/BufferValidationTests.cpp",
     "unittests/validation/CommandBufferValidationTests.cpp",
+    "unittests/validation/CompatValidationTests.cpp",
     "unittests/validation/ComputeIndirectValidationTests.cpp",
     "unittests/validation/ComputeValidationTests.cpp",
     "unittests/validation/CopyCommandsValidationTests.cpp",
