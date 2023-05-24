@@ -14,6 +14,18 @@
 
 #include "src/tint/type/manager.h"
 
+#include "src/tint/type/abstract_float.h"
+#include "src/tint/type/abstract_int.h"
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
+#include "src/tint/type/matrix.h"
+#include "src/tint/type/type.h"
+#include "src/tint/type/u32.h"
+#include "src/tint/type/vector.h"
+#include "src/tint/type/void.h"
+
 namespace tint::type {
 
 Manager::Manager() = default;
@@ -24,4 +36,91 @@ Manager& Manager::operator=(Manager&& rhs) = default;
 
 Manager::~Manager() = default;
 
+const type::Void* Manager::void_() {
+    return Get<type::Void>();
+}
+
+const type::Bool* Manager::bool_() {
+    return Get<type::Bool>();
+}
+
+const type::I32* Manager::i32() {
+    return Get<type::I32>();
+}
+
+const type::U32* Manager::u32() {
+    return Get<type::U32>();
+}
+
+const type::F32* Manager::f32() {
+    return Get<type::F32>();
+}
+
+const type::F16* Manager::f16() {
+    return Get<type::F16>();
+}
+
+const type::AbstractFloat* Manager::AFloat() {
+    return Get<type::AbstractFloat>();
+}
+
+const type::AbstractInt* Manager::AInt() {
+    return Get<type::AbstractInt>();
+}
+
+const type::Vector* Manager::vec(const type::Type* inner, uint32_t size) {
+    return Get<type::Vector>(inner, size);
+}
+
+const type::Vector* Manager::vec2(const type::Type* inner) {
+    return vec(inner, 2);
+}
+
+const type::Vector* Manager::vec3(const type::Type* inner) {
+    return vec(inner, 3);
+}
+
+const type::Vector* Manager::vec4(const type::Type* inner) {
+    return vec(inner, 4);
+}
+
+const type::Matrix* Manager::mat(const type::Type* inner, uint32_t cols, uint32_t rows) {
+    return Get<type::Matrix>(vec(inner, rows), cols);
+}
+
+const type::Matrix* Manager::mat2x2(const type::Type* inner) {
+    return mat(inner, 2, 2);
+}
+
+const type::Matrix* Manager::mat2x3(const type::Type* inner) {
+    return mat(inner, 2, 3);
+}
+
+const type::Matrix* Manager::mat2x4(const type::Type* inner) {
+    return mat(inner, 2, 4);
+}
+
+const type::Matrix* Manager::mat3x2(const type::Type* inner) {
+    return mat(inner, 3, 2);
+}
+
+const type::Matrix* Manager::mat3x3(const type::Type* inner) {
+    return mat(inner, 3, 3);
+}
+
+const type::Matrix* Manager::mat3x4(const type::Type* inner) {
+    return mat(inner, 3, 4);
+}
+
+const type::Matrix* Manager::mat4x2(const type::Type* inner) {
+    return mat(inner, 4, 2);
+}
+
+const type::Matrix* Manager::mat4x3(const type::Type* inner) {
+    return mat(inner, 4, 3);
+}
+
+const type::Matrix* Manager::mat4x4(const type::Type* inner) {
+    return mat(inner, 4, 4);
+}
 }  // namespace tint::type

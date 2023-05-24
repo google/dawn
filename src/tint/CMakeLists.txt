@@ -237,6 +237,8 @@ list(APPEND TINT_LIB_SRCS
   constant/clone_context.h
   constant/composite.cc
   constant/composite.h
+  constant/manager.cc
+  constant/manager.h
   constant/scalar.cc
   constant/scalar.h
   constant/splat.cc
@@ -923,6 +925,7 @@ if(TINT_BUILD_TESTS)
     ast/workgroup_attribute_test.cc
     clone_context_test.cc
     constant/composite_test.cc
+    constant/manager_test.cc
     constant/scalar_test.cc
     constant/splat_test.cc
     debug_test.cc

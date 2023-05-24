@@ -894,6 +894,8 @@ libtint_source_set("libtint_constant_src") {
     "constant/clone_context.h",
     "constant/composite.cc",
     "constant/composite.h",
+    "constant/manager.cc",
+    "constant/manager.h",
     "constant/node.cc",
     "constant/node.h",
     "constant/scalar.cc",
@@ -1681,6 +1683,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("tint_unittests_constant_src") {
     sources = [
       "constant/composite_test.cc",
+      "constant/manager_test.cc",
       "constant/scalar_test.cc",
       "constant/splat_test.cc",
     ]
