@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_CONSTANT_SCALAR_H_
 #define SRC_TINT_CONSTANT_SCALAR_H_
 
+#include "src/tint/constant/manager.h"
 #include "src/tint/constant/value.h"
 #include "src/tint/number.h"
 #include "src/tint/type/type.h"
@@ -63,7 +64,7 @@ class Scalar : public utils::Castable<Scalar<T>, Value> {
     /// @returns the cloned node
     const Scalar* Clone(CloneContext& ctx) const override {
         auto* ty = type->Clone(ctx.type_ctx);
-        return ctx.dst.constants->Create<Scalar<T>>(ty, value);
+        return ctx.dst.Get<Scalar<T>>(ty, value);
     }
 
     /// @returns `value` if `T` is not a Number, otherwise ValueOf returns the inner value of the

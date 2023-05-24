@@ -110,50 +110,6 @@ class Builder {
     /// @returns the start block for the case flow node
     Block* CreateCase(Switch* s, utils::VectorRef<Switch::CaseSelector> selectors);
 
-    /// Creates a constant::Value
-    /// @param args the arguments
-    /// @returns the new constant value
-    template <typename T, typename... ARGS>
-    utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Value>, const T>* create(
-        ARGS&&... args) {
-        return ir.constants_arena.Create<T>(std::forward<ARGS>(args)...);
-    }
-
-    /// @param v the value
-    /// @returns the constant value
-    const constant::Value* Bool(bool v) {
-        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
-        return Constant(create<constant::Scalar<bool>>(ir.types.bool_(), v))->Value();
-    }
-
-    /// @param v the value
-    /// @returns the constant value
-    const constant::Value* U32(uint32_t v) {
-        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
-        return Constant(create<constant::Scalar<u32>>(ir.types.u32(), u32(v)))->Value();
-    }
-
-    /// @param v the value
-    /// @returns the constant value
-    const constant::Value* I32(int32_t v) {
-        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
-        return Constant(create<constant::Scalar<i32>>(ir.types.i32(), i32(v)))->Value();
-    }
-
-    /// @param v the value
-    /// @returns the constant value
-    const constant::Value* F16(float v) {
-        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
-        return Constant(create<constant::Scalar<f16>>(ir.types.f16(), f16(v)))->Value();
-    }
-
-    /// @param v the value
-    /// @returns the constant value
-    const constant::Value* F32(float v) {
-        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
-        return Constant(create<constant::Scalar<f32>>(ir.types.f32(), f32(v)))->Value();
-    }
-
     /// Creates a new ir::Constant
     /// @param val the constant value
     /// @returns the new constant
@@ -164,37 +120,27 @@ class Builder {
     /// Creates a ir::Constant for an i32 Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(i32 v) {
-        return Constant(create<constant::Scalar<i32>>(ir.types.i32(), v));
-    }
+    ir::Constant* Constant(i32 v) { return Constant(ir.constant_values.Get(v)); }
 
     /// Creates a ir::Constant for a u32 Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(u32 v) {
-        return Constant(create<constant::Scalar<u32>>(ir.types.u32(), v));
-    }
+    ir::Constant* Constant(u32 v) { return Constant(ir.constant_values.Get(v)); }
 
     /// Creates a ir::Constant for a f32 Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(f32 v) {
-        return Constant(create<constant::Scalar<f32>>(ir.types.f32(), v));
-    }
+    ir::Constant* Constant(f32 v) { return Constant(ir.constant_values.Get(v)); }
 
     /// Creates a ir::Constant for a f16 Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(f16 v) {
-        return Constant(create<constant::Scalar<f16>>(ir.types.f16(), v));
-    }
+    ir::Constant* Constant(f16 v) { return Constant(ir.constant_values.Get(v)); }
 
     /// Creates a ir::Constant for a bool Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(bool v) {
-        return Constant(create<constant::Scalar<bool>>(ir.types.bool_(), v));
-    }
+    ir::Constant* Constant(bool v) { return Constant(ir.constant_values.Get(v)); }
 
     /// Creates an op for `lhs kind rhs`
     /// @param kind the kind of operation

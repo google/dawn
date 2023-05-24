@@ -39,7 +39,7 @@ TEST_F(IR_AddEmptyEntryPointTest, EmptyModule) {
 }
 
 TEST_F(IR_AddEmptyEntryPointTest, ExistingEntryPoint) {
-    auto* ep = b.CreateFunction("main", mod.types.void_(), Function::PipelineStage::kFragment);
+    auto* ep = b.CreateFunction("main", mod.Types().void_(), Function::PipelineStage::kFragment);
     ep->StartTarget()->SetInstructions(utils::Vector{b.Branch(ep->EndTarget())});
     mod.functions.Push(ep);
 

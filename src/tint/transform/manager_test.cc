@@ -51,7 +51,7 @@ class IR_AddFunction final : public ir::transform::Transform {
     void Run(ir::Module* mod, const DataMap&, DataMap&) const override {
         ir::Builder builder(*mod);
         auto* func =
-            builder.CreateFunction(mod->symbols.New("ir_func"), mod->types.Get<type::Void>());
+            builder.CreateFunction(mod->symbols.New("ir_func"), mod->Types().Get<type::Void>());
         func->StartTarget()->SetInstructions(utils::Vector{builder.Branch(func->EndTarget())});
         mod->functions.Push(func);
     }
@@ -69,7 +69,7 @@ ir::Module MakeIR() {
     ir::Module mod;
     ir::Builder builder(mod);
     auto* func =
-        builder.CreateFunction(builder.ir.symbols.New("main"), builder.ir.types.Get<type::Void>());
+        builder.CreateFunction(builder.ir.symbols.New("main"), mod.Types().Get<type::Void>());
     func->StartTarget()->SetInstructions(utils::Vector{builder.Branch(func->EndTarget())});
     builder.ir.functions.Push(func);
     return mod;

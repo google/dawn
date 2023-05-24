@@ -25,15 +25,15 @@ using namespace tint::number_suffixes;  // NOLINT
 using ConstantTest_Splat = TestHelper;
 
 TEST_F(ConstantTest_Splat, AllZero) {
-    auto* f32 = create<type::F32>();
+    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
 
-    auto* fPos0 = create<Scalar<tint::f32>>(f32, 0_f);
-    auto* fNeg0 = create<Scalar<tint::f32>>(f32, -0_f);
-    auto* fPos1 = create<Scalar<tint::f32>>(f32, 1_f);
+    auto* fPos0 = constants.Get(0_f);
+    auto* fNeg0 = constants.Get(-0_f);
+    auto* fPos1 = constants.Get(1_f);
 
-    auto* SpfPos0 = create<Splat>(f32, fPos0, 2);
-    auto* SpfNeg0 = create<Splat>(f32, fNeg0, 2);
-    auto* SpfPos1 = create<Splat>(f32, fPos1, 2);
+    auto* SpfPos0 = constants.Splat(vec3f, fPos0, 2);
+    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0, 2);
+    auto* SpfPos1 = constants.Splat(vec3f, fPos1, 2);
 
     EXPECT_TRUE(SpfPos0->AllZero());
     EXPECT_FALSE(SpfNeg0->AllZero());
@@ -41,15 +41,15 @@ TEST_F(ConstantTest_Splat, AllZero) {
 }
 
 TEST_F(ConstantTest_Splat, AnyZero) {
-    auto* f32 = create<type::F32>();
+    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
 
-    auto* fPos0 = create<Scalar<tint::f32>>(f32, 0_f);
-    auto* fNeg0 = create<Scalar<tint::f32>>(f32, -0_f);
-    auto* fPos1 = create<Scalar<tint::f32>>(f32, 1_f);
+    auto* fPos0 = constants.Get(0_f);
+    auto* fNeg0 = constants.Get(-0_f);
+    auto* fPos1 = constants.Get(1_f);
 
-    auto* SpfPos0 = create<Splat>(f32, fPos0, 2);
-    auto* SpfNeg0 = create<Splat>(f32, fNeg0, 2);
-    auto* SpfPos1 = create<Splat>(f32, fPos1, 2);
+    auto* SpfPos0 = constants.Splat(vec3f, fPos0, 2);
+    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0, 2);
+    auto* SpfPos1 = constants.Splat(vec3f, fPos1, 2);
 
     EXPECT_TRUE(SpfPos0->AnyZero());
     EXPECT_FALSE(SpfNeg0->AnyZero());
@@ -57,10 +57,10 @@ TEST_F(ConstantTest_Splat, AnyZero) {
 }
 
 TEST_F(ConstantTest_Splat, Index) {
-    auto* f32 = create<type::F32>();
+    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
 
-    auto* f1 = create<Scalar<tint::f32>>(f32, 1_f);
-    auto* sp = create<Splat>(f32, f1, 2);
+    auto* f1 = constants.Get(1_f);
+    auto* sp = constants.Splat(vec3f, f1, 2);
 
     ASSERT_NE(sp->Index(0), nullptr);
     ASSERT_NE(sp->Index(1), nullptr);
@@ -71,17 +71,16 @@ TEST_F(ConstantTest_Splat, Index) {
 }
 
 TEST_F(ConstantTest_Splat, Clone) {
-    auto* i32 = create<type::I32>();
-    auto* val = create<Scalar<tint::i32>>(i32, 12_i);
-    auto* sp = create<Splat>(i32, val, 2);
+    auto* vec3i = create<type::Vector>(create<type::I32>(), 3u);
+    auto* val = constants.Get(12_i);
+    auto* sp = constants.Splat(vec3i, val, 2);
 
-    type::Manager mgr;
-    utils::BlockAllocator<constant::Value> consts;
-    constant::CloneContext ctx{type::CloneContext{{nullptr}, {nullptr, &mgr}}, {&consts}};
+    constant::Manager mgr;
+    constant::CloneContext ctx{type::CloneContext{{nullptr}, {nullptr, &mgr.types}}, mgr};
 
     auto* r = sp->Clone(ctx);
     ASSERT_NE(r, nullptr);
-    EXPECT_TRUE(r->type->Is<type::I32>());
+    EXPECT_TRUE(r->type->Is<type::Vector>());
     EXPECT_TRUE(r->el->Is<Scalar<tint::i32>>());
     EXPECT_EQ(r->count, 2u);
 }

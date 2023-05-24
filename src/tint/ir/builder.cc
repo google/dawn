@@ -170,7 +170,7 @@ Unary* Builder::Negation(const type::Type* type, Value* val) {
 }
 
 Binary* Builder::Not(const type::Type* type, Value* val) {
-    return Equal(type, val, Constant(create<constant::Scalar<bool>>(type, false)));
+    return Equal(type, val, Constant(false));
 }
 
 ir::Bitcast* Builder::Bitcast(const type::Type* type, Value* val) {

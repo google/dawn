@@ -16,11 +16,10 @@
 #define SRC_TINT_CONSTANT_CLONE_CONTEXT_H_
 
 #include "src/tint/type/clone_context.h"
-#include "src/tint/utils/block_allocator.h"
 
-// Forward Declarations
+// Forward declarations
 namespace tint::constant {
-class Value;
+class Manager;
 }  // namespace tint::constant
 
 namespace tint::constant {
@@ -31,10 +30,7 @@ struct CloneContext {
     type::CloneContext type_ctx;
 
     /// Destination information
-    struct {
-        /// The constant allocator
-        utils::BlockAllocator<constant::Value>* constants;
-    } dst;
+    constant::Manager& dst;
 };
 
 }  // namespace tint::constant

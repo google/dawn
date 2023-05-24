@@ -78,9 +78,7 @@
 #include "src/tint/builtin/extension.h"
 #include "src/tint/builtin/interpolation_sampling.h"
 #include "src/tint/builtin/interpolation_type.h"
-#include "src/tint/constant/composite.h"
-#include "src/tint/constant/splat.h"
-#include "src/tint/constant/value.h"
+#include "src/tint/constant/manager.h"
 #include "src/tint/number.h"
 #include "src/tint/program.h"
 #include "src/tint/program_id.h"
@@ -328,9 +326,6 @@ class ProgramBuilder {
     /// SemNodeAllocator is an alias to BlockAllocator<sem::Node>
     using SemNodeAllocator = utils::BlockAllocator<sem::Node>;
 
-    /// ConstantAllocator is an alias to BlockAllocator<constant::Value>
-    using ConstantAllocator = utils::BlockAllocator<constant::Value>;
-
     /// Constructor
     ProgramBuilder();
 
@@ -364,13 +359,13 @@ class ProgramBuilder {
     /// @returns a reference to the program's types
     type::Manager& Types() {
         AssertNotMoved();
-        return types_;
+        return constants.types;
     }
 
     /// @returns a reference to the program's types
     const type::Manager& Types() const {
         AssertNotMoved();
-        return types_;
+        return constants.types;
     }
 
     /// @returns a reference to the program's AST nodes storage
@@ -395,12 +390,6 @@ class ProgramBuilder {
     const SemNodeAllocator& SemNodes() const {
         AssertNotMoved();
         return sem_nodes_;
-    }
-
-    /// @returns a reference to the program's semantic constant storage
-    ConstantAllocator& ConstantNodes() {
-        AssertNotMoved();
-        return constant_nodes_;
     }
 
     /// @returns a reference to the program's AST root Module
@@ -528,53 +517,6 @@ class ProgramBuilder {
         return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
     }
 
-    /// Creates a new constant::Value owned by the ProgramBuilder.
-    /// When the ProgramBuilder is destructed, the sem::Node will also be destructed.
-    /// @param args the arguments to pass to the constructor
-    /// @returns the node pointer
-    template <typename T, typename... ARGS>
-    utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Value> &&
-                                !utils::traits::IsTypeOrDerived<T, constant::Composite> &&
-                                !utils::traits::IsTypeOrDerived<T, constant::Splat>,
-                            T>*
-    create(ARGS&&... args) {
-        AssertNotMoved();
-        return constant_nodes_.Create<T>(std::forward<ARGS>(args)...);
-    }
-
-    /// Constructs a constant of a vector, matrix or array type.
-    ///
-    /// Examines the element values and will return either a constant::Composite or a
-    /// constant::Splat, depending on the element types and values.
-    ///
-    /// @param type the composite type
-    /// @param elements the composite elements
-    /// @returns the node pointer
-    template <
-        typename T,
-        typename = utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Composite> ||
-                                           utils::traits::IsTypeOrDerived<T, constant::Splat>>>
-    const constant::Value* create(const type::Type* type,
-                                  utils::VectorRef<const constant::Value*> elements) {
-        AssertNotMoved();
-        return createSplatOrComposite(type, elements);
-    }
-
-    /// Constructs a splat constant.
-    /// @param type the splat type
-    /// @param element the splat element
-    /// @param n the number of elements
-    /// @returns the node pointer
-    template <
-        typename T,
-        typename = utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Splat>>>
-    const constant::Splat* create(const type::Type* type,
-                                  const constant::Value* element,
-                                  size_t n) {
-        AssertNotMoved();
-        return constant_nodes_.Create<constant::Splat>(type, element, n);
-    }
-
     /// Creates a new type::Node owned by the ProgramBuilder.
     /// When the ProgramBuilder is destructed, owned ProgramBuilder and the returned node will also
     /// be destructed. If T derives from type::UniqueNode, then the calling create() for the same
@@ -584,7 +526,7 @@ class ProgramBuilder {
     template <typename T, typename... ARGS>
     utils::traits::EnableIfIsType<T, type::Node>* create(ARGS&&... args) {
         AssertNotMoved();
-        return types_.Get<T>(std::forward<ARGS>(args)...);
+        return constants.types.Get<T>(std::forward<ARGS>(args)...);
     }
 
     /// Marks this builder as moved, preventing any further use of the builder.
@@ -3953,6 +3895,9 @@ class ProgramBuilder {
     /// @returns the function
     const ast::Function* WrapInFunction(utils::VectorRef<const ast::Statement*> stmts);
 
+    /// The constants manager
+    constant::Manager constants;
+
     /// The builder types
     TypesBuilder const ty{this};
 
@@ -3961,16 +3906,10 @@ class ProgramBuilder {
     void AssertNotMoved() const;
 
   private:
-    const constant::Value* createSplatOrComposite(
-        const type::Type* type,
-        utils::VectorRef<const constant::Value*> elements);
-
     ProgramID id_;
     ast::NodeID last_ast_node_id_ = ast::NodeID{static_cast<decltype(ast::NodeID::value)>(0) - 1};
-    type::Manager types_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;
-    ConstantAllocator constant_nodes_;
     ast::Module* ast_;
     sem::Info sem_;
     SymbolTable symbols_{id_};

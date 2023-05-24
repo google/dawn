@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/constant/value.h"
+#include "src/tint/constant/manager.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/function.h"
@@ -66,10 +66,15 @@ class Module {
     /// @return the unique symbol of the given value.
     Symbol SetName(const Value* value, std::string_view name);
 
+    /// @return the type manager for the module
+    type::Manager& Types() { return constant_values.types; }
+
     /// The flow node allocator
     utils::BlockAllocator<FlowNode> flow_nodes;
-    /// The constant allocator
-    utils::BlockAllocator<constant::Value> constants_arena;
+
+    /// The constant value manager
+    constant::Manager constant_values;
+
     /// The value allocator
     utils::BlockAllocator<Value> values;
 
@@ -79,34 +84,11 @@ class Module {
     /// The block containing module level declarations, if any exist.
     Block* root_block = nullptr;
 
-    /// The type manager for the module
-    type::Manager types;
-
     /// The symbol table for the module
     SymbolTable symbols{prog_id_};
 
-    /// ConstantHasher provides a hash function for a constant::Value pointer, hashing the value
-    /// instead of the pointer itself.
-    struct ConstantHasher {
-        /// @param c the constant pointer to create a hash for
-        /// @return the hash value
-        inline std::size_t operator()(const constant::Value* c) const { return c->Hash(); }
-    };
-
-    /// ConstantEquals provides an equality function for two constant::Value pointers, comparing
-    /// their values instead of the pointers.
-    struct ConstantEquals {
-        /// @param a the first constant pointer to compare
-        /// @param b the second constant pointer to compare
-        /// @return the hash value
-        inline bool operator()(const constant::Value* a, const constant::Value* b) const {
-            return a->Equal(b);
-        }
-    };
-
     /// The map of constant::Value to their ir::Constant.
-    utils::Hashmap<const constant::Value*, ir::Constant*, 16, ConstantHasher, ConstantEquals>
-        constants;
+    utils::Hashmap<const constant::Value*, ir::Constant*, 16> constants;
 };
 
 }  // namespace tint::ir

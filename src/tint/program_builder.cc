@@ -38,9 +38,9 @@ ProgramBuilder::ProgramBuilder()
       ast_(ast_nodes_.Create<ast::Module>(id_, AllocateNodeID(), Source{})) {}
 
 ProgramBuilder::ProgramBuilder(ProgramBuilder&& rhs)
-    : id_(std::move(rhs.id_)),
+    : constants(std::move(rhs.constants)),
+      id_(std::move(rhs.id_)),
       last_ast_node_id_(std::move(rhs.last_ast_node_id_)),
-      types_(std::move(rhs.types_)),
       ast_nodes_(std::move(rhs.ast_nodes_)),
       sem_nodes_(std::move(rhs.sem_nodes_)),
       ast_(std::move(rhs.ast_)),
@@ -57,7 +57,7 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
     AssertNotMoved();
     id_ = std::move(rhs.id_);
     last_ast_node_id_ = std::move(rhs.last_ast_node_id_);
-    types_ = std::move(rhs.types_);
+    constants = std::move(rhs.constants);
     ast_nodes_ = std::move(rhs.ast_nodes_);
     sem_nodes_ = std::move(rhs.sem_nodes_);
     ast_ = std::move(rhs.ast_);
@@ -72,7 +72,7 @@ ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
     ProgramBuilder builder;
     builder.id_ = program->ID();
     builder.last_ast_node_id_ = program->HighestASTNodeID();
-    builder.types_ = type::Manager::Wrap(program->Types());
+    builder.constants = constant::Manager::Wrap(program->Constants());
     builder.ast_ =
         builder.create<ast::Module>(program->AST().source, program->AST().GlobalDeclarations());
     builder.sem_ = sem::Info::Wrap(program->Sem());
@@ -134,41 +134,6 @@ const ast::Function* ProgramBuilder::WrapInFunction(utils::VectorRef<const ast::
                     create<ast::StageAttribute>(ast::PipelineStage::kCompute),
                     WorkgroupSize(1_i, 1_i, 1_i),
                 });
-}
-
-const constant::Value* ProgramBuilder::createSplatOrComposite(
-    const type::Type* type,
-    utils::VectorRef<const constant::Value*> elements) {
-    if (elements.IsEmpty()) {
-        return nullptr;
-    }
-
-    bool any_zero = false;
-    bool all_zero = true;
-    bool all_equal = true;
-    auto* first = elements.Front();
-    for (auto* el : elements) {
-        if (!el) {
-            return nullptr;
-        }
-        if (!any_zero && el->AnyZero()) {
-            any_zero = true;
-        }
-        if (all_zero && !el->AllZero()) {
-            all_zero = false;
-        }
-        if (all_equal && el != first) {
-            if (!el->Equal(first)) {
-                all_equal = false;
-            }
-        }
-    }
-    if (all_equal) {
-        return create<constant::Splat>(type, elements[0], elements.Length());
-    }
-
-    return constant_nodes_.Create<constant::Composite>(type, std::move(elements), all_zero,
-                                                       any_zero);
 }
 
 }  // namespace tint

@@ -51,6 +51,7 @@
 #include "src/tint/ast/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/ast/transform/zero_init_workgroup_memory.h"
 #include "src/tint/ast/variable_decl_statement.h"
+#include "src/tint/constant/splat.h"
 #include "src/tint/constant/value.h"
 #include "src/tint/debug.h"
 #include "src/tint/sem/block_statement.h"

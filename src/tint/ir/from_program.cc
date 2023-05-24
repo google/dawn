@@ -132,9 +132,9 @@ class Impl {
     constant::CloneContext clone_ctx_{
         /* type_ctx */ type::CloneContext{
             /* src */ {&program_->Symbols()},
-            /* dst */ {&builder_.ir.symbols, &builder_.ir.types},
+            /* dst */ {&builder_.ir.symbols, &builder_.ir.Types()},
         },
-        /* dst */ {&builder_.ir.constants_arena},
+        /* dst */ {builder_.ir.constant_values},
     };
 
     /// The stack of control blocks.
@@ -841,7 +841,7 @@ class Impl {
             var,
             [&](const ast::Var* v) {
                 auto* ref = sem->Type()->As<type::Reference>();
-                auto* ty = builder_.ir.types.Get<type::Pointer>(
+                auto* ty = builder_.ir.Types().Get<type::Pointer>(
                     ref->StoreType()->Clone(clone_ctx_.type_ctx), ref->AddressSpace(),
                     ref->Access());
 
@@ -946,7 +946,7 @@ class Impl {
         auto* if_inst = builder_.CreateIf(lhs.Get());
         current_flow_block_->Instructions().Push(if_inst);
 
-        auto* result = builder_.BlockParam(builder_.ir.types.bool_());
+        auto* result = builder_.BlockParam(builder_.ir.Types().bool_());
         if_inst->Merge()->SetParams(utils::Vector{result});
 
         utils::Result<Value*> rhs;

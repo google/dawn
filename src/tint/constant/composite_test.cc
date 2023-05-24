@@ -25,15 +25,15 @@ using namespace tint::number_suffixes;  // NOLINT
 using ConstantTest_Composite = TestHelper;
 
 TEST_F(ConstantTest_Composite, AllZero) {
-    auto* f32 = create<type::F32>();
+    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
 
-    auto* fPos0 = create<Scalar<tint::f32>>(f32, 0_f);
-    auto* fNeg0 = create<Scalar<tint::f32>>(f32, -0_f);
-    auto* fPos1 = create<Scalar<tint::f32>>(f32, 1_f);
+    auto* fPos0 = constants.Get(0_f);
+    auto* fNeg0 = constants.Get(-0_f);
+    auto* fPos1 = constants.Get(1_f);
 
-    auto* compositeAll = create<Composite>(f32, utils::Vector{fPos0, fPos0});
-    auto* compositeAny = create<Composite>(f32, utils::Vector{fNeg0, fPos1, fPos0});
-    auto* compositeNone = create<Composite>(f32, utils::Vector{fNeg0, fNeg0});
+    auto* compositeAll = constants.Composite(vec3f, utils::Vector{fPos0, fPos0});
+    auto* compositeAny = constants.Composite(vec3f, utils::Vector{fNeg0, fPos1, fPos0});
+    auto* compositeNone = constants.Composite(vec3f, utils::Vector{fNeg0, fNeg0});
 
     EXPECT_TRUE(compositeAll->AllZero());
     EXPECT_FALSE(compositeAny->AllZero());
@@ -41,15 +41,15 @@ TEST_F(ConstantTest_Composite, AllZero) {
 }
 
 TEST_F(ConstantTest_Composite, AnyZero) {
-    auto* f32 = create<type::F32>();
+    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
 
-    auto* fPos0 = create<Scalar<tint::f32>>(f32, 0_f);
-    auto* fNeg0 = create<Scalar<tint::f32>>(f32, -0_f);
-    auto* fPos1 = create<Scalar<tint::f32>>(f32, 1_f);
+    auto* fPos0 = constants.Get(0_f);
+    auto* fNeg0 = constants.Get(-0_f);
+    auto* fPos1 = constants.Get(1_f);
 
-    auto* compositeAll = create<Composite>(f32, utils::Vector{fPos0, fPos0});
-    auto* compositeAny = create<Composite>(f32, utils::Vector{fNeg0, fPos1, fPos0});
-    auto* compositeNone = create<Composite>(f32, utils::Vector{fNeg0, fNeg0});
+    auto* compositeAll = constants.Composite(vec3f, utils::Vector{fPos0, fPos0});
+    auto* compositeAny = constants.Composite(vec3f, utils::Vector{fNeg0, fPos1, fPos0});
+    auto* compositeNone = constants.Composite(vec3f, utils::Vector{fNeg0, fNeg0});
 
     EXPECT_TRUE(compositeAll->AnyZero());
     EXPECT_TRUE(compositeAny->AnyZero());
@@ -57,12 +57,12 @@ TEST_F(ConstantTest_Composite, AnyZero) {
 }
 
 TEST_F(ConstantTest_Composite, Index) {
-    auto* f32 = create<type::F32>();
+    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
 
-    auto* fPos0 = create<Scalar<tint::f32>>(f32, 0_f);
-    auto* fPos1 = create<Scalar<tint::f32>>(f32, 1_f);
+    auto* fPos0 = constants.Get(0_f);
+    auto* fPos1 = constants.Get(1_f);
 
-    auto* composite = create<Composite>(f32, utils::Vector{fPos1, fPos0});
+    auto* composite = constants.Composite(vec3f, utils::Vector{fPos1, fPos0});
 
     ASSERT_NE(composite->Index(0), nullptr);
     ASSERT_NE(composite->Index(1), nullptr);
@@ -75,20 +75,19 @@ TEST_F(ConstantTest_Composite, Index) {
 }
 
 TEST_F(ConstantTest_Composite, Clone) {
-    auto* f32 = create<type::F32>();
+    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
 
-    auto* fPos0 = create<Scalar<tint::f32>>(f32, 0_f);
-    auto* fPos1 = create<Scalar<tint::f32>>(f32, 1_f);
+    auto* fPos0 = constants.Get(0_f);
+    auto* fPos1 = constants.Get(1_f);
 
-    auto* composite = create<Composite>(f32, utils::Vector{fPos1, fPos0});
+    auto* composite = constants.Composite(vec3f, utils::Vector{fPos1, fPos0});
 
-    type::Manager mgr;
-    utils::BlockAllocator<constant::Value> consts;
-    constant::CloneContext ctx{type::CloneContext{{nullptr}, {nullptr, &mgr}}, {&consts}};
+    constant::Manager mgr;
+    constant::CloneContext ctx{type::CloneContext{{nullptr}, {nullptr, &mgr.types}}, mgr};
 
     auto* r = composite->As<Composite>()->Clone(ctx);
     ASSERT_NE(r, nullptr);
-    EXPECT_TRUE(r->type->Is<type::F32>());
+    EXPECT_TRUE(r->type->Is<type::Vector>());
     EXPECT_FALSE(r->all_zero);
     EXPECT_TRUE(r->any_zero);
     ASSERT_EQ(r->elements.Length(), 2u);
