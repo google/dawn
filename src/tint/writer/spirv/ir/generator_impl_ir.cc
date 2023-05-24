@@ -33,6 +33,7 @@
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
@@ -177,6 +178,10 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
             },
             [&](const type::Vector* vec) {
                 module_.PushType(spv::Op::OpTypeVector, {id, Type(vec->type()), vec->Width()});
+            },
+            [&](const type::Matrix* mat) {
+                module_.PushType(spv::Op::OpTypeMatrix,
+                                 {id, Type(mat->ColumnType()), mat->columns()});
             },
             [&](const type::Pointer* ptr) {
                 module_.PushType(

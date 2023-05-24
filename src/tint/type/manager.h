@@ -21,6 +21,7 @@
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
@@ -112,21 +113,65 @@ class Manager final {
     /// @param inner the inner type
     /// @param size the vector size
     /// @returns the vector type
-    const type::Type* vec(const type::Type* inner, uint32_t size) {
+    const type::Vector* vec(const type::Type* inner, uint32_t size) {
         return Get<type::Vector>(inner, size);
     }
 
     /// @param inner the inner type
     /// @returns the vector type
-    const type::Type* vec2(const type::Type* inner) { return vec(inner, 2); }
+    const type::Vector* vec2(const type::Type* inner) { return vec(inner, 2); }
 
     /// @param inner the inner type
     /// @returns the vector type
-    const type::Type* vec3(const type::Type* inner) { return vec(inner, 3); }
+    const type::Vector* vec3(const type::Type* inner) { return vec(inner, 3); }
 
     /// @param inner the inner type
     /// @returns the vector type
-    const type::Type* vec4(const type::Type* inner) { return vec(inner, 4); }
+    const type::Vector* vec4(const type::Type* inner) { return vec(inner, 4); }
+
+    /// @param inner the inner type
+    /// @param cols the number of columns
+    /// @param rows the number of rows
+    /// @returns the matrix type
+    const type::Matrix* mat(const type::Type* inner, uint32_t cols, uint32_t rows) {
+        return Get<type::Matrix>(vec(inner, rows), cols);
+    }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat2x2(const type::Type* inner) { return mat(inner, 2, 2); }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat2x3(const type::Type* inner) { return mat(inner, 2, 3); }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat2x4(const type::Type* inner) { return mat(inner, 2, 4); }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat3x2(const type::Type* inner) { return mat(inner, 3, 2); }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat3x3(const type::Type* inner) { return mat(inner, 3, 3); }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat3x4(const type::Type* inner) { return mat(inner, 3, 4); }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat4x2(const type::Type* inner) { return mat(inner, 4, 2); }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat4x3(const type::Type* inner) { return mat(inner, 4, 3); }
+
+    /// @param inner the inner type
+    /// @returns the matrix type
+    const type::Matrix* mat4x4(const type::Type* inner) { return mat(inner, 4, 4); }
 
     /// @returns an iterator to the beginning of the types
     TypeIterator begin() const { return types_.begin(); }

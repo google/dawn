@@ -105,6 +105,26 @@ TEST_F(SpvGeneratorImplTest, Type_Vec4Bool) {
               "%1 = OpTypeVector %2 4\n");
 }
 
+TEST_F(SpvGeneratorImplTest, Type_Mat2x3f) {
+    auto* vec = b.ir.types.mat2x3(b.ir.types.f32());
+    auto id = generator_.Type(vec);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(),
+              "%3 = OpTypeFloat 32\n"
+              "%2 = OpTypeVector %3 3\n"
+              "%1 = OpTypeMatrix %2 2\n");
+}
+
+TEST_F(SpvGeneratorImplTest, Type_Mat4x2h) {
+    auto* vec = b.ir.types.mat4x2(b.ir.types.f16());
+    auto id = generator_.Type(vec);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(),
+              "%3 = OpTypeFloat 16\n"
+              "%2 = OpTypeVector %3 2\n"
+              "%1 = OpTypeMatrix %2 4\n");
+}
+
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
 TEST_F(SpvGeneratorImplTest, Type_Multiple) {
