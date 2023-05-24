@@ -138,5 +138,22 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, Function_ReturnValue) {
+    auto* func = b.CreateFunction("foo", mod.types.i32());
+    func->StartTarget()->SetInstructions(
+        utils::Vector{b.Branch(func->EndTarget(), utils::Vector{b.Constant(i32(42))})});
+
+    generator_.EmitFunction(func);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+%2 = OpTypeInt 32 1
+%3 = OpTypeFunction %2
+%5 = OpConstant %2 42
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+OpReturnValue %5
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv

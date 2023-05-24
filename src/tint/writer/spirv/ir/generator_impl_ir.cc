@@ -332,11 +332,14 @@ void GeneratorImplIr::EmitBranch(const ir::Branch* b) {
         b->To(),
         [&](const ir::Block* blk) { current_function_.push_inst(spv::Op::OpBranch, {Label(blk)}); },
         [&](const ir::FunctionTerminator*) {
-            // TODO(jrprice): Handle the return value, which will be a branch argument.
             if (!b->Args().IsEmpty()) {
-                TINT_ICE(Writer, diagnostics_) << "unimplemented return value";
+                TINT_ASSERT(Writer, b->Args().Length() == 1u);
+                OperandList operands;
+                operands.push_back(Value(b->Args()[0]));
+                current_function_.push_inst(spv::Op::OpReturnValue, operands);
+            } else {
+                current_function_.push_inst(spv::Op::OpReturn, {});
             }
-            current_function_.push_inst(spv::Op::OpReturn, {});
         },
         [&](Default) {
             // A block may not have an outward branch (e.g. an unreachable merge
