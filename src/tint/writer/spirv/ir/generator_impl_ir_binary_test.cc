@@ -147,12 +147,10 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_Vec2i) {
     auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
-    auto* lhs = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(mod.types.Get<type::I32>(), 2u),
-        utils::Vector{b.Constant(42_i)->Value(), b.Constant(-1_i)->Value()}, false, false);
-    auto* rhs = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(mod.types.Get<type::I32>(), 2u),
-        utils::Vector{b.Constant(0_i)->Value(), b.Constant(-43_i)->Value()}, false, false);
+    auto* lhs = b.create<constant::Composite>(mod.types.vec2(mod.types.Get<type::I32>()),
+                                              utils::Vector{b.I32(42), b.I32(-1)}, false, false);
+    auto* rhs = b.create<constant::Composite>(mod.types.vec2(mod.types.Get<type::I32>()),
+                                              utils::Vector{b.I32(0), b.I32(-43)}, false, false);
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Subtract(mod.types.Get<type::Vector>(mod.types.Get<type::I32>(), 2u),
                                  b.Constant(lhs), b.Constant(rhs)),
@@ -180,16 +178,12 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_Vec4f) {
     auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
-    auto* lhs = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(mod.types.Get<type::F32>(), 4u),
-        utils::Vector{b.Constant(42_f)->Value(), b.Constant(-1_f)->Value(),
-                      b.Constant(0_f)->Value(), b.Constant(1.25_f)->Value()},
-        false, false);
-    auto* rhs = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(mod.types.Get<type::F32>(), 4u),
-        utils::Vector{b.Constant(0_f)->Value(), b.Constant(1.25_f)->Value(),
-                      b.Constant(-42_f)->Value(), b.Constant(1_f)->Value()},
-        false, false);
+    auto* lhs = b.create<constant::Composite>(
+        mod.types.vec4(mod.types.Get<type::F32>()),
+        utils::Vector{b.F32(42), b.F32(-1), b.F32(0), b.F32(1.25)}, false, false);
+    auto* rhs = b.create<constant::Composite>(
+        mod.types.vec4(mod.types.Get<type::F32>()),
+        utils::Vector{b.F32(0), b.F32(1.25), b.F32(-42), b.F32(1)}, false, false);
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Subtract(mod.types.Get<type::Vector>(mod.types.Get<type::F32>(), 4u),
                                  b.Constant(lhs), b.Constant(rhs)),

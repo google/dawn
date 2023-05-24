@@ -63,11 +63,10 @@ TEST_F(SpvGeneratorImplTest, Constant_F16) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_Vec4Bool) {
-    auto* t = b.Constant(true);
-    auto* f = b.Constant(false);
-    auto* v = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(mod.types.Get<type::Bool>(), 4u),
-        utils::Vector{t->Value(), f->Value(), f->Value(), t->Value()}, false, true);
+    auto* v = b.create<constant::Composite>(
+        mod.types.vec4(mod.types.Get<type::Bool>()),
+        utils::Vector{b.Bool(true), b.Bool(false), b.Bool(false), b.Bool(true)}, false, true);
+
     generator_.Constant(b.Constant(v));
     EXPECT_EQ(DumpTypes(), R"(%3 = OpTypeBool
 %2 = OpTypeVector %3 4
@@ -78,12 +77,8 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec4Bool) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_Vec2i) {
-    auto* i = mod.types.Get<type::I32>();
-    auto* i_42 = b.Constant(i32(42));
-    auto* i_n1 = b.Constant(i32(-1));
-    auto* v = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(i, 2u), utils::Vector{i_42->Value(), i_n1->Value()}, false,
-        false);
+    auto* v = b.create<constant::Composite>(mod.types.vec2(mod.types.Get<type::I32>()),
+                                            utils::Vector{b.I32(42), b.I32(-1)}, false, false);
     generator_.Constant(b.Constant(v));
     EXPECT_EQ(DumpTypes(), R"(%3 = OpTypeInt 32 1
 %2 = OpTypeVector %3 2
@@ -94,13 +89,9 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec2i) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_Vec3u) {
-    auto* u = mod.types.Get<type::U32>();
-    auto* u_42 = b.Constant(u32(42));
-    auto* u_0 = b.Constant(u32(0));
-    auto* u_4b = b.Constant(u32(4000000000));
-    auto* v = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(u, 3u),
-        utils::Vector{u_42->Value(), u_0->Value(), u_4b->Value()}, false, true);
+    auto* v = b.create<constant::Composite>(mod.types.vec3(mod.types.Get<type::U32>()),
+                                            utils::Vector{b.U32(42), b.U32(0), b.U32(4000000000)},
+                                            false, true);
     generator_.Constant(b.Constant(v));
     EXPECT_EQ(DumpTypes(), R"(%3 = OpTypeInt 32 0
 %2 = OpTypeVector %3 3
@@ -112,14 +103,9 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec3u) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_Vec4f) {
-    auto* f = mod.types.Get<type::F32>();
-    auto* f_42 = b.Constant(f32(42));
-    auto* f_0 = b.Constant(f32(0));
-    auto* f_q = b.Constant(f32(0.25));
-    auto* f_n1 = b.Constant(f32(-1));
-    auto* v = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(f, 4u),
-        utils::Vector{f_42->Value(), f_0->Value(), f_q->Value(), f_n1->Value()}, false, true);
+    auto* v = b.create<constant::Composite>(
+        mod.types.vec4(mod.types.Get<type::F32>()),
+        utils::Vector{b.F32(42), b.F32(0), b.F32(0.25), b.F32(-1)}, false, true);
     generator_.Constant(b.Constant(v));
     EXPECT_EQ(DumpTypes(), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 4
@@ -132,12 +118,8 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec4f) {
 }
 
 TEST_F(SpvGeneratorImplTest, Constant_Vec2h) {
-    auto* h = mod.types.Get<type::F16>();
-    auto* h_42 = b.Constant(f16(42));
-    auto* h_q = b.Constant(f16(0.25));
-    auto* v = mod.constants_arena.Create<constant::Composite>(
-        mod.types.Get<type::Vector>(h, 2u), utils::Vector{h_42->Value(), h_q->Value()}, false,
-        false);
+    auto* v = b.create<constant::Composite>(mod.types.vec2(mod.types.Get<type::F16>()),
+                                            utils::Vector{b.F16(42), b.F16(0.25)}, false, false);
     generator_.Constant(b.Constant(v));
     EXPECT_EQ(DumpTypes(), R"(%3 = OpTypeFloat 16
 %2 = OpTypeVector %3 2

@@ -46,6 +46,7 @@
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/u32.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
 
 namespace tint::ir {
@@ -117,6 +118,41 @@ class Builder {
     utils::traits::EnableIf<utils::traits::IsTypeOrDerived<T, constant::Value>, const T>* create(
         ARGS&&... args) {
         return ir.constants_arena.Create<T>(std::forward<ARGS>(args)...);
+    }
+
+    /// @param v the value
+    /// @returns the constant value
+    const constant::Value* Bool(bool v) {
+        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
+        return Constant(create<constant::Scalar<bool>>(ir.types.Get<type::Bool>(), v))->Value();
+    }
+
+    /// @param v the value
+    /// @returns the constant value
+    const constant::Value* U32(uint32_t v) {
+        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
+        return Constant(create<constant::Scalar<u32>>(ir.types.Get<type::U32>(), u32(v)))->Value();
+    }
+
+    /// @param v the value
+    /// @returns the constant value
+    const constant::Value* I32(int32_t v) {
+        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
+        return Constant(create<constant::Scalar<i32>>(ir.types.Get<type::I32>(), i32(v)))->Value();
+    }
+
+    /// @param v the value
+    /// @returns the constant value
+    const constant::Value* F16(float v) {
+        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
+        return Constant(create<constant::Scalar<f16>>(ir.types.Get<type::F16>(), f16(v)))->Value();
+    }
+
+    /// @param v the value
+    /// @returns the constant value
+    const constant::Value* F32(float v) {
+        // TODO(dsinclair): Replace when constant::Value is uniqed by the arena.
+        return Constant(create<constant::Scalar<f32>>(ir.types.Get<type::F32>(), f32(v)))->Value();
     }
 
     /// Creates a new ir::Constant

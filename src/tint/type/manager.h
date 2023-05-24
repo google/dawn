@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "src/tint/type/type.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/unique_allocator.h"
 
@@ -83,6 +84,23 @@ class Manager final {
     TYPE* Find(ARGS&&... args) const {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);
     }
+
+    /// @param inner the inner type
+    /// @param size the vector size
+    /// @returns the vector type
+    type::Type* vec(type::Type* inner, uint32_t size) { return Get<type::Vector>(inner, size); }
+
+    /// @param inner the inner type
+    /// @returns the vector type
+    type::Type* vec2(type::Type* inner) { return vec(inner, 2); }
+
+    /// @param inner the inner type
+    /// @returns the vector type
+    type::Type* vec3(type::Type* inner) { return vec(inner, 3); }
+
+    /// @param inner the inner type
+    /// @returns the vector type
+    type::Type* vec4(type::Type* inner) { return vec(inner, 4); }
 
     /// @returns an iterator to the beginning of the types
     TypeIterator begin() const { return types_.begin(); }
