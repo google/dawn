@@ -25,6 +25,7 @@
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
+#include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
@@ -210,6 +211,7 @@ uint32_t GeneratorImplIr::Label(const ir::Block* block) {
 void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     // Make an ID for the function.
     auto id = module_.NextId();
+    functions_.Add(func->Name(), id);
 
     // Emit the function name.
     module_.PushDebug(spv::Op::OpName, {id, Operand(func->Name().Name())});
@@ -319,6 +321,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
                 EmitStore(s);
                 return 0u;
             },
+            [&](const ir::UserCall* c) { return EmitUserCall(c); },
             [&](const ir::Var* v) { return EmitVar(v); },
             [&](const ir::If* i) {
                 EmitIf(i);
@@ -430,6 +433,16 @@ uint32_t GeneratorImplIr::EmitLoad(const ir::Load* load) {
 
 void GeneratorImplIr::EmitStore(const ir::Store* store) {
     current_function_.push_inst(spv::Op::OpStore, {Value(store->To()), Value(store->From())});
+}
+
+uint32_t GeneratorImplIr::EmitUserCall(const ir::UserCall* call) {
+    auto id = module_.NextId();
+    OperandList operands = {Type(call->Type()), id, functions_.Get(call->Name()).value()};
+    for (auto* arg : call->Args()) {
+        operands.push_back(Value(arg));
+    }
+    current_function_.push_inst(spv::Op::OpFunctionCall, operands);
+    return id;
 }
 
 uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {

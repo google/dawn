@@ -183,5 +183,73 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, Function_Call) {
+    auto* i32_ty = mod.types.i32();
+    auto* x = b.FunctionParam(i32_ty);
+    auto* y = b.FunctionParam(i32_ty);
+    auto* result = b.Add(i32_ty, x, y);
+    auto* foo = b.CreateFunction("foo", i32_ty);
+    foo->SetParams(utils::Vector{x, y});
+    foo->StartTarget()->SetInstructions(
+        utils::Vector{result, b.Branch(foo->EndTarget(), utils::Vector{result})});
+
+    auto* bar = b.CreateFunction("bar", mod.types.void_());
+    bar->StartTarget()->SetInstructions(
+        utils::Vector{b.UserCall(i32_ty, mod.symbols.Get("foo"),
+                                 utils::Vector{b.Constant(i32(2)), b.Constant(i32(3))}),
+                      b.Branch(bar->EndTarget())});
+
+    generator_.EmitFunction(foo);
+    generator_.EmitFunction(bar);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+OpName %8 "bar"
+%2 = OpTypeInt 32 1
+%5 = OpTypeFunction %2 %2 %2
+%9 = OpTypeVoid
+%10 = OpTypeFunction %9
+%13 = OpConstant %2 2
+%14 = OpConstant %2 3
+%1 = OpFunction %2 None %5
+%3 = OpFunctionParameter %2
+%4 = OpFunctionParameter %2
+%6 = OpLabel
+%7 = OpIAdd %2 %3 %4
+OpReturnValue %7
+OpFunctionEnd
+%8 = OpFunction %9 None %10
+%11 = OpLabel
+%12 = OpFunctionCall %2 %1 %13 %14
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Function_Call_Void) {
+    auto* foo = b.CreateFunction("foo", mod.types.void_());
+    foo->StartTarget()->SetInstructions(utils::Vector{b.Branch(foo->EndTarget())});
+
+    auto* bar = b.CreateFunction("bar", mod.types.void_());
+    bar->StartTarget()->SetInstructions(
+        utils::Vector{b.UserCall(mod.types.void_(), mod.symbols.Get("foo"), utils::Empty),
+                      b.Branch(bar->EndTarget())});
+
+    generator_.EmitFunction(foo);
+    generator_.EmitFunction(bar);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+OpName %5 "bar"
+%2 = OpTypeVoid
+%3 = OpTypeFunction %2
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+OpReturn
+OpFunctionEnd
+%5 = OpFunction %2 None %3
+%6 = OpLabel
+%7 = OpFunctionCall %2 %1
+OpReturn
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv

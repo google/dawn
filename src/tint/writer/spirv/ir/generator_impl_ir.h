@@ -20,6 +20,7 @@
 #include "src/tint/constant/value.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/constant.h"
+#include "src/tint/symbol.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/vector.h"
 #include "src/tint/writer/spirv/binary_writer.h"
@@ -36,6 +37,7 @@ class Function;
 class Load;
 class Module;
 class Store;
+class UserCall;
 class Value;
 class Var;
 }  // namespace tint::ir
@@ -117,6 +119,11 @@ class GeneratorImplIr {
     /// @param store the store instruction to emit
     void EmitStore(const ir::Store* store);
 
+    /// Emit a user call instruction.
+    /// @param call the user call instruction to emit
+    /// @returns the result ID of the instruction
+    uint32_t EmitUserCall(const ir::UserCall* call);
+
     /// Emit a var instruction.
     /// @param var the var instruction to emit
     /// @returns the result ID of the instruction
@@ -170,6 +177,10 @@ class GeneratorImplIr {
 
     /// The map of constants to their result IDs.
     utils::Hashmap<const constant::Value*, uint32_t, 16> constants_;
+
+    /// The map of functions to their result IDs.
+    /// TODO(jrprice): Merge into `values_` map when `ir::Function` becomes an `ir::Value`.
+    utils::Hashmap<Symbol, uint32_t, 8> functions_;
 
     /// The map of non-constant values to their result IDs.
     utils::Hashmap<const ir::Value*, uint32_t, 8> values_;
