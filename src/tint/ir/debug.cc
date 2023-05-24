@@ -31,8 +31,8 @@ namespace tint::ir {
 std::string Debug::AsDotGraph(const Module* mod) {
     size_t node_count = 0;
 
-    std::unordered_set<const FlowNode*> visited;
-    std::unordered_set<const FlowNode*> merge_nodes;
+    std::unordered_set<const Block*> visited;
+    std::unordered_set<const Block*> merge_nodes;
     std::unordered_map<const FlowNode*, std::string> node_to_name;
     utils::StringStream out;
 
@@ -48,7 +48,7 @@ std::string Debug::AsDotGraph(const Module* mod) {
         return name;
     };
 
-    std::function<void(const FlowNode*)> Graph = [&](const FlowNode* node) {
+    std::function<void(const Block*)> Graph = [&](const Block* node) {
         if (visited.count(node) > 0) {
             return;
         }

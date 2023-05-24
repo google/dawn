@@ -21,7 +21,7 @@
 
 // Forward declarations
 namespace tint::ir {
-class FlowNode;
+class Block;
 }  // namespace tint::ir
 
 namespace tint::ir {
@@ -32,17 +32,17 @@ class Branch : public utils::Castable<Branch, Instruction> {
     /// Constructor
     /// @param to the block to branch too
     /// @param args the branch arguments
-    explicit Branch(FlowNode* to, utils::VectorRef<Value*> args = {});
+    explicit Branch(Block* to, utils::VectorRef<Value*> args = {});
     ~Branch() override;
 
     /// @returns the block being branched too.
-    const FlowNode* To() const { return to_; }
+    const Block* To() const { return to_; }
 
     /// @returns the branch arguments
     utils::VectorRef<Value*> Args() const { return args_; }
 
   private:
-    FlowNode* to_;
+    Block* to_;
     utils::Vector<Value*, 2> args_;
 };
 

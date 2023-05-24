@@ -98,7 +98,7 @@ class State {
         if (!ret_ty) {
             return nullptr;
         }
-        auto* body = FlowNodeGraph(fn->StartTarget());
+        auto* body = BlockGraph(fn->StartTarget());
         if (!body) {
             return nullptr;
         }
@@ -108,13 +108,13 @@ class State {
                       std::move(ret_attrs));
     }
 
-    const ast::BlockStatement* FlowNodeGraph(const ir::Block* start_node) {
+    const ast::BlockStatement* BlockGraph(const ir::Block* start_node) {
         // TODO(crbug.com/tint/1902): Check if the block is dead
         utils::Vector<const ast::Statement*,
                       decltype(ast::BlockStatement::statements)::static_length>
             stmts;
 
-        const ir::FlowNode* block = start_node;
+        const ir::Block* block = start_node;
 
         // TODO(crbug.com/tint/1902): Handle block arguments.
 
@@ -171,7 +171,7 @@ class State {
     const ast::IfStatement* If(const ir::If* i) {
         SCOPED_NESTING();
         auto* cond = Expr(i->Condition());
-        auto* t = FlowNodeGraph(i->True());
+        auto* t = BlockGraph(i->True());
         if (TINT_UNLIKELY(!t)) {
             return nullptr;
         }
@@ -187,7 +187,7 @@ class State {
                 }
                 return b.If(cond, t, b.Else(f));
             } else {
-                auto* f = FlowNodeGraph(i->False());
+                auto* f = BlockGraph(i->False());
                 if (!f) {
                     return nullptr;
                 }
@@ -210,7 +210,7 @@ class State {
             s->Cases(),  //
             [&](const ir::Switch::Case c) -> const tint::ast::CaseStatement* {
                 SCOPED_NESTING();
-                auto* body = FlowNodeGraph(c.start);
+                auto* body = BlockGraph(c.start);
                 if (!body) {
                     return nullptr;
                 }
@@ -270,7 +270,7 @@ class State {
     }
 
     /// @return true if there are no instructions between @p node and and @p stop_at
-    bool IsEmpty(const ir::Block* node, const ir::FlowNode* stop_at) {
+    bool IsEmpty(const ir::Block* node, const ir::Block* stop_at) {
         if (node->Instructions().IsEmpty()) {
             return true;
         }

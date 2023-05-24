@@ -16,13 +16,13 @@
 
 #include <utility>
 
-#include "src/tint/ir/flow_node.h"
+#include "src/tint/ir/block.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Branch);
 
 namespace tint::ir {
 
-Branch::Branch(FlowNode* to, utils::VectorRef<Value*> args) : to_(to), args_(std::move(args)) {
+Branch::Branch(Block* to, utils::VectorRef<Value*> args) : to_(to), args_(std::move(args)) {
     TINT_ASSERT(IR, to_);
     to_->AddInboundBranch(this);
     for (auto* arg : args) {

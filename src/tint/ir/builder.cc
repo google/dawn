@@ -217,7 +217,7 @@ ir::Var* Builder::Declare(const type::Type* type) {
     return ir.values.Create<ir::Var>(type);
 }
 
-ir::Branch* Builder::Branch(FlowNode* to, utils::VectorRef<Value*> args) {
+ir::Branch* Builder::Branch(Block* to, utils::VectorRef<Value*> args) {
     return ir.values.Create<ir::Branch>(to, args);
 }
 

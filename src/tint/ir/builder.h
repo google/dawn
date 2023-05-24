@@ -402,7 +402,7 @@ class Builder {
     /// @param to the node being branched too
     /// @param args the branch arguments
     /// @returns the instruction
-    ir::Branch* Branch(FlowNode* to, utils::VectorRef<Value*> args = {});
+    ir::Branch* Branch(Block* to, utils::VectorRef<Value*> args = {});
 
     /// Creates a new `BlockParam`
     /// @param type the parameter type

@@ -101,11 +101,7 @@ using ResultType = utils::Result<Module, diag::List>;
 // For an `if` and `switch` block, the merge has a registered incoming branch instruction of the
 // `if` and `switch. So, to determine if the merge is connected to any of the branches that happend
 // in the `if` or `switch` we need a `count` value that is larger then 1.
-bool IsConnected(const FlowNode* b, uint32_t count) {
-    // Function is always connected as it's the start.
-    if (b->Is<ir::Function>()) {
-        return true;
-    }
+bool IsConnected(const Block* b, uint32_t count) {
     return b->InboundBranches().Length() > count;
 }
 
@@ -170,7 +166,7 @@ class Impl {
         diagnostics_.add_error(tint::diag::System::IR, err, s);
     }
 
-    void BranchTo(FlowNode* node, utils::VectorRef<Value*> args = {}) {
+    void BranchTo(Block* node, utils::VectorRef<Value*> args = {}) {
         TINT_ASSERT(IR, current_flow_block_);
         TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
 
@@ -178,7 +174,7 @@ class Impl {
         current_flow_block_ = nullptr;
     }
 
-    void BranchToIfNeeded(FlowNode* node) {
+    void BranchToIfNeeded(Block* node) {
         if (!current_flow_block_ || current_flow_block_->HasBranchTarget()) {
             return;
         }
@@ -752,7 +748,7 @@ class Impl {
 
     // Discard is being treated as an instruction. The semantics in WGSL is demote_to_helper, so
     // the code has to continue as before it just predicates writes. If WGSL grows some kind of
-    // terminating discard that would probably make sense as a FlowNode but would then require
+    // terminating discard that would probably make sense as a Block but would then require
     // figuring out the multi-level exit that is triggered.
     void EmitDiscard(const ast::DiscardStatement*) {
         auto* inst = builder_.Discard();
