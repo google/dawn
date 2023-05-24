@@ -33,6 +33,17 @@ MaybeError BlitDepthToBuffer(DeviceBase* device,
                              const BufferCopy& dst,
                              const Extent3D& copyExtent);
 
+// BlitStencilToBuffer works around OpenGLES issues of copying stencil textures to a buffer.
+// Supported stencil texture format: *stencil8
+// It dispatches a compute shader textureLoad from the stencil texture and writes to the buffer as a
+// storage buffer.
+
+MaybeError BlitStencilToBuffer(DeviceBase* device,
+                               CommandEncoder* commandEncoder,
+                               const TextureCopy& src,
+                               const BufferCopy& dst,
+                               const Extent3D& copyExtent);
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_BLITDEPTHSTENCILTOBUFFER_H_

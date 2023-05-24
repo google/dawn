@@ -226,6 +226,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     // For OpenGL ES, use compute shader blit to emulate depth32float texture to buffer copies.
     deviceToggles->Default(Toggle::UseBlitForDepth32FloatTextureToBufferCopy,
                            gl.GetVersion().IsES() && !kIsAngleOnWindows);
+
+    // For OpenGL ES, use compute shader blit to emulate stencil texture to buffer copies.
+    deviceToggles->Default(Toggle::UseBlitForStencilTextureToBufferCopy,
+                           gl.GetVersion().IsES() && !kIsAngleOnWindows);
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,

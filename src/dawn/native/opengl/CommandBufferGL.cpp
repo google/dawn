@@ -541,8 +541,6 @@ MaybeError CommandBuffer::Execute() {
                     dst.aspect == Aspect::Stencil,
                     "Copies to stencil textures are unsupported on the OpenGL backend.");
 
-                ASSERT(dst.aspect == Aspect::Color);
-
                 buffer->EnsureDataInitialized();
                 SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copy->copySize);
                 if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,

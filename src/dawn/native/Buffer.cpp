@@ -177,6 +177,9 @@ BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
             device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy)) {
             mUsage |= kInternalStorageBuffer;
         }
+        if (device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy)) {
+            mUsage |= kInternalStorageBuffer;
+        }
     }
 
     GetObjectTrackingList()->Track(this);

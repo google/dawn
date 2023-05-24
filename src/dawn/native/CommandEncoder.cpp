@@ -1362,8 +1362,26 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
 
                     return {};
                 }
+            } else if (aspect == Aspect::Stencil) {
+                if (GetDevice()->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy)) {
+                    TextureCopy src;
+                    src.texture = source->texture;
+                    src.origin = source->origin;
+                    src.mipLevel = source->mipLevel;
+                    src.aspect = aspect;
+
+                    BufferCopy dst;
+                    dst.buffer = destination->buffer;
+                    dst.bytesPerRow = destination->layout.bytesPerRow;
+                    dst.rowsPerImage = destination->layout.rowsPerImage;
+                    dst.offset = destination->layout.offset;
+                    DAWN_TRY_CONTEXT(BlitStencilToBuffer(GetDevice(), this, src, dst, *copySize),
+                                     "copying stencil aspect from %s to %s using blit workaround.",
+                                     src.texture.Get(), destination->buffer);
+
+                    return {};
+                }
             }
-            // TODO(crbug.com/dawn/1782): implement emulation for stencil
 
             CopyTextureToBufferCmd* t2b =
                 allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
