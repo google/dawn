@@ -964,7 +964,7 @@ class Impl {
         auto* if_inst = builder_.CreateIf(lhs.Get());
         current_flow_block_->Instructions().Push(if_inst);
 
-        auto* result = builder_.BlockParam(builder_.ir.types.Get<type::Bool>());
+        auto* result = builder_.BlockParam(builder_.ir.types.bool_());
         if_inst->Merge()->SetParams(utils::Vector{result});
 
         utils::Result<Value*> rhs;

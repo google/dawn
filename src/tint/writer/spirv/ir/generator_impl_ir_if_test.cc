@@ -20,7 +20,7 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
@@ -46,7 +46,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
     auto* i = b.CreateIf(b.Constant(true));
     i->False()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
@@ -54,7 +54,7 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
 
     auto* true_block = i->True();
     true_block->SetInstructions(utils::Vector{
-        b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(1_i)), b.Branch(i->Merge())});
+        b.Add(mod.types.i32(), b.Constant(1_i), b.Constant(1_i)), b.Branch(i->Merge())});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -80,7 +80,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
@@ -88,7 +88,7 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
 
     auto* false_block = i->False();
     false_block->SetInstructions(utils::Vector{
-        b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(1_i)), b.Branch(i->Merge())});
+        b.Add(mod.types.i32(), b.Constant(1_i), b.Constant(1_i)), b.Branch(i->Merge())});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -114,7 +114,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.Branch(func->EndTarget())});

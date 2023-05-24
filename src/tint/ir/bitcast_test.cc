@@ -27,7 +27,7 @@ using IR_InstructionTest = TestHelper;
 TEST_F(IR_InstructionTest, Bitcast) {
     Module mod;
     Builder b{mod};
-    const auto* inst = b.Bitcast(b.ir.types.Get<type::I32>(), b.Constant(4_i));
+    const auto* inst = b.Bitcast(b.ir.types.i32(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<ir::Bitcast>());
     ASSERT_NE(inst->Type(), nullptr);
@@ -43,7 +43,7 @@ TEST_F(IR_InstructionTest, Bitcast) {
 TEST_F(IR_InstructionTest, Bitcast_Usage) {
     Module mod;
     Builder b{mod};
-    const auto* inst = b.Bitcast(b.ir.types.Get<type::I32>(), b.Constant(4_i));
+    const auto* inst = b.Bitcast(b.ir.types.i32(), b.Constant(4_i));
 
     const auto args = inst->Args();
     ASSERT_EQ(args.Length(), 1u);

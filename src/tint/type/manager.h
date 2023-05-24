@@ -17,8 +17,14 @@
 
 #include <utility>
 
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
 #include "src/tint/type/type.h"
+#include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
+#include "src/tint/type/void.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/unique_allocator.h"
 
@@ -85,22 +91,42 @@ class Manager final {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);
     }
 
+    /// @returns a void type
+    const type::Type* void_() { return Get<type::Void>(); }
+
+    /// @returns a bool type
+    const type::Type* bool_() { return Get<type::Bool>(); }
+
+    /// @returns an i32 type
+    const type::Type* i32() { return Get<type::I32>(); }
+
+    /// @returns a u32 type
+    const type::Type* u32() { return Get<type::U32>(); }
+
+    /// @returns an f32 type
+    const type::Type* f32() { return Get<type::F32>(); }
+
+    /// @returns an f16 type
+    const type::Type* f16() { return Get<type::F16>(); }
+
     /// @param inner the inner type
     /// @param size the vector size
     /// @returns the vector type
-    type::Type* vec(type::Type* inner, uint32_t size) { return Get<type::Vector>(inner, size); }
+    const type::Type* vec(const type::Type* inner, uint32_t size) {
+        return Get<type::Vector>(inner, size);
+    }
 
     /// @param inner the inner type
     /// @returns the vector type
-    type::Type* vec2(type::Type* inner) { return vec(inner, 2); }
+    const type::Type* vec2(const type::Type* inner) { return vec(inner, 2); }
 
     /// @param inner the inner type
     /// @returns the vector type
-    type::Type* vec3(type::Type* inner) { return vec(inner, 3); }
+    const type::Type* vec3(const type::Type* inner) { return vec(inner, 3); }
 
     /// @param inner the inner type
     /// @returns the vector type
-    type::Type* vec4(type::Type* inner) { return vec(inner, 4); }
+    const type::Type* vec4(const type::Type* inner) { return vec(inner, 4); }
 
     /// @returns an iterator to the beginning of the types
     TypeIterator begin() const { return types_.begin(); }

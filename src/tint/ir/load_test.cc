@@ -27,7 +27,7 @@ TEST_F(IR_InstructionTest, CreateLoad) {
     Module mod;
     Builder b{mod};
 
-    auto* store_type = b.ir.types.Get<type::I32>();
+    auto* store_type = b.ir.types.i32();
     auto* var = b.Declare(b.ir.types.Get<type::Pointer>(
         store_type, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite));
     const auto* inst = b.Load(var);
@@ -45,7 +45,7 @@ TEST_F(IR_InstructionTest, Load_Usage) {
     Module mod;
     Builder b{mod};
 
-    auto* store_type = b.ir.types.Get<type::I32>();
+    auto* store_type = b.ir.types.i32();
     auto* var = b.Declare(b.ir.types.Get<type::Pointer>(
         store_type, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite));
     const auto* inst = b.Load(var);

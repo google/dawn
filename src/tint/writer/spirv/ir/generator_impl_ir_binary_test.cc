@@ -20,10 +20,9 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_I32) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Add(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(2_i)),
-                      b.Branch(func->EndTarget())});
+    auto* func = b.CreateFunction("foo", mod.types.void_());
+    func->StartTarget()->SetInstructions(utils::Vector{
+        b.Add(mod.types.i32(), b.Constant(1_i), b.Constant(2_i)), b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -41,10 +40,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_U32) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Add(mod.types.Get<type::U32>(), b.Constant(1_u), b.Constant(2_u)),
-                      b.Branch(func->EndTarget())});
+    auto* func = b.CreateFunction("foo", mod.types.void_());
+    func->StartTarget()->SetInstructions(utils::Vector{
+        b.Add(mod.types.u32(), b.Constant(1_u), b.Constant(2_u)), b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -62,10 +60,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Add_F32) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Add(mod.types.Get<type::F32>(), b.Constant(1_f), b.Constant(2_f)),
-                      b.Branch(func->EndTarget())});
+    auto* func = b.CreateFunction("foo", mod.types.void_());
+    func->StartTarget()->SetInstructions(utils::Vector{
+        b.Add(mod.types.f32(), b.Constant(1_f), b.Constant(2_f)), b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -83,9 +80,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_I32) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
     func->StartTarget()->SetInstructions(
-        utils::Vector{b.Subtract(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(2_i)),
+        utils::Vector{b.Subtract(mod.types.i32(), b.Constant(1_i), b.Constant(2_i)),
                       b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
@@ -104,9 +101,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_U32) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
     func->StartTarget()->SetInstructions(
-        utils::Vector{b.Subtract(mod.types.Get<type::U32>(), b.Constant(1_u), b.Constant(2_u)),
+        utils::Vector{b.Subtract(mod.types.u32(), b.Constant(1_u), b.Constant(2_u)),
                       b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
@@ -125,9 +122,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_F32) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
     func->StartTarget()->SetInstructions(
-        utils::Vector{b.Subtract(mod.types.Get<type::F32>(), b.Constant(1_f), b.Constant(2_f)),
+        utils::Vector{b.Subtract(mod.types.f32(), b.Constant(1_f), b.Constant(2_f)),
                       b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
@@ -146,14 +143,14 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_Vec2i) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
-    auto* lhs = b.create<constant::Composite>(mod.types.vec2(mod.types.Get<type::I32>()),
+    auto* func = b.CreateFunction("foo", mod.types.void_());
+    auto* lhs = b.create<constant::Composite>(mod.types.vec2(mod.types.i32()),
                                               utils::Vector{b.I32(42), b.I32(-1)}, false, false);
-    auto* rhs = b.create<constant::Composite>(mod.types.vec2(mod.types.Get<type::I32>()),
+    auto* rhs = b.create<constant::Composite>(mod.types.vec2(mod.types.i32()),
                                               utils::Vector{b.I32(0), b.I32(-43)}, false, false);
     func->StartTarget()->SetInstructions(
-        utils::Vector{b.Subtract(mod.types.Get<type::Vector>(mod.types.Get<type::I32>(), 2u),
-                                 b.Constant(lhs), b.Constant(rhs)),
+        utils::Vector{b.Subtract(mod.types.Get<type::Vector>(mod.types.i32(), 2u), b.Constant(lhs),
+                                 b.Constant(rhs)),
                       b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
@@ -177,16 +174,16 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Sub_Vec4f) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
     auto* lhs = b.create<constant::Composite>(
-        mod.types.vec4(mod.types.Get<type::F32>()),
-        utils::Vector{b.F32(42), b.F32(-1), b.F32(0), b.F32(1.25)}, false, false);
+        mod.types.vec4(mod.types.f32()), utils::Vector{b.F32(42), b.F32(-1), b.F32(0), b.F32(1.25)},
+        false, false);
     auto* rhs = b.create<constant::Composite>(
-        mod.types.vec4(mod.types.Get<type::F32>()),
-        utils::Vector{b.F32(0), b.F32(1.25), b.F32(-42), b.F32(1)}, false, false);
+        mod.types.vec4(mod.types.f32()), utils::Vector{b.F32(0), b.F32(1.25), b.F32(-42), b.F32(1)},
+        false, false);
     func->StartTarget()->SetInstructions(
-        utils::Vector{b.Subtract(mod.types.Get<type::Vector>(mod.types.Get<type::F32>(), 4u),
-                                 b.Constant(lhs), b.Constant(rhs)),
+        utils::Vector{b.Subtract(mod.types.Get<type::Vector>(mod.types.f32(), 4u), b.Constant(lhs),
+                                 b.Constant(rhs)),
                       b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
@@ -212,10 +209,10 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Binary_Chain) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
-    auto* a = b.Subtract(mod.types.Get<type::I32>(), b.Constant(1_i), b.Constant(2_i));
+    auto* func = b.CreateFunction("foo", mod.types.void_());
+    auto* a = b.Subtract(mod.types.i32(), b.Constant(1_i), b.Constant(2_i));
     func->StartTarget()->SetInstructions(
-        utils::Vector{a, b.Add(mod.types.Get<type::I32>(), a, a), b.Branch(func->EndTarget())});
+        utils::Vector{a, b.Add(mod.types.i32(), a, a), b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

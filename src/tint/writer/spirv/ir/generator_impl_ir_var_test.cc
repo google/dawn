@@ -21,10 +21,10 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_NoInit) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
-    auto* ty = mod.types.Get<type::Pointer>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+    auto* ty = mod.types.Get<type::Pointer>(mod.types.i32(), builtin::AddressSpace::kFunction,
+                                            builtin::Access::kReadWrite);
     func->StartTarget()->SetInstructions(utils::Vector{b.Declare(ty), b.Branch(func->EndTarget())});
 
     generator_.EmitFunction(func);
@@ -42,10 +42,10 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_WithInit) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
-    auto* ty = mod.types.Get<type::Pointer>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+    auto* ty = mod.types.Get<type::Pointer>(mod.types.i32(), builtin::AddressSpace::kFunction,
+                                            builtin::Access::kReadWrite);
     auto* v = b.Declare(ty);
     v->SetInitializer(b.Constant(42_i));
 
@@ -68,10 +68,10 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_Name) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
-    auto* ty = mod.types.Get<type::Pointer>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+    auto* ty = mod.types.Get<type::Pointer>(mod.types.i32(), builtin::AddressSpace::kFunction,
+                                            builtin::Access::kReadWrite);
     auto* v = b.Declare(ty);
     func->StartTarget()->SetInstructions(utils::Vector{v, b.Branch(func->EndTarget())});
     mod.SetName(v, "myvar");
@@ -92,10 +92,10 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_DeclInsideBlock) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
-    auto* ty = mod.types.Get<type::Pointer>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+    auto* ty = mod.types.Get<type::Pointer>(mod.types.i32(), builtin::AddressSpace::kFunction,
+                                            builtin::Access::kReadWrite);
     auto* v = b.Declare(ty);
     v->SetInitializer(b.Constant(42_i));
 
@@ -132,9 +132,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_Load) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
-    auto* store_ty = mod.types.Get<type::I32>();
+    auto* store_ty = mod.types.i32();
     auto* ty = mod.types.Get<type::Pointer>(store_ty, builtin::AddressSpace::kFunction,
                                             builtin::Access::kReadWrite);
     auto* v = b.Declare(ty);
@@ -156,10 +156,10 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_Store) {
-    auto* func = b.CreateFunction("foo", mod.types.Get<type::Void>());
+    auto* func = b.CreateFunction("foo", mod.types.void_());
 
-    auto* ty = mod.types.Get<type::Pointer>(
-        mod.types.Get<type::I32>(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+    auto* ty = mod.types.Get<type::Pointer>(mod.types.i32(), builtin::AddressSpace::kFunction,
+                                            builtin::Access::kReadWrite);
     auto* v = b.Declare(ty);
     func->StartTarget()->SetInstructions(
         utils::Vector{v, b.Store(v, b.Constant(42_i)), b.Branch(func->EndTarget())});
