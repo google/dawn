@@ -248,7 +248,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
             cfg.map.insert({override_id, 0.0});
         }
 
-        if (!cfg.map.empty()) {
+        if (!default_values.empty()) {
             transform::DataMap override_data;
             override_data.Add<ast::transform::SubstituteOverride::Config>(cfg);
 
