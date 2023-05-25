@@ -110,12 +110,12 @@ void Disassembler::Walk(const Block* blk) {
         blk,
         [&](const ir::FunctionTerminator* t) {
             TINT_ASSERT(IR, in_function_);
-            Indent() << "%fn" << IdOf(t) << " = func_terminator" << std::endl;
+            Indent() << "%b" << IdOf(t) << " = func_terminator" << std::endl;
             in_function_ = false;
         },
         [&](const ir::RootTerminator* t) {
             TINT_ASSERT(IR, !in_function_);
-            Indent() << "%fn" << IdOf(t) << " = root_terminator" << std::endl << std::endl;
+            Indent() << "%b" << IdOf(t) << " = root_terminator" << std::endl << std::endl;
         },
         [&](const ir::Block* b) {
             // If this block is dead, nothing to do
@@ -123,7 +123,7 @@ void Disassembler::Walk(const Block* blk) {
                 return;
             }
 
-            Indent() << "%fn" << IdOf(b) << " = block";
+            Indent() << "%b" << IdOf(b) << " = block";
             if (!b->Params().IsEmpty()) {
                 out_ << " (";
                 for (auto* p : b->Params()) {
@@ -181,7 +181,7 @@ void Disassembler::EmitFunction(const Function* func) {
 
         out_ << "]";
     }
-    out_ << " -> %fn" << IdOf(func->StartTarget()) << " {" << std::endl;
+    out_ << " -> %b" << IdOf(func->StartTarget()) << " {" << std::endl;
 
     {
         ScopedIndent si(indent_size_);
@@ -319,16 +319,16 @@ void Disassembler::EmitIf(const If* i) {
 
     out_ << " [";
     if (has_true) {
-        out_ << "t: %fn" << IdOf(i->True());
+        out_ << "t: %b" << IdOf(i->True());
     }
     if (has_false) {
         if (has_true) {
             out_ << ", ";
         }
-        out_ << "f: %fn" << IdOf(i->False());
+        out_ << "f: %b" << IdOf(i->False());
     }
     if (i->Merge()->HasBranchTarget()) {
-        out_ << ", m: %fn" << IdOf(i->Merge());
+        out_ << ", m: %b" << IdOf(i->Merge());
     }
     out_ << "]" << std::endl;
 
@@ -349,13 +349,13 @@ void Disassembler::EmitIf(const If* i) {
 }
 
 void Disassembler::EmitLoop(const Loop* l) {
-    out_ << "loop [s: %fn" << IdOf(l->Start());
+    out_ << "loop [s: %b" << IdOf(l->Start());
 
     if (l->Continuing()->HasBranchTarget()) {
-        out_ << ", c: %fn" << IdOf(l->Continuing());
+        out_ << ", c: %b" << IdOf(l->Continuing());
     }
     if (l->Merge()->HasBranchTarget()) {
-        out_ << ", m: %fn" << IdOf(l->Merge());
+        out_ << ", m: %b" << IdOf(l->Merge());
     }
     out_ << "]" << std::endl;
 
@@ -395,10 +395,10 @@ void Disassembler::EmitSwitch(const Switch* s) {
                 EmitValue(selector.val);
             }
         }
-        out_ << ", %fn" << IdOf(c.Start()) << ")";
+        out_ << ", %b" << IdOf(c.Start()) << ")";
     }
     if (s->Merge()->HasBranchTarget()) {
-        out_ << ", m: %fn" << IdOf(s->Merge());
+        out_ << ", m: %b" << IdOf(s->Merge());
     }
     out_ << "]" << std::endl;
 
@@ -415,7 +415,7 @@ void Disassembler::EmitSwitch(const Switch* s) {
 
 void Disassembler::EmitBranch(const Branch* b) {
     std::string suffix = "";
-    out_ << "br %fn" << IdOf(b->To());
+    out_ << "br %b" << IdOf(b->To());
     if (b->To()->Is<FunctionTerminator>()) {
         suffix = "return";
     } else if (b->To()->Is<RootTerminator>()) {
