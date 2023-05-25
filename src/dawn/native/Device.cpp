@@ -1450,7 +1450,7 @@ bool DeviceBase::IsRobustnessEnabled() const {
 }
 
 bool DeviceBase::IsCompatibilityMode() const {
-    return mAdapter->GetFeatureLevel() == FeatureLevel::Compatibility;
+    return mAdapter != nullptr && mAdapter->GetFeatureLevel() == FeatureLevel::Compatibility;
 }
 
 bool DeviceBase::AllowUnsafeAPIs() const {

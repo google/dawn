@@ -460,6 +460,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheShaderNegativeCases) {
 // Tests that pipeline creation wouldn't hit the cache if the pipelines are not exactly the same
 // (fragment color targets differences).
 TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheNegativeCasesFragmentColorTargets) {
+    // In compat, all targets must have the same writeMask
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // First time should create and write out to the cache.
     {
         wgpu::Device device = CreateDevice();

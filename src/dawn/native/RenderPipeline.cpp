@@ -352,6 +352,61 @@ MaybeError ValidateColorTargetState(
     return {};
 }
 
+MaybeError ValidateCompatibilityColorTargetState(
+    const uint8_t firstColorTargetIndex,
+    const ColorTargetState* const firstColorTargetState,
+    const uint8_t targetIndex,
+    const ColorTargetState* target) {
+    DAWN_INVALID_IF(firstColorTargetState->writeMask != target->writeMask,
+                    "targets[%u].writeMask (%s) does not match targets[%u].writeMask (%s).",
+                    targetIndex, target->writeMask, firstColorTargetIndex,
+                    firstColorTargetState->writeMask);
+    if (!firstColorTargetState->blend) {
+        DAWN_INVALID_IF(target->blend,
+                        "targets[%u].blend has a blend state but targets[%u].blend does not.",
+                        targetIndex, firstColorTargetIndex);
+    } else {
+        DAWN_INVALID_IF(!target->blend,
+                        "targets[%u].blend has a blend state but targets[%u].blend does not.",
+                        firstColorTargetIndex, targetIndex);
+
+        const BlendState& currBlendState = *target->blend;
+        const BlendState& firstBlendState = *firstColorTargetState->blend;
+
+        DAWN_INVALID_IF(
+            firstBlendState.color.operation != currBlendState.color.operation,
+            "targets[%u].color.operation (%s) does not match targets[%u].color.operation (%s).",
+            firstColorTargetIndex, firstBlendState.color.operation, targetIndex,
+            currBlendState.color.operation);
+        DAWN_INVALID_IF(
+            firstBlendState.color.srcFactor != currBlendState.color.srcFactor,
+            "targets[%u].color.srcFactor (%s) does not match targets[%u].color.srcFactor (%s).",
+            firstColorTargetIndex, firstBlendState.color.srcFactor, targetIndex,
+            currBlendState.color.srcFactor);
+        DAWN_INVALID_IF(
+            firstBlendState.color.dstFactor != currBlendState.color.dstFactor,
+            "targets[%u].color.dstFactor (%s) does not match targets[%u].color.dstFactor (%s).",
+            firstColorTargetIndex, firstBlendState.color.dstFactor, targetIndex,
+            currBlendState.color.dstFactor);
+        DAWN_INVALID_IF(
+            firstBlendState.alpha.operation != currBlendState.alpha.operation,
+            "targets[%u].alpha.operation (%s) does not match targets[%u].alpha.operation (%s).",
+            firstColorTargetIndex, firstBlendState.alpha.operation, targetIndex,
+            currBlendState.alpha.operation);
+        DAWN_INVALID_IF(
+            firstBlendState.alpha.srcFactor != currBlendState.alpha.srcFactor,
+            "targets[%u].alpha.srcFactor (%s) does not match targets[%u].alpha.srcFactor (%s).",
+            firstColorTargetIndex, firstBlendState.alpha.srcFactor, targetIndex,
+            currBlendState.alpha.srcFactor);
+        DAWN_INVALID_IF(
+            firstBlendState.alpha.dstFactor != currBlendState.alpha.dstFactor,
+            "targets[%u].alpha.dstFactor (%s) does not match targets[%u].alpha.dstFactor (%s).",
+            firstColorTargetIndex, firstBlendState.alpha.dstFactor, targetIndex,
+            currBlendState.alpha.dstFactor);
+    }
+    return {};
+}
+
 MaybeError ValidateFragmentState(DeviceBase* device,
                                  const FragmentState* descriptor,
                                  const PipelineLayoutBase* layout,
@@ -388,20 +443,36 @@ MaybeError ValidateFragmentState(DeviceBase* device,
                         depthStencil->format, descriptor->module, descriptor->entryPoint);
     }
 
+    uint8_t firstColorTargetIndex = 0;
+    const ColorTargetState* firstColorTargetState = nullptr;
     ColorAttachmentFormats colorAttachmentFormats;
-    for (ColorAttachmentIndex i(uint8_t(0));
-         i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->targetCount)); ++i) {
-        const ColorTargetState* target = &descriptor->targets[static_cast<uint8_t>(i)];
+
+    for (ColorAttachmentIndex attachmentIndex(uint8_t(0));
+         attachmentIndex < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->targetCount));
+         ++attachmentIndex) {
+        const uint8_t i = static_cast<uint8_t>(attachmentIndex);
+        const ColorTargetState* target = &descriptor->targets[i];
+
         if (target->format != wgpu::TextureFormat::Undefined) {
             DAWN_TRY_CONTEXT(
-                ValidateColorTargetState(device, target, fragmentMetadata.fragmentOutputsWritten[i],
-                                         fragmentMetadata.fragmentOutputVariables[i]),
-                "validating targets[%u].", static_cast<uint8_t>(i));
+                ValidateColorTargetState(device, target,
+                                         fragmentMetadata.fragmentOutputsWritten[attachmentIndex],
+                                         fragmentMetadata.fragmentOutputVariables[attachmentIndex]),
+                "validating targets[%u].", i);
             colorAttachmentFormats->push_back(&device->GetValidInternalFormat(target->format));
+            if (device->IsCompatibilityMode()) {
+                if (!firstColorTargetState) {
+                    firstColorTargetState = target;
+                    firstColorTargetIndex = i;
+                } else {
+                    DAWN_TRY_CONTEXT(ValidateCompatibilityColorTargetState(
+                                         firstColorTargetIndex, firstColorTargetState, i, target),
+                                     "validating targets[%u] in compatibility mode.", i);
+                }
+            }
         } else {
             DAWN_INVALID_IF(target->blend,
-                            "Color target[%u] blend state is set when the format is undefined.",
-                            static_cast<uint8_t>(i));
+                            "Color target[%u] blend state is set when the format is undefined.", i);
         }
     }
     DAWN_TRY(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats));
