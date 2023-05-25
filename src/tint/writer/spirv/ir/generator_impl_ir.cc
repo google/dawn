@@ -426,6 +426,19 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
             break;
         }
 
+        case ir::Binary::Kind::kAnd: {
+            op = spv::Op::OpBitwiseAnd;
+            break;
+        }
+        case ir::Binary::Kind::kOr: {
+            op = spv::Op::OpBitwiseOr;
+            break;
+        }
+        case ir::Binary::Kind::kXor: {
+            op = spv::Op::OpBitwiseXor;
+            break;
+        }
+
         case ir::Binary::Kind::kEqual: {
             if (lhs_ty->is_bool_scalar_or_vector()) {
                 op = spv::Op::OpLogicalEqual;

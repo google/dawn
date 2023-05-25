@@ -308,6 +308,45 @@ OpFunctionEnd
 )");
 }
 
+using Bitwise = BinaryInstructionTest;
+TEST_P(Bitwise, Scalar) {
+    auto params = GetParam();
+
+    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    func->StartTarget()->SetInstructions(
+        utils::Vector{b.CreateBinary(params.kind, MakeScalarType(params.type),
+                                     MakeScalarValue(params.type), MakeScalarValue(params.type)),
+                      b.Branch(func->EndTarget())});
+
+    generator_.EmitFunction(func);
+    EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
+}
+TEST_P(Bitwise, Vector) {
+    auto params = GetParam();
+
+    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    func->StartTarget()->SetInstructions(
+        utils::Vector{b.CreateBinary(params.kind, MakeVectorType(params.type),
+                                     MakeVectorValue(params.type), MakeVectorValue(params.type)),
+
+                      b.Branch(func->EndTarget())});
+
+    generator_.EmitFunction(func);
+    EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
+}
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest_Binary_I32,
+    Bitwise,
+    testing::Values(BinaryTestCase{kI32, ir::Binary::Kind::kAnd, "OpBitwiseAnd"},
+                    BinaryTestCase{kI32, ir::Binary::Kind::kOr, "OpBitwiseOr"},
+                    BinaryTestCase{kI32, ir::Binary::Kind::kXor, "OpBitwiseXor"}));
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest_Binary_U32,
+    Bitwise,
+    testing::Values(BinaryTestCase{kU32, ir::Binary::Kind::kAnd, "OpBitwiseAnd"},
+                    BinaryTestCase{kU32, ir::Binary::Kind::kOr, "OpBitwiseOr"},
+                    BinaryTestCase{kU32, ir::Binary::Kind::kXor, "OpBitwiseXor"}));
+
 using Comparison = BinaryInstructionTest;
 TEST_P(Comparison, Scalar) {
     auto params = GetParam();
