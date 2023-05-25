@@ -31,15 +31,15 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Vertex) {
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
          utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec4<f32> [@vertex ra: @position]
-  %fn1 = block
-  ret vec4<f32> 0.0f
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():vec4<f32> [@vertex ra: @position] -> %fn1 {
+  %fn1 = block {
+    br %fn2 vec4<f32> 0.0f  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 
@@ -47,15 +47,15 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Fragment) {
     Func("test", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():void [@fragment]
-  %fn1 = block
-  ret
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():void [@fragment] -> %fn1 {
+  %fn1 = block {
+    br %fn2  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 
@@ -63,15 +63,16 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Compute) {
     Func("test", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(8_i, 4_i, 2_i)});
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():void [@compute @workgroup_size(8, 4, 2)]
-  %fn1 = block
-  ret
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test = func():void [@compute @workgroup_size(8, 4, 2)] -> %fn1 {
+  %fn1 = block {
+    br %fn2  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 
@@ -79,15 +80,15 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Return) {
     Func("test", utils::Empty, ty.vec3<f32>(), utils::Vector{Return(vec3<f32>(0_f, 0_f, 0_f))},
          utils::Empty);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec3<f32>
-  %fn1 = block
-  ret vec3<f32> 0.0f
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():vec3<f32> -> %fn1 {
+  %fn1 = block {
+    br %fn2 vec3<f32> 0.0f  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 
@@ -96,15 +97,15 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnPosition) {
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
          utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec4<f32> [@vertex ra: @position]
-  %fn1 = block
-  ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():vec4<f32> [@vertex ra: @position] -> %fn1 {
+  %fn1 = block {
+    br %fn2 vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 
@@ -113,15 +114,16 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnPositionInvariant) {
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
          utils::Vector{Builtin(builtin::BuiltinValue::kPosition), Invariant()});
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec4<f32> [@vertex ra: @position @invariant]
-  %fn1 = block
-  ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test = func():vec4<f32> [@vertex ra: @position @invariant] -> %fn1 {
+  %fn1 = block {
+    br %fn2 vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 
@@ -129,15 +131,16 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnLocation) {
     Func("test", utils::Empty, ty.vec4<f32>(), utils::Vector{Return(vec4<f32>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kFragment)}, utils::Vector{Location(1_i)});
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():vec4<f32> [@fragment ra: @location(1)]
-  %fn1 = block
-  ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test = func():vec4<f32> [@fragment ra: @location(1)] -> %fn1 {
+  %fn1 = block {
+    br %fn2 vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 
@@ -146,15 +149,15 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnFragDepth) {
          utils::Vector{Stage(ast::PipelineStage::kFragment)},
          utils::Vector{Builtin(builtin::BuiltinValue::kFragDepth)});
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():f32 [@fragment ra: @frag_depth]
-  %fn1 = block
-  ret 1.0f
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():f32 [@fragment ra: @frag_depth] -> %fn1 {
+  %fn1 = block {
+    br %fn2 1.0f  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 
@@ -163,15 +166,15 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnSampleMask) {
          utils::Vector{Stage(ast::PipelineStage::kFragment)},
          utils::Vector{Builtin(builtin::BuiltinValue::kSampleMask)});
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = func test():u32 [@fragment ra: @sample_mask]
-  %fn1 = block
-  ret 1u
-func_end
-
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():u32 [@fragment ra: @sample_mask] -> %fn1 {
+  %fn1 = block {
+    br %fn2 1u  # return
+  }
+  %fn2 = func_terminator
+}
 )");
 }
 

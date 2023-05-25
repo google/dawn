@@ -31,22 +31,25 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
     auto* expr = Call("asin", i);
     WrapInFunction(expr);
 
-    auto r = Build();
-    ASSERT_TRUE(r) << Error();
-    auto m = r.Move();
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m), R"(%fn0 = block
-%1:ref<private, f32, read_write> = var private read_write
-store %1:ref<private, f32, read_write>, 1.0f
+    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
+%fn1 = block {
+  %i:ptr<private, f32, read_write> = var, 1.0f
+  br %fn2  # root_end
+}
 
+%fn2 = root_terminator
 
-
-%fn1 = func test_function():void [@compute @workgroup_size(1, 1, 1)]
-  %fn2 = block
-  %2:f32 = asin %1:ref<private, f32, read_write>
-  ret
-func_end
-
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+  %fn3 = block {
+    %3:f32 = load %i
+    %tint_symbol:f32 = asin %3
+    br %fn4  # return
+  }
+  %fn4 = func_terminator
+}
 )");
 }
 
