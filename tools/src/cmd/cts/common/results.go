@@ -204,55 +204,61 @@ func GetResults(
 	}
 
 	results := result.List{}
-	err := rdb.QueryTestResults(ctx, builds.ids(), cfg.Test.Prefix+".*", func(rpb *rdbpb.TestResult) error {
-		if time.Since(lastPrintedDot) > 5*time.Second {
-			lastPrintedDot = time.Now()
-			fmt.Printf(".")
-		}
+	var err error = nil
+	for _, prefix := range cfg.Test.Prefixes {
+		err = rdb.QueryTestResults(ctx, builds.ids(), prefix+".*", func(rpb *rdbpb.TestResult) error {
+			if time.Since(lastPrintedDot) > 5*time.Second {
+				lastPrintedDot = time.Now()
+				fmt.Printf(".")
+			}
 
-		if !strings.HasPrefix(rpb.GetTestId(), cfg.Test.Prefix) {
+			if !strings.HasPrefix(rpb.GetTestId(), prefix) {
+				return nil
+			}
+
+			testName := rpb.GetTestId()[len(prefix):]
+			status := toStatus(rpb.Status)
+			tags := result.NewTags()
+
+			duration := rpb.GetDuration().AsDuration()
+			mayExonerate := false
+
+			for _, sp := range rpb.Tags {
+				if sp.Key == "typ_tag" {
+					tags.Add(sp.Value)
+				}
+				if sp.Key == "javascript_duration" {
+					var err error
+					if duration, err = time.ParseDuration(sp.Value); err != nil {
+						return err
+					}
+				}
+				if sp.Key == "may_exonerate" {
+					var err error
+					if mayExonerate, err = strconv.ParseBool(sp.Value); err != nil {
+						return err
+					}
+				}
+			}
+
+			if status == result.Pass && duration > cfg.Test.SlowThreshold {
+				status = result.Slow
+			}
+
+			results = append(results, result.Result{
+				Query:        query.Parse(testName),
+				Status:       status,
+				Tags:         tags,
+				Duration:     duration,
+				MayExonerate: mayExonerate,
+			})
+
 			return nil
-		}
-
-		testName := rpb.GetTestId()[len(cfg.Test.Prefix):]
-		status := toStatus(rpb.Status)
-		tags := result.NewTags()
-
-		duration := rpb.GetDuration().AsDuration()
-		mayExonerate := false
-
-		for _, sp := range rpb.Tags {
-			if sp.Key == "typ_tag" {
-				tags.Add(sp.Value)
-			}
-			if sp.Key == "javascript_duration" {
-				var err error
-				if duration, err = time.ParseDuration(sp.Value); err != nil {
-					return err
-				}
-			}
-			if sp.Key == "may_exonerate" {
-				var err error
-				if mayExonerate, err = strconv.ParseBool(sp.Value); err != nil {
-					return err
-				}
-			}
-		}
-
-		if status == result.Pass && duration > cfg.Test.SlowThreshold {
-			status = result.Slow
-		}
-
-		results = append(results, result.Result{
-			Query:        query.Parse(testName),
-			Status:       status,
-			Tags:         tags,
-			Duration:     duration,
-			MayExonerate: mayExonerate,
 		})
-
-		return nil
-	})
+		if err != nil {
+			break
+		}
+	}
 
 	fmt.Println(" done")
 

@@ -1,6 +1,9 @@
 {
   "Test": {
-    "Prefix": "ninja://chrome/test:telemetry_gpu_integration_test/gpu_tests.webgpu_cts_integration_test.WebGpuCtsIntegrationTest.",
+    "Prefixes": [
+      "ninja://chrome/test:telemetry_gpu_integration_test/gpu_tests.webgpu_cts_integration_test.WebGpuCtsIntegrationTest.",
+      "ninja://chrome/test:telemetry_gpu_integration_test_android_chrome/gpu_tests.webgpu_cts_integration_test.WebGpuCtsIntegrationTest."
+    ],
     "SlowThreshold": 45000000000 // 45 seconds
   },
   "Gerrit": {

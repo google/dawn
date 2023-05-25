@@ -32,7 +32,7 @@ type Config struct {
 	// Test holds configuration data for test results.
 	Test struct {
 		// The ResultDB string prefix for CTS tests.
-		Prefix string
+		Prefixes []string
 		// The time threshold used to classify tests as slow.
 		SlowThreshold time.Duration
 	}
