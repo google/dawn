@@ -412,6 +412,7 @@ void GeneratorImplIr::EmitIf(const ir::If* i) {
 
 uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
     auto id = module_.NextId();
+    auto* lhs_ty = binary->LHS()->Type();
 
     // Determine the opcode.
     spv::Op op = spv::Op::Max;
@@ -424,6 +425,68 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
             op = binary->Type()->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
             break;
         }
+
+        case ir::Binary::Kind::kEqual: {
+            if (lhs_ty->is_bool_scalar_or_vector()) {
+                op = spv::Op::OpLogicalEqual;
+            } else if (lhs_ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFOrdEqual;
+            } else if (lhs_ty->is_integer_scalar_or_vector()) {
+                op = spv::Op::OpIEqual;
+            }
+            break;
+        }
+        case ir::Binary::Kind::kNotEqual: {
+            if (lhs_ty->is_bool_scalar_or_vector()) {
+                op = spv::Op::OpLogicalNotEqual;
+            } else if (lhs_ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFOrdNotEqual;
+            } else if (lhs_ty->is_integer_scalar_or_vector()) {
+                op = spv::Op::OpINotEqual;
+            }
+            break;
+        }
+        case ir::Binary::Kind::kGreaterThan: {
+            if (lhs_ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFOrdGreaterThan;
+            } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+                op = spv::Op::OpSGreaterThan;
+            } else if (lhs_ty->is_unsigned_integer_scalar_or_vector()) {
+                op = spv::Op::OpUGreaterThan;
+            }
+            break;
+        }
+        case ir::Binary::Kind::kGreaterThanEqual: {
+            if (lhs_ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFOrdGreaterThanEqual;
+            } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+                op = spv::Op::OpSGreaterThanEqual;
+            } else if (lhs_ty->is_unsigned_integer_scalar_or_vector()) {
+                op = spv::Op::OpUGreaterThanEqual;
+            }
+            break;
+        }
+        case ir::Binary::Kind::kLessThan: {
+            if (lhs_ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFOrdLessThan;
+            } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+                op = spv::Op::OpSLessThan;
+            } else if (lhs_ty->is_unsigned_integer_scalar_or_vector()) {
+                op = spv::Op::OpULessThan;
+            }
+            break;
+        }
+        case ir::Binary::Kind::kLessThanEqual: {
+            if (lhs_ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFOrdLessThanEqual;
+            } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+                op = spv::Op::OpSLessThanEqual;
+            } else if (lhs_ty->is_unsigned_integer_scalar_or_vector()) {
+                op = spv::Op::OpULessThanEqual;
+            }
+            break;
+        }
+
         default: {
             TINT_ICE(Writer, diagnostics_)
                 << "unimplemented binary instruction: " << static_cast<uint32_t>(binary->Kind());
