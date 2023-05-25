@@ -25,6 +25,8 @@
 #include "dawn/{{api}}_cpp_chained_struct.h"
 #include "dawn/EnumClassBitmasks.h"
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 
 namespace {{metadata.namespace}} {
 

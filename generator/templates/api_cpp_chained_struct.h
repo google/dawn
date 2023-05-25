@@ -20,6 +20,9 @@
 #ifndef {{API}}_CPP_CHAINED_STRUCT_H_
 #define {{API}}_CPP_CHAINED_STRUCT_H_
 
+#include <cstddef>
+#include <cstdint>
+
 // This header file declares the ChainedStruct structures separately from the {{metadata.api}}
 // headers so that dependencies can directly extend structures without including the larger header
 // which exposes capabilities that may require correctly set proc tables.
