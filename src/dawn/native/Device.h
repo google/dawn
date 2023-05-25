@@ -285,6 +285,8 @@ class DeviceBase : public RefCountedWithExternalCount {
     ExternalTextureBase* APICreateExternalTexture(const ExternalTextureDescriptor* descriptor);
     SamplerBase* APICreateSampler(const SamplerDescriptor* descriptor);
     ShaderModuleBase* APICreateShaderModule(const ShaderModuleDescriptor* descriptor);
+    ShaderModuleBase* APICreateErrorShaderModule(const ShaderModuleDescriptor* descriptor,
+                                                 const char* errorMessage);
     SwapChainBase* APICreateSwapChain(Surface* surface, const SwapChainDescriptor* descriptor);
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 

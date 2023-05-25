@@ -77,12 +77,12 @@ OwnedCompilationMessages::OwnedCompilationMessages() {
 
 OwnedCompilationMessages::~OwnedCompilationMessages() = default;
 
-void OwnedCompilationMessages::AddMessageForTesting(std::string message,
-                                                    wgpu::CompilationMessageType type,
-                                                    uint64_t lineNum,
-                                                    uint64_t linePos,
-                                                    uint64_t offset,
-                                                    uint64_t length) {
+void OwnedCompilationMessages::AddMessage(std::string message,
+                                          wgpu::CompilationMessageType type,
+                                          uint64_t lineNum,
+                                          uint64_t linePos,
+                                          uint64_t offset,
+                                          uint64_t length) {
     // Cannot add messages after GetCompilationInfo has been called.
     ASSERT(mCompilationInfo.messages == nullptr);
 

@@ -37,13 +37,12 @@ class OwnedCompilationMessages : public NonCopyable {
     OwnedCompilationMessages();
     ~OwnedCompilationMessages();
 
-    void AddMessageForTesting(
-        std::string message,
-        wgpu::CompilationMessageType type = wgpu::CompilationMessageType::Info,
-        uint64_t lineNum = 0,
-        uint64_t linePos = 0,
-        uint64_t offset = 0,
-        uint64_t length = 0);
+    void AddMessage(std::string message,
+                    wgpu::CompilationMessageType type = wgpu::CompilationMessageType::Info,
+                    uint64_t lineNum = 0,
+                    uint64_t linePos = 0,
+                    uint64_t offset = 0,
+                    uint64_t length = 0);
     MaybeError AddMessages(const tint::diag::List& diagnostics);
     void ClearMessages();
 

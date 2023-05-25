@@ -1097,6 +1097,14 @@
                 ]
             },
             {
+                "name": "create error shader module",
+                "returns": "shader module",
+                "args": [
+                    {"name": "descriptor", "type": "shader module descriptor", "annotation": "const*"},
+                    {"name": "error message", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
                 "name": "create swap chain",
                 "returns": "swap chain",
                 "args": [

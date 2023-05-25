@@ -1248,6 +1248,21 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
 
     return result.Detach();
 }
+ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescriptor* descriptor,
+                                                         const char* errorMessage) {
+    Ref<ShaderModuleBase> result =
+        ShaderModuleBase::MakeError(this, descriptor ? descriptor->label : nullptr);
+    std::unique_ptr<OwnedCompilationMessages> compilationMessages(
+        std::make_unique<OwnedCompilationMessages>());
+    compilationMessages->AddMessage(errorMessage, wgpu::CompilationMessageType::Error);
+    result->InjectCompilationMessages(std::move(compilationMessages));
+
+    std::unique_ptr<ErrorData> errorData =
+        DAWN_VALIDATION_ERROR("Error in calling %s.CreateShaderModule(%s).", this, descriptor);
+    ConsumeError(std::move(errorData));
+
+    return result.Detach();
+}
 SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
                                               const SwapChainDescriptor* descriptor) {
     Ref<SwapChainBase> result;
