@@ -36,7 +36,7 @@ struct ProgramAndFile {
     /// The tint program parsed from file.
     Program program;
     /// The source file
-    Source::File file;
+    std::unique_ptr<Source::File> file;
 };
 
 /// LoadInputFile attempts to load a benchmark input file with the given file

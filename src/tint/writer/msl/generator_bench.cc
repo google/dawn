@@ -14,7 +14,9 @@
 
 #include <string>
 
+#include "src/tint/ast/module.h"
 #include "src/tint/bench/benchmark.h"
+#include "src/tint/sem/variable.h"
 
 namespace tint::writer::msl {
 namespace {
@@ -26,26 +28,38 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
         return;
     }
     auto& program = std::get<bench::ProgramAndFile>(res).program;
-    for (auto _ : state) {
-        tint::writer::msl::Options gen_options = {};
-        gen_options.array_length_from_uniform.ubo_binding = tint::writer::BindingPoint{0, 30};
-        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-            tint::writer::BindingPoint{0, 0}, 0);
-        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-            tint::writer::BindingPoint{0, 1}, 1);
-        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-            tint::writer::BindingPoint{0, 2}, 2);
-        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-            tint::writer::BindingPoint{0, 3}, 3);
-        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-            tint::writer::BindingPoint{0, 4}, 4);
-        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-            tint::writer::BindingPoint{0, 5}, 5);
-        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-            tint::writer::BindingPoint{0, 6}, 6);
-        gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-            tint::writer::BindingPoint{0, 7}, 7);
 
+    tint::writer::msl::Options gen_options = {};
+    gen_options.array_length_from_uniform.ubo_binding = tint::writer::BindingPoint{0, 30};
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+        tint::writer::BindingPoint{0, 0}, 0);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+        tint::writer::BindingPoint{0, 1}, 1);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+        tint::writer::BindingPoint{0, 2}, 2);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+        tint::writer::BindingPoint{0, 3}, 3);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+        tint::writer::BindingPoint{0, 4}, 4);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+        tint::writer::BindingPoint{0, 5}, 5);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+        tint::writer::BindingPoint{0, 6}, 6);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+        tint::writer::BindingPoint{0, 7}, 7);
+
+    uint32_t next_binding_point = 0;
+    for (auto* var : program.AST().GlobalVariables()) {
+        if (auto* var_sem = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
+            if (auto bp = var_sem->BindingPoint()) {
+                gen_options.binding_remapper_options.binding_points[*bp] = sem::BindingPoint{
+                    0,                     // group
+                    next_binding_point++,  // binding
+                };
+            }
+        }
+    }
+    for (auto _ : state) {
         auto res = Generate(&program, gen_options);
         if (!res.error.empty()) {
             state.SkipWithError(res.error.c_str());

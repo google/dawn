@@ -120,8 +120,8 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name) {
     if (auto err = std::get_if<bench::Error>(&res)) {
         return *err;
     }
-    auto& file = std::get<Source::File>(res);
-    auto program = reader::wgsl::Parse(&file);
+    auto file = std::make_unique<Source::File>(std::move(std::get<Source::File>(res)));
+    auto program = reader::wgsl::Parse(file.get());
     if (program.Diagnostics().contains_errors()) {
         return Error{program.Diagnostics().str()};
     }
