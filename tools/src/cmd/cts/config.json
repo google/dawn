@@ -18,6 +18,16 @@
     }
   },
   "Builders": {
+    "Android-Arm": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "android-dawn-arm-rel"
+    },
+    "Android-Arm64": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "android-dawn-arm64-rel"
+    },
     "Win": {
       "Project": "chromium",
       "Bucket": "try",
