@@ -34,15 +34,15 @@ ir::Block* Builder::CreateRootBlockIfNeeded() {
 }
 
 Block* Builder::CreateBlock() {
-    return ir.flow_nodes.Create<Block>();
+    return ir.blocks.Create<Block>();
 }
 
 RootTerminator* Builder::CreateRootTerminator() {
-    return ir.flow_nodes.Create<RootTerminator>();
+    return ir.blocks.Create<RootTerminator>();
 }
 
 FunctionTerminator* Builder::CreateFunctionTerminator() {
-    return ir.flow_nodes.Create<FunctionTerminator>();
+    return ir.blocks.Create<FunctionTerminator>();
 }
 
 Function* Builder::CreateFunction(std::string_view name,

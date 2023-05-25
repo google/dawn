@@ -18,8 +18,8 @@
 #include <string>
 
 #include "src/tint/ir/binary.h"
+#include "src/tint/ir/block.h"
 #include "src/tint/ir/call.h"
-#include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
@@ -53,7 +53,7 @@ class Disassembler {
   private:
     utils::StringStream& Indent();
 
-    size_t IdOf(const FlowNode* node);
+    size_t IdOf(const Block* blk);
     std::string_view IdOf(const Value* node);
 
     void Walk(const Block* blk);
@@ -72,7 +72,7 @@ class Disassembler {
     const Module& mod_;
     utils::StringStream out_;
     utils::Hashset<const Block*, 32> visited_;
-    utils::Hashmap<const FlowNode*, size_t, 32> flow_node_ids_;
+    utils::Hashmap<const Block*, size_t, 32> block_ids_;
     utils::Hashmap<const Value*, std::string, 32> value_ids_;
     uint32_t indent_size_ = 0;
     bool in_function_ = false;

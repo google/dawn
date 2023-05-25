@@ -18,8 +18,8 @@
 #include <string>
 
 #include "src/tint/constant/manager.h"
+#include "src/tint/ir/block.h"
 #include "src/tint/ir/constant.h"
-#include "src/tint/ir/flow_node.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"
@@ -69,8 +69,8 @@ class Module {
     /// @return the type manager for the module
     type::Manager& Types() { return constant_values.types; }
 
-    /// The flow node allocator
-    utils::BlockAllocator<FlowNode> flow_nodes;
+    /// The block allocator
+    utils::BlockAllocator<Block> blocks;
 
     /// The constant value manager
     constant::Manager constant_values;

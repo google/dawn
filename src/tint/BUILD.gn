@@ -1232,8 +1232,6 @@ if (tint_build_ir) {
       "ir/disassembler.h",
       "ir/discard.cc",
       "ir/discard.h",
-      "ir/flow_node.cc",
-      "ir/flow_node.h",
       "ir/function.cc",
       "ir/function.h",
       "ir/function_param.cc",

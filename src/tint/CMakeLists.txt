@@ -742,8 +742,6 @@ if(${TINT_BUILD_IR})
     ir/discard.h
     ir/from_program.cc
     ir/from_program.h
-    ir/flow_node.cc
-    ir/flow_node.h
     ir/function.cc
     ir/function.h
     ir/function_param.cc

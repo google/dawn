@@ -29,44 +29,44 @@ namespace tint::ir {
 
 // static
 std::string Debug::AsDotGraph(const Module* mod) {
-    size_t node_count = 0;
+    size_t block_count = 0;
 
     std::unordered_set<const Block*> visited;
-    std::unordered_set<const Block*> merge_nodes;
-    std::unordered_map<const FlowNode*, std::string> node_to_name;
+    std::unordered_set<const Block*> merge_blocks;
+    std::unordered_map<const Block*, std::string> block_to_name;
     utils::StringStream out;
 
-    auto name_for = [&](const FlowNode* node) -> std::string {
-        if (node_to_name.count(node) > 0) {
-            return node_to_name[node];
+    auto name_for = [&](const Block* blk) -> std::string {
+        if (block_to_name.count(blk) > 0) {
+            return block_to_name[blk];
         }
 
-        std::string name = "node_" + std::to_string(node_count);
-        node_count += 1;
+        std::string name = "blk_" + std::to_string(block_count);
+        block_count += 1;
 
-        node_to_name[node] = name;
+        block_to_name[blk] = name;
         return name;
     };
 
-    std::function<void(const Block*)> Graph = [&](const Block* node) {
-        if (visited.count(node) > 0) {
+    std::function<void(const Block*)> Graph = [&](const Block* blk) {
+        if (visited.count(blk) > 0) {
             return;
         }
-        visited.insert(node);
+        visited.insert(blk);
 
         tint::Switch(
-            node,
+            blk,
             [&](const ir::FunctionTerminator*) {
                 // Already done
             },
             [&](const ir::Block* b) {
-                if (node_to_name.count(b) == 0) {
+                if (block_to_name.count(b) == 0) {
                     out << name_for(b) << R"( [label="block"])" << std::endl;
                 }
                 out << name_for(b) << " -> " << name_for(b->Branch()->To());
 
                 // Dashed lines to merge blocks
-                if (merge_nodes.count(b->Branch()->To()) != 0) {
+                if (merge_blocks.count(b->Branch()->To()) != 0) {
                     out << " [style=dashed]";
                 }
 

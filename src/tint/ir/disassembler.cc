@@ -72,9 +72,9 @@ void Disassembler::EmitBlockInstructions(const Block* b) {
     }
 }
 
-size_t Disassembler::IdOf(const FlowNode* node) {
+size_t Disassembler::IdOf(const Block* node) {
     TINT_ASSERT(IR, node);
-    return flow_node_ids_.GetOrCreate(node, [&] { return flow_node_ids_.Count(); });
+    return block_ids_.GetOrCreate(node, [&] { return block_ids_.Count(); });
 }
 
 std::string_view Disassembler::IdOf(const Value* value) {
