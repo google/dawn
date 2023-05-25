@@ -77,9 +77,6 @@ class Block : public utils::Castable<Block> {
     /// @returns the params to the block
     utils::Vector<const BlockParam*, 0>& Params() { return params_; }
 
-    /// @returns true if this node has inbound branches and branches out
-    bool IsConnected() const { return HasBranchTarget(); }
-
     /// @returns the inbound branch list for the block
     utils::VectorRef<ir::Branch*> InboundBranches() const { return inbound_branches_; }
 

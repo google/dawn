@@ -327,7 +327,7 @@ void Disassembler::EmitIf(const If* i) {
         }
         out_ << "f: %fn" << IdOf(i->False());
     }
-    if (i->Merge()->IsConnected()) {
+    if (i->Merge()->HasBranchTarget()) {
         out_ << ", m: %fn" << IdOf(i->Merge());
     }
     out_ << "]" << std::endl;
@@ -342,7 +342,7 @@ void Disassembler::EmitIf(const If* i) {
         Indent() << "# False block" << std::endl;
         Walk(i->False());
     }
-    if (i->Merge()->IsConnected()) {
+    if (i->Merge()->HasBranchTarget()) {
         Indent() << "# Merge block" << std::endl;
         Walk(i->Merge());
     }
@@ -351,10 +351,10 @@ void Disassembler::EmitIf(const If* i) {
 void Disassembler::EmitLoop(const Loop* l) {
     out_ << "loop [s: %fn" << IdOf(l->Start());
 
-    if (l->Continuing()->IsConnected()) {
+    if (l->Continuing()->HasBranchTarget()) {
         out_ << ", c: %fn" << IdOf(l->Continuing());
     }
-    if (l->Merge()->IsConnected()) {
+    if (l->Merge()->HasBranchTarget()) {
         out_ << ", m: %fn" << IdOf(l->Merge());
     }
     out_ << "]" << std::endl;
@@ -364,12 +364,12 @@ void Disassembler::EmitLoop(const Loop* l) {
         Walk(l->Start());
     }
 
-    if (l->Continuing()->IsConnected()) {
+    if (l->Continuing()->HasBranchTarget()) {
         ScopedIndent si(indent_size_);
         Indent() << "# Continuing block" << std::endl;
         Walk(l->Continuing());
     }
-    if (l->Merge()->IsConnected()) {
+    if (l->Merge()->HasBranchTarget()) {
         Indent() << "# Merge block" << std::endl;
         Walk(l->Merge());
     }
@@ -397,7 +397,7 @@ void Disassembler::EmitSwitch(const Switch* s) {
         }
         out_ << ", %fn" << IdOf(c.Start()) << ")";
     }
-    if (s->Merge()->IsConnected()) {
+    if (s->Merge()->HasBranchTarget()) {
         out_ << ", m: %fn" << IdOf(s->Merge());
     }
     out_ << "]" << std::endl;
@@ -407,7 +407,7 @@ void Disassembler::EmitSwitch(const Switch* s) {
         Indent() << "# Case block" << std::endl;
         Walk(c.Start());
     }
-    if (s->Merge()->IsConnected()) {
+    if (s->Merge()->HasBranchTarget()) {
         Indent() << "# Merge block" << std::endl;
         Walk(s->Merge());
     }
