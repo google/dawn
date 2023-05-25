@@ -77,7 +77,7 @@ func run() error {
 			return fmt.Errorf("Couldn't parse before date: %w", err)
 		}
 	} else {
-		before = time.Now()
+		before = time.Now().Add(time.Hour * 24)
 	}
 	if *afterFlag != "" {
 		after, err = time.Parse(yyyymmdd, *afterFlag)
@@ -113,8 +113,8 @@ func run() error {
 	for _, project := range []string{"tint", "dawn"} {
 		if changes := changesByProject[project]; len(changes) > 0 {
 			fmt.Println("##", strings.Title(project))
-			for _, change := range changes {
-				fmt.Println(change)
+			for i := len(changes) - 1; i >= 0; i-- {
+				fmt.Println(changes[i])
 			}
 			fmt.Println()
 		}

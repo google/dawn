@@ -80,7 +80,7 @@ func run() error {
 			return fmt.Errorf("Couldn't parse before date: %w", err)
 		}
 	} else {
-		before = time.Now()
+		before = time.Now().Add(time.Hour * 24)
 	}
 	if *afterFlag != "" {
 		after, err = time.Parse(yyyymmdd, *afterFlag)
