@@ -178,10 +178,6 @@ class GeneratorImplIr {
     /// The map of constants to their result IDs.
     utils::Hashmap<const constant::Value*, uint32_t, 16> constants_;
 
-    /// The map of functions to their result IDs.
-    /// TODO(jrprice): Merge into `values_` map when `ir::Function` becomes an `ir::Value`.
-    utils::Hashmap<Symbol, uint32_t, 8> functions_;
-
     /// The map of non-constant values to their result IDs.
     utils::Hashmap<const ir::Value*, uint32_t, 8> values_;
 

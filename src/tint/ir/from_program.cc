@@ -196,10 +196,6 @@ class Impl {
         return nullptr;
     }
 
-    Symbol CloneSymbol(Symbol sym) const {
-        return clone_ctx_.type_ctx.dst.st->Register(sym.Name());
-    }
-
     ResultType EmitModule() {
         auto* sem = program_->Sem().Module();
 
@@ -250,10 +246,12 @@ class Impl {
 
         const auto* sem = program_->Sem().Get(ast_func);
 
-        auto* ir_func = builder_.CreateFunction(CloneSymbol(ast_func->name->symbol),
+        auto* ir_func = builder_.CreateFunction(ast_func->name->symbol.NameView(),
                                                 sem->ReturnType()->Clone(clone_ctx_.type_ctx));
         current_function_ = ir_func;
         builder_.ir.functions.Push(ir_func);
+
+        scopes_.Set(ast_func->name->symbol, ir_func);
 
         if (ast_func->IsEntryPoint()) {
             switch (ast_func->PipelineStage()) {
@@ -1136,8 +1134,9 @@ class Impl {
             return utils::Failure;
         } else {
             // Not a builtin and not a templated call, so this is a user function.
-            auto name = CloneSymbol(expr->target->identifier->symbol);
-            inst = builder_.UserCall(ty, name, std::move(args));
+            inst = builder_.UserCall(
+                ty, scopes_.Get(expr->target->identifier->symbol)->As<ir::Function>(),
+                std::move(args));
         }
         if (inst == nullptr) {
             return utils::Failure;

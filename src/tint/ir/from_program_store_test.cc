@@ -43,7 +43,7 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Assign) {
 
 %fn2 = root_terminator
 
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
     store %a, 4u
     br %fn4  # return

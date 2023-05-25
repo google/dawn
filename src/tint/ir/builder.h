@@ -79,17 +79,6 @@ class Builder {
                              Function::PipelineStage stage = Function::PipelineStage::kUndefined,
                              std::optional<std::array<uint32_t, 3>> wg_size = {});
 
-    /// Creates a function flow node
-    /// @param name the function name
-    /// @param return_type the function return type
-    /// @param stage the function stage
-    /// @param wg_size the workgroup_size
-    /// @returns the flow node
-    Function* CreateFunction(Symbol name,
-                             const type::Type* return_type,
-                             Function::PipelineStage stage = Function::PipelineStage::kUndefined,
-                             std::optional<std::array<uint32_t, 3>> wg_size = {});
-
     /// Creates an if flow node
     /// @param condition the if condition
     /// @returns the flow node
@@ -299,10 +288,10 @@ class Builder {
 
     /// Creates a user function call instruction
     /// @param type the return type of the call
-    /// @param name the name of the function being called
+    /// @param func the function being called
     /// @param args the call arguments
     /// @returns the instruction
-    ir::UserCall* UserCall(const type::Type* type, Symbol name, utils::VectorRef<Value*> args);
+    ir::UserCall* UserCall(const type::Type* type, Function* func, utils::VectorRef<Value*> args);
 
     /// Creates a value conversion instruction
     /// @param to the type converted to

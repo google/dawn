@@ -21,7 +21,6 @@
 
 #include "src/tint/ir/function_param.h"
 #include "src/tint/ir/value.h"
-#include "src/tint/symbol.h"
 #include "src/tint/type/type.h"
 
 // Forward declarations
@@ -64,18 +63,13 @@ class Function : public utils::Castable<Function, Value> {
     };
 
     /// Constructor
-    /// @param n the function name
     /// @param rt the function return type
     /// @param stage the function stage
     /// @param wg_size the workgroup_size
-    Function(Symbol n,
-             const type::Type* rt,
+    Function(const type::Type* rt,
              PipelineStage stage = PipelineStage::kUndefined,
              std::optional<std::array<uint32_t, 3>> wg_size = {});
     ~Function() override;
-
-    /// @returns the function name
-    Symbol Name() const { return name_; }
 
     /// Sets the function stage
     /// @param stage the stage to set
@@ -130,7 +124,6 @@ class Function : public utils::Castable<Function, Value> {
     FunctionTerminator* EndTarget() const { return end_target_; }
 
   private:
-    Symbol name_;
     const type::Type* return_type_;
     PipelineStage pipeline_stage_;
     std::optional<std::array<uint32_t, 3>> workgroup_size_;

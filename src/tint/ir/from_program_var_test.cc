@@ -69,7 +69,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%1 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn1 {
+              R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn1 {
   %fn1 = block {
     %a:ptr<function, u32, read_write> = var
     br %fn2  # return
@@ -88,7 +88,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%1 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn1 {
+              R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn1 {
   %fn1 = block {
     %a:ptr<function, u32, read_write> = var, 2u
     br %fn2  # return

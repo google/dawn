@@ -34,15 +34,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Not) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func my_func():bool -> %fn1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():bool -> %fn1 {
   %fn1 = block {
     br %fn2 false  # return
   }
   %fn2 = func_terminator
 }
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
-    %3:bool = call my_func
+    %3:bool = call %my_func
     %tint_symbol:bool = eq %3, false
     br %fn4  # return
   }
@@ -59,15 +59,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Complement) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func my_func():u32 -> %fn1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %fn1 {
   %fn1 = block {
     br %fn2 1u  # return
   }
   %fn2 = func_terminator
 }
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
-    %3:u32 = call my_func
+    %3:u32 = call %my_func
     %tint_symbol:u32 = complement %3
     br %fn4  # return
   }
@@ -84,15 +84,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Negation) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func my_func():i32 -> %fn1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():i32 -> %fn1 {
   %fn1 = block {
     br %fn2 1i  # return
   }
   %fn2 = func_terminator
 }
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
-    %3:i32 = call my_func
+    %3:i32 = call %my_func
     %tint_symbol:i32 = negation %3
     br %fn4  # return
   }
@@ -118,7 +118,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
 
 %fn2 = root_terminator
 
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
     br %fn4  # return
   }
@@ -146,7 +146,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
 
 %fn2 = root_terminator
 
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
     store %v3, 42i
     br %fn4  # return

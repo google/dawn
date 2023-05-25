@@ -151,7 +151,7 @@ void Disassembler::Walk(const Block* blk) {
 void Disassembler::EmitFunction(const Function* func) {
     in_function_ = true;
 
-    Indent() << "%" << IdOf(func) << " = func " << func->Name().Name() << "(";
+    Indent() << "%" << IdOf(func) << " = func(";
     for (auto* p : func->Params()) {
         if (p != func->Params().Front()) {
             out_ << ", ";
@@ -292,7 +292,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
         },
         [&](const ir::UserCall* uc) {
             EmitValueWithType(uc);
-            out_ << " = call " << uc->Name().Name();
+            out_ << " = call %" << IdOf(uc->Func());
             if (!uc->Args().IsEmpty()) {
                 out_ << ", ";
             }

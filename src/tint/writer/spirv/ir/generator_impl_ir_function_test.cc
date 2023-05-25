@@ -196,10 +196,9 @@ TEST_F(SpvGeneratorImplTest, Function_Call) {
         utils::Vector{result, b.Branch(foo->EndTarget(), utils::Vector{result})});
 
     auto* bar = b.CreateFunction("bar", mod.Types().void_());
-    bar->StartTarget()->SetInstructions(
-        utils::Vector{b.UserCall(i32_ty, mod.symbols.Get("foo"),
-                                 utils::Vector{b.Constant(i32(2)), b.Constant(i32(3))}),
-                      b.Branch(bar->EndTarget())});
+    bar->StartTarget()->SetInstructions(utils::Vector{
+        b.UserCall(i32_ty, foo, utils::Vector{b.Constant(i32(2)), b.Constant(i32(3))}),
+        b.Branch(bar->EndTarget())});
 
     generator_.EmitFunction(foo);
     generator_.EmitFunction(bar);
@@ -231,9 +230,8 @@ TEST_F(SpvGeneratorImplTest, Function_Call_Void) {
     foo->StartTarget()->SetInstructions(utils::Vector{b.Branch(foo->EndTarget())});
 
     auto* bar = b.CreateFunction("bar", mod.Types().void_());
-    bar->StartTarget()->SetInstructions(
-        utils::Vector{b.UserCall(mod.Types().void_(), mod.symbols.Get("foo"), utils::Empty),
-                      b.Branch(bar->EndTarget())});
+    bar->StartTarget()->SetInstructions(utils::Vector{
+        b.UserCall(mod.Types().void_(), foo, utils::Empty), b.Branch(bar->EndTarget())});
 
     generator_.EmitFunction(foo);
     generator_.EmitFunction(bar);

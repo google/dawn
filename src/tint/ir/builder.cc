@@ -49,19 +49,12 @@ Function* Builder::CreateFunction(std::string_view name,
                                   const type::Type* return_type,
                                   Function::PipelineStage stage,
                                   std::optional<std::array<uint32_t, 3>> wg_size) {
-    return CreateFunction(ir.symbols.Register(name), return_type, stage, wg_size);
-}
-
-Function* Builder::CreateFunction(Symbol name,
-                                  const type::Type* return_type,
-                                  Function::PipelineStage stage,
-                                  std::optional<std::array<uint32_t, 3>> wg_size) {
     TINT_ASSERT(IR, return_type);
 
-    auto* ir_func = ir.values.Create<Function>(name, return_type, stage, wg_size);
+    auto* ir_func = ir.values.Create<Function>(return_type, stage, wg_size);
     ir_func->SetStartTarget(CreateBlock());
     ir_func->SetEndTarget(CreateFunctionTerminator());
-
+    ir.SetName(ir_func, name);
     return ir_func;
 }
 
@@ -182,9 +175,9 @@ ir::Discard* Builder::Discard() {
 }
 
 ir::UserCall* Builder::UserCall(const type::Type* type,
-                                Symbol name,
+                                Function* func,
                                 utils::VectorRef<Value*> args) {
-    return ir.values.Create<ir::UserCall>(type, name, std::move(args));
+    return ir.values.Create<ir::UserCall>(type, func, std::move(args));
 }
 
 ir::Convert* Builder::Convert(const type::Type* to,

@@ -35,15 +35,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func my_func():f32 -> %fn1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():f32 -> %fn1 {
   %fn1 = block {
     br %fn2 0.0f  # return
   }
   %fn2 = func_terminator
 }
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
-    %3:f32 = call my_func
+    %3:f32 = call %my_func
     %tint_symbol:f32 = bitcast %3
     br %fn4  # return
   }
@@ -62,7 +62,7 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Discard) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func test_function():void [@fragment] -> %fn1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test_function = func():void [@fragment] -> %fn1 {
   %fn1 = block {
     discard
     br %fn2  # return
@@ -80,15 +80,15 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%1 = func my_func(%p:f32):void -> %fn1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func(%p:f32):void -> %fn1 {
   %fn1 = block {
     br %fn2  # return
   }
   %fn2 = func_terminator
 }
-%3 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
-    %4:void = call my_func, 6.0f
+    %4:void = call %my_func, 6.0f
     br %fn4  # return
   }
   %fn4 = func_terminator
@@ -112,7 +112,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
 
 %fn2 = root_terminator
 
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
     %3:i32 = load %i
     %tint_symbol:f32 = convert i32, %3
@@ -157,7 +157,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
 
 %fn2 = root_terminator
 
-%2 = func test_function():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %fn3 {
   %fn3 = block {
     %3:f32 = load %i
     %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %3
