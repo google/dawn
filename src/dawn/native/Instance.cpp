@@ -217,10 +217,10 @@ ResultOrError<Ref<AdapterBase>> InstanceBase::RequestAdapterInternal(
     if (options->forceFallbackAdapter) {
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
         if (GetEnabledBackends()[wgpu::BackendType::Vulkan]) {
-            dawn_native::vulkan::AdapterDiscoveryOptions vulkanOptions;
+            dawn_native::vulkan::PhysicalDeviceDiscoveryOptions vulkanOptions;
             vulkanOptions.forceSwiftShader = true;
 
-            MaybeError result = DiscoverAdaptersInternal(&vulkanOptions);
+            MaybeError result = DiscoverPhysicalDevicesInternal(&vulkanOptions);
             if (result.IsError()) {
                 dawn::WarningLog() << absl::StrFormat(
                     "Skipping Vulkan Swiftshader adapter because initialization failed: %s",
@@ -232,7 +232,7 @@ ResultOrError<Ref<AdapterBase>> InstanceBase::RequestAdapterInternal(
         return Ref<AdapterBase>(nullptr);
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
     } else {
-        DiscoverDefaultAdapters();
+        DiscoverDefaultPhysicalDevices();
     }
 
     wgpu::AdapterType preferredType;
@@ -314,7 +314,7 @@ ResultOrError<Ref<AdapterBase>> InstanceBase::RequestAdapterInternal(
         new AdapterBase(std::move(selectedPhysicalDevice), featureLevel, adapterToggles));
 }
 
-void InstanceBase::DiscoverDefaultAdapters() {
+void InstanceBase::DiscoverDefaultPhysicalDevices() {
     for (wgpu::BackendType b : IterateBitSet(GetEnabledBackends())) {
         EnsureBackendConnection(b);
     }
@@ -325,7 +325,8 @@ void InstanceBase::DiscoverDefaultAdapters() {
 
     // Query and merge all default adapters for all backends
     for (std::unique_ptr<BackendConnection>& backend : mBackends) {
-        std::vector<Ref<PhysicalDeviceBase>> physicalDevices = backend->DiscoverDefaultAdapters();
+        std::vector<Ref<PhysicalDeviceBase>> physicalDevices =
+            backend->DiscoverDefaultPhysicalDevices();
 
         for (Ref<PhysicalDeviceBase>& physicalDevice : physicalDevices) {
             ASSERT(physicalDevice->GetBackendType() == backend->GetType());
@@ -338,8 +339,8 @@ void InstanceBase::DiscoverDefaultAdapters() {
 }
 
 // This is just a wrapper around the real logic that uses Error.h error handling.
-bool InstanceBase::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
-    MaybeError result = DiscoverAdaptersInternal(options);
+bool InstanceBase::DiscoverPhysicalDevices(const PhysicalDeviceDiscoveryOptionsBase* options) {
+    MaybeError result = DiscoverPhysicalDevicesInternal(options);
 
     if (result.IsError()) {
         dawn::WarningLog() << absl::StrFormat(
@@ -450,7 +451,8 @@ void InstanceBase::EnsureBackendConnection(wgpu::BackendType backendType) {
     mBackendsConnected.set(backendType);
 }
 
-MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options) {
+MaybeError InstanceBase::DiscoverPhysicalDevicesInternal(
+    const PhysicalDeviceDiscoveryOptionsBase* options) {
     wgpu::BackendType backendType = static_cast<wgpu::BackendType>(options->backendType);
     DAWN_TRY(ValidateBackendType(backendType));
 
@@ -468,7 +470,7 @@ MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsB
         foundBackend = true;
 
         std::vector<Ref<PhysicalDeviceBase>> newPhysicalDevices;
-        DAWN_TRY_ASSIGN(newPhysicalDevices, backend->DiscoverAdapters(options));
+        DAWN_TRY_ASSIGN(newPhysicalDevices, backend->DiscoverPhysicalDevices(options));
 
         for (Ref<PhysicalDeviceBase>& physicalDevice : newPhysicalDevices) {
             ASSERT(physicalDevice->GetBackendType() == backend->GetType());

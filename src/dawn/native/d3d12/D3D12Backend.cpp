@@ -39,9 +39,10 @@ uint64_t SetExternalMemoryReservation(WGPUDevice device,
         memorySegment, requestedReservationSize);
 }
 
-AdapterDiscoveryOptions::AdapterDiscoveryOptions() : AdapterDiscoveryOptions(nullptr) {}
+PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions()
+    : PhysicalDeviceDiscoveryOptions(nullptr) {}
 
-AdapterDiscoveryOptions::AdapterDiscoveryOptions(ComPtr<IDXGIAdapter> adapter)
-    : d3d::AdapterDiscoveryOptions(WGPUBackendType_D3D12, std::move(adapter)) {}
+PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(ComPtr<IDXGIAdapter> adapter)
+    : d3d::PhysicalDeviceDiscoveryOptions(WGPUBackendType_D3D12, std::move(adapter)) {}
 
 }  // namespace dawn::native::d3d12

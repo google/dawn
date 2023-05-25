@@ -238,35 +238,35 @@ const PlatformFunctions* Backend::GetFunctions() const {
     return mFunctions.get();
 }
 
-std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters() {
-    AdapterDiscoveryOptions options(ToAPI(GetType()), nullptr);
-    std::vector<Ref<PhysicalDeviceBase>> adapters;
-    if (GetInstance()->ConsumedError(DiscoverAdapters(&options), &adapters)) {
+std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultPhysicalDevices() {
+    PhysicalDeviceDiscoveryOptions options(ToAPI(GetType()), nullptr);
+    std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
+    if (GetInstance()->ConsumedError(DiscoverPhysicalDevices(&options), &physicalDevices)) {
         return {};
     }
-    return adapters;
+    return physicalDevices;
 }
 
-ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
-    const AdapterDiscoveryOptionsBase* optionsBase) {
+ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverPhysicalDevices(
+    const PhysicalDeviceDiscoveryOptionsBase* optionsBase) {
     ASSERT(optionsBase->backendType == ToAPI(GetType()));
-    const AdapterDiscoveryOptions* options =
-        static_cast<const AdapterDiscoveryOptions*>(optionsBase);
+    const PhysicalDeviceDiscoveryOptions* options =
+        static_cast<const PhysicalDeviceDiscoveryOptions*>(optionsBase);
 
-    std::vector<Ref<PhysicalDeviceBase>> adapters;
+    std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
     if (options->dxgiAdapter != nullptr) {
         // |dxgiAdapter| was provided. Discover just that adapter.
         Ref<PhysicalDeviceBase> adapter;
         DAWN_TRY_ASSIGN(adapter, CreatePhysicalDeviceFromIDXGIAdapter(options->dxgiAdapter));
-        adapters.push_back(std::move(adapter));
-        return std::move(adapters);
+        physicalDevices.push_back(std::move(adapter));
+        return std::move(physicalDevices);
     }
 
-    // Enumerate and discover all available adapters.
+    // Enumerate and discover all available physicalDevices.
     for (uint32_t adapterIndex = 0;; ++adapterIndex) {
         ComPtr<IDXGIAdapter1> dxgiAdapter = nullptr;
         if (GetFactory()->EnumAdapters1(adapterIndex, &dxgiAdapter) == DXGI_ERROR_NOT_FOUND) {
-            break;  // No more adapters to enumerate.
+            break;  // No more physicalDevices to enumerate.
         }
 
         ASSERT(dxgiAdapter != nullptr);
@@ -276,10 +276,10 @@ ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
             continue;
         }
 
-        adapters.push_back(std::move(adapter));
+        physicalDevices.push_back(std::move(adapter));
     }
 
-    return adapters;
+    return physicalDevices;
 }
 
 }  // namespace dawn::native::d3d

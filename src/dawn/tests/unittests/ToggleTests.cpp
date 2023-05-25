@@ -170,10 +170,10 @@ TEST_F(InstanceToggleTest, InstanceTogglesInheritToAdapterAndDevice) {
         native::InstanceBase* instance = native::FromAPI(nativeInstance->Get());
         const native::TogglesState& instanceTogglesState = instance->GetTogglesState();
 
-        // Discover adapters with default toggles.
-        instance->DiscoverDefaultAdapters();
+        // Discover physical devices.
+        instance->DiscoverDefaultPhysicalDevices();
 
-        // Get the adapter created by instance with default toggles.
+        // Get the adapters created by instance with default toggles.
         Ref<native::AdapterBase> nullAdapter;
         for (auto& adapter : instance->GetAdapters()) {
             if (adapter->GetPhysicalDevice()->GetBackendType() == wgpu::BackendType::Null) {

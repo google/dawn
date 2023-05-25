@@ -64,7 +64,7 @@ void DawnNativeTest::SetUp() {
     instance = std::make_unique<dawn::native::Instance>(
         reinterpret_cast<const WGPUInstanceDescriptor*>(&instanceDesc));
     instance->EnableAdapterBlocklist(false);
-    instance->DiscoverDefaultAdapters();
+    instance->DiscoverDefaultPhysicalDevices();
 
     std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
 

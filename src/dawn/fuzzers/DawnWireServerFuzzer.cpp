@@ -70,7 +70,7 @@ int DawnWireServerFuzzer::Initialize(int* argc, char*** argv) {
     sVulkanLoader.Open(dawn::GetExecutableDirectory().value_or("") + "vulkan-1.dll");
 #endif
 
-    sInstance->DiscoverDefaultAdapters();
+    sInstance->DiscoverDefaultPhysicalDevices();
 
     return 0;
 }

@@ -21,14 +21,18 @@ typedef void* EGLImage;
 
 namespace dawn::native::opengl {
 
-struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
-    explicit AdapterDiscoveryOptions(WGPUBackendType type);
+struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
+    : public PhysicalDeviceDiscoveryOptionsBase {
+    explicit PhysicalDeviceDiscoveryOptions(WGPUBackendType type);
 
     void* (*getProc)(const char*);
 };
 
+// TODO(dawn:1774): Deprecated.
+using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
+
 // TODO(crbug.com/dawn/810): This struct can be removed once Chrome is no longer using it.
-struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptionsES : public AdapterDiscoveryOptions {
+struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptionsES : public PhysicalDeviceDiscoveryOptions {
     AdapterDiscoveryOptionsES();
 };
 

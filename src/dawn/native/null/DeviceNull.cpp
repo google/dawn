@@ -86,7 +86,7 @@ class Backend : public BackendConnection {
     explicit Backend(InstanceBase* instance)
         : BackendConnection(instance, wgpu::BackendType::Null) {}
 
-    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters() override {
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultPhysicalDevices() override {
         // There is always a single Null adapter because it is purely CPU based and doesn't
         // depend on the system.
         std::vector<Ref<PhysicalDeviceBase>> physicalDevices;

@@ -457,9 +457,9 @@ Backend::Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::Bac
 
 Backend::~Backend() = default;
 
-std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters() {
-    AdapterDiscoveryOptions options;
-    auto result = DiscoverAdapters(&options);
+std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultPhysicalDevices() {
+    PhysicalDeviceDiscoveryOptions options;
+    auto result = DiscoverPhysicalDevices(&options);
     if (result.IsError()) {
         GetInstance()->ConsumedError(result.AcquireError());
         return {};
@@ -467,12 +467,12 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters() {
     return result.AcquireSuccess();
 }
 
-ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
-    const AdapterDiscoveryOptionsBase* optionsBase) {
+ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverPhysicalDevices(
+    const PhysicalDeviceDiscoveryOptionsBase* optionsBase) {
     ASSERT(optionsBase->backendType == WGPUBackendType_Vulkan);
 
-    const AdapterDiscoveryOptions* options =
-        static_cast<const AdapterDiscoveryOptions*>(optionsBase);
+    const PhysicalDeviceDiscoveryOptions* options =
+        static_cast<const PhysicalDeviceDiscoveryOptions*>(optionsBase);
 
     std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
 

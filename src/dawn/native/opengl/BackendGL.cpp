@@ -33,8 +33,8 @@ namespace dawn::native::opengl {
 Backend::Backend(InstanceBase* instance, wgpu::BackendType backendType)
     : BackendConnection(instance, backendType) {}
 
-std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters() {
-    std::vector<Ref<PhysicalDeviceBase>> adapters;
+std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultPhysicalDevices() {
+    std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
 #if DAWN_PLATFORM_IS(WINDOWS)
     const char* eglLib = "libEGL.dll";
 #elif DAWN_PLATFORM_IS(MACOS)
@@ -46,7 +46,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters() {
         return {};
     }
 
-    AdapterDiscoveryOptions options(ToAPI(GetType()));
+    PhysicalDeviceDiscoveryOptions options(ToAPI(GetType()));
     options.getProc =
         reinterpret_cast<void* (*)(const char*)>(mLibEGL.GetProc("eglGetProcAddress"));
     if (!options.getProc) {
@@ -69,39 +69,41 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultAdapters() {
 
     context->MakeCurrent();
 
-    auto result = DiscoverAdapters(&options);
+    auto result = DiscoverPhysicalDevices(&options);
 
     if (result.IsError()) {
         GetInstance()->ConsumedError(result.AcquireError());
     } else {
         auto value = result.AcquireSuccess();
-        adapters.insert(adapters.end(), value.begin(), value.end());
+        physicalDevices.insert(physicalDevices.end(), value.begin(), value.end());
     }
 
     egl.MakeCurrent(prevDisplay, prevDrawSurface, prevReadSurface, prevContext);
 
-    return adapters;
+    return physicalDevices;
 }
 
-ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverAdapters(
-    const AdapterDiscoveryOptionsBase* optionsBase) {
-    // TODO(cwallez@chromium.org): For now only create a single OpenGL adapter because don't
+ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverPhysicalDevices(
+    const PhysicalDeviceDiscoveryOptionsBase* optionsBase) {
+    // TODO(cwallez@chromium.org): For now only create a single OpenGL physicalDevice because don't
     // know how to handle MakeCurrent.
-    DAWN_INVALID_IF(mCreatedAdapter, "The OpenGL backend can only create a single adapter.");
+    DAWN_INVALID_IF(mCreatedPhysicalDevice,
+                    "The OpenGL backend can only create a single physicalDevice.");
 
     ASSERT(static_cast<wgpu::BackendType>(optionsBase->backendType) == GetType());
-    const AdapterDiscoveryOptions* options =
-        static_cast<const AdapterDiscoveryOptions*>(optionsBase);
+    const PhysicalDeviceDiscoveryOptions* options =
+        static_cast<const PhysicalDeviceDiscoveryOptions*>(optionsBase);
 
-    DAWN_INVALID_IF(options->getProc == nullptr, "AdapterDiscoveryOptions::getProc must be set");
+    DAWN_INVALID_IF(options->getProc == nullptr,
+                    "PhysicalDeviceDiscoveryOptions::getProc must be set");
 
-    Ref<PhysicalDevice> adapter = AcquireRef(new PhysicalDevice(
+    Ref<PhysicalDevice> physicalDevice = AcquireRef(new PhysicalDevice(
         GetInstance(), static_cast<wgpu::BackendType>(optionsBase->backendType)));
-    DAWN_TRY(adapter->InitializeGLFunctions(options->getProc));
-    DAWN_TRY(adapter->Initialize());
+    DAWN_TRY(physicalDevice->InitializeGLFunctions(options->getProc));
+    DAWN_TRY(physicalDevice->Initialize());
 
-    mCreatedAdapter = true;
-    std::vector<Ref<PhysicalDeviceBase>> adapters{std::move(adapter)};
+    mCreatedPhysicalDevice = true;
+    std::vector<Ref<PhysicalDeviceBase>> adapters{std::move(physicalDevice)};
     return std::move(adapters);
 }
 

@@ -21,11 +21,11 @@
 
 namespace dawn::native::opengl {
 
-AdapterDiscoveryOptions::AdapterDiscoveryOptions(WGPUBackendType type)
-    : AdapterDiscoveryOptionsBase(type) {}
+PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(WGPUBackendType type)
+    : PhysicalDeviceDiscoveryOptionsBase(type) {}
 
 AdapterDiscoveryOptionsES::AdapterDiscoveryOptionsES()
-    : AdapterDiscoveryOptions(WGPUBackendType_OpenGLES) {}
+    : PhysicalDeviceDiscoveryOptions(WGPUBackendType_OpenGLES) {}
 
 ExternalImageDescriptorEGLImage::ExternalImageDescriptorEGLImage()
     : ExternalImageDescriptor(ExternalImageType::EGLImage) {}

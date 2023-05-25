@@ -30,10 +30,15 @@ class ExternalImageDXGIImpl;
 
 DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<IDXGIAdapter> GetDXGIAdapter(WGPUAdapter adapter);
 
-struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
-    AdapterDiscoveryOptions(WGPUBackendType type, Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
+struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
+    : public PhysicalDeviceDiscoveryOptionsBase {
+    PhysicalDeviceDiscoveryOptions(WGPUBackendType type,
+                                   Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
     Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
 };
+
+// TODO(dawn:1774): Deprecated.
+using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
 
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImageDescriptor {
   public:

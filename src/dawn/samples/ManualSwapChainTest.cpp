@@ -272,7 +272,7 @@ int main(int argc, const char* argv[]) {
     dawnProcSetProcs(&procs);
 
     instance = std::make_unique<dawn::native::Instance>();
-    instance->DiscoverDefaultAdapters();
+    instance->DiscoverDefaultPhysicalDevices();
 
     std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
     dawn::native::Adapter chosenAdapter;

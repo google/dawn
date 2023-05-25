@@ -43,7 +43,7 @@ class DeviceCreationTest : public testing::Test {
         // Create an instance with default toggles and create an adapter from it.
         WGPUInstanceDescriptor safeInstanceDesc = {};
         instance = std::make_unique<dawn::native::Instance>(&safeInstanceDesc);
-        instance->DiscoverDefaultAdapters();
+        instance->DiscoverDefaultPhysicalDevices();
         for (dawn::native::Adapter& nativeAdapter : instance->GetAdapters()) {
             wgpu::AdapterProperties properties;
             nativeAdapter.GetProperties(&properties);
@@ -67,7 +67,7 @@ class DeviceCreationTest : public testing::Test {
             unsafeInstanceDesc.nextInChain = &unsafeInstanceTogglesDesc.chain;
 
             unsafeInstanceDisallow = std::make_unique<dawn::native::Instance>(&unsafeInstanceDesc);
-            unsafeInstanceDisallow->DiscoverDefaultAdapters();
+            unsafeInstanceDisallow->DiscoverDefaultPhysicalDevices();
             for (dawn::native::Adapter& nativeAdapter : unsafeInstanceDisallow->GetAdapters()) {
                 wgpu::AdapterProperties properties;
                 nativeAdapter.GetProperties(&properties);
@@ -90,7 +90,7 @@ class DeviceCreationTest : public testing::Test {
         unsafeInstanceDesc.nextInChain = &unsafeInstanceTogglesDesc.chain;
 
         unsafeInstance = std::make_unique<dawn::native::Instance>(&unsafeInstanceDesc);
-        unsafeInstance->DiscoverDefaultAdapters();
+        unsafeInstance->DiscoverDefaultPhysicalDevices();
         for (dawn::native::Adapter& nativeAdapter : unsafeInstance->GetAdapters()) {
             wgpu::AdapterProperties properties;
             nativeAdapter.GetProperties(&properties);

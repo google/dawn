@@ -33,7 +33,7 @@ void SetupNullBackend(const benchmark::State& state) {
 
     if (!nativeInstance) {
         nativeInstance = std::make_unique<dawn::native::Instance>();
-        nativeInstance->DiscoverDefaultAdapters();
+        nativeInstance->DiscoverDefaultPhysicalDevices();
     }
 
     if (!nullBackendAdapter) {

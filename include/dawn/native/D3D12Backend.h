@@ -38,10 +38,14 @@ DAWN_NATIVE_EXPORT uint64_t SetExternalMemoryReservation(WGPUDevice device,
                                                          uint64_t requestedReservationSize,
                                                          MemorySegment memorySegment);
 
-struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public d3d::AdapterDiscoveryOptions {
-    AdapterDiscoveryOptions();
-    explicit AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
+struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
+    : public d3d::PhysicalDeviceDiscoveryOptions {
+    PhysicalDeviceDiscoveryOptions();
+    explicit PhysicalDeviceDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
 };
+
+// TODO(dawn:1774): Deprecated.
+using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
 
 }  // namespace dawn::native::d3d12
 

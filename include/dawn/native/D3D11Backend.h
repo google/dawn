@@ -25,10 +25,14 @@
 
 namespace dawn::native::d3d11 {
 
-struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public d3d::AdapterDiscoveryOptions {
-    AdapterDiscoveryOptions();
-    explicit AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
+struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
+    : public d3d::PhysicalDeviceDiscoveryOptions {
+    PhysicalDeviceDiscoveryOptions();
+    explicit PhysicalDeviceDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
 };
+
+// TODO(dawn:1774): Deprecated.
+using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
 
 DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D11Device> GetD3D11Device(WGPUDevice device);
 

@@ -75,9 +75,9 @@ class Backend : public BackendConnection {
 
     const PlatformFunctions* GetFunctions() const;
 
-    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultAdapters() override;
-    ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> DiscoverAdapters(
-        const AdapterDiscoveryOptionsBase* optionsBase) override;
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultPhysicalDevices() override;
+    ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> DiscoverPhysicalDevices(
+        const PhysicalDeviceDiscoveryOptionsBase* optionsBase) override;
 
   protected:
     virtual ResultOrError<Ref<PhysicalDeviceBase>> CreatePhysicalDeviceFromIDXGIAdapter(

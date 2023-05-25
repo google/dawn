@@ -128,7 +128,7 @@ wgpu::Device CreateCppDawnDevice() {
     }
 
     instance = std::make_unique<dawn::native::Instance>();
-    instance->DiscoverDefaultAdapters();
+    instance->DiscoverDefaultPhysicalDevices();
 
     // Get an adapter for the backend to use, and create the device.
     dawn::native::Adapter backendAdapter;

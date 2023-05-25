@@ -25,10 +25,11 @@
 
 namespace dawn::native::d3d11 {
 
-AdapterDiscoveryOptions::AdapterDiscoveryOptions() : AdapterDiscoveryOptions(nullptr) {}
+PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions()
+    : PhysicalDeviceDiscoveryOptions(nullptr) {}
 
-AdapterDiscoveryOptions::AdapterDiscoveryOptions(ComPtr<IDXGIAdapter> adapter)
-    : d3d::AdapterDiscoveryOptions(WGPUBackendType_D3D11, std::move(adapter)) {}
+PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(ComPtr<IDXGIAdapter> adapter)
+    : d3d::PhysicalDeviceDiscoveryOptions(WGPUBackendType_D3D11, std::move(adapter)) {}
 
 Microsoft::WRL::ComPtr<ID3D11Device> GetD3D11Device(WGPUDevice device) {
     return ToBackend(FromAPI(device))->GetD3D11Device();

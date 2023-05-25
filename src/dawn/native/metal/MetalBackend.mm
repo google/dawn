@@ -23,8 +23,8 @@
 
 namespace dawn::native::metal {
 
-AdapterDiscoveryOptions::AdapterDiscoveryOptions()
-    : AdapterDiscoveryOptionsBase(WGPUBackendType_Metal) {}
+PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions()
+    : PhysicalDeviceDiscoveryOptionsBase(WGPUBackendType_Metal) {}
 
 ExternalImageDescriptorIOSurface::ExternalImageDescriptorIOSurface()
     : ExternalImageDescriptor(ExternalImageType::IOSurface) {}
