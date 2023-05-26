@@ -3761,8 +3761,9 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
             } else {
                 utils::StringStream ss;
                 ss << "unrecognized diagnostic rule 'chromium." << name << "'\n";
-                utils::SuggestAlternatives(name, builtin::kChromiumDiagnosticRuleStrings, ss,
-                                           "chromium.");
+                utils::SuggestAlternativeOptions opts;
+                opts.prefix = "chromium.";
+                utils::SuggestAlternatives(name, builtin::kChromiumDiagnosticRuleStrings, ss, opts);
                 AddWarning(ss.str(), control.rule_name->source);
             }
         }

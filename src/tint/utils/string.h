@@ -20,6 +20,7 @@
 
 #include "src/tint/utils/slice.h"
 #include "src/tint/utils/string_stream.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::utils {
 
@@ -36,6 +37,12 @@ namespace tint::utils {
         pos += replacement.length();
     }
     return str;
+}
+
+/// @param value the boolean value to be printed as a string
+/// @returns value printed as a string via the stream `<<` operator
+inline std::string ToString(bool value) {
+    return value ? "true" : "false";
 }
 
 /// @param value the value to be printed as a string
@@ -75,15 +82,33 @@ inline size_t HasSuffix(std::string_view str, std::string_view suffix) {
 /// @returns the Levenshtein distance between @p a and @p b
 size_t Distance(std::string_view a, std::string_view b);
 
+/// Options for SuggestAlternatives()
+struct SuggestAlternativeOptions {
+    /// The prefix to apply to the strings when printing
+    std::string_view prefix;
+    /// List all the possible values
+    bool list_possible_values = true;
+};
+
 /// Suggest alternatives for an unrecognized string from a list of possible values.
 /// @param got the unrecognized string
 /// @param strings the list of possible values
 /// @param ss the stream to write the suggest and list of possible values to
-/// @param prefix the prefix to apply to the strings when printing (optional)
+/// @param options options for the suggestion
 void SuggestAlternatives(std::string_view got,
                          Slice<char const* const> strings,
                          utils::StringStream& ss,
-                         std::string_view prefix = "");
+                         const SuggestAlternativeOptions& options = {});
+
+/// Suggest alternatives for an unrecognized string from a list of possible values.
+/// @param got the unrecognized string
+/// @param strings the list of possible values
+/// @param ss the stream to write the suggest and list of possible values to
+/// @param options options for the suggestion
+void SuggestAlternatives(std::string_view got,
+                         Slice<std::string_view> strings,
+                         utils::StringStream& ss,
+                         const SuggestAlternativeOptions& options = {});
 
 /// @param str the input string
 /// @param pred the predicate function
@@ -148,6 +173,51 @@ inline bool IsSpace(char c) {
 /// @return @p str with all whitespace (' ') removed from the start and end of the string.
 inline std::string_view TrimSpace(std::string_view str) {
     return Trim(str, IsSpace);
+}
+
+/// @param str the input string
+/// @param delimiter the delimiter
+/// @return @p str split at each occurrence of @p delimiter
+inline utils::Vector<std::string_view, 8> Split(std::string_view str, std::string_view delimiter) {
+    utils::Vector<std::string_view, 8> out;
+    while (str.length() > delimiter.length()) {
+        auto pos = str.find(delimiter);
+        if (pos == std::string_view::npos) {
+            break;
+        }
+        out.Push(str.substr(0, pos));
+        str = str.substr(pos + delimiter.length());
+    }
+    out.Push(str);
+    return out;
+}
+
+/// @returns @p str quoted with <code>'</code>
+inline std::string Quote(std::string_view str) {
+    return "'" + std::string(str) + "'";
+}
+
+/// @param parts the input parts
+/// @param delimiter the delimiter
+/// @return @p parts joined as a string, delimited with @p delimiter
+template <typename T>
+inline std::string Join(utils::VectorRef<T> parts, std::string_view delimiter) {
+    utils::StringStream s;
+    for (auto& part : parts) {
+        if (part != parts.Front()) {
+            s << delimiter;
+        }
+        s << part;
+    }
+    return s.str();
+}
+
+/// @param parts the input parts
+/// @param delimiter the delimiter
+/// @return @p parts joined as a string, delimited with @p delimiter
+template <typename T, size_t N>
+inline std::string Join(const utils::Vector<T, N>& parts, std::string_view delimiter) {
+    return Join(utils::VectorRef<T>(parts), delimiter);
 }
 
 }  // namespace tint::utils

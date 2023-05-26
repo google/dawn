@@ -26,8 +26,6 @@
 #include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/slice.h"
-#include "src/tint/utils/string.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::utils {
 
@@ -587,12 +585,9 @@ Vector(Ts...) -> Vector<VectorCommonType<Ts...>, sizeof...(Ts)>;
 /// Aside from this move pattern, a VectorRef provides an immutable reference to the Vector.
 template <typename T>
 class VectorRef {
-    /// The slice type used by this vector reference
-    using Slice = utils::Slice<T>;
-
     /// @returns an empty slice.
-    static Slice& EmptySlice() {
-        static Slice empty;
+    static utils::Slice<T>& EmptySlice() {
+        static utils::Slice<T> empty;
         return empty;
     }
 
@@ -608,7 +603,7 @@ class VectorRef {
 
     /// Constructor from a Slice
     /// @param slice the slice
-    VectorRef(Slice& slice)  // NOLINT(runtime/explicit)
+    VectorRef(utils::Slice<T>& slice)  // NOLINT(runtime/explicit)
         : slice_(slice) {}
 
     /// Constructor from a Vector
@@ -621,7 +616,7 @@ class VectorRef {
     /// @param vector the vector to create a reference of
     template <size_t N>
     VectorRef(const Vector<T, N>& vector)  // NOLINT(runtime/explicit)
-        : slice_(const_cast<Slice&>(vector.impl_.slice)) {}
+        : slice_(const_cast<utils::Slice<T>&>(vector.impl_.slice)) {}
 
     /// Constructor from a moved Vector
     /// @param vector the vector being moved
@@ -689,6 +684,9 @@ class VectorRef {
         return {slice_.template Reinterpret<U, ReinterpretMode::kUnsafe>()};
     }
 
+    /// @returns the internal slice of the vector
+    utils::Slice<T> Slice() { return slice_; }
+
     /// @returns true if the vector is empty.
     bool IsEmpty() const { return slice_.len == 0; }
 
@@ -724,7 +722,7 @@ class VectorRef {
     friend class VectorRef;
 
     /// The slice of the vector being referenced.
-    Slice& slice_;
+    utils::Slice<T>& slice_;
     /// Whether the slice data is passed by r-value reference, and can be moved.
     bool can_move_ = false;
 };
@@ -751,44 +749,6 @@ Vector<T, N> ToVector(const std::vector<T>& vector) {
         out.Push(el);
     }
     return out;
-}
-
-/// Prints the vector @p vec to @p o
-/// @param o the stream to write to
-/// @param vec the vector
-/// @return the stream so calls can be chained
-template <typename T, size_t N>
-inline utils::StringStream& operator<<(utils::StringStream& o, const utils::Vector<T, N>& vec) {
-    o << "[";
-    bool first = true;
-    for (auto& el : vec) {
-        if (!first) {
-            o << ", ";
-        }
-        first = false;
-        o << ToString(el);
-    }
-    o << "]";
-    return o;
-}
-
-/// Prints the vector @p vec to @p o
-/// @param o the stream to write to
-/// @param vec the vector reference
-/// @return the stream so calls can be chained
-template <typename T>
-inline utils::StringStream& operator<<(utils::StringStream& o, utils::VectorRef<T> vec) {
-    o << "[";
-    bool first = true;
-    for (auto& el : vec) {
-        if (!first) {
-            o << ", ";
-        }
-        first = false;
-        o << ToString(el);
-    }
-    o << "]";
-    return o;
 }
 
 }  // namespace tint::utils

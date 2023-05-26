@@ -66,6 +66,7 @@
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
+#include "src/tint/utils/string.h"
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/utils/unique_vector.h"
 

@@ -15,6 +15,7 @@
 #include <algorithm>
 
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/transform.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::utils {
@@ -51,33 +52,46 @@ size_t Distance(std::string_view str_a, std::string_view str_b) {
 void SuggestAlternatives(std::string_view got,
                          Slice<char const* const> strings,
                          utils::StringStream& ss,
-                         std::string_view prefix /* = "" */) {
+                         const SuggestAlternativeOptions& options /* = {} */) {
+    auto views = Transform<8>(strings, [](char const* const str) { return std::string_view(str); });
+    SuggestAlternatives(got, views.Slice(), ss, options);
+}
+
+void SuggestAlternatives(std::string_view got,
+                         Slice<std::string_view> strings,
+                         utils::StringStream& ss,
+                         const SuggestAlternativeOptions& options /* = {} */) {
     // If the string typed was within kSuggestionDistance of one of the possible enum values,
     // suggest that. Don't bother with suggestions if the string was extremely long.
     constexpr size_t kSuggestionDistance = 5;
     constexpr size_t kSuggestionMaxLength = 64;
     if (!got.empty() && got.size() < kSuggestionMaxLength) {
         size_t candidate_dist = kSuggestionDistance;
-        const char* candidate = nullptr;
-        for (auto* str : strings) {
+        std::string_view candidate;
+        for (auto str : strings) {
             auto dist = utils::Distance(str, got);
             if (dist < candidate_dist) {
                 candidate = str;
                 candidate_dist = dist;
             }
         }
-        if (candidate) {
-            ss << "Did you mean '" << prefix << candidate << "'?\n";
+        if (!candidate.empty()) {
+            ss << "Did you mean '" << options.prefix << candidate << "'?";
+            if (options.list_possible_values) {
+                ss << "\n";
+            }
         }
     }
 
-    // List all the possible enumerator values
-    ss << "Possible values: ";
-    for (auto* str : strings) {
-        if (str != strings[0]) {
-            ss << ", ";
+    if (options.list_possible_values) {
+        // List all the possible enumerator values
+        ss << "Possible values: ";
+        for (auto str : strings) {
+            if (str != strings[0]) {
+                ss << ", ";
+            }
+            ss << "'" << options.prefix << str << "'";
         }
-        ss << "'" << prefix << str << "'";
     }
 }
 
