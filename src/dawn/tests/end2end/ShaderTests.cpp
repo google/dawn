@@ -1462,6 +1462,48 @@ fn main(@location(0) value : f32) -> @location(0) vec4f {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(255, 255, 255, 255), renderPass.color, 0, 0);
 }
 
+// Test that identifiers containing double underscores are renamed in the GLSL backend.
+TEST_P(ShaderTests, DoubleUnderscore) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+@vertex
+fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+  const pos = array(
+      vec2( 1.0, -1.0),
+      vec2(-1.0, -1.0),
+      vec2( 0.0,  1.0),
+  );
+  return vec4(pos[VertexIndex], 0.0, 1.0);
+})");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+diagnostic(off, derivative_uniformity);
+
+@fragment
+fn main() -> @location(0) vec4f {
+  let re__sult = vec4f(1.0);
+  return re__sult;
+})");
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.Draw(3);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(255, 255, 255, 255), renderPass.color, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),

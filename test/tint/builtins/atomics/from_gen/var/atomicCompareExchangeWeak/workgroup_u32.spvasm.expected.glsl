@@ -6,7 +6,7 @@ struct atomic_compare_exchange_result_u32 {
 };
 
 
-struct x__atomic_compare_exchange_resultu32 {
+struct tint_symbol {
   uint old_value;
   bool exchanged;
 };
@@ -16,7 +16,7 @@ shared uint arg_0;
 void atomicCompareExchangeWeak_83580d() {
   uint arg_1 = 0u;
   uint arg_2 = 0u;
-  x__atomic_compare_exchange_resultu32 res = x__atomic_compare_exchange_resultu32(0u, false);
+  tint_symbol res = tint_symbol(0u, false);
   arg_1 = 1u;
   arg_2 = 1u;
   uint x_21 = arg_2;
@@ -24,11 +24,11 @@ void atomicCompareExchangeWeak_83580d() {
   atomic_compare_exchange_result_u32 atomic_compare_result;
   atomic_compare_result.old_value = atomicCompSwap(arg_0, x_22, x_21);
   atomic_compare_result.exchanged = atomic_compare_result.old_value == x_22;
-  atomic_compare_exchange_result_u32 tint_symbol = atomic_compare_result;
-  uint old_value_1 = tint_symbol.old_value;
+  atomic_compare_exchange_result_u32 tint_symbol_1 = atomic_compare_result;
+  uint old_value_1 = tint_symbol_1.old_value;
   uint x_23 = old_value_1;
-  x__atomic_compare_exchange_resultu32 tint_symbol_1 = x__atomic_compare_exchange_resultu32(x_23, (x_23 == x_21));
-  res = tint_symbol_1;
+  tint_symbol tint_symbol_2 = tint_symbol(x_23, (x_23 == x_21));
+  res = tint_symbol_2;
   return;
 }
 

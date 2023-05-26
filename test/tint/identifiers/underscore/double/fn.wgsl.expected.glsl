@@ -7,14 +7,14 @@ void unused_entry_point() {
 void a() {
 }
 
-void a__() {
+void tint_symbol() {
 }
 
 void b() {
   a();
 }
 
-void b__() {
-  a__();
+void tint_symbol_1() {
+  tint_symbol();
 }
 

@@ -6,8 +6,8 @@ void unused_entry_point() {
 }
 void f() {
   int a = 1;
-  int a__ = a;
+  int tint_symbol = a;
   int b = a;
-  int b__ = a__;
+  int tint_symbol_1 = tint_symbol;
 }
 

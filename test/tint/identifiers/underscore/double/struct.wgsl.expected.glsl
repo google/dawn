@@ -8,12 +8,12 @@ struct a {
   int b;
 };
 
-struct a__ {
-  int b__;
+struct tint_symbol {
+  int tint_symbol_1;
 };
 
 void f() {
-  a__ c = a__(0);
-  int d = c.b__;
+  tint_symbol c = tint_symbol(0);
+  int d = c.tint_symbol_1;
 }
 

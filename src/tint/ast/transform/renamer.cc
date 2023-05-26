@@ -1350,7 +1350,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
                                           kReservedKeywordsGLSL +
                                               sizeof(kReservedKeywordsGLSL) / sizeof(const char*),
                                           name) ||
-                       name.compare(0, 3, "gl_") == 0;
+                       name.compare(0, 3, "gl_") == 0 || name.find("__") != std::string::npos;
             case Target::kHlslKeywords:
                 return std::binary_search(
                     kReservedKeywordsHLSL,
