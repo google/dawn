@@ -121,7 +121,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     // Create the fence event.
     mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
-    DAWN_TRY(PreparePendingCommandContext());
+    DAWN_TRY(mPendingCommands.Intialize(this));
 
     SetLabelImpl();
 
@@ -147,13 +147,6 @@ CommandRecordingContext* Device::GetPendingCommandContext(Device::SubmitMode sub
         mPendingCommands.SetNeedsSubmit();
     }
     return &mPendingCommands;
-}
-
-MaybeError Device::PreparePendingCommandContext() {
-    if (!mPendingCommands.IsOpen()) {
-        DAWN_TRY(mPendingCommands.Open(this));
-    }
-    return {};
 }
 
 MaybeError Device::TickImpl() {

@@ -26,7 +26,7 @@ class Device;
 
 class CommandRecordingContext {
   public:
-    MaybeError Open(Device* device);
+    MaybeError Intialize(Device* device);
 
     void Release();
     bool IsOpen() const;
