@@ -35,6 +35,8 @@ MaybeError InitializeDebugLayerFilters(ComPtr<ID3D11Device> d3d11Device) {
     static D3D11_MESSAGE_ID kDenyIds[] = {
         // D3D11 Debug layer warns no RTV set, however it is allowed.
         D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET,
+        // D3D11 Debug layer warns SetPrivateData() with same name more than once.
+        D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
     };
 
     // Filter out info/message and only create errors from warnings or worse.
