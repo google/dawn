@@ -33,6 +33,7 @@
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
@@ -428,6 +429,9 @@ void Disassembler::EmitBranch(const Branch* b) {
         [&](const ir::ExitIf* ei) { out_ << "exit_if %b" << IdOf(ei->If()->Merge()); },
         [&](const ir::ExitSwitch* es) { out_ << "exit_switch %b" << IdOf(es->Switch()->Merge()); },
         [&](const ir::ExitLoop* el) { out_ << "exit_loop %b" << IdOf(el->Loop()->Merge()); },
+        [&](const ir::NextIteration* ni) {
+            out_ << "next_iteration %b" << IdOf(ni->Loop()->Start());
+        },
         [&](const ir::BreakIf* bi) {
             out_ << "break_if ";
             EmitValue(bi->Condition());

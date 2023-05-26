@@ -575,7 +575,7 @@ class Impl {
                 }
                 // Branch back to the start node if the continue target didn't branch out already
                 if (NeedBranch()) {
-                    SetBranch(builder_.BreakIf(builder_.Constant(false), loop_inst));
+                    SetBranch(builder_.NextIteration(loop_inst));
                 }
             }
         }
@@ -595,7 +595,7 @@ class Impl {
 
         // Continue is always empty, just go back to the start
         current_flow_block_ = loop_inst->Continuing();
-        SetBranch(builder_.BreakIf(builder_.Constant(false), loop_inst));
+        SetBranch(builder_.NextIteration(loop_inst));
 
         {
             ControlStackScope scope(this, loop_inst);
@@ -676,7 +676,7 @@ class Impl {
             if (stmt->continuing) {
                 current_flow_block_ = loop_inst->Continuing();
                 EmitStatement(stmt->continuing);
-                SetBranch(builder_.BreakIf(builder_.Constant(false), loop_inst));
+                SetBranch(builder_.NextIteration(loop_inst));
             }
         }
 

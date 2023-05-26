@@ -205,6 +205,10 @@ ir::Return* Builder::Return(Function* func, utils::VectorRef<Value*> args) {
     return ir.values.Create<ir::Return>(func, args);
 }
 
+ir::NextIteration* Builder::NextIteration(Loop* loop) {
+    return ir.values.Create<ir::NextIteration>(loop);
+}
+
 ir::BreakIf* Builder::BreakIf(Value* condition, Loop* loop) {
     return ir.values.Create<ir::BreakIf>(condition, loop);
 }

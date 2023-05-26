@@ -381,7 +381,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
 
     EXPECT_EQ(1u, loop_flow->Start()->InboundBranches().Length());
     EXPECT_EQ(1u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(2u, loop_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop_flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
@@ -411,7 +411,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
 
       # Continuing block
       %b3 = block {
-        break_if false %b2
+        next_iteration %b2
       }
 
     # Merge block
@@ -513,7 +513,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
 
     EXPECT_EQ(1u, loop_flow->Start()->InboundBranches().Length());
     EXPECT_EQ(1u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, loop_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
@@ -521,21 +521,21 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [s: %b2, c: %b3]
       %b2 = block {
-        if true [t: %b5, f: %b6, m: %b7]
+        if true [t: %b4, f: %b5, m: %b6]
           # True block
-          %b5 = block {
+          %b4 = block {
             ret
           }
 
           # False block
-          %b6 = block {
-            exit_if %b7
+          %b5 = block {
+            exit_if %b6
           }
 
         # Merge block
-        %b7 = block {
+        %b6 = block {
           continue %b3
         }
 
@@ -543,13 +543,8 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
 
       # Continuing block
       %b3 = block {
-        break_if false %b2
+        next_iteration %b2
       }
-
-    # Merge block
-    %b4 = block {
-      ret
-    }
 
   }
 }
@@ -750,7 +745,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 
               # Merge block
               %b18 = block {
-                break_if false %b5
+                next_iteration %b5
               }
 
             }
@@ -781,7 +776,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 
       # Continuing block
       %b3 = block {
-        break_if false %b2
+        next_iteration %b2
       }
 
     # Merge block
@@ -812,7 +807,7 @@ TEST_F(IR_BuilderImplTest, While) {
 
     EXPECT_EQ(1u, flow->Start()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(2u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
@@ -842,7 +837,7 @@ TEST_F(IR_BuilderImplTest, While) {
 
       # Continuing block
       %b3 = block {
-        break_if false %b2
+        next_iteration %b2
       }
 
     # Merge block
@@ -873,7 +868,7 @@ TEST_F(IR_BuilderImplTest, While_Return) {
 
     EXPECT_EQ(1u, flow->Start()->InboundBranches().Length());
     EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(2u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
@@ -903,7 +898,7 @@ TEST_F(IR_BuilderImplTest, While_Return) {
 
       # Continuing block
       %b3 = block {
-        break_if false %b2
+        next_iteration %b2
       }
 
     # Merge block
