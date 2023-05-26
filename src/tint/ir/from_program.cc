@@ -842,8 +842,6 @@ class Impl {
                     ref->Access());
 
                 auto* val = builder_.Declare(ty);
-                current_flow_block_->Instructions().Push(val);
-
                 if (v->initializer) {
                     auto init = EmitExpression(v->initializer);
                     if (!init) {
@@ -851,6 +849,8 @@ class Impl {
                     }
                     val->SetInitializer(init.Get());
                 }
+                current_flow_block_->Instructions().Push(val);
+
                 // Store the declaration so we can get the instruction to store too
                 scopes_.Set(v->name->symbol, val);
 

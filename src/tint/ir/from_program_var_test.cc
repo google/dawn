@@ -72,7 +72,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
+TEST_F(IR_BuilderImplTest, Emit_Var_Init_Constant) {
     auto* expr = Expr(2_u);
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction, expr);
     WrapInFunction(a);
@@ -89,5 +89,27 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
 }
 )");
 }
+
+TEST_F(IR_BuilderImplTest, Emit_Var_Init_NonConstant) {
+    auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction);
+    auto* b = Var("b", ty.u32(), builtin::AddressSpace::kFunction, Add("a", 2_u));
+    WrapInFunction(a, b);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
+  %b1 = block {
+    %a:ptr<function, u32, read_write> = var
+    %3:u32 = load %a
+    %4:u32 = add %3, 2u
+    %b:ptr<function, u32, read_write> = var, %4
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir
