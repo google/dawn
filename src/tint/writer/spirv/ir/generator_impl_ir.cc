@@ -20,11 +20,16 @@
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/break_if.h"
 #include "src/tint/ir/builtin.h"
+#include "src/tint/ir/continue.h"
 #include "src/tint/ir/exit_if.h"
+#include "src/tint/ir/exit_loop.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
+#include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
@@ -334,6 +339,10 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
             [&](const ir::Binary* b) { return EmitBinary(b); },
             [&](const ir::Builtin* b) { return EmitBuiltin(b); },
             [&](const ir::Load* l) { return EmitLoad(l); },
+            [&](const ir::Loop* l) {
+                EmitLoop(l);
+                return 0u;
+            },
             [&](const ir::Store* s) {
                 EmitStore(s);
                 return 0u;
@@ -371,8 +380,25 @@ void GeneratorImplIr::EmitBranch(const ir::Branch* b) {
             }
             return;
         },
+        [&](const ir::BreakIf* breakif) {
+            current_function_.push_inst(spv::Op::OpBranchConditional,
+                                        {
+                                            Value(breakif->Condition()),
+                                            Label(breakif->Loop()->Merge()),
+                                            Label(breakif->Loop()->Start()),
+                                        });
+        },
+        [&](const ir::Continue* cont) {
+            current_function_.push_inst(spv::Op::OpBranch, {Label(cont->Loop()->Continuing())});
+        },
         [&](const ir::ExitIf* if_) {
             current_function_.push_inst(spv::Op::OpBranch, {Label(if_->If()->Merge())});
+        },
+        [&](const ir::ExitLoop* loop) {
+            current_function_.push_inst(spv::Op::OpBranch, {Label(loop->Loop()->Merge())});
+        },
+        [&](const ir::NextIteration* loop) {
+            current_function_.push_inst(spv::Op::OpBranch, {Label(loop->Loop()->Start())});
         },
         [&](Default) {
             TINT_ICE(Writer, diagnostics_) << "unimplemented branch: " << b->TypeInfo().name;
@@ -592,6 +618,37 @@ uint32_t GeneratorImplIr::EmitLoad(const ir::Load* load) {
     auto id = module_.NextId();
     current_function_.push_inst(spv::Op::OpLoad, {Type(load->Type()), id, Value(load->From())});
     return id;
+}
+
+void GeneratorImplIr::EmitLoop(const ir::Loop* loop) {
+    auto header_label = module_.NextId();
+    auto body_label = Label(loop->Start());
+    auto continuing_label = Label(loop->Continuing());
+    auto merge_label = Label(loop->Merge());
+
+    // Branch to and emit the loop header, which contains OpLoopMerge and OpBranch instructions.
+    current_function_.push_inst(spv::Op::OpBranch, {header_label});
+    current_function_.push_inst(spv::Op::OpLabel, {header_label});
+    current_function_.push_inst(
+        spv::Op::OpLoopMerge, {merge_label, continuing_label, U32Operand(SpvLoopControlMaskNone)});
+    current_function_.push_inst(spv::Op::OpBranch, {body_label});
+
+    // Emit the loop body.
+    EmitBlock(loop->Start());
+
+    // Emit the loop continuing block.
+    // The back-edge needs to go to the loop header, so update the label for the start block.
+    block_labels_.Replace(loop->Start(), header_label);
+    if (loop->Continuing()->HasBranchTarget()) {
+        EmitBlock(loop->Continuing());
+    } else {
+        // We still need to emit a continuing block with a back-edge, even if it is unreachable.
+        current_function_.push_inst(spv::Op::OpLabel, {continuing_label});
+        current_function_.push_inst(spv::Op::OpBranch, {header_label});
+    }
+
+    // Emit the loop merge block.
+    EmitBlock(loop->Merge());
 }
 
 void GeneratorImplIr::EmitStore(const ir::Store* store) {

@@ -36,6 +36,7 @@ class Builtin;
 class If;
 class Function;
 class Load;
+class Loop;
 class Module;
 class Store;
 class UserCall;
@@ -120,6 +121,10 @@ class GeneratorImplIr {
     /// @param load the load instruction to emit
     /// @returns the result ID of the instruction
     uint32_t EmitLoad(const ir::Load* load);
+
+    /// Emit a loop instruction.
+    /// @param loop the loop instruction to emit
+    void EmitLoop(const ir::Loop* loop);
 
     /// Emit a store instruction.
     /// @param store the store instruction to emit
