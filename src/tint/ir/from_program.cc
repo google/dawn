@@ -62,6 +62,9 @@
 #include "src/tint/ast/while_statement.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/builder.h"
+#include "src/tint/ir/exit_if.h"
+#include "src/tint/ir/exit_loop.h"
+#include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
@@ -98,11 +101,8 @@ namespace {
 
 using ResultType = utils::Result<Module, diag::List>;
 
-// For an `if` and `switch` block, the merge has a registered incoming branch instruction of the
-// `if` and `switch. So, to determine if the merge is connected to any of the branches that happend
-// in the `if` or `switch` we need a `count` value that is larger then 1.
-bool IsConnected(const Block* b, uint32_t count) {
-    return b->InboundBranches().Length() > count;
+bool IsConnected(const Block* b) {
+    return b->InboundBranches().Length() > 0;
 }
 
 /// Impl is the private-implementation of FromProgram().
@@ -176,21 +176,6 @@ class Impl {
         current_flow_block_ = nullptr;
     }
 
-    void BranchTo(Block* node, utils::VectorRef<Value*> args = {}) {
-        TINT_ASSERT(IR, current_flow_block_);
-        TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
-
-        current_flow_block_->Instructions().Push(builder_.Branch(node, args));
-        current_flow_block_ = nullptr;
-    }
-
-    void BranchToIfNeeded(Block* node) {
-        if (!NeedBranch()) {
-            return;
-        }
-        BranchTo(node);
-    }
-
     Branch* FindEnclosingControl(ControlFlags flags) {
         for (auto it = control_stack_.rbegin(); it != control_stack_.rend(); ++it) {
             if ((*it)->Is<Loop>()) {
@@ -236,11 +221,6 @@ class Impl {
                 [&](Default) {
                     add_error(decl->source, "unknown type: " + std::string(decl->TypeInfo().name));
                 });
-        }
-
-        // Add the root terminator if needed
-        if (mod.root_block) {
-            mod.root_block->Instructions().Push(builder_.Branch(builder_.CreateRootTerminator()));
         }
 
         if (diagnostics_.contains_errors()) {
@@ -541,7 +521,9 @@ class Impl {
             EmitBlock(stmt->body);
 
             // If the true branch did not execute control flow, then go to the Merge().target
-            BranchToIfNeeded(if_inst->Merge());
+            if (NeedBranch()) {
+                SetBranch(builder_.ExitIf(if_inst));
+            }
 
             current_flow_block_ = if_inst->False();
             if (stmt->else_statement) {
@@ -549,14 +531,16 @@ class Impl {
             }
 
             // If the false branch did not execute control flow, then go to the Merge().target
-            BranchToIfNeeded(if_inst->Merge());
+            if (NeedBranch()) {
+                SetBranch(builder_.ExitIf(if_inst));
+            }
         }
         current_flow_block_ = nullptr;
 
         // If both branches went somewhere, then they both returned, continued or broke. So,
         // there is no need for the if merge-block and there is nothing to branch to the merge
         // block anyway.
-        if (IsConnected(if_inst->Merge(), 1)) {
+        if (IsConnected(if_inst->Merge())) {
             current_flow_block_ = if_inst->Merge();
         }
     }
@@ -580,7 +564,7 @@ class Impl {
                 SetBranch(builder_.Continue(loop_inst));
             }
 
-            if (IsConnected(loop_inst->Continuing(), 0)) {
+            if (IsConnected(loop_inst->Continuing())) {
                 // Note, even if there is no continuing block, we may have branched into the
                 // continue so we have to set the current block and then emit the branch if needed
                 // below otherwise empty continuing blocks will fail to branch back to the start
@@ -600,7 +584,7 @@ class Impl {
         // target branches, eventually, to the merge, but nothing branched to the
         // Continuing() block.
         current_flow_block_ = loop_inst->Merge();
-        if (!IsConnected(loop_inst->Merge(), 0)) {
+        if (!IsConnected(loop_inst->Merge())) {
             current_flow_block_ = nullptr;
         }
     }
@@ -626,9 +610,13 @@ class Impl {
 
             // Create an `if (cond) {} else {break;}` control flow
             auto* if_inst = builder_.CreateIf(reg.Get());
-            if_inst->True()->Instructions().Push(builder_.Branch(if_inst->Merge()));
-            if_inst->False()->Instructions().Push(builder_.Branch(loop_inst->Merge()));
             current_flow_block_->Instructions().Push(if_inst);
+
+            current_flow_block_ = if_inst->True();
+            SetBranch(builder_.ExitIf(if_inst));
+
+            current_flow_block_ = if_inst->False();
+            SetBranch(builder_.ExitLoop(loop_inst));
 
             current_flow_block_ = if_inst->Merge();
             EmitBlock(stmt->body);
@@ -669,9 +657,13 @@ class Impl {
 
                 // Create an `if (cond) {} else {break;}` control flow
                 auto* if_inst = builder_.CreateIf(reg.Get());
-                if_inst->True()->Instructions().Push(builder_.Branch(if_inst->Merge()));
-                if_inst->False()->Instructions().Push(builder_.Branch(loop_inst->Merge()));
                 current_flow_block_->Instructions().Push(if_inst);
+
+                current_flow_block_ = if_inst->True();
+                SetBranch(builder_.ExitIf(if_inst));
+
+                current_flow_block_ = if_inst->False();
+                SetBranch(builder_.ExitLoop(loop_inst));
 
                 current_flow_block_ = if_inst->Merge();
             }
@@ -719,12 +711,14 @@ class Impl {
                 current_flow_block_ = builder_.CreateCase(switch_inst, selectors);
                 EmitBlock(c->Body()->Declaration());
 
-                BranchToIfNeeded(switch_inst->Merge());
+                if (NeedBranch()) {
+                    SetBranch(builder_.ExitSwitch(switch_inst));
+                }
             }
         }
         current_flow_block_ = nullptr;
 
-        if (IsConnected(switch_inst->Merge(), 1)) {
+        if (IsConnected(switch_inst->Merge())) {
             current_flow_block_ = switch_inst->Merge();
         }
     }
@@ -746,9 +740,9 @@ class Impl {
         TINT_ASSERT(IR, current_control);
 
         if (auto* c = current_control->As<Loop>()) {
-            BranchTo(c->Merge());
+            SetBranch(builder_.ExitLoop(c));
         } else if (auto* s = current_control->As<Switch>()) {
-            BranchTo(s->Merge());
+            SetBranch(builder_.ExitSwitch(s));
         } else {
             TINT_UNREACHABLE(IR, diagnostics_);
         }
@@ -964,14 +958,14 @@ class Impl {
                 // If the lhs is false, then that is the result we want to pass to the merge
                 // block as our argument
                 current_flow_block_ = if_inst->False();
-                BranchTo(if_inst->Merge(), std::move(alt_args));
+                SetBranch(builder_.ExitIf(if_inst, std::move(alt_args)));
 
                 current_flow_block_ = if_inst->True();
             } else {
                 // If the lhs is true, then that is the result we want to pass to the merge
                 // block as our argument
                 current_flow_block_ = if_inst->True();
-                BranchTo(if_inst->Merge(), std::move(alt_args));
+                SetBranch(builder_.ExitIf(if_inst, std::move(alt_args)));
 
                 current_flow_block_ = if_inst->False();
             }
@@ -983,7 +977,7 @@ class Impl {
             utils::Vector<Value*, 1> args;
             args.Push(rhs.Get());
 
-            BranchTo(if_inst->Merge(), std::move(args));
+            SetBranch(builder_.ExitIf(if_inst, std::move(args)));
         }
         current_flow_block_ = if_inst->Merge();
 

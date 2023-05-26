@@ -46,18 +46,6 @@ class Block : public utils::Castable<Block> {
         return instructions_.Back()->As<ir::Branch>();
     }
 
-    /// @param target the block to see if we trampoline too
-    /// @returns if this block just branches to the provided target.
-    bool IsTrampoline(const Block* target) const {
-        if (instructions_.Length() != 1) {
-            return false;
-        }
-        if (auto* inst = instructions_.Front()->As<ir::Branch>()) {
-            return inst->To() == target;
-        }
-        return false;
-    }
-
     /// Sets the instructions in the block
     /// @param instructions the instructions to set
     void SetInstructions(utils::VectorRef<const Instruction*> instructions) {

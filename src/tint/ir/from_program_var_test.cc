@@ -35,10 +35,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
   %a:ptr<private, u32, read_write> = var
-  br %b2  # root_end
 }
-
-%b2 = root_terminator
 
 )");
 }
@@ -53,10 +50,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
   %a:ptr<private, u32, read_write> = var, 2u
-  br %b2  # root_end
 }
-
-%b2 = root_terminator
 
 )");
 }

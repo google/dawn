@@ -738,12 +738,16 @@ if(${TINT_BUILD_IR})
     ir/continue.h
     ir/convert.cc
     ir/convert.h
-    ir/debug.cc
-    ir/debug.h
     ir/disassembler.cc
     ir/disassembler.h
     ir/discard.cc
     ir/discard.h
+    ir/exit_if.cc
+    ir/exit_if.h
+    ir/exit_loop.cc
+    ir/exit_loop.h
+    ir/exit_switch.cc
+    ir/exit_switch.h
     ir/from_program.cc
     ir/from_program.h
     ir/function.cc
@@ -762,8 +766,6 @@ if(${TINT_BUILD_IR})
     ir/module.h
     ir/return.cc
     ir/return.h
-    ir/root_terminator.cc
-    ir/root_terminator.h
     ir/store.cc
     ir/store.h
     ir/switch.cc

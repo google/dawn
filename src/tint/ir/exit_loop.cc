@@ -1,4 +1,4 @@
-// Copyright 2022 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,29 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_DEBUG_H_
-#define SRC_TINT_IR_DEBUG_H_
+#include "src/tint/ir/exit_loop.h"
 
-#include <string>
+#include "src/tint/ir/loop.h"
 
-#include "src/tint/ir/module.h"
+TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitLoop);
 
 namespace tint::ir {
 
-/// Helper class to debug IR.
-class Debug {
-  public:
-    /// Returns the module as a dot graph
-    /// @param mod the module to emit
-    /// @returns the dot graph for the given module
-    static std::string AsDotGraph(const Module* mod);
+ExitLoop::ExitLoop(ir::Loop* loop) : Base(utils::Empty), loop_(loop) {
+    TINT_ASSERT(IR, loop_);
+    loop_->AddUsage(this);
+    loop_->Merge()->AddInboundBranch(this);
+}
 
-    /// Returns the module as a string
-    /// @param mod the module to emit
-    /// @returns the string representation of the module
-    static std::string AsString(const Module* mod);
-};
+ExitLoop::~ExitLoop() = default;
 
 }  // namespace tint::ir
-
-#endif  // SRC_TINT_IR_DEBUG_H_

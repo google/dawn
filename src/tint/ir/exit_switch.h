@@ -12,22 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_TINT_IR_EXIT_SWITCH_H_
+#define SRC_TINT_IR_EXIT_SWITCH_H_
+
 #include "src/tint/ir/branch.h"
+#include "src/tint/utils/castable.h"
 
-#include <utility>
-
-#include "src/tint/ir/block.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Branch);
+// Forward declarations
+namespace tint::ir {
+class Switch;
+}  // namespace tint::ir
 
 namespace tint::ir {
 
-Branch::Branch(utils::VectorRef<Value*> args) : args_(std::move(args)) {
-    for (auto* arg : args) {
-        arg->AddUsage(this);
-    }
-}
+/// A exit switch instruction.
+class ExitSwitch : public utils::Castable<ExitSwitch, Branch> {
+  public:
+    /// Constructor
+    /// @param sw the switch being exited
+    explicit ExitSwitch(ir::Switch* sw);
+    ~ExitSwitch() override;
 
-Branch::~Branch() = default;
+    /// @returns the switch being exited
+    const ir::Switch* Switch() const { return switch_; }
+
+  private:
+    ir::Switch* switch_ = nullptr;
+};
 
 }  // namespace tint::ir
+
+#endif  // SRC_TINT_IR_EXIT_SWITCH_H_

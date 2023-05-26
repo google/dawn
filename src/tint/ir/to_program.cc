@@ -20,6 +20,7 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/constant.h"
+#include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/load.h"
@@ -121,46 +122,27 @@ class State {
         while (block) {
             TINT_ASSERT(IR, block->HasBranchTarget());
 
-            enum Status { kContinue, kStop, kError };
-
-            Status status = tint::Switch(
-                block,
-
-                [&](const ir::Block* blk) {
-                    for (auto* inst : blk->Instructions()) {
-                        auto stmt = Stmt(inst);
-                        if (TINT_UNLIKELY(!stmt)) {
-                            return kError;
-                        }
-                        if (auto* s = stmt.Get()) {
-                            stmts.Push(s);
-                        }
-                    }
-                    if (auto* if_ = blk->Branch()->As<ir::If>()) {
-                        if (if_->Merge()->HasBranchTarget()) {
-                            block = if_->Merge();
-                            return kContinue;
-                        }
-                    } else if (auto* switch_ = blk->Branch()->As<ir::Switch>()) {
-                        if (switch_->Merge()->HasBranchTarget()) {
-                            block = switch_->Merge();
-                            return kContinue;
-                        }
-                    }
-                    return kStop;
-                },
-
-                [&](Default) {
-                    UNHANDLED_CASE(block);
-                    return kError;
-                });
-
-            if (TINT_UNLIKELY(status == kError)) {
-                return nullptr;
+            for (auto* inst : block->Instructions()) {
+                auto stmt = Stmt(inst);
+                if (TINT_UNLIKELY(!stmt)) {
+                    return nullptr;
+                }
+                if (auto* s = stmt.Get()) {
+                    stmts.Push(s);
+                }
             }
-            if (status == kStop) {
-                break;
+            if (auto* if_ = block->Branch()->As<ir::If>()) {
+                if (if_->Merge()->HasBranchTarget()) {
+                    block = if_->Merge();
+                    continue;
+                }
+            } else if (auto* switch_ = block->Branch()->As<ir::Switch>()) {
+                if (switch_->Merge()->HasBranchTarget()) {
+                    block = switch_->Merge();
+                    continue;
+                }
             }
+            break;
         }
 
         return b.Block(std::move(stmts));
@@ -174,16 +156,20 @@ class State {
             return nullptr;
         }
 
-        if (!IsEmpty(i->False(), i->Merge())) {
+        auto* false_blk = i->False();
+        if (false_blk->Instructions().Length() > 1 ||
+            (false_blk->Instructions().Length() == 1 && false_blk->HasBranchTarget() &&
+             !false_blk->Branch()->Is<ir::ExitIf>())) {
             // If the else target is an `if` which has a merge target that just bounces to the outer
             // if merge target then emit an 'else if' instead of a block statement for the else.
-            if (auto* inst = i->False()->Instructions().Front()->As<ir::If>();
-                inst && inst->Merge()->IsTrampoline(i->Merge())) {
-                auto* f = If(inst);
-                if (!f) {
-                    return nullptr;
+            if (auto* inst = i->False()->Instructions().Front()->As<ir::If>()) {
+                if (auto* br = inst->Merge()->Branch()->As<ir::ExitIf>(); br && br->If() == i) {
+                    auto* f = If(inst);
+                    if (!f) {
+                        return nullptr;
+                    }
+                    return b.If(cond, t, b.Else(f));
                 }
-                return b.If(cond, t, b.Else(f));
             } else {
                 auto* f = BlockGraph(i->False());
                 if (!f) {
@@ -192,7 +178,6 @@ class State {
                 return b.If(cond, t, b.Else(f));
             }
         }
-
         return b.If(cond, t);
     }
 
@@ -263,17 +248,6 @@ class State {
         }
 
         return b.Return(val);
-    }
-
-    /// @return true if there are no instructions between @p node and and @p stop_at
-    bool IsEmpty(const ir::Block* node, const ir::Block* stop_at) {
-        if (node->Instructions().IsEmpty()) {
-            return true;
-        }
-        if (auto* br = node->Instructions().Front()->As<Branch>()) {
-            return !br->Is<ir::Return>() && br->To() == stop_at;
-        }
-        return false;
     }
 
     utils::Result<const ast::Statement*> Stmt(const ir::Instruction* inst) {

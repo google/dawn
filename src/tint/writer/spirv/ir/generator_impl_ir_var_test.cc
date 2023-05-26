@@ -100,7 +100,7 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_DeclInsideBlock) {
     v->SetInitializer(b.Constant(42_i));
 
     auto* i = b.CreateIf(b.Constant(true));
-    i->True()->SetInstructions(utils::Vector{v, b.Branch(i->Merge())});
+    i->True()->SetInstructions(utils::Vector{v, b.ExitIf(i)});
     i->False()->SetInstructions(utils::Vector{b.Return(func)});
     i->Merge()->SetInstructions(utils::Vector{b.Return(func)});
 

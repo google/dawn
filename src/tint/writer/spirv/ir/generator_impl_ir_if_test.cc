@@ -23,8 +23,8 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
     auto* func = b.CreateFunction("foo", mod.Types().void_());
 
     auto* i = b.CreateIf(b.Constant(true));
-    i->True()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
-    i->False()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
+    i->True()->SetInstructions(utils::Vector{b.ExitIf(i)});
+    i->False()->SetInstructions(utils::Vector{b.ExitIf(i)});
     i->Merge()->SetInstructions(utils::Vector{b.Return(func)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
@@ -49,12 +49,12 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
     auto* func = b.CreateFunction("foo", mod.Types().void_());
 
     auto* i = b.CreateIf(b.Constant(true));
-    i->False()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
+    i->False()->SetInstructions(utils::Vector{b.ExitIf(i)});
     i->Merge()->SetInstructions(utils::Vector{b.Return(func)});
 
     auto* true_block = i->True();
-    true_block->SetInstructions(utils::Vector{
-        b.Add(mod.Types().i32(), b.Constant(1_i), b.Constant(1_i)), b.Branch(i->Merge())});
+    true_block->SetInstructions(
+        utils::Vector{b.Add(mod.Types().i32(), b.Constant(1_i), b.Constant(1_i)), b.ExitIf(i)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -83,12 +83,12 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
     auto* func = b.CreateFunction("foo", mod.Types().void_());
 
     auto* i = b.CreateIf(b.Constant(true));
-    i->True()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
+    i->True()->SetInstructions(utils::Vector{b.ExitIf(i)});
     i->Merge()->SetInstructions(utils::Vector{b.Return(func)});
 
     auto* false_block = i->False();
-    false_block->SetInstructions(utils::Vector{
-        b.Add(mod.Types().i32(), b.Constant(1_i), b.Constant(1_i)), b.Branch(i->Merge())});
+    false_block->SetInstructions(
+        utils::Vector{b.Add(mod.Types().i32(), b.Constant(1_i), b.Constant(1_i)), b.ExitIf(i)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 

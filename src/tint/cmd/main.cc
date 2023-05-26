@@ -49,7 +49,6 @@
 #include "tint/tint.h"
 
 #if TINT_BUILD_IR
-#include "src/tint/ir/debug.h"         // nogncheck
 #include "src/tint/ir/disassembler.h"  // nogncheck
 #include "src/tint/ir/from_program.h"  // nogncheck
 #include "src/tint/ir/module.h"        // nogncheck
@@ -110,7 +109,6 @@ struct Options {
 
 #if TINT_BUILD_IR
     bool dump_ir = false;
-    bool dump_ir_graph = false;
     bool use_ir = false;
 #endif  // TINT_BUILD_IR
 
@@ -374,8 +372,6 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 #if TINT_BUILD_IR
         } else if (arg == "--dump-ir") {
             opts->dump_ir = true;
-        } else if (arg == "--dump-ir-graph") {
-            opts->dump_ir_graph = true;
         } else if (arg == "--use-ir") {
             opts->use_ir = true;
 #endif  // TINT_BUILD_IR
@@ -1072,7 +1068,7 @@ int main(int argc, const char** argv) {
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
 #if TINT_BUILD_IR
-    if (options.dump_ir || options.dump_ir_graph) {
+    if (options.dump_ir) {
         auto result = tint::ir::FromProgram(program.get());
         if (!result) {
             std::cerr << "Failed to build IR from program: " << result.Failure() << std::endl;
@@ -1081,10 +1077,6 @@ int main(int argc, const char** argv) {
             if (options.dump_ir) {
                 tint::ir::Disassembler d(mod);
                 std::cout << d.Disassemble() << std::endl;
-            }
-            if (options.dump_ir_graph) {
-                auto graph = tint::ir::Debug::AsDotGraph(&mod);
-                WriteFile("tint.dot", "w", graph);
             }
         }
     }

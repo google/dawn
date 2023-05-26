@@ -19,7 +19,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::If);
 namespace tint::ir {
 
 If::If(Value* cond, Block* t, Block* f, Block* m)
-    : Base(m), condition_(cond), true_(t), false_(f), merge_(m) {
+    : Base(utils::Empty), condition_(cond), true_(t), false_(f), merge_(m) {
     TINT_ASSERT(IR, true_);
     TINT_ASSERT(IR, false_);
     TINT_ASSERT(IR, merge_);

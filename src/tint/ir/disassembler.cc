@@ -27,11 +27,13 @@
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
 #include "src/tint/ir/discard.h"
+#include "src/tint/ir/exit_if.h"
+#include "src/tint/ir/exit_loop.h"
+#include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/return.h"
-#include "src/tint/ir/root_terminator.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/user_call.h"
@@ -70,7 +72,6 @@ void Disassembler::EmitBlockInstructions(const Block* b) {
     for (const auto* inst : b->Instructions()) {
         Indent();
         EmitInstruction(inst);
-        out_ << std::endl;
     }
 }
 
@@ -92,8 +93,8 @@ std::string_view Disassembler::IdOf(const Value* value) {
 std::string Disassembler::Disassemble() {
     if (mod_.root_block) {
         Indent() << "# Root block" << std::endl;
-        Walk(mod_.root_block);
-        Walk(mod_.root_block->Branch()->To());
+        WalkInternal(mod_.root_block);
+        out_ << std::endl;
     }
 
     for (auto* func : mod_.functions) {
@@ -108,41 +109,33 @@ void Disassembler::Walk(const Block* blk) {
     }
     visited_.Add(blk);
 
-    tint::Switch(
-        blk,
-        [&](const ir::RootTerminator* t) {
-            TINT_ASSERT(IR, !in_function_);
-            Indent() << "%b" << IdOf(t) << " = root_terminator" << std::endl << std::endl;
-        },
-        [&](const ir::Block* b) {
-            // If this block is dead, nothing to do
-            if (!b->HasBranchTarget()) {
-                return;
-            }
+    // If this block is dead, nothing to do
+    if (!blk->HasBranchTarget()) {
+        return;
+    }
 
-            Indent() << "%b" << IdOf(b) << " = block";
-            if (!b->Params().IsEmpty()) {
-                out_ << " (";
-                for (auto* p : b->Params()) {
-                    if (p != b->Params().Front()) {
-                        out_ << ", ";
-                    }
-                    EmitValue(p);
-                }
-                out_ << ")";
-            }
+    WalkInternal(blk);
+}
 
-            out_ << " {" << std::endl;
-            {
-                ScopedIndent si(indent_size_);
-                EmitBlockInstructions(b);
+void Disassembler::WalkInternal(const Block* blk) {
+    Indent() << "%b" << IdOf(blk) << " = block";
+    if (!blk->Params().IsEmpty()) {
+        out_ << " (";
+        for (auto* p : blk->Params()) {
+            if (p != blk->Params().Front()) {
+                out_ << ", ";
             }
-            Indent() << "}" << std::endl;
+            EmitValue(p);
+        }
+        out_ << ")";
+    }
 
-            if (!b->Branch()->Is<ir::Return>()) {
-                out_ << std::endl;
-            }
-        });
+    out_ << " {" << std::endl;
+    {
+        ScopedIndent si(indent_size_);
+        EmitBlockInstructions(blk);
+    }
+    Indent() << "}" << std::endl;
 }
 
 void Disassembler::EmitFunction(const Function* func) {
@@ -258,33 +251,39 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitValueWithType(b);
             out_ << " = bitcast ";
             EmitArgs(b);
+            out_ << std::endl;
         },
-        [&](const ir::Discard*) { out_ << "discard"; },
+        [&](const ir::Discard*) { out_ << "discard" << std::endl; },
         [&](const ir::Builtin* b) {
             EmitValueWithType(b);
             out_ << " = " << builtin::str(b->Func()) << " ";
             EmitArgs(b);
+            out_ << std::endl;
         },
         [&](const ir::Construct* c) {
             EmitValueWithType(c);
             out_ << " = construct ";
             EmitArgs(c);
+            out_ << std::endl;
         },
         [&](const ir::Convert* c) {
             EmitValueWithType(c);
             out_ << " = convert " << c->FromType()->FriendlyName() << ", ";
             EmitArgs(c);
+            out_ << std::endl;
         },
         [&](const ir::Load* l) {
             EmitValueWithType(l);
             out_ << " = load ";
             EmitValue(l->From());
+            out_ << std::endl;
         },
         [&](const ir::Store* s) {
             out_ << "store ";
             EmitValue(s->To());
             out_ << ", ";
             EmitValue(s->From());
+            out_ << std::endl;
         },
         [&](const ir::UserCall* uc) {
             EmitValueWithType(uc);
@@ -293,6 +292,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                 out_ << ", ";
             }
             EmitArgs(uc);
+            out_ << std::endl;
         },
         [&](const ir::Var* v) {
             EmitValueWithType(v);
@@ -301,6 +301,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                 out_ << ", ";
                 EmitValue(v->Initializer());
             }
+            out_ << std::endl;
         },
         [&](const ir::Branch* b) { EmitBranch(b); },
         [&](Default) { out_ << "Unknown instruction: " << inst->TypeInfo().name; });
@@ -332,15 +333,18 @@ void Disassembler::EmitIf(const If* i) {
         ScopedIndent si(indent_size_);
         Indent() << "# True block" << std::endl;
         Walk(i->True());
+        out_ << std::endl;
     }
     if (has_false) {
         ScopedIndent si(indent_size_);
         Indent() << "# False block" << std::endl;
         Walk(i->False());
+        out_ << std::endl;
     }
     if (i->Merge()->HasBranchTarget()) {
         Indent() << "# Merge block" << std::endl;
         Walk(i->Merge());
+        out_ << std::endl;
     }
 }
 
@@ -358,16 +362,19 @@ void Disassembler::EmitLoop(const Loop* l) {
     {
         ScopedIndent si(indent_size_);
         Walk(l->Start());
+        out_ << std::endl;
     }
 
     if (l->Continuing()->HasBranchTarget()) {
         ScopedIndent si(indent_size_);
         Indent() << "# Continuing block" << std::endl;
         Walk(l->Continuing());
+        out_ << std::endl;
     }
     if (l->Merge()->HasBranchTarget()) {
         Indent() << "# Merge block" << std::endl;
         Walk(l->Merge());
+        out_ << std::endl;
     }
 }
 
@@ -402,29 +409,31 @@ void Disassembler::EmitSwitch(const Switch* s) {
         ScopedIndent si(indent_size_);
         Indent() << "# Case block" << std::endl;
         Walk(c.Start());
+        out_ << std::endl;
     }
     if (s->Merge()->HasBranchTarget()) {
         Indent() << "# Merge block" << std::endl;
         Walk(s->Merge());
+        out_ << std::endl;
     }
 }
 
 void Disassembler::EmitBranch(const Branch* b) {
-    std::string suffix = "";
-    if (b->Is<ir::Return>()) {
-        out_ << "ret";
-    } else if (auto* cont = b->As<ir::Continue>()) {
-        out_ << "continue %b" << IdOf(cont->Loop()->Continuing());
-    } else if (auto* bi = b->As<ir::BreakIf>()) {
-        out_ << "break_if ";
-        EmitValue(bi->Condition());
-        out_ << " %b" << IdOf(bi->Loop()->Start());
-    } else {
-        out_ << "br %b" << IdOf(b->To());
-        if (b->To()->Is<RootTerminator>()) {
-            suffix = "root_end";
-        }
-    }
+    tint::Switch(
+        b,  //
+        [&](const ir::Return*) { out_ << "ret"; },
+        [&](const ir::Continue* cont) {
+            out_ << "continue %b" << IdOf(cont->Loop()->Continuing());
+        },
+        [&](const ir::ExitIf* ei) { out_ << "exit_if %b" << IdOf(ei->If()->Merge()); },
+        [&](const ir::ExitSwitch* es) { out_ << "exit_switch %b" << IdOf(es->Switch()->Merge()); },
+        [&](const ir::ExitLoop* el) { out_ << "exit_loop %b" << IdOf(el->Loop()->Merge()); },
+        [&](const ir::BreakIf* bi) {
+            out_ << "break_if ";
+            EmitValue(bi->Condition());
+            out_ << " %b" << IdOf(bi->Loop()->Start());
+        },
+        [&](Default) { out_ << "Unknown branch " << b->TypeInfo().name; });
 
     if (!b->Args().IsEmpty()) {
         out_ << " ";
@@ -435,9 +444,7 @@ void Disassembler::EmitBranch(const Branch* b) {
             EmitValue(v);
         }
     }
-    if (!suffix.empty()) {
-        out_ << "  # " << suffix;
-    }
+    out_ << std::endl;
 }
 
 void Disassembler::EmitArgs(const Call* call) {
@@ -508,6 +515,7 @@ void Disassembler::EmitBinary(const Binary* b) {
     EmitValue(b->LHS());
     out_ << ", ";
     EmitValue(b->RHS());
+    out_ << std::endl;
 }
 
 void Disassembler::EmitUnary(const Unary* u) {
@@ -523,6 +531,7 @@ void Disassembler::EmitUnary(const Unary* u) {
     }
     out_ << " ";
     EmitValue(u->Val());
+    out_ << std::endl;
 }
 
 }  // namespace tint::ir

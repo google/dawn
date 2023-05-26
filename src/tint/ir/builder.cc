@@ -37,10 +37,6 @@ Block* Builder::CreateBlock() {
     return ir.blocks.Create<Block>();
 }
 
-RootTerminator* Builder::CreateRootTerminator() {
-    return ir.blocks.Create<RootTerminator>();
-}
-
 Function* Builder::CreateFunction(std::string_view name,
                                   const type::Type* return_type,
                                   Function::PipelineStage stage,
@@ -205,10 +201,6 @@ ir::Var* Builder::Declare(const type::Type* type) {
     return ir.values.Create<ir::Var>(type);
 }
 
-ir::Branch* Builder::Branch(Block* to, utils::VectorRef<Value*> args) {
-    return ir.values.Create<ir::Branch>(to, args);
-}
-
 ir::Return* Builder::Return(Function* func, utils::VectorRef<Value*> args) {
     return ir.values.Create<ir::Return>(func, args);
 }
@@ -219,6 +211,17 @@ ir::BreakIf* Builder::BreakIf(Value* condition, Loop* loop) {
 
 ir::Continue* Builder::Continue(Loop* loop) {
     return ir.values.Create<ir::Continue>(loop);
+}
+ir::ExitSwitch* Builder::ExitSwitch(Switch* sw) {
+    return ir.values.Create<ir::ExitSwitch>(sw);
+}
+
+ir::ExitLoop* Builder::ExitLoop(Loop* loop) {
+    return ir.values.Create<ir::ExitLoop>(loop);
+}
+
+ir::ExitIf* Builder::ExitIf(If* i, utils::VectorRef<Value*> args) {
+    return ir.values.Create<ir::ExitIf>(i, args);
 }
 
 ir::BlockParam* Builder::BlockParam(const type::Type* type) {

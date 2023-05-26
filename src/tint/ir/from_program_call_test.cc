@@ -102,13 +102,10 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
   %i:ptr<private, i32, read_write> = var, 1i
-  br %b2  # root_end
 }
 
-%b2 = root_terminator
-
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:i32 = load %i
     %tint_symbol:f32 = convert i32, %3
     ret
@@ -127,10 +124,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
   %i:ptr<private, vec3<f32>, read_write> = var, vec3<f32> 0.0f
-  br %b2  # root_end
 }
-
-%b2 = root_terminator
 
 )");
 }
@@ -146,13 +140,10 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
   %i:ptr<private, f32, read_write> = var, 1.0f
-  br %b2  # root_end
 }
 
-%b2 = root_terminator
-
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:f32 = load %i
     %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %3
     ret

@@ -37,13 +37,10 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
   %i:ptr<private, f32, read_write> = var, 1.0f
-  br %b2  # root_end
 }
 
-%b2 = root_terminator
-
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:f32 = load %i
     %tint_symbol:f32 = asin %3
     ret

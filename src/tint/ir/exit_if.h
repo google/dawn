@@ -12,37 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_BRANCH_H_
-#define SRC_TINT_IR_BRANCH_H_
+#ifndef SRC_TINT_IR_EXIT_IF_H_
+#define SRC_TINT_IR_EXIT_IF_H_
 
-#include "src/tint/ir/instruction.h"
-#include "src/tint/ir/value.h"
+#include "src/tint/ir/branch.h"
 #include "src/tint/utils/castable.h"
 
 // Forward declarations
 namespace tint::ir {
-class Block;
+class If;
 }  // namespace tint::ir
 
 namespace tint::ir {
 
-/// A branch instruction.
-class Branch : public utils::Castable<Branch, Instruction> {
+/// A exit if instruction.
+class ExitIf : public utils::Castable<ExitIf, Branch> {
   public:
-    ~Branch() override;
-
-    /// @returns the branch arguments
-    utils::VectorRef<Value*> Args() const { return args_; }
-
-  protected:
     /// Constructor
+    /// @param i the if being exited
     /// @param args the branch arguments
-    explicit Branch(utils::VectorRef<Value*> args);
+    explicit ExitIf(ir::If* i, utils::VectorRef<Value*> args = {});
+    ~ExitIf() override;
+
+    /// @returns the if being exited
+    const ir::If* If() const { return if_; }
 
   private:
-    utils::Vector<Value*, 2> args_;
+    ir::If* if_ = nullptr;
 };
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_BRANCH_H_
+#endif  // SRC_TINT_IR_EXIT_IF_H_

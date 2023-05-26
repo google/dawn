@@ -19,6 +19,7 @@
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/module.h"
@@ -354,25 +355,24 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
 }
 
 void GeneratorImplIr::EmitBranch(const ir::Branch* b) {
-    if (b->Is<ir::Return>()) {
-        if (!b->Args().IsEmpty()) {
-            TINT_ASSERT(Writer, b->Args().Length() == 1u);
-            OperandList operands;
-            operands.push_back(Value(b->Args()[0]));
-            current_function_.push_inst(spv::Op::OpReturnValue, operands);
-        } else {
-            current_function_.push_inst(spv::Op::OpReturn, {});
-        }
-        return;
-    }
-
-    Switch(
-        b->To(),
-        [&](const ir::Block* blk) { current_function_.push_inst(spv::Op::OpBranch, {Label(blk)}); },
+    tint::Switch(  //
+        b,         //
+        [&](const ir::Return*) {
+            if (!b->Args().IsEmpty()) {
+                TINT_ASSERT(Writer, b->Args().Length() == 1u);
+                OperandList operands;
+                operands.push_back(Value(b->Args()[0]));
+                current_function_.push_inst(spv::Op::OpReturnValue, operands);
+            } else {
+                current_function_.push_inst(spv::Op::OpReturn, {});
+            }
+            return;
+        },
+        [&](const ir::ExitIf* if_) {
+            current_function_.push_inst(spv::Op::OpBranch, {Label(if_->If()->Merge())});
+        },
         [&](Default) {
-            // A block may not have an outward branch (e.g. an unreachable merge
-            // block).
-            current_function_.push_inst(spv::Op::OpUnreachable, {});
+            TINT_ICE(Writer, diagnostics_) << "unimplemented branch: " << b->TypeInfo().name;
         });
 }
 
@@ -388,10 +388,12 @@ void GeneratorImplIr::EmitIf(const ir::If* i) {
     uint32_t merge_label = Label(merge_block);
     uint32_t true_label = merge_label;
     uint32_t false_label = merge_label;
-    if (true_block->Instructions().Length() > 1 || true_block->Branch()->To() != merge_block) {
+    if (true_block->Instructions().Length() > 1 ||
+        (true_block->HasBranchTarget() && !true_block->Branch()->Is<ir::ExitIf>())) {
         true_label = Label(true_block);
     }
-    if (false_block->Instructions().Length() > 1 || false_block->Branch()->To() != merge_block) {
+    if (false_block->Instructions().Length() > 1 ||
+        (false_block->HasBranchTarget() && !false_block->Branch()->Is<ir::ExitIf>())) {
         false_label = Label(false_block);
     }
 

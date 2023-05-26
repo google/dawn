@@ -57,6 +57,7 @@ class Disassembler {
     std::string_view IdOf(const Value* node);
 
     void Walk(const Block* blk);
+    void WalkInternal(const Block* blk);
     void EmitFunction(const Function* func);
     void EmitInstruction(const Instruction* inst);
     void EmitValueWithType(const Value* val);

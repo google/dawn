@@ -107,13 +107,10 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
   %v2:ptr<private, i32, read_write> = var
-  br %b2  # root_end
 }
 
-%b2 = root_terminator
-
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     ret
   }
 }
@@ -134,13 +131,10 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
   %v3:ptr<private, i32, read_write> = var
-  br %b2  # root_end
 }
 
-%b2 = root_terminator
-
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     store %v3, 42i
     ret
   }
