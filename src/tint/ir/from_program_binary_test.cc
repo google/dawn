@@ -36,17 +36,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = add %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -72,9 +70,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Increment) {
     %3:u32 = load %v1
     %4:u32 = add %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -100,9 +97,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
     %3:u32 = load %v1
     %4:u32 = add %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -117,17 +113,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = sub %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -153,9 +147,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Decrement) {
     %3:i32 = load %v1
     %4:i32 = sub %3, 1i
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -181,9 +174,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
     %3:u32 = load %v1
     %4:u32 = sub %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -198,17 +190,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = mul %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -234,9 +224,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
     %3:u32 = load %v1
     %4:u32 = mul %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -251,17 +240,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = div %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -287,9 +274,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
     %3:u32 = load %v1
     %4:u32 = div %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -304,17 +290,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = mod %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -340,9 +324,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
     %3:u32 = load %v1
     %4:u32 = mod %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -357,17 +340,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = and %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -393,9 +374,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
     %3:bool = load %v1
     %4:bool = and %3, false
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -410,17 +390,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = or %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -446,9 +424,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
     %3:bool = load %v1
     %4:bool = or %3, false
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -463,17 +440,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = xor %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -499,9 +474,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
     %3:u32 = load %v1
     %4:u32 = xor %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -516,40 +490,39 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():bool -> %b1 {
   %b1 = block {
-    br %b2 true  # return
+    ret true
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:bool = call %my_func
-    if %3 [t: %b4, f: %b5, m: %b6]
+    if %3 [t: %b3, f: %b4, m: %b5]
       # True block
-      %b4 = block {
-        br %b6 false
+      %b3 = block {
+        br %b5 false
       }
 
       # False block
-      %b5 = block {
-        br %b6 %3
+      %b4 = block {
+        br %b5 %3
       }
 
     # Merge block
-    %b6 = block (%4:bool) {
-      if %4:bool [t: %b7, f: %b8, m: %b9]
+    %b5 = block (%4:bool) {
+      if %4:bool [t: %b6, f: %b7, m: %b8]
         # True block
-        %b7 = block {
-          br %b9
+        %b6 = block {
+          br %b8
         }
 
         # False block
-        %b8 = block {
-          br %b9
+        %b7 = block {
+          br %b8
         }
 
       # Merge block
-      %b9 = block {
-        br %b10  # return
+      %b8 = block {
+        ret
       }
 
     }
@@ -557,7 +530,6 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 
   }
 
-  %b10 = func_terminator
 }
 )");
 }
@@ -572,40 +544,39 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():bool -> %b1 {
   %b1 = block {
-    br %b2 true  # return
+    ret true
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:bool = call %my_func
-    if %3 [t: %b4, f: %b5, m: %b6]
+    if %3 [t: %b3, f: %b4, m: %b5]
       # True block
-      %b4 = block {
-        br %b6 %3
+      %b3 = block {
+        br %b5 %3
       }
 
       # False block
-      %b5 = block {
-        br %b6 true
+      %b4 = block {
+        br %b5 true
       }
 
     # Merge block
-    %b6 = block (%4:bool) {
-      if %4:bool [t: %b7, f: %b8, m: %b9]
+    %b5 = block (%4:bool) {
+      if %4:bool [t: %b6, f: %b7, m: %b8]
         # True block
-        %b7 = block {
-          br %b9
+        %b6 = block {
+          br %b8
         }
 
         # False block
-        %b8 = block {
-          br %b9
+        %b7 = block {
+          br %b8
         }
 
       # Merge block
-      %b9 = block {
-        br %b10  # return
+      %b8 = block {
+        ret
       }
 
     }
@@ -613,7 +584,6 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
 
   }
 
-  %b10 = func_terminator
 }
 )");
 }
@@ -628,17 +598,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:bool = eq %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -653,17 +621,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:bool = neq %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -678,17 +644,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:bool = lt %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -703,17 +667,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:bool = gt %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -728,17 +690,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:bool = lte %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -753,17 +713,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:bool = gte %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -778,17 +736,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = shiftl %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -814,9 +770,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
     %3:u32 = load %v1
     %4:u32 = shiftl %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -831,17 +786,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 0u  # return
+    ret 0u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = shiftr %3, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -867,9 +820,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
     %3:u32 = load %v1
     %4:u32 = shiftr %3, 1u
     store %v1, %4
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -886,38 +838,36 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():f32 -> %b1 {
   %b1 = block {
-    br %b2 0.0f  # return
+    ret 0.0f
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:f32 = call %my_func
     %4:bool = lt %3, 2.0f
-    if %4 [t: %b4, f: %b5, m: %b6]
+    if %4 [t: %b3, f: %b4, m: %b5]
       # True block
-      %b4 = block {
+      %b3 = block {
         %5:f32 = call %my_func
         %6:f32 = call %my_func
         %7:f32 = mul 2.29999995231628417969f, %6
         %8:f32 = div %5, %7
         %9:bool = gt 2.5f, %8
-        br %b6 %9
+        br %b5 %9
       }
 
       # False block
-      %b5 = block {
-        br %b6 %4
+      %b4 = block {
+        br %b5 %4
       }
 
     # Merge block
-    %b6 = block (%tint_symbol:bool) {
-      br %b7  # return
+    %b5 = block (%tint_symbol:bool) {
+      ret
     }
 
   }
 
-  %b7 = func_terminator
 }
 )");
 }
@@ -933,16 +883,14 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound_WithConstEval) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func(%p:bool):bool -> %b1 {
   %b1 = block {
-    br %b2 true  # return
+    ret true
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %tint_symbol:bool = call %my_func, false
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }

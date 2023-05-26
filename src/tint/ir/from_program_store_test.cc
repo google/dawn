@@ -46,9 +46,8 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Assign) {
 %test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
   %b3 = block {
     store %a, 4u
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }

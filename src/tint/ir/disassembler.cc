@@ -25,10 +25,10 @@
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/convert.h"
 #include "src/tint/ir/discard.h"
-#include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/return.h"
 #include "src/tint/ir/root_terminator.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
@@ -108,11 +108,6 @@ void Disassembler::Walk(const Block* blk) {
 
     tint::Switch(
         blk,
-        [&](const ir::FunctionTerminator* t) {
-            TINT_ASSERT(IR, in_function_);
-            Indent() << "%b" << IdOf(t) << " = func_terminator" << std::endl;
-            in_function_ = false;
-        },
         [&](const ir::RootTerminator* t) {
             TINT_ASSERT(IR, !in_function_);
             Indent() << "%b" << IdOf(t) << " = root_terminator" << std::endl << std::endl;
@@ -142,7 +137,7 @@ void Disassembler::Walk(const Block* blk) {
             }
             Indent() << "}" << std::endl;
 
-            if (!b->Branch()->To()->Is<FunctionTerminator>()) {
+            if (!b->Branch()->Is<ir::Return>()) {
                 out_ << std::endl;
             }
         });
@@ -186,7 +181,6 @@ void Disassembler::EmitFunction(const Function* func) {
     {
         ScopedIndent si(indent_size_);
         Walk(func->StartTarget());
-        Walk(func->EndTarget());
     }
     Indent() << "}" << std::endl;
 }
@@ -415,11 +409,13 @@ void Disassembler::EmitSwitch(const Switch* s) {
 
 void Disassembler::EmitBranch(const Branch* b) {
     std::string suffix = "";
-    out_ << "br %b" << IdOf(b->To());
-    if (b->To()->Is<FunctionTerminator>()) {
-        suffix = "return";
-    } else if (b->To()->Is<RootTerminator>()) {
-        suffix = "root_end";
+    if (b->Is<ir::Return>()) {
+        out_ << "ret";
+    } else {
+        out_ << "br %b" << IdOf(b->To());
+        if (b->To()->Is<RootTerminator>()) {
+            suffix = "root_end";
+        }
     }
 
     if (!b->Args().IsEmpty()) {

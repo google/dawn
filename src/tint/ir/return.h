@@ -12,45 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_BRANCH_H_
-#define SRC_TINT_IR_BRANCH_H_
+#ifndef SRC_TINT_IR_RETURN_H_
+#define SRC_TINT_IR_RETURN_H_
 
-#include "src/tint/ir/instruction.h"
-#include "src/tint/ir/value.h"
+#include "src/tint/ir/branch.h"
 #include "src/tint/utils/castable.h"
 
 // Forward declarations
 namespace tint::ir {
-class Block;
+class Function;
 }  // namespace tint::ir
 
 namespace tint::ir {
 
-/// A branch instruction.
-class Branch : public utils::Castable<Branch, Instruction> {
+/// A return instruction.
+class Return : public utils::Castable<Return, Branch> {
   public:
     /// Constructor
-    /// @param to the block to branch too
+    /// @param func the function being returned
     /// @param args the branch arguments
-    explicit Branch(Block* to, utils::VectorRef<Value*> args = {});
-    ~Branch() override;
+    explicit Return(Function* func, utils::VectorRef<Value*> args = {});
+    ~Return() override;
 
-    /// @returns the block being branched too.
-    const Block* To() const { return to_; }
-
-    /// @returns the branch arguments
-    utils::VectorRef<Value*> Args() const { return args_; }
-
-  protected:
-    /// Constructor
-    /// @param args the branch arguments
-    explicit Branch(utils::VectorRef<Value*> args);
+    /// @returns the function being returned
+    const Function* Func() const { return func_; }
 
   private:
-    Block* to_ = nullptr;
-    utils::Vector<Value*, 2> args_;
+    Function* func_ = nullptr;
 };
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_BRANCH_H_
+#endif  // SRC_TINT_IR_RETURN_H_

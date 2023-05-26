@@ -125,7 +125,7 @@ TEST_P(Arithmetic, Scalar) {
     func->StartTarget()->SetInstructions(
         utils::Vector{b.CreateBinary(params.kind, MakeScalarType(params.type),
                                      MakeScalarValue(params.type), MakeScalarValue(params.type)),
-                      b.Branch(func->EndTarget())});
+                      b.Return(func)});
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
@@ -138,7 +138,7 @@ TEST_P(Arithmetic, Vector) {
         utils::Vector{b.CreateBinary(params.kind, MakeVectorType(params.type),
                                      MakeVectorValue(params.type), MakeVectorValue(params.type)),
 
-                      b.Branch(func->EndTarget())});
+                      b.Return(func)});
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
@@ -172,7 +172,7 @@ TEST_P(Bitwise, Scalar) {
     func->StartTarget()->SetInstructions(
         utils::Vector{b.CreateBinary(params.kind, MakeScalarType(params.type),
                                      MakeScalarValue(params.type), MakeScalarValue(params.type)),
-                      b.Branch(func->EndTarget())});
+                      b.Return(func)});
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
@@ -185,7 +185,7 @@ TEST_P(Bitwise, Vector) {
         utils::Vector{b.CreateBinary(params.kind, MakeVectorType(params.type),
                                      MakeVectorValue(params.type), MakeVectorValue(params.type)),
 
-                      b.Branch(func->EndTarget())});
+                      b.Return(func)});
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
@@ -211,7 +211,7 @@ TEST_P(Comparison, Scalar) {
     func->StartTarget()->SetInstructions(
         utils::Vector{b.CreateBinary(params.kind, mod.Types().bool_(), MakeScalarValue(params.type),
                                      MakeScalarValue(params.type)),
-                      b.Branch(func->EndTarget())});
+                      b.Return(func)});
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
@@ -224,7 +224,7 @@ TEST_P(Comparison, Vector) {
         utils::Vector{b.CreateBinary(params.kind, mod.Types().vec2(mod.Types().bool_()),
                                      MakeVectorValue(params.type), MakeVectorValue(params.type)),
 
-                      b.Branch(func->EndTarget())});
+                      b.Return(func)});
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
@@ -279,7 +279,7 @@ TEST_F(SpvGeneratorImplTest, Binary_Chain) {
     auto* func = b.CreateFunction("foo", mod.Types().void_());
     auto* a = b.Subtract(mod.Types().i32(), b.Constant(1_i), b.Constant(2_i));
     func->StartTarget()->SetInstructions(
-        utils::Vector{a, b.Add(mod.Types().i32(), a, a), b.Branch(func->EndTarget())});
+        utils::Vector{a, b.Add(mod.Types().i32(), a, a), b.Return(func)});
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

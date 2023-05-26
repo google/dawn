@@ -72,9 +72,8 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
               R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
   %b1 = block {
     %a:ptr<function, u32, read_write> = var
-    br %b2  # return
+    ret
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -91,9 +90,8 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init) {
               R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
   %b1 = block {
     %a:ptr<function, u32, read_write> = var, 2u
-    br %b2  # return
+    ret
   }
-  %b2 = func_terminator
 }
 )");
 }

@@ -46,9 +46,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
   %b3 = block {
     %3:f32 = load %i
     %tint_symbol:f32 = asin %3
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }

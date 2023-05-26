@@ -19,10 +19,10 @@
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
-#include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/user_call.h"
@@ -354,18 +354,20 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
 }
 
 void GeneratorImplIr::EmitBranch(const ir::Branch* b) {
+    if (b->Is<ir::Return>()) {
+        if (!b->Args().IsEmpty()) {
+            TINT_ASSERT(Writer, b->Args().Length() == 1u);
+            OperandList operands;
+            operands.push_back(Value(b->Args()[0]));
+            current_function_.push_inst(spv::Op::OpReturnValue, operands);
+        } else {
+            current_function_.push_inst(spv::Op::OpReturn, {});
+        }
+        return;
+    }
+
     Switch(
         b->To(),
-        [&](const ir::FunctionTerminator*) {
-            if (!b->Args().IsEmpty()) {
-                TINT_ASSERT(Writer, b->Args().Length() == 1u);
-                OperandList operands;
-                operands.push_back(Value(b->Args()[0]));
-                current_function_.push_inst(spv::Op::OpReturnValue, operands);
-            } else {
-                current_function_.push_inst(spv::Op::OpReturn, {});
-            }
-        },
         [&](const ir::Block* blk) { current_function_.push_inst(spv::Op::OpBranch, {Label(blk)}); },
         [&](Default) {
             // A block may not have an outward branch (e.g. an unreachable merge

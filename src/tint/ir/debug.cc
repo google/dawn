@@ -18,9 +18,9 @@
 #include <unordered_set>
 
 #include "src/tint/ir/block.h"
-#include "src/tint/ir/function_terminator.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/return.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/switch.h"
 #include "src/tint/utils/string_stream.h"
@@ -54,25 +54,26 @@ std::string Debug::AsDotGraph(const Module* mod) {
         }
         visited.insert(blk);
 
-        tint::Switch(
-            blk,
-            [&](const ir::FunctionTerminator*) {
-                // Already done
-            },
-            [&](const ir::Block* b) {
-                if (block_to_name.count(b) == 0) {
-                    out << name_for(b) << R"( [label="block"])" << std::endl;
-                }
-                out << name_for(b) << " -> " << name_for(b->Branch()->To());
+        tint::Switch(blk,  //
+                     [&](const ir::Block* b) {
+                         if (block_to_name.count(b) == 0) {
+                             out << name_for(b) << R"( [label="block"])" << std::endl;
+                         }
+                         out << name_for(b) << " -> " << name_for(b->Branch()->To());
 
-                // Dashed lines to merge blocks
-                if (merge_blocks.count(b->Branch()->To()) != 0) {
-                    out << " [style=dashed]";
-                }
+                         // Dashed lines to merge blocks
+                         if (merge_blocks.count(b->Branch()->To()) != 0) {
+                             out << " [style=dashed]";
+                         }
 
-                out << std::endl;
-                Graph(b->Branch()->To());
-            });
+                         out << std::endl;
+
+                         if (b->Branch()->Is<ir::Return>()) {
+                             return;
+                         } else {
+                             Graph(b->Branch()->To());
+                         }
+                     });
     };
 
     out << "digraph G {" << std::endl;
@@ -81,7 +82,6 @@ std::string Debug::AsDotGraph(const Module* mod) {
         out << "subgraph cluster_" << mod->NameOf(func).Name() << " {" << std::endl;
         out << R"(label=")" << mod->NameOf(func).Name() << R"(")" << std::endl;
         out << name_for(func->StartTarget()) << R"( [label="start"])" << std::endl;
-        out << name_for(func->EndTarget()) << R"( [label="end"])" << std::endl;
         Graph(func->StartTarget());
         out << "}" << std::endl;
     }

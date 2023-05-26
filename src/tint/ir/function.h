@@ -117,12 +117,6 @@ class Function : public utils::Castable<Function, Value> {
     /// @returns the function start target
     Block* StartTarget() const { return start_target_; }
 
-    /// Sets the end target for the function
-    /// @param target the end target
-    void SetEndTarget(FunctionTerminator* target) { end_target_ = target; }
-    /// @returns the function end target
-    FunctionTerminator* EndTarget() const { return end_target_; }
-
   private:
     const type::Type* return_type_;
     PipelineStage pipeline_stage_;
@@ -134,7 +128,6 @@ class Function : public utils::Castable<Function, Value> {
     utils::Vector<FunctionParam*, 1> params_;
 
     Block* start_target_ = nullptr;
-    FunctionTerminator* end_target_ = nullptr;
 };
 
 utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value);

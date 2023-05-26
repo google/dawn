@@ -36,9 +36,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Vertex) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():vec4<f32> [@vertex ra: @position] -> %b1 {
   %b1 = block {
-    br %b2 vec4<f32> 0.0f  # return
+    ret vec4<f32> 0.0f
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -52,9 +51,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Fragment) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():void [@fragment] -> %b1 {
   %b1 = block {
-    br %b2  # return
+    ret
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -69,9 +67,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Compute) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = func():void [@compute @workgroup_size(8, 4, 2)] -> %b1 {
   %b1 = block {
-    br %b2  # return
+    ret
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -85,9 +82,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_Return) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():vec3<f32> -> %b1 {
   %b1 = block {
-    br %b2 vec3<f32> 0.0f  # return
+    ret vec3<f32> 0.0f
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -102,9 +98,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnPosition) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():vec4<f32> [@vertex ra: @position] -> %b1 {
   %b1 = block {
-    br %b2 vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f  # return
+    ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -120,9 +115,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnPositionInvariant) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = func():vec4<f32> [@vertex ra: @position @invariant] -> %b1 {
   %b1 = block {
-    br %b2 vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f  # return
+    ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -137,9 +131,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnLocation) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = func():vec4<f32> [@fragment ra: @location(1)] -> %b1 {
   %b1 = block {
-    br %b2 vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f  # return
+    ret vec4<f32> 1.0f, 2.0f, 3.0f, 4.0f
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -154,9 +147,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnFragDepth) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():f32 [@fragment ra: @frag_depth] -> %b1 {
   %b1 = block {
-    br %b2 1.0f  # return
+    ret 1.0f
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -171,9 +163,8 @@ TEST_F(IR_BuilderImplTest, EmitFunction_ReturnSampleMask) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():u32 [@fragment ra: @sample_mask] -> %b1 {
   %b1 = block {
-    br %b2 1u  # return
+    ret 1u
   }
-  %b2 = func_terminator
 }
 )");
 }

@@ -746,8 +746,6 @@ if(${TINT_BUILD_IR})
     ir/function.h
     ir/function_param.cc
     ir/function_param.h
-    ir/function_terminator.cc
-    ir/function_terminator.h
     ir/if.cc
     ir/if.h
     ir/instruction.cc
@@ -758,6 +756,8 @@ if(${TINT_BUILD_IR})
     ir/loop.h
     ir/module.cc
     ir/module.h
+    ir/return.cc
+    ir/return.h
     ir/root_terminator.cc
     ir/root_terminator.h
     ir/store.cc

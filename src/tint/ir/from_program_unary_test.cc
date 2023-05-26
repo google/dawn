@@ -36,17 +36,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Not) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():bool -> %b1 {
   %b1 = block {
-    br %b2 false  # return
+    ret false
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:bool = call %my_func
     %tint_symbol:bool = eq %3, false
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -61,17 +59,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Complement) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
-    br %b2 1u  # return
+    ret 1u
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:u32 = call %my_func
     %tint_symbol:u32 = complement %3
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -86,17 +82,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Negation) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():i32 -> %b1 {
   %b1 = block {
-    br %b2 1i  # return
+    ret 1i
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:i32 = call %my_func
     %tint_symbol:i32 = negation %3
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -120,9 +114,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_AddressOf) {
 
 %test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
   %b3 = block {
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -149,9 +142,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Unary_Indirection) {
 %test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
   %b3 = block {
     store %v3, 42i
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }

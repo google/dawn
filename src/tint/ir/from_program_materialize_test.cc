@@ -36,9 +36,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_MaterializedCall) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test_function = func():f32 -> %b1 {
   %b1 = block {
-    br %b2 2.0f  # return
+    ret 2.0f
   }
-  %b2 = func_terminator
 }
 )");
 }

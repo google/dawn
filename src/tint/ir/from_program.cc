@@ -166,6 +166,21 @@ class Impl {
         diagnostics_.add_error(tint::diag::System::IR, err, s);
     }
 
+    void SetBranch(Branch* br) {
+        TINT_ASSERT(IR, current_flow_block_);
+        TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
+
+        current_flow_block_->Instructions().Push(br);
+        current_flow_block_ = nullptr;
+    }
+
+    void SetBranchIfNeeded(Branch* br) {
+        if (!current_flow_block_ || current_flow_block_->HasBranchTarget()) {
+            return;
+        }
+        SetBranch(br);
+    }
+
     void BranchTo(Block* node, utils::VectorRef<Value*> args = {}) {
         TINT_ASSERT(IR, current_flow_block_);
         TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
@@ -337,7 +352,7 @@ class Impl {
 
             // If the branch target has already been set then a `return` was called. Only set in
             // the case where `return` wasn't called.
-            BranchToIfNeeded(current_function_->EndTarget());
+            SetBranchIfNeeded(builder_.Return(current_function_));
         }
 
         TINT_ASSERT(IR, control_stack_.IsEmpty());
@@ -716,8 +731,7 @@ class Impl {
             }
             ret_value.Push(ret.Get());
         }
-
-        BranchTo(current_function_->EndTarget(), std::move(ret_value));
+        SetBranch(builder_.Return(current_function_, std::move(ret_value)));
     }
 
     void EmitBreak(const ast::BreakStatement*) {

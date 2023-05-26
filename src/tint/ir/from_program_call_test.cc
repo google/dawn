@@ -37,17 +37,15 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():f32 -> %b1 {
   %b1 = block {
-    br %b2 0.0f  # return
+    ret 0.0f
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %3:f32 = call %my_func
     %tint_symbol:f32 = bitcast %3
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -65,9 +63,8 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Discard) {
     EXPECT_EQ(Disassemble(m.Get()), R"(%test_function = func():void [@fragment] -> %b1 {
   %b1 = block {
     discard
-    br %b2  # return
+    ret
   }
-  %b2 = func_terminator
 }
 )");
 }
@@ -82,16 +79,14 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func(%p:f32):void -> %b1 {
   %b1 = block {
-    br %b2  # return
+    ret
   }
-  %b2 = func_terminator
 }
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b3 {
-  %b3 = block {
+%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+  %b2 = block {
     %4:void = call %my_func, 6.0f
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -116,9 +111,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
   %b3 = block {
     %3:i32 = load %i
     %tint_symbol:f32 = convert i32, %3
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }
@@ -161,9 +155,8 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
   %b3 = block {
     %3:f32 = load %i
     %tint_symbol:vec3<f32> = construct 2.0f, 3.0f, %3
-    br %b4  # return
+    ret
   }
-  %b4 = func_terminator
 }
 )");
 }

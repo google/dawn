@@ -25,7 +25,7 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
     i->False()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
-    i->Merge()->SetInstructions(utils::Vector{b.Branch(func->EndTarget())});
+    i->Merge()->SetInstructions(utils::Vector{b.Return(func)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -50,7 +50,7 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
 
     auto* i = b.CreateIf(b.Constant(true));
     i->False()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
-    i->Merge()->SetInstructions(utils::Vector{b.Branch(func->EndTarget())});
+    i->Merge()->SetInstructions(utils::Vector{b.Return(func)});
 
     auto* true_block = i->True();
     true_block->SetInstructions(utils::Vector{
@@ -84,7 +84,7 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
 
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.Branch(i->Merge())});
-    i->Merge()->SetInstructions(utils::Vector{b.Branch(func->EndTarget())});
+    i->Merge()->SetInstructions(utils::Vector{b.Return(func)});
 
     auto* false_block = i->False();
     false_block->SetInstructions(utils::Vector{
@@ -117,8 +117,8 @@ TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
     auto* func = b.CreateFunction("foo", mod.Types().void_());
 
     auto* i = b.CreateIf(b.Constant(true));
-    i->True()->SetInstructions(utils::Vector{b.Branch(func->EndTarget())});
-    i->False()->SetInstructions(utils::Vector{b.Branch(func->EndTarget())});
+    i->True()->SetInstructions(utils::Vector{b.Return(func)});
+    i->False()->SetInstructions(utils::Vector{b.Return(func)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
