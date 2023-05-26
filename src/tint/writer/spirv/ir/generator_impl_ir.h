@@ -32,6 +32,7 @@ namespace tint::ir {
 class Binary;
 class Block;
 class Branch;
+class Builtin;
 class If;
 class Function;
 class Load;
@@ -110,6 +111,11 @@ class GeneratorImplIr {
     /// @returns the result ID of the instruction
     uint32_t EmitBinary(const ir::Binary* binary);
 
+    /// Emit a builtin function call instruction.
+    /// @param call the builtin call instruction to emit
+    /// @returns the result ID of the instruction
+    uint32_t EmitBuiltin(const ir::Builtin* call);
+
     /// Emit a load instruction.
     /// @param load the load instruction to emit
     /// @returns the result ID of the instruction
@@ -183,6 +189,9 @@ class GeneratorImplIr {
 
     /// The map of blocks to the IDs of their label instructions.
     utils::Hashmap<const ir::Block*, uint32_t, 8> block_labels_;
+
+    /// The map of extended instruction set names to their result IDs.
+    utils::Hashmap<std::string_view, uint32_t, 2> imports_;
 
     /// The current function that is being emitted.
     Function current_function_;

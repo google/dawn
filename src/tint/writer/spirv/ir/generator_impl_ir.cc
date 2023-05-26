@@ -16,9 +16,11 @@
 
 #include <utility>
 
+#include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/builtin.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
@@ -330,6 +332,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         auto result = Switch(
             inst,  //
             [&](const ir::Binary* b) { return EmitBinary(b); },
+            [&](const ir::Builtin* b) { return EmitBuiltin(b); },
             [&](const ir::Load* l) { return EmitLoad(l); },
             [&](const ir::Store* s) {
                 EmitStore(s);
@@ -514,6 +517,73 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
     // Emit the instruction.
     current_function_.push_inst(
         op, {Type(binary->Type()), id, Value(binary->LHS()), Value(binary->RHS())});
+
+    return id;
+}
+
+uint32_t GeneratorImplIr::EmitBuiltin(const ir::Builtin* builtin) {
+    auto id = module_.NextId();
+    auto* result_ty = builtin->Type();
+
+    spv::Op op = spv::Op::Max;
+    OperandList operands = {Type(result_ty), id};
+
+    // Helper to set up the opcode and operand list for a GLSL extended instruction.
+    auto glsl_ext_inst = [&](enum GLSLstd450 inst) {
+        constexpr const char* kGLSLstd450 = "GLSL.std.450";
+        op = spv::Op::OpExtInst;
+        operands.push_back(imports_.GetOrCreate(kGLSLstd450, [&]() {
+            // Import the instruction set the first time it is requested.
+            auto import = module_.NextId();
+            module_.PushExtImport(spv::Op::OpExtInstImport, {import, Operand(kGLSLstd450)});
+            return import;
+        }));
+        operands.push_back(U32Operand(inst));
+    };
+
+    // Determine the opcode.
+    switch (builtin->Func()) {
+        case builtin::Function::kAbs:
+            if (result_ty->is_float_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450FAbs);
+            } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450SAbs);
+            } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
+                // abs() is a no-op for unsigned integers.
+                return Value(builtin->Args()[0]);
+            }
+            break;
+        case builtin::Function::kMax:
+            if (result_ty->is_float_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450FMax);
+            } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450SMax);
+            } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450UMax);
+            }
+            break;
+        case builtin::Function::kMin:
+            if (result_ty->is_float_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450FMin);
+            } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450SMin);
+            } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450UMin);
+            }
+            break;
+        default:
+            TINT_ICE(Writer, diagnostics_) << "unimplemented builtin function: " << builtin->Func();
+            return 0u;
+    }
+    TINT_ASSERT(Writer, op != spv::Op::Max);
+
+    // Add the arguments to the builtin call.
+    for (auto* arg : builtin->Args()) {
+        operands.push_back(Value(arg));
+    }
+
+    // Emit the instruction.
+    current_function_.push_inst(op, operands);
 
     return id;
 }

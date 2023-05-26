@@ -24,6 +24,15 @@
 
 namespace tint::writer::spirv {
 
+/// The element type of a test.
+enum TestElementType {
+    kBool,
+    kI32,
+    kU32,
+    kF32,
+    kF16,
+};
+
 /// Base helper class for testing the SPIR-V generator implementation.
 template <typename BASE>
 class SpvGeneratorTestHelperBase : public BASE {
@@ -41,6 +50,85 @@ class SpvGeneratorTestHelperBase : public BASE {
 
     /// @returns the disassembled types from the generated module.
     std::string DumpTypes() { return DumpInstructions(generator_.Module().Types()); }
+
+    /// Helper to make a scalar type corresponding to the element type `ty`.
+    /// @param ty the element type
+    /// @returns the scalar type
+    const type::Type* MakeScalarType(TestElementType ty) {
+        switch (ty) {
+            case kBool:
+                return mod.Types().bool_();
+            case kI32:
+                return mod.Types().i32();
+            case kU32:
+                return mod.Types().u32();
+            case kF32:
+                return mod.Types().f32();
+            case kF16:
+                return mod.Types().f16();
+        }
+        return nullptr;
+    }
+
+    /// Helper to make a vector type corresponding to the element type `ty`.
+    /// @param ty the element type
+    /// @returns the vector type
+    const type::Type* MakeVectorType(TestElementType ty) {
+        return mod.Types().vec2(MakeScalarType(ty));
+    }
+
+    /// Helper to make a scalar value with the scalar type `ty`.
+    /// @param ty the element type
+    /// @returns the scalar value
+    ir::Value* MakeScalarValue(TestElementType ty) {
+        switch (ty) {
+            case kBool:
+                return b.Constant(true);
+            case kI32:
+                return b.Constant(i32(1));
+            case kU32:
+                return b.Constant(u32(1));
+            case kF32:
+                return b.Constant(f32(1));
+            case kF16:
+                return b.Constant(f16(1));
+        }
+        return nullptr;
+    }
+
+    /// Helper to make a vector value with an element type of `ty`.
+    /// @param ty the element type
+    /// @returns the vector value
+    ir::Value* MakeVectorValue(TestElementType ty) {
+        switch (ty) {
+            case kBool:
+                return b.Constant(mod.constant_values.Composite(
+                    MakeVectorType(ty),
+                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(true),
+                                                             mod.constant_values.Get(false)}));
+            case kI32:
+                return b.Constant(mod.constant_values.Composite(
+                    MakeVectorType(ty),
+                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(i32(42)),
+                                                             mod.constant_values.Get(i32(-10))}));
+            case kU32:
+                return b.Constant(mod.constant_values.Composite(
+                    MakeVectorType(ty),
+                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(u32(42)),
+                                                             mod.constant_values.Get(u32(10))}));
+            case kF32:
+                return b.Constant(mod.constant_values.Composite(
+                    MakeVectorType(ty),
+                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(f32(42)),
+                                                             mod.constant_values.Get(f32(-0.5))}));
+            case kF16:
+                return b.Constant(mod.constant_values.Composite(
+                    MakeVectorType(ty),
+                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(f16(42)),
+                                                             mod.constant_values.Get(f16(-0.5))}));
+        }
+        return nullptr;
+    }
 };
 
 using SpvGeneratorImplTest = SpvGeneratorTestHelperBase<testing::Test>;
