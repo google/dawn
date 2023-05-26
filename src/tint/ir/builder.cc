@@ -213,6 +213,10 @@ ir::Return* Builder::Return(Function* func, utils::VectorRef<Value*> args) {
     return ir.values.Create<ir::Return>(func, args);
 }
 
+ir::Continue* Builder::Continue(Loop* loop) {
+    return ir.values.Create<ir::Continue>(loop);
+}
+
 ir::BlockParam* Builder::BlockParam(const type::Type* type) {
     return ir.values.Create<ir::BlockParam>(type);
 }

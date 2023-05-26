@@ -23,6 +23,7 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/builtin.h"
 #include "src/tint/ir/construct.h"
+#include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
 #include "src/tint/ir/discard.h"
 #include "src/tint/ir/if.h"
@@ -411,6 +412,8 @@ void Disassembler::EmitBranch(const Branch* b) {
     std::string suffix = "";
     if (b->Is<ir::Return>()) {
         out_ << "ret";
+    } else if (auto* cont = b->As<ir::Continue>()) {
+        out_ << "continue %b" << IdOf(cont->Loop()->Continuing());
     } else {
         out_ << "br %b" << IdOf(b->To());
         if (b->To()->Is<RootTerminator>()) {

@@ -18,6 +18,7 @@
 #include <unordered_set>
 
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/continue.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/return.h"
@@ -70,6 +71,8 @@ std::string Debug::AsDotGraph(const Module* mod) {
 
                          if (b->Branch()->Is<ir::Return>()) {
                              return;
+                         } else if (auto* cont = b->Branch()->As<ir::Continue>()) {
+                             Graph(cont->Loop()->Continuing());
                          } else {
                              Graph(b->Branch()->To());
                          }

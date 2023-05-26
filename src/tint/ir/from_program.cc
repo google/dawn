@@ -166,19 +166,14 @@ class Impl {
         diagnostics_.add_error(tint::diag::System::IR, err, s);
     }
 
+    bool NeedBranch() { return current_flow_block_ && !current_flow_block_->HasBranchTarget(); }
+
     void SetBranch(Branch* br) {
         TINT_ASSERT(IR, current_flow_block_);
         TINT_ASSERT(IR, !current_flow_block_->HasBranchTarget());
 
         current_flow_block_->Instructions().Push(br);
         current_flow_block_ = nullptr;
-    }
-
-    void SetBranchIfNeeded(Branch* br) {
-        if (!current_flow_block_ || current_flow_block_->HasBranchTarget()) {
-            return;
-        }
-        SetBranch(br);
     }
 
     void BranchTo(Block* node, utils::VectorRef<Value*> args = {}) {
@@ -190,7 +185,7 @@ class Impl {
     }
 
     void BranchToIfNeeded(Block* node) {
-        if (!current_flow_block_ || current_flow_block_->HasBranchTarget()) {
+        if (!NeedBranch()) {
             return;
         }
         BranchTo(node);
@@ -346,13 +341,13 @@ class Impl {
         }
         ir_func->SetParams(params);
 
-        {
-            current_flow_block_ = ir_func->StartTarget();
-            EmitBlock(ast_func->body);
+        current_flow_block_ = ir_func->StartTarget();
+        EmitBlock(ast_func->body);
 
-            // If the branch target has already been set then a `return` was called. Only set in
-            // the case where `return` wasn't called.
-            SetBranchIfNeeded(builder_.Return(current_function_));
+        // If the branch target has already been set then a `return` was called. Only set in
+        // the case where `return` wasn't called.
+        if (NeedBranch()) {
+            SetBranch(builder_.Return(current_function_));
         }
 
         TINT_ASSERT(IR, control_stack_.IsEmpty());
@@ -366,7 +361,7 @@ class Impl {
 
             // If the current flow block has a branch target then the rest of the statements in
             // this block are dead code. Skip them.
-            if (!current_flow_block_ || current_flow_block_->HasBranchTarget()) {
+            if (!NeedBranch()) {
                 break;
             }
         }
@@ -580,22 +575,28 @@ class Impl {
             TINT_DEFER(scopes_.Pop());
             EmitStatements(stmt->body->statements);
 
-            // The current block didn't `break`, `return` or `continue`, go to the continuing
-            // block.
-            BranchToIfNeeded(loop_inst->Continuing());
-
-            current_flow_block_ = loop_inst->Continuing();
-            if (stmt->continuing) {
-                EmitBlock(stmt->continuing);
+            // The current block didn't `break`, `return` or `continue`, go to the continuing block.
+            if (NeedBranch()) {
+                SetBranch(builder_.Continue(loop_inst));
             }
 
-            // Branch back to the start node if the continue target didn't branch out already
-            BranchToIfNeeded(loop_inst->Start());
+            if (IsConnected(loop_inst->Continuing(), 0)) {
+                // Note, even if there is no continuing block, we may have branched into the
+                // continue so we have to set the current block and then emit the branch if needed
+                // below otherwise empty continuing blocks will fail to branch back to the start
+                // block.
+                current_flow_block_ = loop_inst->Continuing();
+                if (stmt->continuing) {
+                    EmitBlock(stmt->continuing);
+                }
+                // Branch back to the start node if the continue target didn't branch out already
+                BranchToIfNeeded(loop_inst->Start());
+            }
         }
 
         // The loop merge can get disconnected if the loop returns directly, or the continuing
         // target branches, eventually, to the merge, but nothing branched to the
-        // Continuing().target.
+        // Continuing() block.
         current_flow_block_ = loop_inst->Merge();
         if (!IsConnected(loop_inst->Merge(), 0)) {
             current_flow_block_ = nullptr;
@@ -629,7 +630,9 @@ class Impl {
             current_flow_block_ = if_inst->Merge();
             EmitBlock(stmt->body);
 
-            BranchToIfNeeded(loop_inst->Continuing());
+            if (NeedBranch()) {
+                SetBranch(builder_.Continue(loop_inst));
+            }
         }
         // The while loop always has a path to the Merge().target as the break statement comes
         // before anything inside the loop.
@@ -639,8 +642,6 @@ class Impl {
     void EmitForLoop(const ast::ForLoopStatement* stmt) {
         auto* loop_inst = builder_.CreateLoop();
         current_flow_block_->Instructions().Push(loop_inst);
-
-        loop_inst->Continuing()->Instructions().Push(builder_.Branch(loop_inst->Start()));
 
         // Make sure the initializer ends up in a contained scope
         scopes_.Push();
@@ -673,11 +674,14 @@ class Impl {
             }
 
             EmitBlock(stmt->body);
-            BranchToIfNeeded(loop_inst->Continuing());
+            if (NeedBranch()) {
+                SetBranch(builder_.Continue(loop_inst));
+            }
 
             if (stmt->continuing) {
                 current_flow_block_ = loop_inst->Continuing();
                 EmitStatement(stmt->continuing);
+                loop_inst->Continuing()->Instructions().Push(builder_.Branch(loop_inst->Start()));
             }
         }
 
@@ -752,7 +756,7 @@ class Impl {
         TINT_ASSERT(IR, current_control);
 
         if (auto* c = current_control->As<Loop>()) {
-            BranchTo(c->Continuing());
+            SetBranch(builder_.Continue(c));
         } else {
             TINT_UNREACHABLE(IR, diagnostics_);
         }

@@ -732,6 +732,8 @@ if(${TINT_BUILD_IR})
     ir/constant.h
     ir/construct.cc
     ir/construct.h
+    ir/continue.cc
+    ir/continue.h
     ir/convert.cc
     ir/convert.h
     ir/debug.cc

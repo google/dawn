@@ -24,6 +24,7 @@
 #include "src/tint/ir/builtin.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/construct.h"
+#include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
 #include "src/tint/ir/discard.h"
 #include "src/tint/ir/function.h"
@@ -335,6 +336,11 @@ class Builder {
     /// @param args the return arguments
     /// @returns the instruction
     ir::Return* Return(Function* func, utils::VectorRef<Value*> args = {});
+
+    /// Creates a continue instruction
+    /// @param loop the loop being continued
+    /// @returns the instruction
+    ir::Continue* Continue(Loop* loop);
 
     /// Creates a branch declaration
     /// @param to the node being branched too

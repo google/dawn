@@ -304,18 +304,13 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
     if true [t: %b2, f: %b3, m: %b4]
       # True block
       %b2 = block {
-        loop [s: %b5, c: %b6, m: %b7]
+        loop [s: %b5, m: %b6]
           %b5 = block {
-            br %b7
-          }
-
-          # Continuing block
-          %b6 = block {
-            br %b5
+            br %b6
           }
 
         # Merge block
-        %b7 = block {
+        %b6 = block {
           br %b4
         }
 
@@ -350,25 +345,20 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Start()->InboundBranches().Length());
     EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [s: %b2, m: %b3]
       %b2 = block {
-        br %b4
-      }
-
-      # Continuing block
-      %b3 = block {
-        br %b2
+        br %b3
       }
 
     # Merge block
-    %b4 = block {
+    %b3 = block {
       ret
     }
 
@@ -418,7 +408,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
 
         # Merge block
         %b7 = block {
-          br %b3
+          continue %b3
         }
 
 
@@ -466,7 +456,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
   %b1 = block {
     loop [s: %b2, c: %b3, m: %b4]
       %b2 = block {
-        br %b3
+        continue %b3
       }
 
       # Continuing block
@@ -516,7 +506,7 @@ TEST_F(IR_BuilderImplTest, Loop_Continuing_Body_Scope) {
   %b1 = block {
     loop [s: %b2, c: %b3, m: %b4]
       %b2 = block {
-        br %b3
+        continue %b3
       }
 
       # Continuing block
@@ -589,7 +579,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
 
         # Merge block
         %b6 = block {
-          br %b3
+          continue %b3
         }
 
 
@@ -619,22 +609,17 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop_flow->Start()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3]
+    loop [s: %b2]
       %b2 = block {
         ret
       }
-      # Continuing block
-      %b3 = block {
-        br %b2
-      }
-
 
   }
 
@@ -663,57 +648,17 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop_flow->Start()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, loop_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [s: %b2]
       %b2 = block {
         ret
       }
-      # Continuing block
-      %b3 = block {
-        if true [t: %b5, f: %b6, m: %b7]
-          # True block
-          %b5 = block {
-            br %b4
-          }
-
-          # False block
-          %b6 = block {
-            br %b7
-          }
-
-        # Merge block
-        %b7 = block {
-          br %b2
-        }
-
-
-      }
-
-    # Merge block
-    %b4 = block {
-      if true [t: %b8, f: %b9, m: %b10]
-        # True block
-        %b8 = block {
-          ret
-        }
-        # False block
-        %b9 = block {
-          br %b10
-        }
-
-      # Merge block
-      %b10 = block {
-        ret
-      }
-
-    }
-
 
   }
 
@@ -735,7 +680,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop_flow->Start()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(2u, loop_flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
@@ -745,29 +690,24 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [s: %b2, m: %b3]
       %b2 = block {
-        if true [t: %b5, f: %b6]
+        if true [t: %b4, f: %b5]
           # True block
-          %b5 = block {
-            br %b4
+          %b4 = block {
+            br %b3
           }
 
           # False block
-          %b6 = block {
-            br %b4
+          %b5 = block {
+            br %b3
           }
 
 
       }
 
-      # Continuing block
-      %b3 = block {
-        br %b2
-      }
-
     # Merge block
-    %b4 = block {
+    %b3 = block {
       ret
     }
 
@@ -817,7 +757,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
               if true [t: %b11, f: %b12, m: %b13]
                 # True block
                 %b11 = block {
-                  br %b6
+                  continue %b6
                 }
 
                 # False block
@@ -827,7 +767,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 
               # Merge block
               %b13 = block {
-                br %b6
+                continue %b6
               }
 
 
@@ -838,46 +778,41 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 
           # Continuing block
           %b6 = block {
-            loop [s: %b14, c: %b15, m: %b16]
+            loop [s: %b14, m: %b15]
               %b14 = block {
-                br %b16
-              }
-
-              # Continuing block
-              %b15 = block {
-                br %b14
+                br %b15
               }
 
             # Merge block
-            %b16 = block {
-              loop [s: %b17, c: %b18, m: %b19]
-                %b17 = block {
-                  br %b18
+            %b15 = block {
+              loop [s: %b16, c: %b17, m: %b18]
+                %b16 = block {
+                  continue %b17
                 }
 
                 # Continuing block
-                %b18 = block {
-                  if true [t: %b20, f: %b21, m: %b22]
+                %b17 = block {
+                  if true [t: %b19, f: %b20, m: %b21]
                     # True block
-                    %b20 = block {
-                      br %b19
+                    %b19 = block {
+                      br %b18
                     }
 
                     # False block
-                    %b21 = block {
-                      br %b22
+                    %b20 = block {
+                      br %b21
                     }
 
                   # Merge block
-                  %b22 = block {
-                    br %b17
+                  %b21 = block {
+                    br %b16
                   }
 
 
                 }
 
               # Merge block
-              %b19 = block {
+              %b18 = block {
                 br %b5
               }
 
@@ -889,20 +824,20 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 
         # Merge block
         %b7 = block {
-          if true [t: %b23, f: %b24, m: %b25]
+          if true [t: %b22, f: %b23, m: %b24]
             # True block
-            %b23 = block {
+            %b22 = block {
               br %b4
             }
 
             # False block
-            %b24 = block {
-              br %b25
+            %b23 = block {
+              br %b24
             }
 
           # Merge block
-          %b25 = block {
-            br %b3
+          %b24 = block {
+            continue %b3
           }
 
 
@@ -968,7 +903,7 @@ TEST_F(IR_BuilderImplTest, While) {
 
         # Merge block
         %b7 = block {
-          br %b3
+          continue %b3
         }
 
 
@@ -1103,25 +1038,20 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Start()->InboundBranches().Length());
     EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [s: %b2, m: %b3]
       %b2 = block {
-        br %b4
-      }
-
-      # Continuing block
-      %b3 = block {
-        br %b2
+        br %b3
       }
 
     # Merge block
-    %b4 = block {
+    %b3 = block {
       ret
     }
 
