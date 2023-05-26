@@ -223,8 +223,16 @@ ResultOrError<wgpu::TextureUsage> SwapChain::GetSupportedSurfaceUsage(const Devi
         fn.GetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, surfaceVk, &surfaceCapsVk),
         "GetPhysicalDeviceSurfaceCapabilitiesKHR"));
 
-    wgpu::TextureUsage supportedUsages = wgpu::TextureUsage::RenderAttachment;
-
+    wgpu::TextureUsage supportedUsages = wgpu::TextureUsage::None;
+    if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) {
+        supportedUsages |= wgpu::TextureUsage::CopySrc;
+    }
+    if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
+        supportedUsages |= wgpu::TextureUsage::CopyDst;
+    }
+    if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
+        supportedUsages |= wgpu::TextureUsage::RenderAttachment;
+    }
     if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_SAMPLED_BIT) {
         supportedUsages |= wgpu::TextureUsage::TextureBinding;
     }

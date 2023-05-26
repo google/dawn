@@ -48,8 +48,9 @@ void Device::DestroyImpl() {
 
 ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
     const Surface* surface) const {
-    wgpu::TextureUsage usages =
-        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
+    wgpu::TextureUsage usages = wgpu::TextureUsage::RenderAttachment |
+                                wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
+                                wgpu::TextureUsage::CopyDst;
     return usages;
 }
 
