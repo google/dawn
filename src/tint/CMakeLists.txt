@@ -722,6 +722,8 @@ if(${TINT_BUILD_IR})
     ir/block_param.h
     ir/branch.cc
     ir/branch.h
+    ir/break_if.cc
+    ir/break_if.h
     ir/builder.cc
     ir/builder.h
     ir/builtin.cc

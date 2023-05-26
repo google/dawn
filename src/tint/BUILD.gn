@@ -1214,6 +1214,8 @@ if (tint_build_ir) {
       "ir/block_param.h",
       "ir/branch.cc",
       "ir/branch.h",
+      "ir/break_if.cc",
+      "ir/break_if.h",
       "ir/builder.cc",
       "ir/builder.h",
       "ir/builtin.cc",

@@ -21,6 +21,7 @@
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/break_if.h"
 #include "src/tint/ir/builtin.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
@@ -414,6 +415,10 @@ void Disassembler::EmitBranch(const Branch* b) {
         out_ << "ret";
     } else if (auto* cont = b->As<ir::Continue>()) {
         out_ << "continue %b" << IdOf(cont->Loop()->Continuing());
+    } else if (auto* bi = b->As<ir::BreakIf>()) {
+        out_ << "break_if ";
+        EmitValue(bi->Condition());
+        out_ << " %b" << IdOf(bi->Loop()->Start());
     } else {
         out_ << "br %b" << IdOf(b->To());
         if (b->To()->Is<RootTerminator>()) {

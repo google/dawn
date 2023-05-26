@@ -21,6 +21,7 @@
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block_param.h"
+#include "src/tint/ir/break_if.h"
 #include "src/tint/ir/builtin.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/construct.h"
@@ -336,6 +337,12 @@ class Builder {
     /// @param args the return arguments
     /// @returns the instruction
     ir::Return* Return(Function* func, utils::VectorRef<Value*> args = {});
+
+    /// Creates a loop break-if instruction
+    /// @param condition the break condition
+    /// @param loop the loop being iterated
+    /// @returns the instruction
+    ir::BreakIf* BreakIf(Value* condition, Loop* loop);
 
     /// Creates a continue instruction
     /// @param loop the loop being continued

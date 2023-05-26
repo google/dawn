@@ -590,7 +590,9 @@ class Impl {
                     EmitBlock(stmt->continuing);
                 }
                 // Branch back to the start node if the continue target didn't branch out already
-                BranchToIfNeeded(loop_inst->Start());
+                if (NeedBranch()) {
+                    SetBranch(builder_.BreakIf(builder_.Constant(false), loop_inst));
+                }
             }
         }
 
@@ -608,7 +610,8 @@ class Impl {
         current_flow_block_->Instructions().Push(loop_inst);
 
         // Continue is always empty, just go back to the start
-        loop_inst->Continuing()->Instructions().Push(builder_.Branch(loop_inst->Start()));
+        current_flow_block_ = loop_inst->Continuing();
+        SetBranch(builder_.BreakIf(builder_.Constant(false), loop_inst));
 
         {
             ControlStackScope scope(this, loop_inst);
@@ -681,7 +684,7 @@ class Impl {
             if (stmt->continuing) {
                 current_flow_block_ = loop_inst->Continuing();
                 EmitStatement(stmt->continuing);
-                loop_inst->Continuing()->Instructions().Push(builder_.Branch(loop_inst->Start()));
+                SetBranch(builder_.BreakIf(builder_.Constant(false), loop_inst));
             }
         }
 
@@ -772,31 +775,14 @@ class Impl {
     }
 
     void EmitBreakIf(const ast::BreakIfStatement* stmt) {
+        auto* current_control = FindEnclosingControl(ControlFlags::kExcludeSwitch);
+
         // Emit the break-if condition into the end of the preceding block
-        auto reg = EmitExpression(stmt->condition);
-        if (!reg) {
+        auto cond = EmitExpression(stmt->condition);
+        if (!cond) {
             return;
         }
-        auto* if_inst = builder_.CreateIf(reg.Get());
-        current_flow_block_->Instructions().Push(if_inst);
-
-        auto* current_control = FindEnclosingControl(ControlFlags::kExcludeSwitch);
-        TINT_ASSERT(IR, current_control);
-        TINT_ASSERT(IR, current_control->Is<Loop>());
-
-        auto* loop = current_control->As<Loop>();
-
-        current_flow_block_ = if_inst->True();
-        BranchTo(loop->Merge());
-
-        current_flow_block_ = if_inst->False();
-        BranchTo(if_inst->Merge());
-
-        current_flow_block_ = if_inst->Merge();
-
-        // The `break-if` has to be the last item in the continuing block. The false branch of
-        // the `break-if` will always take us back to the start of the loop.
-        BranchTo(loop->Start());
+        SetBranch(builder_.BreakIf(cond.Get(), current_control->As<ir::Loop>()));
     }
 
     utils::Result<Value*> EmitExpression(const ast::Expression* expr) {
