@@ -185,7 +185,7 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     // because the Vulkan validation layers use static global mutexes which behave badly when
     // Chromium's test launcher forks the test process. The instance will be recreated on test
     // environment setup.
-    std::unique_ptr<dawn::native::Instance> instance = CreateInstanceAndDiscoverAdapters();
+    std::unique_ptr<dawn::native::Instance> instance = CreateInstanceAndDiscoverPhysicalDevices();
     ASSERT(instance);
 
     if (!ValidateToggles(instance.get())) {
@@ -377,8 +377,8 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
     }
 }
 
-std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDiscoverAdapters(
-    dawn::platform::Platform* platform) {
+std::unique_ptr<dawn::native::Instance>
+DawnTestEnvironment::CreateInstanceAndDiscoverPhysicalDevices(dawn::platform::Platform* platform) {
     // Create an instance with toggle AllowUnsafeAPIs enabled, which would be inherited to
     // adapter and device toggles and allow us to test unsafe apis (including experimental
     // features).
@@ -623,7 +623,7 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(
 }
 
 void DawnTestEnvironment::SetUp() {
-    mInstance = CreateInstanceAndDiscoverAdapters();
+    mInstance = CreateInstanceAndDiscoverPhysicalDevices();
     ASSERT(mInstance);
 }
 

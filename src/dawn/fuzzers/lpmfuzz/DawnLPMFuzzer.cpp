@@ -64,9 +64,9 @@ namespace DawnLPMFuzzer {
 int Initialize(int* argc, char*** argv) {
     // TODO(crbug.com/1038952): The Instance must be static because destructing the vkInstance with
     // Swiftshader crashes libFuzzer. When this is fixed, move this into Run so that error injection
-    // for adapter discovery can be fuzzed.
+    // for physical device discovery can be fuzzed.
     sInstance = std::make_unique<dawn::native::Instance>();
-    sInstance->DiscoverDefaultAdapters();
+    sInstance->DiscoverDefaultPhysicalDevices();
 
     return 0;
 }
