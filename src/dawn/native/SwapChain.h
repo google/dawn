@@ -32,7 +32,7 @@ class SwapChainBase : public ApiObjectBase {
   public:
     SwapChainBase(DeviceBase* device, Surface* surface, const SwapChainDescriptor* descriptor);
 
-    static SwapChainBase* MakeError(DeviceBase* device);
+    static SwapChainBase* MakeError(DeviceBase* device, const SwapChainDescriptor* descriptor);
     ObjectType GetType() const override;
 
     // This is called when the swapchain is detached when one of the following happens:
@@ -59,6 +59,7 @@ class SwapChainBase : public ApiObjectBase {
                       wgpu::TextureUsage allowedUsage,
                       uint32_t width,
                       uint32_t height);
+    TextureBase* APIGetCurrentTexture();
     TextureViewBase* APIGetCurrentTextureView();
     void APIPresent();
 
@@ -72,11 +73,13 @@ class SwapChainBase : public ApiObjectBase {
     wgpu::BackendType GetBackendType() const;
 
   protected:
-    SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    SwapChainBase(DeviceBase* device, const SwapChainDescriptor* desc, ObjectBase::ErrorTag tag);
     ~SwapChainBase() override;
     void DestroyImpl() override;
 
   private:
+    void SetChildLabel(ApiObjectBase* child) const;
+
     bool mAttached = false;
     uint32_t mWidth;
     uint32_t mHeight;

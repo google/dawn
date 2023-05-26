@@ -1268,7 +1268,7 @@ SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
     Ref<SwapChainBase> result;
     if (ConsumedError(CreateSwapChain(surface, descriptor), &result,
                       "calling %s.CreateSwapChain(%s).", this, descriptor)) {
-        return SwapChainBase::MakeError(this);
+        return SwapChainBase::MakeError(this, descriptor);
     }
     return result.Detach();
 }

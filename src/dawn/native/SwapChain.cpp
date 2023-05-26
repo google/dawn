@@ -28,7 +28,8 @@ namespace {
 
 class ErrorSwapChain final : public SwapChainBase {
   public:
-    explicit ErrorSwapChain(DeviceBase* device) : SwapChainBase(device, ObjectBase::kError) {}
+    explicit ErrorSwapChain(DeviceBase* device, const SwapChainDescriptor* desc)
+        : SwapChainBase(device, desc, ObjectBase::kError) {}
 
   private:
     ResultOrError<Ref<TextureBase>> GetCurrentTextureImpl() override { UNREACHABLE(); }
@@ -120,12 +121,19 @@ SwapChainBase::~SwapChainBase() {
     ASSERT(!mAttached);
 }
 
-SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag) {}
+SwapChainBase::SwapChainBase(DeviceBase* device,
+                             const SwapChainDescriptor* descriptor,
+                             ObjectBase::ErrorTag tag)
+    : ApiObjectBase(device, tag),
+      mWidth(descriptor->width),
+      mHeight(descriptor->height),
+      mFormat(descriptor->format),
+      mUsage(descriptor->usage),
+      mPresentMode(descriptor->presentMode) {}
 
 // static
-SwapChainBase* SwapChainBase::MakeError(DeviceBase* device) {
-    return new ErrorSwapChain(device);
+SwapChainBase* SwapChainBase::MakeError(DeviceBase* device, const SwapChainDescriptor* desc) {
+    return new ErrorSwapChain(device, desc);
 }
 
 void SwapChainBase::DestroyImpl() {}
@@ -154,11 +162,25 @@ void SwapChainBase::APIConfigure(wgpu::TextureFormat format,
         DAWN_VALIDATION_ERROR("Configure is invalid for surface-based swapchains."));
 }
 
+TextureBase* SwapChainBase::APIGetCurrentTexture() {
+    Ref<TextureBase> result;
+    if (GetDevice()->ConsumedError(GetCurrentTexture(), &result, "calling %s.GetCurrentTexture()",
+                                   this)) {
+        TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
+        TextureBase* errorTexture = TextureBase::MakeError(GetDevice(), &desc);
+        SetChildLabel(errorTexture);
+        return errorTexture;
+    }
+    return result.Detach();
+}
+
 TextureViewBase* SwapChainBase::APIGetCurrentTextureView() {
     Ref<TextureViewBase> result;
     if (GetDevice()->ConsumedError(GetCurrentTextureView(), &result,
                                    "calling %s.GetCurrentTextureView()", this)) {
-        return TextureViewBase::MakeError(GetDevice());
+        TextureViewBase* errorView = TextureViewBase::MakeError(GetDevice());
+        SetChildLabel(errorView);
+        return errorView;
     }
     return result.Detach();
 }
@@ -172,6 +194,7 @@ ResultOrError<Ref<TextureBase>> SwapChainBase::GetCurrentTexture() {
     }
 
     DAWN_TRY_ASSIGN(mCurrentTexture, GetCurrentTextureImpl());
+    SetChildLabel(mCurrentTexture.Get());
 
     // Check that the return texture matches exactly what was given for this descriptor.
     ASSERT(mCurrentTexture->GetFormat().format == mFormat);
@@ -256,6 +279,10 @@ MaybeError SwapChainBase::ValidateGetCurrentTexture() const {
     DAWN_INVALID_IF(!mAttached, "Cannot call GetCurrentTexture on detached %s.", this);
 
     return {};
+}
+
+void SwapChainBase::SetChildLabel(ApiObjectBase* child) const {
+    child->SetLabel(absl::StrFormat("of %s", this));
 }
 
 }  // namespace dawn::native

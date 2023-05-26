@@ -224,12 +224,14 @@
             "BufferUnmap",
             "DeviceCreateErrorBuffer",
             "DeviceCreateQuerySet",
+            "DeviceCreateSwapChain",
             "DeviceCreateTexture",
             "DeviceCreateErrorTexture",
             "DeviceGetAdapter",
             "DeviceGetQueue",
             "DeviceGetSupportedSurfaceUsage",
-            "DeviceInjectError"
+            "DeviceInjectError",
+            "SwapChainGetCurrentTexture"
         ],
         "client_special_objects": [
             "Adapter",
@@ -239,6 +241,7 @@
             "QuerySet",
             "Queue",
             "ShaderModule",
+            "SwapChain",
             "Texture"
         ],
         "server_custom_pre_handler_commands": [

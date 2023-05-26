@@ -33,8 +33,9 @@ ReservedTexture WireClient::ReserveTexture(WGPUDevice device,
     return mImpl->ReserveTexture(device, descriptor);
 }
 
-ReservedSwapChain WireClient::ReserveSwapChain(WGPUDevice device) {
-    return mImpl->ReserveSwapChain(device);
+ReservedSwapChain WireClient::ReserveSwapChain(WGPUDevice device,
+                                               const WGPUSwapChainDescriptor* descriptor) {
+    return mImpl->ReserveSwapChain(device, descriptor);
 }
 
 ReservedDevice WireClient::ReserveDevice() {

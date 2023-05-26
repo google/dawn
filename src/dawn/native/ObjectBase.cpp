@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <mutex>
+#include <utility>
 
 #include "absl/strings/str_format.h"
 #include "dawn/native/Device.h"
@@ -84,8 +85,7 @@ ApiObjectBase::~ApiObjectBase() {
 }
 
 void ApiObjectBase::APISetLabel(const char* label) {
-    mLabel = label;
-    SetLabelImpl();
+    SetLabel(label);
 }
 
 void ApiObjectBase::APIRelease() {
@@ -95,6 +95,11 @@ void ApiObjectBase::APIRelease() {
     // in place. This is temporary solution until we improve the cache's implementation.
     auto deviceLock(GetDevice()->GetScopedLockSafeForDelete());
     Release();
+}
+
+void ApiObjectBase::SetLabel(std::string label) {
+    mLabel = std::move(label);
+    SetLabelImpl();
 }
 
 const std::string& ApiObjectBase::GetLabel() const {

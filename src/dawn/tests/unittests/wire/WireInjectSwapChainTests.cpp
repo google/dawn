@@ -21,17 +21,27 @@ namespace dawn::wire {
 namespace {
 
 using testing::Mock;
+using testing::Return;
 
 class WireInjectSwapChainTests : public WireTest {
   public:
-    WireInjectSwapChainTests() {}
+    WireInjectSwapChainTests() {
+        swapChainDesc = {};
+        swapChainDesc.usage = WGPUTextureUsage_RenderAttachment;
+        swapChainDesc.format = WGPUTextureFormat_RGBA8Unorm;
+        swapChainDesc.width = 17;
+        swapChainDesc.height = 42;
+        swapChainDesc.presentMode = WGPUPresentMode_Mailbox;
+    }
     ~WireInjectSwapChainTests() override = default;
+
+    WGPUSwapChainDescriptor swapChainDesc;
 };
 
 // Test that reserving and injecting a swapchain makes calls on the client object forward to the
 // server object correctly.
 TEST_F(WireInjectSwapChainTests, CallAfterReserveInject) {
-    ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device);
+    ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
     EXPECT_CALL(api, SwapChainReference(apiSwapchain));
@@ -46,8 +56,8 @@ TEST_F(WireInjectSwapChainTests, CallAfterReserveInject) {
 
 // Test that reserve correctly returns different IDs each time.
 TEST_F(WireInjectSwapChainTests, ReserveDifferentIDs) {
-    ReservedSwapChain reservation1 = GetWireClient()->ReserveSwapChain(device);
-    ReservedSwapChain reservation2 = GetWireClient()->ReserveSwapChain(device);
+    ReservedSwapChain reservation1 = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
+    ReservedSwapChain reservation2 = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
     ASSERT_NE(reservation1.id, reservation2.id);
     ASSERT_NE(reservation1.swapchain, reservation2.swapchain);
@@ -55,7 +65,7 @@ TEST_F(WireInjectSwapChainTests, ReserveDifferentIDs) {
 
 // Test that injecting the same id without a destroy first fails.
 TEST_F(WireInjectSwapChainTests, InjectExistingID) {
-    ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device);
+    ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
     EXPECT_CALL(api, SwapChainReference(apiSwapchain));
@@ -71,7 +81,7 @@ TEST_F(WireInjectSwapChainTests, InjectExistingID) {
 
 // Test that the server only borrows the swapchain and does a single reference-release
 TEST_F(WireInjectSwapChainTests, InjectedSwapChainLifetime) {
-    ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device);
+    ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
     // Injecting the swapchain adds a reference
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
@@ -95,17 +105,17 @@ TEST_F(WireInjectSwapChainTests, InjectedSwapChainLifetime) {
 TEST_F(WireInjectSwapChainTests, ReclaimSwapChainReservation) {
     // Test that doing a reservation and full release is an error.
     {
-        ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device);
+        ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
         wgpuSwapChainRelease(reservation.swapchain);
         FlushClient(false);
     }
 
     // Test that doing a reservation and then reclaiming it recycles the ID.
     {
-        ReservedSwapChain reservation1 = GetWireClient()->ReserveSwapChain(device);
+        ReservedSwapChain reservation1 = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
         GetWireClient()->ReclaimSwapChainReservation(reservation1);
 
-        ReservedSwapChain reservation2 = GetWireClient()->ReserveSwapChain(device);
+        ReservedSwapChain reservation2 = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
         // The ID is the same, but the generation is still different.
         ASSERT_EQ(reservation1.id, reservation2.id);
@@ -114,6 +124,31 @@ TEST_F(WireInjectSwapChainTests, ReclaimSwapChainReservation) {
         // No errors should occur.
         FlushClient();
     }
+}
+
+// Test that the texture's reflection is correct for injected swapchains in the wire.
+TEST_F(WireInjectSwapChainTests, SwapChainTextureReflection) {
+    ReservedSwapChain reservation = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
+
+    WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
+    EXPECT_CALL(api, SwapChainReference(apiSwapchain));
+    ASSERT_TRUE(GetWireServer()->InjectSwapChain(apiSwapchain, reservation.id,
+                                                 reservation.generation, reservation.deviceId,
+                                                 reservation.deviceGeneration));
+
+    WGPUTexture tex = wgpuSwapChainGetCurrentTexture(reservation.swapchain);
+    WGPUTexture apiTex = api.GetNewTexture();
+    EXPECT_CALL(api, SwapChainGetCurrentTexture(apiSwapchain)).WillOnce(Return(apiTex));
+    FlushClient();
+
+    EXPECT_EQ(swapChainDesc.width, wgpuTextureGetWidth(tex));
+    EXPECT_EQ(swapChainDesc.height, wgpuTextureGetHeight(tex));
+    EXPECT_EQ(swapChainDesc.usage, wgpuTextureGetUsage(tex));
+    EXPECT_EQ(swapChainDesc.format, wgpuTextureGetFormat(tex));
+    EXPECT_EQ(1u, wgpuTextureGetDepthOrArrayLayers(tex));
+    EXPECT_EQ(1u, wgpuTextureGetMipLevelCount(tex));
+    EXPECT_EQ(1u, wgpuTextureGetSampleCount(tex));
+    EXPECT_EQ(WGPUTextureDimension_2D, wgpuTextureGetDimension(tex));
 }
 
 }  // anonymous namespace

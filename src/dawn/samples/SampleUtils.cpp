@@ -216,7 +216,7 @@ wgpu::Device CreateCppDawnDevice() {
                                      deviceReservation.generation);
             cDevice = deviceReservation.device;
 
-            auto swapChainReservation = wireClient->ReserveSwapChain(cDevice);
+            auto swapChainReservation = wireClient->ReserveSwapChain(cDevice, &swapChainDesc);
             wireServer->InjectSwapChain(backendSwapChain, swapChainReservation.id,
                                         swapChainReservation.generation, deviceReservation.id,
                                         deviceReservation.generation);

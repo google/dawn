@@ -356,6 +356,10 @@ TEST_P(SwapChainWithAdditionalUsageTests, GetSurfaceSupportedUsage) {
 
 // Test that sampling from swapchain is supported.
 TEST_P(SwapChainWithAdditionalUsageTests, SamplingFromSwapChain) {
+    // TODO(dawn:1551): Reenable on D3D11 after suppressing the D3D11 debug layer warning for
+    // setting the same private data multiple times.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     // Skip all tests if readable surface doesn't support texture binding
     DAWN_TEST_UNSUPPORTED_IF(
         (device.GetSupportedSurfaceUsage(surface) & wgpu::TextureUsage::TextureBinding) == 0);

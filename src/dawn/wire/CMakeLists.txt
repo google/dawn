@@ -74,6 +74,8 @@ target_sources(dawn_wire PRIVATE
     "client/RequestTracker.h"
     "client/ShaderModule.cpp"
     "client/ShaderModule.h"
+    "client/SwapChain.cpp"
+    "client/SwapChain.h"
     "client/Texture.cpp"
     "client/Texture.h"
     "server/ObjectStorage.h"

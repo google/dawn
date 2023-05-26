@@ -71,7 +71,8 @@ class Client : public ClientBase {
     MemoryTransferService* GetMemoryTransferService() const { return mMemoryTransferService; }
 
     ReservedTexture ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor);
-    ReservedSwapChain ReserveSwapChain(WGPUDevice device);
+    ReservedSwapChain ReserveSwapChain(WGPUDevice device,
+                                       const WGPUSwapChainDescriptor* descriptor);
     ReservedDevice ReserveDevice();
     ReservedInstance ReserveInstance();
 

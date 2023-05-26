@@ -2576,6 +2576,7 @@
         "category": "object",
         "methods": [
             {"name": "get current texture view", "returns": "texture view"},
+            {"name": "get current texture", "returns": "texture"},
             {"name": "present"}
         ]
     },

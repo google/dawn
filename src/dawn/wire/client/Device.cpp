@@ -213,6 +213,11 @@ WGPUQuerySet Device::CreateQuerySet(const WGPUQuerySetDescriptor* descriptor) {
     return QuerySet::Create(this, descriptor);
 }
 
+WGPUSwapChain Device::CreateSwapChain(WGPUSurface surface,
+                                      const WGPUSwapChainDescriptor* descriptor) {
+    return SwapChain::Create(this, surface, descriptor);
+}
+
 WGPUTexture Device::CreateTexture(const WGPUTextureDescriptor* descriptor) {
     return Texture::Create(this, descriptor);
 }
