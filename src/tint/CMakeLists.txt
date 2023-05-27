@@ -536,6 +536,8 @@ list(APPEND TINT_LIB_SRCS
   utils/hashset.h
   utils/map.h
   utils/math.h
+  utils/parse_num.cc
+  utils/parse_num.h
   utils/predicates.h
   utils/scoped_assignment.h
   utils/slice.h

@@ -25,9 +25,9 @@
 #include <type_traits>
 #include <utility>
 
-#include "absl/strings/charconv.h"
 #include "src/tint/debug.h"
 #include "src/tint/number.h"
+#include "src/tint/utils/parse_num.h"
 #include "src/tint/utils/unicode.h"
 
 namespace tint::reader::wgsl {
@@ -414,12 +414,13 @@ std::optional<Token> Lexer::try_float() {
         end_ptr = &at(length() - 1) + 1;
     }
 
-    double value = 0;
-    auto ret = absl::from_chars(&at(start), end_ptr, value);
-    bool overflow = ret.ec != std::errc();
+    auto ret = utils::ParseDouble(std::string_view(&at(start), end - start));
+    double value = ret ? ret.Get() : 0.0;
+    bool overflow = !ret && ret.Failure() == utils::ParseNumberError::kResultOutOfRange;
 
-    // Value didn't fit in a double, check for underflow as that is 0.0 in WGSL and not an error.
-    if (ret.ec == std::errc::result_out_of_range) {
+    // If the value didn't fit in a double, check for underflow as that is 0.0 in WGSL and not an
+    // error.
+    if (overflow) {
         // The exponent is negative, so treat as underflow
         if (negative_exponent) {
             overflow = false;
@@ -446,7 +447,6 @@ std::optional<Token> Lexer::try_float() {
         }
     }
 
-    TINT_ASSERT(Reader, end_ptr == ret.ptr);
     advance(end - start);
 
     if (has_f_suffix) {

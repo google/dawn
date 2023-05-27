@@ -251,6 +251,8 @@ libtint_source_set("libtint_utils_src") {
     "utils/hashset.h",
     "utils/map.h",
     "utils/math.h",
+    "utils/parse_num.cc",
+    "utils/parse_num.h",
     "utils/predicates.h",
     "utils/scoped_assignment.h",
     "utils/slice.h",
@@ -273,6 +275,8 @@ libtint_source_set("libtint_utils_src") {
   } else {
     sources += [ "diagnostic/printer_other.cc" ]
   }
+
+  deps = [ ":abseil" ]
 }
 
 libtint_source_set("libtint_clone_context_hdrs") {
@@ -1064,7 +1068,6 @@ libtint_source_set("libtint_wgsl_reader_src") {
   ]
 
   deps = [
-    ":abseil",
     ":libtint_ast_src",
     ":libtint_builtins_src",
     ":libtint_program_src",
