@@ -25,6 +25,7 @@
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/exit_loop.h"
+#include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
@@ -32,6 +33,7 @@
 #include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
+#include "src/tint/ir/switch.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
@@ -343,6 +345,10 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
                 EmitLoop(l);
                 return 0u;
             },
+            [&](const ir::Switch* sw) {
+                EmitSwitch(sw);
+                return 0u;
+            },
             [&](const ir::Store* s) {
                 EmitStore(s);
                 return 0u;
@@ -396,6 +402,9 @@ void GeneratorImplIr::EmitBranch(const ir::Branch* b) {
         },
         [&](const ir::ExitLoop* loop) {
             current_function_.push_inst(spv::Op::OpBranch, {Label(loop->Loop()->Merge())});
+        },
+        [&](const ir::ExitSwitch* swtch) {
+            current_function_.push_inst(spv::Op::OpBranch, {Label(swtch->Switch()->Merge())});
         },
         [&](const ir::NextIteration* loop) {
             current_function_.push_inst(spv::Op::OpBranch, {Label(loop->Loop()->Start())});
@@ -649,6 +658,45 @@ void GeneratorImplIr::EmitLoop(const ir::Loop* loop) {
 
     // Emit the loop merge block.
     EmitBlock(loop->Merge());
+}
+
+void GeneratorImplIr::EmitSwitch(const ir::Switch* swtch) {
+    // Find the default selector. There must be exactly one.
+    uint32_t default_label = 0u;
+    for (auto& c : swtch->Cases()) {
+        for (auto& sel : c.selectors) {
+            if (sel.IsDefault()) {
+                default_label = Label(c.Start());
+            }
+        }
+    }
+    TINT_ASSERT(Writer, default_label != 0u);
+
+    // Build the operands to the OpSwitch instruction.
+    OperandList switch_operands = {Value(swtch->Condition()), default_label};
+    for (auto& c : swtch->Cases()) {
+        auto label = Label(c.Start());
+        for (auto& sel : c.selectors) {
+            if (sel.IsDefault()) {
+                continue;
+            }
+            switch_operands.push_back(sel.val->Value()->ValueAs<uint32_t>());
+            switch_operands.push_back(label);
+        }
+    }
+
+    // Emit the OpSelectionMerge and OpSwitch instructions.
+    current_function_.push_inst(spv::Op::OpSelectionMerge,
+                                {Label(swtch->Merge()), U32Operand(SpvSelectionControlMaskNone)});
+    current_function_.push_inst(spv::Op::OpSwitch, switch_operands);
+
+    // Emit the cases.
+    for (auto& c : swtch->Cases()) {
+        EmitBlock(c.Start());
+    }
+
+    // Emit the switch merge block.
+    EmitBlock(swtch->Merge());
 }
 
 void GeneratorImplIr::EmitStore(const ir::Store* store) {

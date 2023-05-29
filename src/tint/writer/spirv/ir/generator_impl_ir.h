@@ -39,6 +39,7 @@ class Load;
 class Loop;
 class Module;
 class Store;
+class Switch;
 class UserCall;
 class Value;
 class Var;
@@ -129,6 +130,10 @@ class GeneratorImplIr {
     /// Emit a store instruction.
     /// @param store the store instruction to emit
     void EmitStore(const ir::Store* store);
+
+    /// Emit a switch instruction.
+    /// @param swtch the switch instruction to emit
+    void EmitSwitch(const ir::Switch* swtch);
 
     /// Emit a user call instruction.
     /// @param call the user call instruction to emit
