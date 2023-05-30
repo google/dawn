@@ -139,6 +139,54 @@ void Disassembler::WalkInternal(const Block* blk) {
     Indent() << "}" << std::endl;
 }
 
+void Disassembler::EmitParamAttributes(FunctionParam* p) {
+    if (!p->Invariant() && !p->Location().has_value() && !p->BindingPoint().has_value() &&
+        !p->Builtin().has_value()) {
+        return;
+    }
+
+    out_ << " [";
+
+    bool need_comma = false;
+    auto comma = [&]() {
+        if (need_comma) {
+            out_ << ", ";
+        }
+    };
+
+    if (p->Invariant()) {
+        comma();
+        out_ << "@invariant";
+        need_comma = true;
+    }
+    if (p->Location().has_value()) {
+        out_ << "@location(" << p->Location()->value << ")";
+        if (p->Location()->interpolation.has_value()) {
+            out_ << ", @interpolate(";
+            out_ << p->Location()->interpolation->type;
+            if (p->Location()->interpolation->sampling !=
+                builtin::InterpolationSampling::kUndefined) {
+                out_ << ", ";
+                out_ << p->Location()->interpolation->sampling;
+            }
+            out_ << ")";
+        }
+        need_comma = true;
+    }
+    if (p->BindingPoint().has_value()) {
+        comma();
+        out_ << "@binding_point(" << p->BindingPoint()->group << ", " << p->BindingPoint()->binding
+             << ")";
+        need_comma = true;
+    }
+    if (p->Builtin().has_value()) {
+        comma();
+        out_ << "@" << p->Builtin().value();
+        need_comma = true;
+    }
+    out_ << "]";
+}
+
 void Disassembler::EmitFunction(const Function* func) {
     in_function_ = true;
 
@@ -148,6 +196,8 @@ void Disassembler::EmitFunction(const Function* func) {
             out_ << ", ";
         }
         out_ << "%" << IdOf(p) << ":" << p->Type()->FriendlyName();
+
+        EmitParamAttributes(p);
     }
     out_ << "):" << func->ReturnType()->FriendlyName();
 

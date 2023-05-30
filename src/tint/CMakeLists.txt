@@ -762,6 +762,7 @@ if(${TINT_BUILD_IR})
     ir/instruction.h
     ir/load.cc
     ir/load.h
+    ir/location.h
     ir/loop.cc
     ir/loop.h
     ir/module.cc

@@ -43,6 +43,7 @@
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/ast/int_literal_expression.h"
+#include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/invariant_attribute.h"
 #include "src/tint/ast/let.h"
 #include "src/tint/ast/literal_expression.h"
@@ -311,9 +312,97 @@ class Impl {
 
         utils::Vector<FunctionParam*, 1> params;
         for (auto* p : ast_func->params) {
-            const auto* param_sem = program_->Sem().Get(p);
+            const auto* param_sem = program_->Sem().Get(p)->As<sem::Parameter>();
             auto* ty = param_sem->Type()->Clone(clone_ctx_.type_ctx);
             auto* param = builder_.FunctionParam(ty);
+
+            // Note, interpolated is only valid when paired with Location, so it will only be set
+            // when the location is set.
+            std::optional<builtin::Interpolation> interpolation;
+            for (auto* attr : p->attributes) {
+                tint::Switch(
+                    attr,  //
+                    [&](const ast::InterpolateAttribute* interp) {
+                        auto type =
+                            program_->Sem()
+                                .Get(interp->type)
+                                ->As<sem::BuiltinEnumExpression<builtin::InterpolationType>>();
+                        builtin::InterpolationType interpolation_type = type->Value();
+
+                        builtin::InterpolationSampling interpolation_sampling =
+                            builtin::InterpolationSampling::kUndefined;
+                        if (interp->sampling) {
+                            auto sampling = program_->Sem()
+                                                .Get(interp->sampling)
+                                                ->As<sem::BuiltinEnumExpression<
+                                                    builtin::InterpolationSampling>>();
+                            interpolation_sampling = sampling->Value();
+                        }
+
+                        interpolation =
+                            builtin::Interpolation{interpolation_type, interpolation_sampling};
+                    },
+                    [&](const ast::InvariantAttribute*) { param->SetInvariant(true); },
+                    [&](const ast::BuiltinAttribute* b) {
+                        if (auto* ident_sem =
+                                program_->Sem()
+                                    .Get(b)
+                                    ->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>()) {
+                            switch (ident_sem->Value()) {
+                                case builtin::BuiltinValue::kVertexIndex:
+                                    param->SetBuiltin(FunctionParam::Builtin::kVertexIndex);
+                                    break;
+                                case builtin::BuiltinValue::kInstanceIndex:
+                                    param->SetBuiltin(FunctionParam::Builtin::kInstanceIndex);
+                                    break;
+                                case builtin::BuiltinValue::kPosition:
+                                    param->SetBuiltin(FunctionParam::Builtin::kPosition);
+                                    break;
+                                case builtin::BuiltinValue::kFrontFacing:
+                                    param->SetBuiltin(FunctionParam::Builtin::kFrontFacing);
+                                    break;
+                                case builtin::BuiltinValue::kLocalInvocationId:
+                                    param->SetBuiltin(FunctionParam::Builtin::kLocalInvocationId);
+                                    break;
+                                case builtin::BuiltinValue::kLocalInvocationIndex:
+                                    param->SetBuiltin(
+                                        FunctionParam::Builtin::kLocalInvocationIndex);
+                                    break;
+                                case builtin::BuiltinValue::kGlobalInvocationId:
+                                    param->SetBuiltin(FunctionParam::Builtin::kGlobalInvocationId);
+                                    break;
+                                case builtin::BuiltinValue::kWorkgroupId:
+                                    param->SetBuiltin(FunctionParam::Builtin::kWorkgroupId);
+                                    break;
+                                case builtin::BuiltinValue::kNumWorkgroups:
+                                    param->SetBuiltin(FunctionParam::Builtin::kNumWorkgroups);
+                                    break;
+                                case builtin::BuiltinValue::kSampleIndex:
+                                    param->SetBuiltin(FunctionParam::Builtin::kSampleIndex);
+                                    break;
+                                case builtin::BuiltinValue::kSampleMask:
+                                    param->SetBuiltin(FunctionParam::Builtin::kSampleMask);
+                                    break;
+                                default:
+                                    TINT_ICE(IR, diagnostics_)
+                                        << "Unknown builtin value in parameter attributes "
+                                        << ident_sem->Value();
+                                    return;
+                            }
+                        } else {
+                            TINT_ICE(IR, diagnostics_) << "Builtin attribute sem invalid";
+                            return;
+                        }
+                    });
+
+                if (param_sem->Location().has_value()) {
+                    param->SetLocation(param_sem->Location().value(), interpolation);
+                }
+                if (param_sem->BindingPoint().has_value()) {
+                    param->SetBindingPoint(param_sem->BindingPoint()->group,
+                                           param_sem->BindingPoint()->binding);
+                }
+            }
 
             scopes_.Set(p->name->symbol, param);
             builder_.ir.SetName(param, p->name->symbol.NameView());

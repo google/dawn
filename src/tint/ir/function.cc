@@ -51,8 +51,6 @@ utils::StringStream& operator<<(utils::StringStream& out, Function::ReturnAttrib
             return out << "position";
         case Function::ReturnAttribute::kInvariant:
             return out << "invariant";
-        default:
-            break;
     }
     return out << "<unknown>";
 }

@@ -1264,5 +1264,85 @@ TEST_F(IR_BuilderImplTest, Emit_Phony) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Invariant) {
+    Func(
+        "f",
+        utils::Vector{Param("a", ty.vec4<f32>(),
+                            utils::Vector{Invariant(), Builtin(builtin::BuiltinValue::kPosition)})},
+        ty.vec4<f32>(), utils::Vector{Return("a")},
+        utils::Vector{Stage(ast::PipelineStage::kFragment)}, utils::Vector{Location(1_i)});
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(
+        Disassemble(m.Get()),
+        R"(%f = func(%a:vec4<f32> [@invariant, @position]):vec4<f32> [@fragment ra: @location(1)] -> %b1 {
+  %b1 = block {
+    ret %a
+  }
+}
+)");
+}
+
+TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Location) {
+    Func("f", utils::Vector{Param("a", ty.f32(), utils::Vector{Location(2_i)})}, ty.f32(),
+         utils::Vector{Return("a")}, utils::Vector{Stage(ast::PipelineStage::kFragment)},
+         utils::Vector{Location(1_i)});
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%f = func(%a:f32 [@location(2)]):f32 [@fragment ra: @location(1)] -> %b1 {
+  %b1 = block {
+    ret %a
+  }
+}
+)");
+}
+
+TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Location_WithInterpolation_LinearCentroid) {
+    Func("f",
+         utils::Vector{Param(
+             "a", ty.f32(),
+             utils::Vector{Location(2_i), Interpolate(builtin::InterpolationType::kLinear,
+                                                      builtin::InterpolationSampling::kCentroid)})},
+         ty.f32(), utils::Vector{Return("a")}, utils::Vector{Stage(ast::PipelineStage::kFragment)},
+         utils::Vector{Location(1_i)});
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(
+        Disassemble(m.Get()),
+        R"(%f = func(%a:f32 [@location(2), @interpolate(linear, centroid)]):f32 [@fragment ra: @location(1)] -> %b1 {
+  %b1 = block {
+    ret %a
+  }
+}
+)");
+}
+
+TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Location_WithInterpolation_Flat) {
+    Func("f",
+         utils::Vector{
+             Param("a", ty.f32(),
+                   utils::Vector{Location(2_i), Interpolate(builtin::InterpolationType::kFlat)})},
+         ty.f32(), utils::Vector{Return("a")}, utils::Vector{Stage(ast::PipelineStage::kFragment)},
+         utils::Vector{Location(1_i)});
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(
+        Disassemble(m.Get()),
+        R"(%f = func(%a:f32 [@location(2), @interpolate(flat)]):f32 [@fragment ra: @location(1)] -> %b1 {
+  %b1 = block {
+    ret %a
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir

@@ -48,8 +48,6 @@ class Function : public utils::Castable<Function, Value> {
 
     /// Attributes attached to return types
     enum class ReturnAttribute {
-        /// No return attribute
-        kNone,
         /// Location attribute
         kLocation,
         /// Builtin Position attribute
