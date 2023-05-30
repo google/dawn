@@ -115,6 +115,9 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
                               (GetParam().mFormat == wgpu::TextureFormat::Stencil8 ||
                                GetParam().mFormat == wgpu::TextureFormat::Depth32Float));
 
+        // TODO(dawn:1844): Work around this by clearing layers one by one on Intel.
+        DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel() && GetParam().mDepthOrArrayLayers > 6);
+
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = GetParam().mDimension;
         descriptor.size.width = kSize;
@@ -266,11 +269,15 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroNonrenderableTextureCreationTests, TextureCreationClears) {
+    // TODO(dawn:1802): Support clearing non-renderable textures.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     Run();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroCompressedTextureCreationTests, TextureCreationClears) {
+    // TODO(dawn:1802): Support clearing non-renderable textures.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     Run();
 }
 
@@ -281,11 +288,15 @@ TEST_P(NonzeroDepthTextureCreationTests, TextureCreationClears) {
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroDepthStencilTextureCreationTests, TextureCreationClears) {
+    // TODO(dawn:1844): Figure this out.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     Run();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroStencilTextureCreationTests, TextureCreationClears) {
+    // TODO(dawn:1844): Figure this out.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     Run();
 }
 
@@ -296,7 +307,9 @@ TEST_P(NonzeroMultisampledTextureCreationTests, TextureCreationClears) {
 
 DAWN_INSTANTIATE_TEST_P(
     NonzeroTextureCreationTests,
-    {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+    {D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                  {"lazy_clear_resource_on_first_use"}),
+     D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                   {"lazy_clear_resource_on_first_use"}),
      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
                   {"lazy_clear_resource_on_first_use"}),
@@ -318,7 +331,9 @@ DAWN_INSTANTIATE_TEST_P(
 );
 
 DAWN_INSTANTIATE_TEST_P(NonzeroNonrenderableTextureCreationTests,
-                        {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                        {D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                                      {"lazy_clear_resource_on_first_use"}),
+                         D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                                       {"lazy_clear_resource_on_first_use"}),
                          MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
                                       {"lazy_clear_resource_on_first_use"}),
@@ -339,7 +354,9 @@ DAWN_INSTANTIATE_TEST_P(NonzeroNonrenderableTextureCreationTests,
 );
 
 DAWN_INSTANTIATE_TEST_P(NonzeroCompressedTextureCreationTests,
-                        {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                        {D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                                      {"lazy_clear_resource_on_first_use"}),
+                         D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                                       {"lazy_clear_resource_on_first_use"}),
                          MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
                                       {"lazy_clear_resource_on_first_use"}),
@@ -360,7 +377,9 @@ DAWN_INSTANTIATE_TEST_P(NonzeroCompressedTextureCreationTests,
 );
 
 DAWN_INSTANTIATE_TEST_P(NonzeroDepthTextureCreationTests,
-                        {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                        {D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                                      {"lazy_clear_resource_on_first_use"}),
+                         D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                                       {"lazy_clear_resource_on_first_use"}),
                          MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
                                       {"lazy_clear_resource_on_first_use"}),
@@ -384,7 +403,9 @@ DAWN_INSTANTIATE_TEST_P(NonzeroDepthTextureCreationTests,
 
 DAWN_INSTANTIATE_TEST_P(
     NonzeroDepthStencilTextureCreationTests,
-    {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+    {D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                  {"lazy_clear_resource_on_first_use"}),
+     D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                   {"lazy_clear_resource_on_first_use"}),
      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
                   {"lazy_clear_resource_on_first_use"}),
@@ -408,7 +429,9 @@ DAWN_INSTANTIATE_TEST_P(
 
 DAWN_INSTANTIATE_TEST_P(
     NonzeroStencilTextureCreationTests,
-    {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+    {D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                  {"lazy_clear_resource_on_first_use"}),
+     D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                   {"lazy_clear_resource_on_first_use"}),
      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
                   {"lazy_clear_resource_on_first_use"}),
@@ -432,7 +455,9 @@ DAWN_INSTANTIATE_TEST_P(
 
 DAWN_INSTANTIATE_TEST_P(
     NonzeroMultisampledTextureCreationTests,
-    {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+    {D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                  {"lazy_clear_resource_on_first_use"}),
+     D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                   {"lazy_clear_resource_on_first_use"}),
      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
                   {"lazy_clear_resource_on_first_use"}),
