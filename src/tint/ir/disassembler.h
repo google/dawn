@@ -60,6 +60,7 @@ class Disassembler {
     void WalkInternal(const Block* blk);
     void EmitFunction(const Function* func);
     void EmitParamAttributes(FunctionParam* p);
+    void EmitBindingPoint(BindingPoint p);
     void EmitInstruction(const Instruction* inst);
     void EmitValueWithType(const Value* val);
     void EmitValue(const Value* val);

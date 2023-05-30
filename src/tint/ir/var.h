@@ -17,8 +17,10 @@
 
 #include "src/tint/builtin/access.h"
 #include "src/tint/builtin/address_space.h"
+#include "src/tint/ir/binding_point.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/utils/castable.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::ir {
 
@@ -39,9 +41,17 @@ class Var : public utils::Castable<Var, Instruction> {
     /// @returns the initializer
     const Value* Initializer() const { return initializer_; }
 
+    /// Sets the binding point
+    /// @param group the group
+    /// @param binding the binding
+    void SetBindingPoint(uint32_t group, uint32_t binding) { binding_point_ = {group, binding}; }
+    /// @returns the binding points if `Attributes` contains `kBindingPoint`
+    std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
+
   private:
     const type::Type* type_;
     Value* initializer_ = nullptr;
+    std::optional<struct BindingPoint> binding_point_;
 };
 
 }  // namespace tint::ir

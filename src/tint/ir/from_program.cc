@@ -940,6 +940,11 @@ class Impl {
                 }
                 current_flow_block_->Instructions().Push(val);
 
+                if (auto* gv = sem->As<sem::GlobalVariable>(); gv && var->HasBindingPoint()) {
+                    val->SetBindingPoint(gv->BindingPoint().value().group,
+                                         gv->BindingPoint().value().binding);
+                }
+
                 // Store the declaration so we can get the instruction to store too
                 scopes_.Set(v->name->symbol, val);
 

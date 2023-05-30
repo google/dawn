@@ -17,9 +17,11 @@
 
 #include <utility>
 
+#include "src/tint/ir/binding_point.h"
 #include "src/tint/ir/location.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/castable.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::ir {
 
@@ -50,14 +52,6 @@ class FunctionParam : public utils::Castable<FunctionParam, Value> {
         kSampleIndex,
         /// Builtin Sample mask
         kSampleMask,
-    };
-
-    /// Binding information
-    struct BindingPoint {
-        /// The `@group` part of the binding point
-        uint32_t group = 0;
-        /// The `@binding` part of the binding point
-        uint32_t binding = 0;
     };
 
     /// Constructor

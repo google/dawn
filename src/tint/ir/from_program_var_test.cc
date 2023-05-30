@@ -55,6 +55,21 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
 )");
 }
 
+TEST_F(IR_BuilderImplTest, Emit_GlobalVar_GroupBinding) {
+    GlobalVar("a", ty.u32(), builtin::AddressSpace::kStorage,
+              utils::Vector{Group(2_u), Binding(3_u)});
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
+%b1 = block {
+  %a:ptr<storage, u32, read> = var @binding_point(2, 3)
+}
+
+)");
+}
+
 TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction);
     WrapInFunction(a);

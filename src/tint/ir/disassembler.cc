@@ -139,6 +139,10 @@ void Disassembler::WalkInternal(const Block* blk) {
     Indent() << "}" << std::endl;
 }
 
+void Disassembler::EmitBindingPoint(BindingPoint p) {
+    out_ << "@binding_point(" << p.group << ", " << p.binding << ")";
+}
+
 void Disassembler::EmitParamAttributes(FunctionParam* p) {
     if (!p->Invariant() && !p->Location().has_value() && !p->BindingPoint().has_value() &&
         !p->Builtin().has_value()) {
@@ -175,8 +179,7 @@ void Disassembler::EmitParamAttributes(FunctionParam* p) {
     }
     if (p->BindingPoint().has_value()) {
         comma();
-        out_ << "@binding_point(" << p->BindingPoint()->group << ", " << p->BindingPoint()->binding
-             << ")";
+        EmitBindingPoint(p->BindingPoint().value());
         need_comma = true;
     }
     if (p->Builtin().has_value()) {
@@ -352,6 +355,11 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                 out_ << ", ";
                 EmitValue(v->Initializer());
             }
+            if (v->BindingPoint().has_value()) {
+                out_ << " ";
+                EmitBindingPoint(v->BindingPoint().value());
+            }
+
             out_ << std::endl;
         },
         [&](const ir::Branch* b) { EmitBranch(b); },

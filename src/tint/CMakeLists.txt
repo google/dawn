@@ -716,6 +716,7 @@ if(${TINT_BUILD_IR})
   list(APPEND TINT_LIB_SRCS
     ir/binary.cc
     ir/binary.h
+    ir/binding_point.h
     ir/bitcast.cc
     ir/bitcast.h
     ir/block.cc
