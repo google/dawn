@@ -231,11 +231,6 @@ crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shad
 crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 
 ################################################################################
-# shader validation failures
-################################################################################
-crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
-
-################################################################################
 # copyToTexture,canvas:color_space_conversion:* fail with swiftshader
 # The other tests about canvas and image bitmap fail with swiftshader on Linux
 ################################################################################
