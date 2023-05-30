@@ -495,6 +495,14 @@ MaybeError ValidateFragmentState(DeviceBase* device,
             format->format);
     }
 
+    if (device->IsCompatibilityMode()) {
+        DAWN_INVALID_IF(
+            fragmentMetadata.usesSampleMaskOutput,
+            "sample_mask is not supported in compatibility mode in the fragment stage (%s, "
+            "entryPoint: %s)",
+            descriptor->module, descriptor->entryPoint);
+    }
+
     return {};
 }
 

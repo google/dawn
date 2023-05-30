@@ -763,6 +763,9 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMas
 // Test using one multisampled color attachment with resolve target can render correctly
 // with non-default sample mask and shader-output mask.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOutputMask) {
+    // sample_mask is not supported in compat.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
     // supported on some platforms.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
@@ -817,6 +820,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
 // Test doing MSAA resolve into multiple resolve targets works correctly with a non-default
 // shader-output mask.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOutputMask) {
+    // sample_mask is not supported in compat.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(dawn:1550) Fails on ARM-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
