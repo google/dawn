@@ -705,6 +705,13 @@ def as_cType(c_prefix, name):
         return c_prefix + name.CamelCase()
 
 
+def as_cReturnType(c_prefix, typ):
+    if typ.category != 'bitmask':
+        return as_cType(c_prefix, typ.name)
+    else:
+        return as_cType(c_prefix, typ.name) + 'Flags'
+
+
 def as_cppType(name):
     if name.native:
         return name.concatcase()
@@ -876,6 +883,7 @@ def make_base_render_params(metadata):
             'as_MethodSuffix': as_MethodSuffix,
             'as_cProc': as_cProc,
             'as_cType': lambda name: as_cType(c_prefix, name),
+            'as_cReturnType': lambda typ: as_cReturnType(c_prefix, typ),
             'as_cppType': as_cppType,
             'as_jsEnumValue': as_jsEnumValue,
             'convert_cType_to_cppType': convert_cType_to_cppType,

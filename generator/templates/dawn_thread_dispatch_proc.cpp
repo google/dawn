@@ -32,7 +32,7 @@ void {{prefix}}ProcSetPerThreadProcs(const {{Prefix}}ProcTable* procs) {
 
 {% for type in by_category["object"] %}
     {% for method in c_methods(type) %}
-        static {{as_cType(method.return_type.name)}} ThreadDispatch{{as_MethodSuffix(type.name, method.name)}}(
+        static {{as_cReturnType(method.return_type)}} ThreadDispatch{{as_MethodSuffix(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}
