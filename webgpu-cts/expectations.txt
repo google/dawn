@@ -445,6 +445,11 @@ crbug.com/dawn/0000 [ arm ] webgpu:api,validation,capability_checks,limits,maxBu
 crbug.com/dawn/0000 [ qualcomm ] webgpu:api,operation,render_pipeline,sample_mask:* [ Skip ]
 
 ################################################################################
+# Flaky on Android ARM
+################################################################################
+crbug.com/tint/1947 [ arm ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
+
+################################################################################
 # untriaged Android failures
 ################################################################################
 crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r16float";dimension="1d" [ Failure ]
