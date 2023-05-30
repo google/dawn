@@ -21,7 +21,9 @@ namespace tint::ir {
 Function::Function(const type::Type* rt,
                    PipelineStage stage,
                    std::optional<std::array<uint32_t, 3>> wg_size)
-    : Base(), return_type_(rt), pipeline_stage_(stage), workgroup_size_(wg_size) {}
+    : Base(), pipeline_stage_(stage), workgroup_size_(wg_size) {
+    return_.type = rt;
+}
 
 Function::~Function() = default;
 
@@ -39,18 +41,14 @@ utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStag
     return out << "<unknown>";
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, Function::ReturnAttribute value) {
+utils::StringStream& operator<<(utils::StringStream& out, enum Function::ReturnBuiltin value) {
     switch (value) {
-        case Function::ReturnAttribute::kLocation:
-            return out << "location";
-        case Function::ReturnAttribute::kFragDepth:
+        case Function::ReturnBuiltin::kFragDepth:
             return out << "frag_depth";
-        case Function::ReturnAttribute::kSampleMask:
+        case Function::ReturnBuiltin::kSampleMask:
             return out << "sample_mask";
-        case Function::ReturnAttribute::kPosition:
+        case Function::ReturnBuiltin::kPosition:
             return out << "position";
-        case Function::ReturnAttribute::kInvariant:
-            return out << "invariant";
     }
     return out << "<unknown>";
 }

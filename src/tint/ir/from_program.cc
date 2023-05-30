@@ -231,6 +231,24 @@ class Impl {
         return ResultType{std::move(mod)};
     }
 
+    builtin::Interpolation ExtractInterpolation(const ast::InterpolateAttribute* interp) {
+        auto type = program_->Sem()
+                        .Get(interp->type)
+                        ->As<sem::BuiltinEnumExpression<builtin::InterpolationType>>();
+        builtin::InterpolationType interpolation_type = type->Value();
+
+        builtin::InterpolationSampling interpolation_sampling =
+            builtin::InterpolationSampling::kUndefined;
+        if (interp->sampling) {
+            auto sampling = program_->Sem()
+                                .Get(interp->sampling)
+                                ->As<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>();
+            interpolation_sampling = sampling->Value();
+        }
+
+        return builtin::Interpolation{interpolation_type, interpolation_sampling};
+    }
+
     void EmitFunction(const ast::Function* ast_func) {
         // The flow stack should have been emptied when the previous function finished building.
         TINT_ASSERT(IR, control_stack_.IsEmpty());
@@ -266,16 +284,16 @@ class Impl {
                 }
             }
 
-            utils::Vector<Function::ReturnAttribute, 1> return_attributes;
+            // Note, interpolated is only valid when paired with Location, so it will only be set
+            // when the location is set.
+            std::optional<builtin::Interpolation> interpolation;
             for (auto* attr : ast_func->return_type_attributes) {
                 tint::Switch(
                     attr,  //
-                    [&](const ast::LocationAttribute*) {
-                        return_attributes.Push(Function::ReturnAttribute::kLocation);
+                    [&](const ast::InterpolateAttribute* interp) {
+                        interpolation = ExtractInterpolation(interp);
                     },
-                    [&](const ast::InvariantAttribute*) {
-                        return_attributes.Push(Function::ReturnAttribute::kInvariant);
-                    },
+                    [&](const ast::InvariantAttribute*) { ir_func->SetReturnInvariant(true); },
                     [&](const ast::BuiltinAttribute* b) {
                         if (auto* ident_sem =
                                 program_->Sem()
@@ -283,13 +301,13 @@ class Impl {
                                     ->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>()) {
                             switch (ident_sem->Value()) {
                                 case builtin::BuiltinValue::kPosition:
-                                    return_attributes.Push(Function::ReturnAttribute::kPosition);
+                                    ir_func->SetReturnBuiltin(Function::ReturnBuiltin::kPosition);
                                     break;
                                 case builtin::BuiltinValue::kFragDepth:
-                                    return_attributes.Push(Function::ReturnAttribute::kFragDepth);
+                                    ir_func->SetReturnBuiltin(Function::ReturnBuiltin::kFragDepth);
                                     break;
                                 case builtin::BuiltinValue::kSampleMask:
-                                    return_attributes.Push(Function::ReturnAttribute::kSampleMask);
+                                    ir_func->SetReturnBuiltin(Function::ReturnBuiltin::kSampleMask);
                                     break;
                                 default:
                                     TINT_ICE(IR, diagnostics_)
@@ -303,9 +321,10 @@ class Impl {
                         }
                     });
             }
-            ir_func->SetReturnAttributes(return_attributes);
+            if (sem->ReturnLocation().has_value()) {
+                ir_func->SetReturnLocation(sem->ReturnLocation().value(), interpolation);
+            }
         }
-        ir_func->SetReturnLocation(sem->ReturnLocation());
 
         scopes_.Push();
         TINT_DEFER(scopes_.Pop());
@@ -323,24 +342,7 @@ class Impl {
                 tint::Switch(
                     attr,  //
                     [&](const ast::InterpolateAttribute* interp) {
-                        auto type =
-                            program_->Sem()
-                                .Get(interp->type)
-                                ->As<sem::BuiltinEnumExpression<builtin::InterpolationType>>();
-                        builtin::InterpolationType interpolation_type = type->Value();
-
-                        builtin::InterpolationSampling interpolation_sampling =
-                            builtin::InterpolationSampling::kUndefined;
-                        if (interp->sampling) {
-                            auto sampling = program_->Sem()
-                                                .Get(interp->sampling)
-                                                ->As<sem::BuiltinEnumExpression<
-                                                    builtin::InterpolationSampling>>();
-                            interpolation_sampling = sampling->Value();
-                        }
-
-                        interpolation =
-                            builtin::Interpolation{interpolation_type, interpolation_sampling};
+                        interpolation = ExtractInterpolation(interp);
                     },
                     [&](const ast::InvariantAttribute*) { param->SetInvariant(true); },
                     [&](const ast::BuiltinAttribute* b) {

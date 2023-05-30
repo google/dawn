@@ -39,7 +39,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
   %i:ptr<private, f32, read_write> = var, 1.0f
 }
 
-%test_function = func():void [@compute @workgroup_size(1, 1, 1)] -> %b2 {
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:f32 = load %i
     %tint_symbol:f32 = asin %3

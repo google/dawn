@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "src/tint/ir/function_param.h"
+#include "src/tint/ir/location.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/type/type.h"
 
@@ -46,18 +47,14 @@ class Function : public utils::Castable<Function, Value> {
         kVertex,
     };
 
-    /// Attributes attached to return types
-    enum class ReturnAttribute {
-        /// Location attribute
-        kLocation,
+    /// Builtin attached to return types
+    enum class ReturnBuiltin {
         /// Builtin Position attribute
         kPosition,
         /// Builtin FragDepth attribute
         kFragDepth,
         /// Builtin SampleMask
         kSampleMask,
-        /// Invariant attribute
-        kInvariant,
     };
 
     /// Constructor
@@ -86,26 +83,35 @@ class Function : public utils::Castable<Function, Value> {
     std::optional<std::array<uint32_t, 3>> WorkgroupSize() const { return workgroup_size_; }
 
     /// @returns the return type for the function
-    const type::Type* ReturnType() const { return return_type_; }
+    const type::Type* ReturnType() const { return return_.type; }
 
     /// Sets the return attributes
-    /// @param attrs the attributes to set
-    void SetReturnAttributes(utils::VectorRef<ReturnAttribute> attrs) {
-        return_attributes_ = std::move(attrs);
+    /// @param builtin the builtin to set
+    void SetReturnBuiltin(ReturnBuiltin builtin) {
+        TINT_ASSERT(IR, !return_.builtin.has_value());
+        return_.builtin = builtin;
     }
-    /// @returns the return attributes
-    utils::VectorRef<ReturnAttribute> ReturnAttributes() const { return return_attributes_; }
+    /// @returns the return builtin attribute
+    std::optional<enum ReturnBuiltin> ReturnBuiltin() const { return return_.builtin; }
 
     /// Sets the return location
     /// @param loc the location to set
-    void SetReturnLocation(std::optional<uint32_t> loc) { return_location_ = loc; }
+    /// @param interp the interpolation
+    void SetReturnLocation(uint32_t loc, std::optional<builtin::Interpolation> interp) {
+        return_.location = {loc, interp};
+    }
     /// @returns the return location
-    std::optional<uint32_t> ReturnLocation() const { return return_location_; }
+    std::optional<Location> ReturnLocation() const { return return_.location; }
+
+    /// Sets the return as invariant
+    /// @param val the invariant value to set
+    void SetReturnInvariant(bool val) { return_.invariant = val; }
+    /// @returns the return invariant value
+    bool ReturnInvariant() const { return return_.invariant; }
 
     /// Sets the function parameters
     /// @param params the function paramters
     void SetParams(utils::VectorRef<FunctionParam*> params) { params_ = std::move(params); }
-
     /// @returns the function parameters
     utils::VectorRef<FunctionParam*> Params() const { return params_; }
 
@@ -116,20 +122,22 @@ class Function : public utils::Castable<Function, Value> {
     Block* StartTarget() const { return start_target_; }
 
   private:
-    const type::Type* return_type_;
     PipelineStage pipeline_stage_;
     std::optional<std::array<uint32_t, 3>> workgroup_size_;
 
-    utils::Vector<ReturnAttribute, 1> return_attributes_;
-    std::optional<uint32_t> return_location_;
+    struct {
+        const type::Type* type = nullptr;
+        std::optional<enum ReturnBuiltin> builtin;
+        std::optional<Location> location;
+        bool invariant = false;
+    } return_;
 
     utils::Vector<FunctionParam*, 1> params_;
-
     Block* start_target_ = nullptr;
 };
 
 utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value);
-utils::StringStream& operator<<(utils::StringStream& out, Function::ReturnAttribute value);
+utils::StringStream& operator<<(utils::StringStream& out, enum Function::ReturnBuiltin value);
 
 }  // namespace tint::ir
 
