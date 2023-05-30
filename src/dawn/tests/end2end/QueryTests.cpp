@@ -510,18 +510,22 @@ TEST_P(OcclusionQueryTests, ResolveToBufferWithOffset) {
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
 
-    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
-    renderPass.renderPassInfo.occlusionQuerySet = querySet;
+    // Fill the occlusion query with some data.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-    pass.SetPipeline(pipeline);
-    pass.BeginOcclusionQuery(0);
-    pass.Draw(3);
-    pass.EndOcclusionQuery();
-    pass.End();
-    wgpu::CommandBuffer commands = encoder.Finish();
-    queue.Submit(1, &commands);
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+        renderPass.renderPassInfo.occlusionQuerySet = querySet;
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.BeginOcclusionQuery(0);
+        pass.Draw(3);
+        pass.EndOcclusionQuery();
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
 
     constexpr uint64_t kBufferSize = kQueryCount * sizeof(uint64_t) + kMinDestinationOffset;
     constexpr uint64_t kCount = kQueryCount + kMinCount;

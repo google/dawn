@@ -95,14 +95,14 @@ ValidationTest::ValidationTest() {
 
         std::vector<dawn::native::Adapter> adapters = gCurrentTest->mDawnInstance->GetAdapters();
         // Validation tests run against the null backend, find the corresponding adapter
-        for (auto& adapter : adapters) {
+        for (auto& candidate : adapters) {
             wgpu::AdapterProperties adapterProperties;
-            adapter.GetProperties(&adapterProperties);
+            candidate.GetProperties(&adapterProperties);
 
             if (adapterProperties.backendType == wgpu::BackendType::Null &&
                 adapterProperties.compatibilityMode == gCurrentTest->UseCompatibilityMode()) {
-                gCurrentTest->mBackendAdapter = adapter;
-                WGPUAdapter cAdapter = adapter.Get();
+                gCurrentTest->mBackendAdapter = candidate;
+                WGPUAdapter cAdapter = candidate.Get();
                 ASSERT(cAdapter);
 
                 dawn::native::GetProcs().adapterReference(cAdapter);
@@ -113,14 +113,13 @@ ValidationTest::ValidationTest() {
         UNREACHABLE();
     };
 
-    procs.adapterRequestDevice = [](WGPUAdapter adapter, const WGPUDeviceDescriptor* descriptor,
+    procs.adapterRequestDevice = [](WGPUAdapter self, const WGPUDeviceDescriptor* descriptor,
                                     WGPURequestDeviceCallback callback, void* userdata) {
         ASSERT(gCurrentTest);
         wgpu::DeviceDescriptor deviceDesc =
             *(reinterpret_cast<const wgpu::DeviceDescriptor*>(descriptor));
         WGPUDevice cDevice = gCurrentTest->CreateTestDevice(
-            dawn::native::Adapter(reinterpret_cast<dawn::native::AdapterBase*>(adapter)),
-            deviceDesc);
+            dawn::native::Adapter(reinterpret_cast<dawn::native::AdapterBase*>(self)), deviceDesc);
         ASSERT(cDevice != nullptr);
         gCurrentTest->mLastCreatedBackendDevice = cDevice;
         callback(WGPURequestDeviceStatus_Success, cDevice, nullptr, userdata);
@@ -233,21 +232,21 @@ void ValidationTest::FlushWire() {
     EXPECT_TRUE(mWireHelper->FlushServer());
 }
 
-void ValidationTest::WaitForAllOperations(const wgpu::Device& device) {
+void ValidationTest::WaitForAllOperations(const wgpu::Device& waitDevice) {
     bool done = false;
-    device.GetQueue().OnSubmittedWorkDone(
+    waitDevice.GetQueue().OnSubmittedWorkDone(
         0u, [](WGPUQueueWorkDoneStatus, void* userdata) { *static_cast<bool*>(userdata) = true; },
         &done);
 
     // Force the currently submitted operations to completed.
     while (!done) {
-        device.Tick();
+        waitDevice.Tick();
         FlushWire();
     }
 
     // TODO(cwallez@chromium.org): It's not clear why we need this additional tick. Investigate it
     // once WebGPU has defined the ordering of callbacks firing.
-    device.Tick();
+    waitDevice.Tick();
     FlushWire();
 }
 

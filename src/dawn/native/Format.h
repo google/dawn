@@ -130,11 +130,11 @@ struct Format {
 
     // Returns true if the formats are copy compatible.
     // Currently means they differ only in sRGB-ness.
-    bool CopyCompatibleWith(const Format& format) const;
+    bool CopyCompatibleWith(const Format& otherFormat) const;
 
     // Returns true if the formats are texture view format compatible.
     // Currently means they differ only in sRGB-ness.
-    bool ViewCompatibleWith(const Format& format) const;
+    bool ViewCompatibleWith(const Format& otherFormat) const;
 
   private:
     // Used to store the aspectInfo for one or more planes. For single plane "color" formats,

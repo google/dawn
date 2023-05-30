@@ -29,7 +29,7 @@ class VertexBufferValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         // Placeholder vertex shader module
-        vsModule = utils::CreateShaderModule(device, R"(
+        defaultVsModule = utils::CreateShaderModule(device, R"(
             @vertex fn main() -> @builtin(position) vec4f {
                 return vec4f(0.0, 0.0, 0.0, 0.0);
             })");
@@ -103,7 +103,7 @@ class VertexBufferValidationTest : public ValidationTest {
         return device.CreateRenderPipeline(&descriptor);
     }
 
-    wgpu::ShaderModule vsModule;
+    wgpu::ShaderModule defaultVsModule;
     wgpu::ShaderModule fsModule;
 };
 
@@ -215,7 +215,6 @@ TEST_F(VertexBufferValidationTest, UnsetInheritedVertexBuffers) {
 
     // Control case: inherited vertex buffers can be unset, and the unset operation does not impact
     // previous pipeline.
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
@@ -594,7 +593,7 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertex) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].offset = 0;
 
-        pipeline1 = MakeRenderPipeline(vsModule, state);
+        pipeline1 = MakeRenderPipeline(defaultVsModule, state);
     }
 
     // Vertex attribute offset is 4
@@ -607,7 +606,7 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertex) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].offset = 4;
 
-        pipeline2 = MakeRenderPipeline(vsModule, state);
+        pipeline2 = MakeRenderPipeline(defaultVsModule, state);
     }
 
     // Control case: draw 3 elements, 3 * 8 = 24 <= 28, is valid anyway
@@ -725,7 +724,7 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsInstance) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].offset = 0;
 
-        pipeline1 = MakeRenderPipeline(vsModule, state);
+        pipeline1 = MakeRenderPipeline(defaultVsModule, state);
     }
 
     // Vertex attribute offset is 4
@@ -738,7 +737,7 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsInstance) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].offset = 4;
 
-        pipeline2 = MakeRenderPipeline(vsModule, state);
+        pipeline2 = MakeRenderPipeline(defaultVsModule, state);
     }
 
     // Control case: draw 3 instances, 3 * 8 = 24 <= 28, is valid anyway
@@ -859,7 +858,7 @@ TEST_F(VertexBufferValidationTest, DrawIndexedStrideLimitsInstance) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].offset = 0;
 
-        pipeline1 = MakeRenderPipeline(vsModule, state);
+        pipeline1 = MakeRenderPipeline(defaultVsModule, state);
     }
 
     // Vertex attribute offset is 4
@@ -872,7 +871,7 @@ TEST_F(VertexBufferValidationTest, DrawIndexedStrideLimitsInstance) {
         state.cVertexBuffers[0].attributeCount = 1;
         state.cAttributes[0].offset = 4;
 
-        pipeline2 = MakeRenderPipeline(vsModule, state);
+        pipeline2 = MakeRenderPipeline(defaultVsModule, state);
     }
 
     // Control case: draw 3 instances, 3 * 8 = 24 <= 28, is valid anyway
@@ -1001,7 +1000,7 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertexMultipleAttributes) {
         state.cAttributes[1].offset = 4;
         state.cAttributes[1].shaderLocation = 1;
 
-        pipeline1 = MakeRenderPipeline(vsModule, state);
+        pipeline1 = MakeRenderPipeline(defaultVsModule, state);
     }
 
     // lastStride = attribute[1].offset + sizeof(attribute[1].format) = 12
@@ -1019,7 +1018,7 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertexMultipleAttributes) {
         state.cAttributes[1].offset = 4;
         state.cAttributes[1].shaderLocation = 1;
 
-        pipeline2 = MakeRenderPipeline(vsModule, state);
+        pipeline2 = MakeRenderPipeline(defaultVsModule, state);
     }
 
     // Valid: draw 4 elements, last stride is 8, 3 * 12 + 8 = 44 <= 44

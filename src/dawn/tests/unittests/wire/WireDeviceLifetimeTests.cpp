@@ -62,12 +62,12 @@ class WireDeviceLifetimeTests : public testing::Test {
     // static variable `lastBackendDevice`. This lets tests control the wire device and the native
     // backend device separately.
     DawnProcTable BuildProcs() {
-        DawnProcTable nativeProcs = native::GetProcs();
-        nativeProcs.adapterRequestDevice = [](WGPUAdapter adapter, const WGPUDeviceDescriptor* desc,
-                                              WGPURequestDeviceCallback callback, void* userdata) {
+        DawnProcTable procs = native::GetProcs();
+        procs.adapterRequestDevice = [](WGPUAdapter self, const WGPUDeviceDescriptor* desc,
+                                        WGPURequestDeviceCallback callback, void* userdata) {
             using WrappedUserdata = std::pair<WGPURequestDeviceCallback, void*>;
             native::GetProcs().adapterRequestDevice(
-                adapter, desc,
+                self, desc,
                 [](WGPURequestDeviceStatus status, WGPUDevice device, char const* message,
                    void* userdata) {
                     lastBackendDevice = device;
@@ -78,7 +78,7 @@ class WireDeviceLifetimeTests : public testing::Test {
                 new WrappedUserdata(callback, userdata));
         };
 
-        return nativeProcs;
+        return procs;
     }
 };
 

@@ -116,10 +116,11 @@ class CreatePipelineAsyncTest : public DawnTest {
                 EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success,
                           status);
 
-                CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
-                task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
-                task->isCompleted = true;
-                task->message = message;
+                CreatePipelineAsyncTask* currentTask =
+                    static_cast<CreatePipelineAsyncTask*>(userdata);
+                currentTask->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
+                currentTask->isCompleted = true;
+                currentTask->message = message;
             },
             &task);
     }

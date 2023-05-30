@@ -1486,7 +1486,6 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
             return buffer0.color;
         })");
 
-    constexpr uint32_t kRTSize = 4;
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
     pipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 

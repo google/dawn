@@ -759,7 +759,6 @@ TEST_F(RenderPipelineValidationTest, VertexOnlyPipelineRequireDepthStencilAttach
     depthStencilTextureDescriptor.sampleCount = 1;
     depthStencilTextureDescriptor.format = kDepthStencilFormat;
     wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilTextureDescriptor);
-    utils::ComboRenderPassDescriptor renderPassDescriptor({}, depthStencilTexture.CreateView());
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
     renderPipelineDescriptor.multisample.count = 1;

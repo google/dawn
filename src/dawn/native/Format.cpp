@@ -89,14 +89,14 @@ bool Format::IsMultiPlanar() const {
     return aspects & (Aspect::Plane0 | Aspect::Plane1);
 }
 
-bool Format::CopyCompatibleWith(const Format& format) const {
+bool Format::CopyCompatibleWith(const Format& otherFormat) const {
     // TODO(crbug.com/dawn/1332): Add a Format compatibility matrix.
-    return baseFormat == format.baseFormat;
+    return baseFormat == otherFormat.baseFormat;
 }
 
-bool Format::ViewCompatibleWith(const Format& format) const {
+bool Format::ViewCompatibleWith(const Format& otherFormat) const {
     // TODO(crbug.com/dawn/1332): Add a Format compatibility matrix.
-    return baseFormat == format.baseFormat;
+    return baseFormat == otherFormat.baseFormat;
 }
 
 const AspectInfo& Format::GetAspectInfo(wgpu::TextureAspect aspect) const {

@@ -368,18 +368,18 @@ void DrawCallPerf::SetUp() {
                         {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, false},
                     });
 
-        // Create the pipeline layout.
+        // Create the pipeline layout for the second pipeline.
         wgpu::BindGroupLayout bindGroupLayouts[2] = {
             mConstantBindGroupLayout,
             mUniformBindGroupLayout,
         };
         pipelineLayoutDesc.bindGroupLayouts = bindGroupLayouts,
         pipelineLayoutDesc.bindGroupLayoutCount = 2;
-        wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
+        pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 
         // Create the fragment shader module. This shader matches the pipeline layout described
         // above.
-        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, kFragmentShaderB);
+        fsModule = utils::CreateShaderModule(device, kFragmentShaderB);
 
         // Create the pipeline.
         renderPipelineDesc.layout = pipelineLayout;

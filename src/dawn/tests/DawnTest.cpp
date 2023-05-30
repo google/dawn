@@ -1145,10 +1145,10 @@ void DawnTestBase::TearDown() {
     }
 }
 
-void DawnTestBase::DestroyDevice(wgpu::Device device) {
-    wgpu::Device resolvedDevice = device;
+void DawnTestBase::DestroyDevice(wgpu::Device deviceToDestroy) {
+    wgpu::Device resolvedDevice = deviceToDestroy;
     if (resolvedDevice == nullptr) {
-        resolvedDevice = this->device;
+        resolvedDevice = device;
     }
 
     // No expectation is added because the expectations for this kind of destruction is set up
@@ -1156,10 +1156,10 @@ void DawnTestBase::DestroyDevice(wgpu::Device device) {
     resolvedDevice.Destroy();
 }
 
-void DawnTestBase::LoseDeviceForTesting(wgpu::Device device) {
-    wgpu::Device resolvedDevice = device;
+void DawnTestBase::LoseDeviceForTesting(wgpu::Device deviceToLose) {
+    wgpu::Device resolvedDevice = deviceToLose;
     if (resolvedDevice == nullptr) {
-        resolvedDevice = this->device;
+        resolvedDevice = device;
     }
 
     EXPECT_CALL(mDeviceLostCallback, Call(WGPUDeviceLostReason_Undefined, testing::_, testing::_))

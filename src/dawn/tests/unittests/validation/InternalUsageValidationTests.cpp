@@ -274,9 +274,9 @@ TEST_F(TextureInternalUsageValidationTest, CommandValidation) {
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoderDescriptor encoderDesc = {};
-        wgpu::DawnEncoderInternalUsageDescriptor internalDesc = {};
-        internalDesc.useInternalUsages = false;
-        encoderDesc.nextInChain = &internalDesc;
+        wgpu::DawnEncoderInternalUsageDescriptor encoderInternalDesc = {};
+        encoderInternalDesc.useInternalUsages = false;
+        encoderDesc.nextInChain = &encoderInternalDesc;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc);
 
         encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
@@ -290,9 +290,9 @@ TEST_F(TextureInternalUsageValidationTest, CommandValidation) {
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoderDescriptor encoderDesc = {};
-        wgpu::DawnEncoderInternalUsageDescriptor internalDesc = {};
-        internalDesc.useInternalUsages = true;
-        encoderDesc.nextInChain = &internalDesc;
+        wgpu::DawnEncoderInternalUsageDescriptor encoderInternalDesc = {};
+        encoderInternalDesc.useInternalUsages = true;
+        encoderDesc.nextInChain = &encoderInternalDesc;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc);
 
         encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
@@ -307,9 +307,9 @@ TEST_F(TextureInternalUsageValidationTest, CommandValidation) {
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoderDescriptor encoderDesc = {};
-        wgpu::DawnEncoderInternalUsageDescriptor internalDesc = {};
-        internalDesc.useInternalUsages = true;
-        encoderDesc.nextInChain = &internalDesc;
+        wgpu::DawnEncoderInternalUsageDescriptor encoderInternalDesc = {};
+        encoderInternalDesc.useInternalUsages = true;
+        encoderDesc.nextInChain = &encoderInternalDesc;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc);
 
         encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);

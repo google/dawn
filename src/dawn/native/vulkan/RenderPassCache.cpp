@@ -81,8 +81,8 @@ void RenderPassCacheQuery::SetDepthStencil(wgpu::TextureFormat format,
     readOnlyDepthStencil = readOnly;
 }
 
-void RenderPassCacheQuery::SetSampleCount(uint32_t sampleCount) {
-    this->sampleCount = sampleCount;
+void RenderPassCacheQuery::SetSampleCount(uint32_t sampleCountIn) {
+    sampleCount = sampleCountIn;
 }
 
 // RenderPassCache

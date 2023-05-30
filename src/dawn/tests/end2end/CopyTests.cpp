@@ -2771,8 +2771,6 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
     }
 
     wgpu::Buffer GetUploadBufferAndExpectedData(std::vector<uint32_t>* expectedData) {
-        const uint32_t kBytesPerRow =
-            Align(kBytesPerBlock * kTextureSize, kTextureBytesPerRowAlignment);
         const size_t kBufferSize =
             kBytesPerRow * (kTextureSize - 1) + kTextureSize * kBytesPerBlock;
 

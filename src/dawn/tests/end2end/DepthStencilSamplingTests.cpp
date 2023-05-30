@@ -779,8 +779,10 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         passDescriptor.cDepthStencilAttachmentInfo.depthClearValue = 0.43f;
         passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue = 31;
 
-        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-        pass.End();
+        {
+            wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
+            pass.End();
+        }
 
         // Render into the output textures
         {
@@ -829,8 +831,10 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         passDescriptor.cDepthStencilAttachmentInfo.depthClearValue = 0.43f;
         passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue = 31;
 
-        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-        pass.End();
+        {
+            wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
+            pass.End();
+        }
 
         // Sample into the output buffers
         {

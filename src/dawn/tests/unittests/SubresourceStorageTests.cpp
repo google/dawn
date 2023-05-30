@@ -46,8 +46,9 @@ struct FakeStorage {
                  layer < range.baseArrayLayer + range.layerCount; layer++) {
                 for (uint32_t level = range.baseMipLevel;
                      level < range.baseMipLevel + range.levelCount; level++) {
-                    SubresourceRange range = SubresourceRange::MakeSingle(aspect, layer, level);
-                    updateFunc(range, &mData[GetDataIndex(aspect, layer, level)]);
+                    SubresourceRange updateRange =
+                        SubresourceRange::MakeSingle(aspect, layer, level);
+                    updateFunc(updateRange, &mData[GetDataIndex(aspect, layer, level)]);
                 }
             }
         }
