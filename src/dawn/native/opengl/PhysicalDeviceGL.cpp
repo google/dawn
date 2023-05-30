@@ -14,6 +14,7 @@
 
 #include "dawn/native/opengl/PhysicalDeviceGL.h"
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
@@ -147,8 +148,71 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 }
 
+namespace {
+GLint Get(const OpenGLFunctions& gl, GLenum pname) {
+    GLint value;
+    gl.GetIntegerv(pname, &value);
+    return value;
+}
+
+GLint GetIndexed(const OpenGLFunctions& gl, GLenum pname, GLuint index) {
+    GLint value;
+    gl.GetIntegeri_v(pname, index, &value);
+    return value;
+}
+}  // namespace
+
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
+    const OpenGLFunctions& gl = mFunctions;
     GetDefaultLimits(&limits->v1);
+
+    limits->v1.maxTextureDimension1D = limits->v1.maxTextureDimension2D =
+        Get(gl, GL_MAX_TEXTURE_SIZE);
+    limits->v1.maxTextureDimension3D = Get(gl, GL_MAX_3D_TEXTURE_SIZE);
+    limits->v1.maxTextureArrayLayers = Get(gl, GL_MAX_ARRAY_TEXTURE_LAYERS);
+
+    // Since we flatten bindings, leave maxBindGroups and maxBindingsPerBindGroup at the default.
+
+    limits->v1.maxDynamicUniformBuffersPerPipelineLayout = Get(gl, GL_MAX_UNIFORM_BUFFER_BINDINGS);
+    limits->v1.maxDynamicStorageBuffersPerPipelineLayout =
+        Get(gl, GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS);
+    limits->v1.maxSampledTexturesPerShaderStage =
+        std::min(Get(gl, GL_MAX_TEXTURE_IMAGE_UNITS), Get(gl, GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS));
+    limits->v1.maxSamplersPerShaderStage = Get(gl, GL_MAX_TEXTURE_IMAGE_UNITS);
+    limits->v1.maxStorageBuffersPerShaderStage = Get(gl, GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS);
+    // TODO(crbug.com/dawn/1834): Note that OpenGLES allows an implementation to have zero vertex
+    // image uniforms, so this isn't technically correct for vertex shaders.
+    limits->v1.maxStorageTexturesPerShaderStage = Get(gl, GL_MAX_FRAGMENT_IMAGE_UNIFORMS);
+
+    limits->v1.maxUniformBuffersPerShaderStage = Get(gl, GL_MAX_UNIFORM_BUFFER_BINDINGS);
+    limits->v1.maxUniformBufferBindingSize = Get(gl, GL_MAX_UNIFORM_BLOCK_SIZE);
+    limits->v1.maxStorageBufferBindingSize = Get(gl, GL_MAX_SHADER_STORAGE_BLOCK_SIZE);
+
+    limits->v1.minUniformBufferOffsetAlignment = Get(gl, GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT);
+    limits->v1.minStorageBufferOffsetAlignment = Get(gl, GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT);
+    limits->v1.maxVertexBuffers = Get(gl, GL_MAX_VERTEX_ATTRIB_BINDINGS);
+    limits->v1.maxBufferSize = kAssumedMaxBufferSize;
+    GLint maxVertexAttribs = Get(gl, GL_MAX_VERTEX_ATTRIBS);
+    limits->v1.maxVertexAttributes = limits->v1.maxVertexBuffers * maxVertexAttribs;
+    limits->v1.maxVertexBufferArrayStride = Get(gl, GL_MAX_VERTEX_ATTRIB_STRIDE);
+    limits->v1.maxInterStageShaderComponents = Get(gl, GL_MAX_VARYING_COMPONENTS);
+    limits->v1.maxInterStageShaderVariables = Get(gl, GL_MAX_VARYING_VECTORS);
+    limits->v1.maxColorAttachments =
+        std::min(Get(gl, GL_MAX_COLOR_ATTACHMENTS), Get(gl, GL_MAX_DRAW_BUFFERS));
+
+    // TODO(crbug.com/dawn/1834): determine if GL has an equivalent value here.
+    //    limits->v1.maxColorAttachmentBytesPerSample = WGPU_LIMIT_U32_UNDEFINED;
+
+    limits->v1.maxComputeWorkgroupStorageSize = Get(gl, GL_MAX_COMPUTE_SHARED_MEMORY_SIZE);
+    limits->v1.maxComputeInvocationsPerWorkgroup = Get(gl, GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS);
+    limits->v1.maxComputeWorkgroupSizeX = GetIndexed(gl, GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0);
+    limits->v1.maxComputeWorkgroupSizeY = GetIndexed(gl, GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1);
+    limits->v1.maxComputeWorkgroupSizeZ = GetIndexed(gl, GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2);
+    GLint v[3];
+    v[0] = GetIndexed(gl, GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0);
+    v[1] = GetIndexed(gl, GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1);
+    v[2] = GetIndexed(gl, GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2);
+    limits->v1.maxComputeWorkgroupsPerDimension = std::min(v[0], std::min(v[1], v[2]));
     return {};
 }
 

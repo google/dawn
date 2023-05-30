@@ -250,6 +250,9 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 
 // Test using the maximum number of dynamic uniform and storage buffers
 TEST_P(MaxLimitTests, MaxDynamicBuffers) {
+    // TODO(https://anglebug.com/8177) Causes assertion failure in ANGLE.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
     wgpu::Limits limits = GetSupportedLimits().limits;
 
     std::vector<wgpu::BindGroupLayoutEntry> bglEntries;
