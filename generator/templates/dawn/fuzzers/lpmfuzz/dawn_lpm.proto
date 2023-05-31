@@ -108,10 +108,16 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
         required {{ lift_objectid_member(member, count) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
     {% elif member.type.name.get() == "ObjectHandle" %}
-        // Skips object handles while lifting dawn.json to protobuf because
-        // ObjectHandles are created and managed in DawnLPMSerializer. Passing
-        // arbitrary ObjectHandles from the fuzzer's bytestream isn't the
-        // strategy for this fuzzer.
+        //* Skips object handles while lifting dawn.json to protobuf because
+        //* ObjectHandles are created and managed in DawnLPMSerializer. Passing
+        //* arbitrary ObjectHandles from the fuzzer's bytestream isn't the
+        //* strategy for this fuzzer.
+    {% elif member.type.name.get() == "void *" %}
+        //* Skip over raw pointers in protobuf, handled by DawnLPMSerializer
+        //* with a hardcoded bytes and length.
+    {% elif member.type in by_category["function pointer"] %}
+        //* Skip over function pointers in protobuf, handled by DawnLPMSerializer
+        //* with a hardcoded bytes and length.
     {% else %}
         required {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
@@ -127,13 +133,13 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
     {% elif member.type.name.get() == "float" %}
         {{ lift_float_array_proto_member(member, count) }}
     {% elif member.type.name.get() == "uint8_t" %}
-        // Skip over byte arrays in protobuf, handled by DawnLPMSerializer
-        // with a hardcoded bytes and length.
+        //* Skip over byte arrays in protobuf, handled by DawnLPMSerializer
+        //* with a hardcoded bytes and length.
     {% elif member.length != 'constant' %}
         {{ lift_varlength_proto_member(member, count) }}
     {% else %}
-        // There shouldn't be any other pass-by-pointer types in
-        // dawn*.json, if any are added we would like to know at compile time
+        //* There shouldn't be any other pass-by-pointer types in
+        //* dawn*.json, if any are added we would like to know at compile time
         {{ unreachable_code() }}
     {% endif %}
 {% endmacro %}
@@ -157,7 +163,6 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
         {{ lift_proto_members_helper(structure, structure.name, structure.members) }}
     }
 {% endfor %}
-
 
 
 {% for command in cmd_records["proto_generated_commands"] %}

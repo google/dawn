@@ -169,7 +169,7 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader) {
     deps = [ ":dawn_lpm_proto" ]
   }
 
-  dawn_fuzzer_test("dawn_lpm_fuzzer_and_vulkan_backend") {
+  dawn_fuzzer_test("dawn_lpm_fuzzer_vulkan_backend") {
     sources = get_target_outputs(":dawn_lpmfuzz_cpp")
     sources += [
       "lpmfuzz/DawnLPMFuzzer.cpp",

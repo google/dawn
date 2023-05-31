@@ -28,6 +28,6 @@ DEFINE_PROTO_FUZZER(const fuzzing::Program& program) {
         wgpu::AdapterProperties properties;
         adapter.GetProperties(&properties);
 
-        return gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
+        return dawn::gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
     });
 }
