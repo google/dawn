@@ -42,7 +42,7 @@ namespace dawn::wire::client {
             {% if Suffix in client_handwritten_commands %}
                 static
             {% endif %}
-            {{as_cReturnType(method.return_type)}} Client{{Suffix}}(
+            {{as_cType(method.return_type.name)}} Client{{Suffix}}(
                 {{-cType}} cSelf
                 {%- for arg in method.arguments -%}
                     , {{as_annotated_cType(arg)}}
