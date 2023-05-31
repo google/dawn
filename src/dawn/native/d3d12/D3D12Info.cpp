@@ -86,6 +86,16 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         }
     }
 
+    info.supportsRootSignatureVersion1_1 = false;
+    D3D12_FEATURE_DATA_ROOT_SIGNATURE featureDataRootSignature = {};
+    featureDataRootSignature.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_ROOT_SIGNATURE, &featureDataRootSignature,
+            sizeof(featureDataRootSignature)))) {
+        info.supportsRootSignatureVersion1_1 =
+            featureDataRootSignature.HighestVersion >= D3D_ROOT_SIGNATURE_VERSION_1_1;
+    }
+
     D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {
         {D3D_SHADER_MODEL_6_4}, {D3D_SHADER_MODEL_6_3}, {D3D_SHADER_MODEL_6_2},
         {D3D_SHADER_MODEL_6_1}, {D3D_SHADER_MODEL_6_0}, {D3D_SHADER_MODEL_5_1}};

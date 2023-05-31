@@ -673,6 +673,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
 DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests,
                       D3D11Backend(),
                       D3D12Backend(),
+                      D3D12Backend({}, {"d3d12_use_root_signature_version_1_1"}),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
@@ -681,7 +682,8 @@ DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests,
 // Only instantiate on D3D12 / Metal where we are sure of the robustness implementation.
 // Tint injects clamping in the shader. OpenGL(ES) / Vulkan robustness is less constrained.
 DAWN_INSTANTIATE_TEST_P(ClampedOOBDynamicBufferOffsetTests,
-                        {D3D12Backend(), MetalBackend()},
+                        {D3D12Backend(), D3D12Backend({}, {"d3d12_use_root_signature_version_1_1"}),
+                         MetalBackend()},
                         {wgpu::BufferUsage::Uniform, wgpu::BufferUsage::Storage},
                         {false, true},
                         {false, true});

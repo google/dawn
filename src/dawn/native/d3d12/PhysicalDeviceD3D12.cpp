@@ -479,6 +479,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     // By default use the maximum shader-visible heap size allowed.
     deviceToggles->Default(Toggle::UseD3D12SmallShaderVisibleHeapForTesting, false);
 
+    // By default use D3D12 Root Signature Version 1.1 when possible
+    deviceToggles->Default(Toggle::D3D12UseRootSignatureVersion1_1,
+                           GetDeviceInfo().supportsRootSignatureVersion1_1);
+
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();
 

@@ -422,6 +422,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Clears some R8-like textures to full 0 bits as soon as they are created. This Toggle is "
       "enabled on Intel Gen12 GPUs due to a mesa driver issue.",
       "https://crbug.com/chromium/1361662", ToggleStage::Device}},
+    {Toggle::D3D12UseRootSignatureVersion1_1,
+     {"d3d12_use_root_signature_version_1_1",
+      "Use D3D12 Root Signature Version 1.1 to make additional guarantees about the descriptors in "
+      "a descriptor heap and the data pointed to by the descriptors so that the drivers can make "
+      "better optimizations on them.",
+      "https://crbug.com/tint/1890", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

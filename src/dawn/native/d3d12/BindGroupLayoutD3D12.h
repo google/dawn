@@ -59,8 +59,8 @@ class BindGroupLayout final : public BindGroupLayoutBase {
     uint32_t GetCbvUavSrvDescriptorCount() const;
     uint32_t GetSamplerDescriptorCount() const;
 
-    const std::vector<D3D12_DESCRIPTOR_RANGE>& GetCbvUavSrvDescriptorRanges() const;
-    const std::vector<D3D12_DESCRIPTOR_RANGE>& GetSamplerDescriptorRanges() const;
+    const std::vector<D3D12_DESCRIPTOR_RANGE1>& GetCbvUavSrvDescriptorRanges() const;
+    const std::vector<D3D12_DESCRIPTOR_RANGE1>& GetSamplerDescriptorRanges() const;
 
   private:
     BindGroupLayout(Device* device,
@@ -82,8 +82,8 @@ class BindGroupLayout final : public BindGroupLayoutBase {
     uint32_t mCbvUavSrvDescriptorCount;
     uint32_t mSamplerDescriptorCount;
 
-    std::vector<D3D12_DESCRIPTOR_RANGE> mCbvUavSrvDescriptorRanges;
-    std::vector<D3D12_DESCRIPTOR_RANGE> mSamplerDescriptorRanges;
+    std::vector<D3D12_DESCRIPTOR_RANGE1> mCbvUavSrvDescriptorRanges;
+    std::vector<D3D12_DESCRIPTOR_RANGE1> mSamplerDescriptorRanges;
 
     SlabAllocator<BindGroup> mBindGroupAllocator;
 

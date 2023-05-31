@@ -36,6 +36,7 @@ struct D3D12DeviceInfo {
     bool supportsDP4a;
     bool supportsCastingFullyTypedFormat;
     uint32_t programmableSamplePositionsTier;
+    bool supportsRootSignatureVersion1_1;
 };
 
 ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDevice);
