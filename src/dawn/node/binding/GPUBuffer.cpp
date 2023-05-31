@@ -93,6 +93,9 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                     break;
                 case WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
                 case WGPUBufferMapAsyncStatus_DestroyedBeforeCallback:
+                case WGPUBufferMapAsyncStatus_MappingAlreadyPending:
+                case WGPUBufferMapAsyncStatus_OffsetOutOfRange:
+                case WGPUBufferMapAsyncStatus_SizeOutOfRange:
                     c->promise.Reject(Errors::AbortError(c->env));
                     break;
                 case WGPUBufferMapAsyncStatus_Unknown:
