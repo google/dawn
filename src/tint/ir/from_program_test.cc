@@ -342,7 +342,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(0u, flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(0u, flow->Body()->InboundBranches().Length());
     EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
 
@@ -379,7 +379,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop_flow->Body()->InboundBranches().Length());
     EXPECT_EQ(1u, loop_flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(1u, loop_flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
@@ -437,7 +437,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop_flow->Body()->InboundBranches().Length());
     EXPECT_EQ(1u, loop_flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(1u, loop_flow->Merge()->InboundBranches().Length());
 
@@ -511,7 +511,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop_flow->Body()->InboundBranches().Length());
     EXPECT_EQ(1u, loop_flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
@@ -563,7 +563,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(0u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop_flow->Body()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
 
@@ -601,7 +601,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(0u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop_flow->Body()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
 
@@ -632,7 +632,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(0u, loop_flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop_flow->Body()->InboundBranches().Length());
     EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(2u, loop_flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
@@ -799,13 +799,13 @@ TEST_F(IR_BuilderImplTest, While) {
     auto m = res.Move();
     auto* flow = FindSingleValue<ir::Loop>(m);
 
-    ASSERT_NE(flow->Start()->Branch(), nullptr);
-    ASSERT_TRUE(flow->Start()->Branch()->Is<ir::If>());
-    auto* if_flow = flow->Start()->Branch()->As<ir::If>();
+    ASSERT_NE(flow->Body()->Branch(), nullptr);
+    ASSERT_TRUE(flow->Body()->Branch()->Is<ir::If>());
+    auto* if_flow = flow->Body()->Branch()->As<ir::If>();
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Body()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
@@ -860,13 +860,13 @@ TEST_F(IR_BuilderImplTest, While_Return) {
     auto m = res.Move();
     auto* flow = FindSingleValue<ir::Loop>(m);
 
-    ASSERT_NE(flow->Start()->Branch(), nullptr);
-    ASSERT_TRUE(flow->Start()->Branch()->Is<ir::If>());
-    auto* if_flow = flow->Start()->Branch()->As<ir::If>();
+    ASSERT_NE(flow->Body()->Branch(), nullptr);
+    ASSERT_TRUE(flow->Body()->Branch()->Is<ir::If>());
+    auto* if_flow = flow->Body()->Branch()->As<ir::If>();
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Body()->InboundBranches().Length());
     EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
@@ -934,13 +934,13 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     auto m = res.Move();
     auto* flow = FindSingleValue<ir::Loop>(m);
 
-    ASSERT_NE(flow->Start()->Branch(), nullptr);
-    ASSERT_TRUE(flow->Start()->Branch()->Is<ir::If>());
-    auto* if_flow = flow->Start()->Branch()->As<ir::If>();
+    ASSERT_NE(flow->Body()->Branch(), nullptr);
+    ASSERT_TRUE(flow->Body()->Branch()->Is<ir::If>());
+    auto* if_flow = flow->Body()->Branch()->As<ir::If>();
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(2u, flow->Body()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(2u, flow->Merge()->InboundBranches().Length());
     EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
@@ -962,7 +962,7 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(0u, flow->Start()->InboundBranches().Length());
+    EXPECT_EQ(0u, flow->Body()->InboundBranches().Length());
     EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
     EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
 

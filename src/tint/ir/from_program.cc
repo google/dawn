@@ -642,7 +642,7 @@ class Impl {
 
         {
             ControlStackScope scope(this, loop_inst);
-            current_block_ = loop_inst->Start();
+            current_block_ = loop_inst->Body();
 
             // The loop doesn't use EmitBlock because it needs the scope stack to not get popped
             // until after the continuing block.
@@ -691,7 +691,7 @@ class Impl {
         {
             ControlStackScope scope(this, loop_inst);
 
-            current_block_ = loop_inst->Start();
+            current_block_ = loop_inst->Body();
 
             // Emit the while condition into the Start().target of the loop
             auto reg = EmitExpression(stmt->condition);
@@ -737,7 +737,7 @@ class Impl {
         {
             ControlStackScope scope(this, loop_inst);
 
-            current_block_ = loop_inst->Start();
+            current_block_ = loop_inst->Body();
 
             if (stmt->condition) {
                 // Emit the condition into the target target of the loop

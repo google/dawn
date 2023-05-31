@@ -30,7 +30,7 @@ BreakIf::BreakIf(Value* condition,
     TINT_ASSERT(IR, loop_);
     condition_->AddUsage(this);
     loop_->AddUsage(this);
-    loop_->Start()->AddInboundBranch(this);
+    loop_->Body()->AddInboundBranch(this);
     loop_->Merge()->AddInboundBranch(this);
 }
 

@@ -430,7 +430,7 @@ void Disassembler::EmitIf(const If* i) {
 }
 
 void Disassembler::EmitLoop(const Loop* l) {
-    out_ << "loop [s: %b" << IdOf(l->Start());
+    out_ << "loop [s: %b" << IdOf(l->Body());
 
     if (l->Continuing()->HasBranchTarget()) {
         out_ << ", c: %b" << IdOf(l->Continuing());
@@ -449,7 +449,7 @@ void Disassembler::EmitLoop(const Loop* l) {
 
     {
         ScopedIndent si(indent_size_);
-        Walk(l->Start());
+        Walk(l->Body());
         out_ << std::endl;
     }
 
@@ -517,12 +517,12 @@ void Disassembler::EmitBranch(const Branch* b) {
         [&](const ir::ExitSwitch* es) { out_ << "exit_switch %b" << IdOf(es->Switch()->Merge()); },
         [&](const ir::ExitLoop* el) { out_ << "exit_loop %b" << IdOf(el->Loop()->Merge()); },
         [&](const ir::NextIteration* ni) {
-            out_ << "next_iteration %b" << IdOf(ni->Loop()->Start());
+            out_ << "next_iteration %b" << IdOf(ni->Loop()->Body());
         },
         [&](const ir::BreakIf* bi) {
             out_ << "break_if ";
             EmitValue(bi->Condition());
-            out_ << " %b" << IdOf(bi->Loop()->Start());
+            out_ << " %b" << IdOf(bi->Loop()->Body());
         },
         [&](Default) { out_ << "Unknown branch " << b->TypeInfo().name; });
 

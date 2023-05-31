@@ -24,7 +24,7 @@ TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
 
     auto* loop = b.CreateLoop();
 
-    loop->Start()->AddInstruction(b.Continue(loop));
+    loop->Body()->AddInstruction(b.Continue(loop));
     loop->Continuing()->AddInstruction(b.BreakIf(b.Constant(true), loop));
     loop->Merge()->AddInstruction(b.Return(func));
 
@@ -58,7 +58,7 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
 
     auto* loop = b.CreateLoop();
 
-    loop->Start()->AddInstruction(b.ExitLoop(loop));
+    loop->Body()->AddInstruction(b.ExitLoop(loop));
     loop->Merge()->AddInstruction(b.Return(func));
 
     func->StartTarget()->AddInstruction(loop);
@@ -93,7 +93,7 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
     cond_break->False()->AddInstruction(b.ExitIf(cond_break));
     cond_break->Merge()->AddInstruction(b.Continue(loop));
 
-    loop->Start()->AddInstruction(cond_break);
+    loop->Body()->AddInstruction(cond_break);
     loop->Continuing()->AddInstruction(b.NextIteration(loop));
     loop->Merge()->AddInstruction(b.Return(func));
 
@@ -136,7 +136,7 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
     cond_break->False()->AddInstruction(b.ExitIf(cond_break));
     cond_break->Merge()->AddInstruction(b.ExitLoop(loop));
 
-    loop->Start()->AddInstruction(cond_break);
+    loop->Body()->AddInstruction(cond_break);
     loop->Continuing()->AddInstruction(b.NextIteration(loop));
     loop->Merge()->AddInstruction(b.Return(func));
 
@@ -176,7 +176,7 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
 
     auto* loop = b.CreateLoop();
 
-    loop->Start()->AddInstruction(b.Return(func));
+    loop->Body()->AddInstruction(b.Return(func));
 
     func->StartTarget()->AddInstruction(loop);
 
@@ -207,7 +207,7 @@ TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
 
     auto* result = b.Equal(mod.Types().i32(), b.Constant(1_i), b.Constant(2_i));
 
-    loop->Start()->AddInstruction(result);
+    loop->Body()->AddInstruction(result);
     loop->Continuing()->AddInstruction(b.BreakIf(result, loop));
     loop->Merge()->AddInstruction(b.Return(func));
 
@@ -242,11 +242,11 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
     auto* outer_loop = b.CreateLoop();
     auto* inner_loop = b.CreateLoop();
 
-    inner_loop->Start()->AddInstruction(b.ExitLoop(inner_loop));
+    inner_loop->Body()->AddInstruction(b.ExitLoop(inner_loop));
     inner_loop->Continuing()->AddInstruction(b.NextIteration(inner_loop));
     inner_loop->Merge()->AddInstruction(b.Continue(outer_loop));
 
-    outer_loop->Start()->AddInstruction(inner_loop);
+    outer_loop->Body()->AddInstruction(inner_loop);
     outer_loop->Continuing()->AddInstruction(b.BreakIf(b.Constant(true), outer_loop));
     outer_loop->Merge()->AddInstruction(b.Return(func));
 
@@ -289,11 +289,11 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
     auto* outer_loop = b.CreateLoop();
     auto* inner_loop = b.CreateLoop();
 
-    inner_loop->Start()->AddInstruction(b.Continue(inner_loop));
+    inner_loop->Body()->AddInstruction(b.Continue(inner_loop));
     inner_loop->Continuing()->AddInstruction(b.BreakIf(b.Constant(true), inner_loop));
     inner_loop->Merge()->AddInstruction(b.BreakIf(b.Constant(true), outer_loop));
 
-    outer_loop->Start()->AddInstruction(b.Continue(outer_loop));
+    outer_loop->Body()->AddInstruction(b.Continue(outer_loop));
     outer_loop->Continuing()->AddInstruction(inner_loop);
     outer_loop->Merge()->AddInstruction(b.Return(func));
 

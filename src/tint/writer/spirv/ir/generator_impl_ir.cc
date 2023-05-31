@@ -441,7 +441,7 @@ void GeneratorImplIr::EmitBranch(const ir::Branch* b) {
                                         {
                                             Value(breakif->Condition()),
                                             Label(breakif->Loop()->Merge()),
-                                            Label(breakif->Loop()->Start()),
+                                            Label(breakif->Loop()->Body()),
                                         });
         },
         [&](const ir::Continue* cont) {
@@ -457,7 +457,7 @@ void GeneratorImplIr::EmitBranch(const ir::Branch* b) {
             current_function_.push_inst(spv::Op::OpBranch, {Label(swtch->Switch()->Merge())});
         },
         [&](const ir::NextIteration* loop) {
-            current_function_.push_inst(spv::Op::OpBranch, {Label(loop->Loop()->Start())});
+            current_function_.push_inst(spv::Op::OpBranch, {Label(loop->Loop()->Body())});
         },
         [&](Default) {
             TINT_ICE(Writer, diagnostics_) << "unimplemented branch: " << b->TypeInfo().name;
@@ -682,7 +682,7 @@ uint32_t GeneratorImplIr::EmitLoad(const ir::Load* load) {
 
 void GeneratorImplIr::EmitLoop(const ir::Loop* loop) {
     auto header_label = module_.NextId();
-    auto body_label = Label(loop->Start());
+    auto body_label = Label(loop->Body());
     auto continuing_label = Label(loop->Continuing());
     auto merge_label = Label(loop->Merge());
 
@@ -694,11 +694,11 @@ void GeneratorImplIr::EmitLoop(const ir::Loop* loop) {
     current_function_.push_inst(spv::Op::OpBranch, {body_label});
 
     // Emit the loop body.
-    EmitBlock(loop->Start());
+    EmitBlock(loop->Body());
 
     // Emit the loop continuing block.
     // The back-edge needs to go to the loop header, so update the label for the start block.
-    block_labels_.Replace(loop->Start(), header_label);
+    block_labels_.Replace(loop->Body(), header_label);
     if (loop->Continuing()->HasBranchTarget()) {
         EmitBlock(loop->Continuing());
     } else {
