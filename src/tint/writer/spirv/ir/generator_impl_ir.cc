@@ -172,6 +172,14 @@ uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {
     });
 }
 
+uint32_t GeneratorImplIr::ConstantNull(const type::Type* type) {
+    return constant_nulls_.GetOrCreate(type, [&]() {
+        auto id = module_.NextId();
+        module_.PushType(spv::Op::OpConstantNull, {Type(type), id});
+        return id;
+    });
+}
+
 uint32_t GeneratorImplIr::Type(const type::Type* ty) {
     return types_.GetOrCreate(ty, [&]() {
         auto id = module_.NextId();
@@ -726,9 +734,6 @@ uint32_t GeneratorImplIr::EmitUserCall(const ir::UserCall* call) {
 }
 
 uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
-    // TODO(crbug.com/tint/1906): Remove this when we use it for emitting workgroup variables.
-    (void)zero_init_workgroup_memory_;
-
     auto id = module_.NextId();
     auto* ptr = var->Type()->As<type::Pointer>();
     TINT_ASSERT(Writer, ptr);
@@ -749,6 +754,17 @@ uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
             if (var->Initializer()) {
                 TINT_ASSERT(Writer, var->Initializer()->Is<ir::Constant>());
                 operands.push_back(Value(var->Initializer()));
+            }
+            module_.PushType(spv::Op::OpVariable, operands);
+            break;
+        }
+        case builtin::AddressSpace::kWorkgroup: {
+            TINT_ASSERT(Writer, !current_function_);
+            OperandList operands = {ty, id, U32Operand(SpvStorageClassWorkgroup)};
+            if (zero_init_workgroup_memory_) {
+                // If requested, use the VK_KHR_zero_initialize_workgroup_memory to zero-initialize
+                // the workgroup variable using an null constant initializer.
+                operands.push_back(ConstantNull(ptr->StoreType()));
             }
             module_.PushType(spv::Op::OpVariable, operands);
             break;

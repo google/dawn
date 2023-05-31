@@ -297,5 +297,118 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, WorkgroupVar) {
+    auto* ty = mod.Types().Get<type::Pointer>(mod.Types().i32(), builtin::AddressSpace::kWorkgroup,
+                                              builtin::Access::kReadWrite);
+    b.CreateRootBlockIfNeeded()->SetInstructions(utils::Vector{b.Declare(ty)});
+
+    generator_.Generate();
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %4 "unused_entry_point"
+OpExecutionMode %4 LocalSize 1 1 1
+OpName %4 "unused_entry_point"
+%3 = OpTypeInt 32 1
+%2 = OpTypePointer Workgroup %3
+%1 = OpVariable %2 Workgroup
+%5 = OpTypeVoid
+%6 = OpTypeFunction %5
+%4 = OpFunction %5 None %6
+%7 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, WorkgroupVar_Name) {
+    auto* ty = mod.Types().Get<type::Pointer>(mod.Types().i32(), builtin::AddressSpace::kWorkgroup,
+                                              builtin::Access::kReadWrite);
+    auto* v = b.Declare(ty);
+    b.CreateRootBlockIfNeeded()->SetInstructions(utils::Vector{v});
+    mod.SetName(v, "myvar");
+
+    generator_.Generate();
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %4 "unused_entry_point"
+OpExecutionMode %4 LocalSize 1 1 1
+OpName %1 "myvar"
+OpName %4 "unused_entry_point"
+%3 = OpTypeInt 32 1
+%2 = OpTypePointer Workgroup %3
+%1 = OpVariable %2 Workgroup
+%5 = OpTypeVoid
+%6 = OpTypeFunction %5
+%4 = OpFunction %5 None %6
+%7 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, WorkgroupVar_LoadAndStore) {
+    auto* func = b.CreateFunction("foo", mod.Types().void_(), ir::Function::PipelineStage::kCompute,
+                                  std::array{1u, 1u, 1u});
+    mod.functions.Push(func);
+
+    auto* store_ty = mod.Types().i32();
+    auto* ty = mod.Types().Get<type::Pointer>(store_ty, builtin::AddressSpace::kWorkgroup,
+                                              builtin::Access::kReadWrite);
+    auto* v = b.Declare(ty);
+    b.CreateRootBlockIfNeeded()->SetInstructions(utils::Vector{v});
+
+    auto* load = b.Load(v);
+    auto* add = b.Add(store_ty, v, b.Constant(1_i));
+    auto* store = b.Store(v, add);
+    func->StartTarget()->SetInstructions(utils::Vector{load, add, store, b.Return(func)});
+
+    generator_.Generate();
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %4 "foo"
+OpExecutionMode %4 LocalSize 1 1 1
+OpName %4 "foo"
+%3 = OpTypeInt 32 1
+%2 = OpTypePointer Workgroup %3
+%1 = OpVariable %2 Workgroup
+%5 = OpTypeVoid
+%6 = OpTypeFunction %5
+%10 = OpConstant %3 1
+%4 = OpFunction %5 None %6
+%7 = OpLabel
+%8 = OpLoad %3 %1
+%9 = OpIAdd %3 %1 %10
+OpStore %1 %9
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, WorkgroupVar_ZeroInitializeWithExtension) {
+    auto* ty = mod.Types().Get<type::Pointer>(mod.Types().i32(), builtin::AddressSpace::kWorkgroup,
+                                              builtin::Access::kReadWrite);
+    b.CreateRootBlockIfNeeded()->SetInstructions(utils::Vector{b.Declare(ty)});
+
+    // Create a generator with the zero_init_workgroup_memory flag set to `true`.
+    spirv::GeneratorImplIr gen(&mod, true);
+    gen.Generate();
+    EXPECT_EQ(DumpModule(gen.Module()), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %5 "unused_entry_point"
+OpExecutionMode %5 LocalSize 1 1 1
+OpName %5 "unused_entry_point"
+%3 = OpTypeInt 32 1
+%2 = OpTypePointer Workgroup %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Workgroup %4
+%6 = OpTypeVoid
+%7 = OpTypeFunction %6
+%5 = OpFunction %6 None %7
+%8 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv

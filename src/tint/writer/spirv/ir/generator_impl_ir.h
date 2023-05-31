@@ -76,6 +76,11 @@ class GeneratorImplIr {
     /// @returns the result ID of the constant
     uint32_t Constant(const ir::Constant* constant);
 
+    /// Get the result ID of the OpConstantNull instruction for `type`, emitting it if necessary.
+    /// @param type the type to get the ID for
+    /// @returns the result ID of the OpConstantNull instruction
+    uint32_t ConstantNull(const type::Type* type);
+
     /// Get the result ID of the type `ty`, emitting a type declaration instruction if necessary.
     /// @param ty the type to get the ID for
     /// @returns the result ID of the type
@@ -197,6 +202,9 @@ class GeneratorImplIr {
 
     /// The map of constants to their result IDs.
     utils::Hashmap<const constant::Value*, uint32_t, 16> constants_;
+
+    /// The map of types to the result IDs of their OpConstantNull instructions.
+    utils::Hashmap<const type::Type*, uint32_t, 4> constant_nulls_;
 
     /// The map of non-constant values to their result IDs.
     utils::Hashmap<const ir::Value*, uint32_t, 8> values_;
