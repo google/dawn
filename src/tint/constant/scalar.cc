@@ -14,6 +14,7 @@
 
 #include "src/tint/constant/scalar.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::constant::ScalarBase);
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::AInt>);
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::AFloat>);
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::i32>);
@@ -21,3 +22,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::u32>);
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::f16>);
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::f32>);
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<bool>);
+
+namespace tint::constant {
+
+ScalarBase::~ScalarBase() = default;
+
+}

@@ -24,9 +24,16 @@
 
 namespace tint::constant {
 
+/// ScalarBase is the base class of all Scalar<T> specializations.
+/// Used for querying whether a value is a scalar type.
+class ScalarBase : public utils::Castable<ScalarBase, Value> {
+  public:
+    ~ScalarBase() override;
+};
+
 /// Scalar holds a single scalar or abstract-numeric value.
 template <typename T>
-class Scalar : public utils::Castable<Scalar<T>, Value> {
+class Scalar : public utils::Castable<Scalar<T>, ScalarBase> {
   public:
     static_assert(!std::is_same_v<UnwrapNumber<T>, T> || std::is_same_v<T, bool>,
                   "T must be a Number or bool");
