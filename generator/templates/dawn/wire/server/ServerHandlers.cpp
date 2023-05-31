@@ -54,6 +54,14 @@ namespace dawn::wire::server {
                 {{name}}Data->generation = cmd.{{name}}.generation;
             {% endfor %}
 
+            {%- for member in command.members if member.id_type != None -%}
+                {% set name = as_varName(member.name) %}
+                Known<WGPU{{member.id_type.name.CamelCase()}}> {{name}}Handle;
+                if (!{{member.id_type.name.CamelCase()}}Objects().Get(cmd.{{name}}, &{{name}}Handle)) {
+                    return false;
+                }
+            {%- endfor -%}
+
             //* Do command
             bool success = Do{{Suffix}}(
                 {%- for member in command.members -%}
@@ -63,6 +71,8 @@ namespace dawn::wire::server {
                         {%- else -%}
                             &cmd.{{as_varName(member.name)}}
                         {%- endif -%}
+                    {%- elif member.id_type != None -%}
+                        {{as_varName(member.name)}}Handle
                     {%- else -%}
                         cmd.{{as_varName(member.name)}}
                     {%- endif -%}

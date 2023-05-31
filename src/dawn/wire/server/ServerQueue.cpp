@@ -28,16 +28,11 @@ void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data, WGPUQueueWorkDoneStatu
     SerializeCommand(cmd);
 }
 
-bool Server::DoQueueOnSubmittedWorkDone(ObjectId queueId,
+bool Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
                                         uint64_t signalValue,
                                         uint64_t requestSerial) {
-    auto* queue = QueueObjects().Get(queueId);
-    if (queue == nullptr) {
-        return false;
-    }
-
     auto userdata = MakeUserdata<QueueWorkDoneUserdata>();
-    userdata->queue = ObjectHandle{queueId, queue->generation};
+    userdata->queue = queue.AsHandle();
     userdata->requestSerial = requestSerial;
 
     mProcs.queueOnSubmittedWorkDone(queue->handle, signalValue,
@@ -45,19 +40,11 @@ bool Server::DoQueueOnSubmittedWorkDone(ObjectId queueId,
     return true;
 }
 
-bool Server::DoQueueWriteBuffer(ObjectId queueId,
-                                ObjectId bufferId,
+bool Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
+                                Known<WGPUBuffer> buffer,
                                 uint64_t bufferOffset,
                                 const uint8_t* data,
                                 uint64_t size) {
-    // The null object isn't valid as `self` or `buffer` so we can combine the check with the
-    // check that the ID is valid.
-    auto* queue = QueueObjects().Get(queueId);
-    auto* buffer = BufferObjects().Get(bufferId);
-    if (queue == nullptr || buffer == nullptr) {
-        return false;
-    }
-
     if (size > std::numeric_limits<size_t>::max()) {
         return false;
     }
@@ -67,19 +54,12 @@ bool Server::DoQueueWriteBuffer(ObjectId queueId,
     return true;
 }
 
-bool Server::DoQueueWriteTexture(ObjectId queueId,
+bool Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
                                  const WGPUImageCopyTexture* destination,
                                  const uint8_t* data,
                                  uint64_t dataSize,
                                  const WGPUTextureDataLayout* dataLayout,
                                  const WGPUExtent3D* writeSize) {
-    // The null object isn't valid as `self` so we can combine the check with the
-    // check that the ID is valid.
-    auto* queue = QueueObjects().Get(queueId);
-    if (queue == nullptr) {
-        return false;
-    }
-
     if (dataSize > std::numeric_limits<size_t>::max()) {
         return false;
     }

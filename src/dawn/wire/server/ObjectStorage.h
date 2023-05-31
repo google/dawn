@@ -39,7 +39,7 @@ template <typename T>
 struct ObjectDataBase {
     // The backend-provided handle and generation to this object.
     T handle;
-    uint32_t generation = 0;
+    ObjectGeneration generation = 0;
 
     AllocationState state;
 };
@@ -73,6 +73,27 @@ struct ObjectData<WGPUDevice> : public ObjectDataBase<WGPUDevice> {
     std::unique_ptr<DeviceInfo> info = std::make_unique<DeviceInfo>();
 };
 
+// Information of both an ID and an object data for use as a shorthand in doers.
+template <typename T>
+struct Known {
+    ObjectId id;
+    ObjectData<T>* data;
+
+    const ObjectData<T>* operator->() const {
+        ASSERT(data != nullptr);
+        return data;
+    }
+    ObjectData<T>* operator->() {
+        ASSERT(data != nullptr);
+        return data;
+    }
+
+    ObjectHandle AsHandle() const {
+        ASSERT(data != nullptr);
+        return {id, data->generation};
+    }
+};
+
 // Keeps track of the mapping between client IDs and backend objects.
 template <typename T>
 class KnownObjectsBase {
@@ -91,7 +112,7 @@ class KnownObjectsBase {
 
     // Get a backend objects for a given client ID.
     // Returns nullptr if the ID hasn't previously been allocated.
-    const Data* Get(uint32_t id) const {
+    const Data* Get(ObjectId id) const {
         if (id >= mKnown.size()) {
             return nullptr;
         }
@@ -102,7 +123,7 @@ class KnownObjectsBase {
         }
         return data;
     }
-    Data* Get(uint32_t id) {
+    Data* Get(ObjectId id) {
         if (id >= mKnown.size()) {
             return nullptr;
         }
@@ -114,7 +135,12 @@ class KnownObjectsBase {
         return data;
     }
 
-    Data* FillReservation(uint32_t id, T handle) {
+    bool Get(ObjectId id, Known<T>* result) {
+        *result = Known<T>{id, Get(id)};
+        return (*result).data != nullptr;
+    }
+
+    Data* FillReservation(ObjectId id, T handle) {
         ASSERT(id < mKnown.size());
         Data* data = &mKnown[id];
         ASSERT(data->state == AllocationState::Reserved);
@@ -156,7 +182,7 @@ class KnownObjectsBase {
     }
 
     // Marks an ID as deallocated
-    void Free(uint32_t id) {
+    void Free(ObjectId id) {
         ASSERT(id < mKnown.size());
         mKnown[id].state = AllocationState::Free;
     }
@@ -206,13 +232,13 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
         return data;
     }
 
-    Data* FillReservation(uint32_t id, WGPUDevice handle) {
+    Data* FillReservation(ObjectId id, WGPUDevice handle) {
         Data* data = KnownObjectsBase<WGPUDevice>::FillReservation(id, handle);
         AddToKnownSet(data);
         return data;
     }
 
-    void Free(uint32_t id) {
+    void Free(ObjectId id) {
         mKnownSet.erase(mKnown[id].handle);
         KnownObjectsBase<WGPUDevice>::Free(id);
     }

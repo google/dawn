@@ -25,6 +25,8 @@
                 {%- else -%}
                     {{as_cType(member.type.name)}}* {{as_varName(member.name)}}
                 {%- endif -%}
+            {%- elif member.id_type != None -%}
+                Known<WGPU{{member.id_type.name.CamelCase()}}> {{member.name.camelCase()}}
             {%- else -%}
                 {{as_annotated_cType(member)}}
             {%- endif -%}

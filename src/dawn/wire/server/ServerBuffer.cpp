@@ -51,26 +51,15 @@ bool Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
     return true;
 }
 
-bool Server::DoBufferMapAsync(ObjectId bufferId,
+bool Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
                               uint64_t requestSerial,
                               WGPUMapModeFlags mode,
                               uint64_t offset64,
                               uint64_t size64) {
     // These requests are just forwarded to the buffer, with userdata containing what the
     // client will require in the return command.
-
-    // The null object isn't valid as `self`
-    if (bufferId == 0) {
-        return false;
-    }
-
-    auto* buffer = BufferObjects().Get(bufferId);
-    if (buffer == nullptr) {
-        return false;
-    }
-
     std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
-    userdata->buffer = ObjectHandle{bufferId, buffer->generation};
+    userdata->buffer = buffer.AsHandle();
     userdata->bufferObj = buffer->handle;
     userdata->requestSerial = requestSerial;
     userdata->mode = mode;
@@ -101,27 +90,21 @@ bool Server::DoBufferMapAsync(ObjectId bufferId,
     return true;
 }
 
-bool Server::DoDeviceCreateBuffer(ObjectId deviceId,
+bool Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
                                   const WGPUBufferDescriptor* descriptor,
                                   ObjectHandle bufferResult,
                                   uint64_t readHandleCreateInfoLength,
                                   const uint8_t* readHandleCreateInfo,
                                   uint64_t writeHandleCreateInfoLength,
                                   const uint8_t* writeHandleCreateInfo) {
-    auto* device = DeviceObjects().Get(deviceId);
-    if (device == nullptr) {
-        return false;
-    }
-
     // Create and register the buffer object.
-    auto* resultData = BufferObjects().Allocate(bufferResult);
-    if (resultData == nullptr) {
+    auto* buffer = BufferObjects().Allocate(bufferResult);
+    if (buffer == nullptr) {
         return false;
     }
-    resultData->generation = bufferResult.generation;
-    resultData->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
-    resultData->usage = descriptor->usage;
-    resultData->mappedAtCreation = descriptor->mappedAtCreation;
+    buffer->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
+    buffer->usage = descriptor->usage;
+    buffer->mappedAtCreation = descriptor->mappedAtCreation;
 
     // isReadMode and isWriteMode could be true at the same time if usage contains
     // WGPUMapMode_Read and buffer is mappedAtCreation
@@ -146,22 +129,22 @@ bool Server::DoDeviceCreateBuffer(ObjectId deviceId,
             return false;
         }
         ASSERT(writeHandle != nullptr);
-        resultData->writeHandle.reset(writeHandle);
+        buffer->writeHandle.reset(writeHandle);
         writeHandle->SetDataLength(descriptor->size);
 
         if (descriptor->mappedAtCreation) {
-            void* mapping = mProcs.bufferGetMappedRange(resultData->handle, 0, descriptor->size);
+            void* mapping = mProcs.bufferGetMappedRange(buffer->handle, 0, descriptor->size);
             if (mapping == nullptr) {
                 // A zero mapping is used to indicate an allocation error of an error buffer.
                 // This is a valid case and isn't fatal. Remember the buffer is an error so as
                 // to skip subsequent mapping operations.
-                resultData->mapWriteState = BufferMapWriteState::MapError;
+                buffer->mapWriteState = BufferMapWriteState::MapError;
                 return true;
             }
             ASSERT(mapping != nullptr);
             writeHandle->SetTarget(mapping);
 
-            resultData->mapWriteState = BufferMapWriteState::Mapped;
+            buffer->mapWriteState = BufferMapWriteState::Mapped;
         }
     }
 
@@ -175,31 +158,22 @@ bool Server::DoDeviceCreateBuffer(ObjectId deviceId,
         }
         ASSERT(readHandle != nullptr);
 
-        resultData->readHandle.reset(readHandle);
+        buffer->readHandle.reset(readHandle);
     }
 
     return true;
 }
 
-bool Server::DoBufferUpdateMappedData(ObjectId bufferId,
+bool Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
                                       uint64_t writeDataUpdateInfoLength,
                                       const uint8_t* writeDataUpdateInfo,
                                       uint64_t offset,
                                       uint64_t size) {
-    // The null object isn't valid as `self`
-    if (bufferId == 0) {
-        return false;
-    }
-
     if (writeDataUpdateInfoLength > std::numeric_limits<size_t>::max() ||
         offset > std::numeric_limits<size_t>::max() || size > std::numeric_limits<size_t>::max()) {
         return false;
     }
 
-    auto* buffer = BufferObjects().Get(bufferId);
-    if (buffer == nullptr) {
-        return false;
-    }
     switch (buffer->mapWriteState) {
         case BufferMapWriteState::Unmapped:
             return false;

@@ -20,24 +20,17 @@
 
 namespace dawn::wire::server {
 
-bool Server::DoInstanceRequestAdapter(ObjectId instanceId,
+bool Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
                                       uint64_t requestSerial,
                                       ObjectHandle adapterHandle,
                                       const WGPURequestAdapterOptions* options) {
-    auto* instance = InstanceObjects().Get(instanceId);
-    if (instance == nullptr) {
+    auto* adapter = AdapterObjects().Allocate(adapterHandle, AllocationState::Reserved);
+    if (adapter == nullptr) {
         return false;
     }
-
-    auto* resultData = AdapterObjects().Allocate(adapterHandle, AllocationState::Reserved);
-    if (resultData == nullptr) {
-        return false;
-    }
-
-    resultData->generation = adapterHandle.generation;
 
     auto userdata = MakeUserdata<RequestAdapterUserdata>();
-    userdata->instance = ObjectHandle{instanceId, instance->generation};
+    userdata->instance = instance.AsHandle();
     userdata->requestSerial = requestSerial;
     userdata->adapterObjectId = adapterHandle.id;
 
