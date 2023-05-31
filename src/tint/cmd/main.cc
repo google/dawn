@@ -41,6 +41,8 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/cmd/generate_external_texture_bindings.h"
 #include "src/tint/cmd/helper.h"
+#include "src/tint/utils/cli.h"
+#include "src/tint/utils/defer.h"
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/utils/string_stream.h"
@@ -53,6 +55,36 @@
 #include "src/tint/ir/from_program.h"  // nogncheck
 #include "src/tint/ir/module.h"        // nogncheck
 #endif                                 // TINT_BUILD_IR
+
+#if TINT_BUILD_SPV_WRITER
+#define SPV_WRITER_ONLY(x) x
+#else
+#define SPV_WRITER_ONLY(x)
+#endif
+
+#if TINT_BUILD_WGSL_WRITER
+#define WGSL_WRITER_ONLY(x) x
+#else
+#define WGSL_WRITER_ONLY(x)
+#endif
+
+#if TINT_BUILD_MSL_WRITER
+#define MSL_WRITER_ONLY(x) x
+#else
+#define MSL_WRITER_ONLY(x)
+#endif
+
+#if TINT_BUILD_HLSL_WRITER
+#define HLSL_WRITER_ONLY(x) x
+#else
+#define HLSL_WRITER_ONLY(x)
+#endif
+
+#if TINT_BUILD_GLSL_WRITER
+#define GLSL_WRITER_ONLY(x) x
+#else
+#define GLSL_WRITER_ONLY(x)
+#endif
 
 namespace {
 
@@ -73,7 +105,6 @@ enum class Format {
 };
 
 struct Options {
-    bool show_help = false;
     bool verbose = false;
 
     std::string input_filename;
@@ -99,12 +130,12 @@ struct Options {
     tint::reader::spirv::Options spirv_reader_options;
 #endif
 
-    std::vector<std::string> transforms;
+    tint::utils::Vector<std::string, 4> transforms;
 
     std::string fxc_path;
     std::string dxc_path;
     std::string xcrun_path;
-    std::unordered_map<std::string, double> overrides;
+    tint::utils::Hashmap<std::string, double, 8> overrides;
     std::optional<tint::sem::BindingPoint> hlsl_root_constant_binding_point;
 
 #if TINT_BUILD_IR
@@ -114,94 +145,8 @@ struct Options {
 
 #if TINT_BUILD_SYNTAX_TREE_WRITER
     bool dump_syntax_tree = false;
-#endif  // TINB_BUILD_SYNTAX_TREE_WRITER
+#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 };
-
-const char kUsage[] = R"(Usage: tint [options] <input-file>
-
- options:
-  --format <spirv|spvasm|wgsl|msl|hlsl|none>  -- Output format.
-                               If not provided, will be inferred from output
-                               filename extension:
-                                   .spvasm -> spvasm
-                                   .spv    -> spirv
-                                   .wgsl   -> wgsl
-                                   .metal  -> msl
-                                   .hlsl   -> hlsl
-                               If none matches, then default to SPIR-V assembly.
-  -ep <name>                -- Output single entry point
-  --output-file <name>      -- Output file name.  Use "-" for standard output
-  -o <name>                 -- Output file name.  Use "-" for standard output
-  --transform <name list>   -- Runs transforms, name list is comma separated
-                               Available transforms:
-${transforms} --parse-only              -- Stop after parsing the input
-  --allow-non-uniform-derivatives  -- When using SPIR-V input, allow non-uniform derivatives by
-                               inserting a module-scope directive to suppress any uniformity
-                               violations that may be produced.
-  --disable-workgroup-init  -- Disable workgroup memory zero initialization.
-  --dump-inspector-bindings -- Dump reflection data about bindins to stdout.
-  -h                        -- This help text
-  --hlsl-root-constant-binding-point <group>,<binding>  -- Binding point for root constant.
-                               Specify the binding point for generated uniform buffer
-                               used for num_workgroups in HLSL. If not specified, then
-                               default to binding 0 of the largest used group plus 1,
-                               or group 0 if no resource bound.
-  --validate                -- Validates the generated shader with all available validators
-  --skip-hash <hash list>   -- Skips validation if the hash of the output is equal to any
-                               of the hash codes in the comma separated list of hashes
-  --print-hash              -- Emit the hash of the output program
-  --fxc                     -- Path to FXC dll, used to validate HLSL output.
-                               When specified, automatically enables HLSL validation with FXC
-  --dxc                     -- Path to DXC executable, used to validate HLSL output.
-                               When specified, automatically enables HLSL validation with DXC
-  --xcrun                   -- Path to xcrun executable, used to validate MSL output.
-                               When specified, automatically enables MSL validation
-  --overrides               -- Override values as IDENTIFIER=VALUE, comma-separated.
-  --rename-all              -- Renames all symbols.
-)";
-
-Format parse_format(const std::string& fmt) {
-    (void)fmt;
-
-#if TINT_BUILD_SPV_WRITER
-    if (fmt == "spirv") {
-        return Format::kSpirv;
-    }
-    if (fmt == "spvasm") {
-        return Format::kSpvAsm;
-    }
-#endif  // TINT_BUILD_SPV_WRITER
-
-#if TINT_BUILD_WGSL_WRITER
-    if (fmt == "wgsl") {
-        return Format::kWgsl;
-    }
-#endif  // TINT_BUILD_WGSL_WRITER
-
-#if TINT_BUILD_MSL_WRITER
-    if (fmt == "msl") {
-        return Format::kMsl;
-    }
-#endif  // TINT_BUILD_MSL_WRITER
-
-#if TINT_BUILD_HLSL_WRITER
-    if (fmt == "hlsl") {
-        return Format::kHlsl;
-    }
-#endif  // TINT_BUILD_HLSL_WRITER
-
-#if TINT_BUILD_GLSL_WRITER
-    if (fmt == "glsl") {
-        return Format::kGlsl;
-    }
-#endif  // TINT_BUILD_GLSL_WRITER
-
-    if (fmt == "none") {
-        return Format::kNone;
-    }
-
-    return Format::kUnknown;
-}
 
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
@@ -238,112 +183,154 @@ Format infer_format(const std::string& filename) {
     return Format::kUnknown;
 }
 
-std::vector<std::string> split_on_char(std::string list, char c) {
-    std::vector<std::string> res;
+bool ParseArgs(tint::utils::VectorRef<std::string_view> arguments,
+               std::string transform_names,
+               Options* opts) {
+    using namespace tint::utils::cli;  // NOLINT(build/namespaces)
 
-    std::istringstream str(list);
-    while (str.good()) {
-        std::string substr;
-        getline(str, substr, c);
-        res.push_back(substr);
-    }
-    return res;
-}
+    tint::utils::Vector<EnumName<Format>, 8> format_enum_names{
+        EnumName(Format::kNone, "none"),
+    };
 
-std::vector<std::string> split_on_comma(std::string list) {
-    return split_on_char(list, ',');
-}
+    SPV_WRITER_ONLY(format_enum_names.Emplace(Format::kSpirv, "spirv"));
+    SPV_WRITER_ONLY(format_enum_names.Emplace(Format::kSpvAsm, "spvasm"));
+    WGSL_WRITER_ONLY(format_enum_names.Emplace(Format::kWgsl, "wgsl"));
+    MSL_WRITER_ONLY(format_enum_names.Emplace(Format::kMsl, "msl"));
+    HLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kHlsl, "hlsl"));
+    GLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kGlsl, "glsl"));
 
-std::vector<std::string> split_on_equal(std::string list) {
-    return split_on_char(list, '=');
-}
+    OptionSet options;
+    auto& fmt = options.Add<EnumOption<Format>>("format",
+                                                R"(Output format.
+If not provided, will be inferred from output filename extension:
+  .spvasm -> spvasm
+  .spv    -> spirv
+  .wgsl   -> wgsl
+  .metal  -> msl
+  .hlsl   -> hlsl)",
+                                                format_enum_names, ShortName{"f"});
+    TINT_DEFER(opts->format = fmt.value.value_or(Format::kUnknown));
 
-std::optional<uint64_t> parse_unsigned_number(std::string number) {
-    for (char c : number) {
-        if (!std::isdigit(c)) {
-            // Found a non-digital char, return nullopt
-            return std::nullopt;
-        }
-    }
-
-    errno = 0;
-    char* p_end;
-    uint64_t result;
-    // std::strtoull will not throw exception.
-    result = std::strtoull(number.c_str(), &p_end, 10);
-    if ((errno != 0) || (static_cast<size_t>(p_end - number.c_str()) != number.length())) {
-        // Unexpected conversion result
-        return std::nullopt;
-    }
-
-    return result;
-}
-
-bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
-    for (size_t i = 1; i < args.size(); ++i) {
-        const std::string& arg = args[i];
-        if (arg == "--format") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing value for --format argument." << std::endl;
-                return false;
-            }
-            opts->format = parse_format(args[i]);
-
-            if (opts->format == Format::kUnknown) {
-                std::cerr << "Unknown output format: " << args[i] << std::endl;
-                return false;
-            }
-        } else if (arg == "-ep") {
-            if (i + 1 >= args.size()) {
-                std::cerr << "Missing value for -ep" << std::endl;
-                return false;
-            }
-            i++;
-            opts->ep_name = args[i];
+    auto& ep = options.Add<StringOption>("entry-point", "Output single entry point",
+                                         ShortName{"ep"}, Parameter{"name"});
+    TINT_DEFER({
+        if (ep.value.has_value()) {
+            opts->ep_name = *ep.value;
             opts->emit_single_entry_point = true;
+        }
+    });
 
-        } else if (arg == "-o" || arg == "--output-name") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing value for " << arg << std::endl;
-                return false;
-            }
-            opts->output_file = args[i];
+    auto& output = options.Add<StringOption>("output-name", "Output file name", ShortName{"o"},
+                                             Parameter{"name"});
+    TINT_DEFER(opts->output_file = output.value.value_or(""));
 
-        } else if (arg == "-h" || arg == "--help") {
-            opts->show_help = true;
-        } else if (arg == "-v" || arg == "--verbose") {
-            opts->verbose = true;
-        } else if (arg == "--transform") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing value for " << arg << std::endl;
-                return false;
-            }
-            opts->transforms = split_on_comma(args[i]);
-        } else if (arg == "--parse-only") {
-            opts->parse_only = true;
-        } else if (arg == "--allow-non-uniform-derivatives") {
-#if TINT_BUILD_SPV_READER
-            opts->spirv_reader_options.allow_non_uniform_derivatives = true;
-#else
-            std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
-            return false;
-#endif
-        } else if (arg == "--disable-workgroup-init") {
-            opts->disable_workgroup_init = true;
-        } else if (arg == "--dump-inspector-bindings") {
-            opts->dump_inspector_bindings = true;
-        } else if (arg == "--validate") {
+    auto& fxc_path =
+        options.Add<StringOption>("fxc", R"(Path to FXC dll, used to validate HLSL output.
+When specified, automatically enables HLSL validation with FXC)",
+                                  Parameter{"path"});
+    TINT_DEFER(opts->fxc_path = fxc_path.value.value_or(""));
+
+    auto& dxc_path =
+        options.Add<StringOption>("dxc", R"(Path to DXC dll, used to validate HLSL output.
+When specified, automatically enables HLSL validation with DXC)",
+                                  Parameter{"path"});
+    TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
+
+    auto& xcrun =
+        options.Add<StringOption>("xcrun", R"(Path to xcrun executable, used to validate MSL output.
+When specified, automatically enables MSL validation)",
+                                  Parameter{"path"});
+    TINT_DEFER({
+        if (xcrun.value.has_value()) {
+            opts->xcrun_path = *xcrun.value;
             opts->validate = true;
-        } else if (arg == "--skip-hash") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing hash value for " << arg << std::endl;
-                return false;
+        }
+    });
+
+#if TINT_BUILD_IR
+    auto& dump_ir = options.Add<BoolOption>("dump-ir", "Writes the IR to stdout", Alias{"emit-ir"},
+                                            Default{false});
+    TINT_DEFER(opts->dump_ir = *dump_ir.value);
+
+    auto& use_ir = options.Add<BoolOption>(
+        "use-ir", "Use the IR for writers and transforms when possible", Default{false});
+    TINT_DEFER(opts->use_ir = *use_ir.value);
+#endif  // TINT_BUILD_IR
+
+    auto& verbose =
+        options.Add<BoolOption>("verbose", "Verbose output", ShortName{"v"}, Default{false});
+    TINT_DEFER(opts->verbose = *verbose.value);
+
+    auto& validate = options.Add<BoolOption>(
+        "validate", "Validates the generated shader with all available validators", Default{false});
+    TINT_DEFER(opts->validate = *validate.value);
+
+    auto& parse_only =
+        options.Add<BoolOption>("parse-only", "Stop after parsing the input", Default{false});
+    TINT_DEFER(opts->parse_only = *parse_only.value);
+
+#if TINT_BUILD_SPV_READER
+    auto& allow_nud =
+        options.Add<BoolOption>("allow-non-uniform-derivatives",
+                                R"(When using SPIR-V input, allow non-uniform derivatives by
+inserting a module-scope directive to suppress any uniformity
+violations that may be produced)",
+                                Default{false});
+    TINT_DEFER({
+        if (allow_nud.value.value_or(false)) {
+            opts->spirv_reader_options.allow_non_uniform_derivatives = true;
+        }
+    });
+#endif
+
+    auto& disable_wg_init = options.Add<BoolOption>(
+        "disable-workgroup-init", "Disable workgroup memory zero initialization", Default{false});
+    TINT_DEFER(opts->disable_workgroup_init = *disable_wg_init.value);
+
+    auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
+    TINT_DEFER(opts->rename_all = *rename_all.value);
+
+    auto& dump_inspector_bindings = options.Add<BoolOption>(
+        "dump-inspector-bindings", "Dump reflection data about bindings to stdout",
+        Alias{"emit-inspector-bindings"}, Default{false});
+    TINT_DEFER(opts->dump_inspector_bindings = *dump_inspector_bindings.value);
+
+#if TINT_BUILD_SYNTAX_TREE_WRITER
+    auto& dump_ast = options.Add<BoolOption>("dump-ast", "Writes the AST to stdout",
+                                             Alias{"emit-ast"}, Default{false});
+    TINT_DEFER(opts->dump_ast = *dump_ast.value);
+#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
+
+    auto& print_hash = options.Add<BoolOption>("print-hash", "Emit the hash of the output program",
+                                               Default{false});
+    TINT_DEFER(opts->print_hash = *print_hash.value);
+
+    auto& transforms =
+        options.Add<StringOption>("transform", R"(Runs transforms, name list is comma separated
+Available transforms:
+)" + transform_names,
+                                  ShortName{"t"});
+    TINT_DEFER({
+        if (transforms.value.has_value()) {
+            for (auto transform : tint::utils::Split(*transforms.value, ",")) {
+                opts->transforms.Push(std::string(transform));
             }
-            for (auto hash : split_on_comma(args[i])) {
+        }
+    });
+
+    auto& hlsl_rc_bp = options.Add<StringOption>("hlsl-root-constant-binding-point",
+                                                 R"(Binding point for root constant.
+Specify the binding point for generated uniform buffer
+used for num_workgroups in HLSL. If not specified, then
+default to binding 0 of the largest used group plus 1,
+or group 0 if no resource bound)");
+
+    auto& skip_hash = options.Add<StringOption>(
+        "skip-hash", R"(Skips validation if the hash of the output is equal to any
+of the hash codes in the comma separated list of hashes)");
+    TINT_DEFER({
+        if (skip_hash.value.has_value()) {
+            for (auto hash : tint::utils::Split(*skip_hash.value, ",")) {
                 uint32_t value = 0;
                 int base = 10;
                 if (hash.size() > 2 && hash[0] == '0' && (hash[1] == 'x' || hash[1] == 'X')) {
@@ -353,91 +340,82 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
                 std::from_chars(hash.data(), hash.data() + hash.size(), value, base);
                 opts->skip_hash.emplace(value);
             }
-        } else if (arg == "--print-hash") {
-            opts->print_hash = true;
-        } else if (arg == "--fxc") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing value for " << arg << std::endl;
+        }
+    });
+
+    auto& overrides = options.Add<StringOption>(
+        "overrides", "Override values as IDENTIFIER=VALUE, comma-separated");
+
+    auto& help = options.Add<BoolOption>("help", "Show usage", ShortName{"h"});
+
+    auto show_usage = [&] {
+        std::cout << R"(Usage: tint [options] <input-file>
+
+Options:
+)";
+        options.ShowHelp(std::cout);
+    };
+
+    auto result = options.Parse(std::cerr, arguments);
+    if (!result) {
+        std::cerr << std::endl;
+        show_usage();
+        return false;
+    }
+    if (help.value.value_or(false)) {
+        show_usage();
+        return false;
+    }
+
+    if (overrides.value.has_value()) {
+        for (const auto& o : tint::utils::Split(*overrides.value, ",")) {
+            auto parts = tint::utils::Split(o, "=");
+            if (parts.Length() != 2) {
+                std::cerr << "override values must be of the form IDENTIFIER=VALUE";
                 return false;
             }
-            opts->fxc_path = args[i];
-        } else if (arg == "--dxc") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing value for " << arg << std::endl;
+            auto value = tint::utils::ParseNumber<double>(parts[1]);
+            if (!value) {
+                std::cerr << "invalid override value: " << parts[1];
                 return false;
             }
-            opts->dxc_path = args[i];
-#if TINT_BUILD_IR
-        } else if (arg == "--dump-ir") {
-            opts->dump_ir = true;
-        } else if (arg == "--use-ir") {
-            opts->use_ir = true;
-#endif  // TINT_BUILD_IR
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-        } else if (arg == "--dump-ast") {
-            opts->dump_syntax_tree = true;
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
-        } else if (arg == "--xcrun") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing value for " << arg << std::endl;
-                return false;
-            }
-            opts->xcrun_path = args[i];
-            opts->validate = true;
-        } else if (arg == "--overrides") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing value for " << arg << std::endl;
-                return false;
-            }
-            for (const auto& o : split_on_comma(args[i])) {
-                auto parts = split_on_equal(o);
-                opts->overrides.insert({parts[0], std::stod(parts[1])});
-            }
-        } else if (arg == "--rename-all") {
-            ++i;
-            opts->rename_all = true;
-        } else if (arg == "--hlsl-root-constant-binding-point") {
-            ++i;
-            if (i >= args.size()) {
-                std::cerr << "Missing value for " << arg << std::endl;
-                return false;
-            }
-            auto binding_points = split_on_comma(args[i]);
-            if (binding_points.size() != 2) {
-                std::cerr << "Invalid binding point for " << arg << ": " << args[i] << std::endl;
-                return false;
-            }
-            auto group = parse_unsigned_number(binding_points[0]);
-            if ((!group.has_value()) || (group.value() > std::numeric_limits<uint32_t>::max())) {
-                std::cerr << "Invalid group for " << arg << ": " << binding_points[0] << std::endl;
-                return false;
-            }
-            auto binding = parse_unsigned_number(binding_points[1]);
-            if ((!binding.has_value()) ||
-                (binding.value() > std::numeric_limits<uint32_t>::max())) {
-                std::cerr << "Invalid binding for " << arg << ": " << binding_points[1]
-                          << std::endl;
-                return false;
-            }
-            opts->hlsl_root_constant_binding_point = tint::sem::BindingPoint{
-                static_cast<uint32_t>(group.value()), static_cast<uint32_t>(binding.value())};
-        } else if (!arg.empty()) {
-            if (arg[0] == '-') {
-                std::cerr << "Unrecognized option: " << arg << std::endl;
-                return false;
-            }
-            if (!opts->input_filename.empty()) {
-                std::cerr << "More than one input file specified: '" << opts->input_filename
-                          << "' and '" << arg << "'" << std::endl;
-                return false;
-            }
-            opts->input_filename = arg;
+            opts->overrides.Add(std::string(parts[0]), value.Get());
         }
     }
+
+    if (hlsl_rc_bp.value.has_value()) {
+        auto binding_points = tint::utils::Split(*hlsl_rc_bp.value, ",");
+        if (binding_points.Length() != 2) {
+            std::cerr << "Invalid binding point for " << hlsl_rc_bp.name << ": "
+                      << *hlsl_rc_bp.value << std::endl;
+            return false;
+        }
+        auto group = tint::utils::ParseUint32(binding_points[0]);
+        if (!group) {
+            std::cerr << "Invalid group for " << hlsl_rc_bp.name << ": " << binding_points[0]
+                      << std::endl;
+            return false;
+        }
+        auto binding = tint::utils::ParseUint32(binding_points[1]);
+        if (!binding) {
+            std::cerr << "Invalid binding for " << hlsl_rc_bp.name << ": " << binding_points[1]
+                      << std::endl;
+            return false;
+        }
+        opts->hlsl_root_constant_binding_point =
+            tint::sem::BindingPoint{group.Get(), binding.Get()};
+    }
+
+    auto files = result.Get();
+    if (files.Length() > 1) {
+        std::cerr << "More than one input file specified: "
+                  << tint::utils::Join(Transform(files, tint::utils::Quote), ", ") << std::endl;
+        return false;
+    }
+    if (files.Length() == 1) {
+        opts->input_filename = files[0];
+    }
+
     return true;
 }
 
@@ -677,7 +655,7 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
         const char* default_xcrun_exe = "xcrun";
 #endif
         auto xcrun = tint::utils::Command::LookPath(
-            options.xcrun_path.empty() ? default_xcrun_exe : options.xcrun_path);
+            options.xcrun_path.empty() ? default_xcrun_exe : std::string(options.xcrun_path));
         if (xcrun.Found()) {
             res = tint::val::Msl(xcrun.Path(), result.msl);
         } else {
@@ -738,8 +716,8 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
         tint::val::Result dxc_res;
         bool dxc_found = false;
         if (options.validate || must_validate_dxc) {
-            auto dxc =
-                tint::utils::Command::LookPath(options.dxc_path.empty() ? "dxc" : options.dxc_path);
+            auto dxc = tint::utils::Command::LookPath(
+                options.dxc_path.empty() ? "dxc" : std::string(options.dxc_path));
             if (dxc.Found()) {
                 dxc_found = true;
 
@@ -757,8 +735,8 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
             } else if (must_validate_dxc) {
                 // DXC was explicitly requested. Error if it could not be found.
                 dxc_res.failed = true;
-                dxc_res.output =
-                    "DXC executable '" + options.dxc_path + "' not found. Cannot validate";
+                dxc_res.output = "DXC executable '" + std::string(options.dxc_path) +
+                                 "' not found. Cannot validate";
             }
         }
 
@@ -766,7 +744,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
         bool fxc_found = false;
         if (options.validate || must_validate_fxc) {
             auto fxc = tint::utils::Command::LookPath(
-                options.fxc_path.empty() ? tint::val::kFxcDLLName : options.fxc_path);
+                options.fxc_path.empty() ? tint::val::kFxcDLLName : std::string(options.fxc_path));
 
 #ifdef _WIN32
             if (fxc.Found()) {
@@ -913,7 +891,14 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
 }  // namespace
 
 int main(int argc, const char** argv) {
-    std::vector<std::string> args(argv, argv + argc);
+    tint::utils::Vector<std::string_view, 8> arguments;
+    for (int i = 1; i < argc; i++) {
+        std::string_view arg(argv[i]);
+        if (!arg.empty()) {
+            arguments.Push(argv[i]);
+        }
+    }
+
     Options options;
 
     tint::SetInternalCompilerErrorReporter(&tint::cmd::TintInternalCompilerErrorReporter);
@@ -927,11 +912,6 @@ int main(int argc, const char** argv) {
         return result.wgsl;
     };
 #endif  // TINT_BUILD_WGSL_WRITER
-
-    if (!ParseArgs(args, &options)) {
-        std::cerr << "Failed to parse arguments." << std::endl;
-        return 1;
-    }
 
     struct TransformFactory {
         const char* name;
@@ -970,22 +950,23 @@ int main(int argc, const char** argv) {
              tint::ast::transform::SubstituteOverride::Config cfg;
 
              std::unordered_map<tint::OverrideId, double> values;
-             values.reserve(options.overrides.size());
+             values.reserve(options.overrides.Count());
 
-             for (const auto& [name, value] : options.overrides) {
+             for (auto override : options.overrides) {
+                 const auto& name = override.key;
+                 const auto& value = override.value;
                  if (name.empty()) {
-                     std::cerr << "empty override name";
+                     std::cerr << "empty override name" << std::endl;
                      return false;
                  }
-                 if (isdigit(name[0])) {
-                     tint::OverrideId id{
-                         static_cast<decltype(tint::OverrideId::value)>(atoi(name.c_str()))};
+                 if (auto num = tint::utils::ParseNumber<decltype(tint::OverrideId::value)>(name)) {
+                     tint::OverrideId id{num.Get()};
                      values.emplace(id, value);
                  } else {
                      auto override_names = inspector.GetNamedOverrideIds();
                      auto it = override_names.find(name);
                      if (it == override_names.end()) {
-                         std::cerr << "unknown override '" << name << "'";
+                         std::cerr << "unknown override '" << name << "'" << std::endl;
                          return false;
                      }
                      values.emplace(it->second, value);
@@ -1007,20 +988,8 @@ int main(int argc, const char** argv) {
         return names.str();
     };
 
-    if (options.show_help) {
-        std::string usage = tint::utils::ReplaceAll(kUsage, "${transforms}", transform_names());
-#if TINT_BUILD_IR
-        usage +=
-            "  --dump-ir                 -- Writes the IR to stdout\n"
-            "  --dump-ir-graph           -- Writes the IR graph to 'tint.dot' as a dot graph\n"
-            "  --use-ir                  -- Use the IR for writers and transforms when possible\n";
-#endif  // TINT_BUILD_IR
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-        usage += "  --dump-ast                -- Writes the AST to stdout\n";
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
-
-        std::cout << usage << std::endl;
-        return 0;
+    if (!ParseArgs(arguments, transform_names(), &options)) {
+        return 1;
     }
 
     // Implement output format defaults.
@@ -1138,12 +1107,12 @@ int main(int argc, const char** argv) {
         }
 
         std::cerr << "Unknown transform: " << name << std::endl;
-        std::cerr << "Available transforms: " << std::endl << transform_names();
+        std::cerr << "Available transforms: " << std::endl << transform_names() << std::endl;
         return false;
     };
 
     // If overrides are provided, add the SubstituteOverride transform.
-    if (!options.overrides.empty()) {
+    if (!options.overrides.IsEmpty()) {
         if (!enable_transform("substitute_override")) {
             return 1;
         }

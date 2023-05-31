@@ -17,8 +17,17 @@
 #include "gmock/gmock.h"
 #include "src/tint/utils/string_stream.h"
 
+#include "src/tint/utils/transform.h"  // Used by ToStringList()
+
 namespace tint::utils {
 namespace {
+
+// Workaround for https://github.com/google/googletest/issues/3081
+// Remove when using C++20
+template <size_t N>
+utils::Vector<std::string, N> ToStringList(const utils::Vector<std::string_view, N>& views) {
+    return Transform(views, [](std::string_view view) { return std::string(view); });
+}
 
 TEST(StringTest, ReplaceAll) {
     EXPECT_EQ("xybbcc", ReplaceAll("aabbcc", "aa", "xy"));
@@ -176,16 +185,15 @@ TEST(StringTest, Quote) {
     EXPECT_EQ("'meow'", Quote("meow"));
 }
 
-#if 0  // Enable when moved to C++20 (https://github.com/google/googletest/issues/3081)
 TEST(StringTest, Split) {
-    EXPECT_THAT(Split("", ","), testing::ElementsAre(""));
-    EXPECT_THAT(Split("cat", ","), testing::ElementsAre("cat"));
-    EXPECT_THAT(Split("cat,", ","), testing::ElementsAre("cat", ""));
-    EXPECT_THAT(Split(",cat", ","), testing::ElementsAre("", "cat"));
-    EXPECT_THAT(Split("cat,dog,fish", ","), testing::ElementsAre("cat", "dog", "fish"));
-    EXPECT_THAT(Split("catdogfish", "dog"), testing::ElementsAre("cat", "fish"));
+    EXPECT_THAT(ToStringList(Split("", ",")), testing::ElementsAre(""));
+    EXPECT_THAT(ToStringList(Split("cat", ",")), testing::ElementsAre("cat"));
+    EXPECT_THAT(ToStringList(Split("cat,", ",")), testing::ElementsAre("cat", ""));
+    EXPECT_THAT(ToStringList(Split(",cat", ",")), testing::ElementsAre("", "cat"));
+    EXPECT_THAT(ToStringList(Split("cat,dog,fish", ",")),
+                testing::ElementsAre("cat", "dog", "fish"));
+    EXPECT_THAT(ToStringList(Split("catdogfish", "dog")), testing::ElementsAre("cat", "fish"));
 }
-#endif
 
 TEST(StringTest, Join) {
     EXPECT_EQ(Join(utils::Vector<int, 1>{}, ","), "");
