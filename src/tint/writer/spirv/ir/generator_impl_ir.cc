@@ -368,6 +368,22 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         return;
     }
 
+    // Emit Phi nodes for all the incoming block parameters
+    for (size_t param_idx = 0; param_idx < block->Params().Length(); param_idx++) {
+        auto* param = block->Params()[param_idx];
+        auto id = module_.NextId();
+        values_.Add(param, id);
+        OperandList ops{Type(param->Type()), id};
+
+        for (auto* incoming : block->InboundBranches()) {
+            auto* arg = incoming->Args()[param_idx];
+            ops.push_back(Value(arg));
+            ops.push_back(Label(incoming->Block()));
+        }
+
+        current_function_.push_inst(spv::Op::OpPhi, std::move(ops));
+    }
+
     // Emit the instructions.
     for (auto* inst : block->Instructions()) {
         auto result = Switch(
@@ -455,16 +471,17 @@ void GeneratorImplIr::EmitIf(const ir::If* i) {
 
     // Generate labels for the blocks. We emit the true or false block if it:
     // 1. contains instructions other then the branch, or
-    // 2. branches somewhere other then the Merge().
+    // 2. branches somewhere other then the Merge(), or
+    // 3. the merge has input parameters
     // Otherwise we skip them and branch straight to the merge block.
     uint32_t merge_label = Label(merge_block);
     uint32_t true_label = merge_label;
     uint32_t false_label = merge_label;
-    if (true_block->Instructions().Length() > 1 ||
+    if (true_block->Instructions().Length() > 1 || !merge_block->Params().IsEmpty() ||
         (true_block->HasBranchTarget() && !true_block->Branch()->Is<ir::ExitIf>())) {
         true_label = Label(true_block);
     }
-    if (false_block->Instructions().Length() > 1 ||
+    if (false_block->Instructions().Length() > 1 || !merge_block->Params().IsEmpty() ||
         (false_block->HasBranchTarget() && !false_block->Branch()->Is<ir::ExitIf>())) {
         false_label = Label(false_block);
     }
