@@ -17,6 +17,7 @@
 #include <limits>
 #include <optional>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 
@@ -256,6 +257,29 @@ Return FindStorageBufferBindingAliasing(
     }
 }
 
+bool TextureViewsMatch(const TextureViewBase* a, const TextureViewBase* b) {
+    ASSERT(a->GetTexture() == b->GetTexture());
+    return a->GetFormat().GetIndex() == b->GetFormat().GetIndex() &&
+           a->GetDimension() == b->GetDimension() && a->GetBaseMipLevel() == b->GetBaseMipLevel() &&
+           a->GetLevelCount() == b->GetLevelCount() &&
+           a->GetBaseArrayLayer() == b->GetBaseArrayLayer() &&
+           a->GetLayerCount() == b->GetLayerCount();
+}
+
+using VectorOfTextureViews = StackVector<const TextureViewBase*, 8>;
+
+bool TextureViewsAllMatch(const VectorOfTextureViews& views) {
+    ASSERT(!views->empty());
+
+    const TextureViewBase* first = views[0];
+    for (size_t i = 1; i < views->size(); ++i) {
+        if (!TextureViewsMatch(first, views[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 }  // namespace
 
 enum ValidationAspect {
@@ -307,6 +331,42 @@ MaybeError CommandBufferStateTracker::ValidateCanDraw() {
 
 MaybeError CommandBufferStateTracker::ValidateCanDrawIndexed() {
     return ValidateOperation(kDrawIndexedAspects);
+}
+
+MaybeError CommandBufferStateTracker::ValidateNoDifferentTextureViewsOnSameTexture() {
+    // TODO(dawn:1855): Look into optimizations as unordered_map does many allocations
+    std::unordered_map<const TextureBase*, VectorOfTextureViews> textureToViews;
+
+    for (BindGroupIndex groupIndex :
+         IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+        BindGroupBase* bindGroup = mBindgroups[groupIndex];
+        BindGroupLayoutBase* bgl = bindGroup->GetLayout();
+
+        for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
+            const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
+            if (bindingInfo.bindingType != BindingInfoType::Texture &&
+                bindingInfo.bindingType != BindingInfoType::StorageTexture) {
+                continue;
+            }
+
+            const TextureViewBase* textureViewBase =
+                bindGroup->GetBindingAsTextureView(bindingIndex);
+
+            textureToViews[textureViewBase->GetTexture()]->push_back(textureViewBase);
+        }
+    }
+
+    for (const auto& it : textureToViews) {
+        const TextureBase* texture = it.first;
+        const VectorOfTextureViews& views = it.second;
+        DAWN_INVALID_IF(
+            !TextureViewsAllMatch(views),
+            "In compatibility mode, %s must not have different views in a single draw/dispatch "
+            "command. texture views: %s",
+            texture, ityp::span(views->data(), views->size()));
+    }
+
+    return {};
 }
 
 MaybeError CommandBufferStateTracker::ValidateBufferInRangeForVertexBuffer(uint32_t vertexCount,

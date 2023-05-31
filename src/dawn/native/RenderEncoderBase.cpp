@@ -104,6 +104,10 @@ void RenderEncoderBase::APIDraw(uint32_t vertexCount,
 
                 DAWN_TRY(mCommandBufferState.ValidateCanDraw());
 
+                if (GetDevice()->IsCompatibilityMode()) {
+                    DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
+                }
+
                 DAWN_INVALID_IF(mDisableBaseInstance && firstInstance != 0,
                                 "First instance (%u) must be zero.", firstInstance);
 
@@ -147,6 +151,10 @@ void RenderEncoderBase::APIDrawIndexed(uint32_t indexCount,
 
                 DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
 
+                if (GetDevice()->IsCompatibilityMode()) {
+                    DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
+                }
+
                 DAWN_INVALID_IF(mDisableBaseInstance && firstInstance != 0,
                                 "First instance (%u) must be zero.", firstInstance);
 
@@ -183,6 +191,9 @@ void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t ind
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
                 DAWN_TRY(mCommandBufferState.ValidateCanDraw());
+                if (GetDevice()->IsCompatibilityMode()) {
+                    DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
+                }
 
                 DAWN_INVALID_IF(indirectOffset % 4 != 0,
                                 "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
@@ -235,6 +246,9 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
                 DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
+                if (GetDevice()->IsCompatibilityMode()) {
+                    DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
+                }
 
                 DAWN_INVALID_IF(indirectOffset % 4 != 0,
                                 "Indirect offset (%u) is not a multiple of 4.", indirectOffset);

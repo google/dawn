@@ -208,6 +208,10 @@ void ComputePassEncoder::APIDispatchWorkgroups(uint32_t workgroupCountX,
                                 "Dispatch workgroup count Z (%u) exceeds max compute "
                                 "workgroups per dimension (%u).",
                                 workgroupCountZ, workgroupsPerDimension);
+
+                if (GetDevice()->IsCompatibilityMode()) {
+                    DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
+                }
             }
 
             // Record the synchronization scope for Dispatch, which is just the current
@@ -338,6 +342,10 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
                     "Indirect offset (%u) and dispatch size (%u) exceeds the indirect buffer "
                     "size (%u).",
                     indirectOffset, kDispatchIndirectSize, indirectBuffer->GetSize());
+
+                if (GetDevice()->IsCompatibilityMode()) {
+                    DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
+                }
             }
 
             SyncScopeUsageTracker scope;

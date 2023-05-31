@@ -186,5 +186,700 @@ TEST_F(CompatValidationTest, CanNotUseFragmentShaderWithSampleMask) {
     }
 }
 
+constexpr const char* kRenderTwoTexturesOneBindgroupWGSL = R"(
+    @vertex
+    fn vs(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+        var pos = array(
+            vec4f(-1,  3, 0, 1),
+            vec4f( 3, -1, 0, 1),
+            vec4f(-1, -1, 0, 1));
+        return pos[VertexIndex];
+    }
+
+    @group(0) @binding(0) var tex0 : texture_2d<f32>;
+    @group(0) @binding(1) var tex1 : texture_2d<f32>;
+
+    @fragment
+    fn fs(@builtin(position) pos: vec4f) -> @location(0) vec4f {
+        _ = tex0;
+        _ = tex1;
+        return vec4f(0);
+    }
+)";
+
+constexpr const char* kRenderTwoTexturesTwoBindgroupsWGSL = R"(
+    @vertex
+    fn vs(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+        var pos = array(
+            vec4f(-1,  3, 0, 1),
+            vec4f( 3, -1, 0, 1),
+            vec4f(-1, -1, 0, 1));
+        return pos[VertexIndex];
+    }
+
+    @group(0) @binding(0) var tex0 : texture_2d<f32>;
+    @group(1) @binding(0) var tex1 : texture_2d<f32>;
+
+    @fragment
+    fn fs(@builtin(position) pos: vec4f) -> @location(0) vec4f {
+        _ = tex0;
+        _ = tex1;
+        return vec4f(0);
+    }
+)";
+
+void TestMultipleTextureViewValidationInRenderPass(
+    wgpu::Device device,
+    const char* wgsl,
+    std::function<void(wgpu::Device device,
+                       wgpu::Texture texture,
+                       wgpu::RenderPipeline pipeline,
+                       std::function<void(wgpu::RenderPassEncoder pass)> drawFn)> fn) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {2, 1, 1};
+    descriptor.mipLevelCount = 2;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+    constexpr uint32_t indices[] = {0, 1, 2};
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData(device, indices, sizeof indices, wgpu::BufferUsage::Index);
+
+    // Create a pipeline that will sample from 2 2D textures and output to an attachment.
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, wgsl);
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.vertex.entryPoint = "vs";
+    pDesc.cFragment.module = module;
+    pDesc.cFragment.entryPoint = "fs";
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    fn(device, texture, pipeline, [](wgpu::RenderPassEncoder pass) { pass.Draw(3); });
+
+    fn(device, texture, pipeline, [indexBuffer](wgpu::RenderPassEncoder pass) {
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.DrawIndexed(3);
+    });
+
+    indexBuffer.Destroy();
+    texture.Destroy();
+}
+
+// Test we get a validation error if we have 2 different views of a texture
+// in the same bind group.
+TEST_F(CompatValidationTest, CanNotDrawDifferentMipsSameTextureSameBindGroup) {
+    TestMultipleTextureViewValidationInRenderPass(
+        device, kRenderTwoTexturesOneBindgroupWGSL,
+        [this](wgpu::Device device, wgpu::Texture texture, wgpu::RenderPipeline pipeline,
+               std::function<void(wgpu::RenderPassEncoder pass)> drawFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, 4, 1);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            drawFn(pass);
+            pass.End();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("different views"));
+        });
+}
+
+// Test we get a validation error if we have 2 different views of a texture spanning
+// different bind groups.
+TEST_F(CompatValidationTest, CanNotDrawDifferentMipsSameTextureDifferentBindGroups) {
+    TestMultipleTextureViewValidationInRenderPass(
+        device, kRenderTwoTexturesTwoBindgroupsWGSL,
+        [this](wgpu::Device device, wgpu::Texture texture, wgpu::RenderPipeline pipeline,
+               std::function<void(wgpu::RenderPassEncoder pass)> drawFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, texture.CreateView(&mip0ViewDesc)}});
+
+            wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(1), {{0, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, 4, 1);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup0);
+            pass.SetBindGroup(1, bindGroup1);
+            drawFn(pass);
+            pass.End();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("different views"));
+        });
+}
+
+// Test that it's possible to set a bindgroup that uses a texture with multiple views
+// which would be an error if you issued a draw command but, you then fix the issue by replacing
+// the bindgroup with one that does not have multiple views. We're trying to test
+// that the implementation does the validation at draw command time and not before.
+TEST_F(CompatValidationTest, CanBindDifferentMipsSameTextureSameBindGroupAndFixWithoutError) {
+    TestMultipleTextureViewValidationInRenderPass(
+        device, kRenderTwoTexturesOneBindgroupWGSL,
+        [](wgpu::Device device, wgpu::Texture texture, wgpu::RenderPipeline pipeline,
+           std::function<void(wgpu::RenderPassEncoder pass)> drawFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            // Bindgroup with different views of same texture
+            wgpu::BindGroup badBindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture.CreateView(&mip1ViewDesc)}});
+
+            // Bindgroup with same views of texture
+            wgpu::BindGroup goodBindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture.CreateView(&mip0ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, 4, 1);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, badBindGroup);
+            pass.SetBindGroup(0, goodBindGroup);
+            drawFn(pass);
+            pass.End();
+
+            // No Error is expected
+            encoder.Finish();
+        });
+}
+
+// Test that having 2 texture views that have the same settings, in 2 different
+// bindgroups, does not generate a validation error.
+TEST_F(CompatValidationTest, CanBindSameViewIn2BindGroups) {
+    TestMultipleTextureViewValidationInRenderPass(
+        device, kRenderTwoTexturesTwoBindgroupsWGSL,
+        [](wgpu::Device device, wgpu::Texture texture, wgpu::RenderPipeline pipeline,
+           std::function<void(wgpu::RenderPassEncoder pass)> drawFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+
+            wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, texture.CreateView(&mip0ViewDesc)}});
+
+            // Bindgroup with same view of texture as bindGroup0
+            wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(1), {{0, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, 4, 1);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup0);
+            pass.SetBindGroup(1, bindGroup1);
+            drawFn(pass);
+            pass.End();
+
+            // No Error is expected
+            encoder.Finish();
+        });
+}
+
+// Test that no validation error happens if we have multiple views of a texture
+// but don't draw.
+TEST_F(CompatValidationTest, NoErrorIfMultipleDifferentViewsOfTextureAreNotUsed) {
+    TestMultipleTextureViewValidationInRenderPass(
+        device, kRenderTwoTexturesTwoBindgroupsWGSL,
+        [](wgpu::Device device, wgpu::Texture texture, wgpu::RenderPipeline pipeline,
+           std::function<void(wgpu::RenderPassEncoder pass)> drawFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            // Bindgroup with different views of same texture
+            wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, texture.CreateView(&mip0ViewDesc)}});
+
+            // Bindgroup with same views of texture
+            wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(1), {{0, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, 4, 1);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup0);
+            pass.SetBindGroup(1, bindGroup1);
+            pass.End();
+
+            // No Error is expected because draw was never called
+            encoder.Finish();
+        });
+}
+
+constexpr const char* kComputeTwoTexturesOneBindgroupWGSL = R"(
+    @group(0) @binding(0) var tex0 : texture_2d<f32>;
+    @group(0) @binding(1) var tex1 : texture_2d<f32>;
+
+    @compute @workgroup_size(1)
+    fn cs() {
+        _ = tex0;
+        _ = tex1;
+    }
+)";
+
+constexpr const char* kComputeTwoTexturesTwoBindgroupsWGSL = R"(
+    @group(0) @binding(0) var tex0 : texture_2d<f32>;
+    @group(1) @binding(0) var tex1 : texture_2d<f32>;
+
+    @compute @workgroup_size(1)
+    fn cs() {
+        _ = tex0;
+        _ = tex1;
+    }
+)";
+
+void TestMultipleTextureViewValidationInComputePass(
+    wgpu::Device device,
+    const char* wgsl,
+    wgpu::TextureUsage textureUsage,
+    std::function<void(wgpu::Device device,
+                       wgpu::Texture texture,
+                       wgpu::ComputePipeline pipeline,
+                       std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn)> fn) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {2, 1, 1};
+    descriptor.mipLevelCount = 2;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    descriptor.usage = textureUsage;
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+    constexpr float indirectData[] = {1, 1, 1};
+    wgpu::Buffer indirectBuffer = utils::CreateBufferFromData(
+        device, indirectData, sizeof indirectData, wgpu::BufferUsage::Indirect);
+
+    // Create a pipeline that will sample from 2 2D textures and output to an attachment.
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, wgsl);
+
+    wgpu::ComputePipelineDescriptor pDesc;
+    pDesc.compute.module = module;
+    pDesc.compute.entryPoint = "cs";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pDesc);
+
+    fn(device, texture, pipeline,
+       [](wgpu::ComputePassEncoder pass) { pass.DispatchWorkgroups(1); });
+
+    fn(device, texture, pipeline, [indirectBuffer](wgpu::ComputePassEncoder pass) {
+        pass.DispatchWorkgroupsIndirect(indirectBuffer, 0);
+    });
+
+    indirectBuffer.Destroy();
+    texture.Destroy();
+}
+
+// Test we get a validation error if we have 2 different views of a texture
+// in the same bind group.
+TEST_F(CompatValidationTest, CanNotComputeWithDifferentMipsSameTextureSameBindGroup) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoTexturesOneBindgroupWGSL, wgpu::TextureUsage::TextureBinding,
+        [this](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+               std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            dispatchFn(pass);
+            pass.End();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("different views"));
+        });
+}
+
+// Test we get a validation error if we have 2 different views of a texture spanning
+// different bind groups.
+TEST_F(CompatValidationTest, CanNotComputeWithDifferentMipsSameTextureDifferentBindGroups) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoTexturesTwoBindgroupsWGSL, wgpu::TextureUsage::TextureBinding,
+        [this](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+               std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, texture.CreateView(&mip0ViewDesc)}});
+
+            wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(1), {{0, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup0);
+            pass.SetBindGroup(1, bindGroup1);
+            dispatchFn(pass);
+            pass.End();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("different views"));
+        });
+}
+
+// Test that it's possible to set a bindgroup that uses a texture with multiple views
+// which would be an error if you issued a draw command but, you then fix the issue by replacing
+// the bindgroup with one that does not have multiple views. We're trying to test
+// that the implementation does the validation at draw command time and not before.
+TEST_F(CompatValidationTest,
+       CanBindDifferentMipsSameTextureSameBindGroupAndFixWithoutErrorInComputePass) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoTexturesOneBindgroupWGSL, wgpu::TextureUsage::TextureBinding,
+        [](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+           std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            // Bindgroup with different views of same texture
+            wgpu::BindGroup badBindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture.CreateView(&mip1ViewDesc)}});
+
+            // Bindgroup with same views of texture
+            wgpu::BindGroup goodBindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture.CreateView(&mip0ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, badBindGroup);
+            pass.SetBindGroup(0, goodBindGroup);
+            dispatchFn(pass);
+            pass.End();
+
+            // No Error is expected
+            encoder.Finish();
+        });
+}
+
+// Test that having 2 texture views that have the same settings, in 2 different
+// bindgroups, does not generate a validation error.
+TEST_F(CompatValidationTest, CanBindSameViewIn2BindGroupsInComputePass) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoTexturesTwoBindgroupsWGSL, wgpu::TextureUsage::TextureBinding,
+        [](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+           std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+
+            wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, texture.CreateView(&mip0ViewDesc)}});
+
+            // Bindgroup with same view of texture as bindGroup0
+            wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(1), {{0, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup0);
+            pass.SetBindGroup(1, bindGroup1);
+            dispatchFn(pass);
+            pass.End();
+
+            // No Error is expected
+            encoder.Finish();
+        });
+}
+
+// Test that no validation error happens if we have multiple views of a texture
+// but don't draw.
+TEST_F(CompatValidationTest, NoErrorIfMultipleDifferentViewsOfTextureAreNotUsedInComputePass) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoTexturesTwoBindgroupsWGSL, wgpu::TextureUsage::TextureBinding,
+        [](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+           std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            // Bindgroup with different views of same texture
+            wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, texture.CreateView(&mip0ViewDesc)}});
+
+            // Bindgroup with same views of texture
+            wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(1), {{0, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup0);
+            pass.SetBindGroup(1, bindGroup1);
+            pass.End();
+
+            // No Error is expected because draw was never called
+            encoder.Finish();
+        });
+}
+
+constexpr const char* kComputeTwoStorageTexturesOneBindgroupWGSL = R"(
+    @group(0) @binding(0) var tex0 : texture_storage_2d<rgba8unorm, write>;
+    @group(0) @binding(1) var tex1 : texture_storage_2d<rgba8unorm, write>;
+
+    @compute @workgroup_size(1)
+    fn cs() {
+        _ = tex0;
+        _ = tex1;
+    }
+)";
+
+constexpr const char* kComputeTwoStorageTexturesTwoBindgroupsWGSL = R"(
+    @group(0) @binding(0) var tex0 : texture_storage_2d<rgba8unorm, write>;
+    @group(1) @binding(0) var tex1 : texture_storage_2d<rgba8unorm, write>;
+
+    @compute @workgroup_size(1)
+    fn cs() {
+        _ = tex0;
+        _ = tex1;
+    }
+)";
+
+// Test we get a validation error if we have 2 different views of a storage texture
+// in the same bind group.
+TEST_F(CompatValidationTest, CanNotComputeWithDifferentMipsSameStorageTextureSameBindGroup) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoStorageTexturesOneBindgroupWGSL, wgpu::TextureUsage::StorageBinding,
+        [this](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+               std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            dispatchFn(pass);
+            pass.End();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("different views"));
+        });
+}
+
+// Test we get a validation error if we have 2 different views of a texture spanning
+// different bind groups.
+TEST_F(CompatValidationTest, CanNotComputeWithDifferentMipsSameStorageTextureDifferentBindGroups) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoStorageTexturesTwoBindgroupsWGSL, wgpu::TextureUsage::StorageBinding,
+        [this](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+               std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, texture.CreateView(&mip0ViewDesc)}});
+
+            wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(1), {{0, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup0);
+            pass.SetBindGroup(1, bindGroup1);
+            dispatchFn(pass);
+            pass.End();
+
+            ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("different views"));
+        });
+}
+
+// Test that it's possible to set a bindgroup that uses a texture with multiple views
+// which would be an error if you issued a draw command but, you then fix the issue by replacing
+// the bindgroup with one that does not have multiple views. We're trying to test
+// that the implementation does the validation at draw command time and not before.
+TEST_F(CompatValidationTest,
+       CanBindDifferentMipsSameStorageTextureSameBindGroupAndFixWithoutErrorInComputePass) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoStorageTexturesOneBindgroupWGSL, wgpu::TextureUsage::StorageBinding,
+        [](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+           std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.baseMipLevel = 0;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            // Bindgroup with different views of same texture
+            wgpu::BindGroup badBindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::TextureDescriptor descriptor;
+            descriptor.size = {2, 1, 1};
+            descriptor.mipLevelCount = 2;
+            descriptor.dimension = wgpu::TextureDimension::e2D;
+            descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+            descriptor.usage = wgpu::TextureUsage::StorageBinding;
+            wgpu::Texture texture2 = device.CreateTexture(&descriptor);
+
+            // Bindgroup with same views of texture
+            wgpu::BindGroup goodBindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0),
+                {{0, texture.CreateView(&mip0ViewDesc)}, {1, texture2.CreateView(&mip0ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, badBindGroup);
+            pass.SetBindGroup(0, goodBindGroup);
+            dispatchFn(pass);
+            pass.End();
+
+            // No Error is expected
+            encoder.Finish();
+        });
+}
+
+// Test that no validation error happens if we have multiple views of a texture
+// but don't draw.
+TEST_F(CompatValidationTest,
+       NoErrorIfMultipleDifferentViewsOfStorageTextureAreNotUsedInComputePass) {
+    TestMultipleTextureViewValidationInComputePass(
+        device, kComputeTwoStorageTexturesTwoBindgroupsWGSL, wgpu::TextureUsage::StorageBinding,
+        [](wgpu::Device device, wgpu::Texture texture, wgpu::ComputePipeline pipeline,
+           std::function<void(wgpu::ComputePassEncoder pass)> dispatchFn) {
+            wgpu::TextureViewDescriptor mip0ViewDesc;
+            mip0ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip0ViewDesc.mipLevelCount = 1;
+
+            wgpu::TextureViewDescriptor mip1ViewDesc;
+            mip1ViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            mip1ViewDesc.baseMipLevel = 1;
+            mip1ViewDesc.mipLevelCount = 1;
+
+            // Bindgroup with different views of same texture
+            wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, texture.CreateView(&mip0ViewDesc)}});
+
+            // Bindgroup with same views of texture
+            wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(1), {{0, texture.CreateView(&mip1ViewDesc)}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass({});
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup0);
+            pass.SetBindGroup(1, bindGroup1);
+            pass.End();
+
+            // No Error is expected because draw was never called
+            encoder.Finish();
+        });
+}
+
 }  // anonymous namespace
 }  // namespace dawn
