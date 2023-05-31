@@ -289,6 +289,7 @@ TEST_P(SamplerFilterAnisotropicTest, SlantedPlaneMipmap) {
 }
 
 DAWN_INSTANTIATE_TEST(SamplerFilterAnisotropicTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
