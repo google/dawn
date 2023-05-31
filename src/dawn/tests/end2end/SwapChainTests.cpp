@@ -281,10 +281,6 @@ class SwapChainWithAdditionalUsageTests : public SwapChainTests {
             GTEST_SKIP();
         }
 
-        // TODO(dawn:1551): Reenable on D3D11 after suppressing the D3D11 debug layer warning for
-        // setting the same private data multiple times.
-        DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
         DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::SurfaceCapabilities}));
     }
 
