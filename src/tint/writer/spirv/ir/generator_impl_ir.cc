@@ -100,11 +100,9 @@ bool GeneratorImplIr::Generate() {
 
     // TODO(crbug.com/tint/1906): Emit extensions.
 
-    // TODO(crbug.com/tint/1906): Emit variables.
-    (void)zero_init_workgroup_memory_;
+    // Emit module-scope declarations.
     if (ir_->root_block) {
-        TINT_ICE(Writer, diagnostics_) << "root block is unimplemented";
-        return false;
+        EmitRootBlock(ir_->root_block);
     }
 
     // Emit functions.
@@ -318,6 +316,20 @@ void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
     // TODO(jrprice): Add the interface list of all referenced global variables.
     module_.PushEntryPoint(spv::Op::OpEntryPoint,
                            {U32Operand(stage), id, ir_->NameOf(func).Name()});
+}
+
+void GeneratorImplIr::EmitRootBlock(const ir::Block* root_block) {
+    for (auto* inst : root_block->Instructions()) {
+        auto result = Switch(
+            inst,  //
+            [&](const ir::Var* v) { return EmitVar(v); },
+            [&](Default) {
+                TINT_ICE(Writer, diagnostics_)
+                    << "unimplemented root block instruction: " << inst->TypeInfo().name;
+                return 0u;
+            });
+        values_.Add(inst, result);
+    }
 }
 
 void GeneratorImplIr::EmitBlock(const ir::Block* block) {
@@ -714,21 +726,38 @@ uint32_t GeneratorImplIr::EmitUserCall(const ir::UserCall* call) {
 }
 
 uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
+    // TODO(crbug.com/tint/1906): Remove this when we use it for emitting workgroup variables.
+    (void)zero_init_workgroup_memory_;
+
     auto id = module_.NextId();
     auto* ptr = var->Type()->As<type::Pointer>();
     TINT_ASSERT(Writer, ptr);
     auto ty = Type(ptr);
 
-    if (ptr->AddressSpace() == builtin::AddressSpace::kFunction) {
-        TINT_ASSERT(Writer, current_function_);
-        current_function_.push_var({ty, id, U32Operand(SpvStorageClassFunction)});
-        if (var->Initializer()) {
-            current_function_.push_inst(spv::Op::OpStore, {id, Value(var->Initializer())});
+    switch (ptr->AddressSpace()) {
+        case builtin::AddressSpace::kFunction: {
+            TINT_ASSERT(Writer, current_function_);
+            current_function_.push_var({ty, id, U32Operand(SpvStorageClassFunction)});
+            if (var->Initializer()) {
+                current_function_.push_inst(spv::Op::OpStore, {id, Value(var->Initializer())});
+            }
+            break;
         }
-    } else {
-        TINT_ICE(Writer, diagnostics_)
-            << "unimplemented variable address space " << ptr->AddressSpace();
-        return 0u;
+        case builtin::AddressSpace::kPrivate: {
+            TINT_ASSERT(Writer, !current_function_);
+            OperandList operands = {ty, id, U32Operand(SpvStorageClassPrivate)};
+            if (var->Initializer()) {
+                TINT_ASSERT(Writer, var->Initializer()->Is<ir::Constant>());
+                operands.push_back(Value(var->Initializer()));
+            }
+            module_.PushType(spv::Op::OpVariable, operands);
+            break;
+        }
+        default: {
+            TINT_ICE(Writer, diagnostics_)
+                << "unimplemented variable address space " << ptr->AddressSpace();
+            return 0u;
+        }
     }
 
     // Set the name if present.

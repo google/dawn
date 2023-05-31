@@ -104,6 +104,10 @@ class GeneratorImplIr {
     /// @param block the block to emit
     void EmitBlock(const ir::Block* block);
 
+    /// Emit the root block.
+    /// @param root_block the root block to emit
+    void EmitRootBlock(const ir::Block* root_block);
+
     /// Emit an `if` flow node.
     /// @param i the if node to emit
     void EmitIf(const ir::If* i);
