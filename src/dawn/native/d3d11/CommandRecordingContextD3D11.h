@@ -43,14 +43,24 @@ class CommandRecordingContext {
     Buffer* GetUniformBuffer() const;
     Device* GetDevice() const;
 
+    // Write the built-in variable value to the uniform buffer.
+    void WriteUniformBuffer(uint32_t offset, uint32_t element);
+    MaybeError FlushUniformBuffer();
+
   private:
     bool mIsOpen = false;
     bool mNeedsSubmit = false;
     ComPtr<ID3D11Device> mD3D11Device;
     ComPtr<ID3D11DeviceContext4> mD3D11DeviceContext4;
     ComPtr<ID3DUserDefinedAnnotation> mD3D11UserDefinedAnnotation;
-    // The uniform buffer for built in variables.
+
+    // The maximum number of builtin elements is 4 (vec4). It must be multiple of 4.
+    static constexpr size_t kMaxNumBuiltinElements = 4;
+    // The uniform buffer for built-in variables.
     Ref<Buffer> mUniformBuffer;
+    std::array<uint32_t, kMaxNumBuiltinElements> mUniformBufferData;
+    bool mUniformBufferDirty = false;
+
     Ref<Device> mDevice;
 };
 

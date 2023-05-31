@@ -773,21 +773,17 @@ MaybeError CommandBuffer::RecordFirstIndexOffset(RenderPipeline* renderPipeline,
                                                  CommandRecordingContext* commandContext,
                                                  uint32_t firstVertex,
                                                  uint32_t firstInstance) {
-    if (!(renderPipeline->UsesVertexIndex() || renderPipeline->UsesInstanceIndex())) {
-        // Vertex and instance index are not used in shader, so we don't need to update the uniform
-        // buffer. The original value in the uniform buffer will not be used, so we don't need to
-        // clear it.
-        return {};
+    constexpr uint32_t kFirstVertexOffset = 0;
+    constexpr uint32_t kFirstInstanceOffset = 1;
+
+    if (renderPipeline->UsesVertexIndex()) {
+        commandContext->WriteUniformBuffer(kFirstVertexOffset, firstVertex);
+    }
+    if (renderPipeline->UsesInstanceIndex()) {
+        commandContext->WriteUniformBuffer(kFirstInstanceOffset, firstInstance);
     }
 
-    // TODO(dawn:1705): only update the uniform buffer when the value changes.
-    uint32_t data[4] = {
-        firstVertex,
-        firstInstance,
-    };
-    DAWN_TRY(commandContext->GetUniformBuffer()->Write(commandContext, 0, data, sizeof(data)));
-
-    return {};
+    return commandContext->FlushUniformBuffer();
 }
 
 MaybeError CommandBuffer::RecordNumWorkgroupsForDispatch(ComputePipeline* computePipeline,
@@ -799,14 +795,10 @@ MaybeError CommandBuffer::RecordNumWorkgroupsForDispatch(ComputePipeline* comput
         return {};
     }
 
-    uint32_t data[4] = {
-        dispatchCmd->x,
-        dispatchCmd->y,
-        dispatchCmd->z,
-    };
-    DAWN_TRY(commandContext->GetUniformBuffer()->Write(commandContext, 0, data, sizeof(data)));
-
-    return {};
+    commandContext->WriteUniformBuffer(/*offset=*/0, dispatchCmd->x);
+    commandContext->WriteUniformBuffer(/*offset=*/1, dispatchCmd->y);
+    commandContext->WriteUniformBuffer(/*offset=*/2, dispatchCmd->z);
+    return commandContext->FlushUniformBuffer();
 }
 
 }  // namespace dawn::native::d3d11

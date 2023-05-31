@@ -52,8 +52,6 @@ MaybeError CommandRecordingContext::Intialize(Device* device) {
 
     // Create a uniform buffer for built in variables.
     BufferDescriptor descriptor;
-    // The maximum number of builtin elements is 4 (vec4). It must be multiple of 4.
-    constexpr size_t kMaxNumBuiltinElements = 4;
     descriptor.size = sizeof(uint32_t) * kMaxNumBuiltinElements;
     descriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
     descriptor.mappedAtCreation = false;
@@ -136,6 +134,23 @@ bool CommandRecordingContext::NeedsSubmit() const {
 
 void CommandRecordingContext::SetNeedsSubmit() {
     mNeedsSubmit = true;
+}
+
+void CommandRecordingContext::WriteUniformBuffer(uint32_t offset, uint32_t element) {
+    ASSERT(offset < kMaxNumBuiltinElements);
+    if (mUniformBufferData[offset] != element) {
+        mUniformBufferData[offset] = element;
+        mUniformBufferDirty = true;
+    }
+}
+
+MaybeError CommandRecordingContext::FlushUniformBuffer() {
+    if (mUniformBufferDirty) {
+        DAWN_TRY(mUniformBuffer->Write(this, 0, mUniformBufferData.data(),
+                                       mUniformBufferData.size() * sizeof(uint32_t)));
+        mUniformBufferDirty = false;
+    }
+    return {};
 }
 
 }  // namespace dawn::native::d3d11
