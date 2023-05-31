@@ -144,7 +144,7 @@ struct Options {
 #endif  // TINT_BUILD_IR
 
 #if TINT_BUILD_SYNTAX_TREE_WRITER
-    bool dump_syntax_tree = false;
+    bool dump_ast = false;
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 };
 
@@ -1025,7 +1025,7 @@ int main(int argc, const char** argv) {
     }
 
 #if TINT_BUILD_SYNTAX_TREE_WRITER
-    if (options.dump_syntax_tree) {
+    if (options.dump_ast) {
         tint::writer::syntax_tree::Options gen_options;
         auto result = tint::writer::syntax_tree::Generate(program.get(), gen_options);
         if (!result.success) {
