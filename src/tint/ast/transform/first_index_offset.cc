@@ -51,8 +51,8 @@ FirstIndexOffset::BindingPoint::BindingPoint() = default;
 FirstIndexOffset::BindingPoint::BindingPoint(uint32_t b, uint32_t g) : binding(b), group(g) {}
 FirstIndexOffset::BindingPoint::~BindingPoint() = default;
 
-FirstIndexOffset::Data::Data(bool has_vtx_or_inst_index)
-    : has_vertex_or_instance_index(has_vtx_or_inst_index) {}
+FirstIndexOffset::Data::Data(bool has_vtx_index, bool has_inst_index)
+    : has_vertex_index(has_vtx_index), has_instance_index(has_inst_index) {}
 FirstIndexOffset::Data::Data(const Data&) = default;
 FirstIndexOffset::Data::~Data() = default;
 
@@ -81,7 +81,8 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
     std::unordered_map<const sem::Variable*, const char*> builtin_vars;
     std::unordered_map<const type::StructMember*, const char*> builtin_members;
 
-    bool has_vertex_or_instance_index = false;
+    bool has_vertex_index = false;
+    bool has_instance_index = false;
 
     // Traverse the AST scanning for builtin accesses via variables (includes
     // parameters) or structure member accesses.
@@ -93,12 +94,12 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
                     if (builtin == builtin::BuiltinValue::kVertexIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstVertexName);
-                        has_vertex_or_instance_index = true;
+                        has_vertex_index = true;
                     }
                     if (builtin == builtin::BuiltinValue::kInstanceIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstInstanceName);
-                        has_vertex_or_instance_index = true;
+                        has_instance_index = true;
                     }
                 }
             }
@@ -110,19 +111,19 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
                     if (builtin == builtin::BuiltinValue::kVertexIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstVertexName);
-                        has_vertex_or_instance_index = true;
+                        has_vertex_index = true;
                     }
                     if (builtin == builtin::BuiltinValue::kInstanceIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstInstanceName);
-                        has_vertex_or_instance_index = true;
+                        has_instance_index = true;
                     }
                 }
             }
         }
     }
 
-    if (has_vertex_or_instance_index) {
+    if (has_vertex_index || has_instance_index) {
         // Add uniform buffer members and calculate byte offsets
         utils::Vector<const StructMember*, 8> members;
         members.Push(b.Member(kFirstVertexName, b.ty.u32()));
@@ -160,7 +161,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
         });
     }
 
-    outputs.Add<Data>(has_vertex_or_instance_index);
+    outputs.Add<Data>(has_vertex_index, has_instance_index);
 
     ctx.Clone();
     return Program(std::move(b));

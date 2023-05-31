@@ -230,10 +230,6 @@ void RenderPipeline::ApplyDepthStencilState(CommandRecordingContext* commandCont
     d3dDeviceContext1->OMSetDepthStencilState(mDepthStencilState.Get(), stencilReference);
 }
 
-bool RenderPipeline::GetUsesVertexOrInstanceIndex() const {
-    return mUsesVertexOrInstanceIndex;
-}
-
 void RenderPipeline::SetLabelImpl() {
     SetDebugName(ToBackend(GetDevice()), mRasterizerState.Get(), "Dawn_RenderPipeline", GetLabel());
     SetDebugName(ToBackend(GetDevice()), mInputLayout.Get(), "Dawn_RenderPipeline", GetLabel());
@@ -414,8 +410,8 @@ MaybeError RenderPipeline::InitializeShaders() {
                                   shaderBlob.Data(), shaderBlob.Size(), nullptr, &mVertexShader),
                               "D3D11 create vertex shader"));
         DAWN_TRY(InitializeInputLayout(shaderBlob));
-        mUsesVertexOrInstanceIndex =
-            compiledShader[SingleShaderStage::Vertex].usesVertexOrInstanceIndex;
+        mUsesVertexIndex = compiledShader[SingleShaderStage::Vertex].usesVertexIndex;
+        mUsesInstanceIndex = compiledShader[SingleShaderStage::Vertex].usesInstanceIndex;
     }
 
     if (GetStageMask() & wgpu::ShaderStage::Fragment) {

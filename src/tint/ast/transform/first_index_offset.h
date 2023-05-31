@@ -84,9 +84,9 @@ class FirstIndexOffset final : public utils::Castable<FirstIndexOffset, Transfor
     /// Data holds information about shader usage and constant buffer offsets.
     struct Data final : public utils::Castable<Data, Transform::Data> {
         /// Constructor
-        /// @param has_vtx_or_inst_index True if the shader uses vertex_index or
-        /// instance_index
-        explicit Data(bool has_vtx_or_inst_index);
+        /// @param has_vtx_index True if the shader uses vertex_index
+        /// @param has_inst_index True if the shader uses instance_index
+        Data(bool has_vtx_index, bool has_inst_index);
 
         /// Copy constructor
         Data(const Data&);
@@ -95,7 +95,9 @@ class FirstIndexOffset final : public utils::Castable<FirstIndexOffset, Transfor
         ~Data() override;
 
         /// True if the shader uses vertex_index
-        const bool has_vertex_or_instance_index;
+        const bool has_vertex_index;
+        /// True if the shader uses instance_index
+        const bool has_instance_index;
     };
 
     /// Constructor

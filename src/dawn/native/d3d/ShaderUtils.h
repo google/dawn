@@ -29,7 +29,8 @@ class Device;
 #define COMPILED_SHADER_MEMBERS(X) \
     X(Blob, shaderBlob)            \
     X(std::string, hlslSource)     \
-    X(bool, usesVertexOrInstanceIndex)
+    X(bool, usesVertexIndex)       \
+    X(bool, usesInstanceIndex)
 
 // `CompiledShader` holds a ref to one of the various representations of shader blobs and
 // information used to emulate vertex/instance index starts. It also holds the `hlslSource` for the

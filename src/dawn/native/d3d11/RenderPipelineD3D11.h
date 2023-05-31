@@ -43,7 +43,8 @@ class RenderPipeline final : public RenderPipelineBase {
                          const std::array<float, 4>& blendColor);
     void ApplyDepthStencilState(CommandRecordingContext* commandContext, uint32_t stencilReference);
 
-    bool GetUsesVertexOrInstanceIndex() const;
+    bool UsesVertexIndex() const { return mUsesVertexIndex; }
+    bool UsesInstanceIndex() const { return mUsesInstanceIndex; }
 
   private:
     RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
@@ -65,7 +66,8 @@ class RenderPipeline final : public RenderPipelineBase {
     ComPtr<ID3D11PixelShader> mPixelShader;
     ComPtr<ID3D11BlendState> mBlendState;
     ComPtr<ID3D11DepthStencilState> mDepthStencilState;
-    bool mUsesVertexOrInstanceIndex = false;
+    bool mUsesVertexIndex = false;
+    bool mUsesInstanceIndex = false;
 };
 
 }  // namespace dawn::native::d3d11
