@@ -14,14 +14,18 @@
 
 #include "src/tint/ir/break_if.h"
 
+#include <utility>
+
 #include "src/tint/ir/loop.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::BreakIf);
 
 namespace tint::ir {
 
-BreakIf::BreakIf(Value* condition, ir::Loop* loop)
-    : Base(utils::Empty), condition_(condition), loop_(loop) {
+BreakIf::BreakIf(Value* condition,
+                 ir::Loop* loop,
+                 utils::VectorRef<Value*> args /* = utils::Empty */)
+    : Base(std::move(args)), condition_(condition), loop_(loop) {
     TINT_ASSERT(IR, condition_);
     TINT_ASSERT(IR, loop_);
     condition_->AddUsage(this);

@@ -14,13 +14,16 @@
 
 #include "src/tint/ir/continue.h"
 
+#include <utility>
+
 #include "src/tint/ir/loop.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Continue);
 
 namespace tint::ir {
 
-Continue::Continue(ir::Loop* loop) : Base(utils::Empty), loop_(loop) {
+Continue::Continue(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */)
+    : Base(std::move(args)), loop_(loop) {
     TINT_ASSERT(IR, loop_);
     loop_->AddUsage(this);
     loop_->Continuing()->AddInboundBranch(this);

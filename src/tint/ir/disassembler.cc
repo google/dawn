@@ -122,12 +122,7 @@ void Disassembler::WalkInternal(const Block* blk) {
     Indent() << "%b" << IdOf(blk) << " = block";
     if (!blk->Params().IsEmpty()) {
         out_ << " (";
-        for (auto* p : blk->Params()) {
-            if (p != blk->Params().Front()) {
-                out_ << ", ";
-            }
-            EmitValue(p);
-        }
+        EmitValueList(blk->Params());
         out_ << ")";
     }
 
@@ -443,7 +438,14 @@ void Disassembler::EmitLoop(const Loop* l) {
     if (l->Merge()->HasBranchTarget()) {
         out_ << ", m: %b" << IdOf(l->Merge());
     }
-    out_ << "]" << std::endl;
+    out_ << "]";
+
+    if (!l->Args().IsEmpty()) {
+        out_ << " ";
+        EmitValueList(l->Args());
+    }
+
+    out_ << std::endl;
 
     {
         ScopedIndent si(indent_size_);
@@ -526,25 +528,22 @@ void Disassembler::EmitBranch(const Branch* b) {
 
     if (!b->Args().IsEmpty()) {
         out_ << " ";
-        for (auto* v : b->Args()) {
-            if (v != b->Args().Front()) {
-                out_ << ", ";
-            }
-            EmitValue(v);
-        }
+        EmitValueList(b->Args());
     }
     out_ << std::endl;
 }
 
-void Disassembler::EmitArgs(const Call* call) {
-    bool first = true;
-    for (const auto* arg : call->Args()) {
-        if (!first) {
+void Disassembler::EmitValueList(tint::utils::VectorRef<const tint::ir::Value*> values) {
+    for (auto* v : values) {
+        if (v != values.Front()) {
             out_ << ", ";
         }
-        first = false;
-        EmitValue(arg);
+        EmitValue(v);
     }
+}
+
+void Disassembler::EmitArgs(const Call* call) {
+    EmitValueList(call->Args());
 }
 
 void Disassembler::EmitBinary(const Binary* b) {

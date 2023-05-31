@@ -30,7 +30,8 @@ class ExitSwitch : public utils::Castable<ExitSwitch, Branch> {
   public:
     /// Constructor
     /// @param sw the switch being exited
-    explicit ExitSwitch(ir::Switch* sw);
+    /// @param args the branch arguments
+    explicit ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args = utils::Empty);
     ~ExitSwitch() override;
 
     /// @returns the switch being exited

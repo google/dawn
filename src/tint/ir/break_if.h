@@ -32,7 +32,8 @@ class BreakIf : public utils::Castable<BreakIf, Branch> {
     /// Constructor
     /// @param condition the break condition
     /// @param loop the loop containing the break-if
-    BreakIf(Value* condition, ir::Loop* loop);
+    /// @param args the branch arguments
+    BreakIf(Value* condition, ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
     ~BreakIf() override;
 
     /// @returns the break condition

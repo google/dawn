@@ -14,13 +14,16 @@
 
 #include "src/tint/ir/exit_if.h"
 
+#include <utility>
+
 #include "src/tint/ir/if.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitIf);
 
 namespace tint::ir {
 
-ExitIf::ExitIf(ir::If* i, utils::VectorRef<Value*> args) : Base(args), if_(i) {
+ExitIf::ExitIf(ir::If* i, utils::VectorRef<Value*> args /* = utils::Empty */)
+    : Base(std::move(args)), if_(i) {
     TINT_ASSERT(IR, if_);
     if_->AddUsage(this);
     if_->Merge()->AddInboundBranch(this);

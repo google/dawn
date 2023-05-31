@@ -30,7 +30,8 @@ class Continue : public utils::Castable<Continue, Branch> {
   public:
     /// Constructor
     /// @param loop the loop owning the continue block
-    explicit Continue(ir::Loop* loop);
+    /// @param args the branch arguments
+    explicit Continue(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
     ~Continue() override;
 
     /// @returns the loop owning the continue block

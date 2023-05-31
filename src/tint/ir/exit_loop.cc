@@ -14,13 +14,16 @@
 
 #include "src/tint/ir/exit_loop.h"
 
+#include <utility>
+
 #include "src/tint/ir/loop.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitLoop);
 
 namespace tint::ir {
 
-ExitLoop::ExitLoop(ir::Loop* loop) : Base(utils::Empty), loop_(loop) {
+ExitLoop::ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */)
+    : Base(std::move(args)), loop_(loop) {
     TINT_ASSERT(IR, loop_);
     loop_->AddUsage(this);
     loop_->Merge()->AddInboundBranch(this);

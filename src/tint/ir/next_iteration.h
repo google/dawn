@@ -30,7 +30,8 @@ class NextIteration : public utils::Castable<NextIteration, Branch> {
   public:
     /// Constructor
     /// @param loop the loop being iterated
-    explicit NextIteration(ir::Loop* loop);
+    /// @param args the branch arguments
+    explicit NextIteration(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
     ~NextIteration() override;
 
     /// @returns the loop being iterated

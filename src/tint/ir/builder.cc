@@ -54,8 +54,8 @@ If* Builder::CreateIf(Value* condition) {
     return ir.values.Create<If>(condition, CreateBlock(), CreateBlock(), CreateBlock());
 }
 
-Loop* Builder::CreateLoop() {
-    return ir.values.Create<Loop>(CreateBlock(), CreateBlock(), CreateBlock());
+Loop* Builder::CreateLoop(utils::VectorRef<Value*> args /* = utils::Empty */) {
+    return ir.values.Create<Loop>(CreateBlock(), CreateBlock(), CreateBlock(), std::move(args));
 }
 
 Switch* Builder::CreateSwitch(Value* condition) {
@@ -201,31 +201,36 @@ ir::Var* Builder::Declare(const type::Type* type) {
     return ir.values.Create<ir::Var>(type);
 }
 
-ir::Return* Builder::Return(Function* func, utils::VectorRef<Value*> args) {
-    return ir.values.Create<ir::Return>(func, args);
+ir::Return* Builder::Return(Function* func, utils::VectorRef<Value*> args /* = utils::Empty */) {
+    return ir.values.Create<ir::Return>(func, std::move(args));
 }
 
-ir::NextIteration* Builder::NextIteration(Loop* loop) {
-    return ir.values.Create<ir::NextIteration>(loop);
+ir::NextIteration* Builder::NextIteration(Loop* loop,
+                                          utils::VectorRef<Value*> args /* = utils::Empty */) {
+    return ir.values.Create<ir::NextIteration>(loop, std::move(args));
 }
 
-ir::BreakIf* Builder::BreakIf(Value* condition, Loop* loop) {
-    return ir.values.Create<ir::BreakIf>(condition, loop);
+ir::BreakIf* Builder::BreakIf(Value* condition,
+                              Loop* loop,
+                              utils::VectorRef<Value*> args /* = utils::Empty */) {
+    return ir.values.Create<ir::BreakIf>(condition, loop, std::move(args));
 }
 
-ir::Continue* Builder::Continue(Loop* loop) {
-    return ir.values.Create<ir::Continue>(loop);
-}
-ir::ExitSwitch* Builder::ExitSwitch(Switch* sw) {
-    return ir.values.Create<ir::ExitSwitch>(sw);
+ir::Continue* Builder::Continue(Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */) {
+    return ir.values.Create<ir::Continue>(loop, std::move(args));
 }
 
-ir::ExitLoop* Builder::ExitLoop(Loop* loop) {
-    return ir.values.Create<ir::ExitLoop>(loop);
+ir::ExitSwitch* Builder::ExitSwitch(Switch* sw,
+                                    utils::VectorRef<Value*> args /* = utils::Empty */) {
+    return ir.values.Create<ir::ExitSwitch>(sw, std::move(args));
 }
 
-ir::ExitIf* Builder::ExitIf(If* i, utils::VectorRef<Value*> args) {
-    return ir.values.Create<ir::ExitIf>(i, args);
+ir::ExitLoop* Builder::ExitLoop(Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */) {
+    return ir.values.Create<ir::ExitLoop>(loop, std::move(args));
+}
+
+ir::ExitIf* Builder::ExitIf(If* i, utils::VectorRef<Value*> args /* = utils::Empty */) {
+    return ir.values.Create<ir::ExitIf>(i, std::move(args));
 }
 
 ir::BlockParam* Builder::BlockParam(const type::Type* type) {

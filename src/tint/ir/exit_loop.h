@@ -30,7 +30,8 @@ class ExitLoop : public utils::Castable<ExitLoop, Branch> {
   public:
     /// Constructor
     /// @param loop the loop being exited
-    explicit ExitLoop(ir::Loop* loop);
+    /// @param args the branch arguments
+    explicit ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
     ~ExitLoop() override;
 
     /// @returns the loop being exited

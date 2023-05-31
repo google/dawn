@@ -84,8 +84,9 @@ class Builder {
     If* CreateIf(Value* condition);
 
     /// Creates a loop flow node
+    /// @param args the branch arguments
     /// @returns the flow node
-    Loop* CreateLoop();
+    Loop* CreateLoop(utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a switch flow node
     /// @param condition the switch condition
@@ -336,39 +337,46 @@ class Builder {
     /// @param func the function being returned
     /// @param args the return arguments
     /// @returns the instruction
-    ir::Return* Return(Function* func, utils::VectorRef<Value*> args = {});
+    ir::Return* Return(Function* func, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a loop next iteration instruction
     /// @param loop the loop being iterated
+    /// @param args the branch arguments
     /// @returns the instruction
-    ir::NextIteration* NextIteration(Loop* loop);
+    ir::NextIteration* NextIteration(Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a loop break-if instruction
     /// @param condition the break condition
     /// @param loop the loop being iterated
+    /// @param args the branch arguments
     /// @returns the instruction
-    ir::BreakIf* BreakIf(Value* condition, Loop* loop);
+    ir::BreakIf* BreakIf(Value* condition,
+                         Loop* loop,
+                         utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a continue instruction
     /// @param loop the loop being continued
+    /// @param args the branch arguments
     /// @returns the instruction
-    ir::Continue* Continue(Loop* loop);
+    ir::Continue* Continue(Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates an exit switch instruction
     /// @param sw the switch being exited
+    /// @param args the branch arguments
     /// @returns the instruction
-    ir::ExitSwitch* ExitSwitch(Switch* sw);
+    ir::ExitSwitch* ExitSwitch(Switch* sw, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates an exit loop instruction
     /// @param loop the loop being exited
+    /// @param args the branch arguments
     /// @returns the instruction
-    ir::ExitLoop* ExitLoop(Loop* loop);
+    ir::ExitLoop* ExitLoop(Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates an exit if instruction
     /// @param i the if being exited
     /// @param args the branch arguments
     /// @returns the instruction
-    ir::ExitIf* ExitIf(If* i, utils::VectorRef<Value*> args = {});
+    ir::ExitIf* ExitIf(If* i, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a new `BlockParam`
     /// @param type the parameter type

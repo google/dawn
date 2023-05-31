@@ -14,12 +14,17 @@
 
 #include "src/tint/ir/loop.h"
 
+#include <utility>
+
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Loop);
 
 namespace tint::ir {
 
-Loop::Loop(ir::Block* s, ir::Block* c, ir::Block* m)
-    : Base(utils::Empty), start_(s), continuing_(c), merge_(m) {
+Loop::Loop(ir::Block* s,
+           ir::Block* c,
+           ir::Block* m,
+           utils::VectorRef<Value*> args /* = utils::Empty */)
+    : Base(std::move(args)), start_(s), continuing_(c), merge_(m) {
     TINT_ASSERT(IR, start_);
     TINT_ASSERT(IR, continuing_);
     TINT_ASSERT(IR, merge_);

@@ -14,13 +14,16 @@
 
 #include "src/tint/ir/exit_switch.h"
 
+#include <utility>
+
 #include "src/tint/ir/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitSwitch);
 
 namespace tint::ir {
 
-ExitSwitch::ExitSwitch(ir::Switch* sw) : Base(utils::Empty), switch_(sw) {
+ExitSwitch::ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args /* = utils::Empty */)
+    : Base(std::move(args)), switch_(sw) {
     TINT_ASSERT(IR, switch_);
     switch_->AddUsage(this);
     switch_->Merge()->AddInboundBranch(this);

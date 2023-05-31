@@ -66,6 +66,7 @@ class Disassembler {
     void EmitInstruction(const Instruction* inst);
     void EmitValueWithType(const Value* val);
     void EmitValue(const Value* val);
+    void EmitValueList(tint::utils::VectorRef<const tint::ir::Value*> values);
     void EmitArgs(const Call* call);
     void EmitBinary(const Binary* b);
     void EmitUnary(const Unary* b);

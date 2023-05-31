@@ -31,7 +31,7 @@ class ExitIf : public utils::Castable<ExitIf, Branch> {
     /// Constructor
     /// @param i the if being exited
     /// @param args the branch arguments
-    explicit ExitIf(ir::If* i, utils::VectorRef<Value*> args = {});
+    explicit ExitIf(ir::If* i, utils::VectorRef<Value*> args = utils::Empty);
     ~ExitIf() override;
 
     /// @returns the if being exited

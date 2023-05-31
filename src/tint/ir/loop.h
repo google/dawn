@@ -27,7 +27,8 @@ class Loop : public utils::Castable<Loop, Branch> {
     /// @param s the start block
     /// @param c the continuing block
     /// @param m the merge block
-    Loop(ir::Block* s, ir::Block* c, ir::Block* m);
+    /// @param args the branch arguments
+    Loop(ir::Block* s, ir::Block* c, ir::Block* m, utils::VectorRef<Value*> args = utils::Empty);
     ~Loop() override;
 
     /// @returns the switch start branch
