@@ -111,50 +111,52 @@ class KnownObjectsBase {
     }
 
     // Get a backend objects for a given client ID.
-    // Returns nullptr if the ID hasn't previously been allocated.
-    const Data* Get(ObjectId id) const {
+    // Returns whether the object was previously allocated.
+    bool GetNativeHandle(ObjectId id, T* handle) const {
         if (id >= mKnown.size()) {
-            return nullptr;
+            return false;
         }
 
         const Data* data = &mKnown[id];
         if (data->state != AllocationState::Allocated) {
-            return nullptr;
+            return false;
         }
-        return data;
+        *handle = data->handle;
+
+        return true;
     }
-    Data* Get(ObjectId id) {
+
+    bool Get(ObjectId id, Known<T>* result) {
         if (id >= mKnown.size()) {
-            return nullptr;
+            return false;
         }
 
         Data* data = &mKnown[id];
         if (data->state != AllocationState::Allocated) {
-            return nullptr;
+            return false;
         }
-        return data;
+
+        *result = Known<T>{id, data};
+        return true;
     }
 
-    bool Get(ObjectId id, Known<T>* result) {
-        *result = Known<T>{id, Get(id)};
-        return (*result).data != nullptr;
-    }
-
-    Data* FillReservation(ObjectId id, T handle) {
+    Known<T> FillReservation(ObjectId id, T handle) {
         ASSERT(id < mKnown.size());
         Data* data = &mKnown[id];
         ASSERT(data->state == AllocationState::Reserved);
         data->handle = handle;
         data->state = AllocationState::Allocated;
-        return data;
+        return {id, data};
     }
 
-    // Allocates the data for a given ID and returns it.
-    // Returns nullptr if the ID is already allocated, or too far ahead, or if ID is 0 (ID 0 is
+    // Allocates the data for a given ID and returns it in result.
+    // Returns false if the ID is already allocated, or too far ahead, or if ID is 0 (ID 0 is
     // reserved for nullptr). Invalidates all the Data*
-    Data* Allocate(ObjectHandle handle, AllocationState state = AllocationState::Allocated) {
+    bool Allocate(Known<T>* result,
+                  ObjectHandle handle,
+                  AllocationState state = AllocationState::Allocated) {
         if (handle.id == 0 || handle.id > mKnown.size()) {
-            return nullptr;
+            return false;
         }
 
         Data data;
@@ -163,22 +165,25 @@ class KnownObjectsBase {
 
         if (handle.id >= mKnown.size()) {
             mKnown.push_back(std::move(data));
-            return &mKnown.back();
+            *result = {handle.id, &mKnown.back()};
+            return true;
         }
 
         if (mKnown[handle.id].state != AllocationState::Free) {
-            return nullptr;
+            return false;
         }
 
         // The generation should be strictly increasing.
         if (handle.generation <= mKnown[handle.id].generation) {
-            return nullptr;
+            return false;
         }
         // update the generation in the slot
         data.generation = handle.generation;
 
         mKnown[handle.id] = std::move(data);
-        return &mKnown[handle.id];
+
+        *result = {handle.id, &mKnown[handle.id]};
+        return true;
     }
 
     // Marks an ID as deallocated
@@ -226,16 +231,20 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
   public:
     KnownObjects() = default;
 
-    Data* Allocate(ObjectHandle handle, AllocationState state = AllocationState::Allocated) {
-        Data* data = KnownObjectsBase<WGPUDevice>::Allocate(handle, state);
-        AddToKnownSet(data);
-        return data;
+    bool Allocate(Known<WGPUDevice>* result,
+                  ObjectHandle handle,
+                  AllocationState state = AllocationState::Allocated) {
+        if (KnownObjectsBase<WGPUDevice>::Allocate(result, handle, state)) {
+            AddToKnownSet(*result);
+            return true;
+        }
+        return false;
     }
 
-    Data* FillReservation(ObjectId id, WGPUDevice handle) {
-        Data* data = KnownObjectsBase<WGPUDevice>::FillReservation(id, handle);
-        AddToKnownSet(data);
-        return data;
+    Known<WGPUDevice> FillReservation(ObjectId id, WGPUDevice handle) {
+        Known<WGPUDevice> result = KnownObjectsBase<WGPUDevice>::FillReservation(id, handle);
+        AddToKnownSet(result);
+        return result;
     }
 
     void Free(ObjectId id) {
@@ -246,10 +255,9 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
     bool IsKnown(WGPUDevice device) const { return mKnownSet.count(device) != 0; }
 
   private:
-    void AddToKnownSet(Data* data) {
-        if (data != nullptr && data->state == AllocationState::Allocated &&
-            data->handle != nullptr) {
-            mKnownSet.insert(data->handle);
+    void AddToKnownSet(Known<WGPUDevice> device) {
+        if (device->state == AllocationState::Allocated && device->handle != nullptr) {
+            mKnownSet.insert(device->handle);
         }
     }
     std::unordered_set<WGPUDevice> mKnownSet;

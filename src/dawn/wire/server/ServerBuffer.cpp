@@ -23,8 +23,10 @@
 namespace dawn::wire::server {
 
 bool Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
-    auto* buffer = BufferObjects().Get(cmd.selfId);
-    DAWN_ASSERT(buffer != nullptr);
+    Known<WGPUBuffer> buffer;
+    if (!BufferObjects().Get(cmd.selfId, &buffer)) {
+        return false;
+    }
 
     if (buffer->mappedAtCreation && !(buffer->usage & WGPUMapMode_Write)) {
         // This indicates the writeHandle is for mappedAtCreation only. Destroy on unmap
@@ -40,8 +42,10 @@ bool Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
 
 bool Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
     // Destroying a buffer does an implicit unmapping.
-    auto* buffer = BufferObjects().Get(cmd.selfId);
-    DAWN_ASSERT(buffer != nullptr);
+    Known<WGPUBuffer> buffer;
+    if (!BufferObjects().Get(cmd.selfId, &buffer)) {
+        return false;
+    }
 
     // The buffer was destroyed. Clear the Read/WriteHandle.
     buffer->readHandle = nullptr;
@@ -92,14 +96,14 @@ bool Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
 
 bool Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
                                   const WGPUBufferDescriptor* descriptor,
-                                  ObjectHandle bufferResult,
+                                  ObjectHandle bufferHandle,
                                   uint64_t readHandleCreateInfoLength,
                                   const uint8_t* readHandleCreateInfo,
                                   uint64_t writeHandleCreateInfoLength,
                                   const uint8_t* writeHandleCreateInfo) {
     // Create and register the buffer object.
-    auto* buffer = BufferObjects().Allocate(bufferResult);
-    if (buffer == nullptr) {
+    Known<WGPUBuffer> buffer;
+    if (!BufferObjects().Allocate(&buffer, bufferHandle)) {
         return false;
     }
     buffer->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
@@ -199,8 +203,9 @@ bool Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
 
 void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatus status) {
     // Skip sending the callback if the buffer has already been destroyed.
-    auto* bufferData = BufferObjects().Get(data->buffer.id);
-    if (bufferData == nullptr || bufferData->generation != data->buffer.generation) {
+    Known<WGPUBuffer> buffer;
+    if (!BufferObjects().Get(data->buffer.id, &buffer) ||
+        buffer->generation != data->buffer.generation) {
         return;
     }
 
@@ -221,21 +226,21 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
             // Get the serialization size of the message to initialize ReadHandle data.
             readData = mProcs.bufferGetConstMappedRange(data->bufferObj, data->offset, data->size);
             readDataUpdateInfoLength =
-                bufferData->readHandle->SizeOfSerializeDataUpdate(data->offset, data->size);
+                buffer->readHandle->SizeOfSerializeDataUpdate(data->offset, data->size);
             cmd.readDataUpdateInfoLength = readDataUpdateInfoLength;
         } else {
             ASSERT(data->mode & WGPUMapMode_Write);
             // The in-flight map request returned successfully.
-            bufferData->mapWriteState = BufferMapWriteState::Mapped;
+            buffer->mapWriteState = BufferMapWriteState::Mapped;
             // Set the target of the WriteHandle to the mapped buffer data.
             // writeHandle Target always refers to the buffer base address.
             // but we call getMappedRange exactly with the range of data that is potentially
             // modified (i.e. we don't want getMappedRange(0, wholeBufferSize) if only a
             // subset of the buffer is actually mapped) in case the implementation does some
             // range tracking.
-            bufferData->writeHandle->SetTarget(static_cast<uint8_t*>(mProcs.bufferGetMappedRange(
-                                                   data->bufferObj, data->offset, data->size)) -
-                                               data->offset);
+            buffer->writeHandle->SetTarget(static_cast<uint8_t*>(mProcs.bufferGetMappedRange(
+                                               data->bufferObj, data->offset, data->size)) -
+                                           data->offset);
         }
     }
 
@@ -243,7 +248,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
                                                if (isSuccess && isRead) {
                                                    // The in-flight map request returned
                                                    // successfully.
-                                                   bufferData->readHandle->SerializeDataUpdate(
+                                                   buffer->readHandle->SerializeDataUpdate(
                                                        readData, data->offset, data->size,
                                                        readHandleBuffer);
                                                }

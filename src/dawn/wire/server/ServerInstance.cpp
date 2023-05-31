@@ -24,15 +24,15 @@ bool Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
                                       uint64_t requestSerial,
                                       ObjectHandle adapterHandle,
                                       const WGPURequestAdapterOptions* options) {
-    auto* adapter = AdapterObjects().Allocate(adapterHandle, AllocationState::Reserved);
-    if (adapter == nullptr) {
+    Known<WGPUAdapter> adapter;
+    if (!AdapterObjects().Allocate(&adapter, adapterHandle, AllocationState::Reserved)) {
         return false;
     }
 
     auto userdata = MakeUserdata<RequestAdapterUserdata>();
     userdata->instance = instance.AsHandle();
     userdata->requestSerial = requestSerial;
-    userdata->adapterObjectId = adapterHandle.id;
+    userdata->adapterObjectId = adapter.id;
 
     mProcs.instanceRequestAdapter(instance->handle, options,
                                   ForwardToServer<&Server::OnRequestAdapterCallback>,
@@ -63,8 +63,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     std::vector<WGPUFeatureName> features;
 
     // Assign the handle and allocated status if the adapter is created successfully.
-    auto* adapterObject = AdapterObjects().FillReservation(data->adapterObjectId, adapter);
-    ASSERT(adapterObject != nullptr);
+    AdapterObjects().FillReservation(data->adapterObjectId, adapter);
 
     size_t featuresCount = mProcs.adapterEnumerateFeatures(adapter, nullptr);
     features.resize(featuresCount);

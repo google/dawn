@@ -47,8 +47,8 @@ namespace dawn::wire::server {
                 {% set Type = member.handle_type.name.CamelCase() %}
                 {% set name = as_varName(member.name) %}
 
-                auto* {{name}}Data = {{Type}}Objects().Allocate(cmd.{{name}});
-                if ({{name}}Data == nullptr) {
+                Known<WGPU{{Type}}> {{name}}Data;
+                if (!{{Type}}Objects().Allocate(&{{name}}Data, cmd.{{name}})) {
                     return false;
                 }
                 {{name}}Data->generation = cmd.{{name}}.generation;

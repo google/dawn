@@ -23,15 +23,15 @@ bool Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
                                     uint64_t requestSerial,
                                     ObjectHandle deviceHandle,
                                     const WGPUDeviceDescriptor* descriptor) {
-    auto* device = DeviceObjects().Allocate(deviceHandle, AllocationState::Reserved);
-    if (device == nullptr) {
+    Known<WGPUDevice> device;
+    if (!DeviceObjects().Allocate(&device, deviceHandle, AllocationState::Reserved)) {
         return false;
     }
 
     auto userdata = MakeUserdata<RequestDeviceUserdata>();
     userdata->adapter = adapter.AsHandle();
     userdata->requestSerial = requestSerial;
-    userdata->deviceObjectId = deviceHandle.id;
+    userdata->deviceObjectId = device.id;
 
     mProcs.adapterRequestDevice(adapter->handle, descriptor,
                                 ForwardToServer<&Server::OnRequestDeviceCallback>,
@@ -89,11 +89,11 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.limits = &limits;
 
     // Assign the handle and allocated status if the device is created successfully.
-    auto* deviceObject = DeviceObjects().FillReservation(data->deviceObjectId, device);
-    ASSERT(deviceObject != nullptr);
-    deviceObject->info->server = this;
-    deviceObject->info->self = ObjectHandle{data->deviceObjectId, deviceObject->generation};
-    SetForwardingDeviceCallbacks(deviceObject);
+    Known<WGPUDevice> reservation = DeviceObjects().FillReservation(data->deviceObjectId, device);
+    ASSERT(reservation.data != nullptr);
+    reservation->info->server = this;
+    reservation->info->self = reservation.AsHandle();
+    SetForwardingDeviceCallbacks(reservation);
 
     SerializeCommand(cmd);
 }

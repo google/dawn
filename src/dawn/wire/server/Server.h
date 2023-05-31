@@ -189,7 +189,7 @@ class Server : public ServerBase {
         mSerializer.SerializeCommand(cmd, std::forward<Extensions>(es)...);
     }
 
-    void SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject);
+    void SetForwardingDeviceCallbacks(Known<WGPUDevice> device);
     void ClearDeviceCallbacks(WGPUDevice device);
 
     // Error callbacks

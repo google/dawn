@@ -49,13 +49,13 @@ bool Server::InjectTexture(WGPUTexture texture,
                            uint32_t deviceId,
                            uint32_t deviceGeneration) {
     ASSERT(texture != nullptr);
-    ObjectData<WGPUDevice>* device = DeviceObjects().Get(deviceId);
-    if (device == nullptr || device->generation != deviceGeneration) {
+    Known<WGPUDevice> device;
+    if (!DeviceObjects().Get(deviceId, &device) || device->generation != deviceGeneration) {
         return false;
     }
 
-    ObjectData<WGPUTexture>* data = TextureObjects().Allocate(ObjectHandle{id, generation});
-    if (data == nullptr) {
+    Known<WGPUTexture> data;
+    if (!TextureObjects().Allocate(&data, ObjectHandle{id, generation})) {
         return false;
     }
 
@@ -76,13 +76,13 @@ bool Server::InjectSwapChain(WGPUSwapChain swapchain,
                              uint32_t deviceId,
                              uint32_t deviceGeneration) {
     ASSERT(swapchain != nullptr);
-    ObjectData<WGPUDevice>* device = DeviceObjects().Get(deviceId);
-    if (device == nullptr || device->generation != deviceGeneration) {
+    Known<WGPUDevice> device;
+    if (!DeviceObjects().Get(deviceId, &device) || device->generation != deviceGeneration) {
         return false;
     }
 
-    ObjectData<WGPUSwapChain>* data = SwapChainObjects().Allocate(ObjectHandle{id, generation});
-    if (data == nullptr) {
+    Known<WGPUSwapChain> data;
+    if (!SwapChainObjects().Allocate(&data, ObjectHandle{id, generation})) {
         return false;
     }
 
@@ -99,8 +99,8 @@ bool Server::InjectSwapChain(WGPUSwapChain swapchain,
 
 bool Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
     ASSERT(device != nullptr);
-    ObjectData<WGPUDevice>* data = DeviceObjects().Allocate(ObjectHandle{id, generation});
-    if (data == nullptr) {
+    Known<WGPUDevice> data;
+    if (!DeviceObjects().Allocate(&data, ObjectHandle{id, generation})) {
         return false;
     }
 
@@ -108,7 +108,7 @@ bool Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
     data->generation = generation;
     data->state = AllocationState::Allocated;
     data->info->server = this;
-    data->info->self = ObjectHandle{id, generation};
+    data->info->self = data.AsHandle();
 
     // The device is externally owned so it shouldn't be destroyed when we receive a destroy
     // message from the client. Add a reference to counterbalance the eventual release.
@@ -121,8 +121,8 @@ bool Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
 
 bool Server::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
     ASSERT(instance != nullptr);
-    ObjectData<WGPUInstance>* data = InstanceObjects().Allocate(ObjectHandle{id, generation});
-    if (data == nullptr) {
+    Known<WGPUInstance> data;
+    if (!InstanceObjects().Allocate(&data, ObjectHandle{id, generation})) {
         return false;
     }
 
@@ -138,18 +138,18 @@ bool Server::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generat
 }
 
 WGPUDevice Server::GetDevice(uint32_t id, uint32_t generation) {
-    ObjectData<WGPUDevice>* data = DeviceObjects().Get(id);
-    if (data == nullptr || data->generation != generation) {
+    Known<WGPUDevice> device;
+    if (!DeviceObjects().Get(id, &device) || device->generation != generation) {
         return nullptr;
     }
-    return data->handle;
+    return device->handle;
 }
 
 bool Server::IsDeviceKnown(WGPUDevice device) const {
     return DeviceObjects().IsKnown(device);
 }
 
-void Server::SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject) {
+void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
     // Note: these callbacks are manually inlined here since they do not acquire and
     // free their userdata. Also unlike other callbacks, these are cleared and unset when
     // the server is destroyed, so we don't need to check if the server is still alive
@@ -158,28 +158,28 @@ void Server::SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject) 
     // ClearDeviceCallbacks. This ensures that callbacks will not fire after |deviceObject|
     // is freed.
     mProcs.deviceSetUncapturedErrorCallback(
-        deviceObject->handle,
+        device->handle,
         [](WGPUErrorType type, const char* message, void* userdata) {
             DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
             info->server->OnUncapturedError(info->self, type, message);
         },
-        deviceObject->info.get());
+        device->info.get());
     // Set callback to post warning and other infomation to client.
     // Almost the same with UncapturedError.
     mProcs.deviceSetLoggingCallback(
-        deviceObject->handle,
+        device->handle,
         [](WGPULoggingType type, const char* message, void* userdata) {
             DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
             info->server->OnLogging(info->self, type, message);
         },
-        deviceObject->info.get());
+        device->info.get());
     mProcs.deviceSetDeviceLostCallback(
-        deviceObject->handle,
+        device->handle,
         [](WGPUDeviceLostReason reason, const char* message, void* userdata) {
             DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
             info->server->OnDeviceLost(info->self, reason, message);
         },
-        deviceObject->info.get());
+        device->info.get());
 }
 
 void Server::ClearDeviceCallbacks(WGPUDevice device) {

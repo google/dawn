@@ -73,25 +73,25 @@ namespace dawn::wire::server {
         switch(objectType) {
             {% for type in by_category["object"] %}
                 case ObjectType::{{type.name.CamelCase()}}: {
-                    auto* data = {{type.name.CamelCase()}}Objects().Get(objectId);
-                    if (data == nullptr) {
+                    Known<WGPU{{type.name.CamelCase()}}> obj;
+                    if (!{{type.name.CamelCase()}}Objects().Get(objectId, &obj)) {
                         return false;
                     }
-                    if (data->state == AllocationState::Allocated) {
-                        ASSERT(data->handle != nullptr);
+                    if (obj->state == AllocationState::Allocated) {
+                        ASSERT(obj->handle != nullptr);
                         {% if type.name.CamelCase() in server_reverse_lookup_objects %}
                             {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
                         {% endif %}
 
                         {% if type.name.get() == "device" %}
-                            if (data->handle != nullptr) {
+                            if (obj->handle != nullptr) {
                                 //* Deregisters uncaptured error and device lost callbacks since
                                 //* they should not be forwarded if the device no longer exists on the wire.
-                                ClearDeviceCallbacks(data->handle);
+                                ClearDeviceCallbacks(obj->handle);
                             }
                         {% endif %}
 
-                        mProcs.{{as_varName(type.name, Name("release"))}}(data->handle);
+                        mProcs.{{as_varName(type.name, Name("release"))}}(obj->handle);
                     }
                     {{type.name.CamelCase()}}Objects().Free(objectId);
                     return true;
