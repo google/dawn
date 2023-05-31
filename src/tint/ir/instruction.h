@@ -18,6 +18,11 @@
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/castable.h"
 
+// Forward declarations
+namespace tint::ir {
+class Block;
+}  // namespace tint::ir
+
 namespace tint::ir {
 
 /// An instruction in the IR.
@@ -26,9 +31,22 @@ class Instruction : public utils::Castable<Instruction, Value> {
     /// Destructor
     ~Instruction() override;
 
+    /// Sets the block that owns this instruction
+    /// @param block the new owner block
+    void SetBlock(ir::Block* block) { block_ = block; }
+
+    /// @returns the block that owns this instruction
+    ir::Block* Block() { return block_; }
+
+    /// @returns the block that owns this instruction
+    const ir::Block* Block() const { return block_; }
+
   protected:
     /// Constructor
     Instruction();
+
+    /// The block that owns this instruction
+    ir::Block* block_ = nullptr;
 };
 
 }  // namespace tint::ir

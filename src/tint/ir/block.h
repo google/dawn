@@ -48,14 +48,14 @@ class Block : public utils::Castable<Block> {
 
     /// Sets the instructions in the block
     /// @param instructions the instructions to set
-    void SetInstructions(utils::VectorRef<const Instruction*> instructions) {
-        instructions_ = std::move(instructions);
-    }
+    void SetInstructions(utils::VectorRef<Instruction*> instructions);
 
     /// @returns the instructions in the block
     utils::VectorRef<const Instruction*> Instructions() const { return instructions_; }
-    /// @returns the instructions in the block
-    utils::Vector<const Instruction*, 16>& Instructions() { return instructions_; }
+
+    /// Adds the instruction to the end of the block
+    /// @param inst the instruction to add
+    void AddInstruction(Instruction* inst);
 
     /// Sets the params to the block
     /// @param params the params for the block

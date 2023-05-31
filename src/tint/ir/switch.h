@@ -39,24 +39,24 @@ class Switch : public utils::Castable<Switch, Branch> {
         /// The case selector for this node
         utils::Vector<CaseSelector, 4> selectors;
         /// The start block for the case block.
-        Block* start = nullptr;
+        ir::Block* start = nullptr;
 
         /// @returns the case start target
-        const Block* Start() const { return start; }
+        const ir::Block* Start() const { return start; }
         /// @returns the case start target
-        Block* Start() { return start; }
+        ir::Block* Start() { return start; }
     };
 
     /// Constructor
     /// @param cond the condition
     /// @param m the merge block
-    explicit Switch(Value* cond, Block* m);
+    explicit Switch(Value* cond, ir::Block* m);
     ~Switch() override;
 
     /// @returns the switch merge branch
-    const Block* Merge() const { return merge_; }
+    const ir::Block* Merge() const { return merge_; }
     /// @returns the switch merge branch
-    Block* Merge() { return merge_; }
+    ir::Block* Merge() { return merge_; }
 
     /// @returns the switch cases
     utils::VectorRef<Case> Cases() const { return cases_; }
@@ -70,7 +70,7 @@ class Switch : public utils::Castable<Switch, Branch> {
 
   private:
     Value* condition_ = nullptr;
-    Block* merge_ = nullptr;
+    ir::Block* merge_ = nullptr;
     utils::Vector<Case, 4> cases_;
 };
 

@@ -25,11 +25,11 @@ TEST_F(SpvGeneratorImplTest, Switch_Basic) {
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
     auto* def_case = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector()});
-    def_case->Instructions().Push(b.ExitSwitch(swtch));
+    def_case->AddInstruction(b.ExitSwitch(swtch));
 
-    swtch->Merge()->Instructions().Push(b.Return(func));
+    swtch->Merge()->AddInstruction(b.Return(func));
 
-    func->StartTarget()->Instructions().Push(swtch);
+    func->StartTarget()->AddInstruction(swtch);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -55,17 +55,17 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleCases) {
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
     auto* case_a = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
-    case_a->Instructions().Push(b.ExitSwitch(swtch));
+    case_a->AddInstruction(b.ExitSwitch(swtch));
 
     auto* case_b = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
-    case_b->Instructions().Push(b.ExitSwitch(swtch));
+    case_b->AddInstruction(b.ExitSwitch(swtch));
 
     auto* def_case = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector()});
-    def_case->Instructions().Push(b.ExitSwitch(swtch));
+    def_case->AddInstruction(b.ExitSwitch(swtch));
 
-    swtch->Merge()->Instructions().Push(b.Return(func));
+    swtch->Merge()->AddInstruction(b.Return(func));
 
-    func->StartTarget()->Instructions().Push(swtch);
+    func->StartTarget()->AddInstruction(swtch);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -96,19 +96,19 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleSelectorsPerCase) {
 
     auto* case_a = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                                      ir::Switch::CaseSelector{b.Constant(3_i)}});
-    case_a->Instructions().Push(b.ExitSwitch(swtch));
+    case_a->AddInstruction(b.ExitSwitch(swtch));
 
     auto* case_b = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)},
                                                      ir::Switch::CaseSelector{b.Constant(4_i)}});
-    case_b->Instructions().Push(b.ExitSwitch(swtch));
+    case_b->AddInstruction(b.ExitSwitch(swtch));
 
     auto* def_case = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(5_i)},
                                                        ir::Switch::CaseSelector()});
-    def_case->Instructions().Push(b.ExitSwitch(swtch));
+    def_case->AddInstruction(b.ExitSwitch(swtch));
 
-    swtch->Merge()->Instructions().Push(b.Return(func));
+    swtch->Merge()->AddInstruction(b.Return(func));
 
-    func->StartTarget()->Instructions().Push(swtch);
+    func->StartTarget()->AddInstruction(swtch);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -138,15 +138,15 @@ TEST_F(SpvGeneratorImplTest, Switch_AllCasesReturn) {
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
     auto* case_a = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
-    case_a->Instructions().Push(b.Return(func));
+    case_a->AddInstruction(b.Return(func));
 
     auto* case_b = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
-    case_b->Instructions().Push(b.Return(func));
+    case_b->AddInstruction(b.Return(func));
 
     auto* def_case = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector()});
-    def_case->Instructions().Push(b.Return(func));
+    def_case->AddInstruction(b.Return(func));
 
-    func->StartTarget()->Instructions().Push(swtch);
+    func->StartTarget()->AddInstruction(swtch);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -176,19 +176,19 @@ TEST_F(SpvGeneratorImplTest, Switch_ConditionalBreak) {
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
     auto* cond_break = b.CreateIf(b.Constant(true));
-    cond_break->True()->Instructions().Push(b.ExitSwitch(swtch));
-    cond_break->False()->Instructions().Push(b.ExitIf(cond_break));
-    cond_break->Merge()->Instructions().Push(b.Return(func));
+    cond_break->True()->AddInstruction(b.ExitSwitch(swtch));
+    cond_break->False()->AddInstruction(b.ExitIf(cond_break));
+    cond_break->Merge()->AddInstruction(b.Return(func));
 
     auto* case_a = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
-    case_a->Instructions().Push(cond_break);
+    case_a->AddInstruction(cond_break);
 
     auto* def_case = b.CreateCase(swtch, utils::Vector{ir::Switch::CaseSelector()});
-    def_case->Instructions().Push(b.ExitSwitch(swtch));
+    def_case->AddInstruction(b.ExitSwitch(swtch));
 
-    swtch->Merge()->Instructions().Push(b.Return(func));
+    swtch->Merge()->AddInstruction(b.Return(func));
 
-    func->StartTarget()->Instructions().Push(swtch);
+    func->StartTarget()->AddInstruction(swtch);
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

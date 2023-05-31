@@ -22,4 +22,16 @@ Block::Block() : Base() {}
 
 Block::~Block() = default;
 
+void Block::AddInstruction(Instruction* inst) {
+    instructions_.Push(inst);
+    inst->SetBlock(this);
+}
+
+void Block::SetInstructions(utils::VectorRef<Instruction*> instructions) {
+    for (auto* i : instructions) {
+        i->SetBlock(this);
+    }
+    instructions_ = std::move(instructions);
+}
+
 }  // namespace tint::ir

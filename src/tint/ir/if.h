@@ -34,7 +34,7 @@ class If : public utils::Castable<If, Branch> {
     /// @param t the true block
     /// @param f the false block
     /// @param m the merge block
-    explicit If(Value* cond, Block* t, Block* f, Block* m);
+    explicit If(Value* cond, ir::Block* t, ir::Block* f, ir::Block* m);
     ~If() override;
 
     /// @returns the if condition
@@ -43,25 +43,25 @@ class If : public utils::Castable<If, Branch> {
     Value* Condition() { return condition_; }
 
     /// @returns the true branch block
-    const Block* True() const { return true_; }
+    const ir::Block* True() const { return true_; }
     /// @returns the true branch block
-    Block* True() { return true_; }
+    ir::Block* True() { return true_; }
 
     /// @returns the false branch block
-    const Block* False() const { return false_; }
+    const ir::Block* False() const { return false_; }
     /// @returns the false branch block
-    Block* False() { return false_; }
+    ir::Block* False() { return false_; }
 
     /// @returns the merge branch block
-    const Block* Merge() const { return merge_; }
+    const ir::Block* Merge() const { return merge_; }
     /// @returns the merge branch block
-    Block* Merge() { return merge_; }
+    ir::Block* Merge() { return merge_; }
 
   private:
     Value* condition_ = nullptr;
-    Block* true_ = nullptr;
-    Block* false_ = nullptr;
-    Block* merge_ = nullptr;
+    ir::Block* true_ = nullptr;
+    ir::Block* false_ = nullptr;
+    ir::Block* merge_ = nullptr;
 };
 
 }  // namespace tint::ir
