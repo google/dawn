@@ -26,6 +26,7 @@
 namespace tint::type {
 class AbstractFloat;
 class AbstractInt;
+class Array;
 class Bool;
 class F16;
 class F32;
@@ -181,6 +182,17 @@ class Manager final {
     /// @param inner the inner type
     /// @returns the matrix type
     const type::Matrix* mat4x4(const type::Type* inner);
+
+    /// @param elem_ty the array element type
+    /// @param count the array element count
+    /// @param stride the optional array element stride
+    /// @returns the array type
+    const type::Array* array(const type::Type* elem_ty, uint32_t count, uint32_t stride = 0);
+
+    /// @param elem_ty the array element type
+    /// @param stride the optional array element stride
+    /// @returns the runtime array type
+    const type::Array* runtime_array(const type::Type* elem_ty, uint32_t stride = 0);
 
     /// @returns an iterator to the beginning of the types
     TypeIterator begin() const { return types_.begin(); }

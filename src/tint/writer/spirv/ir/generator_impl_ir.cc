@@ -18,6 +18,7 @@
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
+#include "src/tint/constant/scalar.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/break_if.h"
@@ -39,6 +40,7 @@
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -205,6 +207,18 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
             [&](const type::Matrix* mat) {
                 module_.PushType(spv::Op::OpTypeMatrix,
                                  {id, Type(mat->ColumnType()), mat->columns()});
+            },
+            [&](const type::Array* arr) {
+                if (arr->ConstantCount()) {
+                    auto* count = ir_->constant_values.Get(u32(arr->ConstantCount().value()));
+                    module_.PushType(spv::Op::OpTypeArray,
+                                     {id, Type(arr->ElemType()), Constant(count)});
+                } else {
+                    TINT_ASSERT(Writer, arr->Count()->Is<type::RuntimeArrayCount>());
+                    module_.PushType(spv::Op::OpTypeRuntimeArray, {id, Type(arr->ElemType())});
+                }
+                module_.PushAnnot(spv::Op::OpDecorate,
+                                  {id, U32Operand(SpvDecorationArrayStride), arr->Stride()});
             },
             [&](const type::Pointer* ptr) {
                 module_.PushType(

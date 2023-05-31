@@ -125,6 +125,50 @@ TEST_F(SpvGeneratorImplTest, Type_Mat4x2h) {
               "%1 = OpTypeMatrix %2 4\n");
 }
 
+TEST_F(SpvGeneratorImplTest, Type_Array_DefaultStride) {
+    auto* arr = mod.Types().array(mod.Types().f32(), 4u);
+    auto id = generator_.Type(arr);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(),
+              "%2 = OpTypeFloat 32\n"
+              "%4 = OpTypeInt 32 0\n"
+              "%3 = OpConstant %4 4\n"
+              "%1 = OpTypeArray %2 %3\n");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 4\n");
+}
+
+TEST_F(SpvGeneratorImplTest, Type_Array_ExplicitStride) {
+    auto* arr = mod.Types().array(mod.Types().f32(), 4u, 16);
+    auto id = generator_.Type(arr);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(),
+              "%2 = OpTypeFloat 32\n"
+              "%4 = OpTypeInt 32 0\n"
+              "%3 = OpConstant %4 4\n"
+              "%1 = OpTypeArray %2 %3\n");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 16\n");
+}
+
+TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_DefaultStride) {
+    auto* arr = mod.Types().runtime_array(mod.Types().f32());
+    auto id = generator_.Type(arr);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(),
+              "%2 = OpTypeFloat 32\n"
+              "%1 = OpTypeRuntimeArray %2\n");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 4\n");
+}
+
+TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_ExplicitStride) {
+    auto* arr = mod.Types().runtime_array(mod.Types().f32(), 16);
+    auto id = generator_.Type(arr);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(),
+              "%2 = OpTypeFloat 32\n"
+              "%1 = OpTypeRuntimeArray %2\n");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 16\n");
+}
+
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
 TEST_F(SpvGeneratorImplTest, Type_Multiple) {

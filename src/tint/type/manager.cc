@@ -16,6 +16,7 @@
 
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -123,4 +124,32 @@ const type::Matrix* Manager::mat4x3(const type::Type* inner) {
 const type::Matrix* Manager::mat4x4(const type::Type* inner) {
     return mat(inner, 4, 4);
 }
+
+const type::Array* Manager::array(const type::Type* elem_ty,
+                                  uint32_t count,
+                                  uint32_t stride /* = 0*/) {
+    if (stride == 0) {
+        stride = elem_ty->Align();
+    }
+    return Get<type::Array>(/* element type */ elem_ty,
+                            /* element count */ Get<ConstantArrayCount>(count),
+                            /* array alignment */ elem_ty->Align(),
+                            /* array size */ count * stride,
+                            /* element stride */ stride,
+                            /* implicit stride */ elem_ty->Align());
+}
+
+const type::Array* Manager::runtime_array(const type::Type* elem_ty, uint32_t stride /* = 0 */) {
+    if (stride == 0) {
+        stride = elem_ty->Align();
+    }
+    return Get<type::Array>(
+        /* element type */ elem_ty,
+        /* element count */ Get<RuntimeArrayCount>(),
+        /* array alignment */ elem_ty->Align(),
+        /* array size */ stride,
+        /* element stride */ stride,
+        /* implicit stride */ elem_ty->Align());
+}
+
 }  // namespace tint::type
