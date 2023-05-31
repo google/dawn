@@ -109,9 +109,6 @@ config("internal_config") {
   ]
 
   cflags = []
-  if (is_clang) {
-    cflags += [ "-Wno-shadow" ]
-  }
 
   # Enable more warnings that were found when using Dawn in other projects.
   # Add them only when building in standalone because we control which clang

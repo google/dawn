@@ -465,14 +465,14 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                                             d3d11DepthStencilView.Get());
 
     // Set viewport
-    D3D11_VIEWPORT viewport;
-    viewport.TopLeftX = 0;
-    viewport.TopLeftY = 0;
-    viewport.Width = renderPass->width;
-    viewport.Height = renderPass->height;
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-    d3d11DeviceContext1->RSSetViewports(1, &viewport);
+    D3D11_VIEWPORT defautViewport;
+    defautViewport.TopLeftX = 0;
+    defautViewport.TopLeftY = 0;
+    defautViewport.Width = renderPass->width;
+    defautViewport.Height = renderPass->height;
+    defautViewport.MinDepth = 0.0f;
+    defautViewport.MaxDepth = 1.0f;
+    d3d11DeviceContext1->RSSetViewports(1, &defautViewport);
 
     // Set scissor
     D3D11_RECT scissor;

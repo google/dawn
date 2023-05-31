@@ -238,10 +238,10 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
   private:
     void ApplyBindGroup(const OpenGLFunctions& gl,
-                        BindGroupIndex index,
+                        BindGroupIndex groupIndex,
                         BindGroupBase* group,
                         const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets) {
-        const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[index];
+        const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[groupIndex];
 
         for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
              ++bindingIndex) {

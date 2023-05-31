@@ -1129,7 +1129,6 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
                 uint8_t* data = mCommands.NextData<uint8_t>(size);
-                Device* device = ToBackend(GetDevice());
 
                 UploadHandle uploadHandle;
                 DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(

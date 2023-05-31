@@ -160,13 +160,13 @@ void PlatformFunctions::LoadDXCompiler(const std::string& baseWindowsSDKPath) {
         return;
     }
 
-    const char* dxCompilerDLLName = "dxcompiler.dll";
-    const std::array<std::string, 2> kDxCompilerDLLPaths = {
-        {dxCompilerDLLName, baseWindowsSDKPath + dxCompilerDLLName}};
+    constexpr char kDxCompilerDLLName[] = "dxcompiler.dll";
+    const std::array<std::string, 2> dxCompilerDLLPaths = {
+        {kDxCompilerDLLName, baseWindowsSDKPath + kDxCompilerDLLName}};
 
     DynamicLib dxCompilerLib;
-    for (const std::string& dxCompilerDLLName : kDxCompilerDLLPaths) {
-        if (dxCompilerLib.Open(dxCompilerDLLName, nullptr)) {
+    for (const std::string& dllName : dxCompilerDLLPaths) {
+        if (dxCompilerLib.Open(dllName, nullptr)) {
             break;
         }
     }

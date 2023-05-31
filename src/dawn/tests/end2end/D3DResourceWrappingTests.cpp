@@ -127,12 +127,12 @@ class D3DResourceTestBase : public DawnTest {
     }
 
     void WrapSharedHandle(const wgpu::TextureDescriptor* dawnDesc,
-                          const D3D11_TEXTURE2D_DESC* baseD3dDescriptor,
+                          const D3D11_TEXTURE2D_DESC* d3dDesc,
                           wgpu::Texture* dawnTexture,
                           ID3D11Texture2D** d3d11TextureOut,
                           std::unique_ptr<native::d3d::ExternalImageDXGI>* externalImageOut) const {
         ComPtr<ID3D11Texture2D> d3d11Texture;
-        HRESULT hr = mD3d11Device->CreateTexture2D(baseD3dDescriptor, nullptr, &d3d11Texture);
+        HRESULT hr = mD3d11Device->CreateTexture2D(d3dDesc, nullptr, &d3d11Texture);
         ASSERT_EQ(hr, S_OK);
 
         std::unique_ptr<native::d3d::ExternalImageDXGI> externalImage =
@@ -774,9 +774,11 @@ TEST_P(D3DSharedHandleUsageTests, ConcurrentExternalImageReadAccess) {
                      &externalImage);
 
     // Clear to red.
-    const wgpu::Color solidRed{1.0f, 0.0f, 0.0f, 1.0f};
-    ASSERT_NE(texture.Get(), nullptr);
-    ClearImage(texture.Get(), solidRed, device);
+    {
+        const wgpu::Color solidRed{1.0f, 0.0f, 0.0f, 1.0f};
+        ASSERT_NE(texture.Get(), nullptr);
+        ClearImage(texture.Get(), solidRed, device);
+    }
 
     native::d3d::ExternalImageDXGIFenceDescriptor signalFence;
     externalImage->EndAccess(texture.Get(), &signalFence);

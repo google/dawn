@@ -402,17 +402,17 @@ DawnTestEnvironment::CreateInstanceAndDiscoverPhysicalDevices(dawn::platform::Pl
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGLES
     if (dawn::GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {
-        const char* platform;
+        const char* anglePlatform;
         if (!mANGLEBackend.empty()) {
-            platform = mANGLEBackend.c_str();
+            anglePlatform = mANGLEBackend.c_str();
         } else {
 #if DAWN_PLATFORM_IS(WINDOWS)
-            platform = "d3d11";
+            anglePlatform = "d3d11";
 #else
-            platform = "swiftshader";
+            anglePlatform = "swiftshader";
 #endif
         }
-        dawn::SetEnvironmentVar("ANGLE_DEFAULT_PLATFORM", platform);
+        dawn::SetEnvironmentVar("ANGLE_DEFAULT_PLATFORM", anglePlatform);
     }
 #endif  // DAWN_ENABLE_BACKEND_OPENGLES
 

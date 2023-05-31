@@ -108,7 +108,7 @@ using ResultOrError = Result<T, ErrorData>;
 
 #define DAWN_CONCAT1(x, y) x##y
 #define DAWN_CONCAT2(x, y) DAWN_CONCAT1(x, y)
-#define DAWN_LOCAL_VAR DAWN_CONCAT2(_localVar, __LINE__)
+#define DAWN_LOCAL_VAR(name) DAWN_CONCAT2(DAWN_CONCAT2(_localVar, __LINE__), name)
 
 // When Errors aren't handled explicitly, calls to functions returning errors should be
 // wrapped in an DAWN_TRY. It will return the error if any, otherwise keep executing
@@ -116,26 +116,29 @@ using ResultOrError = Result<T, ErrorData>;
 #define DAWN_TRY(EXPR) DAWN_TRY_WITH_CLEANUP(EXPR, {})
 
 #define DAWN_TRY_CONTEXT(EXPR, ...) \
-    DAWN_TRY_WITH_CLEANUP(EXPR, { error->AppendContext(absl::StrFormat(__VA_ARGS__)); })
+    DAWN_TRY_WITH_CLEANUP(EXPR,     \
+                          { DAWN_LOCAL_VAR(Error)->AppendContext(absl::StrFormat(__VA_ARGS__)); })
 
-#define DAWN_TRY_WITH_CLEANUP(EXPR, BODY)                                                     \
-    {                                                                                         \
-        auto DAWN_LOCAL_VAR = EXPR;                                                           \
-        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                                        \
-            std::unique_ptr<::dawn::native::ErrorData> error = DAWN_LOCAL_VAR.AcquireError(); \
-            {BODY} /* comment to force the formatter to insert a newline */                   \
-            error->AppendBacktrace(__FILE__, __func__, __LINE__);                             \
-            return {std::move(error)};                                                        \
-        }                                                                                     \
-    }                                                                                         \
-    for (;;)                                                                                  \
+#define DAWN_TRY_WITH_CLEANUP(EXPR, BODY)                                       \
+    {                                                                           \
+        auto DAWN_LOCAL_VAR(Result) = EXPR;                                     \
+        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR(Result).IsError())) {                  \
+            auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError(); \
+            {BODY} /* comment to force the formatter to insert a newline */     \
+            DAWN_LOCAL_VAR(Error)                                               \
+                ->AppendBacktrace(__FILE__, __func__, __LINE__);                \
+            return {std::move(DAWN_LOCAL_VAR(Error))};                          \
+        }                                                                       \
+    }                                                                           \
+    for (;;)                                                                    \
     break
 
 // DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
 // any, to VAR.
 #define DAWN_TRY_ASSIGN(VAR, EXPR) DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, {})
 #define DAWN_TRY_ASSIGN_CONTEXT(VAR, EXPR, ...) \
-    DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, { error->AppendContext(absl::StrFormat(__VA_ARGS__)); })
+    DAWN_TRY_ASSIGN_WITH_CLEANUP(               \
+        VAR, EXPR, { DAWN_LOCAL_VAR(Error)->AppendContext(absl::StrFormat(__VA_ARGS__)); })
 
 // Argument helpers are used to determine which macro implementations should be called when
 // overloading with different number of variables.
@@ -147,20 +150,23 @@ using ResultOrError = Result<T, ErrorData>;
 // return value of the macro when necessary. This is particularly useful if the function
 // calling the macro may want to return void instead of the error, i.e. in a test where we may
 // just want to assert and fail if the assign cannot go through. In both the cleanup and return
-// clauses, users can use the `error` variable to access the pointer to the acquired error.
+// clauses, users can use the `DAWN_LOCAL_VAR(Error)` variable to access the pointer to the
+// acquired error.
 //
 // Example usages:
 //     3 Argument Case:
 //          Result res;
 //          DAWN_TRY_ASSIGN_WITH_CLEANUP(
-//              res, GetResultOrErrorFunction(), { AddAdditionalErrorInformation(error.get()); }
-//          );
+//              res, GetResultOrErrorFunction(), {
+//                  AddAdditionalErrorInformation(DAWN_LOCAL_VAR(Error).get());
+//              });
 //
 //     4 Argument Case:
 //          bool FunctionThatReturnsBool() {
 //              DAWN_TRY_ASSIGN_WITH_CLEANUP(
-//                  res, GetResultOrErrorFunction(),
-//                  { AddAdditionalErrorInformation(error.get()); },
+//                  res, GetResultOrErrorFunction(), {
+//                      AddAdditionalErrorInformation(DAWN_LOCAL_VAR(Error).get());
+//                  },
 //                  false
 //              );
 //          }
@@ -171,20 +177,21 @@ using ResultOrError = Result<T, ErrorData>;
     (__VA_ARGS__)
 
 #define DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_3_(VAR, EXPR, BODY) \
-    DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_(VAR, EXPR, BODY, std::move(error))
+    DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_(VAR, EXPR, BODY, std::move(DAWN_LOCAL_VAR(Error)))
 
-#define DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_(VAR, EXPR, BODY, RET)            \
-    {                                                                         \
-        auto DAWN_LOCAL_VAR = EXPR;                                           \
-        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                        \
-            std::unique_ptr<ErrorData> error = DAWN_LOCAL_VAR.AcquireError(); \
-            {BODY} /* comment to force the formatter to insert a newline */   \
-            error->AppendBacktrace(__FILE__, __func__, __LINE__);             \
-            return (RET);                                                     \
-        }                                                                     \
-        VAR = DAWN_LOCAL_VAR.AcquireSuccess();                                \
-    }                                                                         \
-    for (;;)                                                                  \
+#define DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_(VAR, EXPR, BODY, RET)              \
+    {                                                                           \
+        auto DAWN_LOCAL_VAR(Result) = EXPR;                                     \
+        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR(Result).IsError())) {                  \
+            auto DAWN_LOCAL_VAR(Error) = DAWN_LOCAL_VAR(Result).AcquireError(); \
+            {BODY} /* comment to force the formatter to insert a newline */     \
+            DAWN_LOCAL_VAR(Error)                                               \
+                ->AppendBacktrace(__FILE__, __func__, __LINE__);                \
+            return (RET);                                                       \
+        }                                                                       \
+        VAR = DAWN_LOCAL_VAR(Result).AcquireSuccess();                          \
+    }                                                                           \
+    for (;;)                                                                    \
     break
 
 // Assert that errors are device loss so that we can continue with destruction
