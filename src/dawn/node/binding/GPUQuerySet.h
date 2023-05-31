@@ -35,7 +35,7 @@ class GPUQuerySet final : public interop::GPUQuerySet {
     // interop::GPUQuerySet interface compliance
     void destroy(Napi::Env) override;
     interop::GPUQueryType getType(Napi::Env) override;
-    interop::GPUSize32 getCount(Napi::Env) override;
+    interop::GPUSize32Out getCount(Napi::Env) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;
 

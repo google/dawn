@@ -43,7 +43,7 @@ interop::GPUQueryType GPUQuerySet::getType(Napi::Env env) {
     return result;
 }
 
-interop::GPUSize32 GPUQuerySet::getCount(Napi::Env) {
+interop::GPUSize32Out GPUQuerySet::getCount(Napi::Env) {
     return query_set_.GetCount();
 }
 

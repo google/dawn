@@ -89,4 +89,6 @@ typedef(ArrayBufferView or ArrayBuffer) BufferSource;
 
 [LegacyNoInterfaceObject] interface DOMException {};
 
+[LegacyNoInterfaceObject] interface VideoFrame {};
+
 enum PredefinedColorSpace { "srgb", "display-p3" };

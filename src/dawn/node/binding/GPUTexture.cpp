@@ -55,23 +55,23 @@ void GPUTexture::destroy(Napi::Env) {
     texture_.Destroy();
 }
 
-interop::GPUIntegerCoordinate GPUTexture::getWidth(Napi::Env) {
+interop::GPUIntegerCoordinateOut GPUTexture::getWidth(Napi::Env) {
     return texture_.GetWidth();
 }
 
-interop::GPUIntegerCoordinate GPUTexture::getHeight(Napi::Env) {
+interop::GPUIntegerCoordinateOut GPUTexture::getHeight(Napi::Env) {
     return texture_.GetHeight();
 }
 
-interop::GPUIntegerCoordinate GPUTexture::getDepthOrArrayLayers(Napi::Env) {
+interop::GPUIntegerCoordinateOut GPUTexture::getDepthOrArrayLayers(Napi::Env) {
     return texture_.GetDepthOrArrayLayers();
 }
 
-interop::GPUIntegerCoordinate GPUTexture::getMipLevelCount(Napi::Env) {
+interop::GPUIntegerCoordinateOut GPUTexture::getMipLevelCount(Napi::Env) {
     return texture_.GetMipLevelCount();
 }
 
-interop::GPUSize32 GPUTexture::getSampleCount(Napi::Env) {
+interop::GPUSize32Out GPUTexture::getSampleCount(Napi::Env) {
     return texture_.GetSampleCount();
 }
 
@@ -101,14 +101,14 @@ interop::GPUTextureFormat GPUTexture::getFormat(Napi::Env env) {
     return result;
 }
 
-interop::GPUTextureUsageFlags GPUTexture::getUsage(Napi::Env env) {
+interop::GPUFlagsConstant GPUTexture::getUsage(Napi::Env env) {
     interop::GPUTextureUsageFlags result;
 
     Converter conv(env);
     if (!conv(result, texture_.GetUsage())) {
         Napi::Error::New(env, "Couldn't convert usage to a JavaScript value.")
             .ThrowAsJavaScriptException();
-        return {0u};  // Doesn't get used.
+        return 0u;  // Doesn't get used.
     }
 
     return result;

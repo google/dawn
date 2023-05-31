@@ -46,11 +46,11 @@ class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
     void end(Napi::Env) override;
     void setBindGroup(Napi::Env,
                       interop::GPUIndex32 index,
-                      interop::Interface<interop::GPUBindGroup> bindGroup,
+                      std::optional<interop::Interface<interop::GPUBindGroup>> bindGroup,
                       std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) override;
     void setBindGroup(Napi::Env,
                       interop::GPUIndex32 index,
-                      interop::Interface<interop::GPUBindGroup> bindGroup,
+                      std::optional<interop::Interface<interop::GPUBindGroup>> bindGroup,
                       interop::Uint32Array dynamicOffsetsData,
                       interop::GPUSize64 dynamicOffsetsDataStart,
                       interop::GPUSize32 dynamicOffsetsDataLength) override;

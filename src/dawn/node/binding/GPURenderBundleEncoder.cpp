@@ -42,7 +42,7 @@ interop::Interface<interop::GPURenderBundle> GPURenderBundleEncoder::finish(
 void GPURenderBundleEncoder::setBindGroup(
     Napi::Env env,
     interop::GPUIndex32 index,
-    interop::Interface<interop::GPUBindGroup> bindGroup,
+    std::optional<interop::Interface<interop::GPUBindGroup>> bindGroup,
     std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) {
     Converter conv(env);
 
@@ -56,12 +56,13 @@ void GPURenderBundleEncoder::setBindGroup(
     enc_.SetBindGroup(index, bg, num_offsets, offsets);
 }
 
-void GPURenderBundleEncoder::setBindGroup(Napi::Env env,
-                                          interop::GPUIndex32 index,
-                                          interop::Interface<interop::GPUBindGroup> bindGroup,
-                                          interop::Uint32Array dynamicOffsetsData,
-                                          interop::GPUSize64 dynamicOffsetsDataStart,
-                                          interop::GPUSize32 dynamicOffsetsDataLength) {
+void GPURenderBundleEncoder::setBindGroup(
+    Napi::Env env,
+    interop::GPUIndex32 index,
+    std::optional<interop::Interface<interop::GPUBindGroup>> bindGroup,
+    interop::Uint32Array dynamicOffsetsData,
+    interop::GPUSize64 dynamicOffsetsDataStart,
+    interop::GPUSize32 dynamicOffsetsDataLength) {
     Converter conv(env);
 
     wgpu::BindGroup bg{};
@@ -118,11 +119,12 @@ void GPURenderBundleEncoder::setIndexBuffer(Napi::Env env,
     enc_.SetIndexBuffer(b, f, o, s);
 }
 
-void GPURenderBundleEncoder::setVertexBuffer(Napi::Env env,
-                                             interop::GPUIndex32 slot,
-                                             interop::Interface<interop::GPUBuffer> buffer,
-                                             interop::GPUSize64 offset,
-                                             std::optional<interop::GPUSize64> size) {
+void GPURenderBundleEncoder::setVertexBuffer(
+    Napi::Env env,
+    interop::GPUIndex32 slot,
+    std::optional<interop::Interface<interop::GPUBuffer>> buffer,
+    interop::GPUSize64 offset,
+    std::optional<interop::GPUSize64> size) {
     Converter conv(env);
 
     wgpu::Buffer b{};

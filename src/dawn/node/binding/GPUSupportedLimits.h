@@ -34,6 +34,7 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMaxTextureDimension3D(Napi::Env) override;
     uint32_t getMaxTextureArrayLayers(Napi::Env) override;
     uint32_t getMaxBindGroups(Napi::Env) override;
+    uint32_t getMaxBindGroupsPlusVertexBuffers(Napi::Env) override;
     uint32_t getMaxBindingsPerBindGroup(Napi::Env) override;
     uint32_t getMaxDynamicUniformBuffersPerPipelineLayout(Napi::Env) override;
     uint32_t getMaxDynamicStorageBuffersPerPipelineLayout(Napi::Env) override;

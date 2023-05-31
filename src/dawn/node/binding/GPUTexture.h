@@ -37,14 +37,14 @@ class GPUTexture final : public interop::GPUTexture {
         Napi::Env,
         interop::GPUTextureViewDescriptor descriptor) override;
     void destroy(Napi::Env) override;
-    interop::GPUIntegerCoordinate getWidth(Napi::Env) override;
-    interop::GPUIntegerCoordinate getHeight(Napi::Env) override;
-    interop::GPUIntegerCoordinate getDepthOrArrayLayers(Napi::Env) override;
-    interop::GPUIntegerCoordinate getMipLevelCount(Napi::Env) override;
-    interop::GPUSize32 getSampleCount(Napi::Env) override;
+    interop::GPUIntegerCoordinateOut getWidth(Napi::Env) override;
+    interop::GPUIntegerCoordinateOut getHeight(Napi::Env) override;
+    interop::GPUIntegerCoordinateOut getDepthOrArrayLayers(Napi::Env) override;
+    interop::GPUIntegerCoordinateOut getMipLevelCount(Napi::Env) override;
+    interop::GPUSize32Out getSampleCount(Napi::Env) override;
     interop::GPUTextureDimension getDimension(Napi::Env) override;
     interop::GPUTextureFormat getFormat(Napi::Env) override;
-    interop::GPUTextureUsageFlags getUsage(Napi::Env) override;
+    interop::GPUFlagsConstant getUsage(Napi::Env) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;
 

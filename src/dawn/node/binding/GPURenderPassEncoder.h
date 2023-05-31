@@ -56,11 +56,11 @@ class GPURenderPassEncoder final : public interop::GPURenderPassEncoder {
     void end(Napi::Env) override;
     void setBindGroup(Napi::Env,
                       interop::GPUIndex32 index,
-                      interop::Interface<interop::GPUBindGroup> bindGroup,
+                      std::optional<interop::Interface<interop::GPUBindGroup>> bindGroup,
                       std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) override;
     void setBindGroup(Napi::Env,
                       interop::GPUIndex32 index,
-                      interop::Interface<interop::GPUBindGroup> bindGroup,
+                      std::optional<interop::Interface<interop::GPUBindGroup>> bindGroup,
                       interop::Uint32Array dynamicOffsetsData,
                       interop::GPUSize64 dynamicOffsetsDataStart,
                       interop::GPUSize32 dynamicOffsetsDataLength) override;
@@ -75,7 +75,7 @@ class GPURenderPassEncoder final : public interop::GPURenderPassEncoder {
                         std::optional<interop::GPUSize64> size) override;
     void setVertexBuffer(Napi::Env,
                          interop::GPUIndex32 slot,
-                         interop::Interface<interop::GPUBuffer> buffer,
+                         std::optional<interop::Interface<interop::GPUBuffer>> buffer,
                          interop::GPUSize64 offset,
                          std::optional<interop::GPUSize64> size) override;
     void draw(Napi::Env,
