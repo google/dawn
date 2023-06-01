@@ -24,9 +24,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_BuilderImplTest = TestHelper;
+using IR_FromProgramCallTest = TestHelper;
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
+TEST_F(IR_FromProgramCallTest, EmitExpression_Bitcast) {
     Func("my_func", utils::Empty, ty.f32(), utils::Vector{Return(0_f)});
 
     auto* expr = Bitcast<f32>(Call("my_func"));
@@ -50,7 +50,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Bitcast) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitStatement_Discard) {
+TEST_F(IR_FromProgramCallTest, EmitStatement_Discard) {
     auto* expr = Discard();
     Func("test_function", {}, ty.void_(), expr,
          utils::Vector{
@@ -69,7 +69,7 @@ TEST_F(IR_BuilderImplTest, EmitStatement_Discard) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
+TEST_F(IR_FromProgramCallTest, EmitStatement_UserFunction) {
     Func("my_func", utils::Vector{Param("p", ty.f32())}, ty.void_(), utils::Empty);
 
     auto* stmt = CallStmt(Call("my_func", Mul(2_a, 3_a)));
@@ -91,7 +91,7 @@ TEST_F(IR_BuilderImplTest, EmitStatement_UserFunction) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
+TEST_F(IR_FromProgramCallTest, EmitExpression_Convert) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_i));
     auto* expr = Call(ty.f32(), i);
     WrapInFunction(expr);
@@ -114,7 +114,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Convert) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
+TEST_F(IR_FromProgramCallTest, EmitExpression_ConstructEmpty) {
     auto* expr = vec3(ty.f32());
     GlobalVar("i", builtin::AddressSpace::kPrivate, expr);
 
@@ -129,7 +129,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_ConstructEmpty) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Construct) {
+TEST_F(IR_FromProgramCallTest, EmitExpression_Construct) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
     auto* expr = vec3(ty.f32(), 2_f, 3_f, i);
     WrapInFunction(expr);

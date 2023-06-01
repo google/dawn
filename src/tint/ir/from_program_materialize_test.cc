@@ -24,9 +24,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_BuilderImplTest = TestHelper;
+using IR_FromProgramMaterializeTest = TestHelper;
 
-TEST_F(IR_BuilderImplTest, EmitExpression_MaterializedCall) {
+TEST_F(IR_FromProgramMaterializeTest, EmitExpression_MaterializedCall) {
     auto* expr = Return(Call("trunc", 2.5_f));
 
     Func("test_function", {}, ty.f32(), expr, utils::Empty);

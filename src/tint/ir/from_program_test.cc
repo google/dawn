@@ -51,9 +51,9 @@ T* FindSingleValue(Module& mod) {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_BuilderImplTest = TestHelper;
+using IR_FromProgramTest = TestHelper;
 
-TEST_F(IR_BuilderImplTest, Func) {
+TEST_F(IR_FromProgramTest, Func) {
     Func("f", utils::Empty, ty.void_(), utils::Empty);
 
     auto m = Build();
@@ -74,7 +74,7 @@ TEST_F(IR_BuilderImplTest, Func) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Func_WithParam) {
+TEST_F(IR_FromProgramTest, Func_WithParam) {
     Func("f", utils::Vector{Param("a", ty.u32())}, ty.u32(), utils::Vector{Return("a")});
 
     auto m = Build();
@@ -95,7 +95,7 @@ TEST_F(IR_BuilderImplTest, Func_WithParam) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Func_WithMultipleParam) {
+TEST_F(IR_FromProgramTest, Func_WithMultipleParam) {
     Func("f", utils::Vector{Param("a", ty.u32()), Param("b", ty.i32()), Param("c", ty.bool_())},
          ty.void_(), utils::Empty);
 
@@ -117,7 +117,7 @@ TEST_F(IR_BuilderImplTest, Func_WithMultipleParam) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EntryPoint) {
+TEST_F(IR_FromProgramTest, EntryPoint) {
     Func("f", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
@@ -127,7 +127,7 @@ TEST_F(IR_BuilderImplTest, EntryPoint) {
     EXPECT_EQ(m->functions[0]->Stage(), Function::PipelineStage::kFragment);
 }
 
-TEST_F(IR_BuilderImplTest, IfStatement) {
+TEST_F(IR_FromProgramTest, IfStatement) {
     auto* ast_if = If(true, Block(), Else(Block()));
     WrapInFunction(ast_if);
 
@@ -167,7 +167,7 @@ TEST_F(IR_BuilderImplTest, IfStatement) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
+TEST_F(IR_FromProgramTest, IfStatement_TrueReturns) {
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(ast_if);
 
@@ -207,7 +207,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_TrueReturns) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
+TEST_F(IR_FromProgramTest, IfStatement_FalseReturns) {
     auto* ast_if = If(true, Block(), Else(Block(Return())));
     WrapInFunction(ast_if);
 
@@ -247,7 +247,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_FalseReturns) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
+TEST_F(IR_FromProgramTest, IfStatement_BothReturn) {
     auto* ast_if = If(true, Block(Return()), Else(Block(Return())));
     WrapInFunction(ast_if);
 
@@ -282,7 +282,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_BothReturn) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
+TEST_F(IR_FromProgramTest, IfStatement_JumpChainToMerge) {
     auto* ast_loop = Loop(Block(Break()));
     auto* ast_if = If(true, Block(ast_loop));
     WrapInFunction(ast_if);
@@ -330,7 +330,7 @@ TEST_F(IR_BuilderImplTest, IfStatement_JumpChainToMerge) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
+TEST_F(IR_FromProgramTest, Loop_WithBreak) {
     auto* ast_loop = Loop(Block(Break()));
     WrapInFunction(ast_loop);
 
@@ -364,7 +364,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithBreak) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
+TEST_F(IR_FromProgramTest, Loop_WithContinue) {
     auto* ast_if = If(true, Block(Break()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
@@ -424,7 +424,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinue) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
+TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
     auto* ast_break_if = BreakIf(true);
     auto* ast_loop = Loop(Block(), Block(ast_break_if));
     WrapInFunction(ast_loop);
@@ -464,7 +464,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithContinuing_BreakIf) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_Continuing_Body_Scope) {
+TEST_F(IR_FromProgramTest, Loop_Continuing_Body_Scope) {
     auto* a = Decl(Let("a", Expr(true)));
     auto* ast_break_if = BreakIf("a");
     auto* ast_loop = Loop(Block(a), Block(ast_break_if));
@@ -497,7 +497,7 @@ TEST_F(IR_BuilderImplTest, Loop_Continuing_Body_Scope) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
+TEST_F(IR_FromProgramTest, Loop_WithReturn) {
     auto* ast_if = If(true, Block(Return()));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
@@ -551,7 +551,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithReturn) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
+TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn) {
     auto* ast_loop = Loop(Block(Return(), Continue()));
     WrapInFunction(ast_loop, If(true, Block(Return())));
 
@@ -580,7 +580,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
+TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     // Note, even though there is code in the loop merge (specifically, the
     // `ast_if` below), it doesn't get emitted as there is no way to reach the
     // loop merge due to the loop itself doing a `return`. This is why the
@@ -618,7 +618,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
+TEST_F(IR_FromProgramTest, Loop_WithIf_BothBranchesBreak) {
     auto* ast_if = If(true, Block(Break()), Else(Block(Break())));
     auto* ast_loop = Loop(Block(ast_if, Continue()));
     WrapInFunction(ast_loop);
@@ -667,7 +667,7 @@ TEST_F(IR_BuilderImplTest, Loop_WithIf_BothBranchesBreak) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Loop_Nested) {
+TEST_F(IR_FromProgramTest, Loop_Nested) {
     auto* ast_if_a = If(true, Block(Break()));
     auto* ast_if_b = If(true, Block(Continue()));
     auto* ast_if_c = BreakIf(true);
@@ -789,7 +789,7 @@ TEST_F(IR_BuilderImplTest, Loop_Nested) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, While) {
+TEST_F(IR_FromProgramTest, While) {
     auto* ast_while = While(false, Block());
     WrapInFunction(ast_while);
 
@@ -850,7 +850,7 @@ TEST_F(IR_BuilderImplTest, While) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, While_Return) {
+TEST_F(IR_FromProgramTest, While_Return) {
     auto* ast_while = While(true, Block(Return()));
     WrapInFunction(ast_while);
 
@@ -912,7 +912,7 @@ TEST_F(IR_BuilderImplTest, While_Return) {
 }
 
 // TODO(dsinclair): Enable when variable declarations and increment are supported
-TEST_F(IR_BuilderImplTest, DISABLED_For) {
+TEST_F(IR_FromProgramTest, DISABLED_For) {
     // for(var i: 0; i < 10; i++) {
     // }
     //
@@ -950,7 +950,7 @@ TEST_F(IR_BuilderImplTest, DISABLED_For) {
     EXPECT_EQ(Disassemble(m), R"()");
 }
 
-TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
+TEST_F(IR_FromProgramTest, For_NoInitCondOrContinuing) {
     auto* ast_for = For(nullptr, nullptr, nullptr, Block(Break()));
     WrapInFunction(ast_for);
 
@@ -984,7 +984,7 @@ TEST_F(IR_BuilderImplTest, For_NoInitCondOrContinuing) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Switch) {
+TEST_F(IR_FromProgramTest, Switch) {
     auto* ast_switch = Switch(
         1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)}, Block()),
                            Case(utils::Vector{CaseSelector(1_i)}, Block()), DefaultCase(Block())});
@@ -1049,7 +1049,7 @@ TEST_F(IR_BuilderImplTest, Switch) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Switch_MultiSelector) {
+TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
     auto* ast_switch = Switch(
         1_i,
         utils::Vector{Case(
@@ -1100,7 +1100,7 @@ TEST_F(IR_BuilderImplTest, Switch_MultiSelector) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
+TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
     auto* ast_switch = Switch(1_i, utils::Vector{DefaultCase(Block())});
     WrapInFunction(ast_switch);
 
@@ -1139,7 +1139,7 @@ TEST_F(IR_BuilderImplTest, Switch_OnlyDefault) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
+TEST_F(IR_FromProgramTest, Switch_WithBreak) {
     auto* ast_switch = Switch(1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)},
                                                       Block(Break(), If(true, Block(Return())))),
                                                  DefaultCase(Block())});
@@ -1192,7 +1192,7 @@ TEST_F(IR_BuilderImplTest, Switch_WithBreak) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
+TEST_F(IR_FromProgramTest, Switch_AllReturn) {
     auto* ast_switch =
         Switch(1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)}, Block(Return())),
                                   DefaultCase(Block(Return()))});
@@ -1242,7 +1242,7 @@ TEST_F(IR_BuilderImplTest, Switch_AllReturn) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Emit_Phony) {
+TEST_F(IR_FromProgramTest, Emit_Phony) {
     Func("b", utils::Empty, ty.i32(), Return(1_i));
     WrapInFunction(Ignore(Call("b")));
 
@@ -1264,7 +1264,7 @@ TEST_F(IR_BuilderImplTest, Emit_Phony) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Invariant) {
+TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Invariant) {
     Func(
         "f",
         utils::Vector{Param("a", ty.vec4<f32>(),
@@ -1284,7 +1284,7 @@ TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Invariant) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Location) {
+TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location) {
     Func("f", utils::Vector{Param("a", ty.f32(), utils::Vector{Location(2_i)})}, ty.f32(),
          utils::Vector{Return("a")}, utils::Vector{Stage(ast::PipelineStage::kFragment)},
          utils::Vector{Location(1_i)});
@@ -1301,7 +1301,7 @@ TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Location) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Location_WithInterpolation_LinearCentroid) {
+TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolation_LinearCentroid) {
     Func("f",
          utils::Vector{Param(
              "a", ty.f32(),
@@ -1323,7 +1323,7 @@ TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Location_WithInterpolati
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Func_WithParam_WithAttribute_Location_WithInterpolation_Flat) {
+TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolation_Flat) {
     Func("f",
          utils::Vector{
              Param("a", ty.f32(),

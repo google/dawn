@@ -24,9 +24,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_BuilderImplTest = TestHelper;
+using IR_FromProgramBuiltinTest = TestHelper;
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Builtin) {
+TEST_F(IR_FromProgramBuiltinTest, EmitExpression_Builtin) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
     auto* expr = Call("asin", i);
     WrapInFunction(expr);

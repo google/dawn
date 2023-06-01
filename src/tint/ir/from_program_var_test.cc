@@ -24,9 +24,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_BuilderImplTest = TestHelper;
+using IR_FromProgramVarTest = TestHelper;
 
-TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
+TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_NoInit) {
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate);
 
     auto m = Build();
@@ -40,7 +40,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_NoInit) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
+TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_Init) {
     auto* expr = Expr(2_u);
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate, expr);
 
@@ -55,7 +55,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_Init) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Emit_GlobalVar_GroupBinding) {
+TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_GroupBinding) {
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kStorage,
               utils::Vector{Group(2_u), Binding(3_u)});
 
@@ -70,7 +70,7 @@ TEST_F(IR_BuilderImplTest, Emit_GlobalVar_GroupBinding) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
+TEST_F(IR_FromProgramVarTest, Emit_Var_NoInit) {
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction);
     WrapInFunction(a);
 
@@ -87,7 +87,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_NoInit) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Emit_Var_Init_Constant) {
+TEST_F(IR_FromProgramVarTest, Emit_Var_Init_Constant) {
     auto* expr = Expr(2_u);
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction, expr);
     WrapInFunction(a);
@@ -105,7 +105,7 @@ TEST_F(IR_BuilderImplTest, Emit_Var_Init_Constant) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, Emit_Var_Init_NonConstant) {
+TEST_F(IR_FromProgramVarTest, Emit_Var_Init_NonConstant) {
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction);
     auto* b = Var("b", ty.u32(), builtin::AddressSpace::kFunction, Add("a", 2_u));
     WrapInFunction(a, b);

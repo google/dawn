@@ -24,9 +24,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_BuilderImplTest = TestHelper;
+using IR_FromProgramBinaryTest = TestHelper;
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Add) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Add(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -49,7 +49,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Add) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Increment) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Increment) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = Increment("v1");
     WrapInFunction(expr);
@@ -73,7 +73,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Increment) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundAdd) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kAdd);
     WrapInFunction(expr);
@@ -97,7 +97,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAdd) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Subtract) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Sub(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -120,7 +120,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Subtract) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Decrement) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Decrement) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.i32());
     auto* expr = Decrement("v1");
     WrapInFunction(expr);
@@ -144,7 +144,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Decrement) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundSubtract) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kSubtract);
     WrapInFunction(expr);
@@ -168,7 +168,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundSubtract) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Multiply) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Mul(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -191,7 +191,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Multiply) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundMultiply) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kMultiply);
     WrapInFunction(expr);
@@ -215,7 +215,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundMultiply) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Div) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Div(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -238,7 +238,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Div) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundDiv) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kDivide);
     WrapInFunction(expr);
@@ -262,7 +262,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundDiv) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Modulo) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Mod(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -285,7 +285,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Modulo) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundModulo) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kModulo);
     WrapInFunction(expr);
@@ -309,7 +309,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundModulo) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_And) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = And(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -332,7 +332,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_And) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundAnd) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.bool_());
     auto* expr = CompoundAssign("v1", false, ast::BinaryOp::kAnd);
     WrapInFunction(expr);
@@ -356,7 +356,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundAnd) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Or) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Or(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -379,7 +379,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Or) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundOr) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.bool_());
     auto* expr = CompoundAssign("v1", false, ast::BinaryOp::kOr);
     WrapInFunction(expr);
@@ -403,7 +403,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundOr) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Xor) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Xor(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -426,7 +426,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Xor) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundXor) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kXor);
     WrapInFunction(expr);
@@ -450,7 +450,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundXor) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_LogicalAnd) {
     Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(true)});
     auto* expr = If(LogicalAnd(Call("my_func"), false), Block());
     WrapInFunction(expr);
@@ -502,7 +502,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalAnd) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_LogicalOr) {
     Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(true)});
     auto* expr = If(LogicalOr(Call("my_func"), true), Block());
     WrapInFunction(expr);
@@ -554,7 +554,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LogicalOr) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Equal) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Equal(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -577,7 +577,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Equal) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_NotEqual) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = NotEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -600,7 +600,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_NotEqual) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_LessThan) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = LessThan(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -623,7 +623,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThan) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_GreaterThan) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = GreaterThan(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -646,7 +646,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThan) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_LessThanEqual) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = LessThanEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -669,7 +669,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_LessThanEqual) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_GreaterThanEqual) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = GreaterThanEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -692,7 +692,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_GreaterThanEqual) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_ShiftLeft) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Shl(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -715,7 +715,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftLeft) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundShiftLeft) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kShiftLeft);
     WrapInFunction(expr);
@@ -739,7 +739,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftLeft) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_ShiftRight) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
     auto* expr = Shr(Call("my_func"), 4_u);
     WrapInFunction(expr);
@@ -762,7 +762,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_ShiftRight) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_CompoundShiftRight) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.u32());
     auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kShiftRight);
     WrapInFunction(expr);
@@ -786,7 +786,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_CompoundShiftRight) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Compound) {
     Func("my_func", utils::Empty, ty.f32(), utils::Vector{Return(0_f)});
 
     auto* expr = LogicalAnd(LessThan(Call("my_func"), 2_f),
@@ -831,7 +831,7 @@ TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound) {
 )");
 }
 
-TEST_F(IR_BuilderImplTest, EmitExpression_Binary_Compound_WithConstEval) {
+TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Compound_WithConstEval) {
     Func("my_func", utils::Vector{Param("p", ty.bool_())}, ty.bool_(), utils::Vector{Return(true)});
     auto* expr = Call("my_func", LogicalAnd(LessThan(2.4_f, 2_f),
                                             GreaterThan(2.5_f, Div(10_f, Mul(2.3_f, 9.4_f)))));
