@@ -940,6 +940,7 @@ if(TINT_BUILD_TESTS)
     constant/manager_test.cc
     constant/scalar_test.cc
     constant/splat_test.cc
+    constant/value_test.cc
     debug_test.cc
     diagnostic/diagnostic_test.cc
     diagnostic/formatter_test.cc

@@ -14,6 +14,7 @@
 
 #include "src/tint/constant/value.h"
 
+#include "src/tint/constant/splat.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/array.h"
 #include "src/tint/type/matrix.h"
@@ -30,50 +31,67 @@ Value::~Value() = default;
 
 /// Equal returns true if the constants `a` and `b` are of the same type and value.
 bool Value::Equal(const constant::Value* b) const {
+    if (this == b) {
+        return true;
+    }
     if (Hash() != b->Hash()) {
         return false;
     }
     if (Type() != b->Type()) {
         return false;
     }
+
+    auto elements_equal = [&](size_t count) {
+        if (count == 0) {
+            return true;
+        }
+
+        // Avoid per-element comparisons if the constants are splats
+        bool a_is_splat = Is<Splat>();
+        bool b_is_splat = b->Is<Splat>();
+        if (a_is_splat && b_is_splat) {
+            return Index(0)->Equal(b->Index(0));
+        }
+
+        if (a_is_splat) {
+            auto* el_a = Index(0);
+            for (size_t i = 0; i < count; i++) {
+                if (!el_a->Equal(b->Index(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        if (b_is_splat) {
+            auto* el_b = b->Index(0);
+            for (size_t i = 0; i < count; i++) {
+                if (!Index(i)->Equal(el_b)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Per-element comparison
+        for (size_t i = 0; i < count; i++) {
+            if (!Index(i)->Equal(b->Index(i))) {
+                return false;
+            }
+        }
+        return true;
+    };
+
     return Switch(
         Type(),  //
-        [&](const type::Vector* vec) {
-            for (size_t i = 0; i < vec->Width(); i++) {
-                if (!Index(i)->Equal(b->Index(i))) {
-                    return false;
-                }
-            }
-            return true;
-        },
-        [&](const type::Matrix* mat) {
-            for (size_t i = 0; i < mat->columns(); i++) {
-                if (!Index(i)->Equal(b->Index(i))) {
-                    return false;
-                }
-            }
-            return true;
-        },
+        [&](const type::Vector* vec) { return elements_equal(vec->Width()); },
+        [&](const type::Matrix* mat) { return elements_equal(mat->columns()); },
+        [&](const type::Struct* str) { return elements_equal(str->Members().Length()); },
         [&](const type::Array* arr) {
-            if (auto count = arr->ConstantCount()) {
-                for (size_t i = 0; i < count; i++) {
-                    if (!Index(i)->Equal(b->Index(i))) {
-                        return false;
-                    }
-                }
-                return true;
+            if (auto n = arr->ConstantCount()) {
+                return elements_equal(*n);
             }
-
             return false;
-        },
-        [&](const type::Struct* str) {
-            auto count = str->Members().Length();
-            for (size_t i = 0; i < count; i++) {
-                if (!Index(i)->Equal(b->Index(i))) {
-                    return false;
-                }
-            }
-            return true;
         },
         [&](Default) {
             auto va = InternalValue();

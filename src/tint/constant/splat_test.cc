@@ -31,9 +31,9 @@ TEST_F(ConstantTest_Splat, AllZero) {
     auto* fNeg0 = constants.Get(-0_f);
     auto* fPos1 = constants.Get(1_f);
 
-    auto* SpfPos0 = constants.Splat(vec3f, fPos0, 2);
-    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0, 2);
-    auto* SpfPos1 = constants.Splat(vec3f, fPos1, 2);
+    auto* SpfPos0 = constants.Splat(vec3f, fPos0, 3);
+    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0, 3);
+    auto* SpfPos1 = constants.Splat(vec3f, fPos1, 3);
 
     EXPECT_TRUE(SpfPos0->AllZero());
     EXPECT_FALSE(SpfNeg0->AllZero());
@@ -47,9 +47,9 @@ TEST_F(ConstantTest_Splat, AnyZero) {
     auto* fNeg0 = constants.Get(-0_f);
     auto* fPos1 = constants.Get(1_f);
 
-    auto* SpfPos0 = constants.Splat(vec3f, fPos0, 2);
-    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0, 2);
-    auto* SpfPos1 = constants.Splat(vec3f, fPos1, 2);
+    auto* SpfPos0 = constants.Splat(vec3f, fPos0, 3);
+    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0, 3);
+    auto* SpfPos1 = constants.Splat(vec3f, fPos1, 3);
 
     EXPECT_TRUE(SpfPos0->AnyZero());
     EXPECT_FALSE(SpfNeg0->AnyZero());

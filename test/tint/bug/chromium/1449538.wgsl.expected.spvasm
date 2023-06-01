@@ -1,0 +1,162 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 68
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %f "f"
+               OpName %i0520 "i0520"
+               OpName %i62 "i62"
+               OpName %i0520_0 "i0520"
+               OpName %i62_0 "i62"
+               OpName %i62_1 "i62"
+               OpName %i60 "i60"
+               OpName %i62_2 "i62"
+               OpName %i60_0 "i60"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+          %8 = OpConstantNull %int
+%_ptr_Function_int = OpTypePointer Function %int
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %1
+          %6 = OpLabel
+      %i0520 = OpVariable %_ptr_Function_int Function %8
+        %i62 = OpVariable %_ptr_Function_int Function %8
+    %i0520_0 = OpVariable %_ptr_Function_int Function %8
+      %i62_0 = OpVariable %_ptr_Function_int Function %8
+      %i62_1 = OpVariable %_ptr_Function_int Function %8
+        %i60 = OpVariable %_ptr_Function_int Function %8
+      %i62_2 = OpVariable %_ptr_Function_int Function %8
+      %i60_0 = OpVariable %_ptr_Function_int Function %8
+               OpStore %i0520 %8
+               OpBranch %11
+         %11 = OpLabel
+               OpLoopMerge %12 %13 None
+               OpBranch %14
+         %14 = OpLabel
+               OpSelectionMerge %17 None
+               OpBranchConditional %true %18 %17
+         %18 = OpLabel
+               OpBranch %12
+         %17 = OpLabel
+               OpBranch %13
+         %13 = OpLabel
+               OpBranch %11
+         %12 = OpLabel
+               OpStore %i62 %8
+               OpBranch %20
+         %20 = OpLabel
+               OpLoopMerge %21 %22 None
+               OpBranch %23
+         %23 = OpLabel
+               OpSelectionMerge %24 None
+               OpBranchConditional %true %25 %24
+         %25 = OpLabel
+               OpBranch %21
+         %24 = OpLabel
+               OpBranch %22
+         %22 = OpLabel
+               OpBranch %20
+         %21 = OpLabel
+               OpStore %i0520_0 %8
+               OpBranch %27
+         %27 = OpLabel
+               OpLoopMerge %28 %29 None
+               OpBranch %30
+         %30 = OpLabel
+               OpSelectionMerge %31 None
+               OpBranchConditional %true %32 %31
+         %32 = OpLabel
+               OpBranch %28
+         %31 = OpLabel
+               OpBranch %29
+         %29 = OpLabel
+               OpBranch %27
+         %28 = OpLabel
+               OpStore %i62_0 %8
+               OpBranch %34
+         %34 = OpLabel
+               OpLoopMerge %35 %36 None
+               OpBranch %37
+         %37 = OpLabel
+               OpSelectionMerge %38 None
+               OpBranchConditional %true %39 %38
+         %39 = OpLabel
+               OpBranch %35
+         %38 = OpLabel
+               OpBranch %36
+         %36 = OpLabel
+               OpBranch %34
+         %35 = OpLabel
+               OpStore %i62_1 %8
+               OpBranch %41
+         %41 = OpLabel
+               OpLoopMerge %42 %43 None
+               OpBranch %44
+         %44 = OpLabel
+               OpSelectionMerge %45 None
+               OpBranchConditional %true %46 %45
+         %46 = OpLabel
+               OpBranch %42
+         %45 = OpLabel
+               OpBranch %43
+         %43 = OpLabel
+               OpBranch %41
+         %42 = OpLabel
+               OpStore %i60 %8
+               OpBranch %48
+         %48 = OpLabel
+               OpLoopMerge %49 %50 None
+               OpBranch %51
+         %51 = OpLabel
+               OpSelectionMerge %52 None
+               OpBranchConditional %true %53 %52
+         %53 = OpLabel
+               OpBranch %49
+         %52 = OpLabel
+               OpBranch %50
+         %50 = OpLabel
+               OpBranch %48
+         %49 = OpLabel
+               OpStore %i62_2 %8
+               OpBranch %55
+         %55 = OpLabel
+               OpLoopMerge %56 %57 None
+               OpBranch %58
+         %58 = OpLabel
+               OpSelectionMerge %59 None
+               OpBranchConditional %true %60 %59
+         %60 = OpLabel
+               OpBranch %56
+         %59 = OpLabel
+               OpBranch %57
+         %57 = OpLabel
+               OpBranch %55
+         %56 = OpLabel
+               OpStore %i60_0 %8
+               OpBranch %62
+         %62 = OpLabel
+               OpLoopMerge %63 %64 None
+               OpBranch %65
+         %65 = OpLabel
+               OpSelectionMerge %66 None
+               OpBranchConditional %true %67 %66
+         %67 = OpLabel
+               OpBranch %63
+         %66 = OpLabel
+               OpBranch %64
+         %64 = OpLabel
+               OpBranch %62
+         %63 = OpLabel
+               OpReturn
+               OpFunctionEnd
