@@ -76,10 +76,10 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_u32) {
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeInt 32 0
 %3 = OpTypeFunction %2
-%6 = OpConstant %2 1
+%5 = OpConstant %2 1
 %1 = OpFunction %2 None %3
 %4 = OpLabel
-OpReturnValue %6
+OpReturnValue %5
 OpFunctionEnd
 )");
 }
@@ -95,12 +95,12 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
 %3 = OpTypeInt 32 0
 %2 = OpTypeVector %3 2
 %4 = OpTypeFunction %2
-%8 = OpConstant %3 42
-%9 = OpConstant %3 10
-%7 = OpConstantComposite %2 %8 %9
+%7 = OpConstant %3 42
+%8 = OpConstant %3 10
+%6 = OpConstantComposite %2 %7 %8
 %1 = OpFunction %2 None %4
 %5 = OpLabel
-OpReturnValue %7
+OpReturnValue %6
 OpFunctionEnd
 )");
 }

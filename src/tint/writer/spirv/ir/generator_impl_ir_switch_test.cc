@@ -324,9 +324,9 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
 %6 = OpConstant %7 42
 %11 = OpConstant %7 10
 %12 = OpConstant %7 20
-%14 = OpTypeBool
-%15 = OpConstantTrue %14
-%16 = OpConstantFalse %14
+%13 = OpTypeBool
+%15 = OpConstantTrue %13
+%16 = OpConstantFalse %13
 %1 = OpFunction %2 None %3
 %4 = OpLabel
 OpSelectionMerge %9 None
@@ -337,7 +337,7 @@ OpBranch %9
 OpBranch %9
 %9 = OpLabel
 %10 = OpPhi %7 %11 %5 %12 %8
-%13 = OpPhi %14 %15 %5 %16 %8
+%14 = OpPhi %13 %15 %5 %16 %8
 OpReturnValue %10
 OpFunctionEnd
 )");

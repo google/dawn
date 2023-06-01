@@ -237,12 +237,7 @@ uint32_t GeneratorImplIr::Value(const ir::Value* value) {
         value,  //
         [&](const ir::Constant* constant) { return Constant(constant); },
         [&](const ir::Value*) {
-            auto id = values_.Find(value);
-            if (TINT_UNLIKELY(!id)) {
-                TINT_ICE(Writer, diagnostics_) << "missing result ID for value";
-                return 0u;
-            }
-            return *id;
+            return values_.GetOrCreate(value, [&] { return module_.NextId(); });
         });
 }
 
@@ -251,9 +246,7 @@ uint32_t GeneratorImplIr::Label(const ir::Block* block) {
 }
 
 void GeneratorImplIr::EmitFunction(const ir::Function* func) {
-    // Make an ID for the function.
-    auto id = module_.NextId();
-    values_.Add(func, id);
+    auto id = Value(func);
 
     // Emit the function name.
     module_.PushDebug(spv::Op::OpName, {id, Operand(ir_->NameOf(func).Name())});
@@ -272,9 +265,8 @@ void GeneratorImplIr::EmitFunction(const ir::Function* func) {
     // Generate function parameter declarations and add their type IDs to the function signature.
     for (auto* param : func->Params()) {
         auto param_type_id = Type(param->Type());
-        auto param_id = module_.NextId();
+        auto param_id = Value(param);
         params.push_back(Instruction(spv::Op::OpFunctionParameter, {param_type_id, param_id}));
-        values_.Add(param, param_id);
         function_type.param_type_ids.Push(param_type_id);
         if (auto name = ir_->NameOf(param)) {
             module_.PushDebug(spv::Op::OpName, {param_id, Operand(name.Name())});
@@ -342,15 +334,13 @@ void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
 
 void GeneratorImplIr::EmitRootBlock(const ir::Block* root_block) {
     for (auto* inst : root_block->Instructions()) {
-        auto result = Switch(
+        Switch(
             inst,  //
             [&](const ir::Var* v) { return EmitVar(v); },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "unimplemented root block instruction: " << inst->TypeInfo().name;
-                return 0u;
             });
-        values_.Add(inst, result);
     }
 }
 
@@ -371,9 +361,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
     // Emit Phi nodes for all the incoming block parameters
     for (size_t param_idx = 0; param_idx < block->Params().Length(); param_idx++) {
         auto* param = block->Params()[param_idx];
-        auto id = module_.NextId();
-        values_.Add(param, id);
-        OperandList ops{Type(param->Type()), id};
+        OperandList ops{Type(param->Type()), Value(param)};
 
         for (auto* incoming : block->InboundBranches()) {
             auto* arg = incoming->Args()[param_idx];
@@ -386,39 +374,22 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
 
     // Emit the instructions.
     for (auto* inst : block->Instructions()) {
-        auto result = Switch(
-            inst,  //
-            [&](const ir::Binary* b) { return EmitBinary(b); },
-            [&](const ir::Builtin* b) { return EmitBuiltin(b); },
-            [&](const ir::Load* l) { return EmitLoad(l); },
-            [&](const ir::Loop* l) {
-                EmitLoop(l);
-                return 0u;
-            },
-            [&](const ir::Switch* sw) {
-                EmitSwitch(sw);
-                return 0u;
-            },
-            [&](const ir::Store* s) {
-                EmitStore(s);
-                return 0u;
-            },
-            [&](const ir::UserCall* c) { return EmitUserCall(c); },
-            [&](const ir::Var* v) { return EmitVar(v); },
-            [&](const ir::If* i) {
-                EmitIf(i);
-                return 0u;
-            },
-            [&](const ir::Branch* b) {
-                EmitBranch(b);
-                return 0u;
-            },
+        Switch(
+            inst,                                             //
+            [&](const ir::Binary* b) { EmitBinary(b); },      //
+            [&](const ir::Builtin* b) { EmitBuiltin(b); },    //
+            [&](const ir::Load* l) { EmitLoad(l); },          //
+            [&](const ir::Loop* l) { EmitLoop(l); },          //
+            [&](const ir::Switch* sw) { EmitSwitch(sw); },    //
+            [&](const ir::Store* s) { EmitStore(s); },        //
+            [&](const ir::UserCall* c) { EmitUserCall(c); },  //
+            [&](const ir::Var* v) { EmitVar(v); },            //
+            [&](const ir::If* i) { EmitIf(i); },              //
+            [&](const ir::Branch* b) { EmitBranch(b); },      //
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "unimplemented instruction: " << inst->TypeInfo().name;
-                return 0u;
             });
-        values_.Add(inst, result);
     }
 }
 
@@ -504,8 +475,8 @@ void GeneratorImplIr::EmitIf(const ir::If* i) {
     EmitBlock(merge_block);
 }
 
-uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
-    auto id = module_.NextId();
+void GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
+    auto id = Value(binary);
     auto* lhs_ty = binary->LHS()->Type();
 
     // Determine the opcode.
@@ -603,13 +574,19 @@ uint32_t GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
     // Emit the instruction.
     current_function_.push_inst(
         op, {Type(binary->Type()), id, Value(binary->LHS()), Value(binary->RHS())});
-
-    return id;
 }
 
-uint32_t GeneratorImplIr::EmitBuiltin(const ir::Builtin* builtin) {
-    auto id = module_.NextId();
+void GeneratorImplIr::EmitBuiltin(const ir::Builtin* builtin) {
     auto* result_ty = builtin->Type();
+
+    if (builtin->Func() == builtin::Function::kAbs &&
+        result_ty->is_unsigned_integer_scalar_or_vector()) {
+        // abs() is a no-op for unsigned integers.
+        values_.Add(builtin, Value(builtin->Args()[0]));
+        return;
+    }
+
+    auto id = Value(builtin);
 
     spv::Op op = spv::Op::Max;
     OperandList operands = {Type(result_ty), id};
@@ -634,9 +611,6 @@ uint32_t GeneratorImplIr::EmitBuiltin(const ir::Builtin* builtin) {
                 glsl_ext_inst(GLSLstd450FAbs);
             } else if (result_ty->is_signed_integer_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450SAbs);
-            } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
-                // abs() is a no-op for unsigned integers.
-                return Value(builtin->Args()[0]);
             }
             break;
         case builtin::Function::kMax:
@@ -659,7 +633,6 @@ uint32_t GeneratorImplIr::EmitBuiltin(const ir::Builtin* builtin) {
             break;
         default:
             TINT_ICE(Writer, diagnostics_) << "unimplemented builtin function: " << builtin->Func();
-            return 0u;
     }
     TINT_ASSERT(Writer, op != spv::Op::Max);
 
@@ -670,14 +643,11 @@ uint32_t GeneratorImplIr::EmitBuiltin(const ir::Builtin* builtin) {
 
     // Emit the instruction.
     current_function_.push_inst(op, operands);
-
-    return id;
 }
 
-uint32_t GeneratorImplIr::EmitLoad(const ir::Load* load) {
-    auto id = module_.NextId();
-    current_function_.push_inst(spv::Op::OpLoad, {Type(load->Type()), id, Value(load->From())});
-    return id;
+void GeneratorImplIr::EmitLoad(const ir::Load* load) {
+    current_function_.push_inst(spv::Op::OpLoad,
+                                {Type(load->Type()), Value(load), Value(load->From())});
 }
 
 void GeneratorImplIr::EmitLoop(const ir::Loop* loop) {
@@ -754,18 +724,17 @@ void GeneratorImplIr::EmitStore(const ir::Store* store) {
     current_function_.push_inst(spv::Op::OpStore, {Value(store->To()), Value(store->From())});
 }
 
-uint32_t GeneratorImplIr::EmitUserCall(const ir::UserCall* call) {
-    auto id = module_.NextId();
-    OperandList operands = {Type(call->Type()), id, values_.Get(call->Func()).value()};
+void GeneratorImplIr::EmitUserCall(const ir::UserCall* call) {
+    auto id = Value(call);
+    OperandList operands = {Type(call->Type()), id, Value(call->Func())};
     for (auto* arg : call->Args()) {
         operands.push_back(Value(arg));
     }
     current_function_.push_inst(spv::Op::OpFunctionCall, operands);
-    return id;
 }
 
-uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
-    auto id = module_.NextId();
+void GeneratorImplIr::EmitVar(const ir::Var* var) {
+    auto id = Value(var);
     auto* ptr = var->Type()->As<type::Pointer>();
     TINT_ASSERT(Writer, ptr);
     auto ty = Type(ptr);
@@ -803,7 +772,6 @@ uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
         default: {
             TINT_ICE(Writer, diagnostics_)
                 << "unimplemented variable address space " << ptr->AddressSpace();
-            return 0u;
         }
     }
 
@@ -811,8 +779,6 @@ uint32_t GeneratorImplIr::EmitVar(const ir::Var* var) {
     if (auto name = ir_->NameOf(var)) {
         module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
     }
-
-    return id;
 }
 
 }  // namespace tint::writer::spirv

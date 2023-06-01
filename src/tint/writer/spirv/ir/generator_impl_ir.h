@@ -31,6 +31,7 @@
 namespace tint::ir {
 class Binary;
 class Block;
+class BlockParam;
 class Branch;
 class Builtin;
 class If;
@@ -119,18 +120,15 @@ class GeneratorImplIr {
 
     /// Emit a binary instruction.
     /// @param binary the binary instruction to emit
-    /// @returns the result ID of the instruction
-    uint32_t EmitBinary(const ir::Binary* binary);
+    void EmitBinary(const ir::Binary* binary);
 
     /// Emit a builtin function call instruction.
     /// @param call the builtin call instruction to emit
-    /// @returns the result ID of the instruction
-    uint32_t EmitBuiltin(const ir::Builtin* call);
+    void EmitBuiltin(const ir::Builtin* call);
 
     /// Emit a load instruction.
     /// @param load the load instruction to emit
-    /// @returns the result ID of the instruction
-    uint32_t EmitLoad(const ir::Load* load);
+    void EmitLoad(const ir::Load* load);
 
     /// Emit a loop instruction.
     /// @param loop the loop instruction to emit
@@ -146,13 +144,11 @@ class GeneratorImplIr {
 
     /// Emit a user call instruction.
     /// @param call the user call instruction to emit
-    /// @returns the result ID of the instruction
-    uint32_t EmitUserCall(const ir::UserCall* call);
+    void EmitUserCall(const ir::UserCall* call);
 
     /// Emit a var instruction.
     /// @param var the var instruction to emit
-    /// @returns the result ID of the instruction
-    uint32_t EmitVar(const ir::Var* var);
+    void EmitVar(const ir::Var* var);
 
     /// Emit a branch instruction.
     /// @param b the branch instruction to emit

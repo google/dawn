@@ -161,9 +161,9 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue) {
 %3 = OpTypeFunction %2
 %9 = OpTypeBool
 %8 = OpConstantTrue %9
-%11 = OpTypeInt 32 1
-%12 = OpConstant %11 10
-%13 = OpConstant %11 20
+%10 = OpTypeInt 32 1
+%12 = OpConstant %10 10
+%13 = OpConstant %10 20
 %1 = OpFunction %2 None %3
 %4 = OpLabel
 OpSelectionMerge %5 None
@@ -173,8 +173,8 @@ OpBranch %5
 %7 = OpLabel
 OpBranch %5
 %5 = OpLabel
-%10 = OpPhi %11 %12 %6 %13 %7
-OpReturnValue %10
+%11 = OpPhi %10 %12 %6 %13 %7
+OpReturnValue %11
 OpFunctionEnd
 )");
 }
@@ -277,9 +277,9 @@ TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue) {
 %3 = OpTypeFunction %2
 %9 = OpTypeBool
 %8 = OpConstantTrue %9
-%11 = OpTypeInt 32 1
-%12 = OpConstant %11 10
-%13 = OpConstant %11 20
+%10 = OpTypeInt 32 1
+%12 = OpConstant %10 10
+%13 = OpConstant %10 20
 %15 = OpConstantFalse %9
 %1 = OpFunction %2 None %3
 %4 = OpLabel
@@ -290,9 +290,9 @@ OpBranch %5
 %7 = OpLabel
 OpBranch %5
 %5 = OpLabel
-%10 = OpPhi %11 %12 %6 %13 %7
+%11 = OpPhi %10 %12 %6 %13 %7
 %14 = OpPhi %9 %8 %6 %15 %7
-OpReturnValue %10
+OpReturnValue %11
 OpFunctionEnd
 )");
 }
