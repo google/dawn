@@ -61,14 +61,14 @@ void Server::OnLogging(ObjectHandle device, WGPULoggingType type, const char* me
     SerializeCommand(cmd);
 }
 
-bool Server::DoDevicePopErrorScope(Known<WGPUDevice> device, uint64_t requestSerial) {
+WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device, uint64_t requestSerial) {
     auto userdata = MakeUserdata<ErrorScopeUserdata>();
     userdata->requestSerial = requestSerial;
     userdata->device = device.AsHandle();
 
     mProcs.devicePopErrorScope(device->handle, ForwardToServer<&Server::OnDevicePopErrorScope>,
                                userdata.release());
-    return true;
+    return WireResult::Success;
 }
 
 void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
@@ -83,15 +83,14 @@ void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
     SerializeCommand(cmd);
 }
 
-bool Server::DoDeviceCreateComputePipelineAsync(Known<WGPUDevice> device,
-                                                uint64_t requestSerial,
-                                                ObjectHandle pipelineObjectHandle,
-                                                const WGPUComputePipelineDescriptor* descriptor) {
+WireResult Server::DoDeviceCreateComputePipelineAsync(
+    Known<WGPUDevice> device,
+    uint64_t requestSerial,
+    ObjectHandle pipelineObjectHandle,
+    const WGPUComputePipelineDescriptor* descriptor) {
     Known<WGPUComputePipeline> pipeline;
-    if (!ComputePipelineObjects().Allocate(&pipeline, pipelineObjectHandle,
-                                           AllocationState::Reserved)) {
-        return false;
-    }
+    WIRE_TRY(ComputePipelineObjects().Allocate(&pipeline, pipelineObjectHandle,
+                                               AllocationState::Reserved));
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
@@ -101,7 +100,7 @@ bool Server::DoDeviceCreateComputePipelineAsync(Known<WGPUDevice> device,
     mProcs.deviceCreateComputePipelineAsync(
         device->handle, descriptor, ForwardToServer<&Server::OnCreateComputePipelineAsyncCallback>,
         userdata.release());
-    return true;
+    return WireResult::Success;
 }
 
 void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* data,
@@ -120,15 +119,14 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
     SerializeCommand(cmd);
 }
 
-bool Server::DoDeviceCreateRenderPipelineAsync(Known<WGPUDevice> device,
-                                               uint64_t requestSerial,
-                                               ObjectHandle pipelineObjectHandle,
-                                               const WGPURenderPipelineDescriptor* descriptor) {
+WireResult Server::DoDeviceCreateRenderPipelineAsync(
+    Known<WGPUDevice> device,
+    uint64_t requestSerial,
+    ObjectHandle pipelineObjectHandle,
+    const WGPURenderPipelineDescriptor* descriptor) {
     Known<WGPURenderPipeline> pipeline;
-    if (!RenderPipelineObjects().Allocate(&pipeline, pipelineObjectHandle,
-                                          AllocationState::Reserved)) {
-        return false;
-    }
+    WIRE_TRY(RenderPipelineObjects().Allocate(&pipeline, pipelineObjectHandle,
+                                              AllocationState::Reserved));
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
@@ -138,7 +136,7 @@ bool Server::DoDeviceCreateRenderPipelineAsync(Known<WGPUDevice> device,
     mProcs.deviceCreateRenderPipelineAsync(
         device->handle, descriptor, ForwardToServer<&Server::OnCreateRenderPipelineAsyncCallback>,
         userdata.release());
-    return true;
+    return WireResult::Success;
 }
 
 void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* data,

@@ -19,14 +19,12 @@
 
 namespace dawn::wire::server {
 
-bool Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
-                                    uint64_t requestSerial,
-                                    ObjectHandle deviceHandle,
-                                    const WGPUDeviceDescriptor* descriptor) {
+WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
+                                          uint64_t requestSerial,
+                                          ObjectHandle deviceHandle,
+                                          const WGPUDeviceDescriptor* descriptor) {
     Known<WGPUDevice> device;
-    if (!DeviceObjects().Allocate(&device, deviceHandle, AllocationState::Reserved)) {
-        return false;
-    }
+    WIRE_TRY(DeviceObjects().Allocate(&device, deviceHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<RequestDeviceUserdata>();
     userdata->adapter = adapter.AsHandle();
@@ -36,7 +34,7 @@ bool Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
     mProcs.adapterRequestDevice(adapter->handle, descriptor,
                                 ForwardToServer<&Server::OnRequestDeviceCallback>,
                                 userdata.release());
-    return true;
+    return WireResult::Success;
 }
 
 void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,

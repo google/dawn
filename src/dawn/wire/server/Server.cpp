@@ -43,21 +43,20 @@ Server::~Server() {
     DestroyAllObjects(mProcs);
 }
 
-bool Server::InjectTexture(WGPUTexture texture,
-                           uint32_t id,
-                           uint32_t generation,
-                           uint32_t deviceId,
-                           uint32_t deviceGeneration) {
+WireResult Server::InjectTexture(WGPUTexture texture,
+                                 uint32_t id,
+                                 uint32_t generation,
+                                 uint32_t deviceId,
+                                 uint32_t deviceGeneration) {
     ASSERT(texture != nullptr);
     Known<WGPUDevice> device;
-    if (!DeviceObjects().Get(deviceId, &device) || device->generation != deviceGeneration) {
-        return false;
+    WIRE_TRY(DeviceObjects().Get(deviceId, &device));
+    if (device->generation != deviceGeneration) {
+        return WireResult::FatalError;
     }
 
     Known<WGPUTexture> data;
-    if (!TextureObjects().Allocate(&data, ObjectHandle{id, generation})) {
-        return false;
-    }
+    WIRE_TRY(TextureObjects().Allocate(&data, ObjectHandle{id, generation}));
 
     data->handle = texture;
     data->generation = generation;
@@ -67,24 +66,23 @@ bool Server::InjectTexture(WGPUTexture texture,
     // message from the client. Add a reference to counterbalance the eventual release.
     mProcs.textureReference(texture);
 
-    return true;
+    return WireResult::Success;
 }
 
-bool Server::InjectSwapChain(WGPUSwapChain swapchain,
-                             uint32_t id,
-                             uint32_t generation,
-                             uint32_t deviceId,
-                             uint32_t deviceGeneration) {
+WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
+                                   uint32_t id,
+                                   uint32_t generation,
+                                   uint32_t deviceId,
+                                   uint32_t deviceGeneration) {
     ASSERT(swapchain != nullptr);
     Known<WGPUDevice> device;
-    if (!DeviceObjects().Get(deviceId, &device) || device->generation != deviceGeneration) {
-        return false;
+    WIRE_TRY(DeviceObjects().Get(deviceId, &device));
+    if (device->generation != deviceGeneration) {
+        return WireResult::FatalError;
     }
 
     Known<WGPUSwapChain> data;
-    if (!SwapChainObjects().Allocate(&data, ObjectHandle{id, generation})) {
-        return false;
-    }
+    WIRE_TRY(SwapChainObjects().Allocate(&data, ObjectHandle{id, generation}));
 
     data->handle = swapchain;
     data->generation = generation;
@@ -94,15 +92,13 @@ bool Server::InjectSwapChain(WGPUSwapChain swapchain,
     // message from the client. Add a reference to counterbalance the eventual release.
     mProcs.swapChainReference(swapchain);
 
-    return true;
+    return WireResult::Success;
 }
 
-bool Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
+WireResult Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
     ASSERT(device != nullptr);
     Known<WGPUDevice> data;
-    if (!DeviceObjects().Allocate(&data, ObjectHandle{id, generation})) {
-        return false;
-    }
+    WIRE_TRY(DeviceObjects().Allocate(&data, ObjectHandle{id, generation}));
 
     data->handle = device;
     data->generation = generation;
@@ -116,15 +112,13 @@ bool Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
 
     // Set callbacks to forward errors to the client.
     SetForwardingDeviceCallbacks(data);
-    return true;
+    return WireResult::Success;
 }
 
-bool Server::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
+WireResult Server::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
     ASSERT(instance != nullptr);
     Known<WGPUInstance> data;
-    if (!InstanceObjects().Allocate(&data, ObjectHandle{id, generation})) {
-        return false;
-    }
+    WIRE_TRY(InstanceObjects().Allocate(&data, ObjectHandle{id, generation}));
 
     data->handle = instance;
     data->generation = generation;
@@ -134,12 +128,13 @@ bool Server::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generat
     // message from the client. Add a reference to counterbalance the eventual release.
     mProcs.instanceReference(instance);
 
-    return true;
+    return WireResult::Success;
 }
 
 WGPUDevice Server::GetDevice(uint32_t id, uint32_t generation) {
     Known<WGPUDevice> device;
-    if (!DeviceObjects().Get(id, &device) || device->generation != generation) {
+    if (DeviceObjects().Get(id, &device) != WireResult::Success ||
+        device->generation != generation) {
         return nullptr;
     }
     return device->handle;

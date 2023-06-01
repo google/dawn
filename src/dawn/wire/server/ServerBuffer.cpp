@@ -22,11 +22,9 @@
 
 namespace dawn::wire::server {
 
-bool Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
+WireResult Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
     Known<WGPUBuffer> buffer;
-    if (!BufferObjects().Get(cmd.selfId, &buffer)) {
-        return false;
-    }
+    WIRE_TRY(BufferObjects().Get(cmd.selfId, &buffer));
 
     if (buffer->mappedAtCreation && !(buffer->usage & WGPUMapMode_Write)) {
         // This indicates the writeHandle is for mappedAtCreation only. Destroy on unmap
@@ -37,29 +35,27 @@ bool Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
 
     buffer->mapWriteState = BufferMapWriteState::Unmapped;
 
-    return true;
+    return WireResult::Success;
 }
 
-bool Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
+WireResult Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
     // Destroying a buffer does an implicit unmapping.
     Known<WGPUBuffer> buffer;
-    if (!BufferObjects().Get(cmd.selfId, &buffer)) {
-        return false;
-    }
+    WIRE_TRY(BufferObjects().Get(cmd.selfId, &buffer));
 
     // The buffer was destroyed. Clear the Read/WriteHandle.
     buffer->readHandle = nullptr;
     buffer->writeHandle = nullptr;
     buffer->mapWriteState = BufferMapWriteState::Unmapped;
 
-    return true;
+    return WireResult::Success;
 }
 
-bool Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
-                              uint64_t requestSerial,
-                              WGPUMapModeFlags mode,
-                              uint64_t offset64,
-                              uint64_t size64) {
+WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
+                                    uint64_t requestSerial,
+                                    WGPUMapModeFlags mode,
+                                    uint64_t offset64,
+                                    uint64_t size64) {
     // These requests are just forwarded to the buffer, with userdata containing what the
     // client will require in the return command.
     std::unique_ptr<MapUserdata> userdata = MakeUserdata<MapUserdata>();
@@ -75,11 +71,11 @@ bool Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     // in server. All other invalid actual size can be caught by dawn native side validation.
     if (offset64 > std::numeric_limits<size_t>::max()) {
         OnBufferMapAsyncCallback(userdata.get(), WGPUBufferMapAsyncStatus_OffsetOutOfRange);
-        return true;
+        return WireResult::Success;
     }
     if (size64 >= WGPU_WHOLE_MAP_SIZE) {
         OnBufferMapAsyncCallback(userdata.get(), WGPUBufferMapAsyncStatus_SizeOutOfRange);
-        return true;
+        return WireResult::Success;
     }
 
     size_t offset = static_cast<size_t>(offset64);
@@ -91,21 +87,19 @@ bool Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
     mProcs.bufferMapAsync(buffer->handle, mode, offset, size,
                           ForwardToServer<&Server::OnBufferMapAsyncCallback>, userdata.release());
 
-    return true;
+    return WireResult::Success;
 }
 
-bool Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
-                                  const WGPUBufferDescriptor* descriptor,
-                                  ObjectHandle bufferHandle,
-                                  uint64_t readHandleCreateInfoLength,
-                                  const uint8_t* readHandleCreateInfo,
-                                  uint64_t writeHandleCreateInfoLength,
-                                  const uint8_t* writeHandleCreateInfo) {
+WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
+                                        const WGPUBufferDescriptor* descriptor,
+                                        ObjectHandle bufferHandle,
+                                        uint64_t readHandleCreateInfoLength,
+                                        const uint8_t* readHandleCreateInfo,
+                                        uint64_t writeHandleCreateInfoLength,
+                                        const uint8_t* writeHandleCreateInfo) {
     // Create and register the buffer object.
     Known<WGPUBuffer> buffer;
-    if (!BufferObjects().Allocate(&buffer, bufferHandle)) {
-        return false;
-    }
+    WIRE_TRY(BufferObjects().Allocate(&buffer, bufferHandle));
     buffer->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
     buffer->usage = descriptor->usage;
     buffer->mappedAtCreation = descriptor->mappedAtCreation;
@@ -121,7 +115,7 @@ bool Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
         writeHandleCreateInfoLength > std::numeric_limits<size_t>::max() ||
         readHandleCreateInfoLength >
             std::numeric_limits<size_t>::max() - writeHandleCreateInfoLength) {
-        return false;
+        return WireResult::FatalError;
     }
 
     if (isWriteMode) {
@@ -130,7 +124,7 @@ bool Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
         if (!mMemoryTransferService->DeserializeWriteHandle(
                 writeHandleCreateInfo, static_cast<size_t>(writeHandleCreateInfoLength),
                 &writeHandle)) {
-            return false;
+            return WireResult::FatalError;
         }
         ASSERT(writeHandle != nullptr);
         buffer->writeHandle.reset(writeHandle);
@@ -143,7 +137,7 @@ bool Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
                 // This is a valid case and isn't fatal. Remember the buffer is an error so as
                 // to skip subsequent mapping operations.
                 buffer->mapWriteState = BufferMapWriteState::MapError;
-                return true;
+                return WireResult::Success;
             }
             ASSERT(mapping != nullptr);
             writeHandle->SetTarget(mapping);
@@ -158,53 +152,56 @@ bool Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
         if (!mMemoryTransferService->DeserializeReadHandle(
                 readHandleCreateInfo, static_cast<size_t>(readHandleCreateInfoLength),
                 &readHandle)) {
-            return false;
+            return WireResult::FatalError;
         }
         ASSERT(readHandle != nullptr);
 
         buffer->readHandle.reset(readHandle);
     }
 
-    return true;
+    return WireResult::Success;
 }
 
-bool Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
-                                      uint64_t writeDataUpdateInfoLength,
-                                      const uint8_t* writeDataUpdateInfo,
-                                      uint64_t offset,
-                                      uint64_t size) {
+WireResult Server::DoBufferUpdateMappedData(Known<WGPUBuffer> buffer,
+                                            uint64_t writeDataUpdateInfoLength,
+                                            const uint8_t* writeDataUpdateInfo,
+                                            uint64_t offset,
+                                            uint64_t size) {
     if (writeDataUpdateInfoLength > std::numeric_limits<size_t>::max() ||
         offset > std::numeric_limits<size_t>::max() || size > std::numeric_limits<size_t>::max()) {
-        return false;
+        return WireResult::FatalError;
     }
 
     switch (buffer->mapWriteState) {
         case BufferMapWriteState::Unmapped:
-            return false;
+            return WireResult::FatalError;
         case BufferMapWriteState::MapError:
             // The buffer is mapped but there was an error allocating mapped data.
             // Do not perform the memcpy.
-            return true;
+            return WireResult::Success;
         case BufferMapWriteState::Mapped:
             break;
     }
     if (!buffer->writeHandle) {
         // This check is performed after the check for the MapError state. It is permissible
         // to Unmap and attempt to update mapped data of an error buffer.
-        return false;
+        return WireResult::FatalError;
     }
 
     // Deserialize the flush info and flush updated data from the handle into the target
     // of the handle. The target is set via WriteHandle::SetTarget.
-    return buffer->writeHandle->DeserializeDataUpdate(
-        writeDataUpdateInfo, static_cast<size_t>(writeDataUpdateInfoLength),
-        static_cast<size_t>(offset), static_cast<size_t>(size));
+    if (!buffer->writeHandle->DeserializeDataUpdate(
+            writeDataUpdateInfo, static_cast<size_t>(writeDataUpdateInfoLength),
+            static_cast<size_t>(offset), static_cast<size_t>(size))) {
+        return WireResult::FatalError;
+    }
+    return WireResult::Success;
 }
 
 void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatus status) {
     // Skip sending the callback if the buffer has already been destroyed.
     Known<WGPUBuffer> buffer;
-    if (!BufferObjects().Get(data->buffer.id, &buffer) ||
+    if (BufferObjects().Get(data->buffer.id, &buffer) != WireResult::Success ||
         buffer->generation != data->buffer.generation) {
         return;
     }

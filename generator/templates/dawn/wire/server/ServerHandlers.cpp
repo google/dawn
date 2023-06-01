@@ -23,22 +23,16 @@ namespace dawn::wire::server {
 
         {% set Suffix = command.name.CamelCase() %}
         //* The generic command handlers
-        bool Server::Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer) {
+        WireResult Server::Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer) {
             {{Suffix}}Cmd cmd;
-            WireResult deserializeResult = cmd.Deserialize(deserializeBuffer, &mAllocator
+            WIRE_TRY(cmd.Deserialize(deserializeBuffer, &mAllocator
                 {%- if command.may_have_dawn_object -%}
                     , *this
                 {%- endif -%}
-            );
-
-            if (deserializeResult == WireResult::FatalError) {
-                return false;
-            }
+            ));
 
             {% if Suffix in server_custom_pre_handler_commands %}
-                if (!PreHandle{{Suffix}}(cmd)) {
-                    return false;
-                }
+                WIRE_TRY(PreHandle{{Suffix}}(cmd));
             {% endif %}
 
             //* Allocate any result objects
@@ -48,22 +42,18 @@ namespace dawn::wire::server {
                 {% set name = as_varName(member.name) %}
 
                 Known<WGPU{{Type}}> {{name}}Data;
-                if (!{{Type}}Objects().Allocate(&{{name}}Data, cmd.{{name}})) {
-                    return false;
-                }
+                WIRE_TRY({{Type}}Objects().Allocate(&{{name}}Data, cmd.{{name}}));
                 {{name}}Data->generation = cmd.{{name}}.generation;
             {% endfor %}
 
             {%- for member in command.members if member.id_type != None -%}
                 {% set name = as_varName(member.name) %}
                 Known<WGPU{{member.id_type.name.CamelCase()}}> {{name}}Handle;
-                if (!{{member.id_type.name.CamelCase()}}Objects().Get(cmd.{{name}}, &{{name}}Handle)) {
-                    return false;
-                }
+                WIRE_TRY({{member.id_type.name.CamelCase()}}Objects().Get(cmd.{{name}}, &{{name}}Handle));
             {%- endfor -%}
 
             //* Do command
-            bool success = Do{{Suffix}}(
+            WIRE_TRY(Do{{Suffix}}(
                 {%- for member in command.members -%}
                     {%- if member.is_return_value -%}
                         {%- if member.handle_type -%}
@@ -78,11 +68,7 @@ namespace dawn::wire::server {
                     {%- endif -%}
                     {%- if not loop.last -%}, {% endif %}
                 {%- endfor -%}
-            );
-
-            if (!success) {
-                return false;
-            }
+            ));
 
             {%- for member in command.members if member.is_return_value and member.handle_type -%}
                 {% set Type = member.handle_type.name.CamelCase() %}
@@ -94,7 +80,7 @@ namespace dawn::wire::server {
                 {% endif %}
             {% endfor %}
 
-            return true;
+            return WireResult::Success;
         }
     {% endfor %}
 
@@ -115,18 +101,18 @@ namespace dawn::wire::server {
 
             WireCmd cmdId = *static_cast<const volatile WireCmd*>(static_cast<const volatile void*>(
                 deserializeBuffer.Buffer() + sizeof(CmdHeader)));
-            bool success = false;
+            WireResult result;
             switch (cmdId) {
                 {% for command in cmd_records["command"] %}
                     case WireCmd::{{command.name.CamelCase()}}:
-                        success = Handle{{command.name.CamelCase()}}(&deserializeBuffer);
+                        result = Handle{{command.name.CamelCase()}}(&deserializeBuffer);
                         break;
                 {% endfor %}
                 default:
-                    success = false;
+                    result = WireResult::FatalError;
             }
 
-            if (!success) {
+            if (result != WireResult::Success) {
                 return nullptr;
             }
             mAllocator.Reset();

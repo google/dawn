@@ -71,10 +71,7 @@ namespace dawn::wire::server {
         // Implementation of the ObjectIdResolver interface
         {% for type in by_category["object"] %}
             WireResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {
-                if (!mKnown{{type.name.CamelCase()}}.GetNativeHandle(id, out)) {
-                    return WireResult::FatalError;
-                }
-                return WireResult::Success;
+                return mKnown{{type.name.CamelCase()}}.GetNativeHandle(id, out);
             }
 
             WireResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {

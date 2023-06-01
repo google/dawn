@@ -111,33 +111,33 @@ class KnownObjectsBase {
     }
 
     // Get a backend objects for a given client ID.
-    // Returns whether the object was previously allocated.
-    bool GetNativeHandle(ObjectId id, T* handle) const {
+    // Returns an error if the object wasn't previously allocated.
+    WireResult GetNativeHandle(ObjectId id, T* handle) const {
         if (id >= mKnown.size()) {
-            return false;
+            return WireResult::FatalError;
         }
 
         const Data* data = &mKnown[id];
         if (data->state != AllocationState::Allocated) {
-            return false;
+            return WireResult::FatalError;
         }
         *handle = data->handle;
 
-        return true;
+        return WireResult::Success;
     }
 
-    bool Get(ObjectId id, Known<T>* result) {
+    WireResult Get(ObjectId id, Known<T>* result) {
         if (id >= mKnown.size()) {
-            return false;
+            return WireResult::FatalError;
         }
 
         Data* data = &mKnown[id];
         if (data->state != AllocationState::Allocated) {
-            return false;
+            return WireResult::FatalError;
         }
 
         *result = Known<T>{id, data};
-        return true;
+        return WireResult::Success;
     }
 
     Known<T> FillReservation(ObjectId id, T handle) {
@@ -152,11 +152,11 @@ class KnownObjectsBase {
     // Allocates the data for a given ID and returns it in result.
     // Returns false if the ID is already allocated, or too far ahead, or if ID is 0 (ID 0 is
     // reserved for nullptr). Invalidates all the Data*
-    bool Allocate(Known<T>* result,
-                  ObjectHandle handle,
-                  AllocationState state = AllocationState::Allocated) {
+    WireResult Allocate(Known<T>* result,
+                        ObjectHandle handle,
+                        AllocationState state = AllocationState::Allocated) {
         if (handle.id == 0 || handle.id > mKnown.size()) {
-            return false;
+            return WireResult::FatalError;
         }
 
         Data data;
@@ -166,16 +166,16 @@ class KnownObjectsBase {
         if (handle.id >= mKnown.size()) {
             mKnown.push_back(std::move(data));
             *result = {handle.id, &mKnown.back()};
-            return true;
+            return WireResult::Success;
         }
 
         if (mKnown[handle.id].state != AllocationState::Free) {
-            return false;
+            return WireResult::FatalError;
         }
 
         // The generation should be strictly increasing.
         if (handle.generation <= mKnown[handle.id].generation) {
-            return false;
+            return WireResult::FatalError;
         }
         // update the generation in the slot
         data.generation = handle.generation;
@@ -183,7 +183,7 @@ class KnownObjectsBase {
         mKnown[handle.id] = std::move(data);
 
         *result = {handle.id, &mKnown[handle.id]};
-        return true;
+        return WireResult::Success;
     }
 
     // Marks an ID as deallocated
@@ -231,14 +231,12 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
   public:
     KnownObjects() = default;
 
-    bool Allocate(Known<WGPUDevice>* result,
-                  ObjectHandle handle,
-                  AllocationState state = AllocationState::Allocated) {
-        if (KnownObjectsBase<WGPUDevice>::Allocate(result, handle, state)) {
-            AddToKnownSet(*result);
-            return true;
-        }
-        return false;
+    WireResult Allocate(Known<WGPUDevice>* result,
+                        ObjectHandle handle,
+                        AllocationState state = AllocationState::Allocated) {
+        WIRE_TRY(KnownObjectsBase<WGPUDevice>::Allocate(result, handle, state));
+        AddToKnownSet(*result);
+        return WireResult::Success;
     }
 
     Known<WGPUDevice> FillReservation(ObjectId id, WGPUDevice handle) {

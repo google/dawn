@@ -15,9 +15,9 @@
 // Command handlers & doers
 {% for command in cmd_records["command"] %}
     {% set Suffix = command.name.CamelCase() %}
-    bool Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer);
+    WireResult Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer);
 
-    bool Do{{Suffix}}(
+    WireResult Do{{Suffix}}(
         {%- for member in command.members -%}
             {%- if member.is_return_value -%}
                 {%- if member.handle_type -%}
@@ -36,5 +36,5 @@
 {% endfor %}
 
 {% for CommandName in server_custom_pre_handler_commands %}
-    bool PreHandle{{CommandName}}(const {{CommandName}}Cmd& cmd);
+    WireResult PreHandle{{CommandName}}(const {{CommandName}}Cmd& cmd);
 {% endfor %}

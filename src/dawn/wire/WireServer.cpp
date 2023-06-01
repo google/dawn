@@ -35,7 +35,8 @@ bool WireServer::InjectTexture(WGPUTexture texture,
                                uint32_t generation,
                                uint32_t deviceId,
                                uint32_t deviceGeneration) {
-    return mImpl->InjectTexture(texture, id, generation, deviceId, deviceGeneration);
+    return mImpl->InjectTexture(texture, id, generation, deviceId, deviceGeneration) ==
+           WireResult::Success;
 }
 
 bool WireServer::InjectSwapChain(WGPUSwapChain swapchain,
@@ -43,15 +44,16 @@ bool WireServer::InjectSwapChain(WGPUSwapChain swapchain,
                                  uint32_t generation,
                                  uint32_t deviceId,
                                  uint32_t deviceGeneration) {
-    return mImpl->InjectSwapChain(swapchain, id, generation, deviceId, deviceGeneration);
+    return mImpl->InjectSwapChain(swapchain, id, generation, deviceId, deviceGeneration) ==
+           WireResult::Success;
 }
 
 bool WireServer::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
-    return mImpl->InjectDevice(device, id, generation);
+    return mImpl->InjectDevice(device, id, generation) == WireResult::Success;
 }
 
 bool WireServer::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
-    return mImpl->InjectInstance(instance, id, generation);
+    return mImpl->InjectInstance(instance, id, generation) == WireResult::Success;
 }
 
 WGPUDevice WireServer::GetDevice(uint32_t id, uint32_t generation) {
