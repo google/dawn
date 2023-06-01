@@ -543,7 +543,6 @@ source_set("end2end_tests_sources") {
     "end2end/PrimitiveTopologyTests.cpp",
     "end2end/QueryTests.cpp",
     "end2end/QueueTests.cpp",
-    "end2end/QueueTimelineTests.cpp",
     "end2end/ReadOnlyDepthStencilAttachmentTests.cpp",
     "end2end/RenderAttachmentTests.cpp",
     "end2end/RenderBundleTests.cpp",
