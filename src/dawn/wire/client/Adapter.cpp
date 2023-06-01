@@ -71,14 +71,25 @@ void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
         return;
     }
 
+    // The descriptor is passed so that the deviceLostCallback can be tracked client-side and called
+    // when the device is lost.
     Device* device = client->Make<Device>(descriptor);
     uint64_t serial = mRequestDeviceRequests.Add({callback, device->GetWireId(), userdata});
+
+    // Ensure the device lost callback isn't serialized as part of the command, as it cannot be
+    // passed between processes.
+    WGPUDeviceDescriptor wireDescriptor = {};
+    if (descriptor) {
+        wireDescriptor = *descriptor;
+        wireDescriptor.deviceLostCallback = nullptr;
+        wireDescriptor.deviceLostUserdata = nullptr;
+    }
 
     AdapterRequestDeviceCmd cmd;
     cmd.adapterId = GetWireId();
     cmd.requestSerial = serial;
     cmd.deviceObjectHandle = device->GetWireHandle();
-    cmd.descriptor = descriptor;
+    cmd.descriptor = &wireDescriptor;
 
     client->SerializeCommand(cmd);
 }

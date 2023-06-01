@@ -68,6 +68,12 @@
         //* trusted boundary.
         {%- set Provider = ", provider" if member.type.may_have_dawn_object else "" -%}
         WIRE_TRY({{as_cType(member.type.name)}}Serialize({{in}}, &{{out}}, buffer{{Provider}}));
+    {%- elif member.type.category == "function pointer" -%}
+        //* Function pointers cannot be serialized.
+        if ({{in}} != nullptr) {
+            return WireResult::FatalError;
+        }
+        {{out}} = nullptr;
     {%- else -%}
         {{out}} = {{in}};
     {%- endif -%}
@@ -89,6 +95,12 @@
                 {%- endif -%}
             ));
         {%- endif -%}
+    {%- elif member.type.category == "function pointer" -%}
+        //* Function pointers cannot be deserialized.
+        if ({{in}} != nullptr) {
+            return WireResult::FatalError;
+        }
+        {{out}} = nullptr;
     {%- else -%}
         static_assert(sizeof({{out}}) >= sizeof({{in}}), "Deserialize assignment may not narrow.");
         {{out}} = {{in}};
