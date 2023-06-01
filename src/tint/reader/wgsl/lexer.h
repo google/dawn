@@ -53,7 +53,7 @@ class Lexer {
                                            size_t prefix_count,
                                            int32_t base);
 
-    std::optional<Token> check_keyword(const Source&, std::string_view);
+    std::optional<Token::Type> parse_keyword(std::string_view);
 
     /// The try_* methods have the following in common:
     /// - They assume there is at least one character to be consumed,

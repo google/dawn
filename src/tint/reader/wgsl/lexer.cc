@@ -994,12 +994,11 @@ std::optional<Token> Lexer::try_ident() {
 
         // Consume continuing codepoint
         advance(n);
-    }
 
-    if (at(start) == '_') {
-        // Check for an underscore on its own (special token), or a
-        // double-underscore (not allowed).
-        if ((pos() == start + 1) || (at(start + 1) == '_')) {
+        if (pos() - start == 2 && substr(start, 2) == "__") {
+            // Identifiers prefixed with two or more underscores are not allowed.
+            // We check for these in the loop to bail early and prevent quadratic parse time for
+            // long sequences of ____.
             set_pos(start);
             return {};
         }
@@ -1008,8 +1007,8 @@ std::optional<Token> Lexer::try_ident() {
     auto str = substr(start, pos() - start);
     end_source(source);
 
-    if (auto t = check_keyword(source, str); t.has_value() && !t->IsUninitialized()) {
-        return t;
+    if (auto t = parse_keyword(str); t.has_value()) {
+        return Token{t.value(), source, str};
     }
 
     return Token{Token::Type::kIdentifier, source, str};
@@ -1194,92 +1193,95 @@ std::optional<Token> Lexer::try_punctuation() {
     return Token{type, source};
 }
 
-std::optional<Token> Lexer::check_keyword(const Source& source, std::string_view str) {
+std::optional<Token::Type> Lexer::parse_keyword(std::string_view str) {
     if (str == "alias") {
-        return Token{Token::Type::kAlias, source, "alias"};
+        return Token::Type::kAlias;
     }
     if (str == "bitcast") {
-        return Token{Token::Type::kBitcast, source, "bitcast"};
+        return Token::Type::kBitcast;
     }
     if (str == "break") {
-        return Token{Token::Type::kBreak, source, "break"};
+        return Token::Type::kBreak;
     }
     if (str == "case") {
-        return Token{Token::Type::kCase, source, "case"};
+        return Token::Type::kCase;
     }
     if (str == "const") {
-        return Token{Token::Type::kConst, source, "const"};
+        return Token::Type::kConst;
     }
     if (str == "const_assert") {
-        return Token{Token::Type::kConstAssert, source, "const_assert"};
+        return Token::Type::kConstAssert;
     }
     if (str == "continue") {
-        return Token{Token::Type::kContinue, source, "continue"};
+        return Token::Type::kContinue;
     }
     if (str == "continuing") {
-        return Token{Token::Type::kContinuing, source, "continuing"};
+        return Token::Type::kContinuing;
     }
     if (str == "diagnostic") {
-        return Token{Token::Type::kDiagnostic, source, "diagnostic"};
+        return Token::Type::kDiagnostic;
     }
     if (str == "discard") {
-        return Token{Token::Type::kDiscard, source, "discard"};
+        return Token::Type::kDiscard;
     }
     if (str == "default") {
-        return Token{Token::Type::kDefault, source, "default"};
+        return Token::Type::kDefault;
     }
     if (str == "else") {
-        return Token{Token::Type::kElse, source, "else"};
+        return Token::Type::kElse;
     }
     if (str == "enable") {
-        return Token{Token::Type::kEnable, source, "enable"};
+        return Token::Type::kEnable;
     }
     if (str == "fallthrough") {
-        return Token{Token::Type::kFallthrough, source, "fallthrough"};
+        return Token::Type::kFallthrough;
     }
     if (str == "false") {
-        return Token{Token::Type::kFalse, source, "false"};
+        return Token::Type::kFalse;
     }
     if (str == "fn") {
-        return Token{Token::Type::kFn, source, "fn"};
+        return Token::Type::kFn;
     }
     if (str == "for") {
-        return Token{Token::Type::kFor, source, "for"};
+        return Token::Type::kFor;
     }
     if (str == "if") {
-        return Token{Token::Type::kIf, source, "if"};
+        return Token::Type::kIf;
     }
     if (str == "let") {
-        return Token{Token::Type::kLet, source, "let"};
+        return Token::Type::kLet;
     }
     if (str == "loop") {
-        return Token{Token::Type::kLoop, source, "loop"};
+        return Token::Type::kLoop;
     }
     if (str == "override") {
-        return Token{Token::Type::kOverride, source, "override"};
+        return Token::Type::kOverride;
     }
     if (str == "return") {
-        return Token{Token::Type::kReturn, source, "return"};
+        return Token::Type::kReturn;
     }
     if (str == "requires") {
-        return Token{Token::Type::kRequires, source, "requires"};
+        return Token::Type::kRequires;
     }
     if (str == "struct") {
-        return Token{Token::Type::kStruct, source, "struct"};
+        return Token::Type::kStruct;
     }
     if (str == "switch") {
-        return Token{Token::Type::kSwitch, source, "switch"};
+        return Token::Type::kSwitch;
     }
     if (str == "true") {
-        return Token{Token::Type::kTrue, source, "true"};
+        return Token::Type::kTrue;
     }
     if (str == "var") {
-        return Token{Token::Type::kVar, source, "var"};
+        return Token::Type::kVar;
     }
     if (str == "while") {
-        return Token{Token::Type::kWhile, source, "while"};
+        return Token::Type::kWhile;
     }
-    return {};
+    if (str == "_") {
+        return Token::Type::kUnderscore;
+    }
+    return std::nullopt;
 }
 
 }  // namespace tint::reader::wgsl
