@@ -26,6 +26,8 @@ ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s);
 
 bool IsTypeless(DXGI_FORMAT format);
 
+bool IsDepthStencil(DXGI_FORMAT format);
+
 uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion);
 
 DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format);

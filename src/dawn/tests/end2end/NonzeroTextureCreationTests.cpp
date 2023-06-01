@@ -288,15 +288,11 @@ TEST_P(NonzeroDepthTextureCreationTests, TextureCreationClears) {
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroDepthStencilTextureCreationTests, TextureCreationClears) {
-    // TODO(dawn:1844): Figure this out.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     Run();
 }
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroStencilTextureCreationTests, TextureCreationClears) {
-    // TODO(dawn:1844): Figure this out.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     Run();
 }
 
