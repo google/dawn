@@ -486,9 +486,11 @@ class PhysicalDevice : public PhysicalDeviceBase {
                 if (gpu_info::IsIntelGen11(vendorId, deviceId)) {
                     return true;
                 }
+#if DAWN_PLATFORM_IS(MACOS)
                 if (gpu_info::IsIntel(vendorId) && !IsMacOSVersionAtLeast(11)) {
                     return true;
                 }
+#endif
                 return false;
             };
             if (ShouldLeakCounterSets()) {
