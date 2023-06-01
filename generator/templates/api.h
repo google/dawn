@@ -167,7 +167,7 @@ extern "C" {
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Procs of {{type.name.CamelCase()}}
     {% for method in c_methods(type) %}
-        typedef {{as_cType(method.return_type.name)}} (*{{as_cProc(type.name, method.name)}})(
+        typedef {{as_cReturnType(method.return_type)}} (*{{as_cProc(type.name, method.name)}})(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 ,{{" "}}
@@ -193,7 +193,7 @@ extern "C" {
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Methods of {{type.name.CamelCase()}}
     {% for method in c_methods(type) %}
-        {{API}}_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
+        {{API}}_EXPORT {{as_cReturnType(method.return_type)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 ,{{" "}}
