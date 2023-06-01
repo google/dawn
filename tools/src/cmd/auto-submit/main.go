@@ -123,6 +123,7 @@ func (a *app) submitReadyChanges() error {
 			Messages:         true,
 			CurrentRevision:  true,
 			DetailedAccounts: true,
+			Submittable:      true,
 		},
 		"status:open",
 		"author:"+a.user,
@@ -131,7 +132,7 @@ func (a *app) submitReadyChanges() error {
 		"label:kokoro",
 		"repo:"+*repoFlag)
 	if err != nil {
-		return fmt.Errorf("failed to Query changes: %w", err)
+		return fmt.Errorf("failed to query changes: %w", err)
 	}
 
 	for _, change := range changes {
@@ -148,18 +149,31 @@ func (a *app) submitReadyChanges() error {
 		}
 
 		isReadyToSubmit := true &&
+			change.Submittable &&
 			hasLabel("Kokoro", 1) &&
 			hasLabel("Auto-Submit", 1) &&
 			hasLabel("Code-Review", 2) &&
 			!hasLabel("Code-Review", -1) &&
 			!hasLabel("Code-Review", -2)
 		if !isReadyToSubmit {
-			// Change does not have all the required labels to submit
+			// Change is not ready to be submitted
 			continue
 		}
 
 		if hasLabel("Commit-Queue", 2) {
 			// Change already in the process of submitting
+			continue
+		}
+
+		submittedTogether, err := a.ChangesSubmittedTogether(change.ChangeID)
+		if err != nil {
+			return fmt.Errorf("failed to query changes submitted together: %w", err)
+		}
+		if len(submittedTogether) > 1 { // Include the change itself
+			// Change has unsubmitted parents
+			if *verboseFlag {
+				log.Printf("%v has %v unsubmitted parents", change.ChangeID, len(submittedTogether)-1)
+			}
 			continue
 		}
 
@@ -204,11 +218,11 @@ func parseCQStatus(change gerrit.ChangeInfo) cqStatus {
 			continue
 		}
 		if msg.Author.Email == cqEmailAccount {
-			if strings.Contains(msg.Message, "This CL has passed the run") {
-				return cqPassed
-			}
 			if strings.Contains(msg.Message, "This CL has failed the run") {
 				return cqFailed
+			}
+			if strings.Contains(msg.Message, "This CL has passed the run") {
+				return cqPassed
 			}
 		}
 	}

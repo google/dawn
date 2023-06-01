@@ -128,6 +128,7 @@ type QueryExtraData struct {
 	Messages         bool
 	CurrentRevision  bool
 	DetailedAccounts bool
+	Submittable      bool
 }
 
 // QueryChanges returns the changes that match the given query strings.
@@ -148,6 +149,9 @@ func (g *Gerrit) QueryChangesWith(extras QueryExtraData, queries ...string) (cha
 	}
 	if extras.DetailedAccounts {
 		changeOpts.AdditionalFields = append(changeOpts.AdditionalFields, "DETAILED_ACCOUNTS")
+	}
+	if extras.Submittable {
+		changeOpts.AdditionalFields = append(changeOpts.AdditionalFields, "SUBMITTABLE")
 	}
 
 	for {
@@ -172,6 +176,16 @@ func (g *Gerrit) QueryChangesWith(extras QueryExtraData, queries ...string) (cha
 // See: https://gerrit-review.googlesource.com/Documentation/user-search.html#search-operators
 func (g *Gerrit) QueryChanges(queries ...string) (changes []gerrit.ChangeInfo, query string, err error) {
 	return g.QueryChangesWith(QueryExtraData{}, queries...)
+}
+
+// ChangesSubmittedTogether returns the changes that want to be submitted together
+// See: https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#submitted-together
+func (g *Gerrit) ChangesSubmittedTogether(changeID string) (changes []gerrit.ChangeInfo, err error) {
+	info, _, err := g.client.Changes.ChangesSubmittedTogether(changeID)
+	if err != nil {
+		return nil, g.maybeWrapError(err)
+	}
+	return *info, nil
 }
 
 func (g *Gerrit) AddLabel(changeID, revisionID, message, label string, value int) error {
