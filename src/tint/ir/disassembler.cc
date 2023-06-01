@@ -70,7 +70,7 @@ utils::StringStream& Disassembler::Indent() {
 }
 
 void Disassembler::EmitBlockInstructions(const Block* b) {
-    for (const auto* inst : b->Instructions()) {
+    for (const auto* inst : *b) {
         Indent();
         EmitInstruction(inst);
     }

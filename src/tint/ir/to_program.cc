@@ -122,7 +122,7 @@ class State {
         while (block) {
             TINT_ASSERT(IR, block->HasBranchTarget());
 
-            for (auto* inst : block->Instructions()) {
+            for (auto* inst : *block) {
                 auto stmt = Stmt(inst);
                 if (TINT_UNLIKELY(!stmt)) {
                     return nullptr;
@@ -157,14 +157,14 @@ class State {
         }
 
         auto* false_blk = i->False();
-        if (false_blk->Instructions().Length() > 1 ||
-            (false_blk->Instructions().Length() == 1 && false_blk->HasBranchTarget() &&
-             !false_blk->Branch()->Is<ir::ExitIf>())) {
+        if (false_blk->Length() > 1 || (false_blk->Length() == 1 && false_blk->HasBranchTarget() &&
+                                        !false_blk->Branch()->Is<ir::ExitIf>())) {
             // If the else target is an `if` which has a merge target that just bounces to the outer
             // if merge target then emit an 'else if' instead of a block statement for the else.
-            if (auto* inst = i->False()->Instructions().Front()->As<ir::If>()) {
-                if (auto* br = inst->Merge()->Branch()->As<ir::ExitIf>(); br && br->If() == i) {
-                    auto* f = If(inst);
+            if (auto* inst = i->False()->Instructions(); inst && inst->As<ir::If>()) {
+                auto* if_ = inst->As<ir::If>();
+                if (auto* br = if_->Merge()->Branch()->As<ir::ExitIf>(); br && br->If() == i) {
+                    auto* f = If(if_);
                     if (!f) {
                         return nullptr;
                     }

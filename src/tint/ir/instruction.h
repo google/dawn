@@ -41,6 +41,11 @@ class Instruction : public utils::Castable<Instruction, Value> {
     /// @returns the block that owns this instruction
     const ir::Block* Block() const { return block_; }
 
+    /// Pointer to the next instruction in the list
+    Instruction* next = nullptr;
+    /// Pointer to the previous instruction in the list
+    Instruction* prev = nullptr;
+
   protected:
     /// Constructor
     Instruction();

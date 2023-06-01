@@ -119,4 +119,21 @@ class InternalCompilerError {
         }                                                                                \
     } while (false)
 
+/// TINT_ASSERT_OR_RETURN() is a macro for checking the expression is true, triggering a
+/// TINT_ICE if it is not and returning from the calling function.
+/// The ICE message contains the callsite's file and line.
+/// @warning: Unlike TINT_ICE() and TINT_UNREACHABLE(), TINT_ASSERT_OR_RETURN() does not
+/// append a message to an existing tint::diag::List. As such, TINT_ASSERT_OR_RETURN()
+/// may silently fail in builds where SetInternalCompilerErrorReporter() is not
+/// called. Only use in places where there's no sensible place to put proper
+/// error handling.
+#define TINT_ASSERT_OR_RETURN(system, condition)                                         \
+    do {                                                                                 \
+        if (TINT_UNLIKELY(!(condition))) {                                               \
+            tint::diag::List diagnostics;                                                \
+            TINT_ICE(system, diagnostics) << "TINT_ASSERT(" #system ", " #condition ")"; \
+            return;                                                                      \
+        }                                                                                \
+    } while (false)
+
 #endif  // SRC_TINT_DEBUG_H_

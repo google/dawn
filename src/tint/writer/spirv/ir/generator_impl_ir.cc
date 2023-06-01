@@ -333,7 +333,7 @@ void GeneratorImplIr::EmitEntryPoint(const ir::Function* func, uint32_t id) {
 }
 
 void GeneratorImplIr::EmitRootBlock(const ir::Block* root_block) {
-    for (auto* inst : root_block->Instructions()) {
+    for (auto* inst : *root_block) {
         Switch(
             inst,  //
             [&](const ir::Var* v) { return EmitVar(v); },
@@ -353,7 +353,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
 
     // If there are no instructions in the block, it's a dead end, so we shouldn't be able to get
     // here to begin with.
-    if (block->Instructions().IsEmpty()) {
+    if (block->IsEmpty()) {
         current_function_.push_inst(spv::Op::OpUnreachable, {});
         return;
     }
@@ -373,7 +373,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
     }
 
     // Emit the instructions.
-    for (auto* inst : block->Instructions()) {
+    for (auto* inst : *block) {
         Switch(
             inst,                                             //
             [&](const ir::Binary* b) { EmitBinary(b); },      //
@@ -448,11 +448,11 @@ void GeneratorImplIr::EmitIf(const ir::If* i) {
     uint32_t merge_label = Label(merge_block);
     uint32_t true_label = merge_label;
     uint32_t false_label = merge_label;
-    if (true_block->Instructions().Length() > 1 || !merge_block->Params().IsEmpty() ||
+    if (true_block->Length() > 1 || !merge_block->Params().IsEmpty() ||
         (true_block->HasBranchTarget() && !true_block->Branch()->Is<ir::ExitIf>())) {
         true_label = Label(true_block);
     }
-    if (false_block->Instructions().Length() > 1 || !merge_block->Params().IsEmpty() ||
+    if (false_block->Length() > 1 || !merge_block->Params().IsEmpty() ||
         (false_block->HasBranchTarget() && !false_block->Branch()->Is<ir::ExitIf>())) {
         false_label = Label(false_block);
     }

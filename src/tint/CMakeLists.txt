@@ -1484,6 +1484,7 @@ if(TINT_BUILD_TESTS)
     list(APPEND TINT_TEST_SRCS
       ir/binary_test.cc
       ir/bitcast_test.cc
+      ir/block_test.cc
       ir/constant_test.cc
       ir/discard_test.cc
       ir/from_program_binary_test.cc

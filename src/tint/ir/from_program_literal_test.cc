@@ -26,13 +26,13 @@ namespace tint::ir {
 namespace {
 
 const Value* GlobalVarInitializer(const Module& m) {
-    const auto instr = m.root_block->Instructions();
-
-    if (instr.Length() == 0u) {
+    if (m.root_block->Length() == 0u) {
         ADD_FAILURE() << "m.root_block has no instruction";
         return nullptr;
     }
-    auto* var = instr[0]->As<ir::Var>();
+
+    const auto instr = m.root_block->Instructions();
+    auto* var = instr->As<ir::Var>();
     if (!var) {
         ADD_FAILURE() << "m.root_block.instructions[0] was not a var";
         return nullptr;
@@ -81,14 +81,20 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_Bool_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto instr = m.Get().root_block->Instructions();
-    auto* var_a = instr[0]->As<ir::Var>();
+    auto itr = m.Get().root_block->begin();
+    auto* var_a = (*itr)->As<ir::Var>();
+    ++itr;
+
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = instr[1]->As<ir::Var>();
+    auto* var_b = (*itr)->As<ir::Var>();
+    ++itr;
+
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = instr[2]->As<ir::Var>();
+    auto* var_c = (*itr)->As<ir::Var>();
+    ++itr;
+
     ASSERT_NE(var_c, nullptr);
-    auto* var_d = instr[3]->As<ir::Var>();
+    auto* var_d = (*itr)->As<ir::Var>();
     ASSERT_NE(var_d, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
@@ -118,12 +124,16 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F32_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto instr = m.Get().root_block->Instructions();
-    auto* var_a = instr[0]->As<ir::Var>();
+    auto itr = m.Get().root_block->begin();
+    auto* var_a = (*itr)->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = instr[1]->As<ir::Var>();
+    ++itr;
+
+    auto* var_b = (*itr)->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = instr[2]->As<ir::Var>();
+    ++itr;
+
+    auto* var_c = (*itr)->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
@@ -154,12 +164,16 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_F16_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto instr = m.Get().root_block->Instructions();
-    auto* var_a = instr[0]->As<ir::Var>();
+    auto itr = m.Get().root_block->begin();
+    auto* var_a = (*itr)->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = instr[1]->As<ir::Var>();
+    ++itr;
+
+    auto* var_b = (*itr)->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = instr[2]->As<ir::Var>();
+    ++itr;
+
+    auto* var_c = (*itr)->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
@@ -188,12 +202,16 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_I32_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto instr = m.Get().root_block->Instructions();
-    auto* var_a = instr[0]->As<ir::Var>();
+    auto itr = m.Get().root_block->begin();
+    auto* var_a = (*itr)->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = instr[1]->As<ir::Var>();
+    ++itr;
+
+    auto* var_b = (*itr)->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = instr[2]->As<ir::Var>();
+    ++itr;
+
+    auto* var_c = (*itr)->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
@@ -222,12 +240,16 @@ TEST_F(IR_BuilderImplTest, EmitLiteral_U32_Deduped) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    auto instr = m.Get().root_block->Instructions();
-    auto* var_a = instr[0]->As<ir::Var>();
+    auto itr = m.Get().root_block->begin();
+    auto* var_a = (*itr)->As<ir::Var>();
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = instr[1]->As<ir::Var>();
+    ++itr;
+
+    auto* var_b = (*itr)->As<ir::Var>();
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = instr[2]->As<ir::Var>();
+    ++itr;
+
+    auto* var_c = (*itr)->As<ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
