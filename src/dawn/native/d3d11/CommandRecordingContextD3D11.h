@@ -59,7 +59,7 @@ class CommandRecordingContext {
     // The uniform buffer for built-in variables.
     Ref<Buffer> mUniformBuffer;
     std::array<uint32_t, kMaxNumBuiltinElements> mUniformBufferData;
-    bool mUniformBufferDirty = false;
+    bool mUniformBufferDirty = true;
 
     Ref<Device> mDevice;
 };
