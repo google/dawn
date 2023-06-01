@@ -217,5 +217,131 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
+    auto* func = b.CreateFunction("foo", mod.Types().void_());
+
+    auto* merge_param = b.BlockParam(b.ir.Types().i32());
+
+    auto* s = b.CreateSwitch(b.Constant(42_i));
+    auto* case_a = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
+                                                 ir::Switch::CaseSelector{nullptr}});
+    case_a->AddInstruction(b.ExitSwitch(s, utils::Vector{b.Constant(10_i)}));
+
+    auto* case_b = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+    case_b->AddInstruction(b.ExitSwitch(s, utils::Vector{b.Constant(20_i)}));
+
+    s->Merge()->SetParams(utils::Vector{merge_param});
+    s->Merge()->AddInstruction(b.Return(func));
+
+    func->StartTarget()->SetInstructions(utils::Vector{s});
+
+    generator_.EmitFunction(func);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+%2 = OpTypeVoid
+%3 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpConstant %7 42
+%11 = OpConstant %7 10
+%12 = OpConstant %7 20
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+OpSelectionMerge %9 None
+OpSwitch %6 %5 1 %5 2 %8
+%5 = OpLabel
+OpBranch %9
+%8 = OpLabel
+OpBranch %9
+%9 = OpLabel
+%10 = OpPhi %7 %11 %5 %12 %8
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
+    auto* func = b.CreateFunction("foo", mod.Types().void_());
+
+    auto* s = b.CreateSwitch(b.Constant(42_i));
+    auto* case_a = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
+                                                 ir::Switch::CaseSelector{nullptr}});
+    case_a->AddInstruction(b.Return(func, utils::Vector{b.Constant(10_i)}));
+
+    auto* case_b = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+    case_b->AddInstruction(b.ExitSwitch(s, utils::Vector{b.Constant(20_i)}));
+
+    s->Merge()->SetParams(utils::Vector{b.BlockParam(b.ir.Types().i32())});
+    s->Merge()->AddInstruction(b.Return(func));
+
+    func->StartTarget()->SetInstructions(utils::Vector{s});
+
+    generator_.EmitFunction(func);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+%2 = OpTypeVoid
+%3 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpConstant %7 42
+%10 = OpConstant %7 10
+%12 = OpConstant %7 20
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+OpSelectionMerge %9 None
+OpSwitch %6 %5 1 %5 2 %8
+%5 = OpLabel
+OpReturnValue %10
+%8 = OpLabel
+OpBranch %9
+%9 = OpLabel
+%11 = OpPhi %7 %12 %8
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
+    auto* func = b.CreateFunction("foo", mod.Types().void_());
+
+    auto* merge_param_0 = b.BlockParam(b.ir.Types().i32());
+    auto* merge_param_1 = b.BlockParam(b.ir.Types().bool_());
+
+    auto* s = b.CreateSwitch(b.Constant(42_i));
+    auto* case_a = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
+                                                 ir::Switch::CaseSelector{nullptr}});
+    case_a->AddInstruction(b.ExitSwitch(s, utils::Vector{b.Constant(10_i), b.Constant(true)}));
+
+    auto* case_b = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+    case_b->AddInstruction(b.ExitSwitch(s, utils::Vector{b.Constant(20_i), b.Constant(false)}));
+
+    s->Merge()->SetParams(utils::Vector{merge_param_0, merge_param_1});
+    s->Merge()->AddInstruction(b.Return(func, utils::Vector{merge_param_0}));
+
+    func->StartTarget()->SetInstructions(utils::Vector{s});
+
+    generator_.EmitFunction(func);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+%2 = OpTypeVoid
+%3 = OpTypeFunction %2
+%7 = OpTypeInt 32 1
+%6 = OpConstant %7 42
+%11 = OpConstant %7 10
+%12 = OpConstant %7 20
+%14 = OpTypeBool
+%15 = OpConstantTrue %14
+%16 = OpConstantFalse %14
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+OpSelectionMerge %9 None
+OpSwitch %6 %5 1 %5 2 %8
+%5 = OpLabel
+OpBranch %9
+%8 = OpLabel
+OpBranch %9
+%9 = OpLabel
+%10 = OpPhi %7 %11 %5 %12 %8
+%13 = OpPhi %14 %15 %5 %16 %8
+OpReturnValue %10
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv
