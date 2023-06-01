@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "gtest/gtest-spi.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -52,23 +53,23 @@ TEST_F(BuilderTest, Assign_Var) {
 }
 
 TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
-    auto* v = GlobalVar("var", ty.f32(), builtin::AddressSpace::kPrivate);
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder pb;
 
-    auto* assign = Assign("var", Expr(1_f));
+            auto* v = pb.GlobalVar("var", pb.ty.f32(), builtin::AddressSpace::kPrivate);
 
-    WrapInFunction(assign);
+            auto* assign = pb.Assign("var", pb.Expr(1_f));
 
-    spirv::Builder& b = Build();
+            pb.WrapInFunction(assign);
 
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
-    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
+            auto program = std::make_unique<Program>(std::move(pb));
+            auto b = std::make_unique<spirv::Builder>(program.get());
 
-    tint::SetInternalCompilerErrorReporter(nullptr);
-
-    EXPECT_FALSE(b.GenerateAssignStatement(assign)) << b.Diagnostics();
-    EXPECT_TRUE(b.has_error());
-    EXPECT_THAT(b.Diagnostics().str(),
-                ::testing::HasSubstr("trying to add SPIR-V instruction 62 outside a function"));
+            b->GenerateGlobalVariable(v);
+            b->GenerateAssignStatement(assign);
+        },
+        "trying to add SPIR-V instruction 62 outside a function");
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroInitializer) {

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -23,21 +24,24 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
-    auto* init = vec3<f32>(1_f, 1_f, 3_f);
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder pb;
 
-    auto* v = GlobalConst("c", ty.vec3<f32>(), init);
+            auto* init = pb.vec3<f32>(1_f, 1_f, 3_f);
 
-    auto* expr = Expr("c");
-    WrapInFunction(expr);
+            auto* v = pb.GlobalConst("c", pb.ty.vec3<f32>(), init);
 
-    spirv::Builder& b = Build();
+            auto* expr = pb.Expr("c");
+            pb.WrapInFunction(expr);
 
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.Diagnostics();
-    ASSERT_FALSE(b.has_error()) << b.Diagnostics();
+            auto program = std::make_unique<Program>(std::move(pb));
+            auto b = std::make_unique<spirv::Builder>(program.get());
 
-    EXPECT_EQ(DumpInstructions(b.Module().Types()), R"()");
-
-    EXPECT_EQ(b.GenerateIdentifierExpression(expr), 0u);
+            b->GenerateGlobalVariable(v);
+            b->GenerateIdentifierExpression(expr);
+        },
+        "internal compiler error: unable to find ID for variable: c");
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {

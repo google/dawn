@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "gtest/gtest-spi.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -51,19 +52,20 @@ TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
     // if (true) {
     // }
 
-    auto* block = Block();
-    auto* expr = If(true, block);
-    WrapInFunction(expr);
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder pb;
 
-    spirv::Builder& b = Build();
+            auto* block = pb.Block();
+            auto* expr = pb.If(true, block);
+            pb.WrapInFunction(expr);
 
-    tint::SetInternalCompilerErrorReporter(nullptr);
+            auto program = std::make_unique<Program>(std::move(pb));
+            auto b = std::make_unique<spirv::Builder>(program.get());
 
-    EXPECT_FALSE(b.GenerateIfStatement(expr)) << b.Diagnostics();
-    EXPECT_TRUE(b.has_error());
-    EXPECT_THAT(b.Diagnostics().str(),
-                ::testing::HasSubstr(
-                    "Internal error: trying to add SPIR-V instruction 247 outside a function"));
+            b->GenerateIfStatement(expr);
+        },
+        "Internal error: trying to add SPIR-V instruction 247 outside a function");
 }
 
 TEST_F(BuilderTest, If_WithStatements) {

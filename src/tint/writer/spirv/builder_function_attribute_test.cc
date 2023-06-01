@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "gtest/gtest-spi.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/writer/spirv/spv_dump.h"
@@ -151,44 +152,44 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
-    Override("width", ty.i32(), Call<i32>(2_i), Id(7_u));
-    Override("height", ty.i32(), Call<i32>(3_i), Id(8_u));
-    Override("depth", ty.i32(), Call<i32>(4_i), Id(9_u));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
-                          WorkgroupSize("width", "height", "depth"),
-                          Stage(ast::PipelineStage::kCompute),
-                      });
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder pb;
+            pb.Override("width", pb.ty.i32(), pb.Call<i32>(2_i), pb.Id(7_u));
+            pb.Override("height", pb.ty.i32(), pb.Call<i32>(3_i), pb.Id(8_u));
+            pb.Override("depth", pb.ty.i32(), pb.Call<i32>(4_i), pb.Id(9_u));
+            auto* func = pb.Func("main", utils::Empty, pb.ty.void_(), utils::Empty,
+                                 utils::Vector{
+                                     pb.WorkgroupSize("width", "height", "depth"),
+                                     pb.Stage(ast::PipelineStage::kCompute),
+                                 });
+            auto program = std::make_unique<Program>(std::move(pb));
+            auto b = std::make_unique<spirv::Builder>(program.get());
 
-    spirv::Builder& b = Build();
-
-    tint::SetInternalCompilerErrorReporter(nullptr);
-
-    EXPECT_FALSE(b.GenerateExecutionModes(func, 3)) << b.Diagnostics();
-    EXPECT_THAT(
-        b.Diagnostics().str(),
-        ::testing::HasSubstr(
-            "override-expressions should have been removed with the SubstituteOverride transform"));
+            b->GenerateExecutionModes(func, 3);
+        },
+        "override-expressions should have been removed with the SubstituteOverride transform");
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
-    Override("height", ty.i32(), Call<i32>(2_i), Id(7_u));
-    GlobalConst("depth", ty.i32(), Call<i32>(3_i));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
-                          WorkgroupSize(4_i, "height", "depth"),
-                          Stage(ast::PipelineStage::kCompute),
-                      });
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder pb;
 
-    spirv::Builder& b = Build();
+            pb.Override("height", pb.ty.i32(), pb.Call<i32>(2_i), pb.Id(7_u));
+            pb.GlobalConst("depth", pb.ty.i32(), pb.Call<i32>(3_i));
+            auto* func = pb.Func("main", utils::Empty, pb.ty.void_(), utils::Empty,
+                                 utils::Vector{
+                                     pb.WorkgroupSize(4_i, "height", "depth"),
+                                     pb.Stage(ast::PipelineStage::kCompute),
+                                 });
 
-    tint::SetInternalCompilerErrorReporter(nullptr);
+            auto program = std::make_unique<Program>(std::move(pb));
+            auto b = std::make_unique<spirv::Builder>(program.get());
 
-    EXPECT_FALSE(b.GenerateExecutionModes(func, 3)) << b.Diagnostics();
-    EXPECT_THAT(
-        b.Diagnostics().str(),
-        ::testing::HasSubstr(
-            "override-expressions should have been removed with the SubstituteOverride transform"));
+            b->GenerateExecutionModes(func, 3);
+        },
+        "override-expressions should have been removed with the SubstituteOverride transform");
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_MultipleFragment) {

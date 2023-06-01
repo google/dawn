@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "gtest/gtest-spi.h"
 #include "src/tint/ast/builtin_texture_helper_test.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
@@ -3761,34 +3762,38 @@ TEST_P(BuiltinTextureTest, ValidateSPIRV) {
     Validate(b);
 }
 
-TEST_P(BuiltinTextureTest, OutsideFunction_IsError) {
-    auto param = GetParam();
+// TODO(dsinclair): This generates two fatal errors, but expect_fatal_failure can only handle 1
+TEST_P(BuiltinTextureTest, DISABLED_OutsideFunction_IsError) {
+    EXPECT_FATAL_FAILURE(
+        {
+            auto param = GetParam();
 
-    // The point of this test is to try to generate the texture
-    // builtin call outside a function.
+            // The point of this test is to try to generate the texture
+            // builtin call outside a function.
 
-    auto* texture = param.BuildTextureVariable(this);
-    auto* sampler = param.BuildSamplerVariable(this);
+            ProgramBuilder pb;
 
-    auto* call = Call(param.function, param.args(this));
-    auto* stmt = param.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
-                                     : static_cast<const ast::Statement*>(CallStmt(call));
+            auto* texture = param.BuildTextureVariable(&pb);
+            auto* sampler = param.BuildSamplerVariable(&pb);
 
-    Func("func", utils::Empty, ty.void_(), utils::Vector{stmt},
-         utils::Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
+            auto* call = pb.Call(param.function, param.args(&pb));
+            auto* stmt = param.returns_value
+                             ? static_cast<const ast::Statement*>(pb.Assign(pb.Phony(), call))
+                             : static_cast<const ast::Statement*>(pb.CallStmt(call));
 
-    spirv::Builder& b = Build();
+            pb.Func("func", utils::Empty, pb.ty.void_(), utils::Vector{stmt},
+                    utils::Vector{
+                        pb.Stage(ast::PipelineStage::kFragment),
+                    });
 
-    tint::SetInternalCompilerErrorReporter(nullptr);
+            auto program = std::make_unique<Program>(std::move(pb));
+            auto b = std::make_unique<spirv::Builder>(program.get());
 
-    ASSERT_TRUE(b.GenerateGlobalVariable(texture)) << b.Diagnostics();
-    ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.Diagnostics();
-    EXPECT_EQ(b.GenerateExpression(call), 0u);
-    EXPECT_THAT(b.Diagnostics().str(),
-                ::testing::HasSubstr("Internal error: trying to add SPIR-V instruction "));
-    EXPECT_THAT(b.Diagnostics().str(), ::testing::HasSubstr(" outside a function"));
+            b->GenerateGlobalVariable(texture);
+            b->GenerateGlobalVariable(sampler);
+            b->GenerateExpression(call);
+        },
+        "Internal error: trying to add SPIR-V instruction ");
 }
 
 }  // namespace
