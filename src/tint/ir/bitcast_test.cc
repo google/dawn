@@ -22,9 +22,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_InstructionTest = TestHelper;
+using IR_BitcastTest = TestHelper;
 
-TEST_F(IR_InstructionTest, Bitcast) {
+TEST_F(IR_BitcastTest, Bitcast) {
     Module mod;
     Builder b{mod};
     const auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
@@ -40,7 +40,7 @@ TEST_F(IR_InstructionTest, Bitcast) {
     EXPECT_EQ(4_i, val->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, Bitcast_Usage) {
+TEST_F(IR_BitcastTest, Bitcast_Usage) {
     Module mod;
     Builder b{mod};
     const auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));

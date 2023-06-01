@@ -21,9 +21,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_InstructionTest = TestHelper;
+using IR_BinaryTest = TestHelper;
 
-TEST_F(IR_InstructionTest, CreateAnd) {
+TEST_F(IR_BinaryTest, CreateAnd) {
     Module mod;
     Builder b{mod};
 
@@ -44,7 +44,7 @@ TEST_F(IR_InstructionTest, CreateAnd) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateOr) {
+TEST_F(IR_BinaryTest, CreateOr) {
     Module mod;
     Builder b{mod};
 
@@ -64,7 +64,7 @@ TEST_F(IR_InstructionTest, CreateOr) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateXor) {
+TEST_F(IR_BinaryTest, CreateXor) {
     Module mod;
     Builder b{mod};
 
@@ -84,7 +84,7 @@ TEST_F(IR_InstructionTest, CreateXor) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateEqual) {
+TEST_F(IR_BinaryTest, CreateEqual) {
     Module mod;
     Builder b{mod};
 
@@ -104,7 +104,7 @@ TEST_F(IR_InstructionTest, CreateEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateNotEqual) {
+TEST_F(IR_BinaryTest, CreateNotEqual) {
     Module mod;
     Builder b{mod};
 
@@ -124,7 +124,7 @@ TEST_F(IR_InstructionTest, CreateNotEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateLessThan) {
+TEST_F(IR_BinaryTest, CreateLessThan) {
     Module mod;
     Builder b{mod};
 
@@ -144,7 +144,7 @@ TEST_F(IR_InstructionTest, CreateLessThan) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateGreaterThan) {
+TEST_F(IR_BinaryTest, CreateGreaterThan) {
     Module mod;
     Builder b{mod};
 
@@ -164,7 +164,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThan) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateLessThanEqual) {
+TEST_F(IR_BinaryTest, CreateLessThanEqual) {
     Module mod;
     Builder b{mod};
 
@@ -184,7 +184,7 @@ TEST_F(IR_InstructionTest, CreateLessThanEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
+TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
     Module mod;
     Builder b{mod};
 
@@ -204,7 +204,7 @@ TEST_F(IR_InstructionTest, CreateGreaterThanEqual) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateNot) {
+TEST_F(IR_BinaryTest, CreateNot) {
     Module mod;
     Builder b{mod};
     const auto* inst = b.Not(mod.Types().bool_(), b.Constant(true));
@@ -223,7 +223,7 @@ TEST_F(IR_InstructionTest, CreateNot) {
     EXPECT_FALSE(rhs->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
-TEST_F(IR_InstructionTest, CreateShiftLeft) {
+TEST_F(IR_BinaryTest, CreateShiftLeft) {
     Module mod;
     Builder b{mod};
 
@@ -243,7 +243,7 @@ TEST_F(IR_InstructionTest, CreateShiftLeft) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateShiftRight) {
+TEST_F(IR_BinaryTest, CreateShiftRight) {
     Module mod;
     Builder b{mod};
 
@@ -263,7 +263,7 @@ TEST_F(IR_InstructionTest, CreateShiftRight) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateAdd) {
+TEST_F(IR_BinaryTest, CreateAdd) {
     Module mod;
     Builder b{mod};
 
@@ -283,7 +283,7 @@ TEST_F(IR_InstructionTest, CreateAdd) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateSubtract) {
+TEST_F(IR_BinaryTest, CreateSubtract) {
     Module mod;
     Builder b{mod};
 
@@ -303,7 +303,7 @@ TEST_F(IR_InstructionTest, CreateSubtract) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateMultiply) {
+TEST_F(IR_BinaryTest, CreateMultiply) {
     Module mod;
     Builder b{mod};
 
@@ -323,7 +323,7 @@ TEST_F(IR_InstructionTest, CreateMultiply) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateDivide) {
+TEST_F(IR_BinaryTest, CreateDivide) {
     Module mod;
     Builder b{mod};
 
@@ -343,7 +343,7 @@ TEST_F(IR_InstructionTest, CreateDivide) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateModulo) {
+TEST_F(IR_BinaryTest, CreateModulo) {
     Module mod;
     Builder b{mod};
 
@@ -363,7 +363,7 @@ TEST_F(IR_InstructionTest, CreateModulo) {
     EXPECT_EQ(2_i, rhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, Binary_Usage) {
+TEST_F(IR_BinaryTest, Binary_Usage) {
     Module mod;
     Builder b{mod};
     const auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
@@ -379,7 +379,7 @@ TEST_F(IR_InstructionTest, Binary_Usage) {
     EXPECT_EQ(inst->RHS()->Usage()[0], inst);
 }
 
-TEST_F(IR_InstructionTest, Binary_Usage_DuplicateValue) {
+TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
     Module mod;
     Builder b{mod};
     auto val = b.Constant(4_i);

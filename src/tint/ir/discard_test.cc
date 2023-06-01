@@ -19,9 +19,9 @@
 namespace tint::ir {
 namespace {
 
-using IR_InstructionTest = TestHelper;
+using IR_DiscardTest = TestHelper;
 
-TEST_F(IR_InstructionTest, Discard) {
+TEST_F(IR_DiscardTest, Discard) {
     Module mod;
     Builder b{mod};
 

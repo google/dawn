@@ -21,9 +21,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_InstructionTest = TestHelper;
+using IR_StoreTest = TestHelper;
 
-TEST_F(IR_InstructionTest, CreateStore) {
+TEST_F(IR_StoreTest, CreateStore) {
     Module mod;
     Builder b{mod};
 
@@ -41,7 +41,7 @@ TEST_F(IR_InstructionTest, CreateStore) {
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, Store_Usage) {
+TEST_F(IR_StoreTest, Store_Usage) {
     Module mod;
     Builder b{mod};
 

@@ -21,9 +21,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_InstructionTest = TestHelper;
+using IR_UnaryTest = TestHelper;
 
-TEST_F(IR_InstructionTest, CreateComplement) {
+TEST_F(IR_UnaryTest, CreateComplement) {
     Module mod;
     Builder b{mod};
     auto* inst = b.Complement(mod.Types().i32(), b.Constant(4_i));
@@ -37,7 +37,7 @@ TEST_F(IR_InstructionTest, CreateComplement) {
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, CreateNegation) {
+TEST_F(IR_UnaryTest, CreateNegation) {
     Module mod;
     Builder b{mod};
     auto* inst = b.Negation(mod.Types().i32(), b.Constant(4_i));
@@ -51,7 +51,7 @@ TEST_F(IR_InstructionTest, CreateNegation) {
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_InstructionTest, Unary_Usage) {
+TEST_F(IR_UnaryTest, Unary_Usage) {
     Module mod;
     Builder b{mod};
     auto* inst = b.Negation(mod.Types().i32(), b.Constant(4_i));

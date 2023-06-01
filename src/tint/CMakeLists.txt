@@ -1497,6 +1497,7 @@ if(TINT_BUILD_TESTS)
       ir/from_program_test.cc
       ir/from_program_unary_test.cc
       ir/from_program_var_test.cc
+      ir/instruction_test.cc
       ir/load_test.cc
       ir/module_test.cc
       ir/store_test.cc

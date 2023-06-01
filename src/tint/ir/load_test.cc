@@ -21,9 +21,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_InstructionTest = TestHelper;
+using IR_LoadTest = TestHelper;
 
-TEST_F(IR_InstructionTest, CreateLoad) {
+TEST_F(IR_LoadTest, CreateLoad) {
     Module mod;
     Builder b{mod};
 
@@ -41,7 +41,7 @@ TEST_F(IR_InstructionTest, CreateLoad) {
     EXPECT_EQ(inst->From(), var);
 }
 
-TEST_F(IR_InstructionTest, Load_Usage) {
+TEST_F(IR_LoadTest, Load_Usage) {
     Module mod;
     Builder b{mod};
 
