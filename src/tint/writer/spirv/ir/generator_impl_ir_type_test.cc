@@ -149,6 +149,22 @@ TEST_F(SpvGeneratorImplTest, Type_Array_ExplicitStride) {
     EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 16\n");
 }
 
+TEST_F(SpvGeneratorImplTest, Type_Array_NestedArray) {
+    auto* arr = mod.Types().array(mod.Types().array(mod.Types().f32(), 64u), 4u);
+    auto id = generator_.Type(arr);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(),
+              "%3 = OpTypeFloat 32\n"
+              "%5 = OpTypeInt 32 0\n"
+              "%4 = OpConstant %5 64\n"
+              "%2 = OpTypeArray %3 %4\n"
+              "%6 = OpConstant %5 4\n"
+              "%1 = OpTypeArray %2 %6\n");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()),
+              "OpDecorate %2 ArrayStride 4\n"
+              "OpDecorate %1 ArrayStride 256\n");
+}
+
 TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_DefaultStride) {
     auto* arr = mod.Types().runtime_array(mod.Types().f32());
     auto id = generator_.Type(arr);
