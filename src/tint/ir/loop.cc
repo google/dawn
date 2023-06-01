@@ -28,6 +28,8 @@ Loop::Loop(ir::Block* b,
     TINT_ASSERT(IR, body_);
     TINT_ASSERT(IR, continuing_);
     TINT_ASSERT(IR, merge_);
+
+    body_->AddInboundBranch(this);
 }
 
 Loop::~Loop() = default;

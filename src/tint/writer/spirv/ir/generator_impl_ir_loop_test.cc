@@ -330,5 +330,105 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
+    auto* func = b.CreateFunction("foo", mod.Types().void_());
+
+    auto* l = b.CreateLoop(utils::Vector{b.Constant(1_i)});
+    func->StartTarget()->AddInstruction(l);
+
+    auto* loop_param = b.BlockParam(b.ir.Types().i32());
+    l->Body()->SetParams(utils::Vector{loop_param});
+    auto* inc = b.Add(b.ir.Types().i32(), loop_param, b.Constant(1_i));
+    l->Body()->AddInstruction(inc);
+    l->Body()->AddInstruction(b.Continue(l, utils::Vector{inc}));
+
+    auto* cont_param = b.BlockParam(b.ir.Types().i32());
+    l->Continuing()->SetParams(utils::Vector{cont_param});
+    auto* cmp = b.GreaterThan(b.ir.Types().bool_(), cont_param, b.Constant(5_i));
+    l->Continuing()->AddInstruction(cmp);
+    l->Continuing()->AddInstruction(b.BreakIf(cmp, l, utils::Vector{cont_param}));
+
+    generator_.EmitFunction(func);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+%2 = OpTypeVoid
+%3 = OpTypeFunction %2
+%9 = OpTypeInt 32 1
+%11 = OpConstant %9 1
+%16 = OpTypeBool
+%17 = OpConstant %9 5
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+OpBranch %5
+%5 = OpLabel
+OpLoopMerge %8 %7 None
+OpBranch %6
+%6 = OpLabel
+%10 = OpPhi %9 %11 %12 %13 %7
+%14 = OpIAdd %9 %10 %11
+OpBranch %7
+%7 = OpLabel
+%13 = OpPhi %9 %14 %5
+%15 = OpSGreaterThan %16 %13 %17
+OpBranchConditional %15 %8 %5
+%8 = OpLabel
+OpUnreachable
+OpFunctionEnd
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
+    auto* func = b.CreateFunction("foo", mod.Types().void_());
+
+    auto* l = b.CreateLoop(utils::Vector{b.Constant(1_i), b.Constant(false)});
+    func->StartTarget()->AddInstruction(l);
+
+    auto* loop_param_a = b.BlockParam(b.ir.Types().i32());
+    auto* loop_param_b = b.BlockParam(b.ir.Types().bool_());
+    l->Body()->SetParams(utils::Vector{loop_param_a, loop_param_b});
+    auto* inc = b.Add(b.ir.Types().i32(), loop_param_a, b.Constant(1_i));
+    l->Body()->AddInstruction(inc);
+    l->Body()->AddInstruction(b.Continue(l, utils::Vector{inc, loop_param_b}));
+
+    auto* cont_param_a = b.BlockParam(b.ir.Types().i32());
+    auto* cont_param_b = b.BlockParam(b.ir.Types().bool_());
+    l->Continuing()->SetParams(utils::Vector{cont_param_a, cont_param_b});
+    auto* cmp = b.GreaterThan(b.ir.Types().bool_(), cont_param_a, b.Constant(5_i));
+    l->Continuing()->AddInstruction(cmp);
+    auto* not_b = b.Not(b.ir.Types().bool_(), cont_param_b);
+    l->Continuing()->AddInstruction(not_b);
+    l->Continuing()->AddInstruction(b.BreakIf(cmp, l, utils::Vector{cont_param_a, not_b}));
+
+    generator_.EmitFunction(func);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+%2 = OpTypeVoid
+%3 = OpTypeFunction %2
+%9 = OpTypeInt 32 1
+%11 = OpConstant %9 1
+%14 = OpTypeBool
+%16 = OpConstantFalse %14
+%21 = OpConstant %9 5
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+OpBranch %5
+%5 = OpLabel
+OpLoopMerge %8 %7 None
+OpBranch %6
+%6 = OpLabel
+%10 = OpPhi %9 %11 %12 %13 %7
+%15 = OpPhi %14 %16 %12 %17 %7
+%18 = OpIAdd %9 %10 %11
+OpBranch %7
+%7 = OpLabel
+%13 = OpPhi %9 %18 %5
+%19 = OpPhi %14 %15 %5
+%20 = OpSGreaterThan %14 %13 %21
+%17 = OpLogicalEqual %14 %19 %16
+OpBranchConditional %20 %8 %5
+%8 = OpLabel
+OpUnreachable
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv
