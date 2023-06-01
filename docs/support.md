@@ -48,7 +48,7 @@ Support for OpenGL is in progress with the aim to make OpenGL ES 3.1 (with exten
 Other flavors of OpenGL (desktop OpenGL) or binding APIs (GLX, WGL, EAGL, CGL) are supported as best effort with contributions welcome.
 
 
-## Microsoft's D3D12
+## Microsoft's D3D11
 
 Dawn doesn't have a D3D11 backend at the moment, but D3D11 support can be achieved with the OpenGL ES backend through ANGLE's OpenGL ES to D3D11 translation.
 There might be a D3D11 backend in the future.
