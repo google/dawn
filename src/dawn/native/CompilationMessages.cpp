@@ -86,9 +86,6 @@ void OwnedCompilationMessages::AddMessage(std::string message,
     // Cannot add messages after GetCompilationInfo has been called.
     ASSERT(mCompilationInfo.messages == nullptr);
 
-    // Message can only contain ascii characters.
-    ASSERT(tint::utils::utf8::IsASCII(message));
-
     mMessageStrings.push_back(message);
     mMessages.push_back({nullptr, nullptr, static_cast<WGPUCompilationMessageType>(type), lineNum,
                          linePos, offset, length, linePos, offset, length});
