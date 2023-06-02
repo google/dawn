@@ -902,7 +902,7 @@ Expect<ENUM> ParserImpl::expect_enum(std::string_view name,
         if (val != ENUM::kUndefined) {
             synchronized_ = true;
             next();
-            return {val, t.source()};
+            return val;
         }
     }
 
@@ -2115,10 +2115,10 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
 //   | PERIOD swizzle_name component_or_swizzle_specifier?
 Maybe<const ast::Expression*> ParserImpl::component_or_swizzle_specifier(
     const ast::Expression* prefix) {
-    Source source;
+    MultiTokenSource source(this, prefix->source);
 
     while (continue_parsing()) {
-        if (match(Token::Type::kBracketLeft, &source)) {
+        if (match(Token::Type::kBracketLeft)) {
             auto res = sync(Token::Type::kBracketRight, [&]() -> Maybe<const ast::Expression*> {
                 auto param = expression();
                 if (param.errored) {
@@ -2132,7 +2132,7 @@ Maybe<const ast::Expression*> ParserImpl::component_or_swizzle_specifier(
                     return Failure::kErrored;
                 }
 
-                return create<ast::IndexAccessorExpression>(source, prefix, param.value);
+                return create<ast::IndexAccessorExpression>(source.Source(), prefix, param.value);
             });
 
             if (res.errored) {
@@ -2148,7 +2148,7 @@ Maybe<const ast::Expression*> ParserImpl::component_or_swizzle_specifier(
                 return Failure::kErrored;
             }
 
-            prefix = builder_.MemberAccessor(ident.source, prefix, ident.value);
+            prefix = builder_.MemberAccessor(source.Source(), prefix, ident.value);
             continue;
         }
 
@@ -3197,8 +3197,11 @@ bool ParserImpl::expect(std::string_view use, Token::Type tok) {
     return false;
 }
 
-Expect<int32_t> ParserImpl::expect_sint(std::string_view use) {
+Expect<int32_t> ParserImpl::expect_sint(std::string_view use, Source* source /* = nullptr */) {
     auto& t = peek();
+    if (source) {
+        *source = t.source();
+    }
     if (!t.Is(Token::Type::kIntLiteral) && !t.Is(Token::Type::kIntLiteral_I)) {
         return add_error(t.source(), "expected signed integer literal", use);
     }
@@ -3211,33 +3214,35 @@ Expect<int32_t> ParserImpl::expect_sint(std::string_view use) {
     }
 
     next();
-    return {static_cast<int32_t>(t.to_i64()), t.source()};
+    return static_cast<int32_t>(t.to_i64());
 }
 
 Expect<uint32_t> ParserImpl::expect_positive_sint(std::string_view use) {
-    auto sint = expect_sint(use);
+    Source source;
+    auto sint = expect_sint(use, &source);
     if (sint.errored) {
         return Failure::kErrored;
     }
 
     if (sint.value < 0) {
-        return add_error(sint.source, std::string(use) + " must be positive");
+        return add_error(source, std::string(use) + " must be positive");
     }
 
-    return {static_cast<uint32_t>(sint.value), sint.source};
+    return static_cast<uint32_t>(sint.value);
 }
 
 Expect<uint32_t> ParserImpl::expect_nonzero_positive_sint(std::string_view use) {
-    auto sint = expect_sint(use);
+    Source source;
+    auto sint = expect_sint(use, &source);
     if (sint.errored) {
         return Failure::kErrored;
     }
 
     if (sint.value <= 0) {
-        return add_error(sint.source, std::string(use) + " must be greater than 0");
+        return add_error(source, std::string(use) + " must be greater than 0");
     }
 
-    return {static_cast<uint32_t>(sint.value), sint.source};
+    return static_cast<uint32_t>(sint.value);
 }
 
 Expect<const ast::Identifier*> ParserImpl::expect_ident(

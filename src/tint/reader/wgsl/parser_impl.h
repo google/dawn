@@ -99,10 +99,9 @@ class ParserImpl {
 
         /// Constructor for a successful parse.
         /// @param val the result value of the parse
-        /// @param s the optional source of the value
         template <typename U>
-        inline Expect(U&& val, const Source& s = {})  // NOLINT
-            : value(std::forward<U>(val)), source(s) {}
+        inline Expect(U&& val)  // NOLINT
+            : value(std::forward<U>(val)) {}
 
         /// Constructor for parse error.
         inline Expect(Failure::Errored) : errored(true) {}  // NOLINT
@@ -130,8 +129,6 @@ class ParserImpl {
         /// The expected value of a successful parse.
         /// Zero-initialized when there was a parse error.
         T value{};
-        /// Optional source of the value.
-        Source source;
         /// True if there was a error parsing.
         bool errored = false;
     };
@@ -684,7 +681,9 @@ class ParserImpl {
     /// Consumes the next token on match.
     /// @param use a description of what was being parsed if an error was raised
     /// @returns the parsed integer.
-    Expect<int32_t> expect_sint(std::string_view use);
+    /// @param source if not nullptr, the next token's source is written to this
+    /// pointer, regardless of success or error
+    Expect<int32_t> expect_sint(std::string_view use, Source* source = nullptr);
     /// Parses a signed integer from the next token in the stream, erroring if
     /// the next token is not a signed integer or is negative.
     /// Consumes the next token if it is a signed integer (not necessarily
