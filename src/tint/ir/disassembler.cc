@@ -392,7 +392,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             EmitValueWithType(a);
             out_ << " = access ";
             EmitValue(a->Object());
-            out_ << " ";
+            out_ << ", ";
             for (size_t i = 0; i < a->Indices().Length(); ++i) {
                 if (i > 0) {
                     out_ << ", ";
