@@ -293,6 +293,9 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
 
     void DoTest() {
         DAWN_SUPPRESS_TEST_IF(IsWARP());
+        // TODO(dawn:1859): Fix it on D3D11 Intel.
+        DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel() && GetParam().mArrayLayerCount > 12);
+
         uint32_t width = GetParam().mTextureWidth;
         uint32_t height = GetParam().mTextureHeight;
         uint32_t depthOrArrayLayerCount = GetParam().mArrayLayerCount;
@@ -351,7 +354,7 @@ TEST_P(TextureCorruptionTests_Format, Tests) {
 }
 
 DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_Format,
-                        {D3D12Backend()},
+                        {D3D11Backend(), D3D12Backend()},
                         {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm,
                          wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA16Uint,
                          wgpu::TextureFormat::RGBA32Uint, wgpu::TextureFormat::Depth16Unorm,
@@ -370,7 +373,7 @@ TEST_P(TextureCorruptionTests_WidthAndHeight, Tests) {
 }
 
 DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_WidthAndHeight,
-                        {D3D12Backend()},
+                        {D3D11Backend(), D3D12Backend()},
                         {kDefaultFormat},
                         {100u, 200u, 300u, 400u, 500u, 600u, 700u, 800u, 900u, 1000u, 1200u},
                         {100u, 200u},
@@ -386,7 +389,7 @@ TEST_P(TextureCorruptionTests_ArrayLayer, Tests) {
 }
 
 DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_ArrayLayer,
-                        {D3D12Backend()},
+                        {D3D11Backend(), D3D12Backend()},
                         {kDefaultFormat},
                         {100u, 600u, 1200u},
                         {kDefaultHeight},
@@ -402,7 +405,7 @@ TEST_P(TextureCorruptionTests_Mipmap, Tests) {
 }
 
 DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_Mipmap,
-                        {D3D12Backend()},
+                        {D3D11Backend(), D3D12Backend()},
                         {kDefaultFormat},
                         {100u, 600u, 1200u},
                         {kDefaultHeight},
@@ -435,7 +438,7 @@ TEST_P(TextureCorruptionTests_Multisample, Tests) {
 }
 
 DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_Multisample,
-                        {D3D12Backend()},
+                        {D3D11Backend(), D3D12Backend()},
                         {kDefaultFormat},
                         {100u, 200u, 300u, 400u, 500u, 600u, 700u, 800u, 900u, 1000u, 1200u},
                         {100u, 200u},
@@ -451,7 +454,7 @@ TEST_P(TextureCorruptionTests_WriteType, Tests) {
 }
 
 DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_WriteType,
-                        {D3D12Backend()},
+                        {D3D11Backend(), D3D12Backend()},
                         {kDefaultFormat},
                         {100u, 600u, 1200u},
                         {kDefaultHeight},
