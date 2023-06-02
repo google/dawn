@@ -114,6 +114,10 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
 
+    // TODO(crbug.com/dawn/1705): Use a zero buffer to clear buffers. Otherwise, the test
+    // OOMs.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 

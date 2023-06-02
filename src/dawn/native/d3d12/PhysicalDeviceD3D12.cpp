@@ -307,9 +307,18 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     // Max number of "constants" where each constant is a 16-byte float4
     limits->v1.maxUniformBufferBindingSize = D3D12_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16;
-    // D3D12 limit of number of texels in a buffer == (1 << 27)
-    limits->v1.maxStorageBufferBindingSize = uint64_t(1)
-                                             << D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP;
+
+    if (gpu_info::IsQualcomm(GetVendorId())) {
+        // limit of number of texels in a buffer == (1 << 27)
+        // D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP
+        // This limit doesn't apply to a raw buffer, but only applies to
+        // typed, or structured buffer. so this could be a QC driver bug.
+        limits->v1.maxStorageBufferBindingSize = uint64_t(1)
+                                                 << D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP;
+    } else {
+        limits->v1.maxStorageBufferBindingSize = kAssumedMaxBufferSize;
+    }
+
     // D3D12 has no documented limit on the buffer size.
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
 
