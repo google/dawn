@@ -193,7 +193,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleElementSwizzle) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Var_MultiElementSwizzle) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle) {
     // var a: vec3<f32>
     // let b = a.zyxz
 
@@ -216,7 +216,7 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Var_MultiElementSwizzle) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Var_MultiElementSwizzleOfSwizzle) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
     // var a: vec3<f32>
     // let b = a.zyx.yy
 
@@ -232,15 +232,15 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Var_MultiElementSwizzleOfSw
   %b1 = block {
     %a:ptr<function, vec3<f32>, read_write> = var
     %3:vec3<f32> = load %a
-    %2:vec3<f32> = swizzle %1, zyx
-    %b:vec2<f32> = swizzle %2, yy
+    %4:vec3<f32> = swizzle %3, zyx
+    %b:vec2<f32> = swizzle %4, yy
     ret
   }
 }
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Var_MultiElementSwizzle_MiddleOfChain) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) {
     // struct MyStruct { a: i32; foo: vec4<f32> }
     // var a: MyStruct;
     // let b = a.foo.zyx.yx[0]
@@ -262,11 +262,11 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Var_MultiElementSwizzle_Mid
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, MyStruct, read_write> = var
-    %1:ptr<function, vec4<f32>, read_write> = access %a, 1
-    %2:vec4<f32> = load %1
-    %3:vec3<f32> = swizzle %2, zxy
-    %4:vec2<f32> = swizzle %3, yx
-    %b:f32 = access %4, 0
+    %3:ptr<function, vec4<f32>, read_write> = access %a 1u
+    %4:vec4<f32> = load %3
+    %5:vec3<f32> = swizzle %4, zyx
+    %6:vec2<f32> = swizzle %5, yx
+    %b:f32 = access %6 0u
     ret
   }
 }
@@ -424,7 +424,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleElement) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzle) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle) {
     // let a: vec3<f32 = vec3()>
     // let b = a.zyxz
 
@@ -438,15 +438,14 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzle) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:vec3<f32> = construct vec3<f32>
-    %b:vec4<f32> = swizzle vec3<f32>(0u), zyxz
+    %b:vec4<f32> = swizzle vec3<f32>(0.0f), zyxz
     ret
   }
 }
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzleOfSwizzle) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
     // let a: vec3<f32> = vec3();
     // let b = a.zyx.yy
 
@@ -460,7 +459,7 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzleOfSw
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %2:vec3<f32> = swizzle vec3<f32>(0u) zyx
+    %2:vec3<f32> = swizzle vec3<f32>(0.0f), zyx
     %b:vec2<f32> = swizzle %2, yy
     ret
   }
@@ -468,7 +467,7 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzleOfSw
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzle_MiddleOfChain) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChain) {
     // struct MyStruct { a: i32; foo: vec4<f32> }
     // let a: MyStruct = MyStruct();
     // let b = a.foo.zyx.yx[0]
@@ -489,10 +488,10 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzle_Mid
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %2:vec4<f32> = access MyStruct(), 1u
-    %2:vec3<f32> = swizzle %1, zxy
-    %3:vec2<f32> = swizzle %2, yx
-    %b:f32 = access %3, 0u
+    %2:vec4<f32> = access MyStruct(0i, vec4<f32>(0.0f)) 1u
+    %3:vec3<f32> = swizzle %2, zyx
+    %4:vec2<f32> = swizzle %3, yx
+    %b:f32 = access %4 0u
     ret
   }
 }

@@ -1271,6 +1271,8 @@ if (tint_build_ir) {
       "ir/store.h",
       "ir/switch.cc",
       "ir/switch.h",
+      "ir/swizzle.cc",
+      "ir/swizzle.h",
       "ir/transform/transform.cc",
       "ir/transform/transform.h",
       "ir/unary.cc",

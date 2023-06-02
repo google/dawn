@@ -42,6 +42,7 @@
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/swizzle.h"
 #include "src/tint/ir/unary.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/value.h"
@@ -395,6 +396,13 @@ class Builder {
     /// @param indices the access indices
     /// @returns the instruction
     ir::Access* Access(const type::Type* type, Value* source, utils::VectorRef<Value*> indices);
+
+    /// Creates a new `Swizzle`
+    /// @param type the return type
+    /// @param source the source value
+    /// @param indices the access indices
+    /// @returns the instruction
+    ir::Swizzle* Swizzle(const type::Type* type, Value* source, utils::VectorRef<uint32_t> indices);
 
     /// Retrieves the root block for the module, creating if necessary
     /// @returns the root block

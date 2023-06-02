@@ -38,6 +38,7 @@
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/swizzle.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
@@ -397,6 +398,29 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                     out_ << ", ";
                 }
                 EmitValue(a->Indices()[i]);
+            }
+            out_ << std::endl;
+        },
+        [&](const ir::Swizzle* s) {
+            EmitValueWithType(s);
+            out_ << " = swizzle ";
+            EmitValue(s->Object());
+            out_ << ", ";
+            for (auto idx : s->Indices()) {
+                switch (idx) {
+                    case 0:
+                        out_ << "x";
+                        break;
+                    case 1:
+                        out_ << "y";
+                        break;
+                    case 2:
+                        out_ << "z";
+                        break;
+                    case 3:
+                        out_ << "w";
+                        break;
+                }
             }
             out_ << std::endl;
         },

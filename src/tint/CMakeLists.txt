@@ -780,6 +780,8 @@ if(${TINT_BUILD_IR})
     ir/store.h
     ir/switch.cc
     ir/switch.h
+    ir/swizzle.cc
+    ir/swizzle.h
     ir/to_program.cc
     ir/to_program.h
     ir/unary.cc

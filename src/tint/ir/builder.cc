@@ -247,4 +247,10 @@ ir::Access* Builder::Access(const type::Type* type,
     return ir.values.Create<ir::Access>(type, source, indices);
 }
 
+ir::Swizzle* Builder::Swizzle(const type::Type* type,
+                              Value* source,
+                              utils::VectorRef<uint32_t> indices) {
+    return ir.values.Create<ir::Swizzle>(type, source, indices);
+}
+
 }  // namespace tint::ir
