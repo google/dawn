@@ -425,6 +425,12 @@ crbug.com/1421045 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_chec
 crbug.com/dawn/1843 [ amd-0x67ef mac ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ RetryOnFailure ]
 
 ################################################################################
+# Causing bot instability on Mac AMD
+# KEEP
+################################################################################
+crbug.com/1448651 [ amd-0x67ef ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:* [ Skip ]
+
+################################################################################
 # untriaged failures
 ################################################################################
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
@@ -635,21 +641,6 @@ crbug.com/dawn/0000 [ android-r ] webgpu:web_platform,copyToTexture,canvas:copy_
 crbug.com/dawn/0000 [ android-t ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
 
 # New flakes. Please triage:
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="one-minus-constant";dstFactor="one-minus-src";operation="reverse-subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="one-minus-dst-alpha";dstFactor="constant";operation="add" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="one-minus-src";dstFactor="one-minus-dst";operation="subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="one-minus-src-alpha";dstFactor="src-alpha-saturated";operation="reverse-subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="src-alpha";dstFactor="one-minus-constant";operation="add" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="alpha";srcFactor="src-alpha-saturated";dstFactor="src";operation="subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="constant";dstFactor="dst-alpha";operation="reverse-subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="dst";dstFactor="one-minus-src-alpha";operation="add" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="one";dstFactor="constant";operation="subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="one-minus-constant";dstFactor="one-minus-dst";operation="subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="one-minus-dst";dstFactor="src-alpha-saturated";operation="reverse-subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="one-minus-src";dstFactor="one-minus-constant";operation="add" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="one-minus-src-alpha";dstFactor="src";operation="subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="src-alpha";dstFactor="dst-alpha";operation="reverse-subtract" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:component="color";srcFactor="src-alpha-saturated";dstFactor="one-minus-src-alpha";operation="add" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,color_target_state:blending,clamping:format="rg16float";srcValue=0.6;dstValue=0.2 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,depth:depth_compare_func:format="depth16unorm";depthCompare="always";depthClearValue=0 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:api,operation,rendering,depth:depth_compare_func:format="depth16unorm";depthCompare="less";depthClearValue=1 [ RetryOnFailure ]
