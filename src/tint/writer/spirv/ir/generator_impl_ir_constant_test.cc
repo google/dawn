@@ -17,6 +17,8 @@
 namespace tint::writer::spirv {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
+
 TEST_F(SpvGeneratorImplTest, Constant_Bool) {
     generator_.Constant(b.Constant(true));
     generator_.Constant(b.Constant(false));
@@ -190,6 +192,56 @@ TEST_F(SpvGeneratorImplTest, Constant_Mat4x2h) {
 %15 = OpConstant %4 0x1p-1
 %14 = OpConstantComposite %3 %15 %9
 %1 = OpConstantComposite %2 %5 %8 %11 %14
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Constant_Array_I32) {
+    auto* arr =
+        mod.constant_values.Composite(ty.array(ty.i32(), 4), utils::Vector{
+                                                                 mod.constant_values.Get(1_i),
+                                                                 mod.constant_values.Get(2_i),
+                                                                 mod.constant_values.Get(3_i),
+                                                                 mod.constant_values.Get(4_i),
+                                                             });
+    generator_.Constant(b.Constant(arr));
+    EXPECT_EQ(DumpTypes(), R"(%3 = OpTypeInt 32 1
+%5 = OpTypeInt 32 0
+%4 = OpConstant %5 4
+%2 = OpTypeArray %3 %4
+%6 = OpConstant %3 1
+%7 = OpConstant %3 2
+%8 = OpConstant %3 3
+%9 = OpConstant %3 4
+%1 = OpConstantComposite %2 %6 %7 %8 %9
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Constant_Array_Array_I32) {
+    auto* inner =
+        mod.constant_values.Composite(ty.array(ty.i32(), 4), utils::Vector{
+                                                                 mod.constant_values.Get(1_i),
+                                                                 mod.constant_values.Get(2_i),
+                                                                 mod.constant_values.Get(3_i),
+                                                                 mod.constant_values.Get(4_i),
+                                                             });
+    auto* arr = mod.constant_values.Composite(ty.array(ty.array(ty.i32(), 4), 4), utils::Vector{
+                                                                                      inner,
+                                                                                      inner,
+                                                                                      inner,
+                                                                                      inner,
+                                                                                  });
+    generator_.Constant(b.Constant(arr));
+    EXPECT_EQ(DumpTypes(), R"(%4 = OpTypeInt 32 1
+%6 = OpTypeInt 32 0
+%5 = OpConstant %6 4
+%3 = OpTypeArray %4 %5
+%2 = OpTypeArray %3 %5
+%8 = OpConstant %4 1
+%9 = OpConstant %4 2
+%10 = OpConstant %4 3
+%11 = OpConstant %4 4
+%7 = OpConstantComposite %3 %8 %9 %10 %11
+%1 = OpConstantComposite %2 %7 %7 %7 %7
 )");
 }
 

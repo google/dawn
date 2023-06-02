@@ -168,6 +168,14 @@ uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {
                 }
                 module_.PushType(spv::Op::OpConstantComposite, operands);
             },
+            [&](const type::Array* arr) {
+                TINT_ASSERT(Writer, arr->ConstantCount());
+                OperandList operands = {Type(ty), id};
+                for (uint32_t i = 0; i < arr->ConstantCount(); i++) {
+                    operands.push_back(Constant(constant->Index(i)));
+                }
+                module_.PushType(spv::Op::OpConstantComposite, operands);
+            },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled constant type: " << ty->FriendlyName();
             });
