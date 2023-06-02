@@ -14,18 +14,12 @@
 
 #include "src/tint/ir/block.h"
 #include "gtest/gtest-spi.h"
-#include "gtest/gtest.h"
-#include "src/tint/ir/builder.h"
-#include "src/tint/ir/module.h"
+#include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
 namespace {
 
-class IR_BlockTest : public ::testing::Test {
-  public:
-    Module mod;
-    Builder b{mod};
-};
+using IR_BlockTest = IRTestHelper;
 
 TEST_F(IR_BlockTest, SetInstructions) {
     auto* inst1 = b.CreateLoop();

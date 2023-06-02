@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/ir/builder.h"
-#include "src/tint/ir/test_helper.h"
+#include "src/tint/ir/ir_test_helper.h"
 #include "src/tint/ir/value.h"
 
 namespace tint::ir {
@@ -21,12 +21,9 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_ConstantTest = TestHelper;
+using IR_ConstantTest = IRTestHelper;
 
 TEST_F(IR_ConstantTest, f32) {
-    Module mod;
-    Builder b{mod};
-
     utils::StringStream str;
 
     auto* c = b.Constant(1.2_f);
@@ -40,9 +37,6 @@ TEST_F(IR_ConstantTest, f32) {
 }
 
 TEST_F(IR_ConstantTest, f16) {
-    Module mod;
-    Builder b{mod};
-
     utils::StringStream str;
 
     auto* c = b.Constant(1.1_h);
@@ -56,9 +50,6 @@ TEST_F(IR_ConstantTest, f16) {
 }
 
 TEST_F(IR_ConstantTest, i32) {
-    Module mod;
-    Builder b{mod};
-
     utils::StringStream str;
 
     auto* c = b.Constant(1_i);
@@ -72,9 +63,6 @@ TEST_F(IR_ConstantTest, i32) {
 }
 
 TEST_F(IR_ConstantTest, u32) {
-    Module mod;
-    Builder b{mod};
-
     utils::StringStream str;
 
     auto* c = b.Constant(2_u);
@@ -88,9 +76,6 @@ TEST_F(IR_ConstantTest, u32) {
 }
 
 TEST_F(IR_ConstantTest, bool) {
-    Module mod;
-    Builder b{mod};
-
     {
         utils::StringStream str;
 

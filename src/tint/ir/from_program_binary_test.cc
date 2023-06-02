@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/test_helper.h"
-
 #include "gmock/gmock.h"
 #include "src/tint/ast/case_selector.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/constant/scalar.h"
+#include "src/tint/ir/program_test_helper.h"
 
 namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_FromProgramBinaryTest = TestHelper;
+using IR_FromProgramBinaryTest = ProgramTestHelper;
 
 TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Add) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});

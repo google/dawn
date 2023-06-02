@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/test_helper.h"
-
 #include "gmock/gmock.h"
 #include "src/tint/ast/case_selector.h"
 #include "src/tint/ast/int_literal_expression.h"
@@ -21,6 +19,7 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/program_test_helper.h"
 #include "src/tint/ir/switch.h"
 
 namespace tint::ir {
@@ -51,7 +50,7 @@ T* FindSingleValue(Module& mod) {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_FromProgramTest = TestHelper;
+using IR_FromProgramTest = ProgramTestHelper;
 
 TEST_F(IR_FromProgramTest, Func) {
     Func("f", utils::Empty, ty.void_(), utils::Empty);

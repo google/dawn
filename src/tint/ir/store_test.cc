@@ -14,19 +14,16 @@
 
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
-#include "src/tint/ir/test_helper.h"
+#include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_StoreTest = TestHelper;
+using IR_StoreTest = IRTestHelper;
 
 TEST_F(IR_StoreTest, CreateStore) {
-    Module mod;
-    Builder b{mod};
-
     // TODO(dsinclair): This is wrong, but we don't have anything correct to store too at the
     // moment.
     auto* to = b.Discard();
@@ -42,9 +39,6 @@ TEST_F(IR_StoreTest, CreateStore) {
 }
 
 TEST_F(IR_StoreTest, Store_Usage) {
-    Module mod;
-    Builder b{mod};
-
     auto* to = b.Discard();
     const auto* inst = b.Store(to, b.Constant(4_i));
 

@@ -13,19 +13,15 @@
 // limitations under the License.
 
 #include "gtest/gtest-spi.h"
-#include "gtest/gtest.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/builder.h"
+#include "src/tint/ir/ir_test_helper.h"
 #include "src/tint/ir/module.h"
 
 namespace tint::ir {
 namespace {
 
-class IR_InstructionTest : public ::testing::Test {
-  public:
-    Module mod;
-    Builder b{mod};
-};
+using IR_InstructionTest = IRTestHelper;
 
 TEST_F(IR_InstructionTest, InsertBefore) {
     auto* inst1 = b.CreateLoop();

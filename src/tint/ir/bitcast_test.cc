@@ -15,18 +15,16 @@
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/instruction.h"
-#include "src/tint/ir/test_helper.h"
+#include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_BitcastTest = TestHelper;
+using IR_BitcastTest = IRTestHelper;
 
 TEST_F(IR_BitcastTest, Bitcast) {
-    Module mod;
-    Builder b{mod};
     const auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<ir::Bitcast>());
@@ -41,8 +39,6 @@ TEST_F(IR_BitcastTest, Bitcast) {
 }
 
 TEST_F(IR_BitcastTest, Bitcast_Usage) {
-    Module mod;
-    Builder b{mod};
     const auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
 
     const auto args = inst->Args();

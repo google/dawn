@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_TEST_HELPER_H_
-#define SRC_TINT_IR_TEST_HELPER_H_
+#ifndef SRC_TINT_IR_PROGRAM_TEST_HELPER_H_
+#define SRC_TINT_IR_PROGRAM_TEST_HELPER_H_
 
 #include <memory>
 #include <string>
@@ -30,10 +30,10 @@ namespace tint::ir {
 
 /// Helper class for testing
 template <typename BASE>
-class TestHelperBase : public BASE, public ProgramBuilder {
+class ProgramTestHelperBase : public BASE, public ProgramBuilder {
   public:
-    TestHelperBase() = default;
-    ~TestHelperBase() override = default;
+    ProgramTestHelperBase() = default;
+    ~ProgramTestHelperBase() override = default;
 
     /// Build the module, cleaning up the program before returning.
     /// @returns the generated module
@@ -57,11 +57,11 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     }
 };
 
-using TestHelper = TestHelperBase<testing::Test>;
+using ProgramTestHelper = ProgramTestHelperBase<testing::Test>;
 
 template <typename T>
-using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
+using ProgramTestParamHelper = ProgramTestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_TEST_HELPER_H_
+#endif  // SRC_TINT_IR_PROGRAM_TEST_HELPER_H_

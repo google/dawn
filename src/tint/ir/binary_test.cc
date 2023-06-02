@@ -14,19 +14,16 @@
 
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
-#include "src/tint/ir/test_helper.h"
+#include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_BinaryTest = TestHelper;
+using IR_BinaryTest = IRTestHelper;
 
 TEST_F(IR_BinaryTest, CreateAnd) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -45,9 +42,6 @@ TEST_F(IR_BinaryTest, CreateAnd) {
 }
 
 TEST_F(IR_BinaryTest, CreateOr) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.Or(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -65,9 +59,6 @@ TEST_F(IR_BinaryTest, CreateOr) {
 }
 
 TEST_F(IR_BinaryTest, CreateXor) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.Xor(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -85,9 +76,6 @@ TEST_F(IR_BinaryTest, CreateXor) {
 }
 
 TEST_F(IR_BinaryTest, CreateEqual) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.Equal(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -105,9 +93,6 @@ TEST_F(IR_BinaryTest, CreateEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateNotEqual) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.NotEqual(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -125,9 +110,6 @@ TEST_F(IR_BinaryTest, CreateNotEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateLessThan) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.LessThan(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -145,9 +127,6 @@ TEST_F(IR_BinaryTest, CreateLessThan) {
 }
 
 TEST_F(IR_BinaryTest, CreateGreaterThan) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.GreaterThan(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -165,9 +144,6 @@ TEST_F(IR_BinaryTest, CreateGreaterThan) {
 }
 
 TEST_F(IR_BinaryTest, CreateLessThanEqual) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.LessThanEqual(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -185,9 +161,6 @@ TEST_F(IR_BinaryTest, CreateLessThanEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.GreaterThanEqual(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -205,8 +178,6 @@ TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateNot) {
-    Module mod;
-    Builder b{mod};
     const auto* inst = b.Not(mod.Types().bool_(), b.Constant(true));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -224,9 +195,6 @@ TEST_F(IR_BinaryTest, CreateNot) {
 }
 
 TEST_F(IR_BinaryTest, CreateShiftLeft) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.ShiftLeft(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -244,9 +212,6 @@ TEST_F(IR_BinaryTest, CreateShiftLeft) {
 }
 
 TEST_F(IR_BinaryTest, CreateShiftRight) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.ShiftRight(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -264,9 +229,6 @@ TEST_F(IR_BinaryTest, CreateShiftRight) {
 }
 
 TEST_F(IR_BinaryTest, CreateAdd) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.Add(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -284,9 +246,6 @@ TEST_F(IR_BinaryTest, CreateAdd) {
 }
 
 TEST_F(IR_BinaryTest, CreateSubtract) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.Subtract(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -304,9 +263,6 @@ TEST_F(IR_BinaryTest, CreateSubtract) {
 }
 
 TEST_F(IR_BinaryTest, CreateMultiply) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.Multiply(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -324,9 +280,6 @@ TEST_F(IR_BinaryTest, CreateMultiply) {
 }
 
 TEST_F(IR_BinaryTest, CreateDivide) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.Divide(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -344,9 +297,6 @@ TEST_F(IR_BinaryTest, CreateDivide) {
 }
 
 TEST_F(IR_BinaryTest, CreateModulo) {
-    Module mod;
-    Builder b{mod};
-
     const auto* inst = b.Modulo(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     ASSERT_TRUE(inst->Is<Binary>());
@@ -364,8 +314,6 @@ TEST_F(IR_BinaryTest, CreateModulo) {
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage) {
-    Module mod;
-    Builder b{mod};
     const auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
@@ -380,8 +328,6 @@ TEST_F(IR_BinaryTest, Binary_Usage) {
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
-    Module mod;
-    Builder b{mod};
     auto val = b.Constant(4_i);
     const auto* inst = b.And(mod.Types().i32(), val, val);
 

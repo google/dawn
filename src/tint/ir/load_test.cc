@@ -14,22 +14,19 @@
 
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
-#include "src/tint/ir/test_helper.h"
+#include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_LoadTest = TestHelper;
+using IR_LoadTest = IRTestHelper;
 
 TEST_F(IR_LoadTest, CreateLoad) {
-    Module mod;
-    Builder b{mod};
-
     auto* store_type = mod.Types().i32();
-    auto* var = b.Declare(mod.Types().Get<type::Pointer>(
-        store_type, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite));
+    auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
+                                              builtin::Access::kReadWrite));
     const auto* inst = b.Load(var);
 
     ASSERT_TRUE(inst->Is<Load>());
@@ -42,12 +39,9 @@ TEST_F(IR_LoadTest, CreateLoad) {
 }
 
 TEST_F(IR_LoadTest, Load_Usage) {
-    Module mod;
-    Builder b{mod};
-
     auto* store_type = mod.Types().i32();
-    auto* var = b.Declare(mod.Types().Get<type::Pointer>(
-        store_type, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite));
+    auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
+                                              builtin::Access::kReadWrite));
     const auto* inst = b.Load(var);
 
     ASSERT_NE(inst->From(), nullptr);

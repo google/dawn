@@ -1503,10 +1503,11 @@ if(TINT_BUILD_TESTS)
       ir/from_program_unary_test.cc
       ir/from_program_var_test.cc
       ir/instruction_test.cc
+      ir/ir_test_helper.h
       ir/load_test.cc
       ir/module_test.cc
+      ir/program_test_helper.h
       ir/store_test.cc
-      ir/test_helper.h
       ir/transform/add_empty_entry_point_test.cc
       ir/unary_test.cc
     )

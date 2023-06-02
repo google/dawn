@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/ir/module.h"
-#include "src/tint/ir/test_helper.h"
+#include "src/tint/ir/ir_test_helper.h"
 #include "src/tint/ir/var.h"
 
 namespace tint::ir {
@@ -21,23 +21,20 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_ModuleTest = TestHelper;
+using IR_ModuleTest = IRTestHelper;
 
 TEST_F(IR_ModuleTest, NameOfUnnamed) {
-    Module mod;
     auto* v = mod.values.Create<ir::Var>(mod.Types().i32());
     EXPECT_FALSE(mod.NameOf(v).IsValid());
 }
 
 TEST_F(IR_ModuleTest, SetName) {
-    Module mod;
     auto* v = mod.values.Create<ir::Var>(mod.Types().i32());
     EXPECT_EQ(mod.SetName(v, "a").Name(), "a");
     EXPECT_EQ(mod.NameOf(v).Name(), "a");
 }
 
 TEST_F(IR_ModuleTest, SetNameRename) {
-    Module mod;
     auto* v = mod.values.Create<ir::Var>(mod.Types().i32());
     EXPECT_EQ(mod.SetName(v, "a").Name(), "a");
     EXPECT_EQ(mod.SetName(v, "b").Name(), "b");
@@ -45,7 +42,6 @@ TEST_F(IR_ModuleTest, SetNameRename) {
 }
 
 TEST_F(IR_ModuleTest, SetNameCollision) {
-    Module mod;
     auto* a = mod.values.Create<ir::Var>(mod.Types().i32());
     auto* b = mod.values.Create<ir::Var>(mod.Types().i32());
     auto* c = mod.values.Create<ir::Var>(mod.Types().i32());
