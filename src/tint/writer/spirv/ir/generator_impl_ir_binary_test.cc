@@ -36,7 +36,7 @@ using Arithmetic = SpvGeneratorImplTestWithParam<BinaryTestCase>;
 TEST_P(Arithmetic, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.CreateBinary(params.kind, MakeScalarType(params.type),
                                      MakeScalarValue(params.type), MakeScalarValue(params.type)),
@@ -48,7 +48,7 @@ TEST_P(Arithmetic, Scalar) {
 TEST_P(Arithmetic, Vector) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.CreateBinary(params.kind, MakeVectorType(params.type),
                                      MakeVectorValue(params.type), MakeVectorValue(params.type)),
@@ -83,7 +83,7 @@ using Bitwise = SpvGeneratorImplTestWithParam<BinaryTestCase>;
 TEST_P(Bitwise, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.CreateBinary(params.kind, MakeScalarType(params.type),
                                      MakeScalarValue(params.type), MakeScalarValue(params.type)),
@@ -95,7 +95,7 @@ TEST_P(Bitwise, Scalar) {
 TEST_P(Bitwise, Vector) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.CreateBinary(params.kind, MakeVectorType(params.type),
                                      MakeVectorValue(params.type), MakeVectorValue(params.type)),
@@ -122,9 +122,9 @@ using Comparison = SpvGeneratorImplTestWithParam<BinaryTestCase>;
 TEST_P(Comparison, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(
-        utils::Vector{b.CreateBinary(params.kind, mod.Types().bool_(), MakeScalarValue(params.type),
+        utils::Vector{b.CreateBinary(params.kind, ty.bool_(), MakeScalarValue(params.type),
                                      MakeScalarValue(params.type)),
                       b.Return(func)});
 
@@ -134,10 +134,10 @@ TEST_P(Comparison, Scalar) {
 TEST_P(Comparison, Vector) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(
-        utils::Vector{b.CreateBinary(params.kind, mod.Types().vec2(mod.Types().bool_()),
-                                     MakeVectorValue(params.type), MakeVectorValue(params.type)),
+        utils::Vector{b.CreateBinary(params.kind, ty.vec2(ty.bool_()), MakeVectorValue(params.type),
+                                     MakeVectorValue(params.type)),
 
                       b.Return(func)});
 
@@ -191,10 +191,9 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryTestCase{kBool, ir::Binary::Kind::kNotEqual, "OpLogicalNotEqual"}));
 
 TEST_F(SpvGeneratorImplTest, Binary_Chain) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
-    auto* a = b.Subtract(mod.Types().i32(), b.Constant(1_i), b.Constant(2_i));
-    func->StartTarget()->SetInstructions(
-        utils::Vector{a, b.Add(mod.Types().i32(), a, a), b.Return(func)});
+    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* a = b.Subtract(ty.i32(), b.Constant(1_i), b.Constant(2_i));
+    func->StartTarget()->SetInstructions(utils::Vector{a, b.Add(ty.i32(), a, a), b.Return(func)});
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

@@ -20,7 +20,7 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.ExitIf(i)});
@@ -46,7 +46,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* i = b.CreateIf(b.Constant(true));
     i->False()->SetInstructions(utils::Vector{b.ExitIf(i)});
@@ -54,7 +54,7 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
 
     auto* true_block = i->True();
     true_block->SetInstructions(
-        utils::Vector{b.Add(mod.Types().i32(), b.Constant(1_i), b.Constant(1_i)), b.ExitIf(i)});
+        utils::Vector{b.Add(ty.i32(), b.Constant(1_i), b.Constant(1_i)), b.ExitIf(i)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -80,7 +80,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.ExitIf(i)});
@@ -88,7 +88,7 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
 
     auto* false_block = i->False();
     false_block->SetInstructions(
-        utils::Vector{b.Add(mod.Types().i32(), b.Constant(1_i), b.Constant(1_i)), b.ExitIf(i)});
+        utils::Vector{b.Add(ty.i32(), b.Constant(1_i), b.Constant(1_i)), b.ExitIf(i)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -114,7 +114,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.Return(func)});
@@ -143,7 +143,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
@@ -180,7 +180,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_TrueReturn) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
@@ -217,7 +217,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_FalseReturn) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
@@ -254,7 +254,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* merge_param_0 = b.BlockParam(b.ir.Types().i32());
     auto* merge_param_1 = b.BlockParam(b.ir.Types().bool_());

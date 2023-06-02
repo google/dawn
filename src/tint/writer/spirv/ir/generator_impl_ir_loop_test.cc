@@ -20,7 +20,7 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* loop = b.CreateLoop();
 
@@ -54,7 +54,7 @@ OpFunctionEnd
 
 // Test that we still emit the continuing block with a back-edge, even when it is unreachable.
 TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* loop = b.CreateLoop();
 
@@ -84,7 +84,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* loop = b.CreateLoop();
 
@@ -127,7 +127,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* loop = b.CreateLoop();
 
@@ -172,7 +172,7 @@ OpFunctionEnd
 // Test that we still emit the continuing block with a back-edge, and the merge block, even when
 // they are unreachable.
 TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* loop = b.CreateLoop();
 
@@ -201,11 +201,11 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* loop = b.CreateLoop();
 
-    auto* result = b.Equal(mod.Types().i32(), b.Constant(1_i), b.Constant(2_i));
+    auto* result = b.Equal(ty.i32(), b.Constant(1_i), b.Constant(2_i));
 
     loop->Body()->Append(result);
     loop->Continuing()->Append(b.BreakIf(result, loop));
@@ -237,7 +237,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* outer_loop = b.CreateLoop();
     auto* inner_loop = b.CreateLoop();
@@ -284,7 +284,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* outer_loop = b.CreateLoop();
     auto* inner_loop = b.CreateLoop();
@@ -331,7 +331,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* l = b.CreateLoop(utils::Vector{b.Constant(1_i)});
     func->StartTarget()->Append(l);
@@ -377,7 +377,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* l = b.CreateLoop(utils::Vector{b.Constant(1_i), b.Constant(false)});
     func->StartTarget()->Append(l);

@@ -37,7 +37,7 @@ using Builtin_1arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_1arg, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Builtin(MakeScalarType(params.type), params.function,
                                 utils::Vector{MakeScalarValue(params.type)}),
@@ -49,7 +49,7 @@ TEST_P(Builtin_1arg, Scalar) {
 TEST_P(Builtin_1arg, Vector) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Builtin(MakeVectorType(params.type), params.function,
                                 utils::Vector{MakeVectorValue(params.type)}),
@@ -110,7 +110,7 @@ using Builtin_2arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_2arg, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{
         b.Builtin(MakeScalarType(params.type), params.function,
                   utils::Vector{MakeScalarValue(params.type), MakeScalarValue(params.type)}),
@@ -122,7 +122,7 @@ TEST_P(Builtin_2arg, Scalar) {
 TEST_P(Builtin_2arg, Vector) {
     auto params = GetParam();
 
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{
         b.Builtin(MakeVectorType(params.type), params.function,
                   utils::Vector{MakeVectorValue(params.type), MakeVectorValue(params.type)}),

@@ -20,7 +20,7 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, Switch_Basic) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
@@ -50,7 +50,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_MultipleCases) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
@@ -90,7 +90,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_MultipleSelectorsPerCase) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
@@ -133,7 +133,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_AllCasesReturn) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
@@ -171,7 +171,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_ConditionalBreak) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* swtch = b.CreateSwitch(b.Constant(42_i));
 
@@ -218,7 +218,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
@@ -259,7 +259,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* s = b.CreateSwitch(b.Constant(42_i));
     auto* case_a = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
@@ -298,7 +298,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
-    auto* func = b.CreateFunction("foo", mod.Types().void_());
+    auto* func = b.CreateFunction("foo", ty.void_());
 
     auto* merge_param_0 = b.BlockParam(b.ir.Types().i32());
     auto* merge_param_1 = b.BlockParam(b.ir.Types().bool_());
