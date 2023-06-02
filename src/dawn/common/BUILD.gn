@@ -118,6 +118,7 @@ config("internal_config") {
     cflags += [
       "-Wconditional-uninitialized",
       "-Wcstring-format-directive",
+      "-Wctad-maybe-unsupported",
       "-Wc++11-narrowing",
       "-Wdeprecated-copy",
       "-Wdeprecated-copy-dtor",

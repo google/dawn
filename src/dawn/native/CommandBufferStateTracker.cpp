@@ -363,7 +363,8 @@ MaybeError CommandBufferStateTracker::ValidateNoDifferentTextureViewsOnSameTextu
             !TextureViewsAllMatch(views),
             "In compatibility mode, %s must not have different views in a single draw/dispatch "
             "command. texture views: %s",
-            texture, ityp::span(views->data(), views->size()));
+            texture,
+            ityp::span<size_t, const TextureViewBase* const>(views->data(), views->size()));
     }
 
     return {};
