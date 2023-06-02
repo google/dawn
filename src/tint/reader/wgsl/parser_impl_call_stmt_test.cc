@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, Statement_Call_Missing_RightParen) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
-    EXPECT_EQ(p->error(), "1:3: expected ')' for function call");
+    EXPECT_EQ(p->error(), "1:3: expected expression for function call");
 }
 
 TEST_F(ParserImplTest, Statement_Call_Missing_Semi) {
@@ -101,7 +101,7 @@ TEST_F(ParserImplTest, Statement_Call_Bad_ArgList) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
-    EXPECT_EQ(p->error(), "1:5: expected ')' for function call");
+    EXPECT_EQ(p->error(), "1:5: expected ',' for function call");
 }
 
 }  // namespace

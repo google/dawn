@@ -314,7 +314,7 @@ TEST_F(ForStmtErrorTest, InvalidBreakConditionMatch) {
 // Test a for loop with an invalid continuing statement.
 TEST_F(ForStmtErrorTest, InvalidContinuingAsFuncCall) {
     std::string for_str = "for (;; a(,) ) { }";
-    std::string error_str = "1:11: expected ')' for function call";
+    std::string error_str = "1:11: expected expression for function call";
 
     TestForWithError(for_str, error_str);
 }

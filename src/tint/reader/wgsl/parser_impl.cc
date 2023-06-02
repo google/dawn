@@ -2162,22 +2162,12 @@ Maybe<const ast::Expression*> ParserImpl::component_or_swizzle_specifier(
 //   : PAREN_LEFT ((expression COMMA)* expression COMMA?)? PAREN_RIGHT
 Expect<ParserImpl::ExpressionList> ParserImpl::expect_argument_expression_list(
     std::string_view use) {
-    return expect_paren_block(use, [&]() -> Expect<ExpressionList> {
-        ExpressionList ret;
-        while (continue_parsing()) {
-            auto arg = expression();
-            if (arg.errored) {
-                return Failure::kErrored;
-            } else if (!arg.matched) {
-                break;
-            }
-            ret.Push(arg.value);
-
-            if (!match(Token::Type::kComma)) {
-                break;
-            }
+    return expect_paren_block(use, [&]() -> Expect<ParserImpl::ExpressionList> {  //
+        auto list = expression_list(use, Token::Type::kParenRight);
+        if (list.errored) {
+            return Failure::kErrored;
         }
-        return ret;
+        return list.value;
     });
 }
 
@@ -2482,10 +2472,21 @@ Expect<const ast::Expression*> ParserImpl::expect_expression(std::string_view us
     return add_error(t, "expected expression for " + std::string(use));
 }
 
-Expect<utils::Vector<const ast::Expression*, 3>> ParserImpl::expect_expression_list(
-    std::string_view use,
-    Token::Type terminator) {
-    utils::Vector<const ast::Expression*, 3> exprs;
+Maybe<ParserImpl::ExpressionList> ParserImpl::expression_list(std::string_view use,
+                                                              Token::Type terminator) {
+    if (peek_is(terminator)) {
+        return Failure::kNoMatch;
+    }
+    auto list = expect_expression_list(use, terminator);
+    if (list.errored) {
+        return Failure::kErrored;
+    }
+    return list.value;
+}
+
+Expect<ParserImpl::ExpressionList> ParserImpl::expect_expression_list(std::string_view use,
+                                                                      Token::Type terminator) {
+    ParserImpl::ExpressionList exprs;
     while (continue_parsing()) {
         auto expr = expect_expression(use);
         if (expr.errored) {

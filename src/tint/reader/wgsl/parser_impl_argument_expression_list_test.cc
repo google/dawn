@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingRightParen) {
     auto e = p->expect_argument_expression_list("argument list");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
-    EXPECT_EQ(p->error(), "1:3: expected ')' for argument list");
+    EXPECT_EQ(p->error(), "1:3: expected ',' for argument list");
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression_0) {
@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression_0) {
     auto e = p->expect_argument_expression_list("argument list");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
-    EXPECT_EQ(p->error(), "1:2: expected ')' for argument list");
+    EXPECT_EQ(p->error(), "1:2: expected expression for argument list");
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression_1) {
@@ -88,7 +88,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression_1) {
     auto e = p->expect_argument_expression_list("argument list");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
-    EXPECT_EQ(p->error(), "1:5: expected ')' for argument list");
+    EXPECT_EQ(p->error(), "1:5: expected expression for argument list");
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesInvalidExpression) {
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_HandlesInvalidExpression) {
     auto e = p->expect_argument_expression_list("argument list");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
-    EXPECT_EQ(p->error(), "1:2: expected ')' for argument list");
+    EXPECT_EQ(p->error(), "1:2: expected expression for argument list");
 }
 
 }  // namespace

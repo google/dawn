@@ -141,7 +141,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_InvalidArg) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:3: expected ')' for function call");
+    EXPECT_EQ(p->error(), "1:3: expected expression for function call");
 }
 
 TEST_F(ParserImplTest, SingularExpression_Call_MissingRightParen) {
@@ -151,7 +151,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_MissingRightParen) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:3: expected ')' for function call");
+    EXPECT_EQ(p->error(), "1:3: expected expression for function call");
 }
 
 TEST_F(ParserImplTest, SingularExpression_MemberAccessor) {

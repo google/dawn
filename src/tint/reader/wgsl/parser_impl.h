@@ -565,8 +565,13 @@ class ParserImpl {
     /// @param use the use of the expression list
     /// @param terminator the terminating token for the list
     /// @returns the parsed expression list or error
-    Expect<utils::Vector<const ast::Expression*, 3>> expect_expression_list(std::string_view use,
-                                                                            Token::Type terminator);
+    Maybe<ParserImpl::ExpressionList> expression_list(std::string_view use, Token::Type terminator);
+    /// Parses a comma separated expression list, with at least one expression
+    /// @param use the use of the expression list
+    /// @param terminator the terminating token for the list
+    /// @returns the parsed expression list or error
+    Expect<ParserImpl::ExpressionList> expect_expression_list(std::string_view use,
+                                                              Token::Type terminator);
     /// Parses the `bitwise_expression.post.unary_expression` grammar element
     /// @param lhs the left side of the expression
     /// @returns the parsed expression or nullptr

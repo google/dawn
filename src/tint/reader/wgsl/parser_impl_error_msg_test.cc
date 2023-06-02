@@ -158,7 +158,7 @@ fn f() { loop { break } }
 
 TEST_F(ParserImplErrorTest, CallExprMissingRParen) {
     EXPECT("fn f() { x = f(1.; }",
-           R"(test.wgsl:1:18 error: expected ')' for function call
+           R"(test.wgsl:1:18 error: expected ',' for function call
 fn f() { x = f(1.; }
                  ^
 )");
@@ -166,7 +166,7 @@ fn f() { x = f(1.; }
 
 TEST_F(ParserImplErrorTest, CallStmtMissingRParen) {
     EXPECT("fn f() { f(1.; }",
-           R"(test.wgsl:1:14 error: expected ')' for function call
+           R"(test.wgsl:1:14 error: expected ',' for function call
 fn f() { f(1.; }
              ^
 )");
@@ -174,7 +174,7 @@ fn f() { f(1.; }
 
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument0) {
     EXPECT("fn f() { f(<); }",
-           R"(test.wgsl:1:12 error: expected ')' for function call
+           R"(test.wgsl:1:12 error: expected expression for function call
 fn f() { f(<); }
            ^
 )");
@@ -182,7 +182,7 @@ fn f() { f(<); }
 
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument1) {
     EXPECT("fn f() { f(1.0, <); }",
-           R"(test.wgsl:1:17 error: expected ')' for function call
+           R"(test.wgsl:1:17 error: expected expression for function call
 fn f() { f(1.0, <); }
                 ^
 )");
@@ -206,7 +206,7 @@ fn f() { x = vec2<u32>1,2); }
 
 TEST_F(ParserImplErrorTest, InitializerExprMissingRParen) {
     EXPECT("fn f() { x = vec2<u32>(1,2; }",
-           R"(test.wgsl:1:27 error: expected ')' for function call
+           R"(test.wgsl:1:27 error: expected ',' for function call
 fn f() { x = vec2<u32>(1,2; }
                           ^
 )");
@@ -498,7 +498,7 @@ const i : i32 = 1
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
     EXPECT("const i : vec2<i32> = vec2<i32>(1., 2.;",
-           R"(test.wgsl:1:39 error: expected ')' for function call
+           R"(test.wgsl:1:39 error: expected ',' for function call
 const i : vec2<i32> = vec2<i32>(1., 2.;
                                       ^
 )");
@@ -549,7 +549,7 @@ const i : vec2<i32> = vec2<i32> 1, 2);
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingRParen) {
     EXPECT("const i : vec2<i32> = vec2<i32>(1, 2;",
-           R"(test.wgsl:1:37 error: expected ')' for function call
+           R"(test.wgsl:1:37 error: expected ',' for function call
 const i : vec2<i32> = vec2<i32>(1, 2;
                                     ^
 )");
