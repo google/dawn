@@ -93,18 +93,18 @@ TEST_F(IR_InstructionTest, Fail_InsertAfterNotInserted) {
         "");
 }
 
-TEST_F(IR_InstructionTest, Replace) {
+TEST_F(IR_InstructionTest, ReplaceWith) {
     auto* inst1 = b.CreateLoop();
     auto* inst2 = b.CreateLoop();
     auto* blk = b.CreateBlock();
     blk->Append(inst2);
-    inst2->Replace(inst1);
+    inst2->ReplaceWith(inst1);
     EXPECT_EQ(1u, blk->Length());
     EXPECT_EQ(inst1->Block(), blk);
     EXPECT_EQ(inst2->Block(), nullptr);
 }
 
-TEST_F(IR_InstructionTest, Fail_ReplaceNullptr) {
+TEST_F(IR_InstructionTest, Fail_ReplaceWithNullptr) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
@@ -113,12 +113,12 @@ TEST_F(IR_InstructionTest, Fail_ReplaceNullptr) {
             auto* inst1 = b.CreateLoop();
             auto* blk = b.CreateBlock();
             blk->Append(inst1);
-            inst1->Replace(nullptr);
+            inst1->ReplaceWith(nullptr);
         },
         "");
 }
 
-TEST_F(IR_InstructionTest, Fail_ReplaceNotInserted) {
+TEST_F(IR_InstructionTest, Fail_ReplaceWithNotInserted) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
@@ -126,7 +126,7 @@ TEST_F(IR_InstructionTest, Fail_ReplaceNotInserted) {
 
             auto* inst1 = b.CreateLoop();
             auto* inst2 = b.CreateLoop();
-            inst1->Replace(inst2);
+            inst1->ReplaceWith(inst2);
         },
         "");
 }

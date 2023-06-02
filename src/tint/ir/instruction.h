@@ -48,7 +48,7 @@ class Instruction : public utils::Castable<Instruction, Value> {
     void InsertAfter(Instruction* after);
     /// Replaces this instruction with @p replacement in the owning block owning this instruction
     /// @param replacement the instruction to replace with
-    void Replace(Instruction* replacement);
+    void ReplaceWith(Instruction* replacement);
     /// Removes this instruction from the owning block
     void Remove();
 

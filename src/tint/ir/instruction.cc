@@ -37,7 +37,7 @@ void Instruction::InsertAfter(Instruction* after) {
     after->Block()->InsertAfter(after, this);
 }
 
-void Instruction::Replace(Instruction* replacement) {
+void Instruction::ReplaceWith(Instruction* replacement) {
     TINT_ASSERT_OR_RETURN(IR, replacement);
     TINT_ASSERT_OR_RETURN(IR, Block() != nullptr);
     Block()->Replace(this, replacement);
