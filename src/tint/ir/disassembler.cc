@@ -18,6 +18,7 @@
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/scalar.h"
 #include "src/tint/constant/splat.h"
+#include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block.h"
@@ -382,6 +383,17 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                 EmitBindingPoint(v->BindingPoint().value());
             }
 
+            out_ << std::endl;
+        },
+        [&](const ir::Access* a) {
+            EmitValueWithType(a);
+            out_ << " = access %" << IdOf(a->Object()) << " ";
+            for (size_t i = 0; i < a->Indices().Length(); ++i) {
+                if (i > 0) {
+                    out_ << ", ";
+                }
+                EmitValue(a->Indices()[i]);
+            }
             out_ << std::endl;
         },
         [&](const ir::Branch* b) { EmitBranch(b); },

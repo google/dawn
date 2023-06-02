@@ -22,6 +22,7 @@
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/matrix.h"
+#include "src/tint/type/pointer.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
@@ -153,6 +154,12 @@ const type::Array* Manager::runtime_array(const type::Type* elem_ty, uint32_t st
         /* array size */ stride,
         /* element stride */ stride,
         /* implicit stride */ elem_ty->Align());
+}
+
+const type::Pointer* Manager::pointer(const type::Type* subtype,
+                                      builtin::AddressSpace address_space,
+                                      builtin::Access access) {
+    return Get<type::Pointer>(subtype, address_space, access);
 }
 
 }  // namespace tint::type

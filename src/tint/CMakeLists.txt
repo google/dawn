@@ -716,6 +716,8 @@ endif()
 
 if(${TINT_BUILD_IR})
   list(APPEND TINT_LIB_SRCS
+    ir/access.cc
+    ir/access.h
     ir/binary.cc
     ir/binary.h
     ir/binding_point.h
@@ -1487,6 +1489,7 @@ if(TINT_BUILD_TESTS)
       ir/block_test.cc
       ir/constant_test.cc
       ir/discard_test.cc
+      ir/from_program_accessor_test.cc
       ir/from_program_binary_test.cc
       ir/from_program_builtin_test.cc
       ir/from_program_call_test.cc

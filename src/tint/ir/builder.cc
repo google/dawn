@@ -241,4 +241,10 @@ ir::FunctionParam* Builder::FunctionParam(const type::Type* type) {
     return ir.values.Create<ir::FunctionParam>(type);
 }
 
+ir::Access* Builder::Access(const type::Type* type,
+                            Value* source,
+                            utils::VectorRef<Value*> indices) {
+    return ir.values.Create<ir::Access>(type, source, indices);
+}
+
 }  // namespace tint::ir

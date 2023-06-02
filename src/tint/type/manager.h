@@ -17,6 +17,8 @@
 
 #include <utility>
 
+#include "src/tint/builtin/access.h"
+#include "src/tint/builtin/address_space.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/unique_node.h"
 #include "src/tint/utils/hash.h"
@@ -32,6 +34,7 @@ class F16;
 class F32;
 class I32;
 class Matrix;
+class Pointer;
 class U32;
 class Vector;
 class Void;
@@ -193,6 +196,14 @@ class Manager final {
     /// @param stride the optional array element stride
     /// @returns the runtime array type
     const type::Array* runtime_array(const type::Type* elem_ty, uint32_t stride = 0);
+
+    /// @param subtype the pointer subtype
+    /// @param address_space the address space
+    /// @param access the access settings
+    /// @returns the pointer type
+    const type::Pointer* pointer(const type::Type* subtype,
+                                 builtin::AddressSpace address_space,
+                                 builtin::Access access);
 
     /// @returns an iterator to the beginning of the types
     TypeIterator begin() const { return types_.begin(); }

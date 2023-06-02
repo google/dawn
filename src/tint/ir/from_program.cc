@@ -17,7 +17,9 @@
 #include <iostream>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
+#include "src/tint/ast/accessor_expression.h"
 #include "src/tint/ast/alias.h"
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/binary_expression.h"
@@ -42,12 +44,14 @@
 #include "src/tint/ast/identifier_expression.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/increment_decrement_statement.h"
+#include "src/tint/ast/index_accessor_expression.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/invariant_attribute.h"
 #include "src/tint/ast/let.h"
 #include "src/tint/ast/literal_expression.h"
 #include "src/tint/ast/loop_statement.h"
+#include "src/tint/ast/member_accessor_expression.h"
 #include "src/tint/ast/override.h"
 #include "src/tint/ast/phony_expression.h"
 #include "src/tint/ast/return_statement.h"
@@ -80,6 +84,7 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/load.h"
 #include "src/tint/sem/materialize.h"
+#include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/value_constructor.h"
@@ -89,9 +94,11 @@
 #include "src/tint/switch.h"
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/reference.h"
+#include "src/tint/type/struct.h"
 #include "src/tint/type/void.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/result.h"
+#include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -476,7 +483,6 @@ class Impl {
             (void)EmitExpression(stmt->rhs);
             return;
         }
-
         auto lhs = EmitExpression(stmt->lhs);
         if (!lhs) {
             return;
@@ -870,6 +876,108 @@ class Impl {
         SetBranch(builder_.BreakIf(cond.Get(), current_control->As<ir::Loop>()));
     }
 
+    struct AccessorInfo {
+        Value* object = nullptr;
+        utils::Vector<Value*, 1> indices;
+    };
+
+    utils::Result<Value*> EmitAccess(const ast::AccessorExpression* expr) {
+        std::vector<const ast::Expression*> accessors;
+        const ast::Expression* object = expr;
+        while (true) {
+            if (auto* array = object->As<ast::IndexAccessorExpression>()) {
+                accessors.push_back(object);
+                object = array->object;
+            } else if (auto* member = object->As<ast::MemberAccessorExpression>()) {
+                accessors.push_back(object);
+                object = member->object;
+            } else {
+                break;
+            }
+        }
+
+        AccessorInfo info;
+        {
+            auto res = EmitExpression(object);
+            if (!res) {
+                return utils::Failure;
+            }
+            info.object = res.Get();
+        }
+
+        // The AST chain is `inside-out` compared to what we need, which means the list it generates
+        // is backwards. We need to operate on the list in reverse order to have the correct access
+        // chain.
+        for (auto* accessor : utils::Reverse(accessors)) {
+            bool ok = tint::Switch(
+                accessor,
+                [&](const ast::IndexAccessorExpression* idx) {
+                    return GenerateIndexAccessor(idx, &info);
+                },
+                [&](const ast::MemberAccessorExpression* member) {
+                    return GenerateMemberAccessor(member, &info);
+                },
+                [&](Default) {
+                    TINT_ICE(Writer, diagnostics_)
+                        << "invalid accessor in list: " + std::string(accessor->TypeInfo().name);
+                    return false;
+                });
+            if (!ok) {
+                return utils::Failure;
+            }
+        }
+
+        const type::Type* ty = nullptr;
+        if (auto* sem = program_->Sem().Get(expr)->As<sem::Load>()) {
+            auto* ref = sem->ReferenceType();
+            ty = builder_.ir.Types().pointer(ref->StoreType()->Clone(clone_ctx_.type_ctx),
+                                             ref->AddressSpace(), ref->Access());
+        } else {
+            ty = program_->Sem().Get(expr)->UnwrapLoad()->Type()->Clone(clone_ctx_.type_ctx);
+        }
+
+        auto* access = builder_.Access(ty, info.object, info.indices);
+        current_block_->Append(access);
+        return access;
+    }
+
+    bool GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, AccessorInfo* info) {
+        auto res = EmitExpression(expr->index);
+        if (!res) {
+            return false;
+        }
+
+        info->indices.Push(res.Get());
+        return true;
+    }
+
+    bool GenerateMemberAccessor(const ast::MemberAccessorExpression* expr, AccessorInfo* info) {
+        auto* expr_sem = program_->Sem().Get(expr)->UnwrapLoad();
+
+        return tint::Switch(
+            expr_sem,  //
+            [&](const sem::StructMemberAccess* access) {
+                uint32_t idx = access->Member()->Index();
+                info->indices.Push(builder_.Constant(u32(idx)));
+                return true;
+            },
+            [&](const sem::Swizzle* swizzle) {
+                auto& indices = swizzle->Indices();
+                if (indices.Length() == 1) {
+                    info->indices.Push(builder_.Constant(u32(indices[0])));
+                    return true;
+                }
+
+                TINT_ICE(IR, diagnostics_) << "unhandled multi index swizzle";
+                return false;
+            },
+            [&](Default) {
+                TINT_ICE(IR, diagnostics_)
+                    << "unhandled member index type: " << expr_sem->TypeInfo().name;
+                return false;
+            });
+    }
+
     utils::Result<Value*> EmitExpression(const ast::Expression* expr) {
         // If this is a value that has been const-eval'd return the result.
         auto* sem = program_->Sem().GetVal(expr);
@@ -882,10 +990,8 @@ class Impl {
         }
 
         auto result = tint::Switch(
-            expr,
-            // [&](const ast::IndexAccessorExpression* a) {
-            // TODO(dsinclair): Implement
-            // },
+            expr,  //
+            [&](const ast::AccessorExpression* a) { return EmitAccess(a); },
             [&](const ast::BinaryExpression* b) { return EmitBinary(b); },
             [&](const ast::BitcastExpression* b) { return EmitBitcast(b); },
             [&](const ast::CallExpression* c) { return EmitCall(c); },
@@ -899,9 +1005,6 @@ class Impl {
                 return {v};
             },
             [&](const ast::LiteralExpression* l) { return EmitLiteral(l); },
-            // [&](const ast::MemberAccessorExpression* m) {
-            // TODO(dsinclair): Implement
-            // },
             [&](const ast::UnaryOpExpression* u) { return EmitUnary(u); },
             // Note, ast::PhonyExpression is explicitly not handled here as it should never get
             // into this method. The assignment statement should have filtered it out already.
@@ -917,7 +1020,6 @@ class Impl {
             current_block_->Append(load);
             return load;
         }
-
         return result;
     }
 
