@@ -824,7 +824,28 @@ class ParserImpl {
 
     /// Reports an error if the attribute list `list` is not empty.
     /// Used to ensure that all attributes are consumed.
-    bool expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> list);
+    Expect<Void> expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> list);
+
+    /// Raises an error if the next token is the start of a template list.
+    /// Used to hint to the user that the parser interpreted the following as a templated identifier
+    /// expression:
+    ///
+    /// ```
+    /// a < b, c >
+    ///   ^~~~~~~~
+    /// ```
+    Expect<Void> expect_next_not_template_list(const Source& lhs_source);
+
+    /// Raises an error if the parsed expression is a templated identifier expression
+    /// Used to hint to the user that the parser intepreted the following as a templated identifier
+    /// expression:
+    ///
+    /// ```
+    /// a < b, c > d
+    /// ^^^^^^^^^^
+    ///    expr
+    /// ```
+    Expect<Void> expect_not_templated_ident_expr(const ast::Expression* expr);
 
     /// Parses the given enum, providing sensible error messages if the next token does not match
     /// any of the enum values.

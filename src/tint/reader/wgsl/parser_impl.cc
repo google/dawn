@@ -579,7 +579,7 @@ Maybe<Void> ParserImpl::global_decl() {
         errored = true;
     }
     if (decl.matched) {
-        if (!expect_attributes_consumed(attrs.value)) {
+        if (expect_attributes_consumed(attrs.value).errored) {
             return Failure::kErrored;
         }
         return kSuccess;
@@ -590,7 +590,7 @@ Maybe<Void> ParserImpl::global_decl() {
         errored = true;
     }
     if (str.matched) {
-        if (!expect_attributes_consumed(attrs.value)) {
+        if (expect_attributes_consumed(attrs.value).errored) {
             return Failure::kErrored;
         }
         return kSuccess;
@@ -2496,7 +2496,22 @@ Expect<ParserImpl::ExpressionList> ParserImpl::expect_expression_list(std::strin
         if (peek_is(terminator)) {
             break;
         }
-        if (!expect(use, Token::Type::kComma)) {
+
+        // Check if the next token is a template start, which was likely intended as a less-than.
+        if (expect_next_not_template_list(expr->source).errored) {
+            return Failure::kErrored;  // expect_next_not_template_list() raised an error.
+        }
+        if (!match(Token::Type::kComma)) {
+            // Next expression is not a terminator or comma, so this is a parse error.
+
+            // Check if last parsed expression was a templated identifier, which was likely indented
+            // as a less-than / greater-than.
+            if (expect_not_templated_ident_expr(expr.value).errored) {
+                return Failure::kErrored;  // expect_not_templated_ident_expr() raised an error.
+            }
+
+            // Emit the expected ',' error
+            expect(use, Token::Type::kComma);
             return Failure::kErrored;
         }
         if (peek_is(terminator)) {
@@ -3074,12 +3089,58 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
     }
 }
 
-bool ParserImpl::expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> in) {
+Expect<Void> ParserImpl::expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> in) {
     if (in.IsEmpty()) {
-        return true;
+        return kSuccess;
     }
     add_error(in[0]->source, "unexpected attributes");
-    return false;
+    return Failure::kErrored;
+}
+
+Expect<Void> ParserImpl::expect_next_not_template_list(const Source& lhs_source) {
+    Source end;
+    if (!match(Token::Type::kTemplateArgsLeft, &end)) {
+        return kSuccess;
+    }
+
+    // Try to find end of template
+    for (size_t i = 0; i < 32; i++) {
+        if (auto& t = peek(i); t.type() == Token::Type::kTemplateArgsRight) {
+            end = t.source();
+        }
+    }
+    Source template_source = lhs_source;
+    template_source.range.end = end.range.end;
+    add_error(template_source, "parsed as template list");
+
+    if (auto rhs = expression(); rhs.matched) {
+        Source lt_source = lhs_source;
+        lt_source.range.end = rhs->source.range.end;
+        add_note(lt_source,
+                 "if this is intended to be a less-than expression then wrap in parentheses");
+    }
+    return Failure::kErrored;
+}
+
+Expect<Void> ParserImpl::expect_not_templated_ident_expr(const ast::Expression* expr) {
+    auto* ident_expr = expr->As<ast::IdentifierExpression>();
+    if (!ident_expr) {
+        return kSuccess;
+    }
+    auto* ident = ident_expr->identifier->As<ast::TemplatedIdentifier>();
+    if (!ident) {
+        return kSuccess;
+    }
+
+    add_error(ident->source, "parsed as template list");
+
+    if (auto rhs = expression(); rhs.matched) {
+        Source gt_source = ident->arguments.Back()->source;
+        gt_source.range.end = rhs->source.range.end;
+        add_note(gt_source,
+                 "if this is intended to be a greater-than expression then wrap in parentheses");
+    }
+    return Failure::kErrored;
 }
 
 // severity_control_name
