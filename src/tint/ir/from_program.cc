@@ -906,13 +906,8 @@ class Impl {
             }
             info.object = res.Get();
         }
-
-        if (auto* sem = program_->Sem().Get(expr)->As<sem::Load>()) {
-            auto* ref = sem->ReferenceType();
-            info.result_type = ref->StoreType()->Clone(clone_ctx_.type_ctx);
-        } else {
-            info.result_type = program_->Sem().Get(expr)->Type()->Clone(clone_ctx_.type_ctx);
-        }
+        info.result_type =
+            program_->Sem().Get(expr)->Type()->UnwrapRef()->Clone(clone_ctx_.type_ctx);
 
         // The AST chain is `inside-out` compared to what we need, which means the list it generates
         // is backwards. We need to operate on the list in reverse order to have the correct access

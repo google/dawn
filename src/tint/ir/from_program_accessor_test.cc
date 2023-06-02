@@ -169,6 +169,29 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_Mixed) {
 )");
 }
 
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_AssignmentLHS) {
+    // var a: array<u32, 4>();
+    // a[2] = 0;
+
+    auto* a = Var("a", ty.array<u32, 4>(), builtin::AddressSpace::kFunction);
+    auto* assign = Assign(IndexAccessor(a, 2_u), 0_u);
+    WrapInFunction(Block(utils::Vector{Decl(a), assign}));
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    %a:ptr<function, array<u32, 4>, read_write> = var
+    %3:ptr<function, u32, read_write> = access %a, 2u
+    store %3, 0u
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleElementSwizzle) {
     // var a: vec2<f32>
     // let b = a.y
