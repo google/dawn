@@ -14,6 +14,7 @@
 
 #include <limits>
 #include <string>
+#include <vector>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
@@ -879,6 +880,69 @@ TEST_F(CompatValidationTest,
             // No Error is expected because draw was never called
             encoder.Finish();
         });
+}
+
+class CompatCompressedTextureToBufferCopyValidationTests : public CompatValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
+        std::vector<wgpu::FeatureName> requiredFeatures;
+        for (TextureInfo textureInfo : textureInfos) {
+            if (adapter.HasFeature(textureInfo.feature)) {
+                requiredFeatures.push_back(textureInfo.feature);
+            }
+        }
+
+        descriptor.requiredFeatures = requiredFeatures.data();
+        descriptor.requiredFeaturesCount = requiredFeatures.size();
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+
+    struct TextureInfo {
+        wgpu::FeatureName feature;
+        wgpu::TextureFormat format;
+    };
+    static constexpr TextureInfo textureInfos[] = {
+        {
+            wgpu::FeatureName::TextureCompressionBC,
+            wgpu::TextureFormat::BC2RGBAUnorm,
+        },
+        {
+            wgpu::FeatureName::TextureCompressionETC2,
+            wgpu::TextureFormat::ETC2RGB8Unorm,
+        },
+        {
+            wgpu::FeatureName::TextureCompressionASTC,
+            wgpu::TextureFormat::ASTC4x4Unorm,
+        },
+    };
+};
+
+TEST_F(CompatCompressedTextureToBufferCopyValidationTests, CanNotCopyCompressedTextureToBuffer) {
+    for (TextureInfo textureInfo : textureInfos) {
+        if (!device.HasFeature(textureInfo.feature)) {
+            continue;
+        }
+
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {4, 4, 1};
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.format = textureInfo.format;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+        wgpu::BufferDescriptor bufferDescriptor;
+        bufferDescriptor.size = 256 * 4;
+        bufferDescriptor.usage = wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+        wgpu::ImageCopyTexture source = utils::CreateImageCopyTexture(texture);
+        wgpu::ImageCopyBuffer destination = utils::CreateImageCopyBuffer(buffer, 0, 256, 4);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToBuffer(&source, &destination, &descriptor.size);
+        ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("cannot be used"));
+    }
 }
 
 }  // anonymous namespace
