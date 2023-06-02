@@ -293,17 +293,19 @@ void Disassembler::EmitValue(const Value* val) {
                         out_ << (scalar->ValueAs<bool>() ? "true" : "false");
                     },
                     [&](const constant::Splat* splat) {
-                        out_ << splat->Type()->FriendlyName() << " ";
+                        out_ << splat->Type()->FriendlyName() << "(";
                         emit(splat->Index(0));
+                        out_ << ")";
                     },
                     [&](const constant::Composite* composite) {
-                        out_ << composite->Type()->FriendlyName() << " ";
+                        out_ << composite->Type()->FriendlyName() << "(";
                         for (const auto* elem : composite->elements) {
                             if (elem != composite->elements[0]) {
                                 out_ << ", ";
                             }
                             emit(elem);
                         }
+                        out_ << ")";
                     });
             };
             emit(constant->Value());
@@ -387,7 +389,9 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
         },
         [&](const ir::Access* a) {
             EmitValueWithType(a);
-            out_ << " = access %" << IdOf(a->Object()) << " ";
+            out_ << " = access ";
+            EmitValue(a->Object());
+            out_ << " ";
             for (size_t i = 0; i < a->Indices().Length(); ++i) {
                 if (i > 0) {
                     out_ << ", ";

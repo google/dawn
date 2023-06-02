@@ -123,7 +123,7 @@ TEST_F(IR_FromProgramCallTest, EmitExpression_ConstructEmpty) {
 
     EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
 %b1 = block {
-  %i:ptr<private, vec3<f32>, read_write> = var, vec3<f32> 0.0f
+  %i:ptr<private, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
 }
 
 )");

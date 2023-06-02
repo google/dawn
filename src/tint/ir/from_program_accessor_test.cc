@@ -273,8 +273,8 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Var_MultiElementSwizzle_Mid
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_SingleIndex) {
-    // let a: vec3<u32> = vec3(1, 2, 3)
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleIndex) {
+    // let a: vec3<u32> = vec3()
     // let b = a[2]
     auto* a = Let("a", ty.vec3<u32>(), vec(ty.u32(), 3));
     auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
@@ -286,15 +286,14 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_SingleIndex) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:vec3<u32> = construct vec3<u32>, 1, 2, 3
-    %b:u32 = access %1, 2u
+    %b:u32 = access vec3<u32>(0u) 2u
     ret
   }
 }
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiIndex) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiIndex) {
     // let a: mat3x4<f32> = mat3x4<u32>()
     // let b = a[2][3]
 
@@ -308,15 +307,14 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiIndex) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:mat3x4<f32> = construct mat2x3<f32> 0
-    %b:f32 = access %1 2u, 3u
+    %b:f32 = access mat3x4<f32>(vec4<f32>(0.0f)) 2u, 3u
     ret
   }
 }
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_SingleMember) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleMember) {
     // struct MyStruct { foo: i32 }
     // let a: MyStruct = MyStruct();
     // let b = a.foo
@@ -334,15 +332,14 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_SingleMember) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:MyStruct = construct MyStruct
-    %b:i32 = access %1 0u
+    %b:i32 = access MyStruct(0i) 0u
     ret
   }
 }
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiMember) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiMember) {
     // struct Inner { bar: f32 }
     // struct Outer { a: i32, foo: Inner }
     // let a: Outer = Outer();
@@ -365,15 +362,14 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiMember) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:Outer = construt Outer
-    %b:f32 = access %1 1u, 0u
+    %b:f32 = access Outer(0i, Inner(0.0f)) 1u, 0u
     ret
   }
 }
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_Mixed) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_Mixed) {
     // struct Outer { a: i32, foo: array<Inner, 4> }
     // struct Inner { b: i32, c: f32, bar: vec4<f32> }
     // let a: array<Outer, 4> = array();
@@ -400,15 +396,14 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_Mixed) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:array<Outer, 4> = construct array<Outer, 4>
-    %b:vec4<f32 = access %1 0u, 1u, 1u, 2u
+    %b:vec4<f32> = access array<Outer, 4>(Outer(0i, array<Inner, 4>(Inner(0i, 0.0f, vec4<f32>(0.0f))))) 0u, 1u, 1u, 2u
     ret
   }
 }
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_SingleElement) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleElement) {
     // let a: vec2<f32> = vec2()
     // let b = a.y
 
@@ -422,8 +417,7 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_SingleElement) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:vec2<f32> = construct vec2<f32>
-    %b:f32 = access %1 1u
+    %b:f32 = access vec2<f32>(0.0f) 1u
     ret
   }
 }
@@ -445,7 +439,7 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzle) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %1:vec3<f32> = construct vec3<f32>
-    %b:vec4<f32> = swizzle %1, zyxz
+    %b:vec4<f32> = swizzle vec3<f32>(0u), zyxz
     ret
   }
 }
@@ -466,8 +460,7 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzleOfSw
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:vec3<f32> = construct vec3<f32>
-    %2:vec3<f32> = swizzle %1, zyx
+    %2:vec3<f32> = swizzle vec3<f32>(0u) zyx
     %b:vec2<f32> = swizzle %2, yy
     ret
   }
@@ -496,8 +489,7 @@ TEST_F(IR_FromProgramAccessorTest, DISABLED_Accessor_Let_MultiElementSwizzle_Mid
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %1:MyStruct = construct MyStruct
-    %2:vec4<f32> = access %a, 1u
+    %2:vec4<f32> = access MyStruct(), 1u
     %2:vec3<f32> = swizzle %1, zxy
     %3:vec2<f32> = swizzle %2, yx
     %b:f32 = access %3, 0u
