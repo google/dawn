@@ -25,6 +25,10 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/vector.h"
 
+#ifndef NDEBUG
+#define TINT_ASSERT_ITERATORS_NOT_INVALIDATED
+#endif
+
 namespace tint::utils {
 
 /// Action taken by a map mutation
@@ -190,10 +194,20 @@ class HashmapBase {
     class IteratorT {
       public:
         /// @returns the value pointed to by this iterator
-        EntryRef<IS_CONST> operator->() const { return *this; }
+        EntryRef<IS_CONST> operator->() const {
+#ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
+            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
+                                   "iterator invalidated by container modification");
+#endif
+            return *this;
+        }
 
         /// @returns a reference to the value at the iterator
         EntryRef<IS_CONST> operator*() const {
+#ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
+            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
+                                   "iterator invalidated by container modification");
+#endif
             auto& ref = current->entry.value();
             if constexpr (ValueIsVoid) {
                 return ref;
@@ -205,6 +219,10 @@ class HashmapBase {
         /// Increments the iterator
         /// @returns this iterator
         IteratorT& operator++() {
+#ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
+            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
+                                   "iterator invalidated by container modification");
+#endif
             if (current == end) {
                 return *this;
             }
@@ -216,12 +234,24 @@ class HashmapBase {
         /// Equality operator
         /// @param other the other iterator to compare this iterator to
         /// @returns true if this iterator is equal to other
-        bool operator==(const IteratorT& other) const { return current == other.current; }
+        bool operator==(const IteratorT& other) const {
+#ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
+            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
+                                   "iterator invalidated by container modification");
+#endif
+            return current == other.current;
+        }
 
         /// Inequality operator
         /// @param other the other iterator to compare this iterator to
         /// @returns true if this iterator is not equal to other
-        bool operator!=(const IteratorT& other) const { return current != other.current; }
+        bool operator!=(const IteratorT& other) const {
+#ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
+            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
+                                   "iterator invalidated by container modification");
+#endif
+            return current != other.current;
+        }
 
       private:
         /// Friend class
@@ -229,7 +259,17 @@ class HashmapBase {
 
         using SLOT = std::conditional_t<IS_CONST, const Slot, Slot>;
 
-        IteratorT(SLOT* c, SLOT* e) : current(c), end(e) { SkipToNextValue(); }
+        IteratorT(SLOT* c, SLOT* e, [[maybe_unused]] const HashmapBase& m)
+            : current(c),
+              end(e)
+#ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
+              ,
+              map(m),
+              initial_generation(m.Generation())
+#endif
+        {
+            SkipToNextValue();
+        }
 
         /// Moves the iterator forward, stopping at the next slot that is not empty.
         void SkipToNextValue() {
@@ -240,6 +280,11 @@ class HashmapBase {
 
         SLOT* current;  /// The slot the iterator is pointing to
         SLOT* end;      /// One past the last slot in the map
+
+#ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
+        const HashmapBase& map;     /// The hashmap that is being iterated over.
+        size_t initial_generation;  /// The generation ID when the iterator was created.
+#endif
     };
 
     /// An immutable key and mutable value iterator
@@ -373,16 +418,16 @@ class HashmapBase {
     size_t Generation() const { return generation_; }
 
     /// @returns an immutable iterator to the start of the map.
-    ConstIterator begin() const { return ConstIterator{slots_.begin(), slots_.end()}; }
+    ConstIterator begin() const { return ConstIterator{slots_.begin(), slots_.end(), *this}; }
 
     /// @returns an immutable iterator to the end of the map.
-    ConstIterator end() const { return ConstIterator{slots_.end(), slots_.end()}; }
+    ConstIterator end() const { return ConstIterator{slots_.end(), slots_.end(), *this}; }
 
     /// @returns an iterator to the start of the map.
-    Iterator begin() { return Iterator{slots_.begin(), slots_.end()}; }
+    Iterator begin() { return Iterator{slots_.begin(), slots_.end(), *this}; }
 
     /// @returns an iterator to the end of the map.
-    Iterator end() { return Iterator{slots_.end(), slots_.end()}; }
+    Iterator end() { return Iterator{slots_.end(), slots_.end(), *this}; }
 
     /// A debug function for checking that the map is in good health.
     /// Asserts if the map is corrupted.
