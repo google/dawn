@@ -46,6 +46,7 @@ class Value;
 class Var;
 }  // namespace tint::ir
 namespace tint::type {
+class Struct;
 class Type;
 }  // namespace tint::type
 
@@ -96,6 +97,11 @@ class GeneratorImplIr {
     /// @param block the block to get the label ID for
     /// @returns the ID of the block's label
     uint32_t Label(const ir::Block* block);
+
+    /// Emit a struct type.
+    /// @param id the result ID to use
+    /// @param str the struct type to emit
+    void EmitStructType(uint32_t id, const type::Struct* str);
 
     /// Emit a function.
     /// @param func the function to emit

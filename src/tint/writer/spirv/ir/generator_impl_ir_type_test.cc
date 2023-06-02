@@ -185,6 +185,76 @@ TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_ExplicitStride) {
     EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 16\n");
 }
 
+TEST_F(SpvGeneratorImplTest, Type_Struct) {
+    auto* str = mod.Types().Get<type::Struct>(
+        mod.symbols.Register("MyStruct"),
+        utils::Vector{
+            mod.Types().Get<type::StructMember>(mod.symbols.Register("a"), mod.Types().f32(), 0u,
+                                                0u, 4u, 4u, type::StructMemberAttributes{}),
+            mod.Types().Get<type::StructMember>(mod.symbols.Register("b"),
+                                                mod.Types().vec4(mod.Types().i32()), 1u, 16u, 16u,
+                                                16u, type::StructMemberAttributes{}),
+        },
+        16u, 32u, 32u);
+    auto id = generator_.Type(str);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeFloat 32
+%4 = OpTypeInt 32 1
+%3 = OpTypeVector %4 4
+%1 = OpTypeStruct %2 %3
+)");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), R"(OpMemberDecorate %1 0 Offset 0
+OpMemberDecorate %1 1 Offset 16
+)");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Debug()), R"(OpMemberName %1 0 "a"
+OpMemberName %1 1 "b"
+OpName %1 "MyStruct"
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Type_Struct_MatrixLayout) {
+    auto* str = mod.Types().Get<type::Struct>(
+        mod.symbols.Register("MyStruct"),
+        utils::Vector{
+            mod.Types().Get<type::StructMember>(mod.symbols.Register("m"),
+                                                mod.Types().mat3x3(mod.Types().f32()), 0u, 0u, 16u,
+                                                48u, type::StructMemberAttributes{}),
+            // Matrices nested inside arrays need layout decorations on the struct member too.
+            mod.Types().Get<type::StructMember>(
+                mod.symbols.Register("arr"),
+                mod.Types().array(mod.Types().array(mod.Types().mat2x4(mod.Types().f16()), 4), 4),
+                1u, 64u, 8u, 64u, type::StructMemberAttributes{}),
+        },
+        16u, 128u, 128u);
+    auto id = generator_.Type(str);
+    EXPECT_EQ(id, 1u);
+    EXPECT_EQ(DumpTypes(), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypeMatrix %3 3
+%9 = OpTypeFloat 16
+%8 = OpTypeVector %9 4
+%7 = OpTypeMatrix %8 2
+%11 = OpTypeInt 32 0
+%10 = OpConstant %11 4
+%6 = OpTypeArray %7 %10
+%5 = OpTypeArray %6 %10
+%1 = OpTypeStruct %2 %5
+)");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), R"(OpMemberDecorate %1 0 Offset 0
+OpMemberDecorate %1 0 ColMajor
+OpMemberDecorate %1 0 MatrixStride 16
+OpDecorate %6 ArrayStride 16
+OpDecorate %5 ArrayStride 64
+OpMemberDecorate %1 1 Offset 64
+OpMemberDecorate %1 1 ColMajor
+OpMemberDecorate %1 1 MatrixStride 8
+)");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Debug()), R"(OpMemberName %1 0 "m"
+OpMemberName %1 1 "arr"
+OpName %1 "MyStruct"
+)");
+}
+
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
 TEST_F(SpvGeneratorImplTest, Type_Multiple) {

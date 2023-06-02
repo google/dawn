@@ -47,6 +47,7 @@
 #include "src/tint/type/i32.h"
 #include "src/tint/type/matrix.h"
 #include "src/tint/type/pointer.h"
+#include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
@@ -225,6 +226,7 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
                     spv::Op::OpTypePointer,
                     {id, U32Operand(StorageClass(ptr->AddressSpace())), Type(ptr->StoreType())});
             },
+            [&](const type::Struct* str) { EmitStructType(id, str); },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled type: " << ty->FriendlyName();
             });
@@ -243,6 +245,47 @@ uint32_t GeneratorImplIr::Value(const ir::Value* value) {
 
 uint32_t GeneratorImplIr::Label(const ir::Block* block) {
     return block_labels_.GetOrCreate(block, [&]() { return module_.NextId(); });
+}
+
+void GeneratorImplIr::EmitStructType(uint32_t id, const type::Struct* str) {
+    // Helper to return `type` or a potentially nested array element type within `type` as a matrix
+    // type, or nullptr if no such matrix type is present.
+    auto get_nested_matrix_type = [&](const type::Type* type) {
+        while (auto* arr = type->As<type::Array>()) {
+            type = arr->ElemType();
+        }
+        return type->As<type::Matrix>();
+    };
+
+    OperandList operands = {id};
+    for (auto* member : str->Members()) {
+        operands.push_back(Type(member->Type()));
+
+        // Generate struct member offset decoration.
+        module_.PushAnnot(
+            spv::Op::OpMemberDecorate,
+            {operands[0], member->Index(), U32Operand(SpvDecorationOffset), member->Offset()});
+
+        // Emit matrix layout decorations if necessary.
+        if (auto* matrix_type = get_nested_matrix_type(member->Type())) {
+            const uint32_t effective_row_count = (matrix_type->rows() == 2) ? 2 : 4;
+            module_.PushAnnot(spv::Op::OpMemberDecorate,
+                              {id, member->Index(), U32Operand(SpvDecorationColMajor)});
+            module_.PushAnnot(spv::Op::OpMemberDecorate,
+                              {id, member->Index(), U32Operand(SpvDecorationMatrixStride),
+                               Operand(effective_row_count * matrix_type->type()->Size())});
+        }
+
+        if (member->Name().IsValid()) {
+            module_.PushDebug(spv::Op::OpMemberName,
+                              {operands[0], member->Index(), Operand(member->Name().Name())});
+        }
+    }
+    module_.PushType(spv::Op::OpTypeStruct, std::move(operands));
+
+    if (str->Name().IsValid()) {
+        module_.PushDebug(spv::Op::OpName, {operands[0], Operand(str->Name().Name())});
+    }
 }
 
 void GeneratorImplIr::EmitFunction(const ir::Function* func) {
