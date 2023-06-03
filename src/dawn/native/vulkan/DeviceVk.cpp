@@ -445,8 +445,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         // Always request all the features from VK_EXT_subgroup_size_control when available.
         usedKnobs.subgroupSizeControlFeatures = mDeviceInfo.subgroupSizeControlFeatures;
         featuresChain.Add(&usedKnobs.subgroupSizeControlFeatures);
-
-        mComputeSubgroupSize = FindComputeSubgroupSize();
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory)) {
@@ -587,32 +585,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
                             "vkCreateDevice"));
 
     return usedKnobs;
-}
-
-uint32_t Device::FindComputeSubgroupSize() const {
-    if (!mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) {
-        return 0;
-    }
-
-    const VkPhysicalDeviceSubgroupSizeControlPropertiesEXT& ext =
-        mDeviceInfo.subgroupSizeControlProperties;
-
-    if (ext.minSubgroupSize == ext.maxSubgroupSize) {
-        return 0;
-    }
-
-    // At the moment, only Intel devices support varying subgroup sizes and 16, which is the
-    // next value after the minimum of 8, is the sweet spot according to [1]. Hence the
-    // following heuristics, which may need to be adjusted in the future for other
-    // architectures, or if a specific API is added to let client code select the size..
-    //
-    // [1] https://bugs.freedesktop.org/show_bug.cgi?id=108875
-    uint32_t subgroupSize = ext.minSubgroupSize * 2;
-    if (subgroupSize <= ext.maxSubgroupSize) {
-        return subgroupSize;
-    } else {
-        return ext.minSubgroupSize;
-    }
 }
 
 void Device::GatherQueueFromDevice() {
@@ -952,7 +924,7 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
 }
 
 uint32_t Device::GetComputeSubgroupSize() const {
-    return mComputeSubgroupSize;
+    return ToBackend(GetPhysicalDevice())->GetDefaultComputeSubgroupSize();
 }
 
 void Device::OnDebugMessage(std::string message) {

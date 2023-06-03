@@ -163,8 +163,6 @@ class Device final : public DeviceBase {
     ResultOrError<VulkanDeviceKnobs> CreateDevice(VkPhysicalDevice vkPhysicalDevice);
     void GatherQueueFromDevice();
 
-    uint32_t FindComputeSubgroupSize() const;
-
     MaybeError CheckDebugLayerAndGenerateErrors();
     void AppendDebugLayerMessages(ErrorData* error) override;
     void CheckDebugMessagesAfterDestruction() const;
@@ -181,7 +179,6 @@ class Device final : public DeviceBase {
     VkDevice mVkDevice = VK_NULL_HANDLE;
     uint32_t mQueueFamily = 0;
     VkQueue mQueue = VK_NULL_HANDLE;
-    uint32_t mComputeSubgroupSize = 0;
 
     SerialQueue<ExecutionSerial, Ref<DescriptorSetAllocator>>
         mDescriptorAllocatorsPendingDeallocation;

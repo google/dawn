@@ -45,6 +45,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidQualcomm() const;
     bool IsIntelMesa() const;
 
+    uint32_t GetDefaultComputeSubgroupSize() const;
+
   private:
     MaybeError InitializeImpl() override;
     void InitializeSupportedFeaturesImpl() override;
@@ -58,9 +60,13 @@ class PhysicalDevice : public PhysicalDeviceBase {
                                                     const DeviceDescriptor* descriptor,
                                                     const TogglesState& deviceToggles) override;
 
+    uint32_t FindDefaultComputeSubgroupSize() const;
+
     VkPhysicalDevice mVkPhysicalDevice;
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};
+
+    uint32_t mDefaultComputeSubgroupSize = 0;
 };
 
 }  // namespace dawn::native::vulkan
