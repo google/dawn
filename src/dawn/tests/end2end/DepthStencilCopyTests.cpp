@@ -514,9 +514,6 @@ class DepthCopyTests : public DepthStencilCopyTests {
                                        uint32_t textureArrayLayerCount,
                                        uint32_t testLevel,
                                        bool checkBufferContent) {
-        // TODO(crbug.com/dawn/1291): Compute emulation path fails for Angle on Windows.
-        DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
         uint32_t mipLevelCount = testLevel + 1;
         wgpu::Texture texture =
             CreateTexture(textureWidth, textureHeight,
@@ -776,9 +773,6 @@ TEST_P(DepthCopyTests, BufferCopySizeEdgeCase) {
 class DepthCopyFromBufferTests : public DepthStencilCopyTests {
   public:
     void DoTest(uint32_t bufferCopyOffset, bool hasRenderAttachmentUsage) {
-        // TODO(crbug.com/dawn/1291): Compute emulation path fails for Angle on Windows.
-        DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
         constexpr uint32_t kWidth = 8;
         constexpr uint32_t kHeight = 1;
 
@@ -896,9 +890,6 @@ class StencilCopyTests : public DepthStencilCopyTests {
                                          uint32_t textureArrayLayerCount,
                                          uint32_t testLevel,
                                          bool checkBufferContent) {
-        // TODO(crbug.com/dawn/1291): Compute emulation path fails for Angle on Windows.
-        DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
         // TODO(crbug.com/dawn/1835): ResourceBarrier state mismatch.
         DAWN_SUPPRESS_TEST_IF(textureArrayLayerCount > 1 && IsD3D12() &&
                               IsBackendValidationEnabled());

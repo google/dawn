@@ -279,21 +279,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
                            gl.GetVersion().IsES());
     // For OpenGL/OpenGL ES, use compute shader blit to emulate depth16unorm texture to buffer
     // copies.
-    // Disable Angle on windows as it seems to have side-effect.
-#if DAWN_PLATFORM_IS(WINDOWS)
-    const bool kIsAngleOnWindows = mName.find("ANGLE") != std::string::npos;
-#else
-    constexpr bool kIsAngleOnWindows = false;
-#endif
-    deviceToggles->Default(Toggle::UseBlitForDepth16UnormTextureToBufferCopy, !kIsAngleOnWindows);
+    deviceToggles->Default(Toggle::UseBlitForDepth16UnormTextureToBufferCopy, true);
 
     // For OpenGL ES, use compute shader blit to emulate depth32float texture to buffer copies.
     deviceToggles->Default(Toggle::UseBlitForDepth32FloatTextureToBufferCopy,
-                           gl.GetVersion().IsES() && !kIsAngleOnWindows);
+                           gl.GetVersion().IsES());
 
     // For OpenGL ES, use compute shader blit to emulate stencil texture to buffer copies.
-    deviceToggles->Default(Toggle::UseBlitForStencilTextureToBufferCopy,
-                           gl.GetVersion().IsES() && !kIsAngleOnWindows);
+    deviceToggles->Default(Toggle::UseBlitForStencilTextureToBufferCopy, gl.GetVersion().IsES());
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,
