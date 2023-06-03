@@ -12,23 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/branch.h"
+#ifndef SRC_TINT_IR_VALIDATE_H_
+#define SRC_TINT_IR_VALIDATE_H_
 
-#include <utility>
+#include <string>
 
-#include "src/tint/ir/block.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Branch);
+#include "src/tint/ir/module.h"
+#include "src/tint/utils/result.h"
 
 namespace tint::ir {
 
-Branch::Branch(utils::VectorRef<Value*> args) : args_(std::move(args)) {
-    for (auto* arg : args) {
-        TINT_ASSERT(IR, arg);
-        arg->AddUsage(this);
-    }
-}
+/// Signifies the validation completed successfully
+struct Success {};
 
-Branch::~Branch() = default;
+/// Validates that a given IR module is correctly formed
+/// @param mod the module to validate
+/// @returns true on success, an error result otherwise
+utils::Result<Success, std::string> Validate(const Module& mod);
 
 }  // namespace tint::ir
+
+#endif  // SRC_TINT_IR_VALIDATE_H_
