@@ -14,12 +14,17 @@
 
 #include "src/tint/ir/discard.h"
 #include "src/tint/debug.h"
+#include "src/tint/type/void.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Discard);
 
 namespace tint::ir {
 
-Discard::Discard() : Base(nullptr, utils::Empty) {}
+Discard::Discard(const type::Type* ty) : Base(ty, utils::Empty) {
+    if (ty) {
+        TINT_ASSERT(IR, ty->Is<type::Void>());
+    }
+}
 
 Discard::~Discard() = default;
 

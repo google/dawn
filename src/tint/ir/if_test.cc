@@ -1,0 +1,73 @@
+// Copyright 2023 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "src/tint/ir/if.h"
+#include "gtest/gtest-spi.h"
+#include "src/tint/ir/ir_test_helper.h"
+
+namespace tint::ir {
+namespace {
+
+using namespace tint::number_suffixes;  // NOLINT
+using IR_IfTest = IRTestHelper;
+
+TEST_F(IR_IfTest, Usage) {
+    auto* cond = b.Constant(true);
+    auto* if_ = b.CreateIf(cond);
+    ASSERT_EQ(1u, cond->Usage().Length());
+    EXPECT_EQ(if_, cond->Usage()[0]);
+}
+
+TEST_F(IR_IfTest, Fail_NullCondition) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            b.CreateIf(nullptr);
+        },
+        "");
+}
+
+TEST_F(IR_IfTest, Fail_NullTrueBlock) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            If if_(b.Constant(false), nullptr, b.CreateBlock(), b.CreateBlock());
+        },
+        "");
+}
+
+TEST_F(IR_IfTest, Fail_NullFalseBlock) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            If if_(b.Constant(false), b.CreateBlock(), nullptr, b.CreateBlock());
+        },
+        "");
+}
+
+TEST_F(IR_IfTest, Fail_NullMergeBlock) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            If if_(b.Constant(false), b.CreateBlock(), b.CreateBlock(), nullptr);
+        },
+        "");
+}
+
+}  // namespace
+}  // namespace tint::ir

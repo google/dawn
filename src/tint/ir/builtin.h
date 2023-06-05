@@ -28,7 +28,9 @@ class Builtin : public utils::Castable<Builtin, Call> {
     /// @param res_type the result type
     /// @param func the builtin function
     /// @param args the conversion arguments
-    Builtin(const type::Type* res_type, builtin::Function func, utils::VectorRef<Value*> args);
+    Builtin(const type::Type* res_type,
+            builtin::Function func,
+            utils::VectorRef<Value*> args = utils::Empty);
     ~Builtin() override;
 
     /// @returns the builtin function

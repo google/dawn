@@ -40,7 +40,7 @@ class Call : public utils::Castable<Call, Instruction> {
     Call(const type::Type* result_type, utils::VectorRef<Value*> args);
 
   private:
-    const type::Type* result_type_;
+    const type::Type* result_type_ = nullptr;
     utils::Vector<Value*, 1> args_;
 };
 

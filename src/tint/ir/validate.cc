@@ -73,20 +73,7 @@ class Validator {
         }
     }
 
-    void CheckFunction(const Function* func) {
-        for (const auto* param : func->Params()) {
-            if (param == nullptr) {
-                AddError("function '" + Name(func) + "': null parameter");
-                continue;
-            }
-        }
-
-        if (func->StartTarget() == nullptr) {
-            AddError("function '" + Name(func) + "': null start target");
-        } else {
-            CheckBlock(func->StartTarget());
-        }
-    }
+    void CheckFunction(const Function* func) { CheckBlock(func->StartTarget()); }
 
     void CheckBlock(const Block* blk) {
         if (!blk->HasBranchTarget()) {

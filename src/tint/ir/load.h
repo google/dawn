@@ -36,8 +36,8 @@ class Load : public utils::Castable<Load, Instruction> {
     Value* From() const { return from_; }
 
   private:
-    const type::Type* result_type_;
-    Value* from_;
+    const type::Type* result_type_ = nullptr;
+    Value* from_ = nullptr;
 };
 
 }  // namespace tint::ir

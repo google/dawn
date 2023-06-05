@@ -122,7 +122,7 @@ class Block : public utils::Castable<Block> {
 
     /// Sets the params to the block
     /// @param params the params for the block
-    void SetParams(utils::VectorRef<const BlockParam*> params) { params_ = std::move(params); }
+    void SetParams(utils::VectorRef<const BlockParam*> params);
     /// @return the parameters passed into the block
     utils::VectorRef<const BlockParam*> Params() const { return params_; }
     /// @returns the params to the block
@@ -133,7 +133,7 @@ class Block : public utils::Castable<Block> {
 
     /// Adds the given node to the inbound branches
     /// @param node the node to add
-    void AddInboundBranch(ir::Branch* node) { inbound_branches_.Push(node); }
+    void AddInboundBranch(ir::Branch* node);
 
   private:
     struct {

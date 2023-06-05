@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/ir_test_helper.h"
@@ -23,7 +24,7 @@ using namespace tint::number_suffixes;  // NOLINT
 
 using IR_LoadTest = IRTestHelper;
 
-TEST_F(IR_LoadTest, CreateLoad) {
+TEST_F(IR_LoadTest, Creat) {
     auto* store_type = mod.Types().i32();
     auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
                                               builtin::Access::kReadWrite));
@@ -38,7 +39,7 @@ TEST_F(IR_LoadTest, CreateLoad) {
     EXPECT_EQ(inst->From(), var);
 }
 
-TEST_F(IR_LoadTest, Load_Usage) {
+TEST_F(IR_LoadTest, Usage) {
     auto* store_type = mod.Types().i32();
     auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
                                               builtin::Access::kReadWrite));
@@ -47,6 +48,50 @@ TEST_F(IR_LoadTest, Load_Usage) {
     ASSERT_NE(inst->From(), nullptr);
     ASSERT_EQ(inst->From()->Usage().Length(), 1u);
     EXPECT_EQ(inst->From()->Usage()[0], inst);
+}
+
+TEST_F(IR_LoadTest, Fail_NullType) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+
+            auto* store_type = mod.Types().i32();
+            auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
+                                                      builtin::Access::kReadWrite));
+            Load l(nullptr, var);
+        },
+        "");
+}
+
+TEST_F(IR_LoadTest, Fail_NonPtr_Builder) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            b.Load(b.Declare(mod.Types().f32()));
+        },
+        "");
+}
+
+TEST_F(IR_LoadTest, Fail_NullValue_Builder) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            b.Load(nullptr);
+        },
+        "");
+}
+
+TEST_F(IR_LoadTest, Fail_NullValue) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            Load l(mod.Types().f32(), nullptr);
+        },
+        "");
 }
 
 }  // namespace

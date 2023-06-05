@@ -22,7 +22,10 @@ namespace tint::ir {
 
 Return::Return(Function* func, utils::VectorRef<Value*> args) : Base(args), func_(func) {
     TINT_ASSERT(IR, func_);
-    func_->AddUsage(this);
+
+    if (func_) {
+        func_->AddUsage(this);
+    }
 }
 
 Return::~Return() = default;

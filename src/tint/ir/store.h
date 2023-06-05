@@ -36,8 +36,8 @@ class Store : public utils::Castable<Store, Instruction> {
     Value* From() const { return from_; }
 
   private:
-    Value* to_;
-    Value* from_;
+    Value* to_ = nullptr;
+    Value* from_ = nullptr;
 };
 
 }  // namespace tint::ir

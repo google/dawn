@@ -25,8 +25,11 @@ namespace tint::ir {
 ExitLoop::ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */)
     : Base(std::move(args)), loop_(loop) {
     TINT_ASSERT(IR, loop_);
-    loop_->AddUsage(this);
-    loop_->Merge()->AddInboundBranch(this);
+
+    if (loop_) {
+        loop_->AddUsage(this);
+        loop_->Merge()->AddInboundBranch(this);
+    }
 }
 
 ExitLoop::~ExitLoop() = default;

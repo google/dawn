@@ -49,7 +49,7 @@ class Var : public utils::Castable<Var, Instruction> {
     std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
 
   private:
-    const type::Type* type_;
+    const type::Type* type_ = nullptr;
     Value* initializer_ = nullptr;
     std::optional<struct BindingPoint> binding_point_;
 };

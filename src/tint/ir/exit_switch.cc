@@ -25,8 +25,11 @@ namespace tint::ir {
 ExitSwitch::ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args /* = utils::Empty */)
     : Base(std::move(args)), switch_(sw) {
     TINT_ASSERT(IR, switch_);
-    switch_->AddUsage(this);
-    switch_->Merge()->AddInboundBranch(this);
+
+    if (switch_) {
+        switch_->AddUsage(this);
+        switch_->Merge()->AddInboundBranch(this);
+    }
 }
 
 ExitSwitch::~ExitSwitch() = default;

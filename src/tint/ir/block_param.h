@@ -33,7 +33,7 @@ class BlockParam : public utils::Castable<BlockParam, Value> {
 
   private:
     /// the result type of the instruction
-    const type::Type* type_;
+    const type::Type* type_ = nullptr;
 };
 
 }  // namespace tint::ir

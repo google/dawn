@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/builder.h"
+#include "gtest/gtest-spi.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/ir_test_helper.h"
@@ -46,6 +46,26 @@ TEST_F(IR_BitcastTest, Bitcast_Usage) {
     ASSERT_NE(args[0], nullptr);
     ASSERT_EQ(args[0]->Usage().Length(), 1u);
     EXPECT_EQ(args[0]->Usage()[0], inst);
+}
+
+TEST_F(IR_BitcastTest, Fail_NullValue) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            b.Bitcast(mod.Types().i32(), nullptr);
+        },
+        "");
+}
+
+TEST_F(IR_BitcastTest, Fail_NullType) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            b.Bitcast(nullptr, b.Constant(u32(1)));
+        },
+        "");
 }
 
 }  // namespace

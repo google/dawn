@@ -35,7 +35,7 @@ class Constant : public utils::Castable<Constant, Value> {
     const type::Type* Type() const override { return value_->Type(); }
 
   private:
-    const constant::Value* const value_;
+    const constant::Value* const value_ = nullptr;
 };
 
 }  // namespace tint::ir

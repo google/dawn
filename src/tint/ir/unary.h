@@ -49,8 +49,8 @@ class Unary : public utils::Castable<Unary, Instruction> {
 
   private:
     enum Kind kind_;
-    const type::Type* result_type_;
-    Value* val_;
+    const type::Type* result_type_ = nullptr;
+    Value* val_ = nullptr;
 };
 
 }  // namespace tint::ir

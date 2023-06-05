@@ -22,6 +22,22 @@ Block::Block() : Base() {}
 
 Block::~Block() = default;
 
+void Block::SetParams(utils::VectorRef<const BlockParam*> params) {
+    params_ = std::move(params);
+
+    for (auto* param : params_) {
+        TINT_ASSERT(IR, param != nullptr);
+    }
+}
+
+void Block::AddInboundBranch(ir::Branch* node) {
+    TINT_ASSERT(IR, node != nullptr);
+
+    if (node) {
+        inbound_branches_.Push(node);
+    }
+}
+
 void Block::Prepend(Instruction* inst) {
     TINT_ASSERT_OR_RETURN(IR, inst);
     TINT_ASSERT_OR_RETURN(IR, inst->Block() == nullptr);

@@ -294,7 +294,9 @@ class Builder {
     /// @param func the function being called
     /// @param args the call arguments
     /// @returns the instruction
-    ir::UserCall* UserCall(const type::Type* type, Function* func, utils::VectorRef<Value*> args);
+    ir::UserCall* UserCall(const type::Type* type,
+                           Function* func,
+                           utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a value conversion instruction
     /// @param to the type converted to
@@ -309,7 +311,7 @@ class Builder {
     /// @param to the type being converted
     /// @param args the arguments to be converted
     /// @returns the instruction
-    ir::Construct* Construct(const type::Type* to, utils::VectorRef<Value*> args);
+    ir::Construct* Construct(const type::Type* to, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a builtin call instruction
     /// @param type the return type
@@ -318,7 +320,7 @@ class Builder {
     /// @returns the instruction
     ir::Builtin* Builtin(const type::Type* type,
                          builtin::Function func,
-                         utils::VectorRef<Value*> args);
+                         utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a load instruction
     /// @param from the expression being loaded from

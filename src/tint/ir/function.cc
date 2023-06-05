@@ -21,11 +21,20 @@ namespace tint::ir {
 Function::Function(const type::Type* rt,
                    PipelineStage stage,
                    std::optional<std::array<uint32_t, 3>> wg_size)
-    : Base(), pipeline_stage_(stage), workgroup_size_(wg_size) {
+    : pipeline_stage_(stage), workgroup_size_(wg_size) {
+    TINT_ASSERT(IR, rt != nullptr);
+
     return_.type = rt;
 }
 
 Function::~Function() = default;
+
+void Function::SetParams(utils::VectorRef<FunctionParam*> params) {
+    params_ = std::move(params);
+    for (auto* param : params_) {
+        TINT_ASSERT(IR, param != nullptr);
+    }
+}
 
 utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value) {
     switch (value) {

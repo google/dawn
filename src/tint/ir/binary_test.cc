@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/builder.h"
+#include "gtest/gtest-spi.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -22,6 +22,36 @@ namespace {
 using namespace tint::number_suffixes;  // NOLINT
 
 using IR_BinaryTest = IRTestHelper;
+
+TEST_F(IR_BinaryTest, Fail_NullType) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            b.Add(nullptr, b.Constant(u32(1)), b.Constant(u32(2)));
+        },
+        "");
+}
+
+TEST_F(IR_BinaryTest, Fail_NullLHS) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            b.Add(mod.Types().u32(), nullptr, b.Constant(u32(2)));
+        },
+        "");
+}
+
+TEST_F(IR_BinaryTest, Fail_NullRHS) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            b.Add(mod.Types().u32(), b.Constant(u32(1)), nullptr);
+        },
+        "");
+}
 
 TEST_F(IR_BinaryTest, CreateAnd) {
     const auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));

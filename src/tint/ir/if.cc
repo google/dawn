@@ -20,13 +20,20 @@ namespace tint::ir {
 
 If::If(Value* cond, ir::Block* t, ir::Block* f, ir::Block* m)
     : Base(utils::Empty), condition_(cond), true_(t), false_(f), merge_(m) {
+    TINT_ASSERT(IR, condition_);
     TINT_ASSERT(IR, true_);
     TINT_ASSERT(IR, false_);
     TINT_ASSERT(IR, merge_);
 
-    condition_->AddUsage(this);
-    true_->AddInboundBranch(this);
-    false_->AddInboundBranch(this);
+    if (condition_) {
+        condition_->AddUsage(this);
+    }
+    if (true_) {
+        true_->AddInboundBranch(this);
+    }
+    if (false_) {
+        false_->AddInboundBranch(this);
+    }
 }
 
 If::~If() = default;

@@ -21,8 +21,12 @@ namespace tint::ir {
 
 Unary::Unary(enum Kind k, const type::Type* res_ty, Value* val)
     : kind_(k), result_type_(res_ty), val_(val) {
-    TINT_ASSERT(IR, val_);
-    val_->AddUsage(this);
+    TINT_ASSERT(IR, val_ != nullptr);
+    TINT_ASSERT(IR, result_type_ != nullptr);
+
+    if (val_) {
+        val_->AddUsage(this);
+    }
 }
 
 Unary::~Unary() = default;

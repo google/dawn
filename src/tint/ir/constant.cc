@@ -18,7 +18,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Constant);
 
 namespace tint::ir {
 
-Constant::Constant(const constant::Value* val) : value_(val) {}
+Constant::Constant(const constant::Value* val) : value_(val) {
+    TINT_ASSERT(IR, value_);
+}
 
 Constant::~Constant() = default;
 

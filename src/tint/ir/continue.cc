@@ -25,8 +25,11 @@ namespace tint::ir {
 Continue::Continue(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */)
     : Base(std::move(args)), loop_(loop) {
     TINT_ASSERT(IR, loop_);
-    loop_->AddUsage(this);
-    loop_->Continuing()->AddInboundBranch(this);
+
+    if (loop_) {
+        loop_->AddUsage(this);
+        loop_->Continuing()->AddInboundBranch(this);
+    }
 }
 
 Continue::~Continue() = default;

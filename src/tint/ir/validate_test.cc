@@ -61,27 +61,6 @@ TEST_F(IR_ValidateTest, Function) {
     EXPECT_TRUE(res) << res.Failure();
 }
 
-TEST_F(IR_ValidateTest, Function_NullStartTarget) {
-    auto* f = b.CreateFunction("my_func", mod.Types().void_());
-    mod.functions.Push(f);
-
-    f->SetStartTarget(nullptr);
-    auto res = ir::Validate(mod);
-    ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure(), "error: function 'my_func': null start target");
-}
-
-TEST_F(IR_ValidateTest, Function_ParamNull) {
-    auto* f = b.CreateFunction("my_func", mod.Types().void_());
-    mod.functions.Push(f);
-
-    f->SetParams(utils::Vector<FunctionParam*, 1>{nullptr});
-    f->StartTarget()->SetInstructions(utils::Vector{b.Return(f)});
-    auto res = ir::Validate(mod);
-    ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure(), "error: function 'my_func': null parameter");
-}
-
 TEST_F(IR_ValidateTest, Block_NoBranchAtEnd) {
     auto* f = b.CreateFunction("my_func", mod.Types().void_());
     mod.functions.Push(f);

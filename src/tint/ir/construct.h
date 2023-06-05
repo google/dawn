@@ -26,7 +26,7 @@ class Construct : public utils::Castable<Construct, Call> {
     /// Constructor
     /// @param type the result type
     /// @param args the constructor arguments
-    Construct(const type::Type* type, utils::VectorRef<Value*> args);
+    explicit Construct(const type::Type* type, utils::VectorRef<Value*> args = utils::Empty);
     ~Construct() override;
 };
 

@@ -68,9 +68,9 @@ class Binary : public utils::Castable<Binary, Instruction> {
 
   private:
     enum Kind kind_;
-    const type::Type* result_type_;
-    Value* lhs_;
-    Value* rhs_;
+    const type::Type* result_type_ = nullptr;
+    Value* lhs_ = nullptr;
+    Value* rhs_ = nullptr;
 };
 
 }  // namespace tint::ir

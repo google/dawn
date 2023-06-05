@@ -22,8 +22,13 @@ namespace tint::ir {
 Store::Store(Value* to, Value* from) : Base(), to_(to), from_(from) {
     TINT_ASSERT(IR, to_);
     TINT_ASSERT(IR, from_);
-    to_->AddUsage(this);
-    from_->AddUsage(this);
+
+    if (to_) {
+        to_->AddUsage(this);
+    }
+    if (from_) {
+        from_->AddUsage(this);
+    }
 }
 
 Store::~Store() = default;

@@ -25,7 +25,10 @@ namespace tint::ir {
 Branch::Branch(utils::VectorRef<Value*> args) : args_(std::move(args)) {
     for (auto* arg : args) {
         TINT_ASSERT(IR, arg);
-        arg->AddUsage(this);
+
+        if (arg) {
+            arg->AddUsage(this);
+        }
     }
 }
 

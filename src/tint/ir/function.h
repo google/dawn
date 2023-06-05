@@ -111,13 +111,16 @@ class Function : public utils::Castable<Function, Value> {
 
     /// Sets the function parameters
     /// @param params the function paramters
-    void SetParams(utils::VectorRef<FunctionParam*> params) { params_ = std::move(params); }
+    void SetParams(utils::VectorRef<FunctionParam*> params);
     /// @returns the function parameters
     utils::VectorRef<FunctionParam*> Params() const { return params_; }
 
     /// Sets the start target for the function
     /// @param target the start target
-    void SetStartTarget(Block* target) { start_target_ = target; }
+    void SetStartTarget(Block* target) {
+        TINT_ASSERT(IR, target != nullptr);
+        start_target_ = target;
+    }
     /// @returns the function start target
     Block* StartTarget() const { return start_target_; }
 

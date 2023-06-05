@@ -21,7 +21,10 @@ namespace tint::ir {
 Switch::Switch(Value* cond, ir::Block* m) : Base(utils::Empty), condition_(cond), merge_(m) {
     TINT_ASSERT(IR, condition_);
     TINT_ASSERT(IR, merge_);
-    condition_->AddUsage(this);
+
+    if (condition_) {
+        condition_->AddUsage(this);
+    }
 }
 
 Switch::~Switch() = default;

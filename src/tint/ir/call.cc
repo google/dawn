@@ -22,8 +22,13 @@ namespace tint::ir {
 
 Call::Call(const type::Type* res_ty, utils::VectorRef<Value*> arguments)
     : result_type_(res_ty), args_(std::move(arguments)) {
+    TINT_ASSERT(IR, result_type_);
+
     for (auto* arg : args_) {
-        arg->AddUsage(this);
+        TINT_ASSERT(IR, arg);
+        if (arg) {
+            arg->AddUsage(this);
+        }
     }
 }
 

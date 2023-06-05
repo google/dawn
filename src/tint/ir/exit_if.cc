@@ -25,8 +25,11 @@ namespace tint::ir {
 ExitIf::ExitIf(ir::If* i, utils::VectorRef<Value*> args /* = utils::Empty */)
     : Base(std::move(args)), if_(i) {
     TINT_ASSERT(IR, if_);
-    if_->AddUsage(this);
-    if_->Merge()->AddInboundBranch(this);
+
+    if (if_) {
+        if_->AddUsage(this);
+        if_->Merge()->AddInboundBranch(this);
+    }
 }
 
 ExitIf::~ExitIf() = default;

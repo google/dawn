@@ -28,10 +28,15 @@ BreakIf::BreakIf(Value* condition,
     : Base(std::move(args)), condition_(condition), loop_(loop) {
     TINT_ASSERT(IR, condition_);
     TINT_ASSERT(IR, loop_);
-    condition_->AddUsage(this);
-    loop_->AddUsage(this);
-    loop_->Body()->AddInboundBranch(this);
-    loop_->Merge()->AddInboundBranch(this);
+
+    if (condition_) {
+        condition_->AddUsage(this);
+    }
+    if (loop_) {
+        loop_->AddUsage(this);
+        loop_->Body()->AddInboundBranch(this);
+        loop_->Merge()->AddInboundBranch(this);
+    }
 }
 
 BreakIf::~BreakIf() = default;
