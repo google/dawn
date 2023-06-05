@@ -320,7 +320,7 @@ interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
 
     wgpu::ShaderModuleWGSLDescriptor wgsl_desc{};
     wgpu::ShaderModuleDescriptor sm_desc{};
-    if (!conv(wgsl_desc.source, descriptor.code) || !conv(sm_desc.label, descriptor.label)) {
+    if (!conv(wgsl_desc.code, descriptor.code) || !conv(sm_desc.label, descriptor.label)) {
         return {};
     }
     sm_desc.nextInChain = &wgsl_desc;

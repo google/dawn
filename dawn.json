@@ -2421,9 +2421,7 @@
         "chained": "in",
         "chain roots": ["shader module descriptor"],
         "members": [
-            {"name": "source", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr", "optional": true, "tags": ["dawn", "emscripten"]},
-            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr", "optional": true, "tags": ["dawn", "emscripten"]},
-            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr", "tags": ["upstream"]}
+            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
     },
     "dawn shader module SPIRV options descriptor": {
