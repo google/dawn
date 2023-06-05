@@ -19,6 +19,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/ir/builder.h"
+#include "src/tint/ir/validate.h"
 #include "src/tint/writer/spirv/ir/generator_impl_ir.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 
@@ -49,6 +50,22 @@ class SpvGeneratorTestHelperBase : public BASE {
   protected:
     /// The SPIR-V generator.
     GeneratorImplIr generator_;
+
+    /// Validation errors
+    std::string err_;
+
+    /// @returns the error string from the validation
+    std::string Error() const { return err_; }
+
+    /// @returns true if the IR module is valid
+    bool IRIsValid() {
+        auto res = ir::Validate(mod);
+        if (!res) {
+            err_ = res.Failure().str();
+            return false;
+        }
+        return true;
+    }
 
     /// @returns the disassembled types from the generated module.
     std::string DumpTypes() { return DumpInstructions(generator_.Module().Types()); }

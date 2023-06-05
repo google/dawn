@@ -29,6 +29,8 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -57,6 +59,8 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
         utils::Vector{b.Add(ty.i32(), b.Constant(1_i), b.Constant(1_i)), b.ExitIf(i)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -92,6 +96,8 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -121,6 +127,8 @@ TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
     i->False()->SetInstructions(utils::Vector{b.Return(func)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -154,6 +162,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue) {
     i->Merge()->SetInstructions(utils::Vector{b.Return(func, utils::Vector{merge_param})});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -192,6 +202,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_TrueReturn) {
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -228,6 +240,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_FalseReturn) {
     i->Merge()->SetInstructions(utils::Vector{b.Return(func, utils::Vector{merge_param})});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -270,6 +284,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue) {
     });
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

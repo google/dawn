@@ -31,6 +31,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Basic) {
 
     func->StartTarget()->Append(swtch);
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -66,6 +68,8 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleCases) {
     swtch->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(swtch);
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -110,6 +114,8 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleSelectorsPerCase) {
 
     func->StartTarget()->Append(swtch);
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -147,6 +153,8 @@ TEST_F(SpvGeneratorImplTest, Switch_AllCasesReturn) {
     def_case->Append(b.Return(func));
 
     func->StartTarget()->Append(swtch);
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -189,6 +197,8 @@ TEST_F(SpvGeneratorImplTest, Switch_ConditionalBreak) {
     swtch->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(swtch);
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -235,6 +245,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
 
     func->StartTarget()->SetInstructions(utils::Vector{s});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -273,6 +285,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
     s->Merge()->Append(b.Return(func));
 
     func->StartTarget()->SetInstructions(utils::Vector{s});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -315,6 +329,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
     s->Merge()->Append(b.Return(func, utils::Vector{merge_param_0}));
 
     func->StartTarget()->SetInstructions(utils::Vector{s});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

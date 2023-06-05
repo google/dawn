@@ -14,6 +14,7 @@
 
 #include "src/tint/ir/validate.h"
 
+#include <string>
 #include <utility>
 
 #include "src/tint/ir/access.h"
@@ -164,13 +165,9 @@ class Validator {
 
 }  // namespace
 
-utils::Result<Success, std::string> Validate(const Module& mod) {
+utils::Result<Success, diag::List> Validate(const Module& mod) {
     Validator v(mod);
-    auto r = v.IsValid();
-    if (!r) {
-        return r.Failure().str();
-    }
-    return Success{};
+    return v.IsValid();
 }
 
 }  // namespace tint::ir

@@ -21,6 +21,8 @@ TEST_F(SpvGeneratorImplTest, Function_Empty) {
     auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{b.Return(func)});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -37,6 +39,8 @@ TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
     auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{b.Return(func)});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     generator_.EmitFunction(func);
     generator_.EmitFunction(func);
@@ -49,6 +53,8 @@ TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Compute) {
     auto* func =
         b.CreateFunction("main", ty.void_(), ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
     func->StartTarget()->SetInstructions(utils::Vector{b.Return(func)});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint GLCompute %1 "main"
@@ -67,6 +73,8 @@ TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Fragment) {
     auto* func = b.CreateFunction("main", ty.void_(), ir::Function::PipelineStage::kFragment);
     func->StartTarget()->SetInstructions(utils::Vector{b.Return(func)});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint Fragment %1 "main"
 OpExecutionMode %1 OriginUpperLeft
@@ -83,6 +91,8 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Vertex) {
     auto* func = b.CreateFunction("main", ty.void_(), ir::Function::PipelineStage::kVertex);
     func->StartTarget()->SetInstructions(utils::Vector{b.Return(func)});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint Vertex %1 "main"
@@ -107,6 +117,8 @@ TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Multiple) {
 
     auto* f3 = b.CreateFunction("main3", ty.void_(), ir::Function::PipelineStage::kFragment);
     f3->StartTarget()->SetInstructions(utils::Vector{b.Return(f3)});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(f1);
     generator_.EmitFunction(f2);
@@ -142,6 +154,8 @@ TEST_F(SpvGeneratorImplTest, Function_ReturnValue) {
     func->StartTarget()->SetInstructions(
         utils::Vector{b.Return(func, utils::Vector{b.Constant(i32(42))})});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeInt 32 1
@@ -165,6 +179,8 @@ TEST_F(SpvGeneratorImplTest, Function_Parameters) {
         utils::Vector{result, b.Return(func, utils::Vector{result})});
     mod.SetName(x, "x");
     mod.SetName(y, "y");
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -196,6 +212,8 @@ TEST_F(SpvGeneratorImplTest, Function_Call) {
     bar->StartTarget()->SetInstructions(utils::Vector{
         b.UserCall(i32_ty, foo, utils::Vector{b.Constant(i32(2)), b.Constant(i32(3))}),
         b.Return(bar)});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(foo);
     generator_.EmitFunction(bar);
@@ -229,6 +247,8 @@ TEST_F(SpvGeneratorImplTest, Function_Call_Void) {
     auto* bar = b.CreateFunction("bar", ty.void_());
     bar->StartTarget()->SetInstructions(
         utils::Vector{b.UserCall(ty.void_(), foo, utils::Empty), b.Return(bar)});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(foo);
     generator_.EmitFunction(bar);

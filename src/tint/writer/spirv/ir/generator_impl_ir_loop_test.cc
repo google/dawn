@@ -30,6 +30,8 @@ TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
 
     func->StartTarget()->Append(loop);
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -62,6 +64,8 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
     loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -98,6 +102,8 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
     loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -142,6 +148,8 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
 
     func->StartTarget()->Append(loop);
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -180,6 +188,8 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
 
     func->StartTarget()->Append(loop);
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -212,6 +222,8 @@ TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
     loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -251,6 +263,8 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
     outer_loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(outer_loop);
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -298,6 +312,8 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
     outer_loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(outer_loop);
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -348,6 +364,8 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     l->Continuing()->Append(cmp);
     l->Continuing()->Append(b.BreakIf(cmp, l, utils::Vector{cont_param}));
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -397,6 +415,8 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     auto* not_b = b.Not(b.ir.Types().bool_(), cont_param_b);
     l->Continuing()->Append(not_b);
     l->Continuing()->Append(b.BreakIf(cmp, l, utils::Vector{cont_param_a, not_b}));
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

@@ -37,6 +37,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/user_call.h"
+#include "src/tint/ir/validate.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
@@ -92,6 +93,12 @@ GeneratorImplIr::GeneratorImplIr(ir::Module* module, bool zero_init_workgroup_me
     : ir_(module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
 bool GeneratorImplIr::Generate() {
+    auto valid = ir::Validate(*ir_);
+    if (!valid) {
+        diagnostics_ = valid.Failure();
+        return false;
+    }
+
     // Run the IR transformations to prepare for SPIR-V emission.
     Sanitize(ir_);
 

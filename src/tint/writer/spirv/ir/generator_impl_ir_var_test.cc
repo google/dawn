@@ -28,6 +28,8 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_NoInit) {
                                            builtin::Access::kReadWrite)),
                       b.Return(func)});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -50,6 +52,8 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_WithInit) {
     v->SetInitializer(b.Constant(42_i));
 
     func->StartTarget()->SetInstructions(utils::Vector{v, b.Return(func)});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -74,6 +78,8 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_Name) {
         ty.pointer(ty.i32(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite));
     func->StartTarget()->SetInstructions(utils::Vector{v, b.Return(func)});
     mod.SetName(v, "myvar");
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -103,6 +109,8 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_DeclInsideBlock) {
     i->Merge()->SetInstructions(utils::Vector{b.Return(func)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -137,6 +145,8 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_Load) {
         ty.pointer(store_ty, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite));
     func->StartTarget()->SetInstructions(utils::Vector{v, b.Load(v), b.Return(func)});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -160,6 +170,8 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_Store) {
     func->StartTarget()->SetInstructions(
         utils::Vector{v, b.Store(v, b.Constant(42_i)), b.Return(func)});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
@@ -180,7 +192,7 @@ TEST_F(SpvGeneratorImplTest, PrivateVar_NoInit) {
     b.CreateRootBlockIfNeeded()->SetInstructions(utils::Vector{b.Declare(
         ty.pointer(ty.i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite))});
 
-    generator_.Generate();
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint GLCompute %4 "unused_entry_point"
@@ -204,7 +216,7 @@ TEST_F(SpvGeneratorImplTest, PrivateVar_WithInit) {
     b.CreateRootBlockIfNeeded()->SetInstructions(utils::Vector{v});
     v->SetInitializer(b.Constant(42_i));
 
-    generator_.Generate();
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint GLCompute %5 "unused_entry_point"
@@ -230,7 +242,7 @@ TEST_F(SpvGeneratorImplTest, PrivateVar_Name) {
     v->SetInitializer(b.Constant(42_i));
     mod.SetName(v, "myvar");
 
-    generator_.Generate();
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint GLCompute %5 "unused_entry_point"
@@ -265,7 +277,7 @@ TEST_F(SpvGeneratorImplTest, PrivateVar_LoadAndStore) {
     auto* store = b.Store(v, add);
     func->StartTarget()->SetInstructions(utils::Vector{load, add, store, b.Return(func)});
 
-    generator_.Generate();
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %5 "foo"
@@ -292,7 +304,7 @@ TEST_F(SpvGeneratorImplTest, WorkgroupVar) {
     b.CreateRootBlockIfNeeded()->SetInstructions(utils::Vector{b.Declare(
         ty.pointer(ty.i32(), builtin::AddressSpace::kWorkgroup, builtin::Access::kReadWrite))});
 
-    generator_.Generate();
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint GLCompute %4 "unused_entry_point"
@@ -316,7 +328,7 @@ TEST_F(SpvGeneratorImplTest, WorkgroupVar_Name) {
     b.CreateRootBlockIfNeeded()->SetInstructions(utils::Vector{v});
     mod.SetName(v, "myvar");
 
-    generator_.Generate();
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint GLCompute %4 "unused_entry_point"
@@ -350,7 +362,7 @@ TEST_F(SpvGeneratorImplTest, WorkgroupVar_LoadAndStore) {
     auto* store = b.Store(v, add);
     func->StartTarget()->SetInstructions(utils::Vector{load, add, store, b.Return(func)});
 
-    generator_.Generate();
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint GLCompute %4 "foo"
@@ -378,7 +390,7 @@ TEST_F(SpvGeneratorImplTest, WorkgroupVar_ZeroInitializeWithExtension) {
 
     // Create a generator with the zero_init_workgroup_memory flag set to `true`.
     spirv::GeneratorImplIr gen(&mod, true);
-    gen.Generate();
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics().str();
     EXPECT_EQ(DumpModule(gen.Module()), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint GLCompute %5 "unused_entry_point"

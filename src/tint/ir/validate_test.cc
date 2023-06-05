@@ -30,7 +30,7 @@ TEST_F(IR_ValidateTest, RootBlock_Var) {
     mod.root_block->Append(b.Declare(mod.Types().pointer(
         mod.Types().i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite)));
     auto res = ir::Validate(mod);
-    EXPECT_TRUE(res) << res.Failure();
+    EXPECT_TRUE(res) << res.Failure().str();
 }
 
 TEST_F(IR_ValidateTest, RootBlock_NonVar) {
@@ -39,7 +39,7 @@ TEST_F(IR_ValidateTest, RootBlock_NonVar) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure(), "error: root block: invalid instruction: tint::ir::Loop");
+    EXPECT_EQ(res.Failure().str(), "error: root block: invalid instruction: tint::ir::Loop");
 }
 
 TEST_F(IR_ValidateTest, RootBlock_VarBadType) {
@@ -47,7 +47,8 @@ TEST_F(IR_ValidateTest, RootBlock_VarBadType) {
     mod.root_block->Append(b.Declare(mod.Types().i32()));
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure(), "error: root block: 'var' type is not a pointer: tint::type::I32");
+    EXPECT_EQ(res.Failure().str(),
+              "error: root block: 'var' type is not a pointer: tint::type::I32");
 }
 
 TEST_F(IR_ValidateTest, Function) {
@@ -58,7 +59,7 @@ TEST_F(IR_ValidateTest, Function) {
         utils::Vector{b.FunctionParam(mod.Types().i32()), b.FunctionParam(mod.Types().f32())});
     f->StartTarget()->SetInstructions(utils::Vector{b.Return(f)});
     auto res = ir::Validate(mod);
-    EXPECT_TRUE(res) << res.Failure();
+    EXPECT_TRUE(res) << res.Failure().str();
 }
 
 TEST_F(IR_ValidateTest, Block_NoBranchAtEnd) {
@@ -67,7 +68,7 @@ TEST_F(IR_ValidateTest, Block_NoBranchAtEnd) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure(), "error: block: does not end in a branch");
+    EXPECT_EQ(res.Failure().str(), "error: block: does not end in a branch");
 }
 
 TEST_F(IR_ValidateTest, Block_BranchInMiddle) {
@@ -77,7 +78,7 @@ TEST_F(IR_ValidateTest, Block_BranchInMiddle) {
     f->StartTarget()->SetInstructions(utils::Vector{b.Return(f), b.Return(f)});
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure(), "error: block: branch which isn't the final instruction");
+    EXPECT_EQ(res.Failure().str(), "error: block: branch which isn't the final instruction");
 }
 
 }  // namespace

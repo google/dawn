@@ -43,6 +43,8 @@ TEST_P(Builtin_1arg, Scalar) {
                                 utils::Vector{MakeScalarValue(params.type)}),
                       b.Return(func)});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
 }
@@ -55,6 +57,8 @@ TEST_P(Builtin_1arg, Vector) {
                                 utils::Vector{MakeVectorValue(params.type)}),
 
                       b.Return(func)});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
@@ -71,6 +75,8 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_u32) {
     auto* func = b.CreateFunction("foo", MakeScalarType(kU32));
     func->StartTarget()->SetInstructions(
         utils::Vector{result, b.Return(func, utils::Vector{result})});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -89,6 +95,8 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
     auto* func = b.CreateFunction("foo", MakeVectorType(kU32));
     func->StartTarget()->SetInstructions(
         utils::Vector{result, b.Return(func, utils::Vector{result})});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
@@ -116,6 +124,8 @@ TEST_P(Builtin_2arg, Scalar) {
                   utils::Vector{MakeScalarValue(params.type), MakeScalarValue(params.type)}),
         b.Return(func)});
 
+    ASSERT_TRUE(IRIsValid()) << Error();
+
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
 }
@@ -128,6 +138,8 @@ TEST_P(Builtin_2arg, Vector) {
                   utils::Vector{MakeVectorValue(params.type), MakeVectorValue(params.type)}),
 
         b.Return(func)});
+
+    ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
