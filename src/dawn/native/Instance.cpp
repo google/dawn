@@ -134,8 +134,6 @@ Ref<InstanceBase> InstanceBase::Create(const InstanceDescriptor* descriptor) {
         TogglesState::CreateFromTogglesDescriptor(instanceTogglesDesc, ToggleStage::Instance);
     // By default disable the AllowUnsafeAPIs instance toggle, it will be inherited to adapters
     // and devices created by this instance if not overriden.
-    // TODO(dawn:1685): Remove DisallowUnsafeAPIs.
-    instanceToggles.Default(Toggle::DisallowUnsafeAPIs, true);
     instanceToggles.Default(Toggle::AllowUnsafeAPIs, false);
 
     Ref<InstanceBase> instance = AcquireRef(new InstanceBase(instanceToggles));

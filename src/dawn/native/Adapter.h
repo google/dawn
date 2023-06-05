@@ -55,11 +55,6 @@ class AdapterBase : public RefCounted {
     // Get the actual toggles state of the adapter.
     const TogglesState& GetTogglesState() const;
 
-    // Temporary wrapper to decide whether unsafe APIs are allowed while in the process of
-    // deprecating DisallowUnsafeAPIs toggle.
-    // TODO(dawn:1685): Remove wrapper once DisallowUnsafeAPIs is fully removed.
-    bool AllowUnsafeAPIs() const;
-
     FeatureLevel GetFeatureLevel() const;
 
   private:

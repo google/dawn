@@ -143,8 +143,7 @@ MaybeError PhysicalDeviceBase::ValidateFeatureSupportedWithToggles(
     // Experimental features are guarded by the AllowUnsafeAPIs toggle.
     if (featureInfo->featureState == FeatureInfo::FeatureState::Experimental) {
         // AllowUnsafeAPIs toggle is by default disabled if not explicitly enabled.
-        DAWN_INVALID_IF(toggles.IsEnabled(Toggle::DisallowUnsafeAPIs) &&
-                            !toggles.IsEnabled(Toggle::AllowUnsafeAPIs),
+        DAWN_INVALID_IF(!toggles.IsEnabled(Toggle::AllowUnsafeAPIs),
                         "Feature %s is guarded by toggle allow_unsafe_apis.", featureInfo->name);
     }
 

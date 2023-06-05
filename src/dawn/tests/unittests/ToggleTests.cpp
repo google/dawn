@@ -66,10 +66,9 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
     {
         std::unique_ptr<native::Instance> instance;
 
-        // Create an instance with default toggles, where AllowUnsafeAPIs is disabled and
-        // DisallowUnsafeAPIs is enabled.
+        // Create an instance with default toggles, where AllowUnsafeAPIs is disabled.
         instance = std::make_unique<native::Instance>();
-        validateInstanceToggles(instance.get(), {"disallow_unsafe_apis"}, {"allow_unsafe_apis"});
+        validateInstanceToggles(instance.get(), {}, {"allow_unsafe_apis"});
     }
 
     // Create instance with empty toggles descriptor
@@ -86,44 +85,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
         // Create an instance with default toggles, where AllowUnsafeAPIs is disabled and
         // DisallowUnsafeAPIs is enabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {"disallow_unsafe_apis"}, {"allow_unsafe_apis"});
-    }
-
-    // Create instance with DisallowUnsafeAPIs explicitly enabled in toggles descriptor
-    {
-        std::unique_ptr<native::Instance> instance;
-
-        const char* disallowUnsafeApisToggle = "disallow_unsafe_apis";
-        WGPUDawnTogglesDescriptor instanceTogglesDesc = {};
-        instanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        instanceTogglesDesc.enabledTogglesCount = 1;
-        instanceTogglesDesc.enabledToggles = &disallowUnsafeApisToggle;
-
-        WGPUInstanceDescriptor instanceDesc = {};
-        instanceDesc.nextInChain = &instanceTogglesDesc.chain;
-
-        // Create an instance with DisallowUnsafeApis explicitly enabled.
-        instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {disallowUnsafeApisToggle}, {"allow_unsafe_apis"});
-    }
-
-    // Create instance with DisallowUnsafeAPIs explicitly disabled in toggles descriptor
-    {
-        std::unique_ptr<native::Instance> instance;
-
-        const char* disallowUnsafeApisToggle = "disallow_unsafe_apis";
-        WGPUDawnTogglesDescriptor instanceTogglesDesc = {};
-        instanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        instanceTogglesDesc.disabledTogglesCount = 1;
-        instanceTogglesDesc.disabledToggles = &disallowUnsafeApisToggle;
-
-        WGPUInstanceDescriptor instanceDesc = {};
-        instanceDesc.nextInChain = &instanceTogglesDesc.chain;
-
-        // Create an instance with DisallowUnsafeApis explicitly disabled.
-        instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {},
-                                {disallowUnsafeApisToggle, "allow_unsafe_apis"});
+        validateInstanceToggles(instance.get(), {}, {"allow_unsafe_apis"});
     }
 
     // Create instance with AllowUnsafeAPIs explicitly enabled in toggles descriptor
@@ -141,8 +103,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
 
         // Create an instance with AllowUnsafeAPIs explicitly enabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {allowUnsafeApisToggle, "disallow_unsafe_apis"},
-                                {});
+        validateInstanceToggles(instance.get(), {allowUnsafeApisToggle}, {});
     }
 
     // Create instance with AllowUnsafeAPIs explicitly disabled in toggles descriptor
@@ -160,7 +121,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
 
         // Create an instance with AllowUnsafeAPIs explicitly disabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {"disallow_unsafe_apis"}, {allowUnsafeApisToggle});
+        validateInstanceToggles(instance.get(), {}, {allowUnsafeApisToggle});
     }
 }
 
@@ -203,42 +164,6 @@ TEST_F(InstanceToggleTest, InstanceTogglesInheritToAdapterAndDevice) {
 
         nullDevice->Release();
     };
-
-    // Create instance with DisallowUnsafeAPIs explicitly enabled in toggles descriptor
-    {
-        std::unique_ptr<native::Instance> instance;
-
-        const char* disallowUnsafeApisToggle = "disallow_unsafe_apis";
-        WGPUDawnTogglesDescriptor instanceTogglesDesc = {};
-        instanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        instanceTogglesDesc.enabledTogglesCount = 1;
-        instanceTogglesDesc.enabledToggles = &disallowUnsafeApisToggle;
-
-        WGPUInstanceDescriptor instanceDesc = {};
-        instanceDesc.nextInChain = &instanceTogglesDesc.chain;
-
-        // Create an instance with DisallowUnsafeApis explicitly enabled.
-        instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceTogglesInheritedToAdapter(instance.get());
-    }
-
-    // Create instance with DisallowUnsafeAPIs explicitly disabled in toggles descriptor
-    {
-        std::unique_ptr<native::Instance> instance;
-
-        const char* disallowUnsafeApisToggle = "disallow_unsafe_apis";
-        WGPUDawnTogglesDescriptor instanceTogglesDesc = {};
-        instanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        instanceTogglesDesc.disabledTogglesCount = 1;
-        instanceTogglesDesc.disabledToggles = &disallowUnsafeApisToggle;
-
-        WGPUInstanceDescriptor instanceDesc = {};
-        instanceDesc.nextInChain = &instanceTogglesDesc.chain;
-
-        // Create an instance with DisallowUnsafeApis explicitly enabled.
-        instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceTogglesInheritedToAdapter(instance.get());
-    }
 
     // Create instance with AllowUnsafeAPIs explicitly enabled in toggles descriptor
     {

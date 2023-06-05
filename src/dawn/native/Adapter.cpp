@@ -188,11 +188,6 @@ const TogglesState& AdapterBase::GetTogglesState() const {
     return mTogglesState;
 }
 
-bool AdapterBase::AllowUnsafeAPIs() const {
-    return GetTogglesState().IsEnabled(Toggle::AllowUnsafeAPIs) ||
-           !GetTogglesState().IsEnabled(Toggle::DisallowUnsafeAPIs);
-}
-
 FeatureLevel AdapterBase::GetFeatureLevel() const {
     return mFeatureLevel;
 }
