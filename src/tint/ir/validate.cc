@@ -16,11 +16,29 @@
 
 #include <utility>
 
+#include "src/tint/ir/access.h"
+#include "src/tint/ir/binary.h"
+#include "src/tint/ir/bitcast.h"
+#include "src/tint/ir/break_if.h"
+#include "src/tint/ir/builtin.h"
+#include "src/tint/ir/construct.h"
+#include "src/tint/ir/continue.h"
+#include "src/tint/ir/convert.h"
+#include "src/tint/ir/discard.h"
+#include "src/tint/ir/exit_if.h"
+#include "src/tint/ir/exit_loop.h"
+#include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
+#include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/swizzle.h"
+#include "src/tint/ir/unary.h"
+#include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/pointer.h"
@@ -92,14 +110,54 @@ class Validator {
 
     void CheckInstruction(const Instruction* inst) {
         tint::Switch(
-            inst,  //
+            inst,                                          //
+            [&](const ir::Access*) {},                     //
+            [&](const ir::Binary*) {},                     //
+            [&](const ir::Branch* b) { CheckBranch(b); },  //
+            [&](const ir::Call* c) { CheckCall(c); },      //
+            [&](const ir::Load*) {},                       //
+            [&](const ir::Store*) {},                      //
+            [&](const ir::Swizzle*) {},                    //
+            [&](const ir::Unary*) {},                      //
+            [&](const ir::Var*) {},                        //
+            [&](Default) {
+                AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
+            });
+    }
+
+    void CheckCall(const ir::Call* call) {
+        tint::Switch(
+            call,                          //
+            [&](const ir::Bitcast*) {},    //
+            [&](const ir::Builtin*) {},    //
+            [&](const ir::Construct*) {},  //
+            [&](const ir::Convert*) {},    //
+            [&](const ir::Discard*) {},    //
+            [&](const ir::UserCall*) {},   //
+            [&](Default) {
+                AddError(std::string("missing validation of call: ") + call->TypeInfo().name);
+            });
+    }
+
+    void CheckBranch(const ir::Branch* b) {
+        tint::Switch(
+            b,                                 //
+            [&](const ir::BreakIf*) {},        //
+            [&](const ir::Continue*) {},       //
+            [&](const ir::ExitIf*) {},         //
+            [&](const ir::ExitLoop*) {},       //
+            [&](const ir::ExitSwitch*) {},     //
+            [&](const ir::If*) {},             //
+            [&](const ir::Loop*) {},           //
+            [&](const ir::NextIteration*) {},  //
             [&](const ir::Return* ret) {
                 if (ret->Func() == nullptr) {
                     AddError("return: null function");
                 }
-            },
+            },                          //
+            [&](const ir::Switch*) {},  //
             [&](Default) {
-                AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
+                AddError(std::string("missing validation of branch: ") + b->TypeInfo().name);
             });
     }
 };
