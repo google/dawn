@@ -63,7 +63,6 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "dawn/webgpu_cpp.h"
 #include "webgpu/webgpu_glfw.h"
@@ -337,7 +336,6 @@ int main(int argc, const char* argv[]) {
     AddWindow();
 
     while (windows.size() != 0) {
-        dawn::utils::ScopedAutoreleasePool pool;
         glfwPollEvents();
         wgpuInstanceProcessEvents(instance->Get());
 

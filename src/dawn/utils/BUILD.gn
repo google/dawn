@@ -32,7 +32,6 @@ static_library("utils") {
     "ComboRenderPipelineDescriptor.cpp",
     "ComboRenderPipelineDescriptor.h",
     "PlatformDebugLogger.h",
-    "ScopedAutoreleasePool.h",
     "SystemUtils.cpp",
     "SystemUtils.h",
     "TerribleCommandBuffer.cpp",
@@ -75,12 +74,6 @@ static_library("utils") {
     frameworks += [ "QuartzCore.framework" ]
   } else {
     sources += [ "PosixTimer.cpp" ]
-  }
-
-  if (is_mac) {
-    sources += [ "ScopedAutoreleasePool.mm" ]
-  } else {
-    sources += [ "ScopedAutoreleasePool.cpp" ]
   }
 
   public_deps = [ "${dawn_root}/include/dawn:cpp_headers" ]

@@ -228,10 +228,10 @@ TEST_F(WindowSurfaceInstanceTests, CorrectSTypeMetal) {
 
 // Test with setting an invalid layer
 TEST_F(WindowSurfaceInstanceTests, InvalidMetalLayer) {
+    auto caLayer = utils::CreatePlaceholderCALayer();
+
     wgpu::SurfaceDescriptorFromMetalLayer chainedDescriptor;
-    // The CALayer is autoreleased. Releasing it causes a test failure when the Chromium GTest
-    // autoreleasepool is emptied.
-    chainedDescriptor.layer = utils::CreatePlaceholderCALayer();
+    chainedDescriptor.layer = caLayer.layer;
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = &chainedDescriptor;

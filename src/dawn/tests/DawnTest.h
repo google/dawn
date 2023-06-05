@@ -34,7 +34,6 @@
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/ParamGenerator.h"
 #include "dawn/tests/ToggleParser.h"
-#include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/webgpu_cpp.h"
@@ -588,7 +587,6 @@ class DawnTestBase {
     void* GetUniqueUserdata();
 
   private:
-    dawn::utils::ScopedAutoreleasePool mObjCAutoreleasePool;
     AdapterTestParam mParam;
     std::unique_ptr<dawn::utils::WireHelper> mWireHelper;
     wgpu::Instance mInstance;

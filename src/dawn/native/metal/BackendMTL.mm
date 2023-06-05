@@ -255,12 +255,12 @@ DAWN_NOINLINE bool IsGPUCounterSupported(id<MTLDevice> device,
 
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    PhysicalDevice(InstanceBase* instance, id<MTLDevice> device)
-        : PhysicalDeviceBase(instance, wgpu::BackendType::Metal), mDevice(device) {
+    PhysicalDevice(InstanceBase* instance, NSPRef<id<MTLDevice>> device)
+        : PhysicalDeviceBase(instance, wgpu::BackendType::Metal), mDevice(std::move(device)) {
         mName = std::string([[*mDevice name] UTF8String]);
 
         PCIIDs ids;
-        if (!instance->ConsumedError(GetDevicePCIInfo(device, &ids))) {
+        if (!instance->ConsumedError(GetDevicePCIInfo(*mDevice, &ids))) {
             mVendorId = ids.vendorId;
             mDeviceId = ids.deviceId;
         }
@@ -269,7 +269,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         mAdapterType = wgpu::AdapterType::IntegratedGPU;
         const char* systemName = "iOS ";
 #elif DAWN_PLATFORM_IS(MACOS)
-        if ([device isLowPower]) {
+        if ([*mDevice isLowPower]) {
             mAdapterType = wgpu::AdapterType::IntegratedGPU;
         } else {
             mAdapterType = wgpu::AdapterType::DiscreteGPU;
@@ -834,29 +834,29 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultPhysicalDevices() {
 ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverPhysicalDevices(
     const PhysicalDeviceDiscoveryOptionsBase* optionsBase) {
     ASSERT(optionsBase->backendType == WGPUBackendType_Metal);
-
-    std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
+    @autoreleasepool {
+        std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
 #if DAWN_PLATFORM_IS(MACOS)
-    NSRef<NSArray<id<MTLDevice>>> devices = AcquireNSRef(MTLCopyAllDevices());
+        for (id<MTLDevice> device in MTLCopyAllDevices()) {
+            Ref<PhysicalDevice> physicalDevice =
+                AcquireRef(new PhysicalDevice(GetInstance(), AcquireNSPRef(device)));
+            if (!GetInstance()->ConsumedError(physicalDevice->Initialize())) {
+                physicalDevices.push_back(std::move(physicalDevice));
+            }
+        }
+#endif
 
-    for (id<MTLDevice> device in devices.Get()) {
-        Ref<PhysicalDevice> physicalDevice = AcquireRef(new PhysicalDevice(GetInstance(), device));
+        // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
+#if defined(DAWN_PLATFORM_IOS)
+        Ref<PhysicalDevice> physicalDevice = AcquireRef(
+            new PhysicalDevice(GetInstance(), AcquireNSPRef(MTLCreateSystemDefaultDevice())));
         if (!GetInstance()->ConsumedError(physicalDevice->Initialize())) {
             physicalDevices.push_back(std::move(physicalDevice));
         }
-    }
 #endif
 
-    // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
-#if defined(DAWN_PLATFORM_IOS)
-    Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(GetInstance(), MTLCreateSystemDefaultDevice()));
-    if (!GetInstance()->ConsumedError(physicalDevice->Initialize())) {
-        physicalDevices.push_back(std::move(physicalDevice));
+        return physicalDevices;
     }
-#endif
-
-    return physicalDevices;
 }
 
 BackendConnection* Connect(InstanceBase* instance) {

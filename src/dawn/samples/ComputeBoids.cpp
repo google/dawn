@@ -20,7 +20,6 @@
 #include "dawn/samples/SampleUtils.h"
 
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
@@ -322,7 +321,6 @@ int main(int argc, const char* argv[]) {
     init();
 
     while (!ShouldQuit()) {
-        dawn::utils::ScopedAutoreleasePool pool;
         ProcessEvents();
         frame();
         dawn::utils::USleep(16000);

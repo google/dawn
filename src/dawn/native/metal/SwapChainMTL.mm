@@ -92,14 +92,16 @@ MaybeError SwapChain::PresentImpl() {
 }
 
 ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
-    ASSERT(mCurrentDrawable == nullptr);
-    mCurrentDrawable = [*mLayer nextDrawable];
+    @autoreleasepool {
+        ASSERT(mCurrentDrawable == nullptr);
+        mCurrentDrawable = [*mLayer nextDrawable];
 
-    TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
+        TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
 
-    mTexture =
-        Texture::CreateWrapping(ToBackend(GetDevice()), &textureDesc, [*mCurrentDrawable texture]);
-    return mTexture;
+        mTexture = Texture::CreateWrapping(ToBackend(GetDevice()), &textureDesc,
+                                           NSPRef<id<MTLTexture>>([*mCurrentDrawable texture]));
+        return mTexture;
+    }
 }
 
 void SwapChain::DetachFromSurfaceImpl() {

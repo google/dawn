@@ -31,22 +31,24 @@ Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(devi
 Queue::~Queue() = default;
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
-    Device* device = ToBackend(GetDevice());
+    @autoreleasepool {
+        Device* device = ToBackend(GetDevice());
 
-    CommandRecordingContext* commandContext = device->GetPendingCommandContext();
+        CommandRecordingContext* commandContext = device->GetPendingCommandContext();
 
-    TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
-    for (uint32_t i = 0; i < commandCount; ++i) {
-        DAWN_TRY(ToBackend(commands[i])->FillCommands(commandContext));
+        TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
+        for (uint32_t i = 0; i < commandCount; ++i) {
+            DAWN_TRY(ToBackend(commands[i])->FillCommands(commandContext));
+        }
+        TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
+
+        DAWN_TRY(device->SubmitPendingCommandBuffer());
+
+        // Call Tick() to get a chance to resolve callbacks.
+        DAWN_TRY(device->Tick());
+
+        return {};
     }
-    TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
-
-    DAWN_TRY(device->SubmitPendingCommandBuffer());
-
-    // Call Tick() to get a chance to resolve callbacks.
-    DAWN_TRY(device->Tick());
-
-    return {};
 }
 
 }  // namespace dawn::native::metal

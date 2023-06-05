@@ -109,10 +109,12 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           NSPRef<id<MTLDevice>> mtlDevice,
                                           const DeviceDescriptor* descriptor,
                                           const TogglesState& deviceToggles) {
-    Ref<Device> device =
-        AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor, deviceToggles));
-    DAWN_TRY(device->Initialize(descriptor));
-    return device;
+    @autoreleasepool {
+        Ref<Device> device =
+            AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor, deviceToggles));
+        DAWN_TRY(device->Initialize(descriptor));
+        return device;
+    }
 }
 
 Device::Device(AdapterBase* adapter,
