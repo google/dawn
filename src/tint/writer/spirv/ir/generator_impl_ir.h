@@ -29,6 +29,7 @@
 
 // Forward declarations
 namespace tint::ir {
+class Access;
 class Binary;
 class Block;
 class BlockParam;
@@ -123,6 +124,10 @@ class GeneratorImplIr {
     /// Emit an `if` flow node.
     /// @param i the if node to emit
     void EmitIf(const ir::If* i);
+
+    /// Emit an access instruction
+    /// @param access the access instruction to emit
+    void EmitAccess(const ir::Access* access);
 
     /// Emit a binary instruction.
     /// @param binary the binary instruction to emit

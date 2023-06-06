@@ -19,6 +19,7 @@
 #include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
 #include "src/tint/constant/scalar.h"
+#include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/break_if.h"
@@ -434,6 +435,7 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
     for (auto* inst : *block) {
         Switch(
             inst,                                             //
+            [&](const ir::Access* a) { EmitAccess(a); },      //
             [&](const ir::Binary* b) { EmitBinary(b); },      //
             [&](const ir::Builtin* b) { EmitBuiltin(b); },    //
             [&](const ir::Load* l) { EmitLoad(l); },          //
@@ -531,6 +533,59 @@ void GeneratorImplIr::EmitIf(const ir::If* i) {
 
     // Emit the merge block.
     EmitBlock(merge_block);
+}
+
+void GeneratorImplIr::EmitAccess(const ir::Access* access) {
+    auto id = Value(access);
+    OperandList operands = {Type(access->Type()), id, Value(access->Object())};
+
+    if (access->Type()->Is<type::Pointer>()) {
+        // Use OpAccessChain for accesses into pointer types.
+        for (auto* idx : access->Indices()) {
+            operands.push_back(Value(idx));
+        }
+        current_function_.push_inst(spv::Op::OpAccessChain, std::move(operands));
+        return;
+    }
+
+    // For non-pointer types, we assume that the indices are constants and use OpCompositeExtract.
+    // If we hit a non-constant index into a vector type, use OpVectorExtractDynamic for it.
+    // TODO(jrprice): Port VarForDynamicIndex transform to IR to make the above assertion true.
+    auto* ty = access->Object()->Type();
+    for (auto* idx : access->Indices()) {
+        if (auto* constant = idx->As<ir::Constant>()) {
+            // Push the index to the chain and update the current type.
+            auto i = constant->Value()->ValueAs<u32>();
+            operands.push_back(i);
+            ty = Switch(
+                ty,  //
+                [&](const type::Array* arr) { return arr->ElemType(); },
+                [&](const type::Matrix* mat) { return mat->ColumnType(); },
+                [&](const type::Struct* str) { return str->Members()[i]->Type(); },
+                [&](const type::Vector* vec) { return vec->type(); },
+                [&](Default) { return nullptr; });
+        } else {
+            // The VarForDynamicIndex transform ensures that only value types that are vectors
+            // will be dynamically indexed, as we can use OpVectorExtractDynamic for this case.
+            TINT_ASSERT(Writer, ty->Is<type::Vector>());
+
+            // If this wasn't the first access in the chain then emit the chain so far as an
+            // OpCompositeExtract, creating a new result ID for the resulting vector.
+            auto vec_id = Value(access->Object());
+            if (operands.size() > 3) {
+                vec_id = module_.NextId();
+                operands[0] = Type(ty);
+                operands[1] = vec_id;
+                current_function_.push_inst(spv::Op::OpCompositeExtract, std::move(operands));
+            }
+
+            // Now emit the OpVectorExtractDynamic instruction.
+            operands = {Type(access->Type()), id, vec_id, Value(idx)};
+            current_function_.push_inst(spv::Op::OpVectorExtractDynamic, std::move(operands));
+            return;
+        }
+    }
+    current_function_.push_inst(spv::Op::OpCompositeExtract, std::move(operands));
 }
 
 void GeneratorImplIr::EmitBinary(const ir::Binary* binary) {
