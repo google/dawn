@@ -62,7 +62,7 @@ void GPUComputePassEncoder::setBindGroup(
 
     wgpu::BindGroup bg{};
     uint32_t* offsets = nullptr;
-    uint32_t num_offsets = 0;
+    size_t num_offsets = 0;
     if (!conv(bg, bindGroup) || !conv(offsets, num_offsets, dynamicOffsets)) {
         return;
     }

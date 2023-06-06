@@ -20,6 +20,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Numeric.h"
 #include "dawn/common/ityp_stack_vec.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
@@ -61,7 +62,8 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                        ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label) {
     ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
-    for (BindGroupIndex group(0); group < BindGroupIndex(descriptor->bindGroupLayoutCount);
+    for (BindGroupIndex group(0);
+         group < BindGroupIndex(checked_cast<uint32_t>(descriptor->bindGroupLayoutCount));
          ++group) {
         mBindGroupLayouts[group] = descriptor->bindGroupLayouts[static_cast<uint32_t>(group)];
         mMask.set(group);

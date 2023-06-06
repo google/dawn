@@ -46,7 +46,8 @@ A **record** is a list of **record members**, each of which is a dictionary with
  - `"default"` (optional) a number or string. If set the record member will use that value as default value. Depending on the member's category it can be a number, a string containing a number, or the name of an enum/bitmask value.
  - `"wire_is_data_only"` (default to false) a boolean that says whether it is safe to directly return a pointer of this member that is pointing to a piece of memory in the transfer buffer into dawn_wire. To prevent TOCTOU attacks, by default in dawn_wire we must ensure every single value returned to dawn_native a copy of what's in the wire, so `"wire_is_data_only"` is set to true only when the member is data-only and don't impact control flow.
 
-**`"native"`**, doesn't have any other key. This is used to define native types that can be referenced by name in other things.
+**`"native"`** native types that can be referenced by name in other things.
+ - `"wire transparent"` (defaults to true) a boolean that indicates whether the native type should be transparent (serialized as is) on the wire.
 
 **`"typedef"`** (usually only used for gradual deprecations):
  - `"type"`: the name of the things this is a typedef for.

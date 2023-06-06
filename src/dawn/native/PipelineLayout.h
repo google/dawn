@@ -45,7 +45,7 @@ struct StageAndDescriptor {
     SingleShaderStage shaderStage;
     ShaderModuleBase* module;
     std::string entryPoint;
-    uint32_t constantCount = 0u;
+    size_t constantCount = 0u;
     ConstantEntry const* constants = nullptr;
 };
 

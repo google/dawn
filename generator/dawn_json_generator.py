@@ -147,6 +147,7 @@ class FunctionPointerType(Type):
         Type.__init__(self, name, json_data)
         self.return_type = None
         self.arguments = []
+        self.is_wire_transparent = True
 
 
 class TypedefType(Type):
@@ -158,7 +159,7 @@ class TypedefType(Type):
 class NativeType(Type):
     def __init__(self, is_enabled, name, json_data):
         Type.__init__(self, name, json_data, native=True)
-        self.is_wire_transparent = True
+        self.is_wire_transparent = json_data.get('wire transparent', True)
 
 
 # Methods and structures are both "records", so record members correspond to

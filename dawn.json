@@ -160,7 +160,7 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "required features count", "type": "uint32_t", "default": 0},
+            {"name": "required features count", "type": "size_t", "default": 0},
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required features count", "default": "nullptr"},
             {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
             {"name": "default queue", "type": "queue descriptor"},
@@ -174,9 +174,9 @@
         "chained": "in",
         "chain roots": ["instance descriptor", "device descriptor"],
         "members": [
-            {"name": "enabled toggles count", "type": "uint32_t", "default": 0},
+            {"name": "enabled toggles count", "type": "size_t", "default": 0},
             {"name": "enabled toggles", "type": "char", "annotation": "const*const*", "length": "enabled toggles count"},
-            {"name": "disabled toggles count", "type": "uint32_t", "default": 0},
+            {"name": "disabled toggles count", "type": "size_t", "default": 0},
             {"name": "disabled toggles", "type": "char", "annotation": "const*const*", "length": "disabled toggles count"}
         ]
     },
@@ -241,7 +241,7 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "bind group layout"},
-            {"name": "entry count", "type": "uint32_t"},
+            {"name": "entry count", "type": "size_t"},
             {"name": "entries", "type": "bind group entry", "annotation": "const*", "length": "entry count"}
         ]
     },
@@ -367,7 +367,7 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "entry count", "type": "uint32_t"},
+            {"name": "entry count", "type": "size_t"},
             {"name": "entries", "type": "bind group layout entry", "annotation": "const*", "length": "entry count"}
         ]
     },
@@ -733,7 +733,7 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "message count", "type": "uint32_t"},
+            {"name": "message count", "type": "size_t"},
             {"name": "messages", "type": "compilation message", "annotation": "const*", "length": "message count"}
         ]
     },
@@ -783,7 +783,7 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "timestamp write count", "type": "uint32_t", "default": 0},
+            {"name": "timestamp write count", "type": "size_t", "default": 0},
             {"name": "timestamp writes", "type": "compute pass timestamp write", "annotation": "const*", "length": "timestamp write count"}
         ]
     },
@@ -818,7 +818,7 @@
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
                     {"name": "group", "type": "bind group"},
-                    {"name": "dynamic offset count", "type": "uint32_t", "default": "0"},
+                    {"name": "dynamic offset count", "type": "size_t", "default": "0"},
                     {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count", "default": "nullptr"}
                 ]
             },
@@ -1559,7 +1559,7 @@
         "members": [
             {"name": "array stride", "type": "uint64_t"},
             {"name": "step mode", "type": "vertex step mode", "default": "vertex"},
-            {"name": "attribute count", "type": "uint32_t"},
+            {"name": "attribute count", "type": "size_t"},
             {"name": "attributes", "type": "vertex attribute", "annotation": "const*", "length": "attribute count"}
         ]
     },
@@ -1635,7 +1635,7 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "bind group layout count", "type": "uint32_t"},
+            {"name": "bind group layout count", "type": "size_t"},
             {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count"}
         ]
     },
@@ -1672,7 +1672,7 @@
         "members": [
             {"name": "module", "type": "shader module"},
             {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"},
-            {"name": "constant count", "type": "uint32_t", "default": 0},
+            {"name": "constant count", "type": "size_t", "default": 0},
             {"name": "constants", "type": "constant entry", "annotation": "const*", "length": "constant count"}
         ]
     },
@@ -1717,7 +1717,7 @@
             {"name": "type", "type": "query type"},
             {"name": "count", "type": "uint32_t"},
             {"name": "pipeline statistics", "type": "pipeline statistic name", "annotation": "const*", "length": "pipeline statistics count"},
-            {"name": "pipeline statistics count", "type": "uint32_t", "default": "0"}
+            {"name": "pipeline statistics count", "type": "size_t", "default": "0"}
         ]
     },
     "query type": {
@@ -1734,7 +1734,7 @@
             {
                 "name": "submit",
                 "args": [
-                    {"name": "command count", "type": "uint32_t"},
+                    {"name": "command count", "type": "size_t"},
                     {"name": "commands", "type": "command buffer", "annotation": "const*", "length": "command count"}
                 ]
             },
@@ -1858,7 +1858,7 @@
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
                     {"name": "group", "type": "bind group"},
-                    {"name": "dynamic offset count", "type": "uint32_t", "default": "0"},
+                    {"name": "dynamic offset count", "type": "size_t", "default": "0"},
                     {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count", "default": "nullptr"}
                 ]
             },
@@ -1959,7 +1959,7 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "color formats count", "type": "uint32_t"},
+            {"name": "color formats count", "type": "size_t"},
             {"name": "color formats", "type": "texture format", "annotation": "const*", "length": "color formats count"},
             {"name": "depth stencil format", "type": "texture format", "default": "undefined"},
             {"name": "sample count", "type": "uint32_t", "default": "1"},
@@ -1999,11 +1999,11 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "color attachment count", "type": "uint32_t"},
+            {"name": "color attachment count", "type": "size_t"},
             {"name": "color attachments", "type": "render pass color attachment", "annotation": "const*", "length": "color attachment count"},
             {"name": "depth stencil attachment", "type": "render pass depth stencil attachment", "annotation": "const*", "optional": true},
             {"name": "occlusion query set", "type": "query set", "optional": true},
-            {"name": "timestamp write count", "type": "uint32_t", "default": 0},
+            {"name": "timestamp write count", "type": "size_t", "default": 0},
             {"name": "timestamp writes", "type": "render pass timestamp write", "annotation": "const*", "length": "timestamp write count"}
         ]
     },
@@ -2030,7 +2030,7 @@
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
                     {"name": "group", "type": "bind group"},
-                    {"name": "dynamic offset count", "type": "uint32_t", "default": "0"},
+                    {"name": "dynamic offset count", "type": "size_t", "default": "0"},
                     {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count", "default": "nullptr"}
                 ]
             },
@@ -2070,7 +2070,7 @@
             {
               "name": "execute bundles",
               "args": [
-                  {"name": "bundle count", "type": "uint32_t"},
+                  {"name": "bundle count", "type": "size_t"},
                   {"name": "bundles", "type": "render bundle", "annotation": "const*", "length": "bundle count"}
               ]
             },
@@ -2243,9 +2243,9 @@
         "members": [
             {"name": "module", "type": "shader module"},
             {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"},
-            {"name": "constant count", "type": "uint32_t", "default": 0},
+            {"name": "constant count", "type": "size_t", "default": 0},
             {"name": "constants", "type": "constant entry", "annotation": "const*", "length": "constant count"},
-            {"name": "buffer count", "type": "uint32_t", "default": 0},
+            {"name": "buffer count", "type": "size_t", "default": 0},
             {"name": "buffers", "type": "vertex buffer layout", "annotation": "const*", "length": "buffer count"}
         ]
     },
@@ -2303,9 +2303,9 @@
         "members": [
             {"name": "module", "type": "shader module"},
             {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"},
-            {"name": "constant count", "type": "uint32_t", "default": 0},
+            {"name": "constant count", "type": "size_t", "default": 0},
             {"name": "constants", "type": "constant entry", "annotation": "const*", "length": "constant count"},
-            {"name": "target count", "type": "uint32_t"},
+            {"name": "target count", "type": "size_t"},
             {"name": "targets", "type": "color target state", "annotation": "const*", "length": "target count"}
         ]
     },
@@ -2394,7 +2394,7 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "hint count", "type": "uint32_t", "default": 0, "tags": ["upstream"]},
+            {"name": "hint count", "type": "size_t", "default": 0, "tags": ["upstream"]},
             {"name": "hints", "type": "shader module compilation hint", "annotation": "const*", "length": "hint count", "tags": ["upstream"]}
         ]
     },
@@ -2704,7 +2704,7 @@
             {"name": "format", "type": "texture format"},
             {"name": "mip level count", "type": "uint32_t", "default": 1},
             {"name": "sample count", "type": "uint32_t", "default": 1},
-            {"name": "view format count", "type": "uint32_t", "default": 0},
+            {"name": "view format count", "type": "size_t", "default": 0},
             {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count"}
         ]
     },
@@ -2973,7 +2973,8 @@
         "category": "native"
     },
     "size_t": {
-        "category": "native"
+        "category": "native",
+        "wire transparent": false
     },
     "uint16_t": {
         "category": "native"

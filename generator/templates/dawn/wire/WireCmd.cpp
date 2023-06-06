@@ -16,6 +16,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
+#include "dawn/common/Numeric.h"
 #include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/Wire.h"
 
@@ -47,8 +48,10 @@
         {{as_cType(member.type.name)}}Transfer
     {%- elif member.type.category == "bitmask" -%}
         {{as_cType(member.type.name)}}Flags
+    {%- elif as_cType(member.type.name) == "size_t" -%}
+        {{as_cType(types["uint64_t"].name)}}
     {%- else -%}
-        {{ assert(as_cType(member.type.name) != "size_t") }}
+        {{ assert(member.type.is_wire_transparent) }}
         {{as_cType(member.type.name)}}
     {%- endif -%}
 {%- endmacro %}
@@ -101,6 +104,12 @@
             return WireResult::FatalError;
         }
         {{out}} = nullptr;
+    {%- elif member.type.name.get() == "size_t" -%}
+        // Deserializing into size_t requires check that the uint64_t used on the wire won't narrow.
+        if ({{in}} > std::numeric_limits<size_t>::max()) {
+            return WireResult::FatalError;
+        }
+        {{out}} = checked_cast<size_t>({{in}});
     {%- else -%}
         static_assert(sizeof({{out}}) >= sizeof({{in}}), "Deserialize assignment may not narrow.");
         {{out}} = {{in}};

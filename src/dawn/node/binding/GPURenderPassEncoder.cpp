@@ -78,7 +78,7 @@ void GPURenderPassEncoder::executeBundles(
     Converter conv(env);
 
     wgpu::RenderBundle* bundles = nullptr;
-    uint32_t bundleCount = 0;
+    size_t bundleCount = 0;
     if (!conv(bundles, bundleCount, bundles_in)) {
         return;
     }
@@ -99,7 +99,7 @@ void GPURenderPassEncoder::setBindGroup(
 
     wgpu::BindGroup bg{};
     uint32_t* offsets = nullptr;
-    uint32_t num_offsets = 0;
+    size_t num_offsets = 0;
     if (!conv(bg, bindGroup) || !conv(offsets, num_offsets, dynamicOffsets)) {
         return;
     }
