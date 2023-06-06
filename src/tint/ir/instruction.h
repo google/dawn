@@ -52,6 +52,11 @@ class Instruction : public utils::Castable<Instruction, Value> {
     /// Removes this instruction from the owning block
     void Remove();
 
+    /// Set an operand at a given index.
+    /// @param index the operand index
+    /// @param value the value to use
+    virtual void SetOperand(uint32_t index, ir::Value* value) = 0;
+
     /// Pointer to the next instruction in the list
     Instruction* next = nullptr;
     /// Pointer to the previous instruction in the list

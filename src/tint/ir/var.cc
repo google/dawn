@@ -29,13 +29,7 @@ Var::Var(const type::Type* ty) : type_(ty) {
 Var::~Var() = default;
 
 void Var::SetInitializer(Value* initializer) {
-    if (operands_[0]) {
-        operands_[0]->RemoveUsage({this, 0u});
-    }
-    operands_[0] = initializer;
-    if (initializer) {
-        initializer->AddUsage({this, 0u});
-    }
+    SetOperand(0, initializer);
 }
 
 }  // namespace tint::ir

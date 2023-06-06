@@ -26,6 +26,21 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N>, Instruc
     /// Destructor
     ~OperandInstruction() override = default;
 
+    /// Set an operand at a given index.
+    /// @param index the operand index
+    /// @param value the value to use
+    void SetOperand(uint32_t index, ir::Value* value) override {
+        TINT_ASSERT(IR, index < operands_.Length());
+        if (operands_[index]) {
+            operands_[index]->RemoveUsage({this, index});
+        }
+        operands_[index] = value;
+        if (value) {
+            value->AddUsage({this, index});
+        }
+        return;
+    }
+
   protected:
     /// Append a new operand to the operand list for this instruction.
     /// @param value the operand value to append

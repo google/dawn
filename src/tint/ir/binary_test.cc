@@ -369,5 +369,19 @@ TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
                 testing::UnorderedElementsAre(Usage{inst, 0u}, Usage{inst, 1u}));
 }
 
+TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
+    auto* rhs_a = b.Constant(2_i);
+    auto* rhs_b = b.Constant(3_i);
+    auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), rhs_a);
+
+    EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
+
+    EXPECT_THAT(rhs_a->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(rhs_b->Usages(), testing::UnorderedElementsAre());
+    inst->SetOperand(1, rhs_b);
+    EXPECT_THAT(rhs_a->Usages(), testing::UnorderedElementsAre());
+    EXPECT_THAT(rhs_b->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+}
+
 }  // namespace
 }  // namespace tint::ir
