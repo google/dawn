@@ -1359,6 +1359,11 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
                     (format.format == wgpu::TextureFormat::Depth32Float &&
                      GetDevice()->IsToggleEnabled(
                          Toggle::UseBlitForDepth32FloatTextureToBufferCopy))) {
+                    // This function might create new resources. Need to lock the Device.
+                    // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at
+                    // Command Submit time, so the locking would be removed from here at that point.
+                    auto deviceLock(GetDevice()->GetScopedLock());
+
                     TextureCopy src;
                     src.texture = source->texture;
                     src.origin = source->origin;
@@ -1378,6 +1383,11 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
                 }
             } else if (aspect == Aspect::Stencil) {
                 if (GetDevice()->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy)) {
+                    // This function might create new resources. Need to lock the Device.
+                    // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at
+                    // Command Submit time, so the locking would be removed from here at that point.
+                    auto deviceLock(GetDevice()->GetScopedLock());
+
                     TextureCopy src;
                     src.texture = source->texture;
                     src.origin = source->origin;
