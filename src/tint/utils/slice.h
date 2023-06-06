@@ -117,6 +117,15 @@ struct Slice {
     /// Constructor
     Slice(EmptyType) {}  // NOLINT
 
+    /// Copy constructor with covariance / const conversion
+    /// @param other the vector to copy
+    /// @see CanReinterpretSlice for rules about conversion
+    template <typename U,
+              typename = std::enable_if_t<CanReinterpretSlice<ReinterpretMode::kSafe, T, U>>>
+    Slice(const Slice<U>& other) {  // NOLINT(runtime/explicit)
+        *this = other.template Reinterpret<T, ReinterpretMode::kSafe>();
+    }
+
     /// Constructor
     /// @param d pointer to the first element in the slice
     /// @param l total number of elements in the slice

@@ -72,6 +72,21 @@ TEST(TintSliceTest, Ctor) {
     EXPECT_TRUE(slice.IsEmpty());
 }
 
+TEST(TintSliceTest, CtorCast) {
+    C1* elements[3];
+
+    Slice<C1*> slice_a;
+    slice_a.data = &elements[0];
+    slice_a.len = 3;
+    slice_a.cap = 3;
+
+    Slice<const C0*> slice_b(slice_a);
+    EXPECT_EQ(slice_b.data, Bitcast<const C0**>(&elements[0]));
+    EXPECT_EQ(slice_b.len, 3u);
+    EXPECT_EQ(slice_b.cap, 3u);
+    EXPECT_FALSE(slice_b.IsEmpty());
+}
+
 TEST(TintSliceTest, CtorEmpty) {
     Slice<int> slice{Empty};
     EXPECT_EQ(slice.data, nullptr);
