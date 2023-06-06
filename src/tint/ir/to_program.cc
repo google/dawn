@@ -92,9 +92,15 @@ class State {
     const ast::Function* Fn(const Function* fn) {
         SCOPED_NESTING();
 
-        auto name = NameOf(fn);
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
-        utils::Vector<const ast::Parameter*, 1> params{};
+        static constexpr size_t N = decltype(ast::Function::params)::static_length;
+        auto params = utils::Transform<N>(fn->Params(), [&](const ir::FunctionParam* param) {
+            auto name = NameOf(param);
+            auto ty = Type(param->Type());
+            return b.Param(name, ty);
+        });
+
+        auto name = NameOf(fn);
         auto ret_ty = Type(fn->ReturnType());
         auto* body = BlockGraph(fn->StartTarget());
         utils::Vector<const ast::Attribute*, 1> attrs{};
@@ -323,6 +329,7 @@ class State {
             [&](const ir::Constant* c) { return ConstExpr(c); },
             [&](const ir::Load* l) { return LoadExpr(l); },
             [&](const ir::Var* v) { return VarExpr(v); },
+            [&](const ir::FunctionParam* p) { return ParamExpr(p); },
             [&](Default) {
                 UNHANDLED_CASE(val);
                 return b.Expr("<error>");
@@ -370,6 +377,11 @@ class State {
     /// @return an ast::Expression from @p v.
     /// @note May be a semantically-invalid placeholder expression on error.
     const ast::Expression* VarExpr(const ir::Var* v) { return b.Expr(NameOf(v)); }
+
+    /// @param p the ir::FunctionParam
+    /// @return an ast::Expression from @p p.
+    /// @note May be a semantically-invalid placeholder expression on error.
+    const ast::Expression* ParamExpr(const ir::FunctionParam* p) { return b.Expr(NameOf(p)); }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Types
