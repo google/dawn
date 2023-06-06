@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/access.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -28,11 +30,8 @@ TEST_F(IR_AccessTest, SetsUsage) {
     auto* idx = b.Constant(u32(1));
     auto* a = b.Access(mod.Types().i32(), var, utils::Vector{idx});
 
-    EXPECT_EQ(1u, idx->Usage().Length());
-    EXPECT_EQ(a, idx->Usage()[0]);
-
-    EXPECT_EQ(1u, var->Usage().Length());
-    EXPECT_EQ(a, var->Usage()[0]);
+    EXPECT_THAT(var->Usages(), testing::UnorderedElementsAre(Usage{a, 0u}));
+    EXPECT_THAT(idx->Usages(), testing::UnorderedElementsAre(Usage{a, 1u}));
 }
 
 TEST_F(IR_AccessTest, Fail_NullType) {

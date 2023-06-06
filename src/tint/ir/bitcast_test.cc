@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
+#include "src/tint/ir/builder.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/ir_test_helper.h"
@@ -39,13 +41,12 @@ TEST_F(IR_BitcastTest, Bitcast) {
 }
 
 TEST_F(IR_BitcastTest, Bitcast_Usage) {
-    const auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
+    auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
 
     const auto args = inst->Args();
     ASSERT_EQ(args.Length(), 1u);
     ASSERT_NE(args[0], nullptr);
-    ASSERT_EQ(args[0]->Usage().Length(), 1u);
-    EXPECT_EQ(args[0]->Usage()[0], inst);
+    EXPECT_THAT(args[0]->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
 TEST_F(IR_BitcastTest, Fail_NullValue) {

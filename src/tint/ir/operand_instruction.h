@@ -31,7 +31,7 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N>, Instruc
     /// @param value the operand value to append
     void AddOperand(ir::Value* value) {
         if (value) {
-            value->AddUsage(this);
+            value->AddUsage({this, static_cast<uint32_t>(operands_.Length())});
         }
         operands_.Push(value);
     }

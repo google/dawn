@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
@@ -24,7 +25,7 @@ using namespace tint::number_suffixes;  // NOLINT
 
 using IR_LoadTest = IRTestHelper;
 
-TEST_F(IR_LoadTest, Creat) {
+TEST_F(IR_LoadTest, Create) {
     auto* store_type = mod.Types().i32();
     auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
                                               builtin::Access::kReadWrite));
@@ -43,11 +44,10 @@ TEST_F(IR_LoadTest, Usage) {
     auto* store_type = mod.Types().i32();
     auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
                                               builtin::Access::kReadWrite));
-    const auto* inst = b.Load(var);
+    auto* inst = b.Load(var);
 
     ASSERT_NE(inst->From(), nullptr);
-    ASSERT_EQ(inst->From()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->From()->Usage()[0], inst);
+    EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
 TEST_F(IR_LoadTest, Fail_NullType) {

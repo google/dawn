@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
@@ -54,8 +55,7 @@ TEST_F(IR_UnaryTest, Unary_Usage) {
     EXPECT_EQ(inst->Kind(), Unary::Kind::kNegation);
 
     ASSERT_NE(inst->Val(), nullptr);
-    ASSERT_EQ(inst->Val()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->Val()->Usage()[0], inst);
+    EXPECT_THAT(inst->Val()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
 TEST_F(IR_UnaryTest, Fail_NullType) {

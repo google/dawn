@@ -31,7 +31,7 @@ Var::~Var() = default;
 void Var::SetInitializer(Value* initializer) {
     operands_[0] = initializer;
     if (initializer) {
-        initializer->AddUsage(this);
+        initializer->AddUsage({this, 0u});
     }
     // TODO(dsinclair): Probably should do a RemoveUsage on an existing initializer if set
 }

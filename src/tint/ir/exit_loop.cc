@@ -27,7 +27,6 @@ ExitLoop::ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Emp
     TINT_ASSERT(IR, loop_);
 
     if (loop_) {
-        loop_->AddUsage(this);
         loop_->Merge()->AddInboundBranch(this);
     }
     AddOperands(std::move(args));

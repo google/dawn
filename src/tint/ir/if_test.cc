@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/ir/if.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -25,8 +26,7 @@ using IR_IfTest = IRTestHelper;
 TEST_F(IR_IfTest, Usage) {
     auto* cond = b.Constant(true);
     auto* if_ = b.CreateIf(cond);
-    ASSERT_EQ(1u, cond->Usage().Length());
-    EXPECT_EQ(if_, cond->Usage()[0]);
+    EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{if_, 0u}));
 }
 
 TEST_F(IR_IfTest, Fail_NullCondition) {

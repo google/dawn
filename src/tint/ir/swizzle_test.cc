@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/swizzle.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -27,8 +29,7 @@ TEST_F(IR_SwizzleTest, SetsUsage) {
     auto* var = b.Declare(ty);
     auto* a = b.Swizzle(mod.Types().i32(), var, utils::Vector{1u});
 
-    EXPECT_EQ(1u, var->Usage().Length());
-    EXPECT_EQ(a, var->Usage()[0]);
+    EXPECT_THAT(var->Usages(), testing::UnorderedElementsAre(Usage{a, 0u}));
 }
 
 TEST_F(IR_SwizzleTest, Fail_NullType) {

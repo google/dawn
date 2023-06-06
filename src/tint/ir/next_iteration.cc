@@ -27,7 +27,6 @@ NextIteration::NextIteration(ir::Loop* loop, utils::VectorRef<Value*> args /* = 
     TINT_ASSERT(IR, loop_);
 
     if (loop_) {
-        loop_->AddUsage(this);
         loop_->Body()->AddInboundBranch(this);
     }
     AddOperands(std::move(args));

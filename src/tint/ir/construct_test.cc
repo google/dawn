@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/construct.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -27,10 +29,8 @@ TEST_F(IR_ConstructTest, Usage) {
     auto* arg2 = b.Constant(false);
     auto* c = b.Construct(mod.Types().f32(), utils::Vector{arg1, arg2});
 
-    ASSERT_EQ(1u, arg1->Usage().Length());
-    ASSERT_EQ(1u, arg2->Usage().Length());
-    EXPECT_EQ(c, arg1->Usage()[0]);
-    EXPECT_EQ(c, arg2->Usage()[0]);
+    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{c, 0u}));
+    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{c, 1u}));
 }
 
 TEST_F(IR_ConstructTest, Fail_NullType) {

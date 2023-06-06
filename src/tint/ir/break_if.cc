@@ -31,7 +31,6 @@ BreakIf::BreakIf(Value* condition,
 
     AddOperand(condition);
     if (loop_) {
-        loop_->AddUsage(this);
         loop_->Body()->AddInboundBranch(this);
         loop_->Merge()->AddInboundBranch(this);
     }

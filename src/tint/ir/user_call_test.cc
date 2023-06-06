@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/user_call.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -23,15 +25,13 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_UserCallTest = IRTestHelper;
 
 TEST_F(IR_UserCallTest, Usage) {
+    auto* func = b.CreateFunction("myfunc", mod.Types().void_());
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* e = b.UserCall(mod.Types().void_(), b.CreateFunction("myfunc", mod.Types().void_()),
-                         utils::Vector{arg1, arg2});
-    ASSERT_EQ(1u, arg1->Usage().Length());
-    ASSERT_EQ(1u, arg2->Usage().Length());
-
-    EXPECT_EQ(e, arg1->Usage()[0]);
-    EXPECT_EQ(e, arg2->Usage()[0]);
+    auto* e = b.UserCall(mod.Types().void_(), func, utils::Vector{arg1, arg2});
+    EXPECT_THAT(func->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
+    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
+    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 2u}));
 }
 
 TEST_F(IR_UserCallTest, Fail_NullType) {

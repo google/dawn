@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/switch.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -24,9 +26,8 @@ using IR_SwitchTest = IRTestHelper;
 
 TEST_F(IR_SwitchTest, Usage) {
     auto* cond = b.Constant(true);
-    auto* if_ = b.CreateSwitch(cond);
-    ASSERT_EQ(1u, cond->Usage().Length());
-    EXPECT_EQ(if_, cond->Usage()[0]);
+    auto* switch_ = b.CreateSwitch(cond);
+    EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{switch_, 0u}));
 }
 
 TEST_F(IR_SwitchTest, Fail_NullCondition) {

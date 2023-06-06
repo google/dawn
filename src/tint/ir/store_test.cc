@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
@@ -40,15 +41,13 @@ TEST_F(IR_StoreTest, CreateStore) {
 
 TEST_F(IR_StoreTest, Store_Usage) {
     auto* to = b.Discard();
-    const auto* inst = b.Store(to, b.Constant(4_i));
+    auto* inst = b.Store(to, b.Constant(4_i));
 
     ASSERT_NE(inst->To(), nullptr);
-    ASSERT_EQ(inst->To()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->To()->Usage()[0], inst);
+    EXPECT_THAT(inst->To()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 
     ASSERT_NE(inst->From(), nullptr);
-    ASSERT_EQ(inst->From()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->From()->Usage()[0], inst);
+    EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_StoreTest, Fail_NullTo) {

@@ -26,7 +26,7 @@ Return::Return(Function* func, utils::VectorRef<Value*> args) : func_(func) {
     TINT_ASSERT(IR, func_);
 
     if (func_) {
-        func_->AddUsage(this);
+        func_->AddUsage({this, 0u});
     }
     AddOperands(std::move(args));
 }

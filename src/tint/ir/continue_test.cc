@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/continue.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -28,13 +30,9 @@ TEST_F(IR_ContinueTest, Usage) {
     auto* arg2 = b.Constant(2_u);
 
     auto* brk = b.Continue(loop, utils::Vector{arg1, arg2});
-    ASSERT_EQ(1u, loop->Usage().Length());
-    ASSERT_EQ(1u, arg1->Usage().Length());
-    ASSERT_EQ(1u, arg2->Usage().Length());
 
-    EXPECT_EQ(brk, loop->Usage()[0]);
-    EXPECT_EQ(brk, arg1->Usage()[0]);
-    EXPECT_EQ(brk, arg2->Usage()[0]);
+    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{brk, 0u}));
+    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{brk, 1u}));
 }
 
 TEST_F(IR_ContinueTest, Fail_NullLoop) {

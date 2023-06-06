@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
+#include "src/tint/ir/builder.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -344,29 +346,27 @@ TEST_F(IR_BinaryTest, CreateModulo) {
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage) {
-    const auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
 
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
 
     ASSERT_NE(inst->LHS(), nullptr);
-    ASSERT_EQ(inst->LHS()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->LHS()->Usage()[0], inst);
+    EXPECT_THAT(inst->LHS()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 
     ASSERT_NE(inst->RHS(), nullptr);
-    ASSERT_EQ(inst->RHS()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->RHS()->Usage()[0], inst);
+    EXPECT_THAT(inst->RHS()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
     auto val = b.Constant(4_i);
-    const auto* inst = b.And(mod.Types().i32(), val, val);
+    auto* inst = b.And(mod.Types().i32(), val, val);
 
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
     ASSERT_EQ(inst->LHS(), inst->RHS());
 
     ASSERT_NE(inst->LHS(), nullptr);
-    ASSERT_EQ(inst->LHS()->Usage().Length(), 1u);
-    EXPECT_EQ(inst->LHS()->Usage()[0], inst);
+    EXPECT_THAT(inst->LHS()->Usages(),
+                testing::UnorderedElementsAre(Usage{inst, 0u}, Usage{inst, 1u}));
 }
 
 }  // namespace

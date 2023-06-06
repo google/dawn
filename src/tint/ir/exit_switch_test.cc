@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/exit_switch.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -27,13 +29,9 @@ TEST_F(IR_ExitSwitchTest, Usage) {
     auto* arg2 = b.Constant(2_u);
     auto* switch_ = b.CreateSwitch(b.Constant(true));
     auto* e = b.ExitSwitch(switch_, utils::Vector{arg1, arg2});
-    ASSERT_EQ(1u, arg1->Usage().Length());
-    ASSERT_EQ(1u, arg2->Usage().Length());
-    ASSERT_EQ(1u, switch_->Usage().Length());
 
-    EXPECT_EQ(e, arg1->Usage()[0]);
-    EXPECT_EQ(e, arg2->Usage()[0]);
-    EXPECT_EQ(e, switch_->Usage()[0]);
+    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
+    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
 }
 
 TEST_F(IR_ExitSwitchTest, Fail_NullSwitch) {

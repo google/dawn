@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/var.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -39,8 +41,7 @@ TEST_F(IR_VarTest, Initializer_Usage) {
     auto* init = b.Constant(1_f);
     var->SetInitializer(init);
 
-    ASSERT_EQ(1u, init->Usage().Length());
-    EXPECT_EQ(var, init->Usage()[0]);
+    EXPECT_THAT(init->Usages(), testing::UnorderedElementsAre(Usage{var, 0u}));
 }
 
 }  // namespace

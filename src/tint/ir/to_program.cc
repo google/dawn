@@ -322,7 +322,7 @@ class State {
         // of usage. Currently a value is inlined if it has a single usage and is unnamed.
         // TODO(crbug.com/tint/1902): This logic needs to check that the sequence of side-effecting
         // expressions is not changed by inlining the expression. This needs fixing.
-        bool create_let = val->Usage().Length() > 1 || mod.NameOf(val).IsValid();
+        bool create_let = val->Usages().Count() > 1 || mod.NameOf(val).IsValid();
         if (create_let) {
             auto* init = Expr(val);  // Must come before giving the value a name
             auto name = AssignNameTo(val);

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/ir_test_helper.h"
@@ -28,10 +29,8 @@ TEST_F(IR_BuiltinTest, Usage) {
     auto* builtin =
         b.Builtin(mod.Types().f32(), builtin::Function::kAbs, utils::Vector{arg1, arg2});
 
-    ASSERT_EQ(1u, arg1->Usage().Length());
-    ASSERT_EQ(1u, arg2->Usage().Length());
-    EXPECT_EQ(builtin, arg1->Usage()[0]);
-    EXPECT_EQ(builtin, arg2->Usage()[0]);
+    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{builtin, 0u}));
+    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
 }
 
 TEST_F(IR_BuiltinTest, Fail_NullType) {
