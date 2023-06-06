@@ -17,6 +17,7 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/constant.h"
@@ -28,6 +29,7 @@
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/unary.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/program_builder.h"
@@ -95,12 +97,12 @@ class State {
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
         static constexpr size_t N = decltype(ast::Function::params)::static_length;
         auto params = utils::Transform<N>(fn->Params(), [&](const ir::FunctionParam* param) {
-            auto name = NameOf(param);
+            auto name = AssignNameTo(param);
             auto ty = Type(param->Type());
             return b.Param(name, ty);
         });
 
-        auto name = NameOf(fn);
+        auto name = AssignNameTo(fn);
         auto ret_ty = Type(fn->ReturnType());
         auto* body = BlockGraph(fn->StartTarget());
         utils::Vector<const ast::Attribute*, 1> attrs{};
@@ -156,13 +158,13 @@ class State {
     const ast::Statement* Stmt(const ir::Instruction* inst) {
         return tint::Switch(
             inst,                                                        //
+            [&](const ir::Store* i) { return Store(i); },                //
             [&](const ir::Call* i) { return CallStmt(i); },              //
             [&](const ir::Var* i) { return Var(i); },                    //
-            [&](const ir::Load*) { return nullptr; },                    //
-            [&](const ir::Store* i) { return Store(i); },                //
             [&](const ir::If* if_) { return If(if_); },                  //
             [&](const ir::Switch* switch_) { return Switch(switch_); },  //
             [&](const ir::Return* ret) { return Return(ret); },          //
+            [&](const ir::Value*) { return ValueStmt(inst); },
             // TODO(dsinclair): Remove when branch is only a parent ...
             [&](const ir::Branch*) { return nullptr; },
             [&](Default) {
@@ -286,7 +288,7 @@ class State {
     /// @param var the ir::Var
     /// @return an ast::VariableDeclStatement from @p var
     const ast::VariableDeclStatement* Var(const ir::Var* var) {
-        Symbol name = NameOf(var);
+        Symbol name = AssignNameTo(var);
         auto* ptr = var->Type()->As<type::Pointer>();
         auto ty = Type(ptr->StoreType());
         const ast::Expression* init = nullptr;
@@ -307,7 +309,26 @@ class State {
     /// @return an ast::AssignmentStatement from @p call
     const ast::AssignmentStatement* Store(const ir::Store* store) {
         auto* expr = Expr(store->From());
-        return b.Assign(NameOf(store->To()), expr);
+        return b.Assign(AssignNameTo(store->To()), expr);
+    }
+
+    /// @param val the ir::Value
+    /// @return an ast::Statement from @p val, or nullptr if the value does not produce a statement.
+    const ast::Statement* ValueStmt(const ir::Value* val) {
+        // As we're visiting this value's declaration it shouldn't already have a name reserved.
+        TINT_ASSERT(IR, !value_names_.Contains(val));
+
+        // Determine whether the value should be placed into a let, or inlined in its single place
+        // of usage. Currently a value is inlined if it has a single usage and is unnamed.
+        // TODO(crbug.com/tint/1902): This logic needs to check that the sequence of side-effecting
+        // expressions is not changed by inlining the expression. This needs fixing.
+        bool create_let = val->Usage().Length() > 1 || mod.NameOf(val).IsValid();
+        if (create_let) {
+            auto* init = Expr(val);  // Must come before giving the value a name
+            auto name = AssignNameTo(val);
+            return b.Decl(b.Let(name, init));
+        }
+        return nullptr;  // Value will be inlined at its place of usage.
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -324,12 +345,16 @@ class State {
     /// @return an ast::Expression from @p val.
     /// @note May be a semantically-invalid placeholder expression on error.
     const ast::Expression* Expr(const ir::Value* val) {
+        if (auto name = value_names_.Get(val)) {
+            return b.Expr(name.value());
+        }
+
         return tint::Switch(
             val,  //
             [&](const ir::Constant* c) { return ConstExpr(c); },
             [&](const ir::Load* l) { return LoadExpr(l); },
-            [&](const ir::Var* v) { return VarExpr(v); },
-            [&](const ir::FunctionParam* p) { return ParamExpr(p); },
+            [&](const ir::Unary* u) { return UnaryExpr(u); },
+            [&](const ir::Binary* u) { return BinaryExpr(u); },
             [&](Default) {
                 UNHANDLED_CASE(val);
                 return b.Expr("<error>");
@@ -344,7 +369,7 @@ class State {
             utils::Transform<2>(call->Args(), [&](const ir::Value* arg) { return Expr(arg); });
         return tint::Switch(
             call,  //
-            [&](const ir::UserCall* c) { return b.Call(NameOf(c->Func()), std::move(args)); },
+            [&](const ir::UserCall* c) { return b.Call(AssignNameTo(c->Func()), std::move(args)); },
             [&](Default) {
                 UNHANDLED_CASE(call);
                 return b.Call("<error>");
@@ -373,15 +398,68 @@ class State {
     /// @note May be a semantically-invalid placeholder expression on error.
     const ast::Expression* LoadExpr(const ir::Load* l) { return Expr(l->From()); }
 
-    /// @param v the ir::Var
-    /// @return an ast::Expression from @p v.
+    /// @param u the ir::Unary
+    /// @return an ast::UnaryOpExpression from @p u.
     /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* VarExpr(const ir::Var* v) { return b.Expr(NameOf(v)); }
+    const ast::Expression* UnaryExpr(const ir::Unary* u) {
+        switch (u->Kind()) {
+            case ir::Unary::Kind::kComplement:
+                return b.Complement(Expr(u->Val()));
+            case ir::Unary::Kind::kNegation:
+                return b.Negation(Expr(u->Val()));
+        }
+        return b.Expr("<error>");
+    }
 
-    /// @param p the ir::FunctionParam
-    /// @return an ast::Expression from @p p.
+    /// @param e the ir::Binary
+    /// @return an ast::BinaryOpExpression from @p e.
     /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* ParamExpr(const ir::FunctionParam* p) { return b.Expr(NameOf(p)); }
+    const ast::Expression* BinaryExpr(const ir::Binary* e) {
+        if (e->Kind() == ir::Binary::Kind::kEqual) {
+            auto* rhs = e->RHS()->As<ir::Constant>();
+            if (rhs && rhs->Type()->Is<type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
+                // expr == false
+                return b.Not(Expr(e->LHS()));
+            }
+        }
+        auto* lhs = Expr(e->LHS());
+        auto* rhs = Expr(e->RHS());
+        switch (e->Kind()) {
+            case ir::Binary::Kind::kAdd:
+                return b.Add(lhs, rhs);
+            case ir::Binary::Kind::kSubtract:
+                return b.Sub(lhs, rhs);
+            case ir::Binary::Kind::kMultiply:
+                return b.Mul(lhs, rhs);
+            case ir::Binary::Kind::kDivide:
+                return b.Div(lhs, rhs);
+            case ir::Binary::Kind::kModulo:
+                return b.Mod(lhs, rhs);
+            case ir::Binary::Kind::kAnd:
+                return b.And(lhs, rhs);
+            case ir::Binary::Kind::kOr:
+                return b.Or(lhs, rhs);
+            case ir::Binary::Kind::kXor:
+                return b.Xor(lhs, rhs);
+            case ir::Binary::Kind::kEqual:
+                return b.Equal(lhs, rhs);
+            case ir::Binary::Kind::kNotEqual:
+                return b.NotEqual(lhs, rhs);
+            case ir::Binary::Kind::kLessThan:
+                return b.LessThan(lhs, rhs);
+            case ir::Binary::Kind::kGreaterThan:
+                return b.GreaterThan(lhs, rhs);
+            case ir::Binary::Kind::kLessThanEqual:
+                return b.LessThanEqual(lhs, rhs);
+            case ir::Binary::Kind::kGreaterThanEqual:
+                return b.GreaterThanEqual(lhs, rhs);
+            case ir::Binary::Kind::kShiftLeft:
+                return b.Shl(lhs, rhs);
+            case ir::Binary::Kind::kShiftRight:
+                return b.Shr(lhs, rhs);
+        }
+        return b.Expr("<error>");
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Types
@@ -476,8 +554,10 @@ class State {
     // Helpers
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// @return the Symbol to emit for the given value
-    Symbol NameOf(const Value* value) {
+    /// Creates and returns a new, unique name for the given value, or returns the previously
+    /// created name.
+    /// @return the value's name
+    Symbol AssignNameTo(const Value* value) {
         TINT_ASSERT(IR, value);
         return value_names_.GetOrCreate(value, [&] {
             if (auto sym = mod.NameOf(value)) {
