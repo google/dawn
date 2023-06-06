@@ -15,13 +15,13 @@
 #ifndef SRC_TINT_IR_ACCESS_H_
 #define SRC_TINT_IR_ACCESS_H_
 
-#include "src/tint/ir/instruction.h"
+#include "src/tint/ir/operand_instruction.h"
 #include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 
 /// An access instruction in the IR.
-class Access : public utils::Castable<Access, Instruction> {
+class Access : public utils::Castable<Access, OperandInstruction<3>> {
   public:
     /// Constructor
     /// @param result_type the result type
@@ -34,15 +34,16 @@ class Access : public utils::Castable<Access, Instruction> {
     const type::Type* Type() const override { return result_type_; }
 
     /// @returns the object used for the access
-    Value* Object() const { return object_; }
+    Value* Object() const { return operands_[0]; }
 
     /// @returns the accessor indices
-    utils::VectorRef<Value*> Indices() const { return indices_; }
+    utils::Slice<Value*> Indices() const {
+        const auto& slice = operands_.Slice();
+        return utils::Slice<Value*>(slice.data + 1, slice.len - 1, slice.cap - 1);
+    }
 
   private:
     const type::Type* result_type_ = nullptr;
-    Value* object_ = nullptr;
-    utils::Vector<Value*, 1> indices_;
 };
 
 }  // namespace tint::ir

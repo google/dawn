@@ -774,6 +774,8 @@ if(${TINT_BUILD_IR})
     ir/module.h
     ir/next_iteration.cc
     ir/next_iteration.h
+    ir/operand_instruction.cc
+    ir/operand_instruction.h
     ir/return.cc
     ir/return.h
     ir/store.cc

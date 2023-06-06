@@ -21,7 +21,7 @@
 
 namespace tint::ir {
 
-/// A value conversion instruction in the IR.
+/// A builtin call instruction in the IR.
 class Builtin : public utils::Castable<Builtin, Call> {
   public:
     /// Constructor

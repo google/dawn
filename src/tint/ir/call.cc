@@ -20,16 +20,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Call);
 
 namespace tint::ir {
 
-Call::Call(const type::Type* res_ty, utils::VectorRef<Value*> arguments)
-    : result_type_(res_ty), args_(std::move(arguments)) {
+Call::Call(const type::Type* res_ty) : result_type_(res_ty) {
     TINT_ASSERT(IR, result_type_);
-
-    for (auto* arg : args_) {
-        TINT_ASSERT(IR, arg);
-        if (arg) {
-            arg->AddUsage(this);
-        }
-    }
 }
 
 Call::~Call() = default;

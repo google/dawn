@@ -15,13 +15,13 @@
 #ifndef SRC_TINT_IR_SWIZZLE_H_
 #define SRC_TINT_IR_SWIZZLE_H_
 
-#include "src/tint/ir/instruction.h"
+#include "src/tint/ir/operand_instruction.h"
 #include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 
 /// A swizzle instruction in the IR.
-class Swizzle : public utils::Castable<Swizzle, Instruction> {
+class Swizzle : public utils::Castable<Swizzle, OperandInstruction<1>> {
   public:
     /// Constructor
     /// @param result_type the result type
@@ -34,14 +34,13 @@ class Swizzle : public utils::Castable<Swizzle, Instruction> {
     const type::Type* Type() const override { return result_type_; }
 
     /// @returns the object used for the access
-    Value* Object() const { return object_; }
+    Value* Object() const { return operands_[0]; }
 
     /// @returns the swizzle indices
     utils::VectorRef<uint32_t> Indices() const { return indices_; }
 
   private:
     const type::Type* result_type_ = nullptr;
-    Value* object_ = nullptr;
     utils::Vector<uint32_t, 4> indices_;
 };
 

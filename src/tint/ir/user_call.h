@@ -31,11 +31,16 @@ class UserCall : public utils::Castable<UserCall, Call> {
     UserCall(const type::Type* type, Function* func, utils::VectorRef<Value*> args);
     ~UserCall() override;
 
+    /// @returns the call arguments
+    utils::Slice<Value*> Args() const override {
+        const auto& slice = operands_.Slice();
+        return utils::Slice<Value*>(slice.data + 1, slice.len - 1, slice.cap - 1);
+    }
+
     /// @returns the called function name
-    const Function* Func() const { return func_; }
+    const Function* Func() const { return operands_.Front()->As<ir::Function>(); }
 
   private:
-    const Function* func_ = nullptr;
 };
 
 }  // namespace tint::ir

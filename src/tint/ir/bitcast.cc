@@ -19,7 +19,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Bitcast);
 
 namespace tint::ir {
 
-Bitcast::Bitcast(const type::Type* ty, Value* val) : Base(ty, utils::Vector{val}) {}
+Bitcast::Bitcast(const type::Type* ty, Value* val) : Base(ty) {
+    TINT_ASSERT(IR, val);
+
+    AddOperand(val);
+}
 
 Bitcast::~Bitcast() = default;
 

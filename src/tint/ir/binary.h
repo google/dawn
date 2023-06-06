@@ -15,13 +15,13 @@
 #ifndef SRC_TINT_IR_BINARY_H_
 #define SRC_TINT_IR_BINARY_H_
 
-#include "src/tint/ir/instruction.h"
+#include "src/tint/ir/operand_instruction.h"
 #include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 
-/// An instruction in the IR.
-class Binary : public utils::Castable<Binary, Instruction> {
+/// A binary instruction in the IR.
+class Binary : public utils::Castable<Binary, OperandInstruction<2>> {
   public:
     /// The kind of instruction.
     enum class Kind {
@@ -61,16 +61,14 @@ class Binary : public utils::Castable<Binary, Instruction> {
     const type::Type* Type() const override { return result_type_; }
 
     /// @returns the left-hand-side value for the instruction
-    const Value* LHS() const { return lhs_; }
+    const Value* LHS() const { return operands_[0]; }
 
     /// @returns the right-hand-side value for the instruction
-    const Value* RHS() const { return rhs_; }
+    const Value* RHS() const { return operands_[1]; }
 
   private:
     enum Kind kind_;
     const type::Type* result_type_ = nullptr;
-    Value* lhs_ = nullptr;
-    Value* rhs_ = nullptr;
 };
 
 }  // namespace tint::ir

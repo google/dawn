@@ -63,13 +63,15 @@ class Switch : public utils::Castable<Switch, Branch> {
     /// @returns the switch cases
     utils::Vector<Case, 4>& Cases() { return cases_; }
 
+    /// @returns the branch arguments
+    utils::Slice<Value*> Args() const override { return utils::Slice<Value*>{}; }
+
     /// @returns the condition
-    const Value* Condition() const { return condition_; }
+    const Value* Condition() const { return operands_[0]; }
     /// @returns the condition
-    Value* Condition() { return condition_; }
+    Value* Condition() { return operands_[0]; }
 
   private:
-    Value* condition_ = nullptr;
     ir::Block* merge_ = nullptr;
     utils::Vector<Case, 4> cases_;
 };

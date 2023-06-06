@@ -12,30 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_STORE_H_
-#define SRC_TINT_IR_STORE_H_
-
 #include "src/tint/ir/operand_instruction.h"
-#include "src/tint/utils/castable.h"
 
-namespace tint::ir {
+TINT_INSTANTIATE_TYPEINFO(tint::ir::OperandInstruction<1>);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::OperandInstruction<2>);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::OperandInstruction<3>);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::OperandInstruction<4>);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::OperandInstruction<8>);
 
-/// A store instruction in the IR.
-class Store : public utils::Castable<Store, OperandInstruction<2>> {
-  public:
-    /// Constructor
-    /// @param to the value to store too
-    /// @param from the value being stored from
-    Store(Value* to, Value* from);
-    ~Store() override;
-
-    /// @returns the value being stored too
-    Value* To() const { return operands_[0]; }
-
-    /// @returns the value being stored
-    Value* From() const { return operands_[1]; }
-};
-
-}  // namespace tint::ir
-
-#endif  // SRC_TINT_IR_STORE_H_
+namespace tint::ir {}  // namespace tint::ir

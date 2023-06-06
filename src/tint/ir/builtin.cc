@@ -24,9 +24,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Builtin);
 namespace tint::ir {
 
 Builtin::Builtin(const type::Type* ty, builtin::Function func, utils::VectorRef<Value*> arguments)
-    : Base(ty, std::move(arguments)), func_(func) {
+    : Base(ty), func_(func) {
     TINT_ASSERT(IR, func != builtin::Function::kNone);
     TINT_ASSERT(IR, func != builtin::Function::kTintMaterialize);
+    AddOperands(std::move(arguments));
 }
 
 Builtin::~Builtin() = default;

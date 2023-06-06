@@ -21,15 +21,17 @@ namespace tint::ir {
 
 Var::Var(const type::Type* ty) : type_(ty) {
     TINT_ASSERT(IR, type_ != nullptr);
+
+    // Default to no initializer.
+    AddOperand(nullptr);
 }
 
 Var::~Var() = default;
 
 void Var::SetInitializer(Value* initializer) {
-    initializer_ = initializer;
-
-    if (initializer_) {
-        initializer_->AddUsage(this);
+    operands_[0] = initializer;
+    if (initializer) {
+        initializer->AddUsage(this);
     }
     // TODO(dsinclair): Probably should do a RemoveUsage on an existing initializer if set
 }

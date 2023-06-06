@@ -124,7 +124,7 @@ void Disassembler::WalkInternal(const Block* blk) {
     Indent() << "%b" << IdOf(blk) << " = block";
     if (!blk->Params().IsEmpty()) {
         out_ << " (";
-        EmitValueList(blk->Params());
+        EmitValueList(blk->Params().Slice());
         out_ << ")";
     }
 
@@ -573,7 +573,7 @@ void Disassembler::EmitBranch(const Branch* b) {
     out_ << std::endl;
 }
 
-void Disassembler::EmitValueList(tint::utils::VectorRef<const tint::ir::Value*> values) {
+void Disassembler::EmitValueList(tint::utils::Slice<const Value*> values) {
     for (auto* v : values) {
         if (v != values.Front()) {
             out_ << ", ";

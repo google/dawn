@@ -23,13 +23,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitLoop);
 namespace tint::ir {
 
 ExitLoop::ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */)
-    : Base(std::move(args)), loop_(loop) {
+    : loop_(loop) {
     TINT_ASSERT(IR, loop_);
 
     if (loop_) {
         loop_->AddUsage(this);
         loop_->Merge()->AddInboundBranch(this);
     }
+    AddOperands(std::move(args));
 }
 
 ExitLoop::~ExitLoop() = default;

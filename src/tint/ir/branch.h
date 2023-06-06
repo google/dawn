@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_BRANCH_H_
 #define SRC_TINT_IR_BRANCH_H_
 
-#include "src/tint/ir/instruction.h"
+#include "src/tint/ir/operand_instruction.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/castable.h"
 
@@ -27,20 +27,12 @@ class Block;
 namespace tint::ir {
 
 /// A branch instruction.
-class Branch : public utils::Castable<Branch, Instruction> {
+class Branch : public utils::Castable<Branch, OperandInstruction<1>> {
   public:
     ~Branch() override;
 
     /// @returns the branch arguments
-    utils::VectorRef<Value*> Args() const { return args_; }
-
-  protected:
-    /// Constructor
-    /// @param args the branch arguments
-    explicit Branch(utils::VectorRef<Value*> args);
-
-  private:
-    utils::Vector<Value*, 2> args_;
+    virtual utils::Slice<Value*> Args() const { return operands_.Slice(); }
 };
 
 }  // namespace tint::ir

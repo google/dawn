@@ -15,13 +15,13 @@
 #ifndef SRC_TINT_IR_UNARY_H_
 #define SRC_TINT_IR_UNARY_H_
 
-#include "src/tint/ir/instruction.h"
+#include "src/tint/ir/operand_instruction.h"
 #include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 
-/// An instruction in the IR.
-class Unary : public utils::Castable<Unary, Instruction> {
+/// A unary instruction in the IR.
+class Unary : public utils::Castable<Unary, OperandInstruction<1>> {
   public:
     /// The kind of instruction.
     enum class Kind {
@@ -40,9 +40,9 @@ class Unary : public utils::Castable<Unary, Instruction> {
     const type::Type* Type() const override { return result_type_; }
 
     /// @returns the value for the instruction
-    const Value* Val() const { return val_; }
+    const Value* Val() const { return operands_[0]; }
     /// @returns the value for the instruction
-    Value* Val() { return val_; }
+    Value* Val() { return operands_[0]; }
 
     /// @returns the kind of unary instruction
     enum Kind Kind() const { return kind_; }
@@ -50,7 +50,6 @@ class Unary : public utils::Castable<Unary, Instruction> {
   private:
     enum Kind kind_;
     const type::Type* result_type_ = nullptr;
-    Value* val_ = nullptr;
 };
 
 }  // namespace tint::ir

@@ -15,13 +15,13 @@
 #ifndef SRC_TINT_IR_LOAD_H_
 #define SRC_TINT_IR_LOAD_H_
 
-#include "src/tint/ir/instruction.h"
+#include "src/tint/ir/operand_instruction.h"
 #include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 
 /// A load instruction in the IR.
-class Load : public utils::Castable<Load, Instruction> {
+class Load : public utils::Castable<Load, OperandInstruction<1>> {
   public:
     /// Constructor
     /// @param type the result type
@@ -32,12 +32,11 @@ class Load : public utils::Castable<Load, Instruction> {
     /// @returns the type of the value
     const type::Type* Type() const override { return result_type_; }
 
-    /// @returns the avlue being loaded from
-    Value* From() const { return from_; }
+    /// @returns the value being loaded from
+    Value* From() const { return operands_[0]; }
 
   private:
     const type::Type* result_type_ = nullptr;
-    Value* from_ = nullptr;
 };
 
 }  // namespace tint::ir

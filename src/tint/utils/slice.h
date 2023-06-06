@@ -159,6 +159,9 @@ struct Slice {
     /// @return true if the slice length is zero
     bool IsEmpty() const { return len == 0; }
 
+    /// @return the length of the slice
+    size_t Length() const { return len; }
+
     /// Index operator
     /// @param i the element index. Must be less than `len`.
     /// @returns a reference to the i'th element.

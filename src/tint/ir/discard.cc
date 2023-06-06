@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Discard);
 
 namespace tint::ir {
 
-Discard::Discard(const type::Type* ty) : Base(ty, utils::Empty) {
+Discard::Discard(const type::Type* ty) : Base(ty) {
     if (ty) {
         TINT_ASSERT(IR, ty->Is<type::Void>());
     }
