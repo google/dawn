@@ -789,7 +789,8 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
                         break;
                     case Aspect::Stencil:
                         srvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
-                        break;
+                        // TODO(dawn:1827) Support sampling the stencil component.
+                        return DAWN_UNIMPLEMENTED_ERROR("Sampling the stencil component.");
                     default:
                         UNREACHABLE();
                         break;
@@ -812,7 +813,8 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
                         break;
                     case Aspect::Stencil:
                         srvDesc.Format = DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
-                        break;
+                        // TODO(dawn:1827) Support sampling the stencil component.
+                        return DAWN_UNIMPLEMENTED_ERROR("Sampling the stencil component.");
                     default:
                         UNREACHABLE();
                         break;
