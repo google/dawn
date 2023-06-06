@@ -16,6 +16,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
+#include "src/tint/ir/builder.h"
+#include "src/tint/ir/instruction.h"
 #include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
@@ -42,6 +44,8 @@ TEST_F(IR_VarTest, Initializer_Usage) {
     var->SetInitializer(init);
 
     EXPECT_THAT(init->Usages(), testing::UnorderedElementsAre(Usage{var, 0u}));
+    var->SetInitializer(nullptr);
+    EXPECT_TRUE(init->Usages().IsEmpty());
 }
 
 }  // namespace

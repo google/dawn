@@ -60,6 +60,10 @@ class Value : public utils::Castable<Value> {
     /// @param u the usage
     void AddUsage(Usage u) { uses_.Add(u); }
 
+    /// Remove a usage of this value.
+    /// @param u the usage
+    void RemoveUsage(Usage u) { uses_.Remove(u); }
+
     /// @returns the set of usages of this value. An instruction may appear multiple times if it
     /// uses the value for multiple different operands.
     const utils::Hashset<Usage, 4, Usage::Hasher>& Usages() const { return uses_; }
