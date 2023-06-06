@@ -111,12 +111,26 @@ struct Hasher<std::vector<T>> {
     }
 };
 
-/// Hasher specialization for utils::vector
+/// Hasher specialization for utils::Vector
 template <typename T, size_t N>
 struct Hasher<utils::Vector<T, N>> {
-    /// @param vector the vector to hash
-    /// @returns a hash of the vector
+    /// @param vector the Vector to hash
+    /// @returns a hash of the Vector
     size_t operator()(const utils::Vector<T, N>& vector) const {
+        auto hash = Hash(vector.Length());
+        for (auto& el : vector) {
+            hash = HashCombine(hash, el);
+        }
+        return hash;
+    }
+};
+
+/// Hasher specialization for utils::VectorRef
+template <typename T>
+struct Hasher<utils::VectorRef<T>> {
+    /// @param vector the VectorRef reference to hash
+    /// @returns a hash of the Vector
+    size_t operator()(const utils::VectorRef<T>& vector) const {
         auto hash = Hash(vector.Length());
         for (auto& el : vector) {
             hash = HashCombine(hash, el);

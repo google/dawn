@@ -43,6 +43,21 @@ TEST(HashTests, TintVector) {
     EXPECT_EQ(Hash(Vector<int, 3>({1, 2, 3})), Hash(Vector<int, 2>({1, 2, 3})));
 }
 
+TEST(HashTests, TintVectorRef) {
+    EXPECT_EQ(Hash(VectorRef<int>(Vector<int, 0>({}))), Hash(VectorRef<int>(Vector<int, 0>({}))));
+    EXPECT_EQ(Hash(VectorRef<int>(Vector<int, 0>({1, 2, 3}))),
+              Hash(VectorRef<int>(Vector<int, 0>({1, 2, 3}))));
+    EXPECT_EQ(Hash(VectorRef<int>(Vector<int, 3>({1, 2, 3}))),
+              Hash(VectorRef<int>(Vector<int, 4>({1, 2, 3}))));
+    EXPECT_EQ(Hash(VectorRef<int>(Vector<int, 3>({1, 2, 3}))),
+              Hash(VectorRef<int>(Vector<int, 2>({1, 2, 3}))));
+
+    EXPECT_EQ(Hash(VectorRef<int>(Vector<int, 0>({}))), Hash(Vector<int, 0>({})));
+    EXPECT_EQ(Hash(VectorRef<int>(Vector<int, 0>({1, 2, 3}))), Hash(Vector<int, 0>({1, 2, 3})));
+    EXPECT_EQ(Hash(VectorRef<int>(Vector<int, 3>({1, 2, 3}))), Hash(Vector<int, 4>({1, 2, 3})));
+    EXPECT_EQ(Hash(VectorRef<int>(Vector<int, 3>({1, 2, 3}))), Hash(Vector<int, 2>({1, 2, 3})));
+}
+
 TEST(HashTests, Tuple) {
     EXPECT_EQ(Hash(std::make_tuple(1)), Hash(std::make_tuple(1)));
     EXPECT_EQ(Hash(std::make_tuple(1, 2, 3)), Hash(std::make_tuple(1, 2, 3)));
