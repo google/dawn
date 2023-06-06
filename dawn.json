@@ -1099,6 +1099,7 @@
             {
                 "name": "create error shader module",
                 "returns": "shader module",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "descriptor", "type": "shader module descriptor", "annotation": "const*"},
                     {"name": "error message", "type": "char", "annotation": "const*", "length": "strlen"}
@@ -2574,7 +2575,7 @@
         "category": "object",
         "methods": [
             {"name": "get current texture view", "returns": "texture view"},
-            {"name": "get current texture", "returns": "texture"},
+            {"name": "get current texture", "returns": "texture", "tags": ["dawn"]},
             {"name": "present"}
         ]
     },
