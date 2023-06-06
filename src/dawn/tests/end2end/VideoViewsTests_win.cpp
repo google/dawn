@@ -175,12 +175,19 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         // Handle is no longer needed once resources are created.
         ::CloseHandle(sharedHandle);
 
+        if (!externalImage) {
+            // Failed to create external image. Return early and close outstanding handles.
+            // Otherwise we'll dereference a nullptr below.
+            ::CloseHandle(fenceSharedHandle);
+            return nullptr;
+        }
+
         native::d3d::ExternalImageDXGIFenceDescriptor fenceDesc;
         fenceDesc.fenceHandle = fenceSharedHandle;
         fenceDesc.fenceValue = 1;
 
         native::d3d::ExternalImageDXGIBeginAccessDescriptor externalAccessDesc;
-        externalAccessDesc.isInitialized = true;
+        externalAccessDesc.isInitialized = initialized;
         externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(textureDesc.usage);
         externalAccessDesc.waitFences = {};
 

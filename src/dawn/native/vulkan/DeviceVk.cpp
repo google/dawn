@@ -882,12 +882,20 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
     if (ConsumedError(ValidateIsAlive())) {
         return nullptr;
     }
-    if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
+    if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor,
+                                                AllowMultiPlanarTextureFormat::Yes))) {
         return nullptr;
     }
     if (ConsumedError(ValidateVulkanImageCanBeWrapped(this, textureDescriptor),
                       "validating that a Vulkan image can be wrapped with %s.",
                       textureDescriptor)) {
+        return nullptr;
+    }
+    if (GetValidInternalFormat(textureDescriptor->format).IsMultiPlanar() &&
+        !descriptor->isInitialized) {
+        bool consumed = ConsumedError(DAWN_VALIDATION_ERROR(
+            "External textures with multiplanar formats must be initialized."));
+        DAWN_UNUSED(consumed);
         return nullptr;
     }
 

@@ -184,7 +184,7 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         native::vulkan::ExternalImageDescriptorDmaBuf descriptor = {};
         descriptor.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
-        descriptor.isInitialized = true;
+        descriptor.isInitialized = initialized;
 
         descriptor.memoryFD = gbm_bo_get_fd(gbmBo);
         for (int plane = 0; plane < gbm_bo_get_plane_count(gbmBo); ++plane) {
@@ -194,12 +194,8 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         descriptor.drmModifier = gbm_bo_get_modifier(gbmBo);
         descriptor.waitFDs = {};
 
-        WGPUTexture texture = native::vulkan::WrapVulkanImage(mWGPUDevice, &descriptor);
-        if (texture != nullptr) {
-            return std::make_unique<PlatformTextureGbm>(wgpu::Texture::Acquire(texture), gbmBo);
-        } else {
-            return nullptr;
-        }
+        return std::make_unique<PlatformTextureGbm>(
+            native::vulkan::WrapVulkanImage(mWGPUDevice, &descriptor), gbmBo);
     }
 
     void DestroyVideoTextureForTest(

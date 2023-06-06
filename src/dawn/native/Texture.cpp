@@ -352,7 +352,8 @@ MaybeError ValidateTextureUsage(const DeviceBase* device,
 }  // anonymous namespace
 
 MaybeError ValidateTextureDescriptor(const DeviceBase* device,
-                                     const TextureDescriptor* descriptor) {
+                                     const TextureDescriptor* descriptor,
+                                     AllowMultiPlanarTextureFormat allowMultiPlanar) {
     DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
                                  wgpu::SType::DawnTextureInternalUsageDescriptor));
 
@@ -365,6 +366,16 @@ MaybeError ValidateTextureDescriptor(const DeviceBase* device,
 
     const Format* format;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
+
+    switch (allowMultiPlanar) {
+        case AllowMultiPlanarTextureFormat::Yes:
+            break;
+        case AllowMultiPlanarTextureFormat::No:
+            DAWN_INVALID_IF(format->IsMultiPlanar(),
+                            "Creation of multiplanar texture format %s is not allowed.",
+                            descriptor->format);
+            break;
+    }
 
     for (uint32_t i = 0; i < descriptor->viewFormatCount; ++i) {
         DAWN_TRY_CONTEXT(

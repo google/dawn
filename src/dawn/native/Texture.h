@@ -29,7 +29,15 @@
 
 namespace dawn::native {
 
-MaybeError ValidateTextureDescriptor(const DeviceBase* device, const TextureDescriptor* descriptor);
+enum class AllowMultiPlanarTextureFormat {
+    No,
+    Yes,
+};
+
+MaybeError ValidateTextureDescriptor(
+    const DeviceBase* device,
+    const TextureDescriptor* descriptor,
+    AllowMultiPlanarTextureFormat allowMultiPlanar = AllowMultiPlanarTextureFormat::No);
 MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                          const TextureBase* texture,
                                          const TextureViewDescriptor* descriptor);

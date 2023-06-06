@@ -368,7 +368,6 @@ dawn_test("dawn_unittests") {
     "unittests/validation/ValidationTest.h",
     "unittests/validation/VertexBufferValidationTests.cpp",
     "unittests/validation/VertexStateValidationTests.cpp",
-    "unittests/validation/VideoViewsValidationTests.cpp",
     "unittests/validation/WritableBufferBindingAliasingValidationTests.cpp",
     "unittests/validation/WritableTextureBindingAliasingValidationTests.cpp",
     "unittests/validation/WriteBufferTests.cpp",
