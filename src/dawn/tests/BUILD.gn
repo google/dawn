@@ -578,14 +578,14 @@ source_set("end2end_tests_sources") {
       "dxgi.lib",
     ]
 
-    sources += [ "end2end/D3DResourceWrappingTests.cpp" ]
+    sources += [
+      "end2end/D3DResourceWrappingTests.cpp",
+      "end2end/VideoViewsTests_win.cpp",
+    ]
   }
 
   if (dawn_enable_d3d12) {
-    sources += [
-      "end2end/D3D12CachingTests.cpp",
-      "end2end/VideoViewsTests_win.cpp",
-    ]
+    sources += [ "end2end/D3D12CachingTests.cpp" ]
   }
 
   if (dawn_enable_metal) {
@@ -604,8 +604,8 @@ source_set("end2end_tests_sources") {
     ]
   }
 
-  if (dawn_enable_d3d12 || (dawn_enable_vulkan && is_chromeos) ||
-      dawn_enable_metal) {
+  if (dawn_enable_d3d11 || dawn_enable_d3d12 ||
+      (dawn_enable_vulkan && is_chromeos) || dawn_enable_metal) {
     sources += [
       "end2end/VideoViewsTests.cpp",
       "end2end/VideoViewsTests.h",

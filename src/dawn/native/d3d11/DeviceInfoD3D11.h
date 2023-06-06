@@ -30,6 +30,7 @@ struct DeviceInfo {
     // indicates that current driver supports the maximum shader model is shader model 6.2.
     uint32_t shaderModel;
     PerStage<std::wstring> shaderProfiles;
+    bool supportsSharedResourceCapabilityTier2;
 };
 
 ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<ID3D11Device>& device);

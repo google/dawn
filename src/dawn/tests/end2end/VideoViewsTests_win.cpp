@@ -202,8 +202,8 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
 }  // anonymous namespace
 
 // static
-BackendTestConfig VideoViewsTestBackend::Backend() {
-    return D3D12Backend();
+std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
+    return {D3D11Backend(), D3D12Backend()};
 }
 // static
 std::unique_ptr<VideoViewsTestBackend> VideoViewsTestBackend::Create() {

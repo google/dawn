@@ -224,8 +224,8 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
 }  // anonymous namespace
 
 // static
-BackendTestConfig VideoViewsTestBackend::Backend() {
-    return VulkanBackend();
+std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
+    return {VulkanBackend()};
 }
 
 // static

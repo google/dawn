@@ -489,7 +489,7 @@ TEST_P(VideoViewsTests, NV12SampleYUVtoRGBMultipleSamplers) {
     mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
 }
 
-DAWN_INSTANTIATE_TEST(VideoViewsTests, VideoViewsTestBackend::Backend());
+DAWN_INSTANTIATE_TEST_V(VideoViewsTests, VideoViewsTestBackend::Backends());
 
 }  // anonymous namespace
 }  // namespace dawn

@@ -25,7 +25,7 @@ namespace dawn {
 
 class VideoViewsTestBackend {
   public:
-    static BackendTestConfig Backend();
+    static std::vector<BackendTestConfig> Backends();
     static std::unique_ptr<VideoViewsTestBackend> Create();
 
     virtual ~VideoViewsTestBackend();

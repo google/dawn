@@ -137,6 +137,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::DepthClipControl);
     EnableFeature(Feature::TextureCompressionBC);
     EnableFeature(Feature::SurfaceCapabilities);
+
+    // To import multi planar textures, we need to at least tier 2 support.
+    if (mDeviceInfo.supportsSharedResourceCapabilityTier2) {
+        EnableFeature(Feature::MultiPlanarFormats);
+    }
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

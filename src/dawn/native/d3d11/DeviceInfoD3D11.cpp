@@ -38,6 +38,17 @@ ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<ID3D11Device>& device) {
     info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_5_0";
     info.shaderProfiles[SingleShaderStage::Compute] = L"cs_5_0";
 
+    // Runtime of the created texture (D3D11 device) and OpenSharedHandle runtime (Dawn's
+    // D3D12 device) must agree on resource sharing capability. For NV12 formats, D3D11
+    // requires at-least D3D11_SHARED_RESOURCE_TIER_2 support.
+    // https://docs.microsoft.com/en-us/windows/win32/api/d3d11/ne-d3d11-d3d11_shared_resource_tier
+    D3D11_FEATURE_DATA_D3D11_OPTIONS5 featureOptions5{};
+    DAWN_TRY(CheckHRESULT(device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS5,
+                                                      &featureOptions5, sizeof(featureOptions5)),
+                          "D3D11_FEATURE_D3D11_OPTIONS5"));
+    info.supportsSharedResourceCapabilityTier2 =
+        featureOptions5.SharedResourceTier >= D3D11_SHARED_RESOURCE_TIER_2;
+
     return std::move(info);
 }
 

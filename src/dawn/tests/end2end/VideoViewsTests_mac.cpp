@@ -178,8 +178,8 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
 }  // anonymous namespace
 
 // static
-BackendTestConfig VideoViewsTestBackend::Backend() {
-    return MetalBackend();
+std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
+    return {MetalBackend()};
 }
 
 // static

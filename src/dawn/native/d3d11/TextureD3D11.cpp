@@ -101,8 +101,19 @@ MaybeError ValidateTextureCanBeWrapped(ID3D11Resource* d3d11Resource,
 }
 
 MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFormat) {
-    // TODO(dawn:1724): support video textures
-    return DAWN_UNIMPLEMENTED_ERROR("Video textures are not supported.");
+    const bool supportsSharedResourceCapabilityTier2 =
+        device->GetDeviceInfo().supportsSharedResourceCapabilityTier2;
+    switch (textureFormat) {
+        case DXGI_FORMAT_NV12:
+            if (supportsSharedResourceCapabilityTier2) {
+                return {};
+            }
+            break;
+        default:
+            break;
+    }
+
+    return DAWN_VALIDATION_ERROR("DXGI format does not support cross-API sharing.");
 }
 
 // static
