@@ -22,6 +22,14 @@ namespace {
 using namespace tint::number_suffixes;  // NOLINT
 using IR_LoopTest = IRTestHelper;
 
+TEST_F(IR_LoopTest, Parent) {
+    auto* loop = b.CreateLoop();
+    EXPECT_EQ(loop->Initializer()->Parent(), loop);
+    EXPECT_EQ(loop->Body()->Parent(), loop);
+    EXPECT_EQ(loop->Continuing()->Parent(), loop);
+    EXPECT_EQ(loop->Merge()->Parent(), loop);
+}
+
 TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
     EXPECT_FATAL_FAILURE(
         {

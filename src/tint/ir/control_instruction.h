@@ -12,27 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/exit_switch.h"
+#ifndef SRC_TINT_IR_CONTROL_INSTRUCTION_H_
+#define SRC_TINT_IR_CONTROL_INSTRUCTION_H_
 
-#include <utility>
-
-#include "src/tint/ir/block.h"
-#include "src/tint/ir/switch.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitSwitch);
+#include "src/tint/ir/branch.h"
 
 namespace tint::ir {
 
-ExitSwitch::ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args /* = utils::Empty */)
-    : switch_(sw) {
-    TINT_ASSERT(IR, switch_);
-
-    if (switch_) {
-        switch_->Merge()->AddInboundBranch(this);
-    }
-    AddOperands(std::move(args));
-}
-
-ExitSwitch::~ExitSwitch() = default;
+/// Base class of instructions that perform branches to two or more blocks, owned by the
+/// ControlInstruction.
+class ControlInstruction : public utils::Castable<ControlInstruction, Branch> {
+  public:
+    /// Destructor
+    ~ControlInstruction() override;
+};
 
 }  // namespace tint::ir
+
+#endif  // SRC_TINT_IR_CONTROL_INSTRUCTION_H_

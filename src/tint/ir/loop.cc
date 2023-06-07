@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "src/tint/ir/block.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Loop);
 
 namespace tint::ir {
@@ -26,8 +28,25 @@ Loop::Loop(ir::Block* i, ir::Block* b, ir::Block* c, ir::Block* m)
     TINT_ASSERT(IR, body_);
     TINT_ASSERT(IR, continuing_);
     TINT_ASSERT(IR, merge_);
+
+    if (initializer_) {
+        initializer_->SetParent(this);
+    }
+    if (body_) {
+        body_->SetParent(this);
+    }
+    if (continuing_) {
+        continuing_->SetParent(this);
+    }
+    if (merge_) {
+        merge_->SetParent(this);
+    }
 }
 
 Loop::~Loop() = default;
+
+bool Loop::HasInitializer() const {
+    return initializer_->HasBranchTarget();
+}
 
 }  // namespace tint::ir

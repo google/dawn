@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "src/tint/ir/block.h"
 #include "src/tint/ir/loop.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::NextIteration);

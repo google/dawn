@@ -145,8 +145,8 @@ class Impl {
         /* dst */ {builder_.ir.constant_values},
     };
 
-    /// The stack of control blocks.
-    utils::Vector<Branch*, 8> control_stack_;
+    /// The stack of flow control instructions.
+    utils::Vector<ControlInstruction*, 8> control_stack_;
 
     /// The current block for expressions.
     Block* current_block_ = nullptr;
@@ -162,7 +162,9 @@ class Impl {
 
     class ControlStackScope {
       public:
-        ControlStackScope(Impl* impl, Branch* b) : impl_(impl) { impl_->control_stack_.Push(b); }
+        ControlStackScope(Impl* impl, ControlInstruction* b) : impl_(impl) {
+            impl_->control_stack_.Push(b);
+        }
 
         ~ControlStackScope() { impl_->control_stack_.Pop(); }
 

@@ -16,6 +16,8 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::If);
 
+#include "src/tint/ir/block.h"
+
 namespace tint::ir {
 
 If::If(Value* cond, ir::Block* t, ir::Block* f, ir::Block* m) : true_(t), false_(f), merge_(m) {
@@ -27,9 +29,14 @@ If::If(Value* cond, ir::Block* t, ir::Block* f, ir::Block* m) : true_(t), false_
     AddOperand(cond);
     if (true_) {
         true_->AddInboundBranch(this);
+        true_->SetParent(this);
     }
     if (false_) {
         false_->AddInboundBranch(this);
+        false_->SetParent(this);
+    }
+    if (merge_) {
+        merge_->SetParent(this);
     }
 }
 

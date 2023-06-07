@@ -15,43 +15,47 @@
 #ifndef SRC_TINT_IR_LOOP_H_
 #define SRC_TINT_IR_LOOP_H_
 
-#include "src/tint/ir/block.h"
-#include "src/tint/ir/branch.h"
+#include "src/tint/ir/control_instruction.h"
 
 namespace tint::ir {
 
 /// Loop instruction.
 ///
 /// ```
-///                        in
-///                         ┃
-///                         ┣━━━━━━━━━━━━━━━━┓
-///                         ▼                ┃
-///             ┌─────────────────────────┐  ┃
-///             │   loop->Initializer()   │  ┃
-///             │       (optional)        │  ┃
-///             └─────────────────────────┘  ┃
-///           NextIteration ┃                ┃
-///                         ┃◀━━━━━━━━━━━━━━━┫
-///                         ▼                ┃
-///             ┌─────────────────────────┐  ┃
-///          ┏━━│       loop->Body()      │  ┃
-///          ┃  └─────────────────────────┘  ┃
-///          ┃     Continue ┃                ┃ NextIteration
-///          ┃              ▼                ┃
-///          ┃  ┌─────────────────────────┐  ┃ BreakIf(false)
-/// ExitLoop ┃  │   loop->Continuing()    │━━┛
-///          ┃  └─────────────────────────┘
-///          ┃              ┃
-///          ┃              ┃ BreakIf(true)
-///          ┗━━━━━━━━━━━━━▶┃
-///                         ▼
-///             ┌─────────────────────────┐
-///             │      loop->Merge()      │
-///             └─────────────────────────┘
+///                     in
+///                      ┃
+///                      ┣━━━━━━━━━━━┓
+///                      ▼           ┃
+///             ┌─────────────────┐  ┃
+///             │   Initializer   │  ┃
+///             │    (optional)   │  ┃
+///             └─────────────────┘  ┃
+///        NextIteration ┃           ┃
+///                      ┃◀━━━━━━━━━━┫
+///                      ▼           ┃
+///             ┌─────────────────┐  ┃
+///          ┏━━│       Body      │  ┃
+///          ┃  └─────────────────┘  ┃
+///          ┃  Continue ┃           ┃ NextIteration
+///          ┃           ▼           ┃
+///          ┃  ┌─────────────────┐  ┃ BreakIf(false)
+/// ExitLoop ┃  │   Continuing    │━━┛
+///             │  (optional)     │
+///          ┃  └─────────────────┘
+///          ┃           ┃
+///          ┃           ┃ BreakIf(true)
+///          ┗━━━━━━━━━━▶┃
+///                      ▼
+///             ┌────────────────┐
+///             │     Merge      │
+///             │  (optional)    │
+///             └────────────────┘
+///                      ┃
+///                      ▼
+///                     out
 ///
 /// ```
-class Loop : public utils::Castable<Loop, Branch> {
+class Loop : public utils::Castable<Loop, ControlInstruction> {
   public:
     /// Constructor
     /// @param i the initializer block
@@ -68,7 +72,7 @@ class Loop : public utils::Castable<Loop, Branch> {
 
     /// @returns true if the loop uses an initializer block. If true, then the Loop first branches
     /// to the initializer block, otherwise it first branches to the body block.
-    bool HasInitializer() const { return initializer_->HasBranchTarget(); }
+    bool HasInitializer() const;
 
     /// @returns the switch start block
     const ir::Block* Body() const { return body_; }

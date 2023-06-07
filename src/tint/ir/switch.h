@@ -15,15 +15,35 @@
 #ifndef SRC_TINT_IR_SWITCH_H_
 #define SRC_TINT_IR_SWITCH_H_
 
-#include "src/tint/ir/block.h"
-#include "src/tint/ir/branch.h"
-#include "src/tint/ir/constant.h"
-#include "src/tint/ir/value.h"
+#include "src/tint/ir/control_instruction.h"
+
+// Forward declarations
+namespace tint::ir {
+class Constant;
+}  // namespace tint::ir
 
 namespace tint::ir {
-
-/// Flow node representing a switch statement
-class Switch : public utils::Castable<Switch, Branch> {
+/// Switch instruction.
+///
+/// ```
+///                           in
+///                            ┃
+///     ╌╌╌╌╌╌╌╌┲━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━┱╌╌╌╌╌╌╌╌
+///             ▼              ▼              ▼
+///        ┌────────┐     ┌────────┐     ┌────────┐
+///        │ Case A │     │ Case B │     │ Case C │
+///        └────────┘     └────────┘     └────────┘
+///  ExitSwitch ┃   ExitSwitch ┃   ExitSwitch ┃
+///             ┃              ▼              ┃
+///             ┃       ┌────────────┐        ┃
+///     ╌╌╌╌╌╌╌╌┺━━━━━━▶│ Merge      │◀━━━━━━━┹╌╌╌╌╌╌╌╌
+///                     │ (optional) │
+///                     └────────────┘
+///                            ┃
+///                            ▼
+///                           out
+/// ```
+class Switch : public utils::Castable<Switch, ControlInstruction> {
   public:
     /// A case selector
     struct CaseSelector {

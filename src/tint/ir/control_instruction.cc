@@ -12,27 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/exit_switch.h"
+#include "src/tint/ir/control_instruction.h"
 
-#include <utility>
-
-#include "src/tint/ir/block.h"
-#include "src/tint/ir/switch.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitSwitch);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::ControlInstruction);
 
 namespace tint::ir {
 
-ExitSwitch::ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args /* = utils::Empty */)
-    : switch_(sw) {
-    TINT_ASSERT(IR, switch_);
-
-    if (switch_) {
-        switch_->Merge()->AddInboundBranch(this);
-    }
-    AddOperands(std::move(args));
-}
-
-ExitSwitch::~ExitSwitch() = default;
+ControlInstruction::~ControlInstruction() = default;
 
 }  // namespace tint::ir

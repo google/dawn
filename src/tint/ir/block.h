@@ -22,6 +22,11 @@
 #include "src/tint/ir/instruction.h"
 #include "src/tint/utils/vector.h"
 
+// Forward declarations
+namespace tint::ir {
+class ControlInstruction;
+}  // namespace tint::ir
+
 namespace tint::ir {
 
 /// A block of statements. The instructions in the block are a linear list of instructions to
@@ -141,6 +146,12 @@ class Block : public utils::Castable<Block> {
     /// @param node the node to add
     void AddInboundBranch(ir::Branch* node);
 
+    /// @return the parent instruction that owns this block
+    ControlInstruction* Parent() const { return parent_; }
+
+    /// @param parent the parent instruction that owns this block
+    void SetParent(ControlInstruction* parent) { parent_ = parent; }
+
   private:
     struct {
         Instruction* first = nullptr;
@@ -156,6 +167,8 @@ class Block : public utils::Castable<Block> {
     ///   - Node is a merge target outside control flow (e.g. an if that returns in both branches)
     ///   - Node is a continue target outside control flow (e.g. a loop that returns)
     utils::Vector<ir::Branch*, 2> inbound_branches_;
+
+    ControlInstruction* parent_ = nullptr;
 };
 
 }  // namespace tint::ir

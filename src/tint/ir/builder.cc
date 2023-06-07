@@ -64,6 +64,7 @@ Block* Builder::CreateCase(Switch* s, utils::VectorRef<Switch::CaseSelector> sel
 
     Block* b = s->Cases().Back().Start();
     b->AddInboundBranch(s);
+    b->SetParent(s);
     return b;
 }
 

@@ -29,6 +29,14 @@ TEST_F(IR_IfTest, Usage) {
     EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{if_, 0u}));
 }
 
+TEST_F(IR_IfTest, Parent) {
+    auto* cond = b.Constant(true);
+    auto* if_ = b.CreateIf(cond);
+    EXPECT_EQ(if_->True()->Parent(), if_);
+    EXPECT_EQ(if_->False()->Parent(), if_);
+    EXPECT_EQ(if_->Merge()->Parent(), if_);
+}
+
 TEST_F(IR_IfTest, Fail_NullCondition) {
     EXPECT_FATAL_FAILURE(
         {

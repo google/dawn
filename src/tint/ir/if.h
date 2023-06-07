@@ -15,19 +15,30 @@
 #ifndef SRC_TINT_IR_IF_H_
 #define SRC_TINT_IR_IF_H_
 
-#include "src/tint/ir/block.h"
-#include "src/tint/ir/branch.h"
-#include "src/tint/ir/value.h"
-
-// Forward declarations
-namespace tint::ir {
-class Block;
-}  // namespace tint::ir
+#include "src/tint/ir/control_instruction.h"
 
 namespace tint::ir {
 
-/// An if instruction
-class If : public utils::Castable<If, Branch> {
+/// If instruction.
+///
+/// ```
+///                   in
+///                    ┃
+///         ┏━━━━━━━━━━┻━━━━━━━━━━┓
+///         ▼                     ▼
+///    ┌────────────┐      ┌────────────┐
+///    │  True      │      │  False     │
+///    | (optional) |      | (optional) |
+///    └────────────┘      └────────────┘
+///  ExitIf ┃     ┌──────────┐     ┃ ExitIf
+///         ┗━━━━▶│  Merge   │◀━━━━┛
+///               │(optional)│
+///               └──────────┘
+///                    ┃
+///                    ▼
+///                   out
+/// ```
+class If : public utils::Castable<If, ControlInstruction> {
   public:
     /// Constructor
     /// @param cond the if condition
