@@ -92,6 +92,12 @@ class Block : public utils::Castable<Block> {
     /// @returns the ending iterator
     Iterator end() const { return Iterator{nullptr}; }
 
+    /// @returns the first instruction in the instruction list
+    Instruction* Front() const { return instructions_.first; }
+
+    /// @returns the last instruction in the instruction list
+    Instruction* Back() const { return instructions_.last; }
+
     /// Adds the instruction to the beginning of the block
     /// @param inst the instruction to add
     void Prepend(Instruction* inst);
