@@ -794,8 +794,6 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadBySampling) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-    // TODO(dawn:1848): support depth-stencil texture write on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     for (wgpu::TextureFormat format :
          {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
@@ -827,8 +825,6 @@ TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadBySampling) {
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadByCopy) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-    // TODO(dawn:1848): support depth-stencil texture write on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     for (wgpu::TextureFormat format :
          {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
@@ -862,8 +858,6 @@ TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadByCopy) {
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndCopyToTextureThenReadByCopy) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-    // TODO(dawn:1848): support depth-stencil texture write on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     for (wgpu::TextureFormat format :
          {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
@@ -1194,8 +1188,6 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // from Snorm textures.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1229,8 +1221,6 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // from Snorm textures.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1267,8 +1257,6 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // from Snorm textures.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 2, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1606,9 +1594,6 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferNonRenderableUnaligned) {
     // from Snorm textures.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
 
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
     wgpu::TextureDescriptor descriptor;
     descriptor.size.width = kUnalignedSize;
     descriptor.size.height = kUnalignedSize;
@@ -1896,7 +1881,6 @@ TEST_P(TextureZeroInitTest, ErrorTextureIsUninitialized) {
 
 DAWN_INSTANTIATE_TEST(
     TextureZeroInitTest,
-    D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"}),
     D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
     D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}, {"use_d3d12_render_pass"}),
     OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
@@ -2341,8 +2325,6 @@ TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
 }
 
 DAWN_INSTANTIATE_TEST(CompressedTextureZeroInitTest,
-                      // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-                      // D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
