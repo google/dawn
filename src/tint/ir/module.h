@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_IR_MODULE_H_
 #define SRC_TINT_IR_MODULE_H_
 
+#include <memory>
 #include <string>
 
 #include "src/tint/constant/manager.h"
@@ -92,6 +93,9 @@ class Module {
 
     /// The map of constant::Value to their ir::Constant.
     utils::Hashmap<const constant::Value*, ir::Constant*, 16> constants;
+
+    /// If the module generated a validation error, will store the file for the disassembly text.
+    std::unique_ptr<Source::File> disassembly_file;
 };
 
 }  // namespace tint::ir

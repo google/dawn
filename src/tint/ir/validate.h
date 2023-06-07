@@ -27,7 +27,7 @@ struct Success {};
 /// Validates that a given IR module is correctly formed
 /// @param mod the module to validate
 /// @returns true on success, an error result otherwise
-utils::Result<Success, diag::List> Validate(const Module& mod);
+utils::Result<Success, diag::List> Validate(Module& mod);
 
 }  // namespace tint::ir
 
