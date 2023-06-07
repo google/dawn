@@ -1106,6 +1106,54 @@ TEST(TintVectorTest, RepeatMoveAssignRef_WithSpill) {
     EXPECT_TRUE(AllExternallyHeld(vec));
 }
 
+TEST(TintVectorTest, CopyAssignSlice_N2_to_N2) {
+    std::string data[] = {"hello", "world"};
+    Slice<std::string> slice(data);
+    Vector<std::string, 2> vec_b;
+    vec_b = slice;
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllInternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignSlice_N2_to_N1) {
+    std::string data[] = {"hello", "world"};
+    Slice<std::string> slice(data);
+    Vector<std::string, 1> vec_b;
+    vec_b = slice;
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignSlice_N2_to_N3) {
+    std::string data[] = {"hello", "world"};
+    Slice<std::string> slice(data);
+    Vector<std::string, 3> vec_b;
+    vec_b = slice;
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllInternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignSlice_N2_to_N0) {
+    std::string data[] = {"hello", "world"};
+    Slice<std::string> slice(data);
+    Vector<std::string, 0> vec_b;
+    vec_b = slice;
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
 TEST(TintVectorTest, Index) {
     Vector<std::string, 2> vec{"hello", "world"};
     static_assert(!std::is_const_v<std::remove_reference_t<decltype(vec[0])>>);

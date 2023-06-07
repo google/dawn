@@ -133,6 +133,10 @@ class Vector {
     /// @param other the vector reference to copy
     Vector(const VectorRef<T>& other) { Copy(other.slice_); }  // NOLINT(runtime/explicit)
 
+    /// Copy constructor from an immutable slice
+    /// @param other the slice to copy
+    Vector(const Slice<T>& other) { Copy(other); }  // NOLINT(runtime/explicit)
+
     /// Destructor
     ~Vector() { ClearAndFree(); }
 
@@ -191,6 +195,14 @@ class Vector {
         if (&other.slice_ != &impl_.slice) {
             MoveOrCopy(std::move(other));
         }
+        return *this;
+    }
+
+    /// Assignment operator for Slice
+    /// @param other the slice to copy
+    /// @returns this vector so calls can be chained
+    Vector& operator=(const Slice<T>& other) {
+        Copy(other);
         return *this;
     }
 
