@@ -29,7 +29,7 @@ class Call : public utils::Castable<Call, OperandInstruction<4>> {
     const type::Type* Type() const override { return result_type_; }
 
     /// @returns the call arguments
-    virtual utils::Slice<Value*> Args() const { return operands_.Slice(); }
+    virtual utils::Slice<Value const* const> Args() const { return operands_.Slice(); }
 
   protected:
     /// Constructor

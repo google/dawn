@@ -1821,6 +1821,24 @@ TEST(TintVectorTest, All) {
     EXPECT_FALSE(vec.All(Ne(9)));
 }
 
+TEST(TintVectorTest, Slice) {
+    Vector<std::string, 3> vec{"hello", "world"};
+    auto slice = vec.Slice();
+    static_assert(std::is_same_v<decltype(slice), Slice<std::string>>);
+    EXPECT_EQ(slice.data, &vec[0]);
+    EXPECT_EQ(slice.len, 2u);
+    EXPECT_EQ(slice.cap, 3u);
+}
+
+TEST(TintVectorTest, SliceConst) {
+    const Vector<std::string, 3> vec{"hello", "world"};
+    auto slice = vec.Slice();
+    static_assert(std::is_same_v<decltype(slice), Slice<const std::string>>);
+    EXPECT_EQ(slice.data, &vec[0]);
+    EXPECT_EQ(slice.len, 2u);
+    EXPECT_EQ(slice.cap, 3u);
+}
+
 TEST(TintVectorTest, ostream) {
     utils::StringStream ss;
     ss << Vector{1, 2, 3};

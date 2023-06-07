@@ -573,7 +573,7 @@ void Disassembler::EmitBranch(const Branch* b) {
     out_ << std::endl;
 }
 
-void Disassembler::EmitValueList(tint::utils::Slice<const Value*> values) {
+void Disassembler::EmitValueList(utils::Slice<Value const* const> values) {
     for (auto* v : values) {
         if (v != values.Front()) {
             out_ << ", ";

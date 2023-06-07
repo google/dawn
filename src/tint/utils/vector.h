@@ -403,7 +403,7 @@ class Vector {
     utils::Slice<T> Slice() { return impl_.slice; }
 
     /// @returns the internal slice of the vector
-    const utils::Slice<T>& Slice() const { return impl_.slice; }
+    utils::Slice<const T> Slice() const { return impl_.slice; }
 
   private:
     /// Friend class (differing specializations of this class)

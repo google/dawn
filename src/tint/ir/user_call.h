@@ -32,9 +32,9 @@ class UserCall : public utils::Castable<UserCall, Call> {
     ~UserCall() override;
 
     /// @returns the call arguments
-    utils::Slice<Value*> Args() const override {
+    utils::Slice<Value const* const> Args() const override {
         const auto& slice = operands_.Slice();
-        return utils::Slice<Value*>(slice.data + 1, slice.len - 1, slice.cap - 1);
+        return utils::Slice<Value const* const>(slice.data + 1, slice.len - 1, slice.cap - 1);
     }
 
     /// @returns the called function name

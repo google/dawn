@@ -38,7 +38,7 @@ class If : public utils::Castable<If, Branch> {
     ~If() override;
 
     /// @returns the branch arguments
-    utils::Slice<Value*> Args() const override { return utils::Slice<Value*>{}; }
+    utils::Slice<Value const* const> Args() const override { return utils::Slice<Value*>{}; }
 
     /// @returns the if condition
     const Value* Condition() const { return operands_[0]; }

@@ -37,9 +37,9 @@ class Access : public utils::Castable<Access, OperandInstruction<3>> {
     Value* Object() const { return operands_[0]; }
 
     /// @returns the accessor indices
-    utils::Slice<Value*> Indices() const {
+    utils::Slice<Value const* const> Indices() const {
         const auto& slice = operands_.Slice();
-        return utils::Slice<Value*>(slice.data + 1, slice.len - 1, slice.cap - 1);
+        return utils::Slice<Value const* const>(slice.data + 1, slice.len - 1, slice.cap - 1);
     }
 
   private:
