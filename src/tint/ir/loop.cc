@@ -20,19 +20,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Loop);
 
 namespace tint::ir {
 
-Loop::Loop(ir::Block* b,
-           ir::Block* c,
-           ir::Block* m,
-           utils::VectorRef<Value*> args /* = utils::Empty */)
-    : body_(b), continuing_(c), merge_(m) {
+Loop::Loop(ir::Block* i, ir::Block* b, ir::Block* c, ir::Block* m)
+    : initializer_(i), body_(b), continuing_(c), merge_(m) {
+    TINT_ASSERT(IR, initializer_);
     TINT_ASSERT(IR, body_);
     TINT_ASSERT(IR, continuing_);
     TINT_ASSERT(IR, merge_);
-
-    if (body_) {
-        body_->AddInboundBranch(this);
-    }
-    AddOperands(std::move(args));
 }
 
 Loop::~Loop() = default;

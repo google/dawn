@@ -349,8 +349,11 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     auto* func = b.CreateFunction("foo", ty.void_());
 
-    auto* l = b.CreateLoop(utils::Vector{b.Constant(1_i)});
+    auto* l = b.CreateLoop();
     func->StartTarget()->Append(l);
+
+    l->Initializer()->AddInboundBranch(l);
+    l->Initializer()->Append(b.NextIteration(l, utils::Vector{b.Constant(1_i)}));
 
     auto* loop_param = b.BlockParam(b.ir.Types().i32());
     l->Body()->SetParams(utils::Vector{loop_param});
@@ -370,25 +373,27 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
 %3 = OpTypeFunction %2
-%9 = OpTypeInt 32 1
-%11 = OpConstant %9 1
+%10 = OpTypeInt 32 1
+%12 = OpConstant %10 1
 %16 = OpTypeBool
-%17 = OpConstant %9 5
+%17 = OpConstant %10 5
 %1 = OpFunction %2 None %3
 %4 = OpLabel
 OpBranch %5
 %5 = OpLabel
-OpLoopMerge %8 %7 None
 OpBranch %6
 %6 = OpLabel
-%10 = OpPhi %9 %11 %12 %13 %7
-%14 = OpIAdd %9 %10 %11
+%11 = OpPhi %10 %12 %5 %13 %8
+OpLoopMerge %9 %8 None
 OpBranch %7
 %7 = OpLabel
-%13 = OpPhi %9 %14 %5
-%15 = OpSGreaterThan %16 %13 %17
-OpBranchConditional %15 %8 %5
+%14 = OpIAdd %10 %11 %12
+OpBranch %8
 %8 = OpLabel
+%13 = OpPhi %10 %14 %6
+%15 = OpSGreaterThan %16 %13 %17
+OpBranchConditional %15 %9 %6
+%9 = OpLabel
 OpUnreachable
 OpFunctionEnd
 )");
@@ -397,8 +402,11 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     auto* func = b.CreateFunction("foo", ty.void_());
 
-    auto* l = b.CreateLoop(utils::Vector{b.Constant(1_i), b.Constant(false)});
+    auto* l = b.CreateLoop();
     func->StartTarget()->Append(l);
+
+    l->Initializer()->AddInboundBranch(l);
+    l->Initializer()->Append(b.NextIteration(l, utils::Vector{b.Constant(1_i), b.Constant(false)}));
 
     auto* loop_param_a = b.BlockParam(b.ir.Types().i32());
     auto* loop_param_b = b.BlockParam(b.ir.Types().bool_());
@@ -422,29 +430,31 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
 %2 = OpTypeVoid
 %3 = OpTypeFunction %2
-%9 = OpTypeInt 32 1
-%11 = OpConstant %9 1
+%10 = OpTypeInt 32 1
+%12 = OpConstant %10 1
 %14 = OpTypeBool
 %16 = OpConstantFalse %14
-%21 = OpConstant %9 5
+%21 = OpConstant %10 5
 %1 = OpFunction %2 None %3
 %4 = OpLabel
 OpBranch %5
 %5 = OpLabel
-OpLoopMerge %8 %7 None
 OpBranch %6
 %6 = OpLabel
-%10 = OpPhi %9 %11 %12 %13 %7
-%15 = OpPhi %14 %16 %12 %17 %7
-%18 = OpIAdd %9 %10 %11
+%11 = OpPhi %10 %12 %5 %13 %8
+%15 = OpPhi %14 %16 %5 %17 %8
+OpLoopMerge %9 %8 None
 OpBranch %7
 %7 = OpLabel
-%13 = OpPhi %9 %18 %5
-%19 = OpPhi %14 %15 %5
+%18 = OpIAdd %10 %11 %12
+OpBranch %8
+%8 = OpLabel
+%13 = OpPhi %10 %18 %6
+%19 = OpPhi %14 %15 %6
 %20 = OpSGreaterThan %14 %13 %21
 %17 = OpLogicalEqual %14 %19 %16
-OpBranchConditional %20 %8 %5
-%8 = OpLabel
+OpBranchConditional %20 %9 %6
+%9 = OpLabel
 OpUnreachable
 OpFunctionEnd
 )");

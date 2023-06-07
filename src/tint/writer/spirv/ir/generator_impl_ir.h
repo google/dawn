@@ -113,9 +113,17 @@ class GeneratorImplIr {
     /// @param id the result ID of the function declaration
     void EmitEntryPoint(const ir::Function* func, uint32_t id);
 
-    /// Emit a block.
+    /// Emit a block, including the initial OpLabel, OpPhis and instructions.
     /// @param block the block to emit
     void EmitBlock(const ir::Block* block);
+
+    /// Emit all OpPhi nodes for incoming branches to @p block.
+    /// @param block the block to emit the OpPhis for
+    void EmitIncomingPhis(const ir::Block* block);
+
+    /// Emit all instructions of @p block.
+    /// @param block the block's instructions to emit
+    void EmitBlockInstructions(const ir::Block* block);
 
     /// Emit the root block.
     /// @param root_block the root block to emit

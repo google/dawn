@@ -44,6 +44,7 @@
 #include "src/tint/switch.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/scoped_assignment.h"
+#include "src/tint/utils/string.h"
 
 namespace tint::ir {
 namespace {
@@ -470,25 +471,31 @@ void Disassembler::EmitIf(const If* i) {
 }
 
 void Disassembler::EmitLoop(const Loop* l) {
-    out_ << "loop [s: %b" << IdOf(l->Body());
-
+    utils::Vector<std::string, 4> parts;
+    if (l->Initializer()->HasBranchTarget()) {
+        parts.Push("i: %b" + std::to_string(IdOf(l->Initializer())));
+    }
+    if (l->Body()->HasBranchTarget()) {
+        parts.Push("b: %b" + std::to_string(IdOf(l->Body())));
+    }
     if (l->Continuing()->HasBranchTarget()) {
-        out_ << ", c: %b" << IdOf(l->Continuing());
+        parts.Push("c: %b" + std::to_string(IdOf(l->Continuing())));
     }
     if (l->Merge()->HasBranchTarget()) {
-        out_ << ", m: %b" << IdOf(l->Merge());
+        parts.Push("m: %b" + std::to_string(IdOf(l->Merge())));
     }
-    out_ << "]";
+    out_ << "loop [" << utils::Join(parts, ", ") << "]" << std::endl;
 
-    if (!l->Args().IsEmpty()) {
-        out_ << " ";
-        EmitValueList(l->Args());
+    if (l->Initializer()->HasBranchTarget()) {
+        ScopedIndent si(indent_size_);
+        Indent() << "# Initializer block" << std::endl;
+        Walk(l->Initializer());
+        out_ << std::endl;
     }
-
-    out_ << std::endl;
 
     {
         ScopedIndent si(indent_size_);
+        Indent() << "# Body block" << std::endl;
         Walk(l->Body());
         out_ << std::endl;
     }

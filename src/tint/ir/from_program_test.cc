@@ -302,7 +302,8 @@ TEST_F(IR_FromProgramTest, IfStatement_JumpChainToMerge) {
     if true [t: %b2, f: %b3, m: %b4]
       # True block
       %b2 = block {
-        loop [s: %b5, m: %b6]
+        loop [b: %b5, m: %b6]
+          # Body block
           %b5 = block {
             exit_loop %b6
           }
@@ -348,7 +349,8 @@ TEST_F(IR_FromProgramTest, Loop_WithBreak) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, m: %b3]
+    loop [b: %b2, m: %b3]
+      # Body block
       %b2 = block {
         exit_loop %b3
       }
@@ -388,7 +390,8 @@ TEST_F(IR_FromProgramTest, Loop_WithContinue) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [b: %b2, c: %b3, m: %b4]
+      # Body block
       %b2 = block {
         if true [t: %b5, f: %b6, m: %b7]
           # True block
@@ -443,7 +446,8 @@ TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [b: %b2, c: %b3, m: %b4]
+      # Body block
       %b2 = block {
         continue %b3
       }
@@ -476,7 +480,8 @@ TEST_F(IR_FromProgramTest, Loop_Continuing_Body_Scope) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [b: %b2, c: %b3, m: %b4]
+      # Body block
       %b2 = block {
         continue %b3
       }
@@ -520,7 +525,8 @@ TEST_F(IR_FromProgramTest, Loop_WithReturn) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3]
+    loop [b: %b2, c: %b3]
+      # Body block
       %b2 = block {
         if true [t: %b4, f: %b5, m: %b6]
           # True block
@@ -569,7 +575,8 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2]
+    loop [b: %b2]
+      # Body block
       %b2 = block {
         ret
       }
@@ -607,7 +614,8 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2]
+    loop [b: %b2]
+      # Body block
       %b2 = block {
         ret
       }
@@ -641,7 +649,8 @@ TEST_F(IR_FromProgramTest, Loop_WithIf_BothBranchesBreak) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, m: %b3]
+    loop [b: %b2, m: %b3]
+      # Body block
       %b2 = block {
         if true [t: %b4, f: %b5]
           # True block
@@ -686,9 +695,11 @@ TEST_F(IR_FromProgramTest, Loop_Nested) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [b: %b2, c: %b3, m: %b4]
+      # Body block
       %b2 = block {
-        loop [s: %b5, c: %b6, m: %b7]
+        loop [b: %b5, c: %b6, m: %b7]
+          # Body block
           %b5 = block {
             if true [t: %b8, f: %b9, m: %b10]
               # True block
@@ -725,14 +736,16 @@ TEST_F(IR_FromProgramTest, Loop_Nested) {
 
           # Continuing block
           %b6 = block {
-            loop [s: %b14, m: %b15]
+            loop [b: %b14, m: %b15]
+              # Body block
               %b14 = block {
                 exit_loop %b15
               }
 
             # Merge block
             %b15 = block {
-              loop [s: %b16, c: %b17, m: %b18]
+              loop [b: %b16, c: %b17, m: %b18]
+                # Body block
                 %b16 = block {
                   continue %b17
                 }
@@ -814,7 +827,8 @@ TEST_F(IR_FromProgramTest, While) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [b: %b2, c: %b3, m: %b4]
+      # Body block
       %b2 = block {
         if false [t: %b5, f: %b6, m: %b7]
           # True block
@@ -875,7 +889,8 @@ TEST_F(IR_FromProgramTest, While_Return) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, c: %b3, m: %b4]
+    loop [b: %b2, c: %b3, m: %b4]
+      # Body block
       %b2 = block {
         if true [t: %b5, f: %b6, m: %b7]
           # True block
@@ -949,6 +964,48 @@ TEST_F(IR_FromProgramTest, DISABLED_For) {
     EXPECT_EQ(Disassemble(m), R"()");
 }
 
+TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
+    auto* ast_for = For(Decl(Var("i", ty.i32())), nullptr, nullptr, Block(Break()));
+    WrapInFunction(ast_for);
+
+    auto res = Build();
+    ASSERT_TRUE(res) << (!res ? res.Failure() : "");
+
+    auto m = res.Move();
+    auto* flow = FindSingleValue<ir::Loop>(m);
+
+    ASSERT_EQ(1u, m.functions.Length());
+
+    EXPECT_EQ(1u, flow->Initializer()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Body()->InboundBranches().Length());
+    EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
+
+    EXPECT_EQ(Disassemble(m),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    loop [i: %b2, b: %b3, m: %b4]
+      # Initializer block
+      %b2 = block {
+        %i:ptr<function, i32, read_write> = var
+        next_iteration %b3
+      }
+
+      # Body block
+      %b3 = block {
+        exit_loop %b4
+      }
+
+    # Merge block
+    %b4 = block {
+      ret
+    }
+
+  }
+}
+)");
+}
+
 TEST_F(IR_FromProgramTest, For_NoInitCondOrContinuing) {
     auto* ast_for = For(nullptr, nullptr, nullptr, Block(Break()));
     WrapInFunction(ast_for);
@@ -968,7 +1025,8 @@ TEST_F(IR_FromProgramTest, For_NoInitCondOrContinuing) {
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    loop [s: %b2, m: %b3]
+    loop [b: %b2, m: %b3]
+      # Body block
       %b2 = block {
         exit_loop %b3
       }

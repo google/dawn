@@ -87,9 +87,8 @@ class Builder {
     If* CreateIf(Value* condition);
 
     /// Creates a loop flow node
-    /// @param args the branch arguments
     /// @returns the flow node
-    Loop* CreateLoop(utils::VectorRef<Value*> args = utils::Empty);
+    Loop* CreateLoop();
 
     /// Creates a switch flow node
     /// @param condition the switch condition

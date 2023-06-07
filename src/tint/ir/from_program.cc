@@ -646,6 +646,9 @@ class Impl {
         auto* loop_inst = builder_.CreateLoop();
         current_block_->Append(loop_inst);
 
+        // Loop branches directly to the body (no initializer)
+        loop_inst->Body()->AddInboundBranch(loop_inst);
+
         {
             ControlStackScope scope(this, loop_inst);
             current_block_ = loop_inst->Body();
@@ -689,6 +692,9 @@ class Impl {
     void EmitWhile(const ast::WhileStatement* stmt) {
         auto* loop_inst = builder_.CreateLoop();
         current_block_->Append(loop_inst);
+
+        // Loop branches directly to the body (no initializer)
+        loop_inst->Body()->AddInboundBranch(loop_inst);
 
         // Continue is always empty, just go back to the start
         current_block_ = loop_inst->Continuing();
@@ -735,16 +741,23 @@ class Impl {
         scopes_.Push();
         TINT_DEFER(scopes_.Pop());
 
-        if (stmt->initializer) {
-            // Emit the for initializer before branching to the loop
-            EmitStatement(stmt->initializer);
-        }
-
         {
             ControlStackScope scope(this, loop_inst);
 
-            current_block_ = loop_inst->Body();
+            if (stmt->initializer) {
+                // Loop branches to the initializer
+                loop_inst->Initializer()->AddInboundBranch(loop_inst);
 
+                // Emit the for initializer before branching to the body
+                current_block_ = loop_inst->Initializer();
+                EmitStatement(stmt->initializer);
+                SetBranch(builder_.NextIteration(loop_inst));
+            } else {
+                // If there's no initializer, then the loop branches directly to the body block
+                loop_inst->Body()->AddInboundBranch(loop_inst);
+            }
+
+            current_block_ = loop_inst->Body();
             if (stmt->condition) {
                 // Emit the condition into the target target of the loop
                 auto reg = EmitExpression(stmt->condition);

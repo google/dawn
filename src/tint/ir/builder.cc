@@ -51,8 +51,8 @@ If* Builder::CreateIf(Value* condition) {
     return ir.values.Create<If>(condition, CreateBlock(), CreateBlock(), CreateBlock());
 }
 
-Loop* Builder::CreateLoop(utils::VectorRef<Value*> args /* = utils::Empty */) {
-    return ir.values.Create<Loop>(CreateBlock(), CreateBlock(), CreateBlock(), std::move(args));
+Loop* Builder::CreateLoop() {
+    return ir.values.Create<Loop>(CreateBlock(), CreateBlock(), CreateBlock(), CreateBlock());
 }
 
 Switch* Builder::CreateSwitch(Value* condition) {

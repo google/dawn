@@ -417,6 +417,14 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         return;
     }
 
+    // Emit all OpPhi nodes for incoming branches to block.
+    EmitIncomingPhis(block);
+
+    // Emit the block's statements.
+    EmitBlockInstructions(block);
+}
+
+void GeneratorImplIr::EmitIncomingPhis(const ir::Block* block) {
     // Emit Phi nodes for all the incoming block parameters
     for (size_t param_idx = 0; param_idx < block->Params().Length(); param_idx++) {
         auto* param = block->Params()[param_idx];
@@ -430,8 +438,9 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
 
         current_function_.push_inst(spv::Op::OpPhi, std::move(ops));
     }
+}
 
-    // Emit the instructions.
+void GeneratorImplIr::EmitBlockInstructions(const ir::Block* block) {
     for (auto* inst : *block) {
         Switch(
             inst,                                             //
@@ -764,24 +773,34 @@ void GeneratorImplIr::EmitLoad(const ir::Load* load) {
 }
 
 void GeneratorImplIr::EmitLoop(const ir::Loop* loop) {
-    auto header_label = module_.NextId();
-    auto body_label = Label(loop->Body());
+    auto init_label = loop->HasInitializer() ? Label(loop->Initializer()) : 0;
+    auto header_label = Label(loop->Body());  // Back-edge needs to branch to the loop header
+    auto body_label = module_.NextId();
     auto continuing_label = Label(loop->Continuing());
     auto merge_label = Label(loop->Merge());
 
-    // Branch to and emit the loop header, which contains OpLoopMerge and OpBranch instructions.
-    current_function_.push_inst(spv::Op::OpBranch, {header_label});
+    if (init_label != 0) {
+        // Emit the loop initializer.
+        current_function_.push_inst(spv::Op::OpBranch, {init_label});
+        EmitBlock(loop->Initializer());
+    } else {
+        // No initializer. Branch to body.
+        current_function_.push_inst(spv::Op::OpBranch, {header_label});
+    }
+
+    // Emit the loop body header, which contains the OpLoopMerge and OpPhis.
+    // This then unconditionally branches to body_label
     current_function_.push_inst(spv::Op::OpLabel, {header_label});
+    EmitIncomingPhis(loop->Body());
     current_function_.push_inst(
         spv::Op::OpLoopMerge, {merge_label, continuing_label, U32Operand(SpvLoopControlMaskNone)});
     current_function_.push_inst(spv::Op::OpBranch, {body_label});
 
-    // Emit the loop body.
-    EmitBlock(loop->Body());
+    // Emit the loop body
+    current_function_.push_inst(spv::Op::OpLabel, {body_label});
+    EmitBlockInstructions(loop->Body());
 
     // Emit the loop continuing block.
-    // The back-edge needs to go to the loop header, so update the label for the start block.
-    block_labels_.Replace(loop->Body(), header_label);
     if (loop->Continuing()->HasBranchTarget()) {
         EmitBlock(loop->Continuing());
     } else {

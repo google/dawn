@@ -20,25 +20,64 @@
 
 namespace tint::ir {
 
-/// Flow node describing a loop.
+/// Loop instruction.
+///
+/// ```
+///                        in
+///                         ┃
+///                         ┣━━━━━━━━━━━━━━━━┓
+///                         ▼                ┃
+///             ┌─────────────────────────┐  ┃
+///             │   loop->Initializer()   │  ┃
+///             │       (optional)        │  ┃
+///             └─────────────────────────┘  ┃
+///           NextIteration ┃                ┃
+///                         ┃◀━━━━━━━━━━━━━━━┫
+///                         ▼                ┃
+///             ┌─────────────────────────┐  ┃
+///          ┏━━│       loop->Body()      │  ┃
+///          ┃  └─────────────────────────┘  ┃
+///          ┃     Continue ┃                ┃ NextIteration
+///          ┃              ▼                ┃
+///          ┃  ┌─────────────────────────┐  ┃ BreakIf(false)
+/// ExitLoop ┃  │   loop->Continuing()    │━━┛
+///          ┃  └─────────────────────────┘
+///          ┃              ┃
+///          ┃              ┃ BreakIf(true)
+///          ┗━━━━━━━━━━━━━▶┃
+///                         ▼
+///             ┌─────────────────────────┐
+///             │      loop->Merge()      │
+///             └─────────────────────────┘
+///
+/// ```
 class Loop : public utils::Castable<Loop, Branch> {
   public:
     /// Constructor
+    /// @param i the initializer block
     /// @param b the body block
     /// @param c the continuing block
     /// @param m the merge block
-    /// @param args the branch arguments
-    Loop(ir::Block* b, ir::Block* c, ir::Block* m, utils::VectorRef<Value*> args = utils::Empty);
+    Loop(ir::Block* i, ir::Block* b, ir::Block* c, ir::Block* m);
     ~Loop() override;
 
-    /// @returns the switch start branch
+    /// @returns the switch initializer block
+    const ir::Block* Initializer() const { return initializer_; }
+    /// @returns the switch initializer block
+    ir::Block* Initializer() { return initializer_; }
+
+    /// @returns true if the loop uses an initializer block. If true, then the Loop first branches
+    /// to the initializer block, otherwise it first branches to the body block.
+    bool HasInitializer() const { return initializer_->HasBranchTarget(); }
+
+    /// @returns the switch start block
     const ir::Block* Body() const { return body_; }
-    /// @returns the switch start branch
+    /// @returns the switch start block
     ir::Block* Body() { return body_; }
 
-    /// @returns the switch continuing branch
+    /// @returns the switch continuing block
     const ir::Block* Continuing() const { return continuing_; }
-    /// @returns the switch continuing branch
+    /// @returns the switch continuing block
     ir::Block* Continuing() { return continuing_; }
 
     /// @returns the switch merge branch
@@ -47,6 +86,7 @@ class Loop : public utils::Castable<Loop, Branch> {
     ir::Block* Merge() { return merge_; }
 
   private:
+    ir::Block* initializer_ = nullptr;
     ir::Block* body_ = nullptr;
     ir::Block* continuing_ = nullptr;
     ir::Block* merge_ = nullptr;
