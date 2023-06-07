@@ -57,6 +57,8 @@ class TransformTestBase : public BASE {
     ir::Module mod;
     /// The test IR builder.
     ir::Builder b{mod};
+    /// The type manager.
+    type::Manager& ty{mod.Types()};
 
   private:
     std::vector<std::unique_ptr<Source::File>> files_;

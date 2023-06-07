@@ -45,6 +45,14 @@ enum class PipelineStageUsage {
     kComputeOutput,
 };
 
+enum StructFlag {
+    /// The structure is a block-decorated structure (for SPIR-V or GLSL).
+    kBlock,
+};
+
+/// An alias to utils::EnumSet<StructFlag>
+using StructFlags = utils::EnumSet<StructFlag>;
+
 /// Struct holds the Type information for structures.
 class Struct : public utils::Castable<Struct, Type> {
   public:
@@ -93,6 +101,13 @@ class Struct : public utils::Castable<Struct, Type> {
     /// @returns the byte size of the members without the end of structure
     /// alignment padding
     uint32_t SizeNoPadding() const { return size_no_padding_; }
+
+    /// @returns the structure flags
+    type::StructFlags StructFlags() const { return struct_flags_; }
+
+    /// Set a structure flag.
+    /// @param flag the flag to set
+    void SetStructFlag(StructFlag flag) { struct_flags_.Add(flag); }
 
     /// Adds the AddressSpace usage to the structure.
     /// @param usage the storage usage
@@ -153,6 +168,7 @@ class Struct : public utils::Castable<Struct, Type> {
     const uint32_t align_;
     const uint32_t size_;
     const uint32_t size_no_padding_;
+    type::StructFlags struct_flags_;
     std::unordered_set<builtin::AddressSpace> address_space_usage_;
     std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
     utils::Vector<const Struct*, 2> concrete_types_;

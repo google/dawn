@@ -37,6 +37,7 @@
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
+#include "src/tint/ir/transform/block_decorated_structs.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/validate.h"
 #include "src/tint/ir/var.h"
@@ -66,6 +67,7 @@ void Sanitize(ir::Module* module) {
     transform::DataMap data;
 
     manager.Add<ir::transform::AddEmptyEntryPoint>();
+    manager.Add<ir::transform::BlockDecoratedStructs>();
 
     transform::DataMap outputs;
     manager.Run(module, data, outputs);
@@ -298,6 +300,11 @@ void GeneratorImplIr::EmitStructType(uint32_t id, const type::Struct* str) {
         }
     }
     module_.PushType(spv::Op::OpTypeStruct, std::move(operands));
+
+    // Add a Block decoration if necessary.
+    if (str->StructFlags().Contains(type::StructFlag::kBlock)) {
+        module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationBlock)});
+    }
 
     if (str->Name().IsValid()) {
         module_.PushDebug(spv::Op::OpName, {operands[0], Operand(str->Name().Name())});
@@ -888,6 +895,18 @@ void GeneratorImplIr::EmitVar(const ir::Var* var) {
                 operands.push_back(Value(var->Initializer()));
             }
             module_.PushType(spv::Op::OpVariable, operands);
+            break;
+        }
+        case builtin::AddressSpace::kStorage:
+        case builtin::AddressSpace::kUniform: {
+            TINT_ASSERT(Writer, !current_function_);
+            module_.PushType(spv::Op::OpVariable,
+                             {ty, id, U32Operand(StorageClass(ptr->AddressSpace()))});
+            auto bp = var->BindingPoint().value();
+            module_.PushAnnot(spv::Op::OpDecorate,
+                              {id, U32Operand(SpvDecorationDescriptorSet), bp.group});
+            module_.PushAnnot(spv::Op::OpDecorate,
+                              {id, U32Operand(SpvDecorationBinding), bp.binding});
             break;
         }
         case builtin::AddressSpace::kWorkgroup: {

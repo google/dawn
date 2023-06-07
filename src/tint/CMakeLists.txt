@@ -800,6 +800,8 @@ if(${TINT_BUILD_IR})
     ir/var.h
     ir/transform/add_empty_entry_point.cc
     ir/transform/add_empty_entry_point.h
+    ir/transform/block_decorated_structs.cc
+    ir/transform/block_decorated_structs.h
     ir/transform/transform.cc
     ir/transform/transform.h
   )
@@ -1534,6 +1536,7 @@ if(TINT_BUILD_TESTS)
       ir/switch_test.cc
       ir/swizzle_test.cc
       ir/transform/add_empty_entry_point_test.cc
+      ir/transform/block_decorated_structs_test.cc
       ir/unary_test.cc
       ir/user_call_test.cc
       ir/validate_test.cc
