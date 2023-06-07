@@ -90,7 +90,11 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleMember) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+              R"(MyStruct = struct @align(4) {
+  foo:i32 @offset(0)
+}
+
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, MyStruct, read_write> = var
     %3:ptr<function, i32, read_write> = access %a, 0u
@@ -122,7 +126,16 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiMember) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+              R"(Inner = struct @align(4) {
+  bar:f32 @offset(0)
+}
+
+Outer = struct @align(4) {
+  a:i32 @offset(0)
+  foo:Inner @offset(4)
+}
+
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, Outer, read_write> = var
     %3:ptr<function, f32, read_write> = access %a, 1u, 0u
@@ -158,7 +171,18 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_Mixed) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+              R"(Inner = struct @align(16) {
+  b:i32 @offset(0)
+  c:f32 @offset(4)
+  bar:vec4<f32> @offset(16)
+}
+
+Outer = struct @align(16) {
+  a:i32 @offset(0)
+  foo:array<Inner, 4> @offset(16)
+}
+
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, array<Outer, 4>, read_write> = var
     %3:ptr<function, vec4<f32>, read_write> = access %a, 0u, 1u, 1u, 2u
@@ -281,7 +305,12 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChai
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+              R"(MyStruct = struct @align(16) {
+  a:i32 @offset(0)
+  foo:vec4<f32> @offset(16)
+}
+
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, MyStruct, read_write> = var
     %3:ptr<function, vec4<f32>, read_write> = access %a, 1u
@@ -352,7 +381,11 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleMember) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+              R"(MyStruct = struct @align(4) {
+  foo:i32 @offset(0)
+}
+
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %b:i32 = access MyStruct(0i), 0u
     ret
@@ -382,7 +415,16 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiMember) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+              R"(Inner = struct @align(4) {
+  bar:f32 @offset(0)
+}
+
+Outer = struct @align(4) {
+  a:i32 @offset(0)
+  foo:Inner @offset(4)
+}
+
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %b:f32 = access Outer(0i, Inner(0.0f)), 1u, 0u
     ret
@@ -416,7 +458,18 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_Mixed) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+              R"(Inner = struct @align(16) {
+  b:i32 @offset(0)
+  c:f32 @offset(4)
+  bar:vec4<f32> @offset(16)
+}
+
+Outer = struct @align(16) {
+  a:i32 @offset(0)
+  foo:array<Inner, 4> @offset(16)
+}
+
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %b:vec4<f32> = access array<Outer, 4>(Outer(0i, array<Inner, 4>(Inner(0i, 0.0f, vec4<f32>(0.0f))))), 0u, 1u, 1u, 2u
     ret
@@ -508,7 +561,12 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChai
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+              R"(MyStruct = struct @align(16) {
+  a:i32 @offset(0)
+  foo:vec4<f32> @offset(16)
+}
+
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %2:vec4<f32> = access MyStruct(0i, vec4<f32>(0.0f)), 1u
     %3:vec3<f32> = swizzle %2, zyx

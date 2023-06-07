@@ -42,6 +42,7 @@
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
+#include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/string.h"
@@ -95,6 +96,12 @@ std::string_view Disassembler::IdOf(const Value* value) {
 }
 
 std::string Disassembler::Disassemble() {
+    for (auto* ty : mod_.Types()) {
+        if (auto* str = ty->As<type::Struct>()) {
+            EmitStructDecl(str);
+        }
+    }
+
     if (mod_.root_block) {
         Indent() << "# Root block" << std::endl;
         WalkInternal(mod_.root_block);
@@ -666,6 +673,35 @@ void Disassembler::EmitUnary(const Unary* u) {
     }
     out_ << " ";
     EmitValue(u->Val());
+    out_ << std::endl;
+}
+
+void Disassembler::EmitStructDecl(const type::Struct* str) {
+    out_ << str->Name().Name() << " = struct @align(" << str->Align() << ") {" << std::endl;
+    for (auto* member : str->Members()) {
+        out_ << "  " << member->Name().Name() << ":" << member->Type()->FriendlyName();
+        out_ << " @offset(" << member->Offset() << ")";
+        if (member->Attributes().invariant) {
+            out_ << ", @invariant";
+        }
+        if (member->Attributes().location.has_value()) {
+            out_ << ", @location(" << member->Attributes().location.value() << ")";
+        }
+        if (member->Attributes().interpolation.has_value()) {
+            auto& interp = member->Attributes().interpolation.value();
+            out_ << ", @interpolate(" << interp.type;
+            if (interp.sampling != builtin::InterpolationSampling::kUndefined) {
+                out_ << ", " << interp.sampling;
+            }
+            out_ << ")";
+        }
+        if (member->Attributes().builtin.has_value()) {
+            out_ << ", @builtin(" << member->Attributes().builtin.value() << ")";
+        }
+
+        out_ << std::endl;
+    }
+    out_ << "}" << std::endl;
     out_ << std::endl;
 }
 

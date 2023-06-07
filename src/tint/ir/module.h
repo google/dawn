@@ -67,6 +67,9 @@ class Module {
     Symbol SetName(const Value* value, std::string_view name);
 
     /// @return the type manager for the module
+    const type::Manager& Types() const { return constant_values.types; }
+
+    /// @return the type manager for the module
     type::Manager& Types() { return constant_values.types; }
 
     /// The block allocator

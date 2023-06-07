@@ -29,6 +29,11 @@
 #include "src/tint/utils/hashset.h"
 #include "src/tint/utils/string_stream.h"
 
+// Forward declarations.
+namespace tint::type {
+class Struct;
+}
+
 namespace tint::ir {
 
 /// Helper class to disassemble the IR
@@ -74,6 +79,7 @@ class Disassembler {
     void EmitSwitch(const Switch* s);
     void EmitLoop(const Loop* l);
     void EmitIf(const If* i);
+    void EmitStructDecl(const type::Struct* str);
 
     const Module& mod_;
     utils::StringStream out_;
