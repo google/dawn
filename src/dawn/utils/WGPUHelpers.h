@@ -89,7 +89,7 @@ struct BasicRenderPass {
     uint32_t height;
     wgpu::Texture color;
     wgpu::TextureFormat colorFormat;
-    dawn::utils::ComboRenderPassDescriptor renderPassInfo;
+    ComboRenderPassDescriptor renderPassInfo;
 };
 BasicRenderPass CreateBasicRenderPass(
     const wgpu::Device& device,

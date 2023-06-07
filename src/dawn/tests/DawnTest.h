@@ -53,39 +53,42 @@
     this->AddBufferExpectation(__FILE__, __LINE__, buffer, offset, size, expectation)
 
 #define EXPECT_BUFFER_U8_EQ(expected, buffer, offset) \
-    EXPECT_BUFFER(buffer, offset, sizeof(uint8_t), new ::detail::ExpectEq<uint8_t>(expected))
+    EXPECT_BUFFER(buffer, offset, sizeof(uint8_t), new ::dawn::detail::ExpectEq<uint8_t>(expected))
 
 #define EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, offset, count) \
     EXPECT_BUFFER(buffer, offset, sizeof(uint8_t) * (count),       \
-                  new ::detail::ExpectEq<uint8_t>(expected, count))
+                  new ::dawn::detail::ExpectEq<uint8_t>(expected, count))
 
 #define EXPECT_BUFFER_U16_EQ(expected, buffer, offset) \
-    EXPECT_BUFFER(buffer, offset, sizeof(uint16_t), new ::detail::ExpectEq<uint16_t>(expected))
+    EXPECT_BUFFER(buffer, offset, sizeof(uint16_t),    \
+                  new ::dawn::detail::ExpectEq<uint16_t>(expected))
 
 #define EXPECT_BUFFER_U16_RANGE_EQ(expected, buffer, offset, count) \
     EXPECT_BUFFER(buffer, offset, sizeof(uint16_t) * (count),       \
-                  new ::detail::ExpectEq<uint16_t>(expected, count))
+                  new ::dawn::detail::ExpectEq<uint16_t>(expected, count))
 
 #define EXPECT_BUFFER_U32_EQ(expected, buffer, offset) \
-    EXPECT_BUFFER(buffer, offset, sizeof(uint32_t), new ::detail::ExpectEq<uint32_t>(expected))
+    EXPECT_BUFFER(buffer, offset, sizeof(uint32_t),    \
+                  new ::dawn::detail::ExpectEq<uint32_t>(expected))
 
 #define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count) \
     EXPECT_BUFFER(buffer, offset, sizeof(uint32_t) * (count),       \
-                  new ::detail::ExpectEq<uint32_t>(expected, count))
+                  new ::dawn::detail::ExpectEq<uint32_t>(expected, count))
 
 #define EXPECT_BUFFER_U64_EQ(expected, buffer, offset) \
-    EXPECT_BUFFER(buffer, offset, sizeof(uint64_t), new ::detail::ExpectEq<uint64_t>(expected))
+    EXPECT_BUFFER(buffer, offset, sizeof(uint64_t),    \
+                  new ::dawn::detail::ExpectEq<uint64_t>(expected))
 
 #define EXPECT_BUFFER_U64_RANGE_EQ(expected, buffer, offset, count) \
     EXPECT_BUFFER(buffer, offset, sizeof(uint64_t) * (count),       \
-                  new ::detail::ExpectEq<uint64_t>(expected, count))
+                  new ::dawn::detail::ExpectEq<uint64_t>(expected, count))
 
 #define EXPECT_BUFFER_FLOAT_EQ(expected, buffer, offset) \
-    EXPECT_BUFFER(buffer, offset, sizeof(float), new ::detail::ExpectEq<float>(expected))
+    EXPECT_BUFFER(buffer, offset, sizeof(float), new ::dawn::detail::ExpectEq<float>(expected))
 
 #define EXPECT_BUFFER_FLOAT_RANGE_EQ(expected, buffer, offset, count) \
     EXPECT_BUFFER(buffer, offset, sizeof(float) * (count),            \
-                  new ::detail::ExpectEq<float>(expected, count))
+                  new ::dawn::detail::ExpectEq<float>(expected, count))
 
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
@@ -126,11 +129,14 @@
 
 struct GLFWwindow;
 
-namespace dawn::utils {
+void InitDawnEnd2EndTestEnvironment(int argc, char** argv);
+
+namespace dawn {
+namespace utils {
 class PlatformDebugLogger;
 class TerribleCommandBuffer;
 class WireHelper;
-}  // namespace dawn::utils
+}  // namespace utils
 
 namespace detail {
 class Expectation;
@@ -144,13 +150,11 @@ template <typename T>
 class ExpectBetweenColors;
 }  // namespace detail
 
-namespace dawn::wire {
+namespace wire {
 class CommandHandler;
 class WireClient;
 class WireServer;
-}  // namespace dawn::wire
-
-void InitDawnEnd2EndTestEnvironment(int argc, char** argv);
+}  // namespace wire
 
 class DawnTestEnvironment : public testing::Environment {
   public:
@@ -168,8 +172,8 @@ class DawnTestEnvironment : public testing::Environment {
 
     bool UsesWire() const;
     bool IsImplicitDeviceSyncEnabled() const;
-    dawn::native::BackendValidationLevel GetBackendValidationLevel() const;
-    dawn::native::Instance* GetInstance() const;
+    native::BackendValidationLevel GetBackendValidationLevel() const;
+    native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
     bool HasBackendTypeFilter() const;
@@ -182,23 +186,23 @@ class DawnTestEnvironment : public testing::Environment {
     bool RunSuppressedTests() const;
 
   protected:
-    std::unique_ptr<dawn::native::Instance> CreateInstanceAndDiscoverPhysicalDevices(
-        dawn::platform::Platform* platform = nullptr);
-    std::unique_ptr<dawn::native::Instance> mInstance;
+    std::unique_ptr<native::Instance> CreateInstanceAndDiscoverPhysicalDevices(
+        platform::Platform* platform = nullptr);
+    std::unique_ptr<native::Instance> mInstance;
 
   private:
     void ParseArgs(int argc, char** argv);
-    void SelectPreferredAdapterProperties(const dawn::native::Instance* instance);
-    void PrintTestConfigurationAndAdapterInfo(dawn::native::Instance* instance) const;
+    void SelectPreferredAdapterProperties(const native::Instance* instance);
+    void PrintTestConfigurationAndAdapterInfo(native::Instance* instance) const;
 
     /// @returns true if all the toggles are recognised, otherwise prints an error and returns
     /// false.
-    bool ValidateToggles(dawn::native::Instance* instance) const;
+    bool ValidateToggles(native::Instance* instance) const;
 
     bool mUseWire = false;
     bool mEnableImplicitDeviceSync = false;
-    dawn::native::BackendValidationLevel mBackendValidationLevel =
-        dawn::native::BackendValidationLevel::Disabled;
+    native::BackendValidationLevel mBackendValidationLevel =
+        native::BackendValidationLevel::Disabled;
     std::string mANGLEBackend;
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
@@ -213,7 +217,7 @@ class DawnTestEnvironment : public testing::Environment {
     std::vector<wgpu::AdapterType> mDevicePreferences;
     std::vector<TestAdapterProperties> mAdapterProperties;
 
-    std::unique_ptr<dawn::utils::PlatformDebugLogger> mPlatformDebugLogger;
+    std::unique_ptr<utils::PlatformDebugLogger> mPlatformDebugLogger;
 };
 
 class DawnTestBase {
@@ -277,9 +281,9 @@ class DawnTestBase {
     wgpu::BackendType GetBackendTypeFilter() const;
 
     wgpu::Instance GetInstance() const;
-    dawn::native::Adapter GetAdapter() const;
+    native::Adapter GetAdapter() const;
 
-    virtual std::unique_ptr<dawn::platform::Platform> CreateTestPlatform();
+    virtual std::unique_ptr<platform::Platform> CreateTestPlatform();
 
     struct PrintToStringParamName {
         explicit PrintToStringParamName(const char* test);
@@ -355,9 +359,8 @@ class DawnTestBase {
                                               uint32_t level = 0,
                                               wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
                                               uint32_t bytesPerRow = 0) {
-        uint32_t texelBlockSize = dawn::utils::GetTexelBlockSizeInBytes(format);
-        uint32_t texelComponentCount =
-            dawn::utils::GetWGSLRenderableColorTextureComponentCount(format);
+        uint32_t texelBlockSize = utils::GetTexelBlockSizeInBytes(format);
+        uint32_t texelComponentCount = utils::GetWGSLRenderableColorTextureComponentCount(format);
 
         return AddTextureExpectationImpl(
             file, line, std::move(targetDevice),
@@ -588,7 +591,7 @@ class DawnTestBase {
 
   private:
     AdapterTestParam mParam;
-    std::unique_ptr<dawn::utils::WireHelper> mWireHelper;
+    std::unique_ptr<utils::WireHelper> mWireHelper;
     wgpu::Instance mInstance;
     wgpu::Adapter mAdapter;
 
@@ -663,21 +666,21 @@ class DawnTestBase {
     // Assuming the data is mapped, checks all expectations
     void ResolveExpectations();
 
-    dawn::native::Adapter mBackendAdapter;
+    native::Adapter mBackendAdapter;
     WGPUDevice mLastCreatedBackendDevice;
 
-    std::unique_ptr<dawn::platform::Platform> mTestPlatform;
+    std::unique_ptr<platform::Platform> mTestPlatform;
 
-    dawn::Mutex mMutex;
+    Mutex mMutex;
 };
 
-#define DAWN_SKIP_TEST_IF_BASE(condition, type, reason)   \
-    do {                                                  \
-        if (condition) {                                  \
-            dawn::InfoLog() << "Test " type ": " #reason; \
-            GTEST_SKIP();                                 \
-            return;                                       \
-        }                                                 \
+#define DAWN_SKIP_TEST_IF_BASE(condition, type, reason) \
+    do {                                                \
+        if (condition) {                                \
+            InfoLog() << "Test " type ": " #reason;     \
+            GTEST_SKIP();                               \
+            return;                                     \
+        }                                               \
     } while (0)
 
 // Skip a test which requires a feature or a toggle to be present / not present or some WIP
@@ -690,22 +693,20 @@ class DawnTestBase {
 #define DAWN_SUPPRESS_TEST_IF(condition) \
     DAWN_SKIP_TEST_IF_BASE(!RunSuppressedTests() && condition, "suppressed", condition)
 
-#define EXPECT_DEPRECATION_WARNINGS(statement, n)                                 \
-    do {                                                                          \
-        if (UsesWire()) {                                                         \
-            statement;                                                            \
-        } else {                                                                  \
-            size_t warningsBefore =                                               \
-                dawn::native::GetDeprecationWarningCountForTesting(device.Get()); \
-            statement;                                                            \
-            size_t warningsAfter =                                                \
-                dawn::native::GetDeprecationWarningCountForTesting(device.Get()); \
-            EXPECT_EQ(mLastWarningCount, warningsBefore);                         \
-            if (!HasToggleEnabled("skip_validation")) {                           \
-                EXPECT_EQ(warningsAfter, warningsBefore + n);                     \
-            }                                                                     \
-            mLastWarningCount = warningsAfter;                                    \
-        }                                                                         \
+#define EXPECT_DEPRECATION_WARNINGS(statement, n)                                               \
+    do {                                                                                        \
+        if (UsesWire()) {                                                                       \
+            statement;                                                                          \
+        } else {                                                                                \
+            size_t warningsBefore = native::GetDeprecationWarningCountForTesting(device.Get()); \
+            statement;                                                                          \
+            size_t warningsAfter = native::GetDeprecationWarningCountForTesting(device.Get());  \
+            EXPECT_EQ(mLastWarningCount, warningsBefore);                                       \
+            if (!HasToggleEnabled("skip_validation")) {                                         \
+                EXPECT_EQ(warningsAfter, warningsBefore + n);                                   \
+            }                                                                                   \
+            mLastWarningCount = warningsAfter;                                                  \
+        }                                                                                       \
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
@@ -728,11 +729,12 @@ using DawnTest = DawnTestWithParams<>;
 // Instantiate the test once for all backends in the second param. Use it like this:
 //     DAWN_INSTANTIATE_TEST_V(MyTestFixture, std::vector<BackendTestConfig>({{MetalBackend},
 //     {OpenGLBackend}})
-#define DAWN_INSTANTIATE_TEST_V(testName, testParams)                                              \
-    INSTANTIATE_TEST_SUITE_P(, testName,                                                           \
-                             testing::ValuesIn(::detail::GetAvailableAdapterTestParamsForBackends( \
-                                 testParams.data(), testParams.size())),                           \
-                             DawnTestBase::PrintToStringParamName(#testName));                     \
+#define DAWN_INSTANTIATE_TEST_V(testName, testParams)                               \
+    INSTANTIATE_TEST_SUITE_P(                                                       \
+        , testName,                                                                 \
+        testing::ValuesIn(::dawn::detail::GetAvailableAdapterTestParamsForBackends( \
+            testParams.data(), testParams.size())),                                 \
+        DawnTestBase::PrintToStringParamName(#testName));                           \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
 
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
@@ -741,7 +743,7 @@ using DawnTest = DawnTestWithParams<>;
     const decltype(DAWN_PP_GET_HEAD(__VA_ARGS__)) testName##params[] = {__VA_ARGS__};   \
     INSTANTIATE_TEST_SUITE_P(                                                           \
         , testName,                                                                     \
-        testing::ValuesIn(::detail::GetAvailableAdapterTestParamsForBackends(           \
+        testing::ValuesIn(::dawn::detail::GetAvailableAdapterTestParamsForBackends(     \
             testName##params, sizeof(testName##params) / sizeof(testName##params[0]))), \
         DawnTestBase::PrintToStringParamName(#testName));                               \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
@@ -849,7 +851,7 @@ extern template class ExpectEq<uint8_t>;
 extern template class ExpectEq<int16_t>;
 extern template class ExpectEq<uint32_t>;
 extern template class ExpectEq<uint64_t>;
-extern template class ExpectEq<dawn::utils::RGBA8>;
+extern template class ExpectEq<utils::RGBA8>;
 extern template class ExpectEq<float>;
 extern template class ExpectEq<float, uint16_t>;
 
@@ -871,7 +873,7 @@ class ExpectBetweenColors : public Expectation {
 // A color is considered between color0 and color1 when all channel values are within range of
 // each counterparts. It doesn't matter which value is higher or lower. Essentially color =
 // lerp(color0, color1, t) where t is [0,1]. But I don't want to be too strict here.
-extern template class ExpectBetweenColors<dawn::utils::RGBA8>;
+extern template class ExpectBetweenColors<utils::RGBA8>;
 
 class CustomTextureExpectation : public Expectation {
   public:
@@ -880,5 +882,5 @@ class CustomTextureExpectation : public Expectation {
 };
 
 }  // namespace detail
-
+}  // namespace dawn
 #endif  // SRC_DAWN_TESTS_DAWNTEST_H_

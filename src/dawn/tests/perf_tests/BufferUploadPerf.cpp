@@ -17,6 +17,7 @@
 #include "dawn/tests/perf_tests/DawnPerfTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 constexpr unsigned int kNumIterations = 50;
@@ -79,8 +80,6 @@ std::ostream& operator<<(std::ostream& ostream, const BufferUploadParams& param)
 
     return ostream;
 }
-
-}  // namespace
 
 // Test uploading |kBufferSize| bytes of data |kNumIterations| times.
 class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
@@ -152,3 +151,6 @@ DAWN_INSTANTIATE_TEST_P(BufferUploadPerf,
                         {UploadSize::BufferSize_1KB, UploadSize::BufferSize_64KB,
                          UploadSize::BufferSize_1MB, UploadSize::BufferSize_4MB,
                          UploadSize::BufferSize_16MB});
+
+}  // anonymous namespace
+}  // namespace dawn

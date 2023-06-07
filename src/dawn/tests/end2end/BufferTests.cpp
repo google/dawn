@@ -19,6 +19,9 @@
 
 #include "dawn/tests/DawnTest.h"
 
+namespace dawn {
+namespace {
+
 class BufferMappingTests : public DawnTest {
   protected:
     void MapAsyncAndWait(const wgpu::Buffer& buffer,
@@ -1156,3 +1159,6 @@ DAWN_INSTANTIATE_TEST(BufferNoSuballocationTests,
                       OpenGLBackend({"disable_resource_suballocation"}),
                       OpenGLESBackend({"disable_resource_suballocation"}),
                       VulkanBackend({"disable_resource_suballocation"}));
+
+}  // anonymous namespace
+}  // namespace dawn

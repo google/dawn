@@ -25,6 +25,7 @@
 #include "dawn/tests/perf_tests/DawnPerfTestPlatform.h"
 #include "dawn/utils/Timer.h"
 
+namespace dawn {
 namespace {
 
 DawnPerfTestEnvironment* gTestEnv = nullptr;
@@ -38,16 +39,16 @@ void DumpTraceEventsToJSONFile(
     for (const DawnPerfTestPlatform::TraceEvent& traceEvent : traceEventBuffer) {
         const char* category = nullptr;
         switch (traceEvent.category) {
-            case dawn::platform::TraceCategory::General:
+            case platform::TraceCategory::General:
                 category = "general";
                 break;
-            case dawn::platform::TraceCategory::Validation:
+            case platform::TraceCategory::Validation:
                 category = "validation";
                 break;
-            case dawn::platform::TraceCategory::Recording:
+            case platform::TraceCategory::Recording:
                 category = "recording";
                 break;
-            case dawn::platform::TraceCategory::GPUWork:
+            case platform::TraceCategory::GPUWork:
                 category = "gpu";
                 break;
             default:
@@ -70,12 +71,15 @@ void DumpTraceEventsToJSONFile(
 }
 
 }  // namespace
+}  // namespace dawn
 
 void InitDawnPerfTestEnvironment(int argc, char** argv) {
-    gTestEnv = new DawnPerfTestEnvironment(argc, argv);
-    DawnTestEnvironment::SetEnvironment(gTestEnv);
-    testing::AddGlobalTestEnvironment(gTestEnv);
+    dawn::gTestEnv = new dawn::DawnPerfTestEnvironment(argc, argv);
+    dawn::DawnTestEnvironment::SetEnvironment(dawn::gTestEnv);
+    testing::AddGlobalTestEnvironment(dawn::gTestEnv);
 }
+
+namespace dawn {
 
 DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
     : DawnTestEnvironment(argc, argv) {
@@ -107,13 +111,12 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
         }
 
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
-            dawn::InfoLog()
-                << "Additional flags:"
-                << " [--calibration] [--override-steps=x] [--trace-file=file]\n"
-                << "  --calibration: Only run calibration. Calibration allows the perf test"
-                   " runner script to save some time.\n"
-                << " --override-steps: Set a fixed number of steps to run for each test\n"
-                << " --trace-file: The file to dump trace results.\n";
+            InfoLog() << "Additional flags:"
+                      << " [--calibration] [--override-steps=x] [--trace-file=file]\n"
+                      << "  --calibration: Only run calibration. Calibration allows the perf test"
+                         " runner script to save some time.\n"
+                      << " --override-steps: Set a fixed number of steps to run for each test\n"
+                      << " --trace-file: The file to dump trace results.\n";
             continue;
         }
     }
@@ -178,7 +181,7 @@ DawnPerfTestBase::DawnPerfTestBase(DawnTestBase* test,
     : mTest(test),
       mIterationsPerStep(iterationsPerStep),
       mMaxStepsInFlight(maxStepsInFlight),
-      mTimer(dawn::utils::CreateTimer()) {}
+      mTimer(utils::CreateTimer()) {}
 
 DawnPerfTestBase::~DawnPerfTestBase() = default;
 
@@ -230,7 +233,7 @@ void DawnPerfTestBase::RunTest() {
 }
 
 void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
-    dawn::platform::Platform* platform = gTestEnv->GetPlatform();
+    platform::Platform* platform = gTestEnv->GetPlatform();
 
     mNumStepsPerformed = 0;
     mCpuTime = 0;
@@ -312,11 +315,11 @@ void DawnPerfTestBase::OutputResults() {
         double* totalTime = nullptr;
 
         switch (traceEvent.category) {
-            case dawn::platform::TraceCategory::Validation:
+            case platform::TraceCategory::Validation:
                 tracker = &validationTracker;
                 totalTime = &totalValidationTime;
                 break;
-            case dawn::platform::TraceCategory::Recording:
+            case platform::TraceCategory::Recording:
                 tracker = &recordingTracker;
                 totalTime = &totalRecordingTime;
                 break;
@@ -404,6 +407,8 @@ void DawnPerfTestBase::PrintResultImpl(const std::string& trace,
 
     // The results are printed according to the format specified at
     // [chromium]//src/tools/perf/generate_legacy_perf_dashboard_json.py
-    dawn::InfoLog() << (important ? "*" : "") << "RESULT " << metric << ": " << story << "= "
-                    << value << " " << units;
+    InfoLog() << (important ? "*" : "") << "RESULT " << metric << ": " << story << "= " << value
+              << " " << units;
 }
+
+}  // namespace dawn

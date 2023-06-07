@@ -21,6 +21,8 @@
 
 #include "dawn/tests/AdapterTestConfig.h"
 
+namespace dawn {
+
 // ParamStruct is a custom struct which ParamStruct will yield when iterating.
 // The types Params... should be the same as the types passed to the constructor
 // of ParamStruct.
@@ -128,14 +130,16 @@ template <typename Param, typename... Params>
 auto MakeParamGenerator(std::vector<BackendTestConfig>&& first,
                         std::initializer_list<Params>&&... params) {
     return ParamGenerator<Param, AdapterTestParam, Params...>(
-        ::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
+        ::dawn::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
         std::forward<std::initializer_list<Params>&&>(params)...);
 }
 template <typename Param, typename... Params>
 auto MakeParamGenerator(std::vector<BackendTestConfig>&& first, std::vector<Params>&&... params) {
     return ParamGenerator<Param, AdapterTestParam, Params...>(
-        ::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
+        ::dawn::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
         std::forward<std::vector<Params>&&>(params)...);
 }
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_TESTS_PARAMGENERATOR_H_

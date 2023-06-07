@@ -22,39 +22,40 @@
 #include "dawn/platform/tracing/TraceEvent.h"
 #include "dawn/tests/perf_tests/DawnPerfTest.h"
 #include "dawn/utils/Timer.h"
+
+namespace dawn {
 namespace {
 
 struct TraceCategoryInfo {
     unsigned char enabled;
-    dawn::platform::TraceCategory category;
+    platform::TraceCategory category;
 };
 
 constexpr TraceCategoryInfo gTraceCategories[4] = {
-    {1, dawn::platform::TraceCategory::General},
-    {1, dawn::platform::TraceCategory::Validation},
-    {1, dawn::platform::TraceCategory::Recording},
-    {1, dawn::platform::TraceCategory::GPUWork},
+    {1, platform::TraceCategory::General},
+    {1, platform::TraceCategory::Validation},
+    {1, platform::TraceCategory::Recording},
+    {1, platform::TraceCategory::GPUWork},
 };
 
-static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::General) == 0);
-static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Validation) == 1);
-static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Recording) == 2);
-static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::GPUWork) == 3);
+static_assert(static_cast<uint32_t>(platform::TraceCategory::General) == 0);
+static_assert(static_cast<uint32_t>(platform::TraceCategory::Validation) == 1);
+static_assert(static_cast<uint32_t>(platform::TraceCategory::Recording) == 2);
+static_assert(static_cast<uint32_t>(platform::TraceCategory::GPUWork) == 3);
 
 }  // anonymous namespace
 
-DawnPerfTestPlatform::DawnPerfTestPlatform()
-    : dawn::platform::Platform(), mTimer(dawn::utils::CreateTimer()) {}
+DawnPerfTestPlatform::DawnPerfTestPlatform() : platform::Platform(), mTimer(utils::CreateTimer()) {}
 
 DawnPerfTestPlatform::~DawnPerfTestPlatform() = default;
 
 const unsigned char* DawnPerfTestPlatform::GetTraceCategoryEnabledFlag(
-    dawn::platform::TraceCategory category) {
+    platform::TraceCategory category) {
     switch (category) {
-        case dawn::platform::TraceCategory::General:
-        case dawn::platform::TraceCategory::Validation:
-        case dawn::platform::TraceCategory::Recording:
-        case dawn::platform::TraceCategory::GPUWork:
+        case platform::TraceCategory::General:
+        case platform::TraceCategory::Validation:
+        case platform::TraceCategory::Recording:
+        case platform::TraceCategory::GPUWork:
             break;
         default:
             UNREACHABLE();
@@ -112,8 +113,8 @@ uint64_t DawnPerfTestPlatform::AddTraceEvent(char phase,
     buffer->emplace_back(phase, info->category, name, id, timestamp);
 
     size_t hash = 0;
-    dawn::HashCombine(&hash, buffer->size());
-    dawn::HashCombine(&hash, std::this_thread::get_id());
+    HashCombine(&hash, buffer->size());
+    HashCombine(&hash, std::this_thread::get_id());
     return static_cast<uint64_t>(hash);
 }
 
@@ -146,3 +147,5 @@ std::vector<DawnPerfTestPlatform::TraceEvent> DawnPerfTestPlatform::AcquireTrace
     }
     return traceEventBuffer;
 }
+
+}  // namespace dawn

@@ -24,11 +24,12 @@
 
 #include "dawn/platform/DawnPlatform.h"
 
-namespace dawn::utils {
+namespace dawn {
+namespace utils {
 class Timer;
 }
 
-class DawnPerfTestPlatform : public dawn::platform::Platform {
+class DawnPerfTestPlatform : public platform::Platform {
   public:
     // These are trace events according to Google's "Trace Event Format".
     // See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
@@ -36,7 +37,7 @@ class DawnPerfTestPlatform : public dawn::platform::Platform {
     struct TraceEvent final {
         TraceEvent() {}
         TraceEvent(char phaseIn,
-                   dawn::platform::TraceCategory categoryIn,
+                   platform::TraceCategory categoryIn,
                    const char* nameIn,
                    uint64_t idIn,
                    double timestampIn)
@@ -47,7 +48,7 @@ class DawnPerfTestPlatform : public dawn::platform::Platform {
               timestamp(timestampIn) {}
 
         char phase = 0;
-        dawn::platform::TraceCategory category;
+        platform::TraceCategory category;
         const char* name = nullptr;
         uint64_t id = 0;
         std::string threadId;
@@ -61,8 +62,7 @@ class DawnPerfTestPlatform : public dawn::platform::Platform {
     std::vector<TraceEvent> AcquireTraceEventBuffer();
 
   private:
-    const unsigned char* GetTraceCategoryEnabledFlag(
-        dawn::platform::TraceCategory category) override;
+    const unsigned char* GetTraceCategoryEnabledFlag(platform::TraceCategory category) override;
 
     double MonotonicallyIncreasingTime() override;
 
@@ -80,7 +80,7 @@ class DawnPerfTestPlatform : public dawn::platform::Platform {
                            unsigned char flags) override;
 
     bool mRecordTraceEvents = false;
-    std::unique_ptr<dawn::utils::Timer> mTimer;
+    std::unique_ptr<utils::Timer> mTimer;
 
     // Trace event record.
     // Each uses their own trace event buffer, but the PerfTestPlatform owns all of them in
@@ -90,5 +90,7 @@ class DawnPerfTestPlatform : public dawn::platform::Platform {
         mTraceEventBuffers;
     std::mutex mTraceEventBufferMapMutex;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTESTPLATFORM_H_

@@ -20,13 +20,14 @@
 
 #include "dawn/tests/DawnTest.h"
 
-namespace dawn::utils {
+void InitDawnPerfTestEnvironment(int argc, char** argv);
+
+namespace dawn {
+namespace utils {
 class Timer;
 }
 
 class DawnPerfTestPlatform;
-
-void InitDawnPerfTestEnvironment(int argc, char** argv);
 
 class DawnPerfTestEnvironment : public DawnTestEnvironment {
   public:
@@ -108,7 +109,7 @@ class DawnPerfTestBase {
     unsigned int mStepsToRun = 0;
     unsigned int mNumStepsPerformed = 0;
     double mCpuTime;
-    std::unique_ptr<dawn::utils::Timer> mTimer;
+    std::unique_ptr<utils::Timer> mTimer;
 };
 
 template <typename Params = AdapterTestParam>
@@ -128,5 +129,7 @@ class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPer
 };
 
 using DawnPerfTest = DawnPerfTestWithParams<>;
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTEST_H_

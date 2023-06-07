@@ -16,7 +16,10 @@
 
 #include "dawn/native/metal/DeviceMTL.h"
 
-using namespace dawn::native::metal;
+namespace dawn::native {
+namespace {
+
+using namespace metal;
 
 class MetalAutoreleasePoolTests : public DawnTest {
   private:
@@ -60,3 +63,6 @@ TEST_P(MetalAutoreleasePoolTests, EncoderOutlivesAutorelease) {
 }
 
 DAWN_INSTANTIATE_TEST(MetalAutoreleasePoolTests, MetalBackend());
+
+}  // anonymous namespace
+}  // namespace dawn::native

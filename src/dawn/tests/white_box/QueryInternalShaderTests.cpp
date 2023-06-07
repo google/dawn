@@ -33,7 +33,7 @@ void EncodeConvertTimestampsToNanoseconds(wgpu::CommandEncoder encoder,
                     .IsSuccess());
 }
 
-class InternalShaderExpectation : public ::detail::Expectation {
+class InternalShaderExpectation : public ::dawn::detail::Expectation {
   public:
     ~InternalShaderExpectation() override = default;
 

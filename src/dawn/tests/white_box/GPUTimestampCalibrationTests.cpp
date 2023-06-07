@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& o, EncoderType type) {
 
 DAWN_TEST_PARAM_STRUCT(GPUTimestampCalibrationTestParams, FeatureName, EncoderType);
 
-class ExpectBetweenTimestamps : public ::detail::Expectation {
+class ExpectBetweenTimestamps : public detail::Expectation {
   public:
     ~ExpectBetweenTimestamps() override = default;
 

@@ -14,6 +14,9 @@
 
 #include "dawn/tests/DawnTest.h"
 
+namespace dawn {
+namespace {
+
 class MemoryAllocationStressTests : public DawnTest {};
 
 // Test memory allocation is freed correctly when creating and destroying large buffers.
@@ -44,3 +47,6 @@ DAWN_INSTANTIATE_TEST(MemoryAllocationStressTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

@@ -16,6 +16,9 @@
 
 #include "dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class BasicTests : public DawnTest {};
 
 // Test adapter filter by vendor id.
@@ -65,3 +68,6 @@ DAWN_INSTANTIATE_TEST(BasicTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

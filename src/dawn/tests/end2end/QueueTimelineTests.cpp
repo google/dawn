@@ -17,6 +17,9 @@
 #include "dawn/tests/DawnTest.h"
 #include "gmock/gmock.h"
 
+namespace dawn {
+namespace {
+
 using testing::InSequence;
 
 class MockMapCallback {
@@ -105,3 +108,6 @@ DAWN_INSTANTIATE_TEST(QueueTimelineTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+}  // anonymous namespace
+}  // namespace dawn

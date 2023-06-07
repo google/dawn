@@ -17,6 +17,9 @@
 
 #include "dawn/tests/DawnTest.h"
 
+namespace dawn {
+namespace {
+
 class NonzeroBufferCreationTests : public DawnTest {
   public:
     void MapReadAsyncAndWait(wgpu::Buffer buffer, uint64_t offset, uint64_t size) {
@@ -141,3 +144,6 @@ DAWN_INSTANTIATE_TEST(NonzeroBufferCreationTests,
                                       {"lazy_clear_resource_on_first_use"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"},
                                     {"lazy_clear_resource_on_first_use"}));
+
+}  // anonymous namespace
+}  // namespace dawn
