@@ -26,7 +26,7 @@ using IR_SwizzleTest = IRTestHelper;
 TEST_F(IR_SwizzleTest, SetsUsage) {
     auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                    builtin::Access::kReadWrite);
-    auto* var = b.Declare(ty);
+    auto* var = b.Var(ty);
     auto* a = b.Swizzle(mod.Types().i32(), var, utils::Vector{1u});
 
     EXPECT_THAT(var->Usages(), testing::UnorderedElementsAre(Usage{a, 0u}));
@@ -39,7 +39,7 @@ TEST_F(IR_SwizzleTest, Fail_NullType) {
             Builder b{mod};
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
-            auto* var = b.Declare(ty);
+            auto* var = b.Var(ty);
             b.Swizzle(nullptr, var, utils::Vector{1u});
         },
         "");
@@ -62,7 +62,7 @@ TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
             Builder b{mod};
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
-            auto* var = b.Declare(ty);
+            auto* var = b.Var(ty);
             b.Swizzle(mod.Types().i32(), var, utils::Empty);
         },
         "");
@@ -75,7 +75,7 @@ TEST_F(IR_SwizzleTest, Fail_TooManyIndices) {
             Builder b{mod};
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
-            auto* var = b.Declare(ty);
+            auto* var = b.Var(ty);
             b.Swizzle(mod.Types().i32(), var, utils::Vector{1u, 1u, 1u, 1u, 1u});
         },
         "");
@@ -88,7 +88,7 @@ TEST_F(IR_SwizzleTest, Fail_IndexOutOfRange) {
             Builder b{mod};
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
-            auto* var = b.Declare(ty);
+            auto* var = b.Var(ty);
             b.Swizzle(mod.Types().i32(), var, utils::Vector{4u});
         },
         "");

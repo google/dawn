@@ -207,7 +207,7 @@ ir::Store* Builder::Store(Value* to, Value* from) {
     return ir.values.Create<ir::Store>(to, from);
 }
 
-ir::Var* Builder::Declare(const type::Pointer* type) {
+ir::Var* Builder::Var(const type::Pointer* type) {
     return ir.values.Create<ir::Var>(type);
 }
 

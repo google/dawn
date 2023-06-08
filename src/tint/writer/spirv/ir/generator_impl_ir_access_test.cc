@@ -54,7 +54,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest_Access, Array_Pointer_ConstantIndex) {
-    auto* arr_var = b.Declare(ptr(ty.array(ty.i32(), 4)));
+    auto* arr_var = b.Var(ptr(ty.array(ty.i32(), 4)));
     auto* access = b.Access(ptr(ty.i32()), arr_var, utils::Vector{b.Constant(1_u)});
     auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{arr_var, access, b.Return(func)});
@@ -83,8 +83,8 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest_Access, Array_Pointer_DynamicIndex) {
-    auto* arr_var = b.Declare(ptr(ty.array(ty.i32(), 4)));
-    auto* idx_var = b.Declare(ptr(ty.i32()));
+    auto* arr_var = b.Var(ptr(ty.array(ty.i32(), 4)));
+    auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access = b.Access(ptr(ty.i32()), arr_var, utils::Vector{idx});
     auto* func = b.CreateFunction("foo", ty.void_());
@@ -143,7 +143,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest_Access, Matrix_Pointer_ConstantIndex) {
-    auto* mat_var = b.Declare(ptr(ty.mat2x2(ty.f32())));
+    auto* mat_var = b.Var(ptr(ty.mat2x2(ty.f32())));
     auto* access_vec = b.Access(ptr(ty.vec2(ty.f32())), mat_var, utils::Vector{b.Constant(1_u)});
     auto* access_el =
         b.Access(ptr(ty.f32()), mat_var, utils::Vector{b.Constant(1_u), b.Constant(0_u)});
@@ -173,8 +173,8 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest_Access, Matrix_Pointer_DynamicIndex) {
-    auto* mat_var = b.Declare(ptr(ty.mat2x2(ty.f32())));
-    auto* idx_var = b.Declare(ptr(ty.i32()));
+    auto* mat_var = b.Var(ptr(ty.mat2x2(ty.f32())));
+    auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access_vec = b.Access(ptr(ty.vec2(ty.f32())), mat_var, utils::Vector{idx});
     auto* access_el = b.Access(ptr(ty.f32()), mat_var, utils::Vector{idx, idx});
@@ -234,7 +234,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest_Access, Vector_Value_DynamicIndex) {
     auto* vec_val = b.FunctionParam(ty.vec4(ty.i32()));
-    auto* idx_var = b.Declare(ptr(ty.i32()));
+    auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access = b.Access(ty.i32(), vec_val, utils::Vector{idx});
     auto* func = b.CreateFunction("foo", ty.void_());
@@ -262,7 +262,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest_Access, Vector_Pointer_ConstantIndex) {
-    auto* vec_var = b.Declare(ptr(ty.vec4(ty.i32())));
+    auto* vec_var = b.Var(ptr(ty.vec4(ty.i32())));
     auto* access = b.Access(ptr(ty.i32()), vec_var, utils::Vector{b.Constant(1_u)});
     auto* func = b.CreateFunction("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{vec_var, access, b.Return(func)});
@@ -289,8 +289,8 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest_Access, Vector_Pointer_DynamicIndex) {
-    auto* vec_var = b.Declare(ptr(ty.vec4(ty.i32())));
-    auto* idx_var = b.Declare(ptr(ty.i32()));
+    auto* vec_var = b.Var(ptr(ty.vec4(ty.i32())));
+    auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access = b.Access(ptr(ty.i32()), vec_var, utils::Vector{idx});
     auto* func = b.CreateFunction("foo", ty.void_());
@@ -320,7 +320,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest_Access, NestedVector_Value_DynamicIndex) {
     auto* val = b.FunctionParam(ty.array(ty.array(ty.vec4(ty.i32()), 4), 4));
-    auto* idx_var = b.Declare(ptr(ty.i32()));
+    auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access = b.Access(ty.i32(), val, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx});
     auto* func = b.CreateFunction("foo", ty.void_());
@@ -406,7 +406,7 @@ TEST_F(SpvGeneratorImplTest_Access, Struct_Pointer_ConstantIndex) {
                                        16u, type::StructMemberAttributes{}),
         },
         16u, 32u, 32u);
-    auto* str_var = b.Declare(ptr(str));
+    auto* str_var = b.Var(ptr(str));
     auto* access_vec = b.Access(ptr(ty.i32()), str_var, utils::Vector{b.Constant(1_u)});
     auto* access_el =
         b.Access(ptr(ty.i32()), str_var, utils::Vector{b.Constant(1_u), b.Constant(2_u)});

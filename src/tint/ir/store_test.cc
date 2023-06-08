@@ -26,8 +26,8 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_StoreTest = IRTestHelper;
 
 TEST_F(IR_StoreTest, CreateStore) {
-    auto* to = b.Declare(mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kPrivate,
-                                             builtin::Access::kReadWrite));
+    auto* to = b.Var(mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kPrivate,
+                                         builtin::Access::kReadWrite));
     const auto* inst = b.Store(to, b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<Store>());
@@ -65,8 +65,8 @@ TEST_F(IR_StoreTest, Fail_NullFrom) {
         {
             Module mod;
             Builder b{mod};
-            auto* to = b.Declare(mod.Types().pointer(
-                mod.Types().i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+            auto* to = b.Var(mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kPrivate,
+                                                 builtin::Access::kReadWrite));
             b.Store(to, nullptr);
         },
         "");

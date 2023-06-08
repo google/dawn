@@ -143,9 +143,9 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
 
         // Declare a local variable and copy the source object to it.
         auto* local = object_to_local.GetOrCreate(source_object, [&]() {
-            auto* decl = builder.Declare(ir->Types().pointer(to_replace.dynamic_index_source_type,
-                                                             builtin::AddressSpace::kFunction,
-                                                             builtin::Access::kReadWrite));
+            auto* decl = builder.Var(ir->Types().pointer(to_replace.dynamic_index_source_type,
+                                                         builtin::AddressSpace::kFunction,
+                                                         builtin::Access::kReadWrite));
             decl->SetInitializer(source_object);
             decl->InsertBefore(access);
             return decl;

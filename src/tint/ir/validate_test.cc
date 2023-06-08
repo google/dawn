@@ -27,7 +27,7 @@ using IR_ValidateTest = IRTestHelper;
 
 TEST_F(IR_ValidateTest, RootBlock_Var) {
     mod.root_block = b.CreateRootBlockIfNeeded();
-    mod.root_block->Append(b.Declare(mod.Types().pointer(
+    mod.root_block->Append(b.Var(mod.Types().pointer(
         mod.Types().i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite)));
     auto res = ir::Validate(mod);
     EXPECT_TRUE(res) << res.Failure().str();

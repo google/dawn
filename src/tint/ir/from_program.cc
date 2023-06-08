@@ -1077,7 +1077,7 @@ class Impl {
                     ref->StoreType()->Clone(clone_ctx_.type_ctx), ref->AddressSpace(),
                     ref->Access());
 
-                auto* val = builder_.Declare(ty);
+                auto* val = builder_.Var(ty);
                 if (v->initializer) {
                     auto init = EmitExpression(v->initializer);
                     if (!init) {

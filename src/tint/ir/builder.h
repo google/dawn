@@ -339,7 +339,7 @@ class Builder {
     /// Creates a new `var` declaration
     /// @param type the var type
     /// @returns the instruction
-    ir::Var* Declare(const type::Pointer* type);
+    ir::Var* Var(const type::Pointer* type);
 
     /// Creates a return instruction
     /// @param func the function being returned

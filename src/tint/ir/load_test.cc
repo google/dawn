@@ -27,8 +27,8 @@ using IR_LoadTest = IRTestHelper;
 
 TEST_F(IR_LoadTest, Create) {
     auto* store_type = mod.Types().i32();
-    auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
-                                              builtin::Access::kReadWrite));
+    auto* var = b.Var(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
+                                          builtin::Access::kReadWrite));
     const auto* inst = b.Load(var);
 
     ASSERT_TRUE(inst->Is<Load>());
@@ -42,8 +42,8 @@ TEST_F(IR_LoadTest, Create) {
 
 TEST_F(IR_LoadTest, Usage) {
     auto* store_type = mod.Types().i32();
-    auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
-                                              builtin::Access::kReadWrite));
+    auto* var = b.Var(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
+                                          builtin::Access::kReadWrite));
     auto* inst = b.Load(var);
 
     ASSERT_NE(inst->From(), nullptr);
@@ -57,8 +57,8 @@ TEST_F(IR_LoadTest, Fail_NullType) {
             Builder b{mod};
 
             auto* store_type = mod.Types().i32();
-            auto* var = b.Declare(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
-                                                      builtin::Access::kReadWrite));
+            auto* var = b.Var(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
+                                                  builtin::Access::kReadWrite));
             Load l(nullptr, var);
         },
         "");

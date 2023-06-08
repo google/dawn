@@ -26,7 +26,7 @@ using IR_AccessTest = IRTestHelper;
 TEST_F(IR_AccessTest, SetsUsage) {
     auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                    builtin::Access::kReadWrite);
-    auto* var = b.Declare(ty);
+    auto* var = b.Var(ty);
     auto* idx = b.Constant(u32(1));
     auto* a = b.Access(mod.Types().i32(), var, utils::Vector{idx});
 
@@ -41,7 +41,7 @@ TEST_F(IR_AccessTest, Fail_NullType) {
             Builder b{mod};
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
-            auto* var = b.Declare(ty);
+            auto* var = b.Var(ty);
             b.Access(nullptr, var, utils::Vector{b.Constant(u32(1))});
         },
         "");
@@ -64,7 +64,7 @@ TEST_F(IR_AccessTest, Fail_EmptyIndices) {
             Builder b{mod};
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
-            auto* var = b.Declare(ty);
+            auto* var = b.Var(ty);
             b.Access(mod.Types().i32(), var, utils::Empty);
         },
         "");
@@ -77,7 +77,7 @@ TEST_F(IR_AccessTest, Fail_NullIndex) {
             Builder b{mod};
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
-            auto* var = b.Declare(ty);
+            auto* var = b.Var(ty);
             b.Access(mod.Types().i32(), var, utils::Vector<Value*, 1>{nullptr});
         },
         "");

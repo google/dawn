@@ -47,8 +47,8 @@ TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
 }
 
 TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
-    auto* buffer = b.Declare(
-        ty.pointer(ty.i32(), builtin::AddressSpace::kUniform, builtin::Access::kReadWrite));
+    auto* buffer =
+        b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kUniform, builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
     b.CreateRootBlockIfNeeded()->Append(buffer);
 
@@ -83,8 +83,8 @@ tint_symbol_1 = struct @align(4), @block {
 }
 
 TEST_F(IR_BlockDecoratedStructsTest, Scalar_Storage) {
-    auto* buffer = b.Declare(
-        ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
+    auto* buffer =
+        b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
     b.CreateRootBlockIfNeeded()->Append(buffer);
 
@@ -118,8 +118,8 @@ tint_symbol_1 = struct @align(4), @block {
 }
 
 TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
-    auto* buffer = b.Declare(ty.pointer(ty.runtime_array(ty.i32()), builtin::AddressSpace::kStorage,
-                                        builtin::Access::kReadWrite));
+    auto* buffer = b.Var(ty.pointer(ty.runtime_array(ty.i32()), builtin::AddressSpace::kStorage,
+                                    builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
     b.CreateRootBlockIfNeeded()->Append(buffer);
 
@@ -165,8 +165,8 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
                                             4u, 4u, type::StructMemberAttributes{}));
     auto* structure = ty.Get<type::Struct>(mod.symbols.New(), members, 4u, 8u, 8u);
 
-    auto* buffer = b.Declare(
-        ty.pointer(structure, builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
+    auto* buffer =
+        b.Var(ty.pointer(structure, builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
     b.CreateRootBlockIfNeeded()->Append(buffer);
 
@@ -224,13 +224,13 @@ TEST_F(IR_BlockDecoratedStructsTest, StructUsedElsewhere) {
                                             type::StructMemberAttributes{}));
     auto* structure = ty.Get<type::Struct>(mod.symbols.New(), members, 4u, 8u, 8u);
 
-    auto* buffer = b.Declare(
-        ty.pointer(structure, builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
+    auto* buffer =
+        b.Var(ty.pointer(structure, builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
     b.CreateRootBlockIfNeeded()->Append(buffer);
 
-    auto* private_var = b.Declare(
-        ty.pointer(structure, builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+    auto* private_var =
+        b.Var(ty.pointer(structure, builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
     b.CreateRootBlockIfNeeded()->Append(private_var);
 
     auto* func = b.CreateFunction("foo", ty.void_());
@@ -269,12 +269,12 @@ tint_symbol_4 = struct @align(4), @block {
 }
 
 TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
-    auto* buffer_a = b.Declare(
-        ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
-    auto* buffer_b = b.Declare(
-        ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
-    auto* buffer_c = b.Declare(
-        ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
+    auto* buffer_a =
+        b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
+    auto* buffer_b =
+        b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
+    auto* buffer_c =
+        b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
     buffer_a->SetBindingPoint(0, 0);
     buffer_b->SetBindingPoint(0, 1);
     buffer_c->SetBindingPoint(0, 2);
