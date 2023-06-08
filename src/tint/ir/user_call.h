@@ -32,12 +32,10 @@ class UserCall : public utils::Castable<UserCall, Call> {
     ~UserCall() override;
 
     /// @returns the call arguments
-    utils::Slice<Value const* const> Args() const override {
-        return operands_.Slice().Offset(1).Reinterpret<Value const* const>();
-    }
+    utils::Slice<Value* const> Args() override { return operands_.Slice().Offset(1); }
 
     /// @returns the called function name
-    const Function* Func() const { return operands_.Front()->As<ir::Function>(); }
+    Function* Func() { return operands_.Front()->As<ir::Function>(); }
 
   private:
 };

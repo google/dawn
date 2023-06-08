@@ -39,33 +39,9 @@ namespace tint::ir {
 /// Helper class to disassemble the IR
 class Disassembler {
   public:
-    /// An operand used in an instruction
-    struct Operand {
-        /// The instruction
-        const Instruction* instruction = nullptr;
-        /// The operand index
-        uint32_t operand_index = 0u;
-
-        /// A specialization of utils::Hasher for Operand.
-        struct Hasher {
-            /// @param u the operand to hash
-            /// @returns a hash of the operand
-            inline std::size_t operator()(const Operand& u) const {
-                return utils::Hash(u.instruction, u.operand_index);
-            }
-        };
-
-        /// An equality helper for Operand.
-        /// @param other the operand to compare against
-        /// @returns true if the two operands are equal
-        bool operator==(const Operand& other) const {
-            return instruction == other.instruction && operand_index == other.operand_index;
-        }
-    };
-
     /// Constructor
     /// @param mod the module
-    explicit Disassembler(const Module& mod);
+    explicit Disassembler(Module& mod);
     ~Disassembler();
 
     /// Returns the module as a string
@@ -74,41 +50,39 @@ class Disassembler {
 
     /// Writes the block instructions to the stream
     /// @param b the block containing the instructions
-    void EmitBlockInstructions(const Block* b);
+    void EmitBlockInstructions(Block* b);
 
     /// @returns the string representation
     std::string AsString() const { return out_.str(); }
 
     /// @param inst the instruction to retrieve
     /// @returns the source for the instruction
-    Source InstructionSource(const Instruction* inst) {
+    Source InstructionSource(Instruction* inst) {
         return instruction_to_src_.Get(inst).value_or(Source{});
     }
 
     /// @param operand the operand to retrieve
     /// @returns the source for the operand
-    Source OperandSource(Operand operand) {
-        return operand_to_src_.Get(operand).value_or(Source{});
-    }
+    Source OperandSource(Usage operand) { return operand_to_src_.Get(operand).value_or(Source{}); }
 
     /// @param blk teh block to retrieve
     /// @returns the source for the block
-    Source BlockSource(const Block* blk) { return block_to_src_.Get(blk).value_or(Source{}); }
+    Source BlockSource(Block* blk) { return block_to_src_.Get(blk).value_or(Source{}); }
 
     /// Stores the given @p src location for @p inst instruction
     /// @param inst the instruction to store
     /// @param src the source location
-    void SetSource(const Instruction* inst, Source src) { instruction_to_src_.Add(inst, src); }
+    void SetSource(Instruction* inst, Source src) { instruction_to_src_.Add(inst, src); }
 
     /// Stores the given @p src location for @p blk block
     /// @param blk the block to store
     /// @param src the source location
-    void SetSource(const Block* blk, Source src) { block_to_src_.Add(blk, src); }
+    void SetSource(Block* blk, Source src) { block_to_src_.Add(blk, src); }
 
     /// Stores the given @p src location for @p op operand
     /// @param op the operand to store
     /// @param src the source location
-    void SetSource(Operand op, Source src) { operand_to_src_.Add(op, src); }
+    void SetSource(Usage op, Source src) { operand_to_src_.Add(op, src); }
 
     /// @returns the source location for the current emission location
     Source::Location MakeCurrentLocation();
@@ -119,11 +93,11 @@ class Disassembler {
         explicit SourceMarker(Disassembler* d) : dis_(d), begin_(dis_->MakeCurrentLocation()) {}
         ~SourceMarker() = default;
 
-        void Store(const Instruction* inst) { dis_->SetSource(inst, MakeSource()); }
+        void Store(Instruction* inst) { dis_->SetSource(inst, MakeSource()); }
 
-        void Store(const Block* blk) { dis_->SetSource(blk, MakeSource()); }
+        void Store(Block* blk) { dis_->SetSource(blk, MakeSource()); }
 
-        void Store(Operand operand) { dis_->SetSource(operand, MakeSource()); }
+        void Store(Usage operand) { dis_->SetSource(operand, MakeSource()); }
 
         Source MakeSource() const {
             return Source(Source::Range(begin_, dis_->MakeCurrentLocation()));
@@ -136,46 +110,46 @@ class Disassembler {
 
     utils::StringStream& Indent();
 
-    size_t IdOf(const Block* blk);
-    std::string_view IdOf(const Value* node);
+    size_t IdOf(Block* blk);
+    std::string_view IdOf(Value* node);
 
-    void Walk(const Block* blk);
-    void WalkInternal(const Block* blk);
-    void EmitFunction(const Function* func);
-    void EmitParamAttributes(const FunctionParam* p);
-    void EmitReturnAttributes(const Function* func);
+    void Walk(Block* blk);
+    void WalkInternal(Block* blk);
+    void EmitFunction(Function* func);
+    void EmitParamAttributes(FunctionParam* p);
+    void EmitReturnAttributes(Function* func);
     void EmitBindingPoint(BindingPoint p);
     void EmitLocation(Location loc);
-    void EmitInstruction(const Instruction* inst);
-    void EmitValueWithType(const Value* val);
-    void EmitValue(const Value* val);
-    void EmitValueList(utils::Slice<ir::Value const* const> values);
-    void EmitArgs(const Call* call);
-    void EmitBinary(const Binary* b);
-    void EmitUnary(const Unary* b);
-    void EmitBranch(const Branch* b);
-    void EmitSwitch(const Switch* s);
-    void EmitLoop(const Loop* l);
-    void EmitIf(const If* i);
+    void EmitInstruction(Instruction* inst);
+    void EmitValueWithType(Value* val);
+    void EmitValue(Value* val);
+    void EmitValueList(utils::Slice<ir::Value* const> values);
+    void EmitArgs(Call* call);
+    void EmitBinary(Binary* b);
+    void EmitUnary(Unary* b);
+    void EmitBranch(Branch* b);
+    void EmitSwitch(Switch* s);
+    void EmitLoop(Loop* l);
+    void EmitIf(If* i);
     void EmitStructDecl(const type::Struct* str);
     void EmitLine();
-    void EmitOperand(const Value* val, const Instruction* inst, uint32_t index);
-    void EmitInstructionName(std::string_view name, const Instruction* inst);
+    void EmitOperand(Value* val, Instruction* inst, uint32_t index);
+    void EmitInstructionName(std::string_view name, Instruction* inst);
 
-    const Module& mod_;
+    Module& mod_;
     utils::StringStream out_;
-    utils::Hashset<const Block*, 32> visited_;
-    utils::Hashmap<const Block*, size_t, 32> block_ids_;
-    utils::Hashmap<const Value*, std::string, 32> value_ids_;
+    utils::Hashset<Block*, 32> visited_;
+    utils::Hashmap<Block*, size_t, 32> block_ids_;
+    utils::Hashmap<Value*, std::string, 32> value_ids_;
     uint32_t indent_size_ = 0;
     bool in_function_ = false;
 
     uint32_t current_output_line_ = 1;
     uint32_t current_output_start_pos_ = 0;
 
-    utils::Hashmap<const Block*, Source, 8> block_to_src_;
-    utils::Hashmap<const Instruction*, Source, 8> instruction_to_src_;
-    utils::Hashmap<Operand, Source, 8, Operand::Hasher> operand_to_src_;
+    utils::Hashmap<Block*, Source, 8> block_to_src_;
+    utils::Hashmap<Instruction*, Source, 8> instruction_to_src_;
+    utils::Hashmap<Usage, Source, 8, Usage::Hasher> operand_to_src_;
 };
 
 }  // namespace tint::ir

@@ -35,7 +35,7 @@ class ExitLoop : public utils::Castable<ExitLoop, Branch> {
     ~ExitLoop() override;
 
     /// @returns the loop being exited
-    const ir::Loop* Loop() const { return loop_; }
+    ir::Loop* Loop() { return loop_; }
 
   private:
     ir::Loop* loop_ = nullptr;

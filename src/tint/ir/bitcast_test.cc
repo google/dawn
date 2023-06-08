@@ -27,12 +27,12 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_BitcastTest = IRTestHelper;
 
 TEST_F(IR_BitcastTest, Bitcast) {
-    const auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
+    auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
 
     ASSERT_TRUE(inst->Is<ir::Bitcast>());
     ASSERT_NE(inst->Type(), nullptr);
 
-    const auto args = inst->Args();
+    auto args = inst->Args();
     ASSERT_EQ(args.Length(), 1u);
     ASSERT_TRUE(args[0]->Is<Constant>());
     auto val = args[0]->As<Constant>()->Value();
@@ -43,7 +43,7 @@ TEST_F(IR_BitcastTest, Bitcast) {
 TEST_F(IR_BitcastTest, Bitcast_Usage) {
     auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
 
-    const auto args = inst->Args();
+    auto args = inst->Args();
     ASSERT_EQ(args.Length(), 1u);
     ASSERT_NE(args[0], nullptr);
     EXPECT_THAT(args[0]->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));

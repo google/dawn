@@ -57,25 +57,17 @@ class If : public utils::Castable<If, ControlInstruction> {
     ~If() override;
 
     /// @returns the branch arguments
-    utils::Slice<Value const* const> Args() const override { return utils::Slice<Value*>{}; }
+    utils::Slice<Value* const> Args() override { return utils::Slice<Value*>{}; }
 
-    /// @returns the if condition
-    const Value* Condition() const { return operands_[kConditionOperandIndex]; }
     /// @returns the if condition
     Value* Condition() { return operands_[kConditionOperandIndex]; }
 
     /// @returns the true branch block
-    const ir::Block* True() const { return true_; }
-    /// @returns the true branch block
     ir::Block* True() { return true_; }
 
     /// @returns the false branch block
-    const ir::Block* False() const { return false_; }
-    /// @returns the false branch block
     ir::Block* False() { return false_; }
 
-    /// @returns the merge branch block
-    const ir::MultiInBlock* Merge() const { return merge_; }
     /// @returns the merge branch block
     ir::MultiInBlock* Merge() { return merge_; }
 

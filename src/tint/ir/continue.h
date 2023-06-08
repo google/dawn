@@ -35,7 +35,7 @@ class Continue : public utils::Castable<Continue, Branch> {
     ~Continue() override;
 
     /// @returns the loop owning the continue block
-    const ir::Loop* Loop() const { return loop_; }
+    ir::Loop* Loop() { return loop_; }
 
   private:
     ir::Loop* loop_ = nullptr;

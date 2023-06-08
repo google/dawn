@@ -29,7 +29,7 @@ TEST_F(IR_LoadTest, Create) {
     auto* store_type = mod.Types().i32();
     auto* var = b.Var(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
                                           builtin::Access::kReadWrite));
-    const auto* inst = b.Load(var);
+    auto* inst = b.Load(var);
 
     ASSERT_TRUE(inst->Is<Load>());
     ASSERT_EQ(inst->From(), var);

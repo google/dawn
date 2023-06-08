@@ -66,10 +66,10 @@ class Value : public utils::Castable<Value> {
 
     /// @returns the set of usages of this value. An instruction may appear multiple times if it
     /// uses the value for multiple different operands.
-    const utils::Hashset<Usage, 4, Usage::Hasher>& Usages() const { return uses_; }
+    const utils::Hashset<Usage, 4, Usage::Hasher>& Usages() { return uses_; }
 
     /// @returns the type of the value
-    virtual const type::Type* Type() const { return nullptr; }
+    virtual const type::Type* Type() { return nullptr; }
 
     /// Replace all uses of the value.
     /// @param replacer a function which returns a replacement for a given use

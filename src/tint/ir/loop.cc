@@ -45,7 +45,7 @@ Loop::Loop(ir::Block* i, ir::MultiInBlock* b, ir::MultiInBlock* c, ir::MultiInBl
 
 Loop::~Loop() = default;
 
-bool Loop::HasInitializer() const {
+bool Loop::HasInitializer() {
     return initializer_->HasBranchTarget();
 }
 

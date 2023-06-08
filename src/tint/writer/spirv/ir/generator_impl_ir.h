@@ -78,7 +78,7 @@ class GeneratorImplIr {
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
     /// @returns the result ID of the constant
-    uint32_t Constant(const ir::Constant* constant);
+    uint32_t Constant(ir::Constant* constant);
 
     /// Get the result ID of the OpConstantNull instruction for `type`, emitting it if necessary.
     /// @param type the type to get the ID for
@@ -93,12 +93,12 @@ class GeneratorImplIr {
     /// Get the result ID of the value `value`, emitting its instruction if necessary.
     /// @param value the value to get the ID for
     /// @returns the result ID of the value
-    uint32_t Value(const ir::Value* value);
+    uint32_t Value(ir::Value* value);
 
     /// Get the ID of the label for `block`.
     /// @param block the block to get the label ID for
     /// @returns the ID of the block's label
-    uint32_t Label(const ir::Block* block);
+    uint32_t Label(ir::Block* block);
 
     /// Emit a struct type.
     /// @param id the result ID to use
@@ -107,72 +107,72 @@ class GeneratorImplIr {
 
     /// Emit a function.
     /// @param func the function to emit
-    void EmitFunction(const ir::Function* func);
+    void EmitFunction(ir::Function* func);
 
     /// Emit entry point declarations for a function.
     /// @param func the function to emit entry point declarations for
     /// @param id the result ID of the function declaration
-    void EmitEntryPoint(const ir::Function* func, uint32_t id);
+    void EmitEntryPoint(ir::Function* func, uint32_t id);
 
     /// Emit a block, including the initial OpLabel, OpPhis and instructions.
     /// @param block the block to emit
-    void EmitBlock(const ir::Block* block);
+    void EmitBlock(ir::Block* block);
 
     /// Emit all OpPhi nodes for incoming branches to @p block.
     /// @param block the block to emit the OpPhis for
-    void EmitIncomingPhis(const ir::MultiInBlock* block);
+    void EmitIncomingPhis(ir::MultiInBlock* block);
 
     /// Emit all instructions of @p block.
     /// @param block the block's instructions to emit
-    void EmitBlockInstructions(const ir::Block* block);
+    void EmitBlockInstructions(ir::Block* block);
 
     /// Emit the root block.
     /// @param root_block the root block to emit
-    void EmitRootBlock(const ir::Block* root_block);
+    void EmitRootBlock(ir::Block* root_block);
 
     /// Emit an `if` flow node.
     /// @param i the if node to emit
-    void EmitIf(const ir::If* i);
+    void EmitIf(ir::If* i);
 
     /// Emit an access instruction
     /// @param access the access instruction to emit
-    void EmitAccess(const ir::Access* access);
+    void EmitAccess(ir::Access* access);
 
     /// Emit a binary instruction.
     /// @param binary the binary instruction to emit
-    void EmitBinary(const ir::Binary* binary);
+    void EmitBinary(ir::Binary* binary);
 
     /// Emit a builtin function call instruction.
     /// @param call the builtin call instruction to emit
-    void EmitBuiltin(const ir::Builtin* call);
+    void EmitBuiltin(ir::Builtin* call);
 
     /// Emit a load instruction.
     /// @param load the load instruction to emit
-    void EmitLoad(const ir::Load* load);
+    void EmitLoad(ir::Load* load);
 
     /// Emit a loop instruction.
     /// @param loop the loop instruction to emit
-    void EmitLoop(const ir::Loop* loop);
+    void EmitLoop(ir::Loop* loop);
 
     /// Emit a store instruction.
     /// @param store the store instruction to emit
-    void EmitStore(const ir::Store* store);
+    void EmitStore(ir::Store* store);
 
     /// Emit a switch instruction.
     /// @param swtch the switch instruction to emit
-    void EmitSwitch(const ir::Switch* swtch);
+    void EmitSwitch(ir::Switch* swtch);
 
     /// Emit a user call instruction.
     /// @param call the user call instruction to emit
-    void EmitUserCall(const ir::UserCall* call);
+    void EmitUserCall(ir::UserCall* call);
 
     /// Emit a var instruction.
     /// @param var the var instruction to emit
-    void EmitVar(const ir::Var* var);
+    void EmitVar(ir::Var* var);
 
     /// Emit a branch instruction.
     /// @param b the branch instruction to emit
-    void EmitBranch(const ir::Branch* b);
+    void EmitBranch(ir::Branch* b);
 
   private:
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
@@ -223,10 +223,10 @@ class GeneratorImplIr {
     utils::Hashmap<const type::Type*, uint32_t, 4> constant_nulls_;
 
     /// The map of non-constant values to their result IDs.
-    utils::Hashmap<const ir::Value*, uint32_t, 8> values_;
+    utils::Hashmap<ir::Value*, uint32_t, 8> values_;
 
     /// The map of blocks to the IDs of their label instructions.
-    utils::Hashmap<const ir::Block*, uint32_t, 8> block_labels_;
+    utils::Hashmap<ir::Block*, uint32_t, 8> block_labels_;
 
     /// The map of extended instruction set names to their result IDs.
     utils::Hashmap<std::string_view, uint32_t, 2> imports_;

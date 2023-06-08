@@ -38,12 +38,12 @@ class Block : public utils::Castable<Block> {
     ~Block() override;
 
     /// @returns true if this is block has a branch target set
-    bool HasBranchTarget() const {
+    bool HasBranchTarget() {
         return instructions_.last != nullptr && instructions_.last->Is<ir::Branch>();
     }
 
     /// @return the node this block branches to or nullptr if the block doesn't branch
-    const ir::Branch* Branch() const {
+    ir::Branch* Branch() {
         if (!HasBranchTarget()) {
             return nullptr;
         }
@@ -55,7 +55,7 @@ class Block : public utils::Castable<Block> {
     void SetInstructions(utils::VectorRef<Instruction*> instructions);
 
     /// @returns the instructions in the block
-    Instruction* Instructions() const { return instructions_.first; }
+    Instruction* Instructions() { return instructions_.first; }
 
     /// Iterator for the instructions inside a block
     class Iterator {
@@ -91,16 +91,16 @@ class Block : public utils::Castable<Block> {
     };
 
     /// @returns the iterator pointing to the start of the instruction list
-    Iterator begin() const { return Iterator{instructions_.first}; }
+    Iterator begin() { return Iterator{instructions_.first}; }
 
     /// @returns the ending iterator
-    Iterator end() const { return Iterator{nullptr}; }
+    Iterator end() { return Iterator{nullptr}; }
 
     /// @returns the first instruction in the instruction list
-    Instruction* Front() const { return instructions_.first; }
+    Instruction* Front() { return instructions_.first; }
 
     /// @returns the last instruction in the instruction list
-    Instruction* Back() const { return instructions_.last; }
+    Instruction* Back() { return instructions_.last; }
 
     /// Adds the instruction to the beginning of the block
     /// @param inst the instruction to add
@@ -127,13 +127,13 @@ class Block : public utils::Castable<Block> {
     void Remove(Instruction* inst);
 
     /// @returns true if the block contains no instructions
-    bool IsEmpty() const { return Length() == 0; }
+    bool IsEmpty() { return Length() == 0; }
 
     /// @returns the number of instructions in the block
-    size_t Length() const { return instructions_.count; }
+    size_t Length() { return instructions_.count; }
 
     /// @return the parent instruction that owns this block
-    ControlInstruction* Parent() const { return parent_; }
+    ControlInstruction* Parent() { return parent_; }
 
     /// @param parent the parent instruction that owns this block
     void SetParent(ControlInstruction* parent) { parent_ = parent; }

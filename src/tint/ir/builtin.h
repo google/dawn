@@ -34,10 +34,10 @@ class Builtin : public utils::Castable<Builtin, Call> {
     ~Builtin() override;
 
     /// @returns the builtin function
-    builtin::Function Func() const { return func_; }
+    builtin::Function Func() { return func_; }
 
   private:
-    const builtin::Function func_;
+    builtin::Function func_;
 };
 
 }  // namespace tint::ir

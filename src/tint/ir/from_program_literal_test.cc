@@ -24,13 +24,13 @@
 namespace tint::ir {
 namespace {
 
-const Value* GlobalVarInitializer(const Module& m) {
+Value* GlobalVarInitializer(Module& m) {
     if (m.root_block->Length() == 0u) {
         ADD_FAILURE() << "m.root_block has no instruction";
         return nullptr;
     }
 
-    const auto instr = m.root_block->Instructions();
+    auto instr = m.root_block->Instructions();
     auto* var = instr->As<ir::Var>();
     if (!var) {
         ADD_FAILURE() << "m.root_block.instructions[0] was not a var";

@@ -104,6 +104,13 @@ struct [[nodiscard]] Result {
 
     /// @returns the success value
     /// @warning attempting to call this when the Result holds an failure value will result in UB.
+    SUCCESS_TYPE& Get() {
+        Validate();
+        return std::get<SUCCESS_TYPE>(value);
+    }
+
+    /// @returns the success value
+    /// @warning attempting to call this when the Result holds an failure value will result in UB.
     SUCCESS_TYPE&& Move() {
         Validate();
         return std::get<SUCCESS_TYPE>(std::move(value));

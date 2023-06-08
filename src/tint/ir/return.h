@@ -35,7 +35,7 @@ class Return : public utils::Castable<Return, Branch> {
     ~Return() override;
 
     /// @returns the function being returned
-    const Function* Func() const { return func_; }
+    Function* Func() { return func_; }
 
   private:
     Function* func_ = nullptr;

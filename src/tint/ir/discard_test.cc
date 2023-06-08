@@ -23,7 +23,7 @@ namespace {
 using IR_DiscardTest = IRTestHelper;
 
 TEST_F(IR_DiscardTest, Discard) {
-    const auto* inst = b.Discard();
+    auto* inst = b.Discard();
     ASSERT_TRUE(inst->Is<ir::Discard>());
 }
 

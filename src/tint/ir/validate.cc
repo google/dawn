@@ -60,7 +60,7 @@ class Validator {
     utils::Result<Success, diag::List> IsValid() {
         CheckRootBlock(mod_.root_block);
 
-        for (const auto* func : mod_.functions) {
+        for (auto* func : mod_.functions) {
             CheckFunction(func);
         }
 
@@ -81,7 +81,7 @@ class Validator {
     diag::List diagnostics_;
     Disassembler dis_{mod_};
 
-    const Block* current_block_ = nullptr;
+    Block* current_block_ = nullptr;
 
     void DisassembleIfNeeded() {
         if (mod_.disassembly_file) {
@@ -90,7 +90,7 @@ class Validator {
         mod_.disassembly_file = std::make_unique<Source::File>("", dis_.Disassemble());
     }
 
-    void AddError(const Instruction* inst, const std::string& err) {
+    void AddError(Instruction* inst, const std::string& err) {
         DisassembleIfNeeded();
         auto src = dis_.InstructionSource(inst);
         src.file = mod_.disassembly_file.get();
@@ -101,9 +101,9 @@ class Validator {
         }
     }
 
-    void AddError(const Instruction* inst, uint32_t idx, const std::string& err) {
+    void AddError(Instruction* inst, uint32_t idx, const std::string& err) {
         DisassembleIfNeeded();
-        auto src = dis_.OperandSource(Disassembler::Operand{inst, idx});
+        auto src = dis_.OperandSource(Usage{inst, idx});
         src.file = mod_.disassembly_file.get();
         AddError(err, src);
 
@@ -112,14 +112,14 @@ class Validator {
         }
     }
 
-    void AddError(const Block* blk, const std::string& err) {
+    void AddError(Block* blk, const std::string& err) {
         DisassembleIfNeeded();
         auto src = dis_.BlockSource(blk);
         src.file = mod_.disassembly_file.get();
         AddError(err, src);
     }
 
-    void AddNote(const Block* blk, const std::string& err) {
+    void AddNote(Block* blk, const std::string& err) {
         DisassembleIfNeeded();
         auto src = dis_.BlockSource(blk);
         src.file = mod_.disassembly_file.get();
@@ -134,16 +134,16 @@ class Validator {
         diagnostics_.add_note(tint::diag::System::IR, note, src);
     }
 
-    // std::string Name(const Value* v) { return mod_.NameOf(v).Name(); }
+    // std::string Name(Value* v) { return mod_.NameOf(v).Name(); }
 
-    void CheckRootBlock(const Block* blk) {
+    void CheckRootBlock(Block* blk) {
         if (!blk) {
             return;
         }
 
         TINT_SCOPED_ASSIGNMENT(current_block_, blk);
 
-        for (const auto* inst : *blk) {
+        for (auto* inst : *blk) {
             auto* var = inst->As<ir::Var>();
             if (!var) {
                 AddError(inst,
@@ -153,16 +153,16 @@ class Validator {
         }
     }
 
-    void CheckFunction(const Function* func) { CheckBlock(func->StartTarget()); }
+    void CheckFunction(Function* func) { CheckBlock(func->StartTarget()); }
 
-    void CheckBlock(const Block* blk) {
+    void CheckBlock(Block* blk) {
         TINT_SCOPED_ASSIGNMENT(current_block_, blk);
 
         if (!blk->HasBranchTarget()) {
             AddError(blk, "block: does not end in a branch");
         }
 
-        for (const auto* inst : *blk) {
+        for (auto* inst : *blk) {
             if (inst->Is<ir::Branch>() && inst != blk->Branch()) {
                 AddError(inst, "block: branch which isn't the final instruction");
                 continue;
@@ -172,60 +172,60 @@ class Validator {
         }
     }
 
-    void CheckInstruction(const Instruction* inst) {
+    void CheckInstruction(Instruction* inst) {
         tint::Switch(
-            inst,                                          //
-            [&](const ir::Access*) {},                     //
-            [&](const ir::Binary*) {},                     //
-            [&](const ir::Branch* b) { CheckBranch(b); },  //
-            [&](const ir::Call* c) { CheckCall(c); },      //
-            [&](const ir::Load*) {},                       //
-            [&](const ir::Store*) {},                      //
-            [&](const ir::Swizzle*) {},                    //
-            [&](const ir::Unary*) {},                      //
-            [&](const ir::Var*) {},                        //
+            inst,                                //
+            [&](Access*) {},                     //
+            [&](Binary*) {},                     //
+            [&](Branch* b) { CheckBranch(b); },  //
+            [&](Call* c) { CheckCall(c); },      //
+            [&](Load*) {},                       //
+            [&](Store*) {},                      //
+            [&](Swizzle*) {},                    //
+            [&](Unary*) {},                      //
+            [&](Var*) {},                        //
             [&](Default) {
                 AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
             });
     }
 
-    void CheckCall(const ir::Call* call) {
+    void CheckCall(Call* call) {
         tint::Switch(
-            call,                          //
-            [&](const ir::Bitcast*) {},    //
-            [&](const ir::Builtin*) {},    //
-            [&](const ir::Construct*) {},  //
-            [&](const ir::Convert*) {},    //
-            [&](const ir::Discard*) {},    //
-            [&](const ir::UserCall*) {},   //
+            call,                //
+            [&](Bitcast*) {},    //
+            [&](Builtin*) {},    //
+            [&](Construct*) {},  //
+            [&](Convert*) {},    //
+            [&](Discard*) {},    //
+            [&](UserCall*) {},   //
             [&](Default) {
                 AddError(std::string("missing validation of call: ") + call->TypeInfo().name);
             });
     }
 
-    void CheckBranch(const ir::Branch* b) {
+    void CheckBranch(Branch* b) {
         tint::Switch(
-            b,                                         //
-            [&](const ir::BreakIf*) {},                //
-            [&](const ir::Continue*) {},               //
-            [&](const ir::ExitIf*) {},                 //
-            [&](const ir::ExitLoop*) {},               //
-            [&](const ir::ExitSwitch*) {},             //
-            [&](const ir::If* if_) { CheckIf(if_); },  //
-            [&](const ir::Loop*) {},                   //
-            [&](const ir::NextIteration*) {},          //
-            [&](const ir::Return* ret) {
+            b,                               //
+            [&](BreakIf*) {},                //
+            [&](Continue*) {},               //
+            [&](ExitIf*) {},                 //
+            [&](ExitLoop*) {},               //
+            [&](ExitSwitch*) {},             //
+            [&](If* if_) { CheckIf(if_); },  //
+            [&](Loop*) {},                   //
+            [&](NextIteration*) {},          //
+            [&](Return* ret) {
                 if (ret->Func() == nullptr) {
                     AddError("return: null function");
                 }
-            },                          //
-            [&](const ir::Switch*) {},  //
+            },                //
+            [&](Switch*) {},  //
             [&](Default) {
                 AddError(std::string("missing validation of branch: ") + b->TypeInfo().name);
             });
     }
 
-    void CheckIf(const ir::If* if_) {
+    void CheckIf(If* if_) {
         if (!if_->Condition()) {
             AddError(if_, "if: condition is nullptr");
         }

@@ -71,26 +71,18 @@ class Loop : public utils::Castable<Loop, ControlInstruction> {
     ~Loop() override;
 
     /// @returns the switch initializer block
-    const ir::Block* Initializer() const { return initializer_; }
-    /// @returns the switch initializer block
     ir::Block* Initializer() { return initializer_; }
 
     /// @returns true if the loop uses an initializer block. If true, then the Loop first branches
     /// to the initializer block, otherwise it first branches to the body block.
-    bool HasInitializer() const;
+    bool HasInitializer();
 
-    /// @returns the switch start block
-    const ir::MultiInBlock* Body() const { return body_; }
     /// @returns the switch start block
     ir::MultiInBlock* Body() { return body_; }
 
     /// @returns the switch continuing block
-    const ir::MultiInBlock* Continuing() const { return continuing_; }
-    /// @returns the switch continuing block
     ir::MultiInBlock* Continuing() { return continuing_; }
 
-    /// @returns the switch merge branch
-    const ir::MultiInBlock* Merge() const { return merge_; }
     /// @returns the switch merge branch
     ir::MultiInBlock* Merge() { return merge_; }
 

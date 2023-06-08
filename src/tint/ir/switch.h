@@ -49,7 +49,7 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
     /// A case selector
     struct CaseSelector {
         /// @returns true if this is a default selector
-        bool IsDefault() const { return val == nullptr; }
+        bool IsDefault() { return val == nullptr; }
 
         /// The selector value, or nullptr if this is the default selector
         Constant* val = nullptr;
@@ -63,8 +63,6 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
         ir::Block* start = nullptr;
 
         /// @returns the case start target
-        const ir::Block* Start() const { return start; }
-        /// @returns the case start target
         ir::Block* Start() { return start; }
     };
 
@@ -75,20 +73,14 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
     ~Switch() override;
 
     /// @returns the switch merge branch
-    const ir::MultiInBlock* Merge() const { return merge_; }
-    /// @returns the switch merge branch
     ir::MultiInBlock* Merge() { return merge_; }
 
-    /// @returns the switch cases
-    utils::VectorRef<Case> Cases() const { return cases_; }
     /// @returns the switch cases
     utils::Vector<Case, 4>& Cases() { return cases_; }
 
     /// @returns the branch arguments
-    utils::Slice<Value const* const> Args() const override { return {}; }
+    utils::Slice<Value* const> Args() override { return {}; }
 
-    /// @returns the condition
-    const Value* Condition() const { return operands_[0]; }
     /// @returns the condition
     Value* Condition() { return operands_[0]; }
 

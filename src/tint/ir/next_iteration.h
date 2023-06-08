@@ -35,7 +35,7 @@ class NextIteration : public utils::Castable<NextIteration, Branch> {
     ~NextIteration() override;
 
     /// @returns the loop being iterated
-    const ir::Loop* Loop() const { return loop_; }
+    ir::Loop* Loop() { return loop_; }
 
   private:
     ir::Loop* loop_ = nullptr;

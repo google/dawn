@@ -29,7 +29,7 @@ class BlockParam : public utils::Castable<BlockParam, Value> {
     ~BlockParam() override;
 
     /// @returns the type of the var
-    const type::Type* Type() const override { return type_; }
+    const type::Type* Type() override { return type_; }
 
   private:
     /// the result type of the instruction

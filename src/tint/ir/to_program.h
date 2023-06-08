@@ -27,7 +27,7 @@ namespace tint::ir {
 /// @param module the IR module
 /// @return the tint::Program.
 /// @note Check the returned Program::Diagnostics() for any errors.
-Program ToProgram(const Module& module);
+Program ToProgram(Module& module);
 
 }  // namespace tint::ir
 

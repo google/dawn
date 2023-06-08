@@ -51,7 +51,7 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
 
     /// @param mod the module
     /// @returns the disassembly string of the module
-    std::string Disassemble(const Module& mod) const {
+    std::string Disassemble(Module& mod) {
         Disassembler d(mod);
         return d.Disassemble();
     }

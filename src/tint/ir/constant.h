@@ -29,10 +29,10 @@ class Constant : public utils::Castable<Constant, Value> {
     ~Constant() override;
 
     /// @returns the constants value
-    const constant::Value* Value() const { return value_; }
+    const constant::Value* Value() { return value_; }
 
     /// @returns the type of the constant
-    const type::Type* Type() const override { return value_->Type(); }
+    const type::Type* Type() override { return value_->Type(); }
 
   private:
     const constant::Value* const value_ = nullptr;

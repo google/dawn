@@ -65,7 +65,7 @@ namespace {
 
 class State {
   public:
-    explicit State(const Module& m) : mod(m) {}
+    explicit State(Module& m) : mod(m) {}
 
     Program Run() {
         // TODO(crbug.com/tint/1902): Emit root block
@@ -78,13 +78,13 @@ class State {
 
   private:
     /// The source IR module
-    const Module& mod;
+    Module& mod;
 
     /// The target ProgramBuilder
     ProgramBuilder b;
 
     /// A hashmap of value to symbol used in the emitted AST
-    utils::Hashmap<const Value*, Symbol, 32> value_names_;
+    utils::Hashmap<Value*, Symbol, 32> value_names_;
 
     // The nesting depth of the currently generated AST
     // 0 is module scope
@@ -92,12 +92,12 @@ class State {
     // 2+ is within control flow
     uint32_t nesting_depth_ = 0;
 
-    const ast::Function* Fn(const Function* fn) {
+    const ast::Function* Fn(Function* fn) {
         SCOPED_NESTING();
 
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
         static constexpr size_t N = decltype(ast::Function::params)::static_length;
-        auto params = utils::Transform<N>(fn->Params(), [&](const ir::FunctionParam* param) {
+        auto params = utils::Transform<N>(fn->Params(), [&](FunctionParam* param) {
             auto name = AssignNameTo(param);
             auto ty = Type(param->Type());
             return b.Param(name, ty);
@@ -112,13 +112,13 @@ class State {
                       std::move(ret_attrs));
     }
 
-    const ast::BlockStatement* BlockGraph(const ir::Block* start_node) {
+    const ast::BlockStatement* BlockGraph(ir::Block* start_node) {
         // TODO(crbug.com/tint/1902): Check if the block is dead
         utils::Vector<const ast::Statement*,
                       decltype(ast::BlockStatement::statements)::static_length>
             stmts;
 
-        const ir::Block* block = start_node;
+        ir::Block* block = start_node;
 
         // TODO(crbug.com/tint/1902): Handle block arguments.
 
@@ -156,18 +156,18 @@ class State {
 
     /// @param inst the ir::Instruction
     /// @return an ast::Statement from @p inst, or nullptr if there was an error
-    const ast::Statement* Stmt(const ir::Instruction* inst) {
+    const ast::Statement* Stmt(ir::Instruction* inst) {
         return tint::Switch(
-            inst,                                                        //
-            [&](const ir::Store* i) { return Store(i); },                //
-            [&](const ir::Call* i) { return CallStmt(i); },              //
-            [&](const ir::Var* i) { return Var(i); },                    //
-            [&](const ir::If* if_) { return If(if_); },                  //
-            [&](const ir::Switch* switch_) { return Switch(switch_); },  //
-            [&](const ir::Return* ret) { return Return(ret); },          //
-            [&](const ir::Value*) { return ValueStmt(inst); },
+            inst,                                                  //
+            [&](ir::Store* i) { return Store(i); },                //
+            [&](ir::Call* i) { return CallStmt(i); },              //
+            [&](ir::Var* i) { return Var(i); },                    //
+            [&](ir::If* if_) { return If(if_); },                  //
+            [&](ir::Switch* switch_) { return Switch(switch_); },  //
+            [&](ir::Return* ret) { return Return(ret); },          //
+            [&](ir::Value*) { return ValueStmt(inst); },
             // TODO(dsinclair): Remove when branch is only a parent ...
-            [&](const ir::Branch*) { return nullptr; },
+            [&](ir::Branch*) { return nullptr; },
             [&](Default) {
                 UNHANDLED_CASE(inst);
                 return nullptr;
@@ -176,7 +176,7 @@ class State {
 
     /// @param i the ir::If
     /// @return an ast::IfStatement from @p i, or nullptr if there was an error
-    const ast::IfStatement* If(const ir::If* i) {
+    const ast::IfStatement* If(ir::If* i) {
         SCOPED_NESTING();
         auto* cond = Expr(i->Condition());
         auto* t = BlockGraph(i->True());
@@ -211,7 +211,7 @@ class State {
 
     /// @param s the ir::Switch
     /// @return an ast::SwitchStatement from @p s, or nullptr if there was an error
-    const ast::SwitchStatement* Switch(const ir::Switch* s) {
+    const ast::SwitchStatement* Switch(ir::Switch* s) {
         SCOPED_NESTING();
 
         auto* cond = Expr(s->Condition());
@@ -219,33 +219,33 @@ class State {
             return nullptr;
         }
 
-        auto cases = utils::Transform<2>(
-            s->Cases(),  //
-            [&](const ir::Switch::Case c) -> const tint::ast::CaseStatement* {
-                SCOPED_NESTING();
-                auto* body = BlockGraph(c.start);
-                if (!body) {
-                    return nullptr;
-                }
+        auto cases =
+            utils::Transform(s->Cases(),  //
+                             [&](ir::Switch::Case c) -> const tint::ast::CaseStatement* {
+                                 SCOPED_NESTING();
+                                 auto* body = BlockGraph(c.start);
+                                 if (!body) {
+                                     return nullptr;
+                                 }
 
-                auto selectors = utils::Transform(
-                    c.selectors,  //
-                    [&](const ir::Switch::CaseSelector& cs) -> const ast::CaseSelector* {
-                        if (cs.IsDefault()) {
-                            return b.DefaultCaseSelector();
-                        }
-                        auto* expr = Expr(cs.val);
-                        if (!expr) {
-                            return nullptr;
-                        }
-                        return b.CaseSelector(expr);
-                    });
-                if (selectors.Any(utils::IsNull)) {
-                    return nullptr;
-                }
+                                 auto selectors = utils::Transform(
+                                     c.selectors,  //
+                                     [&](ir::Switch::CaseSelector cs) -> const ast::CaseSelector* {
+                                         if (cs.IsDefault()) {
+                                             return b.DefaultCaseSelector();
+                                         }
+                                         auto* expr = Expr(cs.val);
+                                         if (!expr) {
+                                             return nullptr;
+                                         }
+                                         return b.CaseSelector(expr);
+                                     });
+                                 if (selectors.Any(utils::IsNull)) {
+                                     return nullptr;
+                                 }
 
-                return b.Case(std::move(selectors), body);
-            });
+                                 return b.Case(std::move(selectors), body);
+                             });
         if (cases.Any(utils::IsNull)) {
             return nullptr;
         }
@@ -255,7 +255,7 @@ class State {
 
     /// @param ret the ir::Return
     /// @return an ast::ReturnStatement from @p ret, or nullptr if there was an error
-    const ast::ReturnStatement* Return(const ir::Return* ret) {
+    const ast::ReturnStatement* Return(ir::Return* ret) {
         if (ret->Args().IsEmpty()) {
             // Return has no arguments.
             // If this block is nested withing some control flow, then we must
@@ -284,11 +284,11 @@ class State {
 
     /// @param call the ir::Call
     /// @return an ast::CallStatement from @p call, or nullptr if there was an error
-    const ast::CallStatement* CallStmt(const ir::Call* call) { return b.CallStmt(Call(call)); }
+    const ast::CallStatement* CallStmt(ir::Call* call) { return b.CallStmt(Call(call)); }
 
     /// @param var the ir::Var
     /// @return an ast::VariableDeclStatement from @p var
-    const ast::VariableDeclStatement* Var(const ir::Var* var) {
+    const ast::VariableDeclStatement* Var(ir::Var* var) {
         Symbol name = AssignNameTo(var);
         auto* ptr = var->Type();
         auto ty = Type(ptr->StoreType());
@@ -308,14 +308,14 @@ class State {
 
     /// @param store the ir::Store
     /// @return an ast::AssignmentStatement from @p call
-    const ast::AssignmentStatement* Store(const ir::Store* store) {
+    const ast::AssignmentStatement* Store(ir::Store* store) {
         auto* expr = Expr(store->From());
         return b.Assign(AssignNameTo(store->To()), expr);
     }
 
     /// @param val the ir::Value
     /// @return an ast::Statement from @p val, or nullptr if the value does not produce a statement.
-    const ast::Statement* ValueStmt(const ir::Value* val) {
+    const ast::Statement* ValueStmt(ir::Value* val) {
         // As we're visiting this value's declaration it shouldn't already have a name reserved.
         TINT_ASSERT(IR, !value_names_.Contains(val));
 
@@ -345,17 +345,17 @@ class State {
     /// @param val the ir::Expression
     /// @return an ast::Expression from @p val.
     /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* Expr(const ir::Value* val) {
+    const ast::Expression* Expr(ir::Value* val) {
         if (auto name = value_names_.Get(val)) {
             return b.Expr(name.value());
         }
 
         return tint::Switch(
-            val,  //
-            [&](const ir::Constant* c) { return ConstExpr(c); },
-            [&](const ir::Load* l) { return LoadExpr(l); },
-            [&](const ir::Unary* u) { return UnaryExpr(u); },
-            [&](const ir::Binary* u) { return BinaryExpr(u); },
+            val,                                            //
+            [&](ir::Constant* c) { return ConstExpr(c); },  //
+            [&](ir::Load* l) { return LoadExpr(l); },       //
+            [&](ir::Unary* u) { return UnaryExpr(u); },     //
+            [&](ir::Binary* u) { return BinaryExpr(u); },   //
             [&](Default) {
                 UNHANDLED_CASE(val);
                 return b.Expr("<error>");
@@ -365,12 +365,11 @@ class State {
     /// @param call the ir::Call
     /// @return an ast::CallExpression from @p call.
     /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::CallExpression* Call(const ir::Call* call) {
-        auto args =
-            utils::Transform<2>(call->Args(), [&](const ir::Value* arg) { return Expr(arg); });
+    const ast::CallExpression* Call(ir::Call* call) {
+        auto args = utils::Transform<2>(call->Args(), [&](ir::Value* arg) { return Expr(arg); });
         return tint::Switch(
             call,  //
-            [&](const ir::UserCall* c) { return b.Call(AssignNameTo(c->Func()), std::move(args)); },
+            [&](ir::UserCall* c) { return b.Call(AssignNameTo(c->Func()), std::move(args)); },
             [&](Default) {
                 UNHANDLED_CASE(call);
                 return b.Call("<error>");
@@ -380,7 +379,7 @@ class State {
     /// @param c the ir::Constant
     /// @return an ast::Expression from @p c.
     /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* ConstExpr(const ir::Constant* c) {
+    const ast::Expression* ConstExpr(ir::Constant* c) {
         return tint::Switch(
             c->Type(),  //
             [&](const type::I32*) { return b.Expr(c->Value()->ValueAs<i32>()); },
@@ -397,12 +396,12 @@ class State {
     /// @param l the ir::Load
     /// @return an ast::Expression from @p l.
     /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* LoadExpr(const ir::Load* l) { return Expr(l->From()); }
+    const ast::Expression* LoadExpr(ir::Load* l) { return Expr(l->From()); }
 
     /// @param u the ir::Unary
     /// @return an ast::UnaryOpExpression from @p u.
     /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* UnaryExpr(const ir::Unary* u) {
+    const ast::Expression* UnaryExpr(ir::Unary* u) {
         switch (u->Kind()) {
             case ir::Unary::Kind::kComplement:
                 return b.Complement(Expr(u->Val()));
@@ -415,7 +414,7 @@ class State {
     /// @param e the ir::Binary
     /// @return an ast::BinaryOpExpression from @p e.
     /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* BinaryExpr(const ir::Binary* e) {
+    const ast::Expression* BinaryExpr(ir::Binary* e) {
         if (e->Kind() == ir::Binary::Kind::kEqual) {
             auto* rhs = e->RHS()->As<ir::Constant>();
             if (rhs && rhs->Type()->Is<type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
@@ -558,7 +557,7 @@ class State {
     /// Creates and returns a new, unique name for the given value, or returns the previously
     /// created name.
     /// @return the value's name
-    Symbol AssignNameTo(const Value* value) {
+    Symbol AssignNameTo(Value* value) {
         TINT_ASSERT(IR, value);
         return value_names_.GetOrCreate(value, [&] {
             if (auto sym = mod.NameOf(value)) {
@@ -571,7 +570,7 @@ class State {
 
 }  // namespace
 
-Program ToProgram(const Module& i) {
+Program ToProgram(Module& i) {
     return State{i}.Run();
 }
 

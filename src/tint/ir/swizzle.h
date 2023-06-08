@@ -31,13 +31,13 @@ class Swizzle : public utils::Castable<Swizzle, OperandInstruction<1>> {
     ~Swizzle() override;
 
     /// @returns the type of the value
-    const type::Type* Type() const override { return result_type_; }
+    const type::Type* Type() override { return result_type_; }
 
     /// @returns the object used for the access
-    Value* Object() const { return operands_[0]; }
+    Value* Object() { return operands_[0]; }
 
     /// @returns the swizzle indices
-    utils::VectorRef<uint32_t> Indices() const { return indices_; }
+    utils::VectorRef<uint32_t> Indices() { return indices_; }
 
   private:
     const type::Type* result_type_ = nullptr;

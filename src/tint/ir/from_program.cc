@@ -109,7 +109,7 @@ namespace {
 
 using ResultType = utils::Result<Module, diag::List>;
 
-bool IsConnected(const MultiInBlock* b) {
+bool IsConnected(MultiInBlock* b) {
     return b->InboundSiblingBranches().Length() > 0;
 }
 

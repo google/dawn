@@ -35,7 +35,7 @@ class ExitSwitch : public utils::Castable<ExitSwitch, Branch> {
     ~ExitSwitch() override;
 
     /// @returns the switch being exited
-    const ir::Switch* Switch() const { return switch_; }
+    ir::Switch* Switch() { return switch_; }
 
   private:
     ir::Switch* switch_ = nullptr;

@@ -34,9 +34,9 @@ class Convert : public utils::Castable<Convert, Call> {
     ~Convert() override;
 
     /// @returns the from type
-    const type::Type* FromType() const { return from_type_; }
+    const type::Type* FromType() { return from_type_; }
     /// @returns the to type
-    const type::Type* ToType() const { return Type(); }
+    const type::Type* ToType() { return Type(); }
 
   private:
     const type::Type* from_type_ = nullptr;

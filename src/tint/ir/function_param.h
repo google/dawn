@@ -60,7 +60,7 @@ class FunctionParam : public utils::Castable<FunctionParam, Value> {
     ~FunctionParam() override;
 
     /// @returns the type of the var
-    const type::Type* Type() const override { return type_; }
+    const type::Type* Type() override { return type_; }
 
     /// Sets the builtin information. Note, it is currently an error if the builtin is already set.
     /// @param val the builtin to set
@@ -69,13 +69,13 @@ class FunctionParam : public utils::Castable<FunctionParam, Value> {
         builtin_ = val;
     }
     /// @returns the builtin set for the parameter
-    std::optional<FunctionParam::Builtin> Builtin() const { return builtin_; }
+    std::optional<FunctionParam::Builtin> Builtin() { return builtin_; }
 
     /// Sets the parameter as invariant
     /// @param val the value to set for invariant
     void SetInvariant(bool val) { invariant_ = val; }
     /// @returns true if parameter is invariant
-    bool Invariant() const { return invariant_; }
+    bool Invariant() { return invariant_; }
 
     /// Sets the location
     /// @param loc the location value
@@ -84,14 +84,14 @@ class FunctionParam : public utils::Castable<FunctionParam, Value> {
         location_ = {loc, interpolation};
     }
     /// @returns the location if `Attributes` contains `kLocation`
-    std::optional<struct Location> Location() const { return location_; }
+    std::optional<struct Location> Location() { return location_; }
 
     /// Sets the binding point
     /// @param group the group
     /// @param binding the binding
     void SetBindingPoint(uint32_t group, uint32_t binding) { binding_point_ = {group, binding}; }
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
-    std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
+    std::optional<struct BindingPoint> BindingPoint() { return binding_point_; }
 
   private:
     const type::Type* type_ = nullptr;

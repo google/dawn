@@ -39,16 +39,13 @@ class MultiInBlock : public utils::Castable<MultiInBlock, Block> {
 
     /// Sets the params to the block
     /// @param params the params for the block
-    void SetParams(utils::VectorRef<const BlockParam*> params);
-
-    /// @return the parameters passed into the block
-    utils::VectorRef<const BlockParam*> Params() const { return params_; }
+    void SetParams(utils::VectorRef<BlockParam*> params);
 
     /// @returns the params to the block
-    utils::Vector<const BlockParam*, 2>& Params() { return params_; }
+    const utils::Vector<BlockParam*, 2>& Params() { return params_; }
 
     /// @returns branches made to this block by sibling blocks
-    utils::VectorRef<ir::Branch*> InboundSiblingBranches() const {
+    const utils::VectorRef<ir::Branch*> InboundSiblingBranches() {
         return inbound_sibling_branches_;
     }
 
@@ -57,7 +54,7 @@ class MultiInBlock : public utils::Castable<MultiInBlock, Block> {
     void AddInboundSiblingBranch(ir::Branch* branch);
 
   private:
-    utils::Vector<const BlockParam*, 2> params_;
+    utils::Vector<BlockParam*, 2> params_;
     utils::Vector<ir::Branch*, 2> inbound_sibling_branches_;
 };
 

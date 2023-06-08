@@ -55,16 +55,16 @@ class Binary : public utils::Castable<Binary, OperandInstruction<2>> {
     ~Binary() override;
 
     /// @returns the kind of the binary instruction
-    enum Kind Kind() const { return kind_; }
+    enum Kind Kind() { return kind_; }
 
     /// @returns the type of the value
-    const type::Type* Type() const override { return result_type_; }
+    const type::Type* Type() override { return result_type_; }
 
     /// @returns the left-hand-side value for the instruction
-    const Value* LHS() const { return operands_[0]; }
+    Value* LHS() { return operands_[0]; }
 
     /// @returns the right-hand-side value for the instruction
-    const Value* RHS() const { return operands_[1]; }
+    Value* RHS() { return operands_[1]; }
 
   private:
     enum Kind kind_;

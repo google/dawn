@@ -32,7 +32,7 @@ class Branch : public utils::Castable<Branch, OperandInstruction<1>> {
     ~Branch() override;
 
     /// @returns the branch arguments
-    virtual utils::Slice<Value const* const> Args() const { return operands_.Slice(); }
+    virtual utils::Slice<Value* const> Args() { return operands_.Slice(); }
 };
 
 }  // namespace tint::ir

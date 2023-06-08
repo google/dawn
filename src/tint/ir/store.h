@@ -30,10 +30,10 @@ class Store : public utils::Castable<Store, OperandInstruction<2>> {
     ~Store() override;
 
     /// @returns the value being stored too
-    Value* To() const { return operands_[0]; }
+    Value* To() { return operands_[0]; }
 
     /// @returns the value being stored
-    Value* From() const { return operands_[1]; }
+    Value* From() { return operands_[1]; }
 };
 
 }  // namespace tint::ir

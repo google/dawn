@@ -71,7 +71,7 @@ class Function : public utils::Castable<Function, Value> {
     void SetStage(PipelineStage stage) { pipeline_stage_ = stage; }
 
     /// @returns the function pipeline stage
-    PipelineStage Stage() const { return pipeline_stage_; }
+    PipelineStage Stage() { return pipeline_stage_; }
 
     /// Sets the workgroup size
     /// @param x the x size
@@ -80,10 +80,10 @@ class Function : public utils::Castable<Function, Value> {
     void SetWorkgroupSize(uint32_t x, uint32_t y, uint32_t z) { workgroup_size_ = {x, y, z}; }
 
     /// @returns the workgroup size information
-    std::optional<std::array<uint32_t, 3>> WorkgroupSize() const { return workgroup_size_; }
+    std::optional<std::array<uint32_t, 3>> WorkgroupSize() { return workgroup_size_; }
 
     /// @returns the return type for the function
-    const type::Type* ReturnType() const { return return_.type; }
+    const type::Type* ReturnType() { return return_.type; }
 
     /// Sets the return attributes
     /// @param builtin the builtin to set
@@ -92,7 +92,7 @@ class Function : public utils::Castable<Function, Value> {
         return_.builtin = builtin;
     }
     /// @returns the return builtin attribute
-    std::optional<enum ReturnBuiltin> ReturnBuiltin() const { return return_.builtin; }
+    std::optional<enum ReturnBuiltin> ReturnBuiltin() { return return_.builtin; }
 
     /// Sets the return location
     /// @param loc the location to set
@@ -101,19 +101,19 @@ class Function : public utils::Castable<Function, Value> {
         return_.location = {loc, interp};
     }
     /// @returns the return location
-    std::optional<Location> ReturnLocation() const { return return_.location; }
+    std::optional<Location> ReturnLocation() { return return_.location; }
 
     /// Sets the return as invariant
     /// @param val the invariant value to set
     void SetReturnInvariant(bool val) { return_.invariant = val; }
     /// @returns the return invariant value
-    bool ReturnInvariant() const { return return_.invariant; }
+    bool ReturnInvariant() { return return_.invariant; }
 
     /// Sets the function parameters
     /// @param params the function paramters
     void SetParams(utils::VectorRef<FunctionParam*> params);
     /// @returns the function parameters
-    utils::VectorRef<FunctionParam*> Params() const { return params_; }
+    const utils::VectorRef<FunctionParam*> Params() { return params_; }
 
     /// Sets the start target for the function
     /// @param target the start target
@@ -122,7 +122,7 @@ class Function : public utils::Castable<Function, Value> {
         start_target_ = target;
     }
     /// @returns the function start target
-    Block* StartTarget() const { return start_target_; }
+    Block* StartTarget() { return start_target_; }
 
   private:
     PipelineStage pipeline_stage_;

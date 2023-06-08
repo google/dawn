@@ -37,15 +37,13 @@ class Unary : public utils::Castable<Unary, OperandInstruction<1>> {
     ~Unary() override;
 
     /// @returns the type of the value
-    const type::Type* Type() const override { return result_type_; }
+    const type::Type* Type() override { return result_type_; }
 
-    /// @returns the value for the instruction
-    const Value* Val() const { return operands_[0]; }
     /// @returns the value for the instruction
     Value* Val() { return operands_[0]; }
 
     /// @returns the kind of unary instruction
-    enum Kind Kind() const { return kind_; }
+    enum Kind Kind() { return kind_; }
 
   private:
     enum Kind kind_;

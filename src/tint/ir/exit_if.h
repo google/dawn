@@ -35,7 +35,7 @@ class ExitIf : public utils::Castable<ExitIf, Branch> {
     ~ExitIf() override;
 
     /// @returns the if being exited
-    const ir::If* If() const { return if_; }
+    ir::If* If() { return if_; }
 
   private:
     ir::If* if_ = nullptr;

@@ -26,11 +26,11 @@ Module::~Module() = default;
 
 Module& Module::operator=(Module&&) = default;
 
-Symbol Module::NameOf(const Value* value) const {
+Symbol Module::NameOf(Value* value) {
     return value_to_id_.Get(value).value_or(Symbol{});
 }
 
-Symbol Module::SetName(const Value* value, std::string_view name) {
+Symbol Module::SetName(Value* value, std::string_view name) {
     TINT_ASSERT(IR, !name.empty());
 
     if (auto old = value_to_id_.Get(value)) {

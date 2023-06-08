@@ -31,15 +31,10 @@ class Access : public utils::Castable<Access, OperandInstruction<3>> {
     ~Access() override;
 
     /// @returns the type of the value
-    const type::Type* Type() const override { return result_type_; }
+    const type::Type* Type() override { return result_type_; }
 
     /// @returns the object used for the access
-    Value* Object() const { return operands_[0]; }
-
-    /// @returns the accessor indices
-    utils::Slice<Value const* const> Indices() const {
-        return operands_.Slice().Offset(1).Reinterpret<Value const* const>();
-    }
+    Value* Object() { return operands_[0]; }
 
     /// @returns the accessor indices
     utils::Slice<Value*> Indices() { return operands_.Slice().Offset(1); }

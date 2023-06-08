@@ -39,10 +39,10 @@ class Module {
     ProgramID prog_id_;
 
     /// Map of value to pre-declared identifier
-    utils::Hashmap<const Value*, Symbol, 32> value_to_id_;
+    utils::Hashmap<Value*, Symbol, 32> value_to_id_;
 
     /// Map of pre-declared identifier to value
-    utils::Hashmap<Symbol, const Value*, 32> id_to_value_;
+    utils::Hashmap<Symbol, Value*, 32> id_to_value_;
 
   public:
     /// Constructor
@@ -60,15 +60,12 @@ class Module {
 
     /// @param value the value
     /// @return the name of the given value, or an invalid symbol if the value is not named.
-    Symbol NameOf(const Value* value) const;
+    Symbol NameOf(Value* value);
 
     /// @param value the value to name.
     /// @param name the desired name of the value. May be suffixed on collision.
     /// @return the unique symbol of the given value.
-    Symbol SetName(const Value* value, std::string_view name);
-
-    /// @return the type manager for the module
-    const type::Manager& Types() const { return constant_values.types; }
+    Symbol SetName(Value* value, std::string_view name);
 
     /// @return the type manager for the module
     type::Manager& Types() { return constant_values.types; }
