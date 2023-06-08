@@ -38,9 +38,9 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
     auto* func = b.CreateFunction("foo", ty.i32());
     func->SetParams(utils::Vector{arr});
 
-    auto* access = b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_i)});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_i)}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -62,9 +62,10 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
     auto* func = b.CreateFunction("foo", ty.f32());
     func->SetParams(utils::Vector{mat});
 
-    auto* access = b.Access(ty.f32(), mat, utils::Vector{b.Constant(1_i), b.Constant(0_i)});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access =
+        block->Append(b.Access(ty.f32(), mat, utils::Vector{b.Constant(1_i), b.Constant(0_i)}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -87,11 +88,10 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
     auto* func = b.CreateFunction("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
-    auto* access = b.Access(ptr(ty.i32()), arr, utils::Vector{idx});
-    auto* load = b.Load(access);
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(load);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{load}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(b.Access(ptr(ty.i32()), arr, utils::Vector{idx}));
+    auto* load = block->Append(b.Load(access));
+    block->Append(b.Return(func, utils::Vector{load}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -115,11 +115,10 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
     auto* func = b.CreateFunction("foo", ty.f32());
     func->SetParams(utils::Vector{mat, idx});
 
-    auto* access = b.Access(ptr(ty.f32()), mat, utils::Vector{idx, idx});
-    auto* load = b.Load(access);
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(load);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{load}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(b.Access(ptr(ty.f32()), mat, utils::Vector{idx, idx}));
+    auto* load = block->Append(b.Load(access));
+    block->Append(b.Return(func, utils::Vector{load}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -143,9 +142,9 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
     auto* func = b.CreateFunction("foo", ty.f32());
     func->SetParams(utils::Vector{vec, idx});
 
-    auto* access = b.Access(ty.f32(), vec, utils::Vector{idx});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(b.Access(ty.f32(), vec, utils::Vector{idx}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -168,9 +167,9 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
     auto* func = b.CreateFunction("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
-    auto* access = b.Access(ty.i32(), arr, utils::Vector{idx});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(b.Access(ty.i32(), arr, utils::Vector{idx}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -195,9 +194,9 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
     auto* func = b.CreateFunction("foo", ty.f32());
     func->SetParams(utils::Vector{arr, idx});
 
-    auto* access = b.Access(ty.f32(), arr, utils::Vector{idx});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(b.Access(ty.f32(), arr, utils::Vector{idx}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -222,9 +221,9 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
     auto* func = b.CreateFunction("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
-    auto* access = b.Access(ty.i32(), arr, utils::Vector{idx, b.Constant(1_u), idx});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(b.Access(ty.i32(), arr, utils::Vector{idx, b.Constant(1_u), idx}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -249,9 +248,10 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
     auto* func = b.CreateFunction("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
-    auto* access = b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(
+        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -277,10 +277,10 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
     auto* func = b.CreateFunction("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
-    auto* access =
-        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), idx, b.Constant(2_u), idx});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(
+        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), idx, b.Constant(2_u), idx}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -317,10 +317,10 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Struct) {
     auto* func = b.CreateFunction("foo", ty.f32());
     func->SetParams(utils::Vector{str_val, idx});
 
-    auto* access =
-        b.Access(ty.f32(), str_val, utils::Vector{b.Constant(1_u), idx, b.Constant(0_u)});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access}));
+    auto* block = func->StartTarget();
+    auto* access = block->Append(
+        b.Access(ty.f32(), str_val, utils::Vector{b.Constant(1_u), idx, b.Constant(0_u)}));
+    block->Append(b.Return(func, utils::Vector{access}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -354,13 +354,11 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
     auto* func = b.CreateFunction("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx_a, idx_b, idx_c});
 
-    auto* access_a = b.Access(ty.i32(), arr, utils::Vector{idx_a});
-    auto* access_b = b.Access(ty.i32(), arr, utils::Vector{idx_b});
-    auto* access_c = b.Access(ty.i32(), arr, utils::Vector{idx_c});
-    func->StartTarget()->Append(access_a);
-    func->StartTarget()->Append(access_b);
-    func->StartTarget()->Append(access_c);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access_c}));
+    auto* block = func->StartTarget();
+    block->Append(b.Access(ty.i32(), arr, utils::Vector{idx_a}));
+    block->Append(b.Access(ty.i32(), arr, utils::Vector{idx_b}));
+    auto* access_c = block->Append(b.Access(ty.i32(), arr, utils::Vector{idx_c}));
+    block->Append(b.Return(func, utils::Vector{access_c}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -391,16 +389,12 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipConstantInd
     auto* func = b.CreateFunction("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx_a, idx_b, idx_c});
 
-    auto* access_a =
-        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_a});
-    auto* access_b =
-        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_b});
-    auto* access_c =
-        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_c});
-    func->StartTarget()->Append(access_a);
-    func->StartTarget()->Append(access_b);
-    func->StartTarget()->Append(access_c);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{access_c}));
+    auto* block = func->StartTarget();
+    block->Append(b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_a}));
+    block->Append(b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_b}));
+    auto* access_c = block->Append(
+        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_c}));
+    block->Append(b.Return(func, utils::Vector{access_c}));
     mod.functions.Push(func);
 
     auto* expect = R"(

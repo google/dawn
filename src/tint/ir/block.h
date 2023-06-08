@@ -104,10 +104,12 @@ class Block : public utils::Castable<Block> {
 
     /// Adds the instruction to the beginning of the block
     /// @param inst the instruction to add
-    void Prepend(Instruction* inst);
+    /// @returns the instruction to allow calls to be chained
+    Instruction* Prepend(Instruction* inst);
     /// Adds the instruction to the end of the block
     /// @param inst the instruction to add
-    void Append(Instruction* inst);
+    /// @returns the instruction to allow calls to be chained
+    Instruction* Append(Instruction* inst);
     /// Adds the new instruction before the given instruction
     /// @param before the instruction to insert before
     /// @param inst the instruction to insert

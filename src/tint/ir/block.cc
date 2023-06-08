@@ -22,9 +22,9 @@ Block::Block() : Base() {}
 
 Block::~Block() = default;
 
-void Block::Prepend(Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(IR, inst);
-    TINT_ASSERT_OR_RETURN(IR, inst->Block() == nullptr);
+Instruction* Block::Prepend(Instruction* inst) {
+    TINT_ASSERT_OR_RETURN_VALUE(IR, inst, inst);
+    TINT_ASSERT_OR_RETURN_VALUE(IR, inst->Block() == nullptr, inst);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -37,11 +37,13 @@ void Block::Prepend(Instruction* inst) {
         instructions_.first->prev = inst;
         instructions_.first = inst;
     }
+
+    return inst;
 }
 
-void Block::Append(Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(IR, inst);
-    TINT_ASSERT_OR_RETURN(IR, inst->Block() == nullptr);
+Instruction* Block::Append(Instruction* inst) {
+    TINT_ASSERT_OR_RETURN_VALUE(IR, inst, inst);
+    TINT_ASSERT_OR_RETURN_VALUE(IR, inst->Block() == nullptr, inst);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -54,6 +56,8 @@ void Block::Append(Instruction* inst) {
         instructions_.last->next = inst;
         instructions_.last = inst;
     }
+
+    return inst;
 }
 
 void Block::InsertBefore(Instruction* before, Instruction* inst) {

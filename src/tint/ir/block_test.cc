@@ -118,9 +118,9 @@ TEST_F(IR_BlockTest, Append) {
     auto* inst3 = b.CreateLoop();
 
     auto* blk = b.CreateBlock();
-    blk->Append(inst1);
-    blk->Append(inst2);
-    blk->Append(inst3);
+    EXPECT_EQ(blk->Append(inst1), inst1);
+    EXPECT_EQ(blk->Append(inst2), inst2);
+    EXPECT_EQ(blk->Append(inst3), inst3);
 
     ASSERT_EQ(inst1->Block(), blk);
     ASSERT_EQ(inst2->Block(), blk);
@@ -149,9 +149,9 @@ TEST_F(IR_BlockTest, Prepend) {
     auto* inst3 = b.CreateLoop();
 
     auto* blk = b.CreateBlock();
-    blk->Prepend(inst3);
-    blk->Prepend(inst2);
-    blk->Prepend(inst1);
+    EXPECT_EQ(blk->Prepend(inst3), inst3);
+    EXPECT_EQ(blk->Prepend(inst2), inst2);
+    EXPECT_EQ(blk->Prepend(inst1), inst1);
 
     ASSERT_EQ(inst1->Block(), blk);
     ASSERT_EQ(inst2->Block(), blk);

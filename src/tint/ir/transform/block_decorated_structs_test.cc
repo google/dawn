@@ -53,9 +53,9 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
     b.CreateRootBlockIfNeeded()->Append(buffer);
 
     auto* func = b.CreateFunction("foo", ty.i32());
-    auto* load = b.Load(buffer);
-    func->StartTarget()->Append(load);
-    func->StartTarget()->Append(b.Return(func, utils::Vector{load}));
+    auto* block = func->StartTarget();
+    auto* load = block->Append(b.Load(buffer));
+    block->Append(b.Return(func, utils::Vector{load}));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -124,12 +124,12 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
     b.CreateRootBlockIfNeeded()->Append(buffer);
 
     auto* func = b.CreateFunction("foo", ty.void_());
-    auto* access =
+    auto* block = func->StartTarget();
+    auto* access = block->Append(
         b.Access(ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite),
-                 buffer, utils::Vector{b.Constant(1_u)});
-    func->StartTarget()->Append(access);
-    func->StartTarget()->Append(b.Store(access, b.Constant(42_i)));
-    func->StartTarget()->Append(b.Return(func));
+                 buffer, utils::Vector{b.Constant(1_u)}));
+    block->Append(b.Store(access, b.Constant(42_i)));
+    block->Append(b.Return(func));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -174,14 +174,13 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
         ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite);
 
     auto* func = b.CreateFunction("foo", ty.void_());
-    auto* val_ptr = b.Access(i32_ptr, buffer, utils::Vector{b.Constant(0_u)});
-    auto* load = b.Load(val_ptr);
-    auto* elem_ptr = b.Access(i32_ptr, buffer, utils::Vector{b.Constant(1_u), b.Constant(3_u)});
-    func->StartTarget()->Append(val_ptr);
-    func->StartTarget()->Append(load);
-    func->StartTarget()->Append(elem_ptr);
-    func->StartTarget()->Append(b.Store(elem_ptr, load));
-    func->StartTarget()->Append(b.Return(func));
+    auto* block = func->StartTarget();
+    auto* val_ptr = block->Append(b.Access(i32_ptr, buffer, utils::Vector{b.Constant(0_u)}));
+    auto* load = block->Append(b.Load(val_ptr));
+    auto* elem_ptr =
+        block->Append(b.Access(i32_ptr, buffer, utils::Vector{b.Constant(1_u), b.Constant(3_u)}));
+    block->Append(b.Store(elem_ptr, load));
+    block->Append(b.Return(func));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -284,12 +283,11 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     root->Append(buffer_c);
 
     auto* func = b.CreateFunction("foo", ty.void_());
-    auto* load_b = b.Load(buffer_b);
-    auto* load_c = b.Load(buffer_c);
-    func->StartTarget()->Append(load_b);
-    func->StartTarget()->Append(load_c);
-    func->StartTarget()->Append(b.Store(buffer_a, b.Add(ty.i32(), load_b, load_c)));
-    func->StartTarget()->Append(b.Return(func));
+    auto* block = func->StartTarget();
+    auto* load_b = block->Append(b.Load(buffer_b));
+    auto* load_c = block->Append(b.Load(buffer_c));
+    block->Append(b.Store(buffer_a, b.Add(ty.i32(), load_b, load_c)));
+    block->Append(b.Return(func));
     mod.functions.Push(func);
 
     auto* expect = R"(
