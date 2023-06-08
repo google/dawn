@@ -38,8 +38,7 @@ class Access : public utils::Castable<Access, OperandInstruction<3>> {
 
     /// @returns the accessor indices
     utils::Slice<Value const* const> Indices() const {
-        const auto& slice = operands_.Slice();
-        return utils::Slice<Value const* const>(slice.data + 1, slice.len - 1, slice.cap - 1);
+        return operands_.Slice().Offset(1).Reinterpret<Value const* const>();
     }
 
   private:

@@ -162,6 +162,26 @@ struct Slice {
     /// @return the length of the slice
     size_t Length() const { return len; }
 
+    /// Create a new slice that represents an offset into this slice
+    /// @param offset the number of elements to offset
+    /// @return the new slice
+    Slice<T> Offset(size_t offset) const {
+        if (offset > len) {
+            offset = len;
+        }
+        return Slice(data + offset, len - offset, cap - offset);
+    }
+
+    /// Create a new slice that represents a truncated version of this slice
+    /// @param length the new length
+    /// @return a new slice that is truncated to `length` elements
+    Slice<T> Truncate(size_t length) const {
+        if (length > len) {
+            length = len;
+        }
+        return Slice(data, length, length);
+    }
+
     /// Index operator
     /// @param i the element index. Must be less than `len`.
     /// @returns a reference to the i'th element.

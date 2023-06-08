@@ -142,5 +142,44 @@ TEST(TintSliceTest, ReverseBeginEnd) {
     }
 }
 
+TEST(TintSliceTest, Offset) {
+    int elements[] = {1, 2, 3};
+
+    auto slice = Slice{elements};
+    auto offset = slice.Offset(1);
+    EXPECT_EQ(offset.Length(), 2u);
+    EXPECT_EQ(offset[0], 2);
+    EXPECT_EQ(offset[1], 3);
+}
+
+TEST(TintSliceTest, Offset_PastEnd) {
+    int elements[] = {1, 2, 3};
+
+    auto slice = Slice{elements};
+    auto offset = slice.Offset(4);
+    EXPECT_EQ(offset.Length(), 0u);
+}
+
+TEST(TintSliceTest, Truncate) {
+    int elements[] = {1, 2, 3};
+
+    auto slice = Slice{elements};
+    auto truncated = slice.Truncate(2);
+    EXPECT_EQ(truncated.Length(), 2u);
+    EXPECT_EQ(truncated[0], 1);
+    EXPECT_EQ(truncated[1], 2);
+}
+
+TEST(TintSliceTest, Truncate_PastEnd) {
+    int elements[] = {1, 2, 3};
+
+    auto slice = Slice{elements};
+    auto truncated = slice.Truncate(4);
+    EXPECT_EQ(truncated.Length(), 3u);
+    EXPECT_EQ(truncated[0], 1);
+    EXPECT_EQ(truncated[1], 2);
+    EXPECT_EQ(truncated[2], 3);
+}
+
 }  // namespace
 }  // namespace tint::utils

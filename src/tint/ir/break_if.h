@@ -38,8 +38,7 @@ class BreakIf : public utils::Castable<BreakIf, Branch> {
 
     /// @returns the branch arguments
     utils::Slice<Value const* const> Args() const override {
-        const auto& slice = operands_.Slice();
-        return utils::Slice<Value const* const>(slice.data + 1, slice.len - 1, slice.cap - 1);
+        return operands_.Slice().Offset(1).Reinterpret<Value const* const>();
     }
 
     /// @returns the break condition
