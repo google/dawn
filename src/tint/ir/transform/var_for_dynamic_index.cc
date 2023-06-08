@@ -63,49 +63,46 @@ struct PartialAccess {
         return base == other.base && indices == other.indices;
     }
 };
+
+std::optional<AccessToReplace> ShouldReplace(Access* access) {
+    if (access->Type()->Is<type::Pointer>()) {
+        // No need to modify accesses into pointer types.
+        return {};
+    }
+
+    // Find the first dynamic index, if any.
+    const auto& indices = access->Indices();
+    auto* source_type = access->Object()->Type();
+    for (uint32_t i = 0; i < indices.Length(); i++) {
+        if (source_type->Is<type::Vector>()) {
+            // Stop if we hit a vector, as they can support dynamic accesses.
+            return {};
+        }
+
+        // Check if the index is dynamic.
+        auto* const_idx = indices[i]->As<Constant>();
+        if (!const_idx) {
+            return AccessToReplace{access, i, source_type};
+        }
+
+        // Update the current source object type.
+        source_type = tint::Switch(
+            source_type,  //
+            [&](const type::Array* arr) { return arr->ElemType(); },
+            [&](const type::Matrix* mat) { return mat->ColumnType(); },
+            [&](const type::Struct* str) {
+                return str->Members()[const_idx->Value()->ValueAs<u32>()]->Type();
+            });
+    }
+    // No dynamic indices were found.
+    return {};
+}
+
 }  // namespace
 
 VarForDynamicIndex::VarForDynamicIndex() = default;
 
 VarForDynamicIndex::~VarForDynamicIndex() = default;
-
-static std::optional<AccessToReplace> ShouldReplace(Access* access) {
-    AccessToReplace to_replace{access, 0, access->Object()->Type()};
-
-    // Find the first dynamic index, if any.
-    bool has_dynamic_index = false;
-    for (auto* idx : access->Indices()) {
-        if (to_replace.dynamic_index_source_type->Is<type::Vector>()) {
-            // Stop if we hit a vector, as they can support dynamic accesses.
-            break;
-        }
-
-        // Check if the index is dynamic.
-        auto* const_idx = idx->As<Constant>();
-        if (!const_idx) {
-            has_dynamic_index = true;
-            break;
-        }
-        to_replace.first_dynamic_index++;
-
-        // Update the current object type.
-        to_replace.dynamic_index_source_type = tint::Switch(
-            to_replace.dynamic_index_source_type,  //
-            [&](const type::Array* arr) { return arr->ElemType(); },
-            [&](const type::Matrix* mat) { return mat->ColumnType(); },
-            [&](const type::Struct* str) {
-                return str->Members()[const_idx->Value()->ValueAs<u32>()]->Type();
-            },
-            [&](const type::Vector* vec) { return vec->type(); },  //
-            [&](Default) { return nullptr; });
-    }
-    if (!has_dynamic_index) {
-        // No need to modify accesses that only use constant indices.
-        return {};
-    }
-
-    return to_replace;
-}
 
 void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
     ir::Builder builder(*ir);
@@ -113,8 +110,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
     // Find the access instructions that need replacing.
     utils::Vector<AccessToReplace, 4> worklist;
     for (auto* inst : ir->values.Objects()) {
-        auto* access = inst->As<Access>();
-        if (access && !access->Type()->Is<type::Pointer>()) {
+        if (auto* access = inst->As<Access>()) {
             if (auto to_replace = ShouldReplace(access)) {
                 worklist.Push(to_replace.value());
             }
@@ -126,7 +122,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
     utils::Hashmap<PartialAccess, Value*, 4, PartialAccess::Hasher> source_object_to_value;
     for (const auto& to_replace : worklist) {
         auto* access = to_replace.access;
-        Value* source_object = access->Object();
+        auto* source_object = access->Object();
 
         // If the access starts with at least one constant index, extract the source of the first
         // dynamic access to avoid copying the whole object.
@@ -143,7 +139,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
 
         // Declare a local variable and copy the source object to it.
         auto* local = object_to_local.GetOrCreate(source_object, [&]() {
-            auto* decl = builder.Var(ir->Types().pointer(to_replace.dynamic_index_source_type,
+            auto* decl = builder.Var(ir->Types().pointer(source_object->Type(),
                                                          builtin::AddressSpace::kFunction,
                                                          builtin::Access::kReadWrite));
             decl->SetInitializer(source_object);
