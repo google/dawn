@@ -315,6 +315,7 @@ std::string CompileFlagsToStringFXC(uint32_t compileFlags) {
 
 ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     CompiledShader compiledShader;
+    bool shouldDumpShader = r.hlsl.dumpShaders;
     // Compile the source shader to HLSL.
     std::string remappedEntryPoint;
     DAWN_TRY(
@@ -341,7 +342,7 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
 
     // If dumpShaders is false, we don't need the HLSL for logging. Clear the contents so it
     // isn't stored into the cache.
-    if (!r.hlsl.dumpShaders) {
+    if (!shouldDumpShader) {
         compiledShader.hlslSource = "";
     }
     return compiledShader;
