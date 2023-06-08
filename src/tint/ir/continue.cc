@@ -18,6 +18,7 @@
 
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/multi_in_block.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Continue);
 
@@ -28,7 +29,7 @@ Continue::Continue(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Emp
     TINT_ASSERT(IR, loop_);
 
     if (loop_) {
-        loop_->Continuing()->AddInboundBranch(this);
+        loop_->Continuing()->AddInboundSiblingBranch(this);
     }
     AddOperands(std::move(args));
 }

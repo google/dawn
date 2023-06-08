@@ -14,7 +14,6 @@
 
 #include "src/tint/ir/block.h"
 #include "gtest/gtest-spi.h"
-#include "src/tint/ir/block_param.h"
 #include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
@@ -69,18 +68,6 @@ TEST_F(IR_BlockTest, HasBranchTarget_ExitSwitch) {
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_If) {
-    auto* blk = b.CreateBlock();
-    blk->Append(b.CreateIf(b.Constant(true)));
-    EXPECT_TRUE(blk->HasBranchTarget());
-}
-
-TEST_F(IR_BlockTest, HasBranchTarget_Loop) {
-    auto* blk = b.CreateBlock();
-    blk->Append(b.CreateLoop());
-    EXPECT_TRUE(blk->HasBranchTarget());
-}
-
 TEST_F(IR_BlockTest, HasBranchTarget_NextIteration) {
     auto* blk = b.CreateBlock();
     auto* loop = b.CreateLoop();
@@ -93,12 +80,6 @@ TEST_F(IR_BlockTest, HasBranchTarget_Return) {
 
     auto* blk = b.CreateBlock();
     blk->Append(b.Return(f));
-    EXPECT_TRUE(blk->HasBranchTarget());
-}
-
-TEST_F(IR_BlockTest, HasBranchTarget_Switch) {
-    auto* blk = b.CreateBlock();
-    blk->Append(b.CreateSwitch(b.Constant(true)));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
@@ -737,30 +718,6 @@ TEST_F(IR_BlockTest, Fail_RemoveDifferentBlock) {
             blk1->Remove(inst1);
         },
         "internal compiler error");
-}
-
-TEST_F(IR_BlockTest, Fail_NullBlockParam) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-
-            auto* blk = b.CreateBlock();
-            blk->SetParams(utils::Vector<const BlockParam*, 1>{nullptr});
-        },
-        "");
-}
-
-TEST_F(IR_BlockTest, Fail_NullInboundBranch) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-
-            auto* blk = b.CreateBlock();
-            blk->AddInboundBranch(nullptr);
-        },
-        "");
 }
 
 }  // namespace

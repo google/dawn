@@ -38,6 +38,7 @@
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
@@ -67,8 +68,11 @@ class Builder {
     /// Destructor
     ~Builder();
 
-    /// @returns a new block flow node
+    /// @returns a new block
     Block* CreateBlock();
+
+    /// @returns a new multi-in block
+    MultiInBlock* CreateMultiInBlock();
 
     /// Creates a function flow node
     /// @param name the function name

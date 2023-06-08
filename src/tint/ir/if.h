@@ -17,6 +17,11 @@
 
 #include "src/tint/ir/control_instruction.h"
 
+// Forward declarations
+namespace tint::ir {
+class MultiInBlock;
+}  // namespace tint::ir
+
 namespace tint::ir {
 
 /// If instruction.
@@ -48,7 +53,7 @@ class If : public utils::Castable<If, ControlInstruction> {
     /// @param t the true block
     /// @param f the false block
     /// @param m the merge block
-    explicit If(Value* cond, ir::Block* t, ir::Block* f, ir::Block* m);
+    If(Value* cond, ir::Block* t, ir::Block* f, ir::MultiInBlock* m);
     ~If() override;
 
     /// @returns the branch arguments
@@ -70,14 +75,14 @@ class If : public utils::Castable<If, ControlInstruction> {
     ir::Block* False() { return false_; }
 
     /// @returns the merge branch block
-    const ir::Block* Merge() const { return merge_; }
+    const ir::MultiInBlock* Merge() const { return merge_; }
     /// @returns the merge branch block
-    ir::Block* Merge() { return merge_; }
+    ir::MultiInBlock* Merge() { return merge_; }
 
   private:
     ir::Block* true_ = nullptr;
     ir::Block* false_ = nullptr;
-    ir::Block* merge_ = nullptr;
+    ir::MultiInBlock* merge_ = nullptr;
 };
 
 }  // namespace tint::ir

@@ -22,6 +22,7 @@
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/block_param.h"
 #include "src/tint/ir/break_if.h"
 #include "src/tint/ir/builtin.h"
 #include "src/tint/ir/continue.h"
@@ -32,6 +33,7 @@
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
@@ -426,20 +428,22 @@ void GeneratorImplIr::EmitBlock(const ir::Block* block) {
         return;
     }
 
-    // Emit all OpPhi nodes for incoming branches to block.
-    EmitIncomingPhis(block);
+    if (auto* mib = block->As<ir::MultiInBlock>()) {
+        // Emit all OpPhi nodes for incoming branches to block.
+        EmitIncomingPhis(mib);
+    }
 
     // Emit the block's statements.
     EmitBlockInstructions(block);
 }
 
-void GeneratorImplIr::EmitIncomingPhis(const ir::Block* block) {
+void GeneratorImplIr::EmitIncomingPhis(const ir::MultiInBlock* block) {
     // Emit Phi nodes for all the incoming block parameters
     for (size_t param_idx = 0; param_idx < block->Params().Length(); param_idx++) {
         auto* param = block->Params()[param_idx];
         OperandList ops{Type(param->Type()), Value(param)};
 
-        for (auto* incoming : block->InboundBranches()) {
+        for (auto* incoming : block->InboundSiblingBranches()) {
             auto* arg = incoming->Args()[param_idx];
             ops.push_back(Value(arg));
             ops.push_back(Label(incoming->Block()));

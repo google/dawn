@@ -12,47 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/switch.h"
-
-#include "gmock/gmock.h"
+#include "src/tint/ir/multi_in_block.h"
 #include "gtest/gtest-spi.h"
+#include "src/tint/ir/block_param.h"
 #include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
-using IR_SwitchTest = IRTestHelper;
+using IR_MultiInBlockTest = IRTestHelper;
 
-TEST_F(IR_SwitchTest, Usage) {
-    auto* cond = b.Constant(true);
-    auto* switch_ = b.CreateSwitch(cond);
-    EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{switch_, 0u}));
-}
-
-TEST_F(IR_SwitchTest, Parent) {
-    auto* switch_ = b.CreateSwitch(b.Constant(1_i));
-    b.CreateCase(switch_, utils::Vector{Switch::CaseSelector{nullptr}});
-    EXPECT_THAT(switch_->Merge()->Parent(), switch_);
-    EXPECT_THAT(switch_->Cases().Front().Start()->Parent(), switch_);
-}
-
-TEST_F(IR_SwitchTest, Fail_NullCondition) {
+TEST_F(IR_MultiInBlockTest, Fail_NullBlockParam) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
             Builder b{mod};
-            b.CreateSwitch(nullptr);
+
+            auto* blk = b.CreateMultiInBlock();
+            blk->SetParams(utils::Vector<const BlockParam*, 1>{nullptr});
         },
         "");
 }
 
-TEST_F(IR_SwitchTest, Fail_NullMultiInBlock) {
+TEST_F(IR_MultiInBlockTest, Fail_NullInboundBranch) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
             Builder b{mod};
-            Switch switch_(b.Constant(false), nullptr);
+
+            auto* blk = b.CreateMultiInBlock();
+            blk->AddInboundSiblingBranch(nullptr);
         },
         "");
 }

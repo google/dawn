@@ -16,8 +16,8 @@
 
 #include <utility>
 
-#include "src/tint/ir/block.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/multi_in_block.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitIf);
 
@@ -27,7 +27,7 @@ ExitIf::ExitIf(ir::If* i, utils::VectorRef<Value*> args /* = utils::Empty */) : 
     TINT_ASSERT(IR, if_);
 
     if (if_) {
-        if_->Merge()->AddInboundBranch(this);
+        if_->Merge()->AddInboundSiblingBranch(this);
     }
     AddOperands(std::move(args));
 }

@@ -19,6 +19,7 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/program_test_helper.h"
 #include "src/tint/ir/switch.h"
 
@@ -134,13 +135,11 @@ TEST_F(IR_FromProgramTest, IfStatement) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::If>(m);
+    auto* if_ = FindSingleValue<ir::If>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->False()->InboundBranches().Length());
-    EXPECT_EQ(2u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(2u, if_->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -174,13 +173,11 @@ TEST_F(IR_FromProgramTest, IfStatement_TrueReturns) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::If>(m);
+    auto* if_ = FindSingleValue<ir::If>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->False()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, if_->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -214,13 +211,11 @@ TEST_F(IR_FromProgramTest, IfStatement_FalseReturns) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::If>(m);
+    auto* if_ = FindSingleValue<ir::If>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->False()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, if_->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -254,13 +249,11 @@ TEST_F(IR_FromProgramTest, IfStatement_BothReturn) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::If>(m);
+    auto* if_ = FindSingleValue<ir::If>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->False()->InboundBranches().Length());
-    EXPECT_EQ(0u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, if_->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -290,11 +283,6 @@ TEST_F(IR_FromProgramTest, IfStatement_JumpChainToMerge) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* if_flow = FindSingleValue<ir::If>(m);
-    ASSERT_NE(if_flow, nullptr);
-
-    auto* loop_flow = FindSingleValue<ir::Loop>(m);
-    ASSERT_NE(loop_flow, nullptr);
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -338,13 +326,13 @@ TEST_F(IR_FromProgramTest, Loop_WithBreak) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::Loop>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -374,18 +362,13 @@ TEST_F(IR_FromProgramTest, Loop_WithContinue) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop_flow = FindSingleValue<ir::Loop>(m);
-
-    auto* if_flow = FindSingleValue<ir::If>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, loop_flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(1u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, loop_flow->Merge()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -435,13 +418,13 @@ TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop_flow = FindSingleValue<ir::Loop>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, loop_flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(1u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, loop_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -510,17 +493,13 @@ TEST_F(IR_FromProgramTest, Loop_WithReturn) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop_flow = FindSingleValue<ir::Loop>(m);
-    auto* if_flow = FindSingleValue<ir::If>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, loop_flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(1u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -564,13 +543,13 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop_flow = FindSingleValue<ir::Loop>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, loop_flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -603,13 +582,13 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop_flow = FindSingleValue<ir::Loop>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, loop_flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(0u, loop_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -634,17 +613,13 @@ TEST_F(IR_FromProgramTest, Loop_WithIf_BothBranchesBreak) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop_flow = FindSingleValue<ir::Loop>(m);
-    auto* if_flow = FindSingleValue<ir::If>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, loop_flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(0u, loop_flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(2u, loop_flow->Merge()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
-    EXPECT_EQ(0u, if_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(2u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -809,20 +784,13 @@ TEST_F(IR_FromProgramTest, While) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::Loop>(m);
-
-    ASSERT_NE(flow->Body()->Branch(), nullptr);
-    ASSERT_TRUE(flow->Body()->Branch()->Is<ir::If>());
-    auto* if_flow = flow->Body()->Branch()->As<ir::If>();
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -871,20 +839,13 @@ TEST_F(IR_FromProgramTest, While_Return) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::Loop>(m);
-
-    ASSERT_NE(flow->Body()->Branch(), nullptr);
-    ASSERT_TRUE(flow->Body()->Branch()->Is<ir::If>());
-    auto* if_flow = flow->Body()->Branch()->As<ir::If>();
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -946,20 +907,13 @@ TEST_F(IR_FromProgramTest, DISABLED_For) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::Loop>(m);
-
-    ASSERT_NE(flow->Body()->Branch(), nullptr);
-    ASSERT_TRUE(flow->Body()->Branch()->Is<ir::If>());
-    auto* if_flow = flow->Body()->Branch()->As<ir::If>();
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(2u, flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(2u, flow->Merge()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->True()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->False()->InboundBranches().Length());
-    EXPECT_EQ(1u, if_flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(2u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(2u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m), R"()");
 }
@@ -972,14 +926,13 @@ TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::Loop>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->Initializer()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -1014,13 +967,13 @@ TEST_F(IR_FromProgramTest, For_NoInitCondOrContinuing) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleValue<ir::Loop>(m);
+    auto* loop = FindSingleValue<ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    EXPECT_EQ(1u, flow->Body()->InboundBranches().Length());
-    EXPECT_EQ(0u, flow->Continuing()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(1u, loop->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -1072,10 +1025,7 @@ TEST_F(IR_FromProgramTest, Switch) {
     ASSERT_EQ(1u, cases[2].selectors.Length());
     EXPECT_TRUE(cases[2].selectors[0].IsDefault());
 
-    EXPECT_EQ(1u, cases[0].Start()->InboundBranches().Length());
-    EXPECT_EQ(1u, cases[1].Start()->InboundBranches().Length());
-    EXPECT_EQ(1u, cases[2].Start()->InboundBranches().Length());
-    EXPECT_EQ(3u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(3u, flow->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -1135,8 +1085,7 @@ TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
 
     EXPECT_TRUE(cases[0].selectors[2].IsDefault());
 
-    EXPECT_EQ(1u, cases[0].Start()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -1174,8 +1123,7 @@ TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
     ASSERT_EQ(1u, cases[0].selectors.Length());
     EXPECT_TRUE(cases[0].selectors[0].IsDefault());
 
-    EXPECT_EQ(1u, cases[0].Start()->InboundBranches().Length());
-    EXPECT_EQ(1u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(1u, flow->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -1220,9 +1168,7 @@ TEST_F(IR_FromProgramTest, Switch_WithBreak) {
     ASSERT_EQ(1u, cases[1].selectors.Length());
     EXPECT_TRUE(cases[1].selectors[0].IsDefault());
 
-    EXPECT_EQ(1u, cases[0].Start()->InboundBranches().Length());
-    EXPECT_EQ(1u, cases[1].Start()->InboundBranches().Length());
-    EXPECT_EQ(2u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(2u, flow->Merge()->InboundSiblingBranches().Length());
     // This is 1 because the if is dead-code eliminated and the return doesn't happen.
 
     EXPECT_EQ(Disassemble(m),
@@ -1260,7 +1206,6 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    ASSERT_EQ(FindSingleValue<ir::If>(m), nullptr);
 
     auto* flow = FindSingleValue<ir::Switch>(m);
 
@@ -1276,9 +1221,7 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
     ASSERT_EQ(1u, cases[1].selectors.Length());
     EXPECT_TRUE(cases[1].selectors[0].IsDefault());
 
-    EXPECT_EQ(1u, cases[0].Start()->InboundBranches().Length());
-    EXPECT_EQ(1u, cases[1].Start()->InboundBranches().Length());
-    EXPECT_EQ(0u, flow->Merge()->InboundBranches().Length());
+    EXPECT_EQ(0u, flow->Merge()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {

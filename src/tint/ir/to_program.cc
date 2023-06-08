@@ -26,6 +26,7 @@
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"

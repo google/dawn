@@ -18,6 +18,7 @@
 
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/multi_in_block.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::BreakIf);
 
@@ -32,8 +33,8 @@ BreakIf::BreakIf(Value* condition,
 
     AddOperand(condition);
     if (loop_) {
-        loop_->Body()->AddInboundBranch(this);
-        loop_->Merge()->AddInboundBranch(this);
+        loop_->Body()->AddInboundSiblingBranch(this);
+        loop_->Merge()->AddInboundSiblingBranch(this);
     }
     AddOperands(std::move(args));
 }

@@ -774,6 +774,8 @@ if(${TINT_BUILD_IR})
     ir/loop.h
     ir/module.cc
     ir/module.h
+    ir/multi_in_block.cc
+    ir/multi_in_block.h
     ir/next_iteration.cc
     ir/next_iteration.h
     ir/operand_instruction.cc
@@ -1531,6 +1533,7 @@ if(TINT_BUILD_TESTS)
       ir/load_test.cc
       ir/loop_test.cc
       ir/module_test.cc
+      ir/multi_in_block_test.cc
       ir/next_iteration_test.cc
       ir/program_test_helper.h
       ir/return_test.cc

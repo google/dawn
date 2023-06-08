@@ -109,8 +109,8 @@ namespace {
 
 using ResultType = utils::Result<Module, diag::List>;
 
-bool IsConnected(const Block* b) {
-    return b->InboundBranches().Length() > 0;
+bool IsConnected(const MultiInBlock* b) {
+    return b->InboundSiblingBranches().Length() > 0;
 }
 
 /// Impl is the private-implementation of FromProgram().
@@ -648,9 +648,6 @@ class Impl {
         auto* loop_inst = builder_.CreateLoop();
         current_block_->Append(loop_inst);
 
-        // Loop branches directly to the body (no initializer)
-        loop_inst->Body()->AddInboundBranch(loop_inst);
-
         {
             ControlStackScope scope(this, loop_inst);
             current_block_ = loop_inst->Body();
@@ -694,9 +691,6 @@ class Impl {
     void EmitWhile(const ast::WhileStatement* stmt) {
         auto* loop_inst = builder_.CreateLoop();
         current_block_->Append(loop_inst);
-
-        // Loop branches directly to the body (no initializer)
-        loop_inst->Body()->AddInboundBranch(loop_inst);
 
         // Continue is always empty, just go back to the start
         current_block_ = loop_inst->Continuing();
@@ -747,16 +741,10 @@ class Impl {
             ControlStackScope scope(this, loop_inst);
 
             if (stmt->initializer) {
-                // Loop branches to the initializer
-                loop_inst->Initializer()->AddInboundBranch(loop_inst);
-
                 // Emit the for initializer before branching to the body
                 current_block_ = loop_inst->Initializer();
                 EmitStatement(stmt->initializer);
                 SetBranch(builder_.NextIteration(loop_inst));
-            } else {
-                // If there's no initializer, then the loop branches directly to the body block
-                loop_inst->Body()->AddInboundBranch(loop_inst);
             }
 
             current_block_ = loop_inst->Body();

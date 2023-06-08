@@ -16,13 +16,13 @@
 
 #include <utility>
 
-#include "src/tint/ir/block.h"
+#include "src/tint/ir/multi_in_block.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Loop);
 
 namespace tint::ir {
 
-Loop::Loop(ir::Block* i, ir::Block* b, ir::Block* c, ir::Block* m)
+Loop::Loop(ir::Block* i, ir::MultiInBlock* b, ir::MultiInBlock* c, ir::MultiInBlock* m)
     : initializer_(i), body_(b), continuing_(c), merge_(m) {
     TINT_ASSERT(IR, initializer_);
     TINT_ASSERT(IR, body_);

@@ -352,7 +352,6 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     auto* l = b.CreateLoop();
     func->StartTarget()->Append(l);
 
-    l->Initializer()->AddInboundBranch(l);
     l->Initializer()->Append(b.NextIteration(l, utils::Vector{b.Constant(1_i)}));
 
     auto* loop_param = b.BlockParam(b.ir.Types().i32());
@@ -405,7 +404,6 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     auto* l = b.CreateLoop();
     func->StartTarget()->Append(l);
 
-    l->Initializer()->AddInboundBranch(l);
     l->Initializer()->Append(b.NextIteration(l, utils::Vector{b.Constant(1_i), b.Constant(false)}));
 
     auto* loop_param_a = b.BlockParam(b.ir.Types().i32());

@@ -12,27 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/exit_switch.h"
-
-#include <utility>
-
 #include "src/tint/ir/multi_in_block.h"
-#include "src/tint/ir/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitSwitch);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::MultiInBlock);
 
 namespace tint::ir {
 
-ExitSwitch::ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args /* = utils::Empty */)
-    : switch_(sw) {
-    TINT_ASSERT(IR, switch_);
+MultiInBlock::MultiInBlock() : Base() {}
 
-    if (switch_) {
-        switch_->Merge()->AddInboundSiblingBranch(this);
+MultiInBlock::~MultiInBlock() = default;
+
+void MultiInBlock::SetParams(utils::VectorRef<const BlockParam*> params) {
+    params_ = std::move(params);
+
+    for (auto* param : params_) {
+        TINT_ASSERT(IR, param != nullptr);
     }
-    AddOperands(std::move(args));
 }
 
-ExitSwitch::~ExitSwitch() = default;
+void MultiInBlock::AddInboundSiblingBranch(ir::Branch* node) {
+    TINT_ASSERT(IR, node != nullptr);
+
+    if (node) {
+        inbound_sibling_branches_.Push(node);
+    }
+}
 
 }  // namespace tint::ir

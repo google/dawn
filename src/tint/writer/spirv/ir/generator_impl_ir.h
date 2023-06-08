@@ -35,11 +35,12 @@ class Block;
 class BlockParam;
 class Branch;
 class Builtin;
-class If;
 class Function;
+class If;
 class Load;
 class Loop;
 class Module;
+class MultiInBlock;
 class Store;
 class Switch;
 class UserCall;
@@ -119,7 +120,7 @@ class GeneratorImplIr {
 
     /// Emit all OpPhi nodes for incoming branches to @p block.
     /// @param block the block to emit the OpPhis for
-    void EmitIncomingPhis(const ir::Block* block);
+    void EmitIncomingPhis(const ir::MultiInBlock* block);
 
     /// Emit all instructions of @p block.
     /// @param block the block's instructions to emit

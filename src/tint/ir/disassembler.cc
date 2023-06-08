@@ -22,6 +22,7 @@
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/ir/block_param.h"
 #include "src/tint/ir/break_if.h"
 #include "src/tint/ir/builtin.h"
 #include "src/tint/ir/construct.h"
@@ -34,6 +35,7 @@
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
@@ -137,10 +139,12 @@ void Disassembler::Walk(const Block* blk) {
 void Disassembler::WalkInternal(const Block* blk) {
     SourceMarker sm(this);
     Indent() << "%b" << IdOf(blk) << " = block";
-    if (!blk->Params().IsEmpty()) {
-        out_ << " (";
-        EmitValueList(blk->Params().Slice());
-        out_ << ")";
+    if (auto* merge = blk->As<MultiInBlock>()) {
+        if (!merge->Params().IsEmpty()) {
+            out_ << " (";
+            EmitValueList(merge->Params().Slice());
+            out_ << ")";
+        }
     }
 
     out_ << " {";

@@ -16,11 +16,12 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::If);
 
-#include "src/tint/ir/block.h"
+#include "src/tint/ir/multi_in_block.h"
 
 namespace tint::ir {
 
-If::If(Value* cond, ir::Block* t, ir::Block* f, ir::Block* m) : true_(t), false_(f), merge_(m) {
+If::If(Value* cond, ir::Block* t, ir::Block* f, ir::MultiInBlock* m)
+    : true_(t), false_(f), merge_(m) {
     TINT_ASSERT(IR, cond);
     TINT_ASSERT(IR, true_);
     TINT_ASSERT(IR, false_);
@@ -28,11 +29,9 @@ If::If(Value* cond, ir::Block* t, ir::Block* f, ir::Block* m) : true_(t), false_
 
     AddOperand(cond);
     if (true_) {
-        true_->AddInboundBranch(this);
         true_->SetParent(this);
     }
     if (false_) {
-        false_->AddInboundBranch(this);
         false_->SetParent(this);
     }
     if (merge_) {
