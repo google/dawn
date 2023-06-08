@@ -746,6 +746,7 @@ void CommandBufferStateTracker::SetIndexBuffer(wgpu::IndexFormat format, uint64_
 void CommandBufferStateTracker::UnsetVertexBuffer(VertexBufferSlot slot) {
     mVertexBufferSlotsUsed.set(slot, false);
     mVertexBufferSizes[slot] = 0;
+    mAspects.reset(VALIDATION_ASPECT_VERTEX_BUFFERS);
 }
 
 void CommandBufferStateTracker::SetVertexBuffer(VertexBufferSlot slot, uint64_t size) {
