@@ -1241,13 +1241,13 @@ uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
         return 0;
     }
 
-    bool can_cast_or_copy = result_type->is_scalar();
+    bool can_cast_or_copy = result_type->Is<type::Scalar>();
 
     if (auto* res_vec = result_type->As<type::Vector>()) {
-        if (res_vec->type()->is_scalar()) {
+        if (res_vec->type()->Is<type::Scalar>()) {
             auto* value_type = args[0]->Type()->UnwrapRef();
             if (auto* val_vec = value_type->As<type::Vector>()) {
-                if (val_vec->type()->is_scalar()) {
+                if (val_vec->type()->Is<type::Scalar>()) {
                     can_cast_or_copy = res_vec->Width() == val_vec->Width();
                 }
             }
@@ -1304,7 +1304,7 @@ uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
 
         // Both scalars, but not the same type so we need to generate a conversion
         // of the value.
-        if (value_type->is_scalar() && result_type->is_scalar()) {
+        if (value_type->Is<type::Scalar>() && result_type->Is<type::Scalar>()) {
             id = GenerateCastOrCopyOrPassthrough(result_type, args[0]->Declaration(), global_var);
             ops.push_back(Operand(id));
             continue;
@@ -1366,7 +1366,7 @@ uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
     // For a single-value vector initializer, splat the initializer value.
     auto* const init_result_type = call->Type()->UnwrapRef();
     if (args.Length() == 1 && init_result_type->is_scalar_vector() &&
-        args[0]->Type()->UnwrapRef()->is_scalar()) {
+        args[0]->Type()->UnwrapRef()->Is<type::Scalar>()) {
         size_t vec_size = init_result_type->As<type::Vector>()->Width();
         for (size_t i = 0; i < (vec_size - 1); ++i) {
             ops.push_back(ops[kOpsFirstValueIdx]);
@@ -1408,7 +1408,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
     }
 
     auto elem_type_of = [](const type::Type* t) -> const type::Type* {
-        if (t->is_scalar()) {
+        if (t->Is<type::Scalar>()) {
             return t;
         }
         if (auto* v = t->As<type::Vector>()) {
@@ -2449,7 +2449,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             // If the interpolant is scalar but the objects are vectors, we need to
             // splat the interpolant into a vector of the same size.
             auto* result_vector_type = builtin->ReturnType()->As<type::Vector>();
-            if (result_vector_type && builtin->Parameters()[2]->Type()->is_scalar()) {
+            if (result_vector_type && builtin->Parameters()[2]->Type()->Is<type::Scalar>()) {
                 f_id = GenerateSplat(f_id, builtin->Parameters()[0]->Type());
                 if (f_id == 0) {
                     return 0;
@@ -2482,7 +2482,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             // splat the condition into a vector of the same size.
             // TODO(jrprice): If we're targeting SPIR-V 1.4, we don't need to do this.
             auto* result_vector_type = builtin->ReturnType()->As<type::Vector>();
-            if (result_vector_type && builtin->Parameters()[2]->Type()->is_scalar()) {
+            if (result_vector_type && builtin->Parameters()[2]->Type()->Is<type::Scalar>()) {
                 auto* bool_vec_ty = builder_.create<type::Vector>(builder_.create<type::Bool>(),
                                                                   result_vector_type->Width());
                 if (!GenerateTypeIfNeeded(bool_vec_ty)) {

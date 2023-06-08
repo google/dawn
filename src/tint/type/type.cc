@@ -67,10 +67,6 @@ uint32_t Type::Align() const {
     return 0;
 }
 
-bool Type::is_scalar() const {
-    return IsAnyOf<F16, F32, U32, I32, AbstractNumeric, Bool>();
-}
-
 bool Type::is_numeric_scalar() const {
     return IsAnyOf<F16, F32, U32, I32, AbstractNumeric>();
 }
@@ -161,7 +157,7 @@ bool Type::is_numeric_vector() const {
 }
 
 bool Type::is_scalar_vector() const {
-    return Is([](const Vector* v) { return v->type()->is_scalar(); });
+    return Is([](const Vector* v) { return v->type()->Is<type::Scalar>(); });
 }
 
 bool Type::is_numeric_scalar_or_vector() const {
@@ -250,7 +246,7 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
 }
 
 const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
-    if (ty->is_scalar()) {
+    if (ty->Is<type::Scalar>()) {
         if (count) {
             *count = 1;
         }

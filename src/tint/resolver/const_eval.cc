@@ -578,7 +578,7 @@ ConstEval::ConstEval(ProgramBuilder& b, bool use_runtime_semantics /* = false */
 template <typename T>
 ConstEval::Result ConstEval::CreateScalar(const Source& source, const type::Type* t, T v) {
     static_assert(IsNumber<T> || std::is_same_v<T, bool>, "T must be a Number or bool");
-    TINT_ASSERT(Resolver, t->is_scalar());
+    TINT_ASSERT(Resolver, t->Is<type::Scalar>());
 
     if constexpr (IsFloatingPoint<T>) {
         if (!std::isfinite(v.value)) {

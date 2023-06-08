@@ -199,8 +199,8 @@ bool Validator::AddDiagnostic(builtin::DiagnosticRule rule,
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Validator::IsPlain(const type::Type* type) const {
-    return type->is_scalar() ||
-           type->IsAnyOf<type::Atomic, type::Vector, type::Matrix, type::Array, type::Struct>();
+    return type->IsAnyOf<type::Scalar, type::Atomic, type::Vector, type::Matrix, type::Array,
+                         type::Struct>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
@@ -222,7 +222,7 @@ bool Validator::IsFixedFootprint(const type::Type* type) const {
             }
             return true;
         },
-        [&](Default) { return type->is_scalar(); });
+        [&](Default) { return type->Is<type::Scalar>(); });
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
@@ -522,7 +522,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
                 // Since WGSL has no stride attribute, try to provide a useful hint for how the
                 // shader author can resolve the issue.
                 std::string hint;
-                if (arr->ElemType()->is_scalar()) {
+                if (arr->ElemType()->Is<type::Scalar>()) {
                     hint = "Consider using a vector or struct as the element type instead.";
                 } else if (auto* vec = arr->ElemType()->As<type::Vector>();
                            vec && vec->type()->Size() == 4) {
@@ -754,7 +754,7 @@ bool Validator::Override(
         }
     }
 
-    if (!storage_ty->is_scalar()) {
+    if (!storage_ty->Is<type::Scalar>()) {
         AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a 'override'",
                  decl->source);
         return false;
@@ -1842,7 +1842,7 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
 }
 
 bool Validator::Vector(const type::Type* el_ty, const Source& source) const {
-    if (!el_ty->is_scalar()) {
+    if (!el_ty->Is<type::Scalar>()) {
         AddError("vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32'", source);
         return false;
     }

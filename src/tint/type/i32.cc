@@ -30,10 +30,6 @@ I32::I32()
 
 I32::~I32() = default;
 
-bool I32::Equals(const UniqueNode& other) const {
-    return other.Is<I32>();
-}
-
 std::string I32::FriendlyName() const {
     return "i32";
 }

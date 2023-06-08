@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/type/type.h"
+#include "src/tint/type/scalar.h"
 
 // X11 likes to #define Bool leading to confusing error messages.
 // If its defined, undefine it.
@@ -28,17 +28,13 @@
 namespace tint::type {
 
 /// A boolean type
-class Bool final : public utils::Castable<Bool, Type> {
+class Bool final : public utils::Castable<Bool, Scalar> {
   public:
     /// Constructor
     Bool();
 
     /// Destructor
     ~Bool() override;
-
-    /// @param other the other node to compare against
-    /// @returns true if the this type is equal to @p other
-    bool Equals(const UniqueNode& other) const override;
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.

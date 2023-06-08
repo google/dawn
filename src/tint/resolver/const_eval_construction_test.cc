@@ -154,7 +154,7 @@ TEST_P(ResolverConstEvalZeroInitTest, Test) {
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->AllZero());
 
-    if (sem->Type()->is_scalar()) {
+    if (sem->Type()->Is<type::Scalar>()) {
         EXPECT_EQ(sem->ConstantValue()->Index(0), nullptr);
         EXPECT_EQ(sem->ConstantValue()->ValueAs<f32>(), 0.0f);
     } else if (auto* vec = sem->Type()->As<type::Vector>()) {

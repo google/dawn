@@ -31,10 +31,6 @@ class AbstractInt final : public utils::Castable<AbstractInt, AbstractNumeric> {
     /// Destructor
     ~AbstractInt() override;
 
-    /// @param other the other node to compare against
-    /// @returns true if the this type is equal to @p other
-    bool Equals(const UniqueNode& other) const override;
-
     /// @returns the name for this type when printed in diagnostics.
     std::string FriendlyName() const override;
 

@@ -505,7 +505,7 @@ void GeneratorImpl::EmitFloatModulo(utils::StringStream& out, const ast::BinaryE
 }
 
 void GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr) {
-    if (IsRelational(expr->op) && !TypeOf(expr->lhs)->UnwrapRef()->is_scalar()) {
+    if (IsRelational(expr->op) && !TypeOf(expr->lhs)->UnwrapRef()->Is<type::Scalar>()) {
         EmitVectorRelational(out, expr);
         return;
     }
@@ -719,7 +719,7 @@ void GeneratorImpl::EmitBuiltinCall(utils::StringStream& out,
         EmitExpression(out, expr->args[0]);
     } else if ((builtin->Type() == builtin::Function::kAny ||
                 builtin->Type() == builtin::Function::kAll) &&
-               TypeOf(expr->args[0])->UnwrapRef()->is_scalar()) {
+               TypeOf(expr->args[0])->UnwrapRef()->Is<type::Scalar>()) {
         // GLSL does not support any() or all() on scalar arguments. It's a no-op.
         EmitExpression(out, expr->args[0]);
     } else if (builtin->IsBarrier()) {
@@ -2706,7 +2706,7 @@ void GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpr
             out << "~";
             break;
         case ast::UnaryOp::kNot:
-            if (TypeOf(expr)->UnwrapRef()->is_scalar()) {
+            if (TypeOf(expr)->UnwrapRef()->Is<type::Scalar>()) {
                 out << "!";
             } else {
                 out << "not";

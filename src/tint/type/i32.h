@@ -17,22 +17,18 @@
 
 #include <string>
 
-#include "src/tint/type/type.h"
+#include "src/tint/type/scalar.h"
 
 namespace tint::type {
 
 /// A signed int 32 type.
-class I32 final : public utils::Castable<I32, Type> {
+class I32 final : public utils::Castable<I32, Scalar> {
   public:
     /// Constructor
     I32();
 
     /// Destructor
     ~I32() override;
-
-    /// @param other the other node to compare against
-    /// @returns true if the this type is equal to @p other
-    bool Equals(const UniqueNode& other) const override;
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.

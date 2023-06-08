@@ -1101,7 +1101,7 @@ bool GeneratorImpl::EmitValueConstructor(utils::StringStream& out,
     // vector dimension using .x
     const bool is_single_value_vector_init = type->is_scalar_vector() &&
                                              call->Arguments().Length() == 1 &&
-                                             ctor->Parameters()[0]->Type()->is_scalar();
+                                             ctor->Parameters()[0]->Type()->Is<type::Scalar>();
 
     if (brackets) {
         out << "{";

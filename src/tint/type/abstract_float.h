@@ -31,10 +31,6 @@ class AbstractFloat final : public utils::Castable<AbstractFloat, AbstractNumeri
     /// Destructor
     ~AbstractFloat() override;
 
-    /// @param other the other type to compare against
-    /// @returns true if this type is equal to the given type
-    bool Equals(const UniqueNode& other) const override;
-
     /// @returns the name for this type when printed in diagnostics.
     std::string FriendlyName() const override;
 

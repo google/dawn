@@ -34,7 +34,7 @@ bool ShouldRun(const Program* program) {
         if (auto* call = program->Sem().Get<sem::Call>(node)) {
             if (call->Target()->Is<sem::ValueConstructor>() && call->Type()->Is<type::Matrix>()) {
                 auto& args = call->Arguments();
-                if (!args.IsEmpty() && args[0]->Type()->UnwrapRef()->is_scalar()) {
+                if (!args.IsEmpty() && args[0]->Type()->UnwrapRef()->Is<type::Scalar>()) {
                     return true;
                 }
             }

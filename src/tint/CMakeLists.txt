@@ -501,6 +501,8 @@ list(APPEND TINT_LIB_SRCS
   type/sampler.h
   type/sampler_kind.cc
   type/sampler_kind.h
+  type/scalar.cc
+  type/scalar.h
   type/storage_texture.cc
   type/storage_texture.h
   type/struct.cc

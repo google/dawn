@@ -30,10 +30,6 @@ Bool::Bool()
 
 Bool::~Bool() = default;
 
-bool Bool::Equals(const UniqueNode& other) const {
-    return other.Is<Bool>();
-}
-
 std::string Bool::FriendlyName() const {
     return "bool";
 }

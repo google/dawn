@@ -26,10 +26,6 @@ AbstractFloat::AbstractFloat()
 
 AbstractFloat::~AbstractFloat() = default;
 
-bool AbstractFloat::Equals(const UniqueNode& other) const {
-    return other.Is<AbstractFloat>();
-}
-
 std::string AbstractFloat::FriendlyName() const {
     return "abstract-float";
 }

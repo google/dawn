@@ -30,10 +30,6 @@ F32::F32()
 
 F32::~F32() = default;
 
-bool F32::Equals(const UniqueNode& other) const {
-    return other.Is<F32>();
-}
-
 std::string F32::FriendlyName() const {
     return "f32";
 }

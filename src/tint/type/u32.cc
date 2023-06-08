@@ -30,10 +30,6 @@ U32::U32()
 
 U32::~U32() = default;
 
-bool U32::Equals(const UniqueNode& other) const {
-    return other.Is<U32>();
-}
-
 std::string U32::FriendlyName() const {
     return "u32";
 }

@@ -200,7 +200,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             override.name = name;
             override.id = global->OverrideId();
             auto* type = var->Type();
-            TINT_ASSERT(Inspector, type->is_scalar());
+            TINT_ASSERT(Inspector, type->Is<type::Scalar>());
             if (type->is_bool_scalar_or_vector()) {
                 override.type = Override::Type::kBool;
             } else if (type->is_float_scalar()) {
