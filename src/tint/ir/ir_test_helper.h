@@ -32,6 +32,8 @@ class IRTestHelperBase : public BASE {
     Module mod;
     /// The IR builder
     Builder b{mod};
+    /// The type manager
+    type::Manager& ty{mod.Types()};
 };
 
 using IRTestHelper = IRTestHelperBase<testing::Test>;

@@ -21,7 +21,7 @@ namespace {
 
 class SpvGeneratorImplTest_Access : public SpvGeneratorImplTest {
   protected:
-    const type::Type* ptr(const type::Type* elem) {
+    const type::Pointer* ptr(const type::Type* elem) {
         return ty.pointer(elem, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
     }
 };

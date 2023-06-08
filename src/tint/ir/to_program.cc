@@ -290,7 +290,7 @@ class State {
     /// @return an ast::VariableDeclStatement from @p var
     const ast::VariableDeclStatement* Var(const ir::Var* var) {
         Symbol name = AssignNameTo(var);
-        auto* ptr = var->Type()->As<type::Pointer>();
+        auto* ptr = var->Type();
         auto ty = Type(ptr->StoreType());
         const ast::Expression* init = nullptr;
         if (var->Initializer()) {

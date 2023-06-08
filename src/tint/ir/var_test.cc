@@ -39,7 +39,8 @@ TEST_F(IR_VarTest, Fail_NullType) {
 TEST_F(IR_VarTest, Initializer_Usage) {
     Module mod;
     Builder b{mod};
-    auto* var = b.Declare(mod.Types().f32());
+    auto* var = b.Declare(
+        ty.pointer(ty.f32(), builtin::AddressSpace::kFunction, builtin::Access::kReadWrite));
     auto* init = b.Constant(1_f);
     var->SetInitializer(init);
 

@@ -19,7 +19,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Var);
 
 namespace tint::ir {
 
-Var::Var(const type::Type* ty) : type_(ty) {
+Var::Var(const type::Pointer* ty) : type_(ty) {
     TINT_ASSERT(IR, type_ != nullptr);
 
     // Default to no initializer.

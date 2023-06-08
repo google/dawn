@@ -19,6 +19,7 @@
 #include "src/tint/builtin/address_space.h"
 #include "src/tint/ir/binding_point.h"
 #include "src/tint/ir/operand_instruction.h"
+#include "src/tint/type/pointer.h"
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/vector.h"
 
@@ -29,11 +30,11 @@ class Var : public utils::Castable<Var, OperandInstruction<1>> {
   public:
     /// Constructor
     /// @param type the type of the var
-    explicit Var(const type::Type* type);
+    explicit Var(const type::Pointer* type);
     ~Var() override;
 
     /// @returns the type of the var
-    const type::Type* Type() const override { return type_; }
+    const type::Pointer* Type() const override { return type_; }
 
     /// Sets the var initializer
     /// @param initializer the initializer
@@ -49,7 +50,7 @@ class Var : public utils::Castable<Var, OperandInstruction<1>> {
     std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
 
   private:
-    const type::Type* type_ = nullptr;
+    const type::Pointer* type_ = nullptr;
     std::optional<struct BindingPoint> binding_point_;
 };
 

@@ -78,33 +78,6 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidateTest, RootBlock_VarBadType) {
-    mod.root_block = b.CreateRootBlockIfNeeded();
-    mod.root_block->Append(b.Declare(mod.Types().i32()));
-    auto res = ir::Validate(mod);
-    ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(),
-              R"(:3:12 error: root block: 'var' type is not a pointer: tint::type::I32
-  %1:i32 = var
-           ^^^
-
-:2:1 note: In block
-%b1 = block {
-^^^^^^^^^^^^^
-  %1:i32 = var
-^^^^^^^^^^^^^^
-}
-^
-
-note: # Disassembly
-# Root block
-%b1 = block {
-  %1:i32 = var
-}
-
-)");
-}
-
 TEST_F(IR_ValidateTest, Function) {
     auto* f = b.CreateFunction("my_func", mod.Types().void_());
     mod.functions.Push(f);

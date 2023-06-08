@@ -944,8 +944,8 @@ class Impl {
         // The access result type should match the source result type. If the source is a pointer,
         // we generate a pointer.
         const type::Type* ty = nullptr;
-        if (info.object->Type()->Is<type::Pointer>() && !info.result_type->Is<type::Pointer>()) {
-            auto* ptr = info.object->Type()->As<type::Pointer>();
+        if (auto* ptr = info.object->Type()->As<type::Pointer>();
+            ptr && !info.result_type->Is<type::Pointer>()) {
             ty = builder_.ir.Types().pointer(info.result_type, ptr->AddressSpace(), ptr->Access());
         } else {
             ty = info.result_type;

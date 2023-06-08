@@ -134,7 +134,7 @@ class Validator {
         diagnostics_.add_note(tint::diag::System::IR, note, src);
     }
 
-    std::string Name(const Value* v) { return mod_.NameOf(v).Name(); }
+    // std::string Name(const Value* v) { return mod_.NameOf(v).Name(); }
 
     void CheckRootBlock(const Block* blk) {
         if (!blk) {
@@ -149,10 +149,6 @@ class Validator {
                 AddError(inst,
                          std::string("root block: invalid instruction: ") + inst->TypeInfo().name);
                 continue;
-            }
-            if (!var->Type()->Is<type::Pointer>()) {
-                AddError(inst, std::string("root block: 'var' ") + Name(var) +
-                                   "type is not a pointer: " + var->Type()->TypeInfo().name);
             }
         }
     }

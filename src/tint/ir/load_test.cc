@@ -69,7 +69,7 @@ TEST_F(IR_LoadTest, Fail_NonPtr_Builder) {
         {
             Module mod;
             Builder b{mod};
-            b.Load(b.Declare(mod.Types().f32()));
+            b.Load(b.Constant(1_i));
         },
         "");
 }

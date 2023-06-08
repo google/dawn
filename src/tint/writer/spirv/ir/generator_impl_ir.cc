@@ -879,8 +879,7 @@ void GeneratorImplIr::EmitUserCall(const ir::UserCall* call) {
 
 void GeneratorImplIr::EmitVar(const ir::Var* var) {
     auto id = Value(var);
-    auto* ptr = var->Type()->As<type::Pointer>();
-    TINT_ASSERT(Writer, ptr);
+    auto* ptr = var->Type();
     auto ty = Type(ptr);
 
     switch (ptr->AddressSpace()) {
