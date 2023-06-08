@@ -71,6 +71,10 @@ class Value : public utils::Castable<Value> {
     /// @returns the type of the value
     virtual const type::Type* Type() const { return nullptr; }
 
+    /// Replace all uses of the value.
+    /// @param replacer a function which returns a replacement for a given use
+    void ReplaceAllUsesWith(std::function<Value*(Usage use)> replacer);
+
   protected:
     /// Constructor
     Value();

@@ -98,19 +98,17 @@ void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
         var->ReplaceWith(new_var);
 
         // Replace uses of the old variable.
-        while (!var->Usages().IsEmpty()) {
-            auto& use = *var->Usages().begin();
+        var->ReplaceAllUsesWith([&](Usage use) -> Value* {
             if (wrapped) {
                 // The structure has been wrapped, so replace all uses of the old variable with a
                 // member accessor on the new variable.
                 auto* access =
                     builder.Access(var->Type(), new_var, utils::Vector{builder.Constant(0_u)});
                 access->InsertBefore(use.instruction);
-                use.instruction->SetOperand(use.operand_index, access);
-            } else {
-                use.instruction->SetOperand(use.operand_index, new_var);
+                return access;
             }
-        }
+            return new_var;
+        });
     }
 }
 

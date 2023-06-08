@@ -164,10 +164,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
         load->InsertAfter(new_access);
 
         // Replace all uses of the old access instruction with the loaded result.
-        while (!access->Usages().IsEmpty()) {
-            auto& use = *access->Usages().begin();
-            use.instruction->SetOperand(use.operand_index, load);
-        }
+        access->ReplaceAllUsesWith([&](Usage) { return load; });
     }
 }
 
