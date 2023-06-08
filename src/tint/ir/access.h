@@ -41,6 +41,9 @@ class Access : public utils::Castable<Access, OperandInstruction<3>> {
         return operands_.Slice().Offset(1).Reinterpret<Value const* const>();
     }
 
+    /// @returns the accessor indices
+    utils::Slice<Value*> Indices() { return operands_.Slice().Offset(1); }
+
   private:
     const type::Type* result_type_ = nullptr;
 };

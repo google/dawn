@@ -804,6 +804,8 @@ if(${TINT_BUILD_IR})
     ir/transform/block_decorated_structs.h
     ir/transform/transform.cc
     ir/transform/transform.h
+    ir/transform/var_for_dynamic_index.cc
+    ir/transform/var_for_dynamic_index.h
   )
 endif()
 
@@ -1537,6 +1539,7 @@ if(TINT_BUILD_TESTS)
       ir/swizzle_test.cc
       ir/transform/add_empty_entry_point_test.cc
       ir/transform/block_decorated_structs_test.cc
+      ir/transform/var_for_dynamic_index_test.cc
       ir/unary_test.cc
       ir/user_call_test.cc
       ir/validate_test.cc

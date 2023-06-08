@@ -38,6 +38,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/transform/block_decorated_structs.h"
+#include "src/tint/ir/transform/var_for_dynamic_index.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/validate.h"
 #include "src/tint/ir/var.h"
@@ -68,6 +69,7 @@ void Sanitize(ir::Module* module) {
 
     manager.Add<ir::transform::AddEmptyEntryPoint>();
     manager.Add<ir::transform::BlockDecoratedStructs>();
+    manager.Add<ir::transform::VarForDynamicIndex>();
 
     transform::DataMap outputs;
     manager.Run(module, data, outputs);
@@ -566,7 +568,6 @@ void GeneratorImplIr::EmitAccess(const ir::Access* access) {
 
     // For non-pointer types, we assume that the indices are constants and use OpCompositeExtract.
     // If we hit a non-constant index into a vector type, use OpVectorExtractDynamic for it.
-    // TODO(jrprice): Port VarForDynamicIndex transform to IR to make the above assertion true.
     auto* ty = access->Object()->Type();
     for (auto* idx : access->Indices()) {
         if (auto* constant = idx->As<ir::Constant>()) {

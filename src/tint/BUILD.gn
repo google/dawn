@@ -523,6 +523,8 @@ if (tint_build_ir) {
       "ir/transform/add_empty_entry_point.h",
       "ir/transform/block_decorated_structs.cc",
       "ir/transform/block_decorated_structs.h",
+      "ir/transform/var_for_dynamic_index.cc",
+      "ir/transform/var_for_dynamic_index.h",
     ]
     deps = [
       ":libtint_builtins_src",
@@ -1818,6 +1820,7 @@ if (tint_build_unittests) {
         "ir/transform/add_empty_entry_point_test.cc",
         "ir/transform/block_decorated_structs_test.cc",
         "ir/transform/test_helper.h",
+        "ir/transform/var_for_dynamic_index_test.cc",
       ]
 
       deps = [
