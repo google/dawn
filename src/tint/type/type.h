@@ -93,8 +93,6 @@ class Type : public utils::Castable<Type, UniqueNode> {
     /// @see https://www.w3.org/TR/WGSL/#fixed-footprint-types
     inline bool HasFixedFootprint() const { return flags_.Contains(Flag::kFixedFootprint); }
 
-    /// @returns true if this type is a numeric scalar
-    bool is_numeric_scalar() const;
     /// @returns true if this type is a float scalar
     bool is_float_scalar() const;
     /// @returns true if this type is a float matrix

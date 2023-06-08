@@ -67,12 +67,8 @@ uint32_t Type::Align() const {
     return 0;
 }
 
-bool Type::is_numeric_scalar() const {
-    return IsAnyOf<F16, F32, U32, I32, AbstractNumeric>();
-}
-
 bool Type::is_float_scalar() const {
-    return IsAnyOf<F16, F32, AbstractNumeric>();
+    return IsAnyOf<F16, F32, AbstractFloat>();
 }
 
 bool Type::is_float_matrix() const {
@@ -153,7 +149,7 @@ bool Type::is_bool_scalar_or_vector() const {
 }
 
 bool Type::is_numeric_vector() const {
-    return Is([](const Vector* v) { return v->type()->is_numeric_scalar(); });
+    return Is([](const Vector* v) { return v->type()->Is<type::NumericScalar>(); });
 }
 
 bool Type::is_scalar_vector() const {
@@ -161,7 +157,7 @@ bool Type::is_scalar_vector() const {
 }
 
 bool Type::is_numeric_scalar_or_vector() const {
-    return is_numeric_scalar() || is_numeric_vector();
+    return Is<type::NumericScalar>() || is_numeric_vector();
 }
 
 bool Type::is_handle() const {

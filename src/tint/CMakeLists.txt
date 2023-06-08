@@ -491,6 +491,8 @@ list(APPEND TINT_LIB_SRCS
   type/multisampled_texture.h
   type/node.cc
   type/node.h
+  type/numeric_scalar.cc
+  type/numeric_scalar.h
   type/pointer.cc
   type/pointer.h
   type/reference.cc

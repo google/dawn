@@ -17,12 +17,12 @@
 
 #include <string>
 
-#include "src/tint/type/scalar.h"
+#include "src/tint/type/numeric_scalar.h"
 
 namespace tint::type {
 
 /// A signed int 32 type.
-class I32 final : public utils::Castable<I32, Scalar> {
+class I32 final : public utils::Castable<I32, NumericScalar> {
   public:
     /// Constructor
     I32();

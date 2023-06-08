@@ -17,12 +17,12 @@
 
 #include <string>
 
-#include "src/tint/type/scalar.h"
+#include "src/tint/type/numeric_scalar.h"
 
 namespace tint::type {
 
 /// A float 16 type
-class F16 final : public utils::Castable<F16, Scalar> {
+class F16 final : public utils::Castable<F16, NumericScalar> {
   public:
     /// Constructor
     F16();

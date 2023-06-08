@@ -862,6 +862,8 @@ libtint_source_set("libtint_type_src") {
     "type/multisampled_texture.h",
     "type/node.cc",
     "type/node.h",
+    "type/numeric_scalar.cc",
+    "type/numeric_scalar.h",
     "type/pointer.cc",
     "type/pointer.h",
     "type/reference.cc",

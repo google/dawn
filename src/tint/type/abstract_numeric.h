@@ -17,13 +17,13 @@
 
 #include <string>
 
-#include "src/tint/type/scalar.h"
+#include "src/tint/type/numeric_scalar.h"
 
 namespace tint::type {
 
 /// The base class for abstract-int and abstract-float types.
 /// @see https://www.w3.org/TR/WGSL/#types-for-creation-time-constants
-class AbstractNumeric : public utils::Castable<AbstractNumeric, Scalar> {
+class AbstractNumeric : public utils::Castable<AbstractNumeric, NumericScalar> {
   public:
     /// Constructor
     /// @param hash the unique hash of the node

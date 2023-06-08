@@ -1464,7 +1464,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const type::Type* to_type,
                (from_type->is_unsigned_integer_vector() &&
                 to_type->is_integer_scalar_or_vector())) {
         op = spv::Op::OpBitcast;
-    } else if ((from_type->is_numeric_scalar() && to_type->Is<type::Bool>()) ||
+    } else if ((from_type->Is<type::NumericScalar>() && to_type->Is<type::Bool>()) ||
                (from_type->is_numeric_vector() && to_type->is_bool_vector())) {
         // Convert scalar (vector) to bool (vector)
 
@@ -1990,7 +1990,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
                                (lhs_type->is_float_vector() && rhs_type->is_float_scalar()));
 
     if (expr->IsArithmetic() && !is_float_scalar_vector_multiply) {
-        if (lhs_type->Is<type::Vector>() && rhs_type->is_numeric_scalar()) {
+        if (lhs_type->Is<type::Vector>() && rhs_type->Is<type::NumericScalar>()) {
             uint32_t splat_vector_id = GenerateSplat(rhs_id, lhs_type);
             if (splat_vector_id == 0) {
                 return 0;
@@ -1998,7 +1998,7 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
             rhs_id = splat_vector_id;
             rhs_type = lhs_type;
 
-        } else if (lhs_type->is_numeric_scalar() && rhs_type->Is<type::Vector>()) {
+        } else if (lhs_type->Is<type::NumericScalar>() && rhs_type->Is<type::Vector>()) {
             uint32_t splat_vector_id = GenerateSplat(lhs_id, rhs_type);
             if (splat_vector_id == 0) {
                 return 0;
