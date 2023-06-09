@@ -15,6 +15,9 @@
 #include "src/tint/type/manager.h"
 
 #include "gtest/gtest.h"
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/u32.h"
 
@@ -60,6 +63,29 @@ TEST_F(ManagerTest, GetDifferentTypeReturnsDifferentPtr) {
     ASSERT_NE(t2, nullptr);
     EXPECT_NE(t, t2);
     EXPECT_TRUE(t2->Is<U32>());
+}
+
+TEST_F(ManagerTest, CppToType) {
+    Manager tm;
+    const Type* b1 = tm.Get<bool>();
+    const Type* b2 = tm.Get<Bool>();
+    ASSERT_EQ(b1, b2);
+
+    const Type* i1 = tm.Get<i32>();
+    const Type* i2 = tm.Get<I32>();
+    ASSERT_EQ(i1, i2);
+
+    const Type* u1 = tm.Get<u32>();
+    const Type* u2 = tm.Get<U32>();
+    ASSERT_EQ(u1, u2);
+
+    const Type* f1 = tm.Get<f32>();
+    const Type* f2 = tm.Get<F32>();
+    ASSERT_EQ(f1, f2);
+
+    const Type* h1 = tm.Get<f16>();
+    const Type* h2 = tm.Get<F16>();
+    ASSERT_EQ(h1, h2);
 }
 
 TEST_F(ManagerTest, Find) {

@@ -60,6 +60,15 @@ class TransformTestBase : public BASE {
     /// The type manager.
     type::Manager& ty{mod.Types()};
 
+    /// Alias to builtin::AddressSpace::kStorage
+    static constexpr auto storage = builtin::AddressSpace::kStorage;
+    /// Alias to builtin::AddressSpace::kUniform
+    static constexpr auto uniform = builtin::AddressSpace::kUniform;
+    /// Alias to builtin::AddressSpace::kPrivate
+    static constexpr auto private_ = builtin::AddressSpace::kPrivate;
+    /// Alias to builtin::AddressSpace::kFunction
+    static constexpr auto function = builtin::AddressSpace::kFunction;
+
   private:
     std::vector<std::unique_ptr<Source::File>> files_;
 };

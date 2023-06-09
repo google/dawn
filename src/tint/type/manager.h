@@ -19,6 +19,7 @@
 
 #include "src/tint/builtin/access.h"
 #include "src/tint/builtin/address_space.h"
+#include "src/tint/number.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/unique_node.h"
 #include "src/tint/utils/hash.h"
@@ -41,6 +42,9 @@ class Void;
 }  // namespace tint::type
 
 namespace tint::type {
+
+template <typename T>
+struct CppToType;
 
 /// The type manager holds all the pointers to the known types.
 class Manager final {
@@ -78,18 +82,23 @@ class Manager final {
         return out;
     }
 
+    /// Constructs or returns an existing type, unique node or node
     /// @param args the arguments used to construct the type, unique node or node.
+    /// @tparam T a class deriving from type::Node, or a C-like type that's automatically translated
+    /// to the equivalent type node type. For example `Get<i32>()` is equivalent to
+    /// `Get<type::I32>()`
     /// @return a pointer to an instance of `T` with the provided arguments.
-    ///         If NODE derives from UniqueNode and an existing instance of `T` has been
-    ///         constructed, then the same pointer is returned.
-    template <typename NODE, typename... ARGS>
-    NODE* Get(ARGS&&... args) {
-        if constexpr (utils::traits::IsTypeOrDerived<NODE, Type>) {
-            return types_.Get<NODE>(std::forward<ARGS>(args)...);
-        } else if constexpr (utils::traits::IsTypeOrDerived<NODE, UniqueNode>) {
-            return unique_nodes_.Get<NODE>(std::forward<ARGS>(args)...);
+    /// If `T` derives from UniqueNode and an existing instance of `T` has been constructed, then
+    /// the same pointer is returned.
+    template <typename T, typename... ARGS>
+    auto* Get(ARGS&&... args) {
+        using N = ToType<T>;
+        if constexpr (utils::traits::IsTypeOrDerived<N, Type>) {
+            return types_.Get<N>(std::forward<ARGS>(args)...);
+        } else if constexpr (utils::traits::IsTypeOrDerived<N, UniqueNode>) {
+            return unique_nodes_.Get<T>(std::forward<ARGS>(args)...);
         } else {
-            return nodes_.Create<NODE>(std::forward<ARGS>(args)...);
+            return nodes_.Create<T>(std::forward<ARGS>(args)...);
         }
     }
 
@@ -99,8 +108,8 @@ class Manager final {
     template <typename TYPE,
               typename _ = std::enable_if<utils::traits::IsTypeOrDerived<TYPE, Type>>,
               typename... ARGS>
-    TYPE* Find(ARGS&&... args) const {
-        return types_.Find<TYPE>(std::forward<ARGS>(args)...);
+    auto* Find(ARGS&&... args) const {
+        return types_.Find<ToType<TYPE>>(std::forward<ARGS>(args)...);
     }
 
     /// @returns a void type
@@ -133,16 +142,53 @@ class Manager final {
     const type::Vector* vec(const type::Type* inner, uint32_t size);
 
     /// @param inner the inner type
-    /// @returns the vector type
+    /// @returns a vec2 type with the element type @p inner
     const type::Vector* vec2(const type::Type* inner);
 
     /// @param inner the inner type
-    /// @returns the vector type
+    /// @returns a vec3 type with the element type @p inner
     const type::Vector* vec3(const type::Type* inner);
 
     /// @param inner the inner type
-    /// @returns the vector type
+    /// @returns a vec4 type with the element type @p inner
     const type::Vector* vec4(const type::Type* inner);
+
+    /// @tparam T the element type
+    /// @tparam N the vector width
+    /// @returns the vector type
+    template <typename T, size_t N>
+    const type::Vector* vec() {
+        static_assert(N >= 2 && N <= 4);
+        switch (N) {
+            case 2:
+                return vec2<T>();
+            case 3:
+                return vec3<T>();
+            case 4:
+                return vec4<T>();
+        }
+    }
+
+    /// @tparam T the element type
+    /// @returns a vec2 with the element type `T`
+    template <typename T>
+    const type::Vector* vec2() {
+        return vec2(Get<T>());
+    }
+
+    /// @tparam T the element type
+    /// @returns a vec2 with the element type `T`
+    template <typename T>
+    const type::Vector* vec3() {
+        return vec3(Get<T>());
+    }
+
+    /// @tparam T the element type
+    /// @returns a vec2 with the element type `T`
+    template <typename T>
+    const type::Vector* vec4() {
+        return vec4(Get<T>());
+    }
 
     /// @param inner the inner type
     /// @param cols the number of columns
@@ -151,40 +197,103 @@ class Manager final {
     const type::Matrix* mat(const type::Type* inner, uint32_t cols, uint32_t rows);
 
     /// @param inner the inner type
-    /// @returns the matrix type
+    /// @returns a mat2x2 with the element @p inner
     const type::Matrix* mat2x2(const type::Type* inner);
 
+    /// @tparam T the element type
+    /// @returns a mat2x2 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat2x2() {
+        return mat2x2(Get<T>());
+    }
+
     /// @param inner the inner type
-    /// @returns the matrix type
+    /// @returns a mat2x3 with the element @p inner
     const type::Matrix* mat2x3(const type::Type* inner);
 
+    /// @tparam T the element type
+    /// @returns a mat2x3 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat2x3() {
+        return mat2x3(Get<T>());
+    }
+
     /// @param inner the inner type
-    /// @returns the matrix type
+    /// @returns a mat2x4 with the element @p inner
     const type::Matrix* mat2x4(const type::Type* inner);
 
+    /// @tparam T the element type
+    /// @returns a mat2x4 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat2x4() {
+        return mat2x4(Get<T>());
+    }
+
     /// @param inner the inner type
-    /// @returns the matrix type
+    /// @returns a mat3x2 with the element @p inner
     const type::Matrix* mat3x2(const type::Type* inner);
 
+    /// @tparam T the element type
+    /// @returns a mat3x2 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat3x2() {
+        return mat3x2(Get<T>());
+    }
+
     /// @param inner the inner type
-    /// @returns the matrix type
+    /// @returns a mat3x3 with the element @p inner
     const type::Matrix* mat3x3(const type::Type* inner);
 
+    /// @tparam T the element type
+    /// @returns a mat3x3 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat3x3() {
+        return mat3x3(Get<T>());
+    }
+
     /// @param inner the inner type
-    /// @returns the matrix type
+    /// @returns a mat3x4 with the element @p inner
     const type::Matrix* mat3x4(const type::Type* inner);
 
+    /// @tparam T the element type
+    /// @returns a mat3x4 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat3x4() {
+        return mat3x4(Get<T>());
+    }
+
     /// @param inner the inner type
-    /// @returns the matrix type
+    /// @returns a mat4x2 with the element @p inner
     const type::Matrix* mat4x2(const type::Type* inner);
 
-    /// @param inner the inner type
-    /// @returns the matrix type
-    const type::Matrix* mat4x3(const type::Type* inner);
+    /// @tparam T the element type
+    /// @returns a mat4x2 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat4x2() {
+        return mat4x2(Get<T>());
+    }
 
     /// @param inner the inner type
-    /// @returns the matrix type
+    /// @returns a mat4x3 with the element @p inner
+    const type::Matrix* mat4x3(const type::Type* inner);
+
+    /// @tparam T the element type
+    /// @returns a mat4x3 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat4x3() {
+        return mat4x3(Get<T>());
+    }
+
+    /// @param inner the inner type
+    /// @returns a mat4x4 with the element @p inner
     const type::Matrix* mat4x4(const type::Type* inner);
+
+    /// @tparam T the element type
+    /// @returns a mat4x4 with the element type `T`
+    template <typename T>
+    const type::Matrix* mat4x4() {
+        return mat4x4(Get<T>());
+    }
 
     /// @param elem_ty the array element type
     /// @param count the array element count
@@ -197,6 +306,19 @@ class Manager final {
     /// @returns the runtime array type
     const type::Array* runtime_array(const type::Type* elem_ty, uint32_t stride = 0);
 
+    /// @returns an array type with the element type `T` and size `N`.
+    /// @tparam T the element type
+    /// @tparam N the array length. If zero, then constructs a runtime-sized array.
+    /// @param stride the optional array element stride
+    template <typename T, size_t N = 0>
+    const type::Array* array(uint32_t stride = 0) {
+        if constexpr (N == 0) {
+            return runtime_array(Get<T>(), stride);
+        } else {
+            return array(Get<T>(), N, stride);
+        }
+    }
+
     /// @param subtype the pointer subtype
     /// @param address_space the address space
     /// @param access the access settings
@@ -205,12 +327,33 @@ class Manager final {
                                  builtin::AddressSpace address_space,
                                  builtin::Access access);
 
+    /// @tparam SPACE the address space
+    /// @tparam T the storage type
+    /// @tparam ACCESS the access mode
+    /// @returns the pointer type with the templated address space, storage type and access.
+    template <builtin::AddressSpace SPACE,
+              typename T,
+              builtin::Access ACCESS = builtin::Access::kReadWrite>
+    const type::Pointer* ptr() {
+        return pointer(Get<T>(), SPACE, ACCESS);
+    }
+
     /// @returns an iterator to the beginning of the types
     TypeIterator begin() const { return types_.begin(); }
     /// @returns an iterator to the end of the types
     TypeIterator end() const { return types_.end(); }
 
   private:
+    /// ToType<T> is specialized for various `T` types and each specialization contains a single
+    /// `type` alias to the corresponding type deriving from `type::Type`.
+    template <typename T>
+    struct ToTypeImpl {
+        using type = T;
+    };
+
+    template <typename T>
+    using ToType = typename ToTypeImpl<T>::type;
+
     /// Unique types owned by the manager
     utils::UniqueAllocator<Type> types_;
     /// Unique nodes (excluding types) owned by the manager
@@ -218,6 +361,46 @@ class Manager final {
     /// Non-unique nodes owned by the manager
     utils::BlockAllocator<Node> nodes_;
 };
+
+//! @cond Doxygen_Suppress
+// Various template specializations for Manager::ToTypeImpl.
+template <>
+struct Manager::ToTypeImpl<AInt> {
+    using type = type::AbstractInt;
+};
+template <>
+struct Manager::ToTypeImpl<AFloat> {
+    using type = type::AbstractFloat;
+};
+template <>
+struct Manager::ToTypeImpl<i32> {
+    using type = type::I32;
+};
+template <>
+struct Manager::ToTypeImpl<u32> {
+    using type = type::U32;
+};
+template <>
+struct Manager::ToTypeImpl<f32> {
+    using type = type::F32;
+};
+template <>
+struct Manager::ToTypeImpl<f16> {
+    using type = type::F16;
+};
+template <>
+struct Manager::ToTypeImpl<bool> {
+    using type = type::Bool;
+};
+template <typename T>
+struct Manager::ToTypeImpl<const T> {
+    using type = const Manager::ToType<T>;
+};
+template <typename T>
+struct Manager::ToTypeImpl<T*> {
+    using type = Manager::ToType<T>*;
+};
+//! @endcond
 
 }  // namespace tint::type
 

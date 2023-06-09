@@ -34,7 +34,7 @@ class IR_VarForDynamicIndexTest : public TransformTest {
 };
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
-    auto* arr = b.FunctionParam(ty.array(ty.i32(), 4u));
+    auto* arr = b.FunctionParam(ty.array<i32, 4u>());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr});
 
@@ -58,7 +58,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
-    auto* mat = b.FunctionParam(ty.mat2x2(ty.f32()));
+    auto* mat = b.FunctionParam(ty.mat2x2<f32>());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({mat});
 
@@ -82,7 +82,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
-    auto* arr = b.FunctionParam(ptr(ty.array(ty.i32(), 4u)));
+    auto* arr = b.FunctionParam(ptr(ty.array<i32, 4u>()));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr, idx});
@@ -109,7 +109,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
-    auto* mat = b.FunctionParam(ptr(ty.mat2x2(ty.f32())));
+    auto* mat = b.FunctionParam(ptr(ty.mat2x2<f32>()));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({mat, idx});
@@ -136,7 +136,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
-    auto* vec = b.FunctionParam(ty.vec4(ty.f32()));
+    auto* vec = b.FunctionParam(ty.vec4<f32>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({vec, idx});
@@ -161,7 +161,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
-    auto* arr = b.FunctionParam(ty.array(ty.i32(), 4u));
+    auto* arr = b.FunctionParam(ty.array<i32, 4u>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr, idx});
@@ -188,7 +188,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
-    auto* arr = b.FunctionParam(ty.mat2x2(ty.f32()));
+    auto* arr = b.FunctionParam(ty.mat2x2<f32>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arr, idx});
@@ -215,7 +215,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
-    auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u));
+    auto* arr = b.FunctionParam(ty.array(ty.array(ty.array<i32, 4u>(), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr, idx});
@@ -242,7 +242,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
-    auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u));
+    auto* arr = b.FunctionParam(ty.array(ty.array(ty.array<i32, 4u>(), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr, idx});
@@ -270,7 +270,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
-    auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u), 4u));
+    auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.array<i32, 4u>(), 4u), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr, idx});
@@ -301,11 +301,11 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Struct) {
     auto* str_ty = ty.Get<type::Struct>(
         mod.symbols.Register("MyStruct"),
         utils::Vector{
-            ty.Get<type::StructMember>(mod.symbols.Register("arr1"), ty.array(ty.f32(), 1024u), 0u,
-                                       0u, 4u, 4096u, type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("mat"), ty.mat4x4(ty.f32()), 1u, 4096u,
+            ty.Get<type::StructMember>(mod.symbols.Register("arr1"), ty.array<f32, 1024>(), 0u, 0u,
+                                       4u, 4096u, type::StructMemberAttributes{}),
+            ty.Get<type::StructMember>(mod.symbols.Register("mat"), ty.mat4x4<f32>(), 1u, 4096u,
                                        16u, 64u, type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("arr2"), ty.array(ty.f32(), 1024u), 2u,
+            ty.Get<type::StructMember>(mod.symbols.Register("arr2"), ty.array<f32, 1024>(), 2u,
                                        4160u, 4u, 4096u, type::StructMemberAttributes{}),
         },
         16u, 32u, 32u);
@@ -343,7 +343,7 @@ MyStruct = struct @align(16) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
-    auto* arr = b.FunctionParam(ty.array(ty.i32(), 4u));
+    auto* arr = b.FunctionParam(ty.array<i32, 4u>());
     auto* idx_a = b.FunctionParam(ty.i32());
     auto* idx_b = b.FunctionParam(ty.i32());
     auto* idx_c = b.FunctionParam(ty.i32());
@@ -378,7 +378,7 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipConstantIndices) {
-    auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u));
+    auto* arr = b.FunctionParam(ty.array(ty.array(ty.array<i32, 4u>(), 4u), 4u));
     auto* idx_a = b.FunctionParam(ty.i32());
     auto* idx_b = b.FunctionParam(ty.i32());
     auto* idx_c = b.FunctionParam(ty.i32());
