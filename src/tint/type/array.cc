@@ -114,6 +114,13 @@ TypeAndCount Array::Elements(const Type* /* type_if_invalid = nullptr */,
     return {element_, n};
 }
 
+const Type* Array::Element(uint32_t index) const {
+    if (auto* count = count_->As<ConstantArrayCount>()) {
+        return index < count->value ? element_ : nullptr;
+    }
+    return element_;
+}
+
 Array* Array::Clone(CloneContext& ctx) const {
     auto* elem_ty = element_->Clone(ctx);
     auto* count = count_->Clone(ctx);

@@ -74,6 +74,10 @@ TypeAndCount Matrix::Elements(const Type* /* type_if_invalid = nullptr */,
     return {column_type_, columns_};
 }
 
+const Vector* Matrix::Element(uint32_t index) const {
+    return index < columns_ ? column_type_ : nullptr;
+}
+
 Matrix* Matrix::Clone(CloneContext& ctx) const {
     auto* col_ty = column_type_->Clone(ctx);
     return ctx.dst.mgr->Get<Matrix>(col_ty, columns_);

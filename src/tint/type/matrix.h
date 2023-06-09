@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/type/type.h"
+#include "src/tint/type/vector.h"
 
 // Forward declarations
 namespace tint::type {
@@ -68,6 +68,9 @@ class Matrix final : public utils::Castable<Matrix, Type> {
     /// @copydoc Type::Elements
     TypeAndCount Elements(const Type* type_if_invalid = nullptr,
                           uint32_t count_if_invalid = 0) const override;
+
+    /// @copydoc Type::Element
+    const Vector* Element(uint32_t index) const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type

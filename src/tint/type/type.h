@@ -196,6 +196,18 @@ class Type : public utils::Castable<Type, UniqueNode> {
     virtual TypeAndCount Elements(const Type* type_if_invalid = nullptr,
                                   uint32_t count_if_invalid = 0) const;
 
+    /// @param index the i'th element index to return
+    /// @returns The child element with the given index, or nullptr if the element does not exist.
+    ///
+    /// Examples:
+    ///  * Element(1) of `mat3x2<f32>` returns `vec2<f32>`.
+    ///  * Element(1) of `array<vec3<f32>, 5>` returns `vec3<f32>`.
+    ///  * Element(0) of `struct S { a : f32, b : i32 }` returns `f32`.
+    ///  * Element(0) of `f32` returns `nullptr`.
+    ///  * Element(3) of `vec3<f32>` returns `nullptr`.
+    ///  * Element(3) of `struct S { a : f32, b : i32 }` returns `nullptr`.
+    virtual const Type* Element(uint32_t index) const;
+
     /// @returns the most deeply nested element of the type. For non-composite types,
     /// DeepestElement() will return this type. Examples:
     ///  * Element() of `f32` returns `f32`.

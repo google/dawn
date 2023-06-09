@@ -262,6 +262,43 @@ TEST_F(TypeTest, ElementsWithCustomInvalid) {
     EXPECT_EQ(arr_str_f16->Elements(arr_str_f16, 42), (TypeAndCount{str_f16, 5u}));
 }
 
+TEST_F(TypeTest, Element) {
+    EXPECT_TYPE(f32->Element(0), nullptr);
+    EXPECT_TYPE(f16->Element(1), nullptr);
+    EXPECT_TYPE(i32->Element(2), nullptr);
+    EXPECT_TYPE(u32->Element(3), nullptr);
+    EXPECT_TYPE(vec2_f32->Element(0), f32);
+    EXPECT_TYPE(vec2_f32->Element(1), f32);
+    EXPECT_TYPE(vec2_f32->Element(2), nullptr);
+    EXPECT_TYPE(vec3_f16->Element(0), f16);
+    EXPECT_TYPE(vec4_f32->Element(3), f32);
+    EXPECT_TYPE(vec4_f32->Element(4), nullptr);
+    EXPECT_TYPE(vec3_u32->Element(2), u32);
+    EXPECT_TYPE(vec3_u32->Element(3), nullptr);
+    EXPECT_TYPE(vec3_i32->Element(1), i32);
+    EXPECT_TYPE(vec3_i32->Element(4), nullptr);
+    EXPECT_TYPE(mat2x4_f32->Element(1), vec4_f32);
+    EXPECT_TYPE(mat2x4_f32->Element(2), nullptr);
+    EXPECT_TYPE(mat4x2_f32->Element(3), vec2_f32);
+    EXPECT_TYPE(mat4x2_f32->Element(4), nullptr);
+    EXPECT_TYPE(mat4x3_f16->Element(1), vec3_f16);
+    EXPECT_TYPE(mat4x3_f16->Element(5), nullptr);
+    EXPECT_TYPE(str_f16->Element(0), f16);
+    EXPECT_TYPE(str_f16->Element(1), nullptr);
+    EXPECT_TYPE(arr_i32->Element(0), i32);
+    EXPECT_TYPE(arr_i32->Element(4), i32);
+    EXPECT_TYPE(arr_i32->Element(5), nullptr);
+    EXPECT_TYPE(arr_vec3_i32->Element(4), vec3_i32);
+    EXPECT_TYPE(arr_vec3_i32->Element(5), nullptr);
+    EXPECT_TYPE(arr_mat4x3_f16->Element(1), mat4x3_f16);
+    EXPECT_TYPE(arr_mat4x3_f16->Element(10), nullptr);
+    EXPECT_TYPE(arr_mat4x3_af->Element(2), mat4x3_af);
+    EXPECT_TYPE(arr_mat4x3_af->Element(6), nullptr);
+    EXPECT_TYPE(arr_str_f16->Element(0), str_f16);
+    EXPECT_TYPE(arr_str_f16->Element(1), str_f16);
+    EXPECT_TYPE(arr_str_f16->Element(10), nullptr);
+}
+
 TEST_F(TypeTest, DeepestElement) {
     EXPECT_TYPE(f32->DeepestElement(), f32);
     EXPECT_TYPE(f16->DeepestElement(), f16);
