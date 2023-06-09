@@ -406,8 +406,8 @@ MaybeError Texture::Clear(CommandRecordingContext* commandContext,
     Ref<TextureView> view = TextureView::Create(this, &desc);
 
     if (GetFormat().HasDepthOrStencil()) {
-        for (uint32_t mipLevel = view->GetBaseMipLevel(); mipLevel < view->GetLevelCount();
-             ++mipLevel) {
+        for (uint32_t mipLevel = view->GetBaseMipLevel();
+             mipLevel < view->GetBaseMipLevel() + view->GetLevelCount(); ++mipLevel) {
             ComPtr<ID3D11DepthStencilView> d3d11DSV;
             DAWN_TRY_ASSIGN(d3d11DSV,
                             view->CreateD3D11DepthStencilView(/*depthReadOnly=*/false,
@@ -429,8 +429,8 @@ MaybeError Texture::Clear(CommandRecordingContext* commandContext,
         static constexpr std::array<float, 4> kZero = {0.0f, 0.0f, 0.0f, 0.0f};
         static constexpr std::array<float, 4> kNonZero = {1.0f, 1.0f, 1.0f, 1.0f};
 
-        for (uint32_t mipLevel = view->GetBaseMipLevel(); mipLevel < view->GetLevelCount();
-             ++mipLevel) {
+        for (uint32_t mipLevel = view->GetBaseMipLevel();
+             mipLevel < view->GetBaseMipLevel() + view->GetLevelCount(); ++mipLevel) {
             ComPtr<ID3D11RenderTargetView> d3d11RTV;
             DAWN_TRY_ASSIGN(d3d11RTV, view->CreateD3D11RenderTargetView(mipLevel));
             // Clear all layers for each 'mipLevel'.
