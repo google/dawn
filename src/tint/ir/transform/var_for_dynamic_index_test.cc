@@ -35,7 +35,7 @@ class IR_VarForDynamicIndexTest : public TransformTest {
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
     auto* arr = b.FunctionParam(ty.array(ty.i32(), 4u));
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams(utils::Vector{arr});
 
     auto* block = func->StartTarget();
@@ -59,7 +59,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
     auto* mat = b.FunctionParam(ty.mat2x2(ty.f32()));
-    auto* func = b.CreateFunction("foo", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
     func->SetParams(utils::Vector{mat});
 
     auto* block = func->StartTarget();
@@ -85,7 +85,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
 TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
     auto* arr = b.FunctionParam(ptr(ty.array(ty.i32(), 4u)));
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
     auto* block = func->StartTarget();
@@ -112,7 +112,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
 TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
     auto* mat = b.FunctionParam(ptr(ty.mat2x2(ty.f32())));
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
     func->SetParams(utils::Vector{mat, idx});
 
     auto* block = func->StartTarget();
@@ -139,7 +139,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
 TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
     auto* vec = b.FunctionParam(ty.vec4(ty.f32()));
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
     func->SetParams(utils::Vector{vec, idx});
 
     auto* block = func->StartTarget();
@@ -164,7 +164,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
 TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
     auto* arr = b.FunctionParam(ty.array(ty.i32(), 4u));
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
     auto* block = func->StartTarget();
@@ -191,7 +191,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
 TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
     auto* arr = b.FunctionParam(ty.mat2x2(ty.f32()));
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
     func->SetParams(utils::Vector{arr, idx});
 
     auto* block = func->StartTarget();
@@ -218,7 +218,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
 TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
     auto* block = func->StartTarget();
@@ -245,7 +245,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
 TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
     auto* block = func->StartTarget();
@@ -274,7 +274,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
 TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx});
 
     auto* block = func->StartTarget();
@@ -314,7 +314,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Struct) {
         16u, 32u, 32u);
     auto* str_val = b.FunctionParam(str_ty);
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
     func->SetParams(utils::Vector{str_val, idx});
 
     auto* block = func->StartTarget();
@@ -351,7 +351,7 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
     auto* idx_a = b.FunctionParam(ty.i32());
     auto* idx_b = b.FunctionParam(ty.i32());
     auto* idx_c = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx_a, idx_b, idx_c});
 
     auto* block = func->StartTarget();
@@ -386,7 +386,7 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipConstantInd
     auto* idx_a = b.FunctionParam(ty.i32());
     auto* idx_b = b.FunctionParam(ty.i32());
     auto* idx_c = b.FunctionParam(ty.i32());
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     func->SetParams(utils::Vector{arr, idx_a, idx_b, idx_c});
 
     auto* block = func->StartTarget();

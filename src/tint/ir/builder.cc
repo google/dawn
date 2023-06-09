@@ -26,132 +26,128 @@ Builder::Builder(Module& mod) : ir(mod) {}
 
 Builder::~Builder() = default;
 
-ir::Block* Builder::CreateRootBlockIfNeeded() {
+ir::Block* Builder::RootBlock() {
     if (!ir.root_block) {
-        ir.root_block = CreateBlock();
+        ir.root_block = Block();
     }
     return ir.root_block;
 }
 
-Block* Builder::CreateBlock() {
-    return ir.blocks.Create<Block>();
+Block* Builder::Block() {
+    return ir.blocks.Create<ir::Block>();
 }
 
-MultiInBlock* Builder::CreateMultiInBlock() {
-    return ir.blocks.Create<MultiInBlock>();
+MultiInBlock* Builder::MultiInBlock() {
+    return ir.blocks.Create<ir::MultiInBlock>();
 }
 
-Function* Builder::CreateFunction(std::string_view name,
-                                  const type::Type* return_type,
-                                  Function::PipelineStage stage,
-                                  std::optional<std::array<uint32_t, 3>> wg_size) {
-    auto* ir_func = ir.values.Create<Function>(return_type, stage, wg_size);
-    ir_func->SetStartTarget(CreateBlock());
+Function* Builder::Function(std::string_view name,
+                            const type::Type* return_type,
+                            Function::PipelineStage stage,
+                            std::optional<std::array<uint32_t, 3>> wg_size) {
+    auto* ir_func = ir.values.Create<ir::Function>(return_type, stage, wg_size);
+    ir_func->SetStartTarget(Block());
     ir.SetName(ir_func, name);
     return ir_func;
 }
 
-If* Builder::CreateIf(Value* condition) {
-    return ir.values.Create<If>(condition, CreateBlock(), CreateBlock(), CreateMultiInBlock());
+If* Builder::If(Value* condition) {
+    return ir.values.Create<ir::If>(condition, Block(), Block(), MultiInBlock());
 }
 
-Loop* Builder::CreateLoop() {
-    return ir.values.Create<Loop>(CreateBlock(), CreateMultiInBlock(), CreateMultiInBlock(),
-                                  CreateMultiInBlock());
+ir::Loop* Builder::Loop() {
+    return ir.values.Create<ir::Loop>(Block(), MultiInBlock(), MultiInBlock(), MultiInBlock());
 }
 
-Switch* Builder::CreateSwitch(Value* condition) {
-    return ir.values.Create<Switch>(condition, CreateMultiInBlock());
+Switch* Builder::Switch(Value* condition) {
+    return ir.values.Create<ir::Switch>(condition, MultiInBlock());
 }
 
-Block* Builder::CreateCase(Switch* s, utils::VectorRef<Switch::CaseSelector> selectors) {
-    auto* block = CreateBlock();
+Block* Builder::Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selectors) {
+    auto* block = Block();
     s->Cases().Push(Switch::Case{std::move(selectors), block});
     block->SetParent(s);
     return block;
 }
 
-Binary* Builder::CreateBinary(enum Binary::Kind kind,
-                              const type::Type* type,
-                              Value* lhs,
-                              Value* rhs) {
+Binary* Builder::Binary(enum Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs) {
     return ir.values.Create<ir::Binary>(kind, type, lhs, rhs);
 }
 
 Binary* Builder::And(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kAnd, type, lhs, rhs);
+    return Binary(Binary::Kind::kAnd, type, lhs, rhs);
 }
 
 Binary* Builder::Or(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kOr, type, lhs, rhs);
+    return Binary(Binary::Kind::kOr, type, lhs, rhs);
 }
 
 Binary* Builder::Xor(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kXor, type, lhs, rhs);
+    return Binary(Binary::Kind::kXor, type, lhs, rhs);
 }
 
 Binary* Builder::Equal(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kEqual, type, lhs, rhs);
+    return Binary(Binary::Kind::kEqual, type, lhs, rhs);
 }
 
 Binary* Builder::NotEqual(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kNotEqual, type, lhs, rhs);
+    return Binary(Binary::Kind::kNotEqual, type, lhs, rhs);
 }
 
 Binary* Builder::LessThan(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kLessThan, type, lhs, rhs);
+    return Binary(Binary::Kind::kLessThan, type, lhs, rhs);
 }
 
 Binary* Builder::GreaterThan(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kGreaterThan, type, lhs, rhs);
+    return Binary(Binary::Kind::kGreaterThan, type, lhs, rhs);
 }
 
 Binary* Builder::LessThanEqual(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kLessThanEqual, type, lhs, rhs);
+    return Binary(Binary::Kind::kLessThanEqual, type, lhs, rhs);
 }
 
 Binary* Builder::GreaterThanEqual(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kGreaterThanEqual, type, lhs, rhs);
+    return Binary(Binary::Kind::kGreaterThanEqual, type, lhs, rhs);
 }
 
 Binary* Builder::ShiftLeft(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kShiftLeft, type, lhs, rhs);
+    return Binary(Binary::Kind::kShiftLeft, type, lhs, rhs);
 }
 
 Binary* Builder::ShiftRight(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kShiftRight, type, lhs, rhs);
+    return Binary(Binary::Kind::kShiftRight, type, lhs, rhs);
 }
 
 Binary* Builder::Add(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kAdd, type, lhs, rhs);
+    return Binary(Binary::Kind::kAdd, type, lhs, rhs);
 }
 
 Binary* Builder::Subtract(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kSubtract, type, lhs, rhs);
+    return Binary(Binary::Kind::kSubtract, type, lhs, rhs);
 }
 
 Binary* Builder::Multiply(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kMultiply, type, lhs, rhs);
+    return Binary(Binary::Kind::kMultiply, type, lhs, rhs);
 }
 
 Binary* Builder::Divide(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kDivide, type, lhs, rhs);
+    return Binary(Binary::Kind::kDivide, type, lhs, rhs);
 }
 
 Binary* Builder::Modulo(const type::Type* type, Value* lhs, Value* rhs) {
-    return CreateBinary(Binary::Kind::kModulo, type, lhs, rhs);
+    return Binary(Binary::Kind::kModulo, type, lhs, rhs);
 }
 
-Unary* Builder::CreateUnary(enum Unary::Kind kind, const type::Type* type, Value* val) {
+Unary* Builder::Unary(enum Unary::Kind kind, const type::Type* type, Value* val) {
     return ir.values.Create<ir::Unary>(kind, type, val);
 }
 
 Unary* Builder::Complement(const type::Type* type, Value* val) {
-    return CreateUnary(Unary::Kind::kComplement, type, val);
+    return Unary(Unary::Kind::kComplement, type, val);
 }
 
 Unary* Builder::Negation(const type::Type* type, Value* val) {
-    return CreateUnary(Unary::Kind::kNegation, type, val);
+    return Unary(Unary::Kind::kNegation, type, val);
 }
 
 Binary* Builder::Not(const type::Type* type, Value* val) {
@@ -166,7 +162,9 @@ ir::Discard* Builder::Discard() {
     return ir.values.Create<ir::Discard>(ir.Types().void_());
 }
 
-ir::UserCall* Builder::Call(const type::Type* type, Function* func, utils::VectorRef<Value*> args) {
+ir::UserCall* Builder::Call(const type::Type* type,
+                            ir::Function* func,
+                            utils::VectorRef<Value*> args) {
     return ir.values.Create<ir::UserCall>(type, func, std::move(args));
 }
 
@@ -207,35 +205,37 @@ ir::Var* Builder::Var(const type::Pointer* type) {
     return ir.values.Create<ir::Var>(type);
 }
 
-ir::Return* Builder::Return(Function* func, Value* value /* = nullptr */) {
+ir::Return* Builder::Return(ir::Function* func, Value* value /* = nullptr */) {
     return ir.values.Create<ir::Return>(func, value ? utils::Vector{value} : utils::Empty);
 }
 
-ir::NextIteration* Builder::NextIteration(Loop* loop,
+ir::NextIteration* Builder::NextIteration(ir::Loop* loop,
                                           utils::VectorRef<Value*> args /* = utils::Empty */) {
     return ir.values.Create<ir::NextIteration>(loop, std::move(args));
 }
 
 ir::BreakIf* Builder::BreakIf(Value* condition,
-                              Loop* loop,
+                              ir::Loop* loop,
                               utils::VectorRef<Value*> args /* = utils::Empty */) {
     return ir.values.Create<ir::BreakIf>(condition, loop, std::move(args));
 }
 
-ir::Continue* Builder::Continue(Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */) {
+ir::Continue* Builder::Continue(ir::Loop* loop,
+                                utils::VectorRef<Value*> args /* = utils::Empty */) {
     return ir.values.Create<ir::Continue>(loop, std::move(args));
 }
 
-ir::ExitSwitch* Builder::ExitSwitch(Switch* sw,
+ir::ExitSwitch* Builder::ExitSwitch(ir::Switch* sw,
                                     utils::VectorRef<Value*> args /* = utils::Empty */) {
     return ir.values.Create<ir::ExitSwitch>(sw, std::move(args));
 }
 
-ir::ExitLoop* Builder::ExitLoop(Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */) {
+ir::ExitLoop* Builder::ExitLoop(ir::Loop* loop,
+                                utils::VectorRef<Value*> args /* = utils::Empty */) {
     return ir.values.Create<ir::ExitLoop>(loop, std::move(args));
 }
 
-ir::ExitIf* Builder::ExitIf(If* i, utils::VectorRef<Value*> args /* = utils::Empty */) {
+ir::ExitIf* Builder::ExitIf(ir::If* i, utils::VectorRef<Value*> args /* = utils::Empty */) {
     return ir.values.Create<ir::ExitIf>(i, std::move(args));
 }
 

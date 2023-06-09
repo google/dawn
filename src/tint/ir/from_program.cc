@@ -217,7 +217,7 @@ class Impl {
                 [&](const ast::Variable* var) {
                     // Setup the current flow node to be the root block for the module. The builder
                     // will handle creating it if it doesn't exist already.
-                    TINT_SCOPED_ASSIGNMENT(current_block_, builder_.CreateRootBlockIfNeeded());
+                    TINT_SCOPED_ASSIGNMENT(current_block_, builder_.RootBlock());
                     EmitVariable(var);
                 },
                 [&](const ast::Function* func) { EmitFunction(func); },
@@ -264,8 +264,8 @@ class Impl {
 
         const auto* sem = program_->Sem().Get(ast_func);
 
-        auto* ir_func = builder_.CreateFunction(ast_func->name->symbol.NameView(),
-                                                sem->ReturnType()->Clone(clone_ctx_.type_ctx));
+        auto* ir_func = builder_.Function(ast_func->name->symbol.NameView(),
+                                          sem->ReturnType()->Clone(clone_ctx_.type_ctx));
         current_function_ = ir_func;
         builder_.ir.functions.Push(ir_func);
 
@@ -610,7 +610,7 @@ class Impl {
         if (!reg) {
             return;
         }
-        auto* if_inst = builder_.CreateIf(reg.Get());
+        auto* if_inst = builder_.If(reg.Get());
         current_block_->Append(if_inst);
 
         {
@@ -645,7 +645,7 @@ class Impl {
     }
 
     void EmitLoop(const ast::LoopStatement* stmt) {
-        auto* loop_inst = builder_.CreateLoop();
+        auto* loop_inst = builder_.Loop();
         current_block_->Append(loop_inst);
 
         {
@@ -689,7 +689,7 @@ class Impl {
     }
 
     void EmitWhile(const ast::WhileStatement* stmt) {
-        auto* loop_inst = builder_.CreateLoop();
+        auto* loop_inst = builder_.Loop();
         current_block_->Append(loop_inst);
 
         // Continue is always empty, just go back to the start
@@ -708,7 +708,7 @@ class Impl {
             }
 
             // Create an `if (cond) {} else {break;}` control flow
-            auto* if_inst = builder_.CreateIf(reg.Get());
+            auto* if_inst = builder_.If(reg.Get());
             current_block_->Append(if_inst);
 
             current_block_ = if_inst->True();
@@ -730,7 +730,7 @@ class Impl {
     }
 
     void EmitForLoop(const ast::ForLoopStatement* stmt) {
-        auto* loop_inst = builder_.CreateLoop();
+        auto* loop_inst = builder_.Loop();
         current_block_->Append(loop_inst);
 
         // Make sure the initializer ends up in a contained scope
@@ -756,7 +756,7 @@ class Impl {
                 }
 
                 // Create an `if (cond) {} else {break;}` control flow
-                auto* if_inst = builder_.CreateIf(reg.Get());
+                auto* if_inst = builder_.If(reg.Get());
                 current_block_->Append(if_inst);
 
                 current_block_ = if_inst->True();
@@ -791,7 +791,7 @@ class Impl {
         if (!reg) {
             return;
         }
-        auto* switch_inst = builder_.CreateSwitch(reg.Get());
+        auto* switch_inst = builder_.Switch(reg.Get());
         current_block_->Append(switch_inst);
 
         {
@@ -808,7 +808,7 @@ class Impl {
                     }
                 }
 
-                current_block_ = builder_.CreateCase(switch_inst, selectors);
+                current_block_ = builder_.Case(switch_inst, selectors);
                 EmitBlock(c->Body()->Declaration());
 
                 if (NeedBranch()) {
@@ -1180,7 +1180,7 @@ class Impl {
             return utils::Failure;
         }
 
-        auto* if_inst = builder_.CreateIf(lhs.Get());
+        auto* if_inst = builder_.If(lhs.Get());
         current_block_->Append(if_inst);
 
         auto* result = builder_.BlockParam(builder_.ir.Types().bool_());

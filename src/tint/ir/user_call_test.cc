@@ -25,7 +25,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_UserCallTest = IRTestHelper;
 
 TEST_F(IR_UserCallTest, Usage) {
-    auto* func = b.CreateFunction("myfunc", mod.Types().void_());
+    auto* func = b.Function("myfunc", mod.Types().void_());
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
     auto* e = b.Call(mod.Types().void_(), func, utils::Vector{arg1, arg2});
@@ -39,7 +39,7 @@ TEST_F(IR_UserCallTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(nullptr, b.CreateFunction("myfunc", mod.Types().void_()));
+            b.Call(nullptr, b.Function("myfunc", mod.Types().void_()));
         },
         "");
 }
@@ -59,7 +59,7 @@ TEST_F(IR_UserCallTest, Fail_NullArg) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(mod.Types().void_(), b.CreateFunction("myfunc", mod.Types().void_()),
+            b.Call(mod.Types().void_(), b.Function("myfunc", mod.Types().void_()),
                    utils::Vector<Value*, 1>{nullptr});
         },
         "");

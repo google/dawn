@@ -29,7 +29,7 @@ using IR_BlockDecoratedStructsTest = TransformTest;
 using namespace tint::number_suffixes;  // NOLINT
 
 TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->Append(b.Return(func));
     mod.functions.Push(func);
 
@@ -50,9 +50,9 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
     auto* buffer =
         b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kUniform, builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
-    b.CreateRootBlockIfNeeded()->Append(buffer);
+    b.RootBlock()->Append(buffer);
 
-    auto* func = b.CreateFunction("foo", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
     auto* block = func->StartTarget();
     auto* load = block->Append(b.Load(buffer));
     block->Append(b.Return(func, load));
@@ -86,9 +86,9 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Storage) {
     auto* buffer =
         b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
-    b.CreateRootBlockIfNeeded()->Append(buffer);
+    b.RootBlock()->Append(buffer);
 
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->Append(b.Store(buffer, b.Constant(42_i)));
     func->StartTarget()->Append(b.Return(func));
     mod.functions.Push(func);
@@ -121,9 +121,9 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
     auto* buffer = b.Var(ty.pointer(ty.runtime_array(ty.i32()), builtin::AddressSpace::kStorage,
                                     builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
-    b.CreateRootBlockIfNeeded()->Append(buffer);
+    b.RootBlock()->Append(buffer);
 
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     auto* block = func->StartTarget();
     auto* access = block->Append(
         b.Access(ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite),
@@ -168,12 +168,12 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
     auto* buffer =
         b.Var(ty.pointer(structure, builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
-    b.CreateRootBlockIfNeeded()->Append(buffer);
+    b.RootBlock()->Append(buffer);
 
     auto* i32_ptr =
         ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite);
 
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     auto* block = func->StartTarget();
     auto* val_ptr = block->Append(b.Access(i32_ptr, buffer, utils::Vector{b.Constant(0_u)}));
     auto* load = block->Append(b.Load(val_ptr));
@@ -226,13 +226,13 @@ TEST_F(IR_BlockDecoratedStructsTest, StructUsedElsewhere) {
     auto* buffer =
         b.Var(ty.pointer(structure, builtin::AddressSpace::kStorage, builtin::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
-    b.CreateRootBlockIfNeeded()->Append(buffer);
+    b.RootBlock()->Append(buffer);
 
     auto* private_var =
         b.Var(ty.pointer(structure, builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
-    b.CreateRootBlockIfNeeded()->Append(private_var);
+    b.RootBlock()->Append(private_var);
 
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->Append(b.Store(buffer, private_var));
     func->StartTarget()->Append(b.Return(func));
     mod.functions.Push(func);
@@ -277,12 +277,12 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     buffer_a->SetBindingPoint(0, 0);
     buffer_b->SetBindingPoint(0, 1);
     buffer_c->SetBindingPoint(0, 2);
-    auto* root = b.CreateRootBlockIfNeeded();
+    auto* root = b.RootBlock();
     root->Append(buffer_a);
     root->Append(buffer_b);
     root->Append(buffer_c);
 
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     auto* block = func->StartTarget();
     auto* load_b = block->Append(b.Load(buffer_b));
     auto* load_c = block->Append(b.Load(buffer_c));

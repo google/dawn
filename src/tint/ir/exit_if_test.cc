@@ -27,7 +27,7 @@ using IR_ExitIfTest = IRTestHelper;
 TEST_F(IR_ExitIfTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* if_ = b.CreateIf(b.Constant(true));
+    auto* if_ = b.If(b.Constant(true));
     auto* e = b.ExitIf(if_, utils::Vector{arg1, arg2});
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
@@ -49,7 +49,7 @@ TEST_F(IR_ExitIfTest, Fail_NullArg) {
         {
             Module mod;
             Builder b{mod};
-            b.ExitIf(b.CreateIf(b.Constant(false)), utils::Vector<Value*, 1>{nullptr});
+            b.ExitIf(b.If(b.Constant(false)), utils::Vector<Value*, 1>{nullptr});
         },
         "");
 }

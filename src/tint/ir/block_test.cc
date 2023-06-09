@@ -23,72 +23,72 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_BlockTest = IRTestHelper;
 
 TEST_F(IR_BlockTest, HasBranchTarget_Empty) {
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     EXPECT_FALSE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_NoBranch) {
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->Append(b.Add(mod.Types().i32(), b.Constant(1_u), b.Constant(2_u)));
     EXPECT_FALSE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_BreakIf) {
-    auto* blk = b.CreateBlock();
-    auto* loop = b.CreateLoop();
+    auto* blk = b.Block();
+    auto* loop = b.Loop();
     blk->Append(b.BreakIf(b.Constant(true), loop));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_Continue) {
-    auto* blk = b.CreateBlock();
-    auto* loop = b.CreateLoop();
+    auto* blk = b.Block();
+    auto* loop = b.Loop();
     blk->Append(b.Continue(loop));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_ExitIf) {
-    auto* blk = b.CreateBlock();
-    auto* if_ = b.CreateIf(b.Constant(true));
+    auto* blk = b.Block();
+    auto* if_ = b.If(b.Constant(true));
     blk->Append(b.ExitIf(if_));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_ExitLoop) {
-    auto* blk = b.CreateBlock();
-    auto* loop = b.CreateLoop();
+    auto* blk = b.Block();
+    auto* loop = b.Loop();
     blk->Append(b.ExitLoop(loop));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_ExitSwitch) {
-    auto* blk = b.CreateBlock();
-    auto* s = b.CreateSwitch(b.Constant(1_u));
+    auto* blk = b.Block();
+    auto* s = b.Switch(b.Constant(1_u));
     blk->Append(b.ExitSwitch(s));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_NextIteration) {
-    auto* blk = b.CreateBlock();
-    auto* loop = b.CreateLoop();
+    auto* blk = b.Block();
+    auto* loop = b.Loop();
     blk->Append(b.NextIteration(loop));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_Return) {
-    auto* f = b.CreateFunction("myFunc", mod.Types().void_());
+    auto* f = b.Function("myFunc", mod.Types().void_());
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->Append(b.Return(f));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, SetInstructions) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst3 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst3 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst1, inst2, inst3});
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -113,11 +113,11 @@ TEST_F(IR_BlockTest, SetInstructions) {
 }
 
 TEST_F(IR_BlockTest, Append) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst3 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst3 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     EXPECT_EQ(blk->Append(inst1), inst1);
     EXPECT_EQ(blk->Append(inst2), inst2);
     EXPECT_EQ(blk->Append(inst3), inst3);
@@ -144,11 +144,11 @@ TEST_F(IR_BlockTest, Append) {
 }
 
 TEST_F(IR_BlockTest, Prepend) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst3 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst3 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     EXPECT_EQ(blk->Prepend(inst3), inst3);
     EXPECT_EQ(blk->Prepend(inst2), inst2);
     EXPECT_EQ(blk->Prepend(inst1), inst1);
@@ -175,10 +175,10 @@ TEST_F(IR_BlockTest, Prepend) {
 }
 
 TEST_F(IR_BlockTest, InsertBefore_AtStart) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->Append(inst2);
     blk->InsertBefore(inst2, inst1);
 
@@ -199,11 +199,11 @@ TEST_F(IR_BlockTest, InsertBefore_AtStart) {
 }
 
 TEST_F(IR_BlockTest, InsertBefore_Middle) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst3 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst3 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->Append(inst1);
     blk->Append(inst3);
     blk->InsertBefore(inst3, inst2);
@@ -230,10 +230,10 @@ TEST_F(IR_BlockTest, InsertBefore_Middle) {
 }
 
 TEST_F(IR_BlockTest, InsertAfter_AtEnd) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->Append(inst1);
     blk->InsertAfter(inst1, inst2);
 
@@ -254,11 +254,11 @@ TEST_F(IR_BlockTest, InsertAfter_AtEnd) {
 }
 
 TEST_F(IR_BlockTest, InsertAfter_Middle) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst3 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst3 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->Append(inst1);
     blk->Append(inst3);
     blk->InsertAfter(inst1, inst2);
@@ -285,12 +285,12 @@ TEST_F(IR_BlockTest, InsertAfter_Middle) {
 }
 
 TEST_F(IR_BlockTest, Replace_Middle) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst3 = b.CreateLoop();
-    auto* inst4 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst3 = b.Loop();
+    auto* inst4 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst1, inst4, inst3});
     blk->Replace(inst4, inst2);
 
@@ -317,11 +317,11 @@ TEST_F(IR_BlockTest, Replace_Middle) {
 }
 
 TEST_F(IR_BlockTest, Replace_Start) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst4 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst4 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst4, inst2});
     blk->Replace(inst4, inst1);
 
@@ -343,11 +343,11 @@ TEST_F(IR_BlockTest, Replace_Start) {
 }
 
 TEST_F(IR_BlockTest, Replace_End) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst4 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst4 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst1, inst4});
     blk->Replace(inst4, inst2);
 
@@ -369,10 +369,10 @@ TEST_F(IR_BlockTest, Replace_End) {
 }
 
 TEST_F(IR_BlockTest, Replace_OnlyNode) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst4 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst4 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst4});
     blk->Replace(inst4, inst1);
 
@@ -389,11 +389,11 @@ TEST_F(IR_BlockTest, Replace_OnlyNode) {
 }
 
 TEST_F(IR_BlockTest, Remove_Middle) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* inst4 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* inst4 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst1, inst4, inst2});
     blk->Remove(inst4);
 
@@ -413,10 +413,10 @@ TEST_F(IR_BlockTest, Remove_Middle) {
 }
 
 TEST_F(IR_BlockTest, Remove_Start) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst4 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst4 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst4, inst1});
     blk->Remove(inst4);
 
@@ -432,10 +432,10 @@ TEST_F(IR_BlockTest, Remove_Start) {
 }
 
 TEST_F(IR_BlockTest, Remove_End) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst4 = b.CreateLoop();
+    auto* inst1 = b.Loop();
+    auto* inst4 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst1, inst4});
     blk->Remove(inst4);
 
@@ -451,9 +451,9 @@ TEST_F(IR_BlockTest, Remove_End) {
 }
 
 TEST_F(IR_BlockTest, Remove_OnlyNode) {
-    auto* inst4 = b.CreateLoop();
+    auto* inst4 = b.Loop();
 
-    auto* blk = b.CreateBlock();
+    auto* blk = b.Block();
     blk->SetInstructions(utils::Vector{inst4});
     blk->Remove(inst4);
 
@@ -469,7 +469,7 @@ TEST_F(IR_BlockTest, Fail_PrependNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* blk = b.CreateBlock();
+            auto* blk = b.Block();
             blk->Prepend(nullptr);
         },
         "internal compiler error");
@@ -481,8 +481,8 @@ TEST_F(IR_BlockTest, Fail_PrependAlreadyInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->Prepend(inst1);
 
             blk->Prepend(inst1);
@@ -496,7 +496,7 @@ TEST_F(IR_BlockTest, Fail_AppendNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* blk = b.CreateBlock();
+            auto* blk = b.Block();
             blk->Append(nullptr);
         },
         "internal compiler error");
@@ -508,8 +508,8 @@ TEST_F(IR_BlockTest, Fail_AppendAlreadyInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->Append(inst1);
             blk->Append(inst1);
         },
@@ -522,8 +522,8 @@ TEST_F(IR_BlockTest, Fail_InsertBeforeNullptrInst) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->InsertBefore(nullptr, inst1);
         },
         "internal compiler error");
@@ -535,8 +535,8 @@ TEST_F(IR_BlockTest, Fail_InsertBeforeInstNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->Append(inst1);
             blk->InsertBefore(inst1, nullptr);
         },
@@ -549,10 +549,10 @@ TEST_F(IR_BlockTest, Fail_InsertBeforeDifferentBlock) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
-            auto* blk1 = b.CreateBlock();
-            auto* blk2 = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
+            auto* blk1 = b.Block();
+            auto* blk2 = b.Block();
             blk2->Append(inst1);
             blk1->InsertBefore(inst1, inst2);
         },
@@ -565,9 +565,9 @@ TEST_F(IR_BlockTest, Fail_InsertBeforeAlreadyInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
-            auto* blk1 = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
+            auto* blk1 = b.Block();
             blk1->Append(inst1);
             blk1->Append(inst2);
             blk1->InsertBefore(inst1, inst2);
@@ -581,8 +581,8 @@ TEST_F(IR_BlockTest, Fail_InsertAfterNullptrInst) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->InsertAfter(nullptr, inst1);
         },
         "internal compiler error");
@@ -594,8 +594,8 @@ TEST_F(IR_BlockTest, Fail_InsertAfterInstNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->Append(inst1);
             blk->InsertAfter(inst1, nullptr);
         },
@@ -608,10 +608,10 @@ TEST_F(IR_BlockTest, Fail_InsertAfterDifferentBlock) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
-            auto* blk1 = b.CreateBlock();
-            auto* blk2 = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
+            auto* blk1 = b.Block();
+            auto* blk2 = b.Block();
             blk2->Append(inst1);
             blk1->InsertAfter(inst1, inst2);
         },
@@ -624,9 +624,9 @@ TEST_F(IR_BlockTest, Fail_InsertAfterAlreadyInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
-            auto* blk1 = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
+            auto* blk1 = b.Block();
             blk1->Append(inst1);
             blk1->Append(inst2);
             blk1->InsertAfter(inst1, inst2);
@@ -640,8 +640,8 @@ TEST_F(IR_BlockTest, Fail_ReplaceNullptrInst) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->Replace(nullptr, inst1);
         },
         "internal compiler error");
@@ -653,8 +653,8 @@ TEST_F(IR_BlockTest, Fail_ReplaceInstNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->Append(inst1);
             blk->Replace(inst1, nullptr);
         },
@@ -667,10 +667,10 @@ TEST_F(IR_BlockTest, Fail_ReplaceDifferentBlock) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
-            auto* blk1 = b.CreateBlock();
-            auto* blk2 = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
+            auto* blk1 = b.Block();
+            auto* blk2 = b.Block();
             blk2->Append(inst1);
             blk1->Replace(inst1, inst2);
         },
@@ -683,9 +683,9 @@ TEST_F(IR_BlockTest, Fail_ReplaceAlreadyInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
-            auto* blk1 = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
+            auto* blk1 = b.Block();
             blk1->Append(inst1);
             blk1->Append(inst2);
             blk1->Replace(inst1, inst2);
@@ -699,7 +699,7 @@ TEST_F(IR_BlockTest, Fail_RemoveNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* blk = b.CreateBlock();
+            auto* blk = b.Block();
             blk->Remove(nullptr);
         },
         "internal compiler error");
@@ -711,9 +711,9 @@ TEST_F(IR_BlockTest, Fail_RemoveDifferentBlock) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk1 = b.CreateBlock();
-            auto* blk2 = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk1 = b.Block();
+            auto* blk2 = b.Block();
             blk2->Append(inst1);
             blk1->Remove(inst1);
         },

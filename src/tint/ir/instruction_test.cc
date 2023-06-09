@@ -24,9 +24,9 @@ namespace {
 using IR_InstructionTest = IRTestHelper;
 
 TEST_F(IR_InstructionTest, InsertBefore) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* blk = b.CreateBlock();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* blk = b.Block();
     blk->Append(inst2);
     inst1->InsertBefore(inst2);
     EXPECT_EQ(2u, blk->Length());
@@ -39,7 +39,7 @@ TEST_F(IR_InstructionTest, Fail_InsertBeforeNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
+            auto* inst1 = b.Loop();
             inst1->InsertBefore(nullptr);
         },
         "");
@@ -51,17 +51,17 @@ TEST_F(IR_InstructionTest, Fail_InsertBeforeNotInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
             inst1->InsertBefore(inst2);
         },
         "");
 }
 
 TEST_F(IR_InstructionTest, InsertAfter) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* blk = b.CreateBlock();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* blk = b.Block();
     blk->Append(inst2);
     inst1->InsertAfter(inst2);
     EXPECT_EQ(2u, blk->Length());
@@ -74,7 +74,7 @@ TEST_F(IR_InstructionTest, Fail_InsertAfterNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
+            auto* inst1 = b.Loop();
             inst1->InsertAfter(nullptr);
         },
         "");
@@ -86,17 +86,17 @@ TEST_F(IR_InstructionTest, Fail_InsertAfterNotInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
             inst1->InsertAfter(inst2);
         },
         "");
 }
 
 TEST_F(IR_InstructionTest, ReplaceWith) {
-    auto* inst1 = b.CreateLoop();
-    auto* inst2 = b.CreateLoop();
-    auto* blk = b.CreateBlock();
+    auto* inst1 = b.Loop();
+    auto* inst2 = b.Loop();
+    auto* blk = b.Block();
     blk->Append(inst2);
     inst2->ReplaceWith(inst1);
     EXPECT_EQ(1u, blk->Length());
@@ -110,8 +110,8 @@ TEST_F(IR_InstructionTest, Fail_ReplaceWithNullptr) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* blk = b.CreateBlock();
+            auto* inst1 = b.Loop();
+            auto* blk = b.Block();
             blk->Append(inst1);
             inst1->ReplaceWith(nullptr);
         },
@@ -124,16 +124,16 @@ TEST_F(IR_InstructionTest, Fail_ReplaceWithNotInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
-            auto* inst2 = b.CreateLoop();
+            auto* inst1 = b.Loop();
+            auto* inst2 = b.Loop();
             inst1->ReplaceWith(inst2);
         },
         "");
 }
 
 TEST_F(IR_InstructionTest, Remove) {
-    auto* inst1 = b.CreateLoop();
-    auto* blk = b.CreateBlock();
+    auto* inst1 = b.Loop();
+    auto* blk = b.Block();
     blk->Append(inst1);
     EXPECT_EQ(1u, blk->Length());
 
@@ -148,7 +148,7 @@ TEST_F(IR_InstructionTest, Fail_RemoveNotInserted) {
             Module mod;
             Builder b{mod};
 
-            auto* inst1 = b.CreateLoop();
+            auto* inst1 = b.Loop();
             inst1->Remove();
         },
         "");

@@ -23,7 +23,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_LoopTest = IRTestHelper;
 
 TEST_F(IR_LoopTest, Parent) {
-    auto* loop = b.CreateLoop();
+    auto* loop = b.Loop();
     EXPECT_EQ(loop->Initializer()->Parent(), loop);
     EXPECT_EQ(loop->Body()->Parent(), loop);
     EXPECT_EQ(loop->Continuing()->Parent(), loop);
@@ -35,8 +35,7 @@ TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(nullptr, b.CreateMultiInBlock(), b.CreateMultiInBlock(),
-                      b.CreateMultiInBlock());
+            Loop loop(nullptr, b.MultiInBlock(), b.MultiInBlock(), b.MultiInBlock());
         },
         "");
 }
@@ -46,7 +45,7 @@ TEST_F(IR_LoopTest, Fail_NullBodyBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(b.CreateBlock(), nullptr, b.CreateMultiInBlock(), b.CreateMultiInBlock());
+            Loop loop(b.Block(), nullptr, b.MultiInBlock(), b.MultiInBlock());
         },
         "");
 }
@@ -56,7 +55,7 @@ TEST_F(IR_LoopTest, Fail_NullContinuingBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(b.CreateBlock(), b.CreateMultiInBlock(), nullptr, b.CreateMultiInBlock());
+            Loop loop(b.Block(), b.MultiInBlock(), nullptr, b.MultiInBlock());
         },
         "");
 }
@@ -66,7 +65,7 @@ TEST_F(IR_LoopTest, Fail_NullMultiInBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(b.CreateBlock(), b.CreateMultiInBlock(), b.CreateMultiInBlock(), nullptr);
+            Loop loop(b.Block(), b.MultiInBlock(), b.MultiInBlock(), nullptr);
         },
         "");
 }

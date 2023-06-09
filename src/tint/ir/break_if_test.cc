@@ -25,7 +25,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_BreakIfTest = IRTestHelper;
 
 TEST_F(IR_BreakIfTest, Usage) {
-    auto* loop = b.CreateLoop();
+    auto* loop = b.Loop();
     auto* cond = b.Constant(true);
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
@@ -42,7 +42,7 @@ TEST_F(IR_BreakIfTest, Fail_NullCondition) {
         {
             Module mod;
             Builder b{mod};
-            b.BreakIf(nullptr, b.CreateLoop());
+            b.BreakIf(nullptr, b.Loop());
         },
         "");
 }
@@ -62,7 +62,7 @@ TEST_F(IR_BreakIfTest, Fail_NullArg) {
         {
             Module mod;
             Builder b{mod};
-            b.BreakIf(b.Constant(true), b.CreateLoop(), utils::Vector<Value*, 1>{nullptr});
+            b.BreakIf(b.Constant(true), b.Loop(), utils::Vector<Value*, 1>{nullptr});
         },
         "");
 }

@@ -27,7 +27,7 @@ using IR_ExitLoopTest = IRTestHelper;
 TEST_F(IR_ExitLoopTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* loop = b.CreateLoop();
+    auto* loop = b.Loop();
     auto* e = b.ExitLoop(loop, utils::Vector{arg1, arg2});
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
@@ -49,7 +49,7 @@ TEST_F(IR_ExitLoopTest, Fail_NullArg) {
         {
             Module mod;
             Builder b{mod};
-            b.ExitLoop(b.CreateLoop(), utils::Vector<Value*, 1>{nullptr});
+            b.ExitLoop(b.Loop(), utils::Vector<Value*, 1>{nullptr});
         },
         "");
 }

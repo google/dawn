@@ -27,7 +27,7 @@ TEST_F(IR_FunctionTest, Fail_NullReturnType) {
         {
             Module mod;
             Builder b{mod};
-            b.CreateFunction("my_func", nullptr);
+            b.Function("my_func", nullptr);
         },
         "");
 }
@@ -37,7 +37,7 @@ TEST_F(IR_FunctionTest, Fail_DoubleReturnBuiltin) {
         {
             Module mod;
             Builder b{mod};
-            auto* f = b.CreateFunction("my_func", mod.Types().void_());
+            auto* f = b.Function("my_func", mod.Types().void_());
             f->SetReturnBuiltin(Function::ReturnBuiltin::kFragDepth);
             f->SetReturnBuiltin(Function::ReturnBuiltin::kPosition);
         },
@@ -49,7 +49,7 @@ TEST_F(IR_FunctionTest, Fail_NullParam) {
         {
             Module mod;
             Builder b{mod};
-            auto* f = b.CreateFunction("my_func", mod.Types().void_());
+            auto* f = b.Function("my_func", mod.Types().void_());
             f->SetParams(utils::Vector<FunctionParam*, 1>{nullptr});
         },
         "");
@@ -60,7 +60,7 @@ TEST_F(IR_FunctionTest, Fail_NullStartTarget) {
         {
             Module mod;
             Builder b{mod};
-            auto* f = b.CreateFunction("my_func", mod.Types().void_());
+            auto* f = b.Function("my_func", mod.Types().void_());
             f->SetStartTarget(nullptr);
         },
         "");

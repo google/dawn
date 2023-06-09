@@ -27,7 +27,7 @@ using IR_ExitSwitchTest = IRTestHelper;
 TEST_F(IR_ExitSwitchTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* switch_ = b.CreateSwitch(b.Constant(true));
+    auto* switch_ = b.Switch(b.Constant(true));
     auto* e = b.ExitSwitch(switch_, utils::Vector{arg1, arg2});
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
@@ -49,7 +49,7 @@ TEST_F(IR_ExitSwitchTest, Fail_NullArg) {
         {
             Module mod;
             Builder b{mod};
-            b.ExitSwitch(b.CreateSwitch(b.Constant(false)), utils::Vector<Value*, 1>{nullptr});
+            b.ExitSwitch(b.Switch(b.Constant(false)), utils::Vector<Value*, 1>{nullptr});
         },
         "");
 }

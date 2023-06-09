@@ -29,7 +29,7 @@ class SpvGeneratorImplTest_Access : public SpvGeneratorImplTest {
 TEST_F(SpvGeneratorImplTest_Access, Array_Value_ConstantIndex) {
     auto* arr_val = b.FunctionParam(ty.array(ty.i32(), 4));
     auto* access = b.Access(ty.i32(), arr_val, utils::Vector{b.Constant(1_u)});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->SetParams(utils::Vector{arr_val});
     func->StartTarget()->SetInstructions(utils::Vector{access, b.Return(func)});
 
@@ -56,7 +56,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest_Access, Array_Pointer_ConstantIndex) {
     auto* arr_var = b.Var(ptr(ty.array(ty.i32(), 4)));
     auto* access = b.Access(ptr(ty.i32()), arr_var, utils::Vector{b.Constant(1_u)});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{arr_var, access, b.Return(func)});
 
     ASSERT_TRUE(IRIsValid()) << Error();
@@ -87,7 +87,7 @@ TEST_F(SpvGeneratorImplTest_Access, Array_Pointer_DynamicIndex) {
     auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access = b.Access(ptr(ty.i32()), arr_var, utils::Vector{idx});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{idx_var, idx, arr_var, access, b.Return(func)});
 
@@ -119,7 +119,7 @@ TEST_F(SpvGeneratorImplTest_Access, Matrix_Value_ConstantIndex) {
     auto* mat_val = b.FunctionParam(ty.mat2x2(ty.f32()));
     auto* access_vec = b.Access(ty.vec2(ty.f32()), mat_val, utils::Vector{b.Constant(1_u)});
     auto* access_el = b.Access(ty.f32(), mat_val, utils::Vector{b.Constant(1_u), b.Constant(0_u)});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->SetParams(utils::Vector{mat_val});
     func->StartTarget()->SetInstructions(utils::Vector{access_vec, access_el, b.Return(func)});
 
@@ -147,7 +147,7 @@ TEST_F(SpvGeneratorImplTest_Access, Matrix_Pointer_ConstantIndex) {
     auto* access_vec = b.Access(ptr(ty.vec2(ty.f32())), mat_var, utils::Vector{b.Constant(1_u)});
     auto* access_el =
         b.Access(ptr(ty.f32()), mat_var, utils::Vector{b.Constant(1_u), b.Constant(0_u)});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{access_vec, access_el, b.Return(func)});
 
     ASSERT_TRUE(IRIsValid()) << Error();
@@ -178,7 +178,7 @@ TEST_F(SpvGeneratorImplTest_Access, Matrix_Pointer_DynamicIndex) {
     auto* idx = b.Load(idx_var);
     auto* access_vec = b.Access(ptr(ty.vec2(ty.f32())), mat_var, utils::Vector{idx});
     auto* access_el = b.Access(ptr(ty.f32()), mat_var, utils::Vector{idx, idx});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{idx_var, idx, mat_var, access_vec, access_el, b.Return(func)});
 
@@ -211,7 +211,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest_Access, Vector_Value_ConstantIndex) {
     auto* vec_val = b.FunctionParam(ty.vec4(ty.i32()));
     auto* access = b.Access(ty.i32(), vec_val, utils::Vector{b.Constant(1_u)});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->SetParams(utils::Vector{vec_val});
     func->StartTarget()->SetInstructions(utils::Vector{access, b.Return(func)});
 
@@ -237,7 +237,7 @@ TEST_F(SpvGeneratorImplTest_Access, Vector_Value_DynamicIndex) {
     auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access = b.Access(ty.i32(), vec_val, utils::Vector{idx});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->SetParams(utils::Vector{vec_val});
     func->StartTarget()->SetInstructions(utils::Vector{idx_var, idx, access, b.Return(func)});
 
@@ -264,7 +264,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest_Access, Vector_Pointer_ConstantIndex) {
     auto* vec_var = b.Var(ptr(ty.vec4(ty.i32())));
     auto* access = b.Access(ptr(ty.i32()), vec_var, utils::Vector{b.Constant(1_u)});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->SetInstructions(utils::Vector{vec_var, access, b.Return(func)});
 
     ASSERT_TRUE(IRIsValid()) << Error();
@@ -293,7 +293,7 @@ TEST_F(SpvGeneratorImplTest_Access, Vector_Pointer_DynamicIndex) {
     auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access = b.Access(ptr(ty.i32()), vec_var, utils::Vector{idx});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{idx_var, idx, vec_var, access, b.Return(func)});
 
@@ -323,7 +323,7 @@ TEST_F(SpvGeneratorImplTest_Access, NestedVector_Value_DynamicIndex) {
     auto* idx_var = b.Var(ptr(ty.i32()));
     auto* idx = b.Load(idx_var);
     auto* access = b.Access(ty.i32(), val, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->SetParams(utils::Vector{val});
     func->StartTarget()->SetInstructions(utils::Vector{idx_var, idx, access, b.Return(func)});
 
@@ -367,7 +367,7 @@ TEST_F(SpvGeneratorImplTest_Access, Struct_Value_ConstantIndex) {
     auto* str_val = b.FunctionParam(str);
     auto* access_vec = b.Access(ty.i32(), str_val, utils::Vector{b.Constant(1_u)});
     auto* access_el = b.Access(ty.i32(), str_val, utils::Vector{b.Constant(1_u), b.Constant(2_u)});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->SetParams(utils::Vector{str_val});
     func->StartTarget()->SetInstructions(utils::Vector{access_vec, access_el, b.Return(func)});
 
@@ -410,7 +410,7 @@ TEST_F(SpvGeneratorImplTest_Access, Struct_Pointer_ConstantIndex) {
     auto* access_vec = b.Access(ptr(ty.i32()), str_var, utils::Vector{b.Constant(1_u)});
     auto* access_el =
         b.Access(ptr(ty.i32()), str_var, utils::Vector{b.Constant(1_u), b.Constant(2_u)});
-    auto* func = b.CreateFunction("foo", ty.void_());
+    auto* func = b.Function("foo", ty.void_());
     func->StartTarget()->SetInstructions(
         utils::Vector{str_var, access_vec, access_el, b.Return(func)});
 

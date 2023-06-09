@@ -50,7 +50,7 @@ class AST_AddFunction final : public ast::transform::Transform {
 class IR_AddFunction final : public ir::transform::Transform {
     void Run(ir::Module* mod, const DataMap&, DataMap&) const override {
         ir::Builder builder(*mod);
-        auto* func = builder.CreateFunction("ir_func", mod->Types().Get<type::Void>());
+        auto* func = builder.Function("ir_func", mod->Types().Get<type::Void>());
         func->StartTarget()->SetInstructions(utils::Vector{builder.Return(func)});
         mod->functions.Push(func);
     }
@@ -67,7 +67,7 @@ Program MakeAST() {
 ir::Module MakeIR() {
     ir::Module mod;
     ir::Builder builder(mod);
-    auto* func = builder.CreateFunction("main", mod.Types().Get<type::Void>());
+    auto* func = builder.Function("main", mod.Types().Get<type::Void>());
     func->StartTarget()->SetInstructions(utils::Vector{builder.Return(func)});
     builder.ir.functions.Push(func);
     return mod;

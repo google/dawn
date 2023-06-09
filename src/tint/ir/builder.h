@@ -69,10 +69,10 @@ class Builder {
     ~Builder();
 
     /// @returns a new block
-    Block* CreateBlock();
+    ir::Block* Block();
 
     /// @returns a new multi-in block
-    MultiInBlock* CreateMultiInBlock();
+    ir::MultiInBlock* MultiInBlock();
 
     /// Creates a function flow node
     /// @param name the function name
@@ -80,30 +80,30 @@ class Builder {
     /// @param stage the function stage
     /// @param wg_size the workgroup_size
     /// @returns the flow node
-    Function* CreateFunction(std::string_view name,
-                             const type::Type* return_type,
-                             Function::PipelineStage stage = Function::PipelineStage::kUndefined,
-                             std::optional<std::array<uint32_t, 3>> wg_size = {});
+    ir::Function* Function(std::string_view name,
+                           const type::Type* return_type,
+                           Function::PipelineStage stage = Function::PipelineStage::kUndefined,
+                           std::optional<std::array<uint32_t, 3>> wg_size = {});
 
     /// Creates an if flow node
     /// @param condition the if condition
     /// @returns the flow node
-    If* CreateIf(Value* condition);
+    ir::If* If(Value* condition);
 
     /// Creates a loop flow node
     /// @returns the flow node
-    Loop* CreateLoop();
+    ir::Loop* Loop();
 
     /// Creates a switch flow node
     /// @param condition the switch condition
     /// @returns the flow node
-    Switch* CreateSwitch(Value* condition);
+    ir::Switch* Switch(Value* condition);
 
     /// Creates a case flow node for the given case branch.
     /// @param s the switch to create the case into
     /// @param selectors the case selectors for the case statement
     /// @returns the start block for the case flow node
-    Block* CreateCase(Switch* s, utils::VectorRef<Switch::CaseSelector> selectors);
+    ir::Block* Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selectors);
 
     /// Creates a new ir::Constant
     /// @param val the constant value
@@ -143,144 +143,144 @@ class Builder {
     /// @param lhs the left-hand-side of the operation
     /// @param rhs the right-hand-side of the operation
     /// @returns the operation
-    Binary* CreateBinary(enum Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Binary(enum Binary::Kind kind, const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an And operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* And(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* And(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an Or operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* Or(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Or(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an Xor operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* Xor(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Xor(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an Equal operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* Equal(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Equal(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an NotEqual operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* NotEqual(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* NotEqual(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an LessThan operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* LessThan(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* LessThan(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an GreaterThan operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* GreaterThan(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* GreaterThan(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an LessThanEqual operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* LessThanEqual(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* LessThanEqual(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an GreaterThanEqual operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* GreaterThanEqual(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* GreaterThanEqual(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an ShiftLeft operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* ShiftLeft(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* ShiftLeft(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an ShiftRight operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* ShiftRight(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* ShiftRight(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an Add operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* Add(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Add(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an Subtract operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* Subtract(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Subtract(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an Multiply operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* Multiply(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Multiply(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an Divide operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* Divide(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Divide(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an Modulo operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
-    Binary* Modulo(const type::Type* type, Value* lhs, Value* rhs);
+    ir::Binary* Modulo(const type::Type* type, Value* lhs, Value* rhs);
 
     /// Creates an op for `kind val`
     /// @param kind the kind of operation
     /// @param type the result type of the binary expression
     /// @param val the value of the operation
     /// @returns the operation
-    Unary* CreateUnary(enum Unary::Kind kind, const type::Type* type, Value* val);
+    ir::Unary* Unary(enum Unary::Kind kind, const type::Type* type, Value* val);
 
     /// Creates a Complement operation
     /// @param type the result type of the expression
     /// @param val the value
     /// @returns the operation
-    Unary* Complement(const type::Type* type, Value* val);
+    ir::Unary* Complement(const type::Type* type, Value* val);
 
     /// Creates a Negation operation
     /// @param type the result type of the expression
     /// @param val the value
     /// @returns the operation
-    Unary* Negation(const type::Type* type, Value* val);
+    ir::Unary* Negation(const type::Type* type, Value* val);
 
     /// Creates a Not operation
     /// @param type the result type of the expression
     /// @param val the value
     /// @returns the operation
-    Binary* Not(const type::Type* type, Value* val);
+    ir::Binary* Not(const type::Type* type, Value* val);
 
     /// Creates a bitcast instruction
     /// @param type the result type of the bitcast
@@ -298,7 +298,7 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     ir::UserCall* Call(const type::Type* type,
-                       Function* func,
+                       ir::Function* func,
                        utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a builtin call instruction
@@ -342,13 +342,13 @@ class Builder {
     /// @param func the function being returned
     /// @param value the return value
     /// @returns the instruction
-    ir::Return* Return(Function* func, Value* value = nullptr);
+    ir::Return* Return(ir::Function* func, Value* value = nullptr);
 
     /// Creates a loop next iteration instruction
     /// @param loop the loop being iterated
     /// @param args the branch arguments
     /// @returns the instruction
-    ir::NextIteration* NextIteration(Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
+    ir::NextIteration* NextIteration(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a loop break-if instruction
     /// @param condition the break condition
@@ -356,32 +356,32 @@ class Builder {
     /// @param args the branch arguments
     /// @returns the instruction
     ir::BreakIf* BreakIf(Value* condition,
-                         Loop* loop,
+                         ir::Loop* loop,
                          utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a continue instruction
     /// @param loop the loop being continued
     /// @param args the branch arguments
     /// @returns the instruction
-    ir::Continue* Continue(Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
+    ir::Continue* Continue(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates an exit switch instruction
     /// @param sw the switch being exited
     /// @param args the branch arguments
     /// @returns the instruction
-    ir::ExitSwitch* ExitSwitch(Switch* sw, utils::VectorRef<Value*> args = utils::Empty);
+    ir::ExitSwitch* ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates an exit loop instruction
     /// @param loop the loop being exited
     /// @param args the branch arguments
     /// @returns the instruction
-    ir::ExitLoop* ExitLoop(Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
+    ir::ExitLoop* ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates an exit if instruction
     /// @param i the if being exited
     /// @param args the branch arguments
     /// @returns the instruction
-    ir::ExitIf* ExitIf(If* i, utils::VectorRef<Value*> args = utils::Empty);
+    ir::ExitIf* ExitIf(ir::If* i, utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a new `BlockParam`
     /// @param type the parameter type
@@ -409,7 +409,7 @@ class Builder {
 
     /// Retrieves the root block for the module, creating if necessary
     /// @returns the root block
-    ir::Block* CreateRootBlockIfNeeded();
+    ir::Block* RootBlock();
 
     /// The IR module.
     Module& ir;
