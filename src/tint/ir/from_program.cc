@@ -832,7 +832,11 @@ class Impl {
             }
             ret_value = ret.Get();
         }
-        SetBranch(builder_.Return(current_function_, ret_value));
+        if (ret_value) {
+            SetBranch(builder_.Return(current_function_, ret_value));
+        } else {
+            SetBranch(builder_.Return(current_function_));
+        }
     }
 
     void EmitBreak(const ast::BreakStatement*) {

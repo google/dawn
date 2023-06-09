@@ -117,30 +117,6 @@ class VariableDeclStatement;
 
 namespace tint {
 
-namespace detail {
-
-/// IsVectorLike<T>::value is true if T is a utils::Vector or utils::VectorRef.
-template <typename T>
-struct IsVectorLike {
-    /// Non-specialized form of IsVectorLike defaults to false
-    static constexpr bool value = false;
-};
-
-/// IsVectorLike specialization for utils::Vector
-template <typename T, size_t N>
-struct IsVectorLike<utils::Vector<T, N>> {
-    /// True for the IsVectorLike specialization of utils::Vector
-    static constexpr bool value = true;
-};
-
-/// IsVectorLike specialization for utils::VectorRef
-template <typename T>
-struct IsVectorLike<utils::VectorRef<T>> {
-    /// True for the IsVectorLike specialization of utils::VectorRef
-    static constexpr bool value = true;
-};
-}  // namespace detail
-
 // A sentinel type used by some template arguments to signal that the a type should be inferred.
 struct Infer {};
 
@@ -194,11 +170,11 @@ class ProgramBuilder {
     using EnableIfScalar = utils::traits::EnableIf<
         IsScalar<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
-    /// A helper used to disable overloads if the first type in `TYPES` is a utils::Vector,
-    /// utils::VectorRef or utils::VectorRef.
+    /// A helper used to disable overloads if the first type in `TYPES` is a utils::Vector or
+    /// utils::VectorRef.
     template <typename... TYPES>
-    using DisableIfVectorLike = utils::traits::EnableIf<!detail::IsVectorLike<
-        utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>::value>;
+    using DisableIfVectorLike = utils::traits::EnableIf<
+        !utils::IsVectorLike<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to enable overloads if the first type in `TYPES` is identifier-like.
     template <typename... TYPES>

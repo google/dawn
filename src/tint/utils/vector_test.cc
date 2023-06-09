@@ -81,6 +81,10 @@ static_assert(std::is_same_v<VectorCommonType<const C2a*, C2b*>, const C1*>);
 static_assert(std::is_same_v<VectorCommonType<C2a*, const C2b*>, const C1*>);
 static_assert(std::is_same_v<VectorCommonType<const C2a*, const C2b*>, const C1*>);
 
+static_assert(IsVectorLike<Vector<int, 3>>);
+static_assert(IsVectorLike<VectorRef<int>>);
+static_assert(!IsVectorLike<int>);
+
 ////////////////////////////////////////////////////////////////////////////////
 // TintVectorTest
 ////////////////////////////////////////////////////////////////////////////////

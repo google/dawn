@@ -39,19 +39,13 @@ TEST_F(IR_ReturnTest, Fail_NullValue) {
         {
             Module mod;
             Builder b{mod};
-            mod.values.Create<Return>(b.Function("myfunc", mod.Types().void_()),
-                                      utils::Vector<Value*, 1>{nullptr});
+            mod.values.Create<Return>(b.Function("myfunc", mod.Types().void_()), nullptr);
         },
         "");
 }
 
 TEST_F(IR_ReturnTest, ImplicitNoValue) {
     auto* ret = b.Return(b.Function("myfunc", ty.void_()));
-    EXPECT_TRUE(ret->Args().IsEmpty());
-}
-
-TEST_F(IR_ReturnTest, ExplicitNoValue) {
-    auto* ret = b.Return(b.Function("myfunc", ty.void_()), nullptr);
     EXPECT_TRUE(ret->Args().IsEmpty());
 }
 

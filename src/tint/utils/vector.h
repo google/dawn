@@ -766,6 +766,34 @@ Vector<T, N> ToVector(const std::vector<T>& vector) {
     return out;
 }
 
+namespace detail {
+
+/// IsVectorLike<T>::value is true if T is a utils::Vector or utils::VectorRef.
+template <typename T>
+struct IsVectorLike {
+    /// Non-specialized form of IsVectorLike defaults to false
+    static constexpr bool value = false;
+};
+
+/// IsVectorLike specialization for utils::Vector
+template <typename T, size_t N>
+struct IsVectorLike<utils::Vector<T, N>> {
+    /// True for the IsVectorLike specialization of utils::Vector
+    static constexpr bool value = true;
+};
+
+/// IsVectorLike specialization for utils::VectorRef
+template <typename T>
+struct IsVectorLike<utils::VectorRef<T>> {
+    /// True for the IsVectorLike specialization of utils::VectorRef
+    static constexpr bool value = true;
+};
+}  // namespace detail
+
+/// True if T is a Vector<T, N> or VectorRef<T>
+template <typename T>
+static constexpr bool IsVectorLike = detail::IsVectorLike<T>::value;
+
 }  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_VECTOR_H_

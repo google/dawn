@@ -27,6 +27,11 @@ class Load : public utils::Castable<Load, OperandInstruction<1>> {
     /// @param type the result type
     /// @param from the value being loaded from
     Load(const type::Type* type, Value* from);
+
+    /// Constructor (infers type)
+    /// @param from the value being loaded from
+    explicit Load(Value* from);
+
     ~Load() override;
 
     /// @returns the type of the value

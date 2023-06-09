@@ -28,10 +28,15 @@ namespace tint::ir {
 /// A return instruction.
 class Return : public utils::Castable<Return, Branch> {
   public:
+    /// Constructor (no return value)
+    /// @param func the function being returned
+    explicit Return(Function* func);
+
     /// Constructor
     /// @param func the function being returned
-    /// @param args the branch arguments
-    explicit Return(Function* func, utils::VectorRef<Value*> args = {});
+    /// @param arg the return value
+    Return(Function* func, Value* arg);
+
     ~Return() override;
 
     /// @returns the function being returned
