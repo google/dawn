@@ -23,6 +23,12 @@ namespace tint::ir {
 /// An access instruction in the IR.
 class Access : public utils::Castable<Access, OperandInstruction<3>> {
   public:
+    /// The base offset in Operands() for the object being accessed
+    static constexpr size_t kObjectOperandOffset = 0;
+
+    /// The base offset in Operands() for the access indices
+    static constexpr size_t kIndicesOperandOffset = 1;
+
     /// Constructor
     /// @param result_type the result type
     /// @param object the accessor object
@@ -34,10 +40,10 @@ class Access : public utils::Castable<Access, OperandInstruction<3>> {
     const type::Type* Type() override { return result_type_; }
 
     /// @returns the object used for the access
-    Value* Object() { return operands_[0]; }
+    Value* Object() { return operands_[kObjectOperandOffset]; }
 
     /// @returns the accessor indices
-    utils::Slice<Value*> Indices() { return operands_.Slice().Offset(1); }
+    utils::Slice<Value*> Indices() { return operands_.Slice().Offset(kIndicesOperandOffset); }
 
   private:
     const type::Type* result_type_ = nullptr;

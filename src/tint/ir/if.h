@@ -46,7 +46,7 @@ namespace tint::ir {
 class If : public utils::Castable<If, ControlInstruction> {
   public:
     /// The index of the condition operand
-    static constexpr size_t kConditionOperandIndex = 0;
+    static constexpr size_t kConditionOperandOffset = 0;
 
     /// Constructor
     /// @param cond the if condition
@@ -60,7 +60,7 @@ class If : public utils::Castable<If, ControlInstruction> {
     utils::Slice<Value* const> Args() override { return utils::Slice<Value*>{}; }
 
     /// @returns the if condition
-    Value* Condition() { return operands_[kConditionOperandIndex]; }
+    Value* Condition() { return operands_[kConditionOperandOffset]; }
 
     /// @returns the true branch block
     ir::Block* True() { return true_; }

@@ -438,14 +438,9 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             out_ << " = ";
             EmitInstructionName("access", a);
             out_ << " ";
-            EmitValue(a->Object());
+            EmitOperand(a, a->Object(), Access::kObjectOperandOffset);
             out_ << ", ";
-            for (size_t i = 0; i < a->Indices().Length(); ++i) {
-                if (i > 0) {
-                    out_ << ", ";
-                }
-                EmitValue(a->Indices()[i]);
-            }
+            EmitOperandList(a, a->Indices(), Access::kIndicesOperandOffset);
             EmitLine();
         },
         [&](Swizzle* s) {
@@ -477,16 +472,28 @@ void Disassembler::EmitInstruction(Instruction* inst) {
         [&](Default) { out_ << "Unknown instruction: " << inst->TypeInfo().name; });
 }
 
-void Disassembler::EmitOperand(Value* val, Instruction* inst, uint32_t index) {
+void Disassembler::EmitOperand(Instruction* inst, Value* val, size_t index) {
     SourceMarker condMarker(this);
     EmitValue(val);
-    condMarker.Store(Usage{inst, index});
+    condMarker.Store(Usage{inst, static_cast<uint32_t>(index)});
+}
+
+void Disassembler::EmitOperandList(Instruction* inst,
+                                   utils::Slice<Value* const> operands,
+                                   size_t start_index) {
+    size_t index = start_index;
+    for (auto* operand : operands) {
+        if (index != start_index) {
+            out_ << ", ";
+        }
+        EmitOperand(inst, operand, index++);
+    }
 }
 
 void Disassembler::EmitIf(If* i) {
     SourceMarker sm(this);
     out_ << "if ";
-    EmitOperand(i->Condition(), i, If::kConditionOperandIndex);
+    EmitOperand(i, i->Condition(), If::kConditionOperandOffset);
 
     bool has_true = i->True()->HasBranchTarget();
     bool has_false = i->False()->HasBranchTarget();

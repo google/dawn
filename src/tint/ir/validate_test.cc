@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/validate.h"
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/ir_test_helper.h"
+#include "src/tint/ir/validate.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/type/pointer.h"
+#include "src/tint/type/struct.h"
 
 namespace tint::ir {
 namespace {
@@ -27,8 +31,8 @@ using IR_ValidateTest = IRTestHelper;
 
 TEST_F(IR_ValidateTest, RootBlock_Var) {
     mod.root_block = b.CreateRootBlockIfNeeded();
-    mod.root_block->Append(b.Var(mod.Types().pointer(
-        mod.Types().i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite)));
+    mod.root_block->Append(
+        b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite)));
     auto res = ir::Validate(mod);
     EXPECT_TRUE(res) << res.Failure().str();
 }
@@ -79,18 +83,17 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidateTest, Function) {
-    auto* f = b.CreateFunction("my_func", mod.Types().void_());
+    auto* f = b.CreateFunction("my_func", ty.void_());
     mod.functions.Push(f);
 
-    f->SetParams(
-        utils::Vector{b.FunctionParam(mod.Types().i32()), b.FunctionParam(mod.Types().f32())});
+    f->SetParams(utils::Vector{b.FunctionParam(ty.i32()), b.FunctionParam(ty.f32())});
     f->StartTarget()->SetInstructions(utils::Vector{b.Return(f)});
     auto res = ir::Validate(mod);
     EXPECT_TRUE(res) << res.Failure().str();
 }
 
 TEST_F(IR_ValidateTest, Block_NoBranchAtEnd) {
-    auto* f = b.CreateFunction("my_func", mod.Types().void_());
+    auto* f = b.CreateFunction("my_func", ty.void_());
     mod.functions.Push(f);
 
     auto res = ir::Validate(mod);
@@ -109,8 +112,446 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidateTest, Valid_Access_Value) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.mat3x2(ty.f32()));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(
+        b.Access(ty.f32(), obj, utils::Vector{b.Constant(1_u), b.Constant(0_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    EXPECT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidateTest, Valid_Access_Ptr) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.pointer(ty.mat3x2(ty.f32()), builtin::AddressSpace::kPrivate,
+                                           builtin::Access::kReadWrite));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(
+        b.Access(ty.pointer(ty.f32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite),
+                 obj, utils::Vector{b.Constant(1_u), b.Constant(0_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    EXPECT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidateTest, Access_NegativeIndex) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.vec3(ty.f32()));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(b.Access(ty.f32(), obj, utils::Vector{b.Constant(-1_i)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:25 error: access: constant index must be positive, got -1
+    %3:f32 = access %2, -1i
+                        ^^^
+
+:2:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %3:f32 = access %2, -1i
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+note: # Disassembly
+%my_func = func(%2:vec3<f32>):void -> %b1 {
+  %b1 = block {
+    %3:f32 = access %2, -1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_OOB_Index_Value) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.mat3x2(ty.f32()));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(
+        b.Access(ty.f32(), obj, utils::Vector{b.Constant(1_u), b.Constant(3_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:29 error: access: index out of bounds for type vec2<f32>
+    %3:f32 = access %2, 1u, 3u
+                            ^^
+
+:2:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %3:f32 = access %2, 1u, 3u
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+:3:29 note: acceptable range: [0..1]
+    %3:f32 = access %2, 1u, 3u
+                            ^^
+
+note: # Disassembly
+%my_func = func(%2:mat3x2<f32>):void -> %b1 {
+  %b1 = block {
+    %3:f32 = access %2, 1u, 3u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_OOB_Index_Ptr) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.pointer(ty.mat3x2(ty.f32()), builtin::AddressSpace::kPrivate,
+                                           builtin::Access::kReadWrite));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(
+        b.Access(ty.pointer(ty.f32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite),
+                 obj, utils::Vector{b.Constant(1_u), b.Constant(3_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(),
+              R"(:3:55 error: access: index out of bounds for type ptr<vec2<f32>>
+    %3:ptr<private, f32, read_write> = access %2, 1u, 3u
+                                                      ^^
+
+:2:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %3:ptr<private, f32, read_write> = access %2, 1u, 3u
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+:3:55 note: acceptable range: [0..1]
+    %3:ptr<private, f32, read_write> = access %2, 1u, 3u
+                                                      ^^
+
+note: # Disassembly
+%my_func = func(%2:ptr<private, mat3x2<f32>, read_write>):void -> %b1 {
+  %b1 = block {
+    %3:ptr<private, f32, read_write> = access %2, 1u, 3u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_StaticallyUnindexableType_Value) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.f32());
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(b.Access(ty.f32(), obj, utils::Vector{b.Constant(1_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:25 error: access: type f32 cannot be indexed
+    %3:f32 = access %2, 1u
+                        ^^
+
+:2:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %3:f32 = access %2, 1u
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+note: # Disassembly
+%my_func = func(%2:f32):void -> %b1 {
+  %b1 = block {
+    %3:f32 = access %2, 1u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_StaticallyUnindexableType_Ptr) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(
+        ty.pointer(ty.f32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(
+        b.Access(ty.pointer(ty.f32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite),
+                 obj, utils::Vector{b.Constant(1_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:51 error: access: type ptr<f32> cannot be indexed
+    %3:ptr<private, f32, read_write> = access %2, 1u
+                                                  ^^
+
+:2:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %3:ptr<private, f32, read_write> = access %2, 1u
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+note: # Disassembly
+%my_func = func(%2:ptr<private, f32, read_write>):void -> %b1 {
+  %b1 = block {
+    %3:ptr<private, f32, read_write> = access %2, 1u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Value) {
+    utils::Vector members{
+        ty.Get<type::StructMember>(mod.symbols.New(), ty.i32(), 0u, 0u, 4u, 4u,
+                                   type::StructMemberAttributes{}),
+        ty.Get<type::StructMember>(mod.symbols.New(), ty.i32(), 1u, 4u, 4u, 4u,
+                                   type::StructMemberAttributes{}),
+    };
+    auto* str_ty = ty.Get<type::Struct>(mod.symbols.New(), std::move(members), 4u, 8u, 8u);
+
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(str_ty);
+    auto* idx = b.FunctionParam(ty.i32());
+    f->SetParams(utils::Vector{obj, idx});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(b.Access(ty.i32(), obj, utils::Vector{idx}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(),
+              R"(:8:25 error: access: type tint_symbol_2 cannot be dynamically indexed
+    %4:i32 = access %2, %3
+                        ^^
+
+:7:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %4:i32 = access %2, %3
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+note: # Disassembly
+tint_symbol_2 = struct @align(4) {
+  tint_symbol:i32 @offset(0)
+  tint_symbol_1:i32 @offset(4)
+}
+
+%my_func = func(%2:tint_symbol_2, %3:i32):void -> %b1 {
+  %b1 = block {
+    %4:i32 = access %2, %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Ptr) {
+    utils::Vector members{
+        ty.Get<type::StructMember>(mod.symbols.New(), ty.i32(), 0u, 0u, 4u, 4u,
+                                   type::StructMemberAttributes{}),
+        ty.Get<type::StructMember>(mod.symbols.New(), ty.i32(), 1u, 4u, 4u, 4u,
+                                   type::StructMemberAttributes{}),
+    };
+    auto* str_ty = ty.Get<type::Struct>(mod.symbols.New(), std::move(members), 4u, 8u, 8u);
+
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(
+        ty.pointer(str_ty, builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+    auto* idx = b.FunctionParam(ty.i32());
+    f->SetParams(utils::Vector{obj, idx});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(b.Access(ty.i32(), obj, utils::Vector{idx}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(),
+              R"(:8:25 error: access: type ptr<tint_symbol_2> cannot be dynamically indexed
+    %4:i32 = access %2, %3
+                        ^^
+
+:7:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %4:i32 = access %2, %3
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+note: # Disassembly
+tint_symbol_2 = struct @align(4) {
+  tint_symbol:i32 @offset(0)
+  tint_symbol_1:i32 @offset(4)
+}
+
+%my_func = func(%2:ptr<private, tint_symbol_2, read_write>, %3:i32):void -> %b1 {
+  %b1 = block {
+    %4:i32 = access %2, %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_Incorrect_Type_Value_Value) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.mat3x2(ty.f32()));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(
+        b.Access(ty.i32(), obj, utils::Vector{b.Constant(1_u), b.Constant(1_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(),
+              R"(:3:14 error: access: result of access chain is type f32 but instruction type is i32
+    %3:i32 = access %2, 1u, 1u
+             ^^^^^^
+
+:2:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %3:i32 = access %2, 1u, 1u
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+note: # Disassembly
+%my_func = func(%2:mat3x2<f32>):void -> %b1 {
+  %b1 = block {
+    %3:i32 = access %2, 1u, 1u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Ptr) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.pointer(ty.mat3x2(ty.f32()), builtin::AddressSpace::kPrivate,
+                                           builtin::Access::kReadWrite));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(
+        b.Access(ty.pointer(ty.i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite),
+                 obj, utils::Vector{b.Constant(1_u), b.Constant(1_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(
+        res.Failure().str(),
+        R"(:3:40 error: access: result of access chain is type ptr<f32> but instruction type is ptr<i32>
+    %3:ptr<private, i32, read_write> = access %2, 1u, 1u
+                                       ^^^^^^
+
+:2:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %3:ptr<private, i32, read_write> = access %2, 1u, 1u
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+note: # Disassembly
+%my_func = func(%2:ptr<private, mat3x2<f32>, read_write>):void -> %b1 {
+  %b1 = block {
+    %3:ptr<private, i32, read_write> = access %2, 1u, 1u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Value) {
+    auto* f = b.CreateFunction("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.pointer(ty.mat3x2(ty.f32()), builtin::AddressSpace::kPrivate,
+                                           builtin::Access::kReadWrite));
+    f->SetParams(utils::Vector{obj});
+    mod.functions.Push(f);
+
+    f->StartTarget()->Append(
+        b.Access(ty.f32(), obj, utils::Vector{b.Constant(1_u), b.Constant(1_u)}));
+    f->StartTarget()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(
+        res.Failure().str(),
+        R"(:3:14 error: access: result of access chain is type ptr<f32> but instruction type is f32
+    %3:f32 = access %2, 1u, 1u
+             ^^^^^^
+
+:2:1 note: In block
+  %b1 = block {
+^^^^^^^^^^^^^^^
+    %3:f32 = access %2, 1u, 1u
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ret
+^^^^^^^
+  }
+^^^
+
+note: # Disassembly
+%my_func = func(%2:ptr<private, mat3x2<f32>, read_write>):void -> %b1 {
+  %b1 = block {
+    %3:f32 = access %2, 1u, 1u
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidateTest, Block_BranchInMiddle) {
-    auto* f = b.CreateFunction("my_func", mod.Types().void_());
+    auto* f = b.CreateFunction("my_func", ty.void_());
     mod.functions.Push(f);
 
     f->StartTarget()->SetInstructions(utils::Vector{b.Return(f), b.Return(f)});
@@ -141,7 +582,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidateTest, If_ConditionIsBool) {
-    auto* f = b.CreateFunction("my_func", mod.Types().void_());
+    auto* f = b.CreateFunction("my_func", ty.void_());
     mod.functions.Push(f);
 
     auto* if_ = b.CreateIf(b.Constant(1_i));

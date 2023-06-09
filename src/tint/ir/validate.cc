@@ -90,48 +90,55 @@ class Validator {
         mod_.disassembly_file = std::make_unique<Source::File>("", dis_.Disassemble());
     }
 
-    void AddError(Instruction* inst, const std::string& err) {
+    void AddError(Instruction* inst, std::string err) {
         DisassembleIfNeeded();
         auto src = dis_.InstructionSource(inst);
         src.file = mod_.disassembly_file.get();
-        AddError(err, src);
+        AddError(std::move(err), src);
 
         if (current_block_) {
             AddNote(current_block_, "In block");
         }
     }
 
-    void AddError(Instruction* inst, uint32_t idx, const std::string& err) {
+    void AddError(Instruction* inst, size_t idx, std::string err) {
         DisassembleIfNeeded();
-        auto src = dis_.OperandSource(Usage{inst, idx});
+        auto src = dis_.OperandSource(Usage{inst, static_cast<uint32_t>(idx)});
         src.file = mod_.disassembly_file.get();
-        AddError(err, src);
+        AddError(std::move(err), src);
 
         if (current_block_) {
             AddNote(current_block_, "In block");
         }
     }
 
-    void AddError(Block* blk, const std::string& err) {
+    void AddError(Block* blk, std::string err) {
         DisassembleIfNeeded();
         auto src = dis_.BlockSource(blk);
         src.file = mod_.disassembly_file.get();
-        AddError(err, src);
+        AddError(std::move(err), src);
     }
 
-    void AddNote(Block* blk, const std::string& err) {
+    void AddNote(Instruction* inst, size_t idx, std::string err) {
+        DisassembleIfNeeded();
+        auto src = dis_.OperandSource(Usage{inst, static_cast<uint32_t>(idx)});
+        src.file = mod_.disassembly_file.get();
+        AddNote(std::move(err), src);
+    }
+
+    void AddNote(Block* blk, std::string err) {
         DisassembleIfNeeded();
         auto src = dis_.BlockSource(blk);
         src.file = mod_.disassembly_file.get();
-        AddNote(err, src);
+        AddNote(std::move(err), src);
     }
 
-    void AddError(const std::string& err, Source src = {}) {
-        diagnostics_.add_error(tint::diag::System::IR, err, src);
+    void AddError(std::string err, Source src = {}) {
+        diagnostics_.add_error(tint::diag::System::IR, std::move(err), src);
     }
 
-    void AddNote(const std::string& note, Source src = {}) {
-        diagnostics_.add_note(tint::diag::System::IR, note, src);
+    void AddNote(std::string note, Source src = {}) {
+        diagnostics_.add_note(tint::diag::System::IR, std::move(note), src);
     }
 
     // std::string Name(Value* v) { return mod_.NameOf(v).Name(); }
@@ -174,16 +181,16 @@ class Validator {
 
     void CheckInstruction(Instruction* inst) {
         tint::Switch(
-            inst,                                //
-            [&](Access*) {},                     //
-            [&](Binary*) {},                     //
-            [&](Branch* b) { CheckBranch(b); },  //
-            [&](Call* c) { CheckCall(c); },      //
-            [&](Load*) {},                       //
-            [&](Store*) {},                      //
-            [&](Swizzle*) {},                    //
-            [&](Unary*) {},                      //
-            [&](Var*) {},                        //
+            inst,                                    //
+            [&](ir::Access* a) { CheckAccess(a); },  //
+            [&](Binary*) {},                         //
+            [&](Branch* b) { CheckBranch(b); },      //
+            [&](Call* c) { CheckCall(c); },          //
+            [&](Load*) {},                           //
+            [&](Store*) {},                          //
+            [&](Swizzle*) {},                        //
+            [&](Unary*) {},                          //
+            [&](Var*) {},                            //
             [&](Default) {
                 AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
             });
@@ -203,7 +210,75 @@ class Validator {
             });
     }
 
-    void CheckBranch(Branch* b) {
+    void CheckAccess(ir::Access* a) {
+        bool is_ptr = a->Object()->Type()->Is<type::Pointer>();
+        auto* ty = a->Object()->Type()->UnwrapPtr();
+
+        auto current = [&] {
+            return is_ptr ? "ptr<" + ty->FriendlyName() + ">" : ty->FriendlyName();
+        };
+
+        for (size_t i = 0; i < a->Indices().Length(); i++) {
+            auto err = [&](std::string msg) {
+                AddError(a, i + Access::kIndicesOperandOffset, std::move(msg));
+            };
+            auto note = [&](std::string msg) {
+                AddNote(a, i + Access::kIndicesOperandOffset, std::move(msg));
+            };
+
+            auto* index = a->Indices()[i];
+            if (TINT_UNLIKELY(!index->Type()->is_integer_scalar())) {
+                err("access: index must be integer, got " + index->Type()->FriendlyName());
+                return;
+            }
+
+            if (auto* const_index = index->As<ir::Constant>()) {
+                auto* value = const_index->Value();
+                if (value->Type()->is_signed_integer_scalar()) {
+                    // index is a signed integer scalar. Check that the index isn't negative.
+                    // If the index is unsigned, we can skip this.
+                    auto idx = value->ValueAs<AInt>();
+                    if (TINT_UNLIKELY(idx < 0)) {
+                        err("access: constant index must be positive, got " + std::to_string(idx));
+                        return;
+                    }
+                }
+
+                auto idx = value->ValueAs<uint32_t>();
+                auto* el = ty->Element(idx);
+                if (TINT_UNLIKELY(!el)) {
+                    // Is index in bounds?
+                    if (auto el_count = ty->Elements().count; el_count != 0 && idx >= el_count) {
+                        err("access: index out of bounds for type " + current());
+                        note("acceptable range: [0.." + std::to_string(el_count - 1) + "]");
+                        return;
+                    }
+                    err("access: type " + current() + " cannot be indexed");
+                    return;
+                }
+                ty = el;
+            } else {
+                auto* el = ty->Elements().type;
+                if (TINT_UNLIKELY(!el)) {
+                    err("access: type " + current() + " cannot be dynamically indexed");
+                    return;
+                }
+                ty = el;
+            }
+        }
+
+        auto* want_ty = a->Type()->UnwrapPtr();
+        bool want_ptr = a->Type()->Is<type::Pointer>();
+        if (TINT_UNLIKELY(ty != want_ty || is_ptr != want_ptr)) {
+            std::string want =
+                want_ptr ? "ptr<" + want_ty->FriendlyName() + ">" : want_ty->FriendlyName();
+            AddError(a, "access: result of access chain is type " + current() +
+                            " but instruction type is " + want);
+            return;
+        }
+    }
+
+    void CheckBranch(ir::Branch* b) {
         tint::Switch(
             b,                               //
             [&](BreakIf*) {},                //
@@ -230,10 +305,10 @@ class Validator {
             AddError(if_, "if: condition is nullptr");
         }
         if (if_->Condition() && !if_->Condition()->Type()->Is<type::Bool>()) {
-            AddError(if_, If::kConditionOperandIndex, "if: condition must be a `bool` type");
+            AddError(if_, If::kConditionOperandOffset, "if: condition must be a `bool` type");
         }
     }
-};
+};  // namespace
 
 }  // namespace
 

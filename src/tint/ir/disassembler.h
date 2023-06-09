@@ -133,7 +133,10 @@ class Disassembler {
     void EmitIf(If* i);
     void EmitStructDecl(const type::Struct* str);
     void EmitLine();
-    void EmitOperand(Value* val, Instruction* inst, uint32_t index);
+    void EmitOperand(Instruction* inst, Value* val, size_t index);
+    void EmitOperandList(Instruction* inst,
+                         utils::Slice<Value* const> operands,
+                         size_t start_index);
     void EmitInstructionName(std::string_view name, Instruction* inst);
 
     Module& mod_;
