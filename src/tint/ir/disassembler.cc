@@ -137,8 +137,10 @@ void Disassembler::Walk(Block* blk) {
 }
 
 void Disassembler::WalkInternal(Block* blk) {
+    Indent();
+
     SourceMarker sm(this);
-    Indent() << "%b" << IdOf(blk) << " = block";
+    out_ << "%b" << IdOf(blk) << " = block";
     if (auto* merge = blk->As<MultiInBlock>()) {
         if (!merge->Params().IsEmpty()) {
             out_ << " (";
@@ -146,6 +148,7 @@ void Disassembler::WalkInternal(Block* blk) {
             out_ << ")";
         }
     }
+    sm.Store(blk);
 
     out_ << " {";
     EmitLine();
@@ -154,7 +157,6 @@ void Disassembler::WalkInternal(Block* blk) {
         EmitBlockInstructions(blk);
     }
     Indent() << "}";
-    sm.Store(blk);
 
     EmitLine();
 }
