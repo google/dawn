@@ -24,7 +24,7 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/break_if.h"
-#include "src/tint/ir/builtin.h"
+#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
@@ -370,7 +370,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("discard", d);
             EmitLine();
         },
-        [&](Builtin* b) {
+        [&](BuiltinCall* b) {
             EmitValueWithType(b);
             out_ << " = ";
             EmitInstructionName(builtin::str(b->Func()), b);

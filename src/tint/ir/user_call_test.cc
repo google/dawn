@@ -28,7 +28,7 @@ TEST_F(IR_UserCallTest, Usage) {
     auto* func = b.CreateFunction("myfunc", mod.Types().void_());
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* e = b.UserCall(mod.Types().void_(), func, utils::Vector{arg1, arg2});
+    auto* e = b.Call(mod.Types().void_(), func, utils::Vector{arg1, arg2});
     EXPECT_THAT(func->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 2u}));
@@ -39,7 +39,7 @@ TEST_F(IR_UserCallTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.UserCall(nullptr, b.CreateFunction("myfunc", mod.Types().void_()));
+            b.Call(nullptr, b.CreateFunction("myfunc", mod.Types().void_()));
         },
         "");
 }
@@ -49,7 +49,7 @@ TEST_F(IR_UserCallTest, Fail_NullFunction) {
         {
             Module mod;
             Builder b{mod};
-            b.UserCall(mod.Types().f32(), nullptr);
+            b.Call(mod.Types().f32(), nullptr);
         },
         "");
 }
@@ -59,8 +59,8 @@ TEST_F(IR_UserCallTest, Fail_NullArg) {
         {
             Module mod;
             Builder b{mod};
-            b.UserCall(mod.Types().void_(), b.CreateFunction("myfunc", mod.Types().void_()),
-                       utils::Vector<Value*, 1>{nullptr});
+            b.Call(mod.Types().void_(), b.CreateFunction("myfunc", mod.Types().void_()),
+                   utils::Vector<Value*, 1>{nullptr});
         },
         "");
 }

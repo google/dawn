@@ -166,9 +166,7 @@ ir::Discard* Builder::Discard() {
     return ir.values.Create<ir::Discard>(ir.Types().void_());
 }
 
-ir::UserCall* Builder::UserCall(const type::Type* type,
-                                Function* func,
-                                utils::VectorRef<Value*> args) {
+ir::UserCall* Builder::Call(const type::Type* type, Function* func, utils::VectorRef<Value*> args) {
     return ir.values.Create<ir::UserCall>(type, func, std::move(args));
 }
 
@@ -182,10 +180,10 @@ ir::Construct* Builder::Construct(const type::Type* to, utils::VectorRef<Value*>
     return ir.values.Create<ir::Construct>(to, std::move(args));
 }
 
-ir::Builtin* Builder::Builtin(const type::Type* type,
-                              builtin::Function func,
-                              utils::VectorRef<Value*> args) {
-    return ir.values.Create<ir::Builtin>(type, func, args);
+ir::BuiltinCall* Builder::Call(const type::Type* type,
+                               builtin::Function func,
+                               utils::VectorRef<Value*> args) {
+    return ir.values.Create<ir::BuiltinCall>(type, func, args);
 }
 
 ir::Load* Builder::Load(Value* from) {

@@ -737,8 +737,8 @@ if(${TINT_BUILD_IR})
     ir/break_if.h
     ir/builder.cc
     ir/builder.h
-    ir/builtin.cc
-    ir/builtin.h
+    ir/builtin_call.cc
+    ir/builtin_call.h
     ir/call.cc
     ir/call.h
     ir/constant.cc
@@ -1509,7 +1509,7 @@ if(TINT_BUILD_TESTS)
       ir/block_param_test.cc
       ir/block_test.cc
       ir/break_if_test.cc
-      ir/builtin_test.cc
+      ir/builtin_call_test.cc
       ir/constant_test.cc
       ir/construct_test.cc
       ir/continue_test.cc

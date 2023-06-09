@@ -22,7 +22,7 @@
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/break_if.h"
-#include "src/tint/ir/builtin.h"
+#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
@@ -181,16 +181,16 @@ class Validator {
 
     void CheckInstruction(Instruction* inst) {
         tint::Switch(
-            inst,                                    //
-            [&](ir::Access* a) { CheckAccess(a); },  //
-            [&](Binary*) {},                         //
-            [&](Branch* b) { CheckBranch(b); },      //
-            [&](Call* c) { CheckCall(c); },          //
-            [&](Load*) {},                           //
-            [&](Store*) {},                          //
-            [&](Swizzle*) {},                        //
-            [&](Unary*) {},                          //
-            [&](Var*) {},                            //
+            inst,                                //
+            [&](Access* a) { CheckAccess(a); },  //
+            [&](Binary*) {},                     //
+            [&](Branch* b) { CheckBranch(b); },  //
+            [&](Call* c) { CheckCall(c); },      //
+            [&](Load*) {},                       //
+            [&](Store*) {},                      //
+            [&](Swizzle*) {},                    //
+            [&](Unary*) {},                      //
+            [&](Var*) {},                        //
             [&](Default) {
                 AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
             });
@@ -198,13 +198,13 @@ class Validator {
 
     void CheckCall(Call* call) {
         tint::Switch(
-            call,                //
-            [&](Bitcast*) {},    //
-            [&](Builtin*) {},    //
-            [&](Construct*) {},  //
-            [&](Convert*) {},    //
-            [&](Discard*) {},    //
-            [&](UserCall*) {},   //
+            call,                  //
+            [&](Bitcast*) {},      //
+            [&](BuiltinCall*) {},  //
+            [&](Construct*) {},    //
+            [&](Convert*) {},      //
+            [&](Discard*) {},      //
+            [&](UserCall*) {},     //
             [&](Default) {
                 AddError(std::string("missing validation of call: ") + call->TypeInfo().name);
             });

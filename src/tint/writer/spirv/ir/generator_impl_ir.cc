@@ -24,7 +24,7 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/break_if.h"
-#include "src/tint/ir/builtin.h"
+#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/exit_loop.h"
@@ -454,18 +454,18 @@ void GeneratorImplIr::EmitIncomingPhis(ir::MultiInBlock* block) {
 void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
     for (auto* inst : *block) {
         Switch(
-            inst,                                       //
-            [&](ir::Access* a) { EmitAccess(a); },      //
-            [&](ir::Binary* b) { EmitBinary(b); },      //
-            [&](ir::Builtin* b) { EmitBuiltin(b); },    //
-            [&](ir::Load* l) { EmitLoad(l); },          //
-            [&](ir::Loop* l) { EmitLoop(l); },          //
-            [&](ir::Switch* sw) { EmitSwitch(sw); },    //
-            [&](ir::Store* s) { EmitStore(s); },        //
-            [&](ir::UserCall* c) { EmitUserCall(c); },  //
-            [&](ir::Var* v) { EmitVar(v); },            //
-            [&](ir::If* i) { EmitIf(i); },              //
-            [&](ir::Branch* b) { EmitBranch(b); },      //
+            inst,                                             //
+            [&](ir::Access* a) { EmitAccess(a); },            //
+            [&](ir::Binary* b) { EmitBinary(b); },            //
+            [&](ir::BuiltinCall* b) { EmitBuiltinCall(b); },  //
+            [&](ir::Load* l) { EmitLoad(l); },                //
+            [&](ir::Loop* l) { EmitLoop(l); },                //
+            [&](ir::Switch* sw) { EmitSwitch(sw); },          //
+            [&](ir::Store* s) { EmitStore(s); },              //
+            [&](ir::UserCall* c) { EmitUserCall(c); },        //
+            [&](ir::Var* v) { EmitVar(v); },                  //
+            [&](ir::If* i) { EmitIf(i); },                    //
+            [&](ir::Branch* b) { EmitBranch(b); },            //
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "unimplemented instruction: " << inst->TypeInfo().name;
@@ -702,7 +702,7 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
         op, {Type(binary->Type()), id, Value(binary->LHS()), Value(binary->RHS())});
 }
 
-void GeneratorImplIr::EmitBuiltin(ir::Builtin* builtin) {
+void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
     auto* result_ty = builtin->Type();
 
     if (builtin->Func() == builtin::Function::kAbs &&

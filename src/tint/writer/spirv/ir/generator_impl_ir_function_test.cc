@@ -207,8 +207,7 @@ TEST_F(SpvGeneratorImplTest, Function_Call) {
 
     auto* bar = b.CreateFunction("bar", ty.void_());
     bar->StartTarget()->SetInstructions(utils::Vector{
-        b.UserCall(i32_ty, foo, utils::Vector{b.Constant(i32(2)), b.Constant(i32(3))}),
-        b.Return(bar)});
+        b.Call(i32_ty, foo, utils::Vector{b.Constant(i32(2)), b.Constant(i32(3))}), b.Return(bar)});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -243,7 +242,7 @@ TEST_F(SpvGeneratorImplTest, Function_Call_Void) {
 
     auto* bar = b.CreateFunction("bar", ty.void_());
     bar->StartTarget()->SetInstructions(
-        utils::Vector{b.UserCall(ty.void_(), foo, utils::Empty), b.Return(bar)});
+        utils::Vector{b.Call(ty.void_(), foo, utils::Empty), b.Return(bar)});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

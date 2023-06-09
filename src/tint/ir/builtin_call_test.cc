@@ -21,55 +21,53 @@ namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
-using IR_BuiltinTest = IRTestHelper;
+using IR_BuiltinCallTest = IRTestHelper;
 
-TEST_F(IR_BuiltinTest, Usage) {
+TEST_F(IR_BuiltinCallTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* builtin =
-        b.Builtin(mod.Types().f32(), builtin::Function::kAbs, utils::Vector{arg1, arg2});
+    auto* builtin = b.Call(mod.Types().f32(), builtin::Function::kAbs, utils::Vector{arg1, arg2});
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{builtin, 0u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
 }
 
-TEST_F(IR_BuiltinTest, Fail_NullType) {
+TEST_F(IR_BuiltinCallTest, Fail_NullType) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
             Builder b{mod};
-            b.Builtin(nullptr, builtin::Function::kAbs);
+            b.Call(nullptr, builtin::Function::kAbs);
         },
         "");
 }
 
-TEST_F(IR_BuiltinTest, Fail_NoneFunction) {
+TEST_F(IR_BuiltinCallTest, Fail_NoneFunction) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
             Builder b{mod};
-            b.Builtin(mod.Types().f32(), builtin::Function::kNone);
+            b.Call(mod.Types().f32(), builtin::Function::kNone);
         },
         "");
 }
 
-TEST_F(IR_BuiltinTest, Fail_TintMaterializeFunction) {
+TEST_F(IR_BuiltinCallTest, Fail_TintMaterializeFunction) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
             Builder b{mod};
-            b.Builtin(mod.Types().f32(), builtin::Function::kTintMaterialize);
+            b.Call(mod.Types().f32(), builtin::Function::kTintMaterialize);
         },
         "");
 }
 
-TEST_F(IR_BuiltinTest, Fail_NullArg) {
+TEST_F(IR_BuiltinCallTest, Fail_NullArg) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
             Builder b{mod};
-            b.Builtin(mod.Types().f32(), builtin::Function::kAbs,
-                      utils::Vector<Value*, 1>{nullptr});
+            b.Call(mod.Types().f32(), builtin::Function::kAbs, utils::Vector<Value*, 1>{nullptr});
         },
         "");
 }

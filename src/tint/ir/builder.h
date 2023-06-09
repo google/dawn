@@ -23,7 +23,7 @@
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/break_if.h"
-#include "src/tint/ir/builtin.h"
+#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
@@ -297,9 +297,18 @@ class Builder {
     /// @param func the function being called
     /// @param args the call arguments
     /// @returns the instruction
-    ir::UserCall* UserCall(const type::Type* type,
-                           Function* func,
-                           utils::VectorRef<Value*> args = utils::Empty);
+    ir::UserCall* Call(const type::Type* type,
+                       Function* func,
+                       utils::VectorRef<Value*> args = utils::Empty);
+
+    /// Creates a builtin call instruction
+    /// @param type the return type
+    /// @param func the builtin function
+    /// @param args the call arguments
+    /// @returns the instruction
+    ir::BuiltinCall* Call(const type::Type* type,
+                          builtin::Function func,
+                          utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a value conversion instruction
     /// @param to the type converted to
@@ -315,15 +324,6 @@ class Builder {
     /// @param args the arguments to be converted
     /// @returns the instruction
     ir::Construct* Construct(const type::Type* to, utils::VectorRef<Value*> args = utils::Empty);
-
-    /// Creates a builtin call instruction
-    /// @param type the return type
-    /// @param func the builtin function
-    /// @param args the arguments to be converted
-    /// @returns the instruction
-    ir::Builtin* Builtin(const type::Type* type,
-                         builtin::Function func,
-                         utils::VectorRef<Value*> args = utils::Empty);
 
     /// Creates a load instruction
     /// @param from the expression being loaded from

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_BUILTIN_H_
-#define SRC_TINT_IR_BUILTIN_H_
+#ifndef SRC_TINT_IR_BUILTIN_CALL_H_
+#define SRC_TINT_IR_BUILTIN_CALL_H_
 
 #include "src/tint/builtin/function.h"
 #include "src/tint/ir/call.h"
@@ -22,16 +22,16 @@
 namespace tint::ir {
 
 /// A builtin call instruction in the IR.
-class Builtin : public utils::Castable<Builtin, Call> {
+class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
   public:
     /// Constructor
     /// @param res_type the result type
     /// @param func the builtin function
     /// @param args the conversion arguments
-    Builtin(const type::Type* res_type,
-            builtin::Function func,
-            utils::VectorRef<Value*> args = utils::Empty);
-    ~Builtin() override;
+    BuiltinCall(const type::Type* res_type,
+                builtin::Function func,
+                utils::VectorRef<Value*> args = utils::Empty);
+    ~BuiltinCall() override;
 
     /// @returns the builtin function
     builtin::Function Func() { return func_; }
@@ -42,4 +42,4 @@ class Builtin : public utils::Castable<Builtin, Call> {
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_BUILTIN_H_
+#endif  // SRC_TINT_IR_BUILTIN_CALL_H_

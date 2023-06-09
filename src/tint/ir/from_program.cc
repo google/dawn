@@ -1362,7 +1362,7 @@ class Impl {
 
         // If this is a builtin function, emit the specific builtin value
         if (auto* b = sem->Target()->As<sem::Builtin>()) {
-            inst = builder_.Builtin(ty, b->Type(), args);
+            inst = builder_.Call(ty, b->Type(), args);
         } else if (sem->Target()->As<sem::ValueConstructor>()) {
             inst = builder_.Construct(ty, std::move(args));
         } else if (auto* conv = sem->Target()->As<sem::ValueConversion>()) {
@@ -1373,9 +1373,9 @@ class Impl {
             return utils::Failure;
         } else {
             // Not a builtin and not a templated call, so this is a user function.
-            inst = builder_.UserCall(
-                ty, scopes_.Get(expr->target->identifier->symbol)->As<ir::Function>(),
-                std::move(args));
+            inst =
+                builder_.Call(ty, scopes_.Get(expr->target->identifier->symbol)->As<ir::Function>(),
+                              std::move(args));
         }
         if (inst == nullptr) {
             return utils::Failure;
