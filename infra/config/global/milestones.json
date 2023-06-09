@@ -30,5 +30,16 @@
             "win",
             "android"
         ]
+    },
+    "115": {
+        "name": "m115",
+        "chromium_project": "chromium-m115",
+        "ref": "refs/heads/chromium/5790",
+        "platforms": [
+            "linux",
+            "mac",
+            "win",
+            "android"
+        ]
     }
 }
