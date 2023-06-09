@@ -18,11 +18,9 @@
 
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/module.h"
-#include "src/tint/switch.h"
 #include "src/tint/type/array.h"
 #include "src/tint/type/matrix.h"
 #include "src/tint/type/pointer.h"
-#include "src/tint/type/struct.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/utils/hashmap.h"
 
@@ -86,13 +84,7 @@ std::optional<AccessToReplace> ShouldReplace(Access* access) {
         }
 
         // Update the current source object type.
-        source_type = tint::Switch(
-            source_type,  //
-            [&](const type::Array* arr) { return arr->ElemType(); },
-            [&](const type::Matrix* mat) { return mat->ColumnType(); },
-            [&](const type::Struct* str) {
-                return str->Members()[const_idx->Value()->ValueAs<u32>()]->Type();
-            });
+        source_type = source_type->Element(const_idx->Value()->ValueAs<u32>());
     }
     // No dynamic indices were found.
     return {};

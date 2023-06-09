@@ -570,30 +570,24 @@ void GeneratorImplIr::EmitAccess(ir::Access* access) {
 
     // For non-pointer types, we assume that the indices are constants and use OpCompositeExtract.
     // If we hit a non-constant index into a vector type, use OpVectorExtractDynamic for it.
-    auto* ty = access->Object()->Type();
+    auto* source_ty = access->Object()->Type();
     for (auto* idx : access->Indices()) {
         if (auto* constant = idx->As<ir::Constant>()) {
             // Push the index to the chain and update the current type.
             auto i = constant->Value()->ValueAs<u32>();
             operands.push_back(i);
-            ty = Switch(
-                ty,  //
-                [&](const type::Array* arr) { return arr->ElemType(); },
-                [&](const type::Matrix* mat) { return mat->ColumnType(); },
-                [&](const type::Struct* str) { return str->Members()[i]->Type(); },
-                [&](const type::Vector* vec) { return vec->type(); },
-                [&](Default) { return nullptr; });
+            source_ty = source_ty->Element(i);
         } else {
             // The VarForDynamicIndex transform ensures that only value types that are vectors
             // will be dynamically indexed, as we can use OpVectorExtractDynamic for this case.
-            TINT_ASSERT(Writer, ty->Is<type::Vector>());
+            TINT_ASSERT(Writer, source_ty->Is<type::Vector>());
 
             // If this wasn't the first access in the chain then emit the chain so far as an
             // OpCompositeExtract, creating a new result ID for the resulting vector.
             auto vec_id = Value(access->Object());
             if (operands.size() > 3) {
                 vec_id = module_.NextId();
-                operands[0] = Type(ty);
+                operands[0] = Type(source_ty);
                 operands[1] = vec_id;
                 current_function_.push_inst(spv::Op::OpCompositeExtract, std::move(operands));
             }
