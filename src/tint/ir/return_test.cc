@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/return.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
@@ -37,10 +39,28 @@ TEST_F(IR_ReturnTest, Fail_NullValue) {
         {
             Module mod;
             Builder b{mod};
-            b.Return(b.CreateFunction("myfunc", mod.Types().void_()),
-                     utils::Vector<Value*, 1>{nullptr});
+            mod.values.Create<Return>(b.CreateFunction("myfunc", mod.Types().void_()),
+                                      utils::Vector<Value*, 1>{nullptr});
         },
         "");
+}
+
+TEST_F(IR_ReturnTest, ImplicitNoValue) {
+    auto* ret = b.Return(b.CreateFunction("myfunc", ty.void_()));
+    EXPECT_TRUE(ret->Args().IsEmpty());
+}
+
+TEST_F(IR_ReturnTest, ExplicitNoValue) {
+    auto* ret = b.Return(b.CreateFunction("myfunc", ty.void_()), nullptr);
+    EXPECT_TRUE(ret->Args().IsEmpty());
+}
+
+TEST_F(IR_ReturnTest, WithValue) {
+    auto* val = b.Constant(42_i);
+    auto* ret = b.Return(b.CreateFunction("myfunc", ty.i32()), val);
+    ASSERT_EQ(ret->Args().Length(), 1u);
+    EXPECT_EQ(ret->Args()[0], val);
+    EXPECT_THAT(val->Usages(), testing::UnorderedElementsAre(Usage{ret, 0u}));
 }
 
 }  // namespace

@@ -343,9 +343,9 @@ class Builder {
 
     /// Creates a return instruction
     /// @param func the function being returned
-    /// @param args the return arguments
+    /// @param value the return value
     /// @returns the instruction
-    ir::Return* Return(Function* func, utils::VectorRef<Value*> args = utils::Empty);
+    ir::Return* Return(Function* func, Value* value = nullptr);
 
     /// Creates a loop next iteration instruction
     /// @param loop the loop being iterated

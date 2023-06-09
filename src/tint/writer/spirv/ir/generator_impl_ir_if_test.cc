@@ -159,7 +159,7 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue) {
     i->True()->SetInstructions(utils::Vector{b.ExitIf(i, utils::Vector{b.Constant(10_i)})});
     i->False()->SetInstructions(utils::Vector{b.ExitIf(i, utils::Vector{b.Constant(20_i)})});
     i->Merge()->SetParams(utils::Vector{merge_param});
-    i->Merge()->SetInstructions(utils::Vector{b.Return(func, utils::Vector{merge_param})});
+    i->Merge()->SetInstructions(utils::Vector{b.Return(func, merge_param)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -195,10 +195,10 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_TrueReturn) {
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
     auto* i = b.CreateIf(b.Constant(true));
-    i->True()->SetInstructions(utils::Vector{b.Return(func, utils::Vector{b.Constant(42_i)})});
+    i->True()->SetInstructions(utils::Vector{b.Return(func, b.Constant(42_i))});
     i->False()->SetInstructions(utils::Vector{b.ExitIf(i, utils::Vector{b.Constant(20_i)})});
     i->Merge()->SetParams(utils::Vector{merge_param});
-    i->Merge()->SetInstructions(utils::Vector{b.Return(func, utils::Vector{merge_param})});
+    i->Merge()->SetInstructions(utils::Vector{b.Return(func, merge_param)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -235,9 +235,9 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_FalseReturn) {
 
     auto* i = b.CreateIf(b.Constant(true));
     i->True()->SetInstructions(utils::Vector{b.ExitIf(i, utils::Vector{b.Constant(10_i)})});
-    i->False()->SetInstructions(utils::Vector{b.Return(func, utils::Vector{b.Constant(42_i)})});
+    i->False()->SetInstructions(utils::Vector{b.Return(func, b.Constant(42_i))});
     i->Merge()->SetParams(utils::Vector{merge_param});
-    i->Merge()->SetInstructions(utils::Vector{b.Return(func, utils::Vector{merge_param})});
+    i->Merge()->SetInstructions(utils::Vector{b.Return(func, merge_param)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 
@@ -279,9 +279,7 @@ TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue) {
     i->False()->SetInstructions(
         utils::Vector{b.ExitIf(i, utils::Vector{b.Constant(20_i), b.Constant(false)})});
     i->Merge()->SetParams(utils::Vector{merge_param_0, merge_param_1});
-    i->Merge()->SetInstructions(utils::Vector{
-        b.Return(func, utils::Vector{merge_param_0}),
-    });
+    i->Merge()->SetInstructions(utils::Vector{b.Return(func, merge_param_0)});
 
     func->StartTarget()->SetInstructions(utils::Vector{i});
 

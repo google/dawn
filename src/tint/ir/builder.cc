@@ -211,8 +211,8 @@ ir::Var* Builder::Var(const type::Pointer* type) {
     return ir.values.Create<ir::Var>(type);
 }
 
-ir::Return* Builder::Return(Function* func, utils::VectorRef<Value*> args /* = utils::Empty */) {
-    return ir.values.Create<ir::Return>(func, std::move(args));
+ir::Return* Builder::Return(Function* func, Value* value /* = nullptr */) {
+    return ir.values.Create<ir::Return>(func, value ? utils::Vector{value} : utils::Empty);
 }
 
 ir::NextIteration* Builder::NextIteration(Loop* loop,

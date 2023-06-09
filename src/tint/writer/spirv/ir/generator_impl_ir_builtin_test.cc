@@ -73,8 +73,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_u32) {
     auto* result = b.Builtin(MakeScalarType(kU32), builtin::Function::kAbs,
                              utils::Vector{MakeScalarValue(kU32)});
     auto* func = b.CreateFunction("foo", MakeScalarType(kU32));
-    func->StartTarget()->SetInstructions(
-        utils::Vector{result, b.Return(func, utils::Vector{result})});
+    func->StartTarget()->SetInstructions(utils::Vector{result, b.Return(func, result)});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -93,8 +92,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
     auto* result = b.Builtin(MakeVectorType(kU32), builtin::Function::kAbs,
                              utils::Vector{MakeVectorValue(kU32)});
     auto* func = b.CreateFunction("foo", MakeVectorType(kU32));
-    func->StartTarget()->SetInstructions(
-        utils::Vector{result, b.Return(func, utils::Vector{result})});
+    func->StartTarget()->SetInstructions(utils::Vector{result, b.Return(func, result)});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

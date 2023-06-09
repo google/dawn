@@ -55,7 +55,7 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
     auto* func = b.CreateFunction("foo", ty.i32());
     auto* block = func->StartTarget();
     auto* load = block->Append(b.Load(buffer));
-    block->Append(b.Return(func, utils::Vector{load}));
+    block->Append(b.Return(func, load));
     mod.functions.Push(func);
 
     auto* expect = R"(

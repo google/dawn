@@ -276,7 +276,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
     auto* s = b.CreateSwitch(b.Constant(42_i));
     auto* case_a = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                                  ir::Switch::CaseSelector{nullptr}});
-    case_a->Append(b.Return(func, utils::Vector{b.Constant(10_i)}));
+    case_a->Append(b.Return(func, b.Constant(10_i)));
 
     auto* case_b = b.CreateCase(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
     case_b->Append(b.ExitSwitch(s, utils::Vector{b.Constant(20_i)}));
@@ -326,7 +326,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
     case_b->Append(b.ExitSwitch(s, utils::Vector{b.Constant(20_i), b.Constant(false)}));
 
     s->Merge()->SetParams(utils::Vector{merge_param_0, merge_param_1});
-    s->Merge()->Append(b.Return(func, utils::Vector{merge_param_0}));
+    s->Merge()->Append(b.Return(func, merge_param_0));
 
     func->StartTarget()->SetInstructions(utils::Vector{s});
 

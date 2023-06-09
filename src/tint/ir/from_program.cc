@@ -824,15 +824,15 @@ class Impl {
     }
 
     void EmitReturn(const ast::ReturnStatement* stmt) {
-        utils::Vector<Value*, 1> ret_value;
+        Value* ret_value = nullptr;
         if (stmt->value) {
             auto ret = EmitExpression(stmt->value);
             if (!ret) {
                 return;
             }
-            ret_value.Push(ret.Get());
+            ret_value = ret.Get();
         }
-        SetBranch(builder_.Return(current_function_, std::move(ret_value)));
+        SetBranch(builder_.Return(current_function_, ret_value));
     }
 
     void EmitBreak(const ast::BreakStatement*) {

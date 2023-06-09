@@ -151,8 +151,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Function_ReturnValue) {
     auto* func = b.CreateFunction("foo", ty.i32());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Return(func, utils::Vector{b.Constant(i32(42))})});
+    func->StartTarget()->SetInstructions(utils::Vector{b.Return(func, b.Constant(i32(42)))});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -175,8 +174,7 @@ TEST_F(SpvGeneratorImplTest, Function_Parameters) {
     auto* result = b.Add(i32, x, y);
     auto* func = b.CreateFunction("foo", i32);
     func->SetParams(utils::Vector{x, y});
-    func->StartTarget()->SetInstructions(
-        utils::Vector{result, b.Return(func, utils::Vector{result})});
+    func->StartTarget()->SetInstructions(utils::Vector{result, b.Return(func, result)});
     mod.SetName(x, "x");
     mod.SetName(y, "y");
 
@@ -205,8 +203,7 @@ TEST_F(SpvGeneratorImplTest, Function_Call) {
     auto* result = b.Add(i32_ty, x, y);
     auto* foo = b.CreateFunction("foo", i32_ty);
     foo->SetParams(utils::Vector{x, y});
-    foo->StartTarget()->SetInstructions(
-        utils::Vector{result, b.Return(foo, utils::Vector{result})});
+    foo->StartTarget()->SetInstructions(utils::Vector{result, b.Return(foo, result)});
 
     auto* bar = b.CreateFunction("bar", ty.void_());
     bar->StartTarget()->SetInstructions(utils::Vector{
