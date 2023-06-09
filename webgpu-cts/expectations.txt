@@ -76,12 +76,6 @@
 crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ]
 
 ################################################################################
-# copyToTexture flakes on Mac
-################################################################################
-crbug.com/1450814 [ mac intel webgpu-adapter-default ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ RetryOnFailure ]
-crbug.com/1450814 [ mac intel webgpu-adapter-default ] webgpu:web_platform,copyToTexture,* [ RetryOnFailure ]
-
-################################################################################
 # web_platform crashes on SwiftShader
 # Skipped instead of just Crash because of the number of failures
 # KEEP
