@@ -390,7 +390,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitValueWithType(c);
             out_ << " = ";
             EmitInstructionName("convert", c);
-            out_ << " " << c->FromType()->FriendlyName() << ", ";
+            out_ << " ";
             EmitArgs(c);
             EmitLine();
         },

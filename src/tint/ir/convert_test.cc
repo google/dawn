@@ -27,17 +27,7 @@ TEST_F(IR_ConvertTest, Fail_NullToType) {
         {
             Module mod;
             Builder b{mod};
-            b.Convert(nullptr, mod.Types().f32(), utils::Vector{b.Constant(1_u)});
-        },
-        "");
-}
-
-TEST_F(IR_ConvertTest, Fail_NullFromType) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Convert(mod.Types().f32(), nullptr, utils::Vector{b.Constant(1_u)});
+            b.Convert(nullptr, b.Constant(1_u));
         },
         "");
 }
@@ -47,17 +37,7 @@ TEST_F(IR_ConvertTest, Fail_NoArg) {
         {
             Module mod;
             Builder b{mod};
-            b.Convert(mod.Types().f32(), mod.Types().i32(), utils::Empty);
-        },
-        "");
-}
-
-TEST_F(IR_ConvertTest, Fail_NullArg) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Convert(mod.Types().f32(), mod.Types().i32(), utils::Vector<Value*, 1>{nullptr});
+            b.Convert(mod.Types().f32(), nullptr);
         },
         "");
 }

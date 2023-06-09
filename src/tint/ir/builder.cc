@@ -170,10 +170,8 @@ ir::UserCall* Builder::Call(const type::Type* type, Function* func, utils::Vecto
     return ir.values.Create<ir::UserCall>(type, func, std::move(args));
 }
 
-ir::Convert* Builder::Convert(const type::Type* to,
-                              const type::Type* from,
-                              utils::VectorRef<Value*> args) {
-    return ir.values.Create<ir::Convert>(to, from, std::move(args));
+ir::Convert* Builder::Convert(const type::Type* to, Value* value) {
+    return ir.values.Create<ir::Convert>(to, value);
 }
 
 ir::Construct* Builder::Construct(const type::Type* to, utils::VectorRef<Value*> args) {

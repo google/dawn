@@ -22,13 +22,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Convert);
 
 namespace tint::ir {
 
-Convert::Convert(const type::Type* to_type,
-                 const type::Type* from_type,
-                 utils::VectorRef<Value*> arguments)
-    : Base(to_type), from_type_(from_type) {
-    TINT_ASSERT(IR, from_type_);
-    TINT_ASSERT(IR, !arguments.IsEmpty());
-    AddOperands(std::move(arguments));
+Convert::Convert(const type::Type* to_type, Value* value) : Base(to_type) {
+    TINT_ASSERT_OR_RETURN(IR, value);
+
+    AddOperand(value);
 }
 
 Convert::~Convert() = default;

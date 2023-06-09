@@ -106,7 +106,7 @@ TEST_F(IR_FromProgramCallTest, EmitExpression_Convert) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:i32 = load %i
-    %tint_symbol:f32 = convert i32, %3
+    %tint_symbol:f32 = convert %3
     ret
   }
 }

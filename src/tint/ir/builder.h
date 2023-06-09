@@ -312,16 +312,13 @@ class Builder {
 
     /// Creates a value conversion instruction
     /// @param to the type converted to
-    /// @param from the type converted from
-    /// @param args the arguments to be converted
+    /// @param value the value to be converted
     /// @returns the instruction
-    ir::Convert* Convert(const type::Type* to,
-                         const type::Type* from,
-                         utils::VectorRef<Value*> args);
+    ir::Convert* Convert(const type::Type* to, Value* value);
 
     /// Creates a value constructor instruction
-    /// @param to the type being converted
-    /// @param args the arguments to be converted
+    /// @param to the type being constructed
+    /// @param args the arguments to the constructor
     /// @returns the instruction
     ir::Construct* Construct(const type::Type* to, utils::VectorRef<Value*> args = utils::Empty);
 

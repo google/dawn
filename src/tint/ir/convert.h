@@ -25,21 +25,10 @@ namespace tint::ir {
 class Convert : public utils::Castable<Convert, Call> {
   public:
     /// Constructor
-    /// @param result_type the result type
-    /// @param from_type the type being converted from
-    /// @param args the conversion arguments
-    Convert(const type::Type* result_type,
-            const type::Type* from_type,
-            utils::VectorRef<Value*> args);
+    /// @param to_type the target conversion type
+    /// @param value the value to convert
+    Convert(const type::Type* to_type, Value* value);
     ~Convert() override;
-
-    /// @returns the from type
-    const type::Type* FromType() { return from_type_; }
-    /// @returns the to type
-    const type::Type* ToType() { return Type(); }
-
-  private:
-    const type::Type* from_type_ = nullptr;
 };
 
 }  // namespace tint::ir

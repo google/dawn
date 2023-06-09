@@ -1365,9 +1365,8 @@ class Impl {
             inst = builder_.Call(ty, b->Type(), args);
         } else if (sem->Target()->As<sem::ValueConstructor>()) {
             inst = builder_.Construct(ty, std::move(args));
-        } else if (auto* conv = sem->Target()->As<sem::ValueConversion>()) {
-            auto* from = conv->Source()->Clone(clone_ctx_.type_ctx);
-            inst = builder_.Convert(ty, from, std::move(args));
+        } else if (sem->Target()->Is<sem::ValueConversion>()) {
+            inst = builder_.Convert(ty, args[0]);
         } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
             TINT_UNIMPLEMENTED(IR, diagnostics_) << "missing templated ident support";
             return utils::Failure;
