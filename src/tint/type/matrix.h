@@ -65,6 +65,10 @@ class Matrix final : public utils::Castable<Matrix, Type> {
     /// @returns the number of bytes between columns of the matrix
     uint32_t ColumnStride() const;
 
+    /// @copydoc Type::Elements
+    TypeAndCount Elements(const Type* type_if_invalid = nullptr,
+                          uint32_t count_if_invalid = 0) const override;
+
     /// @param ctx the clone context
     /// @returns a clone of this type
     Matrix* Clone(CloneContext& ctx) const override;

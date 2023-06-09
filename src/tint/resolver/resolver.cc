@@ -1869,7 +1869,7 @@ bool Resolver::MaybeMaterializeAndLoadArguments(utils::Vector<const sem::ValueEx
 }
 
 bool Resolver::ShouldMaterializeArgument(const type::Type* parameter_ty) const {
-    const auto* param_el_ty = type::Type::DeepestElementOf(parameter_ty);
+    const auto* param_el_ty = parameter_ty->DeepestElement();
     return param_el_ty && !param_el_ty->Is<type::AbstractNumeric>();
 }
 

@@ -2043,7 +2043,7 @@ bool GeneratorImpl::EmitFrexpCall(utils::StringStream& out,
             }
 
             std::string member_type;
-            if (Is<type::F16>(type::Type::DeepestElementOf(ty))) {
+            if (Is<type::F16>(ty->DeepestElement())) {
                 member_type = width.empty() ? "float16_t" : ("vector<float16_t, " + width + ">");
             } else {
                 member_type = "float" + width;

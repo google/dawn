@@ -241,55 +241,20 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
         [&](Default) { return kNoConversion; });
 }
 
-const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
-    if (ty->Is<type::Scalar>()) {
-        if (count) {
-            *count = 1;
-        }
-        return ty;
-    }
-    return Switch(
-        ty,  //
-        [&](const Vector* v) {
-            if (count) {
-                *count = v->Width();
-            }
-            return v->type();
-        },
-        [&](const Matrix* m) {
-            if (count) {
-                *count = m->columns();
-            }
-            return m->ColumnType();
-        },
-        [&](const Array* a) {
-            if (count) {
-                if (auto* const_count = a->Count()->As<ConstantArrayCount>()) {
-                    *count = const_count->value;
-                }
-            }
-            return a->ElemType();
-        },
-        [&](Default) {
-            if (count) {
-                *count = 1;
-            }
-            return ty;
-        });
+TypeAndCount Type::Elements(const Type* type_if_invalid /* = nullptr */,
+                            uint32_t count_if_invalid /* = 0 */) const {
+    return {type_if_invalid, count_if_invalid};
 }
 
-const Type* Type::DeepestElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
-    auto el_ty = ElementOf(ty, count);
-    while (el_ty && ty != el_ty) {
-        ty = el_ty;
-
-        uint32_t n = 0;
-        el_ty = ElementOf(ty, &n);
-        if (count) {
-            *count *= n;
+const Type* Type::DeepestElement() const {
+    const Type* ty = this;
+    while (true) {
+        auto [el, n] = ty->Elements();
+        if (!el) {
+            return ty;
         }
+        ty = el;
     }
-    return el_ty;
 }
 
 const Type* Type::Common(utils::VectorRef<const Type*> types) {

@@ -590,7 +590,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Currently in WGSL parameters of insertBits must be i32, u32, vecN<i32> or vecN<u32>
-        if (TINT_UNLIKELY(((!type::Type::DeepestElementOf(ty)->IsAnyOf<type::I32, type::U32>())))) {
+        if (TINT_UNLIKELY(((!ty->DeepestElement()->IsAnyOf<type::I32, type::U32>())))) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "insertBits polyfill only support i32, u32, and vector of i32 or u32, got "
                 << ty->FriendlyName();
@@ -883,7 +883,7 @@ struct BuiltinPolyfill::State {
     const Expression* BitshiftModulo(const BinaryExpression* bin_op) {
         auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
         auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
-        auto* lhs_el_ty = type::Type::DeepestElementOf(lhs_ty);
+        auto* lhs_el_ty = lhs_ty->DeepestElement();
         const Expression* mask = b.Expr(AInt(lhs_el_ty->Size() * 8 - 1));
         if (rhs_ty->Is<type::Vector>()) {
             mask = b.Call(CreateASTTypeFor(ctx, rhs_ty), mask);
@@ -904,10 +904,8 @@ struct BuiltinPolyfill::State {
         auto fn = binary_op_polyfills.GetOrCreate(sig, [&] {
             const bool is_div = bin_op->op == BinaryOp::kDivide;
 
-            uint32_t lhs_width = 1;
-            uint32_t rhs_width = 1;
-            const auto* lhs_el_ty = type::Type::ElementOf(lhs_ty, &lhs_width);
-            const auto* rhs_el_ty = type::Type::ElementOf(rhs_ty, &rhs_width);
+            const auto [lhs_el_ty, lhs_width] = lhs_ty->Elements(lhs_ty, 1);
+            const auto [rhs_el_ty, rhs_width] = rhs_ty->Elements(rhs_ty, 1);
 
             const uint32_t width = std::max(lhs_width, rhs_width);
 
@@ -997,10 +995,8 @@ struct BuiltinPolyfill::State {
         auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
         BinaryOpSignature sig{bin_op->op, lhs_ty, rhs_ty};
         auto fn = binary_op_polyfills.GetOrCreate(sig, [&] {
-            uint32_t lhs_width = 1;
-            uint32_t rhs_width = 1;
-            const auto* lhs_el_ty = type::Type::ElementOf(lhs_ty, &lhs_width);
-            const auto* rhs_el_ty = type::Type::ElementOf(rhs_ty, &rhs_width);
+            const auto [lhs_el_ty, lhs_width] = lhs_ty->Elements(lhs_ty, 1);
+            const auto [rhs_el_ty, rhs_width] = rhs_ty->Elements(rhs_ty, 1);
 
             const uint32_t width = std::max(lhs_width, rhs_width);
 
@@ -1249,10 +1245,10 @@ struct BuiltinPolyfill::State {
             [&](const sem::ValueConversion* conv) {
                 if (cfg.builtins.conv_f32_to_iu32) {
                     auto* src_ty = conv->Source();
-                    if (tint::Is<type::F32>(type::Type::ElementOf(src_ty))) {
+                    if (tint::Is<type::F32>(src_ty->Elements(src_ty).type)) {
                         auto* dst_ty = conv->Target();
                         if (tint::utils::IsAnyOf<type::I32, type::U32>(
-                                type::Type::ElementOf(dst_ty))) {
+                                dst_ty->Elements(dst_ty).type)) {
                             return f32_conv_polyfills.GetOrCreate(dst_ty, [&] {  //
                                 return ConvF32ToIU32(src_ty, dst_ty);
                             });

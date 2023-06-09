@@ -1082,7 +1082,7 @@ void GeneratorImpl::EmitFrexpCall(utils::StringStream& out,
 void GeneratorImpl::EmitDegreesCall(utils::StringStream& out,
                                     const ast::CallExpression* expr,
                                     const sem::Builtin* builtin) {
-    auto* return_elem_type = type::Type::DeepestElementOf(builtin->ReturnType());
+    auto* return_elem_type = builtin->ReturnType()->DeepestElement();
     const std::string suffix = Is<type::F16>(return_elem_type) ? "hf" : "f";
     CallBuiltinHelper(out, expr, builtin,
                       [&](TextBuffer* b, const std::vector<std::string>& params) {
@@ -1094,7 +1094,7 @@ void GeneratorImpl::EmitDegreesCall(utils::StringStream& out,
 void GeneratorImpl::EmitRadiansCall(utils::StringStream& out,
                                     const ast::CallExpression* expr,
                                     const sem::Builtin* builtin) {
-    auto* return_elem_type = type::Type::DeepestElementOf(builtin->ReturnType());
+    auto* return_elem_type = builtin->ReturnType()->DeepestElement();
     const std::string suffix = Is<type::F16>(return_elem_type) ? "hf" : "f";
     CallBuiltinHelper(out, expr, builtin,
                       [&](TextBuffer* b, const std::vector<std::string>& params) {
@@ -1181,8 +1181,7 @@ void GeneratorImpl::EmitTextureCall(utils::StringStream& out,
     auto* texture_type = TypeOf(texture)->UnwrapRef()->As<type::Texture>();
 
     auto emit_signed_int_type = [&](const type::Type* ty) {
-        uint32_t width = 0;
-        type::Type::ElementOf(ty, &width);
+        uint32_t width = ty->Elements().count;
         if (width > 1) {
             out << "ivec" << width;
         } else {
@@ -1191,8 +1190,7 @@ void GeneratorImpl::EmitTextureCall(utils::StringStream& out,
     };
 
     auto emit_unsigned_int_type = [&](const type::Type* ty) {
-        uint32_t width = 0;
-        type::Type::ElementOf(ty, &width);
+        uint32_t width = ty->Elements().count;
         if (width > 1) {
             out << "uvec" << width;
         } else {

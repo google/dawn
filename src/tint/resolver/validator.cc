@@ -432,7 +432,7 @@ bool Validator::AddressSpaceLayout(const type::Type* store_ty,
 
     // Among three host-shareable address spaces, f16 is supported in "uniform" and
     // "storage" address space, but not "push_constant" address space yet.
-    if (Is<type::F16>(type::Type::DeepestElementOf(store_ty)) &&
+    if (Is<type::F16>(store_ty->DeepestElement()) &&
         address_space == builtin::AddressSpace::kPushConstant) {
         AddError("using f16 types in 'push_constant' address space is not implemented yet", source);
         return false;

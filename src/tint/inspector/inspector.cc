@@ -80,7 +80,7 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
     TINT_ASSERT(Inspector, type->is_numeric_scalar_or_vector());
 
     ComponentType componentType = Switch(
-        type::Type::DeepestElementOf(type),  //
+        type->DeepestElement(),  //
         [&](const type::F32*) { return ComponentType::kF32; },
         [&](const type::F16*) { return ComponentType::kF16; },
         [&](const type::I32*) { return ComponentType::kI32; },

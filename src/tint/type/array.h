@@ -97,6 +97,10 @@ class Array final : public utils::Castable<Array, Type> {
     /// declared in WGSL.
     std::string FriendlyName() const override;
 
+    /// @copydoc Type::Elements
+    TypeAndCount Elements(const Type* type_if_invalid = nullptr,
+                          uint32_t count_if_invalid = 0) const override;
+
     /// @param ctx the clone context
     /// @returns a clone of this type
     Array* Clone(CloneContext& ctx) const override;
