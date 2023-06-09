@@ -26,7 +26,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_UnaryTest = IRTestHelper;
 
 TEST_F(IR_UnaryTest, CreateComplement) {
-    auto* inst = b.Complement(mod.Types().i32(), b.Constant(4_i));
+    auto* inst = b.Complement(mod.Types().i32(), 4_i);
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Kind(), Unary::Kind::kComplement);
@@ -38,7 +38,7 @@ TEST_F(IR_UnaryTest, CreateComplement) {
 }
 
 TEST_F(IR_UnaryTest, CreateNegation) {
-    auto* inst = b.Negation(mod.Types().i32(), b.Constant(4_i));
+    auto* inst = b.Negation(mod.Types().i32(), 4_i);
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Kind(), Unary::Kind::kNegation);
@@ -50,7 +50,7 @@ TEST_F(IR_UnaryTest, CreateNegation) {
 }
 
 TEST_F(IR_UnaryTest, Unary_Usage) {
-    auto* inst = b.Negation(mod.Types().i32(), b.Constant(4_i));
+    auto* inst = b.Negation(mod.Types().i32(), 4_i);
 
     EXPECT_EQ(inst->Kind(), Unary::Kind::kNegation);
 
@@ -63,7 +63,7 @@ TEST_F(IR_UnaryTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Negation(nullptr, b.Constant(1_i));
+            b.Negation(nullptr, 1_i);
         },
         "");
 }

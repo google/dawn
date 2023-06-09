@@ -14,6 +14,8 @@
 
 #include "src/tint/ir/function.h"
 
+#include "src/tint/utils/predicates.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Function);
 
 namespace tint::ir {
@@ -31,9 +33,12 @@ Function::~Function() = default;
 
 void Function::SetParams(utils::VectorRef<FunctionParam*> params) {
     params_ = std::move(params);
-    for (auto* param : params_) {
-        TINT_ASSERT(IR, param != nullptr);
-    }
+    TINT_ASSERT(IR, !params_.Any(utils::IsNull));
+}
+
+void Function::SetParams(std::initializer_list<FunctionParam*> params) {
+    params_ = params;
+    TINT_ASSERT(IR, !params_.Any(utils::IsNull));
 }
 
 utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value) {

@@ -27,7 +27,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_BitcastTest = IRTestHelper;
 
 TEST_F(IR_BitcastTest, Bitcast) {
-    auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
+    auto* inst = b.Bitcast(mod.Types().i32(), 4_i);
 
     ASSERT_TRUE(inst->Is<ir::Bitcast>());
     ASSERT_NE(inst->Type(), nullptr);
@@ -41,7 +41,7 @@ TEST_F(IR_BitcastTest, Bitcast) {
 }
 
 TEST_F(IR_BitcastTest, Bitcast_Usage) {
-    auto* inst = b.Bitcast(mod.Types().i32(), b.Constant(4_i));
+    auto* inst = b.Bitcast(mod.Types().i32(), 4_i);
 
     auto args = inst->Args();
     ASSERT_EQ(args.Length(), 1u);
@@ -64,7 +64,7 @@ TEST_F(IR_BitcastTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Bitcast(nullptr, b.Constant(u32(1)));
+            b.Bitcast(nullptr, 1_i);
         },
         "");
 }

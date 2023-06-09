@@ -102,8 +102,7 @@ void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
             if (wrapped) {
                 // The structure has been wrapped, so replace all uses of the old variable with a
                 // member accessor on the new variable.
-                auto* access =
-                    builder.Access(var->Type(), new_var, utils::Vector{builder.Constant(0_u)});
+                auto* access = builder.Access(var->Type(), new_var, 0_u);
                 access->InsertBefore(use.instruction);
                 return access;
             }

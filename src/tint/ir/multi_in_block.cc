@@ -14,6 +14,8 @@
 
 #include "src/tint/ir/multi_in_block.h"
 
+#include "src/tint/utils/predicates.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::ir::MultiInBlock);
 
 namespace tint::ir {
@@ -25,9 +27,13 @@ MultiInBlock::~MultiInBlock() = default;
 void MultiInBlock::SetParams(utils::VectorRef<BlockParam*> params) {
     params_ = std::move(params);
 
-    for (auto* param : params_) {
-        TINT_ASSERT(IR, param != nullptr);
-    }
+    TINT_ASSERT(IR, !params_.Any(utils::IsNull));
+}
+
+void MultiInBlock::SetParams(std::initializer_list<BlockParam*> params) {
+    params_ = std::move(params);
+
+    TINT_ASSERT(IR, !params_.Any(utils::IsNull));
 }
 
 void MultiInBlock::AddInboundSiblingBranch(ir::Branch* node) {

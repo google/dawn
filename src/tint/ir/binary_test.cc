@@ -30,7 +30,7 @@ TEST_F(IR_BinaryTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Add(nullptr, b.Constant(u32(1)), b.Constant(u32(2)));
+            b.Add(nullptr, u32(1), u32(2));
         },
         "");
 }
@@ -40,7 +40,7 @@ TEST_F(IR_BinaryTest, Fail_NullLHS) {
         {
             Module mod;
             Builder b{mod};
-            b.Add(mod.Types().u32(), nullptr, b.Constant(u32(2)));
+            b.Add(mod.Types().u32(), nullptr, u32(2));
         },
         "");
 }
@@ -50,13 +50,13 @@ TEST_F(IR_BinaryTest, Fail_NullRHS) {
         {
             Module mod;
             Builder b{mod};
-            b.Add(mod.Types().u32(), b.Constant(u32(1)), nullptr);
+            b.Add(mod.Types().u32(), u32(1), nullptr);
         },
         "");
 }
 
 TEST_F(IR_BinaryTest, CreateAnd) {
-    auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.And(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
@@ -74,7 +74,7 @@ TEST_F(IR_BinaryTest, CreateAnd) {
 }
 
 TEST_F(IR_BinaryTest, CreateOr) {
-    auto* inst = b.Or(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.Or(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kOr);
@@ -91,7 +91,7 @@ TEST_F(IR_BinaryTest, CreateOr) {
 }
 
 TEST_F(IR_BinaryTest, CreateXor) {
-    auto* inst = b.Xor(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.Xor(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kXor);
@@ -108,7 +108,7 @@ TEST_F(IR_BinaryTest, CreateXor) {
 }
 
 TEST_F(IR_BinaryTest, CreateEqual) {
-    auto* inst = b.Equal(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.Equal(mod.Types().bool_(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kEqual);
@@ -125,7 +125,7 @@ TEST_F(IR_BinaryTest, CreateEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateNotEqual) {
-    auto* inst = b.NotEqual(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.NotEqual(mod.Types().bool_(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kNotEqual);
@@ -142,7 +142,7 @@ TEST_F(IR_BinaryTest, CreateNotEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateLessThan) {
-    auto* inst = b.LessThan(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.LessThan(mod.Types().bool_(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kLessThan);
@@ -159,7 +159,7 @@ TEST_F(IR_BinaryTest, CreateLessThan) {
 }
 
 TEST_F(IR_BinaryTest, CreateGreaterThan) {
-    auto* inst = b.GreaterThan(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.GreaterThan(mod.Types().bool_(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kGreaterThan);
@@ -176,7 +176,7 @@ TEST_F(IR_BinaryTest, CreateGreaterThan) {
 }
 
 TEST_F(IR_BinaryTest, CreateLessThanEqual) {
-    auto* inst = b.LessThanEqual(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.LessThanEqual(mod.Types().bool_(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kLessThanEqual);
@@ -193,7 +193,7 @@ TEST_F(IR_BinaryTest, CreateLessThanEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
-    auto* inst = b.GreaterThanEqual(mod.Types().bool_(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.GreaterThanEqual(mod.Types().bool_(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kGreaterThanEqual);
@@ -210,7 +210,7 @@ TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateNot) {
-    auto* inst = b.Not(mod.Types().bool_(), b.Constant(true));
+    auto* inst = b.Not(mod.Types().bool_(), true);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kEqual);
@@ -227,7 +227,7 @@ TEST_F(IR_BinaryTest, CreateNot) {
 }
 
 TEST_F(IR_BinaryTest, CreateShiftLeft) {
-    auto* inst = b.ShiftLeft(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.ShiftLeft(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kShiftLeft);
@@ -244,7 +244,7 @@ TEST_F(IR_BinaryTest, CreateShiftLeft) {
 }
 
 TEST_F(IR_BinaryTest, CreateShiftRight) {
-    auto* inst = b.ShiftRight(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.ShiftRight(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kShiftRight);
@@ -261,7 +261,7 @@ TEST_F(IR_BinaryTest, CreateShiftRight) {
 }
 
 TEST_F(IR_BinaryTest, CreateAdd) {
-    auto* inst = b.Add(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.Add(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAdd);
@@ -278,7 +278,7 @@ TEST_F(IR_BinaryTest, CreateAdd) {
 }
 
 TEST_F(IR_BinaryTest, CreateSubtract) {
-    auto* inst = b.Subtract(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.Subtract(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kSubtract);
@@ -295,7 +295,7 @@ TEST_F(IR_BinaryTest, CreateSubtract) {
 }
 
 TEST_F(IR_BinaryTest, CreateMultiply) {
-    auto* inst = b.Multiply(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.Multiply(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kMultiply);
@@ -312,7 +312,7 @@ TEST_F(IR_BinaryTest, CreateMultiply) {
 }
 
 TEST_F(IR_BinaryTest, CreateDivide) {
-    auto* inst = b.Divide(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.Divide(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kDivide);
@@ -329,7 +329,7 @@ TEST_F(IR_BinaryTest, CreateDivide) {
 }
 
 TEST_F(IR_BinaryTest, CreateModulo) {
-    auto* inst = b.Modulo(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.Modulo(mod.Types().i32(), 4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kModulo);
@@ -346,7 +346,7 @@ TEST_F(IR_BinaryTest, CreateModulo) {
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage) {
-    auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), b.Constant(2_i));
+    auto* inst = b.And(mod.Types().i32(), 4_i, 2_i);
 
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
 
@@ -358,7 +358,7 @@ TEST_F(IR_BinaryTest, Binary_Usage) {
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
-    auto val = b.Constant(4_i);
+    auto val = 4_i;
     auto* inst = b.And(mod.Types().i32(), val, val);
 
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
@@ -372,7 +372,7 @@ TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
 TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
     auto* rhs_a = b.Constant(2_i);
     auto* rhs_b = b.Constant(3_i);
-    auto* inst = b.And(mod.Types().i32(), b.Constant(4_i), rhs_a);
+    auto* inst = b.And(mod.Types().i32(), 4_i, rhs_a);
 
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
 

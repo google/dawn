@@ -54,6 +54,10 @@ class Block : public utils::Castable<Block> {
     /// @param instructions the instructions to set
     void SetInstructions(utils::VectorRef<Instruction*> instructions);
 
+    /// Sets the instructions in the block
+    /// @param instructions the instructions to set
+    void SetInstructions(std::initializer_list<Instruction*> instructions);
+
     /// @returns the instructions in the block
     Instruction* Instructions() { return instructions_.first; }
 

@@ -30,7 +30,7 @@ TEST_F(IR_MultiInBlockTest, Fail_NullBlockParam) {
             Builder b{mod};
 
             auto* blk = b.MultiInBlock();
-            blk->SetParams(utils::Vector<BlockParam*, 1>{nullptr});
+            blk->SetParams({nullptr});
         },
         "");
 }

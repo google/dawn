@@ -26,7 +26,7 @@ using IR_BuiltinCallTest = IRTestHelper;
 TEST_F(IR_BuiltinCallTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* builtin = b.Call(mod.Types().f32(), builtin::Function::kAbs, utils::Vector{arg1, arg2});
+    auto* builtin = b.Call(mod.Types().f32(), builtin::Function::kAbs, arg1, arg2);
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{builtin, 0u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
@@ -67,7 +67,7 @@ TEST_F(IR_BuiltinCallTest, Fail_NullArg) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(mod.Types().f32(), builtin::Function::kAbs, utils::Vector<Value*, 1>{nullptr});
+            b.Call(mod.Types().f32(), builtin::Function::kAbs, nullptr);
         },
         "");
 }

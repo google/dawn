@@ -50,7 +50,7 @@ TEST_F(IR_FunctionTest, Fail_NullParam) {
             Module mod;
             Builder b{mod};
             auto* f = b.Function("my_func", mod.Types().void_());
-            f->SetParams(utils::Vector<FunctionParam*, 1>{nullptr});
+            f->SetParams({nullptr});
         },
         "");
 }

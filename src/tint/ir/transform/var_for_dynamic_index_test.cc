@@ -36,10 +36,10 @@ class IR_VarForDynamicIndexTest : public TransformTest {
 TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
     auto* arr = b.FunctionParam(ty.array(ty.i32(), 4u));
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams(utils::Vector{arr});
+    func->SetParams({arr});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_i)}));
+    auto* access = block->Append(b.Access(ty.i32(), arr, 1_i));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -60,11 +60,10 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
 TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
     auto* mat = b.FunctionParam(ty.mat2x2(ty.f32()));
     auto* func = b.Function("foo", ty.f32());
-    func->SetParams(utils::Vector{mat});
+    func->SetParams({mat});
 
     auto* block = func->StartTarget();
-    auto* access =
-        block->Append(b.Access(ty.f32(), mat, utils::Vector{b.Constant(1_i), b.Constant(0_i)}));
+    auto* access = block->Append(b.Access(ty.f32(), mat, 1_i, 0_i));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -86,10 +85,10 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
     auto* arr = b.FunctionParam(ptr(ty.array(ty.i32(), 4u)));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams(utils::Vector{arr, idx});
+    func->SetParams({arr, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ptr(ty.i32()), arr, utils::Vector{idx}));
+    auto* access = block->Append(b.Access(ptr(ty.i32()), arr, idx));
     auto* load = block->Append(b.Load(access));
     block->Append(b.Return(func, load));
     mod.functions.Push(func);
@@ -113,10 +112,10 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
     auto* mat = b.FunctionParam(ptr(ty.mat2x2(ty.f32())));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
-    func->SetParams(utils::Vector{mat, idx});
+    func->SetParams({mat, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ptr(ty.f32()), mat, utils::Vector{idx, idx}));
+    auto* access = block->Append(b.Access(ptr(ty.f32()), mat, idx, idx));
     auto* load = block->Append(b.Load(access));
     block->Append(b.Return(func, load));
     mod.functions.Push(func);
@@ -140,10 +139,10 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
     auto* vec = b.FunctionParam(ty.vec4(ty.f32()));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
-    func->SetParams(utils::Vector{vec, idx});
+    func->SetParams({vec, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ty.f32(), vec, utils::Vector{idx}));
+    auto* access = block->Append(b.Access(ty.f32(), vec, idx));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -165,10 +164,10 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
     auto* arr = b.FunctionParam(ty.array(ty.i32(), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams(utils::Vector{arr, idx});
+    func->SetParams({arr, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ty.i32(), arr, utils::Vector{idx}));
+    auto* access = block->Append(b.Access(ty.i32(), arr, idx));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -192,10 +191,10 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
     auto* arr = b.FunctionParam(ty.mat2x2(ty.f32()));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
-    func->SetParams(utils::Vector{arr, idx});
+    func->SetParams({arr, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ty.f32(), arr, utils::Vector{idx}));
+    auto* access = block->Append(b.Access(ty.f32(), arr, idx));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -219,10 +218,10 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams(utils::Vector{arr, idx});
+    func->SetParams({arr, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ty.i32(), arr, utils::Vector{idx, b.Constant(1_u), idx}));
+    auto* access = block->Append(b.Access(ty.i32(), arr, idx, 1_u, idx));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -246,11 +245,10 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams(utils::Vector{arr, idx});
+    func->SetParams({arr, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(
-        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx}));
+    auto* access = block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -275,11 +273,10 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.array(ty.i32(), 4u), 4u), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams(utils::Vector{arr, idx});
+    func->SetParams({arr, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(
-        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), idx, b.Constant(2_u), idx}));
+    auto* access = block->Append(b.Access(ty.i32(), arr, 1_u, idx, 2_u, idx));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -315,11 +312,10 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Struct) {
     auto* str_val = b.FunctionParam(str_ty);
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
-    func->SetParams(utils::Vector{str_val, idx});
+    func->SetParams({str_val, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(
-        b.Access(ty.f32(), str_val, utils::Vector{b.Constant(1_u), idx, b.Constant(0_u)}));
+    auto* access = block->Append(b.Access(ty.f32(), str_val, 1_u, idx, 0_u));
     block->Append(b.Return(func, access));
     mod.functions.Push(func);
 
@@ -352,12 +348,12 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
     auto* idx_b = b.FunctionParam(ty.i32());
     auto* idx_c = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams(utils::Vector{arr, idx_a, idx_b, idx_c});
+    func->SetParams({arr, idx_a, idx_b, idx_c});
 
     auto* block = func->StartTarget();
-    block->Append(b.Access(ty.i32(), arr, utils::Vector{idx_a}));
-    block->Append(b.Access(ty.i32(), arr, utils::Vector{idx_b}));
-    auto* access_c = block->Append(b.Access(ty.i32(), arr, utils::Vector{idx_c}));
+    block->Append(b.Access(ty.i32(), arr, idx_a));
+    block->Append(b.Access(ty.i32(), arr, idx_b));
+    auto* access_c = block->Append(b.Access(ty.i32(), arr, idx_c));
     block->Append(b.Return(func, access_c));
     mod.functions.Push(func);
 
@@ -387,13 +383,12 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipConstantInd
     auto* idx_b = b.FunctionParam(ty.i32());
     auto* idx_c = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams(utils::Vector{arr, idx_a, idx_b, idx_c});
+    func->SetParams({arr, idx_a, idx_b, idx_c});
 
     auto* block = func->StartTarget();
-    block->Append(b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_a}));
-    block->Append(b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_b}));
-    auto* access_c = block->Append(
-        b.Access(ty.i32(), arr, utils::Vector{b.Constant(1_u), b.Constant(2_u), idx_c}));
+    block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_a));
+    block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_b));
+    auto* access_c = block->Append(b.Access(ty.i32(), arr, 1_u, 2_u, idx_c));
     block->Append(b.Return(func, access_c));
     mod.functions.Push(func);
 

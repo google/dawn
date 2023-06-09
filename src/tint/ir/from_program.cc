@@ -1188,7 +1188,7 @@ class Impl {
         current_block_->Append(if_inst);
 
         auto* result = builder_.BlockParam(builder_.ir.Types().bool_());
-        if_inst->Merge()->SetParams(utils::Vector{result});
+        if_inst->Merge()->SetParams({result});
 
         utils::Result<Value*> rhs;
         {

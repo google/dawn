@@ -38,10 +38,10 @@ TEST_P(Builtin_1arg, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Call(MakeScalarType(params.type), params.function,
-                             utils::Vector{MakeScalarValue(params.type)}),
-                      b.Return(func)});
+    func->StartTarget()->SetInstructions({
+        b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type)),
+        b.Return(func),
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -52,11 +52,10 @@ TEST_P(Builtin_1arg, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Call(MakeVectorType(params.type), params.function,
-                             utils::Vector{MakeVectorValue(params.type)}),
-
-                      b.Return(func)});
+    func->StartTarget()->SetInstructions({
+        b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type)),
+        b.Return(func),
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -70,10 +69,12 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
 
 // Test that abs of an unsigned value just folds away.
 TEST_F(SpvGeneratorImplTest, Builtin_Abs_u32) {
-    auto* result =
-        b.Call(MakeScalarType(kU32), builtin::Function::kAbs, utils::Vector{MakeScalarValue(kU32)});
+    auto* result = b.Call(MakeScalarType(kU32), builtin::Function::kAbs, MakeScalarValue(kU32));
     auto* func = b.Function("foo", MakeScalarType(kU32));
-    func->StartTarget()->SetInstructions(utils::Vector{result, b.Return(func, result)});
+    func->StartTarget()->SetInstructions({
+        result,
+        b.Return(func, result),
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -88,11 +89,14 @@ OpReturnValue %5
 OpFunctionEnd
 )");
 }
+
 TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
-    auto* result =
-        b.Call(MakeVectorType(kU32), builtin::Function::kAbs, utils::Vector{MakeVectorValue(kU32)});
+    auto* result = b.Call(MakeVectorType(kU32), builtin::Function::kAbs, MakeVectorValue(kU32));
     auto* func = b.Function("foo", MakeVectorType(kU32));
-    func->StartTarget()->SetInstructions(utils::Vector{result, b.Return(func, result)});
+    func->StartTarget()->SetInstructions({
+        result,
+        b.Return(func, result),
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -117,10 +121,11 @@ TEST_P(Builtin_2arg, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(utils::Vector{
-        b.Call(MakeScalarType(params.type), params.function,
-               utils::Vector{MakeScalarValue(params.type), MakeScalarValue(params.type)}),
-        b.Return(func)});
+    func->StartTarget()->SetInstructions({
+        b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type),
+               MakeScalarValue(params.type)),
+        b.Return(func),
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -131,11 +136,12 @@ TEST_P(Builtin_2arg, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(utils::Vector{
-        b.Call(MakeVectorType(params.type), params.function,
-               utils::Vector{MakeVectorValue(params.type), MakeVectorValue(params.type)}),
+    func->StartTarget()->SetInstructions({
+        b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type),
+               MakeVectorValue(params.type)),
 
-        b.Return(func)});
+        b.Return(func),
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

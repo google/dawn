@@ -62,6 +62,10 @@ Block* Builder::Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selec
     return block;
 }
 
+Block* Builder::Case(ir::Switch* s, std::initializer_list<Switch::CaseSelector> selectors) {
+    return Case(s, utils::Vector<Switch::CaseSelector, 4>(selectors));
+}
+
 ir::Discard* Builder::Discard() {
     return ir.values.Create<ir::Discard>(ir.Types().void_());
 }

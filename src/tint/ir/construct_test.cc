@@ -27,7 +27,7 @@ using IR_ConstructTest = IRTestHelper;
 TEST_F(IR_ConstructTest, Usage) {
     auto* arg1 = b.Constant(true);
     auto* arg2 = b.Constant(false);
-    auto* c = b.Construct(mod.Types().f32(), utils::Vector{arg1, arg2});
+    auto* c = b.Construct(mod.Types().f32(), arg1, arg2);
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{c, 0u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{c, 1u}));
@@ -48,7 +48,7 @@ TEST_F(IR_ConstructTest, Fail_NullArg) {
         {
             Module mod;
             Builder b{mod};
-            b.Construct(mod.Types().f32(), utils::Vector<Value*, 1>{nullptr});
+            b.Construct(mod.Types().f32(), nullptr);
         },
         "");
 }

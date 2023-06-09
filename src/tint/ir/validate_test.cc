@@ -72,8 +72,8 @@ TEST_F(IR_ValidateTest, Function) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    f->SetParams(utils::Vector{b.FunctionParam(ty.i32()), b.FunctionParam(ty.f32())});
-    f->StartTarget()->SetInstructions(utils::Vector{b.Return(f)});
+    f->SetParams({b.FunctionParam(ty.i32()), b.FunctionParam(ty.f32())});
+    f->StartTarget()->SetInstructions({b.Return(f)});
     auto res = ir::Validate(mod);
     EXPECT_TRUE(res) << res.Failure().str();
 }
@@ -99,11 +99,10 @@ note: # Disassembly
 TEST_F(IR_ValidateTest, Valid_Access_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.mat3x2(ty.f32()));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
-    f->StartTarget()->Append(
-        b.Access(ty.f32(), obj, utils::Vector{b.Constant(1_u), b.Constant(0_u)}));
+    f->StartTarget()->Append(b.Access(ty.f32(), obj, 1_u, 0_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -114,12 +113,12 @@ TEST_F(IR_ValidateTest, Valid_Access_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.pointer(ty.mat3x2(ty.f32()), builtin::AddressSpace::kPrivate,
                                            builtin::Access::kReadWrite));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
     f->StartTarget()->Append(
         b.Access(ty.pointer(ty.f32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite),
-                 obj, utils::Vector{b.Constant(1_u), b.Constant(0_u)}));
+                 obj, 1_u, 0_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -129,10 +128,10 @@ TEST_F(IR_ValidateTest, Valid_Access_Ptr) {
 TEST_F(IR_ValidateTest, Access_NegativeIndex) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.vec3(ty.f32()));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
-    f->StartTarget()->Append(b.Access(ty.f32(), obj, utils::Vector{b.Constant(-1_i)}));
+    f->StartTarget()->Append(b.Access(ty.f32(), obj, -1_i));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -158,11 +157,10 @@ note: # Disassembly
 TEST_F(IR_ValidateTest, Access_OOB_Index_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.mat3x2(ty.f32()));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
-    f->StartTarget()->Append(
-        b.Access(ty.f32(), obj, utils::Vector{b.Constant(1_u), b.Constant(3_u)}));
+    f->StartTarget()->Append(b.Access(ty.f32(), obj, 1_u, 3_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -193,12 +191,12 @@ TEST_F(IR_ValidateTest, Access_OOB_Index_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.pointer(ty.mat3x2(ty.f32()), builtin::AddressSpace::kPrivate,
                                            builtin::Access::kReadWrite));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
     f->StartTarget()->Append(
         b.Access(ty.pointer(ty.f32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite),
-                 obj, utils::Vector{b.Constant(1_u), b.Constant(3_u)}));
+                 obj, 1_u, 3_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -229,10 +227,10 @@ note: # Disassembly
 TEST_F(IR_ValidateTest, Access_StaticallyUnindexableType_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.f32());
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
-    f->StartTarget()->Append(b.Access(ty.f32(), obj, utils::Vector{b.Constant(1_u)}));
+    f->StartTarget()->Append(b.Access(ty.f32(), obj, 1_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -259,12 +257,12 @@ TEST_F(IR_ValidateTest, Access_StaticallyUnindexableType_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(
         ty.pointer(ty.f32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
     f->StartTarget()->Append(
         b.Access(ty.pointer(ty.f32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite),
-                 obj, utils::Vector{b.Constant(1_u)}));
+                 obj, 1_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -299,10 +297,10 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(str_ty);
     auto* idx = b.FunctionParam(ty.i32());
-    f->SetParams(utils::Vector{obj, idx});
+    f->SetParams({obj, idx});
     mod.functions.Push(f);
 
-    f->StartTarget()->Append(b.Access(ty.i32(), obj, utils::Vector{idx}));
+    f->StartTarget()->Append(b.Access(ty.i32(), obj, idx));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -344,10 +342,10 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Ptr) {
     auto* obj = b.FunctionParam(
         ty.pointer(str_ty, builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
     auto* idx = b.FunctionParam(ty.i32());
-    f->SetParams(utils::Vector{obj, idx});
+    f->SetParams({obj, idx});
     mod.functions.Push(f);
 
-    f->StartTarget()->Append(b.Access(ty.i32(), obj, utils::Vector{idx}));
+    f->StartTarget()->Append(b.Access(ty.i32(), obj, idx));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -379,11 +377,10 @@ tint_symbol_2 = struct @align(4) {
 TEST_F(IR_ValidateTest, Access_Incorrect_Type_Value_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.mat3x2(ty.f32()));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
-    f->StartTarget()->Append(
-        b.Access(ty.i32(), obj, utils::Vector{b.Constant(1_u), b.Constant(1_u)}));
+    f->StartTarget()->Append(b.Access(ty.i32(), obj, 1_u, 1_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -411,12 +408,12 @@ TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.pointer(ty.mat3x2(ty.f32()), builtin::AddressSpace::kPrivate,
                                            builtin::Access::kReadWrite));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
     f->StartTarget()->Append(
         b.Access(ty.pointer(ty.i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite),
-                 obj, utils::Vector{b.Constant(1_u), b.Constant(1_u)}));
+                 obj, 1_u, 1_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -445,11 +442,10 @@ TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.pointer(ty.mat3x2(ty.f32()), builtin::AddressSpace::kPrivate,
                                            builtin::Access::kReadWrite));
-    f->SetParams(utils::Vector{obj});
+    f->SetParams({obj});
     mod.functions.Push(f);
 
-    f->StartTarget()->Append(
-        b.Access(ty.f32(), obj, utils::Vector{b.Constant(1_u), b.Constant(1_u)}));
+    f->StartTarget()->Append(b.Access(ty.f32(), obj, 1_u, 1_u));
     f->StartTarget()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
@@ -478,7 +474,7 @@ TEST_F(IR_ValidateTest, Block_BranchInMiddle) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    f->StartTarget()->SetInstructions(utils::Vector{b.Return(f), b.Return(f)});
+    f->StartTarget()->SetInstructions({b.Return(f), b.Return(f)});
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
     EXPECT_EQ(res.Failure().str(), R"(:3:5 error: block: branch which isn't the final instruction
@@ -503,7 +499,7 @@ TEST_F(IR_ValidateTest, If_ConditionIsBool) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    auto* if_ = b.If(b.Constant(1_i));
+    auto* if_ = b.If(1_i);
     if_->True()->Append(b.Return(f));
     if_->False()->Append(b.Return(f));
 

@@ -27,7 +27,7 @@ TEST_F(IR_SwizzleTest, SetsUsage) {
     auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                    builtin::Access::kReadWrite);
     auto* var = b.Var(ty);
-    auto* a = b.Swizzle(mod.Types().i32(), var, utils::Vector{1u});
+    auto* a = b.Swizzle(mod.Types().i32(), var, {1u});
 
     EXPECT_THAT(var->Usages(), testing::UnorderedElementsAre(Usage{a, 0u}));
 }
@@ -40,7 +40,7 @@ TEST_F(IR_SwizzleTest, Fail_NullType) {
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
             auto* var = b.Var(ty);
-            b.Swizzle(nullptr, var, utils::Vector{1u});
+            b.Swizzle(nullptr, var, {1u});
         },
         "");
 }
@@ -50,7 +50,7 @@ TEST_F(IR_SwizzleTest, Fail_NullObject) {
         {
             Module mod;
             Builder b{mod};
-            b.Swizzle(mod.Types().i32(), nullptr, utils::Vector{1u});
+            b.Swizzle(mod.Types().i32(), nullptr, {1u});
         },
         "");
 }
@@ -76,7 +76,7 @@ TEST_F(IR_SwizzleTest, Fail_TooManyIndices) {
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
             auto* var = b.Var(ty);
-            b.Swizzle(mod.Types().i32(), var, utils::Vector{1u, 1u, 1u, 1u, 1u});
+            b.Swizzle(mod.Types().i32(), var, {1u, 1u, 1u, 1u, 1u});
         },
         "");
 }
@@ -89,7 +89,7 @@ TEST_F(IR_SwizzleTest, Fail_IndexOutOfRange) {
             auto* ty = mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kFunction,
                                            builtin::Access::kReadWrite);
             auto* var = b.Var(ty);
-            b.Swizzle(mod.Types().i32(), var, utils::Vector{4u});
+            b.Swizzle(mod.Types().i32(), var, {4u});
         },
         "");
 }

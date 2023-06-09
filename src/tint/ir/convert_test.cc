@@ -27,7 +27,7 @@ TEST_F(IR_ConvertTest, Fail_NullToType) {
         {
             Module mod;
             Builder b{mod};
-            b.Convert(nullptr, b.Constant(1_u));
+            b.Convert(nullptr, 1_u);
         },
         "");
 }

@@ -89,7 +89,7 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Storage) {
     b.RootBlock()->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->Append(b.Store(buffer, b.Constant(42_i)));
+    func->StartTarget()->Append(b.Store(buffer, 42_i));
     func->StartTarget()->Append(b.Return(func));
     mod.functions.Push(func);
 
@@ -127,8 +127,8 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
     auto* block = func->StartTarget();
     auto* access = block->Append(
         b.Access(ty.pointer(ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite),
-                 buffer, utils::Vector{b.Constant(1_u)}));
-    block->Append(b.Store(access, b.Constant(42_i)));
+                 buffer, 1_u));
+    block->Append(b.Store(access, 42_i));
     block->Append(b.Return(func));
     mod.functions.Push(func);
 
@@ -175,10 +175,9 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
 
     auto* func = b.Function("foo", ty.void_());
     auto* block = func->StartTarget();
-    auto* val_ptr = block->Append(b.Access(i32_ptr, buffer, utils::Vector{b.Constant(0_u)}));
+    auto* val_ptr = block->Append(b.Access(i32_ptr, buffer, 0_u));
     auto* load = block->Append(b.Load(val_ptr));
-    auto* elem_ptr =
-        block->Append(b.Access(i32_ptr, buffer, utils::Vector{b.Constant(1_u), b.Constant(3_u)}));
+    auto* elem_ptr = block->Append(b.Access(i32_ptr, buffer, 1_u, 3_u));
     block->Append(b.Store(elem_ptr, load));
     block->Append(b.Return(func));
     mod.functions.Push(func);

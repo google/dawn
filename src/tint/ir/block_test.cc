@@ -29,14 +29,14 @@ TEST_F(IR_BlockTest, HasBranchTarget_Empty) {
 
 TEST_F(IR_BlockTest, HasBranchTarget_NoBranch) {
     auto* blk = b.Block();
-    blk->Append(b.Add(mod.Types().i32(), b.Constant(1_u), b.Constant(2_u)));
+    blk->Append(b.Add(mod.Types().i32(), 1_u, 2_u));
     EXPECT_FALSE(blk->HasBranchTarget());
 }
 
 TEST_F(IR_BlockTest, HasBranchTarget_BreakIf) {
     auto* blk = b.Block();
     auto* loop = b.Loop();
-    blk->Append(b.BreakIf(b.Constant(true), loop));
+    blk->Append(b.BreakIf(true, loop));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
@@ -49,7 +49,7 @@ TEST_F(IR_BlockTest, HasBranchTarget_Continue) {
 
 TEST_F(IR_BlockTest, HasBranchTarget_ExitIf) {
     auto* blk = b.Block();
-    auto* if_ = b.If(b.Constant(true));
+    auto* if_ = b.If(true);
     blk->Append(b.ExitIf(if_));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
@@ -63,7 +63,7 @@ TEST_F(IR_BlockTest, HasBranchTarget_ExitLoop) {
 
 TEST_F(IR_BlockTest, HasBranchTarget_ExitSwitch) {
     auto* blk = b.Block();
-    auto* s = b.Switch(b.Constant(1_u));
+    auto* s = b.Switch(1_u);
     blk->Append(b.ExitSwitch(s));
     EXPECT_TRUE(blk->HasBranchTarget());
 }
@@ -89,7 +89,7 @@ TEST_F(IR_BlockTest, SetInstructions) {
     auto* inst3 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst1, inst2, inst3});
+    blk->SetInstructions({inst1, inst2, inst3});
 
     ASSERT_EQ(inst1->Block(), blk);
     ASSERT_EQ(inst2->Block(), blk);
@@ -291,7 +291,7 @@ TEST_F(IR_BlockTest, Replace_Middle) {
     auto* inst4 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst1, inst4, inst3});
+    blk->SetInstructions({inst1, inst4, inst3});
     blk->Replace(inst4, inst2);
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -322,7 +322,7 @@ TEST_F(IR_BlockTest, Replace_Start) {
     auto* inst4 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst4, inst2});
+    blk->SetInstructions({inst4, inst2});
     blk->Replace(inst4, inst1);
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -348,7 +348,7 @@ TEST_F(IR_BlockTest, Replace_End) {
     auto* inst4 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst1, inst4});
+    blk->SetInstructions({inst1, inst4});
     blk->Replace(inst4, inst2);
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -373,7 +373,7 @@ TEST_F(IR_BlockTest, Replace_OnlyNode) {
     auto* inst4 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst4});
+    blk->SetInstructions({inst4});
     blk->Replace(inst4, inst1);
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -394,7 +394,7 @@ TEST_F(IR_BlockTest, Remove_Middle) {
     auto* inst4 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst1, inst4, inst2});
+    blk->SetInstructions({inst1, inst4, inst2});
     blk->Remove(inst4);
 
     ASSERT_EQ(inst4->Block(), nullptr);
@@ -417,7 +417,7 @@ TEST_F(IR_BlockTest, Remove_Start) {
     auto* inst4 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst4, inst1});
+    blk->SetInstructions({inst4, inst1});
     blk->Remove(inst4);
 
     ASSERT_EQ(inst4->Block(), nullptr);
@@ -436,7 +436,7 @@ TEST_F(IR_BlockTest, Remove_End) {
     auto* inst4 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst1, inst4});
+    blk->SetInstructions({inst1, inst4});
     blk->Remove(inst4);
 
     ASSERT_EQ(inst4->Block(), nullptr);
@@ -454,7 +454,7 @@ TEST_F(IR_BlockTest, Remove_OnlyNode) {
     auto* inst4 = b.Loop();
 
     auto* blk = b.Block();
-    blk->SetInstructions(utils::Vector{inst4});
+    blk->SetInstructions({inst4});
     blk->Remove(inst4);
 
     ASSERT_EQ(inst4->Block(), nullptr);

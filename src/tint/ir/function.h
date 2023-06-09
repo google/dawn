@@ -110,8 +110,13 @@ class Function : public utils::Castable<Function, Value> {
     bool ReturnInvariant() { return return_.invariant; }
 
     /// Sets the function parameters
-    /// @param params the function paramters
+    /// @param params the function parameters
     void SetParams(utils::VectorRef<FunctionParam*> params);
+
+    /// Sets the function parameters
+    /// @param params the function parameters
+    void SetParams(std::initializer_list<FunctionParam*> params);
+
     /// @returns the function parameters
     const utils::VectorRef<FunctionParam*> Params() { return params_; }
 

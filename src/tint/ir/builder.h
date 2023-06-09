@@ -124,6 +124,12 @@ class Builder {
     /// @returns the start block for the case flow node
     ir::Block* Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selectors);
 
+    /// Creates a case flow node for the given case branch.
+    /// @param s the switch to create the case into
+    /// @param selectors the case selectors for the case statement
+    /// @returns the start block for the case flow node
+    ir::Block* Case(ir::Switch* s, std::initializer_list<Switch::CaseSelector> selectors);
+
     /// Creates a new ir::Constant
     /// @param val the constant value
     /// @returns the new constant

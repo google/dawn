@@ -163,4 +163,10 @@ void Block::SetInstructions(utils::VectorRef<Instruction*> instructions) {
     }
 }
 
+void Block::SetInstructions(std::initializer_list<Instruction*> instructions) {
+    for (auto* i : instructions) {
+        Append(i);
+    }
+}
+
 }  // namespace tint::ir

@@ -37,7 +37,7 @@ TEST_F(IR_NextIterationTest, Fail_NullValue) {
         {
             Module mod;
             Builder b{mod};
-            b.NextIteration(b.Loop(), utils::Vector<Value*, 1>{nullptr});
+            b.NextIteration(b.Loop(), nullptr);
         },
         "");
 }

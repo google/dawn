@@ -28,7 +28,7 @@ using IR_StoreTest = IRTestHelper;
 TEST_F(IR_StoreTest, CreateStore) {
     auto* to = b.Var(mod.Types().pointer(mod.Types().i32(), builtin::AddressSpace::kPrivate,
                                          builtin::Access::kReadWrite));
-    auto* inst = b.Store(to, b.Constant(4_i));
+    auto* inst = b.Store(to, 4_i);
 
     ASSERT_TRUE(inst->Is<Store>());
     ASSERT_EQ(inst->To(), to);
@@ -41,7 +41,7 @@ TEST_F(IR_StoreTest, CreateStore) {
 
 TEST_F(IR_StoreTest, Store_Usage) {
     auto* to = b.Discard();
-    auto* inst = b.Store(to, b.Constant(4_i));
+    auto* inst = b.Store(to, 4_i);
 
     ASSERT_NE(inst->To(), nullptr);
     EXPECT_THAT(inst->To()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
@@ -55,7 +55,7 @@ TEST_F(IR_StoreTest, Fail_NullTo) {
         {
             Module mod;
             Builder b{mod};
-            b.Store(nullptr, b.Constant(1_u));
+            b.Store(nullptr, 1_u);
         },
         "");
 }

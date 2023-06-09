@@ -204,8 +204,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(SpvGeneratorImplTest, Binary_Chain) {
     auto* func = b.Function("foo", ty.void_());
-    auto* a = b.Subtract(ty.i32(), b.Constant(1_i), b.Constant(2_i));
-    func->StartTarget()->SetInstructions(utils::Vector{a, b.Add(ty.i32(), a, a), b.Return(func)});
+    auto* a = b.Subtract(ty.i32(), 1_i, 2_i);
+    func->StartTarget()->SetInstructions({a, b.Add(ty.i32(), a, a), b.Return(func)});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

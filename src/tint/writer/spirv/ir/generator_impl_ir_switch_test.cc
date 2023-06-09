@@ -22,7 +22,7 @@ namespace {
 TEST_F(SpvGeneratorImplTest, Switch_Basic) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* swtch = b.Switch(b.Constant(42_i));
+    auto* swtch = b.Switch(42_i);
 
     auto* def_case = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
@@ -54,7 +54,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Switch_MultipleCases) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* swtch = b.Switch(b.Constant(42_i));
+    auto* swtch = b.Switch(42_i);
 
     auto* case_a = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
     case_a->Append(b.ExitSwitch(swtch));
@@ -96,7 +96,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Switch_MultipleSelectorsPerCase) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* swtch = b.Switch(b.Constant(42_i));
+    auto* swtch = b.Switch(42_i);
 
     auto* case_a = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                                ir::Switch::CaseSelector{b.Constant(3_i)}});
@@ -141,7 +141,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Switch_AllCasesReturn) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* swtch = b.Switch(b.Constant(42_i));
+    auto* swtch = b.Switch(42_i);
 
     auto* case_a = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
     case_a->Append(b.Return(func));
@@ -181,9 +181,9 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Switch_ConditionalBreak) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* swtch = b.Switch(b.Constant(42_i));
+    auto* swtch = b.Switch(42_i);
 
-    auto* cond_break = b.If(b.Constant(true));
+    auto* cond_break = b.If(true);
     cond_break->True()->Append(b.ExitSwitch(swtch));
     cond_break->False()->Append(b.ExitIf(cond_break));
     cond_break->Merge()->Append(b.Return(func));
@@ -232,18 +232,18 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
 
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
-    auto* s = b.Switch(b.Constant(42_i));
+    auto* s = b.Switch(42_i);
     auto* case_a = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                            ir::Switch::CaseSelector{nullptr}});
-    case_a->Append(b.ExitSwitch(s, utils::Vector{b.Constant(10_i)}));
+    case_a->Append(b.ExitSwitch(s, 10_i));
 
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
-    case_b->Append(b.ExitSwitch(s, utils::Vector{b.Constant(20_i)}));
+    case_b->Append(b.ExitSwitch(s, 20_i));
 
-    s->Merge()->SetParams(utils::Vector{merge_param});
+    s->Merge()->SetParams({merge_param});
     s->Merge()->Append(b.Return(func));
 
-    func->StartTarget()->SetInstructions(utils::Vector{s});
+    func->StartTarget()->SetInstructions({s});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -273,18 +273,18 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* s = b.Switch(b.Constant(42_i));
+    auto* s = b.Switch(42_i);
     auto* case_a = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                            ir::Switch::CaseSelector{nullptr}});
-    case_a->Append(b.Return(func, b.Constant(10_i)));
+    case_a->Append(b.Return(func, 10_i));
 
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
-    case_b->Append(b.ExitSwitch(s, utils::Vector{b.Constant(20_i)}));
+    case_b->Append(b.ExitSwitch(s, 20_i));
 
-    s->Merge()->SetParams(utils::Vector{b.BlockParam(b.ir.Types().i32())});
+    s->Merge()->SetParams({b.BlockParam(b.ir.Types().i32())});
     s->Merge()->Append(b.Return(func));
 
-    func->StartTarget()->SetInstructions(utils::Vector{s});
+    func->StartTarget()->SetInstructions({s});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -317,18 +317,18 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
     auto* merge_param_0 = b.BlockParam(b.ir.Types().i32());
     auto* merge_param_1 = b.BlockParam(b.ir.Types().bool_());
 
-    auto* s = b.Switch(b.Constant(42_i));
+    auto* s = b.Switch(42_i);
     auto* case_a = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                            ir::Switch::CaseSelector{nullptr}});
-    case_a->Append(b.ExitSwitch(s, utils::Vector{b.Constant(10_i), b.Constant(true)}));
+    case_a->Append(b.ExitSwitch(s, 10_i, true));
 
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
-    case_b->Append(b.ExitSwitch(s, utils::Vector{b.Constant(20_i), b.Constant(false)}));
+    case_b->Append(b.ExitSwitch(s, 20_i, false));
 
-    s->Merge()->SetParams(utils::Vector{merge_param_0, merge_param_1});
+    s->Merge()->SetParams({merge_param_0, merge_param_1});
     s->Merge()->Append(b.Return(func, merge_param_0));
 
-    func->StartTarget()->SetInstructions(utils::Vector{s});
+    func->StartTarget()->SetInstructions({s});
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
