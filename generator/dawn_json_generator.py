@@ -147,7 +147,6 @@ class FunctionPointerType(Type):
         Type.__init__(self, name, json_data)
         self.return_type = None
         self.arguments = []
-        self.is_wire_transparent = True
 
 
 class TypedefType(Type):

@@ -73,7 +73,7 @@
             {"name": "status", "type": "request adapter status"},
             {"name": "adapter", "type": "adapter"},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "adapter": {
@@ -117,7 +117,7 @@
                 "args": [
                     {"name": "descriptor", "type": "device descriptor", "annotation": "const*", "optional": true, "no_default": true},
                     {"name": "callback", "type": "request device callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -421,7 +421,7 @@
                     {"name": "offset", "type": "size_t"},
                     {"name": "size", "type": "size_t"},
                     {"name": "callback", "type": "buffer map callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -481,7 +481,7 @@
         "category": "function pointer",
         "args": [
             {"name": "status", "type": "buffer map async status"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "buffer map async status": {
@@ -742,7 +742,7 @@
         "args": [
             {"name": "status", "type": "compilation info request status"},
             {"name": "compilation info", "type": "compilation info", "annotation": "const*"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "compilation info request status": {
@@ -945,7 +945,7 @@
             {"name": "status", "type": "create pipeline async status"},
             {"name": "pipeline", "type": "compute pipeline"},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "create pipeline async status": {
@@ -966,7 +966,7 @@
             {"name": "status", "type": "create pipeline async status"},
             {"name": "pipeline", "type": "render pipeline"},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "cull mode": {
@@ -1029,7 +1029,7 @@
                 "args": [
                     {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
                     {"name": "callback", "type": "create compute pipeline async callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -1065,7 +1065,7 @@
                 "args": [
                     {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
                     {"name": "callback", "type": "create render pipeline async callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -1187,7 +1187,7 @@
                 "no autolock": true,
                 "args": [
                     {"name": "callback", "type": "error callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -1196,7 +1196,7 @@
                 "tags": ["dawn"],
                 "args": [
                     {"name": "callback", "type": "logging callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -1205,7 +1205,7 @@
                 "tags": ["deprecated"],
                 "args": [
                     {"name": "callback", "type": "device lost callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -1218,7 +1218,7 @@
                 "name": "pop error scope",
                 "args": [
                     {"name": "callback", "type": "error callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -1250,7 +1250,7 @@
         "args": [
             {"name": "reason", "type": "device lost reason"},
             {"name": "message", "type": "char", "annotation": "const*"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "device lost reason": {
@@ -1269,7 +1269,7 @@
         "args": [
             {"name": "type", "type": "error type"},
             {"name": "message", "type": "char", "annotation": "const*"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "limits": {
@@ -1328,7 +1328,7 @@
         "args": [
             {"name": "type", "type": "logging type"},
             {"name": "message", "type": "char", "annotation": "const*"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "error filter": {
@@ -1535,7 +1535,7 @@
                 "args": [
                     {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
                     {"name": "callback", "type": "request adapter callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             }
         ]
@@ -1745,7 +1745,7 @@
                 "args": [
                     {"name": "signal value", "type": "uint64_t"},
                     {"name": "callback", "type": "queue work done callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -1753,7 +1753,7 @@
                 "tags": ["upstream"],
                 "args": [
                     {"name": "callback", "type": "queue work done callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
@@ -1817,7 +1817,7 @@
         "category": "function pointer",
         "args": [
             {"name": "status", "type": "queue work done status"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
     "queue work done status": {
@@ -2224,7 +2224,7 @@
             {"name": "status", "type": "request device status"},
             {"name": "device", "type": "device"},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "userdata", "type": "void", "annotation": "*"}
+            {"name": "userdata", "type": "void *"}
         ]
     },
 
@@ -2378,7 +2378,7 @@
                 "name": "get compilation info",
                 "args": [
                     {"name": "callback", "type": "compilation info callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
+                    {"name": "userdata", "type": "void *"}
                 ]
             },
             {
