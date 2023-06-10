@@ -62,6 +62,9 @@ struct Robustness::State {
                     // obj[idx]
                     // Array, matrix and vector indexing may require robustness transformation.
                     auto* expr = sem.Get(e)->Unwrap()->As<sem::IndexAccessorExpression>();
+                    if (IsIgnoredResourceBinding(expr->Object()->RootIdentifier())) {
+                        return;
+                    }
                     switch (ActionFor(expr)) {
                         case Action::kPredicate:
                             PredicateIndexAccessor(expr);
@@ -672,6 +675,22 @@ struct Robustness::State {
     /// is 1.
     const CallExpression* CastToUnsigned(const Expression* val, uint32_t width) {
         return b.Call(ScalarOrVecTy(b.ty.u32(), width), val);
+    }
+
+    /// @returns true if the variable represents a resource binding that should be ignored in the
+    /// robustness check.
+    /// TODO(tint:1890): make this function work with unrestricted pointer paramters. Note that this
+    /// depends on transform::DirectVariableAccess to have been run first.
+    bool IsIgnoredResourceBinding(const sem::Variable* variable) const {
+        auto* globalVariable = utils::As<sem::GlobalVariable>(variable);
+        if (globalVariable == nullptr) {
+            return false;
+        }
+        if (!globalVariable->BindingPoint().has_value()) {
+            return false;
+        }
+        sem::BindingPoint bindingPoint = *globalVariable->BindingPoint();
+        return cfg.bindings_ignored.find(bindingPoint) != cfg.bindings_ignored.cend();
     }
 };
 

@@ -18,6 +18,7 @@
 #include <d3dcompiler.h>
 
 #include <string>
+#include <vector>
 
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Serializable.h"
@@ -70,7 +71,8 @@ enum class Compiler { FXC, DXC };
     X(bool, isRobustnessEnabled)                                                                 \
     X(bool, disableWorkgroupInit)                                                                \
     X(bool, polyfillReflectVec2F32)                                                              \
-    X(bool, dumpShaders)
+    X(bool, dumpShaders)                                                                         \
+    X(std::vector<tint::writer::BindingPoint>, bindingPointsIgnoredInRobustnessTransform)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \
     X(bool, hasShaderF16Feature)                    \

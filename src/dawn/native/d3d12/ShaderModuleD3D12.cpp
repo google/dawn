@@ -131,13 +131,13 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
-        const auto& groupBindingInfo = moduleBindingInfo[group];
+        const auto& moduleGroupBindingInfo = moduleBindingInfo[group];
 
         // d3d12::BindGroupLayout packs the bindings per HLSL register-space. We modify
         // the Tint AST to make the "bindings" decoration match the offset chosen by
         // d3d12::BindGroupLayout so that Tint produces HLSL with the correct registers
         // assigned to each interface variable.
-        for (const auto& [binding, bindingInfo] : groupBindingInfo) {
+        for (const auto& [binding, bindingInfo] : moduleGroupBindingInfo) {
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
             BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
                                          static_cast<uint32_t>(binding)};
@@ -159,6 +159,36 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             if (forceStorageBufferAsUAV) {
                 bindingRemapper.access_controls.emplace(srcBindingPoint,
                                                         tint::builtin::Access::kReadWrite);
+            }
+
+            // On D3D12 backend all storage buffers without Dynamic Buffer Offset will always be
+            // bound to root descriptor tables, where D3D12 runtime can guarantee that OOB-read will
+            // always return 0 and OOB-write will always take no action, so we don't need to do
+            // robustness transform on them. Note that we still need to do robustness transform on
+            // uniform buffers because only sized array is allowed in uniform buffers, so FXC will
+            // report compilation error when the indexing to the array in a cBuffer is out of bound
+            // and can be checked at compilation time. Storage buffers are OK because they are
+            // always translated with RWByteAddressBuffers, which has no such sized arrays.
+            //
+            // For example below WGSL shader will cause compilation error when we skip robustness
+            // transform on uniform buffers:
+            //
+            // struct TestData {
+            //     data: array<vec4<u32>, 3>,
+            // };
+            // @group(0) @binding(0) var<uniform> s: TestData;
+            //
+            // fn test() -> u32 {
+            //     let index = 1000000u;
+            //     if (s.data[index][0] != 0u) {    // error X3504: array index out of bounds
+            //         return 0x1004u;
+            //     }
+            //     return 0u;
+            // }
+            if ((bindingInfo.buffer.type == wgpu::BufferBindingType::Storage ||
+                 bindingInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage) &&
+                !bgl->GetBindingInfo(bindingIndex).buffer.hasDynamicOffset) {
+                req.hlsl.bindingPointsIgnoredInRobustnessTransform.emplace_back(srcBindingPoint);
             }
         }
 
