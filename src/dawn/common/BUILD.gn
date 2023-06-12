@@ -48,14 +48,15 @@ config("internal_config") {
     defines += [ "DAWN_ENABLE_ASSERTS" ]
   }
 
-  if (use_fuzzing_engine) {
-    defines += [
-      # Does a hard abort when an assertion fails so that fuzzers catch and parse the failure.
-      "DAWN_ABORT_ON_ASSERT",
+  if (build_with_chromium || use_fuzzing_engine) {
+    # Does a hard abort when an assertion fails so that fuzzers catch and parse the failure.
+    # Also call abort() so chrome can dump crash stach in console.
+    defines += [ "DAWN_ABORT_ON_ASSERT" ]
+  }
 
-      # Disable logging to make fuzzing more efficient.
-      "DAWN_DISABLE_LOGGING",
-    ]
+  if (use_fuzzing_engine) {
+    # Disable logging to make fuzzing more efficient.
+    defines += [ "DAWN_DISABLE_LOGGING" ]
   }
 
   if (dawn_enable_d3d11) {
