@@ -23,11 +23,6 @@ namespace tint::ir {
 /// A load instruction in the IR.
 class Load : public utils::Castable<Load, OperandInstruction<1>> {
   public:
-    /// Constructor
-    /// @param type the result type
-    /// @param from the value being loaded from
-    Load(const type::Type* type, Value* from);
-
     /// Constructor (infers type)
     /// @param from the value being loaded from
     explicit Load(Value* from);
