@@ -644,7 +644,7 @@ TEST_P(QueueWriteTextureTests, WriteStencilAspectWithSourceOffsetUnalignedTo4) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
-    // Copies to a single aspect are unsupported on D3D11.
+    // TODO(dawn:1848): Support depth-stencil texture write on D3D11.
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor textureDescriptor;
@@ -751,7 +751,7 @@ TEST_P(QueueWriteTextureTests, WriteStencilAspectAfterOtherQueueWriteTextureCall
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
-    // Copies to a single aspect are unsupported on D3D11.
+    // TODO(dawn:1848): Support depth-stencil texture write on D3D11.
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor textureDescriptor;
