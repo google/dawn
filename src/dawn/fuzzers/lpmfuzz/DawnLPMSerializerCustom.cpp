@@ -49,7 +49,7 @@ void GetCustomSerializedData(const fuzzing::Command& command,
             wgsl_desc.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
 
             // Hardcoded shader for now, eventually we should write an LPM grammar for WGSL
-            wgsl_desc.source =
+            wgsl_desc.code =
                 "@group(0) @binding(0)\n"
                 "var<storage, read_write> output: array<f32>;\n"
                 "@compute @workgroup_size(64)\n"

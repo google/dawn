@@ -125,7 +125,7 @@ namespace dawn::wire {
         DAWN_UNUSED(mutable_record);
 
         //* Zero out any non-serializable values as they won't be set
-        {% for member in members if member.skip_serialize or member.type in by_category["function pointer"] or member.type.name.get() == "void *" %}
+        {% for member in members if member.skip_serialize %}
             {% set memberName = as_varName(member.name) %}
             memset(&mutable_record->{{ memberName }}, 0, sizeof(mutable_record->{{ memberName }}));
         {% endfor %}
@@ -139,14 +139,8 @@ namespace dawn::wire {
             //* Major WireCmd Divergence: Some member values are hardcoded in dawn_lpm.json
             {% if overrides_key in overrides and member.name.canonical_case() in overrides[overrides_key] %}
                 mutable_record->{{ memberName }} = {{ overrides[overrides_key][member.name.canonical_case()] }};
-            {% elif member.type in by_category["function pointer"]  %}
-                //* Major WireCmd Divergence: DawnLPM handles function pointers uniquely
-                //* as they are always unsafe if they make it through WireCmd
-                mutable_record->{{ memberName }} = reinterpret_cast<{{ member_type(member) }}>(0x41414141);
-            {% elif member.type.name.get() == "void *" %}
-                //* Major WireCmd Divergence: DawnLPM handles raw pointers uniquely
-                //* as they are always unsafe if they make it through WireCmd
-                mutable_record->{{ memberName }} = reinterpret_cast<{{ member_type(member) }}>(0x41414141);
+            {%- elif member.type.category == "function pointer" or member.type.name.get() == "void *" -%}
+                mutable_record->{{ memberName }} = nullptr;
             {% else %}
                 {{ convert_member(member, 'proto_record.' + protoMember, "mutable_record->" + memberName) }}
             {% endif %}
