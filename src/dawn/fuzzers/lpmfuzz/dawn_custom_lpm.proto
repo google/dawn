@@ -20,6 +20,7 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_object_types_lpm_autogen.
 // Custom commands
 message DeviceCreateShaderModule {
     required uint32 self = 1;
+    optional bytes code = 2;
 }
 
 message DestroyObject {

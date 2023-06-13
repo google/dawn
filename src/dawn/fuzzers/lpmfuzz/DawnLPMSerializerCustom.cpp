@@ -48,18 +48,21 @@ void GetCustomSerializedData(const fuzzing::Command& command,
             WGPUShaderModuleWGSLDescriptor wgsl_desc = {};
             wgsl_desc.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
 
-            // Hardcoded shader for now, eventually we should write an LPM grammar for WGSL
-            wgsl_desc.code =
-                "@group(0) @binding(0)\n"
-                "var<storage, read_write> output: array<f32>;\n"
-                "@compute @workgroup_size(64)\n"
-                "fn main( \n"
-                "    @builtin(global_invocation_id) global_id : vec3<u32>,\n"
-                "    @builtin(local_invocation_id) local_id : vec3<u32>,\n"
-                ") { \n"
-                "output[global_id.x] = \n"
-                "    f32(global_id.x) * 1000. + f32(local_id.x);\n"
-                "}";
+            if (command.devicecreateshadermodule().has_code()) {
+                wgsl_desc.code = command.devicecreateshadermodule().code().c_str();
+            } else {
+                wgsl_desc.code =
+                    "@group(0) @binding(0)\n"
+                    "var<storage, read_write> output: array<f32>;\n"
+                    "@compute @workgroup_size(64)\n"
+                    "fn main( \n"
+                    "    @builtin(global_invocation_id) global_id : vec3<u32>,\n"
+                    "    @builtin(local_invocation_id) local_id : vec3<u32>,\n"
+                    ") { \n"
+                    "output[global_id.x] = \n"
+                    "    f32(global_id.x) * 1000. + f32(local_id.x);\n"
+                    "}";
+            }
             cmd_descriptor.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&wgsl_desc);
 
             cmd.descriptor = &cmd_descriptor;
