@@ -65,6 +65,7 @@ struct VulkanDeviceInfo : VulkanDeviceKnobs {
     VkPhysicalDeviceDriverProperties driverProperties;
     VkPhysicalDeviceSubgroupSizeControlPropertiesEXT subgroupSizeControlProperties;
     VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR shaderIntegerDotProductProperties;
+    VkPhysicalDeviceMaintenance4Properties propertiesMaintenance4;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
 

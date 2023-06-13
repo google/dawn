@@ -97,6 +97,7 @@ enum class DeviceExt {
     // Promoted to 1.3
     ShaderIntegerDotProduct,
     ZeroInitializeWorkgroupMemory,
+    Maintenance4,
 
     // Others
     DepthClipEnable,

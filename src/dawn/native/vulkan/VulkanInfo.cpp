@@ -267,6 +267,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT);
         }
 
+        if (info.extensions[DeviceExt::Maintenance4]) {
+            propertiesChain.Add(&info.propertiesMaintenance4,
+                                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_4_PROPERTIES);
+        }
+
         // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
         // the extensions. DeviceExt::GetPhysicalDeviceProperties2 is guaranteed to be available
         // because these extensions (transitively) depend on it in `EnsureDependencies`
