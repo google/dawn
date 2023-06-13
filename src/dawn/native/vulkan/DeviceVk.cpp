@@ -450,24 +450,18 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     if (mDeviceInfo.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory)) {
         ASSERT(usedKnobs.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory));
 
-        usedKnobs.zeroInitializeWorkgroupMemoryFeatures.sType =
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES_KHR;
-
         // Always allow initializing workgroup memory with OpConstantNull when available.
         // Note that the driver still won't initialize workgroup memory unless the workgroup
         // variable is explicitly initialized with OpConstantNull.
-        usedKnobs.zeroInitializeWorkgroupMemoryFeatures.shaderZeroInitializeWorkgroupMemory =
-            VK_TRUE;
+        usedKnobs.zeroInitializeWorkgroupMemoryFeatures =
+            mDeviceInfo.zeroInitializeWorkgroupMemoryFeatures;
         featuresChain.Add(&usedKnobs.zeroInitializeWorkgroupMemoryFeatures);
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ShaderIntegerDotProduct)) {
         ASSERT(usedKnobs.HasExt(DeviceExt::ShaderIntegerDotProduct));
 
-        usedKnobs.shaderIntegerDotProductFeatures.sType =
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_FEATURES;
-
-        usedKnobs.shaderIntegerDotProductFeatures.shaderIntegerDotProduct = VK_TRUE;
+        usedKnobs.shaderIntegerDotProductFeatures = mDeviceInfo.shaderIntegerDotProductFeatures;
         featuresChain.Add(&usedKnobs.shaderIntegerDotProductFeatures);
     }
 
