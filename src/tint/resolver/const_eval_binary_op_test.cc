@@ -2239,6 +2239,84 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_MemberAccess) {
 }
 
 ////////////////////////////////////////////////
+// Short-Circuit with RHS Variable Access
+////////////////////////////////////////////////
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSConstDecl) {
+    // const FALSE = false;
+    // const result = FALSE && FALSE;
+    GlobalConst("FALSE", Expr(false));
+    auto* binary = LogicalAnd("FALSE", "FALSE");
+    GlobalConst("result", binary);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ValidateAnd(Sem(), binary);
+}
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSConstDecl) {
+    // const TRUE = true;
+    // const result = TRUE || TRUE;
+    GlobalConst("TRUE", Expr(true));
+    auto* binary = LogicalOr("TRUE", "TRUE");
+    GlobalConst("result", binary);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ValidateOr(Sem(), binary);
+}
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSLetDecl) {
+    // fn f() {
+    //   let b = false;
+    //   let result = false && b;
+    // }
+    auto* binary = LogicalAnd(false, "b");
+    WrapInFunction(Decl(Let("b", Expr(false))), binary);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ValidateAnd(Sem(), binary);
+}
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSLetDecl) {
+    // fn f() {
+    //   let b = false;
+    //   let result = true || b;
+    // }
+    auto* binary = LogicalOr(true, "b");
+    WrapInFunction(Decl(Let("b", Expr(false))), binary);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ValidateOr(Sem(), binary);
+}
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSVarDecl) {
+    // fn f() {
+    //   var b = false;
+    //   let result = false && b;
+    // }
+    auto* binary = LogicalAnd(false, "b");
+    WrapInFunction(Decl(Var("b", Expr(false))), binary);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().GetVal(binary->lhs)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().GetVal(binary->rhs)->Stage(), sem::EvaluationStage::kRuntime);
+}
+
+TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSVarDecl) {
+    // fn f() {
+    //   var b = false;
+    //   let result = true || b;
+    // }
+    auto* binary = LogicalOr(true, "b");
+    WrapInFunction(Decl(Var("b", Expr(false))), binary);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().GetVal(binary->lhs)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().GetVal(binary->rhs)->Stage(), sem::EvaluationStage::kRuntime);
+}
+
+////////////////////////////////////////////////
 // Short-Circuit Swizzle
 ////////////////////////////////////////////////
 

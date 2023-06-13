@@ -86,13 +86,15 @@ Parameter::Parameter(const ast::Parameter* declaration,
 Parameter::~Parameter() = default;
 
 VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
+                           EvaluationStage stage,
                            Statement* statement,
+                           const constant::Value* constant,
                            sem::Variable* variable)
     : Base(declaration,
            variable->Type(),
-           variable->Stage(),
+           stage,
            statement,
-           variable->ConstantValue(),
+           constant,
            /* has_side_effects */ false),
       variable_(variable) {
     auto* type = variable->Type();

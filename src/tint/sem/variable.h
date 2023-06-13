@@ -259,10 +259,14 @@ class VariableUser final : public utils::Castable<VariableUser, ValueExpression>
   public:
     /// Constructor
     /// @param declaration the AST identifier node
+    /// @param stage the evaluation stage for an expression of this variable type
     /// @param statement the statement that owns this expression
+    /// @param constant the constant value of the expression. May be null
     /// @param variable the semantic variable
     VariableUser(const ast::IdentifierExpression* declaration,
+                 EvaluationStage stage,
                  Statement* statement,
+                 const constant::Value* constant,
                  sem::Variable* variable);
     ~VariableUser() override;
 

@@ -1820,16 +1820,18 @@ ConstEval::Result ConstEval::OpGreaterThanEqual(const type::Type* ty,
 ConstEval::Result ConstEval::OpLogicalAnd(const type::Type* ty,
                                           utils::VectorRef<const constant::Value*> args,
                                           const Source& source) {
-    // Note: Due to short-circuiting, this function is only called if lhs is true, so we could
-    // technically only return the value of the rhs.
-    return CreateScalar(source, ty, args[0]->ValueAs<bool>() && args[1]->ValueAs<bool>());
+    // Due to short-circuiting, this function is only called if lhs is true, so we only return the
+    // value of the rhs.
+    TINT_ASSERT(Resolver, args[0]->ValueAs<bool>());
+    return CreateScalar(source, ty, args[1]->ValueAs<bool>());
 }
 
 ConstEval::Result ConstEval::OpLogicalOr(const type::Type* ty,
                                          utils::VectorRef<const constant::Value*> args,
                                          const Source& source) {
-    // Note: Due to short-circuiting, this function is only called if lhs is false, so we could
-    // technically only return the value of the rhs.
+    // Due to short-circuiting, this function is only called if lhs is false, so we only only return
+    // the value of the rhs.
+    TINT_ASSERT(Resolver, !args[0]->ValueAs<bool>());
     return CreateScalar(source, ty, args[1]->ValueAs<bool>());
 }
 
