@@ -22,16 +22,16 @@ namespace {
 using PointerTest = TestHelper;
 
 TEST_F(PointerTest, Creation) {
-    auto* a = create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* a = create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(),
                               builtin::Access::kReadWrite);
-    auto* b = create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* b = create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(),
                               builtin::Access::kReadWrite);
-    auto* c = create<Pointer>(create<F32>(), builtin::AddressSpace::kStorage,
+    auto* c = create<Pointer>(builtin::AddressSpace::kStorage, create<F32>(),
                               builtin::Access::kReadWrite);
-    auto* d = create<Pointer>(create<I32>(), builtin::AddressSpace::kPrivate,
+    auto* d = create<Pointer>(builtin::AddressSpace::kPrivate, create<I32>(),
                               builtin::Access::kReadWrite);
     auto* e =
-        create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage, builtin::Access::kRead);
+        create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(), builtin::Access::kRead);
 
     EXPECT_TRUE(a->StoreType()->Is<I32>());
     EXPECT_EQ(a->AddressSpace(), builtin::AddressSpace::kStorage);
@@ -44,25 +44,25 @@ TEST_F(PointerTest, Creation) {
 }
 
 TEST_F(PointerTest, Hash) {
-    auto* a = create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* a = create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(),
                               builtin::Access::kReadWrite);
-    auto* b = create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* b = create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(),
                               builtin::Access::kReadWrite);
 
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(PointerTest, Equals) {
-    auto* a = create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* a = create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(),
                               builtin::Access::kReadWrite);
-    auto* b = create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* b = create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(),
                               builtin::Access::kReadWrite);
-    auto* c = create<Pointer>(create<F32>(), builtin::AddressSpace::kStorage,
+    auto* c = create<Pointer>(builtin::AddressSpace::kStorage, create<F32>(),
                               builtin::Access::kReadWrite);
-    auto* d = create<Pointer>(create<I32>(), builtin::AddressSpace::kPrivate,
+    auto* d = create<Pointer>(builtin::AddressSpace::kPrivate, create<I32>(),
                               builtin::Access::kReadWrite);
     auto* e =
-        create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage, builtin::Access::kRead);
+        create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(), builtin::Access::kRead);
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
@@ -73,18 +73,18 @@ TEST_F(PointerTest, Equals) {
 
 TEST_F(PointerTest, FriendlyName) {
     auto* r =
-        create<Pointer>(create<I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kRead);
+        create<Pointer>(builtin::AddressSpace::kUndefined, create<I32>(), builtin::Access::kRead);
     EXPECT_EQ(r->FriendlyName(), "ptr<i32, read>");
 }
 
 TEST_F(PointerTest, FriendlyNameWithAddressSpace) {
     auto* r =
-        create<Pointer>(create<I32>(), builtin::AddressSpace::kWorkgroup, builtin::Access::kRead);
+        create<Pointer>(builtin::AddressSpace::kWorkgroup, create<I32>(), builtin::Access::kRead);
     EXPECT_EQ(r->FriendlyName(), "ptr<workgroup, i32, read>");
 }
 
 TEST_F(PointerTest, Clone) {
-    auto* a = create<Pointer>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* a = create<Pointer>(builtin::AddressSpace::kStorage, create<I32>(),
                               builtin::Access::kReadWrite);
 
     type::Manager mgr;

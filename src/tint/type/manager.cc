@@ -156,10 +156,10 @@ const type::Array* Manager::runtime_array(const type::Type* elem_ty, uint32_t st
         /* implicit stride */ elem_ty->Align());
 }
 
-const type::Pointer* Manager::pointer(const type::Type* subtype,
-                                      builtin::AddressSpace address_space,
-                                      builtin::Access access) {
-    return Get<type::Pointer>(subtype, address_space, access);
+const type::Pointer* Manager::ptr(builtin::AddressSpace address_space,
+                                  const type::Type* subtype,
+                                  builtin::Access access) {
+    return Get<type::Pointer>(address_space, subtype, access);
 }
 
 }  // namespace tint::type

@@ -950,7 +950,7 @@ class Impl {
         const type::Type* ty = nullptr;
         if (auto* ptr = info.object->Type()->As<type::Pointer>();
             ptr && !info.result_type->Is<type::Pointer>()) {
-            ty = builder_.ir.Types().pointer(info.result_type, ptr->AddressSpace(), ptr->Access());
+            ty = builder_.ir.Types().ptr(ptr->AddressSpace(), info.result_type, ptr->Access());
         } else {
             ty = info.result_type;
         }
@@ -1078,7 +1078,7 @@ class Impl {
             [&](const ast::Var* v) {
                 auto* ref = sem->Type()->As<type::Reference>();
                 auto* ty = builder_.ir.Types().Get<type::Pointer>(
-                    ref->StoreType()->Clone(clone_ctx_.type_ctx), ref->AddressSpace(),
+                    ref->AddressSpace(), ref->StoreType()->Clone(clone_ctx_.type_ctx),
                     ref->Access());
 
                 auto* val = builder_.Var(ty);

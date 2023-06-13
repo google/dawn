@@ -29,7 +29,7 @@ using namespace tint::number_suffixes;  // NOLINT
 class IR_VarForDynamicIndexTest : public TransformTest {
   protected:
     const type::Type* ptr(const type::Type* elem) {
-        return ty.pointer(elem, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+        return ty.ptr(builtin::AddressSpace::kFunction, elem, builtin::Access::kReadWrite);
     }
 };
 

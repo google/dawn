@@ -53,7 +53,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypesAssignThroughPoi
     // *b += 2;
     const auto func = builtin::AddressSpace::kFunction;
     auto* var_a = Var("a", ty.i32(), func, Expr(2_i));
-    auto* var_b = Let("b", ty.pointer<i32>(func), AddressOf(Expr("a")));
+    auto* var_b = Let("b", ty.ptr<i32>(func), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b,
                    CompoundAssign(Source{{12, 34}}, Deref("b"), 2_i, ast::BinaryOp::kAdd));
 

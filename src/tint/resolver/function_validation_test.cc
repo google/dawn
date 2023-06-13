@@ -926,7 +926,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_NonPlain) {
-    auto ret_type = ty.pointer(Source{{12, 34}}, ty.i32(), builtin::AddressSpace::kFunction);
+    auto ret_type = ty.ptr(Source{{12, 34}}, builtin::AddressSpace::kFunction, ty.i32());
     Func("f", utils::Empty, ret_type, utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());

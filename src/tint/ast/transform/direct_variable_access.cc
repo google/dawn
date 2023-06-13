@@ -832,8 +832,8 @@ struct DirectVariableAccess::State {
                         auto& symbols = *variant.ptr_param_symbols.Find(param);
                         if (symbols.base_ptr.IsValid()) {
                             auto base_ptr_ty =
-                                b.ty.pointer(CreateASTTypeFor(ctx, incoming_shape->root.type),
-                                             incoming_shape->root.address_space);
+                                b.ty.ptr(incoming_shape->root.address_space,
+                                         CreateASTTypeFor(ctx, incoming_shape->root.type));
                             params.Push(b.Param(symbols.base_ptr, base_ptr_ty));
                         }
                         if (symbols.indices.IsValid()) {

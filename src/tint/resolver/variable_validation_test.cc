@@ -132,7 +132,7 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
     // var i : i32;
     // var p : pointer<function, i32> = &v;
     auto* i = Var("i", ty.i32());
-    auto* p = Var("a", ty.pointer<i32>(Source{{56, 78}}, builtin::AddressSpace::kFunction),
+    auto* p = Var("a", ty.ptr<i32>(Source{{56, 78}}, builtin::AddressSpace::kFunction),
                   builtin::AddressSpace::kUndefined, AddressOf(Source{{12, 34}}, "i"));
     WrapInFunction(i, p);
 
@@ -227,7 +227,7 @@ TEST_F(ResolverVariableValidationTest, LetOfPtrConstructedWithRef) {
     // let b : ptr<function,f32> = a;
     const auto priv = builtin::AddressSpace::kFunction;
     auto* var_a = Var("a", ty.f32(), priv);
-    auto* var_b = Let(Source{{12, 34}}, "b", ty.pointer<f32>(priv), Expr("a"));
+    auto* var_b = Let(Source{{12, 34}}, "b", ty.ptr<f32>(priv), Expr("a"));
     WrapInFunction(var_a, var_b);
 
     ASSERT_FALSE(r()->Resolve());
@@ -319,7 +319,7 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr = Let(Source{{12, 34}}, "p",
-                    ty.pointer<i32>(builtin::AddressSpace::kStorage, builtin::Access::kReadWrite),
+                    ty.ptr<i32>(builtin::AddressSpace::kStorage, builtin::Access::kReadWrite),
                     AddressOf(expr));
 
     WrapInFunction(ptr);

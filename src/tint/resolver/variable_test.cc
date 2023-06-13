@@ -421,7 +421,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
     auto* b = Let("b", ty.bool_(), b_c);
     auto* s = Let("s", ty.Of(S), s_c);
     auto* a = Let("a", ty.Of(A), a_c);
-    auto* p = Let("p", ty.pointer<i32>(builtin::AddressSpace::kFunction), p_c);
+    auto* p = Let("p", ty.ptr<i32>(builtin::AddressSpace::kFunction), p_c);
 
     Func("F", utils::Empty, ty.void_(),
          utils::Vector{

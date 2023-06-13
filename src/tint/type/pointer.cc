@@ -25,7 +25,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Pointer);
 
 namespace tint::type {
 
-Pointer::Pointer(const Type* subtype, builtin::AddressSpace address_space, builtin::Access access)
+Pointer::Pointer(builtin::AddressSpace address_space, const Type* subtype, builtin::Access access)
     : Base(
           utils::Hash(utils::TypeInfo::Of<Pointer>().full_hashcode, address_space, subtype, access),
           type::Flags{}),
@@ -59,7 +59,7 @@ Pointer::~Pointer() = default;
 
 Pointer* Pointer::Clone(CloneContext& ctx) const {
     auto* ty = subtype_->Clone(ctx);
-    return ctx.dst.mgr->Get<Pointer>(ty, address_space_, access_);
+    return ctx.dst.mgr->Get<Pointer>(address_space_, ty, access_);
 }
 
 }  // namespace tint::type

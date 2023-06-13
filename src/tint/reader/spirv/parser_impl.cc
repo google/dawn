@@ -1226,9 +1226,9 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
     }
     switch (ptr_as) {
         case PtrAs::Ref:
-            return ty_.Reference(ast_elem_ty, ast_address_space);
+            return ty_.Reference(ast_address_space, ast_elem_ty);
         case PtrAs::Ptr:
-            return ty_.Pointer(ast_elem_ty, ast_address_space);
+            return ty_.Pointer(ast_address_space, ast_elem_ty);
     }
     Fail() << "invalid value for ptr_as: " << static_cast<int>(ptr_as);
     return nullptr;

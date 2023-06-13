@@ -110,8 +110,8 @@ TEST_F(GlslGeneratorImplTest_Function, PtrParameter) {
     // fn f(foo : ptr<function, f32>) -> f32 {
     //   return *foo;
     // }
-    Func("f", utils::Vector{Param("foo", ty.pointer<f32>(builtin::AddressSpace::kFunction))},
-         ty.f32(), utils::Vector{Return(Deref("foo"))});
+    Func("f", utils::Vector{Param("foo", ty.ptr<f32>(builtin::AddressSpace::kFunction))}, ty.f32(),
+         utils::Vector{Return(Deref("foo"))});
 
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();

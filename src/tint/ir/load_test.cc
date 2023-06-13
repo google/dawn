@@ -26,9 +26,9 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_LoadTest = IRTestHelper;
 
 TEST_F(IR_LoadTest, Create) {
-    auto* store_type = mod.Types().i32();
-    auto* var = b.Var(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
-                                          builtin::Access::kReadWrite));
+    auto* store_type = ty.i32();
+    auto* var =
+        b.Var(ty.ptr(builtin::AddressSpace::kFunction, store_type, builtin::Access::kReadWrite));
     auto* inst = b.Load(var);
 
     ASSERT_TRUE(inst->Is<Load>());
@@ -41,9 +41,9 @@ TEST_F(IR_LoadTest, Create) {
 }
 
 TEST_F(IR_LoadTest, Usage) {
-    auto* store_type = mod.Types().i32();
-    auto* var = b.Var(mod.Types().pointer(store_type, builtin::AddressSpace::kFunction,
-                                          builtin::Access::kReadWrite));
+    auto* store_type = ty.i32();
+    auto* var =
+        b.Var(ty.ptr(builtin::AddressSpace::kFunction, store_type, builtin::Access::kReadWrite));
     auto* inst = b.Load(var);
 
     ASSERT_NE(inst->From(), nullptr);

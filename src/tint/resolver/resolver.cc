@@ -559,7 +559,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         return nullptr;
     }
 
-    auto* var_ty = builder_->create<type::Reference>(storage_ty, address_space, access);
+    auto* var_ty = builder_->create<type::Reference>(address_space, storage_ty, access);
 
     if (!ApplyAddressSpaceUsageToType(address_space, var_ty,
                                       var->type ? var->type->source : var->source)) {
@@ -1939,7 +1939,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
 
     // If we're extracting from a reference, we return a reference.
     if (auto* ref = obj_raw_ty->As<type::Reference>()) {
-        ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
+        ty = builder_->create<type::Reference>(ref->AddressSpace(), ty, ref->Access());
     }
 
     const constant::Value* val = nullptr;
@@ -2583,7 +2583,7 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
             access = access_expr->Value();
         }
 
-        auto* out = b.create<type::Pointer>(store_ty, address_space, access);
+        auto* out = b.create<type::Pointer>(address_space, store_ty, access);
         if (!validator_.Pointer(tmpl_ident, out)) {
             return nullptr;
         }
@@ -3275,7 +3275,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
 
             // If we're extracting from a reference, we return a reference.
             if (auto* ref = object_ty->As<type::Reference>()) {
-                ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
+                ty = builder_->create<type::Reference>(ref->AddressSpace(), ty, ref->Access());
             }
 
             auto val = const_eval_.MemberAccess(object, member);
@@ -3344,7 +3344,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 ty = vec->type();
                 // If we're extracting from a reference, we return a reference.
                 if (auto* ref = object_ty->As<type::Reference>()) {
-                    ty = builder_->create<type::Reference>(ty, ref->AddressSpace(), ref->Access());
+                    ty = builder_->create<type::Reference>(ref->AddressSpace(), ty, ref->Access());
                 }
             } else {
                 // The vector will have a number of components equal to the length of
@@ -3480,7 +3480,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                     return nullptr;
                 }
 
-                ty = builder_->create<type::Pointer>(ref->StoreType(), ref->AddressSpace(),
+                ty = builder_->create<type::Pointer>(ref->AddressSpace(), ref->StoreType(),
                                                      ref->Access());
 
                 root_ident = expr->RootIdentifier();
@@ -3492,7 +3492,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
         case ast::UnaryOp::kIndirection:
             if (auto* ptr = expr_ty->As<type::Pointer>()) {
-                ty = builder_->create<type::Reference>(ptr->StoreType(), ptr->AddressSpace(),
+                ty = builder_->create<type::Reference>(ptr->AddressSpace(), ptr->StoreType(),
                                                        ptr->Access());
                 root_ident = expr->RootIdentifier();
             } else {

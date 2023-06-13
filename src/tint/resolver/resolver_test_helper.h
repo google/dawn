@@ -628,13 +628,13 @@ struct DataType<ptr<T>> {
     /// @param b the ProgramBuilder
     /// @return a new AST alias type
     static inline ast::Type AST(ProgramBuilder& b) {
-        return b.ty.pointer(DataType<T>::AST(b), builtin::AddressSpace::kPrivate,
-                            builtin::Access::kUndefined);
+        return b.ty.ptr(builtin::AddressSpace::kPrivate, DataType<T>::AST(b),
+                        builtin::Access::kUndefined);
     }
     /// @param b the ProgramBuilder
     /// @return the semantic aliased type
     static inline const type::Type* Sem(ProgramBuilder& b) {
-        return b.create<type::Pointer>(DataType<T>::Sem(b), builtin::AddressSpace::kPrivate,
+        return b.create<type::Pointer>(builtin::AddressSpace::kPrivate, DataType<T>::Sem(b),
                                        builtin::Access::kReadWrite);
     }
 

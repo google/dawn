@@ -1855,8 +1855,8 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(const ast::BinaryExpressi
 uint32_t Builder::GenerateSplat(uint32_t scalar_id, const type::Type* vec_type) {
     // Create a new vector to splat scalar into
     auto splat_vector = result_op();
-    auto* splat_vector_type = builder_.create<type::Pointer>(
-        vec_type, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+    auto* splat_vector_type = builder_.create<type::Pointer>(builtin::AddressSpace::kFunction,
+                                                             vec_type, builtin::Access::kReadWrite);
     push_function_var({Operand(GenerateTypeIfNeeded(splat_vector_type)), splat_vector,
                        U32Operand(ConvertAddressSpace(builtin::AddressSpace::kFunction)),
                        Operand(GenerateConstantNullIfNeeded(vec_type))});
@@ -3620,10 +3620,10 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
     // references are not legal in WGSL, so only considering the top-level type is
     // fine.
     if (auto* ptr = type->As<type::Pointer>()) {
-        type = builder_.create<type::Pointer>(ptr->StoreType(), ptr->AddressSpace(),
+        type = builder_.create<type::Pointer>(ptr->AddressSpace(), ptr->StoreType(),
                                               builtin::Access::kReadWrite);
     } else if (auto* ref = type->As<type::Reference>()) {
-        type = builder_.create<type::Pointer>(ref->StoreType(), ref->AddressSpace(),
+        type = builder_.create<type::Pointer>(ref->AddressSpace(), ref->StoreType(),
                                               builtin::Access::kReadWrite);
     }
 

@@ -586,7 +586,7 @@ bool match_ptr(MatchState&, const type::Type* ty, Number& S, const type::Type*& 
 }
 
 const type::Pointer* build_ptr(MatchState& state, Number S, const type::Type* T, Number& A) {
-    return state.builder.create<type::Pointer>(T, static_cast<builtin::AddressSpace>(S.Value()),
+    return state.builder.create<type::Pointer>(static_cast<builtin::AddressSpace>(S.Value()), T,
                                                static_cast<builtin::Access>(A.Value()));
 }
 

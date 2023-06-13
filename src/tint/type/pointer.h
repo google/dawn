@@ -27,10 +27,10 @@ namespace tint::type {
 class Pointer final : public utils::Castable<Pointer, Type> {
   public:
     /// Constructor
-    /// @param subtype the pointee type
     /// @param address_space the address space of the pointer
+    /// @param subtype the pointee type
     /// @param access the resolved access control of the reference
-    Pointer(const Type* subtype, builtin::AddressSpace address_space, builtin::Access access);
+    Pointer(builtin::AddressSpace address_space, const Type* subtype, builtin::Access access);
 
     /// Destructor
     ~Pointer() override;

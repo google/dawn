@@ -22,16 +22,16 @@ namespace {
 using ReferenceTest = TestHelper;
 
 TEST_F(ReferenceTest, Creation) {
-    auto* a = create<Reference>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* a = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
                                 builtin::Access::kReadWrite);
-    auto* b = create<Reference>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* b = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
                                 builtin::Access::kReadWrite);
-    auto* c = create<Reference>(create<F32>(), builtin::AddressSpace::kStorage,
+    auto* c = create<Reference>(builtin::AddressSpace::kStorage, create<F32>(),
                                 builtin::Access::kReadWrite);
-    auto* d = create<Reference>(create<I32>(), builtin::AddressSpace::kPrivate,
+    auto* d = create<Reference>(builtin::AddressSpace::kPrivate, create<I32>(),
                                 builtin::Access::kReadWrite);
     auto* e =
-        create<Reference>(create<I32>(), builtin::AddressSpace::kStorage, builtin::Access::kRead);
+        create<Reference>(builtin::AddressSpace::kStorage, create<I32>(), builtin::Access::kRead);
 
     EXPECT_TRUE(a->StoreType()->Is<I32>());
     EXPECT_EQ(a->AddressSpace(), builtin::AddressSpace::kStorage);
@@ -44,25 +44,25 @@ TEST_F(ReferenceTest, Creation) {
 }
 
 TEST_F(ReferenceTest, Hash) {
-    auto* a = create<Reference>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* a = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
                                 builtin::Access::kReadWrite);
-    auto* b = create<Reference>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* b = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
                                 builtin::Access::kReadWrite);
 
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(ReferenceTest, Equals) {
-    auto* a = create<Reference>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* a = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
                                 builtin::Access::kReadWrite);
-    auto* b = create<Reference>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* b = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
                                 builtin::Access::kReadWrite);
-    auto* c = create<Reference>(create<F32>(), builtin::AddressSpace::kStorage,
+    auto* c = create<Reference>(builtin::AddressSpace::kStorage, create<F32>(),
                                 builtin::Access::kReadWrite);
-    auto* d = create<Reference>(create<I32>(), builtin::AddressSpace::kPrivate,
+    auto* d = create<Reference>(builtin::AddressSpace::kPrivate, create<I32>(),
                                 builtin::Access::kReadWrite);
     auto* e =
-        create<Reference>(create<I32>(), builtin::AddressSpace::kStorage, builtin::Access::kRead);
+        create<Reference>(builtin::AddressSpace::kStorage, create<I32>(), builtin::Access::kRead);
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
@@ -73,18 +73,18 @@ TEST_F(ReferenceTest, Equals) {
 
 TEST_F(ReferenceTest, FriendlyName) {
     auto* r =
-        create<Reference>(create<I32>(), builtin::AddressSpace::kUndefined, builtin::Access::kRead);
+        create<Reference>(builtin::AddressSpace::kUndefined, create<I32>(), builtin::Access::kRead);
     EXPECT_EQ(r->FriendlyName(), "ref<i32, read>");
 }
 
 TEST_F(ReferenceTest, FriendlyNameWithAddressSpace) {
     auto* r =
-        create<Reference>(create<I32>(), builtin::AddressSpace::kWorkgroup, builtin::Access::kRead);
+        create<Reference>(builtin::AddressSpace::kWorkgroup, create<I32>(), builtin::Access::kRead);
     EXPECT_EQ(r->FriendlyName(), "ref<workgroup, i32, read>");
 }
 
 TEST_F(ReferenceTest, Clone) {
-    auto* a = create<Reference>(create<I32>(), builtin::AddressSpace::kStorage,
+    auto* a = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
                                 builtin::Access::kReadWrite);
 
     type::Manager mgr;

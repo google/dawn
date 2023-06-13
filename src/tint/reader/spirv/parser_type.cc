@@ -55,13 +55,13 @@ namespace tint::reader::spirv {
 namespace {
 struct PointerHasher {
     size_t operator()(const Pointer& t) const {
-        return utils::Hash(t.type, t.address_space, t.access);
+        return utils::Hash(t.address_space, t.type, t.access);
     }
 };
 
 struct ReferenceHasher {
     size_t operator()(const Reference& t) const {
-        return utils::Hash(t.type, t.address_space, t.access);
+        return utils::Hash(t.address_space, t.type, t.access);
     }
 };
 
@@ -178,8 +178,8 @@ Type::~Type() = default;
 
 Texture::~Texture() = default;
 
-Pointer::Pointer(const Type* t, builtin::AddressSpace s, builtin::Access a)
-    : type(t), address_space(s), access(a) {}
+Pointer::Pointer(builtin::AddressSpace s, const Type* t, builtin::Access a)
+    : address_space(s), type(t), access(a) {}
 Pointer::Pointer(const Pointer&) = default;
 
 ast::Type Pointer::Build(ProgramBuilder& b) const {
@@ -189,11 +189,11 @@ ast::Type Pointer::Build(ProgramBuilder& b) const {
         // types.
         return b.ty("invalid_spirv_ptr_type");
     }
-    return b.ty.pointer(type->Build(b), address_space, access);
+    return b.ty.ptr(address_space, type->Build(b), access);
 }
 
-Reference::Reference(const Type* t, builtin::AddressSpace s, builtin::Access a)
-    : type(t), address_space(s), access(a) {}
+Reference::Reference(builtin::AddressSpace s, const Type* t, builtin::Access a)
+    : address_space(s), type(t), access(a) {}
 Reference::Reference(const Reference&) = default;
 
 ast::Type Reference::Build(ProgramBuilder& b) const {
@@ -487,16 +487,16 @@ const Type* TypeManager::AsUnsigned(const Type* ty) {
         });
 }
 
-const spirv::Pointer* TypeManager::Pointer(const Type* el,
-                                           builtin::AddressSpace address_space,
+const spirv::Pointer* TypeManager::Pointer(builtin::AddressSpace address_space,
+                                           const Type* el,
                                            builtin::Access access) {
-    return state->pointers_.Get(el, address_space, access);
+    return state->pointers_.Get(address_space, el, access);
 }
 
-const spirv::Reference* TypeManager::Reference(const Type* el,
-                                               builtin::AddressSpace address_space,
+const spirv::Reference* TypeManager::Reference(builtin::AddressSpace address_space,
+                                               const Type* el,
                                                builtin::Access access) {
-    return state->references_.Get(el, address_space, access);
+    return state->references_.Get(address_space, el, access);
 }
 
 const spirv::Vector* TypeManager::Vector(const Type* el, uint32_t size) {

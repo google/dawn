@@ -183,8 +183,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
     // let b : ptr<function,i32> = &a;
     // *b = 2i;
     const auto func = builtin::AddressSpace::kFunction;
-    WrapInFunction(Var("a", ty.i32(), func, Expr(2_i)),                    //
-                   Let("b", ty.pointer<i32>(func), AddressOf(Expr("a"))),  //
+    WrapInFunction(Var("a", ty.i32(), func, Expr(2_i)),                //
+                   Let("b", ty.ptr<i32>(func), AddressOf(Expr("a"))),  //
                    Assign(Deref("b"), 2_i));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -196,7 +196,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignMaterializedThroughPointer_Pass) 
     // *b = 2;
     const auto func = builtin::AddressSpace::kFunction;
     auto* var_a = Var("a", ty.i32(), func, Expr(2_i));
-    auto* var_b = Let("b", ty.pointer<i32>(func), AddressOf(Expr("a")));
+    auto* var_b = Let("b", ty.ptr<i32>(func), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b, Assign(Deref("b"), 2_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

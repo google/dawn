@@ -159,10 +159,10 @@ struct I32 final : public utils::Castable<I32, Type> {
 /// `ptr<SC, T, AM>` type
 struct Pointer final : public utils::Castable<Pointer, Type> {
     /// Constructor
-    /// @param ty the store type
     /// @param sc the pointer address space
+    /// @param ty the store type
     /// @param access the declared access mode
-    Pointer(const Type* ty, builtin::AddressSpace sc, builtin::Access access);
+    Pointer(builtin::AddressSpace sc, const Type* ty, builtin::Access access);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -177,10 +177,10 @@ struct Pointer final : public utils::Castable<Pointer, Type> {
     std::string String() const override;
 #endif  // NDEBUG
 
-    /// the store type
-    Type const* const type;
     /// the pointer address space
     builtin::AddressSpace const address_space;
+    /// the store type
+    Type const* const type;
     /// the pointer declared access mode
     builtin::Access const access;
 };
@@ -190,10 +190,10 @@ struct Pointer final : public utils::Castable<Pointer, Type> {
 /// reader.
 struct Reference final : public utils::Castable<Reference, Type> {
     /// Constructor
-    /// @param ty the referenced type
     /// @param sc the reference address space
+    /// @param ty the referenced type
     /// @param access the reference declared access mode
-    Reference(const Type* ty, builtin::AddressSpace sc, builtin::Access access);
+    Reference(builtin::AddressSpace sc, const Type* ty, builtin::Access access);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -208,10 +208,10 @@ struct Reference final : public utils::Castable<Reference, Type> {
     std::string String() const override;
 #endif  // NDEBUG
 
-    /// the store type
-    Type const* const type;
     /// the pointer address space
     builtin::AddressSpace const address_space;
+    /// the store type
+    Type const* const type;
     /// the pointer declared access mode
     builtin::Access const access;
 };
@@ -543,21 +543,21 @@ class TypeManager {
     /// otherwise nullptr.
     const Type* AsUnsigned(const Type* ty);
 
-    /// @param ty the store type
     /// @param address_space the pointer address space
+    /// @param ty the store type
     /// @param access the declared access mode
     /// @return a Pointer type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const spirv::Pointer* Pointer(const Type* ty,
-                                  builtin::AddressSpace address_space,
+    const spirv::Pointer* Pointer(builtin::AddressSpace address_space,
+                                  const Type* ty,
                                   builtin::Access access = builtin::Access::kUndefined);
-    /// @param ty the referenced type
     /// @param address_space the reference address space
+    /// @param ty the referenced type
     /// @param access the declared access mode
     /// @return a Reference type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const spirv::Reference* Reference(const Type* ty,
-                                      builtin::AddressSpace address_space,
+    const spirv::Reference* Reference(builtin::AddressSpace address_space,
+                                      const Type* ty,
                                       builtin::Access access = builtin::Access::kUndefined);
     /// @param ty the element type
     /// @param sz the number of elements in the vector

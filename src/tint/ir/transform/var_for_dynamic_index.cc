@@ -131,9 +131,9 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
 
         // Declare a local variable and copy the source object to it.
         auto* local = object_to_local.GetOrCreate(source_object, [&]() {
-            auto* decl = builder.Var(ir->Types().pointer(source_object->Type(),
-                                                         builtin::AddressSpace::kFunction,
-                                                         builtin::Access::kReadWrite));
+            auto* decl =
+                builder.Var(ir->Types().ptr(builtin::AddressSpace::kFunction, source_object->Type(),
+                                            builtin::Access::kReadWrite));
             decl->SetInitializer(source_object);
             decl->InsertBefore(access);
             return decl;
@@ -142,8 +142,8 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
         // Create a new access instruction using the local variable as the source.
         utils::Vector<Value*, 4> indices{access->Indices().Offset(to_replace.first_dynamic_index)};
         auto* new_access =
-            builder.Access(ir->Types().pointer(access->Type(), builtin::AddressSpace::kFunction,
-                                               builtin::Access::kReadWrite),
+            builder.Access(ir->Types().ptr(builtin::AddressSpace::kFunction, access->Type(),
+                                           builtin::Access::kReadWrite),
                            local, indices);
         access->ReplaceWith(new_access);
 

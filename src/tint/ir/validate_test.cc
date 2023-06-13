@@ -32,7 +32,7 @@ using IR_ValidateTest = IRTestHelper;
 TEST_F(IR_ValidateTest, RootBlock_Var) {
     mod.root_block = b.RootBlock();
     mod.root_block->Append(
-        b.Var(ty.pointer(ty.i32(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite)));
+        b.Var(ty.ptr(builtin::AddressSpace::kPrivate, ty.i32(), builtin::Access::kReadWrite)));
     auto res = ir::Validate(mod);
     EXPECT_TRUE(res) << res.Failure().str();
 }
@@ -112,7 +112,7 @@ TEST_F(IR_ValidateTest, Valid_Access_Value) {
 TEST_F(IR_ValidateTest, Valid_Access_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(
-        ty.pointer(ty.mat3x2<f32>(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+        ty.ptr(builtin::AddressSpace::kPrivate, ty.mat3x2<f32>(), builtin::Access::kReadWrite));
     f->SetParams({obj});
     mod.functions.Push(f);
 
@@ -188,7 +188,7 @@ note: # Disassembly
 TEST_F(IR_ValidateTest, Access_OOB_Index_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(
-        ty.pointer(ty.mat3x2<f32>(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+        ty.ptr(builtin::AddressSpace::kPrivate, ty.mat3x2<f32>(), builtin::Access::kReadWrite));
     f->SetParams({obj});
     mod.functions.Push(f);
 
@@ -333,7 +333,7 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Ptr) {
 
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(
-        ty.pointer(str_ty, builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+        ty.ptr(builtin::AddressSpace::kPrivate, str_ty, builtin::Access::kReadWrite));
     auto* idx = b.FunctionParam(ty.i32());
     f->SetParams({obj, idx});
     mod.functions.Push(f);
@@ -400,7 +400,7 @@ note: # Disassembly
 TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(
-        ty.pointer(ty.mat3x2<f32>(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+        ty.ptr(builtin::AddressSpace::kPrivate, ty.mat3x2<f32>(), builtin::Access::kReadWrite));
     f->SetParams({obj});
     mod.functions.Push(f);
 
@@ -432,7 +432,7 @@ note: # Disassembly
 TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(
-        ty.pointer(ty.mat3x2<f32>(), builtin::AddressSpace::kPrivate, builtin::Access::kReadWrite));
+        ty.ptr(builtin::AddressSpace::kPrivate, ty.mat3x2<f32>(), builtin::Access::kReadWrite));
     f->SetParams({obj});
     mod.functions.Push(f);
 

@@ -27,10 +27,10 @@ namespace tint::type {
 class Reference final : public utils::Castable<Reference, Type> {
   public:
     /// Constructor
-    /// @param subtype the pointee type
     /// @param address_space the address space of the reference
+    /// @param subtype the pointee type
     /// @param access the resolved access control of the reference
-    Reference(const Type* subtype, builtin::AddressSpace address_space, builtin::Access access);
+    Reference(builtin::AddressSpace address_space, const Type* subtype, builtin::Access access);
 
     /// Destructor
     ~Reference() override;

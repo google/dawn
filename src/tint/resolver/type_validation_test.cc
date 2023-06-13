@@ -807,8 +807,8 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
 TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsPointerParameter_Fail) {
     // fn func(a : ptr<workgroup, array<u32>>) {}
 
-    auto* param = Param("a", ty.pointer(Source{{56, 78}}, ty.array(Source{{12, 34}}, ty.i32()),
-                                        builtin::AddressSpace::kWorkgroup));
+    auto* param = Param("a", ty.ptr(Source{{56, 78}}, builtin::AddressSpace::kWorkgroup,
+                                    ty.array(Source{{12, 34}}, ty.i32())));
 
     Func("func", utils::Vector{param}, ty.void_(),
          utils::Vector{
@@ -881,7 +881,7 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableTypeWithStride) {
-    auto ptr_ty = ty.pointer<u32>(Source{{12, 34}}, builtin::AddressSpace::kUniform);
+    auto ptr_ty = ty.ptr<u32>(Source{{12, 34}}, builtin::AddressSpace::kUniform);
     GlobalVar("arr", ty.array(ptr_ty, 4_i, utils::Vector{Stride(16)}),
               builtin::AddressSpace::kPrivate);
 

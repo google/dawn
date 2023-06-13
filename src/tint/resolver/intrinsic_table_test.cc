@@ -230,7 +230,7 @@ TEST_F(IntrinsicTableTest, MismatchBool) {
 TEST_F(IntrinsicTableTest, MatchPointer) {
     auto* i32 = create<type::I32>();
     auto* atomicI32 = create<type::Atomic>(i32);
-    auto* ptr = create<type::Pointer>(atomicI32, builtin::AddressSpace::kWorkgroup,
+    auto* ptr = create<type::Pointer>(builtin::AddressSpace::kWorkgroup, atomicI32,
                                       builtin::Access::kReadWrite);
     auto result = table->Lookup(builtin::Function::kAtomicLoad, utils::Vector{ptr},
                                 sem::EvaluationStage::kConstant, Source{});
@@ -255,7 +255,7 @@ TEST_F(IntrinsicTableTest, MatchArray) {
     auto* arr =
         create<type::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     auto* arr_ptr =
-        create<type::Pointer>(arr, builtin::AddressSpace::kStorage, builtin::Access::kReadWrite);
+        create<type::Pointer>(builtin::AddressSpace::kStorage, arr, builtin::Access::kReadWrite);
     auto result = table->Lookup(builtin::Function::kArrayLength, utils::Vector{arr_ptr},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
@@ -450,7 +450,7 @@ TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
     auto* f32 = create<type::F32>();
     auto result = table->Lookup(builtin::Function::kCos,
                                 utils::Vector{
-                                    create<type::Reference>(f32, builtin::AddressSpace::kFunction,
+                                    create<type::Reference>(builtin::AddressSpace::kFunction, f32,
                                                             builtin::Access::kReadWrite),
                                 },
                                 sem::EvaluationStage::kConstant, Source{});
@@ -552,7 +552,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
 
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
     auto* af = create<type::AbstractFloat>();
-    auto* bool_ref = create<type::Reference>(create<type::Bool>(), builtin::AddressSpace::kFunction,
+    auto* bool_ref = create<type::Reference>(builtin::AddressSpace::kFunction, create<type::Bool>(),
                                              builtin::Access::kReadWrite);
     auto result = table->Lookup(builtin::Function::kSelect, utils::Vector{af, af, bool_ref},
                                 sem::EvaluationStage::kRuntime, Source{});

@@ -235,7 +235,7 @@ TEST_F(GlslSanitizerTest, SimplifyPointersBasic) {
     // let p : ptr<function, i32> = &v;
     // let x : i32 = *p;
     auto* v = Var("v", ty.i32());
-    auto* p = Let("p", ty.pointer<i32>(builtin::AddressSpace::kFunction), AddressOf(v));
+    auto* p = Let("p", ty.ptr<i32>(builtin::AddressSpace::kFunction), AddressOf(v));
     auto* x = Var("x", ty.i32(), Deref(p));
 
     Func("main", utils::Empty, ty.void_(),
@@ -276,12 +276,11 @@ TEST_F(GlslSanitizerTest, SimplifyPointersComplexChain) {
     // let vp : ptr<function, vec4<f32>> = &(*mp)[2i];
     // let v : vec4<f32> = *vp;
     auto* a = Var("a", ty.array(ty.mat4x4<f32>(), 4_u));
-    auto* ap =
-        Let("ap", ty.pointer(ty.array(ty.mat4x4<f32>(), 4_u), builtin::AddressSpace::kFunction),
-            AddressOf(a));
-    auto* mp = Let("mp", ty.pointer(ty.mat4x4<f32>(), builtin::AddressSpace::kFunction),
+    auto* ap = Let("ap", ty.ptr(builtin::AddressSpace::kFunction, ty.array(ty.mat4x4<f32>(), 4_u)),
+                   AddressOf(a));
+    auto* mp = Let("mp", ty.ptr(builtin::AddressSpace::kFunction, ty.mat4x4<f32>()),
                    AddressOf(IndexAccessor(Deref(ap), 3_i)));
-    auto* vp = Let("vp", ty.pointer(ty.vec4<f32>(), builtin::AddressSpace::kFunction),
+    auto* vp = Let("vp", ty.ptr(builtin::AddressSpace::kFunction, ty.vec4<f32>()),
                    AddressOf(IndexAccessor(Deref(mp), 2_i)));
     auto* v = Var("v", ty.vec4<f32>(), Deref(vp));
 

@@ -142,7 +142,7 @@ TEST_F(ResolverRootIdentifierTest, PointerParameter) {
     // {
     //   let b = a;
     // }
-    auto* param = Param("a", ty.pointer(ty.f32(), builtin::AddressSpace::kFunction));
+    auto* param = Param("a", ty.ptr(builtin::AddressSpace::kFunction, ty.f32()));
     auto* expr_param = Expr(param);
     auto* let = Let("b", expr_param);
     auto* expr_let = Expr("b");

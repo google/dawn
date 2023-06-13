@@ -380,7 +380,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
     //     let x: f32 = (*p).z;
     //     return x;
     // }
-    auto* p = Param("p", ty.pointer(ty.vec4<f32>(), builtin::AddressSpace::kFunction));
+    auto* p = Param("p", ty.ptr(builtin::AddressSpace::kFunction, ty.vec4<f32>()));
     auto* star_p = Deref(p);
     auto* accessor_expr = MemberAccessor(star_p, "z");
     auto* x = Var("x", ty.f32(), accessor_expr);
@@ -397,7 +397,7 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
     //     let x: f32 = *p.z;
     //     return x;
     // }
-    auto* p = Param("p", ty.pointer(ty.vec4<f32>(), builtin::AddressSpace::kFunction));
+    auto* p = Param("p", ty.ptr(builtin::AddressSpace::kFunction, ty.vec4<f32>()));
     auto* accessor_expr = MemberAccessor(p, Ident(Source{{12, 34}}, "z"));
     auto* star_p = Deref(accessor_expr);
     auto* x = Var("x", ty.f32(), star_p);
@@ -1234,9 +1234,8 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
 
 TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
     auto* vf = Var("vf", ty.f32());
-    auto* c =
-        Call(Source{{12, 34}}, ty.pointer<i32>(builtin::AddressSpace::kFunction), ExprList(vf));
-    auto* ip = Let("ip", ty.pointer<i32>(builtin::AddressSpace::kFunction), c);
+    auto* c = Call(Source{{12, 34}}, ty.ptr<i32>(builtin::AddressSpace::kFunction), ExprList(vf));
+    auto* ip = Let("ip", ty.ptr<i32>(builtin::AddressSpace::kFunction), c);
     WrapInFunction(Decl(vf), Decl(ip));
 
     EXPECT_FALSE(r()->Resolve());

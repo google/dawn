@@ -24,8 +24,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Reference);
 
 namespace tint::type {
 
-Reference::Reference(const Type* subtype,
-                     builtin::AddressSpace address_space,
+Reference::Reference(builtin::AddressSpace address_space,
+                     const Type* subtype,
                      builtin::Access access)
     : Base(utils::Hash(utils::TypeInfo::Of<Reference>().full_hashcode,
                        address_space,
@@ -62,7 +62,7 @@ Reference::~Reference() = default;
 
 Reference* Reference::Clone(CloneContext& ctx) const {
     auto* ty = subtype_->Clone(ctx);
-    return ctx.dst.mgr->Get<Reference>(ty, address_space_, access_);
+    return ctx.dst.mgr->Get<Reference>(address_space_, ty, access_);
 }
 
 }  // namespace tint::type

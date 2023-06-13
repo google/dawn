@@ -93,7 +93,7 @@ void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
 
         // Replace the old variable declaration with one that uses the block-decorated struct type.
         auto* new_var =
-            builder.Var(ir->Types().pointer(block_struct, ptr->AddressSpace(), ptr->Access()));
+            builder.Var(ir->Types().ptr(ptr->AddressSpace(), block_struct, ptr->Access()));
         new_var->SetBindingPoint(var->BindingPoint()->group, var->BindingPoint()->binding);
         var->ReplaceWith(new_var);
 

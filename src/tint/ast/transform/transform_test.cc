@@ -127,7 +127,7 @@ TEST_F(CreateASTTypeForTest, Struct) {
 
 TEST_F(CreateASTTypeForTest, PrivatePointer) {
     auto ptr = create([](ProgramBuilder& b) {
-        return b.create<type::Pointer>(b.create<type::I32>(), builtin::AddressSpace::kPrivate,
+        return b.create<type::Pointer>(builtin::AddressSpace::kPrivate, b.create<type::I32>(),
                                        builtin::Access::kReadWrite);
     });
 
@@ -136,7 +136,7 @@ TEST_F(CreateASTTypeForTest, PrivatePointer) {
 
 TEST_F(CreateASTTypeForTest, StorageReadWritePointer) {
     auto ptr = create([](ProgramBuilder& b) {
-        return b.create<type::Pointer>(b.create<type::I32>(), builtin::AddressSpace::kStorage,
+        return b.create<type::Pointer>(builtin::AddressSpace::kStorage, b.create<type::I32>(),
                                        builtin::Access::kReadWrite);
     });
 

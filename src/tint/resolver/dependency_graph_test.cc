@@ -1732,7 +1732,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.array(T, V));
     GlobalVar(Sym(), ty.vec3(T));
     GlobalVar(Sym(), ty.mat3x2(T));
-    GlobalVar(Sym(), ty.pointer(T, builtin::AddressSpace::kPrivate));
+    GlobalVar(Sym(), ty.ptr(builtin::AddressSpace::kPrivate, T));
     GlobalVar(Sym(), ty.sampled_texture(type::TextureDimension::k2d, T));
     GlobalVar(Sym(), ty.depth_texture(type::TextureDimension::k2d));
     GlobalVar(Sym(), ty.depth_multisampled_texture(type::TextureDimension::k2d));

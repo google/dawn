@@ -382,7 +382,7 @@ struct PackedVec3::State {
                                               ? ptr->Access()
                                               : builtin::Access::kUndefined;
                             auto new_ptr_type =
-                                b.ty.pointer(new_store_type, ptr->AddressSpace(), access);
+                                b.ty.ptr(ptr->AddressSpace(), new_store_type, access);
                             ctx.Replace(node, new_ptr_type.expr);
                         }
                     }

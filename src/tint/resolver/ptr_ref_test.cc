@@ -76,15 +76,15 @@ TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
         GlobalVar("sb", ty.Of(buf), builtin::AddressSpace::kStorage, Binding(1_a), Group(0_a));
 
     auto* function_ptr =
-        Let("f_ptr", ty.pointer(ty.i32(), builtin::AddressSpace::kFunction), AddressOf(function));
+        Let("f_ptr", ty.ptr(builtin::AddressSpace::kFunction, ty.i32()), AddressOf(function));
     auto* private_ptr =
-        Let("p_ptr", ty.pointer(ty.i32(), builtin::AddressSpace::kPrivate), AddressOf(private_));
+        Let("p_ptr", ty.ptr(builtin::AddressSpace::kPrivate, ty.i32()), AddressOf(private_));
     auto* workgroup_ptr =
-        Let("w_ptr", ty.pointer(ty.i32(), builtin::AddressSpace::kWorkgroup), AddressOf(workgroup));
+        Let("w_ptr", ty.ptr(builtin::AddressSpace::kWorkgroup, ty.i32()), AddressOf(workgroup));
     auto* uniform_ptr =
-        Let("ub_ptr", ty.pointer(ty.Of(buf), builtin::AddressSpace::kUniform), AddressOf(uniform));
+        Let("ub_ptr", ty.ptr(builtin::AddressSpace::kUniform, ty.Of(buf)), AddressOf(uniform));
     auto* storage_ptr =
-        Let("sb_ptr", ty.pointer(ty.Of(buf), builtin::AddressSpace::kStorage), AddressOf(storage));
+        Let("sb_ptr", ty.ptr(builtin::AddressSpace::kStorage, ty.Of(buf)), AddressOf(storage));
 
     WrapInFunction(function, function_ptr, private_ptr, workgroup_ptr, uniform_ptr, storage_ptr);
 

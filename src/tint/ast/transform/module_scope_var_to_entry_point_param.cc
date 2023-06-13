@@ -160,8 +160,8 @@ struct ModuleScopeVarToEntryPointParam::State {
                 }
 
                 param_type = sc == builtin::AddressSpace::kStorage
-                                 ? ctx.dst->ty.pointer(param_type, sc, var->Access())
-                                 : ctx.dst->ty.pointer(param_type, sc);
+                                 ? ctx.dst->ty.ptr(sc, param_type, var->Access())
+                                 : ctx.dst->ty.ptr(sc, param_type);
                 auto* param = ctx.dst->Param(new_var_symbol, param_type, attributes);
                 ctx.InsertFront(func->params, param);
                 is_pointer = true;
@@ -184,7 +184,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                         ctx.dst->MemberAccessor(ctx.dst->Deref(workgroup_param()), member));
                     auto* local_var = ctx.dst->Let(
                         new_var_symbol,
-                        ctx.dst->ty.pointer(store_type(), builtin::AddressSpace::kWorkgroup),
+                        ctx.dst->ty.ptr(builtin::AddressSpace::kWorkgroup, store_type()),
                         member_ptr);
                     ctx.InsertFront(func->body->statements, ctx.dst->Decl(local_var));
                     is_pointer = true;
@@ -250,8 +250,8 @@ struct ModuleScopeVarToEntryPointParam::State {
         utils::Vector<const Attribute*, 2> attributes;
         if (!ty->is_handle()) {
             param_type = sc == builtin::AddressSpace::kStorage
-                             ? ctx.dst->ty.pointer(param_type, sc, var->Access())
-                             : ctx.dst->ty.pointer(param_type, sc);
+                             ? ctx.dst->ty.ptr(sc, param_type, var->Access())
+                             : ctx.dst->ty.ptr(sc, param_type);
             is_pointer = true;
 
             // Disable validation of the parameter's address space and of arguments passed to it.
@@ -427,8 +427,8 @@ struct ModuleScopeVarToEntryPointParam::State {
                     }
                 } else {
                     // Create a parameter that is a pointer to the private variable struct.
-                    auto ptr = ctx.dst->ty.pointer(ctx.dst->ty(PrivateStructName()),
-                                                   builtin::AddressSpace::kPrivate);
+                    auto ptr = ctx.dst->ty.ptr(builtin::AddressSpace::kPrivate,
+                                               ctx.dst->ty(PrivateStructName()));
                     auto* param = ctx.dst->Param(PrivateStructVariableName(), ptr);
                     ctx.InsertBack(func_ast->params, param);
                 }
@@ -490,7 +490,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                 auto* str =
                     ctx.dst->Structure(ctx.dst->Sym(), std::move(workgroup_parameter_members));
                 auto param_type =
-                    ctx.dst->ty.pointer(ctx.dst->ty.Of(str), builtin::AddressSpace::kWorkgroup);
+                    ctx.dst->ty.ptr(builtin::AddressSpace::kWorkgroup, ctx.dst->ty.Of(str));
                 auto* param =
                     ctx.dst->Param(workgroup_param(), param_type,
                                    utils::Vector{

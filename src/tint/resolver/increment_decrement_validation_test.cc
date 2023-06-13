@@ -65,7 +65,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, ThroughPointer) {
     // let b : ptr<function,i32> = &a;
     // *b++;
     auto* var_a = Var("a", ty.i32(), builtin::AddressSpace::kFunction);
-    auto* var_b = Let("b", ty.pointer<i32>(builtin::AddressSpace::kFunction), AddressOf(Expr("a")));
+    auto* var_b = Let("b", ty.ptr<i32>(builtin::AddressSpace::kFunction), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b, Increment(Source{{12, 34}}, Deref("b")));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

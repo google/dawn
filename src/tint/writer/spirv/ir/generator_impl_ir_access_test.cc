@@ -22,7 +22,7 @@ namespace {
 class SpvGeneratorImplTest_Access : public SpvGeneratorImplTest {
   protected:
     const type::Pointer* ptr(const type::Type* elem) {
-        return ty.pointer(elem, builtin::AddressSpace::kFunction, builtin::Access::kReadWrite);
+        return ty.ptr(builtin::AddressSpace::kFunction, elem, builtin::Access::kReadWrite);
     }
 };
 

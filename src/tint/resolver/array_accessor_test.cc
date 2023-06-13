@@ -316,7 +316,7 @@ TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncGoodParent) {
     //     let x: f32 = (*p)[idx];
     //     return x;
     // }
-    auto* p = Param("p", ty.pointer(ty.vec4<f32>(), builtin::AddressSpace::kFunction));
+    auto* p = Param("p", ty.ptr(builtin::AddressSpace::kFunction, ty.vec4<f32>()));
     auto* idx = Let("idx", ty.u32(), Call<u32>());
     auto* star_p = Deref(p);
     auto* acc = IndexAccessor(Source{{12, 34}}, star_p, idx);
@@ -337,7 +337,7 @@ TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncBadParent) {
     //     let x: f32 = *p[idx];
     //     return x;
     // }
-    auto* p = Param("p", ty.pointer(ty.vec4<f32>(), builtin::AddressSpace::kFunction));
+    auto* p = Param("p", ty.ptr(builtin::AddressSpace::kFunction, ty.vec4<f32>()));
     auto* idx = Let("idx", ty.u32(), Call<u32>());
     auto* accessor_expr = IndexAccessor(Source{{12, 34}}, p, idx);
     auto* star_p = Deref(accessor_expr);

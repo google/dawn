@@ -78,7 +78,7 @@ TEST_F(ResolverIsStorableTest, Matrix) {
 }
 
 TEST_F(ResolverIsStorableTest, Pointer) {
-    auto* ptr = create<type::Pointer>(create<type::I32>(), builtin::AddressSpace::kPrivate,
+    auto* ptr = create<type::Pointer>(builtin::AddressSpace::kPrivate, create<type::I32>(),
                                       builtin::Access::kReadWrite);
     EXPECT_FALSE(r()->IsStorable(ptr));
 }
@@ -112,7 +112,7 @@ TEST_F(ResolverIsStorableTest, Struct_AllMembersStorable) {
 TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
     Structure("S", utils::Vector{
                        Member("a", ty.i32()),
-                       Member("b", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
+                       Member("b", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -138,7 +138,7 @@ TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
     auto* non_storable =
         Structure("nonstorable", utils::Vector{
                                      Member("a", ty.i32()),
-                                     Member("b", ty.pointer<i32>(builtin::AddressSpace::kPrivate)),
+                                     Member("b", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
                                  });
     Structure("S", utils::Vector{
                        Member("a", ty.i32()),

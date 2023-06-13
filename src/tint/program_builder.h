@@ -1124,25 +1124,25 @@ class ProgramBuilder {
                                                type);
         }
 
-        /// @param type the type of the pointer
         /// @param address_space the address space of the pointer
+        /// @param type the type of the pointer
         /// @param access the optional access control of the pointer
         /// @return the pointer to `type` with the given builtin::AddressSpace
-        ast::Type pointer(ast::Type type,
-                          builtin::AddressSpace address_space,
-                          builtin::Access access = builtin::Access::kUndefined) const {
-            return pointer(builder->source_, type, address_space, access);
+        ast::Type ptr(builtin::AddressSpace address_space,
+                      ast::Type type,
+                      builtin::Access access = builtin::Access::kUndefined) const {
+            return ptr(builder->source_, address_space, type, access);
         }
 
         /// @param source the Source of the node
-        /// @param type the type of the pointer
         /// @param address_space the address space of the pointer
+        /// @param type the type of the pointer
         /// @param access the optional access control of the pointer
         /// @return the pointer to `type` with the given builtin::AddressSpace
-        ast::Type pointer(const Source& source,
-                          ast::Type type,
-                          builtin::AddressSpace address_space,
-                          builtin::Access access = builtin::Access::kUndefined) const {
+        ast::Type ptr(const Source& source,
+                      builtin::AddressSpace address_space,
+                      ast::Type type,
+                      builtin::Access access = builtin::Access::kUndefined) const {
             if (access != builtin::Access::kUndefined) {
                 return (*this)(source, "ptr", address_space, type, access);
             } else {
@@ -1154,9 +1154,9 @@ class ProgramBuilder {
         /// @param access the optional access control of the pointer
         /// @return the pointer to type `T` with the given builtin::AddressSpace.
         template <typename T>
-        ast::Type pointer(builtin::AddressSpace address_space,
-                          builtin::Access access = builtin::Access::kUndefined) const {
-            return pointer<T>(builder->source_, address_space, access);
+        ast::Type ptr(builtin::AddressSpace address_space,
+                      builtin::Access access = builtin::Access::kUndefined) const {
+            return ptr<T>(builder->source_, address_space, access);
         }
 
         /// @param source the Source of the node
@@ -1164,9 +1164,9 @@ class ProgramBuilder {
         /// @param access the optional access control of the pointer
         /// @return the pointer to type `T` with the given builtin::AddressSpace.
         template <typename T>
-        ast::Type pointer(const Source& source,
-                          builtin::AddressSpace address_space,
-                          builtin::Access access = builtin::Access::kUndefined) const {
+        ast::Type ptr(const Source& source,
+                      builtin::AddressSpace address_space,
+                      builtin::Access access = builtin::Access::kUndefined) const {
             if (access != builtin::Access::kUndefined) {
                 return (*this)(source, "ptr", address_space, Of<T>(), access);
             } else {

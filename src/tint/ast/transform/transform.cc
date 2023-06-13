@@ -169,7 +169,7 @@ Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
         auto access = address_space == builtin::AddressSpace::kStorage
                           ? p->Access()
                           : builtin::Access::kUndefined;
-        return ctx.dst->ty.pointer(CreateASTTypeFor(ctx, p->StoreType()), address_space, access);
+        return ctx.dst->ty.ptr(address_space, CreateASTTypeFor(ctx, p->StoreType()), access);
     }
     TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
         << "Unhandled type: " << ty->TypeInfo().name;

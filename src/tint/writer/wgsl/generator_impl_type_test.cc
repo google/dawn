@@ -146,8 +146,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Matrix_F16) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
-    auto type =
-        Alias("make_type_reachable", ty.pointer<f32>(builtin::AddressSpace::kWorkgroup))->type;
+    auto type = Alias("make_type_reachable", ty.ptr<f32>(builtin::AddressSpace::kWorkgroup))->type;
 
     GeneratorImpl& gen = Build();
 
@@ -159,7 +158,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_PointerAccessMode) {
     auto type = Alias("make_type_reachable",
-                      ty.pointer<f32>(builtin::AddressSpace::kStorage, builtin::Access::kReadWrite))
+                      ty.ptr<f32>(builtin::AddressSpace::kStorage, builtin::Access::kReadWrite))
                     ->type;
 
     GeneratorImpl& gen = Build();

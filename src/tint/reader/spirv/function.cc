@@ -2512,7 +2512,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
                                          Attributes{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
-        auto* var_type = ty_.Reference(var_store_type, builtin::AddressSpace::kUndefined);
+        auto* var_type = ty_.Reference(builtin::AddressSpace::kUndefined, var_store_type);
         identifier_types_.emplace(inst.result_id(), var_type);
     }
     return success();
@@ -3358,7 +3358,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
             Source{},
             parser_impl_.MakeVar(id, builtin::AddressSpace::kUndefined, builtin::Access::kUndefined,
                                  store_type, nullptr, Attributes{})));
-        auto* type = ty_.Reference(store_type, builtin::AddressSpace::kUndefined);
+        auto* type = ty_.Reference(builtin::AddressSpace::kUndefined, store_type);
         identifier_types_.emplace(id, type);
     }
 
@@ -4892,11 +4892,11 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
 const Type* FunctionEmitter::RemapPointerProperties(const Type* type, uint32_t result_id) {
     if (auto* ast_ptr_type = As<Pointer>(type)) {
         const auto pi = GetPointerInfo(result_id);
-        return ty_.Pointer(ast_ptr_type->type, pi.address_space, pi.access);
+        return ty_.Pointer(pi.address_space, ast_ptr_type->type, pi.access);
     }
     if (auto* ast_ptr_type = As<Reference>(type)) {
         const auto pi = GetPointerInfo(result_id);
-        return ty_.Reference(ast_ptr_type->type, pi.address_space, pi.access);
+        return ty_.Reference(pi.address_space, ast_ptr_type->type, pi.access);
     }
     return type;
 }
@@ -6338,7 +6338,7 @@ TypedExpression FunctionEmitter::AddressOf(TypedExpression expr) {
         return {};
     }
     return {
-        ty_.Pointer(ref->type, ref->address_space),
+        ty_.Pointer(ref->address_space, ref->type),
         create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kAddressOf, expr.expr),
     };
 }

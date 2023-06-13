@@ -803,7 +803,7 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
     auto* v = Expr("v");
     auto* p = Expr("p");
     auto* v_decl = Decl(Var("v", ty.f32()));
-    auto* p_decl = Decl(Let("p", ty.pointer<f32>(builtin::AddressSpace::kFunction), AddressOf(v)));
+    auto* p_decl = Decl(Let("p", ty.ptr<f32>(builtin::AddressSpace::kFunction), AddressOf(v)));
     auto* assign = Assign(Deref(p), 1.23_f);
     Func("my_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -2299,10 +2299,10 @@ TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
 
     Func("helper",
          utils::Vector{
-             Param("sl", ty.pointer(ty.sampler(type::SamplerKind::kSampler),
-                                    builtin::AddressSpace::kFunction)),
-             Param("tl", ty.pointer(ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
-                                    builtin::AddressSpace::kFunction)),
+             Param("sl", ty.ptr(builtin::AddressSpace::kFunction,
+                                ty.sampler(type::SamplerKind::kSampler))),
+             Param("tl", ty.ptr(builtin::AddressSpace::kFunction,
+                                ty.sampled_texture(type::TextureDimension::k2d, ty.f32()))),
          },
          ty.vec4<f32>(),
          utils::Vector{

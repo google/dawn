@@ -319,13 +319,13 @@ class Manager final {
         }
     }
 
-    /// @param subtype the pointer subtype
     /// @param address_space the address space
+    /// @param subtype the pointer subtype
     /// @param access the access settings
     /// @returns the pointer type
-    const type::Pointer* pointer(const type::Type* subtype,
-                                 builtin::AddressSpace address_space,
-                                 builtin::Access access);
+    const type::Pointer* ptr(builtin::AddressSpace address_space,
+                             const type::Type* subtype,
+                             builtin::Access access);
 
     /// @tparam SPACE the address space
     /// @tparam T the storage type
@@ -335,7 +335,7 @@ class Manager final {
               typename T,
               builtin::Access ACCESS = builtin::Access::kReadWrite>
     const type::Pointer* ptr() {
-        return pointer(Get<T>(), SPACE, ACCESS);
+        return ptr(SPACE, Get<T>(), ACCESS);
     }
 
     /// @returns an iterator to the beginning of the types

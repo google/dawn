@@ -538,7 +538,7 @@ class State {
                 auto access = address_space == builtin::AddressSpace::kStorage
                                   ? p->Access()
                                   : builtin::Access::kUndefined;
-                return b.ty.pointer(el, address_space, access);
+                return b.ty.ptr(address_space, el, access);
             },
             [&](const type::Reference*) {
                 TINT_ICE(IR, b.Diagnostics()) << "reference types should never appear in the IR";
