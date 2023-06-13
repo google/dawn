@@ -25,8 +25,7 @@ TEST_F(PromoteSideEffectsToDeclTest, EmptyModule) {
     auto* src = "";
     auto* expect = "";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -44,8 +43,7 @@ fn f() {
 
     auto* expect = src;
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -75,14 +73,13 @@ fn b() -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a();
-  let tint_symbol_1 = b();
+  let tint_symbol : i32 = a();
+  let tint_symbol_1 : i32 = b();
   let r = (tint_symbol + tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -106,13 +103,12 @@ fn a() -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a();
+  let tint_symbol : i32 = a();
   let r = (tint_symbol + b);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -136,14 +132,13 @@ fn a() -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = b;
-  let tint_symbol_1 = a();
+  let tint_symbol : i32 = b;
+  let tint_symbol_1 : i32 = a();
   let r = (tint_symbol + tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -171,13 +166,12 @@ fn f() {
   var b = 1;
   var c = 1;
   var d = 1;
-  let tint_symbol = a();
+  let tint_symbol : i32 = a();
   let r = (((tint_symbol + b) + c) + d);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -205,14 +199,13 @@ fn f() {
   var b = 1;
   var c = 1;
   var d = 1;
-  let tint_symbol = ((b + c) + d);
-  let tint_symbol_1 = a();
+  let tint_symbol : i32 = ((b + c) + d);
+  let tint_symbol_1 : i32 = a();
   let r = (tint_symbol + tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -242,14 +235,13 @@ fn f() {
   var c = 1;
   var d = 1;
   var e = 1;
-  let tint_symbol = (b + c);
-  let tint_symbol_1 = a();
+  let tint_symbol : i32 = (b + c);
+  let tint_symbol_1 : i32 = a();
   let r = (((tint_symbol + tint_symbol_1) + d) + e);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -271,15 +263,14 @@ fn a(v : i32) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
-  let tint_symbol_2 = a(2);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
+  let tint_symbol_2 : i32 = a(2);
   let r = ((tint_symbol + tint_symbol_1) + tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -301,13 +292,12 @@ fn a(i : i32) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = ((((1 + tint_symbol) - 2) + 3) - 4);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -331,15 +321,14 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = b;
-  let tint_symbol_2 = a(1);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = b;
+  let tint_symbol_2 : i32 = a(1);
   let r = ((((tint_symbol + 1) + tint_symbol_1) + tint_symbol_2) + 2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -365,13 +354,12 @@ fn a(i : i32) -> i32 {
 fn main() {
   var b = 1;
   var c = 1;
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = ((1 + tint_symbol) + b);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -395,14 +383,13 @@ fn a(i : i32) -> i32 {
 
 fn main() {
   var b = 1;
-  let tint_symbol = b;
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = b;
+  let tint_symbol_1 : i32 = a(0);
   let r = ((tint_symbol + tint_symbol_1) + 1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -428,13 +415,12 @@ fn a(i : i32) -> i32 {
 fn main() {
   var b = 1;
   var c = 1;
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = (((tint_symbol + b) + 1) + c);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -462,13 +448,12 @@ struct SB {
 
 fn f() {
   var b = 0;
-  let tint_symbol = atomicAdd(&(sb.a), 123);
+  let tint_symbol : i32 = atomicAdd(&(sb.a), 123);
   let r = (tint_symbol + b);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -489,8 +474,7 @@ fn f() {
 
     auto* expect = src;
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -526,14 +510,13 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 0;
-  let tint_symbol = atomicLoad(&(sb.a));
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = atomicLoad(&(sb.a));
+  let tint_symbol_1 : i32 = a(0);
   let r = (tint_symbol + tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -559,15 +542,14 @@ fn a() -> i32 {
 fn f() {
   var b : vec3<i32>;
   var c : i32;
-  let tint_symbol = c;
-  let tint_symbol_1 = b[tint_symbol];
-  let tint_symbol_2 = a();
+  let tint_symbol : i32 = c;
+  let tint_symbol_1 : i32 = b[tint_symbol];
+  let tint_symbol_2 : i32 = a();
   let r = (tint_symbol_1 + tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -599,17 +581,16 @@ fn g(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = g(tint_symbol);
-  let tint_symbol_2 = b;
-  let tint_symbol_3 = a(1);
-  let tint_symbol_4 = g((tint_symbol_2 + tint_symbol_3));
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = g(tint_symbol);
+  let tint_symbol_2 : i32 = b;
+  let tint_symbol_3 : i32 = a(1);
+  let tint_symbol_4 : i32 = g((tint_symbol_2 + tint_symbol_3));
   let r = (tint_symbol_1 - tint_symbol_4);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -634,19 +615,18 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = i32(tint_symbol);
-  let tint_symbol_2 = a(1);
-  let tint_symbol_3 = i32((tint_symbol_2 + b));
-  let tint_symbol_4 = a(2);
-  let tint_symbol_5 = a(3);
-  let tint_symbol_6 = i32((tint_symbol_4 - tint_symbol_5));
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = i32(tint_symbol);
+  let tint_symbol_2 : i32 = a(1);
+  let tint_symbol_3 : i32 = i32((tint_symbol_2 + b));
+  let tint_symbol_4 : i32 = a(2);
+  let tint_symbol_5 : i32 = a(3);
+  let tint_symbol_6 : i32 = i32((tint_symbol_4 - tint_symbol_5));
   let r = ((tint_symbol_1 + tint_symbol_3) - tint_symbol_6);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -671,16 +651,15 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1u;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = u32(tint_symbol);
-  let tint_symbol_2 = a(1);
-  let tint_symbol_3 = u32(tint_symbol_2);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : u32 = u32(tint_symbol);
+  let tint_symbol_2 : i32 = a(1);
+  let tint_symbol_3 : u32 = u32(tint_symbol_2);
   let r = ((tint_symbol_1 + tint_symbol_3) - b);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -705,19 +684,18 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = abs(tint_symbol);
-  let tint_symbol_2 = a(1);
-  let tint_symbol_3 = abs((tint_symbol_2 + b));
-  let tint_symbol_4 = a(2);
-  let tint_symbol_5 = a(3);
-  let tint_symbol_6 = abs((tint_symbol_4 + tint_symbol_5));
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = abs(tint_symbol);
+  let tint_symbol_2 : i32 = a(1);
+  let tint_symbol_3 : i32 = abs((tint_symbol_2 + b));
+  let tint_symbol_4 : i32 = a(2);
+  let tint_symbol_5 : i32 = a(3);
+  let tint_symbol_6 : i32 = abs((tint_symbol_4 + tint_symbol_5));
   let r = ((tint_symbol_1 + tint_symbol_3) - tint_symbol_6);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -750,15 +728,14 @@ fn a(i : i32) -> S {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = b;
-  let tint_symbol_2 = a(1);
+  let tint_symbol : S = a(0);
+  let tint_symbol_1 : i32 = b;
+  let tint_symbol_2 : S = a(1);
   let r = ((tint_symbol.v + tint_symbol_1) + tint_symbol_2.v);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -782,15 +759,14 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = -(a(0));
-  let tint_symbol_1 = b;
-  let tint_symbol_2 = a(1);
+  let tint_symbol : i32 = -(a(0));
+  let tint_symbol_1 : i32 = b;
+  let tint_symbol_2 : i32 = a(1);
   let r = (tint_symbol + -((tint_symbol_1 + tint_symbol_2)));
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -814,14 +790,13 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
   let r = bitcast<u32>((tint_symbol + tint_symbol_1));
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -849,7 +824,7 @@ fn a(i : i32) -> i32 {
 fn f() {
   var b = 1;
   {
-    let tint_symbol = a(0);
+    let tint_symbol : i32 = a(0);
     var r = (tint_symbol + b);
     loop {
       {
@@ -861,8 +836,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -889,7 +863,7 @@ fn a(i : i32) -> i32 {
 fn f() {
   var b = 1;
   loop {
-    let tint_symbol = a(0);
+    let tint_symbol : i32 = a(0);
     if (!(((tint_symbol + b) > 0))) {
       break;
     }
@@ -900,8 +874,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -937,15 +910,14 @@ fn f() {
     }
 
     continuing {
-      let tint_symbol = a(0);
+      let tint_symbol : i32 = a(0);
       r = (tint_symbol + b);
     }
   }
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -978,10 +950,10 @@ fn f() {
   var d = 3;
   var r = 0;
   {
-    let tint_symbol = a(0);
+    let tint_symbol : i32 = a(0);
     var r = (tint_symbol + b);
     loop {
-      let tint_symbol_1 = a(1);
+      let tint_symbol_1 : i32 = a(1);
       if (!(((tint_symbol_1 + c) > 0))) {
         break;
       }
@@ -990,7 +962,7 @@ fn f() {
       }
 
       continuing {
-        let tint_symbol_2 = a(2);
+        let tint_symbol_2 : i32 = a(2);
         r = (tint_symbol_2 + d);
       }
     }
@@ -998,8 +970,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1026,7 +997,7 @@ fn a(i : i32) -> i32 {
 fn f() {
   var b = 1;
   loop {
-    let tint_symbol = a(0);
+    let tint_symbol : i32 = a(0);
     if (!(((tint_symbol + b) > 0))) {
       break;
     }
@@ -1037,8 +1008,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1069,7 +1039,7 @@ fn f() {
   if (true) {
     var marker = 0;
   } else {
-    let tint_symbol = a(0);
+    let tint_symbol : i32 = a(0);
     if (((tint_symbol + b) > 0)) {
       var marker = 1;
     }
@@ -1077,8 +1047,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1119,12 +1088,12 @@ fn f() {
   } else if (true) {
     var marker = 1;
   } else {
-    let tint_symbol = a(0);
+    let tint_symbol : i32 = a(0);
     if (((tint_symbol + b) > 0)) {
       var marker = 2;
     } else {
-      let tint_symbol_1 = a(1);
-      let tint_symbol_2 = a(2);
+      let tint_symbol_1 : i32 = a(1);
+      let tint_symbol_2 : i32 = a(2);
       if (((tint_symbol_1 + tint_symbol_2) > 0)) {
         var marker = 3;
       } else if (true) {
@@ -1137,8 +1106,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1162,14 +1130,13 @@ fn a(i : i32) -> i32 {
 
 fn f() -> i32 {
   var b = 1;
-  let tint_symbol = b;
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = b;
+  let tint_symbol_1 : i32 = a(0);
   return (tint_symbol + tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1196,8 +1163,8 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = b;
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = b;
+  let tint_symbol_1 : i32 = a(0);
   switch((tint_symbol + tint_symbol_1)) {
     default: {
     }
@@ -1205,8 +1172,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1238,8 +1204,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1271,8 +1236,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1302,8 +1266,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1347,8 +1310,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1384,8 +1346,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1429,8 +1390,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1468,8 +1428,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1509,8 +1468,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1548,8 +1506,7 @@ fn main() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1585,8 +1542,7 @@ fn main() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1628,8 +1584,7 @@ fn main() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1685,8 +1640,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1732,8 +1686,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1779,8 +1732,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1818,8 +1770,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1859,8 +1810,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1885,7 +1835,7 @@ fn a(i : i32) -> bool {
 
 fn f() {
   var b = true;
-  let tint_symbol_2 = a(0);
+  let tint_symbol_2 : bool = a(0);
   var tint_symbol_1 = bool(tint_symbol_2);
   if (tint_symbol_1) {
     var tint_symbol_3 = a(1);
@@ -1906,8 +1856,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1932,10 +1881,10 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = true;
-  let tint_symbol_2 = a(0);
+  let tint_symbol_2 : i32 = a(0);
   var tint_symbol_1 = bool(tint_symbol_2);
   if (tint_symbol_1) {
-    let tint_symbol_3 = a(1);
+    let tint_symbol_3 : i32 = a(1);
     tint_symbol_1 = bool(tint_symbol_3);
   }
   var tint_symbol = tint_symbol_1;
@@ -1946,8 +1895,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -1974,18 +1922,17 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol_1 = a(0);
+  let tint_symbol_1 : i32 = a(0);
   var tint_symbol = bool((tint_symbol_1 == b));
   if (tint_symbol) {
-    let tint_symbol_2 = a(1);
+    let tint_symbol_2 : i32 = a(1);
     tint_symbol = bool((tint_symbol_2 == b));
   }
   let r = tint_symbol;
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2010,7 +1957,7 @@ fn a(i : i32) -> bool {
 
 fn f() {
   var b = true;
-  let tint_symbol_2 = a(0);
+  let tint_symbol_2 : bool = a(0);
   var tint_symbol_1 = all(tint_symbol_2);
   if (tint_symbol_1) {
     var tint_symbol_3 = a(1);
@@ -2031,8 +1978,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2065,22 +2011,21 @@ fn a(i : i32) -> S {
 
 fn f() {
   var b = true;
-  let tint_symbol_2 = a(0);
+  let tint_symbol_2 : S = a(0);
   var tint_symbol_1 = tint_symbol_2.v;
   if (tint_symbol_1) {
     tint_symbol_1 = b;
   }
   var tint_symbol = tint_symbol_1;
   if (tint_symbol) {
-    let tint_symbol_3 = a(1);
+    let tint_symbol_3 : S = a(1);
     tint_symbol = tint_symbol_3.v;
   }
   let r = tint_symbol;
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2113,8 +2058,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2146,8 +2090,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2190,8 +2133,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2232,8 +2174,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2279,8 +2220,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2342,8 +2282,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2384,8 +2323,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2427,8 +2365,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2492,8 +2429,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2517,8 +2453,7 @@ fn f() {
 
     auto* expect = src;
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2550,13 +2485,12 @@ fn g(a : i32, b : i32, c : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = g(tint_symbol, b, 3);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2586,15 +2520,14 @@ fn g(a : i32, b : i32, c : i32) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
-  let tint_symbol_2 = a(2);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
+  let tint_symbol_2 : i32 = a(2);
   let r = g(tint_symbol, tint_symbol_1, tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2627,15 +2560,14 @@ fn g(a : i32, b : i32, c : i32) -> i32 {
 
 fn f() {
   var b = 1;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = b;
-  let tint_symbol_2 = a(1);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = b;
+  let tint_symbol_2 : i32 = a(1);
   let r = g(tint_symbol, tint_symbol_1, tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2671,17 +2603,16 @@ fn f() {
   var b = 0;
   var c = 0;
   var d = 0;
-  let tint_symbol = b;
-  let tint_symbol_1 = c;
-  let tint_symbol_2 = a(0);
-  let tint_symbol_3 = g(tint_symbol_1, tint_symbol_2, d);
-  let tint_symbol_4 = a(1);
+  let tint_symbol : i32 = b;
+  let tint_symbol_1 : i32 = c;
+  let tint_symbol_2 : i32 = a(0);
+  let tint_symbol_3 : i32 = g(tint_symbol_1, tint_symbol_2, d);
+  let tint_symbol_4 : i32 = a(1);
   let r = ((tint_symbol + tint_symbol_3) + tint_symbol_4);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2707,13 +2638,12 @@ fn a(i : i32) -> i32 {
 fn f() {
   var b = array<array<i32, 10>, 10>();
   var c = 1;
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   var r = b[tint_symbol][c];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2747,8 +2677,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2772,14 +2701,13 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = array<array<i32, 10>, 10>();
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
   var r = b[tint_symbol][tint_symbol_1];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2805,8 +2733,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2830,13 +2757,12 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = array<i32, 10>();
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   b[tint_symbol] = a(1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2860,14 +2786,13 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = array<array<i32, 10>, 10>();
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
   b[tint_symbol][tint_symbol_1] = a(2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2891,15 +2816,14 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = array<array<array<i32, 10>, 10>, 10>();
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
-  let tint_symbol_2 = a(2);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
+  let tint_symbol_2 : i32 = a(2);
   b[tint_symbol][tint_symbol_1][tint_symbol_2] = a(3);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2927,14 +2851,13 @@ fn f() {
   var b = array<i32, 3>();
   var d = array<array<i32, 3>, 3>();
   var a_1 = 0;
-  let tint_symbol = a(2);
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = a(2);
+  let tint_symbol_1 : i32 = a(0);
   b[tint_symbol] = d[tint_symbol_1][a_1];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2958,13 +2881,12 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = vec3<i32>();
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   b[tint_symbol] = a(1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -2990,13 +2912,12 @@ fn a(i : i32) -> i32 {
 fn f() {
   var b = vec3<i32>();
   var c = 0;
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   b[tint_symbol] = c;
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3022,13 +2943,12 @@ fn a(i : i32) -> i32 {
 fn f() {
   var b = vec3<i32>();
   var c = 0;
-  let tint_symbol = c;
+  let tint_symbol : i32 = c;
   b[tint_symbol] = a(0);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3062,15 +2982,14 @@ struct S {
 }
 
 fn f() {
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
-  let tint_symbol_2 = a(2);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
+  let tint_symbol_2 : i32 = a(2);
   var r = S(tint_symbol, tint_symbol_1, tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3092,15 +3011,14 @@ fn a(i : i32) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
-  let tint_symbol_2 = a(2);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
+  let tint_symbol_2 : i32 = a(2);
   var r = array<i32, 3>(tint_symbol, tint_symbol_1, tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3122,18 +3040,17 @@ fn a(i : i32) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
-  let tint_symbol_2 = array<i32, 2>(tint_symbol, tint_symbol_1);
-  let tint_symbol_3 = a(2);
-  let tint_symbol_4 = a(3);
-  let tint_symbol_5 = array<i32, 2>(tint_symbol_3, tint_symbol_4);
+  let tint_symbol : i32 = a(0);
+  let tint_symbol_1 : i32 = a(1);
+  let tint_symbol_2 : array<i32, 2u> = array<i32, 2>(tint_symbol, tint_symbol_1);
+  let tint_symbol_3 : i32 = a(2);
+  let tint_symbol_4 : i32 = a(3);
+  let tint_symbol_5 : array<i32, 2u> = array<i32, 2>(tint_symbol_3, tint_symbol_4);
   var r = array<array<i32, 2>, 2>(tint_symbol_2, tint_symbol_5);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3155,14 +3072,13 @@ fn a(i : i32) -> vec3<i32> {
 }
 
 fn f() {
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
+  let tint_symbol : vec3<i32> = a(0);
+  let tint_symbol_1 : vec3<i32> = a(1);
   var r = (tint_symbol.x + tint_symbol_1.y);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3194,14 +3110,13 @@ fn a(i : i32) -> S {
 }
 
 fn f() {
-  let tint_symbol = a(0);
-  let tint_symbol_1 = a(1);
+  let tint_symbol : S = a(0);
+  let tint_symbol_1 : S = a(1);
   var r = (tint_symbol.x + tint_symbol_1.y);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3253,19 +3168,18 @@ fn f() {
   var k = 0;
   var l = 0;
   var m = 0;
-  let tint_symbol = a(0);
-  let tint_symbol_1 = i;
-  let tint_symbol_2 = a(1);
-  let tint_symbol_3 = j;
-  let tint_symbol_4 = a(2);
-  let tint_symbol_5 = k;
-  let tint_symbol_6 = b(3);
+  let tint_symbol : S = a(0);
+  let tint_symbol_1 : i32 = i;
+  let tint_symbol_2 : S = a(1);
+  let tint_symbol_3 : i32 = j;
+  let tint_symbol_4 : S = a(2);
+  let tint_symbol_5 : i32 = k;
+  let tint_symbol_6 : i32 = b(3);
   var r = (((((tint_symbol.x + tint_symbol_1) + tint_symbol_2.y) + tint_symbol_3) + tint_symbol_4.arr[((tint_symbol_5 + tint_symbol_6) + l)]) + m);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3289,14 +3203,13 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var v = array<i32, 10>();
-  let tint_symbol = v[0];
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = v[0];
+  let tint_symbol_1 : i32 = a(0);
   let r = (tint_symbol + tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3320,13 +3233,12 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var v = array<i32, 10>();
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = v[tint_symbol];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3350,13 +3262,12 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var v = array<array<i32, 10>, 10>();
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = v[tint_symbol][0];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3380,13 +3291,12 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var v = array<array<i32, 10>, 10>();
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = v[0][tint_symbol];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3412,13 +3322,12 @@ fn a(i : i32) -> i32 {
 fn f() {
   var v = array<array<i32, 10>, 10>();
   var b : i32;
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = v[tint_symbol][b];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3444,14 +3353,13 @@ fn a(i : i32) -> i32 {
 fn f() {
   var v = array<array<i32, 10>, 10>();
   var b : i32;
-  let tint_symbol = b;
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = b;
+  let tint_symbol_1 : i32 = a(0);
   let r = v[tint_symbol][tint_symbol_1];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3477,15 +3385,14 @@ fn a(i : i32) -> i32 {
 fn f() {
   var v = array<i32, 10>();
   var b = 0;
-  let tint_symbol = b;
-  let tint_symbol_1 = v[tint_symbol];
-  let tint_symbol_2 = a(0);
+  let tint_symbol : i32 = b;
+  let tint_symbol_1 : i32 = v[tint_symbol];
+  let tint_symbol_2 : i32 = a(0);
   let r = (tint_symbol_1 + tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3509,14 +3416,13 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var v = array<i32, 10>();
-  let tint_symbol = v[0];
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = v[0];
+  let tint_symbol_1 : i32 = a(0);
   let r = (tint_symbol + v[tint_symbol_1]);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3542,13 +3448,12 @@ fn a(i : i32) -> i32 {
 fn f() {
   var v = array<i32, 10>();
   var w = array<i32, 10>();
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   v[w[tint_symbol]] = 1;
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3574,14 +3479,13 @@ fn a(i : i32) -> i32 {
 fn f() {
   var v = array<i32, 10>();
   var w = array<i32, 10>();
-  let tint_symbol = w[0];
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = w[0];
+  let tint_symbol_1 : i32 = a(0);
   v[(tint_symbol + tint_symbol_1)] = 1;
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3608,14 +3512,13 @@ fn a(i : i32) -> i32 {
 fn f() {
   var v = array<i32, 10>();
   var w = array<i32, 10>();
-  let tint_symbol = w[0];
-  let tint_symbol_1 = a(0);
+  let tint_symbol : i32 = w[0];
+  let tint_symbol_1 : i32 = a(0);
   v[(tint_symbol + w[tint_symbol_1])] = 1;
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3645,14 +3548,13 @@ fn b() -> array<i32, 10> {
 }
 
 fn f() {
-  let tint_symbol = b();
-  let tint_symbol_1 = a(0);
+  let tint_symbol : array<i32, 10u> = b();
+  let tint_symbol_1 : i32 = a(0);
   let r = tint_symbol[tint_symbol_1];
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3682,14 +3584,13 @@ fn b() -> array<i32, 10> {
 }
 
 fn f() {
-  let tint_symbol = b();
-  let tint_symbol_1 = a(0);
+  let tint_symbol : array<i32, 10u> = b();
+  let tint_symbol_1 : i32 = a(0);
   let r = (tint_symbol[0] + tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3718,14 +3619,13 @@ fn modify_vec(p : ptr<function, vec4<i32>>) -> i32 {
 
 fn f() {
   var v = vec4<i32>();
-  let tint_symbol = v.x;
-  let tint_symbol_1 = modify_vec(&(v));
+  let tint_symbol : i32 = v.x;
+  let tint_symbol_1 : i32 = modify_vec(&(v));
   let l = (tint_symbol + tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3755,13 +3655,12 @@ fn get_uv() -> vec2<f32> {
 }
 
 fn f() {
-  let tint_symbol = get_uv();
+  let tint_symbol : vec2<f32> = get_uv();
   let r = textureGather(1, tex, samp, tint_symbol, 1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3801,13 +3700,12 @@ fn g(i : ptr<private, i32>, j : i32) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   let r = g(&(b), tint_symbol);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3824,8 +3722,7 @@ fn f() {
 
     auto* expect = src;
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3863,18 +3760,17 @@ fn g(i : bool) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   var tint_symbol_1 = b(1);
   if (tint_symbol_1) {
     tint_symbol_1 = b(2);
   }
-  let tint_symbol_2 = g(tint_symbol_1);
+  let tint_symbol_2 : i32 = g(tint_symbol_1);
   let r = (tint_symbol + tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3916,14 +3812,13 @@ fn f() {
   if (tint_symbol) {
     tint_symbol = b(1);
   }
-  let tint_symbol_1 = g(tint_symbol);
-  let tint_symbol_2 = a(2);
+  let tint_symbol_1 : i32 = g(tint_symbol);
+  let tint_symbol_2 : i32 = a(2);
   let r = (tint_symbol_1 + tint_symbol_2);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -3961,7 +3856,7 @@ fn g(i : i32, j : bool) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   var tint_symbol_1 = b(1);
   if (tint_symbol_1) {
     tint_symbol_1 = b(2);
@@ -3970,8 +3865,7 @@ fn f() {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -4013,13 +3907,12 @@ fn f() {
   if (tint_symbol) {
     tint_symbol = b(1);
   }
-  let tint_symbol_1 = a(2);
+  let tint_symbol_1 : i32 = a(2);
   let r = g(tint_symbol, tint_symbol_1);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -4065,22 +3958,21 @@ fn g(i : bool, j : i32) -> i32 {
 }
 
 fn f() {
-  let tint_symbol = a(0);
+  let tint_symbol : i32 = a(0);
   var tint_symbol_1 = b(1);
   if (tint_symbol_1) {
-    let tint_symbol_2 = a(2);
-    let tint_symbol_3 = a(3);
+    let tint_symbol_2 : i32 = a(2);
+    let tint_symbol_3 : i32 = a(3);
     tint_symbol_1 = b((tint_symbol_2 + tint_symbol_3));
   }
-  let tint_symbol_4 = a(4);
-  let tint_symbol_5 = g(tint_symbol_1, tint_symbol_4);
-  let tint_symbol_6 = a(5);
+  let tint_symbol_4 : i32 = a(4);
+  let tint_symbol_5 : i32 = g(tint_symbol_1, tint_symbol_4);
+  let tint_symbol_6 : i32 = a(5);
   let r = ((tint_symbol + tint_symbol_5) + tint_symbol_6);
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }
@@ -4118,7 +4010,7 @@ fn side_effects() -> vec2<f32> {
 }
 
 fn f(t : texture_2d<f32>, s : sampler) -> vec4<f32> {
-  let tint_symbol = side_effects();
+  let tint_symbol : vec2<f32> = side_effects();
   return textureSample(t, s, tint_symbol);
 }
 
@@ -4127,8 +4019,79 @@ fn m() -> vec4<f32> {
 }
 )";
 
-    Transform::DataMap data;
-    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+    auto got = Run<PromoteSideEffectsToDecl>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, BuiltinReturnType) {
+    auto* src = R"(
+fn X(a:vec2f, b:vec2f) {
+}
+
+fn Y() -> vec2f { return vec2f(); }
+
+fn f() {
+    var v: vec2f;
+    X(vec2(), v);   // okay
+    X(vec2(), Y()); // errors
+}
+)";
+
+    auto* expect = R"(
+fn X(a : vec2f, b : vec2f) {
+}
+
+fn Y() -> vec2f {
+  return vec2f();
+}
+
+fn f() {
+  var v : vec2f;
+  X(vec2(), v);
+  let tint_symbol : vec2<f32> = vec2();
+  let tint_symbol_1 : vec2<f32> = Y();
+  X(tint_symbol, tint_symbol_1);
+}
+)";
+
+    auto got = Run<PromoteSideEffectsToDecl>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, Bug1963) {
+    auto* src = R"(
+fn X(a:vec2f, b:vec2f) {
+}
+
+fn Y() -> vec2f { return vec2f(); }
+
+fn f() {
+    var v: vec2f;
+    X(vec2(), v);   // okay
+    X(vec2(), Y()); // errors
+}
+)";
+
+    auto* expect = R"(
+fn X(a : vec2f, b : vec2f) {
+}
+
+fn Y() -> vec2f {
+  return vec2f();
+}
+
+fn f() {
+  var v : vec2f;
+  X(vec2(), v);
+  let tint_symbol : vec2<f32> = vec2();
+  let tint_symbol_1 : vec2<f32> = Y();
+  X(tint_symbol, tint_symbol_1);
+}
+)";
+
+    auto got = Run<PromoteSideEffectsToDecl>(src);
 
     EXPECT_EQ(expect, str(got));
 }

@@ -656,26 +656,7 @@ struct DecomposeMemoryAccess::State {
                     << el_ty->TypeInfo().name;
             }
 
-            Type ret_ty;
-
-            // For intrinsics that return a struct, there is no AST node for it, so create one now.
-            if (intrinsic->Type() == builtin::Function::kAtomicCompareExchangeWeak) {
-                auto* str = intrinsic->ReturnType()->As<type::Struct>();
-                TINT_ASSERT(Transform, str);
-
-                utils::Vector<const StructMember*, 8> ast_members;
-                ast_members.Reserve(str->Members().Length());
-                for (auto& m : str->Members()) {
-                    ast_members.Push(
-                        b.Member(ctx.Clone(m->Name()), CreateASTTypeFor(ctx, m->Type())));
-                }
-
-                auto name = b.Symbols().New("atomic_compare_exchange_weak_ret_type");
-                auto* new_str = b.Structure(name, std::move(ast_members));
-                ret_ty = b.ty.Of(new_str);
-            } else {
-                ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());
-            }
+            Type ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());
 
             auto name = b.Symbols().New(buffer.Name() + intrinsic->str());
             b.Func(name, std::move(params), ret_ty, nullptr,

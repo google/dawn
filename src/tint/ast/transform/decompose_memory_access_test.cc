@@ -3640,13 +3640,8 @@ fn sbatomicXor(offset : u32, param_1 : i32) -> i32
 @internal(intrinsic_atomic_exchange_storage_i32) @internal(disable_validation__function_has_no_body)
 fn sbatomicExchange(offset : u32, param_1 : i32) -> i32
 
-struct atomic_compare_exchange_weak_ret_type {
-  old_value : i32,
-  exchanged : bool,
-}
-
 @internal(intrinsic_atomic_compare_exchange_weak_storage_i32) @internal(disable_validation__function_has_no_body)
-fn sbatomicCompareExchangeWeak(offset : u32, param_1 : i32, param_2 : i32) -> atomic_compare_exchange_weak_ret_type
+fn sbatomicCompareExchangeWeak(offset : u32, param_1 : i32, param_2 : i32) -> __atomic_compare_exchange_result_i32
 
 @internal(intrinsic_atomic_store_storage_u32) @internal(disable_validation__function_has_no_body)
 fn sbatomicStore_1(offset : u32, param_1 : u32)
@@ -3678,13 +3673,8 @@ fn sbatomicXor_1(offset : u32, param_1 : u32) -> u32
 @internal(intrinsic_atomic_exchange_storage_u32) @internal(disable_validation__function_has_no_body)
 fn sbatomicExchange_1(offset : u32, param_1 : u32) -> u32
 
-struct atomic_compare_exchange_weak_ret_type_1 {
-  old_value : u32,
-  exchanged : bool,
-}
-
 @internal(intrinsic_atomic_compare_exchange_weak_storage_u32) @internal(disable_validation__function_has_no_body)
-fn sbatomicCompareExchangeWeak_1(offset : u32, param_1 : u32, param_2 : u32) -> atomic_compare_exchange_weak_ret_type_1
+fn sbatomicCompareExchangeWeak_1(offset : u32, param_1 : u32, param_2 : u32) -> __atomic_compare_exchange_result_u32
 
 @compute @workgroup_size(1)
 fn main() {
@@ -3787,13 +3777,8 @@ fn sbatomicXor(offset : u32, param_1 : i32) -> i32
 @internal(intrinsic_atomic_exchange_storage_i32) @internal(disable_validation__function_has_no_body)
 fn sbatomicExchange(offset : u32, param_1 : i32) -> i32
 
-struct atomic_compare_exchange_weak_ret_type {
-  old_value : i32,
-  exchanged : bool,
-}
-
 @internal(intrinsic_atomic_compare_exchange_weak_storage_i32) @internal(disable_validation__function_has_no_body)
-fn sbatomicCompareExchangeWeak(offset : u32, param_1 : i32, param_2 : i32) -> atomic_compare_exchange_weak_ret_type
+fn sbatomicCompareExchangeWeak(offset : u32, param_1 : i32, param_2 : i32) -> __atomic_compare_exchange_result_i32
 
 @internal(intrinsic_atomic_store_storage_u32) @internal(disable_validation__function_has_no_body)
 fn sbatomicStore_1(offset : u32, param_1 : u32)
@@ -3825,13 +3810,8 @@ fn sbatomicXor_1(offset : u32, param_1 : u32) -> u32
 @internal(intrinsic_atomic_exchange_storage_u32) @internal(disable_validation__function_has_no_body)
 fn sbatomicExchange_1(offset : u32, param_1 : u32) -> u32
 
-struct atomic_compare_exchange_weak_ret_type_1 {
-  old_value : u32,
-  exchanged : bool,
-}
-
 @internal(intrinsic_atomic_compare_exchange_weak_storage_u32) @internal(disable_validation__function_has_no_body)
-fn sbatomicCompareExchangeWeak_1(offset : u32, param_1 : u32, param_2 : u32) -> atomic_compare_exchange_weak_ret_type_1
+fn sbatomicCompareExchangeWeak_1(offset : u32, param_1 : u32, param_2 : u32) -> __atomic_compare_exchange_result_u32
 
 @compute @workgroup_size(1)
 fn main() {

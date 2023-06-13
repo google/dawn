@@ -1,0 +1,47 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 24
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %X "X"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %Y "Y"
+               OpName %f "f"
+               OpName %v "v"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+          %5 = OpTypeFunction %void %v2float %v2float
+         %12 = OpTypeFunction %v2float
+         %15 = OpConstantNull %v2float
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %X = OpFunction %void None %5
+          %a = OpFunctionParameter %v2float
+          %b = OpFunctionParameter %v2float
+         %11 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %Y = OpFunction %v2float None %12
+         %14 = OpLabel
+               OpReturnValue %15
+               OpFunctionEnd
+          %f = OpFunction %void None %1
+         %17 = OpLabel
+          %v = OpVariable %_ptr_Function_v2float Function %15
+         %21 = OpLoad %v2float %v
+         %20 = OpFunctionCall %void %X %15 %21
+         %22 = OpFunctionCall %v2float %Y
+         %23 = OpFunctionCall %void %X %15 %22
+               OpReturn
+               OpFunctionEnd

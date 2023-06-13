@@ -14,26 +14,17 @@ groupshared int b_i32;
 struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;
 };
-struct atomic_compare_exchange_weak_ret_type {
-  uint old_value;
-  bool exchanged;
-};
 
-atomic_compare_exchange_weak_ret_type a_u32atomicCompareExchangeWeak(uint offset, uint compare, uint value) {
-  atomic_compare_exchange_weak_ret_type result=(atomic_compare_exchange_weak_ret_type)0;
+atomic_compare_exchange_result_u32 a_u32atomicCompareExchangeWeak(uint offset, uint compare, uint value) {
+  atomic_compare_exchange_result_u32 result=(atomic_compare_exchange_result_u32)0;
   a_u32.InterlockedCompareExchange(offset, compare, value, result.old_value);
   result.exchanged = result.old_value == compare;
   return result;
 }
 
 
-struct atomic_compare_exchange_weak_ret_type_1 {
-  int old_value;
-  bool exchanged;
-};
-
-atomic_compare_exchange_weak_ret_type_1 a_i32atomicCompareExchangeWeak(uint offset, int compare, int value) {
-  atomic_compare_exchange_weak_ret_type_1 result=(atomic_compare_exchange_weak_ret_type_1)0;
+atomic_compare_exchange_result_i32 a_i32atomicCompareExchangeWeak(uint offset, int compare, int value) {
+  atomic_compare_exchange_result_i32 result=(atomic_compare_exchange_result_i32)0;
   a_i32.InterlockedCompareExchange(offset, compare, value, result.old_value);
   result.exchanged = result.old_value == compare;
   return result;
@@ -50,15 +41,15 @@ void main_inner(uint local_invocation_index) {
   GroupMemoryBarrierWithGroupSync();
   {
     uint value = 42u;
-    const atomic_compare_exchange_weak_ret_type r1 = a_u32atomicCompareExchangeWeak(0u, 0u, value);
-    const atomic_compare_exchange_weak_ret_type r2 = a_u32atomicCompareExchangeWeak(0u, 0u, value);
-    const atomic_compare_exchange_weak_ret_type r3 = a_u32atomicCompareExchangeWeak(0u, 0u, value);
+    const atomic_compare_exchange_result_u32 r1 = a_u32atomicCompareExchangeWeak(0u, 0u, value);
+    const atomic_compare_exchange_result_u32 r2 = a_u32atomicCompareExchangeWeak(0u, 0u, value);
+    const atomic_compare_exchange_result_u32 r3 = a_u32atomicCompareExchangeWeak(0u, 0u, value);
   }
   {
     int value = 42;
-    const atomic_compare_exchange_weak_ret_type_1 r1 = a_i32atomicCompareExchangeWeak(0u, 0, value);
-    const atomic_compare_exchange_weak_ret_type_1 r2 = a_i32atomicCompareExchangeWeak(0u, 0, value);
-    const atomic_compare_exchange_weak_ret_type_1 r3 = a_i32atomicCompareExchangeWeak(0u, 0, value);
+    const atomic_compare_exchange_result_i32 r1 = a_i32atomicCompareExchangeWeak(0u, 0, value);
+    const atomic_compare_exchange_result_i32 r2 = a_i32atomicCompareExchangeWeak(0u, 0, value);
+    const atomic_compare_exchange_result_i32 r3 = a_i32atomicCompareExchangeWeak(0u, 0, value);
   }
   {
     uint value = 42u;

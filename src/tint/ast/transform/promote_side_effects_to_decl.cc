@@ -406,7 +406,8 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
         auto clone_maybe_hoisted = [&](const Expression* e) -> const Expression* {
             if (to_hoist.count(e)) {
                 auto name = b.Symbols().New();
-                auto* v = b.Let(name, ctx.Clone(e));
+                auto* ty = sem.GetVal(e)->Type();
+                auto* v = b.Let(name, Transform::CreateASTTypeFor(ctx, ty), ctx.Clone(e));
                 auto* decl = b.Decl(v);
                 curr_stmts->Push(decl);
                 return b.Expr(name);

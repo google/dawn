@@ -1738,6 +1738,10 @@ bool GeneratorImpl::EmitStorageAtomicIntrinsic(
             return true;
         }
         case Op::kAtomicCompareExchangeWeak: {
+            if (!EmitStructType(&helpers_, result_ty->As<type::Struct>())) {
+                return false;
+            }
+
             auto* const value_ty = sem_func->Parameters()[1]->Type()->UnwrapRef();
             // NOTE: We don't need to emit the return type struct here as DecomposeMemoryAccess
             // already added it to the AST, and it should have already been emitted by now.
