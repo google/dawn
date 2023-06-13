@@ -320,6 +320,8 @@ if (DAWN_ENABLE_D3D11)
         "d3d11/PipelineLayoutD3D11.h"
         "d3d11/PlatformFunctionsD3D11.cpp"
         "d3d11/PlatformFunctionsD3D11.h"
+        "d3d11/QuerySetD3D11.cpp"
+        "d3d11/QuerySetD3D11.h"
         "d3d11/QueueD3D11.cpp"
         "d3d11/QueueD3D11.h"
         "d3d11/RenderPipelineD3D11.cpp"

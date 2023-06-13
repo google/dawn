@@ -33,6 +33,7 @@
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
+#include "dawn/native/d3d11/QuerySetD3D11.h"
 #include "dawn/native/d3d11/RenderPipelineD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
@@ -283,7 +284,17 @@ MaybeError CommandBuffer::Execute() {
             }
 
             case Command::ResolveQuerySet: {
-                return DAWN_UNIMPLEMENTED_ERROR("ResolveQuerySet unimplemented");
+                ResolveQuerySetCmd* cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
+                QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                uint32_t firstQuery = cmd->firstQuery;
+                uint32_t queryCount = cmd->queryCount;
+                Buffer* destination = ToBackend(cmd->destination.Get());
+                uint64_t destinationOffset = cmd->destinationOffset;
+
+                DAWN_TRY(querySet->Resolve(commandContext, firstQuery, queryCount, destination,
+                                           destinationOffset));
+                destination->MarkUsedInPendingCommands();
+                break;
             }
 
             case Command::WriteTimestamp: {
@@ -723,11 +734,17 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
             }
 
             case Command::BeginOcclusionQuery: {
-                return DAWN_UNIMPLEMENTED_ERROR("BeginOcclusionQuery unimplemented.");
+                BeginOcclusionQueryCmd* cmd = mCommands.NextCommand<BeginOcclusionQueryCmd>();
+                QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                querySet->BeginQuery(commandContext->GetD3D11DeviceContext(), cmd->queryIndex);
+                break;
             }
 
             case Command::EndOcclusionQuery: {
-                return DAWN_UNIMPLEMENTED_ERROR("EndOcclusionQuery unimplemented.");
+                EndOcclusionQueryCmd* cmd = mCommands.NextCommand<EndOcclusionQueryCmd>();
+                QuerySet* querySet = ToBackend(cmd->querySet.Get());
+                querySet->EndQuery(commandContext->GetD3D11DeviceContext(), cmd->queryIndex);
+                break;
             }
 
             case Command::WriteTimestamp:
