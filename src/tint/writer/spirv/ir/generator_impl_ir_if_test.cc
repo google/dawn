@@ -23,11 +23,11 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
     auto* func = b.Function("foo", ty.void_());
 
     auto* i = b.If(true);
-    i->True()->SetInstructions({b.ExitIf(i)});
-    i->False()->SetInstructions({b.ExitIf(i)});
-    i->Merge()->SetInstructions({b.Return(func)});
+    i->True()->Append(b.ExitIf(i));
+    i->False()->Append(b.ExitIf(i));
+    i->Merge()->Append(b.Return(func));
 
-    func->StartTarget()->SetInstructions({i});
+    func->StartTarget()->Append(i);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -51,13 +51,14 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
     auto* func = b.Function("foo", ty.void_());
 
     auto* i = b.If(true);
-    i->False()->SetInstructions({b.ExitIf(i)});
-    i->Merge()->SetInstructions({b.Return(func)});
+    i->False()->Append(b.ExitIf(i));
+    i->Merge()->Append(b.Return(func));
 
-    auto* true_block = i->True();
-    true_block->SetInstructions({b.Add(ty.i32(), 1_i, 1_i), b.ExitIf(i)});
+    auto tb = b.With(i->True());
+    tb.Add(ty.i32(), 1_i, 1_i);
+    tb.ExitIf(i);
 
-    func->StartTarget()->SetInstructions({i});
+    func->StartTarget()->Append(i);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -86,13 +87,14 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
     auto* func = b.Function("foo", ty.void_());
 
     auto* i = b.If(true);
-    i->True()->SetInstructions({b.ExitIf(i)});
-    i->Merge()->SetInstructions({b.Return(func)});
+    i->True()->Append(b.ExitIf(i));
+    i->Merge()->Append(b.Return(func));
 
-    auto* false_block = i->False();
-    false_block->SetInstructions({b.Add(ty.i32(), 1_i, 1_i), b.ExitIf(i)});
+    auto fb = b.With(i->False());
+    fb.Add(ty.i32(), 1_i, 1_i);
+    fb.ExitIf(i);
 
-    func->StartTarget()->SetInstructions({i});
+    func->StartTarget()->Append(i);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -121,10 +123,10 @@ TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
     auto* func = b.Function("foo", ty.void_());
 
     auto* i = b.If(true);
-    i->True()->SetInstructions({b.Return(func)});
-    i->False()->SetInstructions({b.Return(func)});
+    i->True()->Append(b.Return(func));
+    i->False()->Append(b.Return(func));
 
-    func->StartTarget()->SetInstructions({i});
+    func->StartTarget()->Append(i);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -154,12 +156,13 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue) {
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
     auto* i = b.If(true);
-    i->True()->SetInstructions({b.ExitIf(i, 10_i)});
-    i->False()->SetInstructions({b.ExitIf(i, 20_i)});
-    i->Merge()->SetParams({merge_param});
-    i->Merge()->SetInstructions({b.Return(func, merge_param)});
+    i->True()->Append(b.ExitIf(i, 10_i));
+    i->False()->Append(b.ExitIf(i, 20_i));
 
-    func->StartTarget()->SetInstructions({i});
+    i->Merge()->SetParams({merge_param});
+    i->Merge()->Append(b.Return(func, merge_param));
+
+    func->StartTarget()->Append(i);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -193,12 +196,13 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_TrueReturn) {
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
     auto* i = b.If(true);
-    i->True()->SetInstructions({b.Return(func, 42_i)});
-    i->False()->SetInstructions({b.ExitIf(i, 20_i)});
-    i->Merge()->SetParams({merge_param});
-    i->Merge()->SetInstructions({b.Return(func, merge_param)});
+    i->True()->Append(b.Return(func, 42_i));
+    i->False()->Append(b.ExitIf(i, 20_i));
 
-    func->StartTarget()->SetInstructions({i});
+    i->Merge()->SetParams({merge_param});
+    i->Merge()->Append(b.Return(func, merge_param));
+
+    func->StartTarget()->Append(i);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -232,12 +236,13 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_FalseReturn) {
     auto* merge_param = b.BlockParam(b.ir.Types().i32());
 
     auto* i = b.If(true);
-    i->True()->SetInstructions({b.ExitIf(i, 10_i)});
-    i->False()->SetInstructions({b.Return(func, 42_i)});
-    i->Merge()->SetParams({merge_param});
-    i->Merge()->SetInstructions({b.Return(func, merge_param)});
+    i->True()->Append(b.ExitIf(i, 10_i));
+    i->False()->Append(b.Return(func, 42_i));
 
-    func->StartTarget()->SetInstructions({i});
+    i->Merge()->SetParams({merge_param});
+    i->Merge()->Append(b.Return(func, merge_param));
+
+    func->StartTarget()->Append(i);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -272,12 +277,13 @@ TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue) {
     auto* merge_param_1 = b.BlockParam(b.ir.Types().bool_());
 
     auto* i = b.If(true);
-    i->True()->SetInstructions({b.ExitIf(i, 10_i, true)});
-    i->False()->SetInstructions({b.ExitIf(i, 20_i, false)});
-    i->Merge()->SetParams({merge_param_0, merge_param_1});
-    i->Merge()->SetInstructions({b.Return(func, merge_param_0)});
+    i->True()->Append(b.ExitIf(i, 10_i, true));
+    i->False()->Append(b.ExitIf(i, 20_i, false));
 
-    func->StartTarget()->SetInstructions({i});
+    i->Merge()->SetParams({merge_param_0, merge_param_1});
+    i->Merge()->Append(b.Return(func, merge_param_0));
+
+    func->StartTarget()->Append(i);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

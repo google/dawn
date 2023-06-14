@@ -83,35 +83,6 @@ TEST_F(IR_BlockTest, HasBranchTarget_Return) {
     EXPECT_TRUE(blk->HasBranchTarget());
 }
 
-TEST_F(IR_BlockTest, SetInstructions) {
-    auto* inst1 = b.Loop();
-    auto* inst2 = b.Loop();
-    auto* inst3 = b.Loop();
-
-    auto* blk = b.Block();
-    blk->SetInstructions({inst1, inst2, inst3});
-
-    ASSERT_EQ(inst1->Block(), blk);
-    ASSERT_EQ(inst2->Block(), blk);
-    ASSERT_EQ(inst3->Block(), blk);
-
-    EXPECT_FALSE(blk->IsEmpty());
-    EXPECT_EQ(3u, blk->Length());
-
-    auto* inst = blk->Instructions();
-    ASSERT_EQ(inst, inst1);
-    ASSERT_EQ(inst->prev, nullptr);
-    inst = inst->next;
-
-    ASSERT_EQ(inst, inst2);
-    ASSERT_EQ(inst->prev, inst1);
-    inst = inst->next;
-
-    ASSERT_EQ(inst, inst3);
-    ASSERT_EQ(inst->prev, inst2);
-    ASSERT_EQ(inst->next, nullptr);
-}
-
 TEST_F(IR_BlockTest, Append) {
     auto* inst1 = b.Loop();
     auto* inst2 = b.Loop();
@@ -285,13 +256,12 @@ TEST_F(IR_BlockTest, InsertAfter_Middle) {
 }
 
 TEST_F(IR_BlockTest, Replace_Middle) {
-    auto* inst1 = b.Loop();
-    auto* inst2 = b.Loop();
-    auto* inst3 = b.Loop();
-    auto* inst4 = b.Loop();
-
     auto* blk = b.Block();
-    blk->SetInstructions({inst1, inst4, inst3});
+    auto* inst1 = blk->Append(b.Loop());
+    auto* inst4 = blk->Append(b.Loop());
+    auto* inst3 = blk->Append(b.Loop());
+
+    auto* inst2 = b.Loop();
     blk->Replace(inst4, inst2);
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -317,12 +287,11 @@ TEST_F(IR_BlockTest, Replace_Middle) {
 }
 
 TEST_F(IR_BlockTest, Replace_Start) {
-    auto* inst1 = b.Loop();
-    auto* inst2 = b.Loop();
-    auto* inst4 = b.Loop();
-
     auto* blk = b.Block();
-    blk->SetInstructions({inst4, inst2});
+    auto* inst4 = blk->Append(b.Loop());
+    auto* inst2 = blk->Append(b.Loop());
+
+    auto* inst1 = b.Loop();
     blk->Replace(inst4, inst1);
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -343,12 +312,11 @@ TEST_F(IR_BlockTest, Replace_Start) {
 }
 
 TEST_F(IR_BlockTest, Replace_End) {
-    auto* inst1 = b.Loop();
-    auto* inst2 = b.Loop();
-    auto* inst4 = b.Loop();
-
     auto* blk = b.Block();
-    blk->SetInstructions({inst1, inst4});
+    auto* inst1 = blk->Append(b.Loop());
+    auto* inst4 = blk->Append(b.Loop());
+
+    auto* inst2 = b.Loop();
     blk->Replace(inst4, inst2);
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -369,11 +337,10 @@ TEST_F(IR_BlockTest, Replace_End) {
 }
 
 TEST_F(IR_BlockTest, Replace_OnlyNode) {
-    auto* inst1 = b.Loop();
-    auto* inst4 = b.Loop();
-
     auto* blk = b.Block();
-    blk->SetInstructions({inst4});
+    auto* inst4 = blk->Append(b.Loop());
+
+    auto* inst1 = b.Loop();
     blk->Replace(inst4, inst1);
 
     ASSERT_EQ(inst1->Block(), blk);
@@ -389,12 +356,10 @@ TEST_F(IR_BlockTest, Replace_OnlyNode) {
 }
 
 TEST_F(IR_BlockTest, Remove_Middle) {
-    auto* inst1 = b.Loop();
-    auto* inst2 = b.Loop();
-    auto* inst4 = b.Loop();
-
     auto* blk = b.Block();
-    blk->SetInstructions({inst1, inst4, inst2});
+    auto* inst1 = blk->Append(b.Loop());
+    auto* inst4 = blk->Append(b.Loop());
+    auto* inst2 = blk->Append(b.Loop());
     blk->Remove(inst4);
 
     ASSERT_EQ(inst4->Block(), nullptr);
@@ -413,11 +378,9 @@ TEST_F(IR_BlockTest, Remove_Middle) {
 }
 
 TEST_F(IR_BlockTest, Remove_Start) {
-    auto* inst1 = b.Loop();
-    auto* inst4 = b.Loop();
-
     auto* blk = b.Block();
-    blk->SetInstructions({inst4, inst1});
+    auto* inst4 = blk->Append(b.Loop());
+    auto* inst1 = blk->Append(b.Loop());
     blk->Remove(inst4);
 
     ASSERT_EQ(inst4->Block(), nullptr);
@@ -432,11 +395,9 @@ TEST_F(IR_BlockTest, Remove_Start) {
 }
 
 TEST_F(IR_BlockTest, Remove_End) {
-    auto* inst1 = b.Loop();
-    auto* inst4 = b.Loop();
-
     auto* blk = b.Block();
-    blk->SetInstructions({inst1, inst4});
+    auto* inst1 = blk->Append(b.Loop());
+    auto* inst4 = blk->Append(b.Loop());
     blk->Remove(inst4);
 
     ASSERT_EQ(inst4->Block(), nullptr);
@@ -451,10 +412,8 @@ TEST_F(IR_BlockTest, Remove_End) {
 }
 
 TEST_F(IR_BlockTest, Remove_OnlyNode) {
-    auto* inst4 = b.Loop();
-
     auto* blk = b.Block();
-    blk->SetInstructions({inst4});
+    auto* inst4 = blk->Append(b.Loop());
     blk->Remove(inst4);
 
     ASSERT_EQ(inst4->Block(), nullptr);

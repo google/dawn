@@ -157,16 +157,4 @@ void Block::Remove(Instruction* inst) {
     inst->next = nullptr;
 }
 
-void Block::SetInstructions(utils::VectorRef<Instruction*> instructions) {
-    for (auto* i : instructions) {
-        Append(i);
-    }
-}
-
-void Block::SetInstructions(std::initializer_list<Instruction*> instructions) {
-    for (auto* i : instructions) {
-        Append(i);
-    }
-}
-
 }  // namespace tint::ir

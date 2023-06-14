@@ -183,7 +183,6 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
     auto* func = b.Function("foo", ty.void_());
 
     auto* loop = b.Loop();
-
     loop->Body()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
@@ -215,9 +214,7 @@ TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
 
     auto* loop = b.Loop();
 
-    auto* result = b.Equal(ty.i32(), 1_i, 2_i);
-
-    loop->Body()->Append(result);
+    auto* result = loop->Body()->Append(b.Equal(ty.i32(), 1_i, 2_i));
     loop->Continuing()->Append(b.BreakIf(result, loop));
     loop->Merge()->Append(b.Return(func));
 
@@ -350,20 +347,19 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.void_());
 
     auto* l = b.Loop();
-    func->StartTarget()->Append(l);
-
     l->Initializer()->Append(b.NextIteration(l, 1_i));
+    func->StartTarget()->Append(l);
 
     auto* loop_param = b.BlockParam(b.ir.Types().i32());
     l->Body()->SetParams({loop_param});
-    auto* inc = b.Add(b.ir.Types().i32(), loop_param, 1_i);
-    l->Body()->Append(inc);
+
+    auto* inc = l->Body()->Append(b.Add(b.ir.Types().i32(), loop_param, 1_i));
     l->Body()->Append(b.Continue(l, inc));
 
     auto* cont_param = b.BlockParam(b.ir.Types().i32());
     l->Continuing()->SetParams({cont_param});
-    auto* cmp = b.GreaterThan(b.ir.Types().bool_(), cont_param, 5_i);
-    l->Continuing()->Append(cmp);
+
+    auto* cmp = l->Continuing()->Append(b.GreaterThan(b.ir.Types().bool_(), cont_param, 5_i));
     l->Continuing()->Append(b.BreakIf(cmp, l, cont_param));
 
     ASSERT_TRUE(IRIsValid()) << Error();
@@ -402,25 +398,25 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     auto* func = b.Function("foo", ty.void_());
 
     auto* l = b.Loop();
-    func->StartTarget()->Append(l);
-
     l->Initializer()->Append(b.NextIteration(l, 1_i, false));
+    func->StartTarget()->Append(l);
 
     auto* loop_param_a = b.BlockParam(b.ir.Types().i32());
     auto* loop_param_b = b.BlockParam(b.ir.Types().bool_());
     l->Body()->SetParams({loop_param_a, loop_param_b});
-    auto* inc = b.Add(b.ir.Types().i32(), loop_param_a, 1_i);
-    l->Body()->Append(inc);
-    l->Body()->Append(b.Continue(l, inc, loop_param_b));
+
+    auto lb = b.With(l->Body());
+    auto* inc = lb.Add(b.ir.Types().i32(), loop_param_a, 1_i);
+    lb.Continue(l, inc, loop_param_b);
 
     auto* cont_param_a = b.BlockParam(b.ir.Types().i32());
     auto* cont_param_b = b.BlockParam(b.ir.Types().bool_());
     l->Continuing()->SetParams({cont_param_a, cont_param_b});
-    auto* cmp = b.GreaterThan(b.ir.Types().bool_(), cont_param_a, 5_i);
-    l->Continuing()->Append(cmp);
-    auto* not_b = b.Not(b.ir.Types().bool_(), cont_param_b);
-    l->Continuing()->Append(not_b);
-    l->Continuing()->Append(b.BreakIf(cmp, l, cont_param_a, not_b));
+
+    auto cb = b.With(l->Continuing());
+    auto* cmp = cb.GreaterThan(b.ir.Types().bool_(), cont_param_a, 5_i);
+    auto* not_b = cb.Not(b.ir.Types().bool_(), cont_param_b);
+    cb.BreakIf(cmp, l, cont_param_a, not_b);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

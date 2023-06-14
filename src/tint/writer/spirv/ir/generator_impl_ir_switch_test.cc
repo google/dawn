@@ -243,7 +243,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
     s->Merge()->SetParams({merge_param});
     s->Merge()->Append(b.Return(func));
 
-    func->StartTarget()->SetInstructions({s});
+    func->StartTarget()->Append(s);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -284,7 +284,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
     s->Merge()->SetParams({b.BlockParam(b.ir.Types().i32())});
     s->Merge()->Append(b.Return(func));
 
-    func->StartTarget()->SetInstructions({s});
+    func->StartTarget()->Append(s);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -328,7 +328,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
     s->Merge()->SetParams({merge_param_0, merge_param_1});
     s->Merge()->Append(b.Return(func, merge_param_0));
 
-    func->StartTarget()->SetInstructions({s});
+    func->StartTarget()->Append(s);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

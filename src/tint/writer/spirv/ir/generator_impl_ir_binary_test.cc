@@ -37,10 +37,10 @@ TEST_P(Arithmetic, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Binary(params.kind, MakeScalarType(params.type),
-                               MakeScalarValue(params.type), MakeScalarValue(params.type)),
-                      b.Return(func)});
+    auto sb = b.With(func->StartTarget());
+    sb.Binary(params.kind, MakeScalarType(params.type), MakeScalarValue(params.type),
+              MakeScalarValue(params.type));
+    sb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -51,11 +51,10 @@ TEST_P(Arithmetic, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Binary(params.kind, MakeVectorType(params.type),
-                               MakeVectorValue(params.type), MakeVectorValue(params.type)),
-
-                      b.Return(func)});
+    auto sb = b.With(func->StartTarget());
+    sb.Binary(params.kind, MakeVectorType(params.type), MakeVectorValue(params.type),
+              MakeVectorValue(params.type));
+    sb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -88,10 +87,10 @@ TEST_P(Bitwise, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Binary(params.kind, MakeScalarType(params.type),
-                               MakeScalarValue(params.type), MakeScalarValue(params.type)),
-                      b.Return(func)});
+    auto sb = b.With(func->StartTarget());
+    sb.Binary(params.kind, MakeScalarType(params.type), MakeScalarValue(params.type),
+              MakeScalarValue(params.type));
+    sb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -102,11 +101,10 @@ TEST_P(Bitwise, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Binary(params.kind, MakeVectorType(params.type),
-                               MakeVectorValue(params.type), MakeVectorValue(params.type)),
-
-                      b.Return(func)});
+    auto sb = b.With(func->StartTarget());
+    sb.Binary(params.kind, MakeVectorType(params.type), MakeVectorValue(params.type),
+              MakeVectorValue(params.type));
+    sb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -131,25 +129,24 @@ TEST_P(Comparison, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Binary(params.kind, ty.bool_(), MakeScalarValue(params.type),
-                               MakeScalarValue(params.type)),
-                      b.Return(func)});
+    auto sb = b.With(func->StartTarget());
+    sb.Binary(params.kind, ty.bool_(), MakeScalarValue(params.type), MakeScalarValue(params.type));
+    sb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
 }
+
 TEST_P(Comparison, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->SetInstructions(
-        utils::Vector{b.Binary(params.kind, ty.vec2(ty.bool_()), MakeVectorValue(params.type),
-                               MakeVectorValue(params.type)),
-
-                      b.Return(func)});
+    auto sb = b.With(func->StartTarget());
+    sb.Binary(params.kind, ty.vec2(ty.bool_()), MakeVectorValue(params.type),
+              MakeVectorValue(params.type));
+    sb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -204,8 +201,11 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(SpvGeneratorImplTest, Binary_Chain) {
     auto* func = b.Function("foo", ty.void_());
-    auto* a = b.Subtract(ty.i32(), 1_i, 2_i);
-    func->StartTarget()->SetInstructions({a, b.Add(ty.i32(), a, a), b.Return(func)});
+
+    auto sb = b.With(func->StartTarget());
+    auto* a = sb.Subtract(ty.i32(), 1_i, 2_i);
+    sb.Add(ty.i32(), a, a);
+    sb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
