@@ -28,7 +28,7 @@ Return::Return(Function* func) : func_(func) {
     func_->AddUsage({this, 0u});
 }
 
-Return::Return(Function* func, Value* arg) : func_(func) {
+Return::Return(Function* func, ir::Value* arg) : func_(func) {
     TINT_ASSERT_OR_RETURN(IR, func_);
     TINT_ASSERT_OR_RETURN(IR, arg);
 

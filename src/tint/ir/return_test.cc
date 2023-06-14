@@ -47,6 +47,7 @@ TEST_F(IR_ReturnTest, Fail_NullValue) {
 TEST_F(IR_ReturnTest, ImplicitNoValue) {
     auto* ret = b.Return(b.Function("myfunc", ty.void_()));
     EXPECT_TRUE(ret->Args().IsEmpty());
+    EXPECT_EQ(ret->Value(), nullptr);
 }
 
 TEST_F(IR_ReturnTest, WithValue) {
@@ -54,6 +55,7 @@ TEST_F(IR_ReturnTest, WithValue) {
     auto* ret = b.Return(b.Function("myfunc", ty.i32()), val);
     ASSERT_EQ(ret->Args().Length(), 1u);
     EXPECT_EQ(ret->Args()[0], val);
+    EXPECT_EQ(ret->Value(), val);
     EXPECT_THAT(val->Usages(), testing::UnorderedElementsAre(Usage{ret, 0u}));
 }
 

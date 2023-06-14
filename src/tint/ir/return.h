@@ -35,12 +35,15 @@ class Return : public utils::Castable<Return, Branch> {
     /// Constructor
     /// @param func the function being returned
     /// @param arg the return value
-    Return(Function* func, Value* arg);
+    Return(Function* func, ir::Value* arg);
 
     ~Return() override;
 
     /// @returns the function being returned
     Function* Func() { return func_; }
+
+    /// @returns the return value, or nullptr
+    ir::Value* Value() const { return operands_.Length() > 0 ? operands_[0] : nullptr; }
 
   private:
     Function* func_ = nullptr;
