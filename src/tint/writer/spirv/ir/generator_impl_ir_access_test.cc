@@ -117,11 +117,13 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest_Access, Matrix_Value_ConstantIndex) {
     auto* mat_val = b.FunctionParam(ty.mat2x2(ty.f32()));
-    auto* access_vec = b.Access(ty.vec2(ty.f32()), mat_val, 1_u);
-    auto* access_el = b.Access(ty.f32(), mat_val, 1_u, 0_u);
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({mat_val});
-    func->StartTarget()->SetInstructions({access_vec, access_el, b.Return(func)});
+
+    auto sb = b.With(func->StartTarget());
+    sb.Access(ty.vec2(ty.f32()), mat_val, 1_u);
+    sb.Access(ty.f32(), mat_val, 1_u, 0_u);
+    sb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
