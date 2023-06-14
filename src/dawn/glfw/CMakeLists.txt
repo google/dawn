@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
+if(DAWN_USE_GLFW)
 
 add_library(dawn_glfw STATIC ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(dawn_glfw)

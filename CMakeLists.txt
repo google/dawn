@@ -132,6 +132,7 @@ option_if_not_defined(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backe
 option_if_not_defined(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
 option_if_not_defined(DAWN_USE_WAYLAND "Enable support for Wayland surface" ${USE_WAYLAND})
 option_if_not_defined(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
+option_if_not_defined(DAWN_USE_GLFW "Enable compilation of the GLFW windowing utils" ${DAWN_SUPPORTS_GLFW_FOR_WINDOWING})
 
 option_if_not_defined(DAWN_BUILD_SAMPLES "Enables building Dawn's samples" ${BUILD_SAMPLES})
 option_if_not_defined(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
@@ -152,6 +153,10 @@ endif()
 option_if_not_defined(TINT_BUILD_SAMPLES "Build samples" ${DAWN_BUILD_SAMPLES})
 option_if_not_defined(TINT_BUILD_DOCS "Build documentation" ON)
 option_if_not_defined(TINT_DOCS_WARN_AS_ERROR "When building documentation, treat warnings as errors" OFF)
+
+if (NOT DAWN_USE_GLFW AND (TINT_BUILD_SAMPLES OR DAWN_BUILD_SAMPLES))
+  message(SEND_ERROR "Dawn samples require GLFW")
+endif()
 
 option_if_not_defined(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ${DAWN_ENABLE_VULKAN})
 option_if_not_defined(TINT_BUILD_WGSL_READER "Build the WGSL input reader" ON)
