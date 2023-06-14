@@ -817,7 +817,7 @@
                 "name": "set bind group",
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
-                    {"name": "group", "type": "bind group"},
+                    {"name": "group", "type": "bind group", "optional": true},
                     {"name": "dynamic offset count", "type": "size_t", "default": "0"},
                     {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count", "default": "nullptr"}
                 ]
@@ -1858,7 +1858,7 @@
                 "name": "set bind group",
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
-                    {"name": "group", "type": "bind group"},
+                    {"name": "group", "type": "bind group", "optional": true},
                     {"name": "dynamic offset count", "type": "size_t", "default": "0"},
                     {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count", "default": "nullptr"}
                 ]
@@ -2030,7 +2030,7 @@
                 "name": "set bind group",
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
-                    {"name": "group", "type": "bind group"},
+                    {"name": "group", "type": "bind group", "optional": true},
                     {"name": "dynamic offset count", "type": "size_t", "default": "0"},
                     {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count", "default": "nullptr"}
                 ]

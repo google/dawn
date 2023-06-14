@@ -468,9 +468,15 @@ void RenderEncoderBase::APISetBindGroup(uint32_t groupIndexIn,
                     ValidateSetBindGroup(groupIndex, group, dynamicOffsetCount, dynamicOffsets));
             }
 
-            RecordSetBindGroup(allocator, groupIndex, group, dynamicOffsetCount, dynamicOffsets);
-            mCommandBufferState.SetBindGroup(groupIndex, group, dynamicOffsetCount, dynamicOffsets);
-            mUsageTracker.AddBindGroup(group);
+            if (group == nullptr) {
+                mCommandBufferState.UnsetBindGroup(groupIndex);
+            } else {
+                RecordSetBindGroup(allocator, groupIndex, group, dynamicOffsetCount,
+                                   dynamicOffsets);
+                mCommandBufferState.SetBindGroup(groupIndex, group, dynamicOffsetCount,
+                                                 dynamicOffsets);
+                mUsageTracker.AddBindGroup(group);
+            }
 
             return {};
         },

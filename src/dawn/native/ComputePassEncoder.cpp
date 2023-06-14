@@ -427,9 +427,15 @@ void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
                     ValidateSetBindGroup(groupIndex, group, dynamicOffsetCount, dynamicOffsets));
             }
 
-            mUsageTracker.AddResourcesReferencedByBindGroup(group);
-            RecordSetBindGroup(allocator, groupIndex, group, dynamicOffsetCount, dynamicOffsets);
-            mCommandBufferState.SetBindGroup(groupIndex, group, dynamicOffsetCount, dynamicOffsets);
+            if (group == nullptr) {
+                mCommandBufferState.UnsetBindGroup(groupIndex);
+            } else {
+                mUsageTracker.AddResourcesReferencedByBindGroup(group);
+                RecordSetBindGroup(allocator, groupIndex, group, dynamicOffsetCount,
+                                   dynamicOffsets);
+                mCommandBufferState.SetBindGroup(groupIndex, group, dynamicOffsetCount,
+                                                 dynamicOffsets);
+            }
 
             return {};
         },

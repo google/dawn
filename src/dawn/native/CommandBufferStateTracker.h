@@ -49,6 +49,7 @@ class CommandBufferStateTracker {
     // State-modifying methods
     void SetComputePipeline(ComputePipelineBase* pipeline);
     void SetRenderPipeline(RenderPipelineBase* pipeline);
+    void UnsetBindGroup(BindGroupIndex index);
     void SetBindGroup(BindGroupIndex index,
                       BindGroupBase* bindgroup,
                       uint32_t dynamicOffsetCount,
