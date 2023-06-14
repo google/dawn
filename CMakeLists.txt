@@ -592,21 +592,22 @@ function(tint_default_compile_options TARGET)
       /EHsc
       /W4
       /WX
-      /wd4068
-      /wd4127
-      /wd4244
-      /wd4267
-      /wd4324
-      /wd4458
-      /wd4514
-      /wd4571
-      /wd4625
-      /wd4626
-      /wd4710
-      /wd4774
-      /wd4820
-      /wd5026
-      /wd5027
+      /wd4068 # unknown pragma
+      /wd4127 # conditional expression is constant
+      /wd4244 # 'conversion' conversion from 'type1' to 'type2', possible loss of data
+      /wd4267 # 'var' : conversion from 'size_t' to 'type', possible loss of data
+      /wd4324 # 'struct_name' : structure was padded due to __declspec(align())
+      /wd4459 # declaration of 'identifier' hides global declaration
+      /wd4458 # declaration of 'identifier' hides class member
+      /wd4514 # 'function' : unreferenced inline function has been removed
+      /wd4571 # catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught
+      /wd4625 # 'derived class' : copy constructor was implicitly defined as deleted because a base class copy constructor is inaccessible or deleted
+      /wd4626 # 'derived class' : assignment operator was implicitly defined as deleted because a base class assignment operator is inaccessible or deleted
+      /wd4710 # 'function' : function not inlined
+      /wd4774 # 'function' : format string 'string' requires an argument of type 'type', but variadic argument number has type 'type'
+      /wd4820 # 'bytes' bytes padding added after construct 'member_name'
+      /wd5026 # 'type': move constructor was implicitly defined as deleted
+      /wd5027 # 'type': move assignment operator was implicitly defined as deleted
     )
 
     # When building with clang-cl on Windows, try to match our clang build
