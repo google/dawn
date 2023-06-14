@@ -16,7 +16,8 @@
 #include "src/tint/resolver/const_eval_test.h"
 #include "src/tint/sem/materialize.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 namespace {
@@ -75,7 +76,7 @@ TEST_P(ResolverConstEvalConvTest, Test) {
     auto* input_val = input.Expr(*this);
     auto* expr = Call(type.ast(*this), input_val);
     if (kind == Kind::kVector) {
-        expr = Call(ty.vec<Infer>(3), expr);
+        expr = Call<vec3<Infer>>(expr);
     }
     WrapInFunction(expr);
 
@@ -225,7 +226,7 @@ INSTANTIATE_TEST_SUITE_P(ScalarAndVector,
                                           })));
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_f32_to_i32) {
-    auto* expr = vec3<i32>(vec3<f32>(1.1_f, 2.2_f, 3.3_f));
+    auto* expr = Call<vec3<i32>>(Call<vec3<f32>>(1.1_f, 2.2_f, 3.3_f));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -254,7 +255,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f32_to_i32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
-    auto* expr = vec3<f32>(vec3<u32>(10_u, 20_u, 30_u));
+    auto* expr = Call<vec3<f32>>(Call<vec3<u32>>(10_u, 20_u, 30_u));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -285,7 +286,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
 TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
     Enable(builtin::Extension::kF16);
 
-    auto* expr = vec3<i32>(vec3<f16>(1.1_h, 2.2_h, 3.3_h));
+    auto* expr = Call<vec3<i32>>(Call<vec3<f16>>(1.1_h, 2.2_h, 3.3_h));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -316,7 +317,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
 TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
     Enable(builtin::Extension::kF16);
 
-    auto* expr = vec3<f16>(vec3<u32>(10_u, 20_u, 30_u));
+    auto* expr = Call<vec3<f16>>(Call<vec3<u32>>(10_u, 20_u, 30_u));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -345,7 +346,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
-    auto* expr = vec3<i32>(vec3<f32>(1e10_f, -1e20_f, 1e30_f));
+    auto* expr = Call<vec3<i32>>(Call<vec3<f32>>(1e10_f, -1e20_f, 1e30_f));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -374,7 +375,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
-    auto* expr = vec3<u32>(vec3<f32>(1e10_f, -1e20_f, 1e30_f));
+    auto* expr = Call<vec3<u32>>(Call<vec3<f32>>(1e10_f, -1e20_f, 1e30_f));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -405,7 +406,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
     Enable(builtin::Extension::kF16);
 
-    auto* expr = vec3<f16>(Source{{12, 34}}, vec3<f32>(1e10_f, 0_f, 0_f));
+    auto* expr = Call<vec3<f16>>(Source{{12, 34}}, Call<vec3<f32>>(1e10_f, 0_f, 0_f));
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve());
@@ -415,7 +416,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
     Enable(builtin::Extension::kF16);
 
-    auto* expr = vec3<f16>(vec3<f32>(1e-20_f, -2e-30_f, 3e-40_f));
+    auto* expr = Call<vec3<f16>>(Call<vec3<f32>>(1e-20_f, -2e-30_f, 3e-40_f));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

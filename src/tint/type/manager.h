@@ -19,7 +19,8 @@
 
 #include "src/tint/builtin/access.h"
 #include "src/tint/builtin/address_space.h"
-#include "src/tint/number.h"
+#include "src/tint/builtin/fluent_types.h"
+#include "src/tint/builtin/number.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/unique_node.h"
 #include "src/tint/utils/hash.h"
@@ -42,9 +43,6 @@ class Void;
 }  // namespace tint::type
 
 namespace tint::type {
-
-template <typename T>
-struct CppToType;
 
 /// The type manager holds all the pointers to the known types.
 class Manager final {
@@ -92,10 +90,31 @@ class Manager final {
     /// the same pointer is returned.
     template <typename T, typename... ARGS>
     auto* Get(ARGS&&... args) {
-        using N = ToType<T>;
-        if constexpr (utils::traits::IsTypeOrDerived<N, Type>) {
-            return types_.Get<N>(std::forward<ARGS>(args)...);
-        } else if constexpr (utils::traits::IsTypeOrDerived<N, UniqueNode>) {
+        if constexpr (std::is_same_v<T, tint::AInt>) {
+            return Get<type::AbstractInt>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, tint::AFloat>) {
+            return Get<type::AbstractFloat>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, tint::i32>) {
+            return Get<type::I32>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, tint::u32>) {
+            return Get<type::U32>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, tint::f32>) {
+            return Get<type::F32>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, tint::f16>) {
+            return Get<type::F16>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, bool>) {
+            return Get<type::Bool>(std::forward<ARGS>(args)...);
+        } else if constexpr (builtin::fluent_types::IsVector<T>) {
+            return vec<typename T::type, T::width>(std::forward<ARGS>(args)...);
+        } else if constexpr (builtin::fluent_types::IsMatrix<T>) {
+            return mat<T::columns, T::rows, typename T::type>(std::forward<ARGS>(args)...);
+        } else if constexpr (builtin::fluent_types::IsPointer<T>) {
+            return ptr<T::address, typename T::type, T::access>(std::forward<ARGS>(args)...);
+        } else if constexpr (builtin::fluent_types::IsArray<T>) {
+            return array<typename T::type, T::length>(std::forward<ARGS>(args)...);
+        } else if constexpr (utils::traits::IsTypeOrDerived<T, Type>) {
+            return types_.Get<T>(std::forward<ARGS>(args)...);
+        } else if constexpr (utils::traits::IsTypeOrDerived<T, UniqueNode>) {
             return unique_nodes_.Get<T>(std::forward<ARGS>(args)...);
         } else {
             return nodes_.Create<T>(std::forward<ARGS>(args)...);
@@ -158,6 +177,7 @@ class Manager final {
     /// @returns the vector type
     template <typename T, size_t N>
     const type::Vector* vec() {
+        TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
         static_assert(N >= 2 && N <= 4);
         switch (N) {
             case 2:
@@ -167,6 +187,8 @@ class Manager final {
             case 4:
                 return vec4<T>();
         }
+        return nullptr;  // unreachable
+        TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
     }
 
     /// @tparam T the element type
@@ -295,6 +317,24 @@ class Manager final {
         return mat4x4(Get<T>());
     }
 
+    /// @param columns the number of columns of the matrix
+    /// @param rows the number of rows of the matrix
+    /// @tparam T the element type
+    /// @returns a matrix with the given number of columns and rows
+    template <typename T>
+    const type::Matrix* mat(uint32_t columns, uint32_t rows) {
+        return mat(Get<T>(), columns, rows);
+    }
+
+    /// @tparam C the number of columns in the matrix
+    /// @tparam R the number of rows in the matrix
+    /// @tparam T the element type
+    /// @returns a matrix with the given number of columns and rows
+    template <uint32_t C, uint32_t R, typename T>
+    const type::Matrix* mat() {
+        return mat(Get<T>(), C, R);
+    }
+
     /// @param elem_ty the array element type
     /// @param count the array element count
     /// @param stride the optional array element stride
@@ -325,7 +365,7 @@ class Manager final {
     /// @returns the pointer type
     const type::Pointer* ptr(builtin::AddressSpace address_space,
                              const type::Type* subtype,
-                             builtin::Access access);
+                             builtin::Access access = builtin::Access::kReadWrite);
 
     /// @tparam SPACE the address space
     /// @tparam T the storage type
@@ -336,6 +376,15 @@ class Manager final {
               builtin::Access ACCESS = builtin::Access::kReadWrite>
     const type::Pointer* ptr() {
         return ptr(SPACE, Get<T>(), ACCESS);
+    }
+
+    /// @param subtype the pointer subtype
+    /// @tparam SPACE the address space
+    /// @tparam ACCESS the access mode
+    /// @returns the pointer type with the templated address space, storage type and access.
+    template <builtin::AddressSpace SPACE, builtin::Access ACCESS = builtin::Access::kReadWrite>
+    const type::Pointer* ptr(const type::Type* subtype) {
+        return ptr(SPACE, subtype, ACCESS);
     }
 
     /// @returns an iterator to the beginning of the types
@@ -361,46 +410,6 @@ class Manager final {
     /// Non-unique nodes owned by the manager
     utils::BlockAllocator<Node> nodes_;
 };
-
-//! @cond Doxygen_Suppress
-// Various template specializations for Manager::ToTypeImpl.
-template <>
-struct Manager::ToTypeImpl<AInt> {
-    using type = type::AbstractInt;
-};
-template <>
-struct Manager::ToTypeImpl<AFloat> {
-    using type = type::AbstractFloat;
-};
-template <>
-struct Manager::ToTypeImpl<i32> {
-    using type = type::I32;
-};
-template <>
-struct Manager::ToTypeImpl<u32> {
-    using type = type::U32;
-};
-template <>
-struct Manager::ToTypeImpl<f32> {
-    using type = type::F32;
-};
-template <>
-struct Manager::ToTypeImpl<f16> {
-    using type = type::F16;
-};
-template <>
-struct Manager::ToTypeImpl<bool> {
-    using type = type::Bool;
-};
-template <typename T>
-struct Manager::ToTypeImpl<const T> {
-    using type = const Manager::ToType<T>;
-};
-template <typename T>
-struct Manager::ToTypeImpl<T*> {
-    using type = Manager::ToType<T>*;
-};
-//! @endcond
 
 }  // namespace tint::type
 

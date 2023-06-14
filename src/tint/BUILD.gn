@@ -201,8 +201,6 @@ template("libtint_source_set") {
 
 libtint_source_set("libtint_symbols_src") {
   sources = [
-    "number.cc",
-    "number.h",
     "program_id.cc",
     "program_id.h",
     "reflection.h",
@@ -812,6 +810,7 @@ libtint_source_set("libtint_builtins_src") {
     "builtin/diagnostic_severity.h",
     "builtin/extension.cc",
     "builtin/extension.h",
+    "builtin/fluent_types.h",
     "builtin/function.cc",
     "builtin/function.h",
     "builtin/interpolation.h",
@@ -819,6 +818,8 @@ libtint_source_set("libtint_builtins_src") {
     "builtin/interpolation_sampling.h",
     "builtin/interpolation_type.cc",
     "builtin/interpolation_type.h",
+    "builtin/number.cc",
+    "builtin/number.h",
     "builtin/texel_format.cc",
     "builtin/texel_format.h",
   ]
@@ -920,6 +921,7 @@ libtint_source_set("libtint_constant_src") {
     "constant/value.h",
   ]
   deps = [
+    ":libtint_builtins_src",
     ":libtint_symbols_src",
     ":libtint_type_src",
     ":libtint_utils_src",
@@ -1604,6 +1606,7 @@ if (tint_build_unittests) {
       "builtin/extension_test.cc",
       "builtin/interpolation_sampling_test.cc",
       "builtin/interpolation_type_test.cc",
+      "builtin/number_test.cc",
       "builtin/texel_format_test.cc",
     ]
     deps = [ ":libtint_builtins_src" ]
@@ -2256,6 +2259,7 @@ if (tint_build_unittests) {
 
     deps = [
       ":libtint_ast_transform_src",
+      ":libtint_builtins_src",
       ":libtint_glsl_writer_src",
       ":libtint_symbols_src",
       ":libtint_transform_manager_src",
@@ -2266,7 +2270,6 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_symbols_src") {
     sources = [
-      "number_test.cc",
       "reflection_test.cc",
       "scope_stack_test.cc",
       "symbol_table_test.cc",

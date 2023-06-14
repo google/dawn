@@ -15,7 +15,8 @@
 #include "gmock/gmock.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::hlsl {
 namespace {
@@ -121,7 +122,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Uint) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_F32) {
-    WrapInFunction(vec3<f32>(1_f, 2_f, 3_f));
+    WrapInFunction(Call<vec3<f32>>(1_f, 2_f, 3_f));
 
     GeneratorImpl& gen = Build();
 
@@ -132,7 +133,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_F32) {
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_F16) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(vec3<f16>(1_h, 2_h, 3_h));
+    WrapInFunction(Call<vec3<f16>>(1_h, 2_h, 3_h));
 
     GeneratorImpl& gen = Build();
 
@@ -143,7 +144,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_F16) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_Empty_F32) {
-    WrapInFunction(vec3<f32>());
+    WrapInFunction(Call<vec3<f32>>());
 
     GeneratorImpl& gen = Build();
 
@@ -154,7 +155,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_Empty_F32) {
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_Empty_F16) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(vec3<f16>());
+    WrapInFunction(Call<vec3<f16>>());
 
     GeneratorImpl& gen = Build();
 
@@ -163,7 +164,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_Empty_F16) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F32_Literal) {
-    WrapInFunction(vec3<f32>(2_f));
+    WrapInFunction(Call<vec3<f32>>(2_f));
 
     GeneratorImpl& gen = Build();
 
@@ -174,7 +175,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F32_Literal) {
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F16_Literal) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(vec3<f16>(2_h));
+    WrapInFunction(Call<vec3<f16>>(2_h));
 
     GeneratorImpl& gen = Build();
 
@@ -184,7 +185,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F16_Literal) {
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F32_Var) {
     auto* var = Var("v", Expr(2_f));
-    auto* cast = vec3<f32>(var);
+    auto* cast = Call<vec3<f32>>(var);
     WrapInFunction(var, cast);
 
     GeneratorImpl& gen = Build();
@@ -198,7 +199,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F16_Var) {
     Enable(builtin::Extension::kF16);
 
     auto* var = Var("v", Expr(2_h));
-    auto* cast = vec3<f16>(var);
+    auto* cast = Call<vec3<f16>>(var);
     WrapInFunction(var, cast);
 
     GeneratorImpl& gen = Build();
@@ -209,7 +210,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_F16_Var) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_Bool_Literal) {
-    WrapInFunction(vec3<bool>(true));
+    WrapInFunction(Call<vec3<bool>>(true));
 
     GeneratorImpl& gen = Build();
 
@@ -219,7 +220,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_Bool_Literal) {
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_Bool_Var) {
     auto* var = Var("v", Expr(true));
-    auto* cast = vec3<bool>(var);
+    auto* cast = Call<vec3<bool>>(var);
     WrapInFunction(var, cast);
 
     GeneratorImpl& gen = Build();
@@ -230,7 +231,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_Bool_Var) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_Int) {
-    WrapInFunction(vec3<i32>(2_i));
+    WrapInFunction(Call<vec3<i32>>(2_i));
 
     GeneratorImpl& gen = Build();
 
@@ -239,7 +240,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_Int) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_UInt) {
-    WrapInFunction(vec3<u32>(2_u));
+    WrapInFunction(Call<vec3<u32>>(2_u));
 
     GeneratorImpl& gen = Build();
 
@@ -248,7 +249,8 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Vec_SingleScalar_UInt) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_F32) {
-    WrapInFunction(mat2x3<f32>(vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(3_f, 4_f, 5_f)));
+    WrapInFunction(
+        Call<mat2x3<f32>>(Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(3_f, 4_f, 5_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -261,7 +263,8 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_F32) {
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_F16) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(mat2x3<f16>(vec3<f16>(1_h, 2_h, 3_h), vec3<f16>(3_h, 4_h, 5_h)));
+    WrapInFunction(
+        Call<mat2x3<f16>>(Call<vec3<f16>>(1_h, 2_h, 3_h), Call<vec3<f16>>(3_h, 4_h, 5_h)));
 
     GeneratorImpl& gen = Build();
 
@@ -280,15 +283,14 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Complex_F32) {
     //     vec4<f32>(7.0f),
     //     vec4<f32>(vec4<f32>(42.0f, 21.0f, 6.0f, -5.0f)),
     //   );
-    auto* vector_literal =
-        vec4<f32>(Expr(f32(2.0)), Expr(f32(3.0)), Expr(f32(4.0)), Expr(f32(8.0)));
-    auto* vector_zero_init = vec4<f32>();
-    auto* vector_single_scalar_init = vec4<f32>(Expr(f32(7.0)));
+    auto* vector_literal = Call<vec4<f32>>(f32(2.0), f32(3.0), f32(4.0), f32(8.0));
+    auto* vector_zero_init = Call<vec4<f32>>();
+    auto* vector_single_scalar_init = Call<vec4<f32>>(f32(7.0));
     auto* vector_identical_init =
-        vec4<f32>(vec4<f32>(Expr(f32(42.0)), Expr(f32(21.0)), Expr(f32(6.0)), Expr(f32(-5.0))));
+        Call<vec4<f32>>(Call<vec4<f32>>(f32(42.0), f32(21.0), f32(6.0), f32(-5.0)));
 
-    auto* constructor = mat4x4<f32>(vector_literal, vector_zero_init, vector_single_scalar_init,
-                                    vector_identical_init);
+    auto* constructor = Call<mat4x4<f32>>(vector_literal, vector_zero_init,
+                                          vector_single_scalar_init, vector_identical_init);
 
     WrapInFunction(constructor);
 
@@ -309,15 +311,14 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Complex_F16) {
     //   );
     Enable(builtin::Extension::kF16);
 
-    auto* vector_literal =
-        vec4<f16>(Expr(f16(2.0)), Expr(f16(3.0)), Expr(f16(4.0)), Expr(f16(8.0)));
-    auto* vector_zero_init = vec4<f16>();
-    auto* vector_single_scalar_init = vec4<f16>(Expr(f16(7.0)));
+    auto* vector_literal = Call<vec4<f16>>(f16(2.0), f16(3.0), f16(4.0), f16(8.0));
+    auto* vector_zero_init = Call<vec4<f16>>();
+    auto* vector_single_scalar_init = Call<vec4<f16>>(f16(7.0));
     auto* vector_identical_init =
-        vec4<f16>(vec4<f16>(Expr(f16(42.0)), Expr(f16(21.0)), Expr(f16(6.0)), Expr(f16(-5.0))));
+        Call<vec4<f16>>(Call<vec4<f16>>(f16(42.0), f16(21.0), f16(6.0), f16(-5.0)));
 
-    auto* constructor = mat4x4<f16>(vector_literal, vector_zero_init, vector_single_scalar_init,
-                                    vector_identical_init);
+    auto* constructor = Call<mat4x4<f16>>(vector_literal, vector_zero_init,
+                                          vector_single_scalar_init, vector_identical_init);
 
     WrapInFunction(constructor);
 
@@ -334,7 +335,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Complex_F16) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Empty_F32) {
-    WrapInFunction(mat2x3<f32>());
+    WrapInFunction(Call<mat2x3<f32>>());
 
     GeneratorImpl& gen = Build();
 
@@ -346,7 +347,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Empty_F32) {
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Empty_F16) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(mat2x3<f16>());
+    WrapInFunction(Call<mat2x3<f16>>());
 
     GeneratorImpl& gen = Build();
 
@@ -362,8 +363,8 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Identity_F32) {
     //     var m_2: mat4x4<f32> = mat4x4<f32>(m_1);
     // }
 
-    auto* m_1 = Var("m_1", ty.mat4x4(ty.f32()), mat4x4<f32>());
-    auto* m_2 = Var("m_2", ty.mat4x4(ty.f32()), mat4x4<f32>(m_1));
+    auto* m_1 = Var("m_1", ty.mat4x4(ty.f32()), Call<mat4x4<f32>>());
+    auto* m_2 = Var("m_2", ty.mat4x4(ty.f32()), Call<mat4x4<f32>>(m_1));
 
     WrapInFunction(m_1, m_2);
 
@@ -382,8 +383,8 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Identity_F16) {
 
     Enable(builtin::Extension::kF16);
 
-    auto* m_1 = Var("m_1", ty.mat4x4(ty.f16()), mat4x4<f16>());
-    auto* m_2 = Var("m_2", ty.mat4x4(ty.f16()), mat4x4<f16>(m_1));
+    auto* m_1 = Var("m_1", ty.mat4x4(ty.f16()), Call<mat4x4<f16>>());
+    auto* m_2 = Var("m_2", ty.mat4x4(ty.f16()), Call<mat4x4<f16>>(m_1));
 
     WrapInFunction(m_1, m_2);
 
@@ -396,8 +397,9 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Mat_Identity_F16) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Array) {
-    WrapInFunction(Call(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
-                        vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
+    WrapInFunction(Call<array<vec3<f32>, 3>>(Call<vec3<f32>>(1_f, 2_f, 3_f),
+                                             Call<vec3<f32>>(4_f, 5_f, 6_f),
+                                             Call<vec3<f32>>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -409,7 +411,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Array) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, Type_Array_Empty) {
-    WrapInFunction(Call(ty.array(ty.vec3<f32>(), 3_u)));
+    WrapInFunction(Call<array<vec3<f32>, 3>>());
 
     GeneratorImpl& gen = Build();
 
@@ -424,7 +426,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, Type_Struct) {
                                    Member("c", ty.vec3<i32>()),
                                });
 
-    WrapInFunction(Call(ty.Of(str), 1_i, 2_f, vec3<i32>(3_i, 4_i, 5_i)));
+    WrapInFunction(Call(ty.Of(str), 1_i, 2_f, Call<vec3<i32>>(3_i, 4_i, 5_i)));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 

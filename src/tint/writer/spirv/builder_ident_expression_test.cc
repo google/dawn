@@ -16,7 +16,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::spirv {
 namespace {
@@ -28,7 +29,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
         {
             ProgramBuilder pb;
 
-            auto* init = pb.vec3<f32>(1_f, 1_f, 3_f);
+            auto* init = pb.Call<vec3<f32>>(1_f, 1_f, 3_f);
 
             auto* v = pb.GlobalConst("c", pb.ty.vec3<f32>(), init);
 
@@ -66,7 +67,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
-    auto* init = vec3<f32>(1_f, 1_f, 3_f);
+    auto* init = Call<vec3<f32>>(1_f, 1_f, 3_f);
 
     auto* v = Let("var", ty.vec3<f32>(), init);
 

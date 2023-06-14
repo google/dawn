@@ -22,25 +22,14 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 
 // Helpers and typedefs
 template <typename T>
 using DataType = builder::DataType<T>;
-template <typename T>
-using vec2 = builder::vec2<T>;
-template <typename T>
-using vec3 = builder::vec3<T>;
-template <typename T>
-using vec4 = builder::vec4<T>;
-template <typename T>
-using mat2x2 = builder::mat2x2<T>;
-template <typename T>
-using mat3x3 = builder::mat3x3<T>;
-template <typename T>
-using mat4x4 = builder::mat4x4<T>;
 template <typename T, int ID = 0>
 using alias = builder::alias<T, ID>;
 template <typename T>
@@ -353,7 +342,7 @@ TEST_P(VertexShaderParameterAttributeTest, IsValid) {
     auto* p = Param("a", ty.vec4<f32>(), attrs);
     Func("vertex_main", utils::Vector{p}, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -404,7 +393,7 @@ TEST_P(ComputeShaderReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
     Func("main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>(), 1_f)),
+             Return(Call<vec4<f32>>(1_f)),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
@@ -456,7 +445,7 @@ TEST_P(FragmentShaderReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     attrs.Push(Location(Source{{34, 56}}, 2_a));
-    Func("frag_main", utils::Empty, ty.vec4<f32>(), utils::Vector{Return(Call(ty.vec4<f32>()))},
+    Func("frag_main", utils::Empty, ty.vec4<f32>(), utils::Vector{Return(Call<vec4<f32>>())},
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
@@ -513,7 +502,7 @@ TEST_P(VertexShaderReturnTypeAttributeTest, IsValid) {
     }
     Func("vertex_main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -1602,8 +1591,10 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
 
     Func("F", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("a", ty.vec4<f32>(), Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
-             Decl(Var("b", ty.vec4<f32>(), Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
+             Decl(Var("a", ty.vec4<f32>(),
+                      Call("textureLoad", "A", Call<vec2<i32>>(1_i, 2_i), 0_i))),
+             Decl(Var("b", ty.vec4<f32>(),
+                      Call("textureLoad", "B", Call<vec2<i32>>(1_i, 2_i), 0_i))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1624,14 +1615,16 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
 
     Func("F_A", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("a", ty.vec4<f32>(), Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
+             Decl(Var("a", ty.vec4<f32>(),
+                      Call("textureLoad", "A", Call<vec2<i32>>(1_i, 2_i), 0_i))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
     Func("F_B", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("b", ty.vec4<f32>(), Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
+             Decl(Var("b", ty.vec4<f32>(),
+                      Call("textureLoad", "B", Call<vec2<i32>>(1_i, 2_i), 0_i))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1663,7 +1656,7 @@ TEST_F(InvariantAttributeTests, InvariantWithPosition) {
                         });
     Func("main", utils::Vector{param}, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1682,7 +1675,7 @@ TEST_F(InvariantAttributeTests, InvariantWithoutPosition) {
                         });
     Func("main", utils::Vector{param}, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1705,7 +1698,7 @@ using MustUseAttributeTests = ResolverTest;
 TEST_F(MustUseAttributeTests, MustUse) {
     Func("main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              MustUse(Source{{12, 34}}),
@@ -1964,7 +1957,7 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
 TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
     Func("main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),

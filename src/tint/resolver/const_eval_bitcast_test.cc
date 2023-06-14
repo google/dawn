@@ -14,10 +14,11 @@
 
 #include "src/tint/resolver/const_eval_test.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 struct Case {
     Value input;
@@ -169,24 +170,24 @@ INSTANTIATE_TEST_SUITE_P(Bitcast,
                                      Vec(0_i, 0x3F800000_i, 0x42F60000_i)),
 
                              // Unrepresentable
-                             Failure<f32>(Val(nan_as_u32)),                          //
-                             Failure<f32>(Val(nan_as_i32)),                          //
-                             Failure<f32>(Val(inf_as_u32)),                          //
-                             Failure<f32>(Val(inf_as_i32)),                          //
-                             Failure<f32>(Val(neg_inf_as_u32)),                      //
-                             Failure<f32>(Val(neg_inf_as_i32)),                      //
-                             Failure<builder::vec2<f32>>(Vec(nan_as_u32, 0_u)),      //
-                             Failure<builder::vec2<f32>>(Vec(nan_as_i32, 0_i)),      //
-                             Failure<builder::vec2<f32>>(Vec(inf_as_u32, 0_u)),      //
-                             Failure<builder::vec2<f32>>(Vec(inf_as_i32, 0_i)),      //
-                             Failure<builder::vec2<f32>>(Vec(neg_inf_as_u32, 0_u)),  //
-                             Failure<builder::vec2<f32>>(Vec(neg_inf_as_i32, 0_i)),  //
-                             Failure<builder::vec2<f32>>(Vec(0_u, nan_as_u32)),      //
-                             Failure<builder::vec2<f32>>(Vec(0_i, nan_as_i32)),      //
-                             Failure<builder::vec2<f32>>(Vec(0_u, inf_as_u32)),      //
-                             Failure<builder::vec2<f32>>(Vec(0_i, inf_as_i32)),      //
-                             Failure<builder::vec2<f32>>(Vec(0_u, neg_inf_as_u32)),  //
-                             Failure<builder::vec2<f32>>(Vec(0_i, neg_inf_as_i32)),  //
+                             Failure<f32>(Val(nan_as_u32)),                 //
+                             Failure<f32>(Val(nan_as_i32)),                 //
+                             Failure<f32>(Val(inf_as_u32)),                 //
+                             Failure<f32>(Val(inf_as_i32)),                 //
+                             Failure<f32>(Val(neg_inf_as_u32)),             //
+                             Failure<f32>(Val(neg_inf_as_i32)),             //
+                             Failure<vec2<f32>>(Vec(nan_as_u32, 0_u)),      //
+                             Failure<vec2<f32>>(Vec(nan_as_i32, 0_i)),      //
+                             Failure<vec2<f32>>(Vec(inf_as_u32, 0_u)),      //
+                             Failure<vec2<f32>>(Vec(inf_as_i32, 0_i)),      //
+                             Failure<vec2<f32>>(Vec(neg_inf_as_u32, 0_u)),  //
+                             Failure<vec2<f32>>(Vec(neg_inf_as_i32, 0_i)),  //
+                             Failure<vec2<f32>>(Vec(0_u, nan_as_u32)),      //
+                             Failure<vec2<f32>>(Vec(0_i, nan_as_i32)),      //
+                             Failure<vec2<f32>>(Vec(0_u, inf_as_u32)),      //
+                             Failure<vec2<f32>>(Vec(0_i, inf_as_i32)),      //
+                             Failure<vec2<f32>>(Vec(0_u, neg_inf_as_u32)),  //
+                             Failure<vec2<f32>>(Vec(0_i, neg_inf_as_i32)),  //
                          }));
 
 }  // namespace

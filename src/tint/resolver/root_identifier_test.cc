@@ -19,10 +19,11 @@
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/type/texture_dimension.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 class ResolverRootIdentifierTest : public ResolverTest {};
 
@@ -142,7 +143,7 @@ TEST_F(ResolverRootIdentifierTest, PointerParameter) {
     // {
     //   let b = a;
     // }
-    auto* param = Param("a", ty.ptr(builtin::AddressSpace::kFunction, ty.f32()));
+    auto* param = Param("a", ty.ptr<function, f32>());
     auto* expr_param = Expr(param);
     auto* let = Let("b", expr_param);
     auto* expr_let = Expr("b");

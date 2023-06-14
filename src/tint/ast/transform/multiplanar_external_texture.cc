@@ -27,7 +27,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture::NewBindingPoints);
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::ast::transform {
 namespace {
@@ -270,34 +271,35 @@ struct MultiplanarExternalTexture::State {
     void createGammaCorrectionFn() {
         gamma_correction_sym = b.Symbols().New("gammaCorrection");
 
-        b.Func(
-            gamma_correction_sym,
-            utils::Vector{
-                b.Param("v", b.ty.vec3<f32>()),
-                b.Param("params", b.ty(gamma_transfer_struct_sym)),
-            },
-            b.ty.vec3<f32>(),
-            utils::Vector{
-                // let cond = abs(v) < vec3(params.D);
-                b.Decl(b.Let("cond", b.LessThan(b.Call("abs", "v"),
-                                                b.vec3<f32>(b.MemberAccessor("params", "D"))))),
-                // let t = sign(v) * ((params.C * abs(v)) + params.F);
-                b.Decl(b.Let("t",
-                             b.Mul(b.Call("sign", "v"),
-                                   b.Add(b.Mul(b.MemberAccessor("params", "C"), b.Call("abs", "v")),
-                                         b.MemberAccessor("params", "F"))))),
-                // let f = (sign(v) * pow(((params.A * abs(v)) + params.B),
-                // vec3(params.G))) + params.E;
-                b.Decl(b.Let("f", b.Mul(b.Call("sign", "v"),
-                                        b.Add(b.Call("pow",
-                                                     b.Add(b.Mul(b.MemberAccessor("params", "A"),
-                                                                 b.Call("abs", "v")),
-                                                           b.MemberAccessor("params", "B")),
-                                                     b.vec3<f32>(b.MemberAccessor("params", "G"))),
-                                              b.MemberAccessor("params", "E"))))),
-                // return select(f, t, cond);
-                b.Return(b.Call("select", "f", "t", "cond")),
-            });
+        b.Func(gamma_correction_sym,
+               utils::Vector{
+                   b.Param("v", b.ty.vec3<f32>()),
+                   b.Param("params", b.ty(gamma_transfer_struct_sym)),
+               },
+               b.ty.vec3<f32>(),
+               utils::Vector{
+                   // let cond = abs(v) < vec3(params.D);
+                   b.Decl(b.Let("cond",
+                                b.LessThan(b.Call("abs", "v"),
+                                           b.Call<vec3<f32>>(b.MemberAccessor("params", "D"))))),
+                   // let t = sign(v) * ((params.C * abs(v)) + params.F);
+                   b.Decl(b.Let(
+                       "t", b.Mul(b.Call("sign", "v"),
+                                  b.Add(b.Mul(b.MemberAccessor("params", "C"), b.Call("abs", "v")),
+                                        b.MemberAccessor("params", "F"))))),
+                   // let f = (sign(v) * pow(((params.A * abs(v)) + params.B),
+                   // vec3(params.G))) + params.E;
+                   b.Decl(b.Let(
+                       "f", b.Mul(b.Call("sign", "v"),
+                                  b.Add(b.Call("pow",
+                                               b.Add(b.Mul(b.MemberAccessor("params", "A"),
+                                                           b.Call("abs", "v")),
+                                                     b.MemberAccessor("params", "B")),
+                                               b.Call<vec3<f32>>(b.MemberAccessor("params", "G"))),
+                                        b.MemberAccessor("params", "E"))))),
+                   // return select(f, t, cond);
+                   b.Return(b.Call("select", "f", "t", "cond")),
+               });
     }
 
     /// Constructs a StatementList containing all the statements making up the body of the texture
@@ -313,21 +315,21 @@ struct MultiplanarExternalTexture::State {
             case builtin::Function::kTextureSampleBaseClampToEdge:
                 stmts.Push(b.Decl(b.Let(
                     "modifiedCoords", b.Mul(b.MemberAccessor("params", "coordTransformationMatrix"),
-                                            b.vec3<f32>("coord", 1_a)))));
+                                            b.Call<vec3<f32>>("coord", 1_a)))));
 
                 stmts.Push(b.Decl(
                     b.Let("plane0_dims",
                           b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane0", 0_a)))));
-                stmts.Push(
-                    b.Decl(b.Let("plane0_half_texel", b.Div(b.vec2<f32>(0.5_a), "plane0_dims"))));
+                stmts.Push(b.Decl(
+                    b.Let("plane0_half_texel", b.Div(b.Call<vec2<f32>>(0.5_a), "plane0_dims"))));
                 stmts.Push(b.Decl(
                     b.Let("plane0_clamped", b.Call("clamp", "modifiedCoords", "plane0_half_texel",
                                                    b.Sub(1_a, "plane0_half_texel")))));
                 stmts.Push(b.Decl(
                     b.Let("plane1_dims",
                           b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane1", 0_a)))));
-                stmts.Push(
-                    b.Decl(b.Let("plane1_half_texel", b.Div(b.vec2<f32>(0.5_a), "plane1_dims"))));
+                stmts.Push(b.Decl(
+                    b.Let("plane1_half_texel", b.Div(b.Call<vec2<f32>>(0.5_a), "plane1_dims"))));
                 stmts.Push(b.Decl(
                     b.Let("plane1_clamped", b.Call("clamp", "modifiedCoords", "plane1_half_texel",
                                                    b.Sub(1_a, "plane1_half_texel")))));
@@ -346,7 +348,7 @@ struct MultiplanarExternalTexture::State {
                 // textureLoad(plane0, coord, 0);
                 plane_0_call = b.Call("textureLoad", "plane0", "coord", 0_a);
                 // let coord1 = coord >> 1;
-                stmts.Push(b.Decl(b.Let("coord1", b.Shr("coord", b.vec2<u32>(1_a)))));
+                stmts.Push(b.Decl(b.Let("coord1", b.Shr("coord", b.Call<vec2<u32>>(1_a)))));
                 // textureLoad(plane1, coord1, 0);
                 plane_1_call = b.Call("textureLoad", "plane1", "coord1", 0_a);
                 break;
@@ -367,8 +369,8 @@ struct MultiplanarExternalTexture::State {
                      // color = vec4<f32>(plane_0_call.r, plane_1_call.rg, 1.0) *
                      //         params.yuvToRgbConversionMatrix;
                      b.Assign("color",
-                              b.Mul(b.vec4<f32>(b.MemberAccessor(plane_0_call, "r"),
-                                                b.MemberAccessor(plane_1_call, "rg"), 1_a),
+                              b.Mul(b.Call<vec4<f32>>(b.MemberAccessor(plane_0_call, "r"),
+                                                      b.MemberAccessor(plane_1_call, "rg"), 1_a),
                                     b.MemberAccessor("params", "yuvToRgbConversionMatrix")))))));
 
         // if (params.doYuvToRgbConversionOnly == 0u)
@@ -386,7 +388,7 @@ struct MultiplanarExternalTexture::State {
                                               b.MemberAccessor("params", "gammaEncodeParams"))))));
 
         // return vec4<f32>(color, 1.f);
-        stmts.Push(b.Return(b.vec4<f32>("color", 1_a)));
+        stmts.Push(b.Return(b.Call<vec4<f32>>("color", 1_a)));
 
         return stmts;
     }

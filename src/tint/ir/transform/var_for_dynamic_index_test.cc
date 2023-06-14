@@ -21,17 +21,13 @@
 #include "src/tint/type/matrix.h"
 #include "src/tint/type/struct.h"
 
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
+
 namespace tint::ir::transform {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
-
-class IR_VarForDynamicIndexTest : public TransformTest {
-  protected:
-    const type::Type* ptr(const type::Type* elem) {
-        return ty.ptr(builtin::AddressSpace::kFunction, elem, builtin::Access::kReadWrite);
-    }
-};
+using IR_VarForDynamicIndexTest = TransformTest;
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
     auto* arr = b.FunctionParam(ty.array<i32, 4u>());
@@ -82,13 +78,13 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
-    auto* arr = b.FunctionParam(ptr(ty.array<i32, 4u>()));
+    auto* arr = b.FunctionParam(ty.ptr<function, array<i32, 4u>>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ptr(ty.i32()), arr, idx));
+    auto* access = block->Append(b.Access(ty.ptr<function, i32>(), arr, idx));
     auto* load = block->Append(b.Load(access));
     block->Append(b.Return(func, load));
     mod.functions.Push(func);
@@ -109,13 +105,13 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
-    auto* mat = b.FunctionParam(ptr(ty.mat2x2<f32>()));
+    auto* mat = b.FunctionParam(ty.ptr<function, mat2x2<f32>>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({mat, idx});
 
     auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ptr(ty.f32()), mat, idx, idx));
+    auto* access = block->Append(b.Access(ty.ptr<function, f32>(), mat, idx, idx));
     auto* load = block->Append(b.Load(access));
     block->Append(b.Return(func, load));
     mod.functions.Push(func);

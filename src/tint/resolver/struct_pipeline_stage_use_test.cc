@@ -20,12 +20,12 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/struct.h"
 
-using ::testing::UnorderedElementsAre;
-
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using ::testing::UnorderedElementsAre;
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverPipelineStageUseTest = ResolverTest;
 
@@ -68,7 +68,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
 
     Func("main", utils::Vector{Param("param", ty.Of(s))}, ty.vec4<f32>(),
-         utils::Vector{Return(Call(ty.vec4<f32>()))},
+         utils::Vector{Return(Call<vec4<f32>>())},
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
          utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
 

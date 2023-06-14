@@ -21,13 +21,13 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using IR_StoreTest = IRTestHelper;
 
 TEST_F(IR_StoreTest, CreateStore) {
-    auto* to = b.Var(mod.Types().ptr(builtin::AddressSpace::kPrivate, mod.Types().i32(),
-                                     builtin::Access::kReadWrite));
+    auto* to = b.Var(ty.ptr<private_, i32>());
     auto* inst = b.Store(to, 4_i);
 
     ASSERT_TRUE(inst->Is<Store>());
@@ -65,8 +65,7 @@ TEST_F(IR_StoreTest, Fail_NullFrom) {
         {
             Module mod;
             Builder b{mod};
-            auto* to = b.Var(mod.Types().ptr(builtin::AddressSpace::kPrivate, mod.Types().i32(),
-                                             builtin::Access::kReadWrite));
+            auto* to = b.Var(mod.Types().ptr<private_, i32>());
             b.Store(to, nullptr);
         },
         "");

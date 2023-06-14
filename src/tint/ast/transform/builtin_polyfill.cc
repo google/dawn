@@ -29,7 +29,8 @@
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/map.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BuiltinPolyfill);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BuiltinPolyfill::Config);
@@ -767,7 +768,7 @@ struct BuiltinPolyfill::State {
         auto name = b.Symbols().New("tint_textureSampleBaseClampToEdge");
         auto body = utils::Vector{
             b.Decl(b.Let("dims", b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "t", 0_a)))),
-            b.Decl(b.Let("half_texel", b.Div(b.vec2<f32>(0.5_a), "dims"))),
+            b.Decl(b.Let("half_texel", b.Div(b.Call<vec2<f32>>(0.5_a), "dims"))),
             b.Decl(
                 b.Let("clamped", b.Call("clamp", "coord", "half_texel", b.Sub(1_a, "half_texel")))),
             b.Return(b.Call("textureSampleLevel", "t", "s", "clamped", 0_a)),
@@ -814,7 +815,7 @@ struct BuiltinPolyfill::State {
         auto name = b.Symbols().New("tint_workgroupUniformLoad");
         b.Func(name,
                utils::Vector{
-                   b.Param("p", b.ty.ptr(builtin::AddressSpace::kWorkgroup, T(type))),
+                   b.Param("p", b.ty.ptr<workgroup>(T(type))),
                },
                T(type),
                utils::Vector{

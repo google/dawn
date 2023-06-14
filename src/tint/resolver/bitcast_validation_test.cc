@@ -21,6 +21,8 @@
 namespace tint::resolver {
 namespace {
 
+using namespace tint::builtin::fluent_types;  // NOLINT
+
 struct Type {
     template <typename T>
     static constexpr Type Create() {
@@ -39,36 +41,36 @@ static constexpr Type kNumericScalars[] = {
     Type::Create<u32>(),
 };
 static constexpr Type kVec2NumericScalars[] = {
-    Type::Create<builder::vec2<f32>>(),
-    Type::Create<builder::vec2<i32>>(),
-    Type::Create<builder::vec2<u32>>(),
+    Type::Create<vec2<f32>>(),
+    Type::Create<vec2<i32>>(),
+    Type::Create<vec2<u32>>(),
 };
 static constexpr Type kVec3NumericScalars[] = {
-    Type::Create<builder::vec3<f32>>(),
-    Type::Create<builder::vec3<i32>>(),
-    Type::Create<builder::vec3<u32>>(),
+    Type::Create<vec3<f32>>(),
+    Type::Create<vec3<i32>>(),
+    Type::Create<vec3<u32>>(),
 };
 static constexpr Type kVec4NumericScalars[] = {
-    Type::Create<builder::vec4<f32>>(),
-    Type::Create<builder::vec4<i32>>(),
-    Type::Create<builder::vec4<u32>>(),
+    Type::Create<vec4<f32>>(),
+    Type::Create<vec4<i32>>(),
+    Type::Create<vec4<u32>>(),
 };
 static constexpr Type kInvalid[] = {
     // A non-exhaustive selection of uncastable types
     Type::Create<bool>(),
-    Type::Create<builder::vec2<bool>>(),
-    Type::Create<builder::vec3<bool>>(),
-    Type::Create<builder::vec4<bool>>(),
-    Type::Create<builder::array<2, i32>>(),
-    Type::Create<builder::array<3, u32>>(),
-    Type::Create<builder::array<4, f32>>(),
-    Type::Create<builder::array<5, bool>>(),
-    Type::Create<builder::mat2x2<f32>>(),
-    Type::Create<builder::mat3x3<f32>>(),
-    Type::Create<builder::mat4x4<f32>>(),
-    Type::Create<builder::ptr<i32>>(),
-    Type::Create<builder::ptr<builder::array<2, i32>>>(),
-    Type::Create<builder::ptr<builder::mat2x2<f32>>>(),
+    Type::Create<vec2<bool>>(),
+    Type::Create<vec3<bool>>(),
+    Type::Create<vec4<bool>>(),
+    Type::Create<array<i32, 2>>(),
+    Type::Create<array<u32, 3>>(),
+    Type::Create<array<f32, 4>>(),
+    Type::Create<array<bool, 5>>(),
+    Type::Create<mat2x2<f32>>(),
+    Type::Create<mat3x3<f32>>(),
+    Type::Create<mat4x4<f32>>(),
+    Type::Create<ptr<private_, i32>>(),
+    Type::Create<ptr<private_, array<i32, 2>>>(),
+    Type::Create<ptr<private_, mat2x2<f32>>>(),
 };
 
 using ResolverBitcastValidationTest = ResolverTestWithParam<std::tuple<Type, Type>>;

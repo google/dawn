@@ -148,14 +148,14 @@ constexpr auto* SwizzlePtrTy(std::index_sequence<INDICES...>) {
 /// `[OFFSET..OFFSET+COUNT)`
 template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
 constexpr auto Slice(TUPLE&& t) {
-    return detail::Swizzle<TUPLE>(std::forward<TUPLE>(t), Range<OFFSET, COUNT>());
+    return traits::detail::Swizzle<TUPLE>(std::forward<TUPLE>(t), Range<OFFSET, COUNT>());
 }
 
 /// Resolves to the slice of the tuple `t` with the tuple elements
 /// `[OFFSET..OFFSET+COUNT)`
 template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
 using SliceTuple =
-    std::remove_pointer_t<decltype(detail::SwizzlePtrTy<TUPLE>(Range<OFFSET, COUNT>()))>;
+    std::remove_pointer_t<decltype(traits::detail::SwizzlePtrTy<TUPLE>(Range<OFFSET, COUNT>()))>;
 
 namespace detail {
 /// Base template for IsTypeIn
@@ -171,7 +171,7 @@ struct IsTypeIn<T, TypeContainer<Ts...>> : std::disjunction<std::is_same<T, Ts>.
 /// Works for std::variant, std::tuple, std::pair, or any typename template where all parameters are
 /// types.
 template <typename T, typename TypeContainer>
-static constexpr bool IsTypeIn = detail::IsTypeIn<T, TypeContainer>::value;
+static constexpr bool IsTypeIn = traits::detail::IsTypeIn<T, TypeContainer>::value;
 
 /// Evaluates to the decayed pointer element type, or the decayed type T if T is not a pointer.
 template <typename T>
@@ -207,7 +207,7 @@ struct CharArrayToCharPtrImpl<const char[N]> {
 /// Evaluates to `char*` or `const char*` if `T` is `char[N]` or `const char[N]`, respectively,
 /// otherwise T.
 template <typename T>
-using CharArrayToCharPtr = typename detail::CharArrayToCharPtrImpl<T>::type;
+using CharArrayToCharPtr = typename traits::detail::CharArrayToCharPtrImpl<T>::type;
 
 }  // namespace tint::utils::traits
 

@@ -17,7 +17,8 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/texture_dimension.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 namespace {
@@ -132,8 +133,8 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
     // var i : i32;
     // var p : pointer<function, i32> = &v;
     auto* i = Var("i", ty.i32());
-    auto* p = Var("a", ty.ptr<i32>(Source{{56, 78}}, builtin::AddressSpace::kFunction),
-                  builtin::AddressSpace::kUndefined, AddressOf(Source{{12, 34}}, "i"));
+    auto* p = Var("a", ty.ptr<function, i32>(Source{{56, 78}}), builtin::AddressSpace::kUndefined,
+                  AddressOf(Source{{12, 34}}, "i"));
     WrapInFunction(i, p);
 
     EXPECT_FALSE(r()->Resolve());
@@ -162,7 +163,7 @@ TEST_F(ResolverVariableValidationTest, OverrideExplicitTypeNotScalar) {
 
 TEST_F(ResolverVariableValidationTest, OverrideInferedTypeNotScalar) {
     // override o = vec3(1.0f);
-    Override(Source{{56, 78}}, "o", vec3<f32>(1.0_f));
+    Override(Source{{56, 78}}, "o", Call<vec3<f32>>(1.0_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "56:78 error: vec3<f32> cannot be used as the type of a 'override'");
@@ -314,13 +315,11 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     auto* buf = Structure("S", utils::Vector{
                                    Member("inner", ty.Of(inner)),
                                });
-    auto* storage =
+    auto* var =
         GlobalVar("s", ty.Of(buf), builtin::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
-    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
-    auto* ptr = Let(Source{{12, 34}}, "p",
-                    ty.ptr<i32>(builtin::AddressSpace::kStorage, builtin::Access::kReadWrite),
-                    AddressOf(expr));
+    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(var, "inner"), "arr"), 2_i);
+    auto* ptr = Let(Source{{12, 34}}, "p", ty.ptr<storage, i32, read_write>(), AddressOf(expr));
 
     WrapInFunction(ptr);
 
@@ -390,7 +389,7 @@ TEST_F(ResolverVariableValidationTest, InvalidAddressSpaceForInitializer) {
 
 TEST_F(ResolverVariableValidationTest, VectorConstNoType) {
     // const a vec3 = vec3<f32>();
-    WrapInFunction(Const("a", ty.vec3<Infer>(Source{{12, 34}}), vec3<f32>()));
+    WrapInFunction(Const("a", ty.vec3<Infer>(Source{{12, 34}}), Call<vec3<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'vec3'");
@@ -398,7 +397,7 @@ TEST_F(ResolverVariableValidationTest, VectorConstNoType) {
 
 TEST_F(ResolverVariableValidationTest, VectorLetNoType) {
     // let a : vec3 = vec3<f32>();
-    WrapInFunction(Let("a", ty.vec3<Infer>(Source{{12, 34}}), vec3<f32>()));
+    WrapInFunction(Let("a", ty.vec3<Infer>(Source{{12, 34}}), Call<vec3<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'vec3'");
@@ -414,7 +413,7 @@ TEST_F(ResolverVariableValidationTest, VectorVarNoType) {
 
 TEST_F(ResolverVariableValidationTest, MatrixConstNoType) {
     // const a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Const("a", ty.mat3x3<Infer>(Source{{12, 34}}), mat3x3<f32>()));
+    WrapInFunction(Const("a", ty.mat3x3<Infer>(Source{{12, 34}}), Call<mat3x3<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'mat3x3'");
@@ -422,7 +421,7 @@ TEST_F(ResolverVariableValidationTest, MatrixConstNoType) {
 
 TEST_F(ResolverVariableValidationTest, MatrixLetNoType) {
     // let a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Let("a", ty.mat3x3<Infer>(Source{{12, 34}}), mat3x3<f32>()));
+    WrapInFunction(Let("a", ty.mat3x3<Infer>(Source{{12, 34}}), Call<mat3x3<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: expected '<' for 'mat3x3'");

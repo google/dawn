@@ -121,9 +121,9 @@ class ParserImpl {
         /// std::unique_ptr, operator->() automatically dereferences so that the
         /// return type will always be a pointer to a non-pointer type. #errored
         /// must be false to call.
-        inline typename detail::OperatorArrow<T>::type operator->() {
+        inline typename wgsl::detail::OperatorArrow<T>::type operator->() {
             TINT_ASSERT(Reader, !errored);
-            return detail::OperatorArrow<T>::ptr(value);
+            return wgsl::detail::OperatorArrow<T>::ptr(value);
         }
 
         /// The expected value of a successful parse.
@@ -183,9 +183,9 @@ class ParserImpl {
         /// std::unique_ptr, operator->() automatically dereferences so that the
         /// return type will always be a pointer to a non-pointer type. #errored
         /// must be false to call.
-        inline typename detail::OperatorArrow<T>::type operator->() {
+        inline typename wgsl::detail::OperatorArrow<T>::type operator->() {
             TINT_ASSERT(Reader, !errored);
-            return detail::OperatorArrow<T>::ptr(value);
+            return wgsl::detail::OperatorArrow<T>::ptr(value);
         }
 
         /// The value of a successful parse.

@@ -176,7 +176,7 @@ struct TypeInfo {
     /// @returns the static TypeInfo for the type T
     template <typename T>
     static const TypeInfo& Of() {
-        return detail::TypeInfoOf<std::remove_cv_t<T>>::info;
+        return utils::detail::TypeInfoOf<std::remove_cv_t<T>>::info;
     }
 
     /// @returns a compile-time hashcode for the type `T`.
@@ -281,7 +281,7 @@ struct Infer;
 /// @returns true if `obj` is a valid pointer, and is of, or derives from the class `TO`
 /// @param obj the object to test from
 /// @see CastFlags
-template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
+template <typename TO, int FLAGS = 0, typename FROM = utils::detail::Infer>
 inline bool Is(FROM* obj) {
     if (obj == nullptr) {
         return false;
@@ -295,7 +295,10 @@ inline bool Is(FROM* obj) {
 /// @param pred predicate function with signature `bool(const TYPE*)` called iff object is of, or
 /// derives from the class `TYPE`.
 /// @see CastFlags
-template <typename TYPE, int FLAGS = 0, typename OBJ = detail::Infer, typename Pred = detail::Infer>
+template <typename TYPE,
+          int FLAGS = 0,
+          typename OBJ = utils::detail::Infer,
+          typename Pred = utils::detail::Infer>
 inline bool Is(OBJ* obj, Pred&& pred) {
     return Is<TYPE, FLAGS, OBJ>(obj) && pred(static_cast<std::add_const_t<TYPE>*>(obj));
 }
@@ -315,7 +318,7 @@ inline bool IsAnyOf(OBJ* obj) {
 /// `TO`.
 /// @param obj the object to cast from
 /// @see CastFlags
-template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
+template <typename TO, int FLAGS = 0, typename FROM = utils::detail::Infer>
 inline TO* As(FROM* obj) {
     auto* as_castable = static_cast<CastableBase*>(obj);
     return Is<TO, FLAGS>(obj) ? static_cast<TO*>(as_castable) : nullptr;
@@ -325,7 +328,7 @@ inline TO* As(FROM* obj) {
 /// `TO`.
 /// @param obj the object to cast from
 /// @see CastFlags
-template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
+template <typename TO, int FLAGS = 0, typename FROM = utils::detail::Infer>
 inline const TO* As(const FROM* obj) {
     auto* as_castable = static_cast<const CastableBase*>(obj);
     return Is<TO, FLAGS>(obj) ? static_cast<const TO*>(as_castable) : nullptr;
@@ -361,7 +364,7 @@ class CastableBase {
     /// returns true
     /// @param pred predicate function with signature `bool(const TO*)` called iff object is of, or
     /// derives from the class `TO`.
-    template <typename TO, int FLAGS = 0, typename Pred = detail::Infer>
+    template <typename TO, int FLAGS = 0, typename Pred = utils::detail::Infer>
     inline bool Is(Pred&& pred) const {
         return tint::utils::Is<TO, FLAGS>(this, std::forward<Pred>(pred));
     }
@@ -445,7 +448,7 @@ class Castable : public BASE {
     /// pred(const TO*) returns true
     /// @param pred predicate function with signature `bool(const TO*)` called iff
     /// object is of, or derives from the class `TO`.
-    template <int FLAGS = 0, typename Pred = detail::Infer>
+    template <int FLAGS = 0, typename Pred = utils::detail::Infer>
     inline bool Is(Pred&& pred) const {
         using TO = typename std::remove_pointer<utils::traits::ParameterType<Pred, 0>>::type;
         return tint::utils::Is<TO, FLAGS>(static_cast<const CLASS*>(this),
@@ -534,7 +537,7 @@ struct CastableCommonBaseImpl<A, B, OTHERS...> {
 
 /// Resolves to the common most derived type that each of the types in `TYPES` derives from.
 template <typename... TYPES>
-using CastableCommonBase = detail::CastableCommonBase<TYPES...>;
+using CastableCommonBase = utils::detail::CastableCommonBase<TYPES...>;
 
 }  // namespace tint::utils
 

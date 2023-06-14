@@ -26,12 +26,12 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-using ::testing::HasSubstr;
-
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::writer::msl {
 namespace {
+
+using ::testing::HasSubstr;
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 void FormatMSLField(utils::StringStream& out,
                     const char* addr,
@@ -562,7 +562,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     // array: size(64), align(16)
-    auto array = ty.array(ty.vec3<f32>(), 4_u);
+    auto array = ty.array<vec3<f32>, 4>();
 
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.i32()),

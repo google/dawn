@@ -21,12 +21,13 @@
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/struct.h"
 
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
+
 namespace tint::ir::transform {
 namespace {
 
 using IR_BlockDecoratedStructsTest = TransformTest;
-
-using namespace tint::number_suffixes;  // NOLINT
 
 TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
     auto* func = b.Function("foo", ty.void_());
@@ -116,7 +117,7 @@ tint_symbol_1 = struct @align(4), @block {
 }
 
 TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
-    auto* buffer = b.Var(ty.ptr(storage, ty.runtime_array(ty.i32()), builtin::Access::kReadWrite));
+    auto* buffer = b.Var(ty.ptr<storage, array<i32>>());
     buffer->SetBindingPoint(0, 0);
     b.RootBlock()->Append(buffer);
 
@@ -219,8 +220,7 @@ TEST_F(IR_BlockDecoratedStructsTest, StructUsedElsewhere) {
     buffer->SetBindingPoint(0, 0);
     b.RootBlock()->Append(buffer);
 
-    auto* private_var =
-        b.Var(ty.ptr(builtin::AddressSpace::kPrivate, structure, builtin::Access::kReadWrite));
+    auto* private_var = b.Var(ty.ptr<private_, read_write>(structure));
     b.RootBlock()->Append(private_var);
 
     auto* func = b.Function("foo", ty.void_());

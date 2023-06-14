@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_NUMBER_H_
-#define SRC_TINT_NUMBER_H_
+#ifndef SRC_TINT_BUILTIN_NUMBER_H_
+#define SRC_TINT_BUILTIN_NUMBER_H_
 
 #include <stdint.h>
 #include <cmath>
@@ -66,16 +66,16 @@ namespace tint {
 
 /// Evaluates to true iff T is a Number
 template <typename T>
-constexpr bool IsNumber = detail::IsNumber<T>::value;
+constexpr bool IsNumber = tint::detail::IsNumber<T>::value;
 
 /// Resolves to the underlying type for a Number.
 template <typename T>
-using UnwrapNumber = typename detail::NumberUnwrapper<T>::type;
+using UnwrapNumber = typename tint::detail::NumberUnwrapper<T>::type;
 
 /// Evaluates to true iff T or Number<T> is a floating-point type or is NumberKindF16.
 template <typename T>
 constexpr bool IsFloatingPoint = std::is_floating_point_v<UnwrapNumber<T>> ||
-                                 std::is_same_v<UnwrapNumber<T>, detail::NumberKindF16>;
+                                 std::is_same_v<UnwrapNumber<T>, tint::detail::NumberKindF16>;
 
 /// Evaluates to true iff T or Number<T> is an integral type.
 template <typename T>
@@ -186,7 +186,7 @@ inline utils::StringStream& operator<<(utils::StringStream& out, Number<T> num) 
 /// The partial specification of Number for f16 type, storing the f16 value as float,
 /// and enforcing proper explicit casting.
 template <>
-struct Number<detail::NumberKindF16> : NumberBase<Number<detail::NumberKindF16>> {
+struct Number<tint::detail::NumberKindF16> : NumberBase<Number<tint::detail::NumberKindF16>> {
     /// C++ does not have a native float16 type, so we use a 32-bit float instead.
     using type = float;
 
@@ -226,7 +226,7 @@ struct Number<detail::NumberKindF16> : NumberBase<Number<detail::NumberKindF16>>
 
     /// Negation operator
     /// @returns the negative value of the number
-    Number operator-() const { return Number<detail::NumberKindF16>(-value); }
+    Number operator-() const { return Number<tint::detail::NumberKindF16>(-value); }
 
     /// Assignment operator with parameter as native floating point type
     /// @param v the new value
@@ -246,7 +246,7 @@ struct Number<detail::NumberKindF16> : NumberBase<Number<detail::NumberKindF16>>
     /// Creates an f16 value from the uint16_t bit representation.
     /// @param bits the bits to convert from
     /// @returns the binary16 value based off the provided bit pattern.
-    static Number<detail::NumberKindF16> FromBits(uint16_t bits);
+    static Number<tint::detail::NumberKindF16> FromBits(uint16_t bits);
 
     /// @param value the input float32 value
     /// @returns the float32 value quantized to the smaller float16 value, through truncation of the
@@ -272,7 +272,7 @@ using u32 = Number<uint32_t>;
 using f32 = Number<float>;
 /// `f16` is a type alias to `Number<detail::NumberKindF16>`, which should be IEEE 754 binary16.
 /// However since C++ don't have native binary16 type, the value is stored as float.
-using f16 = Number<detail::NumberKindF16>;
+using f16 = Number<tint::detail::NumberKindF16>;
 
 template <typename T, utils::traits::EnableIf<IsFloatingPoint<T>>* = nullptr>
 inline const auto kPi = T(UnwrapNumber<T>(3.14159265358979323846));
@@ -576,7 +576,7 @@ inline std::optional<AInt> CheckedMod(AInt a, AInt b) {
         return {};
     }
 
-    return AInt{detail::Mod(a.value, b.value)};
+    return AInt{tint::detail::Mod(a.value, b.value)};
 }
 
 /// @returns the remainder of a / b, or an empty optional if the resulting value overflowed the
@@ -587,7 +587,7 @@ inline std::optional<FloatingPointT> CheckedMod(FloatingPointT a, FloatingPointT
     if (b == FloatingPointT{0.0} || b == FloatingPointT{-0.0}) {
         return {};
     }
-    auto result = FloatingPointT{detail::Mod(a.value, b.value)};
+    auto result = FloatingPointT{tint::detail::Mod(a.value, b.value)};
     if (!std::isfinite(result.value)) {
         return {};
     }
@@ -681,4 +681,4 @@ class hash<tint::Number<T>> {
 
 }  // namespace std
 
-#endif  // SRC_TINT_NUMBER_H_
+#endif  // SRC_TINT_BUILTIN_NUMBER_H_

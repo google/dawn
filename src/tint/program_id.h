@@ -103,11 +103,11 @@ void AssertProgramIDsEqual(ProgramID a,
 /// valid program identifiers.
 #if TINT_CHECK_FOR_CROSS_PROGRAM_LEAKS
 #define TINT_ASSERT_PROGRAM_IDS_EQUAL(system, a, b)                        \
-    detail::AssertProgramIDsEqual(                                         \
+    tint::detail::AssertProgramIDsEqual(                                   \
         ProgramIDOf(a), ProgramIDOf(b), false, tint::diag::System::system, \
         "TINT_ASSERT_PROGRAM_IDS_EQUAL(" #system "," #a ", " #b ")", __FILE__, __LINE__)
 #define TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(system, a, b)              \
-    detail::AssertProgramIDsEqual(                                        \
+    tint::detail::AssertProgramIDsEqual(                                  \
         ProgramIDOf(a), ProgramIDOf(b), true, tint::diag::System::system, \
         "TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(" #system ", " #a ", " #b ")", __FILE__, __LINE__)
 #else

@@ -17,7 +17,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::hlsl {
 namespace {
@@ -176,7 +177,7 @@ INSTANTIATE_TEST_SUITE_P(
                                BinaryData::Types::Float}));
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f32) {
-    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
     auto* rhs = Expr(1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -193,7 +194,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f32) {
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
     Enable(builtin::Extension::kF16);
 
-    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
     auto* rhs = Expr(1_h);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -209,7 +210,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f32) {
     auto* lhs = Expr(1_f);
-    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -226,7 +227,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f16) {
     Enable(builtin::Extension::kF16);
 
     auto* lhs = Expr(1_h);
-    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -306,7 +307,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix_f16) {
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector_f32) {
     GlobalVar("mat", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
     auto* lhs = Expr("mat");
-    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
@@ -323,7 +324,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector_f16) {
 
     GlobalVar("mat", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
     auto* lhs = Expr("mat");
-    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
@@ -337,7 +338,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector_f16) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix_f32) {
     GlobalVar("mat", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
-    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
     auto* rhs = Expr("mat");
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -354,7 +355,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix_f16) {
     Enable(builtin::Extension::kF16);
 
     GlobalVar("mat", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
-    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
     auto* rhs = Expr("mat");
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);

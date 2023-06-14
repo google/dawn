@@ -17,7 +17,8 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::wgsl {
 namespace {
@@ -51,7 +52,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar_F16_From_I32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector_F32_From_I32) {
-    auto* cast = vec3<f32>(vec3<i32>(1_i, 2_i, 3_i));
+    auto* cast = Call<vec3<f32>>(Call<vec3<i32>>(1_i, 2_i, 3_i));
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();
@@ -65,7 +66,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector_F32_From_I32) {
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector_F16_From_I32) {
     Enable(builtin::Extension::kF16);
 
-    auto* cast = vec3<f16>(vec3<i32>(1_i, 2_i, 3_i));
+    auto* cast = Call<vec3<f16>>(Call<vec3<i32>>(1_i, 2_i, 3_i));
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();

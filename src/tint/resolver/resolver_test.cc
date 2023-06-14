@@ -48,37 +48,18 @@
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/string_stream.h"
 
+namespace tint::resolver {
+namespace {
+
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
-using namespace tint::number_suffixes;  // NOLINT
-
-namespace tint::resolver {
-namespace {
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 // Helpers and typedefs
 template <typename T>
 using DataType = builder::DataType<T>;
-template <int N, typename T>
-using vec = builder::vec<N, T>;
-template <typename T>
-using vec2 = builder::vec2<T>;
-template <typename T>
-using vec3 = builder::vec3<T>;
-template <typename T>
-using vec4 = builder::vec4<T>;
-template <int N, int M, typename T>
-using mat = builder::mat<N, M, T>;
-template <typename T>
-using mat2x2 = builder::mat2x2<T>;
-template <typename T>
-using mat2x3 = builder::mat2x3<T>;
-template <typename T>
-using mat3x2 = builder::mat3x2<T>;
-template <typename T>
-using mat3x3 = builder::mat3x3<T>;
-template <typename T>
-using mat4x4 = builder::mat4x4<T>;
 template <typename T, int ID = 0>
 using alias = builder::alias<T, ID>;
 template <typename T>
@@ -666,7 +647,7 @@ TEST_F(ResolverTest, Expr_Initializer_Scalar) {
 }
 
 TEST_F(ResolverTest, Expr_Initializer_Type_Vec2) {
-    auto* tc = vec2<f32>(1_f, 1_f);
+    auto* tc = Call<vec2<f32>>(1_f, 1_f);
     WrapInFunction(tc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -678,7 +659,7 @@ TEST_F(ResolverTest, Expr_Initializer_Type_Vec2) {
 }
 
 TEST_F(ResolverTest, Expr_Initializer_Type_Vec3) {
-    auto* tc = vec3<f32>(1_f, 1_f, 1_f);
+    auto* tc = Call<vec3<f32>>(1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -690,7 +671,7 @@ TEST_F(ResolverTest, Expr_Initializer_Type_Vec3) {
 }
 
 TEST_F(ResolverTest, Expr_Initializer_Type_Vec4) {
-    auto* tc = vec4<f32>(1_f, 1_f, 1_f, 1_f);
+    auto* tc = Call<vec4<f32>>(1_f, 1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -756,7 +737,7 @@ TEST_F(ResolverTest, IndexAccessor_Dynamic_Ref_F32) {
     // var a : array<bool, 10u> = 0;
     // var idx : f32 = f32();
     // var f : f32 = a[idx];
-    auto* a = Var("a", ty.array<bool, 10>(), array<bool, 10>());
+    auto* a = Var("a", ty.array<bool, 10>(), Call<array<bool, 10>>());
     auto* idx = Var("idx", ty.f32(), Call<f32>());
     auto* f = Var("f", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, idx)));
     Func("my_func", utils::Empty, ty.void_(),
@@ -803,7 +784,7 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
     auto* v = Expr("v");
     auto* p = Expr("p");
     auto* v_decl = Decl(Var("v", ty.f32()));
-    auto* p_decl = Decl(Let("p", ty.ptr<f32>(builtin::AddressSpace::kFunction), AddressOf(v)));
+    auto* p_decl = Decl(Let("p", ty.ptr<function, f32>(), AddressOf(v)));
     auto* assign = Assign(Deref(p), 1.23_f);
     Func("my_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -2138,7 +2119,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSample) {
               Binding(1_a));
     GlobalVar("s", ty.sampler(type::SamplerKind::kSampler), Group(1_a), Binding(2_a));
 
-    auto* call = Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f));
+    auto* call = Call("textureSample", "t", "s", Call<vec2<f32>>(1_f, 2_f));
     const ast::Function* f =
         Func("test_function", utils::Empty, ty.void_(), utils::Vector{Assign(Phony(), call)},
              utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -2157,7 +2138,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
               Binding(1_a));
     GlobalVar("s", ty.sampler(type::SamplerKind::kSampler), Group(1_a), Binding(2_a));
 
-    auto* inner_call = Assign(Phony(), Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
+    auto* inner_call = Assign(Phony(), Call("textureSample", "t", "s", Call<vec2<f32>>(1_f, 2_f)));
     const ast::Function* inner_func =
         Func("inner_func", utils::Empty, ty.void_(), utils::Vector{inner_call});
     auto* outer_call = CallStmt(Call("inner_func"));
@@ -2183,10 +2164,12 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
               Binding(1_a));
     GlobalVar("s", ty.sampler(type::SamplerKind::kSampler), Group(1_a), Binding(2_a));
 
-    auto* inner_call_1 = Assign(Phony(), Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
+    auto* inner_call_1 =
+        Assign(Phony(), Call("textureSample", "t", "s", Call<vec2<f32>>(1_f, 2_f)));
     const ast::Function* inner_func_1 =
         Func("inner_func_1", utils::Empty, ty.void_(), utils::Vector{inner_call_1});
-    auto* inner_call_2 = Assign(Phony(), Call("textureSample", "t", "s", vec2<f32>(3_f, 4_f)));
+    auto* inner_call_2 =
+        Assign(Phony(), Call("textureSample", "t", "s", Call<vec2<f32>>(3_f, 4_f)));
     const ast::Function* inner_func_2 =
         Func("inner_func_2", utils::Empty, ty.void_(), utils::Vector{inner_call_2});
     auto* outer_call_1 = CallStmt(Call("inner_func_1"));
@@ -2220,10 +2203,12 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariabl
               Binding(2_a));
     GlobalVar("s", ty.sampler(type::SamplerKind::kSampler), Group(1_a), Binding(3_a));
 
-    auto* inner_call_1 = Assign(Phony(), Call("textureSample", "t1", "s", vec2<f32>(1_f, 2_f)));
+    auto* inner_call_1 =
+        Assign(Phony(), Call("textureSample", "t1", "s", Call<vec2<f32>>(1_f, 2_f)));
     const ast::Function* inner_func_1 =
         Func("inner_func_1", utils::Empty, ty.void_(), utils::Vector{inner_call_1});
-    auto* inner_call_2 = Assign(Phony(), Call("textureSample", "t2", "s", vec2<f32>(3_f, 4_f)));
+    auto* inner_call_2 =
+        Assign(Phony(), Call("textureSample", "t2", "s", Call<vec2<f32>>(3_f, 4_f)));
     const ast::Function* inner_func_2 =
         Func("inner_func_2", utils::Empty, ty.void_(), utils::Vector{inner_call_2});
     auto* outer_call_1 = CallStmt(Call("inner_func_1"));
@@ -2299,10 +2284,9 @@ TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
 
     Func("helper",
          utils::Vector{
-             Param("sl", ty.ptr(builtin::AddressSpace::kFunction,
-                                ty.sampler(type::SamplerKind::kSampler))),
-             Param("tl", ty.ptr(builtin::AddressSpace::kFunction,
-                                ty.sampled_texture(type::TextureDimension::k2d, ty.f32()))),
+             Param("sl", ty.ptr<function>(ty.sampler(type::SamplerKind::kSampler))),
+             Param("tl",
+                   ty.ptr<function>(ty.sampled_texture(type::TextureDimension::k2d, ty.f32()))),
          },
          ty.vec4<f32>(),
          utils::Vector{
@@ -2537,7 +2521,7 @@ TEST_F(ResolverTest, MaxNestDepthOfCompositeType_Arrays_Invalid) {
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_ArraysOfVector_Valid) {
-    auto a = ty.array(ty.vec3<i32>(), 10_u);
+    auto a = ty.array<vec3<i32>, 10>();
     size_t depth = 2;  // Depth of array + vector
     size_t iterations = kMaxNestDepthOfCompositeType - depth;
     for (size_t i = 0; i < iterations; ++i) {

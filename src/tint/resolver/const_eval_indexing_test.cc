@@ -14,13 +14,14 @@
 
 #include "src/tint/resolver/const_eval_test.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 namespace {
 
 TEST_F(ResolverConstEvalTest, Vec3_Index) {
-    auto* expr = IndexAccessor(vec3<i32>(1_i, 2_i, 3_i), 2_i);
+    auto* expr = IndexAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), 2_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -35,7 +36,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Index) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_High) {
-    auto* expr = IndexAccessor(vec3<i32>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, 3_i));
+    auto* expr = IndexAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, 3_i));
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
@@ -43,7 +44,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_High) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_Low) {
-    auto* expr = IndexAccessor(vec3<i32>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, -3_i));
+    auto* expr = IndexAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, -3_i));
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
@@ -123,7 +124,7 @@ INSTANTIATE_TEST_SUITE_P(Swizzle,
 }  // namespace Swizzle
 
 TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Scalar) {
-    auto* expr = MemberAccessor(vec3<i32>(1_i, 2_i, 3_i), "y");
+    auto* expr = MemberAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), "y");
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -138,7 +139,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Scalar) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Vector) {
-    auto* expr = MemberAccessor(vec3<i32>(1_i, 2_i, 3_i), "zx");
+    auto* expr = MemberAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), "zx");
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -161,7 +162,8 @@ TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Vector) {
 
 TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Chain) {
     auto* expr =  // (1, 2, 3) -> (2, 3, 1) -> (3, 2) -> 2
-        MemberAccessor(MemberAccessor(MemberAccessor(vec3<i32>(1_i, 2_i, 3_i), "gbr"), "yx"), "y");
+        MemberAccessor(MemberAccessor(MemberAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), "gbr"), "yx"),
+                       "y");
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -176,8 +178,10 @@ TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Chain) {
 }
 
 TEST_F(ResolverConstEvalTest, Mat3x2_Index) {
-    auto* expr = IndexAccessor(
-        mat3x2<f32>(vec2<f32>(1._a, 2._a), vec2<f32>(3._a, 4._a), vec2<f32>(5._a, 6._a)), 2_i);
+    auto* expr =
+        IndexAccessor(Call<mat3x2<f32>>(Call<vec2<f32>>(1._a, 2._a), Call<vec2<f32>>(3._a, 4._a),
+                                        Call<vec2<f32>>(5._a, 6._a)),
+                      2_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -199,9 +203,10 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index) {
 }
 
 TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_High) {
-    auto* expr = IndexAccessor(
-        mat3x2<f32>(vec2<f32>(1._a, 2._a), vec2<f32>(3._a, 4._a), vec2<f32>(5._a, 6._a)),
-        Expr(Source{{12, 34}}, 3_i));
+    auto* expr =
+        IndexAccessor(Call<mat3x2<f32>>(Call<vec2<f32>>(1._a, 2._a), Call<vec2<f32>>(3._a, 4._a),
+                                        Call<vec2<f32>>(5._a, 6._a)),
+                      Expr(Source{{12, 34}}, 3_i));
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
@@ -209,9 +214,10 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_High) {
 }
 
 TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_Low) {
-    auto* expr = IndexAccessor(
-        mat3x2<f32>(vec2<f32>(1._a, 2._a), vec2<f32>(3._a, 4._a), vec2<f32>(5._a, 6._a)),
-        Expr(Source{{12, 34}}, -3_i));
+    auto* expr =
+        IndexAccessor(Call<mat3x2<f32>>(Call<vec2<f32>>(1._a, 2._a), Call<vec2<f32>>(3._a, 4._a),
+                                        Call<vec2<f32>>(5._a, 6._a)),
+                      Expr(Source{{12, 34}}, -3_i));
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
@@ -219,8 +225,9 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_Low) {
 }
 
 TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index) {
-    auto* expr = IndexAccessor(Call(ty.array(ty.vec3<f32>(), 2_u),  //
-                                    vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f)),
+    auto* expr = IndexAccessor(Call<array<vec3<f32>, 2>>(           //
+                                   Call<vec3<f32>>(1_f, 2_f, 3_f),  //
+                                   Call<vec3<f32>>(4_f, 5_f, 6_f)),
                                1_i);
     WrapInFunction(expr);
 
@@ -248,8 +255,9 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index) {
 }
 
 TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_High) {
-    auto* expr = IndexAccessor(Call(ty.array(ty.vec3<f32>(), 2_u),  //
-                                    vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f)),
+    auto* expr = IndexAccessor(Call<array<vec3<f32>, 2>>(           //
+                                   Call<vec3<f32>>(1_f, 2_f, 3_f),  //
+                                   Call<vec3<f32>>(4_f, 5_f, 6_f)),
                                Expr(Source{{12, 34}}, 2_i));
     WrapInFunction(expr);
 
@@ -258,8 +266,9 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_High) {
 }
 
 TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_Low) {
-    auto* expr = IndexAccessor(Call(ty.array(ty.vec3<f32>(), 2_u),  //
-                                    vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f)),
+    auto* expr = IndexAccessor(Call<array<vec3<f32>, 2>>(           //
+                                   Call<vec3<f32>>(1_f, 2_f, 3_f),  //
+                                   Call<vec3<f32>>(4_f, 5_f, 6_f)),
                                Expr(Source{{12, 34}}, -2_i));
     WrapInFunction(expr);
 
@@ -268,7 +277,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_Low) {
 }
 
 TEST_F(ResolverConstEvalTest, RuntimeArray_vec3_f32_Index_OOB_Low) {
-    auto* sb = GlobalVar("sb", ty.array(ty.vec3<f32>()), Group(0_a), Binding(0_a),
+    auto* sb = GlobalVar("sb", ty.array<vec3<f32>>(), Group(0_a), Binding(0_a),
                          builtin::AddressSpace::kStorage);
     auto* expr = IndexAccessor(sb, Expr(Source{{12, 34}}, -2_i));
     WrapInFunction(expr);
@@ -278,11 +287,11 @@ TEST_F(ResolverConstEvalTest, RuntimeArray_vec3_f32_Index_OOB_Low) {
 }
 
 TEST_F(ResolverConstEvalTest, ChainedIndex) {
-    auto* arr_expr = Call(ty.array(ty.mat2x3<f32>(), 2_u),        // array<mat2x3<f32>, 2u>
-                          mat2x3<f32>(vec3<f32>(1_f, 2_f, 3_f),   //
-                                      vec3<f32>(4_f, 5_f, 6_f)),  //
-                          mat2x3<f32>(vec3<f32>(7_f, 0_f, 9_f),   //
-                                      vec3<f32>(10_f, 11_f, 12_f)));
+    auto* arr_expr = Call<array<mat2x3<f32>, 2>>(           //
+        Call<mat2x3<f32>>(Call<vec3<f32>>(1_f, 2_f, 3_f),   //
+                          Call<vec3<f32>>(4_f, 5_f, 6_f)),  //
+        Call<mat2x3<f32>>(Call<vec3<f32>>(7_f, 0_f, 9_f),   //
+                          Call<vec3<f32>>(10_f, 11_f, 12_f)));
 
     auto* mat_expr = IndexAccessor(arr_expr, 1_i);  // arr[1]
     auto* vec_expr = IndexAccessor(mat_expr, 0_i);  // arr[1][0]

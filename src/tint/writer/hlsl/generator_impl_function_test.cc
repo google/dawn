@@ -20,10 +20,11 @@
 
 using ::testing::HasSubstr;
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::writer::hlsl {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using HlslGeneratorImplTest_Function = TestHelper;
 
@@ -101,7 +102,7 @@ TEST_F(HlslGeneratorImplTest_Function, PtrParameter) {
     // fn f(foo : ptr<function, f32>) -> f32 {
     //   return *foo;
     // }
-    Func("f", utils::Vector{Param("foo", ty.ptr<f32>(builtin::AddressSpace::kFunction))}, ty.f32(),
+    Func("f", utils::Vector{Param("foo", ty.ptr<function, f32>())}, ty.f32(),
          utils::Vector{Return(Deref("foo"))});
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -216,7 +217,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Di
 
     Func("vert_main", utils::Empty, ty.Of(interface_struct),
          utils::Vector{
-             Return(Call(ty.Of(interface_struct), Call(ty.vec4<f32>()), Expr(0.5_f), Expr(0.25_f))),
+             Return(Call(ty.Of(interface_struct), Call<vec4<f32>>(), 0.5_f, 0.25_f)),
          },
          utils::Vector{Stage(ast::PipelineStage::kVertex)});
 
@@ -296,8 +297,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_He
 
     Func("foo", utils::Vector{Param("x", ty.f32())}, ty.Of(vertex_output_struct),
          utils::Vector{
-             Return(
-                 Call(ty.Of(vertex_output_struct), Call(ty.vec4<f32>(), "x", "x", "x", Expr(1_f)))),
+             Return(Call(ty.Of(vertex_output_struct), Call<vec4<f32>>("x", "x", "x", 1_f))),
          },
          utils::Empty);
 
@@ -752,7 +752,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayReturn) {
     Func("my_func", utils::Empty, ty.array<f32, 5>(),
          utils::Vector{
-             Return(Call(ty.array<f32, 5>())),
+             Return(Call<array<f32, 5>>()),
          });
 
     GeneratorImpl& gen = Build();

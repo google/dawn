@@ -14,7 +14,8 @@
 
 #include "src/tint/resolver/const_eval_test.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 namespace {
@@ -68,9 +69,9 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
 }
 
 TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
-    auto* c = Const("a", Call(ty.mat2x2<Infer>(),  //
-                              Call(ty.vec<Infer>(2), Expr(1_a), Expr(2_a)),
-                              Call(ty.vec<Infer>(2), Expr(3_a), Expr(4_a))));
+    auto* c = Const("a", Call<mat2x2<Infer>>(              //
+                             Call<vec2<Infer>>(1_a, 2_a),  //
+                             Call<vec2<Infer>>(3_a, 4_a)));
     WrapInFunction(c);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -93,18 +94,18 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
 }
 
 TEST_F(ResolverConstEvalTest, MatrixMemberAccess_AFloat) {
-    auto* c = Const("a", Call(ty.mat2x3<Infer>(),  //
-                              Call(ty.vec3<Infer>(), Expr(1.0_a), Expr(2.0_a), Expr(3.0_a)),
-                              Call(ty.vec3<Infer>(), Expr(4.0_a), Expr(5.0_a), Expr(6.0_a))));
+    auto* c = Const("a", Call<mat2x3<Infer>>(                         //
+                             Call<vec3<Infer>>(1.0_a, 2.0_a, 3.0_a),  //
+                             Call<vec3<Infer>>(4.0_a, 5.0_a, 6.0_a)));
 
-    auto* col_0 = Const("col_0", IndexAccessor("a", Expr(0_i)));
-    auto* col_1 = Const("col_1", IndexAccessor("a", Expr(1_i)));
-    auto* e00 = Const("e00", IndexAccessor("col_0", Expr(0_i)));
-    auto* e01 = Const("e01", IndexAccessor("col_0", Expr(1_i)));
-    auto* e02 = Const("e02", IndexAccessor("col_0", Expr(2_i)));
-    auto* e10 = Const("e10", IndexAccessor("col_1", Expr(0_i)));
-    auto* e11 = Const("e11", IndexAccessor("col_1", Expr(1_i)));
-    auto* e12 = Const("e12", IndexAccessor("col_1", Expr(2_i)));
+    auto* col_0 = Const("col_0", IndexAccessor("a", 0_i));
+    auto* col_1 = Const("col_1", IndexAccessor("a", 1_i));
+    auto* e00 = Const("e00", IndexAccessor("col_0", 0_i));
+    auto* e01 = Const("e01", IndexAccessor("col_0", 1_i));
+    auto* e02 = Const("e02", IndexAccessor("col_0", 2_i));
+    auto* e10 = Const("e10", IndexAccessor("col_1", 0_i));
+    auto* e11 = Const("e11", IndexAccessor("col_1", 1_i));
+    auto* e12 = Const("e12", IndexAccessor("col_1", 2_i));
 
     (void)col_0;
     (void)col_1;
@@ -169,18 +170,18 @@ TEST_F(ResolverConstEvalTest, MatrixMemberAccess_AFloat) {
 }
 
 TEST_F(ResolverConstEvalTest, MatrixMemberAccess_f32) {
-    auto* c = Const("a", Call(ty.mat2x3<Infer>(),  //
-                              Call(ty.vec3<Infer>(), Expr(1.0_f), Expr(2.0_f), Expr(3.0_f)),
-                              Call(ty.vec3<Infer>(), Expr(4.0_f), Expr(5.0_f), Expr(6.0_f))));
+    auto* c = Const("a", Call<mat2x3<Infer>>(                         //
+                             Call<vec3<Infer>>(1.0_f, 2.0_f, 3.0_f),  //
+                             Call<vec3<Infer>>(4.0_f, 5.0_f, 6.0_f)));
 
-    auto* col_0 = Const("col_0", IndexAccessor("a", Expr(0_i)));
-    auto* col_1 = Const("col_1", IndexAccessor("a", Expr(1_i)));
-    auto* e00 = Const("e00", IndexAccessor("col_0", Expr(0_i)));
-    auto* e01 = Const("e01", IndexAccessor("col_0", Expr(1_i)));
-    auto* e02 = Const("e02", IndexAccessor("col_0", Expr(2_i)));
-    auto* e10 = Const("e10", IndexAccessor("col_1", Expr(0_i)));
-    auto* e11 = Const("e11", IndexAccessor("col_1", Expr(1_i)));
-    auto* e12 = Const("e12", IndexAccessor("col_1", Expr(2_i)));
+    auto* col_0 = Const("col_0", IndexAccessor("a", 0_i));
+    auto* col_1 = Const("col_1", IndexAccessor("a", 1_i));
+    auto* e00 = Const("e00", IndexAccessor("col_0", 0_i));
+    auto* e01 = Const("e01", IndexAccessor("col_0", 1_i));
+    auto* e02 = Const("e02", IndexAccessor("col_0", 2_i));
+    auto* e10 = Const("e10", IndexAccessor("col_1", 0_i));
+    auto* e11 = Const("e11", IndexAccessor("col_1", 1_i));
+    auto* e12 = Const("e12", IndexAccessor("col_1", 2_i));
 
     (void)col_0;
     (void)col_1;

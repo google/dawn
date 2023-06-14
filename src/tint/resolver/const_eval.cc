@@ -22,11 +22,11 @@
 #include <type_traits>
 #include <utility>
 
+#include "src/tint/builtin/number.h"
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/scalar.h"
 #include "src/tint/constant/splat.h"
 #include "src/tint/constant/value.h"
-#include "src/tint/number.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/value_constructor.h"

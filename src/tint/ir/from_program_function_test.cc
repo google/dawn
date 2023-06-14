@@ -21,12 +21,14 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using IR_FromProgramFunctionTest = ProgramTestHelper;
 
 TEST_F(IR_FromProgramFunctionTest, EmitFunction_Vertex) {
-    Func("test", utils::Empty, ty.vec4<f32>(), utils::Vector{Return(vec4<f32>(0_f, 0_f, 0_f, 0_f))},
+    Func("test", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{Return(Call<vec4<f32>>(0_f, 0_f, 0_f, 0_f))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
          utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
 
@@ -73,8 +75,8 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_Compute) {
 }
 
 TEST_F(IR_FromProgramFunctionTest, EmitFunction_Return) {
-    Func("test", utils::Empty, ty.vec3<f32>(), utils::Vector{Return(vec3<f32>(0_f, 0_f, 0_f))},
-         utils::Empty);
+    Func("test", utils::Empty, ty.vec3<f32>(),
+         utils::Vector{Return(Call<vec3<f32>>(0_f, 0_f, 0_f))}, utils::Empty);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -88,7 +90,8 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_Return) {
 }
 
 TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPosition) {
-    Func("test", utils::Empty, ty.vec4<f32>(), utils::Vector{Return(vec4<f32>(1_f, 2_f, 3_f, 4_f))},
+    Func("test", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
          utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
 
@@ -104,7 +107,8 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPosition) {
 }
 
 TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPositionInvariant) {
-    Func("test", utils::Empty, ty.vec4<f32>(), utils::Vector{Return(vec4<f32>(1_f, 2_f, 3_f, 4_f))},
+    Func("test", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
          utils::Vector{Builtin(builtin::BuiltinValue::kPosition), Invariant()});
 
@@ -121,7 +125,8 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPositionInvariant) {
 }
 
 TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnLocation) {
-    Func("test", utils::Empty, ty.vec4<f32>(), utils::Vector{Return(vec4<f32>(1_f, 2_f, 3_f, 4_f))},
+    Func("test", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kFragment)}, utils::Vector{Location(1_i)});
 
     auto m = Build();
@@ -137,7 +142,8 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnLocation) {
 }
 
 TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnLocation_Interpolate) {
-    Func("test", utils::Empty, ty.vec4<f32>(), utils::Vector{Return(vec4<f32>(1_f, 2_f, 3_f, 4_f))},
+    Func("test", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kFragment)},
          utils::Vector{Location(1_i), Interpolate(builtin::InterpolationType::kLinear,
                                                   builtin::InterpolationSampling::kCentroid)});

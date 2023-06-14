@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_CONSTANT_COMPOSITE_H_
 #define SRC_TINT_CONSTANT_COMPOSITE_H_
 
+#include "src/tint/builtin/number.h"
 #include "src/tint/constant/value.h"
-#include "src/tint/number.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/hash.h"

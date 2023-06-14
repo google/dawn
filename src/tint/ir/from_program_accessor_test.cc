@@ -24,7 +24,8 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using IR_FromProgramAccessorTest = ProgramTestHelper;
 
@@ -348,7 +349,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiIndex) {
     // let a: mat3x4<f32> = mat3x4<u32>()
     // let b = a[2][3]
 
-    auto* a = Let("a", ty.mat3x4<f32>(), mat3x4<f32>());
+    auto* a = Let("a", ty.mat3x4<f32>(), Call<mat3x4<f32>>());
     auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
     WrapInFunction(Block(utils::Vector{Decl(a), expr}));
 
@@ -448,7 +449,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_Mixed) {
                                          Member("a", ty.i32()),
                                          Member("foo", ty.array(ty.Of(inner), 4_u)),
                                      });
-    auto* a = Let("a", ty.array(ty.Of(outer), 4_u), array(ty.Of(outer), 4_u));
+    auto* a = Let("a", ty.array(ty.Of(outer), 4_u), Call(ty.array(ty.Of(outer), 4_u)));
     auto* expr = Decl(Let(
         "b",
         MemberAccessor(IndexAccessor(MemberAccessor(IndexAccessor(a, 0_u), "foo"), 1_u), "bar")));

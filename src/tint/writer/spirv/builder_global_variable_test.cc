@@ -18,7 +18,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::spirv {
 namespace {
@@ -41,7 +42,7 @@ TEST_F(BuilderTest, GlobalVar_WithAddressSpace) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithInitializer) {
-    auto* init = vec3<f32>(1_f, 1_f, 3_f);
+    auto* init = Call<vec3<f32>>(1_f, 1_f, 3_f);
 
     auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate, init);
 
@@ -91,7 +92,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_Initializer) {
     // const c = vec3<f32>(1f, 2f, 3f);
     // var v = c;
 
-    auto* c = GlobalConst("c", vec3<f32>(1_f, 2_f, 3_f));
+    auto* c = GlobalConst("c", Call<vec3<f32>>(1_f, 2_f, 3_f));
     GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -121,7 +122,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_F16_Initializer) {
     // var v = c;
     Enable(builtin::Extension::kF16);
 
-    auto* c = GlobalConst("c", vec3<f16>(1_h, 2_h, 3_h));
+    auto* c = GlobalConst("c", Call<vec3<f16>>(1_h, 2_h, 3_h));
     GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -150,7 +151,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AInt_Initializer) {
     // const c = vec3(1, 2, 3);
     // var v = c;
 
-    auto* c = GlobalConst("c", Call(ty.vec3<Infer>(), 1_a, 2_a, 3_a));
+    auto* c = GlobalConst("c", Call<vec3<Infer>>(1_a, 2_a, 3_a));
     GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -179,7 +180,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Initializer) {
     // const c = vec3(1.0, 2.0, 3.0);
     // var v = c;
 
-    auto* c = GlobalConst("c", Call(ty.vec3<Infer>(), 1._a, 2._a, 3._a));
+    auto* c = GlobalConst("c", Call<vec3<Infer>>(1._a, 2._a, 3._a));
     GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -208,7 +209,7 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Initializer) {
     // const c = vec3<f32>(vec2<f32>(1f, 2f), 3f));
     // var v = c;
 
-    auto* c = GlobalConst("c", vec3<f32>(vec2<f32>(1_f, 2_f), 3_f));
+    auto* c = GlobalConst("c", Call<vec3<f32>>(Call<vec2<f32>>(1_f, 2_f), 3_f));
     GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();

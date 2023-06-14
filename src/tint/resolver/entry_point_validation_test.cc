@@ -22,26 +22,15 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 // Helpers and typedefs
 template <typename T>
 using DataType = builder::DataType<T>;
-template <typename T>
-using vec2 = builder::vec2<T>;
-template <typename T>
-using vec3 = builder::vec3<T>;
-template <typename T>
-using vec4 = builder::vec4<T>;
-template <typename T>
-using mat2x2 = builder::mat2x2<T>;
-template <typename T>
-using mat3x3 = builder::mat3x3<T>;
-template <typename T>
-using mat4x4 = builder::mat4x4<T>;
 template <typename T>
 using alias = builder::alias<T>;
 
@@ -69,7 +58,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Builtin) {
     // fn main() -> @builtin(position) vec4<f32> { return vec4<f32>(); }
     Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -88,7 +77,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Missing) {
     // }
     Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -105,7 +94,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Multiple) {
     // }
     Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
-             Return(Call(ty.vec4<f32>())),
+             Return(Call<vec4<f32>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kVertex),
@@ -793,7 +782,7 @@ TEST_F(LocationAttributeTests, BadType_Output_Array) {
 
     Func(Source{{12, 34}}, "frag_main", utils::Empty, ty.array<f32, 2>(),
          utils::Vector{
-             Return(Call(ty.array<f32, 2>())),
+             Return(Call<array<f32, 2>>()),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),

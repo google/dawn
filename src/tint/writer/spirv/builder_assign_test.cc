@@ -17,7 +17,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::spirv {
 namespace {
@@ -75,7 +76,7 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
 TEST_F(BuilderTest, Assign_Var_ZeroInitializer) {
     auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
 
-    auto* val = vec3<f32>();
+    auto* val = Call<vec3<f32>>();
     auto* assign = Assign("var", val);
 
     WrapInFunction(assign);
@@ -102,7 +103,7 @@ TEST_F(BuilderTest, Assign_Var_ZeroInitializer) {
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_InitializerNestedVector) {
-    auto* init = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
+    auto* init = Call<vec3<f32>>(Call<vec2<f32>>(1_f, 2_f), 3_f);
 
     auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
 
@@ -135,7 +136,7 @@ TEST_F(BuilderTest, Assign_Var_Complex_InitializerNestedVector) {
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_Initializer) {
-    auto* init = vec3<f32>(1_f, 2_f, 3_f);
+    auto* init = Call<vec3<f32>>(1_f, 2_f, 3_f);
 
     auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
 
@@ -214,7 +215,7 @@ OpStore %9 %10
 TEST_F(BuilderTest, Assign_Vector) {
     auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
 
-    auto* val = vec3<f32>(1_f, 1_f, 3_f);
+    auto* val = Call<vec3<f32>>(1_f, 1_f, 3_f);
     auto* assign = Assign("var", val);
 
     WrapInFunction(assign);

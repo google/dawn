@@ -18,10 +18,11 @@
 
 using ::testing::HasSubstr;
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::writer::hlsl {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using create_type_func_ptr = ast::Type (*)(const ProgramBuilder::TypesBuilder& ty);
 
@@ -1133,7 +1134,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
     });
 
     SetupFunction(utils::Vector{
-        Assign(MemberAccessor("data", "b"), Call(ty.mat2x3<f32>())),
+        Assign(MemberAccessor("data", "b"), Call<mat2x3<f32>>()),
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -1330,7 +1331,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
     SetupUniformBuffer(utils::Vector{
         Member("z", ty.f32()),
-        Member("a", ty.array(ty.vec4(ty.i32()), 5_i)),
+        Member("a", ty.array<vec4<i32>, 5>()),
     });
 
     SetupFunction(utils::Vector{
@@ -1505,7 +1506,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
     SetupUniformBuffer(utils::Vector{
         Member("z", ty.f32()),
-        Member("a", ty.array(ty.vec4(ty.i32()), 5_i)),
+        Member("a", ty.array<vec4<i32>, 5>()),
     });
 
     SetupFunction(utils::Vector{
@@ -1922,7 +1923,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
 
     SetupFunction(utils::Vector{
         Assign(MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2_i), "b"),
-               vec3<f32>(1_f, 2_f, 3_f)),
+               Call<vec3<f32>>(1_f, 2_f, 3_f)),
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -1981,7 +1982,7 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
-    auto* var = Var("my_vec", ty.vec4<f32>(), vec4<f32>(1_f, 2_f, 3_f, 4_f));
+    auto* var = Var("my_vec", ty.vec4<f32>(), Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f));
     auto* expr = MemberAccessor("my_vec", "xyz");
     WrapInFunction(var, expr);
 
@@ -1991,7 +1992,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
-    auto* var = Var("my_vec", ty.vec4<f32>(), vec4<f32>(1_f, 2_f, 3_f, 4_f));
+    auto* var = Var("my_vec", ty.vec4<f32>(), Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f));
     auto* expr = MemberAccessor("my_vec", "gbr");
     WrapInFunction(var, expr);
 

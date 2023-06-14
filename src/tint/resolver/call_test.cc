@@ -18,39 +18,21 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
-// Helpers and typedefs
-template <typename T>
-using DataType = builder::DataType<T>;
-template <int N, typename T>
-using vec = builder::vec<N, T>;
-template <typename T>
-using vec2 = builder::vec2<T>;
-template <typename T>
-using vec3 = builder::vec3<T>;
-template <typename T>
-using vec4 = builder::vec4<T>;
-template <int N, int M, typename T>
-using mat = builder::mat<N, M, T>;
-template <typename T>
-using mat2x2 = builder::mat2x2<T>;
-template <typename T>
-using mat2x3 = builder::mat2x3<T>;
-template <typename T>
-using mat3x2 = builder::mat3x2<T>;
-template <typename T>
-using mat3x3 = builder::mat3x3<T>;
-template <typename T>
-using mat4x4 = builder::mat4x4<T>;
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
+
 template <typename T, int ID = 0>
 using alias = builder::alias<T, ID>;
+
 template <typename T>
 using alias1 = builder::alias1<T>;
+
 template <typename T>
 using alias2 = builder::alias2<T>;
+
 template <typename T>
 using alias3 = builder::alias3<T>;
 
@@ -63,7 +45,7 @@ struct Params {
 
 template <typename T>
 constexpr Params ParamsFor() {
-    return Params{DataType<T>::ExprFromDouble, DataType<T>::AST};
+    return Params{builder::DataType<T>::ExprFromDouble, builder::DataType<T>::AST};
 }
 
 static constexpr Params all_param_types[] = {

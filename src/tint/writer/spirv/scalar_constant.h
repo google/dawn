@@ -20,7 +20,7 @@
 #include <cstring>
 #include <functional>
 
-#include "src/tint/number.h"
+#include "src/tint/builtin/number.h"
 #include "src/tint/utils/hash.h"
 
 // Forward declarations

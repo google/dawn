@@ -25,7 +25,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 namespace {
@@ -5301,8 +5302,7 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     }
     foo_body.Push(b.Decl(b.Let("rhs", rhs_init)));
     for (int i = 0; i < 255; i++) {
-        params.Push(
-            b.Param("p" + std::to_string(i), ty.ptr(builtin::AddressSpace::kFunction, ty.i32())));
+        params.Push(b.Param("p" + std::to_string(i), ty.ptr<function, i32>()));
         if (i > 0) {
             foo_body.Push(b.Assign(b.Deref("p" + std::to_string(i)), "rhs"));
         }

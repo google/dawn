@@ -88,7 +88,7 @@ class Statement : public utils::Castable<Statement, Node> {
     /// pointer to that template argument type, otherwise a CompoundStatement
     /// pointer is returned.
     template <typename... TYPES>
-    const detail::FindFirstParentReturnType<TYPES...>* FindFirstParent() const;
+    const sem::detail::FindFirstParentReturnType<TYPES...>* FindFirstParent() const;
 
     /// @return the closest enclosing block for this statement
     const BlockStatement* Block() const;
@@ -181,8 +181,8 @@ const CompoundStatement* Statement::FindFirstParent(Pred&& pred) const {
 }
 
 template <typename... TYPES>
-const detail::FindFirstParentReturnType<TYPES...>* Statement::FindFirstParent() const {
-    using ReturnType = detail::FindFirstParentReturnType<TYPES...>;
+const sem::detail::FindFirstParentReturnType<TYPES...>* Statement::FindFirstParent() const {
+    using ReturnType = sem::detail::FindFirstParentReturnType<TYPES...>;
     if (sizeof...(TYPES) == 1) {
         if (auto* p = As<ReturnType>()) {
             return p;

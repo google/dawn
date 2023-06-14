@@ -23,7 +23,8 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 namespace {
@@ -31,32 +32,6 @@ namespace {
 // Helpers and typedefs
 template <typename T>
 using DataType = builder::DataType<T>;
-template <typename T>
-using vec2 = builder::vec2<T>;
-template <typename T>
-using vec3 = builder::vec3<T>;
-template <typename T>
-using vec4 = builder::vec4<T>;
-template <typename T>
-using mat2x2 = builder::mat2x2<T>;
-template <typename T>
-using mat2x3 = builder::mat2x3<T>;
-template <typename T>
-using mat2x4 = builder::mat2x4<T>;
-template <typename T>
-using mat3x2 = builder::mat3x2<T>;
-template <typename T>
-using mat3x3 = builder::mat3x3<T>;
-template <typename T>
-using mat3x4 = builder::mat3x4<T>;
-template <typename T>
-using mat4x2 = builder::mat4x2<T>;
-template <typename T>
-using mat4x3 = builder::mat4x3<T>;
-template <typename T>
-using mat4x4 = builder::mat4x4<T>;
-template <int N, typename T>
-using array = builder::array<N, T>;
 template <typename T>
 using alias = builder::alias<T>;
 template <typename T>
@@ -331,7 +306,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatConst) {
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecConst) {
     // const size = vec2<i32>(100, 100);
     // var<private> a : array<f32, size>;
-    GlobalConst("size", Call(ty.vec2<i32>(), 100_i, 100_i));
+    GlobalConst("size", Call<vec2<i32>>(100_i, 100_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
               builtin::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
@@ -881,7 +856,7 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableTypeWithStride) {
-    auto ptr_ty = ty.ptr<u32>(Source{{12, 34}}, builtin::AddressSpace::kUniform);
+    auto ptr_ty = ty.ptr<uniform, u32>(Source{{12, 34}});
     GlobalVar("arr", ty.array(ptr_ty, 4_i, utils::Vector{Stride(16)}),
               builtin::AddressSpace::kPrivate);
 
@@ -1305,8 +1280,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                                          ParamsFor<mat2x2<f16>>(3, 2),
                                          ParamsFor<mat3x3<f16>>(3, 3),
                                          ParamsFor<mat4x4<f16>>(3, 4),
-                                         ParamsFor<array<2, f32>>(4, 2),
-                                         ParamsFor<array<2, f16>>(4, 2)));
+                                         ParamsFor<array<f32, 2>>(4, 2),
+                                         ParamsFor<array<f16, 2>>(4, 2)));
 }  // namespace MatrixTests
 
 namespace VectorTests {
@@ -1366,8 +1341,7 @@ TEST_P(InvalidVectorElementTypes, InvalidElementType) {
               builtin::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: vector element type must be 'bool', 'f32', 'f16', 'i32' "
-              "or 'u32'");
+              "12:34 error: vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32'");
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          InvalidVectorElementTypes,
@@ -1377,7 +1351,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                                          ParamsFor<mat2x2<f32>>(2),
                                          ParamsFor<mat3x3<f16>>(2),
                                          ParamsFor<mat4x4<f32>>(2),
-                                         ParamsFor<array<2, f32>>(2)));
+                                         ParamsFor<array<f32, 2>>(2)));
 }  // namespace VectorTests
 
 namespace BuiltinTypeAliasTests {

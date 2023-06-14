@@ -17,10 +17,11 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverF16ExtensionTest = ResolverTest;
 
@@ -65,7 +66,7 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeInitUsedWithExtension) {
     // var<private> v = vec2<f16>();
     Enable(builtin::Extension::kF16);
 
-    GlobalVar("v", vec2<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("v", Call<vec2<f16>>(), builtin::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -83,14 +84,15 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeConvUsedWithExtension) {
     // var<private> v = vec2<f16>(vec2<f32>());
     Enable(builtin::Extension::kF16);
 
-    GlobalVar("v", vec2<f16>(vec2<f32>()), builtin::AddressSpace::kPrivate);
+    GlobalVar("v", Call<vec2<f16>>(Call<vec2<f32>>()), builtin::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverF16ExtensionTest, Vec2TypeConvUsedWithoutExtension) {
     // var<private> v = vec2<f16>(vec2<f32>());
-    GlobalVar("v", vec2(ty.f16(Source{{12, 34}}), vec2<f32>()), builtin::AddressSpace::kPrivate);
+    GlobalVar("v", Call(ty.vec2(ty.f16(Source{{12, 34}})), Call<vec2<f32>>()),
+              builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: f16 type used without 'f16' extension enabled");

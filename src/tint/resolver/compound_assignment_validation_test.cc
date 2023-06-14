@@ -18,12 +18,12 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/storage_texture.h"
 
-using ::testing::HasSubstr;
-
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using ::testing::HasSubstr;
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverCompoundAssignmentValidationTest = ResolverTest;
 
@@ -51,9 +51,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypesAssignThroughPoi
     // var a : i32;
     // let b : ptr<function,i32> = &a;
     // *b += 2;
-    const auto func = builtin::AddressSpace::kFunction;
-    auto* var_a = Var("a", ty.i32(), func, Expr(2_i));
-    auto* var_b = Let("b", ty.ptr<i32>(func), AddressOf(Expr("a")));
+    auto* var_a = Var("a", ty.i32(), builtin::AddressSpace::kFunction, Expr(2_i));
+    auto* var_b = Let("b", ty.ptr<function, i32>(), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b,
                    CompoundAssign(Source{{12, 34}}, Deref("b"), 2_i, ast::BinaryOp::kAdd));
 
@@ -116,7 +115,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ScalarVector_Fail) {
 
     auto* var = Var("a", ty.f32());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", vec4<f32>(), ast::BinaryOp::kAdd);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", Call<vec4<f32>>(), ast::BinaryOp::kAdd);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -146,7 +145,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ScalarMatrix_Fail) {
 
     auto* var = Var("a", ty.f32());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", mat4x4<f32>(), ast::BinaryOp::kMultiply);
+    auto* assign =
+        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x4<f32>>(), ast::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -162,7 +162,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorMatrix_Pass) {
 
     auto* var = Var("a", ty.vec4<f32>());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", mat4x4<f32>(), ast::BinaryOp::kMultiply);
+    auto* assign =
+        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x4<f32>>(), ast::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -176,7 +177,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorMatrix_ColumnMismatch) {
 
     auto* var = Var("a", ty.vec4<f32>());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", mat4x2<f32>(), ast::BinaryOp::kMultiply);
+    auto* assign =
+        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x2<f32>>(), ast::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -194,7 +196,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorMatrix_ResultMismatch) {
 
     auto* var = Var("a", ty.vec4<f32>());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", mat2x4<f32>(), ast::BinaryOp::kMultiply);
+    auto* assign =
+        CompoundAssign(Source{{12, 34}}, "a", Call<mat2x4<f32>>(), ast::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -210,7 +213,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, MatrixVector_Fail) {
 
     auto* var = Var("a", ty.mat4x4<f32>());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", vec4<f32>(), ast::BinaryOp::kMultiply);
+    auto* assign =
+        CompoundAssign(Source{{12, 34}}, "a", Call<vec4<f32>>(), ast::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());

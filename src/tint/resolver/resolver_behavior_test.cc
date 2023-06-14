@@ -22,10 +22,11 @@
 #include "src/tint/sem/value_expression.h"
 #include "src/tint/sem/while_statement.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 class ResolverBehaviorTest : public ResolverTest {
   protected:
@@ -82,7 +83,7 @@ TEST_F(ResolverBehaviorTest, ExprIndex_Arr) {
     Func("ArrayDiscardOrNext", utils::Empty, ty.array<i32, 4>(),
          utils::Vector{
              If(true, Block(Discard())),
-             Return(array<i32, 4>()),
+             Return(Call<array<i32, 4>>()),
          });
 
     auto* stmt = Decl(Var("lhs", ty.i32(), IndexAccessor(Call("ArrayDiscardOrNext"), 1_i)));

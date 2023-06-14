@@ -36,15 +36,16 @@ namespace tint::resolver {
 namespace {
 
 using ::testing::HasSubstr;
+using namespace tint::builtin::fluent_types;  // NOLINT
 
 using Parameter = sem::Parameter;
 using ParameterUsage = sem::ParameterUsage;
 
-using AFloatV = builder::vec<3, AFloat>;
-using AIntV = builder::vec<3, AInt>;
-using f32V = builder::vec<3, f32>;
-using i32V = builder::vec<3, i32>;
-using u32V = builder::vec<3, u32>;
+using AFloatV = vec3<AFloat>;
+using AIntV = vec3<AInt>;
+using f32V = vec3<f32>;
+using i32V = vec3<i32>;
+using u32V = vec3<u32>;
 
 class IntrinsicTableTest : public testing::Test, public ProgramBuilder {
   public:

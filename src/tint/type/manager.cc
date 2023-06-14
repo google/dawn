@@ -158,7 +158,7 @@ const type::Array* Manager::runtime_array(const type::Type* elem_ty, uint32_t st
 
 const type::Pointer* Manager::ptr(builtin::AddressSpace address_space,
                                   const type::Type* subtype,
-                                  builtin::Access access) {
+                                  builtin::Access access /* = builtin::Access::kReadWrite */) {
     return Get<type::Pointer>(address_space, subtype, access);
 }
 

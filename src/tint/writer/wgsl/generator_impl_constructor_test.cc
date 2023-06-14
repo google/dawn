@@ -18,10 +18,11 @@
 
 using ::testing::HasSubstr;
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::writer::wgsl {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using WgslGeneratorImplTest_Constructor = TestHelper;
 
@@ -129,7 +130,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Uint) {
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Vec_F32) {
-    WrapInFunction(vec3<f32>(1_f, 2_f, 3_f));
+    WrapInFunction(Call<vec3<f32>>(1_f, 2_f, 3_f));
 
     GeneratorImpl& gen = Build();
 
@@ -141,7 +142,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Vec_F32) {
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Vec_F16) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(vec3<f16>(1_h, 2_h, 3_h));
+    WrapInFunction(Call<vec3<f16>>(1_h, 2_h, 3_h));
 
     GeneratorImpl& gen = Build();
 
@@ -151,7 +152,8 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Vec_F16) {
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Mat_F32) {
-    WrapInFunction(mat2x3<f32>(vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(3_f, 4_f, 5_f)));
+    WrapInFunction(
+        Call<mat2x3<f32>>(Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(3_f, 4_f, 5_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -164,7 +166,8 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Mat_F32) {
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Mat_F16) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(mat2x3<f16>(vec3<f16>(1_h, 2_h, 3_h), vec3<f16>(3_h, 4_h, 5_h)));
+    WrapInFunction(
+        Call<mat2x3<f16>>(Call<vec3<f16>>(1_h, 2_h, 3_h), Call<vec3<f16>>(3_h, 4_h, 5_h)));
 
     GeneratorImpl& gen = Build();
 
@@ -175,8 +178,8 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Mat_F16) {
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Array) {
-    WrapInFunction(Call(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
-                        vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
+    WrapInFunction(Call(ty.array<vec3<f32>, 3>(), Call<vec3<f32>>(1_f, 2_f, 3_f),
+                        Call<vec3<f32>>(4_f, 5_f, 6_f), Call<vec3<f32>>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -188,8 +191,8 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Array) {
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_ImplicitArray) {
-    WrapInFunction(Call(ty.array<Infer>(), vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f),
-                        vec3<f32>(7_f, 8_f, 9_f)));
+    WrapInFunction(Call(ty.array<Infer>(), Call<vec3<f32>>(1_f, 2_f, 3_f),
+                        Call<vec3<f32>>(4_f, 5_f, 6_f), Call<vec3<f32>>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 

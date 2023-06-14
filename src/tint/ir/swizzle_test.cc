@@ -18,6 +18,8 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
+using namespace tint::builtin::fluent_types;  // NOLINT
+
 namespace tint::ir {
 namespace {
 

@@ -94,7 +94,8 @@ struct CanReinterpretSlice<MODE, T, T> {
 ///  * `FROM` and `TO` are pointers to CastableBase (or derived), and the pointee type of `TO` is of
 ///     the same type as, or is an ancestor of the pointee type of `FROM`.
 template <ReinterpretMode MODE, typename TO, typename FROM>
-static constexpr bool CanReinterpretSlice = detail::CanReinterpretSlice<MODE, TO, FROM>::value;
+static constexpr bool CanReinterpretSlice =
+    utils::detail::CanReinterpretSlice<MODE, TO, FROM>::value;
 
 /// A slice represents a contigious array of elements of type T.
 template <typename T>

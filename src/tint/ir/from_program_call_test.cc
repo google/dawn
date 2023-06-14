@@ -21,7 +21,8 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using IR_FromProgramCallTest = ProgramTestHelper;
 
@@ -92,7 +93,7 @@ TEST_F(IR_FromProgramCallTest, EmitStatement_UserFunction) {
 
 TEST_F(IR_FromProgramCallTest, EmitExpression_Convert) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_i));
-    auto* expr = Call(ty.f32(), i);
+    auto* expr = Call<f32>(i);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -114,7 +115,7 @@ TEST_F(IR_FromProgramCallTest, EmitExpression_Convert) {
 }
 
 TEST_F(IR_FromProgramCallTest, EmitExpression_ConstructEmpty) {
-    auto* expr = vec3(ty.f32());
+    auto* expr = Call<vec3<f32>>();
     GlobalVar("i", builtin::AddressSpace::kPrivate, expr);
 
     auto m = Build();
@@ -130,7 +131,7 @@ TEST_F(IR_FromProgramCallTest, EmitExpression_ConstructEmpty) {
 
 TEST_F(IR_FromProgramCallTest, EmitExpression_Construct) {
     auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
-    auto* expr = vec3(ty.f32(), 2_f, 3_f, i);
+    auto* expr = Call<vec3<f32>>(2_f, 3_f, i);
     WrapInFunction(expr);
 
     auto m = Build();

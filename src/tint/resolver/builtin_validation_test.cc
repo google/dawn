@@ -19,7 +19,8 @@
 #include "src/tint/sem/value_constructor.h"
 #include "src/tint/utils/string_stream.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 namespace {
@@ -250,10 +251,10 @@ class Constexpr {
                               i32(values[2]));
             case Kind::kVec3_Scalar_Vec2:
                 return b.Call(src, b.ty.vec3<i32>(), i32(values[0]),
-                              b.vec2<i32>(i32(values[1]), i32(values[2])));
+                              b.Call<vec2<i32>>(i32(values[1]), i32(values[2])));
             case Kind::kVec3_Vec2_Scalar:
-                return b.Call(src, b.ty.vec3<i32>(), b.vec2<i32>(i32(values[0]), i32(values[1])),
-                              i32(values[2]));
+                return b.Call(src, b.ty.vec3<i32>(),
+                              b.Call<vec2<i32>>(i32(values[0]), i32(values[1])), i32(values[2]));
             case Kind::kEmptyVec2:
                 return b.Call(src, b.ty.vec2<i32>());
             case Kind::kEmptyVec3:

@@ -25,8 +25,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "src/tint/builtin/number.h"
 #include "src/tint/debug.h"
-#include "src/tint/number.h"
 #include "src/tint/utils/parse_num.h"
 #include "src/tint/utils/unicode.h"
 

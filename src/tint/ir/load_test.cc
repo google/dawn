@@ -21,14 +21,14 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using IR_LoadTest = IRTestHelper;
 
 TEST_F(IR_LoadTest, Create) {
     auto* store_type = ty.i32();
-    auto* var =
-        b.Var(ty.ptr(builtin::AddressSpace::kFunction, store_type, builtin::Access::kReadWrite));
+    auto* var = b.Var(ty.ptr<function, i32>());
     auto* inst = b.Load(var);
 
     ASSERT_TRUE(inst->Is<Load>());
@@ -41,9 +41,7 @@ TEST_F(IR_LoadTest, Create) {
 }
 
 TEST_F(IR_LoadTest, Usage) {
-    auto* store_type = ty.i32();
-    auto* var =
-        b.Var(ty.ptr(builtin::AddressSpace::kFunction, store_type, builtin::Access::kReadWrite));
+    auto* var = b.Var(ty.ptr<function, i32>());
     auto* inst = b.Load(var);
 
     ASSERT_NE(inst->From(), nullptr);
@@ -71,13 +69,7 @@ TEST_F(IR_LoadTest, Fail_NullValue_Builder) {
 }
 
 TEST_F(IR_LoadTest, Fail_NullValue) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            Load l(nullptr);
-        },
-        "");
+    EXPECT_FATAL_FAILURE({ Load l(nullptr); }, "");
 }
 
 }  // namespace

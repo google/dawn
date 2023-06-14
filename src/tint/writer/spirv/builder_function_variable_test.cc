@@ -15,7 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::spirv {
 namespace {
@@ -44,7 +45,7 @@ TEST_F(BuilderTest, FunctionVar_NoAddressSpace) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithConstantInitializer) {
-    auto* init = vec3<f32>(1_f, 1_f, 3_f);
+    auto* init = Call<vec3<f32>>(1_f, 1_f, 3_f);
     auto* v = Var("var", ty.vec3<f32>(), builtin::AddressSpace::kFunction, init);
     WrapInFunction(v);
 
@@ -74,7 +75,7 @@ TEST_F(BuilderTest, FunctionVar_WithConstantInitializer) {
 
 TEST_F(BuilderTest, FunctionVar_WithNonConstantInitializer) {
     auto* a = Let("a", Expr(3_f));
-    auto* init = vec2<f32>(1_f, Add(Expr("a"), 3_f));
+    auto* init = Call<vec2<f32>>(1_f, Add(Expr("a"), 3_f));
 
     auto* v = Var("var", ty.vec2<f32>(), init);
     WrapInFunction(a, v);
@@ -207,7 +208,7 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
 }
 
 TEST_F(BuilderTest, FunctionVar_Let) {
-    auto* init = vec3<f32>(1_f, 1_f, 3_f);
+    auto* init = Call<vec3<f32>>(1_f, 1_f, 3_f);
 
     auto* v = Let("var", ty.vec3<f32>(), init);
 
@@ -227,7 +228,7 @@ TEST_F(BuilderTest, FunctionVar_Let) {
 }
 
 TEST_F(BuilderTest, FunctionVar_Const) {
-    auto* init = vec3<f32>(1_f, 1_f, 3_f);
+    auto* init = Call<vec3<f32>>(1_f, 1_f, 3_f);
 
     auto* v = Const("var", ty.vec3<f32>(), init);
 

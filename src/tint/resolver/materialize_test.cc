@@ -21,26 +21,27 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
 
-using AFloatV = builder::vec<3, AFloat>;
-using AFloatM = builder::mat<3, 2, AFloat>;
-using AFloatA = builder::array<3, AFloat>;
-using AIntV = builder::vec<3, AInt>;
-using AIntA = builder::array<3, AInt>;
-using f32V = builder::vec<3, f32>;
-using f16V = builder::vec<3, f16>;
-using i32V = builder::vec<3, i32>;
-using u32V = builder::vec<3, u32>;
-using f32M = builder::mat<3, 2, f32>;
-using f16M = builder::mat<3, 2, f16>;
-using f32A = builder::array<3, f32>;
-using f16A = builder::array<3, f16>;
-using i32A = builder::array<3, i32>;
-using u32A = builder::array<3, u32>;
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
+
+using AFloatV = vec3<AFloat>;
+using AFloatM = mat3x2<AFloat>;
+using AFloatA = array<AFloat, 3>;
+using AIntV = vec3<AInt>;
+using AIntA = array<AInt, 3>;
+using f32V = vec3<f32>;
+using f16V = vec3<f16>;
+using i32V = vec3<i32>;
+using u32V = vec3<u32>;
+using f32M = mat3x2<f32>;
+using f16M = mat3x2<f16>;
+using f32A = array<f32, 3>;
+using f16A = array<f16, 3>;
+using i32A = array<i32, 3>;
+using u32A = array<u32, 3>;
 
 constexpr double kTooBigF32 = static_cast<double>(3.5e+38);
 constexpr double kTooBigF16 = static_cast<double>(6.6e+4);
@@ -1276,7 +1277,7 @@ TEST_F(MaterializeAbstractStructure, Modf_Scalar_DefaultType) {
 
 TEST_F(MaterializeAbstractStructure, Modf_Vector_DefaultType) {
     // var v = modf(vec2(1));
-    auto* call = Call("modf", Call(ty.vec2<Infer>(), 1_a));
+    auto* call = Call("modf", Call<vec2<Infer>>(1_a));
     WrapInFunction(Decl(Var("v", call)));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(call);
@@ -1316,8 +1317,8 @@ TEST_F(MaterializeAbstractStructure, Modf_Vector_ExplicitType) {
     // var v = modf(vec2(1_h)); // v is __modf_result_vec2_f16
     // v = modf(vec2(1));       // __modf_result_vec2_f16 <- __modf_result_vec2_abstract
     Enable(builtin::Extension::kF16);
-    auto* call = Call("modf", Call(ty.vec2<Infer>(), 1_a));
-    WrapInFunction(Decl(Var("v", Call("modf", Call(ty.vec2<Infer>(), 1_h)))), Assign("v", call));
+    auto* call = Call("modf", Call<vec2<Infer>>(1_a));
+    WrapInFunction(Decl(Var("v", Call("modf", Call<vec2<Infer>>(1_h)))), Assign("v", call));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(call);
     ASSERT_TRUE(sem->Is<sem::Materialize>());
@@ -1353,7 +1354,7 @@ TEST_F(MaterializeAbstractStructure, Frexp_Scalar_DefaultType) {
 
 TEST_F(MaterializeAbstractStructure, Frexp_Vector_DefaultType) {
     // var v = frexp(vec2(1));
-    auto* call = Call("frexp", Call(ty.vec2<Infer>(), 1_a));
+    auto* call = Call("frexp", Call<vec2<Infer>>(1_a));
     WrapInFunction(Decl(Var("v", call)));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(call);
@@ -1399,8 +1400,8 @@ TEST_F(MaterializeAbstractStructure, Frexp_Vector_ExplicitType) {
     // var v = frexp(vec2(1_h)); // v is __frexp_result_vec2_f16
     // v = frexp(vec2(1));       // __frexp_result_vec2_f16 <- __frexp_result_vec2_abstract
     Enable(builtin::Extension::kF16);
-    auto* call = Call("frexp", Call(ty.vec2<Infer>(), 1_a));
-    WrapInFunction(Decl(Var("v", Call("frexp", Call(ty.vec2<Infer>(), 1_h)))), Assign("v", call));
+    auto* call = Call("frexp", Call<vec2<Infer>>(1_a));
+    WrapInFunction(Decl(Var("v", Call("frexp", Call<vec2<Infer>>(1_h)))), Assign("v", call));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(call);
     ASSERT_TRUE(sem->Is<sem::Materialize>());

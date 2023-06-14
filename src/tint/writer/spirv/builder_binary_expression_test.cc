@@ -15,7 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::spirv {
 namespace {
@@ -66,8 +67,8 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
         return;
     }
 
-    auto* lhs = vec3<i32>(1_i, 1_i, 1_i);
-    auto* rhs = vec3<i32>(1_i, 1_i, 1_i);
+    auto* lhs = Call<vec3<i32>>(1_i, 1_i, 1_i);
+    auto* rhs = Call<vec3<i32>>(1_i, 1_i, 1_i);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -159,8 +160,8 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
         return;
     }
 
-    auto* lhs = vec3<u32>(1_u, 1_u, 1_u);
-    auto* rhs = vec3<u32>(1_u, 1_u, 1_u);
+    auto* lhs = Call<vec3<u32>>(1_u, 1_u, 1_u);
+    auto* rhs = Call<vec3<u32>>(1_u, 1_u, 1_u);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -220,8 +221,8 @@ TEST_P(BinaryArithF32Test, Scalar) {
 TEST_P(BinaryArithF32Test, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
-    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
+    auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -279,8 +280,8 @@ TEST_P(BinaryArithF16Test, Vector) {
 
     auto param = GetParam();
 
-    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
-    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
+    auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -334,8 +335,8 @@ TEST_P(BinaryOperatorBoolTest, Scalar) {
 TEST_P(BinaryOperatorBoolTest, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<bool>(false, true, false);
-    auto* rhs = vec3<bool>(true, false, true);
+    auto* lhs = Call<vec3<bool>>(false, true, false);
+    auto* rhs = Call<vec3<bool>>(true, false, true);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -391,8 +392,8 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
 TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<u32>(1_u, 1_u, 1_u);
-    auto* rhs = vec3<u32>(1_u, 1_u, 1_u);
+    auto* lhs = Call<vec3<u32>>(1_u, 1_u, 1_u);
+    auto* rhs = Call<vec3<u32>>(1_u, 1_u, 1_u);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -451,8 +452,8 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
 TEST_P(BinaryCompareSignedIntegerTest, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<i32>(1_i, 1_i, 1_i);
-    auto* rhs = vec3<i32>(1_i, 1_i, 1_i);
+    auto* lhs = Call<vec3<i32>>(1_i, 1_i, 1_i);
+    auto* rhs = Call<vec3<i32>>(1_i, 1_i, 1_i);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -511,8 +512,8 @@ TEST_P(BinaryCompareF32Test, Scalar) {
 TEST_P(BinaryCompareF32Test, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
-    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
+    auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -575,8 +576,8 @@ TEST_P(BinaryCompareF16Test, Vector) {
 
     auto param = GetParam();
 
-    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
-    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
+    auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -608,7 +609,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{ast::BinaryOp::kNotEqual, "OpFOrdNotEqual"}));
 
 TEST_F(BuilderTest, Binary_Multiply_VectorScalar_F32) {
-    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
     auto* rhs = Expr(1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -633,7 +634,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar_F32) {
 TEST_F(BuilderTest, Binary_Multiply_VectorScalar_F16) {
     Enable(builtin::Extension::kF16);
 
-    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
     auto* rhs = Expr(1_h);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -657,7 +658,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar_F16) {
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarVector_F32) {
     auto* lhs = Expr(1_f);
-    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -682,7 +683,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector_F16) {
     Enable(builtin::Extension::kF16);
 
     auto* lhs = Expr(1_h);
-    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -813,7 +814,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix_F16) {
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F32) {
     auto* var = Var("mat", ty.mat3x3<f32>());
-    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), rhs);
 
     WrapInFunction(var, expr);
@@ -843,7 +844,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F16) {
     Enable(builtin::Extension::kF16);
 
     auto* var = Var("mat", ty.mat3x3<f16>());
-    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), rhs);
 
     WrapInFunction(var, expr);
@@ -871,7 +872,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F16) {
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix_F32) {
     auto* var = Var("mat", ty.mat3x3<f32>());
-    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, Expr("mat"));
 
     WrapInFunction(var, expr);
@@ -901,7 +902,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix_F16) {
     Enable(builtin::Extension::kF16);
 
     auto* var = Var("mat", ty.mat3x3<f16>());
-    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, Expr("mat"));
 
@@ -1252,19 +1253,23 @@ static const ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type)
     auto name = builder->Symbols().New();
     switch (type) {
         case Type::f32:
-            builder->GlobalVar(name, builder->ty.vec3<f32>(), builder->vec3<f32>(1_f, 1_f, 1_f),
+            builder->GlobalVar(name, builder->ty.vec3<f32>(),
+                               builder->Call<vec3<f32>>(1_f, 1_f, 1_f),
                                builtin::AddressSpace::kPrivate);
             break;
         case Type::f16:
-            builder->GlobalVar(name, builder->ty.vec3<f16>(), builder->vec3<f16>(1_h, 1_h, 1_h),
+            builder->GlobalVar(name, builder->ty.vec3<f16>(),
+                               builder->Call<vec3<f16>>(1_h, 1_h, 1_h),
                                builtin::AddressSpace::kPrivate);
             break;
         case Type::i32:
-            builder->GlobalVar(name, builder->ty.vec3<i32>(), builder->vec3<i32>(1_i, 1_i, 1_i),
+            builder->GlobalVar(name, builder->ty.vec3<i32>(),
+                               builder->Call<vec3<i32>>(1_i, 1_i, 1_i),
                                builtin::AddressSpace::kPrivate);
             break;
         case Type::u32:
-            builder->GlobalVar(name, builder->ty.vec3<u32>(), builder->vec3<u32>(1_u, 1_u, 1_u),
+            builder->GlobalVar(name, builder->ty.vec3<u32>(),
+                               builder->Call<vec3<u32>>(1_u, 1_u, 1_u),
                                builtin::AddressSpace::kPrivate);
             break;
     }
@@ -1581,11 +1586,11 @@ static const ast::Expression* MakeMat3x4Expr(ProgramBuilder* builder, Type type)
     auto name = builder->Symbols().New();
     switch (type) {
         case Type::f32:
-            builder->GlobalVar(name, builder->ty.mat3x4<f32>(), builder->mat3x4<f32>(),
+            builder->GlobalVar(name, builder->ty.mat3x4<f32>(), builder->Call<mat3x4<f32>>(),
                                builtin::AddressSpace::kPrivate);
             break;
         case Type::f16:
-            builder->GlobalVar(name, builder->ty.mat3x4<f16>(), builder->mat3x4<f16>(),
+            builder->GlobalVar(name, builder->ty.mat3x4<f16>(), builder->Call<mat3x4<f16>>(),
                                builtin::AddressSpace::kPrivate);
             break;
     }
@@ -1595,11 +1600,11 @@ static const ast::Expression* MakeMat4x3Expr(ProgramBuilder* builder, Type type)
     auto name = builder->Symbols().New();
     switch (type) {
         case Type::f32:
-            builder->GlobalVar(name, builder->ty.mat4x3<f32>(), builder->mat4x3<f32>(),
+            builder->GlobalVar(name, builder->ty.mat4x3<f32>(), builder->Call<mat4x3<f32>>(),
                                builtin::AddressSpace::kPrivate);
             break;
         case Type::f16:
-            builder->GlobalVar(name, builder->ty.mat4x3<f16>(), builder->mat4x3<f16>(),
+            builder->GlobalVar(name, builder->ty.mat4x3<f16>(), builder->Call<mat4x3<f16>>(),
                                builtin::AddressSpace::kPrivate);
     }
     return builder->Expr(name);

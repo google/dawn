@@ -19,10 +19,11 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::writer::glsl {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using GlslSanitizerTest = TestHelper;
 
@@ -149,7 +150,7 @@ void main() {
 }
 
 TEST_F(GlslSanitizerTest, PromoteArrayInitializerToConstVar) {
-    auto* array_init = array<i32, 4>(1_i, 2_i, 3_i, 4_i);
+    auto* array_init = Call<array<i32, 4>>(1_i, 2_i, 3_i, 4_i);
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -189,7 +190,7 @@ TEST_F(GlslSanitizerTest, PromoteStructInitializerToConstVar) {
                                    Member("c", ty.i32()),
                                });
     auto* runtime_value = Var("runtime_value", Expr(3_f));
-    auto* struct_init = Call(ty.Of(str), 1_i, vec3<f32>(2_f, runtime_value, 4_f), 4_i);
+    auto* struct_init = Call(ty.Of(str), 1_i, Call<vec3<f32>>(2_f, runtime_value, 4_f), 4_i);
     auto* struct_access = MemberAccessor(struct_init, "b");
     auto* pos = Var("pos", ty.vec3<f32>(), struct_access);
 
@@ -235,7 +236,7 @@ TEST_F(GlslSanitizerTest, SimplifyPointersBasic) {
     // let p : ptr<function, i32> = &v;
     // let x : i32 = *p;
     auto* v = Var("v", ty.i32());
-    auto* p = Let("p", ty.ptr<i32>(builtin::AddressSpace::kFunction), AddressOf(v));
+    auto* p = Let("p", ty.ptr<function, i32>(), AddressOf(v));
     auto* x = Var("x", ty.i32(), Deref(p));
 
     Func("main", utils::Empty, ty.void_(),
@@ -276,12 +277,9 @@ TEST_F(GlslSanitizerTest, SimplifyPointersComplexChain) {
     // let vp : ptr<function, vec4<f32>> = &(*mp)[2i];
     // let v : vec4<f32> = *vp;
     auto* a = Var("a", ty.array(ty.mat4x4<f32>(), 4_u));
-    auto* ap = Let("ap", ty.ptr(builtin::AddressSpace::kFunction, ty.array(ty.mat4x4<f32>(), 4_u)),
-                   AddressOf(a));
-    auto* mp = Let("mp", ty.ptr(builtin::AddressSpace::kFunction, ty.mat4x4<f32>()),
-                   AddressOf(IndexAccessor(Deref(ap), 3_i)));
-    auto* vp = Let("vp", ty.ptr(builtin::AddressSpace::kFunction, ty.vec4<f32>()),
-                   AddressOf(IndexAccessor(Deref(mp), 2_i)));
+    auto* ap = Let("ap", ty.ptr<function, array<mat4x4<f32>, 4>>(), AddressOf(a));
+    auto* mp = Let("mp", ty.ptr<function, mat4x4<f32>>(), AddressOf(IndexAccessor(Deref(ap), 3_i)));
+    auto* vp = Let("vp", ty.ptr<function, vec4<f32>>(), AddressOf(IndexAccessor(Deref(mp), 2_i)));
     auto* v = Var("v", ty.vec4<f32>(), Deref(vp));
 
     Func("main", utils::Empty, ty.void_(),

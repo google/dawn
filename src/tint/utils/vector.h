@@ -571,7 +571,7 @@ struct VectorCommonType</*IS_CASTABLE*/ true, Ts...> {
 /// Helper for determining the Vector element type (`T`) from the vector's constuctor arguments
 template <typename... Ts>
 using VectorCommonType =
-    typename detail::VectorCommonType<IsCastable<std::remove_pointer_t<Ts>...>, Ts...>::type;
+    typename utils::detail::VectorCommonType<IsCastable<std::remove_pointer_t<Ts>...>, Ts...>::type;
 
 /// Deduction guide for Vector
 template <typename... Ts>
@@ -792,7 +792,7 @@ struct IsVectorLike<utils::VectorRef<T>> {
 
 /// True if T is a Vector<T, N> or VectorRef<T>
 template <typename T>
-static constexpr bool IsVectorLike = detail::IsVectorLike<T>::value;
+static constexpr bool IsVectorLike = utils::detail::IsVectorLike<T>::value;
 
 }  // namespace tint::utils
 

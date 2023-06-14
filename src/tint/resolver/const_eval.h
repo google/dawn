@@ -18,7 +18,7 @@
 #include <stddef.h>
 #include <string>
 
-#include "src/tint/number.h"
+#include "src/tint/builtin/number.h"
 #include "src/tint/type/type.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/vector.h"

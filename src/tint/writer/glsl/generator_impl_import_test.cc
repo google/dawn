@@ -17,10 +17,11 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::writer::glsl {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using GlslGeneratorImplTest_Import = TestHelper;
 
@@ -95,7 +96,7 @@ using GlslImportData_SingleVectorParamTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_SingleVectorParamTest, FloatVector) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(0.1_f, 0.2_f, 0.3_f));
+    auto* expr = Call(param.name, Call<vec3<f32>>(0.1_f, 0.2_f, 0.3_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -162,7 +163,7 @@ using GlslImportData_DualParam_VectorTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_DualParam_VectorTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f));
+    auto* expr = Call(param.name, Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(4_f, 5_f, 6_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -227,8 +228,8 @@ using GlslImportData_TripleParam_VectorTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_TripleParam_VectorTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f),
-                      vec3<f32>(7_f, 8_f, 9_f));
+    auto* expr = Call(param.name, Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(4_f, 5_f, 6_f),
+                      Call<vec3<f32>>(7_f, 8_f, 9_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();

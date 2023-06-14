@@ -19,10 +19,11 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::writer::spirv {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using BuilderTest = TestHelper;
 
@@ -61,7 +62,7 @@ TEST_P(Attribute_StageTest, Emit) {
     if (params.stage == ast::PipelineStage::kVertex) {
         ret_type = ty.vec4<f32>();
         ret_type_attrs.Push(Builtin(builtin::BuiltinValue::kPosition));
-        body.Push(Return(Call(ty.vec4<f32>())));
+        body.Push(Return(Call<vec4<f32>>()));
     }
 
     utils::Vector<const ast::Attribute*, 2> deco_list{Stage(params.stage)};

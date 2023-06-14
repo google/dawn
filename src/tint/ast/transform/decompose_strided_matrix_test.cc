@@ -24,7 +24,8 @@
 #include "src/tint/ast/transform/unshadow.h"
 #include "src/tint/program_builder.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::ast::transform {
 namespace {
@@ -356,15 +357,16 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
                          });
     b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
-    b.Func("f", utils::Empty, b.ty.void_(),
-           utils::Vector{
-               b.Assign(b.MemberAccessor("s", "m"),
-                        b.mat2x2<f32>(b.vec2<f32>(1_f, 2_f), b.vec2<f32>(3_f, 4_f))),
-           },
-           utils::Vector{
-               b.Stage(PipelineStage::kCompute),
-               b.WorkgroupSize(1_i),
-           });
+    b.Func(
+        "f", utils::Empty, b.ty.void_(),
+        utils::Vector{
+            b.Assign(b.MemberAccessor("s", "m"),
+                     b.Call<mat2x2<f32>>(b.Call<vec2<f32>>(1_f, 2_f), b.Call<vec2<f32>>(3_f, 4_f))),
+        },
+        utils::Vector{
+            b.Stage(PipelineStage::kCompute),
+            b.WorkgroupSize(1_i),
+        });
 
     auto* expect = R"(
 struct S {
@@ -415,14 +417,15 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
                          });
     b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
-    b.Func("f", utils::Empty, b.ty.void_(),
-           utils::Vector{
-               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "m"), 1_i), b.vec2<f32>(1_f, 2_f)),
-           },
-           utils::Vector{
-               b.Stage(PipelineStage::kCompute),
-               b.WorkgroupSize(1_i),
-           });
+    b.Func(
+        "f", utils::Empty, b.ty.void_(),
+        utils::Vector{
+            b.Assign(b.IndexAccessor(b.MemberAccessor("s", "m"), 1_i), b.Call<vec2<f32>>(1_f, 2_f)),
+        },
+        utils::Vector{
+            b.Stage(PipelineStage::kCompute),
+            b.WorkgroupSize(1_i),
+        });
 
     auto* expect = R"(
 struct S {
@@ -482,8 +485,9 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
                b.Decl(b.Let("x", b.Deref("b"))),
                b.Decl(b.Let("y", b.IndexAccessor(b.Deref("b"), 1_i))),
                b.Decl(b.Let("z", b.IndexAccessor("x", 1_i))),
-               b.Assign(b.Deref("b"), b.mat2x2<f32>(b.vec2<f32>(1_f, 2_f), b.vec2<f32>(3_f, 4_f))),
-               b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), b.vec2<f32>(5_f, 6_f)),
+               b.Assign(b.Deref("b"), b.Call<mat2x2<f32>>(b.Call<vec2<f32>>(1_f, 2_f),
+                                                          b.Call<vec2<f32>>(3_f, 4_f))),
+               b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), b.Call<vec2<f32>>(5_f, 6_f)),
            },
            utils::Vector{
                b.Stage(PipelineStage::kCompute),
@@ -600,15 +604,16 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
                                       }),
                          });
     b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kPrivate);
-    b.Func("f", utils::Empty, b.ty.void_(),
-           utils::Vector{
-               b.Assign(b.MemberAccessor("s", "m"),
-                        b.mat2x2<f32>(b.vec2<f32>(1_f, 2_f), b.vec2<f32>(3_f, 4_f))),
-           },
-           utils::Vector{
-               b.Stage(PipelineStage::kCompute),
-               b.WorkgroupSize(1_i),
-           });
+    b.Func(
+        "f", utils::Empty, b.ty.void_(),
+        utils::Vector{
+            b.Assign(b.MemberAccessor("s", "m"),
+                     b.Call<mat2x2<f32>>(b.Call<vec2<f32>>(1_f, 2_f), b.Call<vec2<f32>>(3_f, 4_f))),
+        },
+        utils::Vector{
+            b.Stage(PipelineStage::kCompute),
+            b.WorkgroupSize(1_i),
+        });
 
     auto* expect = R"(
 struct S {

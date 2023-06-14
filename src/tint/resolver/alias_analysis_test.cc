@@ -18,7 +18,8 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::resolver {
 namespace {
@@ -726,8 +727,8 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.ptr(builtin::AddressSpace::kFunction, ty("S"))),
-             Param("p2", ty.ptr(builtin::AddressSpace::kFunction, ty("S"))),
+             Param("p1", ty.ptr<function>(ty("S"))),
+             Param("p2", ty.ptr<function>(ty("S"))),
          },
          ty.void_(),
          utils::Vector{
@@ -755,8 +756,8 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.ptr(builtin::AddressSpace::kFunction, ty("S"))),
-             Param("p2", ty.ptr(builtin::AddressSpace::kFunction, ty("S"))),
+             Param("p1", ty.ptr<function>(ty("S"))),
+             Param("p2", ty.ptr<function>(ty("S"))),
          },
          ty.void_(),
          utils::Vector{
@@ -787,8 +788,8 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.ptr(builtin::AddressSpace::kFunction, ty("S"))),
-             Param("p2", ty.ptr(builtin::AddressSpace::kFunction, ty("S"))),
+             Param("p1", ty.ptr<function>(ty("S"))),
+             Param("p2", ty.ptr<function>(ty("S"))),
          },
          ty.void_(),
          utils::Vector{
@@ -818,13 +819,13 @@ TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     Func("f2",
          utils::Vector{
-             Param("p1", ty.ptr(builtin::AddressSpace::kFunction, ty.vec4<f32>())),
-             Param("p2", ty.ptr(builtin::AddressSpace::kFunction, ty.vec4<f32>())),
+             Param("p1", ty.ptr<function, vec4<f32>>()),
+             Param("p2", ty.ptr<function, vec4<f32>>()),
          },
          ty.void_(),
          utils::Vector{
              Assign(Phony(), MemberAccessor(Deref("p2"), "zy")),
-             Assign(Deref("p1"), Call(ty.vec4<f32>())),
+             Assign(Deref("p1"), Call<vec4<f32>>()),
          });
     Func("f1", utils::Empty, ty.void_(),
          utils::Vector{

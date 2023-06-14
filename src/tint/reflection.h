@@ -36,7 +36,7 @@ struct HasReflection<T, std::void_t<typename T::Reflection>> : std::true_type {}
 
 /// Is true if the class T has reflected its fields with TINT_REFLECT()
 template <typename T>
-static constexpr bool HasReflection = detail::HasReflection<T>::value;
+static constexpr bool HasReflection = tint::detail::HasReflection<T>::value;
 
 /// Calls @p callback with each field of @p object
 /// @param object the object

@@ -16,7 +16,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::msl {
 namespace {
@@ -134,7 +135,7 @@ using MslImportData_DualParam_VectorTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_VectorTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f));
+    auto* expr = Call(param.name, Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(4_f, 5_f, 6_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -196,8 +197,8 @@ using MslImportData_TripleParam_VectorTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_TripleParam_VectorTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f),
-                      vec3<f32>(7_f, 8_f, 9_f));
+    auto* expr = Call(param.name, Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(4_f, 5_f, 6_f),
+                      Call<vec3<f32>>(7_f, 8_f, 9_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -262,7 +263,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_QuantizeToF16_Scalar) {
 }
 
 TEST_F(MslGeneratorImplTest, MslImportData_QuantizeToF16_Vector) {
-    GlobalVar("v", vec3<f32>(2_f), builtin::AddressSpace::kPrivate);
+    GlobalVar("v", Call<vec3<f32>>(2_f), builtin::AddressSpace::kPrivate);
 
     auto* expr = Call("quantizeToF16", "v");
     WrapInFunction(expr);

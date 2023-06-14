@@ -17,10 +17,11 @@
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverEvaluationStageTest = ResolverTest;
 
@@ -41,7 +42,7 @@ TEST_F(ResolverEvaluationStageTest, Literal_f32) {
 }
 
 TEST_F(ResolverEvaluationStageTest, Vector_Init) {
-    auto* expr = vec3<f32>();
+    auto* expr = Call<vec3<f32>>();
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -52,7 +53,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Init_Const_Const) {
     // const f = 1.f;
     // vec2<f32>(f, f);
     auto* f = Const("f", Expr(1_f));
-    auto* expr = vec2<f32>(f, f);
+    auto* expr = Call<vec2<f32>>(f, f);
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -64,7 +65,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Init_Runtime_Runtime) {
     // var f = 1.f;
     // vec2<f32>(f, f);
     auto* f = Var("f", Expr(1_f));
-    auto* expr = vec2<f32>(f, f);
+    auto* expr = Call<vec2<f32>>(f, f);
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -76,7 +77,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Conv_Const) {
     // const f = 1.f;
     // vec2<u32>(vec2<f32>(f));
     auto* f = Const("f", Expr(1_f));
-    auto* expr = vec2<u32>(vec2<f32>(f));
+    auto* expr = Call<vec2<u32>>(Call<vec2<f32>>(f));
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -88,7 +89,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Conv_Runtime) {
     // var f = 1.f;
     // vec2<u32>(vec2<f32>(f));
     auto* f = Var("f", Expr(1_f));
-    auto* expr = vec2<u32>(vec2<f32>(f));
+    auto* expr = Call<vec2<u32>>(Call<vec2<f32>>(f));
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -97,7 +98,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Conv_Runtime) {
 }
 
 TEST_F(ResolverEvaluationStageTest, Matrix_Init) {
-    auto* expr = mat2x2<f32>();
+    auto* expr = Call<mat2x2<f32>>();
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -105,7 +106,7 @@ TEST_F(ResolverEvaluationStageTest, Matrix_Init) {
 }
 
 TEST_F(ResolverEvaluationStageTest, Array_Init) {
-    auto* expr = array<f32, 3>();
+    auto* expr = Call<array<f32, 3>>();
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -116,7 +117,7 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Const) {
     // const f = 1.f;
     // array<f32, 2>(f, f);
     auto* f = Const("f", Expr(1_f));
-    auto* expr = Call(ty.array<f32, 2>(), f, f);
+    auto* expr = Call<array<f32, 2>>(f, f);
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -130,7 +131,7 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Override) {
     // array<f32, 2>(f1, f2);
     auto* f1 = Const("f1", Expr(1_f));
     auto* f2 = Override("f2", Expr(2_f));
-    auto* expr = Call(ty.array<f32, 2>(), f1, f2);
+    auto* expr = Call<array<f32, 2>>(f1, f2);
     WrapInFunction(f1, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -145,7 +146,7 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Override_Runtime) {
     // array<f32, 2>(f1, f2);
     auto* f1 = Override("f1", Expr(1_f));
     auto* f2 = Var("f2", Expr(2_f));
-    auto* expr = Call(ty.array<f32, 2>(), f1, f2);
+    auto* expr = Call<array<f32, 2>>(f1, f2);
     WrapInFunction(f2, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -160,7 +161,7 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Runtime) {
     // array<f32, 2>(f1, f2);
     auto* f1 = Const("f1", Expr(1_f));
     auto* f2 = Var("f2", Expr(2_f));
-    auto* expr = Call(ty.array<f32, 2>(), f1, f2);
+    auto* expr = Call<array<f32, 2>>(f1, f2);
     WrapInFunction(f1, f2, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -173,7 +174,7 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Runtime_Runtime) {
     // var f = 1.f;
     // array<f32, 2>(f, f);
     auto* f = Var("f", Expr(1_f));
-    auto* expr = Call(ty.array<f32, 2>(), f, f);
+    auto* expr = Call<array<f32, 2>>(f, f);
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -185,7 +186,7 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Const) {
     // const vec = vec4<f32>();
     // const idx = 1_i;
     // vec[idx]
-    auto* vec = Const("vec", vec4<f32>());
+    auto* vec = Const("vec", Call<vec4<f32>>());
     auto* idx = Const("idx", Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, idx, expr);
@@ -200,7 +201,7 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Runtime_Const) {
     // var vec = vec4<f32>();
     // const idx = 1_i;
     // vec[idx]
-    auto* vec = Var("vec", vec4<f32>());
+    auto* vec = Var("vec", Call<vec4<f32>>());
     auto* idx = Const("idx", Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, idx, expr);
@@ -215,7 +216,7 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Override) {
     // const vec = vec4<f32>();
     // override idx = 1_i;
     // vec[idx]
-    auto* vec = Const("vec", vec4<f32>());
+    auto* vec = Const("vec", Call<vec4<f32>>());
     auto* idx = Override("idx", Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, expr);
@@ -230,7 +231,7 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Runtime) {
     // const vec = vec4<f32>();
     // let idx = 1_i;
     // vec[idx]
-    auto* vec = Const("vec", vec4<f32>());
+    auto* vec = Const("vec", Call<vec4<f32>>());
     auto* idx = Let("idx", Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, idx, expr);
@@ -244,7 +245,7 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Runtime) {
 TEST_F(ResolverEvaluationStageTest, Swizzle_Const) {
     // const vec = S();
     // vec.m
-    auto* vec = Const("vec", vec4<f32>());
+    auto* vec = Const("vec", Call<vec4<f32>>());
     auto* expr = MemberAccessor(vec, "xz");
     WrapInFunction(vec, expr);
 
@@ -256,7 +257,7 @@ TEST_F(ResolverEvaluationStageTest, Swizzle_Const) {
 TEST_F(ResolverEvaluationStageTest, Swizzle_Runtime) {
     // var vec = S();
     // vec.m
-    auto* vec = Var("vec", vec4<f32>());
+    auto* vec = Var("vec", Call<vec4<f32>>());
     auto* expr = MemberAccessor(vec, "rg");
     WrapInFunction(vec, expr);
 

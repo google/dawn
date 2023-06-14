@@ -22,7 +22,8 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::wgsl {
 namespace {
@@ -146,7 +147,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Matrix_F16) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
-    auto type = Alias("make_type_reachable", ty.ptr<f32>(builtin::AddressSpace::kWorkgroup))->type;
+    auto type = Alias("make_type_reachable", ty.ptr<workgroup, f32>())->type;
 
     GeneratorImpl& gen = Build();
 
@@ -157,9 +158,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_PointerAccessMode) {
-    auto type = Alias("make_type_reachable",
-                      ty.ptr<f32>(builtin::AddressSpace::kStorage, builtin::Access::kReadWrite))
-                    ->type;
+    auto type = Alias("make_type_reachable", ty.ptr<storage, f32, read_write>())->type;
 
     GeneratorImpl& gen = Build();
 

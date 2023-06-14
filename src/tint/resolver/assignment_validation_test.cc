@@ -19,10 +19,11 @@
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverAssignmentValidationTest = ResolverTest;
 
@@ -182,9 +183,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
     // var a : i32;
     // let b : ptr<function,i32> = &a;
     // *b = 2i;
-    const auto func = builtin::AddressSpace::kFunction;
-    WrapInFunction(Var("a", ty.i32(), func, Expr(2_i)),                //
-                   Let("b", ty.ptr<i32>(func), AddressOf(Expr("a"))),  //
+    WrapInFunction(Var("a", ty.i32(), builtin::AddressSpace::kFunction, Expr(2_i)),  //
+                   Let("b", ty.ptr<function, i32>(), AddressOf(Expr("a"))),          //
                    Assign(Deref("b"), 2_i));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -194,9 +194,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignMaterializedThroughPointer_Pass) 
     // var a : i32;
     // let b : ptr<function,i32> = &a;
     // *b = 2;
-    const auto func = builtin::AddressSpace::kFunction;
-    auto* var_a = Var("a", ty.i32(), func, Expr(2_i));
-    auto* var_b = Let("b", ty.ptr<i32>(func), AddressOf(Expr("a")));
+    auto* var_a = Var("a", ty.i32(), builtin::AddressSpace::kFunction, Expr(2_i));
+    auto* var_b = Let("b", ty.ptr<function, i32>(), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b, Assign(Deref("b"), 2_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -433,9 +432,9 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
                    Assign(Phony(), 3_f),                                    //
                    Assign(Phony(), 4_a),                                    //
                    Assign(Phony(), 5.0_a),                                  //
-                   Assign(Phony(), vec2<Infer>(6_a)),                       //
-                   Assign(Phony(), vec3<Infer>(7.0_a)),                     //
-                   Assign(Phony(), vec4<bool>()),                           //
+                   Assign(Phony(), Call<vec2<Infer>>(6_a)),                 //
+                   Assign(Phony(), Call<vec3<Infer>>(7.0_a)),               //
+                   Assign(Phony(), Call<vec4<bool>>()),                     //
                    Assign(Phony(), "tex"),                                  //
                    Assign(Phony(), "smp"),                                  //
                    Assign(Phony(), AddressOf("s")),                         //

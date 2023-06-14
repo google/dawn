@@ -20,10 +20,11 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/type/texture_dimension.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverLoadTest = ResolverTest;
 
@@ -140,7 +141,7 @@ TEST_F(ResolverLoadTest, Index) {
     // var v = array<i32, 3>(1i, 2i, 3i)[ref];
     auto* ident = Expr("ref");
     WrapInFunction(Var("ref", Expr(1_i)),  //
-                   IndexAccessor(array<i32, 3>(1_i, 2_i, 3_i), ident));
+                   IndexAccessor(Call<array<i32, 3>>(1_i, 2_i, 3_i), ident));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* load = Sem().Get<sem::Load>(ident);
@@ -154,7 +155,7 @@ TEST_F(ResolverLoadTest, MultiComponentSwizzle) {
     // var ref = vec4(1);
     // var v = ref.xyz;
     auto* ident = Expr("ref");
-    WrapInFunction(Var("ref", vec4<i32>(1_i)),  //
+    WrapInFunction(Var("ref", Call<vec4<i32>>(1_i)),  //
                    Var("v", MemberAccessor(ident, "xyz")));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -230,7 +231,7 @@ TEST_F(ResolverLoadTest, FunctionArg_Handles) {
          },
          ty.vec4<f32>(),
          utils::Vector{
-             Return(Call("textureSampleLevel", "tp", "sp", vec2<f32>(), 0_a)),
+             Return(Call("textureSampleLevel", "tp", "sp", Call<vec2<f32>>(), 0_a)),
          });
     auto* t_ident = Expr("t");
     auto* s_ident = Expr("s");

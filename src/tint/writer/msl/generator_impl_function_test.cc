@@ -16,7 +16,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::msl {
 namespace {
@@ -194,7 +195,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_DifferentSta
         });
 
     Func("vert_main", utils::Empty, ty.Of(interface_struct),
-         utils::Vector{Return(Call(ty.Of(interface_struct), 0.5_f, 0.25_f, vec4<f32>()))},
+         utils::Vector{Return(Call(ty.Of(interface_struct), 0.5_f, 0.25_f, Call<vec4<f32>>()))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)});
 
     Func("frag_main", utils::Vector{Param("colors", ty.Of(interface_struct))}, ty.void_(),
@@ -276,8 +277,7 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_HelperFuncti
 
     Func("foo", utils::Vector{Param("x", ty.f32())}, ty.Of(vertex_output_struct),
          utils::Vector{
-             Return(
-                 Call(ty.Of(vertex_output_struct), Call(ty.vec4<f32>(), "x", "x", "x", Expr(1_f)))),
+             Return(Call(ty.Of(vertex_output_struct), Call<vec4<f32>>("x", "x", "x", 1_f))),
          });
     Func("vert_main1", utils::Empty, ty.Of(vertex_output_struct),
          utils::Vector{Return(Expr(Call("foo", Expr(0.5_f))))},

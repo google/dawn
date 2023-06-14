@@ -19,10 +19,11 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/string_stream.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ::testing::HasSubstr;
 
@@ -34,14 +35,6 @@ using builder::alias3;
 using builder::CreatePtrs;
 using builder::CreatePtrsFor;
 using builder::DataType;
-using builder::mat2x2;
-using builder::mat2x3;
-using builder::mat3x2;
-using builder::mat3x3;
-using builder::mat4x4;
-using builder::vec2;
-using builder::vec3;
-using builder::vec4;
 
 class ResolverValueConstructorValidationTest : public resolver::TestHelper, public testing::Test {};
 
@@ -478,7 +471,7 @@ TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_TooM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_InvalidConstructor) {
-    auto* a = Var("a", ty.f32(), Call(Source{{12, 34}}, ty.f32(), Call(ty.array<f32, 4>())));
+    auto* a = Var("a", ty.f32(), Call(Source{{12, 34}}, ty.f32(), Call<array<f32, 4>>()));
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
@@ -492,7 +485,7 @@ namespace ArrayConstructor {
 
 TEST_F(ResolverValueConstructorValidationTest, Array_ZeroValue_Pass) {
     // array<u32, 10u>();
-    auto* tc = array<u32, 10>();
+    auto* tc = Call<array<u32, 10>>();
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -508,7 +501,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_ZeroValue_Pass) {
 
 TEST_F(ResolverValueConstructorValidationTest, Array_U32U32U32) {
     // array<u32, 3u>(0u, 10u, 20u);
-    auto* tc = array<u32, 3>(0_u, 10_u, 20_u);
+    auto* tc = Call<array<u32, 3>>(0_u, 10_u, 20_u);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -527,7 +520,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_U32U32U32) {
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArray_U32U32U32) {
     // array(0u, 10u, 20u);
-    auto* tc = array<Infer>(Source{{12, 34}}, 0_u, 10_u, 20_u);
+    auto* tc = Call<array<Infer>>(Source{{12, 34}}, 0_u, 10_u, 20_u);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -546,7 +539,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArray_U32U32U32) {
 
 TEST_F(ResolverValueConstructorValidationTest, Array_U32AIU32) {
     // array<u32, 3u>(0u, 10, 20u);
-    auto* tc = array<u32, 3>(0_u, 10_a, 20_u);
+    auto* tc = Call<array<u32, 3>>(0_u, 10_a, 20_u);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -565,7 +558,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_U32AIU32) {
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArray_U32AIU32) {
     // array(0u, 10u, 20u);
-    auto* tc = array<Infer>(Source{{12, 34}}, 0_u, 10_a, 20_u);
+    auto* tc = Call<array<Infer>>(Source{{12, 34}}, 0_u, 10_a, 20_u);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -584,7 +577,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArray_U32AIU32) {
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayU32_AIAIAI) {
     // array<u32, 3u>(0, 10, 20);
-    auto* tc = array<u32, 3>(0_a, 10_a, 20_a);
+    auto* tc = Call<array<u32, 3>>(0_a, 10_a, 20_a);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -603,7 +596,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayU32_AIAIAI) {
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArray_AIAIAI) {
     // const c = array(0, 10, 20);
-    auto* tc = array<Infer>(Source{{12, 34}}, 0_a, 10_a, 20_a);
+    auto* tc = Call<array<Infer>>(Source{{12, 34}}, 0_a, 10_a, 20_a);
     WrapInFunction(Decl(Const("C", tc)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -622,9 +615,9 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArray_AIAIAI) {
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecI32_VecAI) {
     // array(vec2(10i), vec2(20));
-    auto* tc = array<Infer>(Source{{12, 34}},              //
-                            Call(ty.vec<Infer>(2), 20_i),  //
-                            Call(ty.vec<Infer>(2), 20_a));
+    auto* tc = Call<array<Infer>>(Source{{12, 34}},         //
+                                  Call<vec2<Infer>>(20_i),  //
+                                  Call<vec2<Infer>>(20_a));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -644,9 +637,9 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecI32_VecAI) {
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecAI_VecF32) {
     // array(vec2(20), vec2(10f));
-    auto* tc = array<Infer>(Source{{12, 34}},              //
-                            Call(ty.vec<Infer>(2), 20_a),  //
-                            Call(ty.vec<Infer>(2), 20_f));
+    auto* tc = Call<array<Infer>>(Source{{12, 34}},         //
+                                  Call<vec2<Infer>>(20_a),  //
+                                  Call<vec2<Infer>>(20_f));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -666,7 +659,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecAI_VecF32) {
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_U32F32) {
     // array<u32, 3u>(0u, 1.0f, 20u);
-    auto* tc = array<u32, 3>(0_u, Expr(Source{{12, 34}}, 1_f), 20_u);
+    auto* tc = Call<array<u32, 3>>(0_u, Expr(Source{{12, 34}}, 1_f), 20_u);
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -675,7 +668,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_U32F32)
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_U32F32) {
     // array(0u, 1.0f, 20u);
-    auto* tc = array<Infer>(Source{{12, 34}}, 0_u, 1_f, 20_u);
+    auto* tc = Call<array<Infer>>(Source{{12, 34}}, 0_u, 1_f, 20_u);
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -687,7 +680,7 @@ note: argument 1 is of type 'f32')");
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_F32I32) {
     // array<f32, 1u>(1i);
-    auto* tc = array<f32, 1>(Expr(Source{{12, 34}}, 1_i));
+    auto* tc = Call<array<f32, 1>>(Expr(Source{{12, 34}}, 1_i));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -696,7 +689,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_F32I32)
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_F32I32) {
     // array(1f, 1i);
-    auto* tc = array<Infer>(Source{{12, 34}}, 1_f, 1_i);
+    auto* tc = Call<array<Infer>>(Source{{12, 34}}, 1_f, 1_i);
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -708,7 +701,7 @@ note: argument 1 is of type 'i32')");
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_U32I32) {
     // array<u32, 1u>(1i, 0u, 0u, 0u, 0u, 0u);
-    auto* tc = array<u32, 1>(Expr(Source{{12, 34}}, 1_i), 0_u, 0_u, 0_u, 0_u);
+    auto* tc = Call<array<u32, 1>>(Expr(Source{{12, 34}}, 1_i), 0_u, 0_u, 0_u, 0_u);
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -717,7 +710,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_U32I32)
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_U32I32) {
     // array(1i, 0u, 0u, 0u, 0u, 0u);
-    auto* tc = array<Infer>(Source{{12, 34}}, 1_i, 0_u, 0_u, 0_u, 0_u);
+    auto* tc = Call<array<Infer>>(Source{{12, 34}}, 1_i, 0_u, 0_u, 0_u, 0_u);
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -729,7 +722,7 @@ note: argument 1 is of type 'u32')");
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_I32Vec2) {
     // array<i32, 3u>(1i, vec2<i32>());
-    auto* tc = array<i32, 3>(1_i, vec2<i32>(Source{{12, 34}}));
+    auto* tc = Call<array<i32, 3>>(1_i, Call<vec2<i32>>(Source{{12, 34}}));
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -738,7 +731,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_I32Vec2
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_I32Vec2) {
     // array(1i, vec2<i32>());
-    auto* tc = array<Infer>(Source{{12, 34}}, 1_i, vec2<i32>());
+    auto* tc = Call<array<Infer>>(Source{{12, 34}}, 1_i, Call<vec2<i32>>());
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -749,7 +742,7 @@ note: argument 1 is of type 'vec2<i32>')");
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32_Vec3u32) {
     // array<vec3<i32>, 2u>(vec3<u32>(), vec3<u32>());
-    auto* t = array(ty.vec3<i32>(), 2_u, vec3<u32>(Source{{12, 34}}), vec3<u32>());
+    auto* t = Call<array<vec3<i32>, 2>>(Call<vec3<u32>>(Source{{12, 34}}), Call<vec3<u32>>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -759,7 +752,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3u32) {
     // array(vec3<i32>(), vec3<u32>());
-    auto* t = array<Infer>(Source{{12, 34}}, vec3<i32>(), vec3<u32>());
+    auto* t = Call<array<Infer>>(Source{{12, 34}}, Call<vec3<i32>>(), Call<vec3<u32>>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -771,7 +764,7 @@ note: argument 1 is of type 'vec3<u32>')");
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3AF) {
     // array(vec3<i32>(), vec3(1.0));
-    auto* t = array<Infer>(Source{{12, 34}}, vec3<i32>(), Call("vec3", 1._a));
+    auto* t = Call<array<Infer>>(Source{{12, 34}}, Call<vec3<i32>>(), Call("vec3", 1._a));
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -783,7 +776,7 @@ note: argument 1 is of type 'vec3<abstract-float>')");
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32_Vec3bool) {
     // array<vec3<i32>, 2u>(vec3<i32>(), vec3<bool>());
-    auto* t = array(ty.vec3<i32>(), 2_u, vec3<i32>(), vec3<bool>());
+    auto* t = Call<array<vec3<i32>, 2>>(Call<vec3<i32>>(), Call<vec3<bool>>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -793,7 +786,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3bool) {
     // array(vec3<i32>(), vec3<bool>());
-    auto* t = array<Infer>(Source{{12, 34}}, vec3<i32>(), vec3<bool>());
+    auto* t = Call<array<Infer>>(Source{{12, 34}}, Call<vec3<i32>>(), Call<vec3<bool>>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -805,7 +798,8 @@ note: argument 1 is of type 'vec3<bool>')");
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayOfArray_SubElemSizeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 3u>(), array<i32, 2u>());
-    auto* t = array(Source{{12, 34}}, ty.array<i32, 2>(), 2_i, array<i32, 3>(), array<i32, 2>());
+    auto* t = Call<array<array<i32, 2>, 2>>(Source{{12, 34}}, Call<array<i32, 3>>(),
+                                            Call<array<i32, 2>>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -815,7 +809,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayOfArray_SubElemSizeMismatch)
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayOfArray_SubElemSizeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 3u>(), array<i32, 2u>());
-    auto* t = array<Infer>(Source{{12, 34}}, array<i32, 3>(), array<i32, 2>());
+    auto* t = Call<array<Infer>>(Source{{12, 34}}, Call<array<i32, 3>>(), Call<array<i32, 2>>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -827,7 +821,8 @@ note: argument 1 is of type 'array<i32, 2>')");
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayOfArray_SubElemTypeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 2u>(), array<u32, 2u>());
-    auto* t = array(Source{{12, 34}}, ty.array<i32, 2>(), 2_i, array<i32, 2>(), array<u32, 2>());
+    auto* t = Call<array<array<i32, 2>, 2>>(Source{{12, 34}}, Call<array<i32, 2>>(),
+                                            Call<array<u32, 2>>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -837,7 +832,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayOfArray_SubElemTypeMismatch)
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayOfArray_SubElemTypeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 2u>(), array<u32, 2u>());
-    auto* t = array<Infer>(Source{{12, 34}}, array<i32, 2>(), array<u32, 2>());
+    auto* t = Call<array<Infer>>(Source{{12, 34}}, Call<array<i32, 2>>(), Call<array<u32, 2>>());
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
@@ -850,7 +845,7 @@ note: argument 1 is of type 'array<u32, 2>')");
 TEST_F(ResolverValueConstructorValidationTest, Array_TooFewElements) {
     // array<i32, 4u>(1i, 2i, 3i);
     SetSource(Source::Location({12, 34}));
-    auto* tc = array<i32, 4>(Expr(1_i), Expr(2_i), Expr(3_i));
+    auto* tc = Call<array<i32, 4>>(Expr(1_i), Expr(2_i), Expr(3_i));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -861,7 +856,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_TooFewElements) {
 TEST_F(ResolverValueConstructorValidationTest, Array_TooManyElements) {
     // array<i32, 4u>(1i, 2i, 3i, 4i, 5i);
     SetSource(Source::Location({12, 34}));
-    auto* tc = array<i32, 4>(Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i), Expr(5_i));
+    auto* tc = Call<array<i32, 4>>(Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i), Expr(5_i));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -873,7 +868,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_TooManyElements) {
 
 TEST_F(ResolverValueConstructorValidationTest, Array_Runtime) {
     // array<i32>(1i);
-    auto* tc = array<i32>(Source{{12, 34}}, Expr(1_i));
+    auto* tc = Call<array<i32>>(Source{{12, 34}}, Expr(1_i));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -882,7 +877,7 @@ TEST_F(ResolverValueConstructorValidationTest, Array_Runtime) {
 
 TEST_F(ResolverValueConstructorValidationTest, Array_RuntimeZeroValue) {
     // array<i32>();
-    auto* tc = array<i32>(Source{{12, 34}});
+    auto* tc = Call<array<i32>>(Source{{12, 34}});
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1048,7 +1043,7 @@ TEST_F(ResolverValueConstructorValidationTest, Convert_f16_to_f32_Success) {
 namespace VectorConstructor {
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec2<f32>(Source{{12, 34}}, 1_i, 2_f));
+    WrapInFunction(Call<vec2<f32>>(Source{{12, 34}}, 1_i, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1058,7 +1053,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Error_ScalarArgumentTypeM
 TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Error_ScalarArgumentTypeMismatch) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(vec2<f16>(Source{{12, 34}}, 1_h, 2_f));
+    WrapInFunction(Call<vec2<f16>>(Source{{12, 34}}, 1_h, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1066,7 +1061,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec2<u32>(Source{{12, 34}}, 1_u, 2_i));
+    WrapInFunction(Call<vec2<u32>>(Source{{12, 34}}, 1_u, 2_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1074,7 +1069,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec2<i32>(Source{{12, 34}}, 1_u, 2_i));
+    WrapInFunction(Call<vec2<i32>>(Source{{12, 34}}, 1_u, 2_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1082,7 +1077,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec2<bool>(Source{{12, 34}}, true, 1_i));
+    WrapInFunction(Call<vec2<bool>>(Source{{12, 34}}, true, 1_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1090,7 +1085,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Error_ScalarArgumentType
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec3ArgumentCardinalityTooLarge) {
-    WrapInFunction(vec2<f32>(Source{{12, 34}}, vec3<f32>()));
+    WrapInFunction(Call<vec2<f32>>(Source{{12, 34}}, Call<vec3<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1098,7 +1093,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec3ArgumentCardinalit
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec4ArgumentCardinalityTooLarge) {
-    WrapInFunction(vec2<f32>(Source{{12, 34}}, vec4<f32>()));
+    WrapInFunction(Call<vec2<f32>>(Source{{12, 34}}, Call<vec4<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1106,7 +1101,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_Vec4ArgumentCardinalit
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsScalar) {
-    WrapInFunction(vec2<f32>(Source{{12, 34}}, 1_f, 2_f, 3_f));
+    WrapInFunction(Call<vec2<f32>>(Source{{12, 34}}, 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1114,7 +1109,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsScalar
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVector) {
-    WrapInFunction(vec2<f32>(Source{{12, 34}}, vec2<f32>(), vec2<f32>()));
+    WrapInFunction(Call<vec2<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), Call<vec2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1123,7 +1118,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVector
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVectorAndScalar) {
-    WrapInFunction(vec2<f32>(Source{{12, 34}}, vec2<f32>(), 1_f));
+    WrapInFunction(Call<vec2<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1131,7 +1126,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_TooManyArgumentsVector
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_InvalidArgumentType) {
-    WrapInFunction(vec2<f32>(Source{{12, 34}}, mat2x2<f32>()));
+    WrapInFunction(Call<vec2<f32>>(Source{{12, 34}}, Call<mat2x2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1139,7 +1134,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Error_InvalidArgumentType) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_ZeroValue) {
-    auto* tc = vec2<f32>();
+    auto* tc = Call<vec2<f32>>();
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1158,7 +1153,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_ZeroValue) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Success_Scalar) {
-    auto* tc = vec2<f32>(1_f, 1_f);
+    auto* tc = Call<vec2<f32>>(1_f, 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1181,7 +1176,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Success_Scalar) {
 TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Success_Scalar) {
     Enable(builtin::Extension::kF16);
 
-    auto* tc = vec2<f16>(1_h, 1_h);
+    auto* tc = Call<vec2<f16>>(1_h, 1_h);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1202,7 +1197,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Success_Scalar) {
-    auto* tc = vec2<u32>(1_u, 1_u);
+    auto* tc = Call<vec2<u32>>(1_u, 1_u);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1223,7 +1218,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Success_Scalar) {
-    auto* tc = vec2<i32>(1_i, 1_i);
+    auto* tc = Call<vec2<i32>>(1_i, 1_i);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1244,7 +1239,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Success_Scalar) {
-    auto* tc = vec2<bool>(true, false);
+    auto* tc = Call<vec2<bool>>(true, false);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1265,7 +1260,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_Identity) {
-    auto* tc = vec2<f32>(vec2<f32>());
+    auto* tc = Call<vec2<f32>>(Call<vec2<f32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1285,7 +1280,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_Identity) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_Vec2TypeConversion) {
-    auto* tc = vec2<f32>(vec2<i32>());
+    auto* tc = Call<vec2<f32>>(Call<vec2<i32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1305,7 +1300,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_Vec2TypeConversion) 
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, 1_f, 2_f, 3_i));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, 1_f, 2_f, 3_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1315,7 +1310,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Error_ScalarArgumentTypeM
 TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Error_ScalarArgumentTypeMismatch) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(vec3<f16>(Source{{12, 34}}, 1_h, 2_h, 3_f));
+    WrapInFunction(Call<vec3<f16>>(Source{{12, 34}}, 1_h, 2_h, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1323,7 +1318,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec3<u32>(Source{{12, 34}}, 1_u, 2_i, 3_u));
+    WrapInFunction(Call<vec3<u32>>(Source{{12, 34}}, 1_u, 2_i, 3_u));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1331,7 +1326,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec3<i32>(Source{{12, 34}}, 1_i, 2_u, 3_i));
+    WrapInFunction(Call<vec3<i32>>(Source{{12, 34}}, 1_i, 2_u, 3_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1339,7 +1334,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3Bool_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec3<bool>(Source{{12, 34}}, false, 1_i, true));
+    WrapInFunction(Call<vec3<bool>>(Source{{12, 34}}, false, 1_i, true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1347,7 +1342,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3Bool_Error_ScalarArgumentType
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_Vec4ArgumentCardinalityTooLarge) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, vec4<f32>()));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, Call<vec4<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1355,7 +1350,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_Vec4ArgumentCardinalit
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsScalar) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, 1_f, 2_f));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, 1_f, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1363,7 +1358,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsScalar)
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsScalar) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, 1_f, 2_f, 3_f, 4_f));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, 1_f, 2_f, 3_f, 4_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1372,7 +1367,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsScalar
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsVec2) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, vec2<f32>()));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, Call<vec2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1380,7 +1375,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooFewArgumentsVec2) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, vec2<f32>(), vec2<f32>()));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), Call<vec2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1389,7 +1384,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2) 
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2AndScalar) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, vec2<f32>(), 1_f, 1_f));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), 1_f, 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1398,7 +1393,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec2An
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec3) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, vec3<f32>(), 1_f));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, Call<vec3<f32>>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1406,7 +1401,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_TooManyArgumentsVec3) 
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_InvalidArgumentType) {
-    WrapInFunction(vec3<f32>(Source{{12, 34}}, mat2x2<f32>()));
+    WrapInFunction(Call<vec3<f32>>(Source{{12, 34}}, Call<mat2x2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1414,7 +1409,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Error_InvalidArgumentType) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ZeroValue) {
-    auto* tc = vec3<f32>();
+    auto* tc = Call<vec3<f32>>();
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1433,7 +1428,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ZeroValue) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Success_Scalar) {
-    auto* tc = vec3<f32>(1_f, 1_f, 1_f);
+    auto* tc = Call<vec3<f32>>(1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1457,7 +1452,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Success_Scalar) {
 TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Success_Scalar) {
     Enable(builtin::Extension::kF16);
 
-    auto* tc = vec3<f16>(1_h, 1_h, 1_h);
+    auto* tc = Call<vec3<f16>>(1_h, 1_h, 1_h);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1479,7 +1474,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Success_Scalar) {
-    auto* tc = vec3<u32>(1_u, 1_u, 1_u);
+    auto* tc = Call<vec3<u32>>(1_u, 1_u, 1_u);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1501,7 +1496,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Success_Scalar) {
-    auto* tc = vec3<i32>(1_i, 1_i, 1_i);
+    auto* tc = Call<vec3<i32>>(1_i, 1_i, 1_i);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1523,7 +1518,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3Bool_Success_Scalar) {
-    auto* tc = vec3<bool>(true, false, true);
+    auto* tc = Call<vec3<bool>>(true, false, true);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1545,7 +1540,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3Bool_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Vec2AndScalar) {
-    auto* tc = vec3<f32>(vec2<f32>(), 1_f);
+    auto* tc = Call<vec3<f32>>(Call<vec2<f32>>(), 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1566,7 +1561,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Vec2AndScalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ScalarAndVec2) {
-    auto* tc = vec3<f32>(1_f, vec2<f32>());
+    auto* tc = Call<vec3<f32>>(1_f, Call<vec2<f32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1587,7 +1582,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ScalarAndVec2) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Identity) {
-    auto* tc = vec3<f32>(vec3<f32>());
+    auto* tc = Call<vec3<f32>>(Call<vec3<f32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1607,7 +1602,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Identity) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Vec3TypeConversion) {
-    auto* tc = vec3<f32>(vec3<i32>());
+    auto* tc = Call<vec3<f32>>(Call<vec3<i32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1627,7 +1622,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Vec3TypeConversion) 
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, 1_f, 1_f, 1_i, 1_f));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, 1_f, 1_f, 1_i, 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1638,7 +1633,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Error_ScalarArgumentTypeM
 TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Error_ScalarArgumentTypeMismatch) {
     Enable(builtin::Extension::kF16);
 
-    WrapInFunction(vec4<f16>(Source{{12, 34}}, 1_h, 1_h, 1_f, 1_h));
+    WrapInFunction(Call<vec4<f16>>(Source{{12, 34}}, 1_h, 1_h, 1_f, 1_h));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1647,7 +1642,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec4<u32>(Source{{12, 34}}, 1_u, 1_u, 1_i, 1_u));
+    WrapInFunction(Call<vec4<u32>>(Source{{12, 34}}, 1_u, 1_u, 1_i, 1_u));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1656,7 +1651,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec4<i32>(Source{{12, 34}}, 1_i, 1_i, 1_u, 1_i));
+    WrapInFunction(Call<vec4<i32>>(Source{{12, 34}}, 1_i, 1_i, 1_u, 1_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1665,7 +1660,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Error_ScalarArgumentTypeMismatch) {
-    WrapInFunction(vec4<bool>(Source{{12, 34}}, true, false, 1_i, true));
+    WrapInFunction(Call<vec4<bool>>(Source{{12, 34}}, true, false, 1_i, true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1674,7 +1669,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Error_ScalarArgumentType
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsScalar) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, 1_f, 2_f, 3_f));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1682,7 +1677,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsScalar)
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsScalar) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, 1_f, 2_f, 3_f, 4_f, 5_f));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, 1_f, 2_f, 3_f, 4_f, 5_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1691,7 +1686,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsScalar
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec2AndScalar) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), 1_f));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1699,7 +1694,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec2And
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2AndScalars) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), 1_f, 2_f, 3_f));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1708,7 +1703,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2An
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Vec2Scalar) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), vec2<f32>(), 1_f));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), Call<vec2<f32>>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1717,7 +1712,8 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Ve
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Vec2Vec2) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), vec2<f32>(), vec2<f32>()));
+    WrapInFunction(
+        Call<vec4<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), Call<vec2<f32>>(), Call<vec2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1727,7 +1723,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2Ve
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec3) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec3<f32>()));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<vec3<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1735,7 +1731,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooFewArgumentsVec3) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndScalars) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec3<f32>(), 1_f, 2_f));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<vec3<f32>>(), 1_f, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1744,7 +1740,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3An
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndVec2) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec3<f32>(), vec2<f32>()));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<vec3<f32>>(), Call<vec2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1753,7 +1749,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3An
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2AndVec3) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec2<f32>(), vec3<f32>()));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<vec2<f32>>(), Call<vec3<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1762,7 +1758,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec2An
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3AndVec3) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, vec3<f32>(), vec3<f32>()));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<vec3<f32>>(), Call<vec3<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1771,7 +1767,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_TooManyArgumentsVec3An
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_InvalidArgumentType) {
-    WrapInFunction(vec4<f32>(Source{{12, 34}}, mat2x2<f32>()));
+    WrapInFunction(Call<vec4<f32>>(Source{{12, 34}}, Call<mat2x2<f32>>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1779,7 +1775,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Error_InvalidArgumentType) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ZeroValue) {
-    auto* tc = vec4<f32>();
+    auto* tc = Call<vec4<f32>>();
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1791,7 +1787,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ZeroValue) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Success_Scalar) {
-    auto* tc = vec4<f32>(1_f, 1_f, 1_f, 1_f);
+    auto* tc = Call<vec4<f32>>(1_f, 1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1805,7 +1801,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Success_Scalar) {
 TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Success_Scalar) {
     Enable(builtin::Extension::kF16);
 
-    auto* tc = vec4<f16>(1_h, 1_h, 1_h, 1_h);
+    auto* tc = Call<vec4<f16>>(1_h, 1_h, 1_h, 1_h);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1817,7 +1813,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Success_Scalar) {
-    auto* tc = vec4<u32>(1_u, 1_u, 1_u, 1_u);
+    auto* tc = Call<vec4<u32>>(1_u, 1_u, 1_u, 1_u);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1829,7 +1825,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Success_Scalar) {
-    auto* tc = vec4<i32>(1_i, 1_i, 1_i, 1_i);
+    auto* tc = Call<vec4<i32>>(1_i, 1_i, 1_i, 1_i);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1841,7 +1837,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Success_Scalar) {
-    auto* tc = vec4<bool>(true, false, true, false);
+    auto* tc = Call<vec4<bool>>(true, false, true, false);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1853,7 +1849,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec2ScalarScalar) {
-    auto* tc = vec4<f32>(vec2<f32>(), 1_f, 1_f);
+    auto* tc = Call<vec4<f32>>(Call<vec2<f32>>(), 1_f, 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1865,7 +1861,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec2ScalarScalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarVec2Scalar) {
-    auto* tc = vec4<f32>(1_f, vec2<f32>(), 1_f);
+    auto* tc = Call<vec4<f32>>(1_f, Call<vec2<f32>>(), 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1877,7 +1873,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarVec2Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarScalarVec2) {
-    auto* tc = vec4<f32>(1_f, 1_f, vec2<f32>());
+    auto* tc = Call<vec4<f32>>(1_f, 1_f, Call<vec2<f32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1889,7 +1885,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarScalarVec2) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec2AndVec2) {
-    auto* tc = vec4<f32>(vec2<f32>(), vec2<f32>());
+    auto* tc = Call<vec4<f32>>(Call<vec2<f32>>(), Call<vec2<f32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1901,7 +1897,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec2AndVec2) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec3AndScalar) {
-    auto* tc = vec4<f32>(vec3<f32>(), 1_f);
+    auto* tc = Call<vec4<f32>>(Call<vec3<f32>>(), 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1913,7 +1909,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec3AndScalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarAndVec3) {
-    auto* tc = vec4<f32>(1_f, vec3<f32>());
+    auto* tc = Call<vec4<f32>>(1_f, Call<vec3<f32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1925,7 +1921,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarAndVec3) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Identity) {
-    auto* tc = vec4<f32>(vec4<f32>());
+    auto* tc = Call<vec4<f32>>(Call<vec4<f32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1937,7 +1933,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Identity) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec4TypeConversion) {
-    auto* tc = vec4<f32>(vec4<i32>());
+    auto* tc = Call<vec4<f32>>(Call<vec4<i32>>());
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1949,9 +1945,9 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec4TypeConversion) 
 }
 
 TEST_F(ResolverValueConstructorValidationTest, NestedVectorConstructors_InnerError) {
-    WrapInFunction(vec4<f32>(vec4<f32>(1_f, 1_f,  //
-                                       vec3<f32>(Source{{12, 34}}, 1_f, 1_f)),
-                             1_f));
+    WrapInFunction(Call<vec4<f32>>(Call<vec4<f32>>(1_f, 1_f,  //
+                                                   Call<vec3<f32>>(Source{{12, 34}}, 1_f, 1_f)),
+                                   1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -1959,7 +1955,7 @@ TEST_F(ResolverValueConstructorValidationTest, NestedVectorConstructors_InnerErr
 }
 
 TEST_F(ResolverValueConstructorValidationTest, NestedVectorConstructors_Success) {
-    auto* tc = vec4<f32>(vec3<f32>(vec2<f32>(1_f, 1_f), 1_f), 1_f);
+    auto* tc = Call<vec4<f32>>(Call<vec3<f32>>(Call<vec2<f32>>(1_f, 1_f), 1_f), 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1974,7 +1970,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_Alias_Argument_Error) {
     auto* alias = Alias("UnsignedInt", ty.u32());
     GlobalVar("uint_var", ty.Of(alias), builtin::AddressSpace::kPrivate);
 
-    auto* tc = vec2<f32>(Source{{12, 34}}, "uint_var");
+    auto* tc = Call<vec2<f32>>(Source{{12, 34}}, "uint_var");
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1987,7 +1983,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_Alias_Argument_Success) {
     GlobalVar("my_f32", ty.Of(f32_alias), builtin::AddressSpace::kPrivate);
     GlobalVar("my_vec2", ty.Of(vec2_alias), builtin::AddressSpace::kPrivate);
 
-    auto* tc = vec3<f32>("my_vec2", "my_f32");
+    auto* tc = Call<vec3<f32>>("my_vec2", "my_f32");
     WrapInFunction(tc);
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -2020,7 +2016,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_ArgumentElementTypeAlias_E
 
     // vec3<u32>(vec<Float32>(), 1.0f)
     auto vec_type = ty.vec(ty.Of(f32_alias), 2);
-    WrapInFunction(vec3<u32>(Source{{12, 34}}, Call(vec_type), 1_f));
+    WrapInFunction(Call<vec3<u32>>(Source{{12, 34}}, Call(vec_type), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
@@ -2032,7 +2028,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_ArgumentElementTypeAlias_S
 
     // vec3<f32>(vec<Float32>(), 1.0f)
     auto vec_type = ty.vec(ty.Of(f32_alias), 2);
-    auto* tc = vec3<f32>(Call(Source{{12, 34}}, vec_type), 1_f);
+    auto* tc = Call<vec3<f32>>(Call(Source{{12, 34}}, vec_type), 1_f);
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2041,11 +2037,11 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_ArgumentElementTypeAlias_S
 TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromScalars) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec2_bool = vec2<Infer>(true, false);
-    auto* vec2_i32 = vec2<Infer>(1_i, 2_i);
-    auto* vec2_u32 = vec2<Infer>(1_u, 2_u);
-    auto* vec2_f32 = vec2<Infer>(1_f, 2_f);
-    auto* vec2_f16 = vec2<Infer>(1_h, 2_h);
+    auto* vec2_bool = Call<vec2<Infer>>(true, false);
+    auto* vec2_i32 = Call<vec2<Infer>>(1_i, 2_i);
+    auto* vec2_u32 = Call<vec2<Infer>>(1_u, 2_u);
+    auto* vec2_f32 = Call<vec2<Infer>>(1_f, 2_f);
+    auto* vec2_f16 = Call<vec2<Infer>>(1_h, 2_h);
     WrapInFunction(vec2_bool, vec2_i32, vec2_u32, vec2_f32, vec2_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2070,11 +2066,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromScalars) 
 TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromVec2) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec2_bool = vec2<Infer>(vec2<bool>(true, false));
-    auto* vec2_i32 = vec2<Infer>(vec2<i32>(1_i, 2_i));
-    auto* vec2_u32 = vec2<Infer>(vec2<u32>(1_u, 2_u));
-    auto* vec2_f32 = vec2<Infer>(vec2<f32>(1_f, 2_f));
-    auto* vec2_f16 = vec2<Infer>(vec2<f16>(1_h, 2_h));
+    auto* vec2_bool = Call<vec2<Infer>>(Call<vec2<bool>>(true, false));
+    auto* vec2_i32 = Call<vec2<Infer>>(Call<vec2<i32>>(1_i, 2_i));
+    auto* vec2_u32 = Call<vec2<Infer>>(Call<vec2<u32>>(1_u, 2_u));
+    auto* vec2_f32 = Call<vec2<Infer>>(Call<vec2<f32>>(1_f, 2_f));
+    auto* vec2_f16 = Call<vec2<Infer>>(Call<vec2<f16>>(1_h, 2_h));
     WrapInFunction(vec2_bool, vec2_i32, vec2_u32, vec2_f32, vec2_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2099,11 +2095,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromVec2) {
 TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalars) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec3_bool = vec3<Infer>(Expr(true), Expr(false), Expr(true));
-    auto* vec3_i32 = vec3<Infer>(Expr(1_i), Expr(2_i), Expr(3_i));
-    auto* vec3_u32 = vec3<Infer>(Expr(1_u), Expr(2_u), Expr(3_u));
-    auto* vec3_f32 = vec3<Infer>(Expr(1_f), Expr(2_f), Expr(3_f));
-    auto* vec3_f16 = vec3<Infer>(Expr(1_h), Expr(2_h), Expr(3_h));
+    auto* vec3_bool = Call<vec3<Infer>>(true, false, true);
+    auto* vec3_i32 = Call<vec3<Infer>>(1_i, 2_i, 3_i);
+    auto* vec3_u32 = Call<vec3<Infer>>(1_u, 2_u, 3_u);
+    auto* vec3_f32 = Call<vec3<Infer>>(1_f, 2_f, 3_f);
+    auto* vec3_f16 = Call<vec3<Infer>>(1_h, 2_h, 3_h);
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2128,11 +2124,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalars) 
 TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromVec3) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec3_bool = vec3<Infer>(vec3<bool>(true, false, true));
-    auto* vec3_i32 = vec3<Infer>(vec3<i32>(1_i, 2_i, 3_i));
-    auto* vec3_u32 = vec3<Infer>(vec3<u32>(1_u, 2_u, 3_u));
-    auto* vec3_f32 = vec3<Infer>(vec3<f32>(1_f, 2_f, 3_f));
-    auto* vec3_f16 = vec3<Infer>(vec3<f16>(1_h, 2_h, 3_h));
+    auto* vec3_bool = Call<vec3<Infer>>(Call<vec3<bool>>(true, false, true));
+    auto* vec3_i32 = Call<vec3<Infer>>(Call<vec3<i32>>(1_i, 2_i, 3_i));
+    auto* vec3_u32 = Call<vec3<Infer>>(Call<vec3<u32>>(1_u, 2_u, 3_u));
+    auto* vec3_f32 = Call<vec3<Infer>>(Call<vec3<f32>>(1_f, 2_f, 3_f));
+    auto* vec3_f16 = Call<vec3<Infer>>(Call<vec3<f16>>(1_h, 2_h, 3_h));
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2157,11 +2153,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromVec3) {
 TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalarAndVec2) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec3_bool = vec3<Infer>(Expr(true), vec2<bool>(false, true));
-    auto* vec3_i32 = vec3<Infer>(Expr(1_i), vec2<i32>(2_i, 3_i));
-    auto* vec3_u32 = vec3<Infer>(Expr(1_u), vec2<u32>(2_u, 3_u));
-    auto* vec3_f32 = vec3<Infer>(Expr(1_f), vec2<f32>(2_f, 3_f));
-    auto* vec3_f16 = vec3<Infer>(Expr(1_h), vec2<f16>(2_h, 3_h));
+    auto* vec3_bool = Call<vec3<Infer>>(true, Call<vec2<bool>>(false, true));
+    auto* vec3_i32 = Call<vec3<Infer>>(1_i, Call<vec2<i32>>(2_i, 3_i));
+    auto* vec3_u32 = Call<vec3<Infer>>(1_u, Call<vec2<u32>>(2_u, 3_u));
+    auto* vec3_f32 = Call<vec3<Infer>>(1_f, Call<vec2<f32>>(2_f, 3_f));
+    auto* vec3_f16 = Call<vec3<Infer>>(1_h, Call<vec2<f16>>(2_h, 3_h));
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2186,11 +2182,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalarAnd
 TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalars) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec4_bool = vec4<Infer>(Expr(true), Expr(false), Expr(true), Expr(false));
-    auto* vec4_i32 = vec4<Infer>(Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i));
-    auto* vec4_u32 = vec4<Infer>(Expr(1_u), Expr(2_u), Expr(3_u), Expr(4_u));
-    auto* vec4_f32 = vec4<Infer>(Expr(1_f), Expr(2_f), Expr(3_f), Expr(4_f));
-    auto* vec4_f16 = vec4<Infer>(Expr(1_h), Expr(2_h), Expr(3_h), Expr(4_h));
+    auto* vec4_bool = Call<vec4<Infer>>(true, false, true, false);
+    auto* vec4_i32 = Call<vec4<Infer>>(1_i, 2_i, 3_i, 4_i);
+    auto* vec4_u32 = Call<vec4<Infer>>(1_u, 2_u, 3_u, 4_u);
+    auto* vec4_f32 = Call<vec4<Infer>>(1_f, 2_f, 3_f, 4_f);
+    auto* vec4_f16 = Call<vec4<Infer>>(1_h, 2_h, 3_h, 4_h);
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2215,11 +2211,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalars) 
 TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec4) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec4_bool = vec4<Infer>(vec4<bool>(true, false, true, false));
-    auto* vec4_i32 = vec4<Infer>(vec4<i32>(1_i, 2_i, 3_i, 4_i));
-    auto* vec4_u32 = vec4<Infer>(vec4<u32>(1_u, 2_u, 3_u, 4_u));
-    auto* vec4_f32 = vec4<Infer>(vec4<f32>(1_f, 2_f, 3_f, 4_f));
-    auto* vec4_f16 = vec4<Infer>(vec4<f16>(1_h, 2_h, 3_h, 4_h));
+    auto* vec4_bool = Call<vec4<Infer>>(Call<vec4<bool>>(true, false, true, false));
+    auto* vec4_i32 = Call<vec4<Infer>>(Call<vec4<i32>>(1_i, 2_i, 3_i, 4_i));
+    auto* vec4_u32 = Call<vec4<Infer>>(Call<vec4<u32>>(1_u, 2_u, 3_u, 4_u));
+    auto* vec4_f32 = Call<vec4<Infer>>(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f));
+    auto* vec4_f16 = Call<vec4<Infer>>(Call<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2244,11 +2240,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec4) {
 TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalarAndVec3) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec4_bool = vec4<Infer>(Expr(true), vec3<bool>(false, true, false));
-    auto* vec4_i32 = vec4<Infer>(Expr(1_i), vec3<i32>(2_i, 3_i, 4_i));
-    auto* vec4_u32 = vec4<Infer>(Expr(1_u), vec3<u32>(2_u, 3_u, 4_u));
-    auto* vec4_f32 = vec4<Infer>(Expr(1_f), vec3<f32>(2_f, 3_f, 4_f));
-    auto* vec4_f16 = vec4<Infer>(Expr(1_h), vec3<f16>(2_h, 3_h, 4_h));
+    auto* vec4_bool = Call<vec4<Infer>>(true, Call<vec3<bool>>(false, true, false));
+    auto* vec4_i32 = Call<vec4<Infer>>(1_i, Call<vec3<i32>>(2_i, 3_i, 4_i));
+    auto* vec4_u32 = Call<vec4<Infer>>(1_u, Call<vec3<u32>>(2_u, 3_u, 4_u));
+    auto* vec4_f32 = Call<vec4<Infer>>(1_f, Call<vec3<f32>>(2_f, 3_f, 4_f));
+    auto* vec4_f16 = Call<vec4<Infer>>(1_h, Call<vec3<f16>>(2_h, 3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2273,11 +2269,12 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalarAnd
 TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec2AndVec2) {
     Enable(builtin::Extension::kF16);
 
-    auto* vec4_bool = vec4<Infer>(vec2<bool>(true, false), vec2<bool>(true, false));
-    auto* vec4_i32 = vec4<Infer>(vec2<i32>(1_i, 2_i), vec2<i32>(3_i, 4_i));
-    auto* vec4_u32 = vec4<Infer>(vec2<u32>(1_u, 2_u), vec2<u32>(3_u, 4_u));
-    auto* vec4_f32 = vec4<Infer>(vec2<f32>(1_f, 2_f), vec2<f32>(3_f, 4_f));
-    auto* vec4_f16 = vec4<Infer>(vec2<f16>(1_h, 2_h), vec2<f16>(3_h, 4_h));
+    auto* vec4_bool =
+        Call<vec4<Infer>>(Call<vec2<bool>>(true, false), Call<vec2<bool>>(true, false));
+    auto* vec4_i32 = Call<vec4<Infer>>(Call<vec2<i32>>(1_i, 2_i), Call<vec2<i32>>(3_i, 4_i));
+    auto* vec4_u32 = Call<vec4<Infer>>(Call<vec2<u32>>(1_u, 2_u), Call<vec2<u32>>(3_u, 4_u));
+    auto* vec4_f32 = Call<vec4<Infer>>(Call<vec2<f32>>(1_f, 2_f), Call<vec2<f32>>(3_f, 4_f));
+    auto* vec4_f16 = Call<vec4<Infer>>(Call<vec2<f16>>(1_h, 2_h), Call<vec2<f16>>(3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2300,9 +2297,9 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec2AndVe
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVecNoArgs) {
-    auto* v2 = vec2<Infer>();
-    auto* v3 = vec3<Infer>();
-    auto* v4 = vec4<Infer>();
+    auto* v2 = Call<vec2<Infer>>();
+    auto* v3 = Call<vec3<Infer>>();
+    auto* v4 = Call<vec4<Infer>>();
 
     GlobalConst("v2", v2);
     GlobalConst("v3", v3);
@@ -2409,8 +2406,8 @@ constexpr MatrixParams MatrixParamsFor() {
         DataType<T>::Name,
         DataType<T>::AST,
         DataType<T>::ExprFromDouble,
-        DataType<tint::resolver::builder::vec<R, T>>::AST,
-        DataType<tint::resolver::builder::mat<C, R, T>>::AST,
+        DataType<vec<R, T>>::AST,
+        DataType<mat<C, R, T>>::AST,
     };
 }
 
@@ -2776,7 +2773,7 @@ TEST_P(MatrixConstructorTest, ElementTypeAlias_Success) {
 
 TEST_F(ResolverValueConstructorValidationTest, MatrixConstructor_ArgumentTypeAlias_Error) {
     auto* alias = Alias("VectorUnsigned2", ty.vec2<u32>());
-    auto* tc = Call(Source{{12, 34}}, ty.mat2x2<f32>(), Call(ty.Of(alias)), vec2<f32>());
+    auto* tc = Call(Source{{12, 34}}, ty.mat2x2<f32>(), Call(ty.Of(alias)), Call<vec2<f32>>());
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2973,12 +2970,6 @@ INSTANTIATE_TEST_SUITE_P(ResolverValueConstructorValidationTest,
 namespace StructConstructor {
 using builder::CreatePtrs;
 using builder::CreatePtrsFor;
-using builder::mat2x2;
-using builder::mat3x3;
-using builder::mat4x4;
-using builder::vec2;
-using builder::vec3;
-using builder::vec4;
 
 constexpr CreatePtrs all_types[] = {
     CreatePtrsFor<bool>(),         //
@@ -3170,7 +3161,7 @@ TEST_F(ResolverValueConstructorValidationTest, NonConstructibleType_Sampler) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, BuilinTypeConstructorAsStatement) {
-    WrapInFunction(CallStmt(vec2<f32>(Source{{12, 34}}, 1_f, 2_f)));
+    WrapInFunction(CallStmt(Call<vec2<f32>>(Source{{12, 34}}, 1_f, 2_f)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: value constructor evaluated but not used");

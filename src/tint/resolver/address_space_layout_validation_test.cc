@@ -17,10 +17,11 @@
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverAddressSpaceLayoutValidationTest = ResolverTest;
 
@@ -430,7 +431,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Alias("Inner", ty.array(ty.vec2<f32>(), 10_u));
+    Alias("Inner", ty.array<vec2<f32>, 10>());
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
@@ -739,7 +740,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStrid
 
     Structure(Source{{12, 34}}, "Outer",
               utils::Vector{
-                  Member("arr", ty.array(ty.vec3<f16>(), 10_u)),
+                  Member("arr", ty.array<vec3<f16>, 10>()),
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),

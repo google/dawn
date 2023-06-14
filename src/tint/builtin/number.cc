@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/number.h"
+#include "src/tint/builtin/number.h"
 
 #include <algorithm>
 #include <cmath>
@@ -345,7 +345,7 @@ uint16_t f16::BitsRepresentation() const {
 }
 
 // static
-Number<detail::NumberKindF16> f16::FromBits(uint16_t bits) {
+Number<tint::detail::NumberKindF16> f16::FromBits(uint16_t bits) {
     // Assert we use binary32 (i.e. float) as underlying type, which has 4 bytes.
     static_assert(std::is_same<f16::type, float>());
 

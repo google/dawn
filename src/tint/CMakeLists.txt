@@ -58,14 +58,14 @@ endfunction()
 add_library(tint_diagnostic_utils
   debug.cc
   debug.h
-  source.h
-  source.cc
   diagnostic/diagnostic.cc
   diagnostic/diagnostic.h
   diagnostic/formatter.cc
   diagnostic/formatter.h
   diagnostic/printer.cc
   diagnostic/printer.h
+  source.cc
+  source.h
   utils/debugger.cc
   utils/debugger.h
   utils/unicode.cc
@@ -232,6 +232,9 @@ list(APPEND TINT_LIB_SRCS
   ast/while_statement.h
   ast/workgroup_attribute.cc
   ast/workgroup_attribute.h
+  builtin/fluent_types.h
+  builtin/number.cc
+  builtin/number.h
   clone_context.cc
   clone_context.h
   constant/clone_context.h
@@ -255,8 +258,6 @@ list(APPEND TINT_LIB_SRCS
   inspector/resource_binding.h
   inspector/scalar.cc
   inspector/scalar.h
-  number.cc
-  number.h
   program_builder.cc
   program_builder.h
   program_id.cc
@@ -955,6 +956,7 @@ if(TINT_BUILD_TESTS)
     ast/variable_test.cc
     ast/while_statement_test.cc
     ast/workgroup_attribute_test.cc
+    builtin/number_test.cc
     clone_context_test.cc
     constant/composite_test.cc
     constant/manager_test.cc
@@ -965,7 +967,6 @@ if(TINT_BUILD_TESTS)
     diagnostic/diagnostic_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
-    number_test.cc
     program_builder_test.cc
     program_test.cc
     reflection_test.cc

@@ -18,6 +18,8 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/atomic.h"
 
+using namespace tint::builtin::fluent_types;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -112,7 +114,7 @@ TEST_F(ResolverIsStorableTest, Struct_AllMembersStorable) {
 TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
     Structure("S", utils::Vector{
                        Member("a", ty.i32()),
-                       Member("b", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
+                       Member("b", ty.ptr<private_, i32>()),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -135,11 +137,10 @@ TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
-    auto* non_storable =
-        Structure("nonstorable", utils::Vector{
-                                     Member("a", ty.i32()),
-                                     Member("b", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
-                                 });
+    auto* non_storable = Structure("nonstorable", utils::Vector{
+                                                      Member("a", ty.i32()),
+                                                      Member("b", ty.ptr<private_, i32>()),
+                                                  });
     Structure("S", utils::Vector{
                        Member("a", ty.i32()),
                        Member("b", ty.Of(non_storable)),

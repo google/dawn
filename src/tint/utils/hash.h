@@ -209,7 +209,7 @@ size_t Hash(const ARGS&... args) {
 ///          The returned hash is dependent on the order of the arguments.
 template <typename... ARGS>
 size_t HashCombine(size_t hash, const ARGS&... values) {
-    constexpr size_t offset = detail::HashCombineOffset<sizeof(size_t)>::value();
+    constexpr size_t offset = utils::detail::HashCombineOffset<sizeof(size_t)>::value();
     ((hash ^= Hash(values) + (offset ^ (hash >> 2))), ...);
     return hash;
 }

@@ -15,7 +15,8 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::writer::hlsl {
 namespace {
@@ -89,7 +90,7 @@ using HlslImportData_SingleVectorParamTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_SingleVectorParamTest, FloatVector) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(0.1_f, 0.2_f, 0.3_f));
+    auto* expr = Call(param.name, Call<vec3<f32>>(0.1_f, 0.2_f, 0.3_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -152,7 +153,7 @@ using HlslImportData_DualParam_VectorTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_DualParam_VectorTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f));
+    auto* expr = Call(param.name, Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(4_f, 5_f, 6_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -215,8 +216,8 @@ using HlslImportData_TripleParam_VectorTest = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_TripleParam_VectorTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f),
-                      vec3<f32>(7_f, 8_f, 9_f));
+    auto* expr = Call(param.name, Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(4_f, 5_f, 6_f),
+                      Call<vec3<f32>>(7_f, 8_f, 9_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -279,7 +280,7 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Scalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Vector) {
-    GlobalVar("v", vec3<f32>(2_f), builtin::AddressSpace::kPrivate);
+    GlobalVar("v", Call<vec3<f32>>(2_f), builtin::AddressSpace::kPrivate);
 
     auto* expr = Call("quantizeToF16", "v");
     WrapInFunction(expr);

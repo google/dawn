@@ -35,7 +35,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength::BufferSizeIntrinsic);
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::ast::transform {
 
@@ -112,7 +113,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                        b.Param("buffer",
                                b.ty.ptr(buffer_type->AddressSpace(), type, buffer_type->Access()),
                                utils::Vector{disable_validation}),
-                       b.Param("result", b.ty.ptr(builtin::AddressSpace::kFunction, b.ty.u32())),
+                       b.Param("result", b.ty.ptr<function, u32>()),
                    },
                    b.ty.void_(), nullptr,
                    utils::Vector{
