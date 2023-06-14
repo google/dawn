@@ -124,11 +124,8 @@ namespace dawn::wire {
         //* Some commands don't set any members.
         DAWN_UNUSED(mutable_record);
 
-        //* Zero out any non-serializable values as they won't be set
-        {% for member in members if member.skip_serialize %}
-            {% set memberName = as_varName(member.name) %}
-            memset(&mutable_record->{{ memberName }}, 0, sizeof(mutable_record->{{ memberName }}));
-        {% endfor %}
+        //* Clear the entire structure to make optional handling simpler.
+        memset(mutable_record, 0, sizeof({{WGPU}}{{ name }}{{ Cmd }}));
 
         //* Pass by Value handling. This mirrors WireCmd with some differences between
         //* convert_member and serialize_member
@@ -136,14 +133,23 @@ namespace dawn::wire {
             {% set memberName = as_varName(member.name) %}
             {% set protoMember = as_protobufMemberName(member.name) %}
 
-            //* Major WireCmd Divergence: Some member values are hardcoded in dawn_lpm.json
-            {% if overrides_key in overrides and member.name.canonical_case() in overrides[overrides_key] %}
-                mutable_record->{{ memberName }} = {{ overrides[overrides_key][member.name.canonical_case()] }};
-            {%- elif member.type.category == "function pointer" or member.type.name.get() == "void *" -%}
-                mutable_record->{{ memberName }} = nullptr;
+            {% if member.optional %}
+                if ( proto_record.has_{{ protoMember }}() ) {
             {% else %}
-                {{ convert_member(member, 'proto_record.' + protoMember, "mutable_record->" + memberName) }}
+                {
             {% endif %}
+                //* Major WireCmd Divergence: Some member values are hardcoded in dawn_lpm.json
+                {% if overrides_key in overrides and
+                   member.name.canonical_case() in overrides[overrides_key] %}
+                    mutable_record->{{ memberName }} =
+                        {{- overrides[overrides_key][member.name.canonical_case()] }};
+                {%- elif member.type.category == "function pointer" or
+                    member.type.name.get() == "void *" -%}
+                    mutable_record->{{ memberName }} = nullptr;
+                {% else %}
+                    {{ convert_member(member, 'proto_record.' + protoMember, "mutable_record->" + memberName) }}
+                {% endif %}
+                }
         {% endfor %}
 
         //* Chained structures are currently not supported.
@@ -151,7 +157,8 @@ namespace dawn::wire {
             mutable_record->nextInChain = nullptr;
         {% endif %}
 
-        //* Special handling for strings for now.
+        //* TODO(1374747): Create a string type that can be either
+        //* random bytes or the fixed entrypoint name.
         {% for member in members if member.length == "strlen" %}
             {% set memberName = as_varName(member.name) %}
             {
@@ -171,27 +178,33 @@ namespace dawn::wire {
             //* an arbitrary size, and are difficult to work with in protobuf.
             {% if member.type.name.get() == 'uint8_t' %}
                 {
-                    const size_t kDataBufferLength = 128;
-                    auto memberLength = kDataBufferLength;
+                const size_t kDataBufferLength = 128;
+                auto memberLength = kDataBufferLength;
 
-                    {{member_type(member)}}* memberBuffer;
-                    WIRE_TRY(serializeBuffer->NextN(memberLength, &memberBuffer));
-                    memset(memberBuffer, 0, kDataBufferLength);
-                    mutable_record->{{ memberName }} = memberBuffer;
+                {{member_type(member)}}* memberBuffer;
+                WIRE_TRY(serializeBuffer->NextN(memberLength, &memberBuffer));
+                memset(memberBuffer, 0, kDataBufferLength);
+                mutable_record->{{ memberName }} = memberBuffer;
 
-                    {% if member.length != "constant" -%}
-                        mutable_record->{{ member.length.name.camelCase() }} = memberLength;
-                    {%- endif %}
+                {% if member.length != "constant" -%}
+                    mutable_record->{{ member.length.name.camelCase() }} = memberLength;
+                {%- endif %}
                 }
             {% else %}
-                {
+                {% set is_fixed_array = true if (member.length == "constant" and member.constant_length > 1) else false %}
+
+                {% if member.optional and not is_fixed_array %}
+                    if ( proto_record.has_{{ protoMember }}() ) {
+                {% else %}
+                    {
+                {% endif %}
                     auto memberLength = static_cast<unsigned int>({{member_length(member, "proto_record." + protoMember)}});
 
                     //* Needed for the edge cases in "external texture descriptor"
                     //* where we want to fuzzer to fill the fixed-length float arrays
                     //* with values, but the length of the protobuf buffer might not
                     //* be large enough for "src transfer function parameters".
-                    {% if member.length == "constant" and member.constant_length > 1 %}
+                    {% if is_fixed_array %}
                         memberLength = std::min(memberLength,  static_cast<unsigned int>({{"proto_record." + protoMember}}().size()));
                     {% endif %}
 
@@ -210,7 +223,7 @@ namespace dawn::wire {
                     {% if member.length != "constant" -%}
                         mutable_record->{{ member.length.name.camelCase() }} = memberLength;
                     {%- endif %}
-                }
+                    }
             {% endif %}
         {% endfor %}
 
