@@ -197,6 +197,8 @@ T Texture::GetD3D11TextureDesc() const {
     // To sample from a depth or stencil texture, we need to create a typeless texture.
     bool needsTypelessFormat =
         GetFormat().HasDepthOrStencil() && (GetUsage() & wgpu::TextureUsage::TextureBinding);
+    // We need to use the typeless format if view format reinterpretation is required.
+    needsTypelessFormat |= GetViewFormats().any();
     desc.Format = needsTypelessFormat ? d3d::DXGITypelessTextureFormat(GetFormat().format)
                                       : d3d::DXGITextureFormat(GetFormat().format);
     desc.Usage = mIsStaging ? D3D11_USAGE_STAGING : D3D11_USAGE_DEFAULT;
