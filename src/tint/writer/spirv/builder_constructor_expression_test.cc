@@ -15,11 +15,11 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::writer::spirv {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using SpvBuilderConstructorTest = TestHelper;
 

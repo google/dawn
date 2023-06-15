@@ -14,11 +14,11 @@
 
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::writer::spirv {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using SpvGeneratorImplTest_Access = SpvGeneratorImplTest;
 

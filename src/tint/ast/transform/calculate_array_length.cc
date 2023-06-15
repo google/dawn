@@ -35,12 +35,11 @@
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength::BufferSizeIntrinsic);
 
+namespace tint::ast::transform {
+namespace {
+
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
-
-namespace tint::ast::transform {
-
-namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* fn : program->AST().Functions()) {

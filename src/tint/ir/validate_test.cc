@@ -22,11 +22,11 @@
 #include "src/tint/type/pointer.h"
 #include "src/tint/type/struct.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::ir {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using IR_ValidateTest = IRTestHelper;
 

@@ -14,11 +14,11 @@
 
 #include "src/tint/resolver/const_eval_test.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 TEST_F(ResolverConstEvalTest, StructMemberAccess) {
     Structure("Inner", utils::Vector{

@@ -24,11 +24,11 @@
 #include "src/tint/ast/transform/unshadow.h"
 #include "src/tint/program_builder.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::ast::transform {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using DecomposeStridedMatrixTest = TransformTest;
 

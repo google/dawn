@@ -27,11 +27,11 @@
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture::NewBindingPoints);
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::ast::transform {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 bool ShouldRun(const Program* program) {
     auto ext = program->Types().Find<type::ExternalTexture>();

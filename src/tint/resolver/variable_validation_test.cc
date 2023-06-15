@@ -17,11 +17,11 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/texture_dimension.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 struct ResolverVariableValidationTest : public resolver::TestHelper, public testing::Test {};
 

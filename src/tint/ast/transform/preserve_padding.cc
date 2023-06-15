@@ -26,10 +26,10 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PreservePadding);
 
+namespace tint::ast::transform {
+
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
-
-namespace tint::ast::transform {
 
 PreservePadding::PreservePadding() = default;
 

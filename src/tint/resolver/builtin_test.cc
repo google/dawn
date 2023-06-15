@@ -43,11 +43,11 @@
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ExpressionList = utils::Vector<const ast::Expression*, 8>;
 

@@ -23,13 +23,12 @@
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/utils/transform.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
 
 using ::testing::ElementsAre;
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 template <typename T>
 class ResolverDependencyGraphTestWithParam : public ResolverTestWithParam<T> {

@@ -15,11 +15,11 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::writer::msl {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using MslGeneratorImplTest = TestHelper;
 

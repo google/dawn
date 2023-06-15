@@ -16,11 +16,11 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::writer::msl {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using MslGeneratorImplTest = TestHelper;
 

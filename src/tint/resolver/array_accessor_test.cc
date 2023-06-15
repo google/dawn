@@ -19,11 +19,11 @@
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/type/reference.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverIndexAccessorTest = ResolverTest;
 

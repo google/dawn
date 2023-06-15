@@ -14,11 +14,11 @@
 
 #include "src/tint/resolver/const_eval_test.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 TEST_F(ResolverConstEvalTest, Vec3_Index) {
     auto* expr = IndexAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), 2_i);

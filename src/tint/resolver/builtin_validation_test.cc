@@ -19,11 +19,11 @@
 #include "src/tint/sem/value_constructor.h"
 #include "src/tint/utils/string_stream.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverBuiltinValidationTest = ResolverTest;
 

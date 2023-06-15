@@ -22,11 +22,11 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 class ResolverFunctionValidationTest : public TestHelper, public testing::Test {};
 

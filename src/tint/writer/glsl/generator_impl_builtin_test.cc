@@ -19,13 +19,12 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
-using ::testing::HasSubstr;
-
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::writer::glsl {
 namespace {
+
+using ::testing::HasSubstr;
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using GlslGeneratorImplTest_Builtin = TestHelper;
 

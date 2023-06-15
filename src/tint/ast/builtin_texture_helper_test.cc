@@ -20,11 +20,11 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/texture_dimension.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::ast::test {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 utils::StringStream& operator<<(utils::StringStream& out, const TextureKind& kind) {
     switch (kind) {

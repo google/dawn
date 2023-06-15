@@ -40,14 +40,13 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/texture_dimension.h"
 
-using ::testing::ElementsAre;
-using ::testing::HasSubstr;
-
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using ::testing::ElementsAre;
+using ::testing::HasSubstr;
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverValidationTest = ResolverTest;
 

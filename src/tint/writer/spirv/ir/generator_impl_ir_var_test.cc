@@ -15,11 +15,11 @@
 #include "src/tint/type/pointer.h"
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::writer::spirv {
 namespace {
+
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 TEST_F(SpvGeneratorImplTest, FunctionVar_NoInit) {
     auto* func = b.Function("foo", ty.void_());

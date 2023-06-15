@@ -15,13 +15,12 @@
 #include "gmock/gmock.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
-
 namespace tint::writer::hlsl {
 namespace {
 
 using ::testing::HasSubstr;
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
 
 using HlslGeneratorImplTest_Constructor = TestHelper;
 

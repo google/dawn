@@ -22,10 +22,10 @@
 
 #include "gmock/gmock.h"
 
+namespace tint::resolver {
+
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
-
-namespace tint::resolver {
 
 // Helpers and typedefs
 template <typename T>
