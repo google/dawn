@@ -45,18 +45,24 @@ TEST_F(IR_ReturnTest, Fail_NullValue) {
 }
 
 TEST_F(IR_ReturnTest, ImplicitNoValue) {
-    auto* ret = b.Return(b.Function("myfunc", ty.void_()));
+    auto* func = b.Function("myfunc", ty.void_());
+    auto* ret = b.Return(func);
+    ASSERT_EQ(ret->Func(), func);
     EXPECT_TRUE(ret->Args().IsEmpty());
     EXPECT_EQ(ret->Value(), nullptr);
+    EXPECT_THAT(func->Usages(), testing::UnorderedElementsAre(Usage{ret, 0u}));
 }
 
 TEST_F(IR_ReturnTest, WithValue) {
+    auto* func = b.Function("myfunc", ty.i32());
     auto* val = b.Constant(42_i);
-    auto* ret = b.Return(b.Function("myfunc", ty.i32()), val);
+    auto* ret = b.Return(func, val);
+    ASSERT_EQ(ret->Func(), func);
     ASSERT_EQ(ret->Args().Length(), 1u);
     EXPECT_EQ(ret->Args()[0], val);
     EXPECT_EQ(ret->Value(), val);
-    EXPECT_THAT(val->Usages(), testing::UnorderedElementsAre(Usage{ret, 0u}));
+    EXPECT_THAT(func->Usages(), testing::UnorderedElementsAre(Usage{ret, 0u}));
+    EXPECT_THAT(val->Usages(), testing::UnorderedElementsAre(Usage{ret, 1u}));
 }
 
 }  // namespace

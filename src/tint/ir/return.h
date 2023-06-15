@@ -40,13 +40,13 @@ class Return : public utils::Castable<Return, Branch> {
     ~Return() override;
 
     /// @returns the function being returned
-    Function* Func() { return func_; }
+    Function* Func() { return operands_[0]->As<Function>(); }
 
     /// @returns the return value, or nullptr
-    ir::Value* Value() const { return operands_.Length() > 0 ? operands_[0] : nullptr; }
+    ir::Value* Value() const { return operands_.Length() > 1 ? operands_[1] : nullptr; }
 
-  private:
-    Function* func_ = nullptr;
+    /// @returns the branch arguments
+    utils::Slice<ir::Value* const> Args() override { return operands_.Slice().Offset(1); }
 };
 
 }  // namespace tint::ir
