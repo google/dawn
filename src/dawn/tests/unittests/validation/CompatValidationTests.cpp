@@ -882,6 +882,32 @@ TEST_F(CompatValidationTest,
         });
 }
 
+TEST_F(CompatValidationTest, CanNotCreateBGRA8UnormSRGBTexture) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {1, 1, 1};
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.format = wgpu::TextureFormat::BGRA8UnormSrgb;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor),
+                        testing::HasSubstr("not supported in compatibility mode"));
+}
+
+TEST_F(CompatValidationTest, CanNotCreateBGRA8UnormTextureWithBGRA8UnormSrgbView) {
+    constexpr wgpu::TextureFormat viewFormat = wgpu::TextureFormat::BGRA8UnormSrgb;
+
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {1, 1, 1};
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.format = wgpu::TextureFormat::BGRA8Unorm;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+    descriptor.viewFormatCount = 1;
+    descriptor.viewFormats = &viewFormat;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor),
+                        testing::HasSubstr("not supported in compatibility mode"));
+}
+
 class CompatCompressedTextureToBufferCopyValidationTests : public CompatValidationTest {
   protected:
     WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,

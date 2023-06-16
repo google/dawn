@@ -796,7 +796,8 @@ ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat f
     DAWN_INVALID_IF(index >= mFormatTable.size(), "Unknown texture format %s.", format);
 
     const Format* internalFormat = &mFormatTable[index];
-    DAWN_INVALID_IF(!internalFormat->isSupported, "Unsupported texture format %s.", format);
+    DAWN_INVALID_IF(!internalFormat->IsSupported(), "Unsupported texture format %s, reason: %s.",
+                    format, internalFormat->unsupportedReason);
 
     return internalFormat;
 }
@@ -804,13 +805,13 @@ ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat f
 const Format& DeviceBase::GetValidInternalFormat(wgpu::TextureFormat format) const {
     FormatIndex index = ComputeFormatIndex(format);
     ASSERT(index < mFormatTable.size());
-    ASSERT(mFormatTable[index].isSupported);
+    ASSERT(mFormatTable[index].IsSupported());
     return mFormatTable[index];
 }
 
 const Format& DeviceBase::GetValidInternalFormat(FormatIndex index) const {
     ASSERT(index < mFormatTable.size());
-    ASSERT(mFormatTable[index].isSupported);
+    ASSERT(mFormatTable[index].IsSupported());
     return mFormatTable[index];
 }
 

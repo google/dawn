@@ -177,7 +177,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 }
 
 const GLFormat& Device::GetGLFormat(const Format& format) {
-    ASSERT(format.isSupported);
+    ASSERT(format.IsSupported());
     ASSERT(format.GetIndex() < mFormatTable.size());
 
     const GLFormat& result = mFormatTable[format.GetIndex()];
