@@ -27,6 +27,13 @@ TEST_F(IR_DiscardTest, Discard) {
     ASSERT_TRUE(inst->Is<ir::Discard>());
 }
 
+TEST_F(IR_DiscardTest, Result) {
+    auto* inst = b.Discard();
+
+    EXPECT_FALSE(inst->HasResults());
+    EXPECT_FALSE(inst->HasMultiResults());
+}
+
 TEST_F(IR_DiscardTest, Fail_NullType) {
     EXPECT_FATAL_FAILURE({ Discard d(nullptr); }, "");
 }

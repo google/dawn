@@ -27,7 +27,7 @@ class Block;
 namespace tint::ir {
 
 /// A branch instruction.
-class Branch : public utils::Castable<Branch, OperandInstruction<1>> {
+class Branch : public utils::Castable<Branch, OperandInstruction<1, 0>> {
   public:
     ~Branch() override;
 

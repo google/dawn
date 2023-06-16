@@ -29,6 +29,7 @@ Swizzle::Swizzle(const type::Type* ty, Value* object, utils::VectorRef<uint32_t>
     TINT_ASSERT(IR, indices.Length() <= 4);
 
     AddOperand(Swizzle::kObjectOperandOffset, object);
+    AddResult(this);
 
     for (auto idx : indices_) {
         TINT_ASSERT(IR, idx < 4);

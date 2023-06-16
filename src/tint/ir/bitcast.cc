@@ -21,6 +21,8 @@ namespace tint::ir {
 
 Bitcast::Bitcast(const type::Type* ty, Value* val) : Base(ty) {
     AddOperand(Bitcast::kValueOperandOffset, val);
+
+    AddResult(this);
 }
 
 Bitcast::~Bitcast() = default;

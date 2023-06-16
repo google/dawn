@@ -38,6 +38,12 @@ TEST_F(IR_VarTest, Fail_NullType) {
         "");
 }
 
+TEST_F(IR_VarTest, Results) {
+    auto* var = b.Var(ty.ptr<function, f32>());
+    EXPECT_TRUE(var->HasResults());
+    EXPECT_FALSE(var->HasMultiResults());
+}
+
 TEST_F(IR_VarTest, Initializer_Usage) {
     Module mod;
     Builder b{mod};

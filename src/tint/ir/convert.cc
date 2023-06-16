@@ -24,6 +24,8 @@ namespace tint::ir {
 
 Convert::Convert(const type::Type* to_type, Value* value) : Base(to_type) {
     AddOperand(Convert::kValueOperandOffset, value);
+
+    AddResult(this);
 }
 
 Convert::~Convert() = default;

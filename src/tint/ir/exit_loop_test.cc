@@ -34,6 +34,16 @@ TEST_F(IR_ExitLoopTest, Usage) {
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
 }
 
+TEST_F(IR_ExitLoopTest, Result) {
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+    auto* loop = b.Loop();
+    auto* e = b.ExitLoop(loop, arg1, arg2);
+
+    EXPECT_FALSE(e->HasResults());
+    EXPECT_FALSE(e->HasMultiResults());
+}
+
 TEST_F(IR_ExitLoopTest, Fail_NullLoop) {
     EXPECT_FATAL_FAILURE(
         {

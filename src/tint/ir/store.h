@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A store instruction in the IR.
-class Store : public utils::Castable<Store, OperandInstruction<2>> {
+class Store : public utils::Castable<Store, OperandInstruction<2, 0>> {
   public:
     /// The offset in Operands() for the `to` value
     static constexpr size_t kToOperandOffset = 0;

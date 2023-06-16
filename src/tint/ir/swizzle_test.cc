@@ -32,6 +32,17 @@ TEST_F(IR_SwizzleTest, SetsUsage) {
     EXPECT_THAT(var->Usages(), testing::UnorderedElementsAre(Usage{a, 0u}));
 }
 
+TEST_F(IR_SwizzleTest, Results) {
+    auto* var = b.Var(ty.ptr<function, i32>());
+    auto* a = b.Swizzle(mod.Types().i32(), var, {1u});
+
+    EXPECT_TRUE(a->HasResults());
+    EXPECT_FALSE(a->HasMultiResults());
+
+    auto results = a->Results();
+    EXPECT_EQ(results[0], a);
+}
+
 TEST_F(IR_SwizzleTest, Fail_NullType) {
     EXPECT_FATAL_FAILURE(
         {

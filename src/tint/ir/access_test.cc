@@ -35,6 +35,18 @@ TEST_F(IR_AccessTest, SetsUsage) {
     EXPECT_THAT(idx->Usages(), testing::UnorderedElementsAre(Usage{a, 1u}));
 }
 
+TEST_F(IR_AccessTest, Result) {
+    auto* type = ty.ptr<function, i32>();
+    auto* var = b.Var(type);
+    auto* idx = b.Constant(u32(1));
+    auto* a = b.Access(ty.i32(), var, idx);
+
+    auto results = a->Results();
+    EXPECT_TRUE(a->HasResults());
+    EXPECT_FALSE(a->HasMultiResults());
+    EXPECT_EQ(a, results[0]);
+}
+
 TEST_F(IR_AccessTest, Fail_NullType) {
     EXPECT_FATAL_FAILURE(
         {

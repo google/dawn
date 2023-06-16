@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A unary instruction in the IR.
-class Unary : public utils::Castable<Unary, OperandInstruction<1>> {
+class Unary : public utils::Castable<Unary, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;

@@ -30,6 +30,12 @@ TEST_F(IR_LoopTest, Parent) {
     EXPECT_EQ(loop->Merge()->Parent(), loop);
 }
 
+TEST_F(IR_LoopTest, Result) {
+    auto* loop = b.Loop();
+    EXPECT_FALSE(loop->HasResults());
+    EXPECT_FALSE(loop->HasMultiResults());
+}
+
 TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
     EXPECT_FATAL_FAILURE(
         {

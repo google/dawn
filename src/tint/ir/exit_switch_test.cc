@@ -34,6 +34,16 @@ TEST_F(IR_ExitSwitchTest, Usage) {
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
 }
 
+TEST_F(IR_ExitSwitchTest, Result) {
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+    auto* switch_ = b.Switch(true);
+    auto* e = b.ExitSwitch(switch_, arg1, arg2);
+
+    EXPECT_FALSE(e->HasResults());
+    EXPECT_FALSE(e->HasMultiResults());
+}
+
 TEST_F(IR_ExitSwitchTest, Fail_NullSwitch) {
     EXPECT_FATAL_FAILURE(
         {

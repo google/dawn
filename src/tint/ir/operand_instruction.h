@@ -20,8 +20,10 @@
 namespace tint::ir {
 
 /// An instruction in the IR that expects one or more operands.
-template <unsigned N>
-class OperandInstruction : public utils::Castable<OperandInstruction<N>, Instruction> {
+/// @tparam N the default number of operands
+/// @tparam R the default number of result values
+template <unsigned N, unsigned R>
+class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Instruction> {
   public:
     /// Destructor
     ~OperandInstruction() override = default;
@@ -40,6 +42,13 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N>, Instruc
         }
         return;
     }
+
+    /// @returns true if the instruction has result values
+    bool HasResults() { return !results_.IsEmpty(); }
+    /// @returns true if the instruction has multiple values
+    bool HasMultiResults() { return results_.Length() > 1; }
+    /// @returns the result values for this instruction
+    utils::VectorRef<Value*> Results() { return results_; }
 
   protected:
     /// Append a new operand to the operand list for this instruction.
@@ -65,8 +74,19 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N>, Instruc
         }
     }
 
+    /// Appends a result value to the instruction
+    /// @param value the value to append
+    void AddResult(Value* value) {
+        if (value) {
+            value->SetSource(this);
+        }
+        results_.Push(value);
+    }
+
     /// The operands to this instruction.
     utils::Vector<ir::Value*, N> operands_;
+    /// The results of this instruction.
+    utils::Vector<ir::Value*, R> results_;
 };
 
 }  // namespace tint::ir

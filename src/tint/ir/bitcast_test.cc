@@ -40,6 +40,15 @@ TEST_F(IR_BitcastTest, Bitcast) {
     EXPECT_EQ(4_i, val->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
+TEST_F(IR_BitcastTest, Result) {
+    auto* a = b.Bitcast(mod.Types().i32(), 4_i);
+
+    auto results = a->Results();
+    EXPECT_TRUE(a->HasResults());
+    EXPECT_FALSE(a->HasMultiResults());
+    EXPECT_EQ(a, results[0]);
+}
+
 TEST_F(IR_BitcastTest, Bitcast_Usage) {
     auto* inst = b.Bitcast(mod.Types().i32(), 4_i);
 

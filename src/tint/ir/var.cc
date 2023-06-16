@@ -24,6 +24,8 @@ Var::Var(const type::Pointer* ty) : type_(ty) {
 
     // Default to no initializer.
     AddOperand(Var::kInitializerOperandOffset, nullptr);
+
+    AddResult(this);
 }
 
 Var::~Var() = default;

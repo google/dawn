@@ -39,7 +39,7 @@ TEST_F(IR_StoreTest, CreateStore) {
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_StoreTest, Store_Usage) {
+TEST_F(IR_StoreTest, Usage) {
     auto* to = b.Discard();
     auto* inst = b.Store(to, 4_i);
 
@@ -48,6 +48,14 @@ TEST_F(IR_StoreTest, Store_Usage) {
 
     ASSERT_NE(inst->From(), nullptr);
     EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+}
+
+TEST_F(IR_StoreTest, Result) {
+    auto* to = b.Discard();
+    auto* inst = b.Store(to, 4_i);
+
+    EXPECT_FALSE(inst->HasResults());
+    EXPECT_FALSE(inst->HasMultiResults());
 }
 
 }  // namespace

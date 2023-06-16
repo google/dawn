@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A load instruction in the IR.
-class Load : public utils::Castable<Load, OperandInstruction<1>> {
+class Load : public utils::Castable<Load, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the from value
     static constexpr size_t kFromOperandOffset = 0;

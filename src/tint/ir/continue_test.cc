@@ -35,6 +35,17 @@ TEST_F(IR_ContinueTest, Usage) {
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{brk, 1u}));
 }
 
+TEST_F(IR_ContinueTest, Results) {
+    auto* loop = b.Loop();
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+
+    auto* brk = b.Continue(loop, arg1, arg2);
+
+    EXPECT_FALSE(brk->HasResults());
+    EXPECT_FALSE(brk->HasMultiResults());
+}
+
 TEST_F(IR_ContinueTest, Fail_NullLoop) {
     EXPECT_FATAL_FAILURE(
         {

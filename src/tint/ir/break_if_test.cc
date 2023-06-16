@@ -37,6 +37,17 @@ TEST_F(IR_BreakIfTest, Usage) {
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{brk, 2u}));
 }
 
+TEST_F(IR_BreakIfTest, Results) {
+    auto* loop = b.Loop();
+    auto* cond = b.Constant(true);
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+
+    auto* brk = b.BreakIf(cond, loop, arg1, arg2);
+    EXPECT_FALSE(brk->HasResults());
+    EXPECT_FALSE(brk->HasMultiResults());
+}
+
 TEST_F(IR_BreakIfTest, Fail_NullLoop) {
     EXPECT_FATAL_FAILURE(
         {

@@ -49,13 +49,22 @@ TEST_F(IR_UnaryTest, CreateNegation) {
     EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_UnaryTest, Unary_Usage) {
+TEST_F(IR_UnaryTest, Usage) {
     auto* inst = b.Negation(mod.Types().i32(), 4_i);
 
     EXPECT_EQ(inst->Kind(), Unary::Kind::kNegation);
 
     ASSERT_NE(inst->Val(), nullptr);
     EXPECT_THAT(inst->Val()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+}
+
+TEST_F(IR_UnaryTest, Result) {
+    auto* inst = b.Negation(mod.Types().i32(), 4_i);
+    EXPECT_TRUE(inst->HasResults());
+    EXPECT_FALSE(inst->HasMultiResults());
+
+    auto results = inst->Results();
+    EXPECT_EQ(results[0], inst);
 }
 
 TEST_F(IR_UnaryTest, Fail_NullType) {

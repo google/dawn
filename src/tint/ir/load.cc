@@ -26,6 +26,8 @@ Load::Load(Value* from) {
     result_type_ = from->Type()->UnwrapPtr();
 
     AddOperand(Load::kFromOperandOffset, from);
+
+    AddResult(this);
 }
 
 Load::~Load() = default;

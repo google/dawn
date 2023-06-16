@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// An access instruction in the IR.
-class Access : public utils::Castable<Access, OperandInstruction<3>> {
+class Access : public utils::Castable<Access, OperandInstruction<3, 1>> {
   public:
     /// The offset in Operands() for the object being accessed
     static constexpr size_t kObjectOperandOffset = 0;

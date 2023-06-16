@@ -26,6 +26,8 @@ UserCall::UserCall(const type::Type* ty, Function* func, utils::VectorRef<Value*
     : Base(ty) {
     AddOperand(UserCall::kFunctionOperandOffset, func);
     AddOperands(UserCall::kArgsOperandOffset, std::move(arguments));
+
+    AddResult(this);
 }
 
 UserCall::~UserCall() = default;

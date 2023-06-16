@@ -35,6 +35,15 @@ TEST_F(IR_BinaryTest, Fail_NullType) {
         "");
 }
 
+TEST_F(IR_BinaryTest, Result) {
+    auto* a = b.Add(mod.Types().i32(), 4_i, 2_i);
+
+    auto results = a->Results();
+    EXPECT_TRUE(a->HasResults());
+    EXPECT_FALSE(a->HasMultiResults());
+    EXPECT_EQ(a, results[0]);
+}
+
 TEST_F(IR_BinaryTest, CreateAnd) {
     auto* inst = b.And(mod.Types().i32(), 4_i, 2_i);
 

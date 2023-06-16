@@ -75,11 +75,19 @@ class Value : public utils::Castable<Value> {
     /// @param replacer a function which returns a replacement for a given use
     void ReplaceAllUsesWith(std::function<Value*(Usage use)> replacer);
 
+    /// Sets the source instruction for this value
+    /// @param inst the instruction to set
+    void SetSource(Instruction* inst) { source_ = inst; }
+
+    /// @returns the source instruction, if any
+    Instruction* Source() { return source_; }
+
   protected:
     /// Constructor
     Value();
 
   private:
+    Instruction* source_ = nullptr;
     utils::Hashset<Usage, 4, Usage::Hasher> uses_;
 };
 }  // namespace tint::ir

@@ -25,6 +25,8 @@ Binary::Binary(enum Kind kind, const type::Type* res_ty, Value* lhs, Value* rhs)
 
     AddOperand(Binary::kLhsOperandOffset, lhs);
     AddOperand(Binary::kRhsOperandOffset, rhs);
+
+    AddResult(this);
 }
 
 Binary::~Binary() = default;

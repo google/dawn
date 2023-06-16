@@ -30,6 +30,13 @@ TEST_F(IR_SwitchTest, Usage) {
     EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{switch_, 0u}));
 }
 
+TEST_F(IR_SwitchTest, Results) {
+    auto* cond = b.Constant(true);
+    auto* switch_ = b.Switch(cond);
+    EXPECT_FALSE(switch_->HasResults());
+    EXPECT_FALSE(switch_->HasMultiResults());
+}
+
 TEST_F(IR_SwitchTest, Parent) {
     auto* switch_ = b.Switch(1_i);
     b.Case(switch_, {Switch::CaseSelector{nullptr}});

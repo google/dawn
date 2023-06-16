@@ -29,6 +29,8 @@ Access::Access(const type::Type* ty, Value* object, utils::VectorRef<Value*> ind
 
     AddOperand(Access::kObjectOperandOffset, object);
     AddOperands(Access::kIndicesOperandOffset, std::move(indices));
+
+    AddResult(this);
 }
 
 Access::~Access() = default;

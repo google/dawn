@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A binary instruction in the IR.
-class Binary : public utils::Castable<Binary, OperandInstruction<2>> {
+class Binary : public utils::Castable<Binary, OperandInstruction<2, 1>> {
   public:
     /// The offset in Operands() for the LHS
     static constexpr size_t kLhsOperandOffset = 0;

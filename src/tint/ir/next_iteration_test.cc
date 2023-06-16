@@ -32,5 +32,12 @@ TEST_F(IR_NextIterationTest, Fail_NullLoop) {
         "");
 }
 
+TEST_F(IR_NextIterationTest, Result) {
+    auto* inst = b.NextIteration(b.Loop());
+
+    EXPECT_FALSE(inst->HasResults());
+    EXPECT_FALSE(inst->HasMultiResults());
+}
+
 }  // namespace
 }  // namespace tint::ir

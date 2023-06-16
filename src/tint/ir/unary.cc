@@ -23,6 +23,7 @@ Unary::Unary(enum Kind k, const type::Type* res_ty, Value* val) : kind_(k), resu
     TINT_ASSERT(IR, result_type_ != nullptr);
 
     AddOperand(Unary::kValueOperandOffset, val);
+    AddResult(this);
 }
 
 Unary::~Unary() = default;

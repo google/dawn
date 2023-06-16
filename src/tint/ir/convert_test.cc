@@ -32,5 +32,15 @@ TEST_F(IR_ConvertTest, Fail_NullToType) {
         "");
 }
 
+TEST_F(IR_ConvertTest, Results) {
+    auto* c = b.Convert(mod.Types().i32(), 1_u);
+
+    EXPECT_TRUE(c->HasResults());
+    EXPECT_FALSE(c->HasMultiResults());
+
+    auto results = c->Results();
+    EXPECT_EQ(results[0], c);
+}
+
 }  // namespace
 }  // namespace tint::ir

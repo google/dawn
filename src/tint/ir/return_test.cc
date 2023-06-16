@@ -45,5 +45,22 @@ TEST_F(IR_ReturnTest, WithValue) {
     EXPECT_THAT(val->Usages(), testing::UnorderedElementsAre(Usage{ret, 1u}));
 }
 
+TEST_F(IR_ReturnTest, Result) {
+    auto* vfunc = b.Function("vfunc", ty.void_());
+    auto* ifunc = b.Function("ifunc", ty.i32());
+
+    {
+        auto* ret1 = b.Return(vfunc);
+        EXPECT_FALSE(ret1->HasResults());
+        EXPECT_FALSE(ret1->HasMultiResults());
+    }
+
+    {
+        auto* ret2 = b.Return(ifunc, b.Constant(42_i));
+        EXPECT_FALSE(ret2->HasResults());
+        EXPECT_FALSE(ret2->HasMultiResults());
+    }
+}
+
 }  // namespace
 }  // namespace tint::ir

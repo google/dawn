@@ -29,6 +29,13 @@ TEST_F(IR_IfTest, Usage) {
     EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{if_, 0u}));
 }
 
+TEST_F(IR_IfTest, Result) {
+    auto* if_ = b.If(b.Constant(true));
+
+    EXPECT_FALSE(if_->HasResults());
+    EXPECT_FALSE(if_->HasMultiResults());
+}
+
 TEST_F(IR_IfTest, Parent) {
     auto* cond = b.Constant(true);
     auto* if_ = b.If(cond);

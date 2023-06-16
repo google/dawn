@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A Call instruction in the IR.
-class Call : public utils::Castable<Call, OperandInstruction<4>> {
+class Call : public utils::Castable<Call, OperandInstruction<4, 1>> {
   public:
     ~Call() override;
 

@@ -33,6 +33,18 @@ TEST_F(IR_ConstructTest, Usage) {
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{c, 1u}));
 }
 
+TEST_F(IR_ConstructTest, Result) {
+    auto* arg1 = b.Constant(true);
+    auto* arg2 = b.Constant(false);
+    auto* c = b.Construct(mod.Types().f32(), arg1, arg2);
+
+    EXPECT_TRUE(c->HasResults());
+    EXPECT_FALSE(c->HasMultiResults());
+
+    auto results = c->Results();
+    EXPECT_EQ(c, results[0]);
+}
+
 TEST_F(IR_ConstructTest, Fail_NullType) {
     EXPECT_FATAL_FAILURE(
         {

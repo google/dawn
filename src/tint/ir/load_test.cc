@@ -48,6 +48,17 @@ TEST_F(IR_LoadTest, Usage) {
     EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
+TEST_F(IR_LoadTest, Results) {
+    auto* var = b.Var(ty.ptr<function, i32>());
+    auto* inst = b.Load(var);
+
+    EXPECT_TRUE(inst->HasResults());
+    EXPECT_FALSE(inst->HasMultiResults());
+
+    auto results = inst->Results();
+    EXPECT_EQ(results[0], inst);
+}
+
 TEST_F(IR_LoadTest, Fail_NonPtr_Builder) {
     EXPECT_FATAL_FAILURE(
         {
