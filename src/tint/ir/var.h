@@ -28,6 +28,9 @@ namespace tint::ir {
 /// A var instruction in the IR.
 class Var : public utils::Castable<Var, OperandInstruction<1>> {
   public:
+    /// The offset in Operands() for the initializer
+    static constexpr size_t kInitializerOperandOffset = 0;
+
     /// Constructor
     /// @param type the type of the var
     explicit Var(const type::Pointer* type);
@@ -40,7 +43,7 @@ class Var : public utils::Castable<Var, OperandInstruction<1>> {
     /// @param initializer the initializer
     void SetInitializer(Value* initializer);
     /// @returns the initializer
-    Value* Initializer() { return operands_[0]; }
+    Value* Initializer() { return operands_[kInitializerOperandOffset]; }
 
     /// Sets the binding point
     /// @param group the group

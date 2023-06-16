@@ -23,6 +23,12 @@ namespace tint::ir {
 /// A store instruction in the IR.
 class Store : public utils::Castable<Store, OperandInstruction<2>> {
   public:
+    /// The offset in Operands() for the `to` value
+    static constexpr size_t kToOperandOffset = 0;
+
+    /// The offset in Operands() for the `from` value
+    static constexpr size_t kFromOperandOffset = 1;
+
     /// Constructor
     /// @param to the value to store too
     /// @param from the value being stored from
@@ -30,10 +36,10 @@ class Store : public utils::Castable<Store, OperandInstruction<2>> {
     ~Store() override;
 
     /// @returns the value being stored too
-    Value* To() { return operands_[0]; }
+    Value* To() { return operands_[kToOperandOffset]; }
 
     /// @returns the value being stored
-    Value* From() { return operands_[1]; }
+    Value* From() { return operands_[kFromOperandOffset]; }
 };
 
 }  // namespace tint::ir

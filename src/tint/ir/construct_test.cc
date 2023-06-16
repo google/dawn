@@ -43,15 +43,5 @@ TEST_F(IR_ConstructTest, Fail_NullType) {
         "");
 }
 
-TEST_F(IR_ConstructTest, Fail_NullArg) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Construct(mod.Types().f32(), nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

@@ -23,18 +23,6 @@ namespace {
 using namespace tint::number_suffixes;  // NOLINT
 using IR_MultiInBlockTest = IRTestHelper;
 
-TEST_F(IR_MultiInBlockTest, Fail_NullBlockParam) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-
-            auto* blk = b.MultiInBlock();
-            blk->SetParams({nullptr});
-        },
-        "");
-}
-
 TEST_F(IR_MultiInBlockTest, Fail_NullInboundBranch) {
     EXPECT_FATAL_FAILURE(
         {

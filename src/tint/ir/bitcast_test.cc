@@ -49,16 +49,6 @@ TEST_F(IR_BitcastTest, Bitcast_Usage) {
     EXPECT_THAT(args[0]->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
-TEST_F(IR_BitcastTest, Fail_NullValue) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Bitcast(mod.Types().i32(), nullptr);
-        },
-        "");
-}
-
 TEST_F(IR_BitcastTest, Fail_NullType) {
     EXPECT_FATAL_FAILURE(
         {

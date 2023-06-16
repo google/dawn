@@ -24,26 +24,6 @@ namespace {
 using namespace tint::number_suffixes;  // NOLINT
 using IR_ReturnTest = IRTestHelper;
 
-TEST_F(IR_ReturnTest, Fail_NullFunction) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Return(nullptr);
-        },
-        "");
-}
-
-TEST_F(IR_ReturnTest, Fail_NullValue) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            mod.values.Create<Return>(b.Function("myfunc", mod.Types().void_()), nullptr);
-        },
-        "");
-}
-
 TEST_F(IR_ReturnTest, ImplicitNoValue) {
     auto* func = b.Function("myfunc", ty.void_());
     auto* ret = b.Return(func);

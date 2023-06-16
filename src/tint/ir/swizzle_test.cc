@@ -43,16 +43,6 @@ TEST_F(IR_SwizzleTest, Fail_NullType) {
         "");
 }
 
-TEST_F(IR_SwizzleTest, Fail_NullObject) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Swizzle(mod.Types().i32(), nullptr, {1u});
-        },
-        "");
-}
-
 TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
     EXPECT_FATAL_FAILURE(
         {

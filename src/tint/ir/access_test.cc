@@ -47,39 +47,5 @@ TEST_F(IR_AccessTest, Fail_NullType) {
         "");
 }
 
-TEST_F(IR_AccessTest, Fail_NullObject) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Access(mod.Types().i32(), nullptr, u32(1));
-        },
-        "");
-}
-
-TEST_F(IR_AccessTest, Fail_EmptyIndices) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            auto* ty = (mod.Types().ptr<function, i32>());
-            auto* var = b.Var(ty);
-            b.Access(mod.Types().i32(), var, utils::Empty);
-        },
-        "");
-}
-
-TEST_F(IR_AccessTest, Fail_NullIndex) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            auto* ty = (mod.Types().ptr<function, i32>());
-            auto* var = b.Var(ty);
-            b.Access(mod.Types().i32(), var, nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

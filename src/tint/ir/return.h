@@ -28,6 +28,12 @@ namespace tint::ir {
 /// A return instruction.
 class Return : public utils::Castable<Return, Branch> {
   public:
+    /// The offset in Operands() for the function being returned
+    static constexpr size_t kFunctionOperandOffset = 0;
+
+    /// The offset in Operands() for the return argument
+    static constexpr size_t kArgOperandOffset = 1;
+
     /// Constructor (no return value)
     /// @param func the function being returned
     explicit Return(Function* func);
@@ -40,13 +46,17 @@ class Return : public utils::Castable<Return, Branch> {
     ~Return() override;
 
     /// @returns the function being returned
-    Function* Func() { return operands_[0]->As<Function>(); }
+    Function* Func() { return operands_[kFunctionOperandOffset]->As<Function>(); }
 
     /// @returns the return value, or nullptr
-    ir::Value* Value() const { return operands_.Length() > 1 ? operands_[1] : nullptr; }
+    ir::Value* Value() const {
+        return operands_.Length() > kArgOperandOffset ? operands_[kArgOperandOffset] : nullptr;
+    }
 
     /// @returns the branch arguments
-    utils::Slice<ir::Value* const> Args() override { return operands_.Slice().Offset(1); }
+    utils::Slice<ir::Value* const> Args() override {
+        return operands_.Slice().Offset(kArgOperandOffset);
+    }
 };
 
 }  // namespace tint::ir

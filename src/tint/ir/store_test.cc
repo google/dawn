@@ -50,26 +50,5 @@ TEST_F(IR_StoreTest, Store_Usage) {
     EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
-TEST_F(IR_StoreTest, Fail_NullTo) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Store(nullptr, 1_u);
-        },
-        "");
-}
-
-TEST_F(IR_StoreTest, Fail_NullFrom) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            auto* to = b.Var(mod.Types().ptr<private_, i32>());
-            b.Store(to, nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

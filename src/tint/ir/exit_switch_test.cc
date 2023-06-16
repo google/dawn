@@ -44,15 +44,5 @@ TEST_F(IR_ExitSwitchTest, Fail_NullSwitch) {
         "");
 }
 
-TEST_F(IR_ExitSwitchTest, Fail_NullArg) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.ExitSwitch(b.Switch(false), nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

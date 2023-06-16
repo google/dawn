@@ -44,26 +44,5 @@ TEST_F(IR_UserCallTest, Fail_NullType) {
         "");
 }
 
-TEST_F(IR_UserCallTest, Fail_NullFunction) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Call(mod.Types().f32(), nullptr);
-        },
-        "");
-}
-
-TEST_F(IR_UserCallTest, Fail_NullArg) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Call(mod.Types().void_(), b.Function("myfunc", mod.Types().void_()),
-                   utils::Vector<Value*, 1>{nullptr});
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

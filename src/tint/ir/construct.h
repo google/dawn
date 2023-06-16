@@ -23,6 +23,9 @@ namespace tint::ir {
 /// A constructor instruction in the IR.
 class Construct : public utils::Castable<Construct, Call> {
   public:
+    /// The base offset in Operands() for the args
+    static constexpr size_t kArgsOperandOffset = 0;
+
     /// Constructor
     /// @param type the result type
     /// @param args the constructor arguments

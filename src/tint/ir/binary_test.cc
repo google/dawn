@@ -35,26 +35,6 @@ TEST_F(IR_BinaryTest, Fail_NullType) {
         "");
 }
 
-TEST_F(IR_BinaryTest, Fail_NullLHS) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Add(mod.Types().u32(), nullptr, u32(2));
-        },
-        "");
-}
-
-TEST_F(IR_BinaryTest, Fail_NullRHS) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Add(mod.Types().u32(), u32(1), nullptr);
-        },
-        "");
-}
-
 TEST_F(IR_BinaryTest, CreateAnd) {
     auto* inst = b.And(mod.Types().i32(), 4_i, 2_i);
 

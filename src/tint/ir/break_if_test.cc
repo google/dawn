@@ -37,32 +37,12 @@ TEST_F(IR_BreakIfTest, Usage) {
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{brk, 2u}));
 }
 
-TEST_F(IR_BreakIfTest, Fail_NullCondition) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.BreakIf(nullptr, b.Loop());
-        },
-        "");
-}
-
 TEST_F(IR_BreakIfTest, Fail_NullLoop) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
             Builder b{mod};
             b.BreakIf(true, nullptr);
-        },
-        "");
-}
-
-TEST_F(IR_BreakIfTest, Fail_NullArg) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.BreakIf(true, b.Loop(), nullptr);
         },
         "");
 }

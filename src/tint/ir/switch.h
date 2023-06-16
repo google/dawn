@@ -46,6 +46,9 @@ namespace tint::ir {
 /// ```
 class Switch : public utils::Castable<Switch, ControlInstruction> {
   public:
+    /// The offset in Operands() for the condition
+    static constexpr size_t kConditionOperandOffset = 0;
+
     /// A case selector
     struct CaseSelector {
         /// @returns true if this is a default selector
@@ -82,7 +85,7 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
     utils::Slice<Value* const> Args() override { return {}; }
 
     /// @returns the condition
-    Value* Condition() { return operands_[0]; }
+    Value* Condition() { return operands_[kConditionOperandOffset]; }
 
   private:
     ir::MultiInBlock* merge_ = nullptr;

@@ -28,6 +28,9 @@ namespace tint::ir {
 /// A exit if instruction.
 class ExitIf : public utils::Castable<ExitIf, Branch> {
   public:
+    /// The base offset in Operands() for the args
+    static constexpr size_t kArgsOperandOffset = 0;
+
     /// Constructor
     /// @param i the if being exited
     /// @param args the branch arguments

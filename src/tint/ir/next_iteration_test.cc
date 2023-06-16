@@ -32,15 +32,5 @@ TEST_F(IR_NextIterationTest, Fail_NullLoop) {
         "");
 }
 
-TEST_F(IR_NextIterationTest, Fail_NullValue) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.NextIteration(b.Loop(), nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

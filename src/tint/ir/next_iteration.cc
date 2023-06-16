@@ -26,10 +26,12 @@ namespace tint::ir {
 NextIteration::NextIteration(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */)
     : loop_(loop) {
     TINT_ASSERT(IR, loop_);
+
+    AddOperands(NextIteration::kArgsOperandOffset, std::move(args));
+
     if (loop_) {
         loop_->Body()->AddInboundSiblingBranch(this);
     }
-    AddOperands(std::move(args));
 }
 
 NextIteration::~NextIteration() = default;

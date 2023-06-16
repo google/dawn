@@ -24,6 +24,9 @@ namespace tint::ir {
 /// A builtin call instruction in the IR.
 class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
   public:
+    /// The base offset in Operands() for the args
+    static constexpr size_t kArgsOperandOffset = 0;
+
     /// Constructor
     /// @param res_type the result type
     /// @param func the builtin function

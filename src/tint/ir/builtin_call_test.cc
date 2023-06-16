@@ -62,15 +62,5 @@ TEST_F(IR_BuiltinCallTest, Fail_TintMaterializeFunction) {
         "");
 }
 
-TEST_F(IR_BuiltinCallTest, Fail_NullArg) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Call(mod.Types().f32(), builtin::Function::kAbs, nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

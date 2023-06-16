@@ -24,14 +24,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Continue);
 
 namespace tint::ir {
 
-Continue::Continue(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */)
-    : loop_(loop) {
+Continue::Continue(ir::Loop* loop, utils::VectorRef<Value*> args) : loop_(loop) {
     TINT_ASSERT(IR, loop_);
+
+    AddOperands(Continue::kArgsOperandOffset, std::move(args));
 
     if (loop_) {
         loop_->Continuing()->AddInboundSiblingBranch(this);
     }
-    AddOperands(std::move(args));
 }
 
 Continue::~Continue() = default;

@@ -28,6 +28,9 @@ namespace tint::ir {
 /// A exit loop instruction.
 class ExitLoop : public utils::Castable<ExitLoop, Branch> {
   public:
+    /// The base offset in Operands() for the args
+    static constexpr size_t kArgsOperandOffset = 0;
+
     /// Constructor
     /// @param loop the loop being exited
     /// @param args the branch arguments

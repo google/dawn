@@ -58,19 +58,5 @@ TEST_F(IR_LoadTest, Fail_NonPtr_Builder) {
         "");
 }
 
-TEST_F(IR_LoadTest, Fail_NullValue_Builder) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Load(nullptr);
-        },
-        "");
-}
-
-TEST_F(IR_LoadTest, Fail_NullValue) {
-    EXPECT_FATAL_FAILURE({ Load l(nullptr); }, "");
-}
-
 }  // namespace
 }  // namespace tint::ir

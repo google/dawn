@@ -37,16 +37,6 @@ TEST_F(IR_IfTest, Parent) {
     EXPECT_EQ(if_->Merge()->Parent(), if_);
 }
 
-TEST_F(IR_IfTest, Fail_NullCondition) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.If(nullptr);
-        },
-        "");
-}
-
 TEST_F(IR_IfTest, Fail_NullTrueBlock) {
     EXPECT_FATAL_FAILURE(
         {

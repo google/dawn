@@ -23,6 +23,9 @@ namespace tint::ir {
 /// A bitcast instruction in the IR.
 class Bitcast : public utils::Castable<Bitcast, Call> {
   public:
+    /// The offset in Operands() for the value
+    static constexpr size_t kValueOperandOffset = 0;
+
     /// Constructor
     /// @param type the result type
     /// @param val the value being bitcast

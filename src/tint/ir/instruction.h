@@ -53,7 +53,7 @@ class Instruction : public utils::Castable<Instruction, Value> {
     /// Set an operand at a given index.
     /// @param index the operand index
     /// @param value the value to use
-    virtual void SetOperand(uint32_t index, ir::Value* value) = 0;
+    virtual void SetOperand(size_t index, ir::Value* value) = 0;
 
     /// Pointer to the next instruction in the list
     Instruction* next = nullptr;

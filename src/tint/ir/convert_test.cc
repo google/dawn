@@ -32,15 +32,5 @@ TEST_F(IR_ConvertTest, Fail_NullToType) {
         "");
 }
 
-TEST_F(IR_ConvertTest, Fail_NoArg) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Convert(mod.Types().f32(), nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

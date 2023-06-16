@@ -37,16 +37,6 @@ TEST_F(IR_SwitchTest, Parent) {
     EXPECT_THAT(switch_->Cases().Front().Start()->Parent(), switch_);
 }
 
-TEST_F(IR_SwitchTest, Fail_NullCondition) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Switch(nullptr);
-        },
-        "");
-}
-
 TEST_F(IR_SwitchTest, Fail_NullMultiInBlock) {
     EXPECT_FATAL_FAILURE(
         {

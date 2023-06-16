@@ -23,13 +23,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitIf);
 
 namespace tint::ir {
 
-ExitIf::ExitIf(ir::If* i, utils::VectorRef<Value*> args /* = utils::Empty */) : if_(i) {
+ExitIf::ExitIf(ir::If* i, utils::VectorRef<Value*> args) : if_(i) {
     TINT_ASSERT(IR, if_);
+
+    AddOperands(ExitIf::kArgsOperandOffset, std::move(args));
 
     if (if_) {
         if_->Merge()->AddInboundSiblingBranch(this);
     }
-    AddOperands(std::move(args));
 }
 
 ExitIf::~ExitIf() = default;

@@ -28,10 +28,11 @@ ExitLoop::ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Emp
     : loop_(loop) {
     TINT_ASSERT(IR, loop_);
 
+    AddOperands(ExitLoop::kArgsOperandOffset, std::move(args));
+
     if (loop_) {
         loop_->Merge()->AddInboundSiblingBranch(this);
     }
-    AddOperands(std::move(args));
 }
 
 ExitLoop::~ExitLoop() = default;

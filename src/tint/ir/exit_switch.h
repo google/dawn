@@ -28,6 +28,9 @@ namespace tint::ir {
 /// A exit switch instruction.
 class ExitSwitch : public utils::Castable<ExitSwitch, Branch> {
   public:
+    /// The base offset in Operands() for the args
+    static constexpr size_t kArgsOperandOffset = 0;
+
     /// Constructor
     /// @param sw the switch being exited
     /// @param args the branch arguments

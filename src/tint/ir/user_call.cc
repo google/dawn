@@ -24,10 +24,8 @@ namespace tint::ir {
 
 UserCall::UserCall(const type::Type* ty, Function* func, utils::VectorRef<Value*> arguments)
     : Base(ty) {
-    TINT_ASSERT(IR, func);
-
-    AddOperand(func);
-    AddOperands(std::move(arguments));
+    AddOperand(UserCall::kFunctionOperandOffset, func);
+    AddOperands(UserCall::kArgsOperandOffset, std::move(arguments));
 }
 
 UserCall::~UserCall() = default;

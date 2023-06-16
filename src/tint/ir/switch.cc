@@ -21,10 +21,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Switch);
 namespace tint::ir {
 
 Switch::Switch(Value* cond, ir::MultiInBlock* m) : merge_(m) {
-    TINT_ASSERT(IR, cond);
     TINT_ASSERT(IR, merge_);
 
-    AddOperand(cond);
+    AddOperand(Switch::kConditionOperandOffset, cond);
 
     if (merge_) {
         merge_->SetParent(this);

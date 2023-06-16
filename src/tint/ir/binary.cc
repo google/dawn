@@ -22,11 +22,9 @@ namespace tint::ir {
 Binary::Binary(enum Kind kind, const type::Type* res_ty, Value* lhs, Value* rhs)
     : kind_(kind), result_type_(res_ty) {
     TINT_ASSERT(IR, result_type_);
-    TINT_ASSERT(IR, lhs);
-    TINT_ASSERT(IR, rhs);
 
-    AddOperand(lhs);
-    AddOperand(rhs);
+    AddOperand(Binary::kLhsOperandOffset, lhs);
+    AddOperand(Binary::kRhsOperandOffset, rhs);
 }
 
 Binary::~Binary() = default;

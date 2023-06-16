@@ -68,15 +68,5 @@ TEST_F(IR_UnaryTest, Fail_NullType) {
         "");
 }
 
-TEST_F(IR_UnaryTest, Fail_NullValue) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Negation(mod.Types().i32(), nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

@@ -29,7 +29,7 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N>, Instruc
     /// Set an operand at a given index.
     /// @param index the operand index
     /// @param value the value to use
-    void SetOperand(uint32_t index, ir::Value* value) override {
+    void SetOperand(size_t index, ir::Value* value) override {
         TINT_ASSERT(IR, index < operands_.Length());
         if (operands_[index]) {
             operands_[index]->RemoveUsage({this, index});
@@ -43,8 +43,11 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N>, Instruc
 
   protected:
     /// Append a new operand to the operand list for this instruction.
+    /// @param idx the index the operand should be at
     /// @param value the operand value to append
-    void AddOperand(ir::Value* value) {
+    void AddOperand(size_t idx, ir::Value* value) {
+        TINT_ASSERT(IR, idx == operands_.Length());
+
         if (value) {
             value->AddUsage({this, static_cast<uint32_t>(operands_.Length())});
         }
@@ -52,11 +55,13 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N>, Instruc
     }
 
     /// Append a list of non-null operands to the operand list for this instruction.
+    /// @param start_idx the index from whic the values should start
     /// @param values the operand values to append
-    void AddOperands(utils::VectorRef<ir::Value*> values) {
+    void AddOperands(size_t start_idx, utils::VectorRef<ir::Value*> values) {
+        size_t idx = start_idx;
         for (auto* val : values) {
-            TINT_ASSERT(IR, val != nullptr);
-            AddOperand(val);
+            AddOperand(idx, val);
+            idx += 1;
         }
     }
 

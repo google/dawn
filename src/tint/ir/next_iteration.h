@@ -28,6 +28,9 @@ namespace tint::ir {
 /// A next iteration instruction.
 class NextIteration : public utils::Castable<NextIteration, Branch> {
   public:
+    /// The base offset in Operands() for the args
+    static constexpr size_t kArgsOperandOffset = 0;
+
     /// Constructor
     /// @param loop the loop being iterated
     /// @param args the branch arguments

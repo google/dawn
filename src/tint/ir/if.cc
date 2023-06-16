@@ -22,12 +22,12 @@ namespace tint::ir {
 
 If::If(Value* cond, ir::Block* t, ir::Block* f, ir::MultiInBlock* m)
     : true_(t), false_(f), merge_(m) {
-    TINT_ASSERT(IR, cond);
     TINT_ASSERT(IR, true_);
     TINT_ASSERT(IR, false_);
     TINT_ASSERT(IR, merge_);
 
-    AddOperand(cond);
+    AddOperand(If::kConditionOperandOffset, cond);
+
     if (true_) {
         true_->SetParent(this);
     }

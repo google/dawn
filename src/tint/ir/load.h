@@ -23,6 +23,9 @@ namespace tint::ir {
 /// A load instruction in the IR.
 class Load : public utils::Castable<Load, OperandInstruction<1>> {
   public:
+    /// The offset in Operands() for the from value
+    static constexpr size_t kFromOperandOffset = 0;
+
     /// Constructor (infers type)
     /// @param from the value being loaded from
     explicit Load(Value* from);
@@ -33,7 +36,7 @@ class Load : public utils::Castable<Load, OperandInstruction<1>> {
     const type::Type* Type() override { return result_type_; }
 
     /// @returns the value being loaded from
-    Value* From() { return operands_[0]; }
+    Value* From() { return operands_[kFromOperandOffset]; }
 
   private:
     const type::Type* result_type_ = nullptr;

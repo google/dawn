@@ -23,6 +23,9 @@ namespace tint::ir {
 /// A unary instruction in the IR.
 class Unary : public utils::Castable<Unary, OperandInstruction<1>> {
   public:
+    /// The offset in Operands() for the value
+    static constexpr size_t kValueOperandOffset = 0;
+
     /// The kind of instruction.
     enum class Kind {
         kComplement,
@@ -40,7 +43,7 @@ class Unary : public utils::Castable<Unary, OperandInstruction<1>> {
     const type::Type* Type() override { return result_type_; }
 
     /// @returns the value for the instruction
-    Value* Val() { return operands_[0]; }
+    Value* Val() { return operands_[kValueOperandOffset]; }
 
     /// @returns the kind of unary instruction
     enum Kind Kind() { return kind_; }

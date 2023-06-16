@@ -45,15 +45,5 @@ TEST_F(IR_ContinueTest, Fail_NullLoop) {
         "");
 }
 
-TEST_F(IR_ContinueTest, Fail_NullArg) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.Continue(b.Loop(), nullptr);
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

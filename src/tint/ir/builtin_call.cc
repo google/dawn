@@ -28,7 +28,8 @@ BuiltinCall::BuiltinCall(const type::Type* ty,
     : Base(ty), func_(func) {
     TINT_ASSERT(IR, func != builtin::Function::kNone);
     TINT_ASSERT(IR, func != builtin::Function::kTintMaterialize);
-    AddOperands(std::move(arguments));
+
+    AddOperands(BuiltinCall::kArgsOperandOffset, std::move(arguments));
 }
 
 BuiltinCall::~BuiltinCall() = default;

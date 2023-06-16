@@ -31,7 +31,7 @@ struct Usage {
     /// The instruction that is using the value;
     Instruction* instruction = nullptr;
     /// The index of the operand that is the value being used.
-    uint32_t operand_index = 0u;
+    size_t operand_index = 0u;
 
     /// A specialization of utils::Hasher for Usage.
     struct Hasher {

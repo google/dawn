@@ -28,6 +28,9 @@ namespace tint::ir {
 /// A continue instruction.
 class Continue : public utils::Castable<Continue, Branch> {
   public:
+    /// The base offset in Operands() for the args
+    static constexpr size_t kArgsOperandOffset = 0;
+
     /// Constructor
     /// @param loop the loop owning the continue block
     /// @param args the branch arguments

@@ -24,19 +24,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::BreakIf);
 
 namespace tint::ir {
 
-BreakIf::BreakIf(Value* condition,
-                 ir::Loop* loop,
-                 utils::VectorRef<Value*> args /* = utils::Empty */)
-    : loop_(loop) {
-    TINT_ASSERT(IR, condition);
+BreakIf::BreakIf(Value* condition, ir::Loop* loop, utils::VectorRef<Value*> args) : loop_(loop) {
     TINT_ASSERT(IR, loop_);
 
-    AddOperand(condition);
+    AddOperand(BreakIf::kConditionOperandOffset, condition);
+    AddOperands(BreakIf::kArgsOperandOffset, std::move(args));
+
     if (loop_) {
         loop_->Body()->AddInboundSiblingBranch(this);
         loop_->Merge()->AddInboundSiblingBranch(this);
     }
-    AddOperands(std::move(args));
 }
 
 BreakIf::~BreakIf() = default;
