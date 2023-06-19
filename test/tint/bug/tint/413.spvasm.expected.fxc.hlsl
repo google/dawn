@@ -3,7 +3,7 @@ RWTexture2D<uint4> Dst : register(u1);
 
 void main_1() {
   uint4 srcValue = uint4(0u, 0u, 0u, 0u);
-  const uint4 x_18 = Src.Load(int3((0).xx, 0));
+  const uint4 x_18 = Src.Load(int3(0, 0, 0));
   srcValue = x_18;
   const uint x_22 = srcValue.x;
   srcValue.x = (x_22 + 1u);

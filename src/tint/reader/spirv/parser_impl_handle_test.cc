@@ -4160,7 +4160,7 @@ TEST_F(SpvParserHandleTest, TexelTypeWhenLoop) {
     const auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var x_24 : vec2f;
 var x_26 : i32;
-x_24 = vec2f(0.0f, 0.0f);
+x_24 = vec2f();
 x_26 = 0i;
 loop {
   var x_27 : i32;

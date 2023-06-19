@@ -1920,6 +1920,13 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
                 return {original_ast_type, builder_.Expr(itr->second)};
             }
 
+            const auto* spirv_const = constant_mgr_->FindDeclaredConstant(id);
+            if (spirv_const->IsZero()) {
+                // All zeros, so just use a zero value constructor and always inline it.
+                return {original_ast_type,
+                        builder_.Call(source, original_ast_type->Build(builder_))};
+            }
+
             // Generate a composite from explicit components.
             ExpressionList ast_components;
             if (!inst->WhileEachInId([&](const uint32_t* id_ref) -> bool {

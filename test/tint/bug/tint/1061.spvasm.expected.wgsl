@@ -21,7 +21,7 @@ fn main_1() {
   if ((distance(x_42, x_44) < 0.10000000149011611938f)) {
     x_GLF_color = vec4f(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
-    x_GLF_color = vec4f(0.0f, 0.0f, 0.0f, 0.0f);
+    x_GLF_color = vec4f();
   }
   return;
 }
