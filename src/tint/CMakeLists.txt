@@ -799,6 +799,8 @@ if(${TINT_BUILD_IR})
     ir/to_program.h
     ir/unary.cc
     ir/unary.h
+    ir/unreachable.cc
+    ir/unreachable.h
     ir/user_call.cc
     ir/user_call.h
     ir/validate.cc

@@ -43,6 +43,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/swizzle.h"
 #include "src/tint/ir/transform/block_decorated_structs.h"
+#include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
@@ -663,6 +664,7 @@ void Disassembler::EmitBranch(Branch* b) {
             EmitValue(bi->Condition());
             out_ << " %b" << IdOf(bi->Loop()->Body());
         },
+        [&](Unreachable*) { out_ << "unreachable"; },
         [&](Default) { out_ << "Unknown branch " << b->TypeInfo().name; });
 
     if (!b->Args().IsEmpty()) {

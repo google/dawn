@@ -1297,6 +1297,8 @@ if (tint_build_ir) {
       "ir/transform/transform.h",
       "ir/unary.cc",
       "ir/unary.h",
+      "ir/unreachable.cc",
+      "ir/unreachable.h",
       "ir/user_call.cc",
       "ir/user_call.h",
       "ir/validate.cc",

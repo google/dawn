@@ -41,6 +41,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/swizzle.h"
 #include "src/tint/ir/unary.h"
+#include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/switch.h"
@@ -293,8 +294,9 @@ class Validator {
                 if (ret->Func() == nullptr) {
                     AddError("return: null function");
                 }
-            },                //
-            [&](Switch*) {},  //
+            },                     //
+            [&](Switch*) {},       //
+            [&](Unreachable*) {},  //
             [&](Default) {
                 AddError(std::string("missing validation of branch: ") + b->TypeInfo().name);
             });

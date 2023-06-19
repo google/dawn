@@ -46,6 +46,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/swizzle.h"
 #include "src/tint/ir/unary.h"
+#include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/ir/var.h"
@@ -680,6 +681,10 @@ class Builder {
                                                           Value(std::forward<OBJ>(object)),
                                                           utils::Vector<uint32_t, 4>(indices)));
     }
+
+    /// Creates an unreachable instruction
+    /// @returns the instruction
+    ir::Unreachable* Unreachable();
 
     /// Retrieves the root block for the module, creating if necessary
     /// @returns the root block

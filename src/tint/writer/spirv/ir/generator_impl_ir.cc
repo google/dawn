@@ -43,6 +43,7 @@
 #include "src/tint/ir/transform/block_decorated_structs.h"
 #include "src/tint/ir/transform/merge_return.h"
 #include "src/tint/ir/transform/var_for_dynamic_index.h"
+#include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/validate.h"
 #include "src/tint/ir/var.h"
@@ -522,6 +523,8 @@ void GeneratorImplIr::EmitBranch(ir::Branch* b) {
         [&](ir::NextIteration* loop) {
             current_function_.push_inst(spv::Op::OpBranch, {Label(loop->Loop()->Body())});
         },
+        [&](ir::Unreachable*) { current_function_.push_inst(spv::Op::OpUnreachable, {}); },
+
         [&](Default) {
             TINT_ICE(Writer, diagnostics_) << "unimplemented branch: " << b->TypeInfo().name;
         });

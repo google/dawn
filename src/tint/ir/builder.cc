@@ -85,4 +85,8 @@ ir::FunctionParam* Builder::FunctionParam(const type::Type* type) {
     return ir.values.Create<ir::FunctionParam>(type);
 }
 
+ir::Unreachable* Builder::Unreachable() {
+    return Append(ir.instructions.Create<ir::Unreachable>());
+}
+
 }  // namespace tint::ir
