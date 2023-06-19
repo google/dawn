@@ -25,10 +25,23 @@ Value::Value() = default;
 
 Value::~Value() = default;
 
+void Value::Destroy() {
+    TINT_ASSERT(IR, Alive());
+    TINT_ASSERT(IR, Usages().Count() == 0);
+    alive_ = false;
+}
+
 void Value::ReplaceAllUsesWith(std::function<Value*(Usage use)> replacer) {
     while (!uses_.IsEmpty()) {
         auto& use = *uses_.begin();
         auto* replacement = replacer(use);
+        use.instruction->SetOperand(use.operand_index, replacement);
+    }
+}
+
+void Value::ReplaceAllUsesWith(Value* replacement) {
+    while (!uses_.IsEmpty()) {
+        auto& use = *uses_.begin();
         use.instruction->SetOperand(use.operand_index, replacement);
     }
 }

@@ -30,6 +30,9 @@ class InstructionResult : public utils::Castable<InstructionResult, Value> {
     /// Destructor
     ~InstructionResult() override;
 
+    /// @copydoc Value::Destroy
+    void Destroy() override;
+
     /// @returns the type of the value
     const type::Type* Type() override { return type_; }
 

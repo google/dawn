@@ -12,24 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/instruction_result.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest-spi.h"
+#include "src/tint/ir/ir_test_helper.h"
 
-#include "src/tint/ir/constant.h"
-#include "src/tint/ir/instruction.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::InstructionResult);
+using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
 
 namespace tint::ir {
+namespace {
 
-InstructionResult::InstructionResult(const type::Type* type) : type_(type) {
-    TINT_ASSERT(IR, type_ != nullptr);
+using IR_InstructionResultTest = IRTestHelper;
+
+TEST_F(IR_InstructionResultTest, Destroy_HasSource) {
+    EXPECT_FATAL_FAILURE(
+        {
+            Module mod;
+            Builder b{mod};
+            auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result();
+            val->Destroy();
+        },
+        "");
 }
 
-InstructionResult::~InstructionResult() = default;
-
-void InstructionResult::Destroy() {
-    TINT_ASSERT(IR, source_ == nullptr);
-    Base::Destroy();
-}
-
+}  // namespace
 }  // namespace tint::ir

@@ -1538,6 +1538,7 @@ if(TINT_BUILD_TESTS)
       ir/function_param_test.cc
       ir/function_test.cc
       ir/if_test.cc
+      ir/instruction_result_test.cc
       ir/instruction_test.cc
       ir/ir_test_helper.h
       ir/load_test.cc
@@ -1557,6 +1558,7 @@ if(TINT_BUILD_TESTS)
       ir/unary_test.cc
       ir/user_call_test.cc
       ir/validate_test.cc
+      ir/value_test.cc
       ir/var_test.cc
     )
   endif()
