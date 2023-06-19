@@ -274,6 +274,13 @@ using f32 = Number<float>;
 /// However since C++ don't have native binary16 type, the value is stored as float.
 using f16 = Number<tint::detail::NumberKindF16>;
 
+/// The algorithms in this module require support for infinity and quiet NaNs on
+/// floating point types.
+static_assert(std::numeric_limits<float>::has_infinity);
+static_assert(std::numeric_limits<float>::has_quiet_NaN);
+static_assert(std::numeric_limits<double>::has_infinity);
+static_assert(std::numeric_limits<double>::has_quiet_NaN);
+
 template <typename T, utils::traits::EnableIf<IsFloatingPoint<T>>* = nullptr>
 inline const auto kPi = T(UnwrapNumber<T>(3.14159265358979323846));
 
