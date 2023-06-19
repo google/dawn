@@ -25,6 +25,7 @@
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/break_if.h"
 #include "src/tint/ir/builtin_call.h"
+#include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/exit_loop.h"
@@ -462,6 +463,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             [&](ir::Access* a) { EmitAccess(a); },            //
             [&](ir::Binary* b) { EmitBinary(b); },            //
             [&](ir::BuiltinCall* b) { EmitBuiltinCall(b); },  //
+            [&](ir::Construct* c) { EmitConstruct(c); },      //
             [&](ir::Load* l) { EmitLoad(l); },                //
             [&](ir::Loop* l) { EmitLoop(l); },                //
             [&](ir::Switch* sw) { EmitSwitch(sw); },          //
@@ -775,6 +777,14 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
 
     // Emit the instruction.
     current_function_.push_inst(op, operands);
+}
+
+void GeneratorImplIr::EmitConstruct(ir::Construct* construct) {
+    OperandList operands = {Type(construct->Result()->Type()), Value(construct)};
+    for (auto* arg : construct->Args()) {
+        operands.push_back(Value(arg));
+    }
+    current_function_.push_inst(spv::Op::OpCompositeConstruct, std::move(operands));
 }
 
 void GeneratorImplIr::EmitLoad(ir::Load* load) {

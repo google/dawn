@@ -35,6 +35,7 @@ class Block;
 class BlockParam;
 class Branch;
 class BuiltinCall;
+class Construct;
 class Function;
 class If;
 class Load;
@@ -150,6 +151,10 @@ class GeneratorImplIr {
     /// Emit a builtin function call instruction.
     /// @param call the builtin call instruction to emit
     void EmitBuiltinCall(ir::BuiltinCall* call);
+
+    /// Emit a construct instruction.
+    /// @param construct the construct instruction to emit
+    void EmitConstruct(ir::Construct* construct);
 
     /// Emit a load instruction.
     /// @param load the load instruction to emit
