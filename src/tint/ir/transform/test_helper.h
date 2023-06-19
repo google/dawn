@@ -24,6 +24,7 @@
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/transform/transform.h"
+#include "src/tint/ir/validate.h"
 #include "src/tint/transform/manager.h"
 
 namespace tint::ir::transform {
@@ -39,10 +40,28 @@ class TransformTestBase : public BASE {
     Transform::DataMap Run(const Transform::DataMap& data = {}) {
         tint::transform::Manager manager;
         tint::transform::DataMap outputs;
+
+        // Validate the input IR.
+        {
+            auto res = ir::Validate(mod);
+            EXPECT_TRUE(res) << res.Failure().str();
+            if (!res) {
+                return outputs;
+            }
+        }
+
+        // Run the transforms.
         for (auto* transform_ptr : std::initializer_list<Transform*>{new TRANSFORMS()...}) {
             manager.append(std::unique_ptr<Transform>(transform_ptr));
         }
         manager.Run(&mod, data, outputs);
+
+        // Validate the output IR.
+        {
+            auto res = ir::Validate(mod);
+            EXPECT_TRUE(res) << res.Failure().str();
+        }
+
         return outputs;
     }
 
@@ -59,9 +78,6 @@ class TransformTestBase : public BASE {
     ir::Builder b{mod};
     /// The type manager.
     type::Manager& ty{mod.Types()};
-
-  private:
-    std::vector<std::unique_ptr<Source::File>> files_;
 };
 
 using TransformTest = TransformTestBase<testing::Test>;
