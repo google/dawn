@@ -19,10 +19,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Bitcast);
 
 namespace tint::ir {
 
-Bitcast::Bitcast(const type::Type* ty, Value* val) : Base(ty) {
+Bitcast::Bitcast(InstructionResult* result, Value* val) {
     AddOperand(Bitcast::kValueOperandOffset, val);
-
-    AddResult(this);
+    AddResult(result);
 }
 
 Bitcast::~Bitcast() = default;

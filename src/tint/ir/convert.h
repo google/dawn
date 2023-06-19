@@ -28,9 +28,9 @@ class Convert : public utils::Castable<Convert, Call> {
     static constexpr size_t kValueOperandOffset = 0;
 
     /// Constructor
-    /// @param to_type the target conversion type
+    /// @param result the result value
     /// @param value the value to convert
-    Convert(const type::Type* to_type, Value* value);
+    Convert(InstructionResult* result, Value* value);
     ~Convert() override;
 };
 

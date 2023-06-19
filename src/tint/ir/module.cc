@@ -26,8 +26,18 @@ Module::~Module() = default;
 
 Module& Module::operator=(Module&&) = default;
 
+Symbol Module::NameOf(Instruction* inst) {
+    TINT_ASSERT(IR, inst->HasResults() && !inst->HasMultiResults());
+    return NameOf(inst->Result());
+}
+
 Symbol Module::NameOf(Value* value) {
     return value_to_id_.Get(value).value_or(Symbol{});
+}
+
+Symbol Module::SetName(Instruction* inst, std::string_view name) {
+    TINT_ASSERT(IR, inst->HasResults() && !inst->HasMultiResults());
+    return SetName(inst->Result(), name);
 }
 
 Symbol Module::SetName(Value* value, std::string_view name) {

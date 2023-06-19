@@ -508,7 +508,7 @@ class Impl {
         auto* lhs_value = builder_.Load(lhs.Get());
         current_block_->Append(lhs_value);
 
-        auto* ty = lhs_value->Type();
+        auto* ty = lhs_value->Result()->Type();
 
         auto* rhs =
             ty->is_signed_integer_scalar() ? builder_.Constant(1_i) : builder_.Constant(1_u);
@@ -540,7 +540,7 @@ class Impl {
         auto* lhs_value = builder_.Load(lhs.Get());
         current_block_->Append(lhs_value);
 
-        auto* ty = lhs_value->Type();
+        auto* ty = lhs_value->Result()->Type();
 
         Binary* inst = nullptr;
         switch (stmt->op) {
@@ -885,7 +885,7 @@ class Impl {
 
     struct AccessorInfo {
         Value* object = nullptr;
-        Instruction* result = nullptr;
+        Value* result = nullptr;
         const type::Type* result_type = nullptr;
         utils::Vector<Value*, 1> indices;
     };
@@ -944,7 +944,7 @@ class Impl {
         return info.result;
     }
 
-    Instruction* GenerateAccess(const AccessorInfo& info) {
+    Value* GenerateAccess(const AccessorInfo& info) {
         // The access result type should match the source result type. If the source is a pointer,
         // we generate a pointer.
         const type::Type* ty = nullptr;
@@ -957,7 +957,7 @@ class Impl {
 
         auto* a = builder_.Access(ty, info.object, info.indices);
         current_block_->Append(a);
-        return a;
+        return a->Result();
     }
 
     bool GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, AccessorInfo& info) {
@@ -1005,14 +1005,15 @@ class Impl {
                     if (auto* ptr = info.object->Type()->As<type::Pointer>()) {
                         auto* load = builder_.Load(info.object);
                         info.result_type = ptr->StoreType();
-                        info.object = load;
+                        info.object = load->Result();
                         current_block_->Append(load);
                     }
                 }
 
-                info.result = builder_.Swizzle(swizzle->Type()->Clone(clone_ctx_.type_ctx),
-                                               info.object, std::move(indices));
-                current_block_->Append(info.result);
+                auto* val = builder_.Swizzle(swizzle->Type()->Clone(clone_ctx_.type_ctx),
+                                             info.object, std::move(indices));
+                current_block_->Append(val);
+                info.result = val->Result();
 
                 info.object = info.result;
                 info.result_type = result_type;
@@ -1065,7 +1066,7 @@ class Impl {
         if (result && sem->Is<sem::Load>()) {
             auto* load = builder_.Load(result.Get());
             current_block_->Append(load);
-            return load;
+            return load->Result();
         }
         return result;
     }
@@ -1097,7 +1098,7 @@ class Impl {
                 }
 
                 // Store the declaration so we can get the instruction to store too
-                scopes_.Set(v->name->symbol, val);
+                scopes_.Set(v->name->symbol, val->Result());
 
                 // Record the original name of the var
                 builder_.ir.SetName(val, v->name->symbol.Name());
@@ -1162,7 +1163,7 @@ class Impl {
         }
 
         current_block_->Append(inst);
-        return inst;
+        return inst->Result();
     }
 
     // A short-circut needs special treatment. The short-circuit is decomposed into the relevant
@@ -1307,7 +1308,7 @@ class Impl {
         }
 
         current_block_->Append(inst);
-        return inst;
+        return inst->Result();
     }
 
     utils::Result<Value*> EmitBitcast(const ast::BitcastExpression* expr) {
@@ -1321,7 +1322,7 @@ class Impl {
         auto* inst = builder_.Bitcast(ty, val.Get());
 
         current_block_->Append(inst);
-        return inst;
+        return inst->Result();
     }
 
     void EmitCall(const ast::CallStatement* stmt) { (void)EmitCall(stmt->expr); }
@@ -1384,7 +1385,7 @@ class Impl {
             return utils::Failure;
         }
         current_block_->Append(inst);
-        return inst;
+        return inst->Result();
     }
 
     utils::Result<Value*> EmitLiteral(const ast::LiteralExpression* lit) {

@@ -21,7 +21,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::InstructionResult);
 
 namespace tint::ir {
 
-InstructionResult::InstructionResult(const type::Type* type) : type_(type) {}
+InstructionResult::InstructionResult(const type::Type* type) : type_(type) {
+    TINT_ASSERT(IR, type_ != nullptr);
+}
 
 InstructionResult::~InstructionResult() = default;
 

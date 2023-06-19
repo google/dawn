@@ -42,9 +42,8 @@ TEST_F(IR_UserCallTest, Results) {
 
     EXPECT_TRUE(e->HasResults());
     EXPECT_FALSE(e->HasMultiResults());
-
-    auto results = e->Results();
-    EXPECT_EQ(results[0], e);
+    EXPECT_TRUE(e->Result()->Is<InstructionResult>());
+    EXPECT_EQ(e->Result()->Source(), e);
 }
 
 TEST_F(IR_UserCallTest, Fail_NullType) {

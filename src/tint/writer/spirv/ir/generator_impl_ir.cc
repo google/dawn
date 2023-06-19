@@ -256,6 +256,10 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
     });
 }
 
+uint32_t GeneratorImplIr::Value(ir::Instruction* inst) {
+    return Value(inst->Result());
+}
+
 uint32_t GeneratorImplIr::Value(ir::Value* value) {
     return Switch(
         value,  //
@@ -556,10 +560,12 @@ void GeneratorImplIr::EmitIf(ir::If* i) {
 }
 
 void GeneratorImplIr::EmitAccess(ir::Access* access) {
-    auto id = Value(access);
-    OperandList operands = {Type(access->Type()), id, Value(access->Object())};
+    auto* ty = access->Result()->Type();
 
-    if (access->Type()->Is<type::Pointer>()) {
+    auto id = Value(access);
+    OperandList operands = {Type(ty), id, Value(access->Object())};
+
+    if (ty->Is<type::Pointer>()) {
         // Use OpAccessChain for accesses into pointer types.
         for (auto* idx : access->Indices()) {
             operands.push_back(Value(idx));
@@ -593,7 +599,7 @@ void GeneratorImplIr::EmitAccess(ir::Access* access) {
             }
 
             // Now emit the OpVectorExtractDynamic instruction.
-            operands = {Type(access->Type()), id, vec_id, Value(idx)};
+            operands = {Type(ty), id, vec_id, Value(idx)};
             current_function_.push_inst(spv::Op::OpVectorExtractDynamic, std::move(operands));
             return;
         }
@@ -603,17 +609,18 @@ void GeneratorImplIr::EmitAccess(ir::Access* access) {
 
 void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
     auto id = Value(binary);
+    auto* ty = binary->Result()->Type();
     auto* lhs_ty = binary->LHS()->Type();
 
     // Determine the opcode.
     spv::Op op = spv::Op::Max;
     switch (binary->Kind()) {
         case ir::Binary::Kind::kAdd: {
-            op = binary->Type()->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
+            op = ty->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
             break;
         }
         case ir::Binary::Kind::kSubtract: {
-            op = binary->Type()->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
+            op = ty->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
             break;
         }
 
@@ -698,17 +705,16 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
     }
 
     // Emit the instruction.
-    current_function_.push_inst(
-        op, {Type(binary->Type()), id, Value(binary->LHS()), Value(binary->RHS())});
+    current_function_.push_inst(op, {Type(ty), id, Value(binary->LHS()), Value(binary->RHS())});
 }
 
 void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
-    auto* result_ty = builtin->Type();
+    auto* result_ty = builtin->Result()->Type();
 
     if (builtin->Func() == builtin::Function::kAbs &&
         result_ty->is_unsigned_integer_scalar_or_vector()) {
         // abs() is a no-op for unsigned integers.
-        values_.Add(builtin, Value(builtin->Args()[0]));
+        values_.Add(builtin->Result(), Value(builtin->Args()[0]));
         return;
     }
 
@@ -773,7 +779,7 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
 
 void GeneratorImplIr::EmitLoad(ir::Load* load) {
     current_function_.push_inst(spv::Op::OpLoad,
-                                {Type(load->Type()), Value(load), Value(load->From())});
+                                {Type(load->Result()->Type()), Value(load), Value(load->From())});
 }
 
 void GeneratorImplIr::EmitLoop(ir::Loop* loop) {
@@ -862,7 +868,7 @@ void GeneratorImplIr::EmitStore(ir::Store* store) {
 
 void GeneratorImplIr::EmitUserCall(ir::UserCall* call) {
     auto id = Value(call);
-    OperandList operands = {Type(call->Type()), id, Value(call->Func())};
+    OperandList operands = {Type(call->Result()->Type()), id, Value(call->Func())};
     for (auto* arg : call->Args()) {
         operands.push_back(Value(arg));
     }
@@ -871,7 +877,7 @@ void GeneratorImplIr::EmitUserCall(ir::UserCall* call) {
 
 void GeneratorImplIr::EmitVar(ir::Var* var) {
     auto id = Value(var);
-    auto* ptr = var->Type();
+    auto* ptr = var->Result()->Type()->As<type::Pointer>();
     auto ty = Type(ptr);
 
     switch (ptr->AddressSpace()) {

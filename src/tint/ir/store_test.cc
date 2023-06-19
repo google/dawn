@@ -31,7 +31,7 @@ TEST_F(IR_StoreTest, CreateStore) {
     auto* inst = b.Store(to, 4_i);
 
     ASSERT_TRUE(inst->Is<Store>());
-    ASSERT_EQ(inst->To(), to);
+    ASSERT_EQ(inst->To(), to->Result());
 
     ASSERT_TRUE(inst->From()->Is<Constant>());
     auto lhs = inst->From()->As<Constant>()->Value();
@@ -40,7 +40,7 @@ TEST_F(IR_StoreTest, CreateStore) {
 }
 
 TEST_F(IR_StoreTest, Usage) {
-    auto* to = b.Discard();
+    auto* to = b.Var(ty.ptr<private_, i32>());
     auto* inst = b.Store(to, 4_i);
 
     ASSERT_NE(inst->To(), nullptr);
@@ -51,7 +51,7 @@ TEST_F(IR_StoreTest, Usage) {
 }
 
 TEST_F(IR_StoreTest, Result) {
-    auto* to = b.Discard();
+    auto* to = b.Var(ty.ptr<private_, i32>());
     auto* inst = b.Store(to, 4_i);
 
     EXPECT_FALSE(inst->HasResults());

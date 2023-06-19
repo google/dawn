@@ -27,19 +27,14 @@ class Load : public utils::Castable<Load, OperandInstruction<1, 1>> {
     static constexpr size_t kFromOperandOffset = 0;
 
     /// Constructor (infers type)
+    /// @param result the result value
     /// @param from the value being loaded from
-    explicit Load(Value* from);
+    Load(InstructionResult* result, Value* from);
 
     ~Load() override;
 
-    /// @returns the type of the value
-    const type::Type* Type() override { return result_type_; }
-
     /// @returns the value being loaded from
     Value* From() { return operands_[kFromOperandOffset]; }
-
-  private:
-    const type::Type* result_type_ = nullptr;
 };
 
 }  // namespace tint::ir

@@ -58,9 +58,20 @@ class Module {
     /// @returns a reference to this module
     Module& operator=(Module&& o);
 
+    /// @param inst the instruction
+    /// @return the name of the given instruction, or an invalid symbol if the instruction is not
+    /// named. Requires that the instruction only has a single return value.
+    Symbol NameOf(Instruction* inst);
+
     /// @param value the value
     /// @return the name of the given value, or an invalid symbol if the value is not named.
     Symbol NameOf(Value* value);
+
+    /// @param inst the instruction to set the name of
+    /// @param name the desired name of the value. May be suffixed on collision.
+    /// @return the unique symbol of the given value
+    /// @note requires the instruction be a single result instruction.
+    Symbol SetName(Instruction* inst, std::string_view name);
 
     /// @param value the value to name.
     /// @param name the desired name of the value. May be suffixed on collision.

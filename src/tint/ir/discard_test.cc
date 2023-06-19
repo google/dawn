@@ -34,18 +34,5 @@ TEST_F(IR_DiscardTest, Result) {
     EXPECT_FALSE(inst->HasMultiResults());
 }
 
-TEST_F(IR_DiscardTest, Fail_NullType) {
-    EXPECT_FATAL_FAILURE({ Discard d(nullptr); }, "");
-}
-
-TEST_F(IR_DiscardTest, Fail_NonVoidType) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Discard d(mod.Types().i32());
-        },
-        "");
-}
-
 }  // namespace
 }  // namespace tint::ir

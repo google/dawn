@@ -33,7 +33,15 @@ class InstructionResult : public utils::Castable<InstructionResult, Value> {
     /// @returns the type of the value
     const type::Type* Type() override { return type_; }
 
+    /// Sets the source instruction for this value
+    /// @param inst the instruction to set
+    void SetSource(Instruction* inst) { source_ = inst; }
+
+    /// @returns the source instruction, if any
+    Instruction* Source() { return source_; }
+
   private:
+    Instruction* source_ = nullptr;
     const type::Type* type_ = nullptr;
 };
 

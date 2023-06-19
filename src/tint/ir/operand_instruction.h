@@ -16,6 +16,7 @@
 #define SRC_TINT_IR_OPERAND_INSTRUCTION_H_
 
 #include "src/tint/ir/instruction.h"
+#include "src/tint/ir/instruction_result.h"
 
 namespace tint::ir {
 
@@ -44,11 +45,21 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
     }
 
     /// @returns true if the instruction has result values
-    bool HasResults() { return !results_.IsEmpty(); }
+    bool HasResults() override { return !results_.IsEmpty(); }
     /// @returns true if the instruction has multiple values
-    bool HasMultiResults() { return results_.Length() > 1; }
+    bool HasMultiResults() override { return results_.Length() > 1; }
+
+    /// @returns the first result. Returns `nullptr` if there are no results, or if ther are
+    /// multi-results
+    InstructionResult* Result() override {
+        if (!HasResults() || HasMultiResults()) {
+            return nullptr;
+        }
+        return results_[0];
+    }
+
     /// @returns the result values for this instruction
-    utils::VectorRef<Value*> Results() { return results_; }
+    utils::VectorRef<InstructionResult*> Results() override { return results_; }
 
   protected:
     /// Append a new operand to the operand list for this instruction.
@@ -76,7 +87,7 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
 
     /// Appends a result value to the instruction
     /// @param value the value to append
-    void AddResult(Value* value) {
+    void AddResult(InstructionResult* value) {
         if (value) {
             value->SetSource(this);
         }
@@ -86,7 +97,7 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
     /// The operands to this instruction.
     utils::Vector<ir::Value*, N> operands_;
     /// The results of this instruction.
-    utils::Vector<ir::Value*, R> results_;
+    utils::Vector<ir::InstructionResult*, R> results_;
 };
 
 }  // namespace tint::ir

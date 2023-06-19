@@ -22,16 +22,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::BuiltinCall);
 
 namespace tint::ir {
 
-BuiltinCall::BuiltinCall(const type::Type* ty,
+BuiltinCall::BuiltinCall(InstructionResult* result,
                          builtin::Function func,
                          utils::VectorRef<Value*> arguments)
-    : Base(ty), func_(func) {
+    : func_(func) {
     TINT_ASSERT(IR, func != builtin::Function::kNone);
     TINT_ASSERT(IR, func != builtin::Function::kTintMaterialize);
 
     AddOperands(BuiltinCall::kArgsOperandOffset, std::move(arguments));
-
-    AddResult(this);
+    AddResult(result);
 }
 
 BuiltinCall::~BuiltinCall() = default;

@@ -38,10 +38,10 @@ TEST_F(IR_BinaryTest, Fail_NullType) {
 TEST_F(IR_BinaryTest, Result) {
     auto* a = b.Add(mod.Types().i32(), 4_i, 2_i);
 
-    auto results = a->Results();
     EXPECT_TRUE(a->HasResults());
     EXPECT_FALSE(a->HasMultiResults());
-    EXPECT_EQ(a, results[0]);
+    EXPECT_TRUE(a->Result()->Is<InstructionResult>());
+    EXPECT_EQ(a, a->Result()->Source());
 }
 
 TEST_F(IR_BinaryTest, CreateAnd) {
@@ -49,7 +49,7 @@ TEST_F(IR_BinaryTest, CreateAnd) {
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Kind(), Binary::Kind::kAnd);
-    ASSERT_NE(inst->Type(), nullptr);
+    ASSERT_NE(inst->Results()[0]->Type(), nullptr);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
     auto lhs = inst->LHS()->As<Constant>()->Value();

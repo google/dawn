@@ -53,6 +53,7 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
     b.RootBlock()->Append(buffer);
 
     auto* func = b.Function("foo", ty.i32());
+
     auto* block = func->StartTarget();
     auto* load = block->Append(b.Load(buffer));
     block->Append(b.Return(func, load));
@@ -122,10 +123,12 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
     b.RootBlock()->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
-    auto* block = func->StartTarget();
-    auto* access = block->Append(b.Access(ty.ptr<storage, i32>(), buffer, 1_u));
-    block->Append(b.Store(access, 42_i));
-    block->Append(b.Return(func));
+
+    auto sb = b.With(func->StartTarget());
+    auto* access = sb.Access(ty.ptr<storage, i32>(), buffer, 1_u);
+    sb.Store(access, 42_i);
+    sb.Return(func);
+
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -168,12 +171,14 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
     auto* i32_ptr = ty.ptr<storage, i32>();
 
     auto* func = b.Function("foo", ty.void_());
-    auto* block = func->StartTarget();
-    auto* val_ptr = block->Append(b.Access(i32_ptr, buffer, 0_u));
-    auto* load = block->Append(b.Load(val_ptr));
-    auto* elem_ptr = block->Append(b.Access(i32_ptr, buffer, 1_u, 3_u));
-    block->Append(b.Store(elem_ptr, load));
-    block->Append(b.Return(func));
+
+    auto sb = b.With(func->StartTarget());
+    auto* val_ptr = sb.Access(i32_ptr, buffer, 0_u);
+    auto* load = sb.Load(val_ptr);
+    auto* elem_ptr = sb.Access(i32_ptr, buffer, 1_u, 3_u);
+    sb.Store(elem_ptr, load);
+    sb.Return(func);
+
     mod.functions.Push(func);
 
     auto* expect = R"(

@@ -25,21 +25,12 @@ class Call : public utils::Castable<Call, OperandInstruction<4, 1>> {
   public:
     ~Call() override;
 
-    /// @returns the type of the value
-    const type::Type* Type() override { return result_type_; }
-
     /// @returns the call arguments
     virtual utils::Slice<Value* const> Args() { return operands_.Slice(); }
 
   protected:
     /// Constructor
-    Call() = delete;
-    /// Constructor
-    /// @param result_type the result type
-    explicit Call(const type::Type* result_type);
-
-  private:
-    const type::Type* result_type_ = nullptr;
+    Call();
 };
 
 }  // namespace tint::ir

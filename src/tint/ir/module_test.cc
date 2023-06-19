@@ -25,33 +25,33 @@ using namespace tint::number_suffixes;        // NOLINT
 using IR_ModuleTest = IRTestHelper;
 
 TEST_F(IR_ModuleTest, NameOfUnnamed) {
-    auto* v = mod.values.Create<ir::Var>(ty.ptr<function, i32>());
+    auto* v = b.Var(ty.ptr<function, i32>());
     EXPECT_FALSE(mod.NameOf(v).IsValid());
 }
 
 TEST_F(IR_ModuleTest, SetName) {
-    auto* v = mod.values.Create<ir::Var>(ty.ptr<function, i32>());
+    auto* v = b.Var(ty.ptr<function, i32>());
     EXPECT_EQ(mod.SetName(v, "a").Name(), "a");
     EXPECT_EQ(mod.NameOf(v).Name(), "a");
 }
 
 TEST_F(IR_ModuleTest, SetNameRename) {
-    auto* v = mod.values.Create<ir::Var>(ty.ptr<function, i32>());
+    auto* v = b.Var(ty.ptr<function, i32>());
     EXPECT_EQ(mod.SetName(v, "a").Name(), "a");
     EXPECT_EQ(mod.SetName(v, "b").Name(), "b");
     EXPECT_EQ(mod.NameOf(v).Name(), "b");
 }
 
 TEST_F(IR_ModuleTest, SetNameCollision) {
-    auto* a = mod.values.Create<ir::Var>(ty.ptr<function, i32>());
-    auto* b = mod.values.Create<ir::Var>(ty.ptr<function, i32>());
-    auto* c = mod.values.Create<ir::Var>(ty.ptr<function, i32>());
-    EXPECT_EQ(mod.SetName(a, "x").Name(), "x");
-    EXPECT_EQ(mod.SetName(b, "x_1").Name(), "x_1");
-    EXPECT_EQ(mod.SetName(c, "x").Name(), "x_2");
-    EXPECT_EQ(mod.NameOf(a).Name(), "x");
-    EXPECT_EQ(mod.NameOf(b).Name(), "x_1");
-    EXPECT_EQ(mod.NameOf(c).Name(), "x_2");
+    auto* v1 = b.Var(ty.ptr<function, i32>());
+    auto* v2 = b.Var(ty.ptr<function, i32>());
+    auto* v3 = b.Var(ty.ptr<function, i32>());
+    EXPECT_EQ(mod.SetName(v1, "x").Name(), "x");
+    EXPECT_EQ(mod.SetName(v2, "x_1").Name(), "x_1");
+    EXPECT_EQ(mod.SetName(v3, "x").Name(), "x_2");
+    EXPECT_EQ(mod.NameOf(v1).Name(), "x");
+    EXPECT_EQ(mod.NameOf(v2).Name(), "x_1");
+    EXPECT_EQ(mod.NameOf(v3).Name(), "x_2");
 }
 
 }  // namespace

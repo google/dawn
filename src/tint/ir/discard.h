@@ -25,8 +25,7 @@ namespace tint::ir {
 class Discard : public utils::Castable<Discard, Call> {
   public:
     /// Constructor
-    /// @param ty the type of the discard, must be Void type.
-    explicit Discard(const type::Type* ty);
+    Discard();
     ~Discard() override;
 };
 

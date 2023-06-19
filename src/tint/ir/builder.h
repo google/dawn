@@ -197,10 +197,21 @@ class Builder {
     /// @returns @p v
     ir::Value* Value(ir::Value* v) { return v; }
 
-    /// Creates a ir::Constant for the given boolean
-    /// @param v the boolean value
-    /// @returns the new constant
-    ir::Constant* Value(bool v) { return Constant(v); }
+    /// Extract the first result from the instruction
+    /// @param inst the instruction
+    /// @returns the result value
+    ir::Value* Value(ir::Instruction* inst) {
+        TINT_ASSERT(IR, inst->HasResults() && !inst->HasMultiResults());
+        return inst->Result();
+    }
+
+    /// Creates a value from the given number
+    /// @param n the number
+    /// @returns the value
+    template <typename T>
+    ir::Value* Value(Number<T> n) {
+        return Constant(n);
+    }
 
     /// Pass-through overload for Values() with vector-like argument
     /// @param vec the vector of ir::Value*
@@ -233,7 +244,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Binary(enum Binary::Kind kind, const type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Append(ir.instructions.Create<ir::Binary>(kind, type, Value(std::forward<LHS>(lhs)),
+        return Append(ir.instructions.Create<ir::Binary>(InstructionResult(type), kind,
+                                                         Value(std::forward<LHS>(lhs)),
                                                          Value(std::forward<RHS>(rhs))));
     }
 
@@ -416,7 +428,8 @@ class Builder {
     /// @returns the operation
     template <typename VAL>
     ir::Unary* Unary(enum Unary::Kind kind, const type::Type* type, VAL&& val) {
-        return Append(ir.instructions.Create<ir::Unary>(kind, type, Value(std::forward<VAL>(val))));
+        return Append(ir.instructions.Create<ir::Unary>(InstructionResult(type), kind,
+                                                        Value(std::forward<VAL>(val))));
     }
 
     /// Creates a Complement operation
@@ -452,7 +465,8 @@ class Builder {
     /// @returns the instruction
     template <typename VAL>
     ir::Bitcast* Bitcast(const type::Type* type, VAL&& val) {
-        return Append(ir.instructions.Create<ir::Bitcast>(type, Value(std::forward<VAL>(val))));
+        return Append(ir.instructions.Create<ir::Bitcast>(InstructionResult(type),
+                                                          Value(std::forward<VAL>(val))));
     }
 
     /// Creates a discard instruction
@@ -466,8 +480,8 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::UserCall* Call(const type::Type* type, ir::Function* func, ARGS&&... args) {
-        return Append(
-            ir.instructions.Create<ir::UserCall>(type, func, Values(std::forward<ARGS>(args)...)));
+        return Append(ir.instructions.Create<ir::UserCall>(InstructionResult(type), func,
+                                                           Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a builtin call instruction
@@ -477,7 +491,7 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::BuiltinCall* Call(const type::Type* type, builtin::Function func, ARGS&&... args) {
-        return Append(ir.instructions.Create<ir::BuiltinCall>(type, func,
+        return Append(ir.instructions.Create<ir::BuiltinCall>(InstructionResult(type), func,
                                                               Values(std::forward<ARGS>(args)...)));
     }
 
@@ -487,7 +501,8 @@ class Builder {
     /// @returns the instruction
     template <typename VAL>
     ir::Convert* Convert(const type::Type* to, VAL&& val) {
-        return Append(ir.instructions.Create<ir::Convert>(to, Value(std::forward<VAL>(val))));
+        return Append(ir.instructions.Create<ir::Convert>(InstructionResult(to),
+                                                          Value(std::forward<VAL>(val))));
     }
 
     /// Creates a value constructor instruction
@@ -496,8 +511,8 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::Construct* Construct(const type::Type* type, ARGS&&... args) {
-        return Append(
-            ir.instructions.Create<ir::Construct>(type, Values(std::forward<ARGS>(args)...)));
+        return Append(ir.instructions.Create<ir::Construct>(InstructionResult(type),
+                                                            Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a load instruction
@@ -505,16 +520,19 @@ class Builder {
     /// @returns the instruction
     template <typename VAL>
     ir::Load* Load(VAL&& from) {
-        return Append(ir.instructions.Create<ir::Load>(Value(std::forward<VAL>(from))));
+        auto* val = Value(std::forward<VAL>(from));
+        return Append(
+            ir.instructions.Create<ir::Load>(InstructionResult(val->Type()->UnwrapPtr()), val));
     }
 
     /// Creates a store instruction
     /// @param to the expression being stored too
     /// @param from the expression being stored
     /// @returns the instruction
-    template <typename ARG>
-    ir::Store* Store(ir::Value* to, ARG&& from) {
-        return Append(ir.instructions.Create<ir::Store>(to, Value(std::forward<ARG>(from))));
+    template <typename TO, typename ARG>
+    ir::Store* Store(TO&& to, ARG&& from) {
+        return Append(ir.instructions.Create<ir::Store>(Value(std::forward<TO>(to)),
+                                                        Value(std::forward<ARG>(from))));
     }
 
     /// Creates a new `var` declaration
@@ -613,9 +631,10 @@ class Builder {
     /// @param object the object being accessed
     /// @param indices the access indices
     /// @returns the instruction
-    template <typename... ARGS>
-    ir::Access* Access(const type::Type* type, ir::Value* object, ARGS&&... indices) {
-        return Append(ir.instructions.Create<ir::Access>(type, object,
+    template <typename OBJ, typename... ARGS>
+    ir::Access* Access(const type::Type* type, OBJ&& object, ARGS&&... indices) {
+        return Append(ir.instructions.Create<ir::Access>(InstructionResult(type),
+                                                         Value(std::forward<OBJ>(object)),
                                                          Values(std::forward<ARGS>(indices)...)));
     }
 
@@ -624,18 +643,25 @@ class Builder {
     /// @param object the object being swizzled
     /// @param indices the swizzle indices
     /// @returns the instruction
-    ir::Swizzle* Swizzle(const type::Type* type,
-                         ir::Value* object,
-                         utils::VectorRef<uint32_t> indices);
+    template <typename OBJ>
+    ir::Swizzle* Swizzle(const type::Type* type, OBJ&& object, utils::VectorRef<uint32_t> indices) {
+        return Append(ir.instructions.Create<ir::Swizzle>(
+            InstructionResult(type), Value(std::forward<OBJ>(object)), std::move(indices)));
+    }
 
     /// Creates a new `Swizzle`
     /// @param type the return type
     /// @param object the object being swizzled
     /// @param indices the swizzle indices
     /// @returns the instruction
+    template <typename OBJ>
     ir::Swizzle* Swizzle(const type::Type* type,
-                         ir::Value* object,
-                         std::initializer_list<uint32_t> indices);
+                         OBJ&& object,
+                         std::initializer_list<uint32_t> indices) {
+        return Append(ir.instructions.Create<ir::Swizzle>(InstructionResult(type),
+                                                          Value(std::forward<OBJ>(object)),
+                                                          utils::Vector<uint32_t, 4>(indices)));
+    }
 
     /// Retrieves the root block for the module, creating if necessary
     /// @returns the root block

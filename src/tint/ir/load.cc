@@ -21,13 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Load);
 
 namespace tint::ir {
 
-Load::Load(Value* from) {
-    TINT_ASSERT_OR_RETURN(IR, from && tint::Is<type::Pointer>(from->Type()));
-    result_type_ = from->Type()->UnwrapPtr();
+Load::Load(InstructionResult* result, Value* from) {
+    TINT_ASSERT(IR, from->Type()->Is<type::Pointer>());
+    TINT_ASSERT(IR, from && from->Type()->UnwrapPtr() == result->Type());
 
     AddOperand(Load::kFromOperandOffset, from);
-
-    AddResult(this);
+    AddResult(result);
 }
 
 Load::~Load() = default;

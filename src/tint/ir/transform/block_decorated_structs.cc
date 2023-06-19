@@ -45,7 +45,7 @@ void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
         if (!var) {
             continue;
         }
-        auto* ptr = var->Type()->As<type::Pointer>();
+        auto* ptr = var->Result()->Type()->As<type::Pointer>();
         if (!ptr || !(ptr->AddressSpace() == builtin::AddressSpace::kStorage ||
                       ptr->AddressSpace() == builtin::AddressSpace::kUniform)) {
             continue;
@@ -55,7 +55,7 @@ void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
 
     // Now process the buffer variables.
     for (auto* var : buffer_variables) {
-        auto* ptr = var->Type()->As<type::Pointer>();
+        auto* ptr = var->Result()->Type()->As<type::Pointer>();
         auto* store_ty = ptr->StoreType();
 
         bool wrapped = false;
@@ -98,15 +98,15 @@ void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
         var->ReplaceWith(new_var);
 
         // Replace uses of the old variable.
-        var->ReplaceAllUsesWith([&](Usage use) -> Value* {
+        var->Result()->ReplaceAllUsesWith([&](Usage use) -> Value* {
             if (wrapped) {
                 // The structure has been wrapped, so replace all uses of the old variable with a
                 // member accessor on the new variable.
-                auto* access = builder.Access(var->Type(), new_var, 0_u);
+                auto* access = builder.Access(var->Result()->Type(), new_var, 0_u);
                 access->InsertBefore(use.instruction);
-                return access;
+                return access->Result();
             }
-            return new_var;
+            return new_var->Result();
         });
     }
 }

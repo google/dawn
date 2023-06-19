@@ -30,23 +30,17 @@ class Access : public utils::Castable<Access, OperandInstruction<3, 1>> {
     static constexpr size_t kIndicesOperandOffset = 1;
 
     /// Constructor
-    /// @param result_type the result type
+    /// @param result the result value
     /// @param object the accessor object
     /// @param indices the indices to access
-    Access(const type::Type* result_type, Value* object, utils::VectorRef<Value*> indices);
+    Access(InstructionResult* result, Value* object, utils::VectorRef<Value*> indices);
     ~Access() override;
-
-    /// @returns the type of the value
-    const type::Type* Type() override { return result_type_; }
 
     /// @returns the object used for the access
     Value* Object() { return operands_[kObjectOperandOffset]; }
 
     /// @returns the accessor indices
     utils::Slice<Value*> Indices() { return operands_.Slice().Offset(kIndicesOperandOffset); }
-
-  private:
-    const type::Type* result_type_ = nullptr;
 };
 
 }  // namespace tint::ir

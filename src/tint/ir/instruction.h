@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_IR_INSTRUCTION_H_
 #define SRC_TINT_IR_INSTRUCTION_H_
 
+#include "src/tint/ir/instruction_result.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/castable.h"
 
@@ -26,7 +27,7 @@ class Block;
 namespace tint::ir {
 
 /// An instruction in the IR.
-class Instruction : public utils::Castable<Instruction, Value> {
+class Instruction : public utils::Castable<Instruction> {
   public:
     /// Destructor
     ~Instruction() override;
@@ -54,6 +55,18 @@ class Instruction : public utils::Castable<Instruction, Value> {
     /// @param index the operand index
     /// @param value the value to use
     virtual void SetOperand(size_t index, ir::Value* value) = 0;
+
+    /// @returns true if the instruction has result values
+    virtual bool HasResults() { return false; }
+    /// @returns true if the instruction has multiple values
+    virtual bool HasMultiResults() { return false; }
+
+    /// @returns the first result. Returns `nullptr` if there are no results, or if ther are
+    /// multi-results
+    virtual InstructionResult* Result() { return nullptr; }
+
+    /// @returns the result values for this instruction
+    virtual utils::VectorRef<InstructionResult*> Results() { return utils::Empty; }
 
     /// Pointer to the next instruction in the list
     Instruction* next = nullptr;

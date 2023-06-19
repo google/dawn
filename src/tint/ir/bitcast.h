@@ -27,9 +27,9 @@ class Bitcast : public utils::Castable<Bitcast, Call> {
     static constexpr size_t kValueOperandOffset = 0;
 
     /// Constructor
-    /// @param type the result type
+    /// @param result the result value
     /// @param val the value being bitcast
-    Bitcast(const type::Type* type, Value* val);
+    Bitcast(InstructionResult* result, Value* val);
     ~Bitcast() override;
 };
 

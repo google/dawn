@@ -27,9 +27,9 @@ class Construct : public utils::Castable<Construct, Call> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor
-    /// @param type the result type
+    /// @param result the result value
     /// @param args the constructor arguments
-    explicit Construct(const type::Type* type, utils::VectorRef<Value*> args = utils::Empty);
+    explicit Construct(InstructionResult* result, utils::VectorRef<Value*> args = utils::Empty);
     ~Construct() override;
 };
 

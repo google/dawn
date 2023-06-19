@@ -95,6 +95,11 @@ class GeneratorImplIr {
     /// @returns the result ID of the value
     uint32_t Value(ir::Value* value);
 
+    /// Get the result ID of the instruction result `value`, emitting its instruction if necessary.
+    /// @param inst the instruction to get the ID for
+    /// @returns the result ID of the instruction
+    uint32_t Value(ir::Instruction* inst);
+
     /// Get the ID of the label for `block`.
     /// @param block the block to get the label ID for
     /// @returns the ID of the block's label

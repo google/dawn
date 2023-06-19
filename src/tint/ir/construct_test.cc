@@ -40,9 +40,8 @@ TEST_F(IR_ConstructTest, Result) {
 
     EXPECT_TRUE(c->HasResults());
     EXPECT_FALSE(c->HasMultiResults());
-
-    auto results = c->Results();
-    EXPECT_EQ(c, results[0]);
+    EXPECT_TRUE(c->Result()->Is<InstructionResult>());
+    EXPECT_EQ(c, c->Result()->Source());
 }
 
 TEST_F(IR_ConstructTest, Fail_NullType) {

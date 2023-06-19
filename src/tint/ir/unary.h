@@ -33,14 +33,11 @@ class Unary : public utils::Castable<Unary, OperandInstruction<1, 1>> {
     };
 
     /// Constructor
+    /// @param result the result value
     /// @param kind the kind of unary instruction
-    /// @param result_type the result type
     /// @param val the input value for the instruction
-    Unary(enum Kind kind, const type::Type* result_type, Value* val);
+    Unary(InstructionResult* result, enum Kind kind, Value* val);
     ~Unary() override;
-
-    /// @returns the type of the value
-    const type::Type* Type() override { return result_type_; }
 
     /// @returns the value for the instruction
     Value* Val() { return operands_[kValueOperandOffset]; }
@@ -50,7 +47,6 @@ class Unary : public utils::Castable<Unary, OperandInstruction<1, 1>> {
 
   private:
     enum Kind kind_;
-    const type::Type* result_type_ = nullptr;
 };
 
 }  // namespace tint::ir

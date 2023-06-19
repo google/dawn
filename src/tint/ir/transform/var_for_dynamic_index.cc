@@ -63,7 +63,7 @@ struct PartialAccess {
 };
 
 std::optional<AccessToReplace> ShouldReplace(Access* access) {
-    if (access->Type()->Is<type::Pointer>()) {
+    if (access->Result()->Type()->Is<type::Pointer>()) {
         // No need to modify accesses into pointer types.
         return {};
     }
@@ -125,7 +125,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
                 auto* intermediate_source = builder.Access(to_replace.dynamic_index_source_type,
                                                            source_object, partial_access.indices);
                 intermediate_source->InsertBefore(access);
-                return intermediate_source;
+                return intermediate_source->Result();
             });
         }
 
@@ -136,14 +136,14 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
                                             builtin::Access::kReadWrite));
             decl->SetInitializer(source_object);
             decl->InsertBefore(access);
-            return decl;
+            return decl->Result();
         });
 
         // Create a new access instruction using the local variable as the source.
         utils::Vector<Value*, 4> indices{access->Indices().Offset(to_replace.first_dynamic_index)};
         auto* new_access =
-            builder.Access(ir->Types().ptr(builtin::AddressSpace::kFunction, access->Type(),
-                                           builtin::Access::kReadWrite),
+            builder.Access(ir->Types().ptr(builtin::AddressSpace::kFunction,
+                                           access->Result()->Type(), builtin::Access::kReadWrite),
                            local, indices);
         access->ReplaceWith(new_access);
 
@@ -152,7 +152,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
         load->InsertAfter(new_access);
 
         // Replace all uses of the old access instruction with the loaded result.
-        access->ReplaceAllUsesWith([&](Usage) { return load; });
+        access->Result()->ReplaceAllUsesWith([&](Usage) { return load->Result(); });
     }
 }
 

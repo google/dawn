@@ -27,14 +27,11 @@ class Swizzle : public utils::Castable<Swizzle, OperandInstruction<1, 1>> {
     static constexpr size_t kObjectOperandOffset = 0;
 
     /// Constructor
-    /// @param result_type the result type
+    /// @param result the result value
     /// @param object the object being swizzled
     /// @param indices the indices to swizzle
-    Swizzle(const type::Type* result_type, Value* object, utils::VectorRef<uint32_t> indices);
+    Swizzle(InstructionResult* result, Value* object, utils::VectorRef<uint32_t> indices);
     ~Swizzle() override;
-
-    /// @returns the type of the value
-    const type::Type* Type() override { return result_type_; }
 
     /// @returns the object used for the access
     Value* Object() { return operands_[kObjectOperandOffset]; }
@@ -43,7 +40,6 @@ class Swizzle : public utils::Castable<Swizzle, OperandInstruction<1, 1>> {
     utils::VectorRef<uint32_t> Indices() { return indices_; }
 
   private:
-    const type::Type* result_type_ = nullptr;
     utils::Vector<uint32_t, 4> indices_;
 };
 

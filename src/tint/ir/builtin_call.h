@@ -28,10 +28,10 @@ class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor
-    /// @param res_type the result type
+    /// @param result the result value
     /// @param func the builtin function
     /// @param args the conversion arguments
-    BuiltinCall(const type::Type* res_type,
+    BuiltinCall(InstructionResult* result,
                 builtin::Function func,
                 utils::VectorRef<Value*> args = utils::Empty);
     ~BuiltinCall() override;

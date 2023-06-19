@@ -37,9 +37,8 @@ TEST_F(IR_ConvertTest, Results) {
 
     EXPECT_TRUE(c->HasResults());
     EXPECT_FALSE(c->HasMultiResults());
-
-    auto results = c->Results();
-    EXPECT_EQ(results[0], c);
+    EXPECT_TRUE(c->Result()->Is<InstructionResult>());
+    EXPECT_EQ(c->Result()->Source(), c);
 }
 
 }  // namespace

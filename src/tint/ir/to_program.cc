@@ -158,14 +158,16 @@ class State {
     /// @return an ast::Statement from @p inst, or nullptr if there was an error
     const ast::Statement* Stmt(ir::Instruction* inst) {
         return tint::Switch(
-            inst,                                                  //
-            [&](ir::Store* i) { return Store(i); },                //
-            [&](ir::Call* i) { return CallStmt(i); },              //
-            [&](ir::Var* i) { return Var(i); },                    //
-            [&](ir::If* if_) { return If(if_); },                  //
-            [&](ir::Switch* switch_) { return Switch(switch_); },  //
-            [&](ir::Return* ret) { return Return(ret); },          //
-            [&](ir::Value*) { return ValueStmt(inst); },
+            inst,                                                       //
+            [&](ir::Store* i) { return Store(i); },                     //
+            [&](ir::Call* i) { return CallStmt(i); },                   //
+            [&](ir::Var* i) { return Var(i); },                         //
+            [&](ir::If* if_) { return If(if_); },                       //
+            [&](ir::Switch* switch_) { return Switch(switch_); },       //
+            [&](ir::Return* ret) { return Return(ret); },               //
+            [&](ir::Load* l) { return ValueStmt(l->Result()); },        //
+            [&](ir::Binary* bin) { return ValueStmt(bin->Result()); },  //
+            [&](ir::Unary* u) { return ValueStmt(u->Result()); },       //
             // TODO(dsinclair): Remove when branch is only a parent ...
             [&](ir::Branch*) { return nullptr; },
             [&](Default) {
@@ -290,7 +292,7 @@ class State {
     /// @return an ast::VariableDeclStatement from @p var
     const ast::VariableDeclStatement* Var(ir::Var* var) {
         Symbol name = AssignNameTo(var);
-        auto* ptr = var->Type();
+        auto* ptr = var->Result()->Type()->As<type::Pointer>();
         auto ty = Type(ptr->StoreType());
         const ast::Expression* init = nullptr;
         if (var->Initializer()) {
@@ -321,8 +323,8 @@ class State {
 
         // Determine whether the value should be placed into a let, or inlined in its single place
         // of usage. Currently a value is inlined if it has a single usage and is unnamed.
-        // TODO(crbug.com/tint/1902): This logic needs to check that the sequence of side-effecting
-        // expressions is not changed by inlining the expression. This needs fixing.
+        // TODO(crbug.com/tint/1902): This logic needs to check that the sequence of side -
+        // effecting expressions is not changed by inlining the expression. This needs fixing.
         bool create_let = val->Usages().Count() > 1 || mod.NameOf(val).IsValid();
         if (create_let) {
             auto* init = Expr(val);  // Must come before giving the value a name
@@ -342,20 +344,36 @@ class State {
     // This prevents littering the ToProgram logic with expensive error checking code.
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// @param val the ir::Expression
-    /// @return an ast::Expression from @p val.
-    /// @note May be a semantically-invalid placeholder expression on error.
+    /// @param val the value
+    /// @returns the ast::Expression from the values source instruction
     const ast::Expression* Expr(ir::Value* val) {
         if (auto name = value_names_.Get(val)) {
             return b.Expr(name.value());
         }
 
         return tint::Switch(
-            val,                                            //
-            [&](ir::Constant* c) { return ConstExpr(c); },  //
-            [&](ir::Load* l) { return LoadExpr(l); },       //
-            [&](ir::Unary* u) { return UnaryExpr(u); },     //
-            [&](ir::Binary* u) { return BinaryExpr(u); },   //
+            val,                                                          //
+            [&](ir::Constant* c) { return ConstExpr(c); },                //
+            [&](ir::InstructionResult* r) { return Expr(r->Source()); },  //
+            [&](Default) -> const ast::Expression* {
+                UNHANDLED_CASE(val);
+                return b.Expr("<error>");
+            });
+    }
+
+    /// @param val the ir::Expression
+    /// @return an ast::Expression from @p val.
+    /// @note May be a semantically-invalid placeholder expression on error.
+    const ast::Expression* Expr(ir::Instruction* val) {
+        if (auto name = value_names_.Get(val->Result())) {
+            return b.Expr(name.value());
+        }
+
+        return tint::Switch(
+            val,                                           //
+            [&](ir::Load* l) { return LoadExpr(l); },      //
+            [&](ir::Unary* u) { return UnaryExpr(u); },    //
+            [&](ir::Binary* u) { return BinaryExpr(u); },  //
             [&](Default) {
                 UNHANDLED_CASE(val);
                 return b.Expr("<error>");
@@ -553,6 +571,11 @@ class State {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Helpers
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// Creates and returns a new, unique name for the instructions result value, or returns the
+    /// previously created name. Must not be called with a multi-result instruction.
+    /// @return the instruction values name
+    Symbol AssignNameTo(Instruction* inst) { return AssignNameTo(inst->Result()); }
 
     /// Creates and returns a new, unique name for the given value, or returns the previously
     /// created name.

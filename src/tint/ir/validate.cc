@@ -267,8 +267,8 @@ class Validator {
             }
         }
 
-        auto* want_ty = a->Type()->UnwrapPtr();
-        bool want_ptr = a->Type()->Is<type::Pointer>();
+        auto* want_ty = a->Result()->Type()->UnwrapPtr();
+        bool want_ptr = a->Result()->Type()->Is<type::Pointer>();
         if (TINT_UNLIKELY(ty != want_ty || is_ptr != want_ptr)) {
             std::string want =
                 want_ptr ? "ptr<" + want_ty->FriendlyName() + ">" : want_ty->FriendlyName();

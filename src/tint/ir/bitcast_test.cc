@@ -30,7 +30,7 @@ TEST_F(IR_BitcastTest, Bitcast) {
     auto* inst = b.Bitcast(mod.Types().i32(), 4_i);
 
     ASSERT_TRUE(inst->Is<ir::Bitcast>());
-    ASSERT_NE(inst->Type(), nullptr);
+    ASSERT_NE(inst->Result()->Type(), nullptr);
 
     auto args = inst->Args();
     ASSERT_EQ(args.Length(), 1u);
@@ -43,10 +43,10 @@ TEST_F(IR_BitcastTest, Bitcast) {
 TEST_F(IR_BitcastTest, Result) {
     auto* a = b.Bitcast(mod.Types().i32(), 4_i);
 
-    auto results = a->Results();
     EXPECT_TRUE(a->HasResults());
     EXPECT_FALSE(a->HasMultiResults());
-    EXPECT_EQ(a, results[0]);
+    EXPECT_TRUE(a->Result()->Is<InstructionResult>());
+    EXPECT_EQ(a, a->Result()->Source());
 }
 
 TEST_F(IR_BitcastTest, Bitcast_Usage) {

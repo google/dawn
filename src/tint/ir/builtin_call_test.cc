@@ -39,9 +39,8 @@ TEST_F(IR_BuiltinCallTest, Result) {
 
     EXPECT_TRUE(builtin->HasResults());
     EXPECT_FALSE(builtin->HasMultiResults());
-
-    auto results = builtin->Results();
-    EXPECT_EQ(results[0], builtin);
+    EXPECT_TRUE(builtin->Result()->Is<InstructionResult>());
+    EXPECT_EQ(builtin->Result()->Source(), builtin);
 }
 
 TEST_F(IR_BuiltinCallTest, Fail_NullType) {

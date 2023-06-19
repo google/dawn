@@ -121,6 +121,7 @@ class Disassembler {
     void EmitBindingPoint(BindingPoint p);
     void EmitLocation(Location loc);
     void EmitInstruction(Instruction* inst);
+    void EmitValueWithType(Instruction* val);
     void EmitValueWithType(Value* val);
     void EmitValue(Value* val);
     void EmitValueList(utils::Slice<ir::Value* const> values);
