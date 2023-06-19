@@ -58,6 +58,11 @@ TEST_F(SpvGeneratorImplTest, Type_F16) {
     auto id = generator_.Type(ty.f16());
     EXPECT_EQ(id, 1u);
     EXPECT_EQ(DumpTypes(), "%1 = OpTypeFloat 16\n");
+    EXPECT_EQ(DumpInstructions(generator_.Module().Capabilities()),
+              "OpCapability Float16\n"
+              "OpCapability UniformAndStorageBuffer16BitAccess\n"
+              "OpCapability StorageBuffer16BitAccess\n"
+              "OpCapability StorageInputOutput16\n");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec2i) {

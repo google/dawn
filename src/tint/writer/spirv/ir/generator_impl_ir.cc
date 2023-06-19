@@ -225,6 +225,10 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
                 module_.PushType(spv::Op::OpTypeFloat, {id, 32u});
             },
             [&](const type::F16*) {
+                module_.PushCapability(SpvCapabilityFloat16);
+                module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
+                module_.PushCapability(SpvCapabilityStorageBuffer16BitAccess);
+                module_.PushCapability(SpvCapabilityStorageInputOutput16);
                 module_.PushType(spv::Op::OpTypeFloat, {id, 16u});
             },
             [&](const type::Vector* vec) {
