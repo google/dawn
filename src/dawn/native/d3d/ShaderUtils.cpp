@@ -252,7 +252,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     return {};
 }
 
-std::string CompileFlagsToStringFXC(uint32_t compileFlags) {
+std::string CompileFlagsToString(uint32_t compileFlags) {
     struct Flag {
         uint32_t value;
         const char* name;
@@ -365,6 +365,8 @@ void DumpCompiledShader(Device* device,
     const Blob& shaderBlob = compiledShader.shaderBlob;
     if (!shaderBlob.Empty()) {
         if (device->IsToggleEnabled(Toggle::UseDXC)) {
+            dumpedMsg << "/* DXC compile flags */ " << std::endl
+                      << CompileFlagsToString(compileFlags) << std::endl;
             dumpedMsg << "/* Dumped disassembled DXIL */" << std::endl;
             ComPtr<IDxcBlobEncoding> dxcBlob;
             ComPtr<IDxcBlobEncoding> disassembly;
@@ -379,7 +381,7 @@ void DumpCompiledShader(Device* device,
             }
         } else {
             dumpedMsg << "/* FXC compile flags */ " << std::endl
-                      << CompileFlagsToStringFXC(compileFlags) << std::endl;
+                      << CompileFlagsToString(compileFlags) << std::endl;
             dumpedMsg << "/* Dumped disassembled DXBC */" << std::endl;
             ComPtr<ID3DBlob> disassembly;
             UINT flags =
