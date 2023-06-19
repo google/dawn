@@ -41,11 +41,11 @@ fn test_int_S1_c0_b() -> bool {
   ok = true;
   x_41 = false;
   if (true) {
-    x_40 = all(((x_35 / vec4i(x_27, x_27, x_27, x_27)) == x_35));
+    x_40 = all(((x_35 / vec4i(x_27)) == x_35));
     x_41 = x_40;
   }
   ok = x_41;
-  let x_44 = vec4i(x_27, x_27, x_27, x_27);
+  let x_44 = vec4i(x_27);
   val = x_44;
   let x_47 = (x_44 + x_46);
   val = x_47;
@@ -106,11 +106,11 @@ fn main_1() {
   x_9_ok = true;
   x_87 = false;
   if (true) {
-    x_86 = all(((x_82 / vec4f(x_77, x_77, x_77, x_77)) == x_82));
+    x_86 = all(((x_82 / vec4f(x_77)) == x_82));
     x_87 = x_86;
   }
   x_9_ok = x_87;
-  let x_89 = vec4f(x_77, x_77, x_77, x_77);
+  let x_89 = vec4f(x_77);
   x_10_val = x_89;
   let x_92 = (x_89 + x_91);
   x_10_val = x_92;

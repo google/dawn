@@ -53,11 +53,11 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41 = false;
   if (true) {
-    x_40 = all(equal(tint_div(ivec4(0), ivec4(x_27, x_27, x_27, x_27)), ivec4(0)));
+    x_40 = all(equal(tint_div(ivec4(0), ivec4(x_27)), ivec4(0)));
     x_41 = x_40;
   }
   ok = x_41;
-  ivec4 x_44 = ivec4(x_27, x_27, x_27, x_27);
+  ivec4 x_44 = ivec4(x_27);
   val = x_44;
   ivec4 x_47 = (x_44 + ivec4(1));
   val = x_47;
@@ -112,11 +112,11 @@ void main_1() {
   x_9_ok = true;
   x_87 = false;
   if (true) {
-    x_86 = all(equal((vec4(0.0f) / vec4(x_77, x_77, x_77, x_77)), vec4(0.0f)));
+    x_86 = all(equal((vec4(0.0f) / vec4(x_77)), vec4(0.0f)));
     x_87 = x_86;
   }
   x_9_ok = x_87;
-  vec4 x_89 = vec4(x_77, x_77, x_77, x_77);
+  vec4 x_89 = vec4(x_77);
   x_10_val = x_89;
   vec4 x_92 = (x_89 + vec4(1.0f));
   x_10_val = x_92;

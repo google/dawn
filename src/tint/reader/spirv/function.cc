@@ -3895,14 +3895,31 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 
     if (op == spv::Op::OpCompositeConstruct) {
         ExpressionList operands;
+        bool all_same = true;
+        uint32_t first_id = 0u;
         for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
             auto operand = MakeOperand(inst, iarg);
             if (!operand) {
                 return {};
             }
             operands.Push(operand.expr);
+
+            // Check if this argument is different from the others.
+            auto arg_id = inst.GetSingleWordInOperand(iarg);
+            if (first_id != 0u) {
+                if (arg_id != first_id) {
+                    all_same = false;
+                }
+            } else {
+                first_id = arg_id;
+            }
         }
-        return {ast_type, builder_.Call(ast_type->Build(builder_), std::move(operands))};
+        if (all_same && ast_type->Is<Vector>()) {
+            // We're constructing a vector and all the operands were the same, so use a splat.
+            return {ast_type, builder_.Call(ast_type->Build(builder_), operands[0])};
+        } else {
+            return {ast_type, builder_.Call(ast_type->Build(builder_), std::move(operands))};
+        }
     }
 
     if (op == spv::Op::OpCompositeExtract) {

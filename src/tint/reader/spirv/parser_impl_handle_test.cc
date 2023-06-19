@@ -4250,7 +4250,7 @@ loop {
   }
 }
 let x_21 = select(0.0f, x_14, (x_14 > 1.0f));
-x_1 = vec4f(x_21, x_21, x_21, x_21);
+x_1 = vec4f(x_21);
 return;
 )";
     ASSERT_EQ(expect, got);

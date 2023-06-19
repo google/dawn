@@ -29,11 +29,11 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41 = false;
   if (true) {
-    x_40 = all((tint_div((0).xxxx, int4(x_27, x_27, x_27, x_27)) == (0).xxxx));
+    x_40 = all((tint_div((0).xxxx, int4((x_27).xxxx)) == (0).xxxx));
     x_41 = x_40;
   }
   ok = x_41;
-  const int4 x_44 = int4(x_27, x_27, x_27, x_27);
+  const int4 x_44 = int4((x_27).xxxx);
   val = x_44;
   const int4 x_47 = (x_44 + (1).xxxx);
   val = x_47;
@@ -88,11 +88,11 @@ void main_1() {
   x_9_ok = true;
   x_87 = false;
   if (true) {
-    x_86 = all((((0.0f).xxxx / float4(x_77, x_77, x_77, x_77)) == (0.0f).xxxx));
+    x_86 = all((((0.0f).xxxx / float4((x_77).xxxx)) == (0.0f).xxxx));
     x_87 = x_86;
   }
   x_9_ok = x_87;
-  const float4 x_89 = float4(x_77, x_77, x_77, x_77);
+  const float4 x_89 = float4((x_77).xxxx);
   x_10_val = x_89;
   const float4 x_92 = (x_89 + (1.0f).xxxx);
   x_10_val = x_92;

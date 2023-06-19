@@ -101,6 +101,27 @@ let x_3 = vec2f(50.0f, 60.0f);
 )"));
 }
 
+TEST_F(SpvParserTest_Composite_Construct, VectorSplat) {
+    const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCompositeConstruct %v4uint %uint_10 %uint_10 %uint_10 %uint_10
+     %2 = OpCompositeConstruct %v2int %int_30 %int_30
+     %3 = OpCompositeConstruct %v2float %float_50 %float_50
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_1 = vec4u(10u);
+let x_2 = vec2i(30i);
+let x_3 = vec2f(50.0f);
+)"));
+}
+
 TEST_F(SpvParserTest_Composite_Construct, Matrix) {
     const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
