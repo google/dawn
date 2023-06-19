@@ -49,6 +49,7 @@
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/ir/var.h"
+#include "src/tint/switch.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -618,6 +619,19 @@ class Builder {
     template <typename... ARGS>
     ir::ExitIf* ExitIf(ir::If* i, ARGS&&... args) {
         return Append(ir.instructions.Create<ir::ExitIf>(i, Values(std::forward<ARGS>(args)...)));
+    }
+
+    /// Creates an exit instruction for the given control instruction
+    /// @param inst the control instruction being exited
+    /// @param args the branch arguments
+    /// @returns the exit instruction, or nullptr if the control instruction is not supported.
+    template <typename... ARGS>
+    ir::Branch* Exit(ir::ControlInstruction* inst, ARGS&&... args) {
+        return tint::Switch(
+            inst,  //
+            [&](ir::If* i) { return ExitIf(i, std::forward<ARGS>(args)...); },
+            [&](ir::Loop* i) { return ExitLoop(i, std::forward<ARGS>(args)...); },
+            [&](ir::Switch* i) { return ExitSwitch(i, std::forward<ARGS>(args)...); });
     }
 
     /// Creates a new `BlockParam`
