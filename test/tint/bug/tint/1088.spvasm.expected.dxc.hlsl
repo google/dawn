@@ -21,7 +21,7 @@ void main_1() {
   const float3 x_13 = position_1;
   q = float4(x_13.x, x_13.y, x_13.z, 1.0f);
   const float4 x_21 = q;
-  p = float3(x_21.x, x_21.y, x_21.z);
+  p = x_21.xyz;
   const float x_27 = p.x;
   const float x_41 = asfloat(x_14[13].x);
   const float x_45 = position_1.y;

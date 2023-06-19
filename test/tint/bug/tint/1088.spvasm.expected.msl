@@ -41,7 +41,7 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, const cons
   float3 const x_13 = (*(tint_private_vars)).position_1;
   q = float4(x_13[0], x_13[1], x_13[2], 1.0f);
   float4 const x_21 = q;
-  p = float3(x_21[0], x_21[1], x_21[2]);
+  p = x_21.xyz;
   float const x_27 = p[0];
   float const x_41 = (*(tint_symbol_5)).test[0].el;
   float const x_45 = (*(tint_private_vars)).position_1[1];

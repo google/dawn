@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 123
+; Bound: 120
 ; Schema: 0
                OpCapability Shader
-         %76 = OpExtInstImport "GLSL.std.450"
+         %73 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %main "main" %position_1_param_1 %uv_param_1 %normal_param_1 %gl_Position_1 %vUV_1_1 %vertex_point_size
                OpName %position_1_param_1 "position_1_param_1"
@@ -110,7 +110,7 @@
 %_ptr_Function_float = OpTypePointer Function %float
      %uint_3 = OpConstant %uint 3
         %int = OpTypeInt 32 1
-         %64 = OpConstantNull %int
+         %61 = OpConstantNull %int
 %_ptr_Uniform_float = OpTypePointer Uniform %float
      %uint_1 = OpConstant %uint 1
 %_ptr_Private_float = OpTypePointer Private %float
@@ -118,7 +118,7 @@
 %_ptr_Uniform_mat4v4float = OpTypePointer Uniform %mat4v4float
    %float_n1 = OpConstant %float -1
    %main_out = OpTypeStruct %v4float %v2float
-        %104 = OpTypeFunction %main_out %v3float %v2float %v3float
+        %101 = OpTypeFunction %main_out %v3float %v2float %v3float
      %main_1 = OpFunction %void None %39
          %42 = OpLabel
           %q = OpVariable %_ptr_Function_v4float Function %12
@@ -130,76 +130,73 @@
          %52 = OpCompositeConstruct %v4float %48 %49 %50 %float_1
                OpStore %q %52
          %53 = OpLoad %v4float %q
-         %54 = OpCompositeExtract %float %53 0
-         %55 = OpCompositeExtract %float %53 1
-         %56 = OpCompositeExtract %float %53 2
-         %57 = OpCompositeConstruct %v3float %54 %55 %56
-               OpStore %p %57
-         %60 = OpAccessChain %_ptr_Function_float %p %uint_0
-         %61 = OpLoad %float %60
-         %66 = OpAccessChain %_ptr_Uniform_float %x_14 %uint_0 %uint_3 %64 %uint_0
-         %67 = OpLoad %float %66
-         %70 = OpAccessChain %_ptr_Private_float %position_1 %uint_1
-         %71 = OpLoad %float %70
-         %72 = OpAccessChain %_ptr_Uniform_float %x_14 %uint_0 %uint_1
-         %73 = OpLoad %float %72
-         %74 = OpAccessChain %_ptr_Function_float %p %uint_0
-         %77 = OpFMul %float %67 %71
-         %78 = OpFAdd %float %77 %73
-         %75 = OpExtInst %float %76 Sin %78
-         %79 = OpFAdd %float %61 %75
-               OpStore %74 %79
-         %80 = OpAccessChain %_ptr_Function_float %p %uint_1
-         %81 = OpLoad %float %80
-         %82 = OpAccessChain %_ptr_Uniform_float %x_14 %uint_0 %uint_1
-         %83 = OpLoad %float %82
-         %84 = OpAccessChain %_ptr_Function_float %p %uint_1
-         %87 = OpFAdd %float %83 %float_4
-         %85 = OpExtInst %float %76 Sin %87
-         %88 = OpFAdd %float %81 %85
-               OpStore %84 %88
-         %90 = OpAccessChain %_ptr_Uniform_mat4v4float %x_14 %uint_0 %uint_0
-         %91 = OpLoad %mat4v4float %90
-         %92 = OpLoad %v3float %p
-         %93 = OpCompositeExtract %float %92 0
-         %94 = OpCompositeExtract %float %92 1
-         %95 = OpCompositeExtract %float %92 2
-         %96 = OpCompositeConstruct %v4float %93 %94 %95 %float_1
-         %97 = OpMatrixTimesVector %v4float %91 %96
-               OpStore %gl_Position %97
-         %98 = OpLoad %v2float %uv
-               OpStore %vUV %98
-         %99 = OpAccessChain %_ptr_Private_float %gl_Position %uint_1
-        %100 = OpLoad %float %99
-        %101 = OpAccessChain %_ptr_Private_float %gl_Position %uint_1
-        %103 = OpFMul %float %100 %float_n1
-               OpStore %101 %103
+         %54 = OpVectorShuffle %v3float %53 %53 0 1 2
+               OpStore %p %54
+         %57 = OpAccessChain %_ptr_Function_float %p %uint_0
+         %58 = OpLoad %float %57
+         %63 = OpAccessChain %_ptr_Uniform_float %x_14 %uint_0 %uint_3 %61 %uint_0
+         %64 = OpLoad %float %63
+         %67 = OpAccessChain %_ptr_Private_float %position_1 %uint_1
+         %68 = OpLoad %float %67
+         %69 = OpAccessChain %_ptr_Uniform_float %x_14 %uint_0 %uint_1
+         %70 = OpLoad %float %69
+         %71 = OpAccessChain %_ptr_Function_float %p %uint_0
+         %74 = OpFMul %float %64 %68
+         %75 = OpFAdd %float %74 %70
+         %72 = OpExtInst %float %73 Sin %75
+         %76 = OpFAdd %float %58 %72
+               OpStore %71 %76
+         %77 = OpAccessChain %_ptr_Function_float %p %uint_1
+         %78 = OpLoad %float %77
+         %79 = OpAccessChain %_ptr_Uniform_float %x_14 %uint_0 %uint_1
+         %80 = OpLoad %float %79
+         %81 = OpAccessChain %_ptr_Function_float %p %uint_1
+         %84 = OpFAdd %float %80 %float_4
+         %82 = OpExtInst %float %73 Sin %84
+         %85 = OpFAdd %float %78 %82
+               OpStore %81 %85
+         %87 = OpAccessChain %_ptr_Uniform_mat4v4float %x_14 %uint_0 %uint_0
+         %88 = OpLoad %mat4v4float %87
+         %89 = OpLoad %v3float %p
+         %90 = OpCompositeExtract %float %89 0
+         %91 = OpCompositeExtract %float %89 1
+         %92 = OpCompositeExtract %float %89 2
+         %93 = OpCompositeConstruct %v4float %90 %91 %92 %float_1
+         %94 = OpMatrixTimesVector %v4float %88 %93
+               OpStore %gl_Position %94
+         %95 = OpLoad %v2float %uv
+               OpStore %vUV %95
+         %96 = OpAccessChain %_ptr_Private_float %gl_Position %uint_1
+         %97 = OpLoad %float %96
+         %98 = OpAccessChain %_ptr_Private_float %gl_Position %uint_1
+        %100 = OpFMul %float %97 %float_n1
+               OpStore %98 %100
                OpReturn
                OpFunctionEnd
- %main_inner = OpFunction %main_out None %104
+ %main_inner = OpFunction %main_out None %101
 %position_1_param = OpFunctionParameter %v3float
    %uv_param = OpFunctionParameter %v2float
 %normal_param = OpFunctionParameter %v3float
-        %110 = OpLabel
+        %107 = OpLabel
                OpStore %position_1 %position_1_param
                OpStore %uv %uv_param
                OpStore %normal %normal_param
-        %111 = OpFunctionCall %void %main_1
-        %112 = OpLoad %v4float %gl_Position
-        %113 = OpLoad %v2float %vUV
-        %114 = OpCompositeConstruct %main_out %112 %113
-               OpReturnValue %114
+        %108 = OpFunctionCall %void %main_1
+        %109 = OpLoad %v4float %gl_Position
+        %110 = OpLoad %v2float %vUV
+        %111 = OpCompositeConstruct %main_out %109 %110
+               OpReturnValue %111
                OpFunctionEnd
        %main = OpFunction %void None %39
-        %116 = OpLabel
-        %118 = OpLoad %v3float %position_1_param_1
-        %119 = OpLoad %v2float %uv_param_1
-        %120 = OpLoad %v3float %normal_param_1
-        %117 = OpFunctionCall %main_out %main_inner %118 %119 %120
-        %121 = OpCompositeExtract %v4float %117 0
-               OpStore %gl_Position_1 %121
-        %122 = OpCompositeExtract %v2float %117 1
-               OpStore %vUV_1_1 %122
+        %113 = OpLabel
+        %115 = OpLoad %v3float %position_1_param_1
+        %116 = OpLoad %v2float %uv_param_1
+        %117 = OpLoad %v3float %normal_param_1
+        %114 = OpFunctionCall %main_out %main_inner %115 %116 %117
+        %118 = OpCompositeExtract %v4float %114 0
+               OpStore %gl_Position_1 %118
+        %119 = OpCompositeExtract %v2float %114 1
+               OpStore %vUV_1_1 %119
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

@@ -4,9 +4,9 @@ void main_1() {
   vec3 v = vec3(0.0f);
   float x_14 = v.y;
   vec3 x_16 = v;
-  vec2 x_17 = vec2(x_16.x, x_16.z);
+  vec2 x_17 = x_16.xz;
   vec3 x_18 = v;
-  vec3 x_19 = vec3(x_18.x, x_18.z, x_18.y);
+  vec3 x_19 = x_18.xzy;
   return;
 }
 

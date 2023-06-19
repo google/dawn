@@ -4693,40 +4693,68 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(const spvtools::opt::Instruct
     const auto vec0_len = type_mgr_->GetType(vec0.type_id())->AsVector()->element_count();
     const auto vec1_len = type_mgr_->GetType(vec1.type_id())->AsVector()->element_count();
 
-    // Idiomatic vector accessors.
+    // Helper to get the name for the component index `i`.
+    auto component_name = [](uint32_t i) {
+        constexpr const char* names[] = {"x", "y", "z", "w"};
+        TINT_ASSERT(Reader, i < 4);
+        return names[i];
+    };
 
-    // Generate an ast::TypeInitializer expression.
+    // Build a swizzle for each consecutive set of indices that fall within the same vector.
     // Assume the literal indices are valid, and there is a valid number of them.
     auto source = GetSourceForInst(inst);
     const Vector* result_type = As<Vector>(parser_impl_.ConvertType(inst.type_id()));
+    uint32_t last_vec_id = 0u;
+    std::string swizzle;
     ExpressionList values;
     for (uint32_t i = 2; i < inst.NumInOperands(); ++i) {
-        const auto index = inst.GetSingleWordInOperand(i);
+        // Select the source vector and determine the index within it.
+        uint32_t vec_id = 0u;
+        uint32_t index = inst.GetSingleWordInOperand(i);
         if (index < vec0_len) {
-            auto expr = MakeExpression(vec0_id);
-            if (!expr) {
-                return {};
-            }
-            values.Push(create<ast::MemberAccessorExpression>(source, expr.expr, Swizzle(index)));
+            vec_id = vec0_id;
         } else if (index < vec0_len + vec1_len) {
-            const auto sub_index = index - vec0_len;
-            TINT_ASSERT(Reader, sub_index < kMaxVectorLen);
-            auto expr = MakeExpression(vec1_id);
-            if (!expr) {
-                return {};
-            }
-            values.Push(
-                create<ast::MemberAccessorExpression>(source, expr.expr, Swizzle(sub_index)));
+            vec_id = vec1_id;
+            index -= vec0_len;
+            TINT_ASSERT(Reader, index < kMaxVectorLen);
         } else if (index == 0xFFFFFFFF) {
-            // By rule, this maps to OpUndef.  Instead, make it zero.
-            values.Push(parser_impl_.MakeNullValue(result_type->type));
+            // By rule, this maps to OpUndef. Instead, take the first component of the first vector.
+            vec_id = vec0_id;
+            index = 0u;
         } else {
             Fail() << "invalid vectorshuffle ID %" << inst.result_id()
                    << ": index too large: " << index;
             return {};
         }
+
+        if (vec_id != last_vec_id && !swizzle.empty()) {
+            // The source vector has changed, so emit the swizzle so far.
+            auto expr = MakeExpression(last_vec_id);
+            if (!expr) {
+                return {};
+            }
+            values.Push(builder_.MemberAccessor(source, expr.expr, builder_.Ident(swizzle)));
+            swizzle.clear();
+        }
+        swizzle += component_name(index);
+        last_vec_id = vec_id;
     }
-    return {result_type, builder_.Call(source, result_type->Build(builder_), std::move(values))};
+
+    // Emit the final swizzle.
+    auto expr = MakeExpression(last_vec_id);
+    if (!expr) {
+        return {};
+    }
+    values.Push(builder_.MemberAccessor(source, expr.expr, builder_.Ident(swizzle)));
+
+    if (values.Length() == 1) {
+        // There's only one swizzle, so just return it.
+        return {result_type, values[0]};
+    } else {
+        // There's multiple swizzles, so generate a type constructor expression to combine them.
+        return {result_type,
+                builder_.Call(source, result_type->Build(builder_), std::move(values))};
+    }
 }
 
 bool FunctionEmitter::RegisterSpecialBuiltInVariables() {

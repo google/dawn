@@ -36,7 +36,7 @@ fn main_1() {
   let x_13 = position_1;
   q = vec4f(x_13.x, x_13.y, x_13.z, 1.0f);
   let x_21 = q;
-  p = vec3f(x_21.x, x_21.y, x_21.z);
+  p = x_21.xyz;
   let x_27 = p.x;
   let x_41 = x_14.test[0i].el;
   let x_45 = position_1.y;

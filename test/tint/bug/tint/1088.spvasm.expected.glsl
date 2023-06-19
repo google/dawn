@@ -36,7 +36,7 @@ void main_1() {
   vec3 x_13 = position_1;
   q = vec4(x_13.x, x_13.y, x_13.z, 1.0f);
   vec4 x_21 = q;
-  p = vec3(x_21.x, x_21.y, x_21.z);
+  p = x_21.xyz;
   float x_27 = p.x;
   float x_41 = x_14.inner.test[0].el;
   float x_45 = position_1.y;

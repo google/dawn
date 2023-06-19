@@ -2,8 +2,8 @@ const x_10 = vec3f(1.0f, 2.0f, 3.0f);
 
 fn main_1() {
   let x_11 = x_10.y;
-  let x_13 = vec2f(x_10.x, x_10.z);
-  let x_14 = vec3f(x_10.x, x_10.z, x_10.y);
+  let x_13 = x_10.xz;
+  let x_14 = x_10.xzy;
   return;
 }
 
