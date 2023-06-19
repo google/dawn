@@ -19,9 +19,9 @@ var<private> sk_Clockwise : bool;
 
 var<private> vcolor_S0 : vec4f;
 
-const x_46 = vec4i(1i, 1i, 1i, 1i);
+const x_46 = vec4i(1i);
 
-const x_57 = vec4i(2i, 2i, 2i, 2i);
+const x_57 = vec4i(2i);
 
 fn test_int_S1_c0_b() -> bool {
   var unknown : i32;
@@ -76,9 +76,9 @@ fn test_int_S1_c0_b() -> bool {
   return x_66;
 }
 
-const x_91 = vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+const x_91 = vec4f(1.0f);
 
-const x_102 = vec4f(2.0f, 2.0f, 2.0f, 2.0f);
+const x_102 = vec4f(2.0f);
 
 fn main_1() {
   var outputColor_S0 : vec4f;

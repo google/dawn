@@ -1928,6 +1928,8 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
             }
 
             // Generate a composite from explicit components.
+            bool all_same = true;
+            uint32_t first_id = 0u;
             ExpressionList ast_components;
             if (!inst->WhileEachInId([&](const uint32_t* id_ref) -> bool {
                     auto component = MakeConstantExpression(*id_ref);
@@ -1936,14 +1938,30 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
                         return false;
                     }
                     ast_components.Push(component.expr);
+
+                    // Check if this argument is different from the others.
+                    if (first_id != 0u) {
+                        if (*id_ref != first_id) {
+                            all_same = false;
+                        }
+                    } else {
+                        first_id = *id_ref;
+                    }
+
                     return true;
                 })) {
                 // We've already emitted a diagnostic.
                 return {};
             }
 
-            auto* expr = builder_.Call(source, original_ast_type->Build(builder_),
-                                       std::move(ast_components));
+            const ast::Expression* expr = nullptr;
+            if (all_same && original_ast_type->Is<Vector>()) {
+                // We're constructing a vector and all the operands were the same, so use a splat.
+                expr = builder_.Call(source, original_ast_type->Build(builder_), ast_components[0]);
+            } else {
+                expr = builder_.Call(source, original_ast_type->Build(builder_),
+                                     std::move(ast_components));
+            }
 
             if (def_use_mgr_->NumUses(id) == 1) {
                 // The constant is only used once, so just inline its use.

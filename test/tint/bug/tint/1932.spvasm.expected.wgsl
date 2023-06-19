@@ -1,4 +1,4 @@
-const x_22 = vec2f(2.0f, 2.0f);
+const x_22 = vec2f(2.0f);
 
 fn main_1() {
   let distance_1 = x_22;

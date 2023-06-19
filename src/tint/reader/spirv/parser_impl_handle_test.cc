@@ -4171,11 +4171,11 @@ loop {
 
   continuing {
     x_27 = (x_26 + 1i);
-    x_24 = vec2f(1.0f, 1.0f);
+    x_24 = vec2f(1.0f);
     x_26 = x_27;
   }
 }
-textureStore(Output2Texture2D, vec2i(vec2u(1u, 1u)), vec4f(x_24, 0.0f, 0.0f));
+textureStore(Output2Texture2D, vec2i(vec2u(1u)), vec4f(x_24, 0.0f, 0.0f));
 return;
 )";
     ASSERT_EQ(expect, got);

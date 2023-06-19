@@ -138,7 +138,7 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
     EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 = mat3x2f("
                                                                   "vec2f(50.0f, 60.0f), "
                                                                   "vec2f(60.0f, 50.0f), "
-                                                                  "vec2f(70.0f, 70.0f));"));
+                                                                  "vec2f(70.0f));"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Array) {

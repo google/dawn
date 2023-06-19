@@ -499,8 +499,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Matrix) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("myvar[2u] = vec4f(42.0f, 42.0f, 42.0f, 42.0f);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar[2u] = vec4f(42.0f);"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Array) {
@@ -531,8 +530,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Array) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("myvar[2u] = vec4f(42.0f, 42.0f, 42.0f, 42.0f);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar[2u] = vec4f(42.0f);"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct) {
