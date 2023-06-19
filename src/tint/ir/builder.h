@@ -35,6 +35,7 @@
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/function_param.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/instruction_result.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
@@ -122,8 +123,8 @@ class Builder {
     /// @returns the flow node
     template <typename T>
     ir::If* If(T&& condition) {
-        return Append(ir.values.Create<ir::If>(Value(std::forward<T>(condition)), Block(), Block(),
-                                               MultiInBlock()));
+        return Append(ir.instructions.Create<ir::If>(Value(std::forward<T>(condition)), Block(),
+                                                     Block(), MultiInBlock()));
     }
 
     /// Creates a loop flow node
@@ -136,7 +137,7 @@ class Builder {
     template <typename T>
     ir::Switch* Switch(T&& condition) {
         return Append(
-            ir.values.Create<ir::Switch>(Value(std::forward<T>(condition)), MultiInBlock()));
+            ir.instructions.Create<ir::Switch>(Value(std::forward<T>(condition)), MultiInBlock()));
     }
 
     /// Creates a case flow node for the given case branch.
@@ -232,8 +233,8 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::Binary* Binary(enum Binary::Kind kind, const type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Append(ir.values.Create<ir::Binary>(kind, type, Value(std::forward<LHS>(lhs)),
-                                                   Value(std::forward<RHS>(rhs))));
+        return Append(ir.instructions.Create<ir::Binary>(kind, type, Value(std::forward<LHS>(lhs)),
+                                                         Value(std::forward<RHS>(rhs))));
     }
 
     /// Creates an And operation
@@ -415,7 +416,7 @@ class Builder {
     /// @returns the operation
     template <typename VAL>
     ir::Unary* Unary(enum Unary::Kind kind, const type::Type* type, VAL&& val) {
-        return Append(ir.values.Create<ir::Unary>(kind, type, Value(std::forward<VAL>(val))));
+        return Append(ir.instructions.Create<ir::Unary>(kind, type, Value(std::forward<VAL>(val))));
     }
 
     /// Creates a Complement operation
@@ -451,7 +452,7 @@ class Builder {
     /// @returns the instruction
     template <typename VAL>
     ir::Bitcast* Bitcast(const type::Type* type, VAL&& val) {
-        return Append(ir.values.Create<ir::Bitcast>(type, Value(std::forward<VAL>(val))));
+        return Append(ir.instructions.Create<ir::Bitcast>(type, Value(std::forward<VAL>(val))));
     }
 
     /// Creates a discard instruction
@@ -466,7 +467,7 @@ class Builder {
     template <typename... ARGS>
     ir::UserCall* Call(const type::Type* type, ir::Function* func, ARGS&&... args) {
         return Append(
-            ir.values.Create<ir::UserCall>(type, func, Values(std::forward<ARGS>(args)...)));
+            ir.instructions.Create<ir::UserCall>(type, func, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a builtin call instruction
@@ -476,8 +477,8 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::BuiltinCall* Call(const type::Type* type, builtin::Function func, ARGS&&... args) {
-        return Append(
-            ir.values.Create<ir::BuiltinCall>(type, func, Values(std::forward<ARGS>(args)...)));
+        return Append(ir.instructions.Create<ir::BuiltinCall>(type, func,
+                                                              Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a value conversion instruction
@@ -486,7 +487,7 @@ class Builder {
     /// @returns the instruction
     template <typename VAL>
     ir::Convert* Convert(const type::Type* to, VAL&& val) {
-        return Append(ir.values.Create<ir::Convert>(to, Value(std::forward<VAL>(val))));
+        return Append(ir.instructions.Create<ir::Convert>(to, Value(std::forward<VAL>(val))));
     }
 
     /// Creates a value constructor instruction
@@ -495,7 +496,8 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::Construct* Construct(const type::Type* type, ARGS&&... args) {
-        return Append(ir.values.Create<ir::Construct>(type, Values(std::forward<ARGS>(args)...)));
+        return Append(
+            ir.instructions.Create<ir::Construct>(type, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a load instruction
@@ -503,7 +505,7 @@ class Builder {
     /// @returns the instruction
     template <typename VAL>
     ir::Load* Load(VAL&& from) {
-        return Append(ir.values.Create<ir::Load>(Value(std::forward<VAL>(from))));
+        return Append(ir.instructions.Create<ir::Load>(Value(std::forward<VAL>(from))));
     }
 
     /// Creates a store instruction
@@ -512,7 +514,7 @@ class Builder {
     /// @returns the instruction
     template <typename ARG>
     ir::Store* Store(ir::Value* to, ARG&& from) {
-        return Append(ir.values.Create<ir::Store>(to, Value(std::forward<ARG>(from))));
+        return Append(ir.instructions.Create<ir::Store>(to, Value(std::forward<ARG>(from))));
     }
 
     /// Creates a new `var` declaration
@@ -523,7 +525,9 @@ class Builder {
     /// Creates a return instruction
     /// @param func the function being returned
     /// @returns the instruction
-    ir::Return* Return(ir::Function* func) { return Append(ir.values.Create<ir::Return>(func)); }
+    ir::Return* Return(ir::Function* func) {
+        return Append(ir.instructions.Create<ir::Return>(func));
+    }
 
     /// Creates a return instruction
     /// @param func the function being returned
@@ -531,7 +535,7 @@ class Builder {
     /// @returns the instruction
     template <typename ARG>
     ir::Return* Return(ir::Function* func, ARG&& value) {
-        return Append(ir.values.Create<ir::Return>(func, Value(std::forward<ARG>(value))));
+        return Append(ir.instructions.Create<ir::Return>(func, Value(std::forward<ARG>(value))));
     }
 
     /// Creates a loop next iteration instruction
@@ -541,7 +545,7 @@ class Builder {
     template <typename... ARGS>
     ir::NextIteration* NextIteration(ir::Loop* loop, ARGS&&... args) {
         return Append(
-            ir.values.Create<ir::NextIteration>(loop, Values(std::forward<ARGS>(args)...)));
+            ir.instructions.Create<ir::NextIteration>(loop, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a loop break-if instruction
@@ -551,8 +555,8 @@ class Builder {
     /// @returns the instruction
     template <typename CONDITION, typename... ARGS>
     ir::BreakIf* BreakIf(CONDITION&& condition, ir::Loop* loop, ARGS&&... args) {
-        return Append(ir.values.Create<ir::BreakIf>(Value(std::forward<CONDITION>(condition)), loop,
-                                                    Values(std::forward<ARGS>(args)...)));
+        return Append(ir.instructions.Create<ir::BreakIf>(
+            Value(std::forward<CONDITION>(condition)), loop, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a continue instruction
@@ -561,7 +565,8 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::Continue* Continue(ir::Loop* loop, ARGS&&... args) {
-        return Append(ir.values.Create<ir::Continue>(loop, Values(std::forward<ARGS>(args)...)));
+        return Append(
+            ir.instructions.Create<ir::Continue>(loop, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates an exit switch instruction
@@ -570,7 +575,8 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::ExitSwitch* ExitSwitch(ir::Switch* sw, ARGS&&... args) {
-        return Append(ir.values.Create<ir::ExitSwitch>(sw, Values(std::forward<ARGS>(args)...)));
+        return Append(
+            ir.instructions.Create<ir::ExitSwitch>(sw, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates an exit loop instruction
@@ -579,7 +585,8 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::ExitLoop* ExitLoop(ir::Loop* loop, ARGS&&... args) {
-        return Append(ir.values.Create<ir::ExitLoop>(loop, Values(std::forward<ARGS>(args)...)));
+        return Append(
+            ir.instructions.Create<ir::ExitLoop>(loop, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates an exit if instruction
@@ -588,7 +595,7 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::ExitIf* ExitIf(ir::If* i, ARGS&&... args) {
-        return Append(ir.values.Create<ir::ExitIf>(i, Values(std::forward<ARGS>(args)...)));
+        return Append(ir.instructions.Create<ir::ExitIf>(i, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a new `BlockParam`
@@ -608,8 +615,8 @@ class Builder {
     /// @returns the instruction
     template <typename... ARGS>
     ir::Access* Access(const type::Type* type, ir::Value* object, ARGS&&... indices) {
-        return Append(
-            ir.values.Create<ir::Access>(type, object, Values(std::forward<ARGS>(indices)...)));
+        return Append(ir.instructions.Create<ir::Access>(type, object,
+                                                         Values(std::forward<ARGS>(indices)...)));
     }
 
     /// Creates a new `Swizzle`
@@ -633,6 +640,13 @@ class Builder {
     /// Retrieves the root block for the module, creating if necessary
     /// @returns the root block
     ir::Block* RootBlock();
+
+    /// Creates a new runtime value
+    /// @param type the return type
+    /// @returns the value
+    ir::InstructionResult* InstructionResult(const type::Type* type) {
+        return ir.values.Create<ir::InstructionResult>(type);
+    }
 
     /// The IR module.
     Module& ir;

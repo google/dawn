@@ -772,6 +772,8 @@ if(${TINT_BUILD_IR})
     ir/if.h
     ir/instruction.cc
     ir/instruction.h
+    ir/instruction_result.cc
+    ir/instruction_result.h
     ir/load.cc
     ir/load.h
     ir/location.h

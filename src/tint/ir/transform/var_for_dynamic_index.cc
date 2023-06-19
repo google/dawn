@@ -101,7 +101,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
 
     // Find the access instructions that need replacing.
     utils::Vector<AccessToReplace, 4> worklist;
-    for (auto* inst : ir->values.Objects()) {
+    for (auto* inst : ir->instructions.Objects()) {
         if (auto* access = inst->As<Access>()) {
             if (auto to_replace = ShouldReplace(access)) {
                 worklist.Push(to_replace.value());

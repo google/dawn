@@ -55,7 +55,7 @@ Function* Builder::Function(std::string_view name,
 
 ir::Loop* Builder::Loop() {
     return Append(
-        ir.values.Create<ir::Loop>(Block(), MultiInBlock(), MultiInBlock(), MultiInBlock()));
+        ir.instructions.Create<ir::Loop>(Block(), MultiInBlock(), MultiInBlock(), MultiInBlock()));
 }
 
 Block* Builder::Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selectors) {
@@ -70,11 +70,11 @@ Block* Builder::Case(ir::Switch* s, std::initializer_list<Switch::CaseSelector> 
 }
 
 ir::Discard* Builder::Discard() {
-    return Append(ir.values.Create<ir::Discard>(ir.Types().void_()));
+    return Append(ir.instructions.Create<ir::Discard>(ir.Types().void_()));
 }
 
 ir::Var* Builder::Var(const type::Pointer* type) {
-    return Append(ir.values.Create<ir::Var>(type));
+    return Append(ir.instructions.Create<ir::Var>(type));
 }
 
 ir::BlockParam* Builder::BlockParam(const type::Type* type) {
@@ -88,13 +88,14 @@ ir::FunctionParam* Builder::FunctionParam(const type::Type* type) {
 ir::Swizzle* Builder::Swizzle(const type::Type* type,
                               ir::Value* object,
                               utils::VectorRef<uint32_t> indices) {
-    return Append(ir.values.Create<ir::Swizzle>(type, object, std::move(indices)));
+    return Append(ir.instructions.Create<ir::Swizzle>(type, object, std::move(indices)));
 }
 
 ir::Swizzle* Builder::Swizzle(const type::Type* type,
                               ir::Value* object,
                               std::initializer_list<uint32_t> indices) {
-    return Append(ir.values.Create<ir::Swizzle>(type, object, utils::Vector<uint32_t, 4>(indices)));
+    return Append(
+        ir.instructions.Create<ir::Swizzle>(type, object, utils::Vector<uint32_t, 4>(indices)));
 }
 
 }  // namespace tint::ir

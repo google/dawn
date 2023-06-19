@@ -20,8 +20,8 @@
 namespace tint::ir {
 
 /// An instruction in the IR that expects one or more operands.
-/// @tparam N the default number of operands
-/// @tparam R the default number of result values
+/// @tparam N the number of operands before spilling to the heap
+/// @tparam R the number of result values before spilling to the heap
 template <unsigned N, unsigned R>
 class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Instruction> {
   public:

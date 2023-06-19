@@ -76,6 +76,9 @@ class Module {
     /// The constant value manager
     constant::Manager constant_values;
 
+    /// The instruction allocator
+    utils::BlockAllocator<Instruction> instructions;
+
     /// The value allocator
     utils::BlockAllocator<Value> values;
 
