@@ -1546,6 +1546,7 @@ if(TINT_BUILD_TESTS)
       ir/module_test.cc
       ir/multi_in_block_test.cc
       ir/next_iteration_test.cc
+      ir/operand_instruction_test.cc
       ir/program_test_helper.h
       ir/return_test.cc
       ir/store_test.cc

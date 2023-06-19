@@ -32,6 +32,33 @@ class Instruction : public utils::Castable<Instruction> {
     /// Destructor
     ~Instruction() override;
 
+    /// Set an operand at a given index.
+    /// @param index the operand index
+    /// @param value the value to use
+    virtual void SetOperand(size_t index, ir::Value* value) = 0;
+
+    /// @returns the operands of the instruction
+    virtual utils::VectorRef<ir::Value*> Operands() = 0;
+
+    /// @returns true if the instruction has result values
+    virtual bool HasResults() { return false; }
+    /// @returns true if the instruction has multiple values
+    virtual bool HasMultiResults() { return false; }
+
+    /// @returns the first result. Returns `nullptr` if there are no results, or if ther are
+    /// multi-results
+    virtual InstructionResult* Result() { return nullptr; }
+
+    /// @returns the result values for this instruction
+    virtual utils::VectorRef<InstructionResult*> Results() { return utils::Empty; }
+
+    /// Removes the instruction from the block, and destroys all the result values.
+    /// The result values must not be in use.
+    virtual void Destroy();
+
+    /// @returns true if the Instruction has not been destroyed with Destroy()
+    bool Alive() const { return alive_; }
+
     /// Sets the block that owns this instruction
     /// @param block the new owner block
     void SetBlock(ir::Block* block) { block_ = block; }
@@ -51,23 +78,6 @@ class Instruction : public utils::Castable<Instruction> {
     /// Removes this instruction from the owning block
     void Remove();
 
-    /// Set an operand at a given index.
-    /// @param index the operand index
-    /// @param value the value to use
-    virtual void SetOperand(size_t index, ir::Value* value) = 0;
-
-    /// @returns true if the instruction has result values
-    virtual bool HasResults() { return false; }
-    /// @returns true if the instruction has multiple values
-    virtual bool HasMultiResults() { return false; }
-
-    /// @returns the first result. Returns `nullptr` if there are no results, or if ther are
-    /// multi-results
-    virtual InstructionResult* Result() { return nullptr; }
-
-    /// @returns the result values for this instruction
-    virtual utils::VectorRef<InstructionResult*> Results() { return utils::Empty; }
-
     /// Pointer to the next instruction in the list
     Instruction* next = nullptr;
     /// Pointer to the previous instruction in the list
@@ -79,6 +89,9 @@ class Instruction : public utils::Castable<Instruction> {
 
     /// The block that owns this instruction
     ir::Block* block_ = nullptr;
+
+  private:
+    bool alive_ = true;
 };
 
 }  // namespace tint::ir
