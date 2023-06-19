@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include "gmock/gmock.h"
+#include "src/tint/utils/predicates.h"
 
 namespace tint::utils {
 namespace {
@@ -36,6 +37,16 @@ constexpr std::array kPrimes{
 TEST(Hashset, Empty) {
     Hashset<std::string, 8> set;
     EXPECT_EQ(set.Count(), 0u);
+}
+
+TEST(Hashset, InitializerConstructor) {
+    Hashset<int, 8> set{1, 5, 7};
+    EXPECT_EQ(set.Count(), 3u);
+    EXPECT_TRUE(set.Contains(1u));
+    EXPECT_FALSE(set.Contains(3u));
+    EXPECT_TRUE(set.Contains(5u));
+    EXPECT_TRUE(set.Contains(7u));
+    EXPECT_FALSE(set.Contains(9u));
 }
 
 TEST(Hashset, AddRemove) {
@@ -138,6 +149,32 @@ TEST(Hashset, Soak) {
         }
         set.ValidateIntegrity();
     }
+}
+
+TEST(HashsetTest, Any) {
+    Hashset<int, 8> set{1, 7, 5, 9};
+    EXPECT_TRUE(set.Any(Eq(1)));
+    EXPECT_FALSE(set.Any(Eq(2)));
+    EXPECT_FALSE(set.Any(Eq(3)));
+    EXPECT_FALSE(set.Any(Eq(4)));
+    EXPECT_TRUE(set.Any(Eq(5)));
+    EXPECT_FALSE(set.Any(Eq(6)));
+    EXPECT_TRUE(set.Any(Eq(7)));
+    EXPECT_FALSE(set.Any(Eq(8)));
+    EXPECT_TRUE(set.Any(Eq(9)));
+}
+
+TEST(HashsetTest, All) {
+    Hashset<int, 8> set{1, 7, 5, 9};
+    EXPECT_FALSE(set.All(Ne(1)));
+    EXPECT_TRUE(set.All(Ne(2)));
+    EXPECT_TRUE(set.All(Ne(3)));
+    EXPECT_TRUE(set.All(Ne(4)));
+    EXPECT_FALSE(set.All(Ne(5)));
+    EXPECT_TRUE(set.All(Ne(6)));
+    EXPECT_FALSE(set.All(Ne(7)));
+    EXPECT_TRUE(set.All(Ne(8)));
+    EXPECT_FALSE(set.All(Ne(9)));
 }
 
 }  // namespace

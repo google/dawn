@@ -35,6 +35,17 @@ class Hashset : public HashmapBase<KEY, void, N, HASH, EQUAL> {
     using PutMode = typename Base::PutMode;
 
   public:
+    using Base::Base;
+
+    /// Constructor with initializer list of items
+    /// @param items the items to place into the set
+    Hashset(std::initializer_list<KEY> items) {
+        this->Reserve(items.size());
+        for (auto item : items) {
+            this->Add(item);
+        }
+    }
+
     /// Adds a value to the set, if the set does not already contain an entry equal to `value`.
     /// @param value the value to add to the set.
     /// @returns true if the value was added, false if there was an existing value in the set.
@@ -54,6 +65,30 @@ class Hashset : public HashmapBase<KEY, void, N, HASH, EQUAL> {
             out.Push(value);
         }
         return out;
+    }
+
+    /// @returns true if the predicate function returns true for any of the elements of the set
+    /// @param pred a function-like with the signature `bool(T)`
+    template <typename PREDICATE>
+    bool Any(PREDICATE&& pred) const {
+        for (const auto& it : *this) {
+            if (pred(it)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// @returns false if the predicate function returns false for any of the elements of the set
+    /// @param pred a function-like with the signature `bool(T)`
+    template <typename PREDICATE>
+    bool All(PREDICATE&& pred) const {
+        for (const auto& it : *this) {
+            if (!pred(it)) {
+                return false;
+            }
+        }
+        return true;
     }
 };
 
