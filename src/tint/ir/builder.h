@@ -192,6 +192,10 @@ class Builder {
         return Constant(std::forward<T>(number));
     }
 
+    /// Pass-through overload for nullptr values
+    /// @returns nullptr
+    ir::Value* Value(std::nullptr_t) { return nullptr; }
+
     /// Pass-through overload for Value()
     /// @param v the ir::Value pointer
     /// @returns @p v

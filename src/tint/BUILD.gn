@@ -521,6 +521,8 @@ if (tint_build_ir) {
       "ir/transform/add_empty_entry_point.h",
       "ir/transform/block_decorated_structs.cc",
       "ir/transform/block_decorated_structs.h",
+      "ir/transform/merge_return.cc",
+      "ir/transform/merge_return.h",
       "ir/transform/var_for_dynamic_index.cc",
       "ir/transform/var_for_dynamic_index.h",
     ]
@@ -1830,6 +1832,7 @@ if (tint_build_unittests) {
       sources = [
         "ir/transform/add_empty_entry_point_test.cc",
         "ir/transform/block_decorated_structs_test.cc",
+        "ir/transform/merge_return_test.cc",
         "ir/transform/test_helper.h",
         "ir/transform/var_for_dynamic_index_test.cc",
       ]

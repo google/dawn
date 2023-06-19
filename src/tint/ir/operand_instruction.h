@@ -74,8 +74,8 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
         operands_.Push(value);
     }
 
-    /// Append a list of non-null operands to the operand list for this instruction.
-    /// @param start_idx the index from whic the values should start
+    /// Append a list of operands to the operand list for this instruction.
+    /// @param start_idx the index from which the values should start
     /// @param values the operand values to append
     void AddOperands(size_t start_idx, utils::VectorRef<ir::Value*> values) {
         size_t idx = start_idx;

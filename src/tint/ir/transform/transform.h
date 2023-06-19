@@ -19,6 +19,7 @@
 
 #include <utility>
 
+#include "src/tint/builtin/address_space.h"
 #include "src/tint/utils/castable.h"
 
 // Forward declarations

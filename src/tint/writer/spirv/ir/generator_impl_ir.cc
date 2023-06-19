@@ -41,6 +41,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/transform/block_decorated_structs.h"
+#include "src/tint/ir/transform/merge_return.h"
 #include "src/tint/ir/transform/var_for_dynamic_index.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/validate.h"
@@ -72,6 +73,7 @@ void Sanitize(ir::Module* module) {
 
     manager.Add<ir::transform::AddEmptyEntryPoint>();
     manager.Add<ir::transform::BlockDecoratedStructs>();
+    manager.Add<ir::transform::MergeReturn>();
     manager.Add<ir::transform::VarForDynamicIndex>();
 
     transform::DataMap outputs;
