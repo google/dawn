@@ -120,7 +120,7 @@ class QueueBase : public ApiObjectBase {
                                     const TextureDataLayout& dataLayout,
                                     const Extent3D* writeSize) const;
 
-    void SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);
+    MaybeError SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);
 
     SerialMap<ExecutionSerial, std::unique_ptr<TrackTaskCallback>> mTasksInFlight;
 };

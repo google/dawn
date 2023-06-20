@@ -26,15 +26,12 @@ namespace dawn::native::opengl {
 Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {}
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
-    Device* device = ToBackend(GetDevice());
-
     TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
     for (uint32_t i = 0; i < commandCount; ++i) {
         DAWN_TRY(ToBackend(commands[i])->Execute());
     }
     TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
 
-    device->SubmitFenceSync();
     return {};
 }
 

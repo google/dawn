@@ -381,11 +381,9 @@ Queue::~Queue() {}
 MaybeError Queue::SubmitImpl(uint32_t, CommandBufferBase* const*) {
     Device* device = ToBackend(GetDevice());
 
-    // The Vulkan, D3D12 and Metal implementation all tick the device here,
-    // for testing purposes we should also tick in the null implementation.
-    DAWN_TRY(device->Tick());
+    DAWN_TRY(device->SubmitPendingOperations());
 
-    return device->SubmitPendingOperations();
+    return {};
 }
 
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,

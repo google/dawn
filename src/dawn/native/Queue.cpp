@@ -198,11 +198,16 @@ ObjectType QueueBase::GetType() const {
 }
 
 void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* commands) {
-    SubmitInternal(commandCount, commands);
+    MaybeError result = SubmitInternal(commandCount, commands);
 
+    // Destroy the command buffers even if SubmitInternal failed. (crbug.com/dawn/1863)
     for (uint32_t i = 0; i < commandCount; ++i) {
         commands[i]->Destroy();
     }
+
+    DAWN_UNUSED(GetDevice()->ConsumedError(
+        std::move(result), "calling %s.Submit(%s)", this,
+        ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount)));
 }
 
 void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
@@ -543,26 +548,24 @@ MaybeError QueueBase::ValidateWriteTexture(const ImageCopyTexture* destination,
     return {};
 }
 
-void QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands) {
+MaybeError QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands) {
     DeviceBase* device = GetDevice();
-    if (device->ConsumedError(device->ValidateIsAlive())) {
-        // If device is lost, don't let any commands be submitted
-        return;
-    }
+
+    // If device is lost, don't let any commands be submitted
+    DAWN_TRY(device->ValidateIsAlive());
 
     TRACE_EVENT0(device->GetPlatform(), General, "Queue::Submit");
     if (device->IsValidationEnabled()) {
-        if (device->ConsumedError(
-                ValidateSubmit(commandCount, commands), "calling %s.Submit(%s)", this,
-                ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount))) {
-            return;
-        }
+        DAWN_TRY(ValidateSubmit(commandCount, commands));
     }
     ASSERT(!IsError());
 
-    if (device->ConsumedError(SubmitImpl(commandCount, commands))) {
-        return;
-    }
+    DAWN_TRY(SubmitImpl(commandCount, commands));
+
+    // Call Tick() to flush pending work.
+    DAWN_TRY(device->Tick());
+
+    return {};
 }
 
 }  // namespace dawn::native
