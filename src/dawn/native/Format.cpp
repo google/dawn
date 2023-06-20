@@ -497,21 +497,21 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         AddMultiAspectFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,
             wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, false, multiPlanarFormatUnsupportedReason, false, 3);
 
-        // clang-format on
+    // clang-format on
 
-        // This checks that each format is set at least once, the second part of checking that all
-        // formats are checked exactly once. If this assertion is failing and texture formats have
-        // been added or removed recently, check that kKnownFormatCount has been updated.
-        ASSERT(formatsSet.all());
+    // This checks that each format is set at least once, the second part of checking that all
+    // formats are checked exactly once. If this assertion is failing and texture formats have
+    // been added or removed recently, check that kKnownFormatCount has been updated.
+    ASSERT(formatsSet.all());
 
-        return table;
+    return table;
 }
 
 namespace {
 
 template <class... Ts>
 struct overloaded : Ts... {
-        using Ts::operator()...;
+    using Ts::operator()...;
 };
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
@@ -522,16 +522,15 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const UnsupportedReason& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
-        std::visit(overloaded{[](const std::monostate&) { UNREACHABLE(); },
-                              [s](const RequiresFeature& requiresFeature) {
-                                  s->Append(absl::StrFormat("requires feature %s",
-                                                            requiresFeature.feature));
-                              },
-                              [s](const CompatibilityMode&) {
-                                  s->Append("not supported in compatibility mode");
-                              }},
-                   value);
-        return {true};
+    std::visit(
+        overloaded{
+            [](const std::monostate&) { UNREACHABLE(); },
+            [s](const RequiresFeature& requiresFeature) {
+                s->Append(absl::StrFormat("requires feature %s", requiresFeature.feature));
+            },
+            [s](const CompatibilityMode&) { s->Append("not supported in compatibility mode"); }},
+        value);
+    return {true};
 }
 
 }  // namespace dawn::native
