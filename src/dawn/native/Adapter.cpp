@@ -232,6 +232,8 @@ std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapter
                 return 5;
             case wgpu::BackendType::Null:
                 return 6;
+            case wgpu::BackendType::Undefined:
+                UNREACHABLE();
         }
     };
 

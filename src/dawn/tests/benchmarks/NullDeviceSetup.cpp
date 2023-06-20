@@ -36,11 +36,8 @@ void SetupNullBackend(const benchmark::State& state) {
     }
 
     if (!nullBackendAdapter) {
-        wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-        backendTypeOptions.backendType = wgpu::BackendType::Null;
-
         wgpu::RequestAdapterOptions options = {};
-        options.nextInChain = &backendTypeOptions;
+        options.backendType = wgpu::BackendType::Null;
 
         auto nativeAdapter = nativeInstance->EnumerateAdapters(&options)[0];
         nullBackendAdapter = wgpu::Adapter(nativeAdapter.Get());

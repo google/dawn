@@ -706,11 +706,8 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
                                       WGPURequestAdapterCallback callback, void* userdata) {
         ASSERT(gCurrentTest);
 
-        wgpu::RequestAdapterOptionsBackendType adapterBackendTypeOptions;
-        adapterBackendTypeOptions.backendType = gCurrentTest->mParam.adapterProperties.backendType;
-
         wgpu::RequestAdapterOptions adapterOptions;
-        adapterOptions.nextInChain = &adapterBackendTypeOptions;
+        adapterOptions.backendType = gCurrentTest->mParam.adapterProperties.backendType;
         adapterOptions.compatibilityMode = gCurrentTest->mParam.adapterProperties.compatibilityMode;
 
         // Find the adapter that exactly matches our adapter properties.

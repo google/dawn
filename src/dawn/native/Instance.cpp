@@ -241,11 +241,7 @@ bool InstanceBase::DiscoverPhysicalDevices(
                           "RequestAdapter instead.";
     // Transform the deprecated options to RequestAdapterOptions.
     RequestAdapterOptions adapterOptions = {};
-
-    RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = wgpu::BackendType(deprecatedOptions->backendType);
-
-    adapterOptions.nextInChain = &backendTypeOptions;
+    adapterOptions.backendType = wgpu::BackendType(deprecatedOptions->backendType);
 
 #if defined(DAWN_ENABLE_BACKEND_D3D11) || defined(DAWN_ENABLE_BACKEND_D3D12)
     d3d::RequestAdapterOptionsLUID adapterOptionsLUID = {};
@@ -255,7 +251,7 @@ bool InstanceBase::DiscoverPhysicalDevices(
     opengl::RequestAdapterOptionsGetGLProc glGetProcOptions = {};
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 
-    switch (backendTypeOptions.backendType) {
+    switch (adapterOptions.backendType) {
 #if defined(DAWN_ENABLE_BACKEND_D3D11) || defined(DAWN_ENABLE_BACKEND_D3D12)
         case wgpu::BackendType::D3D11:
         case wgpu::BackendType::D3D12: {
@@ -268,7 +264,7 @@ bool InstanceBase::DiscoverPhysicalDevices(
                     return false;
                 }
                 adapterOptionsLUID.adapterLUID = desc.AdapterLuid;
-                backendTypeOptions.nextInChain = &adapterOptionsLUID;
+                adapterOptions.nextInChain = &adapterOptionsLUID;
             }
             break;
         }
@@ -280,7 +276,7 @@ bool InstanceBase::DiscoverPhysicalDevices(
             glGetProcOptions.getProc =
                 static_cast<const opengl::PhysicalDeviceDiscoveryOptions*>(deprecatedOptions)
                     ->getProc;
-            backendTypeOptions.nextInChain = &glGetProcOptions;
+            adapterOptions.nextInChain = &glGetProcOptions;
             break;
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 
@@ -455,16 +451,12 @@ std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     const RequestAdapterOptions* options) {
     ASSERT(options);
 
-    const RequestAdapterOptionsBackendType* backendTypeOptions = nullptr;
-    FindInChain(options->nextInChain, &backendTypeOptions);
-
     BackendsBitset enabledBackends = GetEnabledBackends();
     BackendsBitset backendsToFind;
-    if (backendTypeOptions) {
+    if (options->backendType != wgpu::BackendType::Undefined) {
         backendsToFind = {};
-        if (!ConsumedErrorAndWarnOnce(ValidateBackendType(backendTypeOptions->backendType))) {
-            wgpu::BackendType backendType(backendTypeOptions->backendType);
-            backendsToFind.set(backendType, enabledBackends[backendType]);
+        if (!ConsumedErrorAndWarnOnce(ValidateBackendType(options->backendType))) {
+            backendsToFind.set(options->backendType, enabledBackends[options->backendType]);
         }
     } else {
         backendsToFind = enabledBackends;

@@ -65,11 +65,8 @@ void DawnNativeTest::SetUp() {
         reinterpret_cast<const WGPUInstanceDescriptor*>(&instanceDesc));
     instance->EnableAdapterBlocklist(false);
 
-    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = wgpu::BackendType::Null;
-
     wgpu::RequestAdapterOptions options = {};
-    options.nextInChain = &backendTypeOptions;
+    options.backendType = wgpu::BackendType::Null;
 
     adapter = instance->EnumerateAdapters(&options)[0];
     device = wgpu::Device::Acquire(CreateTestDevice());

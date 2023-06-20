@@ -44,11 +44,8 @@ class DeviceCreationTest : public testing::Test {
         WGPUInstanceDescriptor safeInstanceDesc = {};
         instance = std::make_unique<dawn::native::Instance>(&safeInstanceDesc);
 
-        wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-        backendTypeOptions.backendType = wgpu::BackendType::Null;
-
         wgpu::RequestAdapterOptions options = {};
-        options.nextInChain = &backendTypeOptions;
+        options.backendType = wgpu::BackendType::Null;
 
         // Get the null adapter with default toggles.
         adapter = instance->EnumerateAdapters(&options)[0];

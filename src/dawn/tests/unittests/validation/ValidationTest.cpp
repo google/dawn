@@ -144,11 +144,8 @@ void ValidationTest::SetUp() {
         "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
     mWireHelper->BeginWireTrace(traceName.c_str());
 
-    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = wgpu::BackendType::Null;
-
     wgpu::RequestAdapterOptions options = {};
-    options.nextInChain = &backendTypeOptions;
+    options.backendType = wgpu::BackendType::Null;
     options.compatibilityMode = gCurrentTest->UseCompatibilityMode();
 
     mInstance.RequestAdapter(

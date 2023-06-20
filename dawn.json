@@ -53,17 +53,9 @@
         "members": [
             {"name": "compatible surface", "type": "surface", "optional": true},
             {"name": "power preference", "type": "power preference", "default": "undefined"},
+            {"name": "backend type", "type": "backend type", "default": "undefined"},
             {"name": "force fallback adapter", "type": "bool", "default": "false"},
             {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
-        ]
-    },
-    "request adapter options backend type": {
-        "tags": ["dawn"],
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["request adapter options"],
-        "members": [
-            {"name": "backend type", "type": "backend type"}
         ]
     },
     "request adapter status": {
@@ -210,14 +202,15 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "null"},
-            {"value": 1, "name": "WebGPU"},
-            {"value": 2, "name": "D3D11"},
-            {"value": 3, "name": "D3D12"},
-            {"value": 4, "name": "metal"},
-            {"value": 5, "name": "vulkan"},
-            {"value": 6, "name": "openGL"},
-            {"value": 7, "name": "openGLES"}
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 1, "name": "null"},
+            {"value": 2, "name": "WebGPU"},
+            {"value": 3, "name": "D3D11"},
+            {"value": 4, "name": "D3D12"},
+            {"value": 5, "name": "metal"},
+            {"value": 6, "name": "vulkan"},
+            {"value": 7, "name": "openGL"},
+            {"value": 8, "name": "openGLES"}
         ]
     },
     "bind group": {
@@ -2628,9 +2621,8 @@
             {"value": 1007, "name": "dawn buffer descriptor error info from wire client", "tags": ["dawn"]},
             {"value": 1008, "name": "dawn toggles descriptor", "tags": ["dawn", "native"]},
             {"value": 1009, "name": "dawn shader module SPIRV options descriptor", "tags": ["dawn"]},
-            {"value": 1010, "name": "request adapter options backend type", "tags": ["dawn"]},
-            {"value": 1011, "name": "request adapter options LUID", "tags": ["dawn", "native"]},
-            {"value": 1012, "name": "request adapter options get GL proc", "tags": ["dawn", "native"]}
+            {"value": 1010, "name": "request adapter options LUID", "tags": ["dawn", "native"]},
+            {"value": 1011, "name": "request adapter options get GL proc", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

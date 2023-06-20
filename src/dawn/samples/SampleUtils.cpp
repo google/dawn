@@ -129,11 +129,8 @@ wgpu::Device CreateCppDawnDevice() {
 
     instance = std::make_unique<dawn::native::Instance>();
 
-    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = backendType;
-
     wgpu::RequestAdapterOptions options = {};
-    options.nextInChain = &backendTypeOptions;
+    options.backendType = backendType;
 
     // Get an adapter for the backend to use, and create the device.
     dawn::native::Adapter backendAdapter = instance->EnumerateAdapters(&options)[0];

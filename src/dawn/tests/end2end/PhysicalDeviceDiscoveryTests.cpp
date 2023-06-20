@@ -263,11 +263,8 @@ TEST(AdapterEnumerationTests, OnlyFallback) {
 TEST(AdapterEnumerationTests, OnlyVulkan) {
     native::Instance instance;
 
-    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = wgpu::BackendType::Vulkan;
-
     wgpu::RequestAdapterOptions adapterOptions = {};
-    adapterOptions.nextInChain = &backendTypeOptions;
+    adapterOptions.backendType = wgpu::BackendType::Vulkan;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
     for (const auto& adapter : adapters) {
@@ -282,11 +279,8 @@ TEST(AdapterEnumerationTests, OnlyVulkan) {
 TEST(AdapterEnumerationTests, OnlyD3D11) {
     native::Instance instance;
 
-    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = wgpu::BackendType::D3D11;
-
     wgpu::RequestAdapterOptions adapterOptions = {};
-    adapterOptions.nextInChain = &backendTypeOptions;
+    adapterOptions.backendType = wgpu::BackendType::D3D11;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
     for (const auto& adapter : adapters) {
@@ -320,12 +314,9 @@ TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
         native::d3d::RequestAdapterOptionsLUID luidOptions = {};
         luidOptions.adapterLUID = adapterDesc.AdapterLuid;
 
-        wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-        backendTypeOptions.backendType = wgpu::BackendType::D3D11;
-
         wgpu::RequestAdapterOptions adapterOptions = {};
-        adapterOptions.nextInChain = &backendTypeOptions;
-        backendTypeOptions.nextInChain = &luidOptions;
+        adapterOptions.backendType = wgpu::BackendType::D3D11;
+        adapterOptions.nextInChain = &luidOptions;
 
         const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
         if (adapters.empty()) {
@@ -362,11 +353,8 @@ TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
 TEST(AdapterEnumerationTests, OnlyD3D12) {
     native::Instance instance;
 
-    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = wgpu::BackendType::D3D12;
-
     wgpu::RequestAdapterOptions adapterOptions = {};
-    adapterOptions.nextInChain = &backendTypeOptions;
+    adapterOptions.backendType = wgpu::BackendType::D3D12;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
     for (const auto& adapter : adapters) {
@@ -400,12 +388,9 @@ TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D12) {
         native::d3d::RequestAdapterOptionsLUID luidOptions = {};
         luidOptions.adapterLUID = adapterDesc.AdapterLuid;
 
-        wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-        backendTypeOptions.backendType = wgpu::BackendType::D3D12;
-
         wgpu::RequestAdapterOptions adapterOptions = {};
-        adapterOptions.nextInChain = &backendTypeOptions;
-        backendTypeOptions.nextInChain = &luidOptions;
+        adapterOptions.backendType = wgpu::BackendType::D3D12;
+        adapterOptions.nextInChain = &luidOptions;
 
         const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
         if (adapters.empty()) {
@@ -442,11 +427,8 @@ TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D12) {
 TEST(AdapterEnumerationTests, OnlyMetal) {
     native::Instance instance;
 
-    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = wgpu::BackendType::Metal;
-
     wgpu::RequestAdapterOptions adapterOptions = {};
-    adapterOptions.nextInChain = &backendTypeOptions;
+    adapterOptions.backendType = wgpu::BackendType::Metal;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
     for (const auto& adapter : adapters) {
@@ -460,11 +442,8 @@ TEST(AdapterEnumerationTests, OnlyMetal) {
 // Test enumerating the Metal backend, then the Vulkan backend
 // does not duplicate physical devices.
 TEST(AdapterEnumerationTests, OneBackendThenTheOther) {
-    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
-    backendTypeOptions.backendType = wgpu::BackendType::Metal;
-
     wgpu::RequestAdapterOptions adapterOptions = {};
-    adapterOptions.nextInChain = &backendTypeOptions;
+    adapterOptions.backendType = wgpu::BackendType::Metal;
 
     native::Instance instance;
 
@@ -482,7 +461,7 @@ TEST(AdapterEnumerationTests, OneBackendThenTheOther) {
     }
     // Enumerate vulkan adapters. We should only see vulkan adapters.
     {
-        backendTypeOptions.backendType = wgpu::BackendType::Vulkan;
+        adapterOptions.backendType = wgpu::BackendType::Vulkan;
 
         const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
         for (const auto& adapter : adapters) {
@@ -495,7 +474,7 @@ TEST(AdapterEnumerationTests, OneBackendThenTheOther) {
 
     // Enumerate metal adapters. We should see the same number of metal adapters.
     {
-        backendTypeOptions.backendType = wgpu::BackendType::Metal;
+        adapterOptions.backendType = wgpu::BackendType::Metal;
 
         const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
         uint32_t metalAdapterCount2 = adapters.size();

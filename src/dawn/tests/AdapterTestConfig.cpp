@@ -91,6 +91,7 @@ std::string TestAdapterProperties::ParamName() const {
             return "OpenGLES";
         case wgpu::BackendType::Vulkan:
             return "Vulkan";
+        case wgpu::BackendType::Undefined:
         default:
             UNREACHABLE();
     }
