@@ -124,7 +124,7 @@ def _NonInclusiveFileFilter(file):
         "tools/src/container/key.go",  # External URL
         "go.sum",  # External URL
     ]
-    return file.LocalPath() not in filter_list
+    return file.LocalPath().replace('\\', '/') not in filter_list
 
 
 def _CheckNoStaleGen(input_api, output_api):
