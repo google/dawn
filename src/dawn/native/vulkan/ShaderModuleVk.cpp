@@ -176,6 +176,7 @@ ShaderModule::~ShaderModule() = default;
     X(bool, disableSymbolRenaming)                                                               \
     X(bool, useZeroInitializeWorkgroupMemoryExtension)                                           \
     X(bool, clampFragDepth)                                                                      \
+    X(bool, disableImageRobustness)                                                              \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
@@ -262,6 +263,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.useZeroInitializeWorkgroupMemoryExtension =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
     req.clampFragDepth = clampFragDepth;
+    req.disableImageRobustness = GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
     req.tracePlatform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
 
@@ -333,6 +335,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 r.useZeroInitializeWorkgroupMemoryExtension;
             options.binding_remapper_options = r.bindingRemapper;
             options.external_texture_options = r.externalTextureOptions;
+            options.disable_image_robustness = r.disableImageRobustness;
 
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General,
                          "tint::writer::spirv::Generate()");

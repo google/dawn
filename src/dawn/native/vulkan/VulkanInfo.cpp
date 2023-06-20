@@ -282,6 +282,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES);
         }
 
+        if (info.extensions[DeviceExt::Robustness2]) {
+            featuresChain.Add(&info.robustness2Features,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT);
+        }
+
         // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
         // the extensions. DeviceExt::GetPhysicalDeviceProperties2 is guaranteed to be available
         // because these extensions (transitively) depend on it in `EnsureDependencies`

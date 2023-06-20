@@ -82,6 +82,12 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         // Robustness must come after PromoteSideEffectsToDecl
         // Robustness must come before BuiltinPolyfill and CanonicalizeEntryPointIO
         manager.Add<ast::transform::Robustness>();
+
+        ast::transform::Robustness::Config config = {};
+        if (options.disable_image_robustness) {
+            config.texture_action = ast::transform::Robustness::Action::kIgnore;
+        }
+        data.Add<ast::transform::Robustness::Config>(config);
     }
 
     // BindingRemapper must come before MultiplanarExternalTexture. Note, this is flipped to the

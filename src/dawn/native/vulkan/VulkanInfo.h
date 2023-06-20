@@ -54,6 +54,7 @@ struct VulkanDeviceKnobs {
     VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR zeroInitializeWorkgroupMemoryFeatures;
     VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR shaderIntegerDotProductFeatures;
     VkPhysicalDeviceDepthClipEnableFeaturesEXT depthClipEnableFeatures;
+    VkPhysicalDeviceRobustness2FeaturesEXT robustness2Features;
 
     bool HasExt(DeviceExt ext) const;
     DeviceExtSet extensions;

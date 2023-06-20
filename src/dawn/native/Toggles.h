@@ -99,6 +99,7 @@ enum class Toggle {
     D3D12PolyfillReflectVec2F32,
     VulkanClearGen12TextureWithCCSAmbiguateOnCreation,
     D3D12UseRootSignatureVersion1_1,
+    VulkanUseImageRobustAccess2,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
