@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/ContentLessObjectCache.h"
 #include "dawn/common/Mutex.h"
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Commands.h"

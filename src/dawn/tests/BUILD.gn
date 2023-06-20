@@ -281,6 +281,7 @@ dawn_test("dawn_unittests") {
     "unittests/ChainUtilsTests.cpp",
     "unittests/CommandAllocatorTests.cpp",
     "unittests/ConcurrentCacheTests.cpp",
+    "unittests/ContentLessObjectCacheTests.cpp",
     "unittests/EnumClassBitmasksTests.cpp",
     "unittests/EnumMaskIteratorTests.cpp",
     "unittests/ErrorTests.cpp",

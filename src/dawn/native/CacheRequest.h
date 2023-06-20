@@ -32,26 +32,6 @@ namespace dawn::native {
 
 namespace detail {
 
-template <typename T>
-struct UnwrapResultOrError {
-    using type = T;
-};
-
-template <typename T>
-struct UnwrapResultOrError<ResultOrError<T>> {
-    using type = T;
-};
-
-template <typename T>
-struct IsResultOrError {
-    static constexpr bool value = false;
-};
-
-template <typename T>
-struct IsResultOrError<ResultOrError<T>> {
-    static constexpr bool value = true;
-};
-
 void LogCacheHitError(std::unique_ptr<ErrorData> error);
 
 }  // namespace detail

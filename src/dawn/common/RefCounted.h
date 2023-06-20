@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <type_traits>
 
 #include "dawn/common/RefBase.h"
 
@@ -32,6 +33,9 @@ class RefCount {
 
     // Add a reference.
     void Increment();
+    // Tries to add a reference. Returns false if the ref count is already at 0. This is used when
+    // operating on a raw pointer to a RefCounted instead of a valid Ref that may be soon deleted.
+    bool TryIncrement();
 
     // Remove a reference. Returns true if this was the last reference.
     bool Decrement();
@@ -39,6 +43,9 @@ class RefCount {
   private:
     std::atomic<uint64_t> mRefCount;
 };
+
+template <typename T>
+class Ref;
 
 class RefCounted {
   public:
@@ -51,6 +58,19 @@ class RefCounted {
     // Release() is called by internal code, so it's assumed that there is already a thread
     // synchronization in place for destruction.
     void Release();
+
+    // Tries to return a valid Ref to `object` if it's internal refcount is not already 0. If the
+    // internal refcount has already reached 0, returns nullptr instead.
+    template <typename T, typename = typename std::is_convertible<T, RefCounted>>
+    friend Ref<T> TryGetRef(T* object) {
+        // Since this is called on the RefCounted class directly, and can race with destruction, we
+        // verify that we can safely increment the refcount first, create the Ref, then decrement
+        // the refcount in that order to ensure that the resultant Ref is a valid Ref.
+        if (!object->mRefCount.TryIncrement()) {
+            return nullptr;
+        }
+        return AcquireRef(object);
+    }
 
     void APIReference() { Reference(); }
     // APIRelease() can be called without any synchronization guarantees so we need to use a Release

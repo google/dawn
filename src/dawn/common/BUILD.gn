@@ -233,6 +233,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "Compiler.h",
       "ConcurrentCache.h",
       "Constants.h",
+      "ContentLessObjectCache.h",
       "CoreFoundationRef.h",
       "DynamicLib.cpp",
       "DynamicLib.h",

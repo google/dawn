@@ -56,6 +56,26 @@ void RefCount::Increment() {
     mRefCount.fetch_add(kRefCountIncrement, std::memory_order_relaxed);
 }
 
+bool RefCount::TryIncrement() {
+    uint64_t current = mRefCount.load(std::memory_order_relaxed);
+    bool success = false;
+    do {
+        if ((current & ~kPayloadMask) == 0u) {
+            return false;
+        }
+        // The relaxed ordering guarantees only the atomicity of the update. This is fine because:
+        //   - If another thread's decrement happens before this increment, the increment should
+        //     fail.
+        //   - If another thread's decrement happens after this increment, the decrement shouldn't
+        //     delete the object, because the ref count > 0.
+        // See Boost library for reference:
+        //   https://github.com/boostorg/smart_ptr/blob/develop/include/boost/smart_ptr/detail/sp_counted_base_std_atomic.hpp#L62
+        success = mRefCount.compare_exchange_weak(current, current + kRefCountIncrement,
+                                                  std::memory_order_relaxed);
+    } while (!success);
+    return true;
+}
+
 bool RefCount::Decrement() {
     ASSERT((mRefCount & ~kPayloadMask) != 0);
 

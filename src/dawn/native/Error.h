@@ -41,6 +41,30 @@ using MaybeError = Result<void, ErrorData>;
 template <typename T>
 using ResultOrError = Result<T, ErrorData>;
 
+namespace detail {
+
+template <typename T>
+struct UnwrapResultOrError {
+    using type = T;
+};
+
+template <typename T>
+struct UnwrapResultOrError<ResultOrError<T>> {
+    using type = T;
+};
+
+template <typename T>
+struct IsResultOrError {
+    static constexpr bool value = false;
+};
+
+template <typename T>
+struct IsResultOrError<ResultOrError<T>> {
+    static constexpr bool value = true;
+};
+
+}  // namespace detail
+
 // Returning a success is done like so:
 //   return {}; // for Error
 //   return SomethingOfTypeT; // for ResultOrError<T>
