@@ -456,6 +456,15 @@ crbug.com/dawn/0000 [ qualcomm ] webgpu:api,operation,render_pipeline,sample_mas
 crbug.com/tint/1947 [ arm ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
 
 ################################################################################
+# Make GPUExternalTexture from VideoFrame active until source is closed
+################################################################################
+crbug.com/1411908 [ android ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_task:sourceType="VideoFrame" [ Skip ]
+crbug.com/1411908 [ chromeos ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_task:sourceType="VideoFrame" [ Skip ]
+crbug.com/1411908 [ linux ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_task:sourceType="VideoFrame" [ Skip ]
+crbug.com/1411908 [ mac ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_task:sourceType="VideoFrame" [ Skip ]
+crbug.com/1411908 [ win ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_task:sourceType="VideoFrame" [ Skip ]
+
+################################################################################
 # untriaged Android failures
 ################################################################################
 crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r16float";dimension="1d" [ Failure ]
