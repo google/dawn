@@ -292,9 +292,10 @@ void QueueBase::APIWriteBuffer(BufferBase* buffer,
                                uint64_t bufferOffset,
                                const void* data,
                                size_t size) {
-    DAWN_UNUSED(GetDevice()->ConsumedError(WriteBuffer(buffer, bufferOffset, data, size),
-                                           "calling %s.WriteBuffer(%s, %s, (%d bytes))", this,
-                                           buffer, bufferOffset, size));
+    DAWN_UNUSED(
+        GetDevice()->ConsumedError(WriteBuffer(buffer, bufferOffset, data, size),
+                                   "calling %s.WriteBuffer(%s, (%d bytes), data, (%d bytes))", this,
+                                   buffer, bufferOffset, size));
 }
 
 MaybeError QueueBase::WriteBuffer(BufferBase* buffer,
