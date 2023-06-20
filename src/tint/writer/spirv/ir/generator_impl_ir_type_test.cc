@@ -186,15 +186,11 @@ TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_ExplicitStride) {
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Struct) {
-    auto* str = ty.Get<type::Struct>(
-        mod.symbols.Register("MyStruct"),
-        utils::Vector{
-            ty.Get<type::StructMember>(mod.symbols.Register("a"), ty.f32(), 0u, 0u, 4u, 4u,
-                                       type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("b"), ty.vec4(ty.i32()), 1u, 16u, 16u,
-                                       16u, type::StructMemberAttributes{}),
-        },
-        16u, 32u, 32u);
+    auto* str =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.Register("a"), ty.f32()},
+                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
+                                               });
     auto id = generator_.Type(str);
     EXPECT_EQ(id, 1u);
     EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeFloat 32
@@ -212,17 +208,13 @@ OpName %1 "MyStruct"
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Struct_MatrixLayout) {
-    auto* str = ty.Get<type::Struct>(
-        mod.symbols.Register("MyStruct"),
-        utils::Vector{
-            ty.Get<type::StructMember>(mod.symbols.Register("m"), ty.mat3x3(ty.f32()), 0u, 0u, 16u,
-                                       48u, type::StructMemberAttributes{}),
+    auto* str = ty.Struct(
+        mod.symbols.New("MyStruct"),
+        {
+            {mod.symbols.Register("m"), ty.mat3x3<f32>()},
             // Matrices nested inside arrays need layout decorations on the struct member too.
-            ty.Get<type::StructMember>(mod.symbols.Register("arr"),
-                                       ty.array(ty.array(ty.mat2x4(ty.f16()), 4), 4), 1u, 64u, 8u,
-                                       64u, type::StructMemberAttributes{}),
-        },
-        16u, 128u, 128u);
+            {mod.symbols.Register("arr"), ty.array(ty.array(ty.mat2x4<f16>(), 4), 4)},
+        });
     auto id = generator_.Type(str);
     EXPECT_EQ(id, 1u);
     EXPECT_EQ(DumpTypes(), R"(%4 = OpTypeFloat 32
@@ -242,7 +234,7 @@ OpMemberDecorate %1 0 ColMajor
 OpMemberDecorate %1 0 MatrixStride 16
 OpDecorate %6 ArrayStride 16
 OpDecorate %5 ArrayStride 64
-OpMemberDecorate %1 1 Offset 64
+OpMemberDecorate %1 1 Offset 48
 OpMemberDecorate %1 1 ColMajor
 OpMemberDecorate %1 1 MatrixStride 8
 )");

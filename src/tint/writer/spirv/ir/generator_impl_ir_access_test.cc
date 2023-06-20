@@ -372,15 +372,11 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest_Access, Struct_Value_ConstantIndex) {
-    auto* str = ty.Get<type::Struct>(
-        mod.symbols.Register("MyStruct"),
-        utils::Vector{
-            ty.Get<type::StructMember>(mod.symbols.Register("a"), ty.f32(), 0u, 0u, 4u, 4u,
-                                       type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("b"), ty.vec4(ty.i32()), 1u, 16u, 16u,
-                                       16u, type::StructMemberAttributes{}),
-        },
-        16u, 32u, 32u);
+    auto* str =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.Register("a"), ty.f32()},
+                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
+                                               });
     auto* str_val = b.FunctionParam(str);
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({str_val});
@@ -416,15 +412,11 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest_Access, Struct_Pointer_ConstantIndex) {
-    auto* str = ty.Get<type::Struct>(
-        mod.symbols.Register("MyStruct"),
-        utils::Vector{
-            ty.Get<type::StructMember>(mod.symbols.Register("a"), ty.f32(), 0u, 0u, 4u, 4u,
-                                       type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("b"), ty.vec4(ty.i32()), 1u, 16u, 16u,
-                                       16u, type::StructMemberAttributes{}),
-        },
-        16u, 32u, 32u);
+    auto* str =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.Register("a"), ty.f32()},
+                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
+                                               });
     auto* func = b.Function("foo", ty.void_());
 
     auto sb = b.With(func->StartTarget());

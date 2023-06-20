@@ -21,6 +21,8 @@
 #include "src/tint/builtin/address_space.h"
 #include "src/tint/builtin/fluent_types.h"
 #include "src/tint/builtin/number.h"
+#include "src/tint/symbol.h"
+#include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/unique_node.h"
 #include "src/tint/utils/hash.h"
@@ -385,6 +387,30 @@ class Manager final {
     template <builtin::AddressSpace SPACE, builtin::Access ACCESS = builtin::Access::kReadWrite>
     const type::Pointer* ptr(const type::Type* subtype) {
         return ptr(SPACE, subtype, ACCESS);
+    }
+
+    /// A structure member descriptor.
+    struct StructMemberDesc {
+        /// The name of the struct member.
+        Symbol name;
+        /// The type of the struct member.
+        const type::Type* type = nullptr;
+        /// The optional struct member attributes.
+        type::StructMemberAttributes attributes = {};
+    };
+
+    /// Create a new structure declaration.
+    /// @param name the name of the structure
+    /// @param members the list of structure member descriptors
+    /// @returns the structure type
+    const type::Struct* Struct(Symbol name, utils::VectorRef<StructMemberDesc> members);
+
+    /// Create a new structure declaration.
+    /// @param name the name of the structure
+    /// @param members the list of structure member descriptors
+    /// @returns the structure type
+    const type::Struct* Struct(Symbol name, std::initializer_list<StructMemberDesc> members) {
+        return Struct(name, utils::Vector<StructMemberDesc, 4>(members));
     }
 
     /// @returns an iterator to the beginning of the types

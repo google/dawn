@@ -285,13 +285,10 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Value) {
-    utils::Vector members{
-        ty.Get<type::StructMember>(mod.symbols.New(), ty.i32(), 0u, 0u, 4u, 4u,
-                                   type::StructMemberAttributes{}),
-        ty.Get<type::StructMember>(mod.symbols.New(), ty.i32(), 1u, 4u, 4u, 4u,
-                                   type::StructMemberAttributes{}),
-    };
-    auto* str_ty = ty.Get<type::Struct>(mod.symbols.New(), std::move(members), 4u, 8u, 8u);
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.i32()},
+                                                          });
 
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(str_ty);
@@ -306,7 +303,7 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Value) {
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
     EXPECT_EQ(res.Failure().str(),
-              R"(:8:25 error: access: type tint_symbol_2 cannot be dynamically indexed
+              R"(:8:25 error: access: type MyStruct cannot be dynamically indexed
     %4:i32 = access %2, %3
                         ^^
 
@@ -315,12 +312,12 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Value) {
   ^^^^^^^^^^^
 
 note: # Disassembly
-tint_symbol_2 = struct @align(4) {
-  tint_symbol:i32 @offset(0)
-  tint_symbol_1:i32 @offset(4)
+MyStruct = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
 }
 
-%my_func = func(%2:tint_symbol_2, %3:i32):void -> %b1 {
+%my_func = func(%2:MyStruct, %3:i32):void -> %b1 {
   %b1 = block {
     %4:i32 = access %2, %3
     ret
@@ -330,13 +327,10 @@ tint_symbol_2 = struct @align(4) {
 }
 
 TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Ptr) {
-    utils::Vector members{
-        ty.Get<type::StructMember>(mod.symbols.New(), ty.i32(), 0u, 0u, 4u, 4u,
-                                   type::StructMemberAttributes{}),
-        ty.Get<type::StructMember>(mod.symbols.New(), ty.i32(), 1u, 4u, 4u, 4u,
-                                   type::StructMemberAttributes{}),
-    };
-    auto* str_ty = ty.Get<type::Struct>(mod.symbols.New(), std::move(members), 4u, 8u, 8u);
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.i32()},
+                                                          });
 
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, read_write>(str_ty));
@@ -351,7 +345,7 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Ptr) {
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
     EXPECT_EQ(res.Failure().str(),
-              R"(:8:25 error: access: type ptr<tint_symbol_2> cannot be dynamically indexed
+              R"(:8:25 error: access: type ptr<MyStruct> cannot be dynamically indexed
     %4:i32 = access %2, %3
                         ^^
 
@@ -360,12 +354,12 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Ptr) {
   ^^^^^^^^^^^
 
 note: # Disassembly
-tint_symbol_2 = struct @align(4) {
-  tint_symbol:i32 @offset(0)
-  tint_symbol_1:i32 @offset(4)
+MyStruct = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
 }
 
-%my_func = func(%2:ptr<private, tint_symbol_2, read_write>, %3:i32):void -> %b1 {
+%my_func = func(%2:ptr<private, MyStruct, read_write>, %3:i32):void -> %b1 {
   %b1 = block {
     %4:i32 = access %2, %3
     ret

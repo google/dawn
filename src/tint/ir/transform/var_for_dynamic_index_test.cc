@@ -294,17 +294,12 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
 }
 
 TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Struct) {
-    auto* str_ty = ty.Get<type::Struct>(
-        mod.symbols.Register("MyStruct"),
-        utils::Vector{
-            ty.Get<type::StructMember>(mod.symbols.Register("arr1"), ty.array<f32, 1024>(), 0u, 0u,
-                                       4u, 4096u, type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("mat"), ty.mat4x4<f32>(), 1u, 4096u,
-                                       16u, 64u, type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("arr2"), ty.array<f32, 1024>(), 2u,
-                                       4160u, 4u, 4096u, type::StructMemberAttributes{}),
-        },
-        16u, 32u, 32u);
+    auto* str_ty = ty.Struct(mod.symbols.Register("MyStruct"),
+                             {
+                                 {mod.symbols.Register("arr1"), ty.array<f32, 1024>()},
+                                 {mod.symbols.Register("mat"), ty.mat4x4<f32>()},
+                                 {mod.symbols.Register("arr2"), ty.array<f32, 1024>()},
+                             });
     auto* str_val = b.FunctionParam(str_ty);
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());

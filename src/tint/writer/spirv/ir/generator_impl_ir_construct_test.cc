@@ -116,17 +116,12 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Construct_Struct) {
-    auto* str = ty.Get<type::Struct>(
-        mod.symbols.Register("MyStruct"),
-        utils::Vector{
-            ty.Get<type::StructMember>(mod.symbols.Register("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                       type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("b"), ty.u32(), 1u, 4u, 4u, 4u,
-                                       type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.Register("c"), ty.vec4<f32>(), 2u, 16u, 16u, 16u,
-                                       type::StructMemberAttributes{}),
-        },
-        16u, 32u, 32u);
+    auto* str =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.Register("a"), ty.i32()},
+                                                   {mod.symbols.Register("b"), ty.u32()},
+                                                   {mod.symbols.Register("c"), ty.vec4<f32>()},
+                                               });
 
     auto* func = b.Function("foo", str);
     func->SetParams({
