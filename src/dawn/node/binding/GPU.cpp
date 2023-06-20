@@ -120,7 +120,7 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
         return promise;
     }
 
-    auto adapters = instance_.GetAdapters();
+    auto adapters = instance_.EnumerateAdapters();
     if (adapters.empty()) {
         promise.Resolve({});
         return promise;

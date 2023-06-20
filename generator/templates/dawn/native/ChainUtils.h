@@ -27,26 +27,18 @@
 #include "{{native_dir}}/Error.h"
 
 namespace {{native_namespace}} {
-namespace detail {
-    // Mapping from native types to the expected STypes is implemented as template specializations.
+
     template <typename T>
-    struct STypeForImpl;
+    inline {{namespace}}::SType STypeFor;
+
+    // Specialize STypeFor to map from native struct types to their SType.
     {% for value in types["s type"].values %}
         {% if value.valid and value.name.get() in types %}
             template <>
-            struct STypeForImpl<{{as_cppEnum(value.name)}}> {
-                static constexpr {{namespace}}::SType value = {{namespace}}::SType::{{as_cppEnum(value.name)}};
-            };
+            inline {{namespace}}::SType STypeFor<{{as_cppEnum(value.name)}}> = {{namespace}}::SType::{{as_cppEnum(value.name)}};
         {% endif %}
     {% endfor %}
-    template <>
-    struct STypeForImpl<DawnInstanceDescriptor> {
-        static constexpr {{namespace}}::SType value = {{namespace}}::SType::DawnInstanceDescriptor;
-    };
-}  // namespace detail
 
-    template <typename T>
-    constexpr {{namespace}}::SType STypeFor = detail::STypeForImpl<T>::value;
     template <typename T>
     void FindInChain(const ChainedStruct* chain, const T** out) {
         for (; chain; chain = chain->nextInChain) {

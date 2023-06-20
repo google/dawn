@@ -20,7 +20,7 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/native/Buffer.h"
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"

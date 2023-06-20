@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <algorithm>
+#include <utility>
 #include <vector>
 
 #include "dawn/common/Assert.h"
@@ -86,31 +87,24 @@ ValidationTest::ValidationTest() {
 
     DawnProcTable procs = dawn::native::GetProcs();
 
-    // Override procs to provide harness-specific behavior to always select the null adapter, with
-    // adapter toggles inherited from instance toggles state. WGPURequestAdapterOptions is ignored
-    // here.
-    procs.instanceRequestAdapter = [](WGPUInstance instance, const WGPURequestAdapterOptions*,
+    // Forward to dawn::native instanceRequestAdapter, but save the returned adapter in
+    // gCurrentTest->mBackendAdapter.
+    procs.instanceRequestAdapter = [](WGPUInstance instance,
+                                      const WGPURequestAdapterOptions* options,
                                       WGPURequestAdapterCallback callback, void* userdata) {
         ASSERT(gCurrentTest);
+        dawn::native::GetProcs().instanceRequestAdapter(
+            instance, options,
+            [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, char const* message,
+               void* userdata) {
+                gCurrentTest->mBackendAdapter = dawn::native::FromAPI(cAdapter);
 
-        std::vector<dawn::native::Adapter> adapters = gCurrentTest->mDawnInstance->GetAdapters();
-        // Validation tests run against the null backend, find the corresponding adapter
-        for (auto& candidate : adapters) {
-            wgpu::AdapterProperties adapterProperties;
-            candidate.GetProperties(&adapterProperties);
-
-            if (adapterProperties.backendType == wgpu::BackendType::Null &&
-                adapterProperties.compatibilityMode == gCurrentTest->UseCompatibilityMode()) {
-                gCurrentTest->mBackendAdapter = candidate;
-                WGPUAdapter cAdapter = candidate.Get();
-                ASSERT(cAdapter);
-
-                dawn::native::GetProcs().adapterReference(cAdapter);
-                callback(WGPURequestAdapterStatus_Success, cAdapter, nullptr, userdata);
-                return;
-            }
-        }
-        UNREACHABLE();
+                auto* callbackAndUserdata =
+                    static_cast<std::pair<WGPURequestAdapterCallback, void*>*>(userdata);
+                callbackAndUserdata->first(status, cAdapter, message, callbackAndUserdata->second);
+                delete callbackAndUserdata;
+            },
+            new std::pair<WGPURequestAdapterCallback, void*>(callback, userdata));
     };
 
     procs.adapterRequestDevice = [](WGPUAdapter self, const WGPUDeviceDescriptor* descriptor,
@@ -143,8 +137,6 @@ void ValidationTest::SetUp() {
     instanceDesc.nextInChain = &instanceToggles.chain;
 
     mDawnInstance = std::make_unique<dawn::native::Instance>(&instanceDesc);
-
-    mDawnInstance->DiscoverDefaultPhysicalDevices();
     mInstance = mWireHelper->RegisterInstance(mDawnInstance->Get());
 
     std::string traceName =
@@ -152,10 +144,15 @@ void ValidationTest::SetUp() {
         "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
     mWireHelper->BeginWireTrace(traceName.c_str());
 
-    // RequestAdapter is overriden to ignore RequestAdapterOptions and always select the null
-    // adapter.
+    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
+    backendTypeOptions.backendType = wgpu::BackendType::Null;
+
+    wgpu::RequestAdapterOptions options = {};
+    options.nextInChain = &backendTypeOptions;
+    options.compatibilityMode = gCurrentTest->UseCompatibilityMode();
+
     mInstance.RequestAdapter(
-        nullptr,
+        &options,
         [](WGPURequestAdapterStatus, WGPUAdapter cAdapter, const char*, void* userdata) {
             *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(cAdapter);
         },

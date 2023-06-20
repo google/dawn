@@ -26,7 +26,7 @@
 #include "dawn/native/BlitDepthStencilToBuffer.h"
 #include "dawn/native/BlitDepthToDepth.h"
 #include "dawn/native/Buffer.h"
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/CommandBufferStateTracker.h"
 #include "dawn/native/CommandValidation.h"

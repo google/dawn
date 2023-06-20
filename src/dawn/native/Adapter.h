@@ -15,9 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_ADAPTER_H_
 #define SRC_DAWN_NATIVE_ADAPTER_H_
 
-#include "dawn/native/DawnNative.h"
+#include <vector>
 
 #include "dawn/common/RefCounted.h"
+#include "dawn/native/DawnNative.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/dawn_platform.h"
 
@@ -64,6 +65,9 @@ class AdapterBase : public RefCounted {
     // Adapter toggles state, currently only inherited from instance toggles state.
     TogglesState mTogglesState;
 };
+
+std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapters,
+                                           const RequestAdapterOptions* options);
 
 }  // namespace dawn::native
 

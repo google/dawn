@@ -33,17 +33,17 @@ void SetupNullBackend(const benchmark::State& state) {
 
     if (!nativeInstance) {
         nativeInstance = std::make_unique<dawn::native::Instance>();
-        nativeInstance->DiscoverDefaultPhysicalDevices();
     }
 
     if (!nullBackendAdapter) {
-        for (auto& a : nativeInstance->GetAdapters()) {
-            wgpu::AdapterProperties properties;
-            a.GetProperties(&properties);
-            if (properties.backendType == wgpu::BackendType::Null) {
-                nullBackendAdapter = wgpu::Adapter(a.Get());
-            }
-        }
+        wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
+        backendTypeOptions.backendType = wgpu::BackendType::Null;
+
+        wgpu::RequestAdapterOptions options = {};
+        options.nextInChain = &backendTypeOptions;
+
+        auto nativeAdapter = nativeInstance->EnumerateAdapters(&options)[0];
+        nullBackendAdapter = wgpu::Adapter(nativeAdapter.Get());
     }
     ASSERT(nullBackendAdapter != nullptr);
 }

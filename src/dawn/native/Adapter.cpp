@@ -14,10 +14,13 @@
 
 #include "dawn/native/Adapter.h"
 
+#include <algorithm>
 #include <memory>
+#include <tuple>
 #include <utility>
+#include <vector>
 
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
@@ -190,6 +193,55 @@ const TogglesState& AdapterBase::GetTogglesState() const {
 
 FeatureLevel AdapterBase::GetFeatureLevel() const {
     return mFeatureLevel;
+}
+
+std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapters,
+                                           const RequestAdapterOptions* options) {
+    const bool highPerformance =
+        options != nullptr && options->powerPreference == wgpu::PowerPreference::HighPerformance;
+
+    const auto ComputeAdapterTypeRank = [&](const Ref<AdapterBase>& a) {
+        switch (a->GetPhysicalDevice()->GetAdapterType()) {
+            case wgpu::AdapterType::DiscreteGPU:
+                return highPerformance ? 0 : 1;
+            case wgpu::AdapterType::IntegratedGPU:
+                return highPerformance ? 1 : 0;
+            case wgpu::AdapterType::CPU:
+                return 2;
+            case wgpu::AdapterType::Unknown:
+                return 3;
+        }
+    };
+
+    const auto ComputeBackendTypeRank = [](const Ref<AdapterBase>& a) {
+        switch (a->GetPhysicalDevice()->GetBackendType()) {
+            // Sort backends generally in order of Core -> Compat -> Testing,
+            // while preferring OS-specific backends like Metal/D3D.
+            case wgpu::BackendType::Metal:
+            case wgpu::BackendType::D3D12:
+                return 0;
+            case wgpu::BackendType::Vulkan:
+                return 1;
+            case wgpu::BackendType::D3D11:
+                return 2;
+            case wgpu::BackendType::OpenGLES:
+                return 3;
+            case wgpu::BackendType::OpenGL:
+                return 4;
+            case wgpu::BackendType::WebGPU:
+                return 5;
+            case wgpu::BackendType::Null:
+                return 6;
+        }
+    };
+
+    std::sort(adapters.begin(), adapters.end(),
+              [&](const Ref<AdapterBase>& a, const Ref<AdapterBase>& b) -> bool {
+                  return std::tuple(ComputeAdapterTypeRank(a), ComputeBackendTypeRank(a)) <
+                         std::tuple(ComputeAdapterTypeRank(b), ComputeBackendTypeRank(b));
+              });
+
+    return adapters;
 }
 
 }  // namespace dawn::native

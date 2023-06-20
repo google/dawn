@@ -128,21 +128,15 @@ wgpu::Device CreateCppDawnDevice() {
     }
 
     instance = std::make_unique<dawn::native::Instance>();
-    instance->DiscoverDefaultPhysicalDevices();
+
+    wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
+    backendTypeOptions.backendType = backendType;
+
+    wgpu::RequestAdapterOptions options = {};
+    options.nextInChain = &backendTypeOptions;
 
     // Get an adapter for the backend to use, and create the device.
-    dawn::native::Adapter backendAdapter;
-    {
-        std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
-        auto adapterIt = std::find_if(adapters.begin(), adapters.end(),
-                                      [](const dawn::native::Adapter adapter) -> bool {
-                                          wgpu::AdapterProperties properties;
-                                          adapter.GetProperties(&properties);
-                                          return properties.backendType == backendType;
-                                      });
-        ASSERT(adapterIt != adapters.end());
-        backendAdapter = *adapterIt;
-    }
+    dawn::native::Adapter backendAdapter = instance->EnumerateAdapters(&options)[0];
 
     std::vector<const char*> enableToggleNames;
     std::vector<const char*> disabledToggleNames;

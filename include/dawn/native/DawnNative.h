@@ -30,6 +30,7 @@ class Platform;
 namespace wgpu {
 struct AdapterProperties;
 struct DeviceDescriptor;
+struct RequestAdapterOptions;
 }  // namespace wgpu
 
 namespace dawn::native {
@@ -107,6 +108,11 @@ class DAWN_NATIVE_EXPORT Adapter {
     void RequestDevice(const WGPUDeviceDescriptor* descriptor,
                        WGPURequestDeviceCallback callback,
                        void* userdata);
+    void RequestDevice(std::nullptr_t descriptor,
+                       WGPURequestDeviceCallback callback,
+                       void* userdata) {
+        RequestDevice(static_cast<const wgpu::DeviceDescriptor*>(descriptor), callback, userdata);
+    }
 
     // Returns the underlying WGPUAdapter object.
     WGPUAdapter Get() const;
@@ -173,7 +179,14 @@ class DAWN_NATIVE_EXPORT Instance {
     void DiscoverDefaultAdapters();
     bool DiscoverAdapters(const AdapterDiscoveryOptionsBase* options);
 
-    // Returns a vector of adapters, one for each physical device the instance knows about.
+    // Discovers and returns a vector of adapters.
+    // All systems adapters that can be found are returned if no options are passed.
+    // Otherwise, returns adapters based on the `options`.
+    std::vector<Adapter> EnumerateAdapters(const WGPURequestAdapterOptions* options) const;
+    std::vector<Adapter> EnumerateAdapters(
+        const wgpu::RequestAdapterOptions* options = nullptr) const;
+
+    // Deprecated. Call EnumerateAdapters instead.
     std::vector<Adapter> GetAdapters() const;
 
     const ToggleInfo* GetToggleInfo(const char* toggleName);
@@ -210,8 +223,8 @@ DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(WGPUDevice device);
 // Backdoor to get the number of deprecation warnings for testing
 DAWN_NATIVE_EXPORT size_t GetDeprecationWarningCountForTesting(WGPUDevice device);
 
-// Backdoor to get the number of adapters an instance knows about for testing
-DAWN_NATIVE_EXPORT size_t GetAdapterCountForTesting(WGPUInstance instance);
+// Backdoor to get the number of physical devices an instance knows about for testing
+DAWN_NATIVE_EXPORT size_t GetPhysicalDeviceCountForTesting(WGPUInstance instance);
 
 //  Query if texture has been initialized
 DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(

@@ -78,8 +78,7 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
     {
         auto instance = std::make_unique<native::Instance>();
         instance->EnableAdapterBlocklist(false);
-        instance->DiscoverDefaultPhysicalDevices();
-        for (const native::Adapter& adapter : instance->GetAdapters()) {
+        for (const native::Adapter& adapter : instance->EnumerateAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 
@@ -96,8 +95,7 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
 
         auto instance = std::make_unique<native::Instance>();
         instance->EnableAdapterBlocklist(false);
-        instance->DiscoverDefaultPhysicalDevices();
-        for (native::Adapter& adapter : instance->GetAdapters()) {
+        for (native::Adapter& adapter : instance->EnumerateAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 
@@ -127,8 +125,7 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
     {
         auto instance = std::make_unique<native::Instance>();
         instance->EnableAdapterBlocklist(false);
-        instance->DiscoverDefaultPhysicalDevices();
-        for (const native::Adapter& adapter : instance->GetAdapters()) {
+        for (const native::Adapter& adapter : instance->EnumerateAdapters()) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 
@@ -152,8 +149,7 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
         // It will only be valid as long as the instance is alive.
         WGPUInstance unsafeInstancePtr = instance->Get();
 
-        instance->DiscoverDefaultPhysicalDevices();
-        for (native::Adapter& nativeAdapter : instance->GetAdapters()) {
+        for (native::Adapter& nativeAdapter : instance->EnumerateAdapters()) {
             wgpu::AdapterProperties properties;
             nativeAdapter.GetProperties(&properties);
 
@@ -167,9 +163,9 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
                 // holding onto the instance. The instance should have cleared all internal
                 // references to adapters when the last external ref is dropped.
                 adapter = wgpu::Adapter(nativeAdapter.Get());
-                EXPECT_GT(native::GetAdapterCountForTesting(unsafeInstancePtr), 0u);
+                EXPECT_GT(native::GetPhysicalDeviceCountForTesting(unsafeInstancePtr), 0u);
                 instance.reset();
-                EXPECT_EQ(native::GetAdapterCountForTesting(unsafeInstancePtr), 0u);
+                EXPECT_EQ(native::GetPhysicalDeviceCountForTesting(unsafeInstancePtr), 0u);
                 break;
             }
         }

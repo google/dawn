@@ -21,9 +21,11 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "dawn/common/RefCounted.h"
+#include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
@@ -45,6 +47,8 @@ class Surface;
 class XlibXcbFunctions;
 
 using BackendsBitset = ityp::bitset<wgpu::BackendType, kEnumCount<wgpu::BackendType>>;
+using BackendsArray = ityp::
+    array<wgpu::BackendType, std::unique_ptr<BackendConnection>, kEnumCount<wgpu::BackendType>>;
 
 InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor);
 
@@ -58,11 +62,18 @@ class InstanceBase final : public RefCountedWithExternalCount {
                            WGPURequestAdapterCallback callback,
                            void* userdata);
 
+    // Deprecated: Discover physical devices and save them on the instance.
     void DiscoverDefaultPhysicalDevices();
     bool DiscoverPhysicalDevices(const PhysicalDeviceDiscoveryOptionsBase* options);
-
-    // Return adapters created on every known physical device.
+    // Return adapters created on physical device discovered by the instance.
     std::vector<Ref<AdapterBase>> GetAdapters() const;
+
+    // Discovers and returns a vector of adapters.
+    // All systems adapters that can be found are returned if no options are passed.
+    // Otherwise, returns adapters based on the `options`.
+    std::vector<Ref<AdapterBase>> EnumerateAdapters(const RequestAdapterOptions* options = nullptr);
+
+    size_t GetPhysicalDeviceCountForTesting() const;
 
     // Used to handle error that happen up to device creation.
     bool ConsumedError(MaybeError maybeError);
@@ -72,6 +83,20 @@ class InstanceBase final : public RefCountedWithExternalCount {
         if (resultOrError.IsError()) {
             ConsumeError(resultOrError.AcquireError());
             return true;
+        }
+        *result = resultOrError.AcquireSuccess();
+        return false;
+    }
+
+    // Consume an error and log its warning at most once. This is useful for
+    // physical device creation errors that happen because the backend is not
+    // supported or doesn't meet the required capabilities.
+    bool ConsumedErrorAndWarnOnce(MaybeError maybeError);
+
+    template <typename T>
+    [[nodiscard]] bool ConsumedErrorAndWarnOnce(ResultOrError<T> resultOrError, T* result) {
+        if (DAWN_UNLIKELY(resultOrError.IsError())) {
+            return ConsumedErrorAndWarnOnce(resultOrError.AcquireError());
         }
         *result = resultOrError.AcquireSuccess();
         return false;
@@ -135,17 +160,19 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // Lazily creates connections to all backends that have been compiled.
     void EnsureBackendConnection(wgpu::BackendType backendType);
 
-    MaybeError DiscoverPhysicalDevicesInternal(const PhysicalDeviceDiscoveryOptionsBase* options);
-
-    ResultOrError<Ref<AdapterBase>> RequestAdapterInternal(const RequestAdapterOptions* options);
+    // Deprecated: Discover physical devices with options, and save them on the instance.
+    void DeprecatedDiscoverPhysicalDevices(const RequestAdapterOptions* options);
+    // Enumerate physical devices according to options and return them.
+    std::vector<Ref<PhysicalDeviceBase>> EnumeratePhysicalDevices(
+        const RequestAdapterOptions* options);
 
     void ConsumeError(std::unique_ptr<ErrorData> error);
+
+    std::unordered_set<std::string> warningMessages;
 
     std::vector<std::string> mRuntimeSearchPaths;
 
     BackendsBitset mBackendsConnected;
-
-    bool mDiscoveredDefaultAdapters = false;
 
     bool mBeginCaptureOnStartup = false;
     bool mEnableAdapterBlocklist = false;
@@ -156,8 +183,9 @@ class InstanceBase final : public RefCountedWithExternalCount {
     std::unique_ptr<BlobCache> mBlobCache;
     BlobCache mPassthroughBlobCache;
 
-    std::vector<std::unique_ptr<BackendConnection>> mBackends;
-    std::vector<Ref<PhysicalDeviceBase>> mPhysicalDevices;
+    BackendsArray mBackends;
+    std::vector<Ref<PhysicalDeviceBase>> mDeprecatedPhysicalDevices;
+    bool mDeprecatedDiscoveredDefaultPhysicalDevices = false;
 
     TogglesState mToggles;
 

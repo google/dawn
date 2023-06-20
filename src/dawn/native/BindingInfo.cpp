@@ -14,7 +14,7 @@
 
 #include "dawn/native/BindingInfo.h"
 
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Limits.h"
 
 namespace dawn::native {

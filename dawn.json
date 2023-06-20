@@ -57,6 +57,15 @@
             {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
         ]
     },
+    "request adapter options backend type": {
+        "tags": ["dawn"],
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["request adapter options"],
+        "members": [
+            {"name": "backend type", "type": "backend type"}
+        ]
+    },
     "request adapter status": {
         "category": "enum",
         "emscripten_no_enum_table": true,
@@ -2618,7 +2627,10 @@
             {"value": 1006, "name": "dawn adapter properties power preference", "tags": ["dawn", "native"]},
             {"value": 1007, "name": "dawn buffer descriptor error info from wire client", "tags": ["dawn"]},
             {"value": 1008, "name": "dawn toggles descriptor", "tags": ["dawn", "native"]},
-            {"value": 1009, "name": "dawn shader module SPIRV options descriptor", "tags": ["dawn"]}
+            {"value": 1009, "name": "dawn shader module SPIRV options descriptor", "tags": ["dawn"]},
+            {"value": 1010, "name": "request adapter options backend type", "tags": ["dawn"]},
+            {"value": 1011, "name": "request adapter options LUID", "tags": ["dawn", "native"]},
+            {"value": 1012, "name": "request adapter options get GL proc", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

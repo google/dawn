@@ -20,7 +20,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 

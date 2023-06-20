@@ -18,7 +18,7 @@
 #include <cmath>
 
 #include "dawn/common/BitSetIterator.h"
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"

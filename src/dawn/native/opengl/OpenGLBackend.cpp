@@ -21,6 +21,10 @@
 
 namespace dawn::native::opengl {
 
+RequestAdapterOptionsGetGLProc::RequestAdapterOptionsGetGLProc() {
+    sType = wgpu::SType::RequestAdapterOptionsGetGLProc;
+}
+
 PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(WGPUBackendType type)
     : PhysicalDeviceDiscoveryOptionsBase(type) {}
 

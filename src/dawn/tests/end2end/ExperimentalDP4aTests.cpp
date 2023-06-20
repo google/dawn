@@ -87,7 +87,7 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
         IsDP4aSupportedOnAdapter() &&
         // Proper toggle, allow_unsafe_apis and use_dxc if d3d12
         // Note that "allow_unsafe_apis" is always enabled in
-        // DawnTestEnvironment::CreateInstanceAndDiscoverPhysicalDevices.
+        // DawnTestEnvironment::CreateInstance.
         HasToggleEnabled("allow_unsafe_apis") && UseDxcEnabledOrNonD3D12();
     const bool deviceSupportDP4AFeature =
         device.HasFeature(wgpu::FeatureName::ChromiumExperimentalDp4a);

@@ -23,9 +23,9 @@ namespace dawn::native::opengl {
 
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    PhysicalDevice(InstanceBase* instance, wgpu::BackendType backendType);
-
-    MaybeError InitializeGLFunctions(void* (*getProc)(const char*));
+    static ResultOrError<Ref<PhysicalDevice>> Create(InstanceBase* instance,
+                                                     wgpu::BackendType backendType,
+                                                     void* (*getProc)(const char*));
 
     ~PhysicalDevice() override = default;
 
@@ -34,6 +34,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
 
   private:
+    PhysicalDevice(InstanceBase* instance, wgpu::BackendType backendType);
+    MaybeError InitializeGLFunctions(void* (*getProc)(const char*));
+
     MaybeError InitializeImpl() override;
     void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;

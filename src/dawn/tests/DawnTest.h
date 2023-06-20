@@ -186,8 +186,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool RunSuppressedTests() const;
 
   protected:
-    std::unique_ptr<native::Instance> CreateInstanceAndDiscoverPhysicalDevices(
-        platform::Platform* platform = nullptr);
+    std::unique_ptr<native::Instance> CreateInstance(platform::Platform* platform = nullptr);
     std::unique_ptr<native::Instance> mInstance;
 
   private:

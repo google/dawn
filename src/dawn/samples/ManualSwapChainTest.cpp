@@ -271,18 +271,8 @@ int main(int argc, const char* argv[]) {
     dawnProcSetProcs(&procs);
 
     instance = std::make_unique<dawn::native::Instance>();
-    instance->DiscoverDefaultPhysicalDevices();
 
-    std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
-    dawn::native::Adapter chosenAdapter;
-    for (dawn::native::Adapter& adapter : adapters) {
-        wgpu::AdapterProperties properties;
-        adapter.GetProperties(&properties);
-        if (properties.backendType != wgpu::BackendType::Null) {
-            chosenAdapter = adapter;
-            break;
-        }
-    }
+    dawn::native::Adapter chosenAdapter = instance->EnumerateAdapters()[0];
     ASSERT(chosenAdapter);
 
     // Setup the device on that adapter.

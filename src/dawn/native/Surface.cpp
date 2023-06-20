@@ -15,7 +15,7 @@
 #include "dawn/native/Surface.h"
 
 #include "dawn/common/Platform.h"
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/SwapChain.h"
 

@@ -181,12 +181,26 @@ bool Instance::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
 }
 
 std::vector<Adapter> Instance::GetAdapters() const {
+    dawn::WarningLog() << "GetAdapters() is deprecated. Call EnumerateAdapters(options) instead.";
     // Adapters are owned by mImpl so it is safe to return non RAII pointers to them
     std::vector<Adapter> adapters;
     for (const Ref<AdapterBase>& adapter : mImpl->GetAdapters()) {
         adapters.push_back(Adapter(adapter.Get()));
     }
     return adapters;
+}
+
+std::vector<Adapter> Instance::EnumerateAdapters(const WGPURequestAdapterOptions* options) const {
+    // Adapters are owned by mImpl so it is safe to return non RAII pointers to them
+    std::vector<Adapter> adapters;
+    for (const Ref<AdapterBase>& adapter : mImpl->EnumerateAdapters(FromAPI(options))) {
+        adapters.push_back(Adapter(adapter.Get()));
+    }
+    return adapters;
+}
+
+std::vector<Adapter> Instance::EnumerateAdapters(const wgpu::RequestAdapterOptions* options) const {
+    return EnumerateAdapters(reinterpret_cast<const WGPURequestAdapterOptions*>(options));
 }
 
 const ToggleInfo* Instance::GetToggleInfo(const char* toggleName) {
@@ -231,8 +245,8 @@ size_t GetDeprecationWarningCountForTesting(WGPUDevice device) {
     return FromAPI(device)->GetDeprecationWarningCountForTesting();
 }
 
-size_t GetAdapterCountForTesting(WGPUInstance instance) {
-    return FromAPI(instance)->GetAdapters().size();
+size_t GetPhysicalDeviceCountForTesting(WGPUInstance instance) {
+    return FromAPI(instance)->GetPhysicalDeviceCountForTesting();
 }
 
 bool IsTextureSubresourceInitialized(WGPUTexture texture,

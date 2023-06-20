@@ -34,6 +34,7 @@ enum class ICD {
     None,
     SwiftShader,
 };
+constexpr uint32_t kICDCount = 2u;
 
 class Device;
 
@@ -91,12 +92,15 @@ class Backend : public BackendConnection {
 
     MaybeError Initialize();
 
-    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultPhysicalDevices() override;
-    ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> DiscoverPhysicalDevices(
-        const PhysicalDeviceDiscoveryOptionsBase* optionsBase) override;
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(
+        const RequestAdapterOptions* options) override;
+    void ClearPhysicalDevices() override;
+    size_t GetPhysicalDeviceCountForTesting() const override;
 
   private:
-    ityp::array<ICD, Ref<VulkanInstance>, 2> mVulkanInstances = {};
+    ityp::bitset<ICD, kICDCount> mVulkanInstancesCreated = {};
+    ityp::array<ICD, Ref<VulkanInstance>, kICDCount> mVulkanInstances = {};
+    ityp::array<ICD, std::vector<Ref<PhysicalDevice>>, kICDCount> mPhysicalDevices = {};
 };
 
 }  // namespace dawn::native::vulkan

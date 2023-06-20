@@ -36,8 +36,7 @@ class AdapterCreationTest : public ::testing::Test {
 
         {
             auto nativeInstance = std::make_unique<native::Instance>();
-            nativeInstance->DiscoverDefaultPhysicalDevices();
-            for (native::Adapter& nativeAdapter : nativeInstance->GetAdapters()) {
+            for (native::Adapter& nativeAdapter : nativeInstance->EnumerateAdapters()) {
                 anyAdapterAvailable = true;
 
                 wgpu::AdapterProperties properties;
@@ -113,8 +112,13 @@ TEST_F(AdapterCreationTest, FallbackAdapter) {
     MockCallback<WGPURequestAdapterCallback> cb;
 
     WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
-        .WillOnce(SaveArg<1>(&cAdapter));
+    if (swiftShaderAvailable) {
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+    } else {
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Unavailable, nullptr, _, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+    }
     instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
 
     wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
@@ -136,8 +140,13 @@ TEST_F(AdapterCreationTest, PreferHighPerformance) {
     MockCallback<WGPURequestAdapterCallback> cb;
 
     WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
-        .WillOnce(SaveArg<1>(&cAdapter));
+    if (anyAdapterAvailable) {
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+    } else {
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Unavailable, nullptr, _, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+    }
     instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
 
     wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
@@ -157,8 +166,13 @@ TEST_F(AdapterCreationTest, PreferLowPower) {
     MockCallback<WGPURequestAdapterCallback> cb;
 
     WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
-        .WillOnce(SaveArg<1>(&cAdapter));
+    if (anyAdapterAvailable) {
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+    } else {
+        EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Unavailable, nullptr, _, this))
+            .WillOnce(SaveArg<1>(&cAdapter));
+    }
     instance.RequestAdapter(&options, cb.Callback(), cb.MakeUserdata(this));
 
     wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);

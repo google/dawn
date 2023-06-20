@@ -43,16 +43,15 @@ class DeviceCreationTest : public testing::Test {
         // Create an instance with default toggles and create an adapter from it.
         WGPUInstanceDescriptor safeInstanceDesc = {};
         instance = std::make_unique<dawn::native::Instance>(&safeInstanceDesc);
-        instance->DiscoverDefaultPhysicalDevices();
-        for (dawn::native::Adapter& nativeAdapter : instance->GetAdapters()) {
-            wgpu::AdapterProperties properties;
-            nativeAdapter.GetProperties(&properties);
 
-            if (properties.backendType == wgpu::BackendType::Null) {
-                adapter = wgpu::Adapter(nativeAdapter.Get());
-                break;
-            }
-        }
+        wgpu::RequestAdapterOptionsBackendType backendTypeOptions = {};
+        backendTypeOptions.backendType = wgpu::BackendType::Null;
+
+        wgpu::RequestAdapterOptions options = {};
+        options.nextInChain = &backendTypeOptions;
+
+        // Get the null adapter with default toggles.
+        adapter = instance->EnumerateAdapters(&options)[0];
 
         // Create an instance with toggle AllowUnsafeAPIs enabled, and create an unsafe adapter
         // from it.
@@ -65,19 +64,10 @@ class DeviceCreationTest : public testing::Test {
         unsafeInstanceDesc.nextInChain = &unsafeInstanceTogglesDesc.chain;
 
         unsafeInstance = std::make_unique<dawn::native::Instance>(&unsafeInstanceDesc);
-        unsafeInstance->DiscoverDefaultPhysicalDevices();
-        for (dawn::native::Adapter& nativeAdapter : unsafeInstance->GetAdapters()) {
-            wgpu::AdapterProperties properties;
-            nativeAdapter.GetProperties(&properties);
+        unsafeAdapter = unsafeInstance->EnumerateAdapters(&options)[0];
 
-            if (properties.backendType == wgpu::BackendType::Null) {
-                unsafeAdapter = wgpu::Adapter(nativeAdapter.Get());
-                break;
-            }
-        }
-
-        ASSERT_NE(adapter, nullptr);
-        ASSERT_NE(unsafeAdapter, nullptr);
+        ASSERT_NE(adapter.Get(), nullptr);
+        ASSERT_NE(unsafeAdapter.Get(), nullptr);
     }
 
     void TearDown() override {
@@ -93,8 +83,8 @@ class DeviceCreationTest : public testing::Test {
 
     std::unique_ptr<dawn::native::Instance> instance;
     std::unique_ptr<dawn::native::Instance> unsafeInstance;
-    wgpu::Adapter adapter;
-    wgpu::Adapter unsafeAdapter;
+    dawn::native::Adapter adapter;
+    dawn::native::Adapter unsafeAdapter;
     dawn::native::FeaturesInfo featuresInfo;
 };
 

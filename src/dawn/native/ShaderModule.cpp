@@ -21,7 +21,7 @@
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Constants.h"
 #include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CompilationMessages.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectContentHasher.h"

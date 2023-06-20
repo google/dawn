@@ -792,27 +792,22 @@ Backend::Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::Bac
 
 Backend::~Backend() = default;
 
-std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverDefaultPhysicalDevices() {
-    PhysicalDeviceDiscoveryOptions options;
-    auto result = DiscoverPhysicalDevices(&options);
-    if (result.IsError()) {
-        GetInstance()->ConsumedError(result.AcquireError());
+std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
+    const RequestAdapterOptions* options) {
+    if (options->forceFallbackAdapter) {
         return {};
     }
-    return result.AcquireSuccess();
-}
-
-ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverPhysicalDevices(
-    const PhysicalDeviceDiscoveryOptionsBase* optionsBase) {
-    ASSERT(optionsBase->backendType == WGPUBackendType_Metal);
+    if (!mPhysicalDevices.empty()) {
+        // Devices already discovered.
+        return std::vector<Ref<PhysicalDeviceBase>>{mPhysicalDevices};
+    }
     @autoreleasepool {
-        std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
 #if DAWN_PLATFORM_IS(MACOS)
         for (id<MTLDevice> device in MTLCopyAllDevices()) {
             Ref<PhysicalDevice> physicalDevice =
                 AcquireRef(new PhysicalDevice(GetInstance(), AcquireNSPRef(device)));
-            if (!GetInstance()->ConsumedError(physicalDevice->Initialize())) {
-                physicalDevices.push_back(std::move(physicalDevice));
+            if (!GetInstance()->ConsumedErrorAndWarnOnce(physicalDevice->Initialize())) {
+                mPhysicalDevices.push_back(std::move(physicalDevice));
             }
         }
 #endif
@@ -821,13 +816,20 @@ ResultOrError<std::vector<Ref<PhysicalDeviceBase>>> Backend::DiscoverPhysicalDev
 #if defined(DAWN_PLATFORM_IOS)
         Ref<PhysicalDevice> physicalDevice = AcquireRef(
             new PhysicalDevice(GetInstance(), AcquireNSPRef(MTLCreateSystemDefaultDevice())));
-        if (!GetInstance()->ConsumedError(physicalDevice->Initialize())) {
-            physicalDevices.push_back(std::move(physicalDevice));
+        if (!GetInstance()->ConsumedErrorAndWarnOnce(physicalDevice->Initialize())) {
+            mPhysicalDevices.push_back(std::move(physicalDevice));
         }
 #endif
-
-        return physicalDevices;
     }
+    return std::vector<Ref<PhysicalDeviceBase>>{mPhysicalDevices};
+}
+
+void Backend::ClearPhysicalDevices() {
+    mPhysicalDevices.clear();
+}
+
+size_t Backend::GetPhysicalDeviceCountForTesting() const {
+    return mPhysicalDevices.size();
 }
 
 BackendConnection* Connect(InstanceBase* instance) {

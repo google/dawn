@@ -18,8 +18,16 @@
 typedef void* EGLImage;
 
 #include "dawn/native/DawnNative.h"
+#include "dawn/webgpu_cpp_chained_struct.h"
 
 namespace dawn::native::opengl {
+
+// Can be chained in WGPURequestAdapterOptions
+struct DAWN_NATIVE_EXPORT RequestAdapterOptionsGetGLProc : wgpu::ChainedStruct {
+    RequestAdapterOptionsGetGLProc();
+
+    void* (*getProc)(const char*);
+};
 
 struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
     : public PhysicalDeviceDiscoveryOptionsBase {

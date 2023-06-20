@@ -19,7 +19,7 @@
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ExternalTexture.h"

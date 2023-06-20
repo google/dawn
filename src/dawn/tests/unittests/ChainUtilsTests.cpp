@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn {

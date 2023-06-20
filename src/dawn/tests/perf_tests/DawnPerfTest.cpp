@@ -126,7 +126,7 @@ DawnPerfTestEnvironment::~DawnPerfTestEnvironment() = default;
 
 void DawnPerfTestEnvironment::SetUp() {
     mPlatform = std::make_unique<DawnPerfTestPlatform>();
-    mInstance = CreateInstanceAndDiscoverPhysicalDevices(mPlatform.get());
+    mInstance = CreateInstance(mPlatform.get());
     ASSERT(mInstance);
 
     // Begin writing the trace event array.

@@ -86,14 +86,26 @@ class Backend : public BackendConnection {
     explicit Backend(InstanceBase* instance)
         : BackendConnection(instance, wgpu::BackendType::Null) {}
 
-    std::vector<Ref<PhysicalDeviceBase>> DiscoverDefaultPhysicalDevices() override {
-        // There is always a single Null adapter because it is purely CPU based and doesn't
-        // depend on the system.
-        std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
-        Ref<PhysicalDevice> physicalDevice = AcquireRef(new PhysicalDevice(GetInstance()));
-        physicalDevices.push_back(std::move(physicalDevice));
-        return physicalDevices;
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(
+        const RequestAdapterOptions* options) override {
+        if (options->forceFallbackAdapter) {
+            return {};
+        }
+        // There is always a single Null physical device because it is purely CPU based
+        // and doesn't depend on the system.
+        if (mPhysicalDevice == nullptr) {
+            mPhysicalDevice = AcquireRef(new PhysicalDevice(GetInstance()));
+        }
+        return {mPhysicalDevice};
     }
+
+    void ClearPhysicalDevices() override { mPhysicalDevice = nullptr; }
+    size_t GetPhysicalDeviceCountForTesting() const override {
+        return mPhysicalDevice != nullptr ? 1 : 0;
+    }
+
+  private:
+    Ref<PhysicalDevice> mPhysicalDevice;
 };
 
 BackendConnection* Connect(InstanceBase* instance) {

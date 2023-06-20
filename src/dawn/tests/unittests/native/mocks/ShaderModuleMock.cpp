@@ -14,7 +14,7 @@
 
 #include "dawn/tests/unittests/native/mocks/ShaderModuleMock.h"
 
-#include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/ChainUtils.h"
 
 namespace dawn::native {
 

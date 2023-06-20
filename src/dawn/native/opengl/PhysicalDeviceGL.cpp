@@ -54,6 +54,16 @@ uint32_t GetVendorIdFromVendors(const char* vendor) {
 
 }  // anonymous namespace
 
+// static
+ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(InstanceBase* instance,
+                                                          wgpu::BackendType backendType,
+                                                          void* (*getProc)(const char*)) {
+    Ref<PhysicalDevice> physicalDevice = AcquireRef(new PhysicalDevice(instance, backendType));
+    DAWN_TRY(physicalDevice->InitializeGLFunctions(getProc));
+    DAWN_TRY(physicalDevice->Initialize());
+    return physicalDevice;
+}
+
 PhysicalDevice::PhysicalDevice(InstanceBase* instance, wgpu::BackendType backendType)
     : PhysicalDeviceBase(instance, backendType) {}
 
