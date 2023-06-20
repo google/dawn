@@ -76,6 +76,8 @@ enum extension {
   chromium_experimental_full_ptr_parameters
   // A Chromium-specific extension that relaxes memory layout requirements for uniform storage.
   chromium_internal_relaxed_uniform_layout
+  // A Chromium-specific extension that enables dual source blending.
+  chromium_internal_dual_source_blending
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
@@ -260,6 +262,7 @@ enum attribute {
   fragment
   group
   id
+  index
   interpolate
   invariant
   location

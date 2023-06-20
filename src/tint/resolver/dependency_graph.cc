@@ -34,6 +34,7 @@
 #include "src/tint/ast/identifier.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/increment_decrement_statement.h"
+#include "src/tint/ast/index_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/invariant_attribute.h"
@@ -388,6 +389,10 @@ class DependencyScanner {
             },
             [&](const ast::IdAttribute* id) {
                 TraverseExpression(id->expr);
+                return true;
+            },
+            [&](const ast::IndexAttribute* index) {
+                TraverseExpression(index->expr);
                 return true;
             },
             [&](const ast::InterpolateAttribute* interpolate) {

@@ -320,6 +320,10 @@ class Resolver {
     /// @returns the location value on success.
     utils::Result<uint32_t> LocationAttribute(const ast::LocationAttribute* attr);
 
+    /// Resolves the `@index` attribute @p attr
+    /// @returns the index value on success.
+    utils::Result<uint32_t> IndexAttribute(const ast::IndexAttribute* attr);
+
     /// Resolves the `@binding` attribute @p attr
     /// @returns the binding value on success.
     utils::Result<uint32_t> BindingAttribute(const ast::BindingAttribute* attr);

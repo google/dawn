@@ -52,6 +52,9 @@ Attribute ParseAttribute(std::string_view str) {
     if (str == "id") {
         return Attribute::kId;
     }
+    if (str == "index") {
+        return Attribute::kIndex;
+    }
     if (str == "interpolate") {
         return Attribute::kInterpolate;
     }
@@ -96,6 +99,8 @@ utils::StringStream& operator<<(utils::StringStream& out, Attribute value) {
             return out << "group";
         case Attribute::kId:
             return out << "id";
+        case Attribute::kIndex:
+            return out << "index";
         case Attribute::kInterpolate:
             return out << "interpolate";
         case Attribute::kInvariant:

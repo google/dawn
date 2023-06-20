@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, AttributeList_Invalid) {
     EXPECT_TRUE(attrs.value.IsEmpty());
     EXPECT_EQ(p->error(), R"(1:2: expected attribute
 Did you mean 'invariant'?
-Possible values: 'align', 'binding', 'builtin', 'compute', 'diagnostic', 'fragment', 'group', 'id', 'interpolate', 'invariant', 'location', 'must_use', 'size', 'vertex', 'workgroup_size')");
+Possible values: 'align', 'binding', 'builtin', 'compute', 'diagnostic', 'fragment', 'group', 'id', 'index', 'interpolate', 'invariant', 'location', 'must_use', 'size', 'vertex', 'workgroup_size')");
 }
 
 }  // namespace

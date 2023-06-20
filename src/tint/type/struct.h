@@ -185,6 +185,8 @@ class Struct : public utils::Castable<Struct, Type> {
 struct StructMemberAttributes {
     /// The value of a `@location` attribute
     std::optional<uint32_t> location;
+    /// The value of a `@index` attribute
+    std::optional<uint32_t> index;
     /// The value of a `@builtin` attribute
     std::optional<builtin::BuiltinValue> builtin;
     /// The values of a `@interpolate` attribute

@@ -48,6 +48,7 @@ static constexpr Case kValidCases[] = {
     {"chromium_experimental_full_ptr_parameters",
      Extension::kChromiumExperimentalFullPtrParameters},
     {"chromium_experimental_push_constant", Extension::kChromiumExperimentalPushConstant},
+    {"chromium_internal_dual_source_blending", Extension::kChromiumInternalDualSourceBlending},
     {"chromium_internal_relaxed_uniform_layout", Extension::kChromiumInternalRelaxedUniformLayout},
     {"f16", Extension::kF16},
 };
@@ -65,12 +66,15 @@ static constexpr Case kInvalidCases[] = {
     {"chvomium_experimental_push_constiint", Extension::kUndefined},
     {"chromiu8WWexperimental_push_constant", Extension::kUndefined},
     {"chromium_experiMental_push_costanxx", Extension::kUndefined},
-    {"chromium_internal_relaxed_unXform_layugg", Extension::kUndefined},
-    {"chromiuu_iVterna_relxed_unifXrm_layout", Extension::kUndefined},
-    {"chromium_internal_relaxed_uni3orm_layout", Extension::kUndefined},
-    {"fE6", Extension::kUndefined},
-    {"fPTT", Extension::kUndefined},
-    {"dxx6", Extension::kUndefined},
+    {"Xhromium_ggnternal_dual_sourceblending", Extension::kUndefined},
+    {"chromium_internludual_sorce_bVenXing", Extension::kUndefined},
+    {"chromium_internal_dual_source_b3ending", Extension::kUndefined},
+    {"chromium_internal_rElaxed_uniform_layout", Extension::kUndefined},
+    {"chromium_internalPPrTTlaed_uniform_layout", Extension::kUndefined},
+    {"chroddium_internxxl_relaxed_unform_layout", Extension::kUndefined},
+    {"4416", Extension::kUndefined},
+    {"fSVV6", Extension::kUndefined},
+    {"RR2", Extension::kUndefined},
 };
 
 using ExtensionParseTest = testing::TestWithParam<Case>;

@@ -329,6 +329,11 @@ class Validator {
                            const Source& source,
                            const bool is_input = false) const;
 
+    /// Validates a index attribute
+    /// @param index_attr the index attribute to validate
+    /// @returns true on success, false otherwise.
+    bool IndexAttribute(const ast::IndexAttribute* index_attr) const;
+
     /// Validates a loop statement
     /// @param stmt the loop statement
     /// @returns true on success, false otherwise.

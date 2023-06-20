@@ -50,6 +50,7 @@
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/ast/index_accessor_expression.h"
+#include "src/tint/ast/index_attribute.h"
 #include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/invariant_attribute.h"
@@ -3262,6 +3263,23 @@ class ProgramBuilder {
     template <typename EXPR>
     const ast::LocationAttribute* Location(EXPR&& location) {
         return create<ast::LocationAttribute>(source_, Expr(std::forward<EXPR>(location)));
+    }
+
+    /// Creates an ast::IndexAttribute
+    /// @param source the source information
+    /// @param index the index value expression
+    /// @returns the index attribute pointer
+    template <typename EXPR>
+    const ast::IndexAttribute* Index(const Source& source, EXPR&& index) {
+        return create<ast::IndexAttribute>(source, Expr(std::forward<EXPR>(index)));
+    }
+
+    /// Creates an ast::IndexAttribute
+    /// @param index the index value expression
+    /// @returns the index attribute pointer
+    template <typename EXPR>
+    const ast::IndexAttribute* Index(EXPR&& index) {
+        return create<ast::IndexAttribute>(source_, Expr(std::forward<EXPR>(index)));
     }
 
     /// Creates an ast::IdAttribute

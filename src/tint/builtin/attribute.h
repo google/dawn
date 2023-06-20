@@ -41,6 +41,7 @@ enum class Attribute {
     kFragment,
     kGroup,
     kId,
+    kIndex,
     kInterpolate,
     kInvariant,
     kLocation,
@@ -61,9 +62,9 @@ utils::StringStream& operator<<(utils::StringStream& out, Attribute value);
 Attribute ParseAttribute(std::string_view str);
 
 constexpr const char* kAttributeStrings[] = {
-    "align",    "binding",  "builtin", "compute",     "diagnostic",
-    "fragment", "group",    "id",      "interpolate", "invariant",
-    "location", "must_use", "size",    "vertex",      "workgroup_size",
+    "align",    "binding", "builtin", "compute",        "diagnostic", "fragment",
+    "group",    "id",      "index",   "interpolate",    "invariant",  "location",
+    "must_use", "size",    "vertex",  "workgroup_size",
 };
 
 }  // namespace tint::builtin

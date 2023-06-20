@@ -158,6 +158,8 @@ list(APPEND TINT_LIB_SRCS
   ast/increment_decrement_statement.h
   ast/index_accessor_expression.cc
   ast/index_accessor_expression.h
+  ast/index_attribute.cc
+  ast/index_attribute.h
   ast/int_literal_expression.cc
   ast/int_literal_expression.h
   ast/internal_attribute.cc
@@ -939,6 +941,7 @@ if(TINT_BUILD_TESTS)
     ast/if_statement_test.cc
     ast/increment_decrement_statement_test.cc
     ast/index_accessor_expression_test.cc
+    ast/index_attribute_test.cc
     ast/int_literal_expression_test.cc
     ast/interpolate_attribute_test.cc
     ast/location_attribute_test.cc
@@ -1008,6 +1011,7 @@ if(TINT_BUILD_TESTS)
     resolver/control_block_validation_test.cc
     resolver/dependency_graph_test.cc
     resolver/diagnostic_control_test.cc
+    resolver/dual_source_blending_extension_test.cc
     resolver/entry_point_validation_test.cc
     resolver/evaluation_stage_test.cc
     resolver/expression_kind_test.cc

@@ -29,6 +29,7 @@
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/if_statement.h"
+#include "src/tint/ast/index_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/loop_statement.h"
@@ -1115,6 +1116,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                                        is_input)) {
                     return false;
                 }
+            } else if (auto* index_attr = attr->As<ast::IndexAttribute>()) {
+                return IndexAttribute(index_attr);
             } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
                 if (decl->PipelineStage() == ast::PipelineStage::kCompute) {
                     is_invalid_compute_shader_attribute = true;
@@ -2113,6 +2116,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                     }
                     return true;
                 },
+                [&](const ast::IndexAttribute* index) { return IndexAttribute(index); },
                 [&](const ast::BuiltinAttribute* builtin_attr) {
                     if (!BuiltinAttribute(builtin_attr, member->Type(), stage,
                                           /* is_input */ false)) {
@@ -2195,6 +2199,18 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
     }
 
     return true;
+}
+
+bool Validator::IndexAttribute(const ast::IndexAttribute* index_attr) const {
+    if (!enabled_extensions_.Contains(builtin::Extension::kChromiumInternalDualSourceBlending)) {
+        AddError(
+            "use of '@index' attribute requires enabling extension "
+            "'chromium_internal_dual_source_blending'",
+            index_attr->source);
+        return false;
+    }
+
+    return false;
 }
 
 bool Validator::Return(const ast::ReturnStatement* ret,
