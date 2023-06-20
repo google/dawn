@@ -28,7 +28,7 @@ Switch::~Switch() = default;
 
 void Switch::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
     for (auto& c : cases_) {
-        cb(c.Start());
+        cb(c.Block());
     }
 }
 

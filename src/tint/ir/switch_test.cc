@@ -40,7 +40,7 @@ TEST_F(IR_SwitchTest, Results) {
 TEST_F(IR_SwitchTest, Parent) {
     auto* switch_ = b.Switch(1_i);
     b.Case(switch_, {Switch::CaseSelector{nullptr}});
-    EXPECT_THAT(switch_->Cases().Front().Start()->Parent(), switch_);
+    EXPECT_THAT(switch_->Cases().Front().Block()->Parent(), switch_);
 }
 
 }  // namespace

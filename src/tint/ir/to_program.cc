@@ -210,8 +210,8 @@ class State {
 
                                  const ast::BlockStatement* body = nullptr;
                                  {
-                                     TINT_SCOPED_ASSIGNMENT(current_switch_case_, c.Start());
-                                     body = Block(c.Start());
+                                     TINT_SCOPED_ASSIGNMENT(current_switch_case_, c.Block());
+                                     body = Block(c.Block());
                                  }
                                  if (!body) {
                                      return nullptr;
