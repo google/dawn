@@ -239,10 +239,8 @@ class DeviceBase : public RefCountedWithExternalCount {
         const CommandEncoderDescriptor* descriptor = nullptr);
     ResultOrError<Ref<ComputePipelineBase>> CreateComputePipeline(
         const ComputePipelineDescriptor* descriptor);
-    MaybeError CreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
-                                          WGPUCreateComputePipelineAsyncCallback callback,
-                                          void* userdata);
-
+    ResultOrError<Ref<ComputePipelineBase>> CreateUninitializedComputePipeline(
+        const ComputePipelineDescriptor* descriptor);
     ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor);
     ResultOrError<Ref<QuerySetBase>> CreateQuerySet(const QuerySetDescriptor* descriptor);
@@ -250,9 +248,8 @@ class DeviceBase : public RefCountedWithExternalCount {
         const RenderBundleEncoderDescriptor* descriptor);
     ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipeline(
         const RenderPipelineDescriptor* descriptor);
-    MaybeError CreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
-                                         WGPUCreateRenderPipelineAsyncCallback callback,
-                                         void* userdata);
+    ResultOrError<Ref<RenderPipelineBase>> CreateUninitializedRenderPipeline(
+        const RenderPipelineDescriptor* descriptor);
     ResultOrError<Ref<SamplerBase>> CreateSampler(const SamplerDescriptor* descriptor = nullptr);
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
@@ -405,10 +402,10 @@ class DeviceBase : public RefCountedWithExternalCount {
     CallbackTaskManager* GetCallbackTaskManager() const;
     dawn::platform::WorkerTaskPool* GetWorkerTaskPool() const;
 
-    void AddComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
+    void AddComputePipelineAsyncCallbackTask(ResultOrError<Ref<ComputePipelineBase>> result,
                                              WGPUCreateComputePipelineAsyncCallback callback,
                                              void* userdata);
-    void AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
+    void AddRenderPipelineAsyncCallbackTask(ResultOrError<Ref<RenderPipelineBase>> result,
                                             WGPUCreateRenderPipelineAsyncCallback callback,
                                             void* userdata);
 

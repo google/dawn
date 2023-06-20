@@ -26,89 +26,6 @@
 
 namespace dawn::native {
 
-CreatePipelineAsyncCallbackTaskBase::CreatePipelineAsyncCallbackTaskBase(void* userdata)
-    : mStatus(WGPUCreatePipelineAsyncStatus_Success), mUserData(userdata) {}
-
-CreatePipelineAsyncCallbackTaskBase::CreatePipelineAsyncCallbackTaskBase(
-    WGPUCreatePipelineAsyncStatus status,
-    std::string errorMessage,
-    void* userdata)
-    : mErrorMessage(errorMessage), mStatus(status), mUserData(userdata) {}
-
-CreatePipelineAsyncCallbackTaskBase::~CreatePipelineAsyncCallbackTaskBase() = default;
-
-CreateComputePipelineAsyncCallbackTask::CreateComputePipelineAsyncCallbackTask(
-    Ref<ComputePipelineBase> pipeline,
-    WGPUCreateComputePipelineAsyncCallback callback,
-    void* userdata)
-    : CreatePipelineAsyncCallbackTaskBase(userdata),
-      mPipeline(std::move(pipeline)),
-      mCreateComputePipelineAsyncCallback(callback) {}
-
-CreateComputePipelineAsyncCallbackTask::CreateComputePipelineAsyncCallbackTask(
-    WGPUCreatePipelineAsyncStatus status,
-    std::string errorMessage,
-    WGPUCreateComputePipelineAsyncCallback callback,
-    void* userdata)
-    : CreatePipelineAsyncCallbackTaskBase(status, errorMessage, userdata),
-      mCreateComputePipelineAsyncCallback(callback) {}
-
-CreateComputePipelineAsyncCallbackTask::~CreateComputePipelineAsyncCallbackTask() = default;
-
-void CreateComputePipelineAsyncCallbackTask::FinishImpl() {
-    ASSERT(mCreateComputePipelineAsyncCallback != nullptr);
-    mCreateComputePipelineAsyncCallback(mStatus, ToAPI(mPipeline.Detach()), mErrorMessage.c_str(),
-                                        mUserData);
-}
-
-void CreateComputePipelineAsyncCallbackTask::HandleShutDownImpl() {
-    ASSERT(mCreateComputePipelineAsyncCallback != nullptr);
-    mCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceDestroyed, nullptr,
-                                        "Device destroyed before callback", mUserData);
-}
-
-void CreateComputePipelineAsyncCallbackTask::HandleDeviceLossImpl() {
-    ASSERT(mCreateComputePipelineAsyncCallback != nullptr);
-    mCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr,
-                                        "Device lost before callback", mUserData);
-}
-
-CreateRenderPipelineAsyncCallbackTask::CreateRenderPipelineAsyncCallbackTask(
-    Ref<RenderPipelineBase> pipeline,
-    WGPUCreateRenderPipelineAsyncCallback callback,
-    void* userdata)
-    : CreatePipelineAsyncCallbackTaskBase(userdata),
-      mPipeline(std::move(pipeline)),
-      mCreateRenderPipelineAsyncCallback(callback) {}
-
-CreateRenderPipelineAsyncCallbackTask::CreateRenderPipelineAsyncCallbackTask(
-    WGPUCreatePipelineAsyncStatus status,
-    std::string errorMessage,
-    WGPUCreateRenderPipelineAsyncCallback callback,
-    void* userdata)
-    : CreatePipelineAsyncCallbackTaskBase(status, errorMessage, userdata),
-      mCreateRenderPipelineAsyncCallback(callback) {}
-
-CreateRenderPipelineAsyncCallbackTask::~CreateRenderPipelineAsyncCallbackTask() = default;
-
-void CreateRenderPipelineAsyncCallbackTask::FinishImpl() {
-    ASSERT(mCreateRenderPipelineAsyncCallback != nullptr);
-    mCreateRenderPipelineAsyncCallback(mStatus, ToAPI(mPipeline.Detach()), mErrorMessage.c_str(),
-                                       mUserData);
-}
-
-void CreateRenderPipelineAsyncCallbackTask::HandleShutDownImpl() {
-    ASSERT(mCreateRenderPipelineAsyncCallback != nullptr);
-    mCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceDestroyed, nullptr,
-                                       "Device destroyed before callback", mUserData);
-}
-
-void CreateRenderPipelineAsyncCallbackTask::HandleDeviceLossImpl() {
-    ASSERT(mCreateRenderPipelineAsyncCallback != nullptr);
-    mCreateRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr,
-                                       "Device lost before callback", mUserData);
-}
-
 CreateComputePipelineAsyncTask::CreateComputePipelineAsyncTask(
     Ref<ComputePipelineBase> nonInitializedComputePipeline,
     WGPUCreateComputePipelineAsyncCallback callback,
@@ -132,12 +49,8 @@ void CreateComputePipelineAsyncTask::Run() {
 
     MaybeError maybeError = mComputePipeline->Initialize();
     if (maybeError.IsError()) {
-        std::unique_ptr<ErrorData> error = maybeError.AcquireError();
-        WGPUCreatePipelineAsyncStatus status =
-            CreatePipelineAsyncStatusFromErrorType(error->GetType());
-        device->GetCallbackTaskManager()->AddCallbackTask(
-            std::make_unique<CreateComputePipelineAsyncCallbackTask>(status, error->GetMessage(),
-                                                                     mCallback, mUserdata));
+        device->AddComputePipelineAsyncCallbackTask(maybeError.AcquireError(), mCallback,
+                                                    mUserdata);
     } else {
         device->AddComputePipelineAsyncCallbackTask(mComputePipeline, mCallback, mUserdata);
     }
@@ -186,12 +99,7 @@ void CreateRenderPipelineAsyncTask::Run() {
 
     MaybeError maybeError = mRenderPipeline->Initialize();
     if (maybeError.IsError()) {
-        std::unique_ptr<ErrorData> error = maybeError.AcquireError();
-        WGPUCreatePipelineAsyncStatus status =
-            CreatePipelineAsyncStatusFromErrorType(error->GetType());
-        device->GetCallbackTaskManager()->AddCallbackTask(
-            std::make_unique<CreateRenderPipelineAsyncCallbackTask>(status, error->GetMessage(),
-                                                                    mCallback, mUserdata));
+        device->AddRenderPipelineAsyncCallbackTask(maybeError.AcquireError(), mCallback, mUserdata);
     } else {
         device->AddRenderPipelineAsyncCallbackTask(mRenderPipeline, mCallback, mUserdata);
     }

@@ -436,7 +436,7 @@ TEST_P(DeviceLostTest, DeviceLostDoesntCallUncapturedError) {
     LoseDeviceForTesting();
 }
 
-// Test that WGPUCreatePipelineAsyncStatus_DeviceLost can be correctly returned when device is lost
+// Test that WGPUCreatePipelineAsyncStatus_Success is returned when device is lost
 // before the callback of Create*PipelineAsync() is called.
 TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
@@ -449,7 +449,9 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
 
     auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
                        const char* message, void* userdata) {
-        EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_DeviceLost, status);
+        EXPECT_EQ(WGPUCreatePipelineAsyncStatus_Success, status);
+        EXPECT_NE(returnPipeline, nullptr);
+        wgpu::ComputePipeline::Acquire(returnPipeline);
     };
 
     device.CreateComputePipelineAsync(&descriptor, callback, nullptr);

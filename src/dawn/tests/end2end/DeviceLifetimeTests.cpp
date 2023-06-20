@@ -344,8 +344,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
         &desc,
         [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
            void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus_Success, status);
+            EXPECT_NE(cPipeline, nullptr);
             wgpu::ComputePipeline::Acquire(cPipeline);
-            EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_DeviceDestroyed);
         },
         nullptr);
 
@@ -400,21 +401,23 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     // Create a pipeline ahead of time so it's in the cache.
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
 
-    bool wire = UsesWire();
+    bool done = false;
     device.CreateComputePipelineAsync(
         &desc,
         [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char*,
            void* userdata) {
-            const bool wire = *static_cast<bool*>(userdata);
             wgpu::ComputePipeline::Acquire(cPipeline);
-            // On the wire, all callbacks get rejected immediately with once the device is deleted.
-            // In native, expect success since the compilation hits the frontend cache immediately.
-            // TODO(crbug.com/dawn/1122): These callbacks should be made consistent.
-            EXPECT_EQ(status, wire ? WGPUCreatePipelineAsyncStatus_DeviceDestroyed
-                                   : WGPUCreatePipelineAsyncStatus_Success);
+            EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_Success);
+            EXPECT_NE(cPipeline, nullptr);
+
+            *static_cast<bool*>(userdata) = true;
         },
-        &wire);
+        &done);
     device = nullptr;
+
+    while (!done) {
+        WaitABit();
+    }
 }
 
 // Test that the device can be dropped inside a createPipelineAsync callback which will hit the
@@ -442,6 +445,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
             wgpu::ComputePipeline::Acquire(cPipeline);
             // Success because it hits the frontend cache immediately.
             EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_Success);
+            EXPECT_NE(cPipeline, nullptr);
 
             static_cast<Userdata*>(userdata)->device = nullptr;
             static_cast<Userdata*>(userdata)->done = true;
@@ -471,8 +475,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
         &desc,
         [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
            void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus_Success, status);
+            EXPECT_NE(cPipeline, nullptr);
             wgpu::ComputePipeline::Acquire(cPipeline);
-            EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_DeviceDestroyed);
         },
         nullptr);
 
@@ -482,7 +487,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
     device = nullptr;
 }
 
-// Test that the device can be dropped inside a createPipelineAsync callback which which will race
+// Test that the device can be dropped inside a createPipelineAsync callback which will race
 // with a compilation to add the same pipeline to the frontend cache
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
     wgpu::ComputePipelineDescriptor desc;
@@ -501,8 +506,9 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
         &desc,
         [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
            void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus_Success, status);
+            EXPECT_NE(cPipeline, nullptr);
             wgpu::ComputePipeline::Acquire(cPipeline);
-            EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_Success);
 
             static_cast<Userdata*>(userdata)->device = nullptr;
             static_cast<Userdata*>(userdata)->done = true;

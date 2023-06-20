@@ -360,7 +360,7 @@ TEST_F(WireCreatePipelineAsyncTest, DeviceDeletedBeforeCallback) {
     FlushClient();
 
     EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_DeviceDestroyed, nullptr, _, this))
+                Call(WGPUCreatePipelineAsyncStatus_Success, _, _, this))
         .Times(1);
 
     wgpuDeviceRelease(device);
