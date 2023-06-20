@@ -15,16 +15,65 @@
 #ifndef SRC_TINT_IR_CONTROL_INSTRUCTION_H_
 #define SRC_TINT_IR_CONTROL_INSTRUCTION_H_
 
+#include <utility>
+
 #include "src/tint/ir/branch.h"
+#include "src/tint/ir/operand_instruction.h"
+
+// Forward declarations
+namespace tint::ir {
+class Block;
+class Exit;
+}  // namespace tint::ir
 
 namespace tint::ir {
 
 /// Base class of instructions that perform branches to two or more blocks, owned by the
 /// ControlInstruction.
-class ControlInstruction : public utils::Castable<ControlInstruction, Branch> {
+class ControlInstruction : public utils::Castable<ControlInstruction, OperandInstruction<1, 1>> {
   public:
     /// Destructor
     ~ControlInstruction() override;
+
+    /// Calls @p cb for each block owned by this control instruction
+    /// @param cb the function to call once for each block
+    virtual void ForeachBlock(const std::function<void(ir::Block*)>& cb) = 0;
+
+    /// Sets the results of the control instruction
+    /// @param values the new result values
+    void SetResults(utils::VectorRef<InstructionResult*> values) {
+        for (auto* value : results_) {
+            value->SetSource(nullptr);
+        }
+        results_ = std::move(values);
+        for (auto* value : results_) {
+            value->SetSource(this);
+        }
+    }
+
+    /// Sets the results of the control instruction
+    /// @param values the new result values
+    template <typename... ARGS,
+              typename = std::enable_if_t<!utils::IsVectorLike<
+                  utils::traits::Decay<utils::traits::NthTypeOf<0, ARGS..., void>>>>>
+    void SetResults(ARGS&&... values) {
+        SetResults(utils::Vector{std::forward<ARGS>(values)...});
+    }
+
+    /// @return All the exit branches for the flow control instruction
+    const utils::Hashset<Exit*, 2>& Exits() const { return exits_; }
+
+    /// Adds the exit to the flow control instruction
+    /// @param exit the exit instruction
+    void AddExit(Exit* exit);
+
+    /// Removes the exit to the flow control instruction
+    /// @param exit the exit instruction
+    void RemoveExit(Exit* exit);
+
+  protected:
+    /// The flow control exits
+    utils::Hashset<Exit*, 2> exits_;
 };
 
 }  // namespace tint::ir

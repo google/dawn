@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_EXIT_SWITCH_H_
 #define SRC_TINT_IR_EXIT_SWITCH_H_
 
-#include "src/tint/ir/branch.h"
+#include "src/tint/ir/exit.h"
 #include "src/tint/utils/castable.h"
 
 // Forward declarations
@@ -26,7 +26,7 @@ class Switch;
 namespace tint::ir {
 
 /// A exit switch instruction.
-class ExitSwitch : public utils::Castable<ExitSwitch, Branch> {
+class ExitSwitch : public utils::Castable<ExitSwitch, Exit> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -37,11 +37,12 @@ class ExitSwitch : public utils::Castable<ExitSwitch, Branch> {
     explicit ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args = utils::Empty);
     ~ExitSwitch() override;
 
-    /// @returns the switch being exited
-    ir::Switch* Switch() { return switch_; }
+    /// Re-associates the exit with the given switch instruction
+    /// @param s the new switch to exit from
+    void SetSwitch(ir::Switch* s);
 
-  private:
-    ir::Switch* switch_ = nullptr;
+    /// @returns the switch being exited
+    ir::Switch* Switch();
 };
 
 }  // namespace tint::ir

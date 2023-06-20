@@ -19,6 +19,8 @@
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/switch.h"
+#include "src/tint/utils/reverse.h"
+#include "src/tint/utils/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::MergeReturn);
 
@@ -35,257 +37,261 @@ MergeReturn::~MergeReturn() = default;
 struct MergeReturn::State {
     /// The IR module.
     Module* ir = nullptr;
+
     /// The IR builder.
     Builder b{*ir};
+
     /// The type manager.
     type::Manager& ty{ir->Types()};
 
-    /// The "is returning" flag.
-    Var* return_flag = nullptr;
+    /// The "has not returned" flag.
+    Var* continue_execution = nullptr;
 
-    /// The return value.
+    /// The variable that holds the return value.
+    /// Null when the function does not return a value.
     Var* return_val = nullptr;
 
-    /// A set of merge blocks that have already been processed.
-    utils::Hashset<Block*, 8> processed_merges;
+    /// The final return at the end of the function block.
+    /// May be null when the function returns in all blocks of a control instruction.
+    Return* fn_return = nullptr;
 
-    /// The final merge block that will contain the unique return instruction.
-    Block* final_merge = nullptr;
-
-    /// Track whether the return flag was actually used to conditionalize a merge block.
-    bool uses_return_flag = false;
+    /// A set of control instructions that transitively hold a return instruction
+    utils::Hashset<ControlInstruction*, 8> holds_return_;
 
     /// Constructor
     /// @param mod the module
     explicit State(Module* mod) : ir(mod) {}
 
-    /// Get the nearest non-merge parent block of `block`.
-    /// @param block the block
-    /// @returns the enclosing non-merge block
-    Block* GetEnclosingNonMergeBlock(Block* block) {
-        while (block->Is<MultiInBlock>()) {
-            auto* parent = block->Parent();
-            if (auto* loop = parent->As<Loop>()) {
-                if (block != loop->Merge()) {
-                    break;
-                }
-            }
-            block = parent->Block();
-        }
-        return block;
-    }
-
     /// Process the function.
-    /// @param func the function to process
-    void Process(Function* func) {
-        // Find all of the return instructions in the function.
-        utils::Vector<Return*, 4> returns;
-        for (const auto& usage : func->Usages()) {
+    /// @param fn the function to process
+    void Process(Function* fn) {
+        // Find all of the nested return instructions in the function.
+        for (const auto& usage : fn->Usages()) {
             if (auto* ret = usage.instruction->As<Return>()) {
-                returns.Push(ret);
+                TransitivelyMarkAsReturning(ret->Block()->Parent());
             }
         }
 
-        // If there are no returns, or just a single return at the end of the function (potentially
-        // inside a nested merge block), then nothing needs to be done.
-        if (returns.Length() == 0 ||
-            (returns.Length() == 1 &&
-             GetEnclosingNonMergeBlock(returns[0]->Block()) == func->StartTarget())) {
+        if (holds_return_.IsEmpty()) {
+            // No control instructions hold a return statement, so nothing needs to be done.
             return;
         }
 
         // Create a boolean variable that can be used to check whether the function is returning.
-        return_flag = b.Var(ty.ptr<function, bool>());
-        return_flag->SetInitializer(b.Constant(false));
-        func->StartTarget()->Prepend(return_flag);
-        ir->SetName(return_flag, "return_flag");
+        continue_execution = b.Var(ty.ptr<function, bool>());
+        continue_execution->SetInitializer(b.Constant(true));
+        fn->StartTarget()->Prepend(continue_execution);
+        ir->SetName(continue_execution, "continue_execution");
 
         // Create a variable to hold the return value if needed.
-        if (!func->ReturnType()->Is<type::Void>()) {
-            return_val = b.Var(ty.ptr(function, func->ReturnType()));
-            func->StartTarget()->Prepend(return_val);
+        if (!fn->ReturnType()->Is<type::Void>()) {
+            return_val = b.Var(ty.ptr(function, fn->ReturnType()));
+            fn->StartTarget()->Prepend(return_val);
             ir->SetName(return_val, "return_value");
         }
 
-        // Process all of the return instructions in the function.
-        for (auto* ret : returns) {
-            ProcessReturn(ret);
+        // Look to see if the function ends with a return
+        fn_return = tint::As<Return>(fn->StartTarget()->Branch());
+
+        // Process the function's block.
+        // This will traverse into control instructions that hold returns, and apply the necessary
+        // changes to remove returns.
+        ProcessBlock(fn->StartTarget());
+
+        // If the function didn't end with a return, add one
+        if (!fn_return) {
+            AppendFinalReturn(fn);
         }
 
-        // Add the unique return instruction to the final merge block if needed.
-        if (final_merge) {
-            if (return_val) {
-                auto* retval = final_merge->Append(b.Load(return_val));
-                final_merge->Append(b.Return(func, retval));
-            } else {
-                final_merge->Append(b.Return(func));
-            }
-        }
-
-        // If the return flag was never actually read from, remove it and the corresponding stores.
-        if (!uses_return_flag) {
-            for (const auto& use : return_flag->Result()->Usages()) {
-                use.instruction->Remove();
-            }
-            return_flag->Remove();
-        }
+        // Cleanup - if 'continue_execution' was only ever assigned, remove it.
+        continue_execution->DestroyIfOnlyAssigned();
     }
 
-    /// Process a return instruction.
-    /// @param ret the return instruction
-    void ProcessReturn(Return* ret) {
-        // If this return is at the end of the function, with no value, then we can leave it alone.
-        if (GetEnclosingNonMergeBlock(ret->Block()) == ret->Func()->StartTarget() &&
-            ret->Block()->Length() == 1 && !ret->Value()) {
-            return;
-        }
-
-        // Set the "is returning" flag to `true`, and record the return value if present.
-        b.Store(return_flag, b.Constant(true))->InsertBefore(ret);
-        if (return_val) {
-            b.Store(return_val, ret->Value())->InsertBefore(ret);
-        }
-
-        // Exit from the containing block, which will recursively insert conditionals into the
-        // containing merge blocks as necessary, eventually inserting a unique return instruction.
-        ExitFromBlock(ret->Block());
-        ret->Remove();
-        if (ret->Value()) {
-            ret->Value()->RemoveUsage({ret, 0u});
-        }
-    }
-
-    /// Process a merge block by wrapping its existing instructions (if any) in a conditional such
-    /// that they will only execute if we are not returning.
-    /// @param merge the merge block to process
-    void ProcessMerge(MultiInBlock* merge) {
-        if (processed_merges.Contains(merge)) {
-            return;
-        }
-        processed_merges.Add(merge);
-
-        // If the merge block was empty, we just need to exit from it.
-        if (merge->IsEmpty()) {
-            ExitFromBlock(merge);
-            return;
-        }
-
-        if (merge->Length() == 1) {
-            // If the block only contains an exit_{if,loop,switch}, we can skip adding a conditional
-            // around its contents and just recurse into the parent merge block.
-            if (utils::IsAnyOf<ExitIf, ExitLoop, ExitSwitch>(merge->Branch())) {
-                tint::Switch(
-                    merge->Branch(),  //
-                    [&](If* ifelse) { ProcessMerge(ifelse->Merge()); },
-                    [&](Loop* loop) { ProcessMerge(loop->Merge()); },
-                    [&](Switch* swtch) { ProcessMerge(swtch->Merge()); });
+    /// Marks all the control instructions from ctrl to the function as holding a return.
+    /// @param ctrl the control instruction to mark as returning, along with all ancestor control
+    /// instructions.
+    void TransitivelyMarkAsReturning(ControlInstruction* ctrl) {
+        for (; ctrl; ctrl = ctrl->Block()->Parent()) {
+            if (!holds_return_.Add(ctrl)) {
                 return;
             }
+        }
+    }
 
-            // If the block only contains a return (with no value), we don't need to do anything.
-            if (auto* ret = utils::As<Return>(merge->Branch())) {
-                if (!ret->Value()) {
-                    return;
+    /// Walks the instructions of @p block, processing control instructions that are marked as
+    /// holding a return instruction. After processing a control instruction with a return, the
+    /// instructions following the control instruction will be wrapped in a 'if' that only executes
+    /// if a return was not reached.
+    /// @param block the block to process
+    void ProcessBlock(Block* block) {
+        If* inner_if = nullptr;
+        for (auto* inst = *block->begin(); inst;) {  // For each instruction in 'block'
+            // As we're modifying the block that we're iterating over, grab the pointer to the next
+            // instruction before (potentially) moving 'inst' to another block.
+            auto* next = inst->next;
+            TINT_DEFER(inst = next);
+
+            if (auto* ret = inst->As<Return>()) {
+                // Note: Return instructions are processed without being moved into the 'if' block.
+                ProcessReturn(ret, inner_if);
+                break;  // All instructions processed.
+            }
+
+            if (inst->Is<Unreachable>()) {
+                // Unreachable can become reachable once returns are turned into exits.
+                // As this is the terminator for the branch, simply stop processing the
+                // instructions. A appropriate terminator will be created for this block below.
+                inst->Remove();
+                break;
+            }
+
+            // If we've already passed a control instruction holding a return, then we need to move
+            // the instructions that follow the control instruction into the inner-most 'if'.
+            if (inner_if) {
+                inst->Remove();
+                inner_if->True()->Append(inst);
+            }
+
+            // Control instructions holding a return need to be processed, and then a new 'if' needs
+            // to be created to hold the instructions that are between the control instruction and
+            // the block's terminating instruction.
+            if (auto* ctrl = inst->As<ControlInstruction>()) {
+                if (holds_return_.Contains(ctrl)) {
+                    // Control instruction transitively holds a return.
+                    ctrl->ForeachBlock([&](Block* ctrl_block) { ProcessBlock(ctrl_block); });
+                    if (next && next != fn_return && !utils::IsAnyOf<Exit, Unreachable>(next)) {
+                        inner_if = CreateIfContinueExecution(ctrl);
+                    }
                 }
             }
         }
 
-        // Wrap the existing contents of the merge block in a conditional so that it will only
-        // execute if the "is returning" flag is `false`.
-        uses_return_flag = true;
-        auto* condition = b.Load(return_flag);
-        auto* ifelse = b.If(condition);
+        if (inner_if) {
+            // new_value_with_type returns a new RuntimeValue with the same type as 'v'
+            auto new_value_with_type = [&](Value* v) { return b.InstructionResult(v->Type()); };
 
-        // Move all pre-existing instructions to the new false block.
-        while (!merge->IsEmpty()) {
-            auto* inst = merge->Front();
-            inst->Remove();
-            ifelse->False()->Append(inst);
-        }
+            if (inner_if->True()->HasBranchTarget()) {
+                if (auto* exit_if = inner_if->True()->Branch()->As<ExitIf>()) {
+                    // Ensure the associated 'if' is updated.
+                    exit_if->SetIf(inner_if);
 
-        // Now the merge block will just contain the new conditional.
-        merge->Append(condition);
-        merge->Append(ifelse);
-
-        utils::Vector<Value*, 4> block_args_from_true;
-        utils::Vector<BlockParam*, 4> merge_block_params;
-        if (auto* exitif = ifelse->False()->Back()->As<ExitIf>()) {
-            // If the previous terminator was an exit_if, we need replace it with one that exits to
-            // the new merge block, and propagate the original basic block arguments if any.
-            // The exit_if from the `true` block will just pass undef values to the merge block.
-            utils::Vector<Value*, 4> block_args_from_false;
-            for (uint32_t i = 0; i < exitif->Args().Length(); i++) {
-                block_args_from_true.Push(nullptr);
-                block_args_from_false.Push(exitif->Args()[i]);
-                merge_block_params.Push(b.BlockParam(exitif->If()->Merge()->Params()[i]->Type()));
+                    if (!exit_if->Args().IsEmpty()) {
+                        // Inner-most 'if' has a 'exit_if' that returns values.
+                        // These need propagating through the if stack.
+                        inner_if->SetResults(
+                            utils::Transform<8>(exit_if->Args(), new_value_with_type));
+                    }
+                }
+            } else {
+                // Inner-most if doesn't have a terminating instruction. Add an 'exit_if'.
+                inner_if->True()->Append(b.ExitIf(inner_if));
             }
-            exitif->ReplaceWith(b.ExitIf(ifelse, block_args_from_false));
-        } else {
-            // If this merge block was the final merge block of the function, it won't have a branch
-            // yet. Add an `exit_if` to the new merge block, and record the new merge block as the
-            // new final merge block.
-            if (merge == final_merge) {
-                ifelse->False()->Append(b.ExitIf(ifelse));
-                final_merge = ifelse->Merge();
+
+            // Loop over the 'if' instructions, starting with the inner-most, and add any missing
+            // terminating instructions to the blocks holding the 'if'.
+            for (auto* i = inner_if; i; i = tint::As<If>(i->Block()->Parent())) {
+                if (!i->Block()->HasBranchTarget()) {
+                    // Append the exit instruction to the block holding the 'if'.
+                    utils::Vector<InstructionResult*, 8> exit_args = i->Results();
+                    if (!i->HasResults()) {
+                        i->SetResults(utils::Transform(exit_args, new_value_with_type));
+                    }
+                    auto* exit = b.Exit(i->Block()->Parent(), std::move(exit_args));
+                    i->Block()->Append(exit);
+                }
             }
         }
-
-        // Exit from the `true` block to the new merge block.
-        ifelse->True()->Append(b.ExitIf(ifelse, block_args_from_true));
-
-        // Exit from the new merge block, which will recursively process the parent merge.
-        ifelse->Merge()->SetParams(merge_block_params);
-        ExitFromBlock(ifelse->Merge(), merge_block_params);
-
-        // We never need to process the merge that we've just added, as it only exits.
-        processed_merges.Add(ifelse->Merge());
     }
 
-    /// Add an exit_{if,loop,switch} instruction to `block`, and process the target merge block.
-    /// @param block the block to exit from
-    /// @param args the optional basic block arguments
-    void ExitFromBlock(Block* block, utils::VectorRef<Value*> args = utils::Empty) {
-        // Helper to get the block arguments for an instruction that is exiting to `merge`.
-        auto block_args = [&](auto* merge) -> utils::Vector<Value*, 4> {
-            // If arguments were explicitly provided, use those.
-            if (!args.IsEmpty()) {
-                return args;
-            }
+    /// Transforms a return instruction.
+    /// @param ret the return instruction
+    /// @param cond the possibly null 'if(continue_execution)' instruction for the current block.
+    /// @note unlike other instructions, return instructions are not automatically moved into the
+    /// 'if(continue_execution)' block.
+    void ProcessReturn(Return* ret, If* cond) {
+        if (ret == fn_return) {
+            // 'ret' is the final instruction for the function.
+            ProcessFunctionBlockReturn(ret, cond);
+        } else {
+            // Return is in a nested block
+            ProcessNestedReturn(ret, cond);
+        }
+    }
 
-            // Otherwise, we will pass a list of `undef` values.
-            utils::Vector<Value*, 4> undef_args;
-            undef_args.Resize(merge->Params().Length(), nullptr);
-            return undef_args;
-        };
+    /// Transforms the return instruction that is the last instruction in the function's block.
+    /// @param ret the return instruction
+    /// @param cond the possibly null 'if(continue_execution)' instruction for the current block.
+    void ProcessFunctionBlockReturn(Return* ret, If* cond) {
+        if (!return_val) {
+            return;  // No need to transform non-value, end-of-function returns
+        }
 
-        auto* parent_control_flow = GetEnclosingNonMergeBlock(block)->Parent();
-        tint::Switch(
-            parent_control_flow,
-            [&](If* ifelse) {
-                ProcessMerge(ifelse->Merge());
-                block->Append(b.ExitIf(ifelse, block_args(ifelse->Merge())));
-            },
-            [&](Loop* loop) {
-                ProcessMerge(loop->Merge());
-                block->Append(b.ExitLoop(loop, block_args(loop->Merge())));
-            },
-            [&](Switch* swtch) {
-                ProcessMerge(swtch->Merge());
-                block->Append(b.ExitSwitch(swtch, block_args(swtch->Merge())));
-            },
-            [&](Default) {
-                // This is the top-level merge block, so just record it so that we can add the
-                // unique return instruction to it later.
-                final_merge = block;
-            });
+        // Assign the return's value to 'return_val' inside a 'if(continue_execution)'
+        if (!cond) {
+            cond = CreateIfContinueExecution(ret->prev);
+        }
+        cond->True()->Append(b.Store(return_val, ret->Value()));
+        cond->True()->Append(b.ExitIf(cond));
+
+        // Change the function return to unconditionally load 'return_val' and return it
+        auto* load = b.Load(return_val);
+        load->InsertBefore(ret);
+        ret->SetValue(load->Result());
+    }
+
+    /// Transforms the return instruction that is found in a control instruction.
+    /// @param ret the return instruction
+    /// @param cond the possibly null 'if(continue_execution)' instruction for the current block.
+    void ProcessNestedReturn(Return* ret, If* cond) {
+        // If we have a 'if(continue_execution)' block, then insert instructions into that,
+        // otherwise insert into the block holding the return.
+        auto* block = cond ? cond->True() : ret->Block();
+
+        // Set the 'continue_execution' flag to false, and store the return value into 'return_val',
+        // if present.
+        block->Append(b.Store(continue_execution, false));
+        if (return_val) {
+            block->Append(b.Store(return_val, ret->Args()[0]));
+        }
+
+        // If the outermost control instruction is expecting exit values, then return them as
+        // 'undef' values.
+        auto* ctrl = block->Parent();
+        utils::Vector<Value*, 8> exit_args;
+        exit_args.Resize(ctrl->Results().Length());
+
+        // Replace the return instruction with an exit instruction.
+        block->Append(b.Exit(ctrl, std::move(exit_args)));
+        ret->Destroy();
+    }
+
+    /// Builds instructions to create a 'if(continue_execution)' conditional.
+    /// @param after new instructions will be inserted after this instruction
+    /// @return the 'If' control instruction
+    If* CreateIfContinueExecution(Instruction* after) {
+        auto* load = b.Load(continue_execution);
+        auto* cond = b.If(load);
+        load->InsertAfter(after);
+        cond->InsertAfter(load);
+        return cond;
+    }
+
+    /// Adds a final return instruction to the end of @p fn
+    /// @param fn the function
+    void AppendFinalReturn(Function* fn) {
+        auto fb = b.With(fn->StartTarget());
+        if (return_val) {
+            fb.Return(fn, fb.Load(return_val));
+        } else {
+            fb.Return(fn);
+        }
     }
 };
 
 void MergeReturn::Run(Module* ir, const DataMap&, DataMap&) const {
     // Process each function.
-    for (auto* func : ir->functions) {
-        State state(ir);
-        state.Process(func);
+    for (auto* fn : ir->functions) {
+        State{ir}.Process(fn);
     }
 }
 

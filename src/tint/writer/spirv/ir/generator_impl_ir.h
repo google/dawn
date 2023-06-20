@@ -36,6 +36,10 @@ class BlockParam;
 class Branch;
 class BuiltinCall;
 class Construct;
+class ControlInstruction;
+class ExitIf;
+class ExitLoop;
+class ExitSwitch;
 class Function;
 class If;
 class Load;
@@ -184,6 +188,10 @@ class GeneratorImplIr {
     /// @param b the branch instruction to emit
     void EmitBranch(ir::Branch* b);
 
+    /// Emit the OpPhis for the given flow control instruction.
+    /// @param inst the flow control instruction
+    void EmitExitPhis(ir::ControlInstruction* inst);
+
   private:
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
@@ -243,6 +251,15 @@ class GeneratorImplIr {
 
     /// The current function that is being emitted.
     Function current_function_;
+
+    /// The merge block for the current if statement
+    uint32_t if_merge_label_ = 0;
+
+    /// The merge block for the current loop statement
+    uint32_t loop_merge_label_ = 0;
+
+    /// The merge block for the current switch statement
+    uint32_t switch_merge_label_ = 0;
 
     bool zero_init_workgroup_memory_ = false;
 };

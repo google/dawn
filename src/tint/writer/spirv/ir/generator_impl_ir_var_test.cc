@@ -108,9 +108,9 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_DeclInsideBlock) {
     tb.ExitIf(i);
 
     i->False()->Append(b.Return(func));
-    i->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(i);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

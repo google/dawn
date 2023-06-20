@@ -20,4 +20,12 @@ namespace tint::ir {
 
 ControlInstruction::~ControlInstruction() = default;
 
+void ControlInstruction::AddExit(Exit* exit) {
+    exits_.Add(exit);
+}
+
+void ControlInstruction::RemoveExit(Exit* exit) {
+    exits_.Remove(exit);
+}
+
 }  // namespace tint::ir

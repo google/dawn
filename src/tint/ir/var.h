@@ -49,6 +49,9 @@ class Var : public utils::Castable<Var, OperandInstruction<1, 1>> {
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
     std::optional<struct BindingPoint> BindingPoint() { return binding_point_; }
 
+    /// Destroys this instruction along with any assignment instructions, if the var is never read.
+    void DestroyIfOnlyAssigned();
+
   private:
     std::optional<struct BindingPoint> binding_point_;
 };

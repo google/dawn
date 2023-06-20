@@ -12,31 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/exit_loop.h"
+#include "src/tint/ir/exit.h"
 
-#include <utility>
+#include "src/tint/ir/control_instruction.h"
 
-#include "src/tint/ir/block.h"
-#include "src/tint/ir/loop.h"
-#include "src/tint/ir/multi_in_block.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitLoop);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::Exit);
 
 namespace tint::ir {
 
-ExitLoop::ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */) {
-    SetLoop(loop);
-    AddOperands(ExitLoop::kArgsOperandOffset, std::move(args));
+Exit::~Exit() = default;
+
+void Exit::Destroy() {
+    SetControlInstruction(nullptr);
+    Base::Destroy();
 }
 
-ExitLoop::~ExitLoop() = default;
-
-void ExitLoop::SetLoop(ir::Loop* l) {
-    SetControlInstruction(l);
-}
-
-ir::Loop* ExitLoop::Loop() {
-    return static_cast<ir::Loop*>(ControlInstruction());
+void Exit::SetControlInstruction(ir::ControlInstruction* ctrl_inst) {
+    if (ctrl_inst_ == ctrl_inst) {
+        return;
+    }
+    if (ctrl_inst_) {
+        ctrl_inst_->RemoveExit(this);
+    }
+    ctrl_inst_ = ctrl_inst;
+    if (ctrl_inst_) {
+        ctrl_inst_->AddExit(this);
+    }
 }
 
 }  // namespace tint::ir

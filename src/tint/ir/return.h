@@ -53,6 +53,10 @@ class Return : public utils::Castable<Return, Branch> {
         return operands_.Length() > kArgOperandOffset ? operands_[kArgOperandOffset] : nullptr;
     }
 
+    /// Sets the return value
+    /// @param val the new return value
+    void SetValue(ir::Value* val) { SetOperand(kArgOperandOffset, val); }
+
     /// @returns the branch arguments
     utils::Slice<ir::Value* const> Args() override {
         return operands_.Slice().Offset(kArgOperandOffset);

@@ -32,7 +32,6 @@ BreakIf::BreakIf(Value* condition, ir::Loop* loop, utils::VectorRef<Value*> args
 
     if (loop_) {
         loop_->Body()->AddInboundSiblingBranch(this);
-        loop_->Merge()->AddInboundSiblingBranch(this);
     }
 }
 

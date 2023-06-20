@@ -78,6 +78,14 @@ class Instruction : public utils::Castable<Instruction> {
     /// Removes this instruction from the owning block
     void Remove();
 
+    /// @param idx the index of the result
+    /// @returns the result with index @p idx, or `nullptr` if there are no results or the index is
+    /// out of bounds.
+    Value* Result(size_t idx) {
+        auto res = Results();
+        return idx < res.Length() ? res[idx] : nullptr;
+    }
+
     /// Pointer to the next instruction in the list
     Instruction* next = nullptr;
     /// Pointer to the previous instruction in the list

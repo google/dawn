@@ -27,9 +27,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Basic) {
     auto* def_case = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
 
-    swtch->Merge()->Append(b.Return(func));
-
     func->StartTarget()->Append(swtch);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -65,9 +64,8 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleCases) {
     auto* def_case = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
 
-    swtch->Merge()->Append(b.Return(func));
-
     func->StartTarget()->Append(swtch);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -110,9 +108,8 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleSelectorsPerCase) {
                                                  ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
 
-    swtch->Merge()->Append(b.Return(func));
-
     func->StartTarget()->Append(swtch);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -153,6 +150,7 @@ TEST_F(SpvGeneratorImplTest, Switch_AllCasesReturn) {
     def_case->Append(b.Return(func));
 
     func->StartTarget()->Append(swtch);
+    func->StartTarget()->Append(b.Unreachable());
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -186,17 +184,16 @@ TEST_F(SpvGeneratorImplTest, Switch_ConditionalBreak) {
     auto* cond_break = b.If(true);
     cond_break->True()->Append(b.ExitSwitch(swtch));
     cond_break->False()->Append(b.ExitIf(cond_break));
-    cond_break->Merge()->Append(b.Return(func));
 
     auto* case_a = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
     case_a->Append(cond_break);
+    case_a->Append(b.Return(func));
 
     auto* def_case = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
 
-    swtch->Merge()->Append(b.Return(func));
-
     func->StartTarget()->Append(swtch);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -228,11 +225,10 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
-    auto* func = b.Function("foo", ty.void_());
-
-    auto* merge_param = b.BlockParam(b.ir.Types().i32());
+    auto* func = b.Function("foo", ty.i32());
 
     auto* s = b.Switch(42_i);
+    s->SetResults(b.InstructionResult(ty.i32()));
     auto* case_a = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                            ir::Switch::CaseSelector{nullptr}});
     case_a->Append(b.ExitSwitch(s, 10_i));
@@ -240,40 +236,38 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
     case_b->Append(b.ExitSwitch(s, 20_i));
 
-    s->Merge()->SetParams({merge_param});
-    s->Merge()->Append(b.Return(func));
-
     func->StartTarget()->Append(s);
+    func->StartTarget()->Append(b.Return(func, s));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
+%2 = OpTypeInt 32 1
 %3 = OpTypeFunction %2
-%7 = OpTypeInt 32 1
-%6 = OpConstant %7 42
-%11 = OpConstant %7 10
-%12 = OpConstant %7 20
+%6 = OpConstant %2 42
+%10 = OpConstant %2 10
+%11 = OpConstant %2 20
 %1 = OpFunction %2 None %3
 %4 = OpLabel
-OpSelectionMerge %9 None
-OpSwitch %6 %5 1 %5 2 %8
+OpSelectionMerge %8 None
+OpSwitch %6 %5 1 %5 2 %7
 %5 = OpLabel
-OpBranch %9
+OpBranch %8
+%7 = OpLabel
+OpBranch %8
 %8 = OpLabel
-OpBranch %9
-%9 = OpLabel
-%10 = OpPhi %7 %11 %5 %12 %8
-OpReturn
+%9 = OpPhi %2 %10 %5 %11 %7
+OpReturnValue %9
 OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("foo", ty.i32());
 
     auto* s = b.Switch(42_i);
+    s->SetResults(b.InstructionResult(ty.i32()));
     auto* case_a = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                            ir::Switch::CaseSelector{nullptr}});
     case_a->Append(b.Return(func, 10_i));
@@ -281,43 +275,38 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
     case_b->Append(b.ExitSwitch(s, 20_i));
 
-    s->Merge()->SetParams({b.BlockParam(b.ir.Types().i32())});
-    s->Merge()->Append(b.Return(func));
-
     func->StartTarget()->Append(s);
+    func->StartTarget()->Append(b.Return(func, s));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
+%2 = OpTypeInt 32 1
 %3 = OpTypeFunction %2
-%7 = OpTypeInt 32 1
-%6 = OpConstant %7 42
-%10 = OpConstant %7 10
-%12 = OpConstant %7 20
+%6 = OpConstant %2 42
+%9 = OpConstant %2 10
+%11 = OpConstant %2 20
 %1 = OpFunction %2 None %3
 %4 = OpLabel
-OpSelectionMerge %9 None
-OpSwitch %6 %5 1 %5 2 %8
+OpSelectionMerge %8 None
+OpSwitch %6 %5 1 %5 2 %7
 %5 = OpLabel
-OpReturnValue %10
+OpReturnValue %9
+%7 = OpLabel
+OpBranch %8
 %8 = OpLabel
-OpBranch %9
-%9 = OpLabel
-%11 = OpPhi %7 %12 %8
-OpReturn
+%10 = OpPhi %2 %11 %7
+OpReturnValue %10
 OpFunctionEnd
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
-    auto* func = b.Function("foo", ty.void_());
-
-    auto* merge_param_0 = b.BlockParam(b.ir.Types().i32());
-    auto* merge_param_1 = b.BlockParam(b.ir.Types().bool_());
+TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue_0) {
+    auto* func = b.Function("foo", ty.i32());
 
     auto* s = b.Switch(42_i);
+    s->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
     auto* case_a = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
                                            ir::Switch::CaseSelector{nullptr}});
     case_a->Append(b.ExitSwitch(s, 10_i, true));
@@ -325,24 +314,62 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue) {
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
     case_b->Append(b.ExitSwitch(s, 20_i, false));
 
-    s->Merge()->SetParams({merge_param_0, merge_param_1});
-    s->Merge()->Append(b.Return(func, merge_param_0));
-
     func->StartTarget()->Append(s);
+    func->StartTarget()->Append(b.Return(func, s->Result(0)));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
+%2 = OpTypeInt 32 1
+%3 = OpTypeFunction %2
+%6 = OpConstant %2 42
+%10 = OpConstant %2 10
+%11 = OpConstant %2 20
+%12 = OpTypeBool
+%14 = OpConstantTrue %12
+%15 = OpConstantFalse %12
+%1 = OpFunction %2 None %3
+%4 = OpLabel
+OpSelectionMerge %8 None
+OpSwitch %6 %5 1 %5 2 %7
+%5 = OpLabel
+OpBranch %8
+%7 = OpLabel
+OpBranch %8
+%8 = OpLabel
+%9 = OpPhi %2 %10 %5 %11 %7
+%13 = OpPhi %12 %14 %5 %15 %7
+OpReturnValue %9
+OpFunctionEnd
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue_1) {
+    auto* func = b.Function("foo", ty.bool_());
+
+    auto* s = b.Switch(b.Constant(42_i));
+    s->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
+    auto* case_a = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
+                                           ir::Switch::CaseSelector{nullptr}});
+    case_a->Append(b.ExitSwitch(s, 10_i, true));
+
+    auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+    case_b->Append(b.ExitSwitch(s, 20_i, false));
+
+    func->StartTarget()->Append(s);
+    func->StartTarget()->Append(b.Return(func, s->Result(1)));
+
+    generator_.EmitFunction(func);
+    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
+%2 = OpTypeBool
 %3 = OpTypeFunction %2
 %7 = OpTypeInt 32 1
 %6 = OpConstant %7 42
 %11 = OpConstant %7 10
 %12 = OpConstant %7 20
-%13 = OpTypeBool
-%15 = OpConstantTrue %13
-%16 = OpConstantFalse %13
+%14 = OpConstantTrue %2
+%15 = OpConstantFalse %2
 %1 = OpFunction %2 None %3
 %4 = OpLabel
 OpSelectionMerge %9 None
@@ -353,8 +380,8 @@ OpBranch %9
 OpBranch %9
 %9 = OpLabel
 %10 = OpPhi %7 %11 %5 %12 %8
-%14 = OpPhi %13 %15 %5 %16 %8
-OpReturnValue %10
+%13 = OpPhi %2 %14 %5 %15 %8
+OpReturnValue %13
 OpFunctionEnd
 )");
 }

@@ -762,6 +762,8 @@ if(${TINT_BUILD_IR})
     ir/exit_loop.h
     ir/exit_switch.cc
     ir/exit_switch.h
+    ir/exit.cc
+    ir/exit.h
     ir/from_program.cc
     ir/from_program.h
     ir/function.cc

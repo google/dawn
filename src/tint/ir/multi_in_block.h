@@ -27,10 +27,8 @@ class BlockParam;
 namespace tint::ir {
 
 /// A block that can be the target of multiple branches.
-/// MultiInBlocks maintain a list of inbound branches from branch instructions excluding ir::If,
-/// ir::Switch and ir::Loop which implicitly branch to the internal block.
-/// MultiInBlocks hold a number of BlockParam parameters, used to pass values from the branch source
-/// to this target.
+/// MultiInBlocks maintain a list of inbound branches and a number of BlockParam parameters, used to
+/// pass values from the branch source to this target.
 class MultiInBlock : public utils::Castable<MultiInBlock, Block> {
   public:
     /// Constructor

@@ -26,9 +26,9 @@ TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
 
     loop->Body()->Append(b.Continue(loop));
     loop->Continuing()->Append(b.BreakIf(true, loop));
-    loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -61,9 +61,9 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
     auto* loop = b.Loop();
 
     loop->Body()->Append(b.ExitLoop(loop));
-    loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -95,13 +95,13 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
     auto* cond_break = b.If(true);
     cond_break->True()->Append(b.ExitLoop(loop));
     cond_break->False()->Append(b.ExitIf(cond_break));
-    cond_break->Merge()->Append(b.Continue(loop));
 
     loop->Body()->Append(cond_break);
+    loop->Body()->Append(b.Continue(loop));
     loop->Continuing()->Append(b.NextIteration(loop));
-    loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -140,13 +140,13 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
     auto* cond_break = b.If(true);
     cond_break->True()->Append(b.Continue(loop));
     cond_break->False()->Append(b.ExitIf(cond_break));
-    cond_break->Merge()->Append(b.ExitLoop(loop));
 
     loop->Body()->Append(cond_break);
+    loop->Body()->Append(b.ExitLoop(loop));
     loop->Continuing()->Append(b.NextIteration(loop));
-    loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -186,6 +186,7 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
     loop->Body()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+    func->StartTarget()->Append(b.Unreachable());
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -215,10 +216,12 @@ TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
     auto* loop = b.Loop();
 
     auto* result = loop->Body()->Append(b.Equal(ty.i32(), 1_i, 2_i));
+    loop->Body()->Append(b.Continue(loop, result));
+
     loop->Continuing()->Append(b.BreakIf(result, loop));
-    loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(loop);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -237,6 +240,7 @@ OpLoopMerge %8 %7 None
 OpBranch %6
 %6 = OpLabel
 %9 = OpIEqual %10 %11 %12
+OpBranch %7
 %7 = OpLabel
 OpBranchConditional %9 %8 %5
 %8 = OpLabel
@@ -253,13 +257,13 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
 
     inner_loop->Body()->Append(b.ExitLoop(inner_loop));
     inner_loop->Continuing()->Append(b.NextIteration(inner_loop));
-    inner_loop->Merge()->Append(b.Continue(outer_loop));
 
     outer_loop->Body()->Append(inner_loop);
+    outer_loop->Body()->Append(b.Continue(outer_loop));
     outer_loop->Continuing()->Append(b.BreakIf(true, outer_loop));
-    outer_loop->Merge()->Append(b.Return(func));
 
     func->StartTarget()->Append(outer_loop);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -302,13 +306,13 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
 
     inner_loop->Body()->Append(b.Continue(inner_loop));
     inner_loop->Continuing()->Append(b.BreakIf(true, inner_loop));
-    inner_loop->Merge()->Append(b.BreakIf(true, outer_loop));
 
     outer_loop->Body()->Append(b.Continue(outer_loop));
     outer_loop->Continuing()->Append(inner_loop);
-    outer_loop->Merge()->Append(b.Return(func));
+    outer_loop->Continuing()->Append(b.BreakIf(true, outer_loop));
 
     func->StartTarget()->Append(outer_loop);
+    func->StartTarget()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -346,21 +350,31 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* l = b.Loop();
-    l->Initializer()->Append(b.NextIteration(l, 1_i));
-    func->StartTarget()->Append(l);
+    auto fb = b.With(func->StartTarget());
+    auto* l = fb.Loop();
 
-    auto* loop_param = b.BlockParam(b.ir.Types().i32());
+    {
+        auto ib = b.With(l->Initializer());
+        ib.NextIteration(l, 1_i, false);
+    }
+
+    auto* loop_param = b.BlockParam(ty.i32());
     l->Body()->SetParams({loop_param});
+    {
+        auto lb = b.With(l->Body());
+        auto* inc = lb.Add(ty.i32(), loop_param, 1_i);
+        lb.Continue(l, inc);
+    }
 
-    auto* inc = l->Body()->Append(b.Add(b.ir.Types().i32(), loop_param, 1_i));
-    l->Body()->Append(b.Continue(l, inc));
-
-    auto* cont_param = b.BlockParam(b.ir.Types().i32());
+    auto* cont_param = b.BlockParam(ty.i32());
     l->Continuing()->SetParams({cont_param});
+    {
+        auto cb = b.With(l->Continuing());
+        auto* cmp = cb.GreaterThan(ty.bool_(), cont_param, 5_i);
+        cb.BreakIf(cmp, l, cont_param);
+    }
 
-    auto* cmp = l->Continuing()->Append(b.GreaterThan(b.ir.Types().bool_(), cont_param, 5_i));
-    l->Continuing()->Append(b.BreakIf(cmp, l, cont_param));
+    fb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -389,7 +403,7 @@ OpBranch %8
 %15 = OpSGreaterThan %16 %13 %17
 OpBranchConditional %15 %9 %6
 %9 = OpLabel
-OpUnreachable
+OpReturn
 OpFunctionEnd
 )");
 }
@@ -397,26 +411,34 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* l = b.Loop();
-    l->Initializer()->Append(b.NextIteration(l, 1_i, false));
-    func->StartTarget()->Append(l);
+    auto fb = b.With(func->StartTarget());
+    auto* l = fb.Loop();
 
-    auto* loop_param_a = b.BlockParam(b.ir.Types().i32());
-    auto* loop_param_b = b.BlockParam(b.ir.Types().bool_());
+    {
+        auto ib = b.With(l->Initializer());
+        ib.NextIteration(l, 1_i, false);
+    }
+
+    auto* loop_param_a = b.BlockParam(ty.i32());
+    auto* loop_param_b = b.BlockParam(ty.bool_());
     l->Body()->SetParams({loop_param_a, loop_param_b});
+    {
+        auto lb = b.With(l->Body());
+        auto* inc = lb.Add(ty.i32(), loop_param_a, 1_i);
+        lb.Continue(l, inc, loop_param_b);
+    }
 
-    auto lb = b.With(l->Body());
-    auto* inc = lb.Add(b.ir.Types().i32(), loop_param_a, 1_i);
-    lb.Continue(l, inc, loop_param_b);
-
-    auto* cont_param_a = b.BlockParam(b.ir.Types().i32());
-    auto* cont_param_b = b.BlockParam(b.ir.Types().bool_());
+    auto* cont_param_a = b.BlockParam(ty.i32());
+    auto* cont_param_b = b.BlockParam(ty.bool_());
     l->Continuing()->SetParams({cont_param_a, cont_param_b});
+    {
+        auto cb = b.With(l->Continuing());
+        auto* cmp = cb.GreaterThan(ty.bool_(), cont_param_a, 5_i);
+        auto* not_b = cb.Not(ty.bool_(), cont_param_b);
+        cb.BreakIf(cmp, l, cont_param_a, not_b);
+    }
 
-    auto cb = b.With(l->Continuing());
-    auto* cmp = cb.GreaterThan(b.ir.Types().bool_(), cont_param_a, 5_i);
-    auto* not_b = cb.Not(b.ir.Types().bool_(), cont_param_b);
-    cb.BreakIf(cmp, l, cont_param_a, not_b);
+    fb.Return(func);
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -449,7 +471,7 @@ OpBranch %8
 %17 = OpLogicalEqual %14 %19 %16
 OpBranchConditional %20 %9 %6
 %9 = OpLabel
-OpUnreachable
+OpReturn
 OpFunctionEnd
 )");
 }

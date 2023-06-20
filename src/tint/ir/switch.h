@@ -35,11 +35,8 @@ namespace tint::ir {
 ///        │ Case A │     │ Case B │     │ Case C │
 ///        └────────┘     └────────┘     └────────┘
 ///  ExitSwitch ┃   ExitSwitch ┃   ExitSwitch ┃
-///             ┃              ▼              ┃
-///             ┃       ┌────────────┐        ┃
-///     ╌╌╌╌╌╌╌╌┺━━━━━━▶│ Merge      │◀━━━━━━━┹╌╌╌╌╌╌╌╌
-///                     │ (optional) │
-///                     └────────────┘
+///             ┃              ┃              ┃
+///     ╌╌╌╌╌╌╌╌┺━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━┹╌╌╌╌╌╌╌╌
 ///                            ┃
 ///                            ▼
 ///                           out
@@ -71,24 +68,19 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
 
     /// Constructor
     /// @param cond the condition
-    /// @param m the merge block
-    explicit Switch(Value* cond, ir::MultiInBlock* m);
+    explicit Switch(Value* cond);
     ~Switch() override;
 
-    /// @returns the switch merge branch
-    ir::MultiInBlock* Merge() { return merge_; }
+    /// @copydoc ControlInstruction::ForeachBlock
+    void ForeachBlock(const std::function<void(ir::Block*)>& cb) override;
 
     /// @returns the switch cases
     utils::Vector<Case, 4>& Cases() { return cases_; }
-
-    /// @returns the branch arguments
-    utils::Slice<Value* const> Args() override { return {}; }
 
     /// @returns the condition
     Value* Condition() { return operands_[kConditionOperandOffset]; }
 
   private:
-    ir::MultiInBlock* merge_ = nullptr;
     utils::Vector<Case, 4> cases_;
 };
 

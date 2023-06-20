@@ -48,10 +48,6 @@ class Disassembler {
     /// @returns the string representation of the module
     std::string Disassemble();
 
-    /// Writes the block instructions to the stream
-    /// @param b the block containing the instructions
-    void EmitBlockInstructions(Block* b);
-
     /// @returns the string representation
     std::string AsString() const { return out_.str(); }
 
@@ -113,8 +109,7 @@ class Disassembler {
     size_t IdOf(Block* blk);
     std::string_view IdOf(Value* node);
 
-    void Walk(Block* blk);
-    void WalkInternal(Block* blk);
+    void EmitBlock(Block* blk);
     void EmitFunction(Function* func);
     void EmitParamAttributes(FunctionParam* p);
     void EmitReturnAttributes(Function* func);
@@ -142,7 +137,6 @@ class Disassembler {
 
     Module& mod_;
     utils::StringStream out_;
-    utils::Hashset<Block*, 32> visited_;
     utils::Hashmap<Block*, size_t, 32> block_ids_;
     utils::Hashmap<Value*, std::string, 32> value_ids_;
     uint32_t indent_size_ = 0;

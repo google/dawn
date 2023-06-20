@@ -14,6 +14,7 @@
 
 #include "src/tint/ir/var.h"
 #include "src/tint/debug.h"
+#include "src/tint/ir/store.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Var);
 
@@ -33,6 +34,17 @@ Var::~Var() = default;
 
 void Var::SetInitializer(Value* initializer) {
     SetOperand(Var::kInitializerOperandOffset, initializer);
+}
+
+void Var::DestroyIfOnlyAssigned() {
+    auto* result = Result();
+    if (result->Usages().All([](const Usage& u) { return u.instruction->Is<ir::Store>(); })) {
+        while (!result->Usages().IsEmpty()) {
+            auto& usage = *result->Usages().begin();
+            usage.instruction->Destroy();
+        }
+        Destroy();
+    }
 }
 
 }  // namespace tint::ir

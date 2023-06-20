@@ -54,8 +54,7 @@ Function* Builder::Function(std::string_view name,
 }
 
 ir::Loop* Builder::Loop() {
-    return Append(
-        ir.instructions.Create<ir::Loop>(Block(), MultiInBlock(), MultiInBlock(), MultiInBlock()));
+    return Append(ir.instructions.Create<ir::Loop>(Block(), MultiInBlock(), MultiInBlock()));
 }
 
 Block* Builder::Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selectors) {

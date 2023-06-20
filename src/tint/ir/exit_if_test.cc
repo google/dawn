@@ -15,7 +15,6 @@
 #include "src/tint/ir/exit_if.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/ir/ir_test_helper.h"
 
 namespace tint::ir {
@@ -32,6 +31,7 @@ TEST_F(IR_ExitIfTest, Usage) {
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
+    EXPECT_EQ(if_->Result(), nullptr);
 }
 
 TEST_F(IR_ExitIfTest, Result) {
@@ -44,14 +44,13 @@ TEST_F(IR_ExitIfTest, Result) {
     EXPECT_FALSE(e->HasMultiResults());
 }
 
-TEST_F(IR_ExitIfTest, Fail_NullIf) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            b.ExitIf(nullptr);
-        },
-        "");
+TEST_F(IR_ExitIfTest, Destroy) {
+    auto* if_ = b.If(true);
+    auto* exit = b.ExitIf(if_);
+    EXPECT_THAT(if_->Exits(), testing::UnorderedElementsAre(exit));
+    exit->Destroy();
+    EXPECT_TRUE(if_->Exits().IsEmpty());
+    EXPECT_FALSE(exit->Alive());
 }
 
 }  // namespace

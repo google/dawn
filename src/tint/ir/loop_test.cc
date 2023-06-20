@@ -27,7 +27,6 @@ TEST_F(IR_LoopTest, Parent) {
     EXPECT_EQ(loop->Initializer()->Parent(), loop);
     EXPECT_EQ(loop->Body()->Parent(), loop);
     EXPECT_EQ(loop->Continuing()->Parent(), loop);
-    EXPECT_EQ(loop->Merge()->Parent(), loop);
 }
 
 TEST_F(IR_LoopTest, Result) {
@@ -41,7 +40,7 @@ TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(nullptr, b.MultiInBlock(), b.MultiInBlock(), b.MultiInBlock());
+            Loop loop(nullptr, b.MultiInBlock(), b.MultiInBlock());
         },
         "");
 }
@@ -51,7 +50,7 @@ TEST_F(IR_LoopTest, Fail_NullBodyBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(b.Block(), nullptr, b.MultiInBlock(), b.MultiInBlock());
+            Loop loop(b.Block(), nullptr, b.MultiInBlock());
         },
         "");
 }
@@ -61,17 +60,7 @@ TEST_F(IR_LoopTest, Fail_NullContinuingBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(b.Block(), b.MultiInBlock(), nullptr, b.MultiInBlock());
-        },
-        "");
-}
-
-TEST_F(IR_LoopTest, Fail_NullMultiInBlock) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            Loop loop(b.Block(), b.MultiInBlock(), b.MultiInBlock(), nullptr);
+            Loop loop(b.Block(), b.MultiInBlock(), nullptr);
         },
         "");
 }

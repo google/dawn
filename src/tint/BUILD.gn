@@ -1256,6 +1256,8 @@ if (tint_build_ir) {
       "ir/disassembler.h",
       "ir/discard.cc",
       "ir/discard.h",
+      "ir/exit.cc",
+      "ir/exit.h",
       "ir/exit_if.cc",
       "ir/exit_if.h",
       "ir/exit_loop.cc",
