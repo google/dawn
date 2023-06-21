@@ -527,6 +527,14 @@ void Disassembler::EmitIf(If* i) {
     if (has_false) {
         ScopedIndent si(indent_size_);
         EmitBlock(i->False(), "false");
+    } else if (i->HasResults()) {
+        ScopedIndent si(indent_size_);
+        Indent();
+        out_ << "# implicit false block: exit_if undef";
+        for (size_t v = 1; v < i->Results().Length(); v++) {
+            out_ << ", undef";
+        }
+        EmitLine();
     }
 
     Indent();

@@ -1076,6 +1076,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
                 %12:i32 = add 42i, 1i
                 exit_if %12
               }
+              # implicit false block: exit_if undef
             }
             exit_if %11
           }
@@ -1090,6 +1091,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
             %16:i32 = add %9, 1i
             exit_if %16
           }
+          # implicit false block: exit_if undef
         }
         exit_if %15
       }
