@@ -91,6 +91,11 @@ bool Format::HasAlphaChannel() const {
     return componentCount == 4 && IsColor();
 }
 
+bool Format::IsSnorm() const {
+    return format == wgpu::TextureFormat::RGBA8Snorm || format == wgpu::TextureFormat::RG8Snorm ||
+           format == wgpu::TextureFormat::R8Snorm;
+}
+
 bool Format::IsMultiPlanar() const {
     return aspects & (Aspect::Plane0 | Aspect::Plane1);
 }

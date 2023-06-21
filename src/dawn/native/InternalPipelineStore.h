@@ -16,7 +16,9 @@
 #define SRC_DAWN_NATIVE_INTERNALPIPELINESTORE_H_
 
 #include <unordered_map>
+#include <utility>
 
+#include "dawn/common/HashUtils.h"
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ScratchBuffer.h"
@@ -60,9 +62,20 @@ struct InternalPipelineStore {
 
     Ref<RenderPipelineBase> blitRG8ToDepth16UnormPipeline;
 
-    Ref<ComputePipelineBase> blitDepth16UnormToBufferComputePipeline;
-    Ref<ComputePipelineBase> blitDepth32FloatToBufferComputePipeline;
-    Ref<ComputePipelineBase> blitStencil8ToBufferComputePipeline;
+    using BlitTextureToBufferComputePipelineKeyType =
+        std::pair<wgpu::TextureFormat, wgpu::TextureDimension>;
+    struct BlitTextureToBufferComputePipelineHash {
+        std::size_t operator()(const BlitTextureToBufferComputePipelineKeyType& k) const {
+            size_t hash = 0;
+            HashCombine(&hash, k.first);
+            HashCombine(&hash, k.second);
+            return hash;
+        }
+    };
+    std::unordered_map<BlitTextureToBufferComputePipelineKeyType,
+                       Ref<ComputePipelineBase>,
+                       BlitTextureToBufferComputePipelineHash>
+        blitTextureToBufferComputePipelines;
 
     struct BlitR8ToStencilPipelines {
         Ref<RenderPipelineBase> clearPipeline;

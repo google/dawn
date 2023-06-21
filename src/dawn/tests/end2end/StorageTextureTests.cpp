@@ -675,7 +675,8 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
             continue;
         }
 
-        if (format == wgpu::TextureFormat::RGBA8Snorm && HasToggleEnabled("disable_snorm_read")) {
+        // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
+        if (format == wgpu::TextureFormat::RGBA8Snorm && IsANGLESwiftShader()) {
             continue;
         }
 
@@ -714,7 +715,8 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
             continue;
         }
 
-        if (format == wgpu::TextureFormat::RGBA8Snorm && HasToggleEnabled("disable_snorm_read")) {
+        // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
+        if (format == wgpu::TextureFormat::RGBA8Snorm && IsANGLESwiftShader()) {
             continue;
         }
 

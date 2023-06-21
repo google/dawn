@@ -126,6 +126,7 @@ struct Format {
     bool HasStencil() const;
     bool HasDepthOrStencil() const;
     bool HasAlphaChannel() const;
+    bool IsSnorm() const;
 
     // IsMultiPlanar() returns true if the format allows selecting a plane index. This is only
     // allowed by multi-planar formats (ex. NV12).

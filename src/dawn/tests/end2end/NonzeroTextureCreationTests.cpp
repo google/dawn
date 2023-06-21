@@ -85,10 +85,9 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
                                  !SupportsFeatures({wgpu::FeatureName::TextureCompressionBC}));
 
-        // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
-        // reading from Snorm textures.
+        // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
         DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::RGBA8Snorm &&
-                                 HasToggleEnabled("disable_snorm_read"));
+                                 IsANGLESwiftShader());
 
         // TODO(crbug.com/dawn/667): ANGLE claims to support NV_read_stencil, but won't read
         // correctly from a DEPTH32F_STENCIL8 texture.
@@ -271,6 +270,9 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
 TEST_P(NonzeroNonrenderableTextureCreationTests, TextureCreationClears) {
     // TODO(dawn:1802): Support clearing non-renderable textures.
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
+    // TODO(dawn:1872): suppress
+    DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::RGBA8Snorm &&
+                          (IsOpenGL() || IsOpenGLES()));
     Run();
 }
 

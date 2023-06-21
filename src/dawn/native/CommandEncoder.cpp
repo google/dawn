@@ -23,8 +23,8 @@
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BlitBufferToDepthStencil.h"
-#include "dawn/native/BlitDepthStencilToBuffer.h"
 #include "dawn/native/BlitDepthToDepth.h"
+#include "dawn/native/BlitTextureToBuffer.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandBuffer.h"
@@ -1350,8 +1350,40 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
             TextureDataLayout dstLayout = destination->layout;
             ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, *copySize);
 
+            if (copySize->width == 0 || copySize->height == 0 ||
+                copySize->depthOrArrayLayers == 0) {
+                // Noop copy but is valid, simply skip encoding any command.
+                return {};
+            }
+
             auto format = source->texture->GetFormat();
             auto aspect = ConvertAspect(format, source->aspect);
+
+            if (format.IsSnorm() &&
+                GetDevice()->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy)) {
+                // This function might create new resources. Need to lock the Device.
+                // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at
+                // Command Submit time, so the locking would be removed from here at that point.
+                auto deviceLock(GetDevice()->GetScopedLock());
+
+                TextureCopy src;
+                src.texture = source->texture;
+                src.origin = source->origin;
+                src.mipLevel = source->mipLevel;
+                src.aspect = aspect;
+
+                BufferCopy dst;
+                dst.buffer = destination->buffer;
+                dst.bytesPerRow = destination->layout.bytesPerRow;
+                dst.rowsPerImage = destination->layout.rowsPerImage;
+                dst.offset = destination->layout.offset;
+                DAWN_TRY_CONTEXT(BlitTextureToBuffer(GetDevice(), this, src, dst, *copySize),
+                                 "copying snorm texture %s to %s using blit workaround.",
+                                 src.texture.Get(), destination->buffer);
+
+                return {};
+            }
+
             if (aspect == Aspect::Depth) {
                 if ((format.format == wgpu::TextureFormat::Depth16Unorm &&
                      GetDevice()->IsToggleEnabled(
@@ -1375,7 +1407,7 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
                     dst.bytesPerRow = destination->layout.bytesPerRow;
                     dst.rowsPerImage = destination->layout.rowsPerImage;
                     dst.offset = destination->layout.offset;
-                    DAWN_TRY_CONTEXT(BlitDepthToBuffer(GetDevice(), this, src, dst, *copySize),
+                    DAWN_TRY_CONTEXT(BlitTextureToBuffer(GetDevice(), this, src, dst, *copySize),
                                      "copying depth aspect from %s to %s using blit workaround.",
                                      src.texture.Get(), destination->buffer);
 
@@ -1399,7 +1431,7 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
                     dst.bytesPerRow = destination->layout.bytesPerRow;
                     dst.rowsPerImage = destination->layout.rowsPerImage;
                     dst.offset = destination->layout.offset;
-                    DAWN_TRY_CONTEXT(BlitStencilToBuffer(GetDevice(), this, src, dst, *copySize),
+                    DAWN_TRY_CONTEXT(BlitTextureToBuffer(GetDevice(), this, src, dst, *copySize),
                                      "copying stencil aspect from %s to %s using blit workaround.",
                                      src.texture.Get(), destination->buffer);
 

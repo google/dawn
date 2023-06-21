@@ -401,6 +401,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a blit instead of a copy command to copy stencil aspect of a texture to a buffer."
       "Workaround for OpenGLES.",
       "https://crbug.com/dawn/1782", ToggleStage::Device}},
+    {Toggle::UseBlitForSnormTextureToBufferCopy,
+     {"use_blit_for_snorm_texture_to_buffer_copy",
+      "Use a blit instead of a copy command to copy snorm texture to a buffer."
+      "Workaround for OpenGLES.",
+      "https://crbug.com/dawn/1781", ToggleStage::Device}},
     {Toggle::D3D12ReplaceAddWithMinusWhenDstFactorIsZeroAndSrcFactorIsDstAlpha,
      {"d3d12_replace_add_with_minus_when_dst_factor_is_zero_and_src_factor_is_dst_alpha",
       "Replace the blending operation 'Add' with 'Minus' when dstBlendFactor is 'Zero' and "
