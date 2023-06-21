@@ -1,7 +1,3 @@
-int2 tint_clamp(int2 e, int2 low, int2 high) {
-  return min(max(e, low), high);
-}
-
 struct GammaTransferParams {
   float G;
   float A;
@@ -98,17 +94,9 @@ ExternalTextureParams ext_tex_params_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint2 tint_tmp;
-  t.GetDimensions(tint_tmp.x, tint_tmp.y);
-  float4 red = textureLoadExternal(t, ext_tex_plane_1, tint_clamp((10).xx, (0).xx, int2((tint_tmp - (1u).xx))), ext_tex_params_load(0u));
-  uint2 tint_tmp_1;
-  outImage.GetDimensions(tint_tmp_1.x, tint_tmp_1.y);
-  outImage[tint_clamp((0).xx, (0).xx, int2((tint_tmp_1 - (1u).xx)))] = red;
-  uint2 tint_tmp_2;
-  t.GetDimensions(tint_tmp_2.x, tint_tmp_2.y);
-  float4 green = textureLoadExternal(t, ext_tex_plane_1, tint_clamp(int2(70, 118), (0).xx, int2((tint_tmp_2 - (1u).xx))), ext_tex_params_load(0u));
-  uint2 tint_tmp_3;
-  outImage.GetDimensions(tint_tmp_3.x, tint_tmp_3.y);
-  outImage[tint_clamp(int2(1, 0), (0).xx, int2((tint_tmp_3 - (1u).xx)))] = green;
+  float4 red = textureLoadExternal(t, ext_tex_plane_1, (10).xx, ext_tex_params_load(0u));
+  outImage[(0).xx] = red;
+  float4 green = textureLoadExternal(t, ext_tex_plane_1, int2(70, 118), ext_tex_params_load(0u));
+  outImage[int2(1, 0)] = green;
   return;
 }

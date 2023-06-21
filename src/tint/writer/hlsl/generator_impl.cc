@@ -194,9 +194,16 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         manager.Add<ast::transform::Robustness>();
 
         ast::transform::Robustness::Config config = {};
+
         config.bindings_ignored = std::unordered_set<sem::BindingPoint>(
             options.binding_points_ignored_in_robustness_transform.cbegin(),
             options.binding_points_ignored_in_robustness_transform.cend());
+
+        // Direct3D guarantees to return zero for any resource that is accessed out of bounds, and
+        // according to the description of the assembly store_uav_typed, out of bounds addressing
+        // means nothing gets written to memory.
+        config.texture_action = ast::transform::Robustness::Action::kIgnore;
+
         data.Add<ast::transform::Robustness::Config>(config);
     }
 
