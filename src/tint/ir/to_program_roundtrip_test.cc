@@ -497,6 +497,115 @@ fn f(a : bool, c : bool) -> bool {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Compound assignment
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(IRToProgramRoundtripTest, CompoundAssign_Increment) {
+    Test(R"(
+fn f() {
+  var v : i32;
+  v++;
+}
+)",
+         R"(
+fn f() {
+  var v : i32;
+  v = (v + 1i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, CompoundAssign_Decrement) {
+    Test(R"(
+fn f() {
+  var v : i32;
+  v++;
+}
+)",
+         R"(
+fn f() {
+  var v : i32;
+  v = (v + 1i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, CompoundAssign_Add) {
+    Test(R"(
+fn f() {
+  var v : i32;
+  v += 8i;
+}
+)",
+         R"(
+fn f() {
+  var v : i32;
+  v = (v + 8i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, CompoundAssign_Subtract) {
+    Test(R"(
+fn f() {
+  var v : i32;
+  v -= 8i;
+}
+)",
+         R"(
+fn f() {
+  var v : i32;
+  v = (v - 8i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, CompoundAssign_Multiply) {
+    Test(R"(
+fn f() {
+  var v : i32;
+  v *= 8i;
+}
+)",
+         R"(
+fn f() {
+  var v : i32;
+  v = (v * 8i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, CompoundAssign_Divide) {
+    Test(R"(
+fn f() {
+  var v : i32;
+  v /= 8i;
+}
+)",
+         R"(
+fn f() {
+  var v : i32;
+  v = (v / 8i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, CompoundAssign_Xor) {
+    Test(R"(
+fn f() {
+  var v : i32;
+  v ^= 8i;
+}
+)",
+         R"(
+fn f() {
+  var v : i32;
+  v = (v ^ 8i);
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // let
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, LetUsedOnce) {
