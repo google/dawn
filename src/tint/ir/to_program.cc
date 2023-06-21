@@ -46,6 +46,7 @@
 #include "src/tint/type/texture.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/predicates.h"
+#include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/transform.h"
 #include "src/tint/utils/vector.h"
@@ -64,6 +65,10 @@
 namespace tint::ir {
 
 namespace {
+
+/// Empty struct used as a sentinel value to indicate that an ast::Value has been consumed by its
+/// single place of usage. Attempting to use this value a second time should result in an ICE.
+struct ConsumedValue {};
 
 class State {
   public:
@@ -85,14 +90,24 @@ class State {
     /// The target ProgramBuilder
     ProgramBuilder b;
 
-    /// A hashmap of value to symbol used in the emitted AST
-    utils::Hashmap<Value*, Symbol, 32> value_names_;
+    using ValueBinding = std::variant<Symbol, const ast::Expression*, ConsumedValue>;
+
+    /// A hashmap of value to one of:
+    /// * Symbol           - Name of 'let' (non-inlinable value), 'var' or parameter.
+    /// * ast::Expression* - single use, inlined expression.
+    /// * ConsumedValue    - a special value used to indicate that the value has already been
+    ///                      consumed.
+    utils::Hashmap<Value*, ValueBinding, 32> bindings_;
 
     /// The nesting depth of the currently generated AST
-    /// 0 is module scope
-    /// 1 is root-level function scope
+    /// 0  is module scope
+    /// 1  is root-level function scope
     /// 2+ is within control flow
     uint32_t nesting_depth_ = 0;
+
+    using Statements = utils::Vector<const ast::Statement*,
+                                     decltype(ast::BlockStatement::statements)::static_length>;
+    Statements* statements_ = nullptr;
 
     /// The current switch case block
     ir::Block* current_switch_case_ = nullptr;
@@ -103,12 +118,12 @@ class State {
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
         static constexpr size_t N = decltype(ast::Function::params)::static_length;
         auto params = utils::Transform<N>(fn->Params(), [&](FunctionParam* param) {
-            auto name = AssignNameTo(param);
+            auto name = BindName(param);
             auto ty = Type(param->Type());
             return b.Param(name, ty);
         });
 
-        auto name = AssignNameTo(fn);
+        auto name = BindName(fn);
         auto ret_ty = Type(fn->ReturnType());
         auto* body = Block(fn->StartTarget());
         utils::Vector<const ast::Attribute*, 1> attrs{};
@@ -118,175 +133,135 @@ class State {
     }
 
     const ast::BlockStatement* Block(ir::Block* block) {
-        static constexpr size_t N = decltype(ast::BlockStatement::statements)::static_length;
-        utils::Vector<const ast::Statement*, N> stmts;
+        Statements stmts;
+        TINT_SCOPED_ASSIGNMENT(statements_, &stmts);
 
         // TODO(crbug.com/tint/1902): Handle block arguments.
 
         for (auto* inst : *block) {
-            if (auto stmt = Stmt(inst)) {
-                stmts.Push(stmt);
-            }
+            Instruction(inst);
         }
 
         return b.Block(std::move(stmts));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Statements
-    //
-    // Statement methods may return nullptr, in the case of instructions that do not map to an AST
-    // statement, or in the case of an error. These should simply be ignored.
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    void Append(const ast::Statement* inst) { statements_->Push(inst); }
 
-    /// @param inst the ir::Instruction
-    /// @return an ast::Statement from @p inst, or nullptr if there was an error
-    const ast::Statement* Stmt(ir::Instruction* inst) {
-        return tint::Switch(
-            inst,                                                        //
-            [&](ir::Call* i) { return CallStmt(i); },                    //
-            [&](ir::Var* i) { return Var(i); },                          //
-            [&](ir::Load*) { return nullptr; },                          //
-            [&](ir::Store* i) { return Store(i); },                      //
-            [&](ir::If* if_) { return If(if_); },                        //
-            [&](ir::Switch* switch_) { return Switch(switch_); },        //
-            [&](ir::Return* ret) { return Return(ret); },                //
-            [&](ir::ExitSwitch* e) { return ExitSwitch(e); },            //
-            [&](ir::ExitIf*) { return nullptr; },                        //
-            [&](ir::Instruction* i) { return ValueStmt(i->Result()); },  //
-            [&](Default) {
-                UNHANDLED_CASE(inst);
-                return nullptr;
-            });
+    void Instruction(ir::Instruction* inst) {
+        tint::Switch(
+            inst,                                       //
+            [&](ir::Binary* u) { Binary(u); },          //
+            [&](ir::Call* i) { Call(i); },              //
+            [&](ir::ExitIf*) {},                        //
+            [&](ir::ExitSwitch* i) { ExitSwitch(i); },  //
+            [&](ir::If* i) { If(i); },                  //
+            [&](ir::Load* l) { Load(l); },              //
+            [&](ir::Return* i) { Return(i); },          //
+            [&](ir::Store* i) { Store(i); },            //
+            [&](ir::Switch* i) { Switch(i); },          //
+            [&](ir::Unary* u) { Unary(u); },            //
+            [&](ir::Var* i) { Var(i); },                //
+            [&](Default) { UNHANDLED_CASE(inst); });
     }
 
-    /// @param i the ir::If
-    /// @return an ast::IfStatement from @p i, or nullptr if there was an error
-    const ast::IfStatement* If(ir::If* i) {
+    void If(ir::If* if_) {
         SCOPED_NESTING();
-        auto* cond = Expr(i->Condition());
-        auto* t = Block(i->True());
-        if (TINT_UNLIKELY(!t)) {
-            return nullptr;
-        }
 
-        if (auto* false_blk = i->False(); false_blk && !false_blk->IsEmpty()) {
-            bool maybe_elseif = (false_blk->Length() == 1) ||
-                                (false_blk->Length() == 2 && false_blk->Back()->Is<ir::Branch>());
-            if (maybe_elseif) {
-                if (auto* else_if = false_blk->Front()->As<ir::If>()) {
-                    auto* f = If(else_if);
-                    if (!f) {
-                        return nullptr;
-                    }
-                    return b.If(cond, t, b.Else(f));
+        auto else_if = [](ir::If* i) -> ir::If* {
+            if (auto* false_blk = i->False()) {
+                if ((false_blk->Length() == 1) ||
+                    (false_blk->Length() == 2 && false_blk->Back()->Is<ir::ExitIf>())) {
+                    return false_blk->Front()->As<ir::If>();
                 }
             }
+            return nullptr;
+        };
 
-            auto* f = Block(i->False());
-            if (!f) {
-                return nullptr;
-            }
-            return b.If(cond, t, b.Else(f));
+        utils::Vector<ir::If*, 4> if_chain;
+        for (auto* i = if_; i != nullptr; i = else_if(i)) {
+            if_chain.Push(i);
         }
 
-        return b.If(cond, t);
+        const ast::IfStatement* stmt = nullptr;
+        for (auto* i : utils::Reverse(if_chain)) {
+            auto* cond = Expr(i->Condition());
+            auto* t = Block(i->True());
+            if (i == if_chain.Back()) {
+                if (i->False() && !i->False()->IsEmpty()) {
+                    auto* f = Block(i->False());
+                    stmt = b.If(cond, t, b.Else(f));
+                } else {
+                    stmt = b.If(cond, t);
+                }
+            } else {
+                stmt = b.If(cond, t, b.Else(stmt));
+            }
+        }
+
+        Append(stmt);
     }
 
-    /// @param s the ir::Switch
-    /// @return an ast::SwitchStatement from @p s, or nullptr if there was an error
-    const ast::SwitchStatement* Switch(ir::Switch* s) {
+    void Switch(ir::Switch* s) {
         SCOPED_NESTING();
 
         auto* cond = Expr(s->Condition());
-        if (!cond) {
-            return nullptr;
-        }
 
-        auto cases =
-            utils::Transform(s->Cases(),  //
-                             [&](ir::Switch::Case c) -> const tint::ast::CaseStatement* {
-                                 SCOPED_NESTING();
+        auto cases = utils::Transform(
+            s->Cases(),  //
+            [&](ir::Switch::Case c) -> const tint::ast::CaseStatement* {
+                SCOPED_NESTING();
 
-                                 const ast::BlockStatement* body = nullptr;
-                                 {
-                                     TINT_SCOPED_ASSIGNMENT(current_switch_case_, c.Block());
-                                     body = Block(c.Block());
-                                 }
-                                 if (!body) {
-                                     return nullptr;
-                                 }
+                const ast::BlockStatement* body = nullptr;
+                {
+                    TINT_SCOPED_ASSIGNMENT(current_switch_case_, c.Block());
+                    body = Block(c.Block());
+                }
 
-                                 auto selectors = utils::Transform(
-                                     c.selectors,  //
-                                     [&](ir::Switch::CaseSelector cs) -> const ast::CaseSelector* {
-                                         if (cs.IsDefault()) {
-                                             return b.DefaultCaseSelector();
-                                         }
-                                         auto* expr = Expr(cs.val);
-                                         if (!expr) {
-                                             return nullptr;
-                                         }
-                                         return b.CaseSelector(expr);
-                                     });
-                                 if (selectors.Any(utils::IsNull)) {
-                                     return nullptr;
-                                 }
+                auto selectors = utils::Transform(c.selectors,  //
+                                                  [&](ir::Switch::CaseSelector cs) {
+                                                      return cs.IsDefault()
+                                                                 ? b.DefaultCaseSelector()
+                                                                 : b.CaseSelector(Expr(cs.val));
+                                                  });
+                return b.Case(std::move(selectors), body);
+            });
 
-                                 return b.Case(std::move(selectors), body);
-                             });
-        if (cases.Any(utils::IsNull)) {
-            return nullptr;
-        }
-
-        return b.Switch(cond, std::move(cases));
+        Append(b.Switch(cond, std::move(cases)));
     }
 
-    const ast::BreakStatement* ExitSwitch(const ir::ExitSwitch* e) {
+    void ExitSwitch(const ir::ExitSwitch* e) {
         if (current_switch_case_ && current_switch_case_->Branch() == e) {
-            return nullptr;  // No need to emit
+            return;  // No need to emit
         }
-        return b.Break();
+        Append(b.Break());
     }
 
-    /// @param ret the ir::Return
-    /// @return an ast::ReturnStatement from @p ret, or nullptr if there was an error
-    const ast::ReturnStatement* Return(ir::Return* ret) {
+    void Return(ir::Return* ret) {
         if (ret->Args().IsEmpty()) {
             // Return has no arguments.
             // If this block is nested withing some control flow, then we must
             // emit a 'return' statement, otherwise we've just naturally reached
             // the end of the function where the 'return' is redundant.
             if (nesting_depth_ > 1) {
-                return b.Return();
+                Append(b.Return());
             }
-            return nullptr;
+            return;
         }
 
         // Return has arguments - this is the return value.
         if (ret->Args().Length() != 1) {
             TINT_ICE(IR, b.Diagnostics())
                 << "expected 1 value for return, got " << ret->Args().Length();
-            return b.Return();
+            return;
         }
 
-        auto* val = Expr(ret->Args().Front());
-        if (TINT_UNLIKELY(!val)) {
-            return b.Return();
-        }
-
-        return b.Return(val);
+        Append(b.Return(Expr(ret->Args().Front())));
     }
 
-    /// @param call the ir::Call
-    /// @return an ast::CallStatement from @p call, or nullptr if there was an error
-    const ast::CallStatement* CallStmt(ir::Call* call) { return b.CallStmt(Call(call)); }
-
-    /// @param var the ir::Var
-    /// @return an ast::VariableDeclStatement from @p var
-    const ast::VariableDeclStatement* Var(ir::Var* var) {
-        Symbol name = AssignNameTo(var);
-        auto* ptr = var->Result()->Type()->As<type::Pointer>();
+    void Var(ir::Var* var) {
+        auto* val = var->Result();
+        Symbol name = BindName(val);
+        auto* ptr = As<type::Pointer>(val->Type());
         auto ty = Type(ptr->StoreType());
         const ast::Expression* init = nullptr;
         if (var->Initializer()) {
@@ -294,104 +269,162 @@ class State {
         }
         switch (ptr->AddressSpace()) {
             case builtin::AddressSpace::kFunction:
-                return b.Decl(b.Var(name, ty, init));
+                Append(b.Decl(b.Var(name, ty, init)));
+                return;
             case builtin::AddressSpace::kStorage:
-                return b.Decl(b.Var(name, ty, init, ptr->Access(), ptr->AddressSpace()));
+                Append(b.Decl(b.Var(name, ty, init, ptr->Access(), ptr->AddressSpace())));
+                return;
             default:
-                return b.Decl(b.Var(name, ty, init, ptr->AddressSpace()));
+                Append(b.Decl(b.Var(name, ty, init, ptr->AddressSpace())));
+                return;
         }
     }
 
-    /// @param store the ir::Store
-    /// @return an ast::AssignmentStatement from @p call
-    const ast::AssignmentStatement* Store(ir::Store* store) {
-        auto* expr = Expr(store->From());
-        return b.Assign(AssignNameTo(store->To()), expr);
+    void Store(ir::Store* store) {
+        auto* dst = Expr(store->To());
+        auto* src = Expr(store->From());
+        Append(b.Assign(dst, src));
     }
 
-    /// @param val the ir::Value
-    /// @return an ast::Statement from @p val, or nullptr if the value does not produce a statement.
-    const ast::Statement* ValueStmt(ir::Value* val) {
-        // As we're visiting this value's declaration it shouldn't already have a name reserved.
-        TINT_ASSERT(IR, !value_names_.Contains(val));
-
-        // Determine whether the value should be placed into a let, or inlined in its single place
-        // of usage. Currently a value is inlined if it has a single usage and is unnamed.
-        // TODO(crbug.com/tint/1902): This logic needs to check that the sequence of side -
-        // effecting expressions is not changed by inlining the expression. This needs fixing.
-        bool create_let = val->Usages().Count() > 1 || mod.NameOf(val).IsValid();
-        if (create_let) {
-            auto* init = Expr(val);  // Must come before giving the value a name
-            auto name = AssignNameTo(val);
-            return b.Decl(b.Let(name, init));
-        }
-        return nullptr;  // Value will be inlined at its place of usage.
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Expressions
-    //
-    // The the case of an error:
-    // * The expression generating methods must return a non-null ast expression pointer, which may
-    //   not be semantically legal, but is enough to populate the AST.
-    // * A diagnostic error must be added to the ast::ProgramBuilder.
-    // This prevents littering the ToProgram logic with expensive error checking code.
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /// @param val the value
-    /// @returns the ast::Expression from the values source instruction
-    const ast::Expression* Expr(ir::Value* val) {
-        if (auto name = value_names_.Get(val)) {
-            return b.Expr(name.value());
-        }
-
-        return tint::Switch(
-            val,                                                          //
-            [&](ir::Constant* c) { return ConstExpr(c); },                //
-            [&](ir::InstructionResult* r) { return Expr(r->Source()); },  //
-            [&](Default) -> const ast::Expression* {
-                UNHANDLED_CASE(val);
-                return b.Expr("<error>");
-            });
-    }
-
-    /// @param val the ir::Expression
-    /// @return an ast::Expression from @p val.
-    /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* Expr(ir::Instruction* val) {
-        if (auto name = value_names_.Get(val->Result())) {
-            return b.Expr(name.value());
-        }
-
-        return tint::Switch(
-            val,                                           //
-            [&](ir::Load* l) { return LoadExpr(l); },      //
-            [&](ir::Unary* u) { return UnaryExpr(u); },    //
-            [&](ir::Binary* u) { return BinaryExpr(u); },  //
-            [&](Default) {
-                UNHANDLED_CASE(val);
-                return b.Expr("<error>");
-            });
-    }
-
-    /// @param call the ir::Call
-    /// @return an ast::CallExpression from @p call.
-    /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::CallExpression* Call(ir::Call* call) {
+    void Call(ir::Call* call) {
         auto args = utils::Transform<2>(call->Args(), [&](ir::Value* arg) { return Expr(arg); });
-        return tint::Switch(
+        tint::Switch(
             call,  //
-            [&](ir::UserCall* c) { return b.Call(AssignNameTo(c->Func()), std::move(args)); },
-            [&](Default) {
-                UNHANDLED_CASE(call);
-                return b.Call("<error>");
+            [&](ir::UserCall* c) {
+                auto* expr = b.Call(BindName(c->Func()), std::move(args));
+                if (!call->HasResults() || call->Result()->Usages().IsEmpty()) {
+                    Append(b.CallStmt(expr));
+                }
+                Bind(c->Result(), expr);
+            },
+            [&](Default) { UNHANDLED_CASE(call); });
+    }
+
+    void Load(ir::Load* l) { Bind(l->Result(), Expr(l->From())); }
+
+    void Unary(ir::Unary* u) {
+        const ast::Expression* expr = nullptr;
+        switch (u->Kind()) {
+            case ir::Unary::Kind::kComplement:
+                expr = b.Complement(Expr(u->Val()));
+                break;
+            case ir::Unary::Kind::kNegation:
+                expr = b.Negation(Expr(u->Val()));
+                break;
+        }
+        Bind(u->Result(), expr);
+    }
+
+    void Binary(ir::Binary* e) {
+        if (e->Kind() == ir::Binary::Kind::kEqual) {
+            auto* rhs = e->RHS()->As<ir::Constant>();
+            if (rhs && rhs->Type()->Is<type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
+                // expr == false
+                Bind(e->Result(), b.Not(Expr(e->LHS())));
+                return;
+            }
+        }
+        auto* lhs = Expr(e->LHS());
+        auto* rhs = Expr(e->RHS());
+        const ast::Expression* expr = nullptr;
+        switch (e->Kind()) {
+            case ir::Binary::Kind::kAdd:
+                expr = b.Add(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kSubtract:
+                expr = b.Sub(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kMultiply:
+                expr = b.Mul(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kDivide:
+                expr = b.Div(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kModulo:
+                expr = b.Mod(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kAnd:
+                expr = b.And(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kOr:
+                expr = b.Or(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kXor:
+                expr = b.Xor(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kEqual:
+                expr = b.Equal(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kNotEqual:
+                expr = b.NotEqual(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kLessThan:
+                expr = b.LessThan(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kGreaterThan:
+                expr = b.GreaterThan(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kLessThanEqual:
+                expr = b.LessThanEqual(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kGreaterThanEqual:
+                expr = b.GreaterThanEqual(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kShiftLeft:
+                expr = b.Shl(lhs, rhs);
+                break;
+            case ir::Binary::Kind::kShiftRight:
+                expr = b.Shr(lhs, rhs);
+                break;
+        }
+        Bind(e->Result(), expr);
+    }
+
+    TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
+
+    const ast::Expression* Expr(ir::Value* value) {
+        return tint::Switch(
+            value,                                         //
+            [&](ir::Constant* c) { return Constant(c); },  //
+            [&](Default) -> const ast::Expression* {
+                auto lookup = bindings_.Find(value);
+                if (TINT_UNLIKELY(!lookup)) {
+                    TINT_ICE(IR, b.Diagnostics())
+                        << "Expr(" << (value ? value->TypeInfo().name : "null")
+                        << ") value has no expression";
+                    return b.Expr("<error>");
+                }
+                return std::visit(
+                    [&](auto&& got) -> const ast::Expression* {
+                        using T = std::decay_t<decltype(got)>;
+
+                        if constexpr (std::is_same_v<T, Symbol>) {
+                            return b.Expr(got);  // var, let or parameter.
+                        }
+
+                        if constexpr (std::is_same_v<T, const ast::Expression*>) {
+                            // Single use (inlined) expression.
+                            // Mark the bindings_ map entry as consumed.
+                            *lookup = ConsumedValue{};
+                            return got;
+                        }
+
+                        if constexpr (std::is_same_v<T, ConsumedValue>) {
+                            TINT_ICE(IR, b.Diagnostics()) << "Expr(" << value->TypeInfo().name
+                                                          << ") called twice on the same value";
+                        } else {
+                            TINT_ICE(IR, b.Diagnostics())
+                                << "Expr(" << value->TypeInfo().name << ") has unhandled value";
+                        }
+                        return b.Expr("<error>");
+                    },
+                    *lookup);
             });
     }
 
-    /// @param c the ir::Constant
-    /// @return an ast::Expression from @p c.
-    /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* ConstExpr(ir::Constant* c) {
+    TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
+
+    const ast::Expression* Constant(ir::Constant* c) {
         return tint::Switch(
             c->Type(),  //
             [&](const type::I32*) { return b.Expr(c->Value()->ValueAs<i32>()); },
@@ -403,74 +436,6 @@ class State {
                 UNHANDLED_CASE(c);
                 return b.Expr("<error>");
             });
-    }
-
-    /// @param l the ir::Load
-    /// @return an ast::Expression from @p l.
-    /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* LoadExpr(ir::Load* l) { return Expr(l->From()); }
-
-    /// @param u the ir::Unary
-    /// @return an ast::UnaryOpExpression from @p u.
-    /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* UnaryExpr(ir::Unary* u) {
-        switch (u->Kind()) {
-            case ir::Unary::Kind::kComplement:
-                return b.Complement(Expr(u->Val()));
-            case ir::Unary::Kind::kNegation:
-                return b.Negation(Expr(u->Val()));
-        }
-        return b.Expr("<error>");
-    }
-
-    /// @param e the ir::Binary
-    /// @return an ast::BinaryOpExpression from @p e.
-    /// @note May be a semantically-invalid placeholder expression on error.
-    const ast::Expression* BinaryExpr(ir::Binary* e) {
-        if (e->Kind() == ir::Binary::Kind::kEqual) {
-            auto* rhs = e->RHS()->As<ir::Constant>();
-            if (rhs && rhs->Type()->Is<type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
-                // expr == false
-                return b.Not(Expr(e->LHS()));
-            }
-        }
-        auto* lhs = Expr(e->LHS());
-        auto* rhs = Expr(e->RHS());
-        switch (e->Kind()) {
-            case ir::Binary::Kind::kAdd:
-                return b.Add(lhs, rhs);
-            case ir::Binary::Kind::kSubtract:
-                return b.Sub(lhs, rhs);
-            case ir::Binary::Kind::kMultiply:
-                return b.Mul(lhs, rhs);
-            case ir::Binary::Kind::kDivide:
-                return b.Div(lhs, rhs);
-            case ir::Binary::Kind::kModulo:
-                return b.Mod(lhs, rhs);
-            case ir::Binary::Kind::kAnd:
-                return b.And(lhs, rhs);
-            case ir::Binary::Kind::kOr:
-                return b.Or(lhs, rhs);
-            case ir::Binary::Kind::kXor:
-                return b.Xor(lhs, rhs);
-            case ir::Binary::Kind::kEqual:
-                return b.Equal(lhs, rhs);
-            case ir::Binary::Kind::kNotEqual:
-                return b.NotEqual(lhs, rhs);
-            case ir::Binary::Kind::kLessThan:
-                return b.LessThan(lhs, rhs);
-            case ir::Binary::Kind::kGreaterThan:
-                return b.GreaterThan(lhs, rhs);
-            case ir::Binary::Kind::kLessThanEqual:
-                return b.LessThanEqual(lhs, rhs);
-            case ir::Binary::Kind::kGreaterThanEqual:
-                return b.GreaterThanEqual(lhs, rhs);
-            case ir::Binary::Kind::kShiftLeft:
-                return b.Shl(lhs, rhs);
-            case ir::Binary::Kind::kShiftRight:
-                return b.Shr(lhs, rhs);
-        }
-        return b.Expr("<error>");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -563,25 +528,49 @@ class State {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Helpers
+    // Bindings
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /// Creates and returns a new, unique name for the instructions result value, or returns the
-    /// previously created name. Must not be called with a multi-result instruction.
-    /// @return the instruction values name
-    Symbol AssignNameTo(Instruction* inst) { return AssignNameTo(inst->Result()); }
 
     /// Creates and returns a new, unique name for the given value, or returns the previously
     /// created name.
     /// @return the value's name
-    Symbol AssignNameTo(Value* value) {
+    Symbol BindName(ir::Value* value) {
         TINT_ASSERT(IR, value);
-        return value_names_.GetOrCreate(value, [&] {
+        auto& existing = bindings_.GetOrCreate(value, [&] {
             if (auto sym = mod.NameOf(value)) {
-                return b.Symbols().New(sym.Name());
+                return b.Symbols().New(sym.NameView());
             }
-            return b.Symbols().New("v" + std::to_string(value_names_.Count()));
+            return b.Symbols().New("v");
         });
+        if (auto* name = std::get_if<Symbol>(&existing); TINT_LIKELY(name)) {
+            return *name;
+        }
+
+        TINT_ICE(IR, b.Diagnostics()) << "BindName(" << value->TypeInfo().name
+                                      << ") called on value that has non-name binding";
+        return {};
+    }
+
+    template <typename T>
+    void Bind(ir::Value* value, const T* expr) {
+        TINT_ASSERT(IR, value);
+
+        // Determine whether the value should be placed into a let, or inlined in its single
+        // place of usage. Currently a value is inlined if it has a single usage and is unnamed.
+        // TODO(crbug.com/tint/1902): This logic needs to check that the sequence of
+        // side-effecting expressions is not changed by inlining the expression. This needs
+        // fixing.
+        bool create_let = value->Usages().Count() > 1 || mod.NameOf(value).IsValid();
+        if (create_let) {
+            Append(b.Decl(b.Let(BindName(value), expr)));
+        } else {
+            // Value will be inlined at its place of usage.
+            bool added = bindings_.Add(value, expr);
+            if (TINT_UNLIKELY(!added)) {
+                TINT_ICE(IR, b.Diagnostics())
+                    << "Bind(" << value->TypeInfo().name << ") called twice for same node";
+            }
+        }
     }
 };
 

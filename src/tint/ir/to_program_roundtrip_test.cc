@@ -450,6 +450,26 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, If_Else_Chain) {
+    Test(R"(
+fn x(i : i32) -> bool {
+  return true;
+}
+
+fn f(a : bool, b : bool, c : bool, d : bool) {
+  if (a) {
+    x(0i);
+  } else if (b) {
+    x(1i);
+  } else if (c) {
+    x(2i);
+  } else {
+    x(3i);
+  }
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Switch
 ////////////////////////////////////////////////////////////////////////////////
