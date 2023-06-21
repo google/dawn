@@ -67,6 +67,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     return {};
 }
 
+void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adpterToggles) const {}
+
 void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {}
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,

@@ -84,7 +84,7 @@ WGPUAdapter Adapter::Get() const {
 }
 
 std::vector<const char*> Adapter::GetSupportedFeatures() const {
-    FeaturesSet supportedFeaturesSet = mImpl->GetPhysicalDevice()->GetSupportedFeatures();
+    FeaturesSet supportedFeaturesSet = mImpl->GetSupportedFeatures();
     return supportedFeaturesSet.GetEnabledFeatureNames();
 }
 

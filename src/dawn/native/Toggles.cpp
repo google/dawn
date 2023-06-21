@@ -165,7 +165,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"use_dxc",
       "Use DXC instead of FXC for compiling HLSL when both dxcompiler.dll and dxil.dll is "
       "available.",
-      "https://crbug.com/dawn/402", ToggleStage::Device}},
+      "https://crbug.com/dawn/402", ToggleStage::Adapter}},
     {Toggle::DisableRobustness,
      {"disable_robustness", "Disable robust buffer access", "https://crbug.com/dawn/480",
       ToggleStage::Device}},

@@ -269,6 +269,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
         return Device::Create(adapter, mDevice, descriptor, deviceToggles);
     }
 
+    void SetupBackendAdapterToggles(TogglesState* adapterToggles) const override {}
+
     void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override {
         {
             bool haveStoreAndMSAAResolve = false;

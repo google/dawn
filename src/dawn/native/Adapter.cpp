@@ -27,26 +27,27 @@
 
 namespace dawn::native {
 
-AdapterBase::AdapterBase(Ref<PhysicalDeviceBase> physicalDevice, FeatureLevel featureLevel)
-    : AdapterBase(physicalDevice,
-                  featureLevel,
-                  TogglesState(ToggleStage::Adapter)
-                      .InheritFrom(physicalDevice->GetInstance()->GetTogglesState())) {}
-
 AdapterBase::AdapterBase(Ref<PhysicalDeviceBase> physicalDevice,
                          FeatureLevel featureLevel,
-                         const TogglesState& adapterToggles)
+                         const TogglesState& requiredAdapterToggles)
     : mPhysicalDevice(std::move(physicalDevice)),
       mFeatureLevel(featureLevel),
-      mTogglesState(adapterToggles) {
+      mTogglesState(requiredAdapterToggles) {
     ASSERT(mPhysicalDevice->SupportsFeatureLevel(featureLevel));
     ASSERT(mTogglesState.GetStage() == ToggleStage::Adapter);
+    // Cache the supported features of this adapter. Note that with device toggles overriding, a
+    // device created by this adapter may support features not in this set and vice versa.
+    mSupportedFeatures = mPhysicalDevice->GetSupportedFeatures(mTogglesState);
 }
 
 AdapterBase::~AdapterBase() = default;
 
 void AdapterBase::SetUseTieredLimits(bool useTieredLimits) {
     mUseTieredLimits = useTieredLimits;
+}
+
+FeaturesSet AdapterBase::GetSupportedFeatures() const {
+    return mSupportedFeatures;
 }
 
 PhysicalDeviceBase* AdapterBase::GetPhysicalDevice() {
@@ -101,11 +102,11 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
 }
 
 bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
-    return mPhysicalDevice->HasFeature(feature);
+    return mSupportedFeatures.IsEnabled(feature);
 }
 
 size_t AdapterBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
-    return mPhysicalDevice->EnumerateFeatures(features);
+    return mSupportedFeatures.EnumerateFeatures(features);
 }
 
 DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
@@ -140,11 +141,12 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor*
     // Backend-specific forced and default device toggles
     mPhysicalDevice->SetupBackendDeviceToggles(&deviceToggles);
 
-    // Validate all required features are supported by the adapter and suitable under given toggles.
-    // Note that certain toggles in device toggles state may be overriden by user and different from
-    // the adapter toggles state.
-    // TODO(dawn:1495): After implementing adapter toggles, decide whether we should validate
-    // supported features using adapter toggles or device toggles.
+    // Validate all required features are supported by the adapter and suitable under device
+    // toggles. Note that certain toggles in device toggles state may be overriden by user and
+    // different from the adapter toggles state, and in this case a device may support features
+    // that not supported by the adapter. We allow such toggles overriding for the convinience e.g.
+    // creating a deivce for internal usage with AllowUnsafeAPI enabled from an adapter that
+    // disabled AllowUnsafeAPIS.
     for (uint32_t i = 0; i < descriptor->requiredFeaturesCount; ++i) {
         wgpu::FeatureName feature = descriptor->requiredFeatures[i];
         DAWN_TRY(mPhysicalDevice->ValidateFeatureSupportedWithToggles(feature, deviceToggles));

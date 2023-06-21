@@ -55,6 +55,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     MaybeError ValidateFeatureSupportedWithTogglesImpl(wgpu::FeatureName feature,
                                                        const TogglesState& toggles) const override;
 
+    void SetupBackendAdapterToggles(TogglesState* adapterToggles) const override;
     void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
                                                     const DeviceDescriptor* descriptor,

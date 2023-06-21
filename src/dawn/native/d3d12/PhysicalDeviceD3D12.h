@@ -41,6 +41,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
   private:
     using Base = d3d::PhysicalDevice;
 
+    void SetupBackendAdapterToggles(TogglesState* adapterToggles) const override;
     void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
 
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,

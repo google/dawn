@@ -173,7 +173,7 @@
         "tags": ["dawn", "native"],
         "category": "structure",
         "chained": "in",
-        "chain roots": ["instance descriptor", "device descriptor"],
+        "chain roots": ["instance descriptor", "request adapter options", "device descriptor"],
         "members": [
             {"name": "enabled toggles count", "type": "size_t", "default": 0},
             {"name": "enabled toggles", "type": "char", "annotation": "const*const*", "length": "enabled toggles count"},

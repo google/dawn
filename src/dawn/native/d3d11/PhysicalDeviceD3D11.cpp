@@ -223,13 +223,16 @@ MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     return {};
 }
 
+void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adpterToggles) const {
+    // D3D11 must use FXC, not DXC.
+    adpterToggles->ForceSet(Toggle::UseDXC, false);
+}
+
 void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     // D3D11 can only clear RTV with float values.
     deviceToggles->Default(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
     // TODO(dawn:1848): Support depth-stencil texture write.
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
-    // D3D11 must use FXC, not DXC.
-    deviceToggles->ForceSet(Toggle::UseDXC, false);
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,

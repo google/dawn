@@ -30,7 +30,9 @@ class FeatureTests : public testing::Test {
           mInstanceBase(native::InstanceBase::Create()),
           mPhysicalDevice(mInstanceBase.Get()),
           mUnsafePhysicalDevice(mInstanceBase.Get()),
-          mAdapterBase(&mPhysicalDevice, native::FeatureLevel::Core),
+          mAdapterBase(&mPhysicalDevice,
+                       native::FeatureLevel::Core,
+                       native::TogglesState(native::ToggleStage::Adapter)),
           mUnsafeAdapterBase(&mUnsafePhysicalDevice,
                              native::FeatureLevel::Core,
                              native::TogglesState(native::ToggleStage::Adapter)

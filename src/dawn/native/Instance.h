@@ -65,6 +65,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // Deprecated: Discover physical devices and save them on the instance.
     void DiscoverDefaultPhysicalDevices();
     bool DiscoverPhysicalDevices(const PhysicalDeviceDiscoveryOptionsBase* options);
+
+    // Deprecated. Use EnumerateAdapters instead.
     // Return adapters created on physical device discovered by the instance.
     std::vector<Ref<AdapterBase>> GetAdapters() const;
 
@@ -165,6 +167,12 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // Enumerate physical devices according to options and return them.
     std::vector<Ref<PhysicalDeviceBase>> EnumeratePhysicalDevices(
         const RequestAdapterOptions* options);
+
+    // Helper function that create adapter on given physical device handling required adapter
+    // toggles descriptor.
+    Ref<AdapterBase> CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
+                                   FeatureLevel featureLevel,
+                                   const DawnTogglesDescriptor* requiredAdapterToggles) const;
 
     void ConsumeError(std::unique_ptr<ErrorData> error);
 

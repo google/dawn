@@ -31,7 +31,8 @@ class PerThreadProcTests : public testing::Test {
     PerThreadProcTests()
         : mNativeInstance(native::InstanceBase::Create()),
           mAdapterBase(AcquireRef(new native::null::PhysicalDevice(mNativeInstance.Get())),
-                       native::FeatureLevel::Core) {}
+                       native::FeatureLevel::Core,
+                       native::TogglesState(native::ToggleStage::Adapter)) {}
     ~PerThreadProcTests() override = default;
 
   protected:

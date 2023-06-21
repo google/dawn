@@ -7,6 +7,8 @@ Currently, the `WGPUInstance` doesn't provide a way to query support for these f
 features may not be suitable for general use yet. Currently, they are used in Dawn's testing, and
 in Chromium-specific integration with Dawn.
 
+`DawnTogglesDescriptor` can also be chained on `RequestAdapterOptions` to provide the required adapter toggles. However, the final adapter toggles state also depends on instance toggles inheritance and adapter toggles validation/default-setting.
+
 `dawn::native::Instance::EnumerateAdapters` is a Dawn native-only API that may be used to synchronously
 get a list of adapters according to the RequestAdapterOptions. The members are treated as follows:
  - `RequestAdapterOptions::compatibleSurface` is ignored.
@@ -26,3 +28,9 @@ When discovering adapters on the GL backend, Dawn uses the provided `RequestAdap
 ### `RequestAdapterOptionsLUID`
 
 When discovering adapters on D3D11 and D3D12, Dawn only discovers adapters matching the provided `RequestAdapterOptionsLUID::adapterLUID`. This extension struct does nothing on other backends.
+
+### `DawnTogglesDescriptor`
+
+When discovering adapters, Dawn will use chained `DawnTogglesDescriptor` as required adapter
+toggles. The final toggles state of each result adapter depends on the inheritance of instance
+toggles state, the backend-specific validation and the backend-specific default setting.

@@ -58,7 +58,8 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
         : testing::TestWithParam<DawnFlavor>(),
           mNativeInstance(native::InstanceBase::Create()),
           mAdapterBase(AcquireRef(new native::null::PhysicalDevice(mNativeInstance.Get())),
-                       native::FeatureLevel::Core) {}
+                       native::FeatureLevel::Core,
+                       native::TogglesState(native::ToggleStage::Adapter)) {}
 
     void SetUp() override {
         switch (GetParam()) {

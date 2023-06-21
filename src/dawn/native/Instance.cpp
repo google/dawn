@@ -312,19 +312,29 @@ void InstanceBase::DeprecatedDiscoverPhysicalDevices(const RequestAdapterOptions
     }
 }
 
-std::vector<Ref<AdapterBase>> InstanceBase::GetAdapters() const {
-    // Set up toggles state for default adapters, currently adapter don't have a toggles
-    // descriptor so just inherit from instance toggles.
-    // TODO(dawn:1495): Handle the adapter toggles descriptor after implemented.
-    TogglesState adapterToggles = TogglesState(ToggleStage::Adapter);
+Ref<AdapterBase> InstanceBase::CreateAdapter(
+    Ref<PhysicalDeviceBase> physicalDevice,
+    FeatureLevel featureLevel,
+    const DawnTogglesDescriptor* requiredAdapterToggles) const {
+    // Set up toggles state for default adapter from given toggles descriptor and inherit from
+    // instance toggles.
+    TogglesState adapterToggles =
+        TogglesState::CreateFromTogglesDescriptor(requiredAdapterToggles, ToggleStage::Adapter);
     adapterToggles.InheritFrom(mToggles);
+    // Set up forced and default adapter toggles for selected physical device.
+    physicalDevice->SetupBackendAdapterToggles(&adapterToggles);
 
+    return AcquireRef(new AdapterBase(std::move(physicalDevice), featureLevel, adapterToggles));
+}
+
+std::vector<Ref<AdapterBase>> InstanceBase::GetAdapters() const {
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : mDeprecatedPhysicalDevices) {
         for (FeatureLevel featureLevel : {FeatureLevel::Compatibility, FeatureLevel::Core}) {
             if (physicalDevice->SupportsFeatureLevel(featureLevel)) {
-                adapters.push_back(
-                    AcquireRef(new AdapterBase(physicalDevice, featureLevel, adapterToggles)));
+                // GetAdapters is deprecated, just set up default toggles state. Use
+                // EnumerateAdapters instead.
+                adapters.push_back(CreateAdapter(physicalDevice, featureLevel, nullptr));
             }
         }
     }
@@ -350,24 +360,20 @@ const FeatureInfo* InstanceBase::GetFeatureInfo(wgpu::FeatureName feature) {
 std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     const RequestAdapterOptions* options) {
     if (options == nullptr) {
-        // Default path that returns all WebGPU core adapters on the system.
+        // Default path that returns all WebGPU core adapters on the system with default toggles.
         RequestAdapterOptions defaultOptions = {};
         return EnumerateAdapters(&defaultOptions);
     }
 
-    // Set up toggles state for default adapters, currently adapter don't have a toggles
-    // descriptor so just inherit from instance toggles.
-    // TODO(dawn:1495): Handle the adapter toggles descriptor after implemented.
-    TogglesState adapterToggles = TogglesState(ToggleStage::Adapter);
-    adapterToggles.InheritFrom(mToggles);
+    const DawnTogglesDescriptor* togglesDesc = nullptr;
+    FindInChain(options->nextInChain, &togglesDesc);
 
     FeatureLevel featureLevel =
         options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(options)) {
         ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));
-        adapters.push_back(
-            AcquireRef(new AdapterBase(physicalDevice, featureLevel, adapterToggles)));
+        adapters.push_back(CreateAdapter(physicalDevice, featureLevel, togglesDesc));
     }
     return SortAdapters(std::move(adapters), options);
 }

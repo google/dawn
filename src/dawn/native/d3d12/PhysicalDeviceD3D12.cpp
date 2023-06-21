@@ -457,6 +457,14 @@ void PhysicalDevice::CleanUpDebugLayerFilters() {
     infoQueue->PopStorageFilter();
 }
 
+void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adapterToggles) const {
+    // Check DXC for use_dxc toggle, and default to use FXC
+    if (!GetBackend()->IsDXCAvailable()) {
+        adapterToggles->ForceSet(Toggle::UseDXC, false);
+    }
+    adapterToggles->Default(Toggle::UseDXC, false);
+}
+
 void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     const bool useResourceHeapTier2 = (GetDeviceInfo().resourceHeapTier >= 2);
     deviceToggles->Default(Toggle::UseD3D12ResourceHeapTier2, useResourceHeapTier2);
@@ -472,14 +480,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(
         Toggle::D3D12UseTempBufferInDepthStencilTextureAndBufferCopyWithNonZeroBufferOffset,
         GetDeviceInfo().programmableSamplePositionsTier == 0);
-
-    // Check DXC for use_dxc toggle, and default to use FXC
-    // TODO(dawn:1495): When implementing adapter toggles, promote UseDXC as adapter toggle, and do
-    // the validation when creating adapters.
-    if (!GetBackend()->IsDXCAvailable()) {
-        deviceToggles->ForceSet(Toggle::UseDXC, false);
-    }
-    deviceToggles->Default(Toggle::UseDXC, false);
 
     // Disable optimizations when using FXC
     // See https://crbug.com/dawn/1203
