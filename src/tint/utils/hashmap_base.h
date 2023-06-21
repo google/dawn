@@ -25,9 +25,7 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/vector.h"
 
-#ifndef NDEBUG
 #define TINT_ASSERT_ITERATORS_NOT_INVALIDATED
-#endif
 
 namespace tint::utils {
 
