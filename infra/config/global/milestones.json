@@ -41,5 +41,16 @@
             "win",
             "android"
         ]
+    },
+    "116": {
+        "name": "m116",
+        "chromium_project": "chromium-m116",
+        "ref": "refs/heads/chromium/5845",
+        "platforms": [
+            "linux",
+            "mac",
+            "win",
+            "android"
+        ]
     }
 }
