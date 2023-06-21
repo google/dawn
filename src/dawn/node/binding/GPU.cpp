@@ -105,7 +105,6 @@ GPU::GPU(Flags flags) : flags_(std::move(flags)) {
     if (auto dir = flags_.Get("dlldir")) {
         SetDllDir(dir->c_str());
     }
-    instance_.DiscoverDefaultPhysicalDevices();
 }
 
 interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::requestAdapter(

@@ -66,8 +66,6 @@ int Initialize(int* argc, char*** argv) {
     // Swiftshader crashes libFuzzer. When this is fixed, move this into Run so that error injection
     // for physical device discovery can be fuzzed.
     sInstance = std::make_unique<dawn::native::Instance>();
-    sInstance->DiscoverDefaultPhysicalDevices();
-
     return 0;
 }
 
