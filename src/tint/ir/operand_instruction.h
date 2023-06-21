@@ -57,13 +57,18 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
         ClearOperands();
         operands_ = std::move(operands);
         for (size_t i = 0; i < operands_.Length(); i++) {
-            operands_[i]->AddUsage({this, static_cast<uint32_t>(i)});
+            if (operands_[i]) {
+                operands_[i]->AddUsage({this, static_cast<uint32_t>(i)});
+            }
         }
     }
 
     /// Removes all operands from the instruction
     void ClearOperands() {
         for (uint32_t i = 0; i < operands_.Length(); i++) {
+            if (!operands_[i]) {
+                continue;
+            }
             operands_[i]->RemoveUsage({this, i});
         }
         operands_.Clear();
