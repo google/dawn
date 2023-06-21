@@ -32,7 +32,7 @@ void MultiInBlock::SetParams(std::initializer_list<BlockParam*> params) {
     params_ = std::move(params);
 }
 
-void MultiInBlock::AddInboundSiblingBranch(ir::Branch* node) {
+void MultiInBlock::AddInboundSiblingBranch(ir::Terminator* node) {
     TINT_ASSERT(IR, node != nullptr);
 
     if (node) {

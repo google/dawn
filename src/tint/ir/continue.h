@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_CONTINUE_H_
 #define SRC_TINT_IR_CONTINUE_H_
 
-#include "src/tint/ir/branch.h"
+#include "src/tint/ir/terminator.h"
 #include "src/tint/utils/castable.h"
 
 // Forward declarations
@@ -26,14 +26,14 @@ class Loop;
 namespace tint::ir {
 
 /// A continue instruction.
-class Continue : public utils::Castable<Continue, Branch> {
+class Continue : public utils::Castable<Continue, Terminator> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor
     /// @param loop the loop owning the continue block
-    /// @param args the branch arguments
+    /// @param args the arguments for the MultiInBlock
     explicit Continue(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
     ~Continue() override;
 

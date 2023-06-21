@@ -45,7 +45,7 @@ namespace tint::ir {
 ///          ┃           ▼           ┃
 ///          ┃  ┌─────────────────┐  ┃ BreakIf(false)
 /// ExitLoop ┃  │   Continuing    │━━┛
-///             │  (optional)     │
+///          ┃  │  (optional)     │
 ///          ┃  └─────────────────┘
 ///          ┃           ┃
 ///          ┃           ┃ BreakIf(true)

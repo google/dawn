@@ -39,6 +39,7 @@
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/terminator.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/transform/block_decorated_structs.h"
 #include "src/tint/ir/transform/merge_return.h"
@@ -479,7 +480,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             [&](ir::UserCall* c) { EmitUserCall(c); },        //
             [&](ir::Var* v) { EmitVar(v); },                  //
             [&](ir::If* i) { EmitIf(i); },                    //
-            [&](ir::Branch* b) { EmitBranch(b); },            //
+            [&](ir::Terminator* t) { EmitTerminator(t); },    //
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "unimplemented instruction: " << inst->TypeInfo().name;
@@ -492,14 +493,14 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
     }
 }
 
-void GeneratorImplIr::EmitBranch(ir::Branch* b) {
+void GeneratorImplIr::EmitTerminator(ir::Terminator* t) {
     tint::Switch(  //
-        b,         //
+        t,         //
         [&](ir::Return*) {
-            if (!b->Args().IsEmpty()) {
-                TINT_ASSERT(Writer, b->Args().Length() == 1u);
+            if (!t->Args().IsEmpty()) {
+                TINT_ASSERT(Writer, t->Args().Length() == 1u);
                 OperandList operands;
-                operands.push_back(Value(b->Args()[0]));
+                operands.push_back(Value(t->Args()[0]));
                 current_function_.push_inst(spv::Op::OpReturnValue, operands);
             } else {
                 current_function_.push_inst(spv::Op::OpReturn, {});
@@ -528,7 +529,7 @@ void GeneratorImplIr::EmitBranch(ir::Branch* b) {
         [&](ir::Unreachable*) { current_function_.push_inst(spv::Op::OpUnreachable, {}); },
 
         [&](Default) {
-            TINT_ICE(Writer, diagnostics_) << "unimplemented branch: " << b->TypeInfo().name;
+            TINT_ICE(Writer, diagnostics_) << "unimplemented branch: " << t->TypeInfo().name;
         });
 }
 
@@ -547,11 +548,11 @@ void GeneratorImplIr::EmitIf(ir::If* i) {
     uint32_t true_label = merge_label;
     uint32_t false_label = merge_label;
     if (true_block->Length() > 1 || i->HasResults() ||
-        (true_block->HasBranchTarget() && !true_block->Branch()->Is<ir::ExitIf>())) {
+        (true_block->HasTerminator() && !true_block->Terminator()->Is<ir::ExitIf>())) {
         true_label = Label(true_block);
     }
     if (false_block->Length() > 1 || i->HasResults() ||
-        (false_block->HasBranchTarget() && !false_block->Branch()->Is<ir::ExitIf>())) {
+        (false_block->HasTerminator() && !false_block->Terminator()->Is<ir::ExitIf>())) {
         false_label = Label(false_block);
     }
 
@@ -837,7 +838,7 @@ void GeneratorImplIr::EmitLoop(ir::Loop* loop) {
     EmitBlockInstructions(loop->Body());
 
     // Emit the loop continuing block.
-    if (loop->Continuing()->HasBranchTarget()) {
+    if (loop->Continuing()->HasTerminator()) {
         EmitBlock(loop->Continuing());
     } else {
         // We still need to emit a continuing block with a back-edge, even if it is unreachable.

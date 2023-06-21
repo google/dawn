@@ -109,48 +109,48 @@ class Builder {
     /// @returns a new multi-in block
     ir::MultiInBlock* MultiInBlock();
 
-    /// Creates a function flow node
+    /// Creates a function instruction
     /// @param name the function name
     /// @param return_type the function return type
     /// @param stage the function stage
     /// @param wg_size the workgroup_size
-    /// @returns the flow node
+    /// @returns the instruction
     ir::Function* Function(std::string_view name,
                            const type::Type* return_type,
                            Function::PipelineStage stage = Function::PipelineStage::kUndefined,
                            std::optional<std::array<uint32_t, 3>> wg_size = {});
 
-    /// Creates an if flow node
+    /// Creates an if instruction
     /// @param condition the if condition
-    /// @returns the flow node
+    /// @returns the instruction
     template <typename T>
     ir::If* If(T&& condition) {
         return Append(
             ir.instructions.Create<ir::If>(Value(std::forward<T>(condition)), Block(), Block()));
     }
 
-    /// Creates a loop flow node
-    /// @returns the flow node
+    /// Creates a loop instruction
+    /// @returns the instruction
     ir::Loop* Loop();
 
-    /// Creates a switch flow node
+    /// Creates a switch instruction
     /// @param condition the switch condition
-    /// @returns the flow node
+    /// @returns the instruction
     template <typename T>
     ir::Switch* Switch(T&& condition) {
         return Append(ir.instructions.Create<ir::Switch>(Value(std::forward<T>(condition))));
     }
 
-    /// Creates a case flow node for the given case branch.
+    /// Creates a case for the switch @p s with the given selectors
     /// @param s the switch to create the case into
     /// @param selectors the case selectors for the case statement
-    /// @returns the start block for the case flow node
+    /// @returns the start block for the case instruction
     ir::Block* Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selectors);
 
-    /// Creates a case flow node for the given case branch.
+    /// Creates a case for the switch @p s with the given selectors
     /// @param s the switch to create the case into
     /// @param selectors the case selectors for the case statement
-    /// @returns the start block for the case flow node
+    /// @returns the start block for the case instruction
     ir::Block* Case(ir::Switch* s, std::initializer_list<Switch::CaseSelector> selectors);
 
     /// Creates a new ir::Constant
@@ -563,7 +563,7 @@ class Builder {
 
     /// Creates a loop next iteration instruction
     /// @param loop the loop being iterated
-    /// @param args the branch arguments
+    /// @param args the arguments for the target MultiInBlock
     /// @returns the instruction
     template <typename... ARGS>
     ir::NextIteration* NextIteration(ir::Loop* loop, ARGS&&... args) {
@@ -574,7 +574,7 @@ class Builder {
     /// Creates a loop break-if instruction
     /// @param condition the break condition
     /// @param loop the loop being iterated
-    /// @param args the branch arguments
+    /// @param args the arguments for the target MultiInBlock
     /// @returns the instruction
     template <typename CONDITION, typename... ARGS>
     ir::BreakIf* BreakIf(CONDITION&& condition, ir::Loop* loop, ARGS&&... args) {
@@ -584,7 +584,7 @@ class Builder {
 
     /// Creates a continue instruction
     /// @param loop the loop being continued
-    /// @param args the branch arguments
+    /// @param args the arguments for the target MultiInBlock
     /// @returns the instruction
     template <typename... ARGS>
     ir::Continue* Continue(ir::Loop* loop, ARGS&&... args) {
@@ -594,7 +594,7 @@ class Builder {
 
     /// Creates an exit switch instruction
     /// @param sw the switch being exited
-    /// @param args the branch arguments
+    /// @param args the arguments for the target MultiInBlock
     /// @returns the instruction
     template <typename... ARGS>
     ir::ExitSwitch* ExitSwitch(ir::Switch* sw, ARGS&&... args) {
@@ -604,7 +604,7 @@ class Builder {
 
     /// Creates an exit loop instruction
     /// @param loop the loop being exited
-    /// @param args the branch arguments
+    /// @param args the arguments for the target MultiInBlock
     /// @returns the instruction
     template <typename... ARGS>
     ir::ExitLoop* ExitLoop(ir::Loop* loop, ARGS&&... args) {
@@ -614,7 +614,7 @@ class Builder {
 
     /// Creates an exit if instruction
     /// @param i the if being exited
-    /// @param args the branch arguments
+    /// @param args the arguments for the target MultiInBlock
     /// @returns the instruction
     template <typename... ARGS>
     ir::ExitIf* ExitIf(ir::If* i, ARGS&&... args) {
@@ -623,10 +623,10 @@ class Builder {
 
     /// Creates an exit instruction for the given control instruction
     /// @param inst the control instruction being exited
-    /// @param args the branch arguments
+    /// @param args the arguments for the target MultiInBlock
     /// @returns the exit instruction, or nullptr if the control instruction is not supported.
     template <typename... ARGS>
-    ir::Branch* Exit(ir::ControlInstruction* inst, ARGS&&... args) {
+    ir::Exit* Exit(ir::ControlInstruction* inst, ARGS&&... args) {
         return tint::Switch(
             inst,  //
             [&](ir::If* i) { return ExitIf(i, std::forward<ARGS>(args)...); },

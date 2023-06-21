@@ -226,7 +226,7 @@ class State {
     }
 
     void ExitSwitch(const ir::ExitSwitch* e) {
-        if (current_switch_case_ && current_switch_case_->Branch() == e) {
+        if (current_switch_case_ && current_switch_case_->Terminator() == e) {
             return;  // No need to emit
         }
         Append(b.Break());

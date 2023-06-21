@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/branch.h"
+#include "src/tint/ir/terminator.h"
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Branch);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::Terminator);
 
 namespace tint::ir {
 
-Branch::~Branch() = default;
+Terminator::~Terminator() = default;
 
 }  // namespace tint::ir

@@ -734,8 +734,6 @@ if(${TINT_BUILD_IR})
     ir/block.h
     ir/block_param.cc
     ir/block_param.h
-    ir/branch.cc
-    ir/branch.h
     ir/break_if.cc
     ir/break_if.h
     ir/builder.cc
@@ -799,6 +797,8 @@ if(${TINT_BUILD_IR})
     ir/switch.h
     ir/swizzle.cc
     ir/swizzle.h
+    ir/terminator.cc
+    ir/terminator.h
     ir/to_program.cc
     ir/to_program.h
     ir/unary.cc

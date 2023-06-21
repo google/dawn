@@ -58,10 +58,10 @@ class If : public utils::Castable<If, ControlInstruction> {
     /// @returns the if condition
     Value* Condition() { return operands_[kConditionOperandOffset]; }
 
-    /// @returns the true branch block
+    /// @returns the true block
     ir::Block* True() { return true_; }
 
-    /// @returns the false branch block
+    /// @returns the false block
     ir::Block* False() { return false_; }
 
   private:

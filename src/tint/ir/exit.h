@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_EXIT_H_
 #define SRC_TINT_IR_EXIT_H_
 
-#include "src/tint/ir/branch.h"
+#include "src/tint/ir/terminator.h"
 
 // Forward declarations
 namespace tint::ir {
@@ -25,7 +25,7 @@ class ControlInstruction;
 namespace tint::ir {
 
 /// The base class for all exit terminators.
-class Exit : public utils::Castable<Exit, Branch> {
+class Exit : public utils::Castable<Exit, Terminator> {
   public:
     ~Exit() override;
 

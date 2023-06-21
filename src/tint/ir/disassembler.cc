@@ -487,7 +487,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             }
             EmitLine();
         },
-        [&](Branch* b) { EmitBranch(b); },
+        [&](Terminator* b) { EmitTerminator(b); },
         [&](Default) { out_ << "Unknown instruction: " << inst->TypeInfo().name; });
 }
 
@@ -633,7 +633,7 @@ void Disassembler::EmitSwitch(Switch* s) {
     EmitLine();
 }
 
-void Disassembler::EmitBranch(Branch* b) {
+void Disassembler::EmitTerminator(Terminator* b) {
     SourceMarker sm(this);
     tint::Switch(
         b,                                                                                        //
@@ -650,7 +650,7 @@ void Disassembler::EmitBranch(Branch* b) {
             out_ << " %b" << IdOf(bi->Loop()->Body());
         },
         [&](Unreachable*) { out_ << "unreachable"; },
-        [&](Default) { out_ << "Unknown branch " << b->TypeInfo().name; });
+        [&](Default) { out_ << "unknown terminator " << b->TypeInfo().name; });
 
     if (!b->Args().IsEmpty()) {
         out_ << " ";

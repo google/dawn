@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_BRANCH_H_
-#define SRC_TINT_IR_BRANCH_H_
+#ifndef SRC_TINT_IR_TERMINATOR_H_
+#define SRC_TINT_IR_TERMINATOR_H_
 
 #include "src/tint/ir/operand_instruction.h"
 #include "src/tint/ir/value.h"
@@ -26,15 +26,15 @@ class Block;
 
 namespace tint::ir {
 
-/// A branch instruction.
-class Branch : public utils::Castable<Branch, OperandInstruction<1, 0>> {
+/// The base class of all instructions that terminate a block.
+class Terminator : public utils::Castable<Terminator, OperandInstruction<1, 0>> {
   public:
-    ~Branch() override;
+    ~Terminator() override;
 
-    /// @returns the branch arguments
+    /// @returns the terminator arguments
     virtual utils::Slice<Value* const> Args() { return operands_.Slice(); }
 };
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_BRANCH_H_
+#endif  // SRC_TINT_IR_TERMINATOR_H_

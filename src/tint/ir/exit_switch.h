@@ -33,7 +33,7 @@ class ExitSwitch : public utils::Castable<ExitSwitch, Exit> {
 
     /// Constructor
     /// @param sw the switch being exited
-    /// @param args the branch arguments
+    /// @param args the target MultiInBlock arguments
     explicit ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args = utils::Empty);
     ~ExitSwitch() override;
 

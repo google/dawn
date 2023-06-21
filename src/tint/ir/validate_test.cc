@@ -77,13 +77,13 @@ TEST_F(IR_ValidateTest, Function) {
     EXPECT_TRUE(res) << res.Failure().str();
 }
 
-TEST_F(IR_ValidateTest, Block_NoBranchAtEnd) {
+TEST_F(IR_ValidateTest, Block_NoTerminator) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:2:3 error: block: does not end in a branch
+    EXPECT_EQ(res.Failure().str(), R"(:2:3 error: block: does not end in a terminator instruction
   %b1 = block {
   ^^^^^^^^^^^
 
@@ -461,7 +461,7 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidateTest, Block_BranchInMiddle) {
+TEST_F(IR_ValidateTest, Block_TerminatorInMiddle) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
@@ -471,7 +471,8 @@ TEST_F(IR_ValidateTest, Block_BranchInMiddle) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: block: branch which isn't the final instruction
+    EXPECT_EQ(res.Failure().str(),
+              R"(:3:5 error: block: terminator which isn't the final instruction
     ret
     ^^^
 

@@ -33,7 +33,7 @@ class ExitIf : public utils::Castable<ExitIf, Exit> {
 
     /// Constructor
     /// @param i the if being exited
-    /// @param args the branch arguments
+    /// @param args the target MultiInBlock arguments
     explicit ExitIf(ir::If* i, utils::VectorRef<Value*> args = utils::Empty);
     ~ExitIf() override;
 

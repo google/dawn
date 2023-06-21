@@ -33,7 +33,7 @@ class ExitLoop : public utils::Castable<ExitLoop, Exit> {
 
     /// Constructor
     /// @param loop the loop being exited
-    /// @param args the branch arguments
+    /// @param args the target MultiInBlock arguments
     explicit ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
     ~ExitLoop() override;
 

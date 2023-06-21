@@ -22,65 +22,65 @@ namespace {
 using namespace tint::number_suffixes;  // NOLINT
 using IR_BlockTest = IRTestHelper;
 
-TEST_F(IR_BlockTest, HasBranchTarget_Empty) {
+TEST_F(IR_BlockTest, HasTerminator_Empty) {
     auto* blk = b.Block();
-    EXPECT_FALSE(blk->HasBranchTarget());
+    EXPECT_FALSE(blk->HasTerminator());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_NoBranch) {
+TEST_F(IR_BlockTest, HasTerminator_None) {
     auto* blk = b.Block();
     blk->Append(b.Add(mod.Types().i32(), 1_u, 2_u));
-    EXPECT_FALSE(blk->HasBranchTarget());
+    EXPECT_FALSE(blk->HasTerminator());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_BreakIf) {
+TEST_F(IR_BlockTest, HasTerminator_BreakIf) {
     auto* blk = b.Block();
     auto* loop = b.Loop();
     blk->Append(b.BreakIf(true, loop));
-    EXPECT_TRUE(blk->HasBranchTarget());
+    EXPECT_TRUE(blk->HasTerminator());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_Continue) {
+TEST_F(IR_BlockTest, HasTerminator_Continue) {
     auto* blk = b.Block();
     auto* loop = b.Loop();
     blk->Append(b.Continue(loop));
-    EXPECT_TRUE(blk->HasBranchTarget());
+    EXPECT_TRUE(blk->HasTerminator());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_ExitIf) {
+TEST_F(IR_BlockTest, HasTerminator_ExitIf) {
     auto* blk = b.Block();
     auto* if_ = b.If(true);
     blk->Append(b.ExitIf(if_));
-    EXPECT_TRUE(blk->HasBranchTarget());
+    EXPECT_TRUE(blk->HasTerminator());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_ExitLoop) {
+TEST_F(IR_BlockTest, HasTerminator_ExitLoop) {
     auto* blk = b.Block();
     auto* loop = b.Loop();
     blk->Append(b.ExitLoop(loop));
-    EXPECT_TRUE(blk->HasBranchTarget());
+    EXPECT_TRUE(blk->HasTerminator());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_ExitSwitch) {
+TEST_F(IR_BlockTest, HasTerminator_ExitSwitch) {
     auto* blk = b.Block();
     auto* s = b.Switch(1_u);
     blk->Append(b.ExitSwitch(s));
-    EXPECT_TRUE(blk->HasBranchTarget());
+    EXPECT_TRUE(blk->HasTerminator());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_NextIteration) {
+TEST_F(IR_BlockTest, HasTerminator_NextIteration) {
     auto* blk = b.Block();
     auto* loop = b.Loop();
     blk->Append(b.NextIteration(loop));
-    EXPECT_TRUE(blk->HasBranchTarget());
+    EXPECT_TRUE(blk->HasTerminator());
 }
 
-TEST_F(IR_BlockTest, HasBranchTarget_Return) {
+TEST_F(IR_BlockTest, HasTerminator_Return) {
     auto* f = b.Function("myFunc", mod.Types().void_());
 
     auto* blk = b.Block();
     blk->Append(b.Return(f));
-    EXPECT_TRUE(blk->HasBranchTarget());
+    EXPECT_TRUE(blk->HasTerminator());
 }
 
 TEST_F(IR_BlockTest, Append) {

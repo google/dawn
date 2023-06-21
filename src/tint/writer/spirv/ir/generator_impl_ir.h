@@ -33,7 +33,6 @@ class Access;
 class Binary;
 class Block;
 class BlockParam;
-class Branch;
 class BuiltinCall;
 class Construct;
 class ControlInstruction;
@@ -48,6 +47,7 @@ class Module;
 class MultiInBlock;
 class Store;
 class Switch;
+class Terminator;
 class UserCall;
 class Value;
 class Var;
@@ -184,9 +184,9 @@ class GeneratorImplIr {
     /// @param var the var instruction to emit
     void EmitVar(ir::Var* var);
 
-    /// Emit a branch instruction.
-    /// @param b the branch instruction to emit
-    void EmitBranch(ir::Branch* b);
+    /// Emit a terminator instruction.
+    /// @param term the terminator instruction to emit
+    void EmitTerminator(ir::Terminator* term);
 
     /// Emit the OpPhis for the given flow control instruction.
     /// @param inst the flow control instruction

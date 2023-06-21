@@ -172,13 +172,13 @@ class Impl {
         diagnostics_.add_error(tint::diag::System::IR, err, s);
     }
 
-    bool NeedBranch() { return current_block_ && !current_block_->HasBranchTarget(); }
+    bool NeedTerminator() { return current_block_ && !current_block_->HasTerminator(); }
 
-    void SetBranch(Branch* br) {
+    void SetTerminator(Terminator* terminator) {
         TINT_ASSERT(IR, current_block_);
-        TINT_ASSERT(IR, !current_block_->HasBranchTarget());
+        TINT_ASSERT(IR, !current_block_->HasTerminator());
 
-        current_block_->Append(br);
+        current_block_->Append(terminator);
         current_block_ = nullptr;
     }
 
@@ -211,7 +211,7 @@ class Impl {
                     // Folded away and doesn't appear in the IR.
                 },
                 [&](const ast::Variable* var) {
-                    // Setup the current flow node to be the root block for the module. The builder
+                    // Setup the current block to be the root block for the module. The builder
                     // will handle creating it if it doesn't exist already.
                     TINT_SCOPED_ASSIGNMENT(current_block_, builder_.RootBlock());
                     EmitVariable(var);
@@ -420,10 +420,9 @@ class Impl {
         TINT_SCOPED_ASSIGNMENT(current_block_, ir_func->StartTarget());
         EmitBlock(ast_func->body);
 
-        // If the branch target has already been set then a `return` was called. Only set in
-        // the case where `return` wasn't called.
-        if (NeedBranch()) {
-            SetBranch(builder_.Return(current_function_));
+        // Add a terminator if one was not already created.
+        if (NeedTerminator()) {
+            SetTerminator(builder_.Return(current_function_));
         }
 
         TINT_ASSERT(IR, control_stack_.IsEmpty());
@@ -593,9 +592,9 @@ class Impl {
         scopes_.Push();
         TINT_DEFER(scopes_.Pop());
 
-        // Note, this doesn't need to emit a Block as the current block flow node should be
-        // sufficient as the blocks all get flattened. Each flow control node will inject the
-        // basic blocks it requires.
+        // Note, this doesn't need to emit a Block as the current block should be sufficient as the
+        // blocks all get flattened. Each flow control node will inject the basic blocks it
+        // requires.
         EmitStatements(block->statements);
     }
 
@@ -615,9 +614,9 @@ class Impl {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
                 EmitBlock(stmt->body);
 
-                // If the true block did not branch, then emit an exit_if
-                if (NeedBranch()) {
-                    SetBranch(builder_.ExitIf(if_inst));
+                // If the true block did not terminate, then emit an exit_if
+                if (NeedTerminator()) {
+                    SetTerminator(builder_.ExitIf(if_inst));
                 }
             }
 
@@ -625,9 +624,9 @@ class Impl {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
                 EmitStatement(stmt->else_statement);
 
-                // If the false block did not branch, then emit an exit_if
-                if (NeedBranch()) {
-                    SetBranch(builder_.ExitIf(if_inst));
+                // If the false block did not terminate, then emit an exit_if
+                if (NeedTerminator()) {
+                    SetTerminator(builder_.ExitIf(if_inst));
                 }
             }
         }
@@ -650,8 +649,8 @@ class Impl {
             EmitStatements(stmt->body->statements);
 
             // The current block didn't `break`, `return` or `continue`, go to the continuing block.
-            if (NeedBranch()) {
-                SetBranch(builder_.Continue(loop_inst));
+            if (NeedTerminator()) {
+                SetTerminator(builder_.Continue(loop_inst));
             }
         }
 
@@ -660,9 +659,9 @@ class Impl {
             if (stmt->continuing) {
                 EmitBlock(stmt->continuing);
             }
-            // Branch back to the start block if the continue target didn't branch out already
-            if (NeedBranch()) {
-                SetBranch(builder_.NextIteration(loop_inst));
+            // Branch back to the start block if the continue target didn't terminate already
+            if (NeedTerminator()) {
+                SetTerminator(builder_.NextIteration(loop_inst));
             }
         }
     }
@@ -676,7 +675,7 @@ class Impl {
         // Continue is always empty, just go back to the start
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, loop_inst->Continuing());
-            SetBranch(builder_.NextIteration(loop_inst));
+            SetTerminator(builder_.NextIteration(loop_inst));
         }
 
         {
@@ -694,16 +693,16 @@ class Impl {
 
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
-                SetBranch(builder_.ExitIf(if_inst));
+                SetTerminator(builder_.ExitIf(if_inst));
             }
 
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
-                SetBranch(builder_.ExitLoop(loop_inst));
+                SetTerminator(builder_.ExitLoop(loop_inst));
             }
 
-            if (NeedBranch()) {
-                SetBranch(builder_.Continue(loop_inst));
+            if (NeedTerminator()) {
+                SetTerminator(builder_.Continue(loop_inst));
             }
         }
     }
@@ -724,8 +723,8 @@ class Impl {
             // Emit the for initializer before branching to the loop body
             EmitStatement(stmt->initializer);
 
-            if (NeedBranch()) {
-                SetBranch(builder_.NextIteration(loop_inst));
+            if (NeedTerminator()) {
+                SetTerminator(builder_.NextIteration(loop_inst));
             }
         }
 
@@ -744,24 +743,24 @@ class Impl {
 
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
-                SetBranch(builder_.ExitIf(if_inst));
+                SetTerminator(builder_.ExitIf(if_inst));
             }
 
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
-                SetBranch(builder_.ExitLoop(loop_inst));
+                SetTerminator(builder_.ExitLoop(loop_inst));
             }
         }
 
         EmitBlock(stmt->body);
-        if (NeedBranch()) {
-            SetBranch(builder_.Continue(loop_inst));
+        if (NeedTerminator()) {
+            SetTerminator(builder_.Continue(loop_inst));
         }
 
         if (stmt->continuing) {
             TINT_SCOPED_ASSIGNMENT(current_block_, loop_inst->Continuing());
             EmitStatement(stmt->continuing);
-            SetBranch(builder_.NextIteration(loop_inst));
+            SetTerminator(builder_.NextIteration(loop_inst));
         }
     }
 
@@ -790,8 +789,8 @@ class Impl {
             TINT_SCOPED_ASSIGNMENT(current_block_, builder_.Case(switch_inst, selectors));
             EmitBlock(c->Body()->Declaration());
 
-            if (NeedBranch()) {
-                SetBranch(builder_.ExitSwitch(switch_inst));
+            if (NeedTerminator()) {
+                SetTerminator(builder_.ExitSwitch(switch_inst));
             }
         }
     }
@@ -806,9 +805,9 @@ class Impl {
             ret_value = ret.Get();
         }
         if (ret_value) {
-            SetBranch(builder_.Return(current_function_, ret_value));
+            SetTerminator(builder_.Return(current_function_, ret_value));
         } else {
-            SetBranch(builder_.Return(current_function_));
+            SetTerminator(builder_.Return(current_function_));
         }
     }
 
@@ -817,9 +816,9 @@ class Impl {
         TINT_ASSERT(IR, current_control);
 
         if (auto* c = current_control->As<Loop>()) {
-            SetBranch(builder_.ExitLoop(c));
+            SetTerminator(builder_.ExitLoop(c));
         } else if (auto* s = current_control->As<Switch>()) {
-            SetBranch(builder_.ExitSwitch(s));
+            SetTerminator(builder_.ExitSwitch(s));
         } else {
             TINT_UNREACHABLE(IR, diagnostics_);
         }
@@ -830,7 +829,7 @@ class Impl {
         TINT_ASSERT(IR, current_control);
 
         if (auto* c = current_control->As<Loop>()) {
-            SetBranch(builder_.Continue(c));
+            SetTerminator(builder_.Continue(c));
         } else {
             TINT_UNREACHABLE(IR, diagnostics_);
         }
@@ -853,7 +852,7 @@ class Impl {
         if (!cond) {
             return;
         }
-        SetBranch(builder_.BreakIf(cond.Get(), current_control->As<ir::Loop>()));
+        SetTerminator(builder_.BreakIf(cond.Get(), current_control->As<ir::Loop>()));
     }
 
     struct AccessorInfo {
@@ -1179,11 +1178,11 @@ class Impl {
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
                 auto rhs = EmitExpression(expr->rhs);
-                SetBranch(builder_.ExitIf(if_inst, rhs.Get()));
+                SetTerminator(builder_.ExitIf(if_inst, rhs.Get()));
             }
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
-                SetBranch(builder_.ExitIf(if_inst, builder_.Constant(false)));
+                SetTerminator(builder_.ExitIf(if_inst, builder_.Constant(false)));
             }
         } else {
             //   res = lhs || rhs;
@@ -1197,12 +1196,12 @@ class Impl {
             //   }
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
-                SetBranch(builder_.ExitIf(if_inst, builder_.Constant(true)));
+                SetTerminator(builder_.ExitIf(if_inst, builder_.Constant(true)));
             }
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
                 auto rhs = EmitExpression(expr->rhs);
-                SetBranch(builder_.ExitIf(if_inst, rhs.Get()));
+                SetTerminator(builder_.ExitIf(if_inst, rhs.Get()));
             }
         }
 

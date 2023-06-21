@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_NEXT_ITERATION_H_
 #define SRC_TINT_IR_NEXT_ITERATION_H_
 
-#include "src/tint/ir/branch.h"
+#include "src/tint/ir/terminator.h"
 #include "src/tint/utils/castable.h"
 
 // Forward declarations
@@ -26,14 +26,14 @@ class Loop;
 namespace tint::ir {
 
 /// A next iteration instruction.
-class NextIteration : public utils::Castable<NextIteration, Branch> {
+class NextIteration : public utils::Castable<NextIteration, Terminator> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor
     /// @param loop the loop being iterated
-    /// @param args the branch arguments
+    /// @param args the arguments for the MultiInBlock
     explicit NextIteration(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
     ~NextIteration() override;
 

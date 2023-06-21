@@ -166,13 +166,13 @@ class Validator {
     void CheckBlock(Block* blk) {
         TINT_SCOPED_ASSIGNMENT(current_block_, blk);
 
-        if (!blk->HasBranchTarget()) {
-            AddError(blk, "block: does not end in a branch");
+        if (!blk->HasTerminator()) {
+            AddError(blk, "block: does not end in a terminator instruction");
         }
 
         for (auto* inst : *blk) {
-            if (inst->Is<ir::Branch>() && inst != blk->Branch()) {
-                AddError(inst, "block: branch which isn't the final instruction");
+            if (inst->Is<ir::Terminator>() && inst != blk->Terminator()) {
+                AddError(inst, "block: terminator which isn't the final instruction");
                 continue;
             }
 
@@ -182,19 +182,19 @@ class Validator {
 
     void CheckInstruction(Instruction* inst) {
         tint::Switch(
-            inst,                                //
-            [&](Access* a) { CheckAccess(a); },  //
-            [&](Binary*) {},                     //
-            [&](Branch* b) { CheckBranch(b); },  //
-            [&](Call* c) { CheckCall(c); },      //
-            [&](If* if_) { CheckIf(if_); },      //
-            [&](Load*) {},                       //
-            [&](Loop*) {},                       //
-            [&](Store*) {},                      //
-            [&](Switch*) {},                     //
-            [&](Swizzle*) {},                    //
-            [&](Unary*) {},                      //
-            [&](Var*) {},                        //
+            inst,                                        //
+            [&](Access* a) { CheckAccess(a); },          //
+            [&](Binary*) {},                             //
+            [&](Call* c) { CheckCall(c); },              //
+            [&](If* if_) { CheckIf(if_); },              //
+            [&](Load*) {},                               //
+            [&](Loop*) {},                               //
+            [&](Store*) {},                              //
+            [&](Switch*) {},                             //
+            [&](Swizzle*) {},                            //
+            [&](Terminator* b) { CheckTerminator(b); },  //
+            [&](Unary*) {},                              //
+            [&](Var*) {},                                //
             [&](Default) {
                 AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
             });
@@ -282,7 +282,7 @@ class Validator {
         }
     }
 
-    void CheckBranch(ir::Branch* b) {
+    void CheckTerminator(ir::Terminator* b) {
         tint::Switch(
             b,                           //
             [&](ir::BreakIf*) {},        //
@@ -298,7 +298,7 @@ class Validator {
             },
             [&](ir::Unreachable*) {},  //
             [&](Default) {
-                AddError(std::string("missing validation of branch: ") + b->TypeInfo().name);
+                AddError(std::string("missing validation of terminator: ") + b->TypeInfo().name);
             });
     }
 

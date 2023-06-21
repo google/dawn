@@ -17,8 +17,8 @@
 
 #include <utility>
 
-#include "src/tint/ir/branch.h"
 #include "src/tint/ir/instruction.h"
+#include "src/tint/ir/terminator.h"
 #include "src/tint/utils/vector.h"
 
 // Forward declarations
@@ -29,25 +29,24 @@ class ControlInstruction;
 namespace tint::ir {
 
 /// A block of statements. The instructions in the block are a linear list of instructions to
-/// execute. The block will branch at the end. The only blocks which do not branch are the end
-/// blocks of functions.
+/// execute. The block will terminate with a Terminator instruction at the end.
 class Block : public utils::Castable<Block> {
   public:
     /// Constructor
     Block();
     ~Block() override;
 
-    /// @returns true if this is block has a branch target set
-    bool HasBranchTarget() {
-        return instructions_.last != nullptr && instructions_.last->Is<ir::Branch>();
+    /// @returns true if this is block has a terminator instruction
+    bool HasTerminator() {
+        return instructions_.last != nullptr && instructions_.last->Is<ir::Terminator>();
     }
 
-    /// @return the node this block branches to or nullptr if the block doesn't branch
-    ir::Branch* Branch() {
-        if (!HasBranchTarget()) {
+    /// @return the terminator instruction for this block
+    ir::Terminator* Terminator() {
+        if (!HasTerminator()) {
             return nullptr;
         }
-        return instructions_.last->As<ir::Branch>();
+        return instructions_.last->As<ir::Terminator>();
     }
 
     /// @returns the instructions in the block

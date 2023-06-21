@@ -91,7 +91,7 @@ struct MergeReturn::State {
         }
 
         // Look to see if the function ends with a return
-        fn_return = tint::As<Return>(fn->StartTarget()->Branch());
+        fn_return = tint::As<Return>(fn->StartTarget()->Terminator());
 
         // Process the function's block.
         // This will traverse into control instructions that hold returns, and apply the necessary
@@ -139,7 +139,7 @@ struct MergeReturn::State {
 
             if (inst->Is<Unreachable>()) {
                 // Unreachable can become reachable once returns are turned into exits.
-                // As this is the terminator for the branch, simply stop processing the
+                // As this is the terminator for the block, simply stop processing the
                 // instructions. A appropriate terminator will be created for this block below.
                 inst->Remove();
                 break;
@@ -170,8 +170,8 @@ struct MergeReturn::State {
             // new_value_with_type returns a new RuntimeValue with the same type as 'v'
             auto new_value_with_type = [&](Value* v) { return b.InstructionResult(v->Type()); };
 
-            if (inner_if->True()->HasBranchTarget()) {
-                if (auto* exit_if = inner_if->True()->Branch()->As<ExitIf>()) {
+            if (inner_if->True()->HasTerminator()) {
+                if (auto* exit_if = inner_if->True()->Terminator()->As<ExitIf>()) {
                     // Ensure the associated 'if' is updated.
                     exit_if->SetIf(inner_if);
 
@@ -190,7 +190,7 @@ struct MergeReturn::State {
             // Loop over the 'if' instructions, starting with the inner-most, and add any missing
             // terminating instructions to the blocks holding the 'if'.
             for (auto* i = inner_if; i; i = tint::As<If>(i->Block()->Parent())) {
-                if (!i->Block()->HasBranchTarget()) {
+                if (!i->Block()->HasTerminator()) {
                     // Append the exit instruction to the block holding the 'if'.
                     utils::Vector<InstructionResult*, 8> exit_args = i->Results();
                     if (!i->HasResults()) {

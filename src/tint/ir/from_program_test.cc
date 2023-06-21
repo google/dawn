@@ -26,9 +26,9 @@
 namespace tint::ir {
 namespace {
 
-/// Looks for the flow node with the given type T.
-/// If no flow node is found, then nullptr is returned.
-/// If multiple flow nodes are found with the type T, then an error is raised and the first is
+/// Looks for the instruction with the given type T.
+/// If no instruction is found, then nullptr is returned.
+/// If multiple instructions are found with the type T, then an error is raised and the first is
 /// returned.
 template <typename T>
 T* FindSingleInstruction(Module& mod) {
@@ -812,11 +812,11 @@ TEST_F(IR_FromProgramTest, Switch) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = flow->Cases();
+    auto cases = swtch->Cases();
     ASSERT_EQ(3u, cases.Length());
 
     ASSERT_EQ(1u, cases[0].selectors.Length());
@@ -864,11 +864,11 @@ TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = flow->Cases();
+    auto cases = swtch->Cases();
     ASSERT_EQ(1u, cases.Length());
     ASSERT_EQ(3u, cases[0].selectors.Length());
     ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<constant::Scalar<tint::i32>>());
@@ -903,11 +903,11 @@ TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = flow->Cases();
+    auto cases = swtch->Cases();
     ASSERT_EQ(1u, cases.Length());
     ASSERT_EQ(1u, cases[0].selectors.Length());
     EXPECT_TRUE(cases[0].selectors[0].IsDefault());
@@ -936,11 +936,11 @@ TEST_F(IR_FromProgramTest, Switch_WithBreak) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* flow = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = flow->Cases();
+    auto cases = swtch->Cases();
     ASSERT_EQ(2u, cases.Length());
     ASSERT_EQ(1u, cases[0].selectors.Length());
     ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<constant::Scalar<tint::i32>>());
@@ -981,11 +981,11 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
 
     auto m = res.Move();
 
-    auto* flow = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
-    auto cases = flow->Cases();
+    auto cases = swtch->Cases();
     ASSERT_EQ(2u, cases.Length());
     ASSERT_EQ(1u, cases[0].selectors.Length());
     ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<constant::Scalar<tint::i32>>());

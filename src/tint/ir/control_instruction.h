@@ -17,7 +17,6 @@
 
 #include <utility>
 
-#include "src/tint/ir/branch.h"
 #include "src/tint/ir/operand_instruction.h"
 
 // Forward declarations
@@ -28,7 +27,7 @@ class Exit;
 
 namespace tint::ir {
 
-/// Base class of instructions that perform branches to two or more blocks, owned by the
+/// Base class of instructions that perform control flow to two or more blocks, owned by the
 /// ControlInstruction.
 class ControlInstruction : public utils::Castable<ControlInstruction, OperandInstruction<1, 1>> {
   public:
@@ -60,7 +59,7 @@ class ControlInstruction : public utils::Castable<ControlInstruction, OperandIns
         SetResults(utils::Vector{std::forward<ARGS>(values)...});
     }
 
-    /// @return All the exit branches for the flow control instruction
+    /// @return All the exits for the flow control instruction
     const utils::Hashset<Exit*, 2>& Exits() const { return exits_; }
 
     /// Adds the exit to the flow control instruction

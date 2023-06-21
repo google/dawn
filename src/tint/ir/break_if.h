@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_BREAK_IF_H_
 #define SRC_TINT_IR_BREAK_IF_H_
 
-#include "src/tint/ir/branch.h"
+#include "src/tint/ir/terminator.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/castable.h"
 
@@ -27,7 +27,7 @@ class Loop;
 namespace tint::ir {
 
 /// A break-if iteration instruction.
-class BreakIf : public utils::Castable<BreakIf, Branch> {
+class BreakIf : public utils::Castable<BreakIf, Terminator> {
   public:
     /// The offset in Operands() for the condition
     static constexpr size_t kConditionOperandOffset = 0;
@@ -38,11 +38,11 @@ class BreakIf : public utils::Castable<BreakIf, Branch> {
     /// Constructor
     /// @param condition the break condition
     /// @param loop the loop containing the break-if
-    /// @param args the branch arguments
+    /// @param args the MultiInBlock arguments
     BreakIf(Value* condition, ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
     ~BreakIf() override;
 
-    /// @returns the branch arguments
+    /// @returns the MultiInBlock arguments
     utils::Slice<Value* const> Args() override {
         return operands_.Slice().Offset(kArgsOperandOffset);
     }

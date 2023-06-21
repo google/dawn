@@ -126,7 +126,7 @@ class Disassembler {
     void EmitArgs(Call* call);
     void EmitBinary(Binary* b);
     void EmitUnary(Unary* b);
-    void EmitBranch(Branch* b);
+    void EmitTerminator(Terminator* b);
     void EmitSwitch(Switch* s);
     void EmitLoop(Loop* l);
     void EmitIf(If* i);

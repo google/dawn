@@ -15,12 +15,12 @@
 #ifndef SRC_TINT_IR_UNREACHABLE_H_
 #define SRC_TINT_IR_UNREACHABLE_H_
 
-#include "src/tint/ir/branch.h"
+#include "src/tint/ir/terminator.h"
 
 namespace tint::ir {
 
 /// An unreachable instruction in the IR.
-class Unreachable : public utils::Castable<Unreachable, Branch> {
+class Unreachable : public utils::Castable<Unreachable, Terminator> {
   public:
     ~Unreachable() override;
 };
