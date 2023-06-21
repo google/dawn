@@ -408,7 +408,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlo
     auto tb = b.With(ifelse->True());
     tb.Return(func, 1_i);
     auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse, b.Constant(8_i));
+    fb.ExitIf(ifelse, nullptr);
 
     sb.Return(func, ifelse->Result(0));
 
@@ -420,7 +420,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlo
         ret 1i
       }
       %b3 = block {  # false
-        exit_if 8i  # if_1
+        exit_if undef  # if_1
       }
     }
     ret %3
@@ -441,7 +441,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlo
         exit_if undef  # if_1
       }
       %b3 = block {  # false
-        exit_if 8i  # if_1
+        exit_if undef  # if_1
       }
     }
     %6:bool = load %continue_execution
