@@ -47,7 +47,7 @@ TEST_F(IR_ValidateTest, RootBlock_NonVar) {
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
     EXPECT_EQ(res.Failure().str(), R"(:2:3 error: root block: invalid instruction: tint::ir::Loop
-  loop [b: %b2] {
+  loop [b: %b2] {  # loop_1
   ^^^^^^^^^^^^^
 
 :1:1 note: In block
@@ -56,7 +56,7 @@ TEST_F(IR_ValidateTest, RootBlock_NonVar) {
 
 note: # Disassembly
 %b1 = block {  # root
-  loop [b: %b2] {
+  loop [b: %b2] {  # loop_1
     %b2 = block {  # body
       continue %b3
     }
@@ -503,7 +503,7 @@ TEST_F(IR_ValidateTest, If_ConditionIsBool) {
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
     EXPECT_EQ(res.Failure().str(), R"(:3:8 error: if: condition must be a `bool` type
-    if 1i [t: %b2, f: %b3] {
+    if 1i [t: %b2, f: %b3] {  # if_1
        ^^
 
 :2:3 note: In block
@@ -513,7 +513,7 @@ TEST_F(IR_ValidateTest, If_ConditionIsBool) {
 note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
-    if 1i [t: %b2, f: %b3] {
+    if 1i [t: %b2, f: %b3] {  # if_1
       %b2 = block {  # true
         ret
       }

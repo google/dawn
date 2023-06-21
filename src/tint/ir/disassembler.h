@@ -108,6 +108,9 @@ class Disassembler {
 
     size_t IdOf(Block* blk);
     std::string_view IdOf(Value* node);
+    std::string_view NameOf(If* inst);
+    std::string_view NameOf(Loop* inst);
+    std::string_view NameOf(Switch* inst);
 
     void EmitBlock(Block* blk, std::string_view comment = "");
     void EmitFunction(Function* func);
@@ -148,6 +151,9 @@ class Disassembler {
     utils::Hashmap<Block*, Source, 8> block_to_src_;
     utils::Hashmap<Instruction*, Source, 8> instruction_to_src_;
     utils::Hashmap<Usage, Source, 8, Usage::Hasher> operand_to_src_;
+    utils::Hashmap<If*, std::string, 8> if_names_;
+    utils::Hashmap<Loop*, std::string, 8> loop_names_;
+    utils::Hashmap<Switch*, std::string, 8> switch_names_;
 };
 
 }  // namespace tint::ir

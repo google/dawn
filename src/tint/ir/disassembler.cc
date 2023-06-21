@@ -99,6 +99,23 @@ std::string_view Disassembler::IdOf(Value* value) {
     });
 }
 
+std::string_view Disassembler::NameOf(If* inst) {
+    TINT_ASSERT(IR, inst);
+    return if_names_.GetOrCreate(inst, [&] { return "if_" + std::to_string(if_names_.Count()); });
+}
+
+std::string_view Disassembler::NameOf(Loop* inst) {
+    TINT_ASSERT(IR, inst);
+    return loop_names_.GetOrCreate(inst,
+                                   [&] { return "loop_" + std::to_string(loop_names_.Count()); });
+}
+
+std::string_view Disassembler::NameOf(Switch* inst) {
+    TINT_ASSERT(IR, inst);
+    return switch_names_.GetOrCreate(
+        inst, [&] { return "switch_" + std::to_string(switch_names_.Count()); });
+}
+
 Source::Location Disassembler::MakeCurrentLocation() {
     return Source::Location{current_output_line_, out_.tellp() - current_output_start_pos_ + 1};
 }
@@ -517,7 +534,7 @@ void Disassembler::EmitIf(If* i) {
     out_ << "]";
     sm.Store(i);
 
-    out_ << " {";
+    out_ << " {  # " << NameOf(i);
     EmitLine();
 
     if (has_true) {
@@ -558,7 +575,7 @@ void Disassembler::EmitLoop(Loop* l) {
     out_ << "loop [" << utils::Join(parts, ", ") << "]";
     sm.Store(l);
 
-    out_ << " {";
+    out_ << " {  # " << NameOf(l);
     EmitLine();
 
     if (!l->Initializer()->IsEmpty()) {
@@ -603,7 +620,7 @@ void Disassembler::EmitSwitch(Switch* s) {
         }
         out_ << ", %b" << IdOf(c.Block()) << ")";
     }
-    out_ << "] {";
+    out_ << "] {  # " << NameOf(s);
     EmitLine();
 
     for (auto& c : s->Cases()) {
@@ -641,6 +658,12 @@ void Disassembler::EmitBranch(Branch* b) {
     }
     sm.Store(b);
 
+    tint::Switch(
+        b,                                                                  //
+        [&](ir::ExitIf* e) { out_ << "  # " << NameOf(e->If()); },          //
+        [&](ir::ExitSwitch* e) { out_ << "  # " << NameOf(e->Switch()); },  //
+        [&](ir::ExitLoop* e) { out_ << "  # " << NameOf(e->Loop()); }       //
+    );
     EmitLine();
 }
 

@@ -456,17 +456,17 @@ TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_LogicalAnd) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:bool = call %my_func
-    %logical_and:bool = if %3 [t: %b3, f: %b4] {
+    %logical_and:bool = if %3 [t: %b3, f: %b4] {  # if_1
       %b3 = block {  # true
-        exit_if false
+        exit_if false  # if_1
       }
       %b4 = block {  # false
-        exit_if false
+        exit_if false  # if_1
       }
     }
-    if %logical_and [t: %b5] {
+    if %logical_and [t: %b5] {  # if_2
       %b5 = block {  # true
-        exit_if
+        exit_if  # if_2
       }
     }
     ret
@@ -492,17 +492,17 @@ TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_LogicalOr) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
     %3:bool = call %my_func
-    %logical_or:bool = if %3 [t: %b3, f: %b4] {
+    %logical_or:bool = if %3 [t: %b3, f: %b4] {  # if_1
       %b3 = block {  # true
-        exit_if true
+        exit_if true  # if_1
       }
       %b4 = block {  # false
-        exit_if true
+        exit_if true  # if_1
       }
     }
-    if %logical_or [t: %b5] {
+    if %logical_or [t: %b5] {  # if_2
       %b5 = block {  # true
-        exit_if
+        exit_if  # if_2
       }
     }
     ret
@@ -760,17 +760,17 @@ TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Compound) {
   %b2 = block {
     %3:f32 = call %my_func
     %4:bool = lt %3, 2.0f
-    %tint_symbol:bool = if %4 [t: %b3, f: %b4] {
+    %tint_symbol:bool = if %4 [t: %b3, f: %b4] {  # if_1
       %b3 = block {  # true
         %6:f32 = call %my_func
         %7:f32 = call %my_func
         %8:f32 = mul 2.29999995231628417969f, %7
         %9:f32 = div %6, %8
         %10:bool = gt 2.5f, %9
-        exit_if %10
+        exit_if %10  # if_1
       }
       %b4 = block {  # false
-        exit_if false
+        exit_if false  # if_1
       }
     }
     ret
