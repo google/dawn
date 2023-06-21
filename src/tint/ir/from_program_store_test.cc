@@ -34,8 +34,7 @@ TEST_F(IR_FromProgramStoreTest, EmitStatement_Assign) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %a:ptr<private, u32, read_write> = var
 }
 

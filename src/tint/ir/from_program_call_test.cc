@@ -99,8 +99,7 @@ TEST_F(IR_FromProgramCallTest, EmitExpression_Convert) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %i:ptr<private, i32, read_write> = var, 1i
 }
 
@@ -121,8 +120,7 @@ TEST_F(IR_FromProgramCallTest, EmitExpression_ConstructEmpty) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %i:ptr<private, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
 }
 
@@ -137,8 +135,7 @@ TEST_F(IR_FromProgramCallTest, EmitExpression_Construct) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %i:ptr<private, f32, read_write> = var, 1.0f
 }
 

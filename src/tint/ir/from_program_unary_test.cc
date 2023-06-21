@@ -103,8 +103,7 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_AddressOf) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v2:ptr<private, i32, read_write> = var
 }
 
@@ -127,8 +126,7 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Indirection) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v3:ptr<private, i32, read_write> = var
 }
 

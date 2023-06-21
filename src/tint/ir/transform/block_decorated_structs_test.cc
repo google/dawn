@@ -64,8 +64,7 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:i32 @offset(0)
 }
 
-# Root block
-%b1 = block {
+%b1 = block {  # root
   %1:ptr<uniform, tint_symbol_1, read_write> = var @binding_point(0, 0)
 }
 
@@ -98,8 +97,7 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:i32 @offset(0)
 }
 
-# Root block
-%b1 = block {
+%b1 = block {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
 }
 
@@ -136,8 +134,7 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:array<i32> @offset(0)
 }
 
-# Root block
-%b1 = block {
+%b1 = block {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
 }
 
@@ -191,8 +188,7 @@ tint_symbol = struct @align(4), @block {
   arr:array<i32> @offset(4)
 }
 
-# Root block
-%b1 = block {
+%b1 = block {  # root
   %1:ptr<storage, tint_symbol, read_write> = var @binding_point(0, 0)
 }
 
@@ -240,8 +236,7 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:MyStruct @offset(0)
 }
 
-# Root block
-%b1 = block {
+%b1 = block {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
   %2:ptr<private, MyStruct, read_write> = var
 }
@@ -293,8 +288,7 @@ tint_symbol_5 = struct @align(4), @block {
   tint_symbol_4:i32 @offset(0)
 }
 
-# Root block
-%b1 = block {
+%b1 = block {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
   %2:ptr<storage, tint_symbol_3, read_write> = var @binding_point(0, 1)
   %3:ptr<storage, tint_symbol_5, read_write> = var @binding_point(0, 2)

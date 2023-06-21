@@ -109,7 +109,7 @@ class Disassembler {
     size_t IdOf(Block* blk);
     std::string_view IdOf(Value* node);
 
-    void EmitBlock(Block* blk);
+    void EmitBlock(Block* blk, std::string_view comment = "");
     void EmitFunction(Function* func);
     void EmitParamAttributes(FunctionParam* p);
     void EmitReturnAttributes(Function* func);

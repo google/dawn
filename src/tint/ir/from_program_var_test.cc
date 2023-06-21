@@ -31,8 +31,7 @@ TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_NoInit) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %a:ptr<private, u32, read_write> = var
 }
 
@@ -46,8 +45,7 @@ TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_Init) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %a:ptr<private, u32, read_write> = var, 2u
 }
 
@@ -61,8 +59,7 @@ TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_GroupBinding) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(# Root block
-%b1 = block {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %a:ptr<storage, u32, read> = var @binding_point(2, 3)
 }
 
