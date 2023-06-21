@@ -1174,16 +1174,16 @@ class Impl {
             //   if (lhs) {
             //     res = rhs;
             //   } else {
-            //     res = lhs;
+            //     res = false;
             //   }
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
                 auto rhs = EmitExpression(expr->rhs);
-                SetBranch(builder_.ExitIf(if_inst, utils::Vector{rhs.Get()}));
+                SetBranch(builder_.ExitIf(if_inst, rhs.Get()));
             }
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
-                SetBranch(builder_.ExitIf(if_inst, utils::Vector{lhs.Get()}));
+                SetBranch(builder_.ExitIf(if_inst, builder_.Constant(false)));
             }
         } else {
             //   res = lhs || rhs;
@@ -1191,18 +1191,18 @@ class Impl {
             // transform into:
             //
             //   if (lhs) {
-            //     res = lhs;
+            //     res = true;
             //   } else {
             //     res = rhs;
             //   }
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
-                SetBranch(builder_.ExitIf(if_inst, utils::Vector{lhs.Get()}));
+                SetBranch(builder_.ExitIf(if_inst, builder_.Constant(true)));
             }
             {
                 TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
                 auto rhs = EmitExpression(expr->rhs);
-                SetBranch(builder_.ExitIf(if_inst, utils::Vector{rhs.Get()}));
+                SetBranch(builder_.ExitIf(if_inst, rhs.Get()));
             }
         }
 

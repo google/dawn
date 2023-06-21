@@ -39,12 +39,14 @@ class IRToProgramRoundtripTest : public ProgramTestHelper {
         auto ir_module = FromProgram(&input_program);
         ASSERT_TRUE(ir_module);
 
+        tint::ir::Disassembler d{ir_module.Get()};
+        auto disassembly = d.Disassemble();
+
         auto output_program = ToProgram(ir_module.Get());
         if (!output_program.IsValid()) {
-            tint::ir::Disassembler d{ir_module.Get()};
             FAIL() << output_program.Diagnostics().str() << std::endl  //
                    << "IR:" << std::endl                               //
-                   << d.Disassemble() << std::endl                     //
+                   << disassembly << std::endl                         //
                    << "AST:" << std::endl                              //
                    << Program::printer(&output_program) << std::endl;
         }
@@ -56,10 +58,7 @@ class IRToProgramRoundtripTest : public ProgramTestHelper {
 
         auto expected = expected_wgsl.empty() ? input : utils::TrimSpace(expected_wgsl);
         auto got = utils::TrimSpace(output.wgsl);
-        if (expected != got) {
-            tint::ir::Disassembler d{ir_module.Get()};
-            EXPECT_EQ(expected, got) << "IR:" << std::endl << d.Disassemble();
-        }
+        EXPECT_EQ(expected, got) << "IR:" << std::endl << disassembly;
     }
 
     void Test(std::string_view wgsl) { Test(wgsl, wgsl); }
@@ -266,8 +265,7 @@ fn f(a : i32, b : u32) -> i32 {
 // Short-circuiting binary ops
 ////////////////////////////////////////////////////////////////////////////////
 
-// TODO(crbug.com/tint/1902): Pattern detect this
-TEST_F(IRToProgramRoundtripTest, DISABLED_BinaryOp_LogicalAnd) {
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Param_2) {
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
   return (a && b);
@@ -275,11 +273,225 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-// TODO(crbug.com/tint/1902): Pattern detect this
-TEST_F(IRToProgramRoundtripTest, DISABLED_BinaryOp_LogicalOr) {
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Param_3_ab_c) {
+    Test(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  return ((a && b) && c);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Param_3_a_bc) {
+    Test(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  return ((a && b) && c);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Let_2) {
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
-  return (a && b);
+  let l = (a && b);
+  return l;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Let_3_ab_c) {
+    Test(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  let l = ((a && b) && c);
+  return l;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Let_3_a_bc) {
+    Test(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  let l = (a && (b && c));
+  return l;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Call_2) {
+    Test(R"(
+fn a() -> bool {
+  return true;
+}
+
+fn b() -> bool {
+  return true;
+}
+
+fn f() -> bool {
+  return (a() && b());
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Call_3_ab_c) {
+    Test(R"(
+fn a() -> bool {
+  return true;
+}
+
+fn b() -> bool {
+  return true;
+}
+
+fn c() -> bool {
+  return true;
+}
+
+fn f() -> bool {
+  return ((a() && b()) && c());
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Call_3_a_bc) {
+    Test(R"(
+fn a() -> bool {
+  return true;
+}
+
+fn b() -> bool {
+  return true;
+}
+
+fn c() -> bool {
+  return true;
+}
+
+fn f() -> bool {
+  return (a() && (b() && c()));
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Param_2) {
+    Test(R"(
+fn f(a : bool, b : bool) -> bool {
+  return (a || b);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Param_3_ab_c) {
+    Test(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  return ((a || b) || c);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Param_3_a_bc) {
+    Test(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  return (a || (b || c));
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Let_2) {
+    Test(R"(
+fn f(a : bool, b : bool) -> bool {
+  let l = (a || b);
+  return l;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Let_3_ab_c) {
+    Test(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  let l = ((a || b) || c);
+  return l;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Let_3_a_bc) {
+    Test(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  let l = (a || (b || c));
+  return l;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Call_2) {
+    Test(R"(
+fn a() -> bool {
+  return true;
+}
+
+fn b() -> bool {
+  return true;
+}
+
+fn f() -> bool {
+  return (a() || b());
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Call_3_ab_c) {
+    Test(R"(
+fn a() -> bool {
+  return true;
+}
+
+fn b() -> bool {
+  return true;
+}
+
+fn c() -> bool {
+  return true;
+}
+
+fn f() -> bool {
+  return ((a() || b()) || c());
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Call_3_a_bc) {
+    Test(R"(
+fn a() -> bool {
+  return true;
+}
+
+fn b() -> bool {
+  return true;
+}
+
+fn c() -> bool {
+  return true;
+}
+
+fn f() -> bool {
+  return (a() || (b() || c()));
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalMixed) {
+    Test(R"(
+fn b() -> bool {
+  return true;
+}
+
+fn d() -> bool {
+  return true;
+}
+
+fn f(a : bool, c : bool) -> bool {
+  let l = ((a || b()) && (c || d()));
+  return l;
 }
 )");
 }

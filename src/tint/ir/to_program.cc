@@ -15,8 +15,10 @@
 #include "src/tint/ir/to_program.h"
 
 #include <string>
+#include <tuple>
 #include <utility>
 
+#include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/call.h"
@@ -105,9 +107,9 @@ class State {
     /// 2+ is within control flow
     uint32_t nesting_depth_ = 0;
 
-    using Statements = utils::Vector<const ast::Statement*,
-                                     decltype(ast::BlockStatement::statements)::static_length>;
-    Statements* statements_ = nullptr;
+    using StatementList = utils::Vector<const ast::Statement*,
+                                        decltype(ast::BlockStatement::statements)::static_length>;
+    StatementList* statements_ = nullptr;
 
     /// The current switch case block
     ir::Block* current_switch_case_ = nullptr;
@@ -133,16 +135,19 @@ class State {
     }
 
     const ast::BlockStatement* Block(ir::Block* block) {
-        Statements stmts;
-        TINT_SCOPED_ASSIGNMENT(statements_, &stmts);
-
         // TODO(crbug.com/tint/1902): Handle block arguments.
+        return b.Block(Statements(block));
+    }
 
-        for (auto* inst : *block) {
-            Instruction(inst);
+    StatementList Statements(ir::Block* block) {
+        StatementList stmts;
+        if (block) {
+            TINT_SCOPED_ASSIGNMENT(statements_, &stmts);
+            for (auto* inst : *block) {
+                Instruction(inst);
+            }
         }
-
-        return b.Block(std::move(stmts));
+        return stmts;
     }
 
     void Append(const ast::Statement* inst) { statements_->Push(inst); }
@@ -167,38 +172,29 @@ class State {
     void If(ir::If* if_) {
         SCOPED_NESTING();
 
-        auto else_if = [](ir::If* i) -> ir::If* {
-            if (auto* false_blk = i->False()) {
-                if ((false_blk->Length() == 1) ||
-                    (false_blk->Length() == 2 && false_blk->Back()->Is<ir::ExitIf>())) {
-                    return false_blk->Front()->As<ir::If>();
-                }
-            }
-            return nullptr;
-        };
-
-        utils::Vector<ir::If*, 4> if_chain;
-        for (auto* i = if_; i != nullptr; i = else_if(i)) {
-            if_chain.Push(i);
+        auto true_stmts = Statements(if_->True());
+        auto false_stmts = Statements(if_->False());
+        if (IsShortCircuit(if_, true_stmts, false_stmts)) {
+            return;
         }
 
-        const ast::IfStatement* stmt = nullptr;
-        for (auto* i : utils::Reverse(if_chain)) {
-            auto* cond = Expr(i->Condition());
-            auto* t = Block(i->True());
-            if (i == if_chain.Back()) {
-                if (i->False() && !i->False()->IsEmpty()) {
-                    auto* f = Block(i->False());
-                    stmt = b.If(cond, t, b.Else(f));
-                } else {
-                    stmt = b.If(cond, t);
+        auto* cond = Expr(if_->Condition());
+        auto* true_block = b.Block(std::move(true_stmts));
+
+        switch (false_stmts.Length()) {
+            case 0:
+                Append(b.If(cond, true_block));
+                return;
+            case 1:
+                if (auto* else_if = false_stmts.Front()->As<ast::IfStatement>()) {
+                    Append(b.If(cond, true_block, b.Else(else_if)));
+                    return;
                 }
-            } else {
-                stmt = b.If(cond, t, b.Else(stmt));
-            }
+                break;
         }
 
-        Append(stmt);
+        auto* false_block = b.Block(std::move(false_stmts));
+        Append(b.If(cond, true_block, b.Else(false_block)));
     }
 
     void Switch(ir::Switch* s) {
@@ -294,6 +290,7 @@ class State {
                 auto* expr = b.Call(BindName(c->Func()), std::move(args));
                 if (!call->HasResults() || call->Result()->Usages().IsEmpty()) {
                     Append(b.CallStmt(expr));
+                    return;
                 }
                 Bind(c->Result(), expr);
             },
@@ -534,9 +531,12 @@ class State {
     /// Creates and returns a new, unique name for the given value, or returns the previously
     /// created name.
     /// @return the value's name
-    Symbol BindName(ir::Value* value) {
+    Symbol BindName(Value* value, std::string_view suggested = {}) {
         TINT_ASSERT(IR, value);
         auto& existing = bindings_.GetOrCreate(value, [&] {
+            if (!suggested.empty()) {
+                return b.Symbols().New(suggested);
+            }
             if (auto sym = mod.NameOf(value)) {
                 return b.Symbols().New(sym.NameView());
             }
@@ -554,23 +554,95 @@ class State {
     template <typename T>
     void Bind(ir::Value* value, const T* expr) {
         TINT_ASSERT(IR, value);
-
-        // Determine whether the value should be placed into a let, or inlined in its single
-        // place of usage. Currently a value is inlined if it has a single usage and is unnamed.
-        // TODO(crbug.com/tint/1902): This logic needs to check that the sequence of
-        // side-effecting expressions is not changed by inlining the expression. This needs
-        // fixing.
-        bool create_let = value->Usages().Count() > 1 || mod.NameOf(value).IsValid();
-        if (create_let) {
-            Append(b.Decl(b.Let(BindName(value), expr)));
-        } else {
+        if (CanInline(value)) {
             // Value will be inlined at its place of usage.
             bool added = bindings_.Add(value, expr);
             if (TINT_UNLIKELY(!added)) {
                 TINT_ICE(IR, b.Diagnostics())
                     << "Bind(" << value->TypeInfo().name << ") called twice for same node";
             }
+        } else {
+            Append(b.Decl(b.Let(BindName(value), expr)));
         }
+    }
+
+    /// @returns true if the if the value can be inlined into its single place
+    /// of usage. Currently a value is inlined if it has a single usage and is unnamed.
+    /// TODO(crbug.com/tint/1902): This logic needs to check that the sequence of side-effecting
+    /// expressions is not changed by inlining the expression. This needs fixing.
+    bool CanInline(Value* val) { return val->Usages().Count() == 1 && !mod.NameOf(val).IsValid(); }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Helpers
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    bool IsShortCircuit(ir::If* i,
+                        const StatementList& true_stmts,
+                        const StatementList& false_stmts) {
+        if (!i->HasResults()) {
+            return false;
+        }
+        auto* result = i->Result();
+        if (!result->Type()->Is<type::Bool>()) {
+            return false;  // Wrong result type
+        }
+        if (i->Exits().Count() != 2) {
+            return false;  // Doesn't have two exits
+        }
+        if (!true_stmts.IsEmpty() || !false_stmts.IsEmpty()) {
+            return false;  // True or False blocks contain statements
+        }
+
+        auto* cond = i->Condition();
+        auto* true_val = i->True()->Back()->Operands().Front();
+        auto* false_val = i->False()->Back()->Operands().Front();
+        if (IsConstant(false_val, false)) {
+            //  %res = if %cond {
+            //     block {  # true
+            //       exit_if %true_val;
+            //     }
+            //     block {  # false
+            //       exit_if false;
+            //     }
+            //  }
+            //
+            // transform into:
+            //
+            //   res = cond && true_val;
+            //
+            auto* lhs = Expr(cond);
+            auto* rhs = Expr(true_val);
+            Bind(result, b.LogicalAnd(lhs, rhs));
+            return true;
+        }
+        if (IsConstant(true_val, true)) {
+            //  %res = if %cond {
+            //     block {  # true
+            //       exit_if true;
+            //     }
+            //     block {  # false
+            //       exit_if %false_val;
+            //     }
+            //  }
+            //
+            // transform into:
+            //
+            //   res = cond || false_val;
+            //
+            auto* lhs = Expr(cond);
+            auto* rhs = Expr(false_val);
+            Bind(result, b.LogicalOr(lhs, rhs));
+            return true;
+        }
+        return false;
+    }
+
+    bool IsConstant(ir::Value* val, bool value) {
+        if (auto* c = val->As<ir::Constant>()) {
+            if (c->Type()->Is<type::Bool>()) {
+                return c->Value()->ValueAs<bool>() == value;
+            }
+        }
+        return false;
     }
 };
 

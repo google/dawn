@@ -474,7 +474,7 @@ TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_LogicalAnd) {
 
       # False block
       %b4 = block {
-        exit_if %3
+        exit_if false
       }
 
     if %logical_and [t: %b5]
@@ -509,7 +509,7 @@ TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_LogicalOr) {
     %logical_or:bool = if %3 [t: %b3, f: %b4]
       # True block
       %b3 = block {
-        exit_if %3
+        exit_if true
       }
 
       # False block
@@ -793,7 +793,7 @@ TEST_F(IR_FromProgramBinaryTest, EmitExpression_Binary_Compound) {
 
       # False block
       %b4 = block {
-        exit_if %4
+        exit_if false
       }
 
     ret
