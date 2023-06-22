@@ -63,6 +63,10 @@ class Function final : public utils::Castable<Function, CallTarget> {
     /// @param return_location the location value
     void SetReturnLocation(uint32_t return_location) { return_location_ = return_location; }
 
+    // Sets the function's return index
+    /// @param return_index the index value
+    void SetReturnIndex(uint32_t return_index) { return_index_ = return_index; }
+
     /// @returns the ast::Function declaration
     const ast::Function* Declaration() const { return declaration_; }
 
@@ -255,6 +259,9 @@ class Function final : public utils::Castable<Function, CallTarget> {
     /// @return the location for the return, if provided
     std::optional<uint32_t> ReturnLocation() const { return return_location_; }
 
+    /// @return the index for the return, if provided
+    std::optional<uint32_t> ReturnIndex() const { return return_index_; }
+
     /// Modifies the severity of a specific diagnostic rule for this function.
     /// @param rule the diagnostic rule
     /// @param severity the new diagnostic severity
@@ -290,6 +297,7 @@ class Function final : public utils::Castable<Function, CallTarget> {
     builtin::DiagnosticRuleSeverities diagnostic_severities_;
 
     std::optional<uint32_t> return_location_;
+    std::optional<uint32_t> return_index_;
 };
 
 }  // namespace tint::sem

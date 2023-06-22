@@ -1044,6 +1044,14 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                     func->SetReturnLocation(value.Get());
                     return kSuccess;
                 },
+                [&](const ast::IndexAttribute* attr) {
+                    auto value = IndexAttribute(attr);
+                    if (!value) {
+                        return kErrored;
+                    }
+                    func->SetReturnIndex(value.Get());
+                    return kSuccess;
+                },
                 [&](const ast::BuiltinAttribute* attr) {
                     return BuiltinAttribute(attr) ? kSuccess : kErrored;
                 },

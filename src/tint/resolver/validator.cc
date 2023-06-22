@@ -1052,7 +1052,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // TODO(jrprice): This state could be stored in sem::Function instead, and then passed to
     // sem::Function since it would be useful there too.
     utils::Hashset<builtin::BuiltinValue, 4> builtins;
-    utils::Hashset<uint32_t, 8> locations;
+    utils::Hashset<std::pair<uint32_t, uint32_t>, 8> locationsAndIndexes;
     enum class ParamOrRetType {
         kParameter,
         kReturnType,
@@ -1063,10 +1063,13 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                                                      const type::Type* ty, Source source,
                                                      ParamOrRetType param_or_ret,
                                                      bool is_struct_member,
-                                                     std::optional<uint32_t> location) {
+                                                     std::optional<uint32_t> location,
+                                                     std::optional<uint32_t> index) {
         // Scan attributes for pipeline IO attributes.
         // Check for overlap with attributes that have been seen previously.
         const ast::Attribute* pipeline_io_attribute = nullptr;
+        const ast::LocationAttribute* location_attribute = nullptr;
+        const ast::IndexAttribute* index_attribute = nullptr;
         const ast::InterpolateAttribute* interpolate_attribute = nullptr;
         const ast::InvariantAttribute* invariant_attribute = nullptr;
         for (auto* attr : attrs) {
@@ -1097,6 +1100,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 }
                 builtins.Add(builtin);
             } else if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
+                location_attribute = loc_attr;
                 if (pipeline_io_attribute) {
                     AddError("multiple entry point IO attributes", attr->source);
                     AddNote("previously consumed " + AttrToStr(pipeline_io_attribute),
@@ -1112,12 +1116,12 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     return false;
                 }
 
-                if (!LocationAttribute(loc_attr, location.value(), ty, locations, stage, source,
-                                       is_input)) {
+                if (!LocationAttribute(loc_attr, ty, stage, source, is_input)) {
                     return false;
                 }
             } else if (auto* index_attr = attr->As<ast::IndexAttribute>()) {
-                return IndexAttribute(index_attr);
+                index_attribute = index_attr;
+                return IndexAttribute(index_attr, stage);
             } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
                 if (decl->PipelineStage() == ast::PipelineStage::kCompute) {
                     is_invalid_compute_shader_attribute = true;
@@ -1177,6 +1181,34 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 }
             }
 
+            if (index_attribute) {
+                if (Is<ast::LocationAttribute>(pipeline_io_attribute)) {
+                    AddError("index attribute must only be used with @location",
+                             index_attribute->source);
+                    return false;
+                }
+            }
+
+            if (location_attribute) {
+                uint32_t idx = 0xffffffff;
+                if (index_attribute) {
+                    idx = index.value();
+                }
+
+                std::pair<uint32_t, uint32_t> locationAndIndex(location.value(), idx);
+                if (!locationsAndIndexes.Add(locationAndIndex)) {
+                    utils::StringStream err;
+                    if (!index_attribute) {
+                        err << "@location(" << location.value() << ") appears multiple times";
+                    } else {
+                        err << "@location(" << location.value() << ") @index(" << index.value()
+                            << ") appears multiple times";
+                    }
+                    AddError(err.str(), location_attribute->source);
+                    return false;
+                }
+            }
+
             if (interpolate_attribute) {
                 if (!pipeline_io_attribute ||
                     !pipeline_io_attribute->Is<ast::LocationAttribute>()) {
@@ -1207,9 +1239,11 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // Outer lambda for validating the entry point attributes for a type.
     auto validate_entry_point_attributes =
         [&](utils::VectorRef<const ast::Attribute*> attrs, const type::Type* ty, Source source,
-            ParamOrRetType param_or_ret, std::optional<uint32_t> location) {
+            ParamOrRetType param_or_ret, std::optional<uint32_t> location,
+            std::optional<uint32_t> index) {
             if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
-                                                       /*is_struct_member*/ false, location)) {
+                                                       /*is_struct_member*/ false, location,
+                                                       index)) {
                 return false;
             }
 
@@ -1218,7 +1252,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     if (!validate_entry_point_attributes_inner(
                             member->Declaration()->attributes, member->Type(),
                             member->Declaration()->source, param_or_ret,
-                            /*is_struct_member*/ true, member->Attributes().location)) {
+                            /*is_struct_member*/ true, member->Attributes().location,
+                            member->Attributes().index)) {
                         AddNote("while analyzing entry point '" + decl->name->symbol.Name() + "'",
                                 decl->source);
                         return false;
@@ -1233,7 +1268,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         auto* param_decl = param->Declaration();
         if (!validate_entry_point_attributes(param_decl->attributes, param->Type(),
                                              param_decl->source, ParamOrRetType::kParameter,
-                                             param->Location())) {
+                                             param->Location(), std::nullopt)) {
             return false;
         }
     }
@@ -1241,12 +1276,12 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // Clear IO sets after parameter validation. Builtin and location attributes in return types
     // should be validated independently from those used in parameters.
     builtins.Clear();
-    locations.Clear();
+    locationsAndIndexes.Clear();
 
     if (!func->ReturnType()->Is<type::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
                                              decl->source, ParamOrRetType::kReturnType,
-                                             func->ReturnLocation())) {
+                                             func->ReturnLocation(), func->ReturnIndex())) {
             return false;
         }
     }
@@ -2073,7 +2108,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         return false;
     }
 
-    utils::Hashset<uint32_t, 8> locations;
+    utils::Hashset<std::pair<uint32_t, uint32_t>, 8> locationsAndIndexes;
     for (auto* member : str->Members()) {
         if (auto* r = member->Type()->As<type::Array>()) {
             if (r->Count()->Is<type::RuntimeArrayCount>()) {
@@ -2095,8 +2130,9 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
             return false;
         }
 
-        auto has_location = false;
         auto has_position = false;
+        const ast::IndexAttribute* index_attribute = nullptr;
+        const ast::LocationAttribute* location_attribute = nullptr;
         const ast::InvariantAttribute* invariant_attribute = nullptr;
         const ast::InterpolateAttribute* interpolate_attribute = nullptr;
         for (auto* attr : member->Declaration()->attributes) {
@@ -2107,16 +2143,18 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                     return true;
                 },
                 [&](const ast::LocationAttribute* location) {
-                    has_location = true;
+                    location_attribute = location;
                     TINT_ASSERT(Resolver, member->Attributes().location.has_value());
-                    if (!LocationAttribute(location, member->Attributes().location.value(),
-                                           member->Type(), locations, stage,
+                    if (!LocationAttribute(location, member->Type(), stage,
                                            member->Declaration()->source)) {
                         return false;
                     }
                     return true;
                 },
-                [&](const ast::IndexAttribute* index) { return IndexAttribute(index); },
+                [&](const ast::IndexAttribute* index) {
+                    index_attribute = index;
+                    return IndexAttribute(index, stage);
+                },
                 [&](const ast::BuiltinAttribute* builtin_attr) {
                     if (!BuiltinAttribute(builtin_attr, member->Type(), stage,
                                           /* is_input */ false)) {
@@ -2157,10 +2195,38 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
             return false;
         }
 
-        if (interpolate_attribute && !has_location) {
+        if (index_attribute && !location_attribute) {
+            AddError("index attribute must only be used with @location", index_attribute->source);
+            return false;
+        }
+
+        if (interpolate_attribute && !location_attribute) {
             AddError("interpolate attribute must only be used with @location",
                      interpolate_attribute->source);
             return false;
+        }
+
+        // Ensure all locations and index pairs are unique
+        if (location_attribute) {
+            uint32_t index = 0xffffffff;
+            if (index_attribute) {
+                index = member->Attributes().index.value();
+            }
+            uint32_t location = member->Attributes().location.value();
+            std::pair<uint32_t, uint32_t> locationAndIndex(location, index);
+            if (!locationsAndIndexes.Add(locationAndIndex)) {
+                utils::StringStream err;
+                if (!index_attribute) {
+                    err << "@location(" << location << ") appears multiple times";
+                    AddError(err.str(), location_attribute->source);
+                } else {
+                    err << "@location(" << location << ") @index(" << index
+                        << ") appears multiple times";
+                    AddError(err.str(), index_attribute->source);
+                }
+
+                return false;
+            }
         }
     }
 
@@ -2168,9 +2234,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
 }
 
 bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
-                                  uint32_t location,
                                   const type::Type* type,
-                                  utils::Hashset<uint32_t, 8>& locations,
                                   ast::PipelineStage stage,
                                   const Source& source,
                                   const bool is_input) const {
@@ -2191,17 +2255,11 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
         return false;
     }
 
-    if (!locations.Add(location)) {
-        utils::StringStream err;
-        err << "@location(" << location << ") appears multiple times";
-        AddError(err.str(), loc_attr->source);
-        return false;
-    }
-
     return true;
 }
 
-bool Validator::IndexAttribute(const ast::IndexAttribute* index_attr) const {
+bool Validator::IndexAttribute(const ast::IndexAttribute* index_attr,
+                               ast::PipelineStage stage) const {
     if (!enabled_extensions_.Contains(builtin::Extension::kChromiumInternalDualSourceBlending)) {
         AddError(
             "use of '@index' attribute requires enabling extension "
@@ -2210,7 +2268,19 @@ bool Validator::IndexAttribute(const ast::IndexAttribute* index_attr) const {
         return false;
     }
 
-    return false;
+    if (stage == ast::PipelineStage::kCompute) {
+        AddError("@" + index_attr->Name() + " is not valid for compute shader output",
+                 index_attr->source);
+        return false;
+    }
+
+    if (stage == ast::PipelineStage::kVertex) {
+        AddError("@" + index_attr->Name() + " is not valid for vertex shader output",
+                 index_attr->source);
+        return false;
+    }
+
+    return true;
 }
 
 bool Validator::Return(const ast::ReturnStatement* ret,

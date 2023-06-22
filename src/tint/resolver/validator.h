@@ -314,25 +314,22 @@ class Validator {
 
     /// Validates a location attribute
     /// @param loc_attr the location attribute to validate
-    /// @param location the location value
     /// @param type the variable type
-    /// @param locations the set of locations in the module
     /// @param stage the current pipeline stage
     /// @param source the source of the attribute
     /// @param is_input true if this is an input variable
     /// @returns true on success, false otherwise.
     bool LocationAttribute(const ast::LocationAttribute* loc_attr,
-                           uint32_t location,
                            const type::Type* type,
-                           utils::Hashset<uint32_t, 8>& locations,
                            ast::PipelineStage stage,
                            const Source& source,
                            const bool is_input = false) const;
 
     /// Validates a index attribute
     /// @param index_attr the index attribute to validate
+    /// @param stage the current pipeline stage
     /// @returns true on success, false otherwise.
-    bool IndexAttribute(const ast::IndexAttribute* index_attr) const;
+    bool IndexAttribute(const ast::IndexAttribute* index_attr, ast::PipelineStage stage) const;
 
     /// Validates a loop statement
     /// @param stmt the loop statement
