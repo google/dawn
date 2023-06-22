@@ -158,6 +158,7 @@ class Validator {
                          std::string("root block: invalid instruction: ") + inst->TypeInfo().name);
                 continue;
             }
+            CheckVar(var);
         }
     }
 
@@ -181,6 +182,25 @@ class Validator {
     }
 
     void CheckInstruction(Instruction* inst) {
+        if (!inst->Alive()) {
+            AddError(inst, "destroyed instruction found in instruction list");
+        }
+        if (inst->Result()) {
+            if (inst->Result()->Source() == nullptr) {
+                AddError(inst, "instruction result source is undefined");
+            } else if (inst->Result()->Source() != inst) {
+                AddError(inst, "instruction result source has wrong instruction");
+            }
+        }
+
+        for (auto* op : inst->Operands()) {
+            // Note, a `nullptr` is a valid operand in some cases, like `var` so we can't just check
+            // for `nullptr` here.
+            if (op && !op->Alive()) {
+                AddError(inst, "instruction has undefined operand");
+            }
+        }
+
         tint::Switch(
             inst,                                        //
             [&](Access* a) { CheckAccess(a); },          //
@@ -194,7 +214,7 @@ class Validator {
             [&](Swizzle*) {},                            //
             [&](Terminator* b) { CheckTerminator(b); },  //
             [&](Unary*) {},                              //
-            [&](Var*) {},                                //
+            [&](Var* var) { CheckVar(var); },            //
             [&](Default) {
                 AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
             });
@@ -308,6 +328,18 @@ class Validator {
         }
         if (if_->Condition() && !if_->Condition()->Type()->Is<type::Bool>()) {
             AddError(if_, If::kConditionOperandOffset, "if: condition must be a `bool` type");
+        }
+    }
+
+    void CheckVar(Var* var) {
+        if (var->Result() == nullptr) {
+            AddError(var, "var: result is a nullptr");
+        }
+
+        if (var->Result() && var->Initializer()) {
+            if (var->Initializer()->Type() != var->Result()->Type()->UnwrapPtr()) {
+                AddError(var, "var initializer has incorrect type");
+            }
         }
     }
 };  // namespace

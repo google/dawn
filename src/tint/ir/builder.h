@@ -76,14 +76,6 @@ class Builder {
     using DisableIfVectorLike = utils::traits::EnableIf<
         !utils::IsVectorLike<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
 
-    template <typename T>
-    T* Append(T* val) {
-        if (current_block_) {
-            current_block_->Append(val);
-        }
-        return val;
-    }
-
     /// If set, any created instruction will be auto-appended to the block.
     ir::Block* current_block_ = nullptr;
 
@@ -102,6 +94,18 @@ class Builder {
     /// @param b the block to set as the current block
     /// @returns the builder
     Builder With(Block* b) { return Builder(ir, b); }
+
+    /// Appends and returns the instruction @p val to the current block. If there is no current
+    /// block bound, then @p val is just returned.
+    /// @param val the instruction to append
+    /// @returns the instruction
+    template <typename T>
+    T* Append(T* val) {
+        if (current_block_) {
+            current_block_->Append(val);
+        }
+        return val;
+    }
 
     /// @returns a new block
     ir::Block* Block();

@@ -528,5 +528,189 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidateTest, Var_RootBlock_NullResult) {
+    auto* v = mod.instructions.Create<ir::Var>(nullptr);
+    b.RootBlock()->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:2:11 error: var: result is a nullptr
+  undef = var
+          ^^^
+
+:1:1 note: In block
+%b1 = block {  # root
+^^^^^^^^^^^
+
+note: # Disassembly
+%b1 = block {  # root
+  undef = var
+}
+
+)");
+}
+
+TEST_F(IR_ValidateTest, Var_Function_NullResult) {
+    auto* v = mod.instructions.Create<ir::Var>(nullptr);
+
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->StartTarget());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:13 error: var: result is a nullptr
+    undef = var
+            ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    undef = var
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Var_Init_WrongType) {
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->StartTarget());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    sb.Return(f);
+
+    auto* result = sb.InstructionResult(ty.i32());
+    v->SetInitializer(result);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:41 error: var initializer has incorrect type
+    %2:ptr<function, f32, read_write> = var, %3
+                                        ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, f32, read_write> = var, %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Instruction_AppendedDead) {
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->StartTarget());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    auto* ret = sb.Return(f);
+
+    v->Destroy();
+    v->InsertBefore(ret);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:41 error: destroyed instruction found in instruction list
+    %2:ptr<function, f32, read_write> = var
+                                        ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+:3:41 error: instruction result source is undefined
+    %2:ptr<function, f32, read_write> = var
+                                        ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, f32, read_write> = var
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Instruction_NullSource) {
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->StartTarget());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    sb.Return(f);
+
+    v->Result()->SetSource(nullptr);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:41 error: instruction result source is undefined
+    %2:ptr<function, f32, read_write> = var
+                                        ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, f32, read_write> = var
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Instruction_DeadOperand) {
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->StartTarget());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    sb.Return(f);
+
+    auto* result = sb.InstructionResult(ty.f32());
+    result->Destroy();
+    v->SetInitializer(result);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:41 error: instruction has undefined operand
+    %2:ptr<function, f32, read_write> = var, %3
+                                        ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, f32, read_write> = var, %3
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir
