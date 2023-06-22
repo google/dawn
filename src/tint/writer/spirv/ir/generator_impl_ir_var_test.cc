@@ -24,9 +24,10 @@ using namespace tint::number_suffixes;        // NOLINT
 TEST_F(SpvGeneratorImplTest, FunctionVar_NoInit) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto sb = b.With(func->Block());
-    sb.Var(ty.ptr<function, i32>());
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Var(ty.ptr<function, i32>());
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -47,11 +48,12 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, FunctionVar_WithInit) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto sb = b.With(func->Block());
-    auto* v = sb.Var(ty.ptr<function, i32>());
-    v->SetInitializer(b.Constant(42_i));
+    b.With(func->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        v->SetInitializer(b.Constant(42_i));
 
-    sb.Return(func);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -74,11 +76,12 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, FunctionVar_Name) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto sb = b.With(func->Block());
-    auto* v = sb.Var(ty.ptr<function, i32>());
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Return(func);
 
-    mod.SetName(v, "myvar");
+        mod.SetName(v, "myvar");
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -100,18 +103,17 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, FunctionVar_DeclInsideBlock) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto* i = b.If(true);
+    b.With(func->Block(), [&] {
+        auto* i = b.If(true);
+        b.With(i->True(), [&] {
+            auto* v = b.Var(ty.ptr<function, i32>());
+            v->SetInitializer(b.Constant(42_i));
+            b.ExitIf(i);
+        });
+        b.With(i->False(), [&] { b.Return(func); });
 
-    auto tb = b.With(i->True());
-    auto* v = tb.Var(ty.ptr<function, i32>());
-    v->SetInitializer(b.Constant(42_i));
-    tb.ExitIf(i);
-
-    i->False()->Append(b.Return(func));
-
-    func->Block()->Append(i);
-    func->Block()->Append(b.Return(func));
-
+        b.Return(func);
+    });
     ASSERT_TRUE(IRIsValid()) << Error();
 
     generator_.EmitFunction(func);
@@ -142,12 +144,12 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, FunctionVar_Load) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto sb = b.With(func->Block());
-
-    auto* store_ty = ty.i32();
-    auto* v = sb.Var(ty.ptr(function, store_ty));
-    sb.Load(v);
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        auto* store_ty = ty.i32();
+        auto* v = b.Var(ty.ptr(function, store_ty));
+        b.Load(v);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -169,10 +171,11 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, FunctionVar_Store) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto sb = b.With(func->Block());
-    auto* v = sb.Var(ty.ptr<function, i32>());
-    sb.Store(v, 42_i);
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Store(v, 42_i);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -273,11 +276,12 @@ TEST_F(SpvGeneratorImplTest, PrivateVar_LoadAndStore) {
     v->SetInitializer(b.Constant(42_i));
     b.RootBlock()->Append(v);
 
-    auto sb = b.With(func->Block());
-    sb.Load(v);
-    auto* add = sb.Add(store_ty, v, 1_i);
-    sb.Store(v, add);
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Load(v);
+        auto* add = b.Add(store_ty, v, 1_i);
+        b.Store(v, add);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
@@ -354,11 +358,12 @@ TEST_F(SpvGeneratorImplTest, WorkgroupVar_LoadAndStore) {
     auto* store_ty = ty.i32();
     auto* v = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, store_ty)));
 
-    auto sb = b.With(func->Block());
-    sb.Load(v);
-    auto* add = sb.Add(store_ty, v, 1_i);
-    sb.Store(v, add);
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Load(v);
+        auto* add = b.Add(store_ty, v, 1_i);
+        b.Store(v, add);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
@@ -476,11 +481,12 @@ TEST_F(SpvGeneratorImplTest, StorageVar_LoadAndStore) {
                             std::array{1u, 1u, 1u});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
-    sb.Load(v);
-    auto* add = sb.Add(ty.i32(), v, 1_i);
-    sb.Store(v, add);
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Load(v);
+        auto* add = b.Add(ty.i32(), v, 1_i);
+        b.Store(v, add);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
@@ -587,9 +593,10 @@ TEST_F(SpvGeneratorImplTest, UniformVar_Load) {
                             std::array{1u, 1u, 1u});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
-    sb.Load(v);
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Load(v);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader

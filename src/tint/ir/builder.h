@@ -59,6 +59,7 @@
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
+#include "src/tint/utils/scoped_assignment.h"
 
 namespace tint::ir {
 
@@ -93,7 +94,16 @@ class Builder {
     /// Creates a new builder wrapping the given block
     /// @param b the block to set as the current block
     /// @returns the builder
-    Builder With(Block* b) { return Builder(ir, b); }
+    Builder With(ir::Block* b) { return Builder(ir, b); }
+
+    /// Calls @p cb with the builder appending to block @p b
+    /// @param b the block to set as the block to append to
+    /// @param cb the function to call with the builder appending to block @p b
+    template <typename FUNCTION>
+    void With(ir::Block* b, FUNCTION&& cb) {
+        TINT_SCOPED_ASSIGNMENT(current_block_, b);
+        cb();
+    }
 
     /// Appends and returns the instruction @p val to the current block. If there is no current
     /// block bound, then @p val is just returned.

@@ -29,8 +29,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Vector) {
         b.FunctionParam(ty.i32()),
     });
 
-    auto sb = b.With(func->Block());
-    sb.Return(func, sb.Construct(ty.vec4<i32>(), func->Params()));
+    b.With(func->Block(), [&] { b.Return(func, b.Construct(ty.vec4<i32>(), func->Params())); });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -59,8 +58,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Matrix) {
         b.FunctionParam(ty.vec4<f32>()),
     });
 
-    auto sb = b.With(func->Block());
-    sb.Return(func, sb.Construct(ty.mat3x4<f32>(), func->Params()));
+    b.With(func->Block(), [&] { b.Return(func, b.Construct(ty.mat3x4<f32>(), func->Params())); });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -90,8 +88,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Array) {
         b.FunctionParam(ty.f32()),
     });
 
-    auto sb = b.With(func->Block());
-    sb.Return(func, sb.Construct(ty.array<f32, 4>(), func->Params()));
+    b.With(func->Block(), [&] { b.Return(func, b.Construct(ty.array<f32, 4>(), func->Params())); });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -130,8 +127,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Struct) {
         b.FunctionParam(ty.vec4<f32>()),
     });
 
-    auto sb = b.With(func->Block());
-    sb.Return(func, sb.Construct(str, func->Params()));
+    b.With(func->Block(), [&] { b.Return(func, b.Construct(str, func->Params())); });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

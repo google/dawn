@@ -174,9 +174,10 @@ TEST_F(SpvGeneratorImplTest, Function_Parameters) {
     mod.SetName(x, "x");
     mod.SetName(y, "y");
 
-    auto sb = b.With(func->Block());
-    auto* result = sb.Add(i32, x, y);
-    sb.Return(func, result);
+    b.With(func->Block(), [&] {
+        auto* result = b.Add(i32, x, y);
+        b.Return(func, result);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -203,18 +204,16 @@ TEST_F(SpvGeneratorImplTest, Function_Call) {
     auto* foo = b.Function("foo", i32_ty);
     foo->SetParams({x, y});
 
-    {
-        auto sb = b.With(foo->Block());
-        auto* result = sb.Add(i32_ty, x, y);
-        sb.Return(foo, result);
-    }
+    b.With(foo->Block(), [&] {
+        auto* result = b.Add(i32_ty, x, y);
+        b.Return(foo, result);
+    });
 
     auto* bar = b.Function("bar", ty.void_());
-    {
-        auto sb = b.With(bar->Block());
-        sb.Call(i32_ty, foo, i32(2), i32(3));
-        sb.Return(bar);
-    }
+    b.With(bar->Block(), [&] {
+        b.Call(i32_ty, foo, i32(2), i32(3));
+        b.Return(bar);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -248,9 +247,10 @@ TEST_F(SpvGeneratorImplTest, Function_Call_Void) {
     foo->Block()->Append(b.Return(foo));
 
     auto* bar = b.Function("bar", ty.void_());
-    auto sb = b.With(bar->Block());
-    sb.Call(ty.void_(), foo, utils::Empty);
-    sb.Return(bar);
+    b.With(bar->Block(), [&] {
+        b.Call(ty.void_(), foo, utils::Empty);
+        b.Return(bar);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

@@ -279,12 +279,13 @@ struct MergeReturn::State {
     /// Adds a final return instruction to the end of @p fn
     /// @param fn the function
     void AppendFinalReturn(Function* fn) {
-        auto fb = b.With(fn->Block());
-        if (return_val) {
-            fb.Return(fn, fb.Load(return_val));
-        } else {
-            fb.Return(fn);
-        }
+        b.With(fn->Block(), [&] {
+            if (return_val) {
+                b.Return(fn, b.Load(return_val));
+            } else {
+                b.Return(fn);
+            }
+        });
     }
 };
 

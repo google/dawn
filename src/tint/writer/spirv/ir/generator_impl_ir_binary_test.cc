@@ -37,10 +37,11 @@ TEST_P(Arithmetic, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    auto sb = b.With(func->Block());
-    sb.Binary(params.kind, MakeScalarType(params.type), MakeScalarValue(params.type),
-              MakeScalarValue(params.type));
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Binary(params.kind, MakeScalarType(params.type), MakeScalarValue(params.type),
+                 MakeScalarValue(params.type));
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -51,10 +52,11 @@ TEST_P(Arithmetic, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    auto sb = b.With(func->Block());
-    sb.Binary(params.kind, MakeVectorType(params.type), MakeVectorValue(params.type),
-              MakeVectorValue(params.type));
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Binary(params.kind, MakeVectorType(params.type), MakeVectorValue(params.type),
+                 MakeVectorValue(params.type));
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -87,10 +89,11 @@ TEST_P(Bitwise, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    auto sb = b.With(func->Block());
-    sb.Binary(params.kind, MakeScalarType(params.type), MakeScalarValue(params.type),
-              MakeScalarValue(params.type));
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Binary(params.kind, MakeScalarType(params.type), MakeScalarValue(params.type),
+                 MakeScalarValue(params.type));
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -101,10 +104,11 @@ TEST_P(Bitwise, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    auto sb = b.With(func->Block());
-    sb.Binary(params.kind, MakeVectorType(params.type), MakeVectorValue(params.type),
-              MakeVectorValue(params.type));
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Binary(params.kind, MakeVectorType(params.type), MakeVectorValue(params.type),
+                 MakeVectorValue(params.type));
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -129,9 +133,11 @@ TEST_P(Comparison, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    auto sb = b.With(func->Block());
-    sb.Binary(params.kind, ty.bool_(), MakeScalarValue(params.type), MakeScalarValue(params.type));
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Binary(params.kind, ty.bool_(), MakeScalarValue(params.type),
+                 MakeScalarValue(params.type));
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -143,10 +149,11 @@ TEST_P(Comparison, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    auto sb = b.With(func->Block());
-    sb.Binary(params.kind, ty.vec2(ty.bool_()), MakeVectorValue(params.type),
-              MakeVectorValue(params.type));
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        b.Binary(params.kind, ty.vec2(ty.bool_()), MakeVectorValue(params.type),
+                 MakeVectorValue(params.type));
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -202,10 +209,11 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(SpvGeneratorImplTest, Binary_Chain) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto sb = b.With(func->Block());
-    auto* a = sb.Subtract(ty.i32(), 1_i, 2_i);
-    sb.Add(ty.i32(), a, a);
-    sb.Return(func);
+    b.With(func->Block(), [&] {
+        auto* a = b.Subtract(ty.i32(), 1_i, 2_i);
+        b.Add(ty.i32(), a, a);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

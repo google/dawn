@@ -350,31 +350,28 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto fb = b.With(func->Block());
-    auto* l = fb.Loop();
+    b.With(func->Block(), [&] {
+        auto* l = b.Loop();
 
-    {
-        auto ib = b.With(l->Initializer());
-        ib.NextIteration(l, 1_i, false);
-    }
+        b.With(l->Initializer(), [&] { b.NextIteration(l, 1_i, false); });
 
-    auto* loop_param = b.BlockParam(ty.i32());
-    l->Body()->SetParams({loop_param});
-    {
-        auto lb = b.With(l->Body());
-        auto* inc = lb.Add(ty.i32(), loop_param, 1_i);
-        lb.Continue(l, inc);
-    }
+        auto* loop_param = b.BlockParam(ty.i32());
+        l->Body()->SetParams({loop_param});
 
-    auto* cont_param = b.BlockParam(ty.i32());
-    l->Continuing()->SetParams({cont_param});
-    {
-        auto cb = b.With(l->Continuing());
-        auto* cmp = cb.GreaterThan(ty.bool_(), cont_param, 5_i);
-        cb.BreakIf(cmp, l, cont_param);
-    }
+        b.With(l->Body(), [&] {
+            auto* inc = b.Add(ty.i32(), loop_param, 1_i);
+            b.Continue(l, inc);
+        });
 
-    fb.Return(func);
+        auto* cont_param = b.BlockParam(ty.i32());
+        l->Continuing()->SetParams({cont_param});
+        b.With(l->Continuing(), [&] {
+            auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
+            b.BreakIf(cmp, l, cont_param);
+        });
+
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -411,34 +408,31 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto fb = b.With(func->Block());
-    auto* l = fb.Loop();
+    b.With(func->Block(), [&] {
+        auto* l = b.Loop();
 
-    {
-        auto ib = b.With(l->Initializer());
-        ib.NextIteration(l, 1_i, false);
-    }
+        b.With(l->Initializer(), [&] { b.NextIteration(l, 1_i, false); });
 
-    auto* loop_param_a = b.BlockParam(ty.i32());
-    auto* loop_param_b = b.BlockParam(ty.bool_());
-    l->Body()->SetParams({loop_param_a, loop_param_b});
-    {
-        auto lb = b.With(l->Body());
-        auto* inc = lb.Add(ty.i32(), loop_param_a, 1_i);
-        lb.Continue(l, inc, loop_param_b);
-    }
+        auto* loop_param_a = b.BlockParam(ty.i32());
+        auto* loop_param_b = b.BlockParam(ty.bool_());
+        l->Body()->SetParams({loop_param_a, loop_param_b});
 
-    auto* cont_param_a = b.BlockParam(ty.i32());
-    auto* cont_param_b = b.BlockParam(ty.bool_());
-    l->Continuing()->SetParams({cont_param_a, cont_param_b});
-    {
-        auto cb = b.With(l->Continuing());
-        auto* cmp = cb.GreaterThan(ty.bool_(), cont_param_a, 5_i);
-        auto* not_b = cb.Not(ty.bool_(), cont_param_b);
-        cb.BreakIf(cmp, l, cont_param_a, not_b);
-    }
+        b.With(l->Body(), [&] {
+            auto* inc = b.Add(ty.i32(), loop_param_a, 1_i);
+            b.Continue(l, inc, loop_param_b);
+        });
 
-    fb.Return(func);
+        auto* cont_param_a = b.BlockParam(ty.i32());
+        auto* cont_param_b = b.BlockParam(ty.bool_());
+        l->Continuing()->SetParams({cont_param_a, cont_param_b});
+        b.With(l->Continuing(), [&] {
+            auto* cmp = b.GreaterThan(ty.bool_(), cont_param_a, 5_i);
+            auto* not_b = b.Not(ty.bool_(), cont_param_b);
+            b.BreakIf(cmp, l, cont_param_a, not_b);
+        });
+
+        b.Return(func);
+    });
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

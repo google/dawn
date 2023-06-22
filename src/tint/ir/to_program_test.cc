@@ -129,8 +129,7 @@ TEST_F(IRToProgramTest, UnaryOp_Negate) {
     fn->SetParams({i});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Negation(ty.i32(), i));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Negation(ty.i32(), i)); });
 
     Test(R"(
 fn f(i : i32) -> i32 {
@@ -146,8 +145,7 @@ TEST_F(IRToProgramTest, UnaryOp_Complement) {
     fn->SetParams({i});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Complement(ty.u32(), i));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Complement(ty.u32(), i)); });
 
     Test(R"(
 fn f(i : u32) -> u32 {
@@ -163,8 +161,7 @@ TEST_F(IRToProgramTest, UnaryOp_Not) {
     fn->SetParams({i});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Not(ty.bool_(), i));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Not(ty.bool_(), i)); });
 
     Test(R"(
 fn f(b : bool) -> bool {
@@ -185,8 +182,7 @@ TEST_F(IRToProgramTest, BinaryOp_Add) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Add(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Add(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -204,8 +200,7 @@ TEST_F(IRToProgramTest, BinaryOp_Subtract) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Subtract(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Subtract(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -223,8 +218,7 @@ TEST_F(IRToProgramTest, BinaryOp_Multiply) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Multiply(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Multiply(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -242,8 +236,7 @@ TEST_F(IRToProgramTest, BinaryOp_Divide) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Divide(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Divide(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -261,8 +254,7 @@ TEST_F(IRToProgramTest, BinaryOp_Modulo) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Modulo(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Modulo(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -280,8 +272,7 @@ TEST_F(IRToProgramTest, BinaryOp_And) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.And(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.And(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -299,8 +290,7 @@ TEST_F(IRToProgramTest, BinaryOp_Or) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Or(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Or(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -318,8 +308,7 @@ TEST_F(IRToProgramTest, BinaryOp_Xor) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Xor(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Xor(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> i32 {
@@ -337,8 +326,7 @@ TEST_F(IRToProgramTest, BinaryOp_Equal) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.Equal(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.Equal(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -356,8 +344,7 @@ TEST_F(IRToProgramTest, BinaryOp_NotEqual) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.NotEqual(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.NotEqual(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -375,8 +362,7 @@ TEST_F(IRToProgramTest, BinaryOp_LessThan) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.LessThan(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.LessThan(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -394,8 +380,7 @@ TEST_F(IRToProgramTest, BinaryOp_GreaterThan) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.GreaterThan(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.GreaterThan(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -413,8 +398,7 @@ TEST_F(IRToProgramTest, BinaryOp_LessThanEqual) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.LessThanEqual(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.LessThanEqual(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -432,8 +416,7 @@ TEST_F(IRToProgramTest, BinaryOp_GreaterThanEqual) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.GreaterThanEqual(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.GreaterThanEqual(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -451,8 +434,7 @@ TEST_F(IRToProgramTest, BinaryOp_ShiftLeft) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.ShiftLeft(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.ShiftLeft(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : u32) -> i32 {
@@ -470,8 +452,7 @@ TEST_F(IRToProgramTest, BinaryOp_ShiftRight) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    f.Return(fn, f.ShiftRight(ty.i32(), pa, pb));
+    b.With(fn->Block(), [&] { b.Return(fn, b.ShiftRight(ty.i32(), pa, pb)); });
 
     Test(R"(
 fn f(a : i32, b : u32) -> i32 {
@@ -492,13 +473,14 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_2) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* if_ = f.If(pa);
-    if_->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if_->True()).ExitIf(if_, pb);
-    b.With(if_->False()).ExitIf(if_, false);
+    b.With(fn->Block(), [&] {
+        auto* if_ = b.If(pa);
+        if_->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if_->True(), [&] { b.ExitIf(if_, pb); });
+        b.With(if_->False(), [&] { b.ExitIf(if_, false); });
 
-    f.Return(fn, if_->Result(0));
+        b.Return(fn, if_->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
@@ -518,19 +500,19 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_ab_c) {
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pa);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, pb); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
 
-    auto* if1 = f.If(pa);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, pb);
-    b.With(if1->False()).ExitIf(if1, false);
+        auto* if2 = b.If(if1->Result(0));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, pc); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
 
-    auto* if2 = f.If(if1->Result(0));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, pc);
-    b.With(if2->False()).ExitIf(if2, false);
-
-    f.Return(fn, if2->Result(0));
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
@@ -550,19 +532,18 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_a_bc) {
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pb);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, pc); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
 
-    auto* if1 = f.If(pb);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, pc);
-    b.With(if1->False()).ExitIf(if1, false);
-
-    auto* if2 = f.If(pa);
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, if1->Result(0));
-    b.With(if2->False()).ExitIf(if2, false);
-
-    f.Return(fn, if2->Result(0));
+        auto* if2 = b.If(pa);
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
@@ -580,14 +561,15 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_2) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* if_ = f.If(pa);
-    if_->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if_->True()).ExitIf(if_, pb);
-    b.With(if_->False()).ExitIf(if_, false);
+    b.With(fn->Block(), [&] {
+        auto* if_ = b.If(pa);
+        if_->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if_->True(), [&] { b.ExitIf(if_, pb); });
+        b.With(if_->False(), [&] { b.ExitIf(if_, false); });
 
-    mod.SetName(if_->Result(0), "l");
-    f.Return(fn, if_->Result(0));
+        mod.SetName(if_->Result(0), "l");
+        b.Return(fn, if_->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
@@ -608,20 +590,20 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_ab_c) {
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pa);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, pb); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
 
-    auto* if1 = f.If(pa);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, pb);
-    b.With(if1->False()).ExitIf(if1, false);
+        auto* if2 = b.If(if1->Result(0));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, pc); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
 
-    auto* if2 = f.If(if1->Result(0));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, pc);
-    b.With(if2->False()).ExitIf(if2, false);
-
-    mod.SetName(if2->Result(0), "l");
-    f.Return(fn, if2->Result(0));
+        mod.SetName(if2->Result(0), "l");
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
@@ -642,20 +624,20 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_a_bc) {
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pb);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, pc); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
 
-    auto* if1 = f.If(pb);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, pc);
-    b.With(if1->False()).ExitIf(if1, false);
+        auto* if2 = b.If(pa);
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
 
-    auto* if2 = f.If(pa);
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, if1->Result(0));
-    b.With(if2->False()).ExitIf(if2, false);
-
-    mod.SetName(if2->Result(0), "l");
-    f.Return(fn, if2->Result(0));
+        mod.SetName(if2->Result(0), "l");
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
@@ -666,27 +648,25 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 }
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_2) {
-    auto* fa = b.Function("a", ty.bool_());
-    mod.functions.Push(fa);
-    b.With(fa->Block()).Return(fa, true);
+    auto* fn_a = b.Function("a", ty.bool_());
+    mod.functions.Push(fn_a);
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
-    auto* fb = b.Function("b", ty.bool_());
-    mod.functions.Push(fb);
-    b.With(fb->Block()).Return(fb, true);
+    auto* fn_b = b.Function("b", ty.bool_());
+    mod.functions.Push(fn_b);
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
 
     auto* fn = b.Function("f", ty.bool_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* if_ = f.If(f.Call(ty.bool_(), fa));
-    if_->SetResults(b.InstructionResult(ty.bool_()));
-    {
-        auto true_ = b.With(if_->True());
-        true_.ExitIf(if_, true_.Call(ty.bool_(), fb));
-    }
-    b.With(if_->False()).ExitIf(if_, false);
+    b.With(fn->Block(), [&] {
+        auto* if_ = b.If(b.Call(ty.bool_(), fn_a));
+        if_->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if_->True(), [&] { b.ExitIf(if_, b.Call(ty.bool_(), fn_b)); });
+        b.With(if_->False(), [&] { b.ExitIf(if_, false); });
 
-    f.Return(fn, if_->Result(0));
+        b.Return(fn, if_->Result(0));
+    });
 
     Test(R"(
 fn a() -> bool {
@@ -704,40 +684,34 @@ fn f() -> bool {
 }
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_3_ab_c) {
-    auto* fa = b.Function("a", ty.bool_());
-    mod.functions.Push(fa);
-    b.With(fa->Block()).Return(fa, true);
+    auto* fn_a = b.Function("a", ty.bool_());
+    mod.functions.Push(fn_a);
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
-    auto* fb = b.Function("b", ty.bool_());
-    mod.functions.Push(fb);
-    b.With(fb->Block()).Return(fb, true);
+    auto* fn_b = b.Function("b", ty.bool_());
+    mod.functions.Push(fn_b);
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
 
-    auto* fc = b.Function("c", ty.bool_());
-    mod.functions.Push(fc);
-    b.With(fc->Block()).Return(fc, true);
+    auto* fn_c = b.Function("c", ty.bool_());
+    mod.functions.Push(fn_c);
+    b.With(fn_c->Block(), [&] { b.Return(fn_c, true); });
 
     auto* fn = b.Function("f", ty.bool_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_a));
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_b)); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
 
-    auto* if1 = f.If(f.Call(ty.bool_(), fa));
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    {
-        auto true_ = b.With(if1->True());
-        true_.ExitIf(if1, true_.Call(ty.bool_(), fb));
-    }
-    b.With(if1->False()).ExitIf(if1, false);
+        auto* if2 = b.If(if1->Result(0));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, b.Call(ty.bool_(), fn_c)); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
 
-    auto* if2 = f.If(if1->Result(0));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    {
-        auto true_ = b.With(if2->True());
-        true_.ExitIf(if2, true_.Call(ty.bool_(), fc));
-    }
-    b.With(if2->False()).ExitIf(if2, false);
-
-    f.Return(fn, if2->Result(0));
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn a() -> bool {
@@ -759,37 +733,34 @@ fn f() -> bool {
 }
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_3_a_bc) {
-    auto* fa = b.Function("a", ty.bool_());
-    mod.functions.Push(fa);
-    b.With(fa->Block()).Return(fa, true);
+    auto* fn_a = b.Function("a", ty.bool_());
+    mod.functions.Push(fn_a);
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
-    auto* fb = b.Function("b", ty.bool_());
-    mod.functions.Push(fb);
-    b.With(fb->Block()).Return(fb, true);
+    auto* fn_b = b.Function("b", ty.bool_());
+    mod.functions.Push(fn_b);
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
 
-    auto* fc = b.Function("c", ty.bool_());
-    mod.functions.Push(fc);
-    b.With(fc->Block()).Return(fc, true);
+    auto* fn_c = b.Function("c", ty.bool_());
+    mod.functions.Push(fn_c);
+    b.With(fn_c->Block(), [&] { b.Return(fn_c, true); });
 
     auto* fn = b.Function("f", ty.bool_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_c)); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
 
-    auto* if1 = f.If(f.Call(ty.bool_(), fb));
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    {
-        auto true_ = b.With(if1->True());
-        true_.ExitIf(if1, true_.Call(ty.bool_(), fc));
-    }
-    b.With(if1->False()).ExitIf(if1, false);
+        auto* if2 = b.If(b.Call(ty.bool_(), fn_a));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
 
-    auto* if2 = f.If(f.Call(ty.bool_(), fa));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, if1->Result(0));
-    b.With(if2->False()).ExitIf(if2, false);
-
-    f.Return(fn, if2->Result(0));
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn a() -> bool {
@@ -819,13 +790,14 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_2) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* if_ = f.If(pa);
-    if_->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if_->True()).ExitIf(if_, true);
-    b.With(if_->False()).ExitIf(if_, pb);
+    b.With(fn->Block(), [&] {
+        auto* if_ = b.If(pa);
+        if_->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if_->True(), [&] { b.ExitIf(if_, true); });
+        b.With(if_->False(), [&] { b.ExitIf(if_, pb); });
 
-    f.Return(fn, if_->Result(0));
+        b.Return(fn, if_->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
@@ -845,19 +817,19 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_ab_c) {
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pa);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, pb); });
 
-    auto* if1 = f.If(pa);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, true);
-    b.With(if1->False()).ExitIf(if1, pb);
+        auto* if2 = b.If(if1->Result(0));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, pc); });
 
-    auto* if2 = f.If(if1->Result(0));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, true);
-    b.With(if2->False()).ExitIf(if2, pc);
-
-    f.Return(fn, if2->Result(0));
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
@@ -877,19 +849,19 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_a_bc) {
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pb);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, pc); });
 
-    auto* if1 = f.If(pb);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, true);
-    b.With(if1->False()).ExitIf(if1, pc);
+        auto* if2 = b.If(pa);
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
 
-    auto* if2 = f.If(pa);
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, true);
-    b.With(if2->False()).ExitIf(if2, if1->Result(0));
-
-    f.Return(fn, if2->Result(0));
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
@@ -907,14 +879,15 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_2) {
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* if_ = f.If(pa);
-    if_->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if_->True()).ExitIf(if_, true);
-    b.With(if_->False()).ExitIf(if_, pb);
+    b.With(fn->Block(), [&] {
+        auto* if_ = b.If(pa);
+        if_->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if_->True(), [&] { b.ExitIf(if_, true); });
+        b.With(if_->False(), [&] { b.ExitIf(if_, pb); });
 
-    mod.SetName(if_->Result(0), "l");
-    f.Return(fn, if_->Result(0));
+        mod.SetName(if_->Result(0), "l");
+        b.Return(fn, if_->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
@@ -935,20 +908,20 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_ab_c) {
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pa);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, pb); });
 
-    auto* if1 = f.If(pa);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, true);
-    b.With(if1->False()).ExitIf(if1, pb);
+        auto* if2 = b.If(if1->Result(0));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, pc); });
 
-    auto* if2 = f.If(if1->Result(0));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, true);
-    b.With(if2->False()).ExitIf(if2, pc);
-
-    mod.SetName(if2->Result(0), "l");
-    f.Return(fn, if2->Result(0));
+        mod.SetName(if2->Result(0), "l");
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
@@ -969,20 +942,20 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_a_bc) {
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pb);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, pc); });
 
-    auto* if1 = f.If(pb);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, true);
-    b.With(if1->False()).ExitIf(if1, pc);
+        auto* if2 = b.If(pa);
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
 
-    auto* if2 = f.If(pa);
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, true);
-    b.With(if2->False()).ExitIf(if2, if1->Result(0));
-
-    mod.SetName(if2->Result(0), "l");
-    f.Return(fn, if2->Result(0));
+        mod.SetName(if2->Result(0), "l");
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
@@ -993,27 +966,25 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 }
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_2) {
-    auto* fa = b.Function("a", ty.bool_());
-    mod.functions.Push(fa);
-    b.With(fa->Block()).Return(fa, true);
+    auto* fn_a = b.Function("a", ty.bool_());
+    mod.functions.Push(fn_a);
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
-    auto* fb = b.Function("b", ty.bool_());
-    mod.functions.Push(fb);
-    b.With(fb->Block()).Return(fb, true);
+    auto* fn_b = b.Function("b", ty.bool_());
+    mod.functions.Push(fn_b);
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
 
     auto* fn = b.Function("f", ty.bool_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* if_ = f.If(f.Call(ty.bool_(), fa));
-    if_->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if_->True()).ExitIf(if_, true);
-    {
-        auto false_ = b.With(if_->False());
-        false_.ExitIf(if_, false_.Call(ty.bool_(), fb));
-    }
+    b.With(fn->Block(), [&] {
+        auto* if_ = b.If(b.Call(ty.bool_(), fn_a));
+        if_->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if_->True(), [&] { b.ExitIf(if_, true); });
+        b.With(if_->False(), [&] { b.ExitIf(if_, b.Call(ty.bool_(), fn_b)); });
 
-    f.Return(fn, if_->Result(0));
+        b.Return(fn, if_->Result(0));
+    });
 
     Test(R"(
 fn a() -> bool {
@@ -1031,40 +1002,34 @@ fn f() -> bool {
 }
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_3_ab_c) {
-    auto* fa = b.Function("a", ty.bool_());
-    mod.functions.Push(fa);
-    b.With(fa->Block()).Return(fa, true);
+    auto* fn_a = b.Function("a", ty.bool_());
+    mod.functions.Push(fn_a);
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
-    auto* fb = b.Function("b", ty.bool_());
-    mod.functions.Push(fb);
-    b.With(fb->Block()).Return(fb, true);
+    auto* fn_b = b.Function("b", ty.bool_());
+    mod.functions.Push(fn_b);
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
 
-    auto* fc = b.Function("c", ty.bool_());
-    mod.functions.Push(fc);
-    b.With(fc->Block()).Return(fc, true);
+    auto* fn_c = b.Function("c", ty.bool_());
+    mod.functions.Push(fn_c);
+    b.With(fn_c->Block(), [&] { b.Return(fn_c, true); });
 
     auto* fn = b.Function("f", ty.bool_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_a));
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_b)); });
 
-    auto* if1 = f.If(f.Call(ty.bool_(), fa));
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, true);
-    {
-        auto false_ = b.With(if1->False());
-        false_.ExitIf(if1, false_.Call(ty.bool_(), fb));
-    }
+        auto* if2 = b.If(if1->Result(0));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, b.Call(ty.bool_(), fn_c)); });
 
-    auto* if2 = f.If(if1->Result(0));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, true);
-    {
-        auto false_ = b.With(if2->False());
-        false_.ExitIf(if2, false_.Call(ty.bool_(), fc));
-    }
-
-    f.Return(fn, if2->Result(0));
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn a() -> bool {
@@ -1086,37 +1051,34 @@ fn f() -> bool {
 }
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_3_a_bc) {
-    auto* fa = b.Function("a", ty.bool_());
-    mod.functions.Push(fa);
-    b.With(fa->Block()).Return(fa, true);
+    auto* fn_a = b.Function("a", ty.bool_());
+    mod.functions.Push(fn_a);
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
-    auto* fb = b.Function("b", ty.bool_());
-    mod.functions.Push(fb);
-    b.With(fb->Block()).Return(fb, true);
+    auto* fn_b = b.Function("b", ty.bool_());
+    mod.functions.Push(fn_b);
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
 
-    auto* fc = b.Function("c", ty.bool_());
-    mod.functions.Push(fc);
-    b.With(fc->Block()).Return(fc, true);
+    auto* fn_c = b.Function("c", ty.bool_());
+    mod.functions.Push(fn_c);
+    b.With(fn_c->Block(), [&] { b.Return(fn_c, true); });
 
     auto* fn = b.Function("f", ty.bool_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_c)); });
 
-    auto* if1 = f.If(f.Call(ty.bool_(), fb));
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, true);
-    {
-        auto false_ = b.With(if1->False());
-        false_.ExitIf(if1, false_.Call(ty.bool_(), fc));
-    }
+        auto* if2 = b.If(b.Call(ty.bool_(), fn_a));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
 
-    auto* if2 = f.If(f.Call(ty.bool_(), fa));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if2->True()).ExitIf(if2, true);
-    b.With(if2->False()).ExitIf(if2, if1->Result(0));
-
-    f.Return(fn, if2->Result(0));
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn a() -> bool {
@@ -1138,13 +1100,13 @@ fn f() -> bool {
 }
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalMixed) {
-    auto* fb = b.Function("b", ty.bool_());
-    mod.functions.Push(fb);
-    b.With(fb->Block()).Return(fb, true);
+    auto* fn_b = b.Function("b", ty.bool_());
+    mod.functions.Push(fn_b);
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
 
-    auto* fd = b.Function("d", ty.bool_());
-    mod.functions.Push(fd);
-    b.With(fd->Block()).Return(fd, true);
+    auto* fn_d = b.Function("d", ty.bool_());
+    mod.functions.Push(fn_d);
+    b.With(fn_d->Block(), [&] { b.Return(fn_d, true); });
 
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam(ty.bool_());
@@ -1154,35 +1116,27 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalMixed) {
     fn->SetParams({pa, pc});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(pa);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_b)); });
 
-    auto* if1 = f.If(pa);
-    if1->SetResults(b.InstructionResult(ty.bool_()));
-    b.With(if1->True()).ExitIf(if1, true);
-    {
-        auto false_ = b.With(if1->False());
-        false_.ExitIf(if1, false_.Call(ty.bool_(), fb));
-    }
+        auto* if2 = b.If(if1->Result(0));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] {
+            auto* if3 = b.If(pc);
+            if3->SetResults(b.InstructionResult(ty.bool_()));
+            b.With(if3->True(), [&] { b.ExitIf(if3, true); });
+            b.With(if3->False(), [&] { b.ExitIf(if3, b.Call(ty.bool_(), fn_d)); });
 
-    auto* if2 = f.If(if1->Result(0));
-    if2->SetResults(b.InstructionResult(ty.bool_()));
-    {
-        auto true_ = b.With(if2->True());
+            b.ExitIf(if2, if3->Result(0));
+        });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
 
-        auto* if3 = true_.If(pc);
-        if3->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if3->True()).ExitIf(if3, true);
-        {
-            auto false_ = b.With(if3->False());
-            false_.ExitIf(if3, false_.Call(ty.bool_(), fd));
-        }
-
-        true_.ExitIf(if2, if3->Result(0));
-    }
-    b.With(if2->False()).ExitIf(if2, false);
-
-    mod.SetName(if2->Result(0), "l");
-    f.Return(fn, if2->Result(0));
+        mod.SetName(if2->Result(0), "l");
+        b.Return(fn, if2->Result(0));
+    });
 
     Test(R"(
 fn b() -> bool {
@@ -1207,11 +1161,11 @@ TEST_F(IRToProgramTest, CompoundAssign_Increment) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    f.Store(v, f.Add(ty.i32(), f.Load(v), 1_i));
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Store(v, b.Add(ty.i32(), b.Load(v), 1_i));
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f() {
@@ -1225,11 +1179,11 @@ TEST_F(IRToProgramTest, CompoundAssign_Decrement) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    f.Store(v, f.Subtract(ty.i32(), f.Load(v), 1_i));
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Store(v, b.Subtract(ty.i32(), b.Load(v), 1_i));
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f() {
@@ -1243,11 +1197,11 @@ TEST_F(IRToProgramTest, CompoundAssign_Add) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    f.Store(v, f.Add(ty.i32(), f.Load(v), 8_i));
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Store(v, b.Add(ty.i32(), b.Load(v), 8_i));
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f() {
@@ -1261,11 +1215,11 @@ TEST_F(IRToProgramTest, CompoundAssign_Subtract) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    f.Store(v, f.Subtract(ty.i32(), f.Load(v), 8_i));
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Store(v, b.Subtract(ty.i32(), b.Load(v), 8_i));
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f() {
@@ -1279,11 +1233,11 @@ TEST_F(IRToProgramTest, CompoundAssign_Multiply) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    f.Store(v, f.Multiply(ty.i32(), f.Load(v), 8_i));
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Store(v, b.Multiply(ty.i32(), b.Load(v), 8_i));
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f() {
@@ -1297,11 +1251,11 @@ TEST_F(IRToProgramTest, CompoundAssign_Divide) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    f.Store(v, f.Divide(ty.i32(), f.Load(v), 8_i));
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Store(v, b.Divide(ty.i32(), b.Load(v), 8_i));
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f() {
@@ -1315,11 +1269,11 @@ TEST_F(IRToProgramTest, CompoundAssign_Xor) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    f.Store(v, f.Xor(ty.i32(), f.Load(v), 8_i));
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Store(v, b.Xor(ty.i32(), b.Load(v), 8_i));
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f() {
@@ -1339,11 +1293,11 @@ TEST_F(IRToProgramTest, LetUsedOnce) {
     fn->SetParams({i});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Complement(ty.u32(), i);
-    f.Return(fn, v);
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Complement(ty.u32(), i);
+        b.Return(fn, v);
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f(i : u32) -> u32 {
@@ -1360,11 +1314,11 @@ TEST_F(IRToProgramTest, LetUsedTwice) {
     fn->SetParams({i});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Multiply(ty.i32(), i, 2_i);
-    f.Return(fn, f.Add(ty.i32(), v, v));
-
-    mod.SetName(v, "v");
+    b.With(fn->Block(), [&] {
+        auto* v = b.Multiply(ty.i32(), i, 2_i);
+        b.Return(fn, b.Add(ty.i32(), v, v));
+        mod.SetName(v, "v");
+    });
 
     Test(R"(
 fn f(i : i32) -> i32 {
@@ -1381,9 +1335,10 @@ TEST_F(IRToProgramTest, FunctionScopeVar_i32) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* i = f.Var(ty.ptr<function, i32>());
-    mod.SetName(i, "i");
+    b.With(fn->Block(), [&] {
+        auto* i = b.Var(ty.ptr<function, i32>());
+        mod.SetName(i, "i");
+    });
 
     Test(R"(
 fn f() {
@@ -1396,10 +1351,11 @@ TEST_F(IRToProgramTest, FunctionScopeVar_i32_InitLiteral) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* i = f.Var(ty.ptr<function, i32>());
-    i->SetInitializer(b.Constant(42_i));
-    mod.SetName(i, "i");
+    b.With(fn->Block(), [&] {
+        auto* i = b.Var(ty.ptr<function, i32>());
+        i->SetInitializer(b.Constant(42_i));
+        mod.SetName(i, "i");
+    });
 
     Test(R"(
 fn f() {
@@ -1412,22 +1368,22 @@ TEST_F(IRToProgramTest, FunctionScopeVar_Chained) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* va = b.Var(ty.ptr<function, i32>());
+        va->SetInitializer(b.Constant(42_i));
 
-    auto* va = f.Var(ty.ptr<function, i32>());
-    va->SetInitializer(f.Constant(42_i));
+        auto* la = b.Load(va)->Result();
+        auto* vb = b.Var(ty.ptr<function, i32>());
+        vb->SetInitializer(la);
 
-    auto* la = f.Load(va)->Result();
-    auto* vb = f.Var(ty.ptr<function, i32>());
-    vb->SetInitializer(la);
+        auto* lb = b.Load(vb)->Result();
+        auto* vc = b.Var(ty.ptr<function, i32>());
+        vc->SetInitializer(lb);
 
-    auto* lb = f.Load(vb)->Result();
-    auto* vc = f.Var(ty.ptr<function, i32>());
-    vc->SetInitializer(lb);
-
-    mod.SetName(va, "a");
-    mod.SetName(vb, "b");
-    mod.SetName(vc, "c");
+        mod.SetName(va, "a");
+        mod.SetName(vb, "b");
+        mod.SetName(vc, "c");
+    });
 
     Test(R"(
 fn f() {
@@ -1451,11 +1407,13 @@ TEST_F(IRToProgramTest, If_CallFn) {
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto if_ = f.If(cond);
-    auto true_ = b.With(if_->True());
-    true_.Call(ty.void_(), a);
-    true_.ExitIf(if_);
+    b.With(fn->Block(), [&] {
+        auto* if_ = b.If(cond);
+        b.With(if_->True(), [&] {
+            b.Call(ty.void_(), a);
+            b.ExitIf(if_);
+        });
+    });
 
     Test(R"(
 fn a() {
@@ -1476,10 +1434,10 @@ TEST_F(IRToProgramTest, If_Return) {
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto if_ = f.If(cond);
-    auto true_ = b.With(if_->True());
-    true_.Return(fn);
+    b.With(fn->Block(), [&] {
+        auto if_ = b.If(cond);
+        b.With(if_->True(), [&] { b.Return(fn); });
+    });
 
     Test(R"(
 fn f(cond : bool) {
@@ -1494,14 +1452,14 @@ TEST_F(IRToProgramTest, If_Return_i32) {
     auto* fn = b.Function("f", ty.i32());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* cond = f.Var(ty.ptr<function, bool>());
-    mod.SetName(cond, "cond");
-    cond->SetInitializer(b.Constant(true));
-    auto if_ = f.If(f.Load(cond));
-    auto true_ = b.With(if_->True());
-    true_.Return(fn, 42_i);
-    f.Return(fn, 10_i);
+    b.With(fn->Block(), [&] {
+        auto* cond = b.Var(ty.ptr<function, bool>());
+        mod.SetName(cond, "cond");
+        cond->SetInitializer(b.Constant(true));
+        auto if_ = b.If(b.Load(cond));
+        b.With(if_->True(), [&] { b.Return(fn, 42_i); });
+        b.Return(fn, 10_i);
+    });
 
     Test(R"(
 fn f() -> i32 {
@@ -1515,11 +1473,11 @@ fn f() -> i32 {
 }
 
 TEST_F(IRToProgramTest, If_CallFn_Else_CallFn) {
-    auto* fa = b.Function("a", ty.void_());
-    mod.functions.Push(fa);
+    auto* fn_a = b.Function("a", ty.void_());
+    mod.functions.Push(fn_a);
 
-    auto* fb = b.Function("b", ty.void_());
-    mod.functions.Push(fb);
+    auto* fn_b = b.Function("b", ty.void_());
+    mod.functions.Push(fn_b);
 
     auto* fn = b.Function("f", ty.void_());
     auto* cond = b.FunctionParam(ty.bool_());
@@ -1527,18 +1485,17 @@ TEST_F(IRToProgramTest, If_CallFn_Else_CallFn) {
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto if_ = f.If(cond);
-    {
-        auto true_ = b.With(if_->True());
-        true_.Call(ty.void_(), fa);
-        true_.ExitIf(if_);
-    }
-    {
-        auto false_ = b.With(if_->False());
-        false_.Call(ty.void_(), fb);
-        false_.ExitIf(if_);
-    }
+    b.With(fn->Block(), [&] {
+        auto if_ = b.If(cond);
+        b.With(if_->True(), [&] {
+            b.Call(ty.void_(), fn_a);
+            b.ExitIf(if_);
+        });
+        b.With(if_->False(), [&] {
+            b.Call(ty.void_(), fn_b);
+            b.ExitIf(if_);
+        });
+    });
 
     Test(R"(
 fn a() {
@@ -1561,13 +1518,14 @@ TEST_F(IRToProgramTest, If_Return_f32_Else_Return_f32) {
     auto* fn = b.Function("f", ty.f32());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* cond = f.Var(ty.ptr<function, bool>());
-    mod.SetName(cond, "cond");
-    cond->SetInitializer(b.Constant(true));
-    auto if_ = f.If(f.Load(cond));
-    b.With(if_->True()).Return(fn, 1.0_f);
-    b.With(if_->False()).Return(fn, 2.0_f);
+    b.With(fn->Block(), [&] {
+        auto* cond = b.Var(ty.ptr<function, bool>());
+        mod.SetName(cond, "cond");
+        cond->SetInitializer(b.Constant(true));
+        auto if_ = b.If(b.Load(cond));
+        b.With(if_->True(), [&] { b.Return(fn, 1.0_f); });
+        b.With(if_->False(), [&] { b.Return(fn, 2.0_f); });
+    });
 
     Test(R"(
 fn f() -> f32 {
@@ -1582,28 +1540,28 @@ fn f() -> f32 {
 }
 
 TEST_F(IRToProgramTest, If_Return_u32_Else_CallFn) {
-    auto* fa = b.Function("a", ty.void_());
-    mod.functions.Push(fa);
+    auto* fn_a = b.Function("a", ty.void_());
+    mod.functions.Push(fn_a);
 
-    auto* fb = b.Function("b", ty.void_());
-    mod.functions.Push(fb);
+    auto* fn_b = b.Function("b", ty.void_());
+    mod.functions.Push(fn_b);
 
     auto* fn = b.Function("f", ty.u32());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* cond = f.Var(ty.ptr<function, bool>());
-    mod.SetName(cond, "cond");
-    cond->SetInitializer(b.Constant(true));
-    auto if_ = f.If(f.Load(cond));
-    b.With(if_->True()).Return(fn, 1_u);
-    {
-        auto false_ = b.With(if_->False());
-        false_.Call(ty.void_(), fa);
-        false_.ExitIf(if_);
-    }
-    f.Call(ty.void_(), fb);
-    f.Return(fn, 2_u);
+    b.With(fn->Block(), [&] {
+        auto* cond = b.Var(ty.ptr<function, bool>());
+        mod.SetName(cond, "cond");
+        cond->SetInitializer(b.Constant(true));
+        auto if_ = b.If(b.Load(cond));
+        b.With(if_->True(), [&] { b.Return(fn, 1_u); });
+        b.With(if_->False(), [&] {
+            b.Call(ty.void_(), fn_a);
+            b.ExitIf(if_);
+        });
+        b.Call(ty.void_(), fn_b);
+        b.Return(fn, 2_u);
+    });
 
     Test(R"(
 fn a() {
@@ -1626,39 +1584,37 @@ fn f() -> u32 {
 }
 
 TEST_F(IRToProgramTest, If_CallFn_ElseIf_CallFn) {
-    auto* fa = b.Function("a", ty.void_());
-    mod.functions.Push(fa);
+    auto* fn_a = b.Function("a", ty.void_());
+    mod.functions.Push(fn_a);
 
-    auto* fb = b.Function("b", ty.void_());
-    mod.functions.Push(fb);
+    auto* fn_b = b.Function("b", ty.void_());
+    mod.functions.Push(fn_b);
 
-    auto* fc = b.Function("c", ty.void_());
-    mod.functions.Push(fc);
+    auto* fn_c = b.Function("c", ty.void_());
+    mod.functions.Push(fn_c);
 
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* cond = f.Var(ty.ptr<function, bool>());
-    mod.SetName(cond, "cond");
-    cond->SetInitializer(b.Constant(true));
-    auto if1 = f.If(f.Load(cond));
-    {
-        auto true_ = b.With(if1->True());
-        true_.Call(ty.void_(), fa);
-        true_.ExitIf(if1);
-    }
-    {
-        auto false_ = b.With(if1->False());
-        auto* if2 = false_.If(b.Constant(false));
-        {
-            auto true_ = b.With(if2->True());
-            true_.Call(ty.void_(), fb);
-            true_.ExitIf(if2);
-        }
-        false_.ExitIf(if1);
-    }
-    f.Call(ty.void_(), fc);
+    b.With(fn->Block(), [&] {
+        auto* cond = b.Var(ty.ptr<function, bool>());
+        mod.SetName(cond, "cond");
+        cond->SetInitializer(b.Constant(true));
+        auto if1 = b.If(b.Load(cond));
+        b.With(if1->True(), [&] {
+            b.Call(ty.void_(), fn_a);
+            b.ExitIf(if1);
+        });
+        b.With(if1->False(), [&] {
+            auto* if2 = b.If(b.Constant(false));
+            b.With(if2->True(), [&] {
+                b.Call(ty.void_(), fn_b);
+                b.ExitIf(if2);
+            });
+            b.ExitIf(if1);
+        });
+        b.Call(ty.void_(), fn_c);
+    });
 
     Test(R"(
 fn a() {
@@ -1688,7 +1644,7 @@ TEST_F(IRToProgramTest, If_Else_Chain) {
     mod.SetName(i, "i");
     x->SetParams({i});
     mod.functions.Push(x);
-    b.With(x->Block()).Return(x, true);
+    b.With(x->Block(), [&] { b.Return(x, true); });
 
     auto* fn = b.Function("f", ty.void_());
     auto* pa = b.FunctionParam(ty.bool_());
@@ -1702,37 +1658,31 @@ TEST_F(IRToProgramTest, If_Else_Chain) {
     fn->SetParams({pa, pb, pc, pd});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto if1 = f.If(pa);
-    {
-        auto true1 = b.With(if1->True());
-        true1.Call(ty.void_(), x, 0_i);
-        true1.ExitIf(if1);
-    }
-    {
-        auto false1 = b.With(if1->False());
-        auto* if2 = false1.If(pb);
-        {
-            auto true2 = b.With(if2->True());
-            true2.Call(ty.void_(), x, 1_i);
-            true2.ExitIf(if2);
-        }
-        {
-            auto false2 = b.With(if2->False());
-            auto* if3 = false2.If(pc);
-            {
-                auto true3 = b.With(if3->True());
-                true3.Call(ty.void_(), x, 2_i);
-                true3.ExitIf(if3);
-            }
-            {
-                auto false3 = b.With(if3->False());
-                false3.Call(ty.void_(), x, 3_i);
-                false3.ExitIf(if3);
-            }
-        }
-    }
-
+    b.With(fn->Block(), [&] {
+        auto if1 = b.If(pa);
+        b.With(if1->True(), [&] {
+            b.Call(ty.void_(), x, 0_i);
+            b.ExitIf(if1);
+        });
+        b.With(if1->False(), [&] {
+            auto* if2 = b.If(pb);
+            b.With(if2->True(), [&] {
+                b.Call(ty.void_(), x, 1_i);
+                b.ExitIf(if2);
+                b.With(if2->False(), [&] {
+                    auto* if3 = b.If(pc);
+                    b.With(if3->True(), [&] {
+                        b.Call(ty.void_(), x, 2_i);
+                        b.ExitIf(if3);
+                    });
+                    b.With(if3->False(), [&] {
+                        b.Call(ty.void_(), x, 3_i);
+                        b.ExitIf(if3);
+                    });
+                });
+            });
+        });
+    });
     Test(R"(
 fn x(i : i32) -> bool {
   return true;
@@ -1756,23 +1706,23 @@ fn f(a : bool, b : bool, c : bool, d : bool) {
 // Switch
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, Switch_Default) {
-    auto* fa = b.Function("a", ty.void_());
-    mod.functions.Push(fa);
+    auto* fn_a = b.Function("a", ty.void_());
+    mod.functions.Push(fn_a);
 
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    mod.SetName(v, "v");
-    v->SetInitializer(b.Constant(42_i));
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        mod.SetName(v, "v");
+        v->SetInitializer(b.Constant(42_i));
 
-    auto s = f.Switch(f.Load(v));
-    {
-        auto block = b.With(b.Case(s, {Switch::CaseSelector{}}));
-        block.Call(ty.void_(), fa);
-        block.ExitSwitch(s);
-    }
+        auto s = b.Switch(b.Load(v));
+        b.With(b.Case(s, {Switch::CaseSelector{}}), [&] {
+            b.Call(ty.void_(), fn_a);
+            b.ExitSwitch(s);
+        });
+    });
 
     Test(R"(
 fn a() {
@@ -1790,42 +1740,42 @@ fn f() {
 }
 
 TEST_F(IRToProgramTest, Switch_3_Cases) {
-    auto* fa = b.Function("a", ty.void_());
-    mod.functions.Push(fa);
+    auto* fn_a = b.Function("a", ty.void_());
+    mod.functions.Push(fn_a);
 
-    auto* fb = b.Function("b", ty.void_());
-    mod.functions.Push(fb);
+    auto* fn_b = b.Function("b", ty.void_());
+    mod.functions.Push(fn_b);
 
-    auto* fc = b.Function("c", ty.void_());
-    mod.functions.Push(fc);
+    auto* fn_c = b.Function("c", ty.void_());
+    mod.functions.Push(fn_c);
 
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    mod.SetName(v, "v");
-    v->SetInitializer(b.Constant(42_i));
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        mod.SetName(v, "v");
+        v->SetInitializer(b.Constant(42_i));
 
-    auto s = f.Switch(f.Load(v));
-    {
-        auto block = b.With(b.Case(s, {Switch::CaseSelector{b.Constant(0_i)}}));
-        block.Call(ty.void_(), fa);
-        block.ExitSwitch(s);
-    }
-    {
-        auto block = b.With(b.Case(s, {
-                                          Switch::CaseSelector{b.Constant(1_i)},
-                                          Switch::CaseSelector{},
-                                      }));
-        block.Call(ty.void_(), fb);
-        block.ExitSwitch(s);
-    }
-    {
-        auto block = b.With(b.Case(s, {Switch::CaseSelector{b.Constant(2_i)}}));
-        block.Call(ty.void_(), fc);
-        block.ExitSwitch(s);
-    }
+        auto s = b.Switch(b.Load(v));
+        b.With(b.Case(s, {Switch::CaseSelector{b.Constant(0_i)}}), [&] {
+            b.Call(ty.void_(), fn_a);
+            b.ExitSwitch(s);
+        });
+        b.With(b.Case(s,
+                      {
+                          Switch::CaseSelector{b.Constant(1_i)},
+                          Switch::CaseSelector{},
+                      }),
+               [&] {
+                   b.Call(ty.void_(), fn_b);
+                   b.ExitSwitch(s);
+               });
+        b.With(b.Case(s, {Switch::CaseSelector{b.Constant(2_i)}}), [&] {
+            b.Call(ty.void_(), fn_c);
+            b.ExitSwitch(s);
+        });
+    });
 
     Test(R"(
 fn a() {
@@ -1855,36 +1805,30 @@ fn f() {
 }
 
 TEST_F(IRToProgramTest, Switch_3_Cases_AllReturn) {
-    auto* fa = b.Function("a", ty.void_());
-    mod.functions.Push(fa);
+    auto* fn_a = b.Function("a", ty.void_());
+    mod.functions.Push(fn_a);
 
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
-    auto* v = f.Var(ty.ptr<function, i32>());
-    mod.SetName(v, "v");
-    v->SetInitializer(b.Constant(42_i));
+    b.With(fn->Block(), [&] {
+        auto* v = b.Var(ty.ptr<function, i32>());
+        mod.SetName(v, "v");
+        v->SetInitializer(b.Constant(42_i));
 
-    auto s = f.Switch(f.Load(v));
-    {
-        auto block = b.With(b.Case(s, {Switch::CaseSelector{b.Constant(0_i)}}));
-        block.Return(fn);
-    }
-    {
-        auto block = b.With(b.Case(s, {
-                                          Switch::CaseSelector{b.Constant(1_i)},
-                                          Switch::CaseSelector{},
-                                      }));
-        block.Return(fn);
-    }
-    {
-        auto block = b.With(b.Case(s, {Switch::CaseSelector{b.Constant(2_i)}}));
-        block.Return(fn);
-    }
+        auto s = b.Switch(b.Load(v));
+        b.With(b.Case(s, {Switch::CaseSelector{b.Constant(0_i)}}), [&] { b.Return(fn); });
+        b.With(b.Case(s,
+                      {
+                          Switch::CaseSelector{b.Constant(1_i)},
+                          Switch::CaseSelector{},
+                      }),
+               [&] { b.Return(fn); });
+        b.With(b.Case(s, {Switch::CaseSelector{b.Constant(2_i)}}), [&] { b.Return(fn); });
 
-    f.Call(ty.void_(), fa);
-    f.Return(fn);
+        b.Call(ty.void_(), fn_a);
+        b.Return(fn);
+    });
 
     Test(R"(
 fn a() {
@@ -1909,59 +1853,53 @@ fn f() {
 }
 
 TEST_F(IRToProgramTest, Switch_Nested) {
-    auto* fa = b.Function("a", ty.void_());
-    mod.functions.Push(fa);
+    auto* fn_a = b.Function("a", ty.void_());
+    mod.functions.Push(fn_a);
 
-    auto* fb = b.Function("b", ty.void_());
-    mod.functions.Push(fb);
+    auto* fn_b = b.Function("b", ty.void_());
+    mod.functions.Push(fn_b);
 
-    auto* fc = b.Function("c", ty.void_());
-    mod.functions.Push(fc);
+    auto* fn_c = b.Function("c", ty.void_());
+    mod.functions.Push(fn_c);
 
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* v1 = b.Var(ty.ptr<function, i32>());
+        mod.SetName(v1, "v1");
+        v1->SetInitializer(b.Constant(42_i));
 
-    auto* v1 = f.Var(ty.ptr<function, i32>());
-    mod.SetName(v1, "v1");
-    v1->SetInitializer(b.Constant(42_i));
+        auto* v2 = b.Var(ty.ptr<function, i32>());
+        mod.SetName(v2, "v2");
+        v2->SetInitializer(b.Constant(24_i));
 
-    auto* v2 = f.Var(ty.ptr<function, i32>());
-    mod.SetName(v2, "v2");
-    v2->SetInitializer(b.Constant(24_i));
-
-    auto s1 = f.Switch(f.Load(v1));
-    {
-        auto block = b.With(b.Case(s1, {Switch::CaseSelector{b.Constant(0_i)}}));
-        block.Call(ty.void_(), fa);
-        block.ExitSwitch(s1);
-    }
-    {
-        auto block1 = b.With(b.Case(s1, {
-                                            Switch::CaseSelector{b.Constant(1_i)},
-                                            Switch::CaseSelector{},
-                                        }));
-
-        auto s2 = block1.Switch(block1.Load(v2));
-        {
-            auto block2 = b.With(b.Case(s2, {Switch::CaseSelector{b.Constant(0_i)}}));
-            block2.ExitSwitch(s2);
-        }
-        {
-            auto block2 = b.With(b.Case(s2, {
-                                                Switch::CaseSelector{b.Constant(1_i)},
-                                                Switch::CaseSelector{},
-                                            }));
-            block2.Return(fn);
-        }
-    }
-    {
-        auto block = b.With(b.Case(s1, {Switch::CaseSelector{b.Constant(2_i)}}));
-        block.Call(ty.void_(), fc);
-        block.ExitSwitch(s1);
-    }
-
+        auto s1 = b.Switch(b.Load(v1));
+        b.With(b.Case(s1, {Switch::CaseSelector{b.Constant(0_i)}}), [&] {
+            b.Call(ty.void_(), fn_a);
+            b.ExitSwitch(s1);
+        });
+        b.With(b.Case(s1,
+                      {
+                          Switch::CaseSelector{b.Constant(1_i)},
+                          Switch::CaseSelector{},
+                      }),
+               [&] {
+                   auto s2 = b.Switch(b.Load(v2));
+                   b.With(b.Case(s2, {Switch::CaseSelector{b.Constant(0_i)}}),
+                          [&] { b.ExitSwitch(s2); });
+                   b.With(b.Case(s2,
+                                 {
+                                     Switch::CaseSelector{b.Constant(1_i)},
+                                     Switch::CaseSelector{},
+                                 }),
+                          [&] { b.Return(fn); });
+               });
+        b.With(b.Case(s1, {Switch::CaseSelector{b.Constant(2_i)}}), [&] {
+            b.Call(ty.void_(), fn_c);
+            b.ExitSwitch(s1);
+        });
+    });
     Test(R"(
 fn a() {
 }
@@ -2003,28 +1941,23 @@ TEST_F(IRToProgramTest, For_Empty) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Initializer(), [&] {
+            auto* i = b.Var(ty.ptr<function, i32>());
+            mod.SetName(i, "i");
+            i->SetInitializer(b.Constant(0_i));
 
-    {
-        auto init = b.With(loop->Initializer());
-        auto* i = init.Var(ty.ptr<function, i32>());
-        mod.SetName(i, "i");
-        i->SetInitializer(b.Constant(0_i));
+            b.With(loop->Body(), [&] {
+                auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+                b.With(if_->True(), [&] { b.ExitIf(if_); });
+                b.With(if_->False(), [&] { b.ExitLoop(loop); });
+            });
 
-        {
-            auto body = b.With(loop->Body());
-            auto* if_ = body.If(body.LessThan(ty.bool_(), body.Load(i), 5_i));
-            b.With(if_->True()).ExitIf(if_);
-            b.With(if_->False()).ExitLoop(loop);
-        }
-
-        {
-            auto cont = b.With(loop->Continuing());
-            cont.Store(i, cont.Add(ty.i32(), cont.Load(i), 1_i));
-        }
-    }
+            b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
+        });
+    });
 
     Test(R"(
 fn f() {
@@ -2038,25 +1971,21 @@ TEST_F(IRToProgramTest, For_Empty_NoInit) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* i = b.Var(ty.ptr<function, i32>());
+        mod.SetName(i, "i");
+        i->SetInitializer(b.Constant(0_i));
 
-    auto* i = f.Var(ty.ptr<function, i32>());
-    mod.SetName(i, "i");
-    i->SetInitializer(b.Constant(0_i));
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Body(), [&] {
+            auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+            b.With(if_->True(), [&] { b.ExitIf(if_); });
+            b.With(if_->False(), [&] { b.ExitLoop(loop); });
+        });
 
-    {
-        auto body = b.With(loop->Body());
-        auto* if_ = body.If(body.LessThan(ty.bool_(), body.Load(i), 5_i));
-        b.With(if_->True()).ExitIf(if_);
-        b.With(if_->False()).ExitLoop(loop);
-    }
-
-    {
-        auto cont = b.With(loop->Continuing());
-        cont.Store(i, cont.Add(ty.i32(), cont.Load(i), 1_i));
-    }
+        b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
+    });
 
     Test(R"(
 fn f() {
@@ -2071,23 +2000,21 @@ TEST_F(IRToProgramTest, For_Empty_NoCont) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Initializer(), [&] {
+            auto* i = b.Var(ty.ptr<function, i32>());
+            mod.SetName(i, "i");
+            i->SetInitializer(b.Constant(0_i));
 
-    {
-        auto init = b.With(loop->Initializer());
-        auto* i = init.Var(ty.ptr<function, i32>());
-        mod.SetName(i, "i");
-        i->SetInitializer(b.Constant(0_i));
-
-        {
-            auto body = b.With(loop->Body());
-            auto* if_ = body.If(body.LessThan(ty.bool_(), body.Load(i), 5_i));
-            b.With(if_->True()).ExitIf(if_);
-            b.With(if_->False()).ExitLoop(loop);
-        }
-    }
+            b.With(loop->Body(), [&] {
+                auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+                b.With(if_->True(), [&] { b.ExitIf(if_); });
+                b.With(if_->False(), [&] { b.ExitLoop(loop); });
+            });
+        });
+    });
 
     Test(R"(
 fn f() {
@@ -2102,42 +2029,35 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
     auto* v = b.FunctionParam(ty.i32());
     mod.SetName(v, "v");
     a->SetParams({v});
-    {
-        auto f = b.With(a->Block());
-        f.Return(a, f.Equal(ty.bool_(), v, 1_i));
-    }
+    b.With(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
     mod.functions.Push(a);
 
     auto* fn = b.Function("f", ty.i32());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Initializer(), [&] {
+            auto* i = b.Var(ty.ptr<function, i32>());
+            mod.SetName(i, "i");
+            i->SetInitializer(b.Constant(0_i));
 
-    {
-        auto init = b.With(loop->Initializer());
-        auto* i = init.Var(ty.ptr<function, i32>());
-        mod.SetName(i, "i");
-        i->SetInitializer(b.Constant(0_i));
+            b.With(loop->Body(), [&] {
+                auto* if1 = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+                b.With(if1->True(), [&] { b.ExitIf(if1); });
+                b.With(if1->False(), [&] { b.ExitLoop(loop); });
 
-        {
-            auto body = b.With(loop->Body());
-            auto* if1 = body.If(body.LessThan(ty.bool_(), body.Load(i), 5_i));
-            b.With(if1->True()).ExitIf(if1);
-            b.With(if1->False()).ExitLoop(loop);
+                auto* if2 = b.If(b.Call(ty.bool_(), a, 42_i));
+                b.With(if2->True(), [&] { b.Return(fn, 1_i); });
+                b.With(if2->False(), [&] { b.Return(fn, 2_i); });
+            });
 
-            auto* if2 = body.If(body.Call(ty.bool_(), a, 42_i));
-            b.With(if2->True()).Return(fn, 1_i);
-            b.With(if2->False()).Return(fn, 2_i);
-        }
+            b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
+        });
 
-        {
-            auto cont = b.With(loop->Continuing());
-            cont.Store(i, cont.Add(ty.i32(), cont.Load(i), 1_i));
-        }
-    }
-    f.Return(fn, 3_i);
+        b.Return(fn, 3_i);
+    });
 
     Test(R"(
 fn a(v : i32) -> bool {
@@ -2162,40 +2082,33 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoInit) {
     auto* v = b.FunctionParam(ty.i32());
     mod.SetName(v, "v");
     a->SetParams({v});
-    {
-        auto f = b.With(a->Block());
-        f.Return(a, f.Equal(ty.bool_(), v, 1_i));
-    }
+    b.With(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
     mod.functions.Push(a);
 
     auto* fn = b.Function("f", ty.i32());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* i = b.Var(ty.ptr<function, i32>());
+        mod.SetName(i, "i");
+        i->SetInitializer(b.Constant(0_i));
 
-    auto* i = f.Var(ty.ptr<function, i32>());
-    mod.SetName(i, "i");
-    i->SetInitializer(b.Constant(0_i));
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Body(), [&] {
+            auto* if1 = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+            b.With(if1->True(), [&] { b.ExitIf(if1); });
+            b.With(if1->False(), [&] { b.ExitLoop(loop); });
 
-    {
-        auto body = b.With(loop->Body());
-        auto* if1 = body.If(body.LessThan(ty.bool_(), body.Load(i), 5_i));
-        b.With(if1->True()).ExitIf(if1);
-        b.With(if1->False()).ExitLoop(loop);
+            auto* if2 = b.If(b.Call(ty.bool_(), a, 42_i));
+            b.With(if2->True(), [&] { b.Return(fn, 1_i); });
+            b.With(if2->False(), [&] { b.Return(fn, 2_i); });
+        });
 
-        auto* if2 = body.If(body.Call(ty.bool_(), a, 42_i));
-        b.With(if2->True()).Return(fn, 1_i);
-        b.With(if2->False()).Return(fn, 2_i);
-    }
+        b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
 
-    {
-        auto cont = b.With(loop->Continuing());
-        cont.Store(i, cont.Add(ty.i32(), cont.Load(i), 1_i));
-    }
-
-    f.Return(fn, 3_i);
+        b.Return(fn, 3_i);
+    });
 
     Test(R"(
 fn a(v : i32) -> bool {
@@ -2221,37 +2134,32 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
     auto* v = b.FunctionParam(ty.i32());
     mod.SetName(v, "v");
     a->SetParams({v});
-    {
-        auto f = b.With(a->Block());
-        f.Return(a, f.Equal(ty.bool_(), v, 1_i));
-    }
+    b.With(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
     mod.functions.Push(a);
 
     auto* fn = b.Function("f", ty.i32());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Initializer(), [&] {
+            auto* i = b.Var(ty.ptr<function, i32>());
+            mod.SetName(i, "i");
+            i->SetInitializer(b.Constant(0_i));
 
-    {
-        auto init = b.With(loop->Initializer());
-        auto* i = init.Var(ty.ptr<function, i32>());
-        mod.SetName(i, "i");
-        i->SetInitializer(b.Constant(0_i));
+            b.With(loop->Body(), [&] {
+                auto* if1 = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+                b.With(if1->True(), [&] { b.ExitIf(if1); });
+                b.With(if1->False(), [&] { b.ExitLoop(loop); });
 
-        {
-            auto body = b.With(loop->Body());
-            auto* if1 = body.If(body.LessThan(ty.bool_(), body.Load(i), 5_i));
-            b.With(if1->True()).ExitIf(if1);
-            b.With(if1->False()).ExitLoop(loop);
-
-            auto* if2 = body.If(body.Call(ty.bool_(), a, 42_i));
-            b.With(if2->True()).Return(fn, 1_i);
-            b.With(if2->False()).Return(fn, 2_i);
-        }
-    }
-    f.Return(fn, 3_i);
+                auto* if2 = b.If(b.Call(ty.bool_(), a, 42_i));
+                b.With(if2->True(), [&] { b.Return(fn, 1_i); });
+                b.With(if2->False(), [&] { b.Return(fn, 2_i); });
+            });
+        });
+        b.Return(fn, 3_i);
+    });
 
     Test(R"(
 fn a(v : i32) -> bool {
@@ -2278,16 +2186,15 @@ TEST_F(IRToProgramTest, While_Empty) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
-
-    {
-        auto body = b.With(loop->Body());
-        auto* cond = body.If(true);
-        b.With(cond->True()).ExitIf(cond);
-        b.With(cond->False()).ExitLoop(loop);
-    }
+        b.With(loop->Body(), [&] {
+            auto* cond = b.If(true);
+            b.With(cond->True(), [&] { b.ExitIf(cond); });
+            b.With(cond->False(), [&] { b.ExitLoop(loop); });
+        });
+    });
 
     Test(R"(
 fn f() {
@@ -2304,16 +2211,15 @@ TEST_F(IRToProgramTest, While_Cond) {
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
-
-    {
-        auto body = b.With(loop->Body());
-        auto* if_ = body.If(cond);
-        b.With(if_->True()).ExitIf(if_);
-        b.With(if_->False()).ExitLoop(loop);
-    }
+        b.With(loop->Body(), [&] {
+            auto* if_ = b.If(cond);
+            b.With(if_->True(), [&] { b.ExitIf(if_); });
+            b.With(if_->False(), [&] { b.ExitLoop(loop); });
+        });
+    });
 
     Test(R"(
 fn f(cond : bool) {
@@ -2327,17 +2233,16 @@ TEST_F(IRToProgramTest, While_Break) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
-
-    {
-        auto body = b.With(loop->Body());
-        auto* cond = body.If(true);
-        b.With(cond->True()).ExitIf(cond);
-        b.With(cond->False()).ExitLoop(loop);
-        body.ExitLoop(loop);
-    }
+        b.With(loop->Body(), [&] {
+            auto* cond = b.If(true);
+            b.With(cond->True(), [&] { b.ExitIf(cond); });
+            b.With(cond->False(), [&] { b.ExitLoop(loop); });
+            b.ExitLoop(loop);
+        });
+    });
 
     Test(R"(
 fn f() {
@@ -2355,19 +2260,18 @@ TEST_F(IRToProgramTest, While_IfBreak) {
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Body(), [&] {
+            auto* if1 = b.If(true);
+            b.With(if1->True(), [&] { b.ExitIf(if1); });
+            b.With(if1->False(), [&] { b.ExitLoop(loop); });
 
-    {
-        auto body = b.With(loop->Body());
-        auto* if1 = body.If(true);
-        b.With(if1->True()).ExitIf(if1);
-        b.With(if1->False()).ExitLoop(loop);
-
-        auto* if2 = body.If(cond);
-        b.With(if2->True()).ExitLoop(loop);
-    }
+            auto* if2 = b.If(cond);
+            b.With(if2->True(), [&] { b.ExitLoop(loop); });
+        });
+    });
 
     Test(R"(
 fn f(cond : bool) {
@@ -2387,19 +2291,18 @@ TEST_F(IRToProgramTest, While_IfReturn) {
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Body(), [&] {
+            auto* if1 = b.If(true);
+            b.With(if1->True(), [&] { b.ExitIf(if1); });
+            b.With(if1->False(), [&] { b.ExitLoop(loop); });
 
-    {
-        auto body = b.With(loop->Body());
-        auto* if1 = body.If(true);
-        b.With(if1->True()).ExitIf(if1);
-        b.With(if1->False()).ExitLoop(loop);
-
-        auto* if2 = body.If(cond);
-        b.With(if2->True()).Return(fn);
-    }
+            auto* if2 = b.If(cond);
+            b.With(if2->True(), [&] { b.Return(fn); });
+        });
+    });
 
     Test(R"(
 fn f(cond : bool) {
@@ -2419,11 +2322,11 @@ TEST_F(IRToProgramTest, Loop_Break) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
-
-    b.With(loop->Body()).ExitLoop(loop);
+        b.With(loop->Body(), [&] { b.ExitLoop(loop); });
+    });
 
     Test(R"(
 fn f() {
@@ -2441,16 +2344,14 @@ TEST_F(IRToProgramTest, Loop_IfBreak) {
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
-
-    {
-        auto body = b.With(loop->Body());
-        auto* if_ = body.If(cond);
-        b.With(if_->True()).ExitLoop(loop);
-    }
-
+        b.With(loop->Body(), [&] {
+            auto* if_ = b.If(cond);
+            b.With(if_->True(), [&] { b.ExitLoop(loop); });
+        });
+    });
     Test(R"(
 fn f(cond : bool) {
   loop {
@@ -2469,15 +2370,14 @@ TEST_F(IRToProgramTest, Loop_IfReturn) {
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
-
-    {
-        auto body = b.With(loop->Body());
-        auto* if_ = body.If(cond);
-        b.With(if_->True()).Return(fn);
-    }
+        b.With(loop->Body(), [&] {
+            auto* if_ = b.If(cond);
+            b.With(if_->True(), [&] { b.Return(fn); });
+        });
+    });
 
     Test(R"(
 fn f(cond : bool) {
@@ -2494,24 +2394,20 @@ TEST_F(IRToProgramTest, Loop_IfContinuing) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    auto f = b.With(fn->Block());
+    b.With(fn->Block(), [&] {
+        auto* cond = b.Var(ty.ptr<function, bool>());
+        cond->SetInitializer(b.Constant(false));
+        mod.SetName(cond, "cond");
 
-    auto* cond = f.Var(ty.ptr<function, bool>());
-    cond->SetInitializer(b.Constant(false));
-    mod.SetName(cond, "cond");
+        auto* loop = b.Loop();
 
-    auto* loop = f.Loop();
+        b.With(loop->Body(), [&] {
+            auto* if_ = b.If(cond);
+            b.With(if_->True(), [&] { b.Return(fn); });
+        });
 
-    {
-        auto body = b.With(loop->Body());
-        auto* if_ = body.If(cond);
-        b.With(if_->True()).Return(fn);
-    }
-
-    {
-        auto cont = b.With(loop->Continuing());
-        cont.Store(cond, true);
-    }
+        b.With(loop->Continuing(), [&] { b.Store(cond, true); });
+    });
 
     Test(R"(
 fn f() {

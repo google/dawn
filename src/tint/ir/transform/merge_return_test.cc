@@ -32,8 +32,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInRootBlock) {
     func->SetParams({in});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
-    sb.Return(func, sb.Add(ty.i32(), in, 1_i));
+    b.With(func->Block(), [&] { b.Return(func, b.Add(ty.i32(), in, 1_i)); });
 
     auto* src = R"(
 %foo = func(%2:i32):i32 -> %b1 {
@@ -59,17 +58,14 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
     func->SetParams({in});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        ifelse->SetResults(b.InstructionResult(ty.i32()));
+        b.With(ifelse->True(), [&] { b.ExitIf(ifelse, b.Add(ty.i32(), in, 1_i)); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse, b.Add(ty.i32(), in, 2_i)); });
 
-    auto* ifelse = sb.If(cond);
-    ifelse->SetResults(b.InstructionResult(ty.i32()));
-    auto tb = b.With(ifelse->True());
-    tb.ExitIf(ifelse, tb.Add(ty.i32(), in, 1_i));
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse, fb.Add(ty.i32(), in, 2_i));
-
-    sb.Return(func, ifelse->Result(0));
-
+        b.Return(func, ifelse->Result(0));
+    });
     auto* src = R"(
 %foo = func(%2:i32):i32 -> %b1 {
   %b1 = block {
@@ -103,21 +99,19 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
     func->SetParams({in});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* swtch = b.Switch(in);
+        b.With(b.Case(swtch, {Switch::CaseSelector{}}), [&] { b.ExitSwitch(swtch); });
 
-    auto* swtch = sb.Switch(in);
-    b.Case(swtch, {Switch::CaseSelector{}})->Append(b.ExitSwitch(swtch));
+        b.Loop();
 
-    sb.Loop();
+        auto* ifelse = b.If(cond);
+        ifelse->SetResults(b.InstructionResult(ty.i32()));
+        b.With(ifelse->True(), [&] { b.ExitIf(ifelse, b.Add(ty.i32(), in, 1_i)); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse, b.Add(ty.i32(), in, 2_i)); });
 
-    auto* ifelse = sb.If(cond);
-    ifelse->SetResults(b.InstructionResult(ty.i32()));
-    auto tb = b.With(ifelse->True());
-    tb.ExitIf(ifelse, tb.Add(ty.i32(), in, 1_i));
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse, fb.Add(ty.i32(), in, 2_i));
-
-    sb.Return(func, ifelse->Result(0));
+        b.Return(func, ifelse->Result(0));
+    });
 
     auto* src = R"(
 %foo = func(%2:i32):i32 -> %b1 {
@@ -158,15 +152,13 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        b.With(ifelse->True(), [&] { b.Return(func); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
 
-    auto* ifelse = sb.If(cond);
-    auto tb = b.With(ifelse->True());
-    tb.Return(func);
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse);
-
-    sb.Return(func);
+        b.Return(func);
+    });
 
     auto* src = R"(
 %foo = func(%2:bool):void -> %b1 {
@@ -214,15 +206,13 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_ReturnsCreatedInDifferentOrder)
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        b.Return(func);
 
-    auto* ifelse = sb.If(cond);
-    sb.Return(func);
-
-    auto tb = b.With(ifelse->True());
-    tb.Return(func);
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse);
+        b.With(ifelse->True(), [&] { b.Return(func); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
+    });
 
     auto* src = R"(
 %foo = func(%2:bool):void -> %b1 {
@@ -268,15 +258,13 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        b.With(ifelse->True(), [&] { b.Return(func, 1_i); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
 
-    auto* ifelse = sb.If(cond);
-    auto tb = b.With(ifelse->True());
-    tb.Return(func, 1_i);
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse);
-
-    sb.Return(func, 2_i);
+        b.Return(func, 2_i);
+    });
 
     auto* src = R"(
 %foo = func(%2:bool):i32 -> %b1 {
@@ -334,16 +322,14 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasBasicBlockArg
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        ifelse->SetResults(b.InstructionResult(ty.i32()));
+        b.With(ifelse->True(), [&] { b.Return(func, 1_i); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse, 2_i); });
 
-    auto* ifelse = sb.If(cond);
-    ifelse->SetResults(b.InstructionResult(ty.i32()));
-    auto tb = b.With(ifelse->True());
-    tb.Return(func, 1_i);
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse, 2_i);
-
-    sb.Return(func, ifelse->Result(0));
+        b.Return(func, ifelse->Result(0));
+    });
 
     auto* src = R"(
 %foo = func(%2:bool):i32 -> %b1 {
@@ -401,16 +387,14 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlo
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        ifelse->SetResults(b.InstructionResult(ty.i32()));
+        b.With(ifelse->True(), [&] { b.Return(func, 1_i); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse, nullptr); });
 
-    auto* ifelse = sb.If(cond);
-    ifelse->SetResults(b.InstructionResult(ty.i32()));
-    auto tb = b.With(ifelse->True());
-    tb.Return(func, 1_i);
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse, nullptr);
-
-    sb.Return(func, ifelse->Result(0));
+        b.Return(func, ifelse->Result(0));
+    });
 
     auto* src = R"(
 %foo = func(%2:bool):i32 -> %b1 {
@@ -468,15 +452,13 @@ TEST_F(IR_MergeReturnTest, IfElse_BothSidesReturn) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        b.With(ifelse->True(), [&] { b.Return(func); });
+        b.With(ifelse->False(), [&] { b.Return(func); });
 
-    auto* ifelse = sb.If(cond);
-    auto tb = b.With(ifelse->True());
-    tb.Return(func);
-    auto fb = b.With(ifelse->False());
-    fb.Return(func);
-
-    sb.Unreachable();
+        b.Unreachable();
+    });
 
     auto* src = R"(
 %foo = func(%2:bool):void -> %b1 {
@@ -526,16 +508,14 @@ TEST_F(IR_MergeReturnTest, IfElse_ThenStatements) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        b.With(ifelse->True(), [&] { b.Return(func); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
 
-    auto* ifelse = sb.If(cond);
-    auto tb = b.With(ifelse->True());
-    tb.Return(func);
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse);
-
-    sb.Store(global, 42_i);
-    sb.Return(func);
+        b.Store(global, 42_i);
+        b.Return(func);
+    });
 
     auto* src = R"(
 %b1 = block {  # root
@@ -605,16 +585,14 @@ TEST_F(IR_MergeReturnTest, IfElse_ThenStatements_ReturnsCreatedInDifferentOrder)
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        b.Store(global, 42_i);
+        b.Return(func);
 
-    auto* ifelse = sb.If(cond);
-    sb.Store(global, 42_i);
-    sb.Return(func);
-
-    auto tb = b.With(ifelse->True());
-    tb.Return(func);
-    auto fb = b.With(ifelse->False());
-    fb.ExitIf(ifelse);
+        b.With(ifelse->True(), [&] { b.Return(func); });
+        b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
+    });
 
     auto* src = R"(
 %b1 = block {  # root
@@ -687,32 +665,26 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested) {
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse_outer = b.If(condA);
+        b.With(ifelse_outer->True(), [&] { b.Return(func, 3_i); });
+        b.With(ifelse_outer->False(), [&] {
+            auto* ifelse_middle = b.If(condB);
+            b.With(ifelse_middle->True(), [&] {
+                auto* ifelse_inner = b.If(condC);
+                b.With(ifelse_inner->True(), [&] { b.Return(func, 1_i); });
+                b.With(ifelse_inner->False(), [&] { b.ExitIf(ifelse_inner); });
 
-    auto* ifelse_outer = sb.If(condA);
-    auto outer_true = b.With(ifelse_outer->True());
-    outer_true.Return(func, 3_i);
-    auto outer_false = b.With(ifelse_outer->False());
-    auto* ifelse_middle = outer_false.If(condB);
-
-    sb.Store(global, 3_i);
-    sb.Return(func, sb.Add(ty.i32(), 5_i, 6_i));
-
-    auto middle_true = b.With(ifelse_middle->True());
-    auto* ifelse_inner = middle_true.If(condC);
-    auto middle_false = b.With(ifelse_middle->False());
-    middle_false.ExitIf(ifelse_middle);
-
-    outer_false.Store(global, 2_i);
-    outer_false.ExitIf(ifelse_outer);
-
-    auto inner_true = b.With(ifelse_inner->True());
-    inner_true.Return(func, 1_i);
-    auto inner_false = b.With(ifelse_inner->False());
-    inner_false.ExitIf(ifelse_inner);
-
-    middle_true.Store(global, 1_i);
-    middle_true.Return(func, 2_i);
+                b.Store(global, 1_i);
+                b.Return(func, 2_i);
+            });
+            b.With(ifelse_middle->False(), [&] { b.ExitIf(ifelse_middle); });
+            b.Store(global, 2_i);
+            b.ExitIf(ifelse_outer);
+        });
+        b.Store(global, 3_i);
+        b.Return(func, b.Add(ty.i32(), 5_i, 6_i));
+    });
 
     auto* src = R"(
 %b1 = block {  # root
@@ -843,30 +815,24 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_TrivialMerge) {
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse_outer = b.If(condA);
+        b.With(ifelse_outer->True(), [&] { b.Return(func, 3_i); });
+        b.With(ifelse_outer->False(), [&] {
+            auto* ifelse_middle = b.If(condB);
+            b.With(ifelse_middle->True(), [&] {
+                auto* ifelse_inner = b.If(condC);
+                b.With(ifelse_inner->True(), [&] { b.Return(func, 1_i); });
+                b.With(ifelse_inner->False(), [&] { b.ExitIf(ifelse_inner); });
 
-    auto* ifelse_outer = sb.If(condA);
-    auto outer_true = b.With(ifelse_outer->True());
-    outer_true.Return(func, 3_i);
-    auto outer_false = b.With(ifelse_outer->False());
-    auto* ifelse_middle = outer_false.If(condB);
+                b.ExitIf(ifelse_middle);
+            });
+            b.With(ifelse_middle->False(), [&] { b.ExitIf(ifelse_middle); });
 
-    sb.Return(func, 3_i);
-
-    auto middle_true = b.With(ifelse_middle->True());
-    auto* ifelse_inner = middle_true.If(condC);
-    auto middle_false = b.With(ifelse_middle->False());
-    middle_false.ExitIf(ifelse_middle);
-
-    outer_false.ExitIf(ifelse_outer);
-
-    auto inner_true = b.With(ifelse_inner->True());
-    inner_true.Return(func, 1_i);
-    auto inner_false = b.With(ifelse_inner->False());
-    inner_false.ExitIf(ifelse_inner);
-
-    middle_true.ExitIf(ifelse_middle);
-
+            b.ExitIf(ifelse_outer);
+        });
+        b.Return(func, 3_i);
+    });
     auto* src = R"(
 %b1 = block {  # root
   %1:ptr<private, i32, read_write> = var
@@ -974,31 +940,28 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* ifelse_outer = b.If(condA);
+        ifelse_outer->SetResults(b.InstructionResult(ty.i32()));
+        b.With(ifelse_outer->True(), [&] { b.Return(func, 3_i); });
+        b.With(ifelse_outer->False(), [&] {
+            auto* ifelse_middle = b.If(condB);
+            ifelse_middle->SetResults(b.InstructionResult(ty.i32()));
+            b.With(ifelse_middle->True(), [&] {
+                auto* ifelse_inner = b.If(condC);
 
-    auto* ifelse_outer = sb.If(condA);
-    ifelse_outer->SetResults(b.InstructionResult(ty.i32()));
-    auto outer_true = b.With(ifelse_outer->True());
-    outer_true.Return(func, 3_i);
-    auto outer_false = b.With(ifelse_outer->False());
-    auto* ifelse_middle = outer_false.If(condB);
-    ifelse_middle->SetResults(b.InstructionResult(ty.i32()));
+                b.With(ifelse_inner->True(), [&] { b.Return(func, 1_i); });
+                b.With(ifelse_inner->False(), [&] { b.ExitIf(ifelse_inner); });
 
-    sb.Return(func, sb.Add(ty.i32(), ifelse_outer->Result(0), 1_i));
+                b.ExitIf(ifelse_middle, b.Add(ty.i32(), 42_i, 1_i));
+            });
+            b.With(ifelse_middle->False(),
+                   [&] { b.ExitIf(ifelse_middle, b.Add(ty.i32(), 43_i, 2_i)); });
+            b.ExitIf(ifelse_outer, b.Add(ty.i32(), ifelse_middle->Result(0), 1_i));
+        });
 
-    auto middle_true = b.With(ifelse_middle->True());
-    auto* ifelse_inner = middle_true.If(condC);
-    auto middle_false = b.With(ifelse_middle->False());
-    middle_false.ExitIf(ifelse_middle, middle_false.Add(ty.i32(), 43_i, 2_i));
-
-    outer_false.ExitIf(ifelse_outer, outer_false.Add(ty.i32(), ifelse_middle->Result(0), 1_i));
-
-    auto inner_true = b.With(ifelse_inner->True());
-    inner_true.Return(func, 1_i);
-    auto inner_false = b.With(ifelse_inner->False());
-    inner_false.ExitIf(ifelse_inner);
-
-    middle_true.ExitIf(ifelse_middle, middle_true.Add(ty.i32(), 42_i, 1_i));
+        b.Return(func, b.Add(ty.i32(), ifelse_outer->Result(0), 1_i));
+    });
 
     auto* src = R"(
 %b1 = block {  # root
@@ -1119,13 +1082,12 @@ TEST_F(IR_MergeReturnTest, Loop_UnconditionalReturnInBody) {
     auto* func = b.Function("foo", ty.i32());
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] { b.Return(func, 42_i); });
 
-    auto* loop = sb.Loop();
-    loop->Body()->Append(b.Return(func, 42_i));
-
-    sb.Unreachable();
-
+        b.Unreachable();
+    });
     auto* src = R"(
 %foo = func():i32 -> %b1 {
   %b1 = block {
@@ -1170,26 +1132,25 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {
+            auto* ifelse = b.If(cond);
+            b.With(ifelse->True(), [&] { b.Return(func, 42_i); });
+            b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
 
-    auto* loop = sb.Loop();
-    auto lb = b.With(loop->Body());
-    auto* ifelse = lb.If(cond);
-    {
-        auto tb = b.With(ifelse->True());
-        tb.Return(func, 42_i);
-        auto fb = b.With(ifelse->False());
-        fb.ExitIf(ifelse);
-    }
-    lb.Store(global, 2_i);
-    lb.Continue(loop);
+            b.Store(global, 2_i);
+            b.Continue(loop);
+        });
 
-    auto cb = b.With(loop->Continuing());
-    cb.Store(global, 1_i);
-    cb.BreakIf(true, loop);
+        b.With(loop->Continuing(), [&] {
+            b.Store(global, 1_i);
+            b.BreakIf(true, loop);
+        });
 
-    sb.Store(global, 3_i);
-    sb.Return(func, 43_i);
+        b.Store(global, 3_i);
+        b.Return(func, 43_i);
+    });
 
     auto* src = R"(
 %b1 = block {  # root
@@ -1286,25 +1247,25 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody_UnreachableMerge) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {
+            auto* ifelse = b.If(cond);
 
-    auto* loop = sb.Loop();
-    auto lb = b.With(loop->Body());
-    auto* ifelse = lb.If(cond);
-    {
-        auto tb = b.With(ifelse->True());
-        tb.Return(func, 42_i);
-        auto fb = b.With(ifelse->False());
-        fb.ExitIf(ifelse);
-    }
-    lb.Store(global, 2_i);
-    lb.Continue(loop);
+            b.With(ifelse->True(), [&] { b.Return(func, 42_i); });
+            b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
 
-    auto cb = b.With(loop->Continuing());
-    cb.Store(global, 1_i);
-    cb.NextIteration(loop);
+            b.Store(global, 2_i);
+            b.Continue(loop);
+        });
 
-    sb.Unreachable();
+        b.With(loop->Continuing(), [&] {
+            b.Store(global, 1_i);
+            b.NextIteration(loop);
+        });
+
+        b.Unreachable();
+    });
 
     auto* src = R"(
 %b1 = block {  # root
@@ -1392,28 +1353,26 @@ TEST_F(IR_MergeReturnTest, Loop_WithBasicBlockArgumentsOnMerge) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->SetResults(b.InstructionResult(ty.i32()));
+        b.With(loop->Body(), [&] {
+            auto* ifelse = b.If(cond);
+            b.With(ifelse->True(), [&] { b.Return(func, 42_i); });
+            b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
 
-    auto* loop = sb.Loop();
-    loop->SetResults(b.InstructionResult(ty.i32()));
-    auto lb = b.With(loop->Body());
-    auto* ifelse = lb.If(cond);
-    {
-        auto tb = b.With(ifelse->True());
-        tb.Return(func, 42_i);
-        auto fb = b.With(ifelse->False());
-        fb.ExitIf(ifelse);
-    }
-    lb.Store(global, 2_i);
-    lb.Continue(loop);
+            b.Store(global, 2_i);
+            b.Continue(loop);
+        });
 
-    auto cb = b.With(loop->Continuing());
-    cb.Store(global, 1_i);
-    cb.BreakIf(true, loop, 4_i);
+        b.With(loop->Continuing(), [&] {
+            b.Store(global, 1_i);
+            b.BreakIf(true, loop, 4_i);
+        });
 
-    sb.Store(global, 3_i);
-    sb.Return(func, loop->Result(0));
-
+        b.Store(global, 3_i);
+        b.Return(func, loop->Result(0));
+    });
     auto* src = R"(
 %b1 = block {  # root
   %1:ptr<private, i32, read_write> = var
@@ -1506,15 +1465,13 @@ TEST_F(IR_MergeReturnTest, Switch_UnconditionalReturnInCase) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* sw = b.Switch(cond);
+        b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}), [&] { b.Return(func, 42_i); });
+        b.With(b.Case(sw, {Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw); });
 
-    auto* sw = sb.Switch(cond);
-    auto caseA = b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}));
-    caseA.Return(func, 42_i);
-    auto caseB = b.With(b.Case(sw, {Switch::CaseSelector{}}));
-    caseB.ExitSwitch(sw);
-
-    sb.Return(func, 0_i);
+        b.Return(func, 0_i);
+    });
 
     auto* src = R"(
 %foo = func(%2:i32):i32 -> %b1 {
@@ -1575,24 +1532,21 @@ TEST_F(IR_MergeReturnTest, Switch_ConditionalReturnInBody) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* sw = b.Switch(cond);
+        b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}), [&] {
+            auto* ifelse = b.If(cond);
+            b.With(ifelse->True(), [&] { b.Return(func, 42_i); });
+            b.With(ifelse->False(), [&] { b.ExitIf(ifelse); });
 
-    auto* sw = sb.Switch(cond);
-    auto caseA = b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}));
-    auto* ifelse = caseA.If(cond);
-    {
-        auto tb = b.With(ifelse->True());
-        tb.Return(func, 42_i);
-        auto fb = b.With(ifelse->False());
-        fb.ExitIf(ifelse);
-    }
-    caseA.Store(global, 2_i);
-    caseA.ExitSwitch(sw);
+            b.Store(global, 2_i);
+            b.ExitSwitch(sw);
+        });
 
-    auto caseB = b.With(b.Case(sw, {Switch::CaseSelector{}}));
-    caseB.ExitSwitch(sw);
+        b.With(b.Case(sw, {Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw); });
 
-    sb.Return(func, 0_i);
+        b.Return(func, 0_i);
+    });
 
     auto* src = R"(
 %b1 = block {  # root
@@ -1682,20 +1636,16 @@ TEST_F(IR_MergeReturnTest, Switch_WithBasicBlockArgumentsOnMerge) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
+    b.With(func->Block(), [&] {
+        auto* sw = b.Switch(cond);
+        sw->SetResults(b.InstructionResult(ty.i32()));  // NOLINT: false detection of std::tuple
+        b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}), [&] { b.Return(func, 42_i); });
+        b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(2_i)}}), [&] { b.Return(func, 99_i); });
+        b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(3_i)}}), [&] { b.ExitSwitch(sw, 1_i); });
+        b.With(b.Case(sw, {Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw, 0_i); });
 
-    auto* sw = sb.Switch(cond);
-    sw->SetResults(b.InstructionResult(ty.i32()));  // NOLINT: false detection of std::tuple
-    auto caseA = b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}));
-    caseA.Return(func, 42_i);
-    auto caseB = b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(2_i)}}));
-    caseB.Return(func, 99_i);
-    auto caseC = b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(3_i)}}));
-    caseC.ExitSwitch(sw, 1_i);
-    auto caseD = b.With(b.Case(sw, {Switch::CaseSelector{}}));
-    caseD.ExitSwitch(sw, 0_i);
-
-    sb.Return(func, sw->Result(0));
+        b.Return(func, sw->Result(0));
+    });
 
     auto* src = R"(
 %foo = func(%2:i32):i32 -> %b1 {
@@ -1765,17 +1715,14 @@ TEST_F(IR_MergeReturnTest, LoopIfReturnThenContinue) {
     auto* func = b.Function("foo", ty.void_());
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
-    {
-        auto* loop = sb.Loop();
-        auto lb = sb.With(loop->Body());
-        {
-            auto ib = lb.With(lb.If(true)->True());
-            ib.Return(func);
-        }
-        lb.Continue(loop);
-    }
-    sb.Unreachable();
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {
+            b.With(b.If(true)->True(), [&] { b.Return(func); });
+            b.Continue(loop);
+        });
+        b.Unreachable();
+    });
 
     auto* src = R"(
 %foo = func():void -> %b1 {
@@ -1831,16 +1778,13 @@ TEST_F(IR_MergeReturnTest, NestedIfsWithReturns) {
     auto* func = b.Function("foo", ty.i32());
     mod.functions.Push(func);
 
-    auto sb = b.With(func->Block());
-    {
-        auto outer = b.With(sb.If(true)->True());
-        {
-            auto inner = b.With(outer.If(true)->True());
-            inner.Return(func, 1_i);
-        }
-        outer.Return(func, 2_i);
-    }
-    sb.Return(func, 3_i);
+    b.With(func->Block(), [&] {
+        b.With(b.If(true)->True(), [&] {
+            b.With(b.If(true)->True(), [&] { b.Return(func, 1_i); });
+            b.Return(func, 2_i);
+        });
+        b.Return(func, 3_i);
+    });
 
     auto* src = R"(
 %foo = func():i32 -> %b1 {

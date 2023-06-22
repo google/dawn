@@ -52,9 +52,10 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
     auto* i = b.If(true);
     i->False()->Append(b.ExitIf(i));
 
-    auto tb = b.With(i->True());
-    tb.Add(ty.i32(), 1_i, 1_i);
-    tb.ExitIf(i);
+    b.With(i->True(), [&] {
+        b.Add(ty.i32(), 1_i, 1_i);
+        b.ExitIf(i);
+    });
 
     func->Block()->Append(i);
     func->Block()->Append(b.Return(func));
@@ -88,9 +89,10 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
     auto* i = b.If(true);
     i->True()->Append(b.ExitIf(i));
 
-    auto fb = b.With(i->False());
-    fb.Add(ty.i32(), 1_i, 1_i);
-    fb.ExitIf(i);
+    b.With(i->False(), [&] {
+        b.Add(ty.i32(), 1_i, 1_i);
+        b.ExitIf(i);
+    });
 
     func->Block()->Append(i);
     func->Block()->Append(b.Return(func));
