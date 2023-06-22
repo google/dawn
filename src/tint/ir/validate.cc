@@ -161,7 +161,7 @@ class Validator {
         }
     }
 
-    void CheckFunction(Function* func) { CheckBlock(func->StartTarget()); }
+    void CheckFunction(Function* func) { CheckBlock(func->Block()); }
 
     void CheckBlock(Block* blk) {
         TINT_SCOPED_ASSIGNMENT(current_block_, blk);

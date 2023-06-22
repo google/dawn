@@ -120,14 +120,14 @@ class Function : public utils::Castable<Function, Value> {
     /// @returns the function parameters
     const utils::VectorRef<FunctionParam*> Params() { return params_; }
 
-    /// Sets the start target for the function
-    /// @param target the start target
-    void SetStartTarget(Block* target) {
+    /// Sets the root block for the function
+    /// @param target the root block
+    void SetBlock(Block* target) {
         TINT_ASSERT(IR, target != nullptr);
-        start_target_ = target;
+        block_ = target;
     }
-    /// @returns the function start target
-    Block* StartTarget() { return start_target_; }
+    /// @returns the function root block
+    ir::Block* Block() { return block_; }
 
   private:
     PipelineStage pipeline_stage_;
@@ -141,7 +141,7 @@ class Function : public utils::Castable<Function, Value> {
     } return_;
 
     utils::Vector<FunctionParam*, 1> params_;
-    Block* start_target_ = nullptr;
+    ir::Block* block_ = nullptr;
 };
 
 utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value);

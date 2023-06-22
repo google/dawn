@@ -32,7 +32,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInRootBlock) {
     func->SetParams({in});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
     sb.Return(func, sb.Add(ty.i32(), in, 1_i));
 
     auto* src = R"(
@@ -59,7 +59,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
     func->SetParams({in});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     ifelse->SetResults(b.InstructionResult(ty.i32()));
@@ -103,7 +103,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
     func->SetParams({in});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* swtch = sb.Switch(in);
     b.Case(swtch, {Switch::CaseSelector{}})->Append(b.ExitSwitch(swtch));
@@ -158,7 +158,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     auto tb = b.With(ifelse->True());
@@ -214,7 +214,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_ReturnsCreatedInDifferentOrder)
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     sb.Return(func);
@@ -268,7 +268,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     auto tb = b.With(ifelse->True());
@@ -334,7 +334,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasBasicBlockArg
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     ifelse->SetResults(b.InstructionResult(ty.i32()));
@@ -401,7 +401,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlo
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     ifelse->SetResults(b.InstructionResult(ty.i32()));
@@ -468,7 +468,7 @@ TEST_F(IR_MergeReturnTest, IfElse_BothSidesReturn) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     auto tb = b.With(ifelse->True());
@@ -526,7 +526,7 @@ TEST_F(IR_MergeReturnTest, IfElse_ThenStatements) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     auto tb = b.With(ifelse->True());
@@ -605,7 +605,7 @@ TEST_F(IR_MergeReturnTest, IfElse_ThenStatements_ReturnsCreatedInDifferentOrder)
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse = sb.If(cond);
     sb.Store(global, 42_i);
@@ -687,7 +687,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested) {
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse_outer = sb.If(condA);
     auto outer_true = b.With(ifelse_outer->True());
@@ -843,7 +843,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_TrivialMerge) {
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse_outer = sb.If(condA);
     auto outer_true = b.With(ifelse_outer->True());
@@ -974,7 +974,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* ifelse_outer = sb.If(condA);
     ifelse_outer->SetResults(b.InstructionResult(ty.i32()));
@@ -1119,7 +1119,7 @@ TEST_F(IR_MergeReturnTest, Loop_UnconditionalReturnInBody) {
     auto* func = b.Function("foo", ty.i32());
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* loop = sb.Loop();
     loop->Body()->Append(b.Return(func, 42_i));
@@ -1170,7 +1170,7 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* loop = sb.Loop();
     auto lb = b.With(loop->Body());
@@ -1286,7 +1286,7 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody_UnreachableMerge) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* loop = sb.Loop();
     auto lb = b.With(loop->Body());
@@ -1392,7 +1392,7 @@ TEST_F(IR_MergeReturnTest, Loop_WithBasicBlockArgumentsOnMerge) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* loop = sb.Loop();
     loop->SetResults(b.InstructionResult(ty.i32()));
@@ -1506,7 +1506,7 @@ TEST_F(IR_MergeReturnTest, Switch_UnconditionalReturnInCase) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* sw = sb.Switch(cond);
     auto caseA = b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}));
@@ -1575,7 +1575,7 @@ TEST_F(IR_MergeReturnTest, Switch_ConditionalReturnInBody) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* sw = sb.Switch(cond);
     auto caseA = b.With(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}));
@@ -1682,7 +1682,7 @@ TEST_F(IR_MergeReturnTest, Switch_WithBasicBlockArgumentsOnMerge) {
     func->SetParams({cond});
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
 
     auto* sw = sb.Switch(cond);
     sw->SetResults(b.InstructionResult(ty.i32()));  // NOLINT: false detection of std::tuple
@@ -1765,7 +1765,7 @@ TEST_F(IR_MergeReturnTest, LoopIfReturnThenContinue) {
     auto* func = b.Function("foo", ty.void_());
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
     {
         auto* loop = sb.Loop();
         auto lb = sb.With(loop->Body());
@@ -1831,7 +1831,7 @@ TEST_F(IR_MergeReturnTest, NestedIfsWithReturns) {
     auto* func = b.Function("foo", ty.i32());
     mod.functions.Push(func);
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
     {
         auto outer = b.With(sb.If(true)->True());
         {

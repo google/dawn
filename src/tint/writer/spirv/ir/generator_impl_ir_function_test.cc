@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(SpvGeneratorImplTest, Function_Empty) {
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -37,7 +37,7 @@ OpFunctionEnd
 // Test that we do not emit the same function type more than once.
 TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -52,7 +52,7 @@ TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Compute) {
     auto* func =
         b.Function("main", ty.void_(), ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -71,7 +71,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Fragment) {
     auto* func = b.Function("main", ty.void_(), ir::Function::PipelineStage::kFragment);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -90,7 +90,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Vertex) {
     auto* func = b.Function("main", ty.void_(), ir::Function::PipelineStage::kVertex);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -108,13 +108,13 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Multiple) {
     auto* f1 = b.Function("main1", ty.void_(), ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
-    f1->StartTarget()->Append(b.Return(f1));
+    f1->Block()->Append(b.Return(f1));
 
     auto* f2 = b.Function("main2", ty.void_(), ir::Function::PipelineStage::kCompute, {{8, 2, 16}});
-    f2->StartTarget()->Append(b.Return(f2));
+    f2->Block()->Append(b.Return(f2));
 
     auto* f3 = b.Function("main3", ty.void_(), ir::Function::PipelineStage::kFragment);
-    f3->StartTarget()->Append(b.Return(f3));
+    f3->Block()->Append(b.Return(f3));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -149,7 +149,7 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Function_ReturnValue) {
     auto* func = b.Function("foo", ty.i32());
-    func->StartTarget()->Append(b.Return(func, i32(42)));
+    func->Block()->Append(b.Return(func, i32(42)));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -174,7 +174,7 @@ TEST_F(SpvGeneratorImplTest, Function_Parameters) {
     mod.SetName(x, "x");
     mod.SetName(y, "y");
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
     auto* result = sb.Add(i32, x, y);
     sb.Return(func, result);
 
@@ -204,14 +204,14 @@ TEST_F(SpvGeneratorImplTest, Function_Call) {
     foo->SetParams({x, y});
 
     {
-        auto sb = b.With(foo->StartTarget());
+        auto sb = b.With(foo->Block());
         auto* result = sb.Add(i32_ty, x, y);
         sb.Return(foo, result);
     }
 
     auto* bar = b.Function("bar", ty.void_());
     {
-        auto sb = b.With(bar->StartTarget());
+        auto sb = b.With(bar->Block());
         sb.Call(i32_ty, foo, i32(2), i32(3));
         sb.Return(bar);
     }
@@ -245,10 +245,10 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Function_Call_Void) {
     auto* foo = b.Function("foo", ty.void_());
-    foo->StartTarget()->Append(b.Return(foo));
+    foo->Block()->Append(b.Return(foo));
 
     auto* bar = b.Function("bar", ty.void_());
-    auto sb = b.With(bar->StartTarget());
+    auto sb = b.With(bar->Block());
     sb.Call(ty.void_(), foo, utils::Empty);
     sb.Return(bar);
 

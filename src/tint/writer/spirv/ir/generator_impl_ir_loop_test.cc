@@ -27,8 +27,8 @@ TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
     loop->Body()->Append(b.Continue(loop));
     loop->Continuing()->Append(b.BreakIf(true, loop));
 
-    func->StartTarget()->Append(loop);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(loop);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -62,8 +62,8 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
 
     loop->Body()->Append(b.ExitLoop(loop));
 
-    func->StartTarget()->Append(loop);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(loop);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -100,8 +100,8 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
     loop->Body()->Append(b.Continue(loop));
     loop->Continuing()->Append(b.NextIteration(loop));
 
-    func->StartTarget()->Append(loop);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(loop);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -145,8 +145,8 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
     loop->Body()->Append(b.ExitLoop(loop));
     loop->Continuing()->Append(b.NextIteration(loop));
 
-    func->StartTarget()->Append(loop);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(loop);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -185,8 +185,8 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
     auto* loop = b.Loop();
     loop->Body()->Append(b.Return(func));
 
-    func->StartTarget()->Append(loop);
-    func->StartTarget()->Append(b.Unreachable());
+    func->Block()->Append(loop);
+    func->Block()->Append(b.Unreachable());
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -220,8 +220,8 @@ TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
 
     loop->Continuing()->Append(b.BreakIf(result, loop));
 
-    func->StartTarget()->Append(loop);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(loop);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -262,8 +262,8 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
     outer_loop->Body()->Append(b.Continue(outer_loop));
     outer_loop->Continuing()->Append(b.BreakIf(true, outer_loop));
 
-    func->StartTarget()->Append(outer_loop);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(outer_loop);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -311,8 +311,8 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
     outer_loop->Continuing()->Append(inner_loop);
     outer_loop->Continuing()->Append(b.BreakIf(true, outer_loop));
 
-    func->StartTarget()->Append(outer_loop);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(outer_loop);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -350,7 +350,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto fb = b.With(func->StartTarget());
+    auto fb = b.With(func->Block());
     auto* l = fb.Loop();
 
     {
@@ -411,7 +411,7 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     auto* func = b.Function("foo", ty.void_());
 
-    auto fb = b.With(func->StartTarget());
+    auto fb = b.With(func->Block());
     auto* l = fb.Loop();
 
     {

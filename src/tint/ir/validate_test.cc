@@ -71,7 +71,7 @@ TEST_F(IR_ValidateTest, Function) {
     mod.functions.Push(f);
 
     f->SetParams({b.FunctionParam(ty.i32()), b.FunctionParam(ty.f32())});
-    f->StartTarget()->Append(b.Return(f));
+    f->Block()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
     EXPECT_TRUE(res) << res.Failure().str();
@@ -101,7 +101,7 @@ TEST_F(IR_ValidateTest, Valid_Access_Value) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.f32(), obj, 1_u, 0_u);
     sb.Return(f);
 
@@ -115,7 +115,7 @@ TEST_F(IR_ValidateTest, Valid_Access_Ptr) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.ptr<private_, f32>(), obj, 1_u, 0_u);
     sb.Return(f);
 
@@ -129,7 +129,7 @@ TEST_F(IR_ValidateTest, Access_NegativeIndex) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.f32(), obj, -1_i);
     sb.Return(f);
 
@@ -159,7 +159,7 @@ TEST_F(IR_ValidateTest, Access_OOB_Index_Value) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.f32(), obj, 1_u, 3_u);
     sb.Return(f);
 
@@ -193,7 +193,7 @@ TEST_F(IR_ValidateTest, Access_OOB_Index_Ptr) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.ptr<private_, f32>(), obj, 1_u, 3_u);
     sb.Return(f);
 
@@ -228,7 +228,7 @@ TEST_F(IR_ValidateTest, Access_StaticallyUnindexableType_Value) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.f32(), obj, 1_u);
     sb.Return(f);
 
@@ -258,7 +258,7 @@ TEST_F(IR_ValidateTest, Access_StaticallyUnindexableType_Ptr) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.ptr<private_, f32>(), obj, 1_u);
     sb.Return(f);
 
@@ -294,7 +294,7 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Value) {
     f->SetParams({obj, idx});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.i32(), obj, idx);
     sb.Return(f);
 
@@ -336,7 +336,7 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Ptr) {
     f->SetParams({obj, idx});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.i32(), obj, idx);
     sb.Return(f);
 
@@ -372,7 +372,7 @@ TEST_F(IR_ValidateTest, Access_Incorrect_Type_Value_Value) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.i32(), obj, 1_u, 1_u);
     sb.Return(f);
 
@@ -403,7 +403,7 @@ TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Ptr) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.ptr<private_, i32>(), obj, 1_u, 1_u);
     sb.Return(f);
 
@@ -435,7 +435,7 @@ TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Value) {
     f->SetParams({obj});
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Access(ty.f32(), obj, 1_u, 1_u);
     sb.Return(f);
 
@@ -465,7 +465,7 @@ TEST_F(IR_ValidateTest, Block_TerminatorInMiddle) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Return(f);
     sb.Return(f);
 
@@ -498,8 +498,8 @@ TEST_F(IR_ValidateTest, If_ConditionIsBool) {
     if_->True()->Append(b.Return(f));
     if_->False()->Append(b.Return(f));
 
-    f->StartTarget()->Append(if_);
-    f->StartTarget()->Append(b.Return(f));
+    f->Block()->Append(if_);
+    f->Block()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);

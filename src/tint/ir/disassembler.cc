@@ -283,12 +283,12 @@ void Disassembler::EmitFunction(Function* func) {
 
     EmitReturnAttributes(func);
 
-    out_ << " -> %b" << IdOf(func->StartTarget()) << " {";
+    out_ << " -> %b" << IdOf(func->Block()) << " {";
     EmitLine();
 
     {
         ScopedIndent si(indent_size_);
-        EmitBlock(func->StartTarget());
+        EmitBlock(func->Block());
     }
     Indent() << "}";
     EmitLine();

@@ -25,8 +25,8 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
     auto* i = b.If(true);
     i->True()->Append(b.ExitIf(i));
     i->False()->Append(b.ExitIf(i));
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(i);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -56,8 +56,8 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
     tb.Add(ty.i32(), 1_i, 1_i);
     tb.ExitIf(i);
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(i);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -92,8 +92,8 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
     fb.Add(ty.i32(), 1_i, 1_i);
     fb.ExitIf(i);
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(i);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -125,8 +125,8 @@ TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
     i->True()->Append(b.Return(func));
     i->False()->Append(b.Return(func));
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Unreachable());
+    func->Block()->Append(i);
+    func->Block()->Append(b.Unreachable());
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -158,8 +158,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue) {
     i->True()->Append(b.ExitIf(i, 10_i));
     i->False()->Append(b.ExitIf(i, 20_i));
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Return(func, i));
+    func->Block()->Append(i);
+    func->Block()->Append(b.Return(func, i));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -194,8 +194,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_TrueReturn) {
     i->True()->Append(b.Return(func, 42_i));
     i->False()->Append(b.ExitIf(i, 20_i));
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Return(func, i));
+    func->Block()->Append(i);
+    func->Block()->Append(b.Return(func, i));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -230,8 +230,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_FalseReturn) {
     i->True()->Append(b.ExitIf(i, 10_i));
     i->False()->Append(b.Return(func, 42_i));
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Return(func, i));
+    func->Block()->Append(i);
+    func->Block()->Append(b.Return(func, i));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -266,8 +266,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue_0) {
     i->True()->Append(b.ExitIf(i, 10_i, true));
     i->False()->Append(b.ExitIf(i, 20_i, false));
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Return(func, i->Result(0)));
+    func->Block()->Append(i);
+    func->Block()->Append(b.Return(func, i->Result(0)));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -304,8 +304,8 @@ TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue_1) {
     i->True()->Append(b.ExitIf(i, 10_i, true));
     i->False()->Append(b.ExitIf(i, 20_i, false));
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Return(func, i->Result(1)));
+    func->Block()->Append(i);
+    func->Block()->Append(b.Return(func, i->Result(1)));
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

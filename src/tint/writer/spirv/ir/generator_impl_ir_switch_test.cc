@@ -27,8 +27,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Basic) {
     auto* def_case = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
 
-    func->StartTarget()->Append(swtch);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(swtch);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -64,8 +64,8 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleCases) {
     auto* def_case = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
 
-    func->StartTarget()->Append(swtch);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(swtch);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -108,8 +108,8 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleSelectorsPerCase) {
                                                  ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
 
-    func->StartTarget()->Append(swtch);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(swtch);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -149,8 +149,8 @@ TEST_F(SpvGeneratorImplTest, Switch_AllCasesReturn) {
     auto* def_case = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector()});
     def_case->Append(b.Return(func));
 
-    func->StartTarget()->Append(swtch);
-    func->StartTarget()->Append(b.Unreachable());
+    func->Block()->Append(swtch);
+    func->Block()->Append(b.Unreachable());
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -192,8 +192,8 @@ TEST_F(SpvGeneratorImplTest, Switch_ConditionalBreak) {
     auto* def_case = b.Case(swtch, utils::Vector{ir::Switch::CaseSelector()});
     def_case->Append(b.ExitSwitch(swtch));
 
-    func->StartTarget()->Append(swtch);
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(swtch);
+    func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -236,8 +236,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
     case_b->Append(b.ExitSwitch(s, 20_i));
 
-    func->StartTarget()->Append(s);
-    func->StartTarget()->Append(b.Return(func, s));
+    func->Block()->Append(s);
+    func->Block()->Append(b.Return(func, s));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -275,8 +275,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
     case_b->Append(b.ExitSwitch(s, 20_i));
 
-    func->StartTarget()->Append(s);
-    func->StartTarget()->Append(b.Return(func, s));
+    func->Block()->Append(s);
+    func->Block()->Append(b.Return(func, s));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -314,8 +314,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue_0) {
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
     case_b->Append(b.ExitSwitch(s, 20_i, false));
 
-    func->StartTarget()->Append(s);
-    func->StartTarget()->Append(b.Return(func, s->Result(0)));
+    func->Block()->Append(s);
+    func->Block()->Append(b.Return(func, s->Result(0)));
 
     ASSERT_TRUE(IRIsValid()) << Error();
 
@@ -357,8 +357,8 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue_1) {
     auto* case_b = b.Case(s, utils::Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
     case_b->Append(b.ExitSwitch(s, 20_i, false));
 
-    func->StartTarget()->Append(s);
-    func->StartTarget()->Append(b.Return(func, s->Result(1)));
+    func->Block()->Append(s);
+    func->Block()->Append(b.Return(func, s->Result(1)));
 
     generator_.EmitFunction(func);
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"

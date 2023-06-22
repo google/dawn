@@ -62,7 +62,7 @@ TEST_F(IR_FromProgramTest, Func) {
     ASSERT_EQ(1u, m->functions.Length());
 
     auto* f = m->functions[0];
-    ASSERT_NE(f->StartTarget(), nullptr);
+    ASSERT_NE(f->Block(), nullptr);
 
     EXPECT_EQ(m->functions[0]->Stage(), Function::PipelineStage::kUndefined);
 
@@ -83,7 +83,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam) {
     ASSERT_EQ(1u, m->functions.Length());
 
     auto* f = m->functions[0];
-    ASSERT_NE(f->StartTarget(), nullptr);
+    ASSERT_NE(f->Block(), nullptr);
 
     EXPECT_EQ(m->functions[0]->Stage(), Function::PipelineStage::kUndefined);
 
@@ -105,7 +105,7 @@ TEST_F(IR_FromProgramTest, Func_WithMultipleParam) {
     ASSERT_EQ(1u, m->functions.Length());
 
     auto* f = m->functions[0];
-    ASSERT_NE(f->StartTarget(), nullptr);
+    ASSERT_NE(f->Block(), nullptr);
 
     EXPECT_EQ(m->functions[0]->Stage(), Function::PipelineStage::kUndefined);
 

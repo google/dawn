@@ -31,7 +31,7 @@ using IR_BlockDecoratedStructsTest = TransformTest;
 
 TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(b.Return(func));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -54,7 +54,7 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
 
     auto* func = b.Function("foo", ty.i32());
 
-    auto* block = func->StartTarget();
+    auto* block = func->Block();
     auto* load = block->Append(b.Load(buffer));
     block->Append(b.Return(func, load));
     mod.functions.Push(func);
@@ -88,8 +88,8 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Storage) {
     b.RootBlock()->Append(buffer);
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->Append(b.Store(buffer, 42_i));
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(b.Store(buffer, 42_i));
+    func->Block()->Append(b.Return(func));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -122,7 +122,7 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
 
     auto* func = b.Function("foo", ty.void_());
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
     auto* access = sb.Access(ty.ptr<storage, i32>(), buffer, 1_u);
     sb.Store(access, 42_i);
     sb.Return(func);
@@ -168,7 +168,7 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
 
     auto* func = b.Function("foo", ty.void_());
 
-    auto sb = b.With(func->StartTarget());
+    auto sb = b.With(func->Block());
     auto* val_ptr = sb.Access(i32_ptr, buffer, 0_u);
     auto* load = sb.Load(val_ptr);
     auto* elem_ptr = sb.Access(i32_ptr, buffer, 1_u, 3_u);
@@ -222,8 +222,8 @@ TEST_F(IR_BlockDecoratedStructsTest, StructUsedElsewhere) {
     b.RootBlock()->Append(private_var);
 
     auto* func = b.Function("foo", ty.void_());
-    func->StartTarget()->Append(b.Store(buffer, private_var));
-    func->StartTarget()->Append(b.Return(func));
+    func->Block()->Append(b.Store(buffer, private_var));
+    func->Block()->Append(b.Return(func));
     mod.functions.Push(func);
 
     auto* expect = R"(
@@ -268,7 +268,7 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     root->Append(buffer_c);
 
     auto* func = b.Function("foo", ty.void_());
-    auto* block = func->StartTarget();
+    auto* block = func->Block();
     auto* load_b = block->Append(b.Load(buffer_b));
     auto* load_c = block->Append(b.Load(buffer_c));
     block->Append(b.Store(buffer_a, b.Add(ty.i32(), load_b, load_c)));

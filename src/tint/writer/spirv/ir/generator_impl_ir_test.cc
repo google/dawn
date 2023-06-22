@@ -36,8 +36,8 @@ TEST_F(SpvGeneratorImplTest, Unreachable) {
     i->True()->Append(b.Return(func, 10_i));
     i->False()->Append(b.Return(func, 20_i));
 
-    func->StartTarget()->Append(i);
-    func->StartTarget()->Append(b.Unreachable());
+    func->Block()->Append(i);
+    func->Block()->Append(b.Unreachable());
 
     ASSERT_TRUE(IRIsValid()) << Error();
 

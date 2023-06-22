@@ -417,7 +417,7 @@ class Impl {
         }
         ir_func->SetParams(params);
 
-        TINT_SCOPED_ASSIGNMENT(current_block_, ir_func->StartTarget());
+        TINT_SCOPED_ASSIGNMENT(current_block_, ir_func->Block());
         EmitBlock(ast_func->body);
 
         // Add a terminator if one was not already created.

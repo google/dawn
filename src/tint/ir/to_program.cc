@@ -131,7 +131,7 @@ class State {
 
         auto name = BindName(fn);
         auto ret_ty = Type(fn->ReturnType());
-        auto* body = Block(fn->StartTarget());
+        auto* body = Block(fn->Block());
         utils::Vector<const ast::Attribute*, 1> attrs{};
         utils::Vector<const ast::Attribute*, 1> ret_attrs{};
         return b.Func(name, std::move(params), ret_ty, body, std::move(attrs),

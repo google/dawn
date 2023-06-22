@@ -80,23 +80,23 @@ struct MergeReturn::State {
         // Create a boolean variable that can be used to check whether the function is returning.
         continue_execution = b.Var(ty.ptr<function, bool>());
         continue_execution->SetInitializer(b.Constant(true));
-        fn->StartTarget()->Prepend(continue_execution);
+        fn->Block()->Prepend(continue_execution);
         ir->SetName(continue_execution, "continue_execution");
 
         // Create a variable to hold the return value if needed.
         if (!fn->ReturnType()->Is<type::Void>()) {
             return_val = b.Var(ty.ptr(function, fn->ReturnType()));
-            fn->StartTarget()->Prepend(return_val);
+            fn->Block()->Prepend(return_val);
             ir->SetName(return_val, "return_value");
         }
 
         // Look to see if the function ends with a return
-        fn_return = tint::As<Return>(fn->StartTarget()->Terminator());
+        fn_return = tint::As<Return>(fn->Block()->Terminator());
 
         // Process the function's block.
         // This will traverse into control instructions that hold returns, and apply the necessary
         // changes to remove returns.
-        ProcessBlock(fn->StartTarget());
+        ProcessBlock(fn->Block());
 
         // If the function didn't end with a return, add one
         if (!fn_return) {
@@ -279,7 +279,7 @@ struct MergeReturn::State {
     /// Adds a final return instruction to the end of @p fn
     /// @param fn the function
     void AppendFinalReturn(Function* fn) {
-        auto fb = b.With(fn->StartTarget());
+        auto fb = b.With(fn->Block());
         if (return_val) {
             fb.Return(fn, fb.Load(return_val));
         } else {

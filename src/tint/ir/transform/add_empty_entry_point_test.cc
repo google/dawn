@@ -39,7 +39,7 @@ TEST_F(IR_AddEmptyEntryPointTest, EmptyModule) {
 
 TEST_F(IR_AddEmptyEntryPointTest, ExistingEntryPoint) {
     auto* ep = b.Function("main", mod.Types().void_(), Function::PipelineStage::kFragment);
-    ep->StartTarget()->Append(b.Return(ep));
+    ep->Block()->Append(b.Return(ep));
     mod.functions.Push(ep);
 
     auto* expect = R"(

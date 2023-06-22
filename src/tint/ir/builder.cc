@@ -48,7 +48,7 @@ Function* Builder::Function(std::string_view name,
                             Function::PipelineStage stage,
                             std::optional<std::array<uint32_t, 3>> wg_size) {
     auto* ir_func = ir.values.Create<ir::Function>(return_type, stage, wg_size);
-    ir_func->SetStartTarget(Block());
+    ir_func->SetBlock(Block());
     ir.SetName(ir_func, name);
     return ir_func;
 }

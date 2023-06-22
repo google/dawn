@@ -376,7 +376,7 @@ void GeneratorImplIr::EmitFunction(ir::Function* func) {
     TINT_DEFER(current_function_ = Function());
 
     // Emit the body of the function.
-    EmitBlock(func->StartTarget());
+    EmitBlock(func->Block());
 
     // Add the function to the module.
     module_.PushFunction(current_function_);

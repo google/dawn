@@ -55,13 +55,13 @@ TEST_F(IR_FunctionTest, Fail_NullParam) {
         "");
 }
 
-TEST_F(IR_FunctionTest, Fail_NullStartTarget) {
+TEST_F(IR_FunctionTest, Fail_NullBlock) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
             Builder b{mod};
             auto* f = b.Function("my_func", mod.Types().void_());
-            f->SetStartTarget(nullptr);
+            f->SetBlock(nullptr);
         },
         "");
 }
