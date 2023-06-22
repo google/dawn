@@ -23,13 +23,17 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/constant.h"
+#include "src/tint/ir/continue.h"
 #include "src/tint/ir/exit_if.h"
+#include "src/tint/ir/exit_loop.h"
 #include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/load.h"
+#include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/multi_in_block.h"
+#include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
@@ -159,13 +163,17 @@ class State {
             [&](ir::Call* i) { Call(i); },              //
             [&](ir::ExitIf*) {},                        //
             [&](ir::ExitSwitch* i) { ExitSwitch(i); },  //
+            [&](ir::ExitLoop* i) { ExitLoop(i); },      //
             [&](ir::If* i) { If(i); },                  //
             [&](ir::Load* l) { Load(l); },              //
+            [&](ir::Loop* l) { Loop(l); },              //
             [&](ir::Return* i) { Return(i); },          //
             [&](ir::Store* i) { Store(i); },            //
             [&](ir::Switch* i) { Switch(i); },          //
             [&](ir::Unary* u) { Unary(u); },            //
             [&](ir::Var* i) { Var(i); },                //
+            [&](ir::NextIteration*) {},                 //
+            [&](ir::Continue*) {},                      //
             [&](Default) { UNHANDLED_CASE(inst); });
     }
 
@@ -174,7 +182,7 @@ class State {
 
         auto true_stmts = Statements(if_->True());
         auto false_stmts = Statements(if_->False());
-        if (IsShortCircuit(if_, true_stmts, false_stmts)) {
+        if (AsShortCircuit(if_, true_stmts, false_stmts)) {
             return;
         }
 
@@ -195,6 +203,57 @@ class State {
 
         auto* false_block = b.Block(std::move(false_stmts));
         Append(b.If(cond, true_block, b.Else(false_block)));
+    }
+
+    void Loop(ir::Loop* l) {
+        auto init_stmts = Statements(l->Initializer());
+        auto* init = init_stmts.Length() == 1 ? init_stmts.Front()->As<ast::VariableDeclStatement>()
+                                              : nullptr;
+
+        const ast::Expression* cond = nullptr;
+
+        StatementList body_stmts;
+        {
+            TINT_SCOPED_ASSIGNMENT(statements_, &body_stmts);
+            for (auto* inst : *l->Body()) {
+                if (body_stmts.IsEmpty()) {
+                    if (auto* if_ = inst->As<ir::If>()) {
+                        if (!if_->HasResults() &&                          //
+                            if_->True()->Length() == 1 &&                  //
+                            if_->False()->Length() == 1 &&                 //
+                            tint::Is<ir::ExitIf>(if_->True()->Front()) &&  //
+                            tint::Is<ir::ExitLoop>(if_->False()->Front())) {
+                            cond = Expr(if_->Condition());
+                            continue;
+                        }
+                    }
+                }
+
+                Instruction(inst);
+            }
+        }
+
+        auto cont_stmts = Statements(l->Continuing());
+        auto* cont = cont_stmts.Length() == 1 ? cont_stmts.Front() : nullptr;
+
+        auto* body = b.Block(std::move(body_stmts));
+
+        const ast::Statement* loop = nullptr;
+        if (cond) {
+            if (init || cont) {
+                loop = b.For(init, cond, cont, body);
+            } else {
+                loop = b.While(cond, body);
+            }
+        } else {
+            loop = cont_stmts.IsEmpty() ? b.Loop(body)  //
+                                        : b.Loop(body, b.Block(std::move(cont_stmts)));
+            if (!init_stmts.IsEmpty()) {
+                init_stmts.Push(loop);
+                loop = b.Block(std::move(init_stmts));
+            }
+        }
+        statements_->Push(loop);
     }
 
     void Switch(ir::Switch* s) {
@@ -231,6 +290,8 @@ class State {
         }
         Append(b.Break());
     }
+
+    void ExitLoop(const ir::ExitLoop*) { Append(b.Break()); }
 
     void Return(ir::Return* ret) {
         if (ret->Args().IsEmpty()) {
@@ -575,7 +636,7 @@ class State {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Helpers
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    bool IsShortCircuit(ir::If* i,
+    bool AsShortCircuit(ir::If* i,
                         const StatementList& true_stmts,
                         const StatementList& false_stmts) {
         if (!i->HasResults()) {

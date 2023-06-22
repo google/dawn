@@ -681,7 +681,7 @@ TEST_F(IR_FromProgramTest, While_Return) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(1u, loop->Body()->InboundSiblingBranches().Length());
-    EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -696,7 +696,7 @@ TEST_F(IR_FromProgramTest, While_Return) {
             exit_loop  # loop_1
           }
         }
-        continue %b3
+        ret
       }
       %b3 = block {  # continuing
         next_iteration %b2
