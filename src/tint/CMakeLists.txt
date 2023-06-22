@@ -1578,6 +1578,11 @@ if(TINT_BUILD_TESTS)
     )
   endif()
 
+  if (${TINT_BUILD_IR} AND ${TINT_BUILD_WGSL_WRITER})
+    list(APPEND TINT_TEST_SRCS
+      ir/to_program_test.cc
+    )
+  endif()
 
   if (${TINT_BUILD_FUZZERS})
     list(APPEND TINT_TEST_SRCS
