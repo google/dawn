@@ -31,6 +31,13 @@ namespace dawn::wire::server {
 
       protected:
         void DestroyAllObjects(const DawnProcTable& procs) {
+            //* Release devices first to force completion of any async work.
+            {
+                std::vector<WGPUDevice> handles = mKnownDevice.AcquireAllHandles();
+                for (WGPUDevice handle : handles) {
+                    procs.deviceRelease(handle);
+                }
+            }
             //* Free all objects when the server is destroyed
             {% for type in by_category["object"] if type.name.get() != "device" %}
                 {
@@ -40,13 +47,6 @@ namespace dawn::wire::server {
                     }
                 }
             {% endfor %}
-            //* Release devices last because dawn_native requires this.
-            {
-                std::vector<WGPUDevice> handles = mKnownDevice.AcquireAllHandles();
-                for (WGPUDevice handle : handles) {
-                    procs.deviceRelease(handle);
-                }
-            }
         }
 
         {% for type in by_category["object"] %}
