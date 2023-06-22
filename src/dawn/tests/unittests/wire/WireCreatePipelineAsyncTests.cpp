@@ -27,6 +27,7 @@ namespace {
 using testing::_;
 using testing::InvokeWithoutArgs;
 using testing::Mock;
+using testing::NotNull;
 using testing::Return;
 using testing::Sequence;
 using testing::StrEq;
@@ -124,7 +125,7 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncSuccess) {
     FlushClient();
 
     EXPECT_CALL(*mockCreateComputePipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_Success, _, StrEq(""), this))
+                Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), StrEq(""), this))
         .Times(1);
 
     FlushServer();
@@ -188,7 +189,7 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncSuccess) {
     FlushClient();
 
     EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_Success, _, StrEq(""), this))
+                Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), StrEq(""), this))
         .Times(1);
 
     FlushServer();
@@ -230,7 +231,7 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncError) {
 }
 
 // Test that registering a callback then wire disconnect calls the callback with
-// DeviceLost.
+// Success.
 TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncThenDisconnect) {
     WGPUShaderModuleDescriptor vertexDescriptor = {};
     WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
@@ -257,13 +258,13 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncThenDisconnect) {
     FlushClient();
 
     EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_DeviceLost, _, _, this))
+                Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), StrEq(""), this))
         .Times(1);
     GetWireClient()->Disconnect();
 }
 
 // Test that registering a callback then wire disconnect calls the callback with
-// DeviceLost.
+// Success.
 TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncThenDisconnect) {
     WGPUShaderModuleDescriptor csDescriptor{};
     WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
@@ -285,13 +286,13 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncThenDisconnect) {
     FlushClient();
 
     EXPECT_CALL(*mockCreateComputePipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_DeviceLost, _, _, this))
+                Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), StrEq(""), this))
         .Times(1);
     GetWireClient()->Disconnect();
 }
 
 // Test that registering a callback after wire disconnect calls the callback with
-// DeviceLost.
+// Success.
 TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncAfterDisconnect) {
     WGPUShaderModuleDescriptor vertexDescriptor = {};
     WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
@@ -312,14 +313,14 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr, _, this))
+                Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), StrEq(""), this))
         .Times(1);
     wgpuDeviceCreateRenderPipelineAsync(device, &pipelineDescriptor,
                                         ToMockCreateRenderPipelineAsyncCallback, this);
 }
 
 // Test that registering a callback after wire disconnect calls the callback with
-// DeviceLost.
+// Success.
 TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncAfterDisconnect) {
     WGPUShaderModuleDescriptor csDescriptor{};
     WGPUShaderModule csModule = wgpuDeviceCreateShaderModule(device, &csDescriptor);
@@ -335,7 +336,7 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     EXPECT_CALL(*mockCreateComputePipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr, _, this))
+                Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), StrEq(""), this))
         .Times(1);
 
     wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
@@ -364,7 +365,7 @@ TEST_F(WireCreatePipelineAsyncTest, DeviceDeletedBeforeCallback) {
     FlushClient();
 
     EXPECT_CALL(*mockCreateRenderPipelineAsyncCallback,
-                Call(WGPUCreatePipelineAsyncStatus_Success, _, _, this))
+                Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), StrEq(""), this))
         .Times(1);
 
     wgpuDeviceRelease(device);

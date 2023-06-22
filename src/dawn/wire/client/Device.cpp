@@ -126,14 +126,18 @@ void Device::CancelCallbacksForDisconnect() {
         request->callback(WGPUErrorType_DeviceLost, "Device lost", request->userdata);
     });
 
-    mCreatePipelineAsyncRequests.CloseAll([](CreatePipelineAsyncRequest* request) {
+    mCreatePipelineAsyncRequests.CloseAll([this](CreatePipelineAsyncRequest* request) {
         if (request->createComputePipelineAsyncCallback != nullptr) {
-            request->createComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceLost,
-                                                        nullptr, "Device lost", request->userdata);
+            request->createComputePipelineAsyncCallback(
+                WGPUCreatePipelineAsyncStatus_Success,
+                ToAPI(GetClient()->Get<ComputePipeline>(request->pipelineObjectID)), "",
+                request->userdata);
         } else {
             ASSERT(request->createRenderPipelineAsyncCallback != nullptr);
-            request->createRenderPipelineAsyncCallback(WGPUCreatePipelineAsyncStatus_DeviceLost,
-                                                       nullptr, "Device lost", request->userdata);
+            request->createRenderPipelineAsyncCallback(
+                WGPUCreatePipelineAsyncStatus_Success,
+                ToAPI(GetClient()->Get<RenderPipeline>(request->pipelineObjectID)), "",
+                request->userdata);
         }
     });
 }
@@ -265,12 +269,11 @@ void Device::CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* des
                                         WGPUCreateComputePipelineAsyncCallback callback,
                                         void* userdata) {
     Client* client = GetClient();
-    if (client->IsDisconnected()) {
-        return callback(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr,
-                        "GPU device disconnected", userdata);
-    }
-
     ComputePipeline* pipeline = client->Make<ComputePipeline>();
+
+    if (client->IsDisconnected()) {
+        return callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(pipeline), "", userdata);
+    }
 
     CreatePipelineAsyncRequest request = {};
     request.createComputePipelineAsyncCallback = callback;
@@ -315,12 +318,11 @@ void Device::CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descr
                                        WGPUCreateRenderPipelineAsyncCallback callback,
                                        void* userdata) {
     Client* client = GetClient();
-    if (client->IsDisconnected()) {
-        return callback(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr,
-                        "GPU device disconnected", userdata);
-    }
-
     RenderPipeline* pipeline = client->Make<RenderPipeline>();
+
+    if (client->IsDisconnected()) {
+        return callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(pipeline), "", userdata);
+    }
 
     CreatePipelineAsyncRequest request = {};
     request.createRenderPipelineAsyncCallback = callback;
