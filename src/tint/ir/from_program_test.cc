@@ -708,20 +708,7 @@ TEST_F(IR_FromProgramTest, While_Return) {
 )");
 }
 
-// TODO(dsinclair): Enable when variable declarations and increment are supported
-TEST_F(IR_FromProgramTest, DISABLED_For) {
-    // for(var i: 0; i < 10; i++) {
-    // }
-    //
-    // func -> loop -> loop start -> if true
-    //                            -> if false
-    //
-    //   [if true] -> if merge
-    //   [if false] -> loop merge
-    //   [if merge] -> loop continuing
-    //   [loop continuing] -> loop start
-    //   [loop merge] -> func end
-    //
+TEST_F(IR_FromProgramTest, For) {
     auto* ast_for = For(Decl(Var("i", ty.i32())), LessThan("i", 10_a), Increment("i"), Block());
     WrapInFunction(ast_for);
 
@@ -736,7 +723,38 @@ TEST_F(IR_FromProgramTest, DISABLED_For) {
     EXPECT_EQ(2u, loop->Body()->InboundSiblingBranches().Length());
     EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
 
-    EXPECT_EQ(Disassemble(m), R"()");
+    EXPECT_EQ(Disassemble(m),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
+      %b2 = block {  # initializer
+        %i:ptr<function, i32, read_write> = var
+        next_iteration %b3
+      }
+      %b3 = block {  # body
+        %3:i32 = load %i
+        %4:bool = lt %3, 10i
+        if %4 [t: %b5, f: %b6] {  # if_1
+          %b5 = block {  # true
+            exit_if  # if_1
+          }
+          %b6 = block {  # false
+            exit_loop  # loop_1
+          }
+        }
+        continue %b4
+      }
+      %b4 = block {  # continuing
+        %5:i32 = load %i
+        %6:i32 = add %5, 1i
+        store %i, %6
+        next_iteration %b3
+      }
+    }
+    ret
+  }
+}
+)");
 }
 
 TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
