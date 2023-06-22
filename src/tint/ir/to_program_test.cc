@@ -2179,6 +2179,48 @@ fn f() -> i32 {
 )");
 }
 
+TEST_F(IRToProgramTest, For_CallInInitCondCont) {
+    auto* fn_n = b.Function("n", ty.i32());
+    auto* v = b.FunctionParam(ty.i32());
+    mod.SetName(v, "v");
+    fn_n->SetParams({v});
+    b.With(fn_n->Block(), [&] { b.Return(fn_n, b.Add(ty.i32(), v, 1_i)); });
+    mod.functions.Push(fn_n);
+
+    auto* fn_f = b.Function("f", ty.void_());
+    mod.functions.Push(fn_f);
+
+    b.With(fn_f->Block(), [&] {
+        auto* loop = b.Loop();
+
+        b.With(loop->Initializer(), [&] {
+            auto* n_0 = b.Call(ty.i32(), fn_n, 0_i)->Result();
+            auto* i = b.Var(ty.ptr<function, i32>());
+            mod.SetName(i, "i");
+            i->SetInitializer(n_0);
+
+            b.With(loop->Body(), [&] {
+                auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), b.Call(ty.i32(), fn_n, 1_i)));
+                b.With(if_->True(), [&] { b.ExitIf(if_); });
+                b.With(if_->False(), [&] { b.ExitLoop(loop); });
+            });
+
+            b.With(loop->Continuing(), [&] { b.Store(i, b.Call(ty.i32(), fn_n, b.Load(i))); });
+        });
+    });
+
+    Test(R"(
+fn n(v : i32) -> i32 {
+  return (v + 1i);
+}
+
+fn f() {
+  for(var i : i32 = n(0i); (i < n(1i)); i = n(i)) {
+  }
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // While
 ////////////////////////////////////////////////////////////////////////////////
@@ -2419,6 +2461,48 @@ fn f() {
 
     continuing {
       cond = true;
+    }
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Loop_VarsDeclaredOutsideAndInside) {
+    auto* f = b.Function("f", ty.void_());
+    mod.functions.Push(f);
+
+    b.With(f->Block(), [&] {
+        auto* var_b = b.Var(ty.ptr<function, i32>());
+        var_b->SetInitializer(b.Constant(1_i));
+        mod.SetName(var_b, "b");
+
+        auto* loop = b.Loop();
+
+        b.With(loop->Body(), [&] {
+            auto* var_a = b.Var(ty.ptr<function, i32>());
+            var_a->SetInitializer(b.Constant(2_i));
+            mod.SetName(var_a, "a");
+
+            auto* if_ = b.If(b.Equal(ty.bool_(), b.Load(var_a), b.Load(var_b)));
+            b.With(if_->True(), [&] { b.Return(f); });
+            b.With(if_->False(), [&] { b.ExitIf(if_); });
+
+            b.With(loop->Continuing(),
+                   [&] { b.Store(var_b, b.Add(ty.i32(), b.Load(var_a), b.Load(var_b))); });
+        });
+    });
+
+    Test(R"(
+fn f() {
+  var b : i32 = 1i;
+  loop {
+    var a : i32 = 2i;
+    if ((a == b)) {
+      return;
+    }
+
+    continuing {
+      b = (a + b);
     }
   }
 }

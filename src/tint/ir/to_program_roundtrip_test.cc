@@ -1063,6 +1063,19 @@ fn f() -> i32 {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, For_CallInInitCondCont) {
+    Test(R"(
+fn n(v : i32) -> i32 {
+  return (v + 1i);
+}
+
+fn f() {
+  for(var i : i32 = n(0i); (i < n(1i)); i = n(i)) {
+  }
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // While
 ////////////////////////////////////////////////////////////////////////////////
@@ -1166,6 +1179,24 @@ fn f() {
 
     continuing {
       cond = true;
+    }
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Loop_VarsDeclaredOutsideAndInside) {
+    Test(R"(
+fn f() {
+  var b : i32 = 1i;
+  loop {
+    var a : i32 = 2i;
+    if ((a == b)) {
+      return;
+    }
+
+    continuing {
+      b = (a + b);
     }
   }
 }
