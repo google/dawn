@@ -556,7 +556,7 @@ TEST_F(IR_ValidateTest, Var_Function_NullResult) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     sb.Append(v);
     sb.Return(f);
 
@@ -584,7 +584,7 @@ TEST_F(IR_ValidateTest, Var_Init_WrongType) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
     sb.Return(f);
 
@@ -615,7 +615,7 @@ TEST_F(IR_ValidateTest, Instruction_AppendedDead) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
     auto* ret = sb.Return(f);
 
@@ -654,7 +654,7 @@ TEST_F(IR_ValidateTest, Instruction_NullSource) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
     sb.Return(f);
 
@@ -684,7 +684,7 @@ TEST_F(IR_ValidateTest, Instruction_DeadOperand) {
     auto* f = b.Function("my_func", ty.void_());
     mod.functions.Push(f);
 
-    auto sb = b.With(f->StartTarget());
+    auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
     sb.Return(f);
 
