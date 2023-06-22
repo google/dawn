@@ -2899,7 +2899,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 
     // Push statement blocks for the then-clause and the else-clause.
     // But make sure we do it in the right order.
-    auto push_else = [this, builder, else_end, construct, false_is_break, false_is_continue]() {
+    auto push_else = [this, builder, else_end, construct, false_is_break, false_is_continue] {
         // Push the else clause onto the stack first.
         PushNewStatementBlock(construct, else_end, [=](const StatementList& stmts) {
             // Only set the else-clause if there are statements to fill it.
@@ -3413,7 +3413,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
                 auto copy_name = namer_.MakeDerivedName(namer_.Name(phi_id) + "_c" +
                                                         std::to_string(block_info.id));
                 auto copy_sym = builder_.Symbols().Register(copy_name);
-                copied_phis.GetOrCreate(phi_id, [copy_sym]() { return copy_sym; });
+                copied_phis.GetOrCreate(phi_id, [copy_sym] { return copy_sym; });
                 AddStatement(builder_.WrapInStatement(
                     builder_.Let(copy_sym, builder_.Expr(namer_.Name(phi_id)))));
             }

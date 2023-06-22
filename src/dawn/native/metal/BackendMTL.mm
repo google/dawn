@@ -445,7 +445,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         }
 
         if (@available(macOS 10.15, iOS 14.0, *)) {
-            auto ShouldLeakCounterSets = [this]() {
+            auto ShouldLeakCounterSets = [this] {
                 // Intentionally leak counterSets to workaround an issue where the driver
                 // over-releases the handle if it is accessed more than once. It becomes a zombie.
                 // For more information, see crbug.com/1443658.

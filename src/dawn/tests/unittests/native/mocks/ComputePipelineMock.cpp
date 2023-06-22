@@ -22,9 +22,7 @@ ComputePipelineMock::ComputePipelineMock(DeviceBase* device,
                                          const ComputePipelineDescriptor* descriptor)
     : ComputePipelineBase(device, descriptor) {
     ON_CALL(*this, Initialize).WillByDefault([]() -> MaybeError { return {}; });
-    ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-        this->ComputePipelineBase::DestroyImpl();
-    });
+    ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->ComputePipelineBase::DestroyImpl(); });
 }
 
 ComputePipelineMock::~ComputePipelineMock() = default;

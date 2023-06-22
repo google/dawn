@@ -59,7 +59,7 @@ struct RemoveContinueInSwitch::State {
             made_changes = true;
 
             auto cont_var_name =
-                tint::utils::GetOrCreate(switch_to_cont_var_name, switch_stmt, [&]() {
+                tint::utils::GetOrCreate(switch_to_cont_var_name, switch_stmt, [&] {
                     // Create and insert 'var tint_continue : bool = false;' before the
                     // switch.
                     auto var_name = b.Symbols().New("tint_continue");

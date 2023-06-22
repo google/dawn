@@ -26,7 +26,7 @@ Inspector& InspectorRunner::Initialize(std::string shader) {
 
     file_ = std::make_unique<Source::File>("test", shader);
     program_ = std::make_unique<Program>(reader::wgsl::Parse(file_.get()));
-    [&]() {
+    [&] {
         ASSERT_TRUE(program_->IsValid()) << diag::Formatter().format(program_->Diagnostics());
     }();
     inspector_ = std::make_unique<Inspector>(program_.get());

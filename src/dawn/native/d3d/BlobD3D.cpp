@@ -20,7 +20,7 @@ Blob CreateBlob(ComPtr<ID3DBlob> blob) {
     // Detach so the deleter callback can "own" the reference
     ID3DBlob* ptr = blob.Detach();
     return Blob::UnsafeCreateWithDeleter(reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()),
-                                         ptr->GetBufferSize(), [=]() {
+                                         ptr->GetBufferSize(), [=] {
                                              // Reattach and drop to delete it.
                                              ComPtr<ID3DBlob> b;
                                              b.Attach(ptr);
@@ -32,7 +32,7 @@ Blob CreateBlob(ComPtr<IDxcBlob> blob) {
     // Detach so the deleter callback can "own" the reference
     IDxcBlob* ptr = blob.Detach();
     return Blob::UnsafeCreateWithDeleter(reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()),
-                                         ptr->GetBufferSize(), [=]() {
+                                         ptr->GetBufferSize(), [=] {
                                              // Reattach and drop to delete it.
                                              ComPtr<IDxcBlob> b;
                                              b.Attach(ptr);

@@ -514,7 +514,7 @@ TEST_F(BufferValidationTest, MapAsync_UnmapCalledInCallback) {
         buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
 
         EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
-            .WillOnce(InvokeWithoutArgs([&]() { buf.Unmap(); }));
+            .WillOnce(InvokeWithoutArgs([&] { buf.Unmap(); }));
 
         WaitForAllOperations(device);
     }
@@ -523,7 +523,7 @@ TEST_F(BufferValidationTest, MapAsync_UnmapCalledInCallback) {
         buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
 
         EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
-            .WillOnce(InvokeWithoutArgs([&]() { buf.Unmap(); }));
+            .WillOnce(InvokeWithoutArgs([&] { buf.Unmap(); }));
 
         WaitForAllOperations(device);
     }
@@ -536,7 +536,7 @@ TEST_F(BufferValidationTest, MapAsync_DestroyCalledInCallback) {
         buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
 
         EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
-            .WillOnce(InvokeWithoutArgs([&]() { buf.Destroy(); }));
+            .WillOnce(InvokeWithoutArgs([&] { buf.Destroy(); }));
 
         WaitForAllOperations(device);
     }
@@ -545,7 +545,7 @@ TEST_F(BufferValidationTest, MapAsync_DestroyCalledInCallback) {
         buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
 
         EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
-            .WillOnce(InvokeWithoutArgs([&]() { buf.Destroy(); }));
+            .WillOnce(InvokeWithoutArgs([&] { buf.Destroy(); }));
 
         WaitForAllOperations(device);
     }
@@ -560,7 +560,7 @@ TEST_F(BufferValidationTest, DISABLED_MapAsync_MapAsyncInMapAsyncSuccessCallback
         wgpu::Buffer buf = CreateMapReadBuffer(4);
 
         EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
-            .WillOnce(InvokeWithoutArgs([&]() {
+            .WillOnce(InvokeWithoutArgs([&] {
                 EXPECT_CALL(*mockBufferMapAsyncCallback,
                             Call(WGPUBufferMapAsyncStatus_ValidationError, _));
                 // Should cause validation error because of already mapped buffer
@@ -582,7 +582,7 @@ TEST_F(BufferValidationTest, MapAsync_MapAsyncInMapAsyncRejectionCallback) {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
 
         EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_ValidationError, _))
-            .WillOnce(InvokeWithoutArgs([&]() {
+            .WillOnce(InvokeWithoutArgs([&] {
                 // Retry with valid parameter and it should succeed
                 EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _));
                 buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
@@ -603,7 +603,7 @@ TEST_F(BufferValidationTest, MapAsync_MapAsyncInMapAsyncRejectionCallback) {
 
         EXPECT_CALL(*mockBufferMapAsyncCallback,
                     Call(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, _))
-            .WillOnce(InvokeWithoutArgs([&]() {
+            .WillOnce(InvokeWithoutArgs([&] {
                 // MapAsync call on unmapped buffer should be valid
                 EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _));
                 buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
@@ -621,7 +621,7 @@ TEST_F(BufferValidationTest, MapAsync_MapAsyncInMapAsyncRejectionCallback) {
 
         EXPECT_CALL(*mockBufferMapAsyncCallback,
                     Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, _))
-            .WillOnce(InvokeWithoutArgs([&]() {
+            .WillOnce(InvokeWithoutArgs([&] {
                 // MapAsync call on destroyed buffer should be invalid
                 EXPECT_CALL(*mockBufferMapAsyncCallback,
                             Call(WGPUBufferMapAsyncStatus_ValidationError, _));

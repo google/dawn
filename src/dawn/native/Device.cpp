@@ -1872,7 +1872,7 @@ void DeviceBase::AddComputePipelineAsyncCallbackTask(
         WGPUCreatePipelineAsyncStatus status =
             CreatePipelineAsyncStatusFromErrorType(error->GetType());
         mCallbackTaskManager->AddCallbackTask(
-            [callback, message = error->GetFormattedMessage(), status, userdata]() {
+            [callback, message = error->GetFormattedMessage(), status, userdata] {
                 callback(status, nullptr, message.c_str(), userdata);
             });
     } else {
@@ -1907,7 +1907,7 @@ void DeviceBase::AddRenderPipelineAsyncCallbackTask(ResultOrError<Ref<RenderPipe
         WGPUCreatePipelineAsyncStatus status =
             CreatePipelineAsyncStatusFromErrorType(error->GetType());
         mCallbackTaskManager->AddCallbackTask(
-            [callback, message = error->GetFormattedMessage(), status, userdata]() {
+            [callback, message = error->GetFormattedMessage(), status, userdata] {
                 callback(status, nullptr, message.c_str(), userdata);
             });
     } else {

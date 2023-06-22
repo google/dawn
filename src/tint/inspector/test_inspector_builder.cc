@@ -273,7 +273,7 @@ ast::Type InspectorBuilder::GetCoordsType(type::TextureDimension dim, ast::Type 
         case type::TextureDimension::kCubeArray:
             return ty.vec3(scalar);
         default:
-            [=]() {
+            [=] {
                 utils::StringStream str;
                 str << dim;
                 FAIL() << "Unsupported texture dimension: " << str.str();
@@ -313,19 +313,19 @@ std::function<ast::Type()> InspectorBuilder::GetTypeFunction(ComponentType compo
     std::function<ast::Type()> func;
     switch (component) {
         case ComponentType::kF32:
-            func = [this]() { return ty.f32(); };
+            func = [this] { return ty.f32(); };
             break;
         case ComponentType::kI32:
-            func = [this]() { return ty.i32(); };
+            func = [this] { return ty.i32(); };
             break;
         case ComponentType::kU32:
-            func = [this]() { return ty.u32(); };
+            func = [this] { return ty.u32(); };
             break;
         case ComponentType::kF16:
-            func = [this]() { return ty.f16(); };
+            func = [this] { return ty.f16(); };
             break;
         case ComponentType::kUnknown:
-            return []() { return ast::Type{}; };
+            return [] { return ast::Type{}; };
     }
 
     uint32_t n;
@@ -342,10 +342,10 @@ std::function<ast::Type()> InspectorBuilder::GetTypeFunction(ComponentType compo
             n = 4;
             break;
         default:
-            return []() { return ast::Type{}; };
+            return [] { return ast::Type{}; };
     }
 
-    return [this, func, n]() { return ty.vec(func(), n); };
+    return [this, func, n] { return ty.vec(func(), n); };
 }
 
 Inspector& InspectorBuilder::Build() {
@@ -353,7 +353,7 @@ Inspector& InspectorBuilder::Build() {
         return *inspector_;
     }
     program_ = std::make_unique<Program>(std::move(*this));
-    [&]() {
+    [&] {
         ASSERT_TRUE(program_->IsValid()) << diag::Formatter().format(program_->Diagnostics());
     }();
     inspector_ = std::make_unique<Inspector>(program_.get());

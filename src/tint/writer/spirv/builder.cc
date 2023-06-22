@@ -2626,7 +2626,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     image_operands.reserve(4);  // Enough to fit most parameter lists
 
     // Appends `result_type` and `result_id` to `spirv_params`
-    auto append_result_type_and_id_to_spirv_params = [&]() {
+    auto append_result_type_and_id_to_spirv_params = [&] {
         spirv_params.emplace_back(std::move(result_type));
         spirv_params.emplace_back(std::move(result_id));
     };
@@ -2641,7 +2641,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     //
     // If the texture is not a depth texture, then this function simply delegates
     // to calling append_result_type_and_id_to_spirv_params().
-    auto append_result_type_and_id_to_spirv_params_for_read = [&]() {
+    auto append_result_type_and_id_to_spirv_params_for_read = [&] {
         if (texture_type->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
             auto* f32 = builder_.create<type::F32>();
             auto* spirv_result_type = builder_.create<type::Vector>(f32, 4u);

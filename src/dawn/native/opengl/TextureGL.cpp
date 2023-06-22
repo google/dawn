@@ -407,7 +407,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                     gl.Disable(GL_SCISSOR_TEST);
                     gl.ColorMask(true, true, true, true);
 
-                    auto DoClear = [&]() {
+                    auto DoClear = [&] {
                         switch (baseType) {
                             case TextureComponentType::Float: {
                                 gl.ClearBufferfv(GL_COLOR, 0,

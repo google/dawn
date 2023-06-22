@@ -22,9 +22,7 @@ RenderPipelineMock::RenderPipelineMock(DeviceMock* device,
                                        const RenderPipelineDescriptor* descriptor)
     : RenderPipelineBase(device, descriptor) {
     ON_CALL(*this, Initialize).WillByDefault([]() -> MaybeError { return {}; });
-    ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-        this->RenderPipelineBase::DestroyImpl();
-    });
+    ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->RenderPipelineBase::DestroyImpl(); });
 }
 
 RenderPipelineMock::~RenderPipelineMock() = default;

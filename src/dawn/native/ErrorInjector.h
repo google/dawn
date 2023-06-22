@@ -48,7 +48,7 @@ InjectedErrorResult<ErrorType> MaybeInjectError(ErrorType errorType, ErrorTypes.
 #if defined(DAWN_ENABLE_ERROR_INJECTION)
 
 #define INJECT_ERROR_OR_RUN(stmt, ...)                                                   \
-    [&]() {                                                                              \
+    [&] {                                                                                \
         if (DAWN_UNLIKELY(::dawn::native::ErrorInjectorEnabled())) {                     \
             /* Only used for testing and fuzzing, so it's okay if this is deoptimized */ \
             auto injectedError = ::dawn::native::MaybeInjectError(__VA_ARGS__);          \

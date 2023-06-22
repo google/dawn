@@ -196,7 +196,7 @@ void Disassembler::EmitParamAttributes(FunctionParam* p) {
     out_ << " [";
 
     bool need_comma = false;
-    auto comma = [&]() {
+    auto comma = [&] {
         if (need_comma) {
             out_ << ", ";
         }
@@ -233,7 +233,7 @@ void Disassembler::EmitReturnAttributes(Function* func) {
     out_ << " [";
 
     bool need_comma = false;
-    auto comma = [&]() {
+    auto comma = [&] {
         if (need_comma) {
             out_ << ", ";
         }

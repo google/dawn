@@ -118,7 +118,7 @@ struct PackedVec3::State {
                         // Create a struct with a single `__packed_vec3` member.
                         // Give the struct member the same alignment as the original unpacked vec3
                         // type, to avoid changing the array element stride.
-                        return b.ty(packed_vec3_wrapper_struct_names.GetOrCreate(vec, [&]() {
+                        return b.ty(packed_vec3_wrapper_struct_names.GetOrCreate(vec, [&] {
                             auto name = b.Symbols().New(
                                 "tint_packed_vec3_" + vec->type()->FriendlyName() +
                                 (array_element ? "_array_element" : "_struct_member"));
@@ -161,7 +161,7 @@ struct PackedVec3::State {
             },
             [&](const type::Struct* str) -> Type {
                 if (ContainsVec3(str)) {
-                    auto name = rewritten_structs.GetOrCreate(str, [&]() {
+                    auto name = rewritten_structs.GetOrCreate(str, [&] {
                         utils::Vector<const StructMember*, 4> members;
                         for (auto* member : str->Members()) {
                             // If the member type contains a vec3, rewrite it.
@@ -281,7 +281,7 @@ struct PackedVec3::State {
     /// @param ty the unpacked type
     /// @returns an expression that holds the unpacked value
     const Expression* UnpackComposite(const Expression* expr, const type::Type* ty) {
-        auto helper = unpack_helpers.GetOrCreate(ty, [&]() {
+        auto helper = unpack_helpers.GetOrCreate(ty, [&] {
             return MakePackUnpackHelper(
                 "tint_unpack_vec3_in_composite", ty,
                 [&](const Expression* element,
@@ -297,8 +297,8 @@ struct PackedVec3::State {
                         return UnpackComposite(element, element_type);
                     }
                 },
-                [&]() { return RewriteType(ty); },  //
-                [&]() { return CreateASTTypeFor(ctx, ty); });
+                [&] { return RewriteType(ty); },  //
+                [&] { return CreateASTTypeFor(ctx, ty); });
         });
         return b.Call(helper, expr);
     }
@@ -309,7 +309,7 @@ struct PackedVec3::State {
     /// @param ty the unpacked type
     /// @returns an expression that holds the packed value
     const Expression* PackComposite(const Expression* expr, const type::Type* ty) {
-        auto helper = pack_helpers.GetOrCreate(ty, [&]() {
+        auto helper = pack_helpers.GetOrCreate(ty, [&] {
             return MakePackUnpackHelper(
                 "tint_pack_vec3_in_composite", ty,
                 [&](const Expression* element,
@@ -326,8 +326,8 @@ struct PackedVec3::State {
                         return PackComposite(element, element_type);
                     }
                 },
-                [&]() { return CreateASTTypeFor(ctx, ty); },  //
-                [&]() { return RewriteType(ty); });
+                [&] { return CreateASTTypeFor(ctx, ty); },  //
+                [&] { return RewriteType(ty); });
         });
         return b.Call(helper, expr);
     }

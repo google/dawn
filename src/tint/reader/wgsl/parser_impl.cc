@@ -881,7 +881,7 @@ Maybe<ast::Type> ParserImpl::type_specifier() {
         return builder_.ty(builder_.Ident(source.Source(), ident.to_str()));
     }
 
-    auto args = expect_template_arg_block("type template arguments", [&]() {
+    auto args = expect_template_arg_block("type template arguments", [&] {
         return expect_expression_list("type template argument list",
                                       Token::Type::kTemplateArgsRight);
     });
@@ -2075,7 +2075,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
         const ast::Identifier* ident = nullptr;
 
         if (peek_is(Token::Type::kTemplateArgsLeft)) {
-            auto tmpl_args = expect_template_arg_block("template arguments", [&]() {
+            auto tmpl_args = expect_template_arg_block("template arguments", [&] {
                 return expect_expression_list("template argument list",
                                               Token::Type::kTemplateArgsRight);
             });

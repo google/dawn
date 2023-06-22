@@ -766,7 +766,7 @@ struct VertexPulling::State {
             ctx.InsertFront(func->body->statements, b.Decl(func_var));
             // Capture mapping from location to the new variable.
             LocationInfo info;
-            info.expr = [this, func_var]() { return b.Expr(func_var); };
+            info.expr = [this, func_var] { return b.Expr(func_var); };
 
             auto* sem = src->Sem().Get<sem::Parameter>(param);
             info.type = sem->Type();
@@ -785,11 +785,11 @@ struct VertexPulling::State {
             auto builtin = src->Sem().Get(builtin_attr)->Value();
             // Check for existing vertex_index and instance_index builtins.
             if (builtin == builtin::BuiltinValue::kVertexIndex) {
-                vertex_index_expr = [this, param]() {
+                vertex_index_expr = [this, param] {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 };
             } else if (builtin == builtin::BuiltinValue::kInstanceIndex) {
-                instance_index_expr = [this, param]() {
+                instance_index_expr = [this, param] {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 };
             }
@@ -815,7 +815,7 @@ struct VertexPulling::State {
         utils::Vector<const StructMember*, 8> members_to_clone;
         for (auto* member : struct_ty->members) {
             auto member_sym = ctx.Clone(member->name->symbol);
-            std::function<const Expression*()> member_expr = [this, param_sym, member_sym]() {
+            std::function<const Expression*()> member_expr = [this, param_sym, member_sym] {
                 return b.MemberAccessor(param_sym, member_sym);
             };
 
@@ -907,7 +907,7 @@ struct VertexPulling::State {
                     new_function_parameters.Push(
                         b.Param(name, b.ty.u32(),
                                 utils::Vector{b.Builtin(builtin::BuiltinValue::kVertexIndex)}));
-                    vertex_index_expr = [this, name]() { return b.Expr(name); };
+                    vertex_index_expr = [this, name] { return b.Expr(name); };
                     break;
                 }
             }
@@ -919,7 +919,7 @@ struct VertexPulling::State {
                     new_function_parameters.Push(
                         b.Param(name, b.ty.u32(),
                                 utils::Vector{b.Builtin(builtin::BuiltinValue::kInstanceIndex)}));
-                    instance_index_expr = [this, name]() { return b.Expr(name); };
+                    instance_index_expr = [this, name] { return b.Expr(name); };
                     break;
                 }
             }

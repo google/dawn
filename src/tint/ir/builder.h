@@ -171,7 +171,7 @@ class Builder {
     /// @param val the constant value
     /// @returns the new constant
     ir::Constant* Constant(const constant::Value* val) {
-        return ir.constants.GetOrCreate(val, [&]() { return ir.values.Create<ir::Constant>(val); });
+        return ir.constants.GetOrCreate(val, [&] { return ir.values.Create<ir::Constant>(val); });
     }
 
     /// Creates a ir::Constant for an i32 Scalar

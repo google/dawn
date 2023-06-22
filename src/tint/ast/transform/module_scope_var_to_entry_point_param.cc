@@ -122,7 +122,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         auto* ty = var->Type()->UnwrapRef();
 
         // Helper to create an AST node for the store type of the variable.
-        auto store_type = [&]() { return CreateASTTypeFor(ctx, ty); };
+        auto store_type = [&] { return CreateASTTypeFor(ctx, ty); };
 
         builtin::AddressSpace sc = var->AddressSpace();
         switch (sc) {
@@ -324,7 +324,7 @@ struct ModuleScopeVarToEntryPointParam::State {
 
                     // Create a statement to assign the initializer if present.
                     if (var->initializer) {
-                        private_initializers.Push([&, name, var]() {
+                        private_initializers.Push([&, name, var] {
                             return ctx.dst->Assign(
                                 ctx.dst->MemberAccessor(PrivateStructVariableName(), name),
                                 ctx.Clone(var->initializer));
@@ -401,7 +401,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             // threadgroup memory arguments.
             Symbol workgroup_parameter_symbol;
             StructMemberList workgroup_parameter_members;
-            auto workgroup_param = [&]() {
+            auto workgroup_param = [&] {
                 if (!workgroup_parameter_symbol.IsValid()) {
                     workgroup_parameter_symbol = ctx.dst->Sym();
                 }

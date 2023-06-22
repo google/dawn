@@ -30,7 +30,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// @return the built program
     Program Build() {
         diag::Formatter formatter;
-        [&]() {
+        [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                                    << formatter.format(Diagnostics());
         }();

@@ -149,7 +149,7 @@ uint32_t GeneratorImplIr::Constant(ir::Constant* constant) {
 }
 
 uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {
-    return constants_.GetOrCreate(constant, [&]() {
+    return constants_.GetOrCreate(constant, [&] {
         auto id = module_.NextId();
         auto* ty = constant->Type();
         Switch(
@@ -204,7 +204,7 @@ uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {
 }
 
 uint32_t GeneratorImplIr::ConstantNull(const type::Type* type) {
-    return constant_nulls_.GetOrCreate(type, [&]() {
+    return constant_nulls_.GetOrCreate(type, [&] {
         auto id = module_.NextId();
         module_.PushType(spv::Op::OpConstantNull, {Type(type), id});
         return id;
@@ -212,7 +212,7 @@ uint32_t GeneratorImplIr::ConstantNull(const type::Type* type) {
 }
 
 uint32_t GeneratorImplIr::Type(const type::Type* ty) {
-    return types_.GetOrCreate(ty, [&]() {
+    return types_.GetOrCreate(ty, [&] {
         auto id = module_.NextId();
         Switch(
             ty,  //
@@ -278,7 +278,7 @@ uint32_t GeneratorImplIr::Value(ir::Value* value) {
 }
 
 uint32_t GeneratorImplIr::Label(ir::Block* block) {
-    return block_labels_.GetOrCreate(block, [&]() { return module_.NextId(); });
+    return block_labels_.GetOrCreate(block, [&] { return module_.NextId(); });
 }
 
 void GeneratorImplIr::EmitStructType(uint32_t id, const type::Struct* str) {
@@ -356,7 +356,7 @@ void GeneratorImplIr::EmitFunction(ir::Function* func) {
     }
 
     // Get the ID for the function type (creating it if needed).
-    auto function_type_id = function_types_.GetOrCreate(function_type, [&]() {
+    auto function_type_id = function_types_.GetOrCreate(function_type, [&] {
         auto func_ty_id = module_.NextId();
         OperandList operands = {func_ty_id, return_type_id};
         operands.insert(operands.end(), function_type.param_type_ids.begin(),
@@ -744,7 +744,7 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
     auto glsl_ext_inst = [&](enum GLSLstd450 inst) {
         constexpr const char* kGLSLstd450 = "GLSL.std.450";
         op = spv::Op::OpExtInst;
-        operands.push_back(imports_.GetOrCreate(kGLSLstd450, [&]() {
+        operands.push_back(imports_.GetOrCreate(kGLSLstd450, [&] {
             // Import the instruction set the first time it is requested.
             auto import = module_.NextId();
             module_.PushExtImport(spv::Op::OpExtInstImport, {import, Operand(kGLSLstd450)});

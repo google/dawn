@@ -881,7 +881,7 @@ TEST_P(BufferMappedAtCreationTests, CreateThenMapBeforeUnmapFailure) {
     wgpu::Buffer buffer = BufferMappedAtCreationWithData(
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
 
-    ASSERT_DEVICE_ERROR([&]() {
+    ASSERT_DEVICE_ERROR([&] {
         bool done = false;
         buffer.MapAsync(
             wgpu::MapMode::Write, 0, 4,

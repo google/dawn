@@ -129,7 +129,7 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
     // Expect the server to receive the message. Then, mock a fake reply.
     WGPUAdapter apiAdapter = api.GetNewAdapter();
     EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
                 .WillOnce(
                     SetArgPointee<1>(*reinterpret_cast<WGPUAdapterProperties*>(&fakeProperties)));
@@ -206,7 +206,7 @@ TEST_F(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
     // Expect the server to receive the message. Then, mock a fake reply.
     WGPUAdapter apiAdapter = api.GetNewAdapter();
     EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
                     *properties = {};
@@ -260,7 +260,7 @@ TEST_F(WireInstanceTests, RequestAdapterError) {
 
     // Expect the server to receive the message. Then, mock an error.
     EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error,
                                                    nullptr, "Some error");
         }));

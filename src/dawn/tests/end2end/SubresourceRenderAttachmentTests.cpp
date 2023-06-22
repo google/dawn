@@ -46,7 +46,7 @@ class SubresourceRenderAttachmentTest : public DawnTest {
         float expectedDepth = 0.3f;
         uint8_t expectedStencil = 7;
 
-        utils::ComboRenderPassDescriptor renderPass = [&]() {
+        utils::ComboRenderPassDescriptor renderPass = [&] {
             switch (type) {
                 case Type::Color: {
                     utils::ComboRenderPassDescriptor renderPass({renderTargetView});

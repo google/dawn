@@ -20,7 +20,7 @@ namespace dawn::native {
 
 QueueMock::QueueMock(DeviceMock* device, const QueueDescriptor* descriptor)
     : QueueBase(device, descriptor) {
-    ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->QueueBase::DestroyImpl(); });
+    ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->QueueBase::DestroyImpl(); });
 }
 
 QueueMock::~QueueMock() = default;

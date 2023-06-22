@@ -868,7 +868,7 @@ struct DirectVariableAccess::State {
     /// indices.
     void TransformCall(const sem::Call* call) {
         // Register a custom handler for the specific call expression
-        ctx.Replace(call->Declaration(), [this, call]() {
+        ctx.Replace(call->Declaration(), [this, call] {
             auto target_variant = clone_state->current_variant->calls.Find(call);
             if (!target_variant) {
                 // The current variant does not need to transform this call.

@@ -167,12 +167,12 @@ class MemoryDataBuilder {
         // bytes and avoid NaN or Inf.
         constexpr uint8_t dataMask = ~paddingMask;
         // Get a data byte
-        auto NextDataByte = [&]() {
+        auto NextDataByte = [&] {
             dataByte += 0x11u;
             return static_cast<uint8_t>((dataByte ^ dataXorKey) & dataMask);
         };
         // Get a padding byte
-        auto NextPaddingByte = [&]() {
+        auto NextPaddingByte = [&] {
             paddingByte += 0x13u;
             return static_cast<uint8_t>((paddingByte ^ paddingXorKey) | paddingMask);
         };

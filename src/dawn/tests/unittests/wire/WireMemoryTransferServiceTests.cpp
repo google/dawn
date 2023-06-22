@@ -144,19 +144,19 @@ class WireMemoryTransferServiceTests : public WireTest {
         ClientReadHandle* handle = clientMemoryTransferService.NewReadHandle();
 
         EXPECT_CALL(clientMemoryTransferService, OnCreateReadHandle(sizeof(mBufferContent)))
-            .WillOnce(InvokeWithoutArgs([=]() { return handle; }));
+            .WillOnce(InvokeWithoutArgs([=] { return handle; }));
 
         return handle;
     }
 
     void MockReadHandleCreationFailure() {
         EXPECT_CALL(clientMemoryTransferService, OnCreateReadHandle(sizeof(mBufferContent)))
-            .WillOnce(InvokeWithoutArgs([=]() { return nullptr; }));
+            .WillOnce(InvokeWithoutArgs([=] { return nullptr; }));
     }
 
     void ExpectReadHandleSerialization(ClientReadHandle* handle) {
         EXPECT_CALL(clientMemoryTransferService, OnReadHandleSerializeCreateSize(handle))
-            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeCreateInfo); }));
+            .WillOnce(InvokeWithoutArgs([&] { return sizeof(mSerializeCreateInfo); }));
         EXPECT_CALL(clientMemoryTransferService, OnReadHandleSerializeCreate(handle, _))
             .WillOnce(WithArg<1>([&](void* serializePointer) {
                 memcpy(serializePointer, &mSerializeCreateInfo, sizeof(mSerializeCreateInfo));
@@ -183,13 +183,13 @@ class WireMemoryTransferServiceTests : public WireTest {
         EXPECT_CALL(serverMemoryTransferService,
                     OnDeserializeReadHandle(Pointee(Eq(mSerializeCreateInfo)),
                                             sizeof(mSerializeCreateInfo), _))
-            .WillOnce(InvokeWithoutArgs([&]() { return false; }));
+            .WillOnce(InvokeWithoutArgs([&] { return false; }));
     }
 
     void ExpectServerReadHandleSerializeDataUpdate(ServerReadHandle* handle) {
         EXPECT_CALL(serverMemoryTransferService,
                     OnReadHandleSizeOfSerializeDataUpdate(handle, _, _))
-            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mReadHandleSerializeDataInfo); }));
+            .WillOnce(InvokeWithoutArgs([&] { return sizeof(mReadHandleSerializeDataInfo); }));
         EXPECT_CALL(serverMemoryTransferService,
                     OnReadHandleSerializeDataUpdate(handle, _, _, _, _))
             .WillOnce(WithArg<4>([&](void* serializePointer) {
@@ -221,7 +221,7 @@ class WireMemoryTransferServiceTests : public WireTest {
         ClientWriteHandle* handle = clientMemoryTransferService.NewWriteHandle();
 
         EXPECT_CALL(clientMemoryTransferService, OnCreateWriteHandle(sizeof(mBufferContent)))
-            .WillOnce(InvokeWithoutArgs([=]() { return handle; }));
+            .WillOnce(InvokeWithoutArgs([=] { return handle; }));
         if (mappedAtCreation) {
             EXPECT_CALL(clientMemoryTransferService, OnWriteHandleGetData(handle))
                 .WillOnce(Return(&mBufferContent));
@@ -232,12 +232,12 @@ class WireMemoryTransferServiceTests : public WireTest {
 
     void MockWriteHandleCreationFailure() {
         EXPECT_CALL(clientMemoryTransferService, OnCreateWriteHandle(sizeof(mBufferContent)))
-            .WillOnce(InvokeWithoutArgs([=]() { return nullptr; }));
+            .WillOnce(InvokeWithoutArgs([=] { return nullptr; }));
     }
 
     void ExpectWriteHandleSerialization(ClientWriteHandle* handle) {
         EXPECT_CALL(clientMemoryTransferService, OnWriteHandleSerializeCreateSize(handle))
-            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mSerializeCreateInfo); }));
+            .WillOnce(InvokeWithoutArgs([&] { return sizeof(mSerializeCreateInfo); }));
         EXPECT_CALL(clientMemoryTransferService, OnWriteHandleSerializeCreate(handle, _))
             .WillOnce(WithArg<1>([&](void* serializePointer) {
                 memcpy(serializePointer, &mSerializeCreateInfo, sizeof(mSerializeCreateInfo));
@@ -270,7 +270,7 @@ class WireMemoryTransferServiceTests : public WireTest {
     void ExpectClientWriteHandleSerializeDataUpdate(ClientWriteHandle* handle) {
         EXPECT_CALL(clientMemoryTransferService,
                     OnWriteHandleSizeOfSerializeDataUpdate(handle, _, _))
-            .WillOnce(InvokeWithoutArgs([&]() { return sizeof(mWriteHandleSerializeDataInfo); }));
+            .WillOnce(InvokeWithoutArgs([&] { return sizeof(mWriteHandleSerializeDataInfo); }));
         EXPECT_CALL(clientMemoryTransferService, OnWriteHandleSerializeDataUpdate(handle, _, _, _))
             .WillOnce(WithArg<1>([&](void* serializePointer) {
                 memcpy(serializePointer, &mWriteHandleSerializeDataInfo,
@@ -351,9 +351,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
 
     // Mock a successful callback
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-        }));
+        .WillOnce(InvokeWithoutArgs(
+            [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleGetData(clientHandle))
         .WillOnce(Return(&mBufferContent));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
@@ -424,7 +423,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
 
     // Mock a failed callback.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_ValidationError);
         }));
 
@@ -501,9 +500,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeDataUpdateFailure
 
     // Mock a successful callback
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-        }));
+        .WillOnce(InvokeWithoutArgs(
+            [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
         .WillOnce(Return(&mBufferContent));
 
@@ -547,9 +545,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDestroyBeforeUnmap) {
 
     // Mock a successful callback
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-        }));
+        .WillOnce(InvokeWithoutArgs(
+            [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleGetData(clientHandle))
         .WillOnce(Return(&mBufferContent));
     EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
@@ -602,9 +599,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
 
     // Mock a successful callback.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-        }));
+        .WillOnce(InvokeWithoutArgs(
+            [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleGetData(clientHandle))
         .WillOnce(Return(&mBufferContent));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
@@ -682,7 +678,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
 
     // Mock an error callback.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_ValidationError);
         }));
 
@@ -756,9 +752,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeDataUpdateFailur
 
     // Mock a successful callback.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-        }));
+        .WillOnce(InvokeWithoutArgs(
+            [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleGetData(clientHandle))
         .WillOnce(Return(&mBufferContent));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
@@ -808,9 +803,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDestroyBeforeUnmap) {
 
     // Mock a successful callback.
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
-        }));
+        .WillOnce(InvokeWithoutArgs(
+            [&] { api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success); }));
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleGetData(clientHandle))
         .WillOnce(Return(&mBufferContent));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))

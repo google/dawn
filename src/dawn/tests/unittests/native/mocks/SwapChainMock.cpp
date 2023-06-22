@@ -20,7 +20,7 @@ SwapChainMock::SwapChainMock(DeviceBase* device,
                              Surface* surface,
                              const SwapChainDescriptor* descriptor)
     : SwapChainBase(device, surface, descriptor) {
-    ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->SwapChainBase::DestroyImpl(); });
+    ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->SwapChainBase::DestroyImpl(); });
 }
 
 SwapChainMock::~SwapChainMock() = default;

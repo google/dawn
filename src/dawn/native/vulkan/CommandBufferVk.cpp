@@ -1117,7 +1117,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
     // on our infra).
     ClampFragDepthArgs clampFragDepthArgs = {0.0f, 1.0f};
     bool clampFragDepthArgsDirty = true;
-    auto ApplyClampFragDepthArgs = [&]() {
+    auto ApplyClampFragDepthArgs = [&] {
         if (!clampFragDepthArgsDirty || lastPipeline == nullptr) {
             return;
         }

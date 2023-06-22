@@ -181,7 +181,7 @@ TYPED_TEST(ContentLessObjectCacheTest, InsertingAndFinding) {
     ContentLessObjectCache<RefCountedT, TypeParam> cache;
     std::vector<Ref<RefCountedT>> objects(kNumObjects);
 
-    auto f = [&]() {
+    auto f = [&] {
         for (size_t i = 0; i < kNumObjects; i++) {
             Ref<RefCountedT> object =
                 AcquireRef(new RefCountedT(i, [&](RefCountedT* x) { cache.Erase(x); }));
@@ -220,9 +220,9 @@ TYPED_TEST(ContentLessObjectCacheTest, FindDeleting) {
     EXPECT_TRUE(cache.Insert(object.Get()).second);
 
     // Thread A will release the last reference of the original object.
-    auto threadA = [&]() { object = nullptr; };
+    auto threadA = [&] { object = nullptr; };
     // Thread B will try to Find the entry before it is completely destroyed.
-    auto threadB = [&]() {
+    auto threadB = [&] {
         signalA.Wait();
         TypeParam blueprint(1);
         EXPECT_TRUE(cache.Find(&blueprint) == nullptr);
@@ -252,10 +252,10 @@ TYPED_TEST(ContentLessObjectCacheTest, InsertDeleting) {
         AcquireRef(new RefCountedT(1, [&](RefCountedT* x) { cache.Erase(x); }));
 
     // Thread A will release the last reference of the original object.
-    auto threadA = [&]() { object1 = nullptr; };
+    auto threadA = [&] { object1 = nullptr; };
     // Thread B will try to Insert a hash equivalent entry before the original is completely
     // destroyed.
-    auto threadB = [&]() {
+    auto threadB = [&] {
         signalA.Wait();
         EXPECT_TRUE(cache.Insert(object2.Get()).second);
         signalB.Fire();

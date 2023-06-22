@@ -116,7 +116,7 @@ std::string Struct::Layout() const {
            << ") */ struct " << struct_name << " {\n";
     };
 
-    auto print_struct_end_line = [&]() {
+    auto print_struct_end_line = [&] {
         ss << "/*                         " << std::setw(offset_w + size_w + align_w) << " "
            << "*/ };";
     };

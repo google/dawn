@@ -114,7 +114,7 @@ TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
     // only once.
     EXPECT_CALL(mockDeviceLostCallback,
                 Call(WGPUDeviceLostReason_Undefined, StrEq("lost reason"), this))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
             GetWireClient()->Disconnect();
         }));

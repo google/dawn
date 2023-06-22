@@ -121,7 +121,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
         if (to_replace.first_dynamic_index > 0) {
             PartialAccess partial_access = {
                 access->Object(), access->Indices().Truncate(to_replace.first_dynamic_index)};
-            source_object = source_object_to_value.GetOrCreate(partial_access, [&]() {
+            source_object = source_object_to_value.GetOrCreate(partial_access, [&] {
                 auto* intermediate_source = builder.Access(to_replace.dynamic_index_source_type,
                                                            source_object, partial_access.indices);
                 intermediate_source->InsertBefore(access);
@@ -130,7 +130,7 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
         }
 
         // Declare a local variable and copy the source object to it.
-        auto* local = object_to_local.GetOrCreate(source_object, [&]() {
+        auto* local = object_to_local.GetOrCreate(source_object, [&] {
             auto* decl =
                 builder.Var(ir->Types().ptr(builtin::AddressSpace::kFunction, source_object->Type(),
                                             builtin::Access::kReadWrite));

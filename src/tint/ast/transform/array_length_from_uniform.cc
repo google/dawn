@@ -97,7 +97,7 @@ struct ArrayLengthFromUniform::State {
         // Get (or create, on first call) the uniform buffer that will receive the
         // size of each storage buffer in the module.
         const Variable* buffer_size_ubo = nullptr;
-        auto get_ubo = [&]() {
+        auto get_ubo = [&] {
             if (!buffer_size_ubo) {
                 // Emit an array<vec4<u32>, N>, where N is 1/4 number of elements.
                 // We do this because UBOs require an element stride that is 16-byte

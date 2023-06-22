@@ -88,7 +88,7 @@ OUTPUT Manager::RunTransforms(INPUT in,
 
     // Helper functions to get the current program state as either an AST program or IR module,
     // performing a conversion if necessary.
-    auto get_ast = [&]() {
+    auto get_ast = [&] {
 #if TINT_BUILD_IR
         if (std::holds_alternative<ir::Module*>(target)) {
             // Convert the IR module to an AST program.
@@ -100,7 +100,7 @@ OUTPUT Manager::RunTransforms(INPUT in,
         return std::get<const Program*>(target);
     };
 #if TINT_BUILD_IR
-    auto get_ir = [&]() {
+    auto get_ir = [&] {
         if (std::holds_alternative<const Program*>(target)) {
             // Convert the AST program to an IR module.
             auto converted = ir::FromProgram(std::get<const Program*>(target));

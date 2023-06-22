@@ -523,7 +523,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     // error in metadata.infringedLimits. This is to delay the emission of these validation
     // errors until the entry point is used.
 #define DelayedInvalidIf(invalid, ...)                                              \
-    ([&]() {                                                                        \
+    ([&] {                                                                          \
         if (invalid) {                                                              \
             metadata->infringedLimitErrors.push_back(absl::StrFormat(__VA_ARGS__)); \
         }                                                                           \

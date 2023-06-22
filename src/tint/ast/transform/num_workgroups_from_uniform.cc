@@ -127,7 +127,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     // Get (or create, on first call) the uniform buffer that will receive the
     // number of workgroups.
     const Variable* num_workgroups_ubo = nullptr;
-    auto get_ubo = [&]() {
+    auto get_ubo = [&] {
         if (!num_workgroups_ubo) {
             auto* num_workgroups_struct =
                 b.Structure(b.Sym(), utils::Vector{

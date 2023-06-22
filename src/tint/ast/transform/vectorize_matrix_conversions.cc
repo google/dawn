@@ -115,7 +115,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
         // Replace the matrix conversion to column vector conversions and a matrix construction.
         if (!matrix->HasSideEffects()) {
             // Simply use the argument's declaration if it has no side effects.
-            return build_vectorized_conversion_expression([&]() {  //
+            return build_vectorized_conversion_expression([&] {  //
                 return ctx.Clone(matrix->Declaration());
             });
         } else {
@@ -132,7 +132,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
                            },
                            CreateASTTypeFor(ctx, dst_type),
                            utils::Vector{
-                               b.Return(build_vectorized_conversion_expression([&]() {  //
+                               b.Return(build_vectorized_conversion_expression([&] {  //
                                    return b.Expr("value");
                                })),
                            });

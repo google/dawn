@@ -97,7 +97,7 @@ TEST_F(WireShaderModuleTests, GetCompilationInfo) {
     compilationInfo.messages = &message;
 
     EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallShaderModuleGetCompilationInfoCallback(
                 apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &compilationInfo);
         }));
@@ -137,7 +137,7 @@ TEST_F(WireShaderModuleTests, GetCompilationInfoBeforeDisconnect) {
     compilationInfo.messages = &message;
 
     EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallShaderModuleGetCompilationInfoCallback(
                 apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &compilationInfo);
         }));
@@ -197,7 +197,7 @@ TEST_F(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDisconnect) 
     compilationInfo.messages = &message;
 
     EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallShaderModuleGetCompilationInfoCallback(
                 apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &compilationInfo);
         }));
@@ -224,7 +224,7 @@ TEST_F(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDestruction)
     compilationInfo.messages = &message;
 
     EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallShaderModuleGetCompilationInfoCallback(
                 apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &compilationInfo);
         }));

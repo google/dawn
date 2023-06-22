@@ -476,7 +476,7 @@ class HashmapBase {
 
         const auto hash = Hash(key);
 
-        auto make_entry = [&]() {
+        auto make_entry = [&] {
             if constexpr (ValueIsVoid) {
                 return std::forward<K>(key);
             } else {

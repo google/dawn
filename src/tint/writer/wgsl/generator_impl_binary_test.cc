@@ -34,7 +34,7 @@ using WgslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(WgslBinaryTest, Emit) {
     auto params = GetParam();
 
-    auto op_ty = [&]() {
+    auto op_ty = [&] {
         if (params.op == ast::BinaryOp::kLogicalAnd || params.op == ast::BinaryOp::kLogicalOr) {
             return ty.bool_();
         } else {

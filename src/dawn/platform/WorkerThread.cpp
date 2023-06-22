@@ -76,7 +76,7 @@ std::unique_ptr<dawn::platform::WaitableEvent> AsyncWorkerThreadPool::PostWorker
     std::unique_ptr<AsyncWaitableEvent> waitableEvent = std::make_unique<AsyncWaitableEvent>();
 
     std::function<void()> doTask = [callback, userdata,
-                                    waitableEventImpl = waitableEvent->GetWaitableEventImpl()]() {
+                                    waitableEventImpl = waitableEvent->GetWaitableEventImpl()] {
         callback(userdata);
         waitableEventImpl->MarkAsComplete();
     };

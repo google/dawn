@@ -58,7 +58,7 @@ TEST(BlobTests, UnsafeCreateWithDeleter) {
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b = Blob::UnsafeCreateWithDeleter(data, sizeof(data), [&]() { mockDeleter.Call(); });
+        Blob b = Blob::UnsafeCreateWithDeleter(data, sizeof(data), [&] { mockDeleter.Call(); });
         // Check the contents.
         EXPECT_FALSE(b.Empty());
         EXPECT_EQ(b.Size(), sizeof(data));
@@ -77,7 +77,7 @@ TEST(BlobTests, UnsafeCreateWithDeleterZeroSize) {
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b = Blob::UnsafeCreateWithDeleter(data, 0, [&]() { mockDeleter.Call(); });
+        Blob b = Blob::UnsafeCreateWithDeleter(data, 0, [&] { mockDeleter.Call(); });
         // Check the contents.
         EXPECT_TRUE(b.Empty());
         EXPECT_EQ(b.Size(), 0u);
@@ -95,7 +95,7 @@ TEST(BlobTests, UnsafeCreateWithDeleterEmpty) {
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b = Blob::UnsafeCreateWithDeleter(nullptr, 0, [&]() { mockDeleter.Call(); });
+        Blob b = Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); });
         // Check the contents.
         EXPECT_TRUE(b.Empty());
         EXPECT_EQ(b.Size(), 0u);
@@ -150,7 +150,7 @@ TEST(BlobTests, MoveAssignOver) {
 
     // Create another blob with a mock deleter.
     testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
-    Blob b2 = Blob::UnsafeCreateWithDeleter(nullptr, 0, [&]() { mockDeleter.Call(); });
+    Blob b2 = Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); });
 
     // Move b1 into b2, replacing b2's contents, and expect the deleter to be called.
     EXPECT_CALL(mockDeleter, Call());
@@ -191,7 +191,7 @@ TEST(BlobTests, AlignTo) {
             size_t size = sizeof(data) - offset;
             testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
             Blob b =
-                Blob::UnsafeCreateWithDeleter(&data[offset], size, [&]() { mockDeleter.Call(); });
+                Blob::UnsafeCreateWithDeleter(&data[offset], size, [&] { mockDeleter.Call(); });
             bool alreadyAligned = IsPtrAligned(&data[offset], alignment);
 
             // The backing store should be deleted at the end of the scope, or because it was

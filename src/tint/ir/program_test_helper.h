@@ -41,7 +41,7 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
         SetResolveOnBuild(true);
 
         auto program = std::make_unique<Program>(std::move(*this));
-        [&]() {
+        [&] {
             diag::Formatter formatter;
             ASSERT_TRUE(program->IsValid()) << formatter.format(program->Diagnostics());
         }();

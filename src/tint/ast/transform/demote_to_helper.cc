@@ -188,7 +188,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                             auto* result_struct = sem_call->Type()->As<type::Struct>();
                             auto* atomic_ty = result_struct->Members()[0]->Type();
                             result_ty = b.ty(
-                                utils::GetOrCreate(atomic_cmpxchg_result_types, atomic_ty, [&]() {
+                                utils::GetOrCreate(atomic_cmpxchg_result_types, atomic_ty, [&] {
                                     auto name = b.Sym();
                                     b.Structure(
                                         name,

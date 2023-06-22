@@ -425,7 +425,7 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
 void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instance* instance) {
     // Get the first available preferred device type.
     std::optional<wgpu::AdapterType> preferredDeviceType;
-    [&]() {
+    [&] {
         for (wgpu::AdapterType devicePreference : mDevicePreferences) {
             for (bool compatibilityMode : {false, true}) {
                 wgpu::RequestAdapterOptions adapterOptions;

@@ -103,7 +103,7 @@ struct ExpandCompoundAssignment::State {
             //     foo.bar += rhs;
             // After:
             //     foo.bar = foo.bar + rhs;
-            new_lhs = [&]() { return ctx.Clone(lhs); };
+            new_lhs = [&] { return ctx.Clone(lhs); };
         } else if (index_accessor && is_vec(index_accessor->object)) {
             // This is the case for vector component via an array accessor. We need
             // to capture a pointer to the vector and also the index value.
@@ -115,7 +115,7 @@ struct ExpandCompoundAssignment::State {
             //     (*vec_ptr)[index] = (*vec_ptr)[index] + rhs;
             auto lhs_ptr = hoist_pointer_to(index_accessor->object);
             auto index = hoist_expr_to_let(index_accessor->index);
-            new_lhs = [&, lhs_ptr, index]() { return b.IndexAccessor(b.Deref(lhs_ptr), index); };
+            new_lhs = [&, lhs_ptr, index] { return b.IndexAccessor(b.Deref(lhs_ptr), index); };
         } else if (member_accessor && is_vec(member_accessor->object)) {
             // This is the case for vector component via a member accessor. We just
             // need to capture a pointer to the vector.
@@ -125,7 +125,7 @@ struct ExpandCompoundAssignment::State {
             //     let vec_ptr = &a[idx()];
             //     (*vec_ptr).y = (*vec_ptr).y + rhs;
             auto lhs_ptr = hoist_pointer_to(member_accessor->object);
-            new_lhs = [&, lhs_ptr]() {
+            new_lhs = [&, lhs_ptr] {
                 return b.MemberAccessor(b.Deref(lhs_ptr), ctx.Clone(member_accessor->member));
             };
         } else {
@@ -137,7 +137,7 @@ struct ExpandCompoundAssignment::State {
             //     let lhs_ptr = &a[idx()];
             //     (*lhs_ptr) = (*lhs_ptr) + rhs;
             auto lhs_ptr = hoist_pointer_to(lhs);
-            new_lhs = [&, lhs_ptr]() { return b.Deref(lhs_ptr); };
+            new_lhs = [&, lhs_ptr] { return b.Deref(lhs_ptr); };
         }
 
         // Replace the statement with a regular assignment statement.

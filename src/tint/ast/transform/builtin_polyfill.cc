@@ -285,7 +285,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Returns either u32 or vecN<u32>
-        auto U = [&]() {
+        auto U = [&] {
             if (width == 1) {
                 return b.ty.u32();
             }
@@ -343,7 +343,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Returns either u32 or vecN<u32>
-        auto U = [&]() {
+        auto U = [&] {
             if (width == 1) {
                 return b.ty.u32();
             }
@@ -460,7 +460,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Returns either u32 or vecN<u32>
-        auto U = [&]() {
+        auto U = [&] {
             if (width == 1) {
                 return b.ty.u32();
             }
@@ -532,7 +532,7 @@ struct BuiltinPolyfill::State {
         uint32_t width = WidthOf(ty);
 
         // Returns either u32 or vecN<u32>
-        auto U = [&]() {
+        auto U = [&] {
             if (width == 1) {
                 return b.ty.u32();
             }

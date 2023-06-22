@@ -56,7 +56,7 @@ class WireQueueTests : public WireTest {
 TEST_F(WireQueueTests, OnSubmittedWorkDoneSuccess) {
     wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDone, this);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Success);
         }));
     FlushClient();
@@ -69,7 +69,7 @@ TEST_F(WireQueueTests, OnSubmittedWorkDoneSuccess) {
 TEST_F(WireQueueTests, OnSubmittedWorkDoneError) {
     wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDone, this);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
         }));
     FlushClient();
@@ -83,7 +83,7 @@ TEST_F(WireQueueTests, OnSubmittedWorkDoneError) {
 TEST_F(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnect) {
     wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDone, this);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
         }));
     FlushClient();
@@ -130,7 +130,7 @@ TEST_F(WireQueueTests, OnSubmittedWorkDoneInsideCallbackBeforeDisconnect) {
     TestData testData = {this, &queue, 10};
     wgpuQueueOnSubmittedWorkDone(queue, 0u, ToMockQueueWorkDoneWithNewRequests, &testData);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, 0u, _, _))
-        .WillOnce(InvokeWithoutArgs([&]() {
+        .WillOnce(InvokeWithoutArgs([&] {
             api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
         }));
     FlushClient();

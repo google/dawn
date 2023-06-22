@@ -49,12 +49,12 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         if (gen_) {
             return *gen_;
         }
-        [&]() {
+        [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                                    << diag::Formatter().format(Diagnostics());
         }();
         program = std::make_unique<Program>(std::move(*this));
-        [&]() {
+        [&] {
             ASSERT_TRUE(program->IsValid()) << diag::Formatter().format(program->Diagnostics());
         }();
         gen_ = std::make_unique<GeneratorImpl>(program.get());
@@ -71,17 +71,17 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         if (gen_) {
             return *gen_;
         }
-        [&]() {
+        [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                                    << diag::Formatter().format(Diagnostics());
         }();
         program = std::make_unique<Program>(std::move(*this));
-        [&]() {
+        [&] {
             ASSERT_TRUE(program->IsValid()) << diag::Formatter().format(program->Diagnostics());
         }();
 
         auto result = Sanitize(program.get(), options);
-        [&]() {
+        [&] {
             ASSERT_TRUE(result.program.IsValid())
                 << diag::Formatter().format(result.program.Diagnostics());
         }();

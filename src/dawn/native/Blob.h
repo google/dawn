@@ -68,7 +68,7 @@ Blob CreateBlob(std::vector<T> vec) {
     size_t size = vec.size() * sizeof(T);
     // Move the vector into a new allocation so we can destruct it in the deleter.
     auto* wrapped_vec = new std::vector<T>(std::move(vec));
-    return Blob::UnsafeCreateWithDeleter(data, size, [wrapped_vec]() { delete wrapped_vec; });
+    return Blob::UnsafeCreateWithDeleter(data, size, [wrapped_vec] { delete wrapped_vec; });
 }
 
 }  // namespace dawn::native

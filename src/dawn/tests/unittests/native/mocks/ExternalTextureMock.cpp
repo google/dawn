@@ -21,9 +21,7 @@ using ::testing::NiceMock;
 ExternalTextureMock::ExternalTextureMock(DeviceMock* device,
                                          const ExternalTextureDescriptor* descriptor)
     : ExternalTextureBase(device, descriptor) {
-    ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-        this->ExternalTextureBase::DestroyImpl();
-    });
+    ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->ExternalTextureBase::DestroyImpl(); });
 }
 
 ExternalTextureMock::~ExternalTextureMock() = default;

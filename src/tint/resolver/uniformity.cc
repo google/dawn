@@ -644,7 +644,7 @@ class UniformityGraph {
                     }
 
                     // Add an edge from the variable exit node to its value at this point.
-                    auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
+                    auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&] {
                         auto name = NameFor(var);
                         return CreateNode({name, "_value_", info.type, "_exit"});
                     });
@@ -680,7 +680,7 @@ class UniformityGraph {
                         }
 
                         // Add an edge from the variable exit node to its value at this point.
-                        auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
+                        auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&] {
                             auto name = NameFor(var);
                             return CreateNode({name, "_value_", info.type, "_exit"});
                         });
@@ -783,7 +783,7 @@ class UniformityGraph {
 
                     // Propagate assignments to the loop exit nodes.
                     for (auto* var : current_function_->local_var_decls) {
-                        auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
+                        auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&] {
                             auto name = NameFor(var);
                             return CreateNode({name, "_value_", info.type, "_exit"});
                         });
@@ -859,7 +859,7 @@ class UniformityGraph {
 
                 // Propagate assignments to the loop exit nodes.
                 for (auto* var : current_function_->local_var_decls) {
-                    auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
+                    auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&] {
                         auto name = NameFor(var);
                         return CreateNode({name, "_value_", info.type, "_exit"});
                     });
@@ -1107,7 +1107,7 @@ class UniformityGraph {
                             }
 
                             // Add an edge from the variable exit node to its new value.
-                            auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
+                            auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&] {
                                 auto name = NameFor(var);
                                 return CreateNode({name, "_value_", info.type, "_exit"});
                             });

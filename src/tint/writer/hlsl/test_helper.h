@@ -50,12 +50,12 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         if (gen_) {
             return *gen_;
         }
-        [&]() {
+        [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                                    << diag::Formatter().format(Diagnostics());
         }();
         program = std::make_unique<Program>(std::move(*this));
-        [&]() {
+        [&] {
             ASSERT_TRUE(program->IsValid()) << diag::Formatter().format(program->Diagnostics());
         }();
         gen_ = std::make_unique<GeneratorImpl>(program.get());
@@ -73,15 +73,15 @@ class TestHelperBase : public BODY, public ProgramBuilder {
             return *gen_;
         }
         diag::Formatter formatter;
-        [&]() {
+        [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                                    << formatter.format(Diagnostics());
         }();
         program = std::make_unique<Program>(std::move(*this));
-        [&]() { ASSERT_TRUE(program->IsValid()) << formatter.format(program->Diagnostics()); }();
+        [&] { ASSERT_TRUE(program->IsValid()) << formatter.format(program->Diagnostics()); }();
 
         auto sanitized_result = Sanitize(program.get(), options);
-        [&]() {
+        [&] {
             ASSERT_TRUE(sanitized_result.program.IsValid())
                 << formatter.format(sanitized_result.program.Diagnostics());
         }();
@@ -94,7 +94,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
             /* preserve_unicode */ true);
         transform_manager.Add<tint::ast::transform::Renamer>();
         auto result = transform_manager.Run(&sanitized_result.program, transform_data, outputs);
-        [&]() { ASSERT_TRUE(result.IsValid()) << formatter.format(result.Diagnostics()); }();
+        [&] { ASSERT_TRUE(result.IsValid()) << formatter.format(result.Diagnostics()); }();
         *program = std::move(result);
         gen_ = std::make_unique<GeneratorImpl>(program.get());
         return *gen_;

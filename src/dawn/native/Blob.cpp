@@ -33,7 +33,7 @@ Blob CreateBlob(size_t size, size_t alignment) {
         uint8_t* data = new uint8_t[allocatedSize];
         uint8_t* ptr = AlignPtr(data, alignment);
         ASSERT(ptr + size <= data + allocatedSize);
-        return Blob::UnsafeCreateWithDeleter(ptr, size, [=]() { delete[] data; });
+        return Blob::UnsafeCreateWithDeleter(ptr, size, [=] { delete[] data; });
     } else {
         return Blob();
     }
