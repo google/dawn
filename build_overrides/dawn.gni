@@ -23,6 +23,10 @@ dawn_standalone = true
 # True if Dawn can access build/, testing/ and other Chrome folders.
 dawn_has_build = true
 
+# Whether we allow building DXC. This variable may be used to disable
+# building DXC in Chromium.
+dawn_build_dxc = true
+
 # Defaults for these are set again in dawn_overrides_with_defaults.gni so that
 # users of Dawn don't have to set dirs if they happen to use the same as Dawn.
 
@@ -37,6 +41,8 @@ dawn_swiftshader_dir = "//third_party/swiftshader"
 dawn_vulkan_loader_dir = "//third_party/vulkan-deps/vulkan-loader/src"
 dawn_vulkan_validation_layers_dir =
     "//third_party/vulkan-deps/vulkan-validation-layers/src"
+dawn_dxc_dir = "//third_party/dxc"
+dawn_dxheaders_dir = "//third_party/dxheaders"
 
 # Optional path to a one-liner version file. Default is empty path indicating
 # that git should be used to figure out the version.

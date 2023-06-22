@@ -25,6 +25,11 @@ declare_args() {
   ignore_elf32_limitations = false
 }
 
+# Use C++17 instead of C++20 in MSVC builds
+# TODO(crbug.com/dawn/1881): Fix upstream DXC build on MSVC with C++20 enabled,
+# then remove this flag.
+msvc_use_cxx17 = true
+
 # Detect whether we can use the hermetic XCode like in Chromium and do so if
 # possible.
 if (host_os == "mac" && use_system_xcode == "") {

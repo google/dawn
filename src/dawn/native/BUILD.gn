@@ -484,6 +484,9 @@ source_set("sources") {
   }
 
   if (dawn_enable_d3d12) {
+    if (is_win && dawn_build_dxc) {
+      deps += [ "$dawn_root/third_party/gn/dxc:dxcompiler" ]
+    }
     libs += [ "dxguid.lib" ]
     sources += [
       "d3d12/BackendD3D12.cpp",

@@ -1,0 +1,45 @@
+# Copyright 2023 The Dawn Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# See cmake/modules/HCT.cmake
+template("add_hlsl_hctgen") {
+  assert(defined(invoker.mode), "must set 'mode' in $target_name")
+  assert(defined(invoker.output), "must set 'output' in $target_name")
+
+  action(target_name) {
+    if (defined(invoker.build_dir) && invoker.build_dir) {
+      # TODO(amaiorano): See HCT.cmake
+    }
+    if (defined(invoker.code_tag) && invoker.code_tag) {
+      # TODO(amaiorano): See HCT.cmake
+    }
+
+    script = "${invoker.dawn_dxc_dir}/utils/hct/hctgen.py"
+    inputs = [
+      "${invoker.dawn_dxc_dir}/utils/hct/gen_intrin_main.txt",
+      "${invoker.dawn_dxc_dir}/utils/hct/hctdb.py",
+      "${invoker.dawn_dxc_dir}/utils/hct/hctdb_instrhelp.py",
+    ]
+    gen_output = "$target_gen_dir" + invoker.output
+    outputs = [ gen_output ]
+    args = [
+      "--force-lf",  # Always?
+      "${invoker.mode}",
+      "--output",
+      rebase_path(gen_output, root_build_dir),
+    ]
+
+    # TODO(amaiorano) Make sure both build_dir and code_tag aren't true
+  }
+}

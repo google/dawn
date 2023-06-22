@@ -1,0 +1,43 @@
+# Copyright 2023 The Dawn Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+template("generate_version_include") {
+  assert(defined(invoker.input_file), "must set 'input_file' in $target_name")
+  assert(defined(invoker.output_file), "must set 'output_file' in $target_name")
+
+  if (!defined(invoker.input_file)) {
+    # No input file, generate one
+    assert(false, "Fix gen_version.py so that it outputs to a file")
+    action(target_name) {
+      script = "${dawn_dxc_dir}/utils/version/gen_version.py"
+      outputs = [ "${target_gen_dir}/${invoker.output_file}" ]
+      args = []
+      if (defined(invoker.gen_flags)) {
+        args += invoker.gen_flags
+      }
+      args += [
+        ">",  # TODO(amaiorano): This doesn't work. Need a way to route script
+              # output to a file (modify script or create a 'shell_command'
+              # action template)
+        rebase_path(invoker.output_file, root_build_dir),
+      ]
+    }
+  } else {
+    # Input file provided, just copy it
+    copy(target_name) {
+      sources = [ invoker.input_file ]
+      outputs = [ "${target_gen_dir}/${invoker.output_file}" ]
+    }
+  }
+}

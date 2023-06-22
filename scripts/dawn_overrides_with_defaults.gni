@@ -28,6 +28,10 @@ if (!defined(dawn_has_build)) {
   dawn_has_build = true
 }
 
+if (!defined(dawn_build_dxc)) {
+  dawn_build_dxc = false
+}
+
 if (!defined(dawn_root)) {
   dawn_root = get_path_info("..", "abspath")
 }
@@ -84,6 +88,14 @@ if (!defined(dawn_vulkan_validation_layers_dir)) {
 
 if (!defined(dawn_abseil_dir)) {
   dawn_abseil_dir = "//third_party/abseil-cpp"
+}
+
+if (!defined(dawn_dxc_dir)) {
+  dawn_dxc_dir = "//third_party/dxc"
+}
+
+if (!defined(dawn_dxheaders_dir)) {
+  dawn_dxheaders_dir = "//third_party/dxheaders"
 }
 
 if (!defined(dawn_version_file)) {
