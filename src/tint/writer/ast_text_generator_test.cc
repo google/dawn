@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/text_generator.h"
+#include "src/tint/writer/ast_text_generator.h"
 
 #include "gtest/gtest.h"
 
 namespace tint::writer {
 namespace {
 
-TEST(TextGeneratorTest, UniqueIdentifier) {
+TEST(ASTTextGeneratorTest, UniqueIdentifier) {
     Program program(ProgramBuilder{});
 
-    TextGenerator gen(&program);
+    ASTTextGenerator gen(&program);
 
     ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident");
     ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_1");
 }
 
-TEST(TextGeneratorTest, UniqueIdentifier_ConflictWithExisting) {
+TEST(ASTTextGeneratorTest, UniqueIdentifier_ConflictWithExisting) {
     ProgramBuilder builder;
     builder.Symbols().Register("ident_1");
     builder.Symbols().Register("ident_2");
     Program program(std::move(builder));
 
-    TextGenerator gen(&program);
+    ASTTextGenerator gen(&program);
 
     ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident");
     ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_3");

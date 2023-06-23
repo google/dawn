@@ -254,7 +254,7 @@ SanitizedResult Sanitize(const Program* in,
 }
 
 GeneratorImpl::GeneratorImpl(const Program* program, const Version& version)
-    : TextGenerator(program), version_(version) {}
+    : ASTTextGenerator(program), version_(version) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 

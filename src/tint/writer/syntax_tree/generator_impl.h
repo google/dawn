@@ -36,12 +36,12 @@
 #include "src/tint/program.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/utils/string_stream.h"
-#include "src/tint/writer/text_generator.h"
+#include "src/tint/writer/ast_text_generator.h"
 
 namespace tint::writer::syntax_tree {
 
 /// Implementation class for AST generator
-class GeneratorImpl : public TextGenerator {
+class GeneratorImpl : public ASTTextGenerator {
   public:
     /// Constructor
     /// @param program the program

@@ -562,6 +562,8 @@ list(APPEND TINT_LIB_SRCS
   writer/append_vector.h
   writer/array_length_from_uniform_options.cc
   writer/array_length_from_uniform_options.h
+  writer/ast_text_generator.cc
+  writer/ast_text_generator.h
   writer/binding_point.h
   writer/binding_remapper_options.cc
   writer/binding_remapper_options.h
@@ -1110,10 +1112,10 @@ if(TINT_BUILD_TESTS)
     utils/unique_vector_test.cc
     utils/vector_test.cc
     writer/append_vector_test.cc
+    writer/ast_text_generator_test.cc
     writer/check_supported_extensions_test.cc
     writer/flatten_bindings_test.cc
     writer/float_to_string_test.cc
-    writer/text_generator_test.cc
   )
 
   # Noet, the source files are included here otherwise the cmd sources would not be included in the

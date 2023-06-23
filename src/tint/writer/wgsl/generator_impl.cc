@@ -42,7 +42,7 @@
 
 namespace tint::writer::wgsl {
 
-GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : ASTTextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 

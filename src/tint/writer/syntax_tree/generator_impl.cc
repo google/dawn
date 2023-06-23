@@ -41,7 +41,7 @@
 
 namespace tint::writer::syntax_tree {
 
-GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : ASTTextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 

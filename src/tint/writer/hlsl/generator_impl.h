@@ -38,8 +38,8 @@
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
+#include "src/tint/writer/ast_text_generator.h"
 #include "src/tint/writer/hlsl/generator.h"
-#include "src/tint/writer/text_generator.h"
 
 // Forward declarations
 namespace tint::sem {
@@ -74,7 +74,7 @@ struct SanitizedResult {
 SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Implementation class for HLSL generator
-class GeneratorImpl : public TextGenerator {
+class GeneratorImpl : public ASTTextGenerator {
   public:
     /// Constructor
     /// @param program the program to generate

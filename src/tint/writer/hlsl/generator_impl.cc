@@ -328,7 +328,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     return result;
 }
 
-GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : ASTTextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
