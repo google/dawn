@@ -142,9 +142,15 @@ void PlatformFunctions::LoadDXCLibraries() {
 }
 
 void PlatformFunctions::LoadDXIL(const std::string& baseWindowsSDKPath) {
-    const char* dxilDLLName = "dxil.dll";
-    const std::array<std::string, 2> kDxilDLLPaths = {
-        {dxilDLLName, baseWindowsSDKPath + dxilDLLName}};
+    constexpr char kDxilDLLName[] = "dxil.dll";
+    const std::array kDxilDLLPaths{
+#ifdef DAWN_BUILD_DXC
+        std::string{kDxilDLLName},
+#else
+        std::string{kDxilDLLName},
+        baseWindowsSDKPath + kDxilDLLName,
+#endif
+    };
 
     for (const std::string& dxilDLLPath : kDxilDLLPaths) {
         if (mDXILLib.Open(dxilDLLPath, nullptr)) {
@@ -161,11 +167,16 @@ void PlatformFunctions::LoadDXCompiler(const std::string& baseWindowsSDKPath) {
     }
 
     constexpr char kDxCompilerDLLName[] = "dxcompiler.dll";
-    const std::array<std::string, 2> dxCompilerDLLPaths = {
-        {kDxCompilerDLLName, baseWindowsSDKPath + kDxCompilerDLLName}};
+    const std::array kDxCompilerDLLPaths{
+#ifdef DAWN_BUILD_DXC
+        std::string{kDxCompilerDLLName},
+#else
+        std::string{kDxCompilerDLLName}, baseWindowsSDKPath + kDxCompilerDLLName
+#endif
+    };
 
     DynamicLib dxCompilerLib;
-    for (const std::string& dllName : dxCompilerDLLPaths) {
+    for (const std::string& dllName : kDxCompilerDLLPaths) {
         if (dxCompilerLib.Open(dllName, nullptr)) {
             break;
         }

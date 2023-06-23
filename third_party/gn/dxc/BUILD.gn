@@ -2266,3 +2266,13 @@ executable("dxc") {
     "$dawn_dxc_dir/tools/clang/tools/dxclib/dxc.cpp",
   ]
 }
+
+# Define a target to copy the DXIL signing library, dxil.dll, to the output directory
+if (is_win) {
+  import("//build/config/win/visual_studio_version.gni")
+  copy("copy_dxil_dll") {
+    sources =
+        [ "$windows_sdk_path/bin/$windows_sdk_version/$target_cpu/dxil.dll" ]
+    outputs = [ "$root_out_dir/{{source_file_part}}" ]
+  }
+}

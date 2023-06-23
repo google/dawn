@@ -458,11 +458,18 @@ void PhysicalDevice::CleanUpDebugLayerFilters() {
 }
 
 void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adapterToggles) const {
-    // Check DXC for use_dxc toggle, and default to use FXC
+    // Check for use_dxc toggle
+#ifdef DAWN_BUILD_DXC
+    // By default, use DXC is shader model >= 6.0, otherwise we use FXC
+    const bool default_use_dxc = GetDeviceInfo().shaderModel >= 60;
+    adapterToggles->Default(Toggle::UseDXC, default_use_dxc);
+#else
+    // Default to using FXC
     if (!GetBackend()->IsDXCAvailable()) {
         adapterToggles->ForceSet(Toggle::UseDXC, false);
     }
     adapterToggles->Default(Toggle::UseDXC, false);
+#endif
 }
 
 void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
@@ -605,7 +612,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
             Toggle::D3D12UseTempBufferInTextureToTextureCopyBetweenDifferentDimensions, true);
     }
 
-    // Polyfill reflect builtin for vec2<f32> on Intel device in usng FXC.
+    // Polyfill reflect builtin for vec2<f32> on Intel device if using FXC.
     // See https://crbug.com/tint/1798 for more information.
     if (gpu_info::IsIntel(vendorId) && !deviceToggles->IsEnabled(Toggle::UseDXC)) {
         deviceToggles->Default(Toggle::D3D12PolyfillReflectVec2F32, true);
