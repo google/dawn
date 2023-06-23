@@ -547,7 +547,7 @@ TEST_F(IR_ValidateTest, Var_RootBlock_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:2:11 error: var: result is a nullptr
+    EXPECT_EQ(res.Failure().str(), R"(:2:11 error: var: result is undefined
   undef = var
           ^^^
 
@@ -575,7 +575,7 @@ TEST_F(IR_ValidateTest, Var_Function_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:13 error: var: result is a nullptr
+    EXPECT_EQ(res.Failure().str(), R"(:3:13 error: var: result is undefined
     undef = var
             ^^^
 
@@ -719,6 +719,125 @@ note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
     %2:ptr<function, f32, read_write> = var, %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Instruction_OperandUsageRemoved) {
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->Block());
+    auto* v = sb.Var(ty.ptr<function, f32>());
+    sb.Return(f);
+
+    auto* result = sb.InstructionResult(ty.f32());
+    v->SetInitializer(result);
+    result->RemoveUsage({v, 0u});
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:46 error: instruction operand missing usage
+    %2:ptr<function, f32, read_write> = var, %3
+                                             ^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, f32, read_write> = var, %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Binary_LHS_Nullptr) {
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->Block());
+    sb.Add(ty.i32(), nullptr, sb.Constant(2_i));
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: binary: left operand is undefined
+    %2:i32 = add undef, 2i
+    ^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:i32 = add undef, 2i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Binary_RHS_Nullptr) {
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->Block());
+    sb.Add(ty.i32(), sb.Constant(2_i), nullptr);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: binary: right operand is undefined
+    %2:i32 = add 2i, undef
+    ^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:i32 = add 2i, undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Binary_Result_Nullptr) {
+    auto* bin = mod.instructions.Create<ir::Binary>(nullptr, ir::Binary::Kind::kAdd,
+                                                    b.Constant(3_i), b.Constant(2_i));
+
+    auto* f = b.Function("my_func", ty.void_());
+    mod.functions.Push(f);
+
+    auto sb = b.With(f->Block());
+    sb.Append(bin);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: binary: result is undefined
+    undef = add 3i, 2i
+    ^^^^^^^^^^^^^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    undef = add 3i, 2i
     ret
   }
 }

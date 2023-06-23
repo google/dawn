@@ -378,7 +378,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
         [&](If* i) { EmitIf(i); },          //
         [&](Loop* l) { EmitLoop(l); },      //
         [&](Binary* b) { EmitBinary(b); },  //
-        [&](Unary* u) { EmitUnary(u); },
+        [&](Unary* u) { EmitUnary(u); },    //
         [&](Bitcast* b) {
             EmitValueWithType(b);
             out_ << " = ";
@@ -448,7 +448,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("var", v);
             if (v->Initializer()) {
                 out_ << ", ";
-                EmitValue(v->Initializer());
+                EmitOperand(v, v->Initializer(), Var::kInitializerOperandOffset);
             }
             if (v->BindingPoint().has_value()) {
                 out_ << " ";
@@ -685,6 +685,7 @@ void Disassembler::EmitArgs(Call* call) {
 }
 
 void Disassembler::EmitBinary(Binary* b) {
+    SourceMarker sm(this);
     EmitValueWithType(b);
     out_ << " = ";
     switch (b->Kind()) {
@@ -741,10 +742,13 @@ void Disassembler::EmitBinary(Binary* b) {
     EmitValue(b->LHS());
     out_ << ", ";
     EmitValue(b->RHS());
+
+    sm.Store(b);
     EmitLine();
 }
 
 void Disassembler::EmitUnary(Unary* u) {
+    SourceMarker sm(this);
     EmitValueWithType(u);
     out_ << " = ";
     switch (u->Kind()) {
@@ -757,6 +761,8 @@ void Disassembler::EmitUnary(Unary* u) {
     }
     out_ << " ";
     EmitValue(u->Val());
+
+    sm.Store(u);
     EmitLine();
 }
 
