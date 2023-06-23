@@ -220,7 +220,7 @@ static constexpr std::array<wgpu::TextureFormat, 2> kDepthAndStencilFormats = {
     wgpu::TextureFormat::Depth32FloatStencil8,
 };
 
-bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format);
+bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format, bool isCompatibilityMode);
 
 bool IsBCTextureFormat(wgpu::TextureFormat textureFormat);
 bool IsETC2TextureFormat(wgpu::TextureFormat textureFormat);

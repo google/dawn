@@ -15,7 +15,7 @@
 #include "dawn/utils/TextureUtils.h"
 
 namespace dawn::utils {
-bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format) {
+bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format, bool isCompatibilityMode) {
     switch (format) {
         case wgpu::TextureFormat::R32Uint:
         case wgpu::TextureFormat::R32Sint:
@@ -24,9 +24,6 @@ bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::RGBA8Snorm:
         case wgpu::TextureFormat::RGBA8Uint:
         case wgpu::TextureFormat::RGBA8Sint:
-        case wgpu::TextureFormat::RG32Uint:
-        case wgpu::TextureFormat::RG32Sint:
-        case wgpu::TextureFormat::RG32Float:
         case wgpu::TextureFormat::RGBA16Uint:
         case wgpu::TextureFormat::RGBA16Sint:
         case wgpu::TextureFormat::RGBA16Float:
@@ -34,6 +31,11 @@ bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::RGBA32Sint:
         case wgpu::TextureFormat::RGBA32Float:
             return true;
+            // TODO(crbug.com/dawn/595): 32-bit RG* formats are unsupported on OpenGL ES.
+        case wgpu::TextureFormat::RG32Uint:
+        case wgpu::TextureFormat::RG32Sint:
+        case wgpu::TextureFormat::RG32Float:
+            return !isCompatibilityMode;
 
         default:
             return false;
