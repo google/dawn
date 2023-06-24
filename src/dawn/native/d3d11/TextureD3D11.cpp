@@ -400,46 +400,53 @@ MaybeError Texture::Clear(CommandRecordingContext* commandContext,
             desc.dimension = wgpu::TextureViewDimension::e3D;
             break;
     }
+    // Whether content is initialized is tracked by frontend in unit of a single layer and level, so
+    // we need to check to clear layer by layer, and level by level to make sure that lazy clears
+    // won't overwrite any initialized content.
     desc.baseMipLevel = range.baseMipLevel;
     desc.mipLevelCount = range.levelCount;
-    desc.baseArrayLayer = range.baseArrayLayer;
-    desc.arrayLayerCount = range.layerCount;
+    desc.arrayLayerCount = 1u;
     desc.aspect = wgpu::TextureAspect::All;
 
-    Ref<TextureView> view = TextureView::Create(this, &desc);
+    UINT clearFlags = 0;
+    if (GetFormat().HasDepth() && range.aspects & Aspect::Depth) {
+        clearFlags |= D3D11_CLEAR_DEPTH;
+    }
+    if (GetFormat().HasStencil() && range.aspects & Aspect::Stencil) {
+        clearFlags |= D3D11_CLEAR_STENCIL;
+    }
 
-    if (GetFormat().HasDepthOrStencil()) {
-        for (uint32_t mipLevel = view->GetBaseMipLevel();
-             mipLevel < view->GetBaseMipLevel() + view->GetLevelCount(); ++mipLevel) {
-            ComPtr<ID3D11DepthStencilView> d3d11DSV;
-            DAWN_TRY_ASSIGN(d3d11DSV,
-                            view->CreateD3D11DepthStencilView(/*depthReadOnly=*/false,
-                                                              /*stencilReadOnly=*/false, mipLevel));
-            UINT clearFlags = 0;
-            if (GetFormat().HasDepth() && range.aspects & Aspect::Depth) {
-                clearFlags |= D3D11_CLEAR_DEPTH;
+    for (uint32_t arrayLayer = range.baseArrayLayer;
+         arrayLayer < range.baseArrayLayer + range.layerCount; ++arrayLayer) {
+        desc.baseArrayLayer = arrayLayer;
+        Ref<TextureView> view = TextureView::Create(this, &desc);
+        for (uint32_t mipLevel = range.baseMipLevel;
+             mipLevel < range.baseMipLevel + range.levelCount; ++mipLevel) {
+            if (clearValue == TextureBase::ClearValue::Zero &&
+                IsSubresourceContentInitialized(
+                    SubresourceRange::SingleMipAndLayer(mipLevel, arrayLayer, range.aspects))) {
+                // Skip lazy clears if already initialized.
+                continue;
             }
-            if (GetFormat().HasStencil() && range.aspects & Aspect::Stencil) {
-                clearFlags |= D3D11_CLEAR_STENCIL;
-            }
-            // Clear all layers for each 'mipLevel'.
-            d3d11DeviceContext->ClearDepthStencilView(
-                d3d11DSV.Get(), clearFlags,
-                clearValue == TextureBase::ClearValue::Zero ? 0.0f : 1.0f,
-                clearValue == TextureBase::ClearValue::Zero ? 0u : 1u);
-        }
-    } else {
-        static constexpr std::array<float, 4> kZero = {0.0f, 0.0f, 0.0f, 0.0f};
-        static constexpr std::array<float, 4> kNonZero = {1.0f, 1.0f, 1.0f, 1.0f};
+            if (GetFormat().HasDepthOrStencil()) {
+                ComPtr<ID3D11DepthStencilView> d3d11DSV;
+                DAWN_TRY_ASSIGN(d3d11DSV, view->CreateD3D11DepthStencilView(
+                                              /*depthReadOnly=*/false,
+                                              /*stencilReadOnly=*/false, mipLevel));
+                d3d11DeviceContext->ClearDepthStencilView(
+                    d3d11DSV.Get(), clearFlags,
+                    clearValue == TextureBase::ClearValue::Zero ? 0.0f : 1.0f,
+                    clearValue == TextureBase::ClearValue::Zero ? 0u : 1u);
+            } else {
+                static constexpr std::array<float, 4> kZero = {0.0f, 0.0f, 0.0f, 0.0f};
+                static constexpr std::array<float, 4> kNonZero = {1.0f, 1.0f, 1.0f, 1.0f};
 
-        for (uint32_t mipLevel = view->GetBaseMipLevel();
-             mipLevel < view->GetBaseMipLevel() + view->GetLevelCount(); ++mipLevel) {
-            ComPtr<ID3D11RenderTargetView> d3d11RTV;
-            DAWN_TRY_ASSIGN(d3d11RTV, view->CreateD3D11RenderTargetView(mipLevel));
-            // Clear all layers for each 'mipLevel'.
-            d3d11DeviceContext->ClearRenderTargetView(
-                d3d11RTV.Get(),
-                clearValue == TextureBase::ClearValue::Zero ? kZero.data() : kNonZero.data());
+                ComPtr<ID3D11RenderTargetView> d3d11RTV;
+                DAWN_TRY_ASSIGN(d3d11RTV, view->CreateD3D11RenderTargetView(mipLevel));
+                d3d11DeviceContext->ClearRenderTargetView(
+                    d3d11RTV.Get(),
+                    clearValue == TextureBase::ClearValue::Zero ? kZero.data() : kNonZero.data());
+            }
         }
     }
 
