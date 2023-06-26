@@ -18,6 +18,7 @@
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/type/array.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -156,6 +157,18 @@ void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
         [&](const type::Matrix* mat) {
             EmitType(out, mat->type());
             out << mat->columns() << "x" << mat->rows();
+        },
+        [&](const type::Atomic* atomic) {
+            if (atomic->Type()->Is<type::I32>()) {
+                out << "atomic_int";
+                return;
+            }
+            if (TINT_LIKELY(atomic->Type()->Is<type::U32>())) {
+                out << "atomic_uint";
+                return;
+            }
+            TINT_ICE(Writer, diagnostics_)
+                << "unhandled atomic type " << atomic->Type()->FriendlyName();
         },
         [&](Default) { UNHANDLED_CASE(ty); });
 }

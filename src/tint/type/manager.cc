@@ -72,6 +72,10 @@ const type::AbstractInt* Manager::AInt() {
     return Get<type::AbstractInt>();
 }
 
+const type::Atomic* Manager::atomic(const type::Type* inner) {
+    return Get<type::Atomic>(inner);
+}
+
 const type::Vector* Manager::packed_vec(const type::Type* inner, uint32_t size) {
     return Get<type::Vector>(inner, size, true);
 }

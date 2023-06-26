@@ -22,6 +22,7 @@
 #include "src/tint/builtin/fluent_types.h"
 #include "src/tint/builtin/number.h"
 #include "src/tint/symbol.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/unique_node.h"
@@ -156,6 +157,17 @@ class Manager final {
 
     /// @returns a abstract-int type
     const type::AbstractInt* AInt();
+
+    /// @param inner the inner type
+    /// @returns an atomic type with the element type @p inner
+    const type::Atomic* atomic(const type::Type* inner);
+
+    /// @tparam T the element type
+    /// @returns the atomic type
+    template <typename T>
+    const type::Atomic* atomic() {
+        return atomic(Get<T>());
+    }
 
     /// @param inner the inner type
     /// @param size the vector size
