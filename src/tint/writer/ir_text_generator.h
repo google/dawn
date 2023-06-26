@@ -30,6 +30,11 @@ class IRTextGenerator : public TextGenerator {
     explicit IRTextGenerator(ir::Module* mod);
     ~IRTextGenerator() override;
 
+    /// @return a new, unique identifier with the given prefix.
+    /// @param prefix optional prefix to apply to the generated identifier. If
+    /// empty "tint_symbol" will be used.
+    std::string UniqueIdentifier(const std::string& prefix = "");
+
     /// @returns the generated shader string
     std::string Result() const override {
         utils::StringStream ss;

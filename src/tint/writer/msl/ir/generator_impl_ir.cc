@@ -17,6 +17,7 @@
 #include "src/tint/ir/validate.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/type/array.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
@@ -90,6 +91,33 @@ void GeneratorImplIr::EmitFunction(ir::Function* func) {
     Line() << "}";
 }
 
+const std::string& GeneratorImplIr::ArrayTemplateName() {
+    if (!array_template_name_.empty()) {
+        return array_template_name_;
+    }
+
+    array_template_name_ = UniqueIdentifier("tint_array");
+
+    TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+    Line() << "template<typename T, size_t N>";
+    Line() << "struct " << array_template_name_ << " {";
+
+    {
+        ScopedIndent si(current_buffer_);
+        Line() << "const constant T& operator[](size_t i) const constant { return elements[i]; }";
+        for (auto* space : {"device", "thread", "threadgroup"}) {
+            Line() << space << " T& operator[](size_t i) " << space << " { return elements[i]; }";
+            Line() << "const " << space << " T& operator[](size_t i) const " << space
+                   << " { return elements[i]; }";
+        }
+        Line() << "T elements[N];";
+    }
+    Line() << "};";
+    Line();
+
+    return array_template_name_;
+}
+
 void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
     tint::Switch(
         ty,                                         //
@@ -99,6 +127,23 @@ void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
         [&](const type::F16*) { out << "half"; },   //
         [&](const type::I32*) { out << "int"; },    //
         [&](const type::U32*) { out << "uint"; },   //
+        [&](const type::Array* arr) {
+            out << ArrayTemplateName() << "<";
+            EmitType(out, arr->ElemType());
+            out << ", ";
+            if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+                out << "1";
+            } else {
+                auto count = arr->ConstantCount();
+                if (!count) {
+                    diagnostics_.add_error(diag::System::Writer,
+                                           type::Array::kErrExpectedConstantCount);
+                    return;
+                }
+                out << count.value();
+            }
+            out << ">";
+        },
         [&](Default) { UNHANDLED_CASE(ty); });
 }
 

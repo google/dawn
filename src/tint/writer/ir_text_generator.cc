@@ -20,4 +20,8 @@ IRTextGenerator::IRTextGenerator(ir::Module* mod) : ir_(mod) {}
 
 IRTextGenerator::~IRTextGenerator() = default;
 
+std::string IRTextGenerator::UniqueIdentifier(const std::string& prefix) {
+    return ir_->symbols.New(prefix).Name();
+}
+
 }  // namespace tint::writer

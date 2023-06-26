@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_WRITER_MSL_IR_GENERATOR_IMPL_IR_H_
 #define SRC_TINT_WRITER_MSL_IR_GENERATOR_IMPL_IR_H_
 
+#include <string>
+
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/utils/string_stream.h"
@@ -41,6 +43,13 @@ class GeneratorImplIr : public IRTextGenerator {
     /// @param out the stream to emit too
     /// @param ty the type to emit
     void EmitType(utils::StringStream& out, const type::Type* ty);
+
+    /// @returns the name of the templated `tint_array` helper type, generating it if needed
+    const std::string& ArrayTemplateName();
+
+    /// Unique name of the tint_array<T, N> template.
+    /// Non-empty only if the template has been generated.
+    std::string array_template_name_;
 };
 
 }  // namespace tint::writer::msl

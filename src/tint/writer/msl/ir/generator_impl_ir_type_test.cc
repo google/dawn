@@ -14,6 +14,7 @@
 
 #include "gmock/gmock.h"
 
+#include "src/tint/type/array.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/msl/ir/test_helper_ir.h"
 
@@ -76,66 +77,82 @@ using namespace tint::number_suffixes;        // NOLINT
 // DECLARE_TYPE(half4x3, 32, 8);
 // DECLARE_TYPE(half4x4, 32, 8);
 // using uint = unsigned int;
-//
-// using MslGeneratorImplTest = TestHelper;
-//
-// TEST_F(MslGeneratorImplTest, EmitType_Array) {
-//     auto arr = ty.array<bool, 4>();
-//     ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "ary")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "tint_array<bool, 4>");
-// }
-//
-// TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
-//     auto a = ty.array<bool, 4>();
-//     auto b = ty.array(a, 5_u);
-//     ast::Type type = GlobalVar("G", b, builtin::AddressSpace::kPrivate)->type;
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "ary")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "tint_array<tint_array<bool, 4>, 5>");
-// }
-//
-// TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
-//     auto a = ty.array<bool, 4>();
-//     auto b = ty.array(a, 5_u);
-//     auto c = ty.array(b, 6_u);
-//     ast::Type type = GlobalVar("G", c, builtin::AddressSpace::kPrivate)->type;
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "ary")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "tint_array<tint_array<tint_array<bool, 4>, 5>, 6>");
-// }
-//
-// TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
-//     auto arr = ty.array<bool, 4>();
-//     ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "tint_array<bool, 4>");
-// }
-//
-// TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
-//     auto arr = ty.array<bool, 1>();
-//     ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "ary")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "tint_array<bool, 1>");
-// }
+
+TEST_F(MslGeneratorImplIrTest, EmitType_Array) {
+    generator_.EmitType(generator_.Line(), ty.array<bool, 4>());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+tint_array<bool, 4>)");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_ArrayOfArray) {
+    generator_.EmitType(generator_.Line(), ty.array(ty.array<bool, 4>(), 5));
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+tint_array<tint_array<bool, 4>, 5>)");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_ArrayOfArrayOfArray) {
+    generator_.EmitType(generator_.Line(), ty.array(ty.array(ty.array<bool, 4>(), 5), 6));
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+tint_array<tint_array<tint_array<bool, 4>, 5>, 6>)");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_RuntimeArray) {
+    generator_.EmitType(generator_.Line(), ty.array<bool, 0>());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+tint_array<bool, 1>)");
+}
 
 TEST_F(MslGeneratorImplIrTest, EmitType_Bool) {
     generator_.EmitType(generator_.Line(), ty.bool_());
@@ -582,9 +599,11 @@ TEST_F(MslGeneratorImplIrTest, EmitType_I32) {
 // TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 //     auto* s = Structure("S", utils::Vector{
 //                                  // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
-//                                  Member("tint_pad_2", ty.i32(), utils::Vector{MemberSize(32_a)}),
-//                                  Member("tint_pad_20", ty.f32(),
-//                                         utils::Vector{MemberAlign(128_i), MemberSize(128_u)}),
+//                                  Member("tint_pad_2", ty.i32(),
+//                                  utils::Vector{MemberSize(32_a)}), Member("tint_pad_20",
+//                                  ty.f32(),
+//                                         utils::Vector{MemberAlign(128_i),
+//                                         MemberSize(128_u)}),
 //                                  Member("tint_pad_33", ty.vec2<f32>()),
 //                                  Member("tint_pad_1", ty.u32()),
 //                                  Member("tint_pad_3", ty.vec3<f32>()),
@@ -759,8 +778,8 @@ TEST_F(MslGeneratorImplIrTest, EmitType_Void) {
 //         MslDepthTextureData{type::TextureDimension::k2d, "depth2d<float, access::sample>"},
 //         MslDepthTextureData{type::TextureDimension::k2dArray,
 //                             "depth2d_array<float, access::sample>"},
-//         MslDepthTextureData{type::TextureDimension::kCube, "depthcube<float, access::sample>"},
-//         MslDepthTextureData{type::TextureDimension::kCubeArray,
+//         MslDepthTextureData{type::TextureDimension::kCube, "depthcube<float,
+//         access::sample>"}, MslDepthTextureData{type::TextureDimension::kCubeArray,
 //                             "depthcube_array<float, access::sample>"}));
 //
 // using MslDepthMultisampledTexturesTest = TestHelper;
@@ -834,7 +853,8 @@ TEST_F(MslGeneratorImplIrTest, EmitType_Void) {
 //     auto params = GetParam();
 //
 //     auto s =
-//         ty.storage_texture(params.dim, builtin::TexelFormat::kR32Float, builtin::Access::kWrite);
+//         ty.storage_texture(params.dim, builtin::TexelFormat::kR32Float,
+//         builtin::Access::kWrite);
 //     ast::Type type = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
 //
 //     GeneratorImpl& gen = Build();
@@ -847,11 +867,13 @@ TEST_F(MslGeneratorImplIrTest, EmitType_Void) {
 //     MslGeneratorImplTest,
 //     MslStorageTexturesTest,
 //     testing::Values(
-//         MslStorageTextureData{type::TextureDimension::k1d, "texture1d<float, access::write>"},
-//         MslStorageTextureData{type::TextureDimension::k2d, "texture2d<float, access::write>"},
+//         MslStorageTextureData{type::TextureDimension::k1d, "texture1d<float,
+//         access::write>"}, MslStorageTextureData{type::TextureDimension::k2d,
+//         "texture2d<float, access::write>"},
 //         MslStorageTextureData{type::TextureDimension::k2dArray,
 //                               "texture2d_array<float, access::write>"},
-//         MslStorageTextureData{type::TextureDimension::k3d, "texture3d<float, access::write>"}));
+//         MslStorageTextureData{type::TextureDimension::k3d, "texture3d<float,
+//         access::write>"}));
 
 }  // namespace
 }  // namespace tint::writer::msl
