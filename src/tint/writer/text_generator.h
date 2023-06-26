@@ -85,22 +85,6 @@ class TextGenerator {
         std::vector<Line> lines;
     };
 
-    /// Constructor
-    TextGenerator();
-    virtual ~TextGenerator();
-
-    /// Increment the emitter indent level
-    void increment_indent() { current_buffer_->IncrementIndent(); }
-    /// Decrement the emitter indent level
-    void decrement_indent() { current_buffer_->DecrementIndent(); }
-
-    /// @returns the result data
-    virtual std::string result() const { return main_buffer_.String(); }
-
-    /// @returns the list of diagnostics raised by the generator.
-    const diag::List& Diagnostics() const { return diagnostics_; }
-
-  protected:
     /// LineWriter is a helper that acts as a string buffer, who's content is
     /// emitted to the TextBuffer as a single line on destruction.
     struct LineWriter {
@@ -134,6 +118,26 @@ class TextGenerator {
         TextBuffer* buffer;
     };
 
+    /// Constructor
+    TextGenerator();
+    virtual ~TextGenerator();
+
+    /// Increment the emitter indent level
+    void increment_indent() { current_buffer_->IncrementIndent(); }
+    /// Decrement the emitter indent level
+    void decrement_indent() { current_buffer_->DecrementIndent(); }
+
+    /// @returns a new LineWriter, used for buffering and writing a line to
+    /// the end of #current_buffer_.
+    LineWriter line() { return LineWriter(current_buffer_); }
+
+    /// @returns the result data
+    virtual std::string result() const { return main_buffer_.String(); }
+
+    /// @returns the list of diagnostics raised by the generator.
+    const diag::List& Diagnostics() const { return diagnostics_; }
+
+  protected:
     /// Helper for writing a '(' on construction and a ')' destruction.
     struct ScopedParen {
         /// Constructor
@@ -168,10 +172,6 @@ class TextGenerator {
         ScopedIndent& operator=(const ScopedIndent&) = delete;
         TextBuffer* buffer_;
     };
-
-    /// @returns a new LineWriter, used for buffering and writing a line to
-    /// the end of #current_buffer_.
-    LineWriter line() { return LineWriter(current_buffer_); }
 
     /// @param buffer the TextBuffer to write the line to
     /// @returns a new LineWriter, used for buffering and writing a line to

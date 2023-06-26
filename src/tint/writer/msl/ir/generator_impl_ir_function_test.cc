@@ -22,8 +22,9 @@ TEST_F(MslGeneratorImplIrTest, Function_Empty) {
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(IRIsValid()) << Error();
-
     generator_.EmitFunction(func);
+
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(generator_.result(), R"(
 void foo() {
 }

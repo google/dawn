@@ -17,6 +17,7 @@
 
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/ir_text_generator.h"
 
 namespace tint::writer::msl {
@@ -35,6 +36,11 @@ class GeneratorImplIr : public IRTextGenerator {
     /// Emit the function
     /// @param func the function to emit
     void EmitFunction(ir::Function* func);
+
+    /// Emit a type
+    /// @param out the stream to emit too
+    /// @param ty the type to emit
+    void EmitType(utils::StringStream& out, const type::Type* ty);
 };
 
 }  // namespace tint::writer::msl

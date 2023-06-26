@@ -15,7 +15,14 @@
 #include "src/tint/writer/msl/ir/generator_impl_ir.h"
 
 #include "src/tint/ir/validate.h"
+#include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
+#include "src/tint/type/u32.h"
+#include "src/tint/type/void.h"
 #include "src/tint/utils/scoped_assignment.h"
 
 namespace tint::writer::msl {
@@ -30,6 +37,11 @@ void Sanitize(ir::Module* module) {
 }
 
 }  // namespace
+
+// Helper for calling TINT_UNIMPLEMENTED() from a Switch(object_ptr) default case.
+#define UNHANDLED_CASE(object_ptr)           \
+    TINT_UNIMPLEMENTED(Writer, diagnostics_) \
+        << "unhandled case in Switch(): " << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
 
 GeneratorImplIr::GeneratorImplIr(ir::Module* module) : IRTextGenerator(module) {}
 
@@ -70,8 +82,24 @@ bool GeneratorImplIr::Generate() {
 }
 
 void GeneratorImplIr::EmitFunction(ir::Function* func) {
-    line() << "void " << ir_->NameOf(func).Name() << "() {";
+    {
+        auto out = line();
+        EmitType(out, func->ReturnType());
+        out << " " << ir_->NameOf(func).Name() << "() {";
+    }
     line() << "}";
+}
+
+void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
+    tint::Switch(
+        ty,                                         //
+        [&](const type::Bool*) { out << "bool"; },  //
+        [&](const type::Void*) { out << "void"; },  //
+        [&](const type::F32*) { out << "float"; },  //
+        [&](const type::F16*) { out << "half"; },   //
+        [&](const type::I32*) { out << "int"; },    //
+        [&](const type::U32*) { out << "uint"; },   //
+        [&](Default) { UNHANDLED_CASE(ty); });
 }
 
 }  // namespace tint::writer::msl
