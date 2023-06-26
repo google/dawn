@@ -31,7 +31,7 @@ class ASTTextGenerator : public TextGenerator {
     /// Constructor
     /// @param program the program used by the generator
     explicit ASTTextGenerator(const Program* program);
-    ~ASTTextGenerator();
+    ~ASTTextGenerator() override;
 
     /// @return a new, unique identifier with the given prefix.
     /// @param prefix optional prefix to apply to the generated identifier. If

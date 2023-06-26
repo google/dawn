@@ -1020,6 +1020,15 @@ libtint_source_set("libtint_writer_src") {
     ":libtint_type_src",
     ":libtint_utils_src",
   ]
+
+  if (tint_build_ir) {
+    sources += [
+      "writer/ir_text_generator.cc",
+      "writer/ir_text_generator.h",
+    ]
+
+    deps += [ ":libtint_ir_src" ]
+  }
 }
 
 libtint_source_set("libtint_spv_writer_src") {
@@ -1136,6 +1145,18 @@ libtint_source_set("libtint_msl_writer_src") {
     ":libtint_utils_src",
     ":libtint_writer_src",
   ]
+
+  if (tint_build_ir) {
+    sources += [
+      "writer/msl/ir/generator_impl_ir.cc",
+      "writer/msl/ir/generator_impl_ir.h",
+    ]
+    deps += [
+      ":libtint_ir_builder_src",
+      ":libtint_ir_src",
+      ":libtint_ir_transform_src",
+    ]
+  }
 }
 
 libtint_source_set("libtint_hlsl_writer_src") {
@@ -2191,6 +2212,14 @@ if (tint_build_unittests) {
       ":libtint_utils_src",
       ":tint_unittests_ast_src",
     ]
+
+    if (tint_build_ir) {
+      sources += [
+        "writer/msl/ir/generator_impl_ir_function_test.cc",
+        "writer/msl/ir/test_helper_ir.h",
+      ]
+      deps += [ ":libtint_ir_src" ]
+    }
   }
 
   tint_unittests_source_set("tint_unittests_hlsl_writer_src") {
@@ -2374,6 +2403,7 @@ if (tint_build_unittests) {
       ]
 
       deps = [
+        ":libtint_builtins_src",
         ":libtint_ir_builder_src",
         ":libtint_ir_src",
       ]

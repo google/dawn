@@ -79,7 +79,7 @@ class GeneratorImpl : public ASTTextGenerator {
     /// Constructor
     /// @param program the program to generate
     explicit GeneratorImpl(const Program* program);
-    ~GeneratorImpl();
+    ~GeneratorImpl() override;
 
     /// @returns true on successful generation; false otherwise
     bool Generate();

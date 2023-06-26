@@ -42,7 +42,6 @@
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/swizzle.h"
-#include "src/tint/ir/transform/block_decorated_structs.h"
 #include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"

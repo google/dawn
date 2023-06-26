@@ -87,7 +87,7 @@ class TextGenerator {
 
     /// Constructor
     TextGenerator();
-    ~TextGenerator();
+    virtual ~TextGenerator();
 
     /// Increment the emitter indent level
     void increment_indent() { current_buffer_->IncrementIndent(); }
@@ -95,7 +95,7 @@ class TextGenerator {
     void decrement_indent() { current_buffer_->DecrementIndent(); }
 
     /// @returns the result data
-    std::string result() const { return main_buffer_.String(); }
+    virtual std::string result() const { return main_buffer_.String(); }
 
     /// @returns the list of diagnostics raised by the generator.
     const diag::List& Diagnostics() const { return diagnostics_; }
@@ -183,7 +183,6 @@ class TextGenerator {
     /// The buffer the TextGenerator is currently appending lines to
     TextBuffer* current_buffer_ = &main_buffer_;
 
-  private:
     /// The primary text buffer that the generator will emit
     TextBuffer main_buffer_;
 };

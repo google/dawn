@@ -46,7 +46,7 @@ class GeneratorImpl : public ASTTextGenerator {
     /// Constructor
     /// @param program the program
     explicit GeneratorImpl(const Program* program);
-    ~GeneratorImpl();
+    ~GeneratorImpl() override;
 
     /// Generates the result data
     void Generate();

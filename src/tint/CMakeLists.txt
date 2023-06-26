@@ -575,6 +575,8 @@ list(APPEND TINT_LIB_SRCS
   writer/flatten_bindings.h
   writer/float_to_string.cc
   writer/float_to_string.h
+  writer/ir_text_generator.cc
+  writer/ir_text_generator.h
   writer/text_generator.cc
   writer/text_generator.h
   writer/text.cc
@@ -693,6 +695,13 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl.cc
     writer/msl/generator_impl.h
   )
+
+  if(${TINT_BUILD_IR})
+    list(APPEND TINT_LIB_SRCS
+      writer/msl/ir/generator_impl_ir.cc
+      writer/msl/ir/generator_impl_ir.h
+    )
+  endif()
 endif()
 
 if(${TINT_BUILD_GLSL_WRITER})
@@ -1442,6 +1451,13 @@ if(TINT_BUILD_TESTS)
       writer/msl/generator_impl_variable_decl_statement_test.cc
       writer/msl/test_helper.h
     )
+
+    if(${TINT_BUILD_IR})
+      list(APPEND TINT_TEST_SRCS
+        writer/msl/ir/generator_impl_ir_function_test.cc
+        writer/msl/ir/test_helper_ir.h
+      )
+    endif()
   endif()
 
   if (${TINT_BUILD_GLSL_WRITER})

@@ -81,7 +81,7 @@ class GeneratorImpl : public ASTTextGenerator {
     /// @param program the program to generate
     /// @param version the GLSL version to use
     GeneratorImpl(const Program* program, const Version& version);
-    ~GeneratorImpl();
+    ~GeneratorImpl() override;
 
     /// Generates the GLSL shader
     void Generate();
