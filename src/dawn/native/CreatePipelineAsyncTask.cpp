@@ -49,8 +49,8 @@ void CreateComputePipelineAsyncTask::Run() {
 
     MaybeError maybeError = mComputePipeline->Initialize();
     if (maybeError.IsError()) {
-        device->AddComputePipelineAsyncCallbackTask(maybeError.AcquireError(), mCallback,
-                                                    mUserdata);
+        device->AddComputePipelineAsyncCallbackTask(
+            maybeError.AcquireError(), mComputePipeline->GetLabel().c_str(), mCallback, mUserdata);
     } else {
         device->AddComputePipelineAsyncCallbackTask(mComputePipeline, mCallback, mUserdata);
     }
@@ -99,7 +99,8 @@ void CreateRenderPipelineAsyncTask::Run() {
 
     MaybeError maybeError = mRenderPipeline->Initialize();
     if (maybeError.IsError()) {
-        device->AddRenderPipelineAsyncCallbackTask(maybeError.AcquireError(), mCallback, mUserdata);
+        device->AddRenderPipelineAsyncCallbackTask(
+            maybeError.AcquireError(), mRenderPipeline->GetLabel().c_str(), mCallback, mUserdata);
     } else {
         device->AddRenderPipelineAsyncCallbackTask(mRenderPipeline, mCallback, mUserdata);
     }

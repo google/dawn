@@ -403,10 +403,23 @@ class DeviceBase : public RefCountedWithExternalCount {
     CallbackTaskManager* GetCallbackTaskManager() const;
     dawn::platform::WorkerTaskPool* GetWorkerTaskPool() const;
 
-    void AddComputePipelineAsyncCallbackTask(ResultOrError<Ref<ComputePipelineBase>> result,
+    // Enqueue a successfully-create async pipeline creation callback.
+    void AddComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
                                              WGPUCreateComputePipelineAsyncCallback callback,
                                              void* userdata);
-    void AddRenderPipelineAsyncCallbackTask(ResultOrError<Ref<RenderPipelineBase>> result,
+    void AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
+                                            WGPUCreateRenderPipelineAsyncCallback callback,
+                                            void* userdata);
+    // Enqueue a failed async pipeline creation callback.
+    // If the device is lost, then further errors should not be reported to
+    // the application. Instead of an error, a successful callback is enqueued, using
+    // an error pipeline created with `label`.
+    void AddComputePipelineAsyncCallbackTask(std::unique_ptr<ErrorData> error,
+                                             const char* label,
+                                             WGPUCreateComputePipelineAsyncCallback callback,
+                                             void* userdata);
+    void AddRenderPipelineAsyncCallbackTask(std::unique_ptr<ErrorData> error,
+                                            const char* label,
                                             WGPUCreateRenderPipelineAsyncCallback callback,
                                             void* userdata);
 
