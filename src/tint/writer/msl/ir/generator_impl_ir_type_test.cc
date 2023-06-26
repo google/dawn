@@ -15,6 +15,7 @@
 #include "gmock/gmock.h"
 
 #include "src/tint/type/array.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/msl/ir/test_helper_ir.h"
 
@@ -178,30 +179,43 @@ TEST_F(MslGeneratorImplIrTest, EmitType_I32) {
     EXPECT_EQ(utils::TrimSpace(generator_.Result()), "int");
 }
 
-// TEST_F(MslGeneratorImplTest, EmitType_Matrix_F32) {
-//     auto* f32 = create<type::F32>();
-//     auto* vec3 = create<type::Vector>(f32, 3u);
-//     auto* mat2x3 = create<type::Matrix>(vec3, 2u);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, mat2x3, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "float2x3");
-// }
-//
-// TEST_F(MslGeneratorImplTest, EmitType_Matrix_F16) {
-//     auto* f16 = create<type::F16>();
-//     auto* vec3 = create<type::Vector>(f16, 3u);
-//     auto* mat2x3 = create<type::Matrix>(vec3, 2u);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, mat2x3, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "half2x3");
-// }
-//
+TEST_F(MslGeneratorImplIrTest, EmitType_Matrix_F32) {
+    generator_.EmitType(generator_.Line(), ty.mat2x3<f32>());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "float2x3");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_Matrix_F16) {
+    generator_.EmitType(generator_.Line(), ty.mat2x3<f16>());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "half2x3");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_U32) {
+    generator_.EmitType(generator_.Line(), ty.u32());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "uint");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_Vector) {
+    generator_.EmitType(generator_.Line(), ty.vec3<f32>());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "float3");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_VectorPacked) {
+    generator_.EmitType(generator_.Line(), ty.packed_vec(ty.f32(), 3));
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "packed_float3");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_Void) {
+    generator_.EmitType(generator_.Line(), ty.void_());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "void");
+}
+
 // TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
 //     auto* f32 = create<type::F32>();
 //     auto* p =
@@ -704,30 +718,6 @@ TEST_F(MslGeneratorImplIrTest, EmitType_I32) {
 // };
 // )");
 // }
-
-TEST_F(MslGeneratorImplIrTest, EmitType_U32) {
-    generator_.EmitType(generator_.Line(), ty.u32());
-    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "uint");
-}
-
-// TEST_F(MslGeneratorImplTest, EmitType_Vector) {
-//     auto* f32 = create<type::F32>();
-//     auto* vec3 = create<type::Vector>(f32, 3u);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, vec3, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "float3");
-// }
-
-TEST_F(MslGeneratorImplIrTest, EmitType_Void) {
-    generator_.EmitType(generator_.Line(), ty.void_());
-    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "void");
-}
 
 // TEST_F(MslGeneratorImplTest, EmitType_Sampler) {
 //     auto* sampler = create<type::Sampler>(type::SamplerKind::kSampler);

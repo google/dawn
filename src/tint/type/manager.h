@@ -160,6 +160,11 @@ class Manager final {
     /// @param inner the inner type
     /// @param size the vector size
     /// @returns the vector type
+    const type::Vector* packed_vec(const type::Type* inner, uint32_t size);
+
+    /// @param inner the inner type
+    /// @param size the vector size
+    /// @returns the vector type
     const type::Vector* vec(const type::Type* inner, uint32_t size);
 
     /// @param inner the inner type

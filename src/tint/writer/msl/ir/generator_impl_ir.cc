@@ -22,7 +22,9 @@
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/type/u32.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
 #include "src/tint/utils/scoped_assignment.h"
 
@@ -143,6 +145,17 @@ void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
                 out << count.value();
             }
             out << ">";
+        },
+        [&](const type::Vector* vec) {
+            if (vec->Packed()) {
+                out << "packed_";
+            }
+            EmitType(out, vec->type());
+            out << vec->Width();
+        },
+        [&](const type::Matrix* mat) {
+            EmitType(out, mat->type());
+            out << mat->columns() << "x" << mat->rows();
         },
         [&](Default) { UNHANDLED_CASE(ty); });
 }
