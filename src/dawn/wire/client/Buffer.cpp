@@ -34,7 +34,7 @@ WGPUBuffer CreateErrorBufferOOMAtClient(Device* device, const WGPUBufferDescript
     errorInfo.chain.sType = WGPUSType_DawnBufferDescriptorErrorInfoFromWireClient;
     errorInfo.outOfMemory = true;
     errorBufferDescriptor.nextInChain = &errorInfo.chain;
-    return device->CreateErrorBuffer(&errorBufferDescriptor);
+    return GetProcs().deviceCreateErrorBuffer(ToAPI(device), &errorBufferDescriptor);
 }
 }  // anonymous namespace
 
@@ -87,9 +87,9 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     }
 
     // Create the buffer and send the creation command.
-    // This must happen after any potential device->CreateErrorBuffer()
+    // This must happen after any potential error buffer creation
     // as server expects allocating ids to be monotonically increasing
-    Buffer* buffer = wireClient->Make<Buffer>(device, descriptor);
+    Buffer* buffer = wireClient->Make<Buffer>(descriptor);
     buffer->mDestructWriteHandleOnUnmap = false;
 
     if (descriptor->mappedAtCreation) {
@@ -135,28 +135,10 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     return ToAPI(buffer);
 }
 
-// static
-WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descriptor) {
-    Client* client = device->GetClient();
-    Buffer* buffer = client->Make<Buffer>(device, descriptor);
-
-    DeviceCreateErrorBufferCmd cmd;
-    cmd.self = ToAPI(device);
-    cmd.selfId = device->GetWireId();
-    cmd.descriptor = descriptor;
-    cmd.result = buffer->GetWireHandle();
-    client->SerializeCommand(cmd);
-
-    return ToAPI(buffer);
-}
-
-Buffer::Buffer(const ObjectBaseParams& params,
-               Device* device,
-               const WGPUBufferDescriptor* descriptor)
+Buffer::Buffer(const ObjectBaseParams& params, const WGPUBufferDescriptor* descriptor)
     : ObjectBase(params),
       mSize(descriptor->size),
-      mUsage(static_cast<WGPUBufferUsage>(descriptor->usage)),
-      mDeviceIsAlive(device->GetAliveWeakPtr()) {}
+      mUsage(static_cast<WGPUBufferUsage>(descriptor->usage)) {}
 
 Buffer::~Buffer() {
     FreeMappedData();

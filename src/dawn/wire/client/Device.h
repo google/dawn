@@ -41,17 +41,12 @@ class Device final : public ObjectBase {
     void InjectError(WGPUErrorType type, const char* message);
     void PopErrorScope(WGPUErrorCallback callback, void* userdata);
     WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
-    WGPUBuffer CreateErrorBuffer(const WGPUBufferDescriptor* descriptor);
     void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
                                     WGPUCreateComputePipelineAsyncCallback callback,
                                     void* userdata);
     void CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
                                    WGPUCreateRenderPipelineAsyncCallback callback,
                                    void* userdata);
-    WGPUQuerySet CreateQuerySet(const WGPUQuerySetDescriptor* descriptor);
-    WGPUSwapChain CreateSwapChain(WGPUSurface surface, const WGPUSwapChainDescriptor* descriptor);
-    WGPUTexture CreateTexture(const WGPUTextureDescriptor* descriptor);
-    WGPUTexture CreateErrorTexture(const WGPUTextureDescriptor* descriptor);
 
     void HandleError(WGPUErrorType errorType, const char* message);
     void HandleLogging(WGPULoggingType loggingType, const char* message);

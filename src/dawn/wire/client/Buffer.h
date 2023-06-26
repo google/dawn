@@ -28,9 +28,8 @@ class Device;
 class Buffer final : public ObjectBase {
   public:
     static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
-    static WGPUBuffer CreateError(Device* device, const WGPUBufferDescriptor* descriptor);
 
-    Buffer(const ObjectBaseParams& params, Device* device, const WGPUBufferDescriptor* descriptor);
+    Buffer(const ObjectBaseParams& params, const WGPUBufferDescriptor* descriptor);
     ~Buffer() override;
 
     bool OnMapAsyncCallback(uint64_t requestSerial,
@@ -98,8 +97,6 @@ class Buffer final : public ObjectBase {
     void* mMappedData = nullptr;
     size_t mMapOffset = 0;
     size_t mMapSize = 0;
-
-    std::weak_ptr<bool> mDeviceIsAlive;
 };
 
 }  // namespace dawn::wire::client

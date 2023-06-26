@@ -20,24 +20,6 @@
 
 namespace dawn::wire::client {
 
-// static
-WGPUSwapChain SwapChain::Create(Device* device,
-                                WGPUSurface surface,
-                                const WGPUSwapChainDescriptor* descriptor) {
-    Client* wireClient = device->GetClient();
-    SwapChain* swapChain = wireClient->Make<SwapChain>(surface, descriptor);
-
-    // Send the Device::CreateSwapChain command without modifications.
-    DeviceCreateSwapChainCmd cmd;
-    cmd.self = ToAPI(device);
-    cmd.selfId = device->GetWireId();
-    cmd.descriptor = descriptor;
-    cmd.result = swapChain->GetWireHandle();
-    wireClient->SerializeCommand(cmd);
-
-    return ToAPI(swapChain);
-}
-
 SwapChain::SwapChain(const ObjectBaseParams& params,
                      WGPUSurface,
                      const WGPUSwapChainDescriptor* descriptor)

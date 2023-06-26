@@ -19,22 +19,6 @@
 
 namespace dawn::wire::client {
 
-// static
-WGPUQuerySet QuerySet::Create(Device* device, const WGPUQuerySetDescriptor* descriptor) {
-    Client* wireClient = device->GetClient();
-    QuerySet* querySet = wireClient->Make<QuerySet>(descriptor);
-
-    // Send the Device::CreateQuerySet command without modifications.
-    DeviceCreateQuerySetCmd cmd;
-    cmd.self = ToAPI(device);
-    cmd.selfId = device->GetWireId();
-    cmd.descriptor = descriptor;
-    cmd.result = querySet->GetWireHandle();
-    wireClient->SerializeCommand(cmd);
-
-    return ToAPI(querySet);
-}
-
 QuerySet::QuerySet(const ObjectBaseParams& params, const WGPUQuerySetDescriptor* descriptor)
     : ObjectBase(params), mType(descriptor->type), mCount(descriptor->count) {}
 

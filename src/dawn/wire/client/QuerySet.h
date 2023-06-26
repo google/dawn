@@ -25,8 +25,6 @@ class Device;
 
 class QuerySet final : public ObjectBase {
   public:
-    static WGPUQuerySet Create(Device* device, const WGPUQuerySetDescriptor* descriptor);
-
     QuerySet(const ObjectBaseParams& params, const WGPUQuerySetDescriptor* descriptor);
     ~QuerySet() override;
 

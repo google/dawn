@@ -58,7 +58,23 @@ namespace dawn::wire::client {
 
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
-                        auto* returnObject = self->GetClient()->Make<{{method.return_type.name.CamelCase()}}>();
+                        {% set ReturnObj = method.return_type.name.CamelCase() %}
+
+                        {{ReturnObj}}* returnObject;
+                        if constexpr (std::is_constructible_v<
+                            {{- ReturnObj}}, const ObjectBaseParams&
+                            {%- for arg in method.arguments -%}
+                                , decltype({{as_varName(arg.name)}})
+                            {%- endfor -%}
+                        >) {
+                            returnObject = self->GetClient()->Make<{{ReturnObj}}>(
+                                {%- for arg in method.arguments -%}
+                                    {% if not loop.first %}, {% endif %}{{as_varName(arg.name)}}
+                                {%- endfor -%}
+                            );
+                        } else {
+                            returnObject = self->GetClient()->Make<{{ReturnObj}}>();
+                        }
                         cmd.result = returnObject->GetWireHandle();
                     {% endif %}
 

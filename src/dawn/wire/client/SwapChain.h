@@ -25,10 +25,6 @@ class Device;
 
 class SwapChain final : public ObjectBase {
   public:
-    static WGPUSwapChain Create(Device* device,
-                                WGPUSurface surface,
-                                const WGPUSwapChainDescriptor* descriptor);
-
     SwapChain(const ObjectBaseParams& params,
               WGPUSurface surface,
               const WGPUSwapChainDescriptor* descriptor);
