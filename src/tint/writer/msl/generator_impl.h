@@ -317,13 +317,8 @@ class GeneratorImpl : public ASTTextGenerator {
     /// Handles generating a type
     /// @param out the output of the type stream
     /// @param type the type to generate
-    /// @param name the name of the variable, only used for array emission
-    /// @param name_printed (optional) if not nullptr and an array was printed
     /// @returns true if the type is emitted
-    bool EmitType(utils::StringStream& out,
-                  const type::Type* type,
-                  const std::string& name,
-                  bool* name_printed = nullptr);
+    bool EmitType(utils::StringStream& out, const type::Type* type);
     /// Handles generating type and name
     /// @param out the output stream
     /// @param type the type to generate

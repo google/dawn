@@ -150,7 +150,7 @@ class ScopedBitCast {
 
         // Bit cast
         s << "as_type<";
-        generator->EmitType(s, target_type, "");
+        generator->EmitType(s, target_type);
         s << ">(";
     }
 
@@ -403,7 +403,7 @@ bool GeneratorImpl::EmitIndexAccessor(utils::StringStream& out,
 
 bool GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr) {
     out << "as_type<";
-    if (!EmitType(out, TypeOf(expr)->UnwrapRef(), "")) {
+    if (!EmitType(out, TypeOf(expr)->UnwrapRef())) {
         return false;
     }
 
@@ -795,7 +795,7 @@ bool GeneratorImpl::EmitBuiltinCall(utils::StringStream& out,
 bool GeneratorImpl::EmitTypeConversion(utils::StringStream& out,
                                        const sem::Call* call,
                                        const sem::ValueConversion* conv) {
-    if (!EmitType(out, conv->Target(), "")) {
+    if (!EmitType(out, conv->Target())) {
         return false;
     }
     out << "(";
@@ -819,7 +819,7 @@ bool GeneratorImpl::EmitTypeInitializer(utils::StringStream& out,
     bool ok = Switch(
         type,
         [&](const type::Array*) {
-            if (!EmitType(out, type, "")) {
+            if (!EmitType(out, type)) {
                 return false;
             }
             out << "{";
@@ -832,7 +832,7 @@ bool GeneratorImpl::EmitTypeInitializer(utils::StringStream& out,
             return true;
         },
         [&](Default) {
-            if (!EmitType(out, type, "")) {
+            if (!EmitType(out, type)) {
                 return false;
             }
             out << "(";
@@ -1074,7 +1074,7 @@ bool GeneratorImpl::EmitTextureCall(utils::StringStream& out,
             if (dims.size() == 1) {
                 get_dim(dims[0]);
             } else {
-                EmitType(out, TypeOf(expr)->UnwrapRef(), "");
+                EmitType(out, TypeOf(expr)->UnwrapRef());
                 out << "(";
                 for (size_t i = 0; i < dims.size(); i++) {
                     if (i > 0) {
@@ -1647,7 +1647,7 @@ bool GeneratorImpl::EmitZeroValue(utils::StringStream& out, const type::Type* ty
             return EmitZeroValue(out, vec->type());
         },
         [&](const type::Matrix* mat) {
-            if (!EmitType(out, mat, "")) {
+            if (!EmitType(out, mat)) {
                 return false;
             }
             ScopedParen sp(out);
@@ -1692,7 +1692,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value
             return true;
         },
         [&](const type::Vector* v) {
-            if (!EmitType(out, v, "")) {
+            if (!EmitType(out, v)) {
                 return false;
             }
 
@@ -1716,7 +1716,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value
             return true;
         },
         [&](const type::Matrix* m) {
-            if (!EmitType(out, m, "")) {
+            if (!EmitType(out, m)) {
                 return false;
             }
 
@@ -1733,7 +1733,7 @@ bool GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value
             return true;
         },
         [&](const type::Array* a) {
-            if (!EmitType(out, a, "")) {
+            if (!EmitType(out, a)) {
                 return false;
             }
 
@@ -1875,7 +1875,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
     {
         auto out = Line();
-        if (!EmitType(out, func_sem->ReturnType(), "")) {
+        if (!EmitType(out, func_sem->ReturnType())) {
             return false;
         }
         out << " " << func->name->symbol.Name() << "(";
@@ -1889,14 +1889,13 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
             auto* type = program_->Sem().Get(v)->Type();
 
-            std::string param_name = "const " + v->name->symbol.Name();
-            if (!EmitType(out, type, param_name)) {
+            if (!EmitType(out, type)) {
                 return false;
             }
-            // Parameter name is output as part of the type for pointers.
-            if (!type->Is<type::Pointer>()) {
-                out << " " << v->name->symbol.Name();
+            if (type->Is<type::Pointer>()) {
+                out << " const";
             }
+            out << " " << v->name->symbol.Name();
         }
 
         out << ") {";
@@ -2022,14 +2021,10 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 
             auto* type = program_->Sem().Get(param)->Type()->UnwrapRef();
 
-            auto param_name = param->name->symbol.Name();
-            if (!EmitType(out, type, param_name)) {
+            if (!EmitType(out, type)) {
                 return false;
             }
-            // Parameter name is output as part of the type for pointers.
-            if (!type->Is<type::Pointer>()) {
-                out << " " << param_name;
-            }
+            out << " " << param->name->symbol.Name();
 
             bool ok = Switch(
                 type,  //
@@ -2546,14 +2541,7 @@ bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     return true;
 }
 
-bool GeneratorImpl::EmitType(utils::StringStream& out,
-                             const type::Type* type,
-                             const std::string& name,
-                             bool* name_printed /* = nullptr */) {
-    if (name_printed) {
-        *name_printed = false;
-    }
-
+bool GeneratorImpl::EmitType(utils::StringStream& out, const type::Type* type) {
     return Switch(
         type,
         [&](const type::Atomic* atomic) {
@@ -2571,7 +2559,7 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
         },
         [&](const type::Array* arr) {
             out << ArrayType() << "<";
-            if (!EmitType(out, arr->ElemType(), "")) {
+            if (!EmitType(out, arr->ElemType())) {
                 return false;
             }
             out << ", ";
@@ -2607,7 +2595,7 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
             return true;
         },
         [&](const type::Matrix* mat) {
-            if (!EmitType(out, mat->type(), "")) {
+            if (!EmitType(out, mat->type())) {
                 return false;
             }
             out << mat->columns() << "x" << mat->rows();
@@ -2621,13 +2609,10 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
                 return false;
             }
             out << " ";
-            if (!EmitType(out, ptr->StoreType(), "")) {
+            if (!EmitType(out, ptr->StoreType())) {
                 return false;
             }
-            out << "* " << name;
-            if (name_printed) {
-                *name_printed = true;
-            }
+            out << "*";
             return true;
         },
         [&](const type::Sampler*) {
@@ -2693,7 +2678,7 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
                     return true;
                 },
                 [&](const type::StorageTexture* storage) {
-                    if (!EmitType(out, storage->type(), "")) {
+                    if (!EmitType(out, storage->type())) {
                         return false;
                     }
 
@@ -2710,14 +2695,14 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
                     return true;
                 },
                 [&](const type::MultisampledTexture* ms) {
-                    if (!EmitType(out, ms->type(), "")) {
+                    if (!EmitType(out, ms->type())) {
                         return false;
                     }
                     out << ", access::read";
                     return true;
                 },
                 [&](const type::SampledTexture* sampled) {
-                    if (!EmitType(out, sampled->type(), "")) {
+                    if (!EmitType(out, sampled->type())) {
                         return false;
                     }
                     out << ", access::sample";
@@ -2736,7 +2721,7 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
             if (vec->Packed()) {
                 out << "packed_";
             }
-            if (!EmitType(out, vec->type(), "")) {
+            if (!EmitType(out, vec->type())) {
                 return false;
             }
             out << vec->Width();
@@ -2756,13 +2741,10 @@ bool GeneratorImpl::EmitType(utils::StringStream& out,
 bool GeneratorImpl::EmitTypeAndName(utils::StringStream& out,
                                     const type::Type* type,
                                     const std::string& name) {
-    bool name_printed = false;
-    if (!EmitType(out, type, name, &name_printed)) {
+    if (!EmitType(out, type)) {
         return false;
     }
-    if (!name_printed) {
-        out << " " << name;
-    }
+    out << " " << name;
     return true;
 }
 
@@ -2842,7 +2824,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
             add_byte_offset_comment(out, msl_offset);
         }
 
-        if (!EmitType(out, mem->Type(), mem_name)) {
+        if (!EmitType(out, mem->Type())) {
             return false;
         }
 
@@ -2941,7 +2923,7 @@ bool GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpr
                     return "";
                 }
                 decl << "(const ";
-                if (!EmitType(decl, expr_type, "")) {
+                if (!EmitType(decl, expr_type)) {
                     return "";
                 }
                 decl << " v) {";
@@ -3015,14 +2997,10 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
             return false;
     }
 
-    std::string name = var->name->symbol.Name();
-    if (!EmitType(out, type, name)) {
+    if (!EmitType(out, type)) {
         return false;
     }
-    // Variable name is output as part of the type for pointers.
-    if (!type->Is<type::Pointer>()) {
-        out << " " << name;
-    }
+    out << " " << var->name->symbol.Name();
 
     if (var->initializer != nullptr) {
         out << " = ";
@@ -3064,15 +3042,10 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
             return false;
     }
 
-    std::string name = "const " + let->name->symbol.Name();
-    if (!EmitType(out, type, name)) {
+    if (!EmitType(out, type)) {
         return false;
     }
-
-    // Variable name is output as part of the type for pointers.
-    if (!type->Is<type::Pointer>()) {
-        out << " " << name;
-    }
+    out << " const " << let->name->symbol.Name();
 
     out << " = ";
     if (!EmitExpression(out, let->initializer)) {
