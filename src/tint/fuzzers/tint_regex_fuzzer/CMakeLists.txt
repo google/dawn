@@ -39,6 +39,8 @@ set(REGEX_FUZZER_SOURCES
         cli.h
         fuzzer.cc
         override_cli_params.h
+        ../apply_substitute_overrides.cc
+        ../apply_substitute_overrides.h
         ../tint_common_fuzzer.cc
         ../tint_common_fuzzer.h)
 

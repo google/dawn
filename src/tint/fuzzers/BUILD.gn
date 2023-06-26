@@ -69,6 +69,8 @@ if (build_with_chromium) {
     ]
 
     sources = [
+      "apply_substitute_overrides.cc",
+      "apply_substitute_overrides.h",
       "data_builder.h",
       "mersenne_twister_engine.cc",
       "mersenne_twister_engine.h",

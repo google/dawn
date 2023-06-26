@@ -32,6 +32,7 @@
 
 #include "src/tint/ast/module.h"
 #include "src/tint/diagnostic/formatter.h"
+#include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/program.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/variable.h"
@@ -234,32 +235,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
     {
         // Run SubstituteOverride if required
-
-        ast::transform::SubstituteOverride::Config cfg;
-        inspector::Inspector inspector(&program);
-        auto default_values = inspector.GetOverrideDefaultValues();
-        for (const auto& [override_id, scalar] : default_values) {
-            // If the override is not null, then it has a default value, we can just let it use the
-            // provided default instead of overriding.
-            if (!scalar.IsNull()) {
-                continue;
-            }
-
-            cfg.map.insert({override_id, 0.0});
-        }
-
-        if (!default_values.empty()) {
-            transform::DataMap override_data;
-            override_data.Add<ast::transform::SubstituteOverride::Config>(cfg);
-
-            transform::Manager mgr;
-            mgr.append(std::make_unique<ast::transform::SubstituteOverride>());
-
-            transform::DataMap outputs;
-            auto out = mgr.Run(&program, override_data, outputs);
-            if (!validate_program(out)) {
-                return 0;
-            }
+        auto out = ApplySubstituteOverrides(std::move(program));
+        if (!validate_program(out)) {
+            return 0;
         }
     }
 

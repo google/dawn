@@ -19,6 +19,7 @@
 
 #include <thread>
 
+#include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/inspector/inspector.h"
 #include "src/tint/reader/wgsl/parser.h"
 #include "src/tint/utils/hash.h"
@@ -46,6 +47,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     if (!program.IsValid()) {
         return 0;
     }
+
+    program = tint::fuzzers::ApplySubstituteOverrides(std::move(program));
 
     tint::inspector::Inspector inspector(&program);
     auto entry_points = inspector.GetEntryPoints();

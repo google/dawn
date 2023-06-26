@@ -39,6 +39,8 @@ set(FUZZER_SOURCES ${FUZZER_SOURCES}
         util.h)
 
 set(FUZZER_SOURCES ${FUZZER_SOURCES}
+        ../apply_substitute_overrides.cc
+        ../apply_substitute_overrides.h
         ../tint_common_fuzzer.cc
         ../tint_common_fuzzer.h)
 
