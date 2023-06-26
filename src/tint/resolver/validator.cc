@@ -1237,32 +1237,32 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     };
 
     // Outer lambda for validating the entry point attributes for a type.
-    auto validate_entry_point_attributes =
-        [&](utils::VectorRef<const ast::Attribute*> attrs, const type::Type* ty, Source source,
-            ParamOrRetType param_or_ret, std::optional<uint32_t> location,
-            std::optional<uint32_t> index) {
-            if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
-                                                       /*is_struct_member*/ false, location,
-                                                       index)) {
-                return false;
-            }
+    auto validate_entry_point_attributes = [&](utils::VectorRef<const ast::Attribute*> attrs,
+                                               const type::Type* ty, Source source,
+                                               ParamOrRetType param_or_ret,
+                                               std::optional<uint32_t> location,
+                                               std::optional<uint32_t> index) {
+        if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
+                                                   /*is_struct_member*/ false, location, index)) {
+            return false;
+        }
 
-            if (auto* str = ty->As<sem::Struct>()) {
-                for (auto* member : str->Members()) {
-                    if (!validate_entry_point_attributes_inner(
-                            member->Declaration()->attributes, member->Type(),
-                            member->Declaration()->source, param_or_ret,
-                            /*is_struct_member*/ true, member->Attributes().location,
-                            member->Attributes().index)) {
-                        AddNote("while analyzing entry point '" + decl->name->symbol.Name() + "'",
-                                decl->source);
-                        return false;
-                    }
+        if (auto* str = ty->As<sem::Struct>()) {
+            for (auto* member : str->Members()) {
+                if (!validate_entry_point_attributes_inner(
+                        member->Declaration()->attributes, member->Type(),
+                        member->Declaration()->source, param_or_ret,
+                        /*is_struct_member*/ true, member->Attributes().location,
+                        member->Attributes().index)) {
+                    AddNote("while analyzing entry point '" + decl->name->symbol.Name() + "'",
+                            decl->source);
+                    return false;
                 }
             }
+        }
 
-            return true;
-        };
+        return true;
+    };
 
     for (auto* param : func->Parameters()) {
         auto* param_decl = param->Declaration();
