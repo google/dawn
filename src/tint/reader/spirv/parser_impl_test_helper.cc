@@ -42,7 +42,7 @@ std::string ToString(const Program& program) {
     if (!writer.Diagnostics().empty()) {
         return "WGSL writer error: " + writer.Diagnostics().str();
     }
-    return writer.result();
+    return writer.Result();
 }
 
 std::string ToString(const Program& program, utils::VectorRef<const ast::Statement*> stmts) {
@@ -53,7 +53,7 @@ std::string ToString(const Program& program, utils::VectorRef<const ast::Stateme
     if (!writer.Diagnostics().empty()) {
         return "WGSL writer error: " + writer.Diagnostics().str();
     }
-    return writer.result();
+    return writer.Result();
 }
 
 std::string ToString(const Program& program, const ast::Node* node) {
@@ -73,7 +73,7 @@ std::string ToString(const Program& program, const ast::Node* node) {
             if (!writer.Diagnostics().empty()) {
                 return "WGSL writer error: " + writer.Diagnostics().str();
             }
-            return writer.result();
+            return writer.Result();
         },
         [&](const ast::Identifier* ident) { return ident->symbol.Name(); },
         [&](Default) {

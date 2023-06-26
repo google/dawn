@@ -48,7 +48,7 @@ Result Generate(const Program* program, const Options& options, const std::strin
     impl->Generate();
     result.success = impl->Diagnostics().empty();
     result.error = impl->Diagnostics().str();
-    result.glsl = impl->result();
+    result.glsl = impl->Result();
 
     // Collect the list of entry points in the sanitized program.
     for (auto* func : sanitized_result.program.AST().Functions()) {

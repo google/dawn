@@ -193,7 +193,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
 
     gen.EmitStructType(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(struct S {
+    EXPECT_EQ(gen.Result(), R"(struct S {
   @size(8)
   padding : u32,
   /* @offset(8) */
@@ -217,7 +217,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
 
     gen.EmitStructType(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(struct S {
+    EXPECT_EQ(gen.Result(), R"(struct S {
   @size(8)
   padding : u32,
   /* @offset(8) */
@@ -240,7 +240,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructAlignDecl) {
 
     gen.EmitStructType(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(struct S {
+    EXPECT_EQ(gen.Result(), R"(struct S {
   @align(8)
   a : i32,
   @align(16)
@@ -259,7 +259,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
 
     gen.EmitStructType(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(struct S {
+    EXPECT_EQ(gen.Result(), R"(struct S {
   @size(16)
   a : i32,
   @size(32)
@@ -278,7 +278,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithAttribute) {
 
     gen.EmitStructType(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(struct S {
+    EXPECT_EQ(gen.Result(), R"(struct S {
   a : i32,
   @align(8)
   b : f32,
@@ -297,7 +297,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointAttributes) {
 
     gen.EmitStructType(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(struct S {
+    EXPECT_EQ(gen.Result(), R"(struct S {
   @builtin(vertex_index)
   a : u32,
   @location(2)

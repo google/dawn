@@ -37,10 +37,10 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    EXPECT_EQ(gen.Result(), R"(  switch(cond) {
     case 5: {
       break;
     }
@@ -63,10 +63,10 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    EXPECT_EQ(gen.Result(), R"(  switch(cond) {
     case 5:
     default: {
       break;

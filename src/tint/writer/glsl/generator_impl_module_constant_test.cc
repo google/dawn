@@ -32,7 +32,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalLet) {
     GeneratorImpl& gen = Build();
     gen.EmitProgramConstVariable(var);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "const float pos[3] = float[3](1.0f, 2.0f, 3.0f);\n");
+    EXPECT_EQ(gen.Result(), "const float pos[3] = float[3](1.0f, 2.0f, 3.0f);\n");
 }
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_AInt) {
@@ -45,7 +45,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_AInt) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   int l = 1;
@@ -64,7 +64,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_AFloat) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   float l = 1.0f;
@@ -83,7 +83,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_i32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   int l = 1;
@@ -102,7 +102,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_u32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   uint l = 1u;
@@ -121,7 +121,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   float l = 1.0f;
@@ -142,7 +142,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f16) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 void f() {
@@ -162,7 +162,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_AInt) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   ivec3 l = ivec3(1, 2, 3);
@@ -181,7 +181,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_AFloat) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   vec3 l = vec3(1.0f, 2.0f, 3.0f);
@@ -200,7 +200,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   vec3 l = vec3(1.0f, 2.0f, 3.0f);
@@ -221,7 +221,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f16) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 void f() {
@@ -241,7 +241,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_AFloat) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   mat2x3 l = mat2x3(vec3(1.0f, 2.0f, 3.0f), vec3(4.0f, 5.0f, 6.0f));
@@ -260,7 +260,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   mat2x3 l = mat2x3(vec3(1.0f, 2.0f, 3.0f), vec3(4.0f, 5.0f, 6.0f));
@@ -281,7 +281,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f16) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 void f() {
@@ -301,7 +301,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_arr_f32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   float l[3] = float[3](1.0f, 2.0f, 3.0f);
@@ -323,7 +323,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_arr_vec2_bool) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void f() {
   bvec2 l[3] = bvec2[3](bvec2(true, false), bvec2(false, true), bvec2(true));

@@ -51,7 +51,7 @@ TEST_F(GlslGeneratorImplTest_StorageBuffer, Align) {
     // They will likely require manual padding.
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct Nephews {
   float huey;
@@ -74,7 +74,7 @@ TEST_F(GlslGeneratorImplTest_StorageBuffer, Align_Desktop) {
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 440
+    EXPECT_EQ(gen.Result(), R"(#version 440
 
 struct Nephews {
   float huey;

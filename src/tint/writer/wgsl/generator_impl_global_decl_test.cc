@@ -35,10 +35,10 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  @compute @workgroup_size(1i, 1i, 1i)
+    EXPECT_EQ(gen.Result(), R"(  @compute @workgroup_size(1i, 1i, 1i)
   fn test_function() {
     var a : f32;
   }
@@ -79,10 +79,10 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  var<private> a0 : f32;
+    EXPECT_EQ(gen.Result(), R"(  var<private> a0 : f32;
 
   struct S0 {
     a : i32,
@@ -112,10 +112,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  @group(0) @binding(0) var s : sampler;\n");
+    EXPECT_EQ(gen.Result(), "  @group(0) @binding(0) var s : sampler;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
@@ -124,10 +124,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  @group(0) @binding(0) var t : texture_1d<f32>;\n");
+    EXPECT_EQ(gen.Result(), "  @group(0) @binding(0) var t : texture_1d<f32>;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalConst) {
@@ -136,10 +136,10 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalConst) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  const explicit : f32 = 1.0f;
+    EXPECT_EQ(gen.Result(), R"(  const explicit : f32 = 1.0f;
 
   const inferred = 1.0f;
 )");
@@ -151,10 +151,10 @@ TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  override a : f32;
+    EXPECT_EQ(gen.Result(), R"(  override a : f32;
 
   @id(7) override b : f32;
 )");

@@ -25,10 +25,10 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(b)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  {
+    EXPECT_EQ(gen.Result(), R"(  {
     return;
   }
 )");

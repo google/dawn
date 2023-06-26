@@ -29,7 +29,7 @@ Result Generate(const Program* program, const Options&) {
     impl->Generate();
     result.success = impl->Diagnostics().empty();
     result.error = impl->Diagnostics().str();
-    result.ast = impl->result();
+    result.ast = impl->Result();
 
     return result;
 }

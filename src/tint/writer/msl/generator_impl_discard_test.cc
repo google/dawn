@@ -27,10 +27,10 @@ TEST_F(MslGeneratorImplTest, Emit_Discard) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), "  discard_fragment();\n");
+    EXPECT_EQ(gen.Result(), "  discard_fragment();\n");
 }
 
 }  // namespace

@@ -28,7 +28,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Enable) {
 
     gen.EmitEnable(enable);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(enable f16;
+    EXPECT_EQ(gen.Result(), R"(enable f16;
 )");
 }
 

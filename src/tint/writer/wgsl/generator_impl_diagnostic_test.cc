@@ -27,7 +27,7 @@ TEST_F(WgslGeneratorImplTest, Emit_DiagnosticDirective) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(diagnostic(error, chromium.unreachable_code);
+    EXPECT_EQ(gen.Result(), R"(diagnostic(error, chromium.unreachable_code);
 
 )");
 }
@@ -40,7 +40,7 @@ TEST_F(WgslGeneratorImplTest, Emit_DiagnosticAttribute) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(@diagnostic(error, chromium.unreachable_code)
+    EXPECT_EQ(gen.Result(), R"(@diagnostic(error, chromium.unreachable_code)
 fn foo() {
 }
 )");

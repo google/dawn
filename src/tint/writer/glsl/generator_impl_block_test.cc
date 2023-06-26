@@ -27,10 +27,10 @@ TEST_F(GlslGeneratorImplTest_Block, Emit_Block) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(b);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  {
+    EXPECT_EQ(gen.Result(), R"(  {
     return;
   }
 )");

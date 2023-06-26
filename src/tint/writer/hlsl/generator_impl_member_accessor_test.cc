@@ -131,7 +131,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct Data {
+    EXPECT_EQ(gen.Result(), R"(struct Data {
   float mem;
 };
 
@@ -180,7 +180,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad_ConstantOffset, Te
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(p.expected));
+    EXPECT_THAT(gen.Result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -323,7 +323,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad_DynamicOffset, Tes
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(p.expected));
+    EXPECT_THAT(gen.Result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -454,7 +454,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_UniformBufferLoad_ConstantOffset, Te
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(p.expected));
+    EXPECT_THAT(gen.Result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -730,7 +730,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_UniformBufferLoad_DynamicOffset, Tes
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(p.expected));
+    EXPECT_THAT(gen.Result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1005,7 +1005,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(p.expected));
+    EXPECT_THAT(gen.Result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1153,7 +1153,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_Matrix_F32_Single_Element) {
@@ -1184,7 +1184,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_Matrix_F16_Single_Element) {
@@ -1217,7 +1217,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, UniformBuffer_Load_Matrix_F32_Single_Element) {
@@ -1250,7 +1250,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, UniformBuffer_Load_Matrix_F16_Single_Element) {
@@ -1285,7 +1285,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -1317,7 +1317,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -1351,7 +1351,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -1401,7 +1401,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -1454,7 +1454,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -1492,7 +1492,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -1533,7 +1533,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
@@ -1563,7 +1563,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
@@ -1602,7 +1602,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, UniformBuffer_Load_MultiLevel) {
@@ -1643,7 +1643,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Swizzle) {
@@ -1684,7 +1684,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, UniformBuffer_Load_MultiLevel_Swizzle) {
@@ -1727,7 +1727,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -1769,7 +1769,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -1813,7 +1813,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Index) {
@@ -1854,7 +1854,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, UniformBuffer_Load_MultiLevel_Index) {
@@ -1897,7 +1897,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
@@ -1937,7 +1937,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Swizzle_SingleLetter) {
@@ -1978,7 +1978,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
@@ -1988,7 +1988,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr("my_vec.xyz"));
+    EXPECT_THAT(gen.Result(), HasSubstr("my_vec.xyz"));
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
@@ -1998,7 +1998,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr("my_vec.gbr"));
+    EXPECT_THAT(gen.Result(), HasSubstr("my_vec.gbr"));
 }
 
 }  // namespace

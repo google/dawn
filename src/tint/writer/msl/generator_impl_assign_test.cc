@@ -27,10 +27,10 @@ TEST_F(MslGeneratorImplTest, Emit_Assign) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(assign)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
+    EXPECT_EQ(gen.Result(), "  lhs = rhs;\n");
 }
 
 }  // namespace

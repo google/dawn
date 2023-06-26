@@ -36,10 +36,10 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  #version 310 es
+    EXPECT_EQ(gen.Result(), R"(  #version 310 es
 
   void my_func() {
     return;
@@ -56,10 +56,10 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr(R"(  void tint_symbol() {
+    EXPECT_THAT(gen.Result(), HasSubstr(R"(  void tint_symbol() {
     return;
   })"));
 }
@@ -77,10 +77,10 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithParams) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  #version 310 es
+    EXPECT_EQ(gen.Result(), R"(  #version 310 es
 
   void my_func(float a, int b) {
     return;
@@ -98,7 +98,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_NoReturn_Void) 
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 void func() {
@@ -117,7 +117,7 @@ TEST_F(GlslGeneratorImplTest_Function, PtrParameter) {
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr(R"(float f(inout float foo) {
+    EXPECT_THAT(gen.Result(), HasSubstr(R"(float f(inout float foo) {
   return foo;
 }
 )"));
@@ -145,7 +145,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOutVars) 
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 layout(location = 0) in float foo_1;
@@ -186,7 +186,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOut_Built
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 float frag_main(vec4 coord) {
@@ -238,7 +238,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Di
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 layout(location = 1) out float col1_1;
@@ -317,7 +317,7 @@ TEST_F(GlslGeneratorImplTest_Function,
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-  EXPECT_EQ(gen.result(), R"(struct VertexOutput {
+  EXPECT_EQ(gen.Result(), R"(struct VertexOutput {
   float4 pos;
 };
 
@@ -377,7 +377,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 struct UBO {
@@ -418,7 +418,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_UniformStr
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 struct Uniforms {
@@ -459,7 +459,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RW_Storage
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 struct Data {
@@ -506,7 +506,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RO_Storage
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(#version 310 es
 precision highp float;
 
@@ -552,7 +552,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 struct Data {
@@ -597,7 +597,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_StorageBuf
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 struct Data {
@@ -644,7 +644,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 struct S {
@@ -690,7 +690,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(#version 310 es
 precision highp float;
 
@@ -727,7 +727,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithNameCollisi
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 precision highp float;
 
 void tint_symbol() {
@@ -753,7 +753,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -772,7 +772,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWor
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 layout(local_size_x = 2, local_size_y = 4, local_size_z = 6) in;
 void main() {
@@ -794,7 +794,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWor
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 layout(local_size_x = 2, local_size_y = 3, local_size_z = 4) in;
 void main() {
@@ -833,7 +833,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void my_func(float a[5]) {
   return;
@@ -851,7 +851,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithArrayReturn) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 float[5] my_func() {
   return float[5](0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -915,7 +915,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct Data {
   float d;

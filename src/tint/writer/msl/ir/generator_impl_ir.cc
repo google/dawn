@@ -59,9 +59,9 @@ bool GeneratorImplIr::Generate() {
 
     {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
-        line() << "#include <metal_stdlib>";
-        line();
-        line() << "using namespace metal;";
+        Line() << "#include <metal_stdlib>";
+        Line();
+        Line() << "using namespace metal;";
     }
 
     // Emit module-scope declarations.
@@ -83,11 +83,11 @@ bool GeneratorImplIr::Generate() {
 
 void GeneratorImplIr::EmitFunction(ir::Function* func) {
     {
-        auto out = line();
+        auto out = Line();
         EmitType(out, func->ReturnType());
         out << " " << ir_->NameOf(func).Name() << "() {";
     }
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {

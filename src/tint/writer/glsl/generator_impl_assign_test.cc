@@ -29,11 +29,11 @@ TEST_F(GlslGeneratorImplTest_Assign, Emit_Assign) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(assign);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
+    EXPECT_EQ(gen.Result(), "  lhs = rhs;\n");
 }
 
 }  // namespace

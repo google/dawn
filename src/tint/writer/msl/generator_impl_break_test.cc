@@ -25,10 +25,10 @@ TEST_F(MslGeneratorImplTest, Emit_Break) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(b)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), "  break;\n");
+    EXPECT_EQ(gen.Result(), "  break;\n");
 }
 
 }  // namespace

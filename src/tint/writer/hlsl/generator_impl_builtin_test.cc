@@ -348,7 +348,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Builtin_Call) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "dot(param1, param2)");
@@ -361,7 +361,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Select_Scalar) {
     WrapInFunction(Decl(Var("r", call)));
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(true ? b : a)");
@@ -374,7 +374,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Select_Vector) {
     WrapInFunction(Decl(Var("r", call)));
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(bool2(true, false) ? b : a)");
@@ -387,7 +387,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_f32 {
   float fract;
   float whole;
 };
@@ -415,7 +415,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_f16 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_f16 {
   float16_t fract;
   float16_t whole;
 };
@@ -441,7 +441,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_vec3_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_vec3_f32 {
   float3 fract;
   float3 whole;
 };
@@ -469,7 +469,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_vec3_f16 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_vec3_f16 {
   vector<float16_t, 3> fract;
   vector<float16_t, 3> whole;
 };
@@ -494,7 +494,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_f32 {
   float fract;
   float whole;
 };
@@ -514,7 +514,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_f16 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_f16 {
   float16_t fract;
   float16_t whole;
 };
@@ -532,7 +532,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Const_Modf_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_vec3_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_vec3_f32 {
   float3 fract;
   float3 whole;
 };
@@ -552,7 +552,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Const_Modf_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_vec3_f16 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_vec3_f16 {
   vector<float16_t, 3> fract;
   vector<float16_t, 3> whole;
 };
@@ -576,7 +576,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, NonInitializer_Modf_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct modf_result_vec3_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct modf_result_vec3_f32 {
   float3 fract;
   float3 whole;
 };
@@ -597,7 +597,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_f32 {
   float fract;
   int exp;
 };
@@ -626,7 +626,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_f16 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_f16 {
   float16_t fract;
   int exp;
 };
@@ -653,7 +653,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_vec3_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_vec3_f32 {
   float3 fract;
   int3 exp;
 };
@@ -682,7 +682,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_vec3_f16 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_vec3_f16 {
   vector<float16_t, 3> fract;
   int3 exp;
 };
@@ -708,7 +708,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Const_Frexp_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_f32 {
   float fract;
   int exp;
 };
@@ -728,7 +728,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Const_Frexp_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_f16 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_f16 {
   float16_t fract;
   int exp;
 };
@@ -746,7 +746,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Const_Frexp_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_vec3_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_vec3_f32 {
   float3 fract;
   int3 exp;
 };
@@ -766,7 +766,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Const_Frexp_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_vec3_f16 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_vec3_f16 {
   vector<float16_t, 3> fract;
   int3 exp;
 };
@@ -790,7 +790,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, NonInitializer_Frexp_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(struct frexp_result_vec3_f32 {
+    EXPECT_EQ(gen.Result(), R"(struct frexp_result_vec3_f32 {
   float3 fract;
   int3 exp;
 };
@@ -812,7 +812,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float tint_degrees(float param_0) {
+    EXPECT_EQ(gen.Result(), R"(float tint_degrees(float param_0) {
   return param_0 * 57.29577951308232286465;
 }
 
@@ -833,7 +833,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float3 tint_degrees(float3 param_0) {
+    EXPECT_EQ(gen.Result(), R"(float3 tint_degrees(float3 param_0) {
   return param_0 * 57.29577951308232286465;
 }
 
@@ -856,7 +856,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float16_t tint_degrees(float16_t param_0) {
+    EXPECT_EQ(gen.Result(), R"(float16_t tint_degrees(float16_t param_0) {
   return param_0 * 57.29577951308232286465;
 }
 
@@ -879,7 +879,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Degrees_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(vector<float16_t, 3> tint_degrees(vector<float16_t, 3> param_0) {
+    EXPECT_EQ(gen.Result(), R"(vector<float16_t, 3> tint_degrees(vector<float16_t, 3> param_0) {
   return param_0 * 57.29577951308232286465;
 }
 
@@ -900,7 +900,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Radians_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float tint_radians(float param_0) {
+    EXPECT_EQ(gen.Result(), R"(float tint_radians(float param_0) {
   return param_0 * 0.01745329251994329547;
 }
 
@@ -921,7 +921,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Radians_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float3 tint_radians(float3 param_0) {
+    EXPECT_EQ(gen.Result(), R"(float3 tint_radians(float3 param_0) {
   return param_0 * 0.01745329251994329547;
 }
 
@@ -944,7 +944,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Radians_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float16_t tint_radians(float16_t param_0) {
+    EXPECT_EQ(gen.Result(), R"(float16_t tint_radians(float16_t param_0) {
   return param_0 * 0.01745329251994329547;
 }
 
@@ -967,7 +967,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Radians_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(vector<float16_t, 3> tint_radians(vector<float16_t, 3> param_0) {
+    EXPECT_EQ(gen.Result(), R"(vector<float16_t, 3> tint_radians(vector<float16_t, 3> param_0) {
   return param_0 * 0.01745329251994329547;
 }
 
@@ -988,7 +988,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Sign_Scalar_i32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   int val = 0;
   const int tint_symbol = int(sign(val));
@@ -1005,7 +1005,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Sign_Vector_i32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   int3 val = int3(0, 0, 0);
   const int3 tint_symbol = int3(sign(val));
@@ -1022,7 +1022,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Sign_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   float val = 0.0f;
   const float tint_symbol = float(sign(val));
@@ -1039,7 +1039,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Sign_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   float3 val = float3(0.0f, 0.0f, 0.0f);
   const float3 tint_symbol = float3(sign(val));
@@ -1058,7 +1058,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Sign_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   float16_t val = float16_t(0.0h);
   const float16_t tint_symbol = float16_t(sign(val));
@@ -1077,7 +1077,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Sign_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   vector<float16_t, 3> val = vector<float16_t, 3>(float16_t(0.0h), float16_t(0.0h), float16_t(0.0h));
   const vector<float16_t, 3> tint_symbol = vector<float16_t, 3>(sign(val));
@@ -1094,7 +1094,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Trunc_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float tint_trunc(float param_0) {
+    EXPECT_EQ(gen.Result(), R"(float tint_trunc(float param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);
 }
 
@@ -1115,7 +1115,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Trunc_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float3 tint_trunc(float3 param_0) {
+    EXPECT_EQ(gen.Result(), R"(float3 tint_trunc(float3 param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);
 }
 
@@ -1138,7 +1138,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Trunc_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float16_t tint_trunc(float16_t param_0) {
+    EXPECT_EQ(gen.Result(), R"(float16_t tint_trunc(float16_t param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);
 }
 
@@ -1161,7 +1161,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Trunc_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(vector<float16_t, 3> tint_trunc(vector<float16_t, 3> param_0) {
+    EXPECT_EQ(gen.Result(), R"(vector<float16_t, 3> tint_trunc(vector<float16_t, 3> param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);
 }
 
@@ -1181,7 +1181,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Pack4x8Snorm) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(uint tint_pack4x8snorm(float4 param_0) {
+    EXPECT_EQ(gen.Result(), R"(uint tint_pack4x8snorm(float4 param_0) {
   int4 i = int4(round(clamp(param_0, -1.0, 1.0) * 127.0)) & 0xff;
   return asuint(i.x | i.y << 8 | i.z << 16 | i.w << 24);
 }
@@ -1203,7 +1203,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Pack4x8Unorm) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(uint tint_pack4x8unorm(float4 param_0) {
+    EXPECT_EQ(gen.Result(), R"(uint tint_pack4x8unorm(float4 param_0) {
   uint4 i = uint4(round(clamp(param_0, 0.0, 1.0) * 255.0));
   return (i.x | i.y << 8 | i.z << 16 | i.w << 24);
 }
@@ -1225,7 +1225,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Pack2x16Snorm) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(uint tint_pack2x16snorm(float2 param_0) {
+    EXPECT_EQ(gen.Result(), R"(uint tint_pack2x16snorm(float2 param_0) {
   int2 i = int2(round(clamp(param_0, -1.0, 1.0) * 32767.0)) & 0xffff;
   return asuint(i.x | i.y << 16);
 }
@@ -1247,7 +1247,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Pack2x16Unorm) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(uint tint_pack2x16unorm(float2 param_0) {
+    EXPECT_EQ(gen.Result(), R"(uint tint_pack2x16unorm(float2 param_0) {
   uint2 i = uint2(round(clamp(param_0, 0.0, 1.0) * 65535.0));
   return (i.x | i.y << 16);
 }
@@ -1269,7 +1269,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Pack2x16Float) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(uint tint_pack2x16float(float2 param_0) {
+    EXPECT_EQ(gen.Result(), R"(uint tint_pack2x16float(float2 param_0) {
   uint2 i = f32tof16(param_0);
   return i.x | (i.y << 16);
 }
@@ -1291,7 +1291,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Unpack4x8Snorm) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float4 tint_unpack4x8snorm(uint param_0) {
+    EXPECT_EQ(gen.Result(), R"(float4 tint_unpack4x8snorm(uint param_0) {
   int j = int(param_0);
   int4 i = int4(j << 24, j << 16, j << 8, j) >> 24;
   return clamp(float4(i) / 127.0, -1.0, 1.0);
@@ -1314,7 +1314,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Unpack4x8Unorm) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float4 tint_unpack4x8unorm(uint param_0) {
+    EXPECT_EQ(gen.Result(), R"(float4 tint_unpack4x8unorm(uint param_0) {
   uint j = param_0;
   uint4 i = uint4(j & 0xff, (j >> 8) & 0xff, (j >> 16) & 0xff, j >> 24);
   return float4(i) / 255.0;
@@ -1337,7 +1337,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Unpack2x16Snorm) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float2 tint_unpack2x16snorm(uint param_0) {
+    EXPECT_EQ(gen.Result(), R"(float2 tint_unpack2x16snorm(uint param_0) {
   int j = int(param_0);
   int2 i = int2(j << 16, j) >> 16;
   return clamp(float2(i) / 32767.0, -1.0, 1.0);
@@ -1360,7 +1360,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Unpack2x16Unorm) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float2 tint_unpack2x16unorm(uint param_0) {
+    EXPECT_EQ(gen.Result(), R"(float2 tint_unpack2x16unorm(uint param_0) {
   uint j = param_0;
   uint2 i = uint2(j & 0xffff, j >> 16);
   return float2(i) / 65535.0;
@@ -1383,7 +1383,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Unpack2x16Float) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(float2 tint_unpack2x16float(uint param_0) {
+    EXPECT_EQ(gen.Result(), R"(float2 tint_unpack2x16float(uint param_0) {
   uint i = param_0;
   return f16tof32(uint2(i & 0xffff, i >> 16));
 }
@@ -1411,7 +1411,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, StorageBarrier) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void main() {
   DeviceMemoryBarrierWithGroupSync();
   return;
@@ -1432,7 +1432,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, WorkgroupBarrier) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void main() {
   GroupMemoryBarrierWithGroupSync();
   return;
@@ -1451,7 +1451,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Dot4I8Packed) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(int tint_dot4I8Packed(uint param_0, uint param_1) {
+    EXPECT_EQ(gen.Result(), R"(int tint_dot4I8Packed(uint param_0, uint param_1) {
   int accumulator = 0;
   return dot4add_i8packed(param_0, param_1, accumulator);
 }
@@ -1477,7 +1477,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, Dot4U8Packed) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(uint tint_dot4U8Packed(uint param_0, uint param_1) {
+    EXPECT_EQ(gen.Result(), R"(uint tint_dot4U8Packed(uint param_0, uint param_1) {
   uint accumulator = 0u;
   return dot4add_u8packed(param_0, param_1, accumulator);
 }
@@ -1500,7 +1500,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, CountOneBits) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   int val1 = 0;
   const int tint_symbol = asint(countbits(asuint(val1)));
@@ -1517,7 +1517,7 @@ TEST_F(HlslGeneratorImplTest_Builtin, ReverseBits) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(gen.Result(), R"([numthreads(1, 1, 1)]
 void test_function() {
   int val1 = 0;
   const int tint_symbol = asint(reversebits(asuint(val1)));

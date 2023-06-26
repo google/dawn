@@ -207,7 +207,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr(R"(struct S {
+    EXPECT_THAT(gen.Result(), HasSubstr(R"(struct S {
   int tint_symbol;
   float tint_symbol_1;
 };
@@ -333,7 +333,7 @@ TEST_P(GlslDepthTexturesTest, Emit) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr(params.result));
+    EXPECT_THAT(gen.Result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(
     GlslGeneratorImplTest_Type,
@@ -361,7 +361,7 @@ TEST_F(GlslDepthMultisampledTexturesTest, Emit) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("sampler2DMS tex;"));
+    EXPECT_THAT(gen.Result(), HasSubstr("sampler2DMS tex;"));
 }
 
 enum class TextureDataType { F32, U32, I32 };
@@ -407,7 +407,7 @@ TEST_P(GlslSampledTexturesTest, Emit) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr(params.result));
+    EXPECT_THAT(gen.Result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Type,
                          GlslSampledTexturesTest,
@@ -544,7 +544,7 @@ TEST_P(GlslStorageTexturesTest, Emit) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr(params.result));
+    EXPECT_THAT(gen.Result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(
     GlslGeneratorImplTest_Type,

@@ -27,10 +27,10 @@ TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), "  discard;\n");
+    EXPECT_EQ(gen.Result(), "  discard;\n");
 }
 
 }  // namespace

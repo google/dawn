@@ -293,8 +293,8 @@ TEST_P(GlslGeneratorBuiltinTextureTest, Call) {
 
     auto expected = expected_texture_overload(param.overload);
 
-    EXPECT_THAT(gen.result(), HasSubstr(expected.pre));
-    EXPECT_THAT(gen.result(), HasSubstr(expected.out));
+    EXPECT_THAT(gen.Result(), HasSubstr(expected.pre));
+    EXPECT_THAT(gen.Result(), HasSubstr(expected.out));
 }
 
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorBuiltinTextureTest,

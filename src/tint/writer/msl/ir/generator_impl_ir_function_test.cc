@@ -25,7 +25,7 @@ TEST_F(MslGeneratorImplIrTest, Function_Empty) {
     generator_.EmitFunction(func);
 
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.result(), R"(
+    EXPECT_EQ(generator_.Result(), R"(
 void foo() {
 }
 )");

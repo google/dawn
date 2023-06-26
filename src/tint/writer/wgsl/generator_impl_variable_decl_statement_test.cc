@@ -33,11 +33,11 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(stmt);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  var a : f32;\n");
+    EXPECT_EQ(gen.Result(), "  var a : f32;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {
@@ -48,11 +48,11 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(stmt);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  var a = 123i;\n");
+    EXPECT_EQ(gen.Result(), "  var a = 123i;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_AInt) {
@@ -66,7 +66,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_AInt) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = 1;
   let l = C;
 }
@@ -84,7 +84,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_AFloat) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = 1.0;
   let l = C;
 }
@@ -102,7 +102,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_i32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = 1i;
   let l = C;
 }
@@ -120,7 +120,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_u32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = 1u;
   let l = C;
 }
@@ -138,7 +138,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_f32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = 1.0f;
   let l = C;
 }
@@ -158,7 +158,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_f16) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(enable f16;
+    EXPECT_EQ(gen.Result(), R"(enable f16;
 
 fn f() {
   const C = 1.0h;
@@ -178,7 +178,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_AInt) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = vec3(1, 2, 3);
   let l = C;
 }
@@ -196,7 +196,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_AFloat) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = vec3(1.0, 2.0, 3.0);
   let l = C;
 }
@@ -214,7 +214,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = vec3<f32>(1.0f, 2.0f, 3.0f);
   let l = C;
 }
@@ -234,7 +234,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f16) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(enable f16;
+    EXPECT_EQ(gen.Result(), R"(enable f16;
 
 fn f() {
   const C = vec3<f16>(1.0h, 2.0h, 3.0h);
@@ -254,7 +254,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = mat2x3(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
   let l = C;
 }
@@ -272,7 +272,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = mat2x3<f32>(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f);
   let l = C;
 }
@@ -292,7 +292,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f16) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(enable f16;
+    EXPECT_EQ(gen.Result(), R"(enable f16;
 
 fn f() {
   const C = mat2x3<f16>(1.0h, 2.0h, 3.0h, 4.0h, 5.0h, 6.0h);
@@ -312,7 +312,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_arr_f32) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = array<f32, 3u>(1.0f, 2.0f, 3.0f);
   let l = C;
 }
@@ -333,7 +333,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_arr_vec2_bool) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn f() {
+    EXPECT_EQ(gen.Result(), R"(fn f() {
   const C = array<vec2<bool>, 3u>(vec2<bool>(true, false), vec2<bool>(false, true), vec2<bool>(true, true));
   let l = C;
 }

@@ -28,7 +28,7 @@ TEST_F(HlslGeneratorImplTest, Emit_GlobalConstAssert) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     // const asserts are not emitted
-    EXPECT_EQ(gen.result(), "");
+    EXPECT_EQ(gen.Result(), "");
 }
 
 TEST_F(HlslGeneratorImplTest, Emit_FunctionConstAssert) {
@@ -38,7 +38,7 @@ TEST_F(HlslGeneratorImplTest, Emit_FunctionConstAssert) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     // const asserts are not emitted
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
 }
 )");
 }

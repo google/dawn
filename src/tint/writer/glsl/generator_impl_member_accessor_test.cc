@@ -121,7 +121,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct Data {
   float mem;
@@ -172,7 +172,7 @@ TEST_P(GlslGeneratorImplTest_MemberAccessor_StorageBufferLoad, Test) {
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr(p.expected));
+    EXPECT_THAT(gen.Result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_MemberAccessor,
@@ -225,7 +225,7 @@ TEST_P(GlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr(p.expected));
+    EXPECT_THAT(gen.Result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_MemberAccessor,
@@ -312,7 +312,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_Matrix_Single_Element) {
@@ -360,7 +360,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor,
@@ -405,7 +405,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor,
@@ -456,7 +456,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
@@ -500,7 +500,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
@@ -559,7 +559,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Swizzle) {
@@ -620,7 +620,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor,
@@ -682,7 +682,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Index) {
@@ -743,7 +743,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
@@ -803,7 +803,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Swizzle_SingleLetter) {
@@ -864,7 +864,7 @@ void main() {
   return;
 }
 )";
-    EXPECT_EQ(gen.result(), expected);
+    EXPECT_EQ(gen.Result(), expected);
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
@@ -875,7 +875,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("my_vec.xyz"));
+    EXPECT_THAT(gen.Result(), HasSubstr("my_vec.xyz"));
 }
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
@@ -886,7 +886,7 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
     GeneratorImpl& gen = SanitizeAndBuild();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("my_vec.gbr"));
+    EXPECT_THAT(gen.Result(), HasSubstr("my_vec.gbr"));
 }
 
 }  // namespace

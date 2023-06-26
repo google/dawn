@@ -50,7 +50,7 @@ void TextGenerator::TextBuffer::DecrementIndent() {
 }
 
 void TextGenerator::TextBuffer::Append(const std::string& line) {
-    lines.emplace_back(Line{current_indent, line});
+    lines.emplace_back(LineInfo{current_indent, line});
 }
 
 void TextGenerator::TextBuffer::Insert(const std::string& line, size_t before, uint32_t indent) {
@@ -62,13 +62,13 @@ void TextGenerator::TextBuffer::Insert(const std::string& line, size_t before, u
         return;
     }
     using DT = decltype(lines)::difference_type;
-    lines.insert(lines.begin() + static_cast<DT>(before), Line{indent, line});
+    lines.insert(lines.begin() + static_cast<DT>(before), LineInfo{indent, line});
 }
 
 void TextGenerator::TextBuffer::Append(const TextBuffer& tb) {
     for (auto& line : tb.lines) {
         // TODO(bclayton): inefficient, consider optimizing
-        lines.emplace_back(Line{current_indent + line.indent, line.content});
+        lines.emplace_back(LineInfo{current_indent + line.indent, line.content});
     }
 }
 
@@ -85,7 +85,7 @@ void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint
         // TODO(bclayton): inefficient, consider optimizing
         using DT = decltype(lines)::difference_type;
         lines.insert(lines.begin() + static_cast<DT>(before + idx),
-                     Line{indent + line.indent, line.content});
+                     LineInfo{indent + line.indent, line.content});
         idx++;
     }
 }

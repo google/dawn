@@ -31,7 +31,7 @@ class IRTextGenerator : public TextGenerator {
     ~IRTextGenerator() override;
 
     /// @returns the generated shader string
-    std::string result() const override {
+    std::string Result() const override {
         utils::StringStream ss;
         ss << preamble_buffer_.String() << std::endl << main_buffer_.String();
         return ss.str();

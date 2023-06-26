@@ -44,7 +44,7 @@ TEST_F(HlslGeneratorImplTest, Generate) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(void my_func() {
+    EXPECT_EQ(gen.Result(), R"(void my_func() {
 }
 )");
 }

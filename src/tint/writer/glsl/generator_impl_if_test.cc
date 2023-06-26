@@ -31,10 +31,10 @@ TEST_F(GlslGeneratorImplTest_If, Emit_If) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(i);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  if (cond) {
+    EXPECT_EQ(gen.Result(), R"(  if (cond) {
     return;
   }
 )");
@@ -54,10 +54,10 @@ TEST_F(GlslGeneratorImplTest_If, Emit_IfWithElseIf) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(i);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  if (cond) {
+    EXPECT_EQ(gen.Result(), R"(  if (cond) {
     return;
   } else {
     if (else_cond) {
@@ -79,10 +79,10 @@ TEST_F(GlslGeneratorImplTest_If, Emit_IfWithElse) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(i);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  if (cond) {
+    EXPECT_EQ(gen.Result(), R"(  if (cond) {
     return;
   } else {
     return;
@@ -105,10 +105,10 @@ TEST_F(GlslGeneratorImplTest_If, Emit_IfWithMultiple) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(i);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  if (cond) {
+    EXPECT_EQ(gen.Result(), R"(  if (cond) {
     return;
   } else {
     if (else_cond) {

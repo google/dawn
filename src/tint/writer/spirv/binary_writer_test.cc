@@ -23,7 +23,7 @@ TEST_F(BinaryWriterTest, Preamble) {
     BinaryWriter bw;
     bw.WriteHeader(5);
 
-    auto res = bw.result();
+    auto res = bw.Result();
     ASSERT_EQ(res.size(), 5u);
     EXPECT_EQ(res[0], spv::MagicNumber);
     EXPECT_EQ(res[1], 0x00010300u);  // SPIR-V 1.3
@@ -39,7 +39,7 @@ TEST_F(BinaryWriterTest, Float) {
     BinaryWriter bw;
     bw.WriteModule(&m);
 
-    auto res = bw.result();
+    auto res = bw.Result();
     ASSERT_EQ(res.size(), 2u);
     float f;
     memcpy(&f, res.data() + 1, 4);
@@ -53,7 +53,7 @@ TEST_F(BinaryWriterTest, Int) {
     BinaryWriter bw;
     bw.WriteModule(&m);
 
-    auto res = bw.result();
+    auto res = bw.Result();
     ASSERT_EQ(res.size(), 2u);
     EXPECT_EQ(res[1], 2u);
 }
@@ -65,7 +65,7 @@ TEST_F(BinaryWriterTest, String) {
     BinaryWriter bw;
     bw.WriteModule(&m);
 
-    auto res = bw.result();
+    auto res = bw.Result();
     ASSERT_EQ(res.size(), 4u);
 
     uint8_t* v = reinterpret_cast<uint8_t*>(res.data() + 1);
@@ -90,7 +90,7 @@ TEST_F(BinaryWriterTest, String_Multiple4Length) {
     BinaryWriter bw;
     bw.WriteModule(&m);
 
-    auto res = bw.result();
+    auto res = bw.Result();
     ASSERT_EQ(res.size(), 4u);
 
     uint8_t* v = reinterpret_cast<uint8_t*>(res.data() + 1);
@@ -116,7 +116,7 @@ TEST_F(BinaryWriterTest, TestInstructionWriter) {
     bw.WriteInstruction(i1);
     bw.WriteInstruction(i2);
 
-    auto res = bw.result();
+    auto res = bw.Result();
     ASSERT_EQ(res.size(), 4u);
     EXPECT_EQ(res[1], 2u);
     EXPECT_EQ(res[3], 4u);

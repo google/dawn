@@ -26,10 +26,10 @@ TEST_F(MslGeneratorImplTest, Emit_Continue) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  while (true) {
+    EXPECT_EQ(gen.Result(), R"(  while (true) {
     if (false) {
       break;
     }

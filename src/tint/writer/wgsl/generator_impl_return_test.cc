@@ -29,11 +29,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Return) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(r);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  return;\n");
+    EXPECT_EQ(gen.Result(), "  return;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_ReturnWithValue) {
@@ -42,11 +42,11 @@ TEST_F(WgslGeneratorImplTest, Emit_ReturnWithValue) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(r);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  return 123i;\n");
+    EXPECT_EQ(gen.Result(), "  return 123i;\n");
 }
 
 }  // namespace

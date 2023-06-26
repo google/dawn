@@ -260,7 +260,7 @@ GeneratorImpl::~GeneratorImpl() = default;
 
 void GeneratorImpl::Generate() {
     {
-        auto out = line();
+        auto out = Line();
         out << "#version " << version_.major_version << version_.minor_version << "0";
         if (version_.IsES()) {
             out << " es";
@@ -269,7 +269,7 @@ void GeneratorImpl::Generate() {
 
     auto helpers_insertion_point = current_buffer_->lines.size();
 
-    line();
+    Line();
 
     auto* mod = builder_.Sem().Module();
     for (auto* decl : mod->DependencyOrderedDeclarations()) {
@@ -387,7 +387,7 @@ void GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpr
 }
 
 void GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
-    auto out = line();
+    auto out = Line();
     EmitExpression(out, stmt->lhs);
     out << " = ";
     EmitExpression(out, stmt->rhs);
@@ -470,7 +470,7 @@ void GeneratorImpl::EmitFloatModulo(utils::StringStream& out, const ast::BinaryE
                                 auto fn_name = UniqueIdentifier("tint_float_modulo");
                                 std::vector<std::string> parameter_names;
                                 {
-                                    auto decl = line(&b);
+                                    auto decl = Line(&b);
                                     EmitTypeAndName(decl, ret_ty, builtin::AddressSpace::kUndefined,
                                                     builtin::Access::kUndefined, fn_name);
                                     {
@@ -487,10 +487,10 @@ void GeneratorImpl::EmitFloatModulo(utils::StringStream& out, const ast::BinaryE
                                 }
                                 {
                                     ScopedIndent si(&b);
-                                    line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
+                                    Line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
                                 }
-                                line(&b) << "}";
-                                line(&b);
+                                Line(&b) << "}";
+                                Line(&b);
                                 return fn_name;
                             });
 
@@ -514,27 +514,27 @@ void GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpres
         auto name = UniqueIdentifier(kTempNamePrefix);
 
         {
-            auto pre = line();
+            auto pre = Line();
             pre << "bool " << name << " = ";
             EmitExpression(pre, expr->lhs);
             pre << ";";
         }
 
         if (expr->op == ast::BinaryOp::kLogicalOr) {
-            line() << "if (!" << name << ") {";
+            Line() << "if (!" << name << ") {";
         } else {
-            line() << "if (" << name << ") {";
+            Line() << "if (" << name << ") {";
         }
 
         {
             ScopedIndent si(this);
-            auto pre = line();
+            auto pre = Line();
             pre << name << " = ";
             EmitExpression(pre, expr->rhs);
             pre << ";";
         }
 
-        line() << "}";
+        Line() << "}";
 
         out << "(" << name << ")";
         return;
@@ -633,17 +633,17 @@ void GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Stateme
 }
 
 void GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
-    line() << "{";
+    Line() << "{";
     EmitStatementsWithIndent(stmt->statements);
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
-    line() << "break;";
+    Line() << "break;";
 }
 
 void GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
-    auto out = line();
+    auto out = Line();
     out << "if (";
     EmitExpression(out, b->condition);
     out << ") { break; }";
@@ -825,13 +825,13 @@ void GeneratorImpl::EmitWorkgroupAtomicCall(utils::StringStream& out,
             std::string result = UniqueIdentifier("atomic_compare_result");
 
             {
-                auto pre = line();
+                auto pre = Line();
                 EmitTypeAndName(pre, builtin->ReturnType(), builtin::AddressSpace::kUndefined,
                                 builtin::Access::kUndefined, result);
                 pre << ";";
             }
             {
-                auto pre = line();
+                auto pre = Line();
                 pre << result << ".old_value = atomicCompSwap";
                 {
                     ScopedParen sp(pre);
@@ -844,7 +844,7 @@ void GeneratorImpl::EmitWorkgroupAtomicCall(utils::StringStream& out,
                 pre << ";";
             }
             {
-                auto pre = line();
+                auto pre = Line();
                 pre << result << ".exchanged = " << result << ".old_value == ";
                 EmitExpression(pre, compare_value);
                 pre << ";";
@@ -950,7 +950,7 @@ void GeneratorImpl::EmitSelectCall(utils::StringStream& out,
     if (auto* vec = builtin->Parameters()[2]->Type()->As<type::Vector>()) {
         CallBuiltinHelper(out, expr, builtin,
                           [&](TextBuffer* b, const std::vector<std::string>& params) {
-                              auto l = line(b);
+                              auto l = Line(b);
                               l << "  return ";
                               EmitType(l, builtin->ReturnType(), builtin::AddressSpace::kUndefined,
                                        builtin::Access::kUndefined, "");
@@ -1004,7 +1004,7 @@ void GeneratorImpl::EmitDotCall(utils::StringStream& out,
                 v = s.str();
             }
             {  // (u)int tint_int_dot([i|u]vecN a, [i|u]vecN b) {
-                auto l = line(&b);
+                auto l = Line(&b);
                 EmitType(l, vec_ty->type(), builtin::AddressSpace::kUndefined,
                          builtin::Access::kRead, "");
                 l << " " << fn_name << "(";
@@ -1014,7 +1014,7 @@ void GeneratorImpl::EmitDotCall(utils::StringStream& out,
                 l << " b) {";
             }
             {
-                auto l = line(&b);
+                auto l = Line(&b);
                 l << "  return ";
                 for (uint32_t i = 0; i < vec_ty->Width(); i++) {
                     if (i > 0) {
@@ -1024,7 +1024,7 @@ void GeneratorImpl::EmitDotCall(utils::StringStream& out,
                 }
                 l << ";";
             }
-            line(&b) << "}";
+            Line(&b) << "}";
             return fn_name;
         });
     }
@@ -1048,13 +1048,13 @@ void GeneratorImpl::EmitModfCall(utils::StringStream& out,
                           EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>());
 
                           {
-                              auto l = line(b);
+                              auto l = Line(b);
                               EmitType(l, builtin->ReturnType(), builtin::AddressSpace::kUndefined,
                                        builtin::Access::kUndefined, "");
                               l << " result;";
                           }
-                          line(b) << "result.fract = modf(" << params[0] << ", result.whole);";
-                          line(b) << "return result;";
+                          Line(b) << "result.fract = modf(" << params[0] << ", result.whole);";
+                          Line(b) << "return result;";
                       });
 }
 
@@ -1069,13 +1069,13 @@ void GeneratorImpl::EmitFrexpCall(utils::StringStream& out,
                           EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>());
 
                           {
-                              auto l = line(b);
+                              auto l = Line(b);
                               EmitType(l, builtin->ReturnType(), builtin::AddressSpace::kUndefined,
                                        builtin::Access::kUndefined, "");
                               l << " result;";
                           }
-                          line(b) << "result.fract = frexp(" << params[0] << ", result.exp);";
-                          line(b) << "return result;";
+                          Line(b) << "result.fract = frexp(" << params[0] << ", result.exp);";
+                          Line(b) << "return result;";
                       });
 }
 
@@ -1086,7 +1086,7 @@ void GeneratorImpl::EmitDegreesCall(utils::StringStream& out,
     const std::string suffix = Is<type::F16>(return_elem_type) ? "hf" : "f";
     CallBuiltinHelper(out, expr, builtin,
                       [&](TextBuffer* b, const std::vector<std::string>& params) {
-                          line(b) << "return " << params[0] << " * " << std::setprecision(20)
+                          Line(b) << "return " << params[0] << " * " << std::setprecision(20)
                                   << sem::kRadToDeg << suffix << ";";
                       });
 }
@@ -1098,7 +1098,7 @@ void GeneratorImpl::EmitRadiansCall(utils::StringStream& out,
     const std::string suffix = Is<type::F16>(return_elem_type) ? "hf" : "f";
     CallBuiltinHelper(out, expr, builtin,
                       [&](TextBuffer* b, const std::vector<std::string>& params) {
-                          line(b) << "return " << params[0] << " * " << std::setprecision(20)
+                          Line(b) << "return " << params[0] << " * " << std::setprecision(20)
                                   << sem::kDegToRad << suffix << ";";
                       });
 }
@@ -1113,24 +1113,24 @@ void GeneratorImpl::EmitQuantizeToF16Call(utils::StringStream& out,
             if (auto* vec = builtin->ReturnType()->As<type::Vector>()) {
                 switch (vec->Width()) {
                     case 2: {
-                        line(b) << "return unpackHalf2x16(packHalf2x16(" << v << "));";
+                        Line(b) << "return unpackHalf2x16(packHalf2x16(" << v << "));";
                         return;
                     }
                     case 3: {
-                        line(b) << "return vec3(";
-                        line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".xy)),";
-                        line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".zz)).x);";
+                        Line(b) << "return vec3(";
+                        Line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".xy)),";
+                        Line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".zz)).x);";
                         return;
                     }
                     default: {
-                        line(b) << "return vec4(";
-                        line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".xy)),";
-                        line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".zw)));";
+                        Line(b) << "return vec4(";
+                        Line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".xy)),";
+                        Line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".zw)));";
                         return;
                     }
                 }
             }
-            line(b) << "return unpackHalf2x16(packHalf2x16(vec2(" << v << "))).x;";
+            Line(b) << "return unpackHalf2x16(packHalf2x16(vec2(" << v << "))).x;";
         });
 }
 
@@ -1577,7 +1577,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
 void GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
     auto* sem = builder_.Sem().Get<sem::CaseStatement>(stmt);
     for (auto* selector : sem->Selectors()) {
-        auto out = line();
+        auto out = Line();
 
         if (selector->IsDefault()) {
             out << "default";
@@ -1595,24 +1595,24 @@ void GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
         ScopedIndent si(this);
         EmitStatements(stmt->body->statements);
         if (!last_is_break(stmt->body)) {
-            line() << "break;";
+            Line() << "break;";
         }
     }
 
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
     if (emit_continuing_) {
         emit_continuing_();
     }
-    line() << "continue;";
+    Line() << "continue;";
 }
 
 void GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
     // TODO(dsinclair): Verify this is correct when the discard semantics are
     // defined for WGSL (https://github.com/gpuweb/gpuweb/issues/361)
-    line() << "discard;";
+    Line() << "discard;";
 }
 
 void GeneratorImpl::EmitExpression(utils::StringStream& out, const ast::Expression* expr) {
@@ -1645,7 +1645,7 @@ void GeneratorImpl::EmitIdentifier(utils::StringStream& out,
 
 void GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     {
-        auto out = line();
+        auto out = Line();
         out << "if (";
         EmitExpression(out, stmt->condition);
         out << ") {";
@@ -1653,14 +1653,14 @@ void GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     EmitStatementsWithIndent(stmt->body->statements);
 
     if (stmt->else_statement) {
-        line() << "} else {";
+        Line() << "} else {";
         if (auto* block = stmt->else_statement->As<ast::BlockStatement>()) {
             EmitStatementsWithIndent(block->statements);
         } else {
             EmitStatementsWithIndent(utils::Vector{stmt->else_statement});
         }
     }
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitFunction(const ast::Function* func) {
@@ -1672,7 +1672,7 @@ void GeneratorImpl::EmitFunction(const ast::Function* func) {
     }
 
     {
-        auto out = line();
+        auto out = Line();
         auto name = func->name->symbol.Name();
         EmitType(out, sem->ReturnType(), builtin::AddressSpace::kUndefined,
                  builtin::Access::kReadWrite, "");
@@ -1710,8 +1710,8 @@ void GeneratorImpl::EmitFunction(const ast::Function* func) {
 
     EmitStatementsWithIndent(func->body->statements);
 
-    line() << "}";
-    line();
+    Line() << "}";
+    Line();
 }
 
 void GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
@@ -1776,14 +1776,14 @@ void GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable
     }
     auto bp = *sem->As<sem::GlobalVariable>()->BindingPoint();
     {
-        auto out = line();
+        auto out = Line();
         out << "layout(binding = " << bp.binding << ", std140";
         out << ") uniform " << UniqueIdentifier(StructName(str) + "_ubo") << " {";
     }
     EmitStructMembers(current_buffer_, str);
     auto name = var->name->symbol.Name();
-    line() << "} " << name << ";";
-    line();
+    Line() << "} " << name << ";";
+    Line();
 }
 
 void GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable* sem) {
@@ -1794,16 +1794,16 @@ void GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable
         return;
     }
     auto bp = *sem->As<sem::GlobalVariable>()->BindingPoint();
-    line() << "layout(binding = " << bp.binding << ", std430) buffer "
+    Line() << "layout(binding = " << bp.binding << ", std430) buffer "
            << UniqueIdentifier(StructName(str) + "_ssbo") << " {";
     EmitStructMembers(current_buffer_, str);
     auto name = var->name->symbol.Name();
-    line() << "} " << name << ";";
-    line();
+    Line() << "} " << name << ";";
+    Line();
 }
 
 void GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable* sem) {
-    auto out = line();
+    auto out = Line();
 
     auto name = var->name->symbol.Name();
     auto* type = sem->Type()->UnwrapRef();
@@ -1879,7 +1879,7 @@ void GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
 
 void GeneratorImpl::EmitPrivateVariable(const sem::Variable* var) {
     auto* decl = var->Declaration();
-    auto out = line();
+    auto out = Line();
 
     auto name = decl->name->symbol.Name();
     auto* type = var->Type()->UnwrapRef();
@@ -1896,7 +1896,7 @@ void GeneratorImpl::EmitPrivateVariable(const sem::Variable* var) {
 
 void GeneratorImpl::EmitWorkgroupVariable(const sem::Variable* var) {
     auto* decl = var->Declaration();
-    auto out = line();
+    auto out = Line();
 
     out << "shared ";
 
@@ -1925,7 +1925,7 @@ void GeneratorImpl::EmitIOVariable(const sem::GlobalVariable* var) {
         return;
     }
 
-    auto out = line();
+    auto out = Line();
     EmitAttributes(out, var, decl->attributes);
     EmitInterpolationQualifiers(out, decl->attributes);
 
@@ -2005,7 +2005,7 @@ void GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     }
 
     if (func->PipelineStage() == ast::PipelineStage::kCompute) {
-        auto out = line();
+        auto out = Line();
         // Emit the layout(local_size) attributes.
         auto wgsize = func_sem->WorkgroupSize();
         out << "layout(";
@@ -2029,7 +2029,7 @@ void GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 
     // Emit original entry point signature
     {
-        auto out = line();
+        auto out = Line();
         EmitTypeAndName(out, func_sem->ReturnType(), builtin::AddressSpace::kUndefined,
                         builtin::Access::kUndefined, func->name->symbol.Name());
         out << "(";
@@ -2062,7 +2062,7 @@ void GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     {
         ScopedIndent si(this);
         if (func->PipelineStage() == ast::PipelineStage::kVertex) {
-            line() << "gl_PointSize = 1.0;";
+            Line() << "gl_PointSize = 1.0;";
         }
 
         EmitStatements(func->body->statements);
@@ -2073,7 +2073,7 @@ void GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         }
     }
 
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitConstant(utils::StringStream& out, const constant::Value* constant) {
@@ -2251,23 +2251,23 @@ void GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
     };
 
     TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-    line() << "while (true) {";
+    Line() << "while (true) {";
     {
         ScopedIndent si(this);
         EmitStatements(stmt->body->statements);
         emit_continuing_();
     }
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     // Nest a for loop with a new block. In HLSL the initializer scope is not
     // nested by the for-loop, so we may get variable redefinitions.
-    line() << "{";
-    increment_indent();
+    Line() << "{";
+    IncrementIndent();
     TINT_DEFER({
-        decrement_indent();
-        line() << "}";
+        DecrementIndent();
+        Line() << "}";
     });
 
     TextBuffer init_buf;
@@ -2306,16 +2306,16 @@ void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
         auto emit_continuing = [&] { current_buffer_->Append(cont_buf); };
 
         TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-        line() << "while (true) {";
-        increment_indent();
+        Line() << "while (true) {";
+        IncrementIndent();
         TINT_DEFER({
-            decrement_indent();
-            line() << "}";
+            DecrementIndent();
+            Line() << "}";
         });
 
         if (stmt->condition) {
             current_buffer_->Append(cond_pre);
-            line() << "if (!(" << cond_buf.str() << ")) { break; }";
+            Line() << "if (!(" << cond_buf.str() << ")) { break; }";
         }
 
         EmitStatements(stmt->body->statements);
@@ -2323,7 +2323,7 @@ void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     } else {
         // For-loop can be generated.
         {
-            auto out = line();
+            auto out = Line();
             out << "for";
             {
                 ScopedParen sp(out);
@@ -2347,7 +2347,7 @@ void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
             TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
             EmitStatementsWithIndent(stmt->body->statements);
         }
-        line() << "}";
+        Line() << "}";
     }
 }
 
@@ -2367,21 +2367,21 @@ void GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
     // as a regular while in GLSL. Instead we need to generate a `while(true)` loop.
     bool emit_as_loop = cond_pre.lines.size() > 0;
     if (emit_as_loop) {
-        line() << "while (true) {";
-        increment_indent();
+        Line() << "while (true) {";
+        IncrementIndent();
         TINT_DEFER({
-            decrement_indent();
-            line() << "}";
+            DecrementIndent();
+            Line() << "}";
         });
 
         current_buffer_->Append(cond_pre);
-        line() << "if (!(" << cond_buf.str() << ")) { break; }";
+        Line() << "if (!(" << cond_buf.str() << ")) { break; }";
 
         EmitStatements(stmt->body->statements);
     } else {
         // While can be generated.
         {
-            auto out = line();
+            auto out = Line();
             out << "while";
             {
                 ScopedParen sp(out);
@@ -2390,7 +2390,7 @@ void GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
             out << " {";
         }
         EmitStatementsWithIndent(stmt->body->statements);
-        line() << "}";
+        Line() << "}";
     }
 }
 
@@ -2418,12 +2418,12 @@ void GeneratorImpl::EmitMemberAccessor(utils::StringStream& out,
 
 void GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
     if (stmt->value) {
-        auto out = line();
+        auto out = Line();
         out << "return ";
         EmitExpression(out, stmt->value);
         out << ";";
     } else {
-        line() << "return;";
+        Line() << "return;";
     }
 }
 
@@ -2435,7 +2435,7 @@ void GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::BreakStatement* b) { EmitBreak(b); },
         [&](const ast::BreakIfStatement* b) { EmitBreakIf(b); },
         [&](const ast::CallStatement* c) {
-            auto out = line();
+            auto out = Line();
             EmitCall(out, c->expr);
             out << ";";
         },
@@ -2471,7 +2471,7 @@ void GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
 
 void GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {  // switch(expr) {
-        auto out = line();
+        auto out = Line();
         out << "switch(";
         EmitExpression(out, stmt->condition);
         out << ") {";
@@ -2484,7 +2484,7 @@ void GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
         }
     }
 
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitType(utils::StringStream& out,
@@ -2675,10 +2675,10 @@ void GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
     }
 
     auto address_space_uses = str->AddressSpaceUsage();
-    line(b) << "struct " << StructName(str) << " {";
+    Line(b) << "struct " << StructName(str) << " {";
     EmitStructMembers(b, str);
-    line(b) << "};";
-    line(b);
+    Line(b) << "};";
+    Line(b);
 }
 
 void GeneratorImpl::EmitStructMembers(TextBuffer* b, const type::Struct* str) {
@@ -2687,7 +2687,7 @@ void GeneratorImpl::EmitStructMembers(TextBuffer* b, const type::Struct* str) {
         auto name = mem->Name().Name();
         auto* ty = mem->Type();
 
-        auto out = line(b);
+        auto out = Line(b);
         EmitTypeAndName(out, ty, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite,
                         name);
         out << ";";
@@ -2723,7 +2723,7 @@ void GeneratorImpl::EmitVar(const ast::Var* var) {
     auto* sem = builder_.Sem().Get(var);
     auto* type = sem->Type()->UnwrapRef();
 
-    auto out = line();
+    auto out = Line();
     EmitTypeAndName(out, type, sem->AddressSpace(), sem->Access(), var->name->symbol.Name());
 
     out << " = ";
@@ -2740,7 +2740,7 @@ void GeneratorImpl::EmitLet(const ast::Let* let) {
     auto* sem = builder_.Sem().Get(let);
     auto* type = sem->Type()->UnwrapRef();
 
-    auto out = line();
+    auto out = Line();
     // TODO(senorblanco): handle const
     EmitTypeAndName(out, type, builtin::AddressSpace::kUndefined, builtin::Access::kUndefined,
                     let->name->symbol.Name());
@@ -2754,7 +2754,7 @@ void GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     auto* sem = builder_.Sem().Get(var);
     auto* type = sem->Type();
 
-    auto out = line();
+    auto out = Line();
     out << "const ";
     EmitTypeAndName(out, type, builtin::AddressSpace::kUndefined, builtin::Access::kUndefined,
                     var->name->symbol.Name());
@@ -2776,7 +2776,7 @@ void GeneratorImpl::CallBuiltinHelper(utils::StringStream& out,
         auto fn_name = UniqueIdentifier(std::string("tint_") + builtin::str(builtin->Type()));
         std::vector<std::string> parameter_names;
         {
-            auto decl = line(&b);
+            auto decl = Line(&b);
             EmitTypeAndName(decl, builtin->ReturnType(), builtin::AddressSpace::kUndefined,
                             builtin::Access::kUndefined, fn_name);
             {
@@ -2802,8 +2802,8 @@ void GeneratorImpl::CallBuiltinHelper(utils::StringStream& out,
             ScopedIndent si(&b);
             build(&b, parameter_names);
         }
-        line(&b) << "}";
-        line(&b);
+        Line(&b) << "}";
+        Line(&b);
         return fn_name;
     });
 

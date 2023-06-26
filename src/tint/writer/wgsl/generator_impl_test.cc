@@ -29,7 +29,7 @@ TEST_F(WgslGeneratorImplTest, Generate) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(fn my_func() {
+    EXPECT_EQ(gen.Result(), R"(fn my_func() {
 }
 )");
 }

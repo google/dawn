@@ -26,10 +26,10 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(i)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  if (cond) {
+    EXPECT_EQ(gen.Result(), R"(  if (cond) {
     return;
   }
 )");
@@ -43,10 +43,10 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(i)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  if (cond) {
+    EXPECT_EQ(gen.Result(), R"(  if (cond) {
     return;
   } else {
     if (else_cond) {
@@ -63,10 +63,10 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(i)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  if (cond) {
+    EXPECT_EQ(gen.Result(), R"(  if (cond) {
     return;
   } else {
     return;
@@ -83,10 +83,10 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(i)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  if (cond) {
+    EXPECT_EQ(gen.Result(), R"(  if (cond) {
     return;
   } else {
     if (else_cond) {

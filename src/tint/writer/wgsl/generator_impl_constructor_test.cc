@@ -32,7 +32,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Bool) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("false"));
+    EXPECT_THAT(gen.Result(), HasSubstr("false"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Int) {
@@ -41,7 +41,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Int) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("-12345"));
+    EXPECT_THAT(gen.Result(), HasSubstr("-12345"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, UInt) {
@@ -50,7 +50,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, UInt) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("56779u"));
+    EXPECT_THAT(gen.Result(), HasSubstr("56779u"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, F32) {
@@ -61,7 +61,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, F32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("1073741824.0f"));
+    EXPECT_THAT(gen.Result(), HasSubstr("1073741824.0f"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, F16) {
@@ -74,7 +74,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, F16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("32752.0h"));
+    EXPECT_THAT(gen.Result(), HasSubstr("32752.0h"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_F32) {
@@ -84,7 +84,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_F32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("f32(-0.00001200000042445026f)"));
+    EXPECT_THAT(gen.Result(), HasSubstr("f32(-0.00001200000042445026f)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_F16) {
@@ -96,7 +96,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_F16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("f16(-0.00001198053359985352h)"));
+    EXPECT_THAT(gen.Result(), HasSubstr("f16(-0.00001198053359985352h)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Bool) {
@@ -106,7 +106,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Bool) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("bool(true)"));
+    EXPECT_THAT(gen.Result(), HasSubstr("bool(true)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Int) {
@@ -116,7 +116,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Int) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("i32(-12345i)"));
+    EXPECT_THAT(gen.Result(), HasSubstr("i32(-12345i)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Uint) {
@@ -126,7 +126,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Uint) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("u32(12345u)"));
+    EXPECT_THAT(gen.Result(), HasSubstr("u32(12345u)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Vec_F32) {
@@ -136,7 +136,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Vec_F32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("vec3<f32>(1.0f, 2.0f, 3.0f)"));
+    EXPECT_THAT(gen.Result(), HasSubstr("vec3<f32>(1.0f, 2.0f, 3.0f)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Vec_F16) {
@@ -148,7 +148,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Vec_F16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("vec3<f16>(1.0h, 2.0h, 3.0h)"));
+    EXPECT_THAT(gen.Result(), HasSubstr("vec3<f16>(1.0h, 2.0h, 3.0h)"));
 }
 
 TEST_F(WgslGeneratorImplTest_Constructor, Type_Mat_F32) {
@@ -159,7 +159,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Mat_F32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("mat2x3<f32>(vec3<f32>(1.0f, 2.0f, 3.0f), "
+    EXPECT_THAT(gen.Result(), HasSubstr("mat2x3<f32>(vec3<f32>(1.0f, 2.0f, 3.0f), "
                                         "vec3<f32>(3.0f, 4.0f, 5.0f))"));
 }
 
@@ -173,7 +173,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Mat_F16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(), HasSubstr("mat2x3<f16>(vec3<f16>(1.0h, 2.0h, 3.0h), "
+    EXPECT_THAT(gen.Result(), HasSubstr("mat2x3<f16>(vec3<f16>(1.0h, 2.0h, 3.0h), "
                                         "vec3<f16>(3.0h, 4.0h, 5.0h))"));
 }
 
@@ -185,7 +185,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_Array) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(),
+    EXPECT_THAT(gen.Result(),
                 HasSubstr("array<vec3<f32>, 3u>(vec3<f32>(1.0f, 2.0f, 3.0f), "
                           "vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f))"));
 }
@@ -198,7 +198,7 @@ TEST_F(WgslGeneratorImplTest_Constructor, Type_ImplicitArray) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_THAT(gen.result(),
+    EXPECT_THAT(gen.Result(),
                 HasSubstr("array(vec3<f32>(1.0f, 2.0f, 3.0f), "
                           "vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f))"));
 }

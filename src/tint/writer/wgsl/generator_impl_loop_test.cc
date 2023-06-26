@@ -33,11 +33,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(l);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  loop {
+    EXPECT_EQ(gen.Result(), R"(  loop {
     break;
   }
 )");
@@ -55,11 +55,11 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(l);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  loop {
+    EXPECT_EQ(gen.Result(), R"(  loop {
     break;
 
     continuing {
@@ -81,11 +81,11 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing_BreakIf) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(l);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  loop {
+    EXPECT_EQ(gen.Result(), R"(  loop {
     discard;
 
     continuing {
@@ -108,11 +108,11 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  for({
+    EXPECT_EQ(gen.Result(), R"(  for({
     _ = 1i;
     _ = 2i;
   }; ; ) {
@@ -131,11 +131,11 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithSimpleCond) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  for(; true; ) {
+    EXPECT_EQ(gen.Result(), R"(  for(; true; ) {
     return;
   }
 )");
@@ -152,11 +152,11 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithSimpleCont) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  for(; ; i = (i + 1i)) {
+    EXPECT_EQ(gen.Result(), R"(  for(; ; i = (i + 1i)) {
     return;
   }
 )");
@@ -175,11 +175,11 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  for(; ; {
+    EXPECT_EQ(gen.Result(), R"(  for(; ; {
     _ = 1i;
     _ = 2i;
   }) {
@@ -198,11 +198,11 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  for(var i : i32; true; i = (i + 1i)) {
+    EXPECT_EQ(gen.Result(), R"(  for(var i : i32; true; i = (i + 1i)) {
     return;
   }
 )");
@@ -221,11 +221,11 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  for({
+    EXPECT_EQ(gen.Result(), R"(  for({
     _ = 1i;
     _ = 2i;
   }; true; {
@@ -247,11 +247,11 @@ TEST_F(WgslGeneratorImplTest, Emit_While) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  while(true) {
+    EXPECT_EQ(gen.Result(), R"(  while(true) {
     return;
   }
 )");
@@ -267,11 +267,11 @@ TEST_F(WgslGeneratorImplTest, Emit_While_WithContinue) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  while(true) {
+    EXPECT_EQ(gen.Result(), R"(  while(true) {
     continue;
   }
 )");
@@ -289,11 +289,11 @@ TEST_F(WgslGeneratorImplTest, Emit_WhileMultiCond) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(f);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  while((true && false)) {
+    EXPECT_EQ(gen.Result(), R"(  while((true && false)) {
     return;
   }
 )");

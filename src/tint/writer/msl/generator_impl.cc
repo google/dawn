@@ -287,9 +287,9 @@ bool GeneratorImpl::Generate() {
         return false;
     }
 
-    line() << "#include <metal_stdlib>";
-    line();
-    line() << "using namespace metal;";
+    Line() << "#include <metal_stdlib>";
+    Line();
+    Line() << "using namespace metal;";
 
     auto helpers_insertion_point = current_buffer_->lines.size();
 
@@ -298,7 +298,7 @@ bool GeneratorImpl::Generate() {
         bool ok = Switch(
             decl,  //
             [&](const ast::Struct* str) {
-                TINT_DEFER(line());
+                TINT_DEFER(Line());
                 return EmitTypeDecl(TypeOf(str));
             },
             [&](const ast::Alias*) {
@@ -315,7 +315,7 @@ bool GeneratorImpl::Generate() {
                 return false;
             },
             [&](const ast::Function* func) {
-                TINT_DEFER(line());
+                TINT_DEFER(Line());
                 if (func->IsEntryPoint()) {
                     return EmitEntryPointFunction(func);
                 }
@@ -346,12 +346,12 @@ bool GeneratorImpl::Generate() {
         // 'invariant' attribute requires MSL 2.1 or higher.
         // WGSL can ignore the invariant attribute on pre MSL 2.1 devices.
         // See: https://github.com/gpuweb/gpuweb/issues/893#issuecomment-745537465
-        line(&helpers_) << "#if __METAL_VERSION__ >= 210";
-        line(&helpers_) << "#define " << invariant_define_name_ << " [[invariant]]";
-        line(&helpers_) << "#else";
-        line(&helpers_) << "#define " << invariant_define_name_;
-        line(&helpers_) << "#endif";
-        line(&helpers_);
+        Line(&helpers_) << "#if __METAL_VERSION__ >= 210";
+        Line(&helpers_) << "#define " << invariant_define_name_ << " [[invariant]]";
+        Line(&helpers_) << "#else";
+        Line(&helpers_) << "#define " << invariant_define_name_;
+        Line(&helpers_) << "#endif";
+        Line(&helpers_);
     }
 
     if (!helpers_.lines.empty()) {
@@ -417,7 +417,7 @@ bool GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpr
 }
 
 bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
-    auto out = line();
+    auto out = Line();
 
     if (!EmitExpression(out, stmt->lhs)) {
         return false;
@@ -629,12 +629,12 @@ bool GeneratorImpl::EmitBinary(utils::StringStream& out, const ast::BinaryExpres
 }
 
 bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
-    line() << "break;";
+    Line() << "break;";
     return true;
 }
 
 bool GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
-    auto out = line();
+    auto out = Line();
     out << "if (";
     if (!EmitExpression(out, b->condition)) {
         return false;
@@ -935,7 +935,7 @@ bool GeneratorImpl::EmitAtomicCall(utils::StringStream& out,
                     auto* arg_ty = builtin->Parameters()[1]->Type();
 
                     {
-                        auto f = line(&buf);
+                        auto f = Line(&buf);
                         auto str_name = StructName(builtin->ReturnType()->As<type::Struct>());
                         f << str_name << " " << name << "(";
                         if (!EmitTypeAndName(f, atomic_ty, "atomic")) {
@@ -955,22 +955,22 @@ bool GeneratorImpl::EmitAtomicCall(utils::StringStream& out,
                     buf.IncrementIndent();
                     TINT_DEFER({
                         buf.DecrementIndent();
-                        line(&buf) << "}";
-                        line(&buf);
+                        Line(&buf) << "}";
+                        Line(&buf);
                     });
 
                     {
-                        auto f = line(&buf);
+                        auto f = Line(&buf);
                         if (!EmitTypeAndName(f, arg_ty, "old_value")) {
                             return "";
                         }
                         f << " = compare;";
                     }
-                    line(&buf) << "bool exchanged = "
+                    Line(&buf) << "bool exchanged = "
                                   "atomic_compare_exchange_weak_explicit(atomic, "
                                   "&old_value, value, memory_order_relaxed, "
                                   "memory_order_relaxed);";
-                    line(&buf) << "return {old_value, exchanged};";
+                    Line(&buf) << "return {old_value, exchanged};";
                     return name;
                 });
 
@@ -1315,10 +1315,10 @@ bool GeneratorImpl::EmitDotCall(utils::StringStream& out,
             auto fn_name = UniqueIdentifier("tint_dot" + std::to_string(vec_ty->Width()));
             auto v = "vec<T," + std::to_string(vec_ty->Width()) + ">";
 
-            line(&b) << "template<typename T>";
-            line(&b) << "T " << fn_name << "(" << v << " a, " << v << " b) {";
+            Line(&b) << "template<typename T>";
+            Line(&b) << "T " << fn_name << "(" << v << " a, " << v << " b) {";
             {
-                auto l = line(&b);
+                auto l = Line(&b);
                 l << "  return ";
                 for (uint32_t i = 0; i < vec_ty->Width(); i++) {
                     if (i > 0) {
@@ -1328,7 +1328,7 @@ bool GeneratorImpl::EmitDotCall(utils::StringStream& out,
                 }
                 l << ";";
             }
-            line(&b) << "}";
+            Line(&b) << "}";
             return fn_name;
         });
     }
@@ -1364,9 +1364,9 @@ bool GeneratorImpl::EmitModfCall(utils::StringStream& out,
                 return false;
             }
 
-            line(b) << StructName(builtin->ReturnType()->As<type::Struct>()) << " result;";
-            line(b) << "result.fract = modf(" << in << ", result.whole);";
-            line(b) << "return result;";
+            Line(b) << StructName(builtin->ReturnType()->As<type::Struct>()) << " result;";
+            Line(b) << "result.fract = modf(" << in << ", result.whole);";
+            Line(b) << "return result;";
             return true;
         });
 }
@@ -1390,9 +1390,9 @@ bool GeneratorImpl::EmitFrexpCall(utils::StringStream& out,
                 return false;
             }
 
-            line(b) << StructName(builtin->ReturnType()->As<type::Struct>()) << " result;";
-            line(b) << "result.fract = frexp(" << in << ", result.exp);";
-            line(b) << "return result;";
+            Line(b) << StructName(builtin->ReturnType()->As<type::Struct>()) << " result;";
+            Line(b) << "result.fract = frexp(" << in << ", result.exp);";
+            Line(b) << "return result;";
             return true;
         });
 }
@@ -1402,7 +1402,7 @@ bool GeneratorImpl::EmitDegreesCall(utils::StringStream& out,
                                     const sem::Builtin* builtin) {
     return CallBuiltinHelper(out, expr, builtin,
                              [&](TextBuffer* b, const std::vector<std::string>& params) {
-                                 line(b) << "return " << params[0] << " * " << std::setprecision(20)
+                                 Line(b) << "return " << params[0] << " * " << std::setprecision(20)
                                          << sem::kRadToDeg << ";";
                                  return true;
                              });
@@ -1413,7 +1413,7 @@ bool GeneratorImpl::EmitRadiansCall(utils::StringStream& out,
                                     const sem::Builtin* builtin) {
     return CallBuiltinHelper(out, expr, builtin,
                              [&](TextBuffer* b, const std::vector<std::string>& params) {
-                                 line(b) << "return " << params[0] << " * " << std::setprecision(20)
+                                 Line(b) << "return " << params[0] << " * " << std::setprecision(20)
                                          << sem::kDegToRad << ";";
                                  return true;
                              });
@@ -1576,7 +1576,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
 bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
     auto* sem = builder_.Sem().Get<sem::CaseStatement>(stmt);
     for (auto* selector : sem->Selectors()) {
-        auto out = line();
+        auto out = Line();
 
         if (selector->IsDefault()) {
             out << "default";
@@ -1602,11 +1602,11 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
         }
 
         if (!last_is_break(stmt->body)) {
-            line() << "break;";
+            Line() << "break;";
         }
     }
 
-    line() << "}";
+    Line() << "}";
 
     return true;
 }
@@ -1616,7 +1616,7 @@ bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
         return false;
     }
 
-    line() << "continue;";
+    Line() << "continue;";
     return true;
 }
 
@@ -1874,7 +1874,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     auto* func_sem = program_->Sem().Get(func);
 
     {
-        auto out = line();
+        auto out = Line();
         if (!EmitType(out, func_sem->ReturnType(), "")) {
             return false;
         }
@@ -1906,7 +1906,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
         return false;
     }
 
-    line() << "}";
+    Line() << "}";
 
     return true;
 }
@@ -2003,7 +2003,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     };
 
     {
-        auto out = line();
+        auto out = Line();
 
         EmitStage(out, func->PipelineStage());
         out << " ";
@@ -2126,7 +2126,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         }
     }
 
-    line() << "}";
+    Line() << "}";
     return true;
 }
 
@@ -2147,7 +2147,7 @@ bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
     };
 
     TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-    line() << "while (true) {";
+    Line() << "while (true) {";
     {
         ScopedIndent si(this);
         if (!EmitStatements(stmt->body->statements)) {
@@ -2157,7 +2157,7 @@ bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
             return false;
         }
     }
-    line() << "}";
+    Line() << "}";
 
     return true;
 }
@@ -2198,15 +2198,15 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     // statement(s) before the loop in a new block.
     bool nest_in_block = init_buf.lines.size() > 1 || (stmt->initializer && emit_as_loop);
     if (nest_in_block) {
-        line() << "{";
-        increment_indent();
+        Line() << "{";
+        IncrementIndent();
         current_buffer_->Append(init_buf);
         init_buf.lines.clear();  // Don't emit the initializer again in the 'for'
     }
     TINT_DEFER({
         if (nest_in_block) {
-            decrement_indent();
-            line() << "}";
+            DecrementIndent();
+            Line() << "}";
         }
     });
 
@@ -2217,16 +2217,16 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
         };
 
         TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-        line() << "while (true) {";
-        increment_indent();
+        Line() << "while (true) {";
+        IncrementIndent();
         TINT_DEFER({
-            decrement_indent();
-            line() << "}";
+            DecrementIndent();
+            Line() << "}";
         });
 
         if (stmt->condition) {
             current_buffer_->Append(cond_pre);
-            line() << "if (!(" << cond_buf.str() << ")) { break; }";
+            Line() << "if (!(" << cond_buf.str() << ")) { break; }";
         }
 
         if (!EmitStatements(stmt->body->statements)) {
@@ -2239,7 +2239,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     } else {
         // For-loop can be generated.
         {
-            auto out = line();
+            auto out = Line();
             out << "for";
             {
                 ScopedParen sp(out);
@@ -2265,7 +2265,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 return false;
             }
         }
-        line() << "}";
+        Line() << "}";
     }
 
     return true;
@@ -2290,22 +2290,22 @@ bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
     // as a regular while in MSL. Instead we need to generate a `while(true)` loop.
     bool emit_as_loop = cond_pre.lines.size() > 0;
     if (emit_as_loop) {
-        line() << "while (true) {";
-        increment_indent();
+        Line() << "while (true) {";
+        IncrementIndent();
         TINT_DEFER({
-            decrement_indent();
-            line() << "}";
+            DecrementIndent();
+            Line() << "}";
         });
 
         current_buffer_->Append(cond_pre);
-        line() << "if (!(" << cond_buf.str() << ")) { break; }";
+        Line() << "if (!(" << cond_buf.str() << ")) { break; }";
         if (!EmitStatements(stmt->body->statements)) {
             return false;
         }
     } else {
         // While can be generated.
         {
-            auto out = line();
+            auto out = Line();
             out << "while";
             {
                 ScopedParen sp(out);
@@ -2316,7 +2316,7 @@ bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
         if (!EmitStatementsWithIndent(stmt->body->statements)) {
             return false;
         }
-        line() << "}";
+        Line() << "}";
     }
     return true;
 }
@@ -2324,13 +2324,13 @@ bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
 bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
     // TODO(dsinclair): Verify this is correct when the discard semantics are
     // defined for WGSL (https://github.com/gpuweb/gpuweb/issues/361)
-    line() << "discard_fragment();";
+    Line() << "discard_fragment();";
     return true;
 }
 
 bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     {
-        auto out = line();
+        auto out = Line();
         out << "if (";
         if (!EmitExpression(out, stmt->condition)) {
             return false;
@@ -2343,7 +2343,7 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     }
 
     if (stmt->else_statement) {
-        line() << "} else {";
+        Line() << "} else {";
         if (auto* block = stmt->else_statement->As<ast::BlockStatement>()) {
             if (!EmitStatementsWithIndent(block->statements)) {
                 return false;
@@ -2354,7 +2354,7 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
             }
         }
     }
-    line() << "}";
+    Line() << "}";
 
     return true;
 }
@@ -2413,7 +2413,7 @@ bool GeneratorImpl::EmitMemberAccessor(utils::StringStream& out,
 }
 
 bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
-    auto out = line();
+    auto out = Line();
     out << "return";
     if (stmt->value) {
         out << " ";
@@ -2426,13 +2426,13 @@ bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
-    line() << "{";
+    Line() << "{";
 
     if (!EmitStatementsWithIndent(stmt->statements)) {
         return false;
     }
 
-    line() << "}";
+    Line() << "}";
 
     return true;
 }
@@ -2453,7 +2453,7 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
             return EmitBreakIf(b);
         },
         [&](const ast::CallStatement* c) {  //
-            auto out = line();
+            auto out = Line();
             if (!EmitCall(out, c->expr)) {  //
                 return false;
             }
@@ -2524,7 +2524,7 @@ bool GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Stateme
 
 bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {
-        auto out = line();
+        auto out = Line();
         out << "switch(";
         if (!EmitExpression(out, stmt->condition)) {
             return false;
@@ -2541,7 +2541,7 @@ bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
         }
     }
 
-    line() << "}";
+    Line() << "}";
 
     return true;
 }
@@ -2795,7 +2795,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
         return true;
     }
 
-    line(b) << "struct " << StructName(str) << " {";
+    Line(b) << "struct " << StructName(str) << " {";
 
     bool is_host_shareable = str->IsHostShareable();
 
@@ -2812,7 +2812,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
             name = UniqueIdentifier("tint_pad");
         } while (str->FindMember(program_->Symbols().Get(name)));
 
-        auto out = line(b);
+        auto out = Line(b);
         add_byte_offset_comment(out, msl_offset);
         out << ArrayType() << "<int8_t, " << size << "> " << name << ";";
     };
@@ -2821,7 +2821,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
 
     uint32_t msl_offset = 0;
     for (auto* mem : str->Members()) {
-        auto out = line(b);
+        auto out = Line(b);
         auto mem_name = mem->Name().Name();
         auto wgsl_offset = mem->Offset();
 
@@ -2917,7 +2917,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
 
     b->DecrementIndent();
 
-    line(b) << "};";
+    Line(b) << "};";
     return true;
 }
 
@@ -2936,7 +2936,7 @@ bool GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpr
 
             auto fn_name = UniqueIdentifier("tint_unary_minus");
             {
-                auto decl = line(&b);
+                auto decl = Line(&b);
                 if (!EmitTypeAndName(decl, expr_type, fn_name)) {
                     return "";
                 }
@@ -2951,10 +2951,10 @@ bool GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpr
                 ScopedIndent si(&b);
                 const auto largest_negative_value =
                     std::to_string(std::numeric_limits<int32_t>::min());
-                line(&b) << "return select(-v, v, v == " << largest_negative_value << ");";
+                Line(&b) << "return select(-v, v, v == " << largest_negative_value << ");";
             }
-            line(&b) << "}";
-            line(&b);
+            Line(&b) << "}";
+            Line(&b);
             return fn_name;
         });
 
@@ -2998,7 +2998,7 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
     auto* sem = program_->Sem().Get(var);
     auto* type = sem->Type()->UnwrapRef();
 
-    auto out = line();
+    auto out = Line();
 
     switch (sem->AddressSpace()) {
         case builtin::AddressSpace::kFunction:
@@ -3046,7 +3046,7 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
     auto* sem = program_->Sem().Get(let);
     auto* type = sem->Type();
 
-    auto out = line();
+    auto out = Line();
 
     switch (sem->AddressSpace()) {
         case builtin::AddressSpace::kFunction:
@@ -3212,7 +3212,7 @@ bool GeneratorImpl::CallBuiltinHelper(utils::StringStream& out,
         auto fn_name = UniqueIdentifier(std::string("tint_") + builtin::str(builtin->Type()));
         std::vector<std::string> parameter_names;
         {
-            auto decl = line(&b);
+            auto decl = Line(&b);
             if (!EmitTypeAndName(decl, builtin->ReturnType(), fn_name)) {
                 return "";
             }
@@ -3237,8 +3237,8 @@ bool GeneratorImpl::CallBuiltinHelper(utils::StringStream& out,
                 return "";
             }
         }
-        line(&b) << "}";
-        line(&b);
+        Line(&b) << "}";
+        Line(&b);
         return fn_name;
     });
 
@@ -3268,19 +3268,19 @@ const std::string& GeneratorImpl::ArrayType() {
     if (array_template_name_.empty()) {
         array_template_name_ = UniqueIdentifier("tint_array");
         auto* buf = &helpers_;
-        line(buf) << "template<typename T, size_t N>";
-        line(buf) << "struct " << array_template_name_ << " {";
-        line(buf) << "    const constant T& operator[](size_t i) const constant"
+        Line(buf) << "template<typename T, size_t N>";
+        Line(buf) << "struct " << array_template_name_ << " {";
+        Line(buf) << "    const constant T& operator[](size_t i) const constant"
                   << " { return elements[i]; }";
         for (auto* space : {"device", "thread", "threadgroup"}) {
-            line(buf) << "    " << space << " T& operator[](size_t i) " << space
+            Line(buf) << "    " << space << " T& operator[](size_t i) " << space
                       << " { return elements[i]; }";
-            line(buf) << "    const " << space << " T& operator[](size_t i) const " << space
+            Line(buf) << "    const " << space << " T& operator[](size_t i) const " << space
                       << " { return elements[i]; }";
         }
-        line(buf) << "    T elements[N];";
-        line(buf) << "};";
-        line(buf);
+        Line(buf) << "    T elements[N];";
+        Line(buf) << "};";
+        Line(buf);
     }
     return array_template_name_;
 }

@@ -138,27 +138,27 @@ using namespace tint::number_suffixes;        // NOLINT
 // }
 
 TEST_F(MslGeneratorImplIrTest, EmitType_Bool) {
-    generator_.EmitType(generator_.line(), ty.bool_());
+    generator_.EmitType(generator_.Line(), ty.bool_());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.result()), "bool");
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "bool");
 }
 
 TEST_F(MslGeneratorImplIrTest, EmitType_F32) {
-    generator_.EmitType(generator_.line(), ty.f32());
+    generator_.EmitType(generator_.Line(), ty.f32());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.result()), "float");
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "float");
 }
 
 TEST_F(MslGeneratorImplIrTest, EmitType_F16) {
-    generator_.EmitType(generator_.line(), ty.f16());
+    generator_.EmitType(generator_.Line(), ty.f16());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.result()), "half");
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "half");
 }
 
 TEST_F(MslGeneratorImplIrTest, EmitType_I32) {
-    generator_.EmitType(generator_.line(), ty.i32());
+    generator_.EmitType(generator_.Line(), ty.i32());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.result()), "int");
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "int");
 }
 
 // TEST_F(MslGeneratorImplTest, EmitType_Matrix_F32) {
@@ -687,9 +687,9 @@ TEST_F(MslGeneratorImplIrTest, EmitType_I32) {
 // }
 
 TEST_F(MslGeneratorImplIrTest, EmitType_U32) {
-    generator_.EmitType(generator_.line(), ty.u32());
+    generator_.EmitType(generator_.Line(), ty.u32());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.result()), "uint");
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "uint");
 }
 
 // TEST_F(MslGeneratorImplTest, EmitType_Vector) {
@@ -704,10 +704,10 @@ TEST_F(MslGeneratorImplIrTest, EmitType_U32) {
 // }
 
 TEST_F(MslGeneratorImplIrTest, EmitType_Void) {
-    generator_.EmitType(generator_.line(), ty.void_());
+    generator_.EmitType(generator_.Line(), ty.void_());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
 
-    EXPECT_EQ(utils::TrimSpace(generator_.result()), "void");
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "void");
 }
 
 // TEST_F(MslGeneratorImplTest, EmitType_Sampler) {

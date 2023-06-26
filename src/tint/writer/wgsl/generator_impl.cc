@@ -54,13 +54,13 @@ void GeneratorImpl::Generate() {
         has_directives = true;
     }
     for (auto diagnostic : program_->AST().DiagnosticDirectives()) {
-        auto out = line();
+        auto out = Line();
         EmitDiagnosticControl(out, diagnostic->control);
         out << ";";
         has_directives = true;
     }
     if (has_directives) {
-        line();
+        Line();
     }
     // Generate global declarations in the order they appear in the module.
     for (auto* decl : program_->AST().GlobalDeclarations()) {
@@ -71,11 +71,11 @@ void GeneratorImpl::Generate() {
             decl,  //
             [&](const ast::TypeDecl* td) { return EmitTypeDecl(td); },
             [&](const ast::Function* func) { return EmitFunction(func); },
-            [&](const ast::Variable* var) { return EmitVariable(line(), var); },
+            [&](const ast::Variable* var) { return EmitVariable(Line(), var); },
             [&](const ast::ConstAssert* ca) { return EmitConstAssert(ca); },
             [&](Default) { TINT_UNREACHABLE(Writer, diagnostics_); });
         if (decl != program_->AST().GlobalDeclarations().Back()) {
-            line();
+            Line();
         }
     }
 }
@@ -86,7 +86,7 @@ void GeneratorImpl::EmitDiagnosticControl(utils::StringStream& out,
 }
 
 void GeneratorImpl::EmitEnable(const ast::Enable* enable) {
-    auto out = line();
+    auto out = Line();
     out << "enable ";
     for (auto* ext : enable->extensions) {
         if (ext != enable->extensions.Front()) {
@@ -101,7 +101,7 @@ void GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
     Switch(
         ty,  //
         [&](const ast::Alias* alias) {
-            auto out = line();
+            auto out = Line();
             out << "alias " << alias->name->symbol.Name() << " = ";
             EmitExpression(out, alias->type);
             out << ";";
@@ -233,10 +233,10 @@ void GeneratorImpl::EmitIdentifier(utils::StringStream& out, const ast::Identifi
 
 void GeneratorImpl::EmitFunction(const ast::Function* func) {
     if (func->attributes.Length()) {
-        EmitAttributes(line(), func->attributes);
+        EmitAttributes(Line(), func->attributes);
     }
     {
-        auto out = line();
+        auto out = Line();
         out << "fn " << func->name->symbol.Name() << "(";
 
         bool first = true;
@@ -277,7 +277,7 @@ void GeneratorImpl::EmitFunction(const ast::Function* func) {
 
     if (func->body) {
         EmitStatementsWithIndent(func->body->statements);
-        line() << "}";
+        Line() << "}";
     }
 }
 
@@ -294,19 +294,19 @@ void GeneratorImpl::EmitImageFormat(utils::StringStream& out, const builtin::Tex
 
 void GeneratorImpl::EmitStructType(const ast::Struct* str) {
     if (str->attributes.Length()) {
-        EmitAttributes(line(), str->attributes);
+        EmitAttributes(Line(), str->attributes);
     }
-    line() << "struct " << str->name->symbol.Name() << " {";
+    Line() << "struct " << str->name->symbol.Name() << " {";
 
     auto add_padding = [&](uint32_t size) {
-        line() << "@size(" << size << ")";
+        Line() << "@size(" << size << ")";
 
         // Note: u32 is the smallest primitive we currently support. When WGSL
         // supports smaller types, this will need to be updated.
-        line() << UniqueIdentifier("padding") << " : u32,";
+        Line() << UniqueIdentifier("padding") << " : u32,";
     };
 
-    increment_indent();
+    IncrementIndent();
     uint32_t offset = 0;
     for (auto* mem : str->members) {
         // TODO(crbug.com/tint/798) move the @offset attribute handling to the transform::Wgsl
@@ -327,7 +327,7 @@ void GeneratorImpl::EmitStructType(const ast::Struct* str) {
         attributes_sanitized.Reserve(mem->attributes.Length());
         for (auto* attr : mem->attributes) {
             if (attr->Is<ast::StructMemberOffsetAttribute>()) {
-                auto l = line();
+                auto l = Line();
                 l << "/* ";
                 EmitAttributes(l, utils::Vector{attr});
                 l << " */";
@@ -337,17 +337,17 @@ void GeneratorImpl::EmitStructType(const ast::Struct* str) {
         }
 
         if (!attributes_sanitized.IsEmpty()) {
-            EmitAttributes(line(), attributes_sanitized);
+            EmitAttributes(Line(), attributes_sanitized);
         }
 
-        auto out = line();
+        auto out = Line();
         out << mem->name->symbol.Name() << " : ";
         EmitExpression(out, mem->type);
         out << ",";
     }
-    decrement_indent();
+    DecrementIndent();
 
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitVariable(utils::StringStream& out, const ast::Variable* v) {
@@ -579,11 +579,11 @@ void GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpr
 
 void GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
     {
-        auto out = line();
+        auto out = Line();
         EmitBlockHeader(out, stmt);
     }
     EmitStatementsWithIndent(stmt->statements);
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitBlockHeader(utils::StringStream& out, const ast::BlockStatement* stmt) {
@@ -602,7 +602,7 @@ void GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::BreakStatement* b) { EmitBreak(b); },
         [&](const ast::BreakIfStatement* b) { EmitBreakIf(b); },
         [&](const ast::CallStatement* c) {
-            auto out = line();
+            auto out = Line();
             EmitCall(out, c->expr);
             out << ";";
         },
@@ -617,7 +617,7 @@ void GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::ReturnStatement* r) { EmitReturn(r); },
         [&](const ast::ConstAssert* c) { EmitConstAssert(c); },
         [&](const ast::SwitchStatement* s) { EmitSwitch(s); },
-        [&](const ast::VariableDeclStatement* v) { EmitVariable(line(), v->variable); },
+        [&](const ast::VariableDeclStatement* v) { EmitVariable(Line(), v->variable); },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer,
                                    "unknown statement type: " + std::string(stmt->TypeInfo().name));
@@ -636,7 +636,7 @@ void GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Stateme
 }
 
 void GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
-    auto out = line();
+    auto out = Line();
 
     EmitExpression(out, stmt->lhs);
     out << " = ";
@@ -645,11 +645,11 @@ void GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
 }
 
 void GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
-    line() << "break;";
+    Line() << "break;";
 }
 
 void GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
-    auto out = line();
+    auto out = Line();
 
     out << "break if ";
     EmitExpression(out, b->condition);
@@ -658,11 +658,11 @@ void GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
 
 void GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
     if (stmt->selectors.Length() == 1 && stmt->ContainsDefault()) {
-        auto out = line();
+        auto out = Line();
         out << "default: ";
         EmitBlockHeader(out, stmt->body);
     } else {
-        auto out = line();
+        auto out = Line();
         out << "case ";
 
         bool first = true;
@@ -683,11 +683,11 @@ void GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
         EmitBlockHeader(out, stmt->body);
     }
     EmitStatementsWithIndent(stmt->body->statements);
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitCompoundAssign(const ast::CompoundAssignmentStatement* stmt) {
-    auto out = line();
+    auto out = Line();
 
     EmitExpression(out, stmt->lhs);
     out << " ";
@@ -698,12 +698,12 @@ void GeneratorImpl::EmitCompoundAssign(const ast::CompoundAssignmentStatement* s
 }
 
 void GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
-    line() << "continue;";
+    Line() << "continue;";
 }
 
 void GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     {
-        auto out = line();
+        auto out = Line();
 
         if (!stmt->attributes.IsEmpty()) {
             EmitAttributes(out, stmt->attributes);
@@ -722,7 +722,7 @@ void GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     while (e) {
         if (auto* elseif = e->As<ast::IfStatement>()) {
             {
-                auto out = line();
+                auto out = Line();
                 out << "} else if (";
                 EmitExpression(out, elseif->condition);
                 out << ") ";
@@ -733,7 +733,7 @@ void GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
         } else {
             auto* body = e->As<ast::BlockStatement>();
             {
-                auto out = line();
+                auto out = Line();
                 out << "} else ";
                 EmitBlockHeader(out, body);
             }
@@ -742,22 +742,22 @@ void GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
         }
     }
 
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
-    auto out = line();
+    auto out = Line();
     EmitExpression(out, stmt->lhs);
     out << (stmt->increment ? "++" : "--") << ";";
 }
 
 void GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
-    line() << "discard;";
+    Line() << "discard;";
 }
 
 void GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
     {
-        auto out = line();
+        auto out = Line();
 
         if (!stmt->attributes.IsEmpty()) {
             EmitAttributes(out, stmt->attributes);
@@ -767,14 +767,14 @@ void GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
         out << "loop ";
         EmitBlockHeader(out, stmt->body);
     }
-    increment_indent();
+    IncrementIndent();
 
     EmitStatements(stmt->body->statements);
 
     if (stmt->continuing && !stmt->continuing->Empty()) {
-        line();
+        Line();
         {
-            auto out = line();
+            auto out = Line();
             out << "continuing ";
             if (!stmt->continuing->attributes.IsEmpty()) {
                 EmitAttributes(out, stmt->continuing->attributes);
@@ -783,11 +783,11 @@ void GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
             out << "{";
         }
         EmitStatementsWithIndent(stmt->continuing->statements);
-        line() << "}";
+        Line() << "}";
     }
 
-    decrement_indent();
-    line() << "}";
+    DecrementIndent();
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
@@ -804,7 +804,7 @@ void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     }
 
     {
-        auto out = line();
+        auto out = Line();
 
         if (!stmt->attributes.IsEmpty()) {
             EmitAttributes(out, stmt->attributes);
@@ -858,12 +858,12 @@ void GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
 
     EmitStatementsWithIndent(stmt->body->statements);
 
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
     {
-        auto out = line();
+        auto out = Line();
 
         if (!stmt->attributes.IsEmpty()) {
             EmitAttributes(out, stmt->attributes);
@@ -883,11 +883,11 @@ void GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
 
     EmitStatementsWithIndent(stmt->body->statements);
 
-    line() << "}";
+    Line() << "}";
 }
 
 void GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
-    auto out = line();
+    auto out = Line();
 
     out << "return";
     if (stmt->value) {
@@ -898,7 +898,7 @@ void GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
 }
 
 void GeneratorImpl::EmitConstAssert(const ast::ConstAssert* stmt) {
-    auto out = line();
+    auto out = Line();
     out << "const_assert ";
     EmitExpression(out, stmt->condition);
     out << ";";
@@ -906,7 +906,7 @@ void GeneratorImpl::EmitConstAssert(const ast::ConstAssert* stmt) {
 
 void GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {
-        auto out = line();
+        auto out = Line();
 
         if (!stmt->attributes.IsEmpty()) {
             EmitAttributes(out, stmt->attributes);
@@ -932,7 +932,7 @@ void GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
         }
     }
 
-    line() << "}";
+    Line() << "}";
 }
 
 }  // namespace tint::writer::wgsl

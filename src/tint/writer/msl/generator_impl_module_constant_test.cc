@@ -31,7 +31,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_AInt) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -49,7 +49,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_AFloat) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -67,7 +67,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_i32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -85,7 +85,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_u32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -103,7 +103,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -123,7 +123,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -141,7 +141,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_AInt) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -159,7 +159,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_AFloat) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -177,7 +177,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -197,7 +197,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_vec3_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -215,7 +215,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_mat2x3_AFloat) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -233,7 +233,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_mat2x3_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -253,7 +253,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_mat2x3_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 void f() {
@@ -271,7 +271,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_arr_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -304,7 +304,7 @@ TEST_F(MslGeneratorImplTest, Emit_GlobalConst_arr_vec2_bool) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 

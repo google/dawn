@@ -31,7 +31,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_AInt) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const int l = 1;
 }
 )");
@@ -45,7 +45,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_AFloat) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const float l = 1.0f;
 }
 )");
@@ -59,7 +59,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_i32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const int l = 1;
 }
 )");
@@ -73,7 +73,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_u32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const uint l = 1u;
 }
 )");
@@ -87,7 +87,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const float l = 1.0f;
 }
 )");
@@ -103,7 +103,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const float16_t l = float16_t(1.0h);
 }
 )");
@@ -117,7 +117,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_AInt) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const int3 l = int3(1, 2, 3);
 }
 )");
@@ -131,7 +131,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_AFloat) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const float3 l = float3(1.0f, 2.0f, 3.0f);
 }
 )");
@@ -145,7 +145,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const float3 l = float3(1.0f, 2.0f, 3.0f);
 }
 )");
@@ -161,7 +161,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const vector<float16_t, 3> l = vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h));
 }
 )");
@@ -175,7 +175,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_AFloat) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const float2x3 l = float2x3(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f));
 }
 )");
@@ -189,7 +189,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const float2x3 l = float2x3(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f));
 }
 )");
@@ -205,7 +205,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const matrix<float16_t, 2, 3> l = matrix<float16_t, 2, 3>(vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h)), vector<float16_t, 3>(float16_t(4.0h), float16_t(5.0h), float16_t(6.0h)));
 }
 )");
@@ -219,7 +219,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_arr_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const float l[3] = {1.0f, 2.0f, 3.0f};
 }
 )");
@@ -236,7 +236,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_arr_vec2_bool) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    EXPECT_EQ(gen.result(), R"(void f() {
+    EXPECT_EQ(gen.Result(), R"(void f() {
   const bool2 l[3] = {bool2(true, false), bool2(false, true), (true).xx};
 }
 )");

@@ -27,10 +27,10 @@ TEST_F(MslGeneratorImplTest, Emit_Return) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), "  return;\n");
+    EXPECT_EQ(gen.Result(), "  return;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
@@ -39,10 +39,10 @@ TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(r)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), "  return 123;\n");
+    EXPECT_EQ(gen.Result(), "  return 123;\n");
 }
 
 }  // namespace

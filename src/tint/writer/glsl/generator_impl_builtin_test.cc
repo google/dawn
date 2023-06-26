@@ -349,7 +349,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Builtin_Call) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     utils::StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -363,7 +363,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Scalar) {
     WrapInFunction(Decl(Var("r", call)));
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     utils::StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -377,7 +377,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Vector) {
     WrapInFunction(Decl(Var("r", call)));
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     utils::StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -395,7 +395,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, FMA_f32) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     utils::StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -414,7 +414,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, FMA_f16) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     utils::StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -429,7 +429,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct modf_result_f32 {
   float fract;
@@ -466,7 +466,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Scalar_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct modf_result_f16 {
@@ -502,7 +502,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct modf_result_vec3_f32 {
   vec3 fract;
@@ -539,7 +539,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Modf_Vector_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct modf_result_vec3_f16 {
@@ -574,7 +574,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct modf_result_f32 {
   float fract;
@@ -603,7 +603,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Scalar_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct modf_result_f16 {
@@ -631,7 +631,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Vector_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct modf_result_vec3_f32 {
   vec3 fract;
@@ -660,7 +660,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Modf_Vector_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct modf_result_vec3_f16 {
@@ -689,7 +689,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct frexp_result_f32 {
   float fract;
@@ -726,7 +726,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Scalar_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct frexp_result_f16 {
@@ -762,7 +762,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct frexp_result_vec3_f32 {
   vec3 fract;
@@ -799,7 +799,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Runtime_Frexp_Vector_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct frexp_result_vec3_f16 {
@@ -834,7 +834,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Scalar_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct frexp_result_f32 {
   float fract;
@@ -863,7 +863,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Scalar_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct frexp_result_f16 {
@@ -891,7 +891,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Vector_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct frexp_result_vec3_f32 {
   vec3 fract;
@@ -920,7 +920,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Const_Frexp_Vector_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct frexp_result_vec3_f16 {
@@ -950,7 +950,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 float tint_degrees(float param_0) {
   return param_0 * 57.29577951308232286465f;
@@ -979,7 +979,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Vector_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec3 tint_degrees(vec3 param_0) {
   return param_0 * 57.29577951308232286465f;
@@ -1010,7 +1010,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_degrees(float16_t param_0) {
@@ -1042,7 +1042,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Vector_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_degrees(f16vec3 param_0) {
@@ -1072,7 +1072,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Scalar_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 float tint_radians(float param_0) {
   return param_0 * 0.01745329251994329547f;
@@ -1101,7 +1101,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Vector_f32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec3 tint_radians(vec3 param_0) {
   return param_0 * 0.01745329251994329547f;
@@ -1132,7 +1132,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Scalar_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_radians(float16_t param_0) {
@@ -1164,7 +1164,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Radians_Vector_f16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_radians(f16vec3 param_0) {
@@ -1196,7 +1196,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, ExtractBits) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 uvec3 tint_extract_bits(uvec3 v, uint offset, uint count) {
   uint s = min(offset, 32u);
@@ -1231,7 +1231,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, InsertBits) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
   uint s = min(offset, 32u);
@@ -1263,7 +1263,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack4x8Snorm) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec4 p1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1282,7 +1282,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack4x8Unorm) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec4 p1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1301,7 +1301,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Snorm) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec2 p1 = vec2(0.0f, 0.0f);
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1320,7 +1320,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Unorm) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec2 p1 = vec2(0.0f, 0.0f);
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1339,7 +1339,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Pack2x16Float) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec2 p1 = vec2(0.0f, 0.0f);
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1358,7 +1358,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack4x8Snorm) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 uint p1 = 0u;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1377,7 +1377,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack4x8Unorm) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 uint p1 = 0u;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1396,7 +1396,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Snorm) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 uint p1 = 0u;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1415,7 +1415,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Unorm) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 uint p1 = 0u;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1434,7 +1434,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Unpack2x16Float) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 uint p1 = 0u;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -1459,7 +1459,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, StorageBarrier) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -1483,7 +1483,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, WorkgroupBarrier) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -1501,7 +1501,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, DotI32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 int tint_int_dot(ivec3 a, ivec3 b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
@@ -1528,7 +1528,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, DotU32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 uint tint_int_dot(uvec3 a, uvec3 b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
@@ -1555,7 +1555,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Scalar) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 float tint_quantizeToF16(float param_0) {
   return unpackHalf2x16(packHalf2x16(vec2(param_0))).x;
@@ -1583,7 +1583,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Vec2) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec2 tint_quantizeToF16(vec2 param_0) {
   return unpackHalf2x16(packHalf2x16(param_0));
@@ -1611,7 +1611,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Vec3) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec3 tint_quantizeToF16(vec3 param_0) {
   return vec3(
@@ -1641,7 +1641,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Vec4) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec4 tint_quantizeToF16(vec4 param_0) {
   return vec4(

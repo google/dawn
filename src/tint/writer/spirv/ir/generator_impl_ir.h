@@ -75,7 +75,7 @@ class GeneratorImplIr {
     spirv::Module& Module() { return module_; }
 
     /// @returns the generated SPIR-V binary data
-    const std::vector<uint32_t>& Result() const { return writer_.result(); }
+    const std::vector<uint32_t>& Result() const { return writer_.Result(); }
 
     /// @returns the list of diagnostics raised by the generator
     diag::List Diagnostics() const { return diagnostics_; }

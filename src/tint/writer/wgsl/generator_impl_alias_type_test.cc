@@ -28,7 +28,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
     gen.EmitTypeDecl(alias);
 
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(alias a = f32;
+    EXPECT_EQ(gen.Result(), R"(alias a = f32;
 )");
 }
 
@@ -46,7 +46,7 @@ TEST_F(WgslGeneratorImplTest, EmitTypeDecl_Struct) {
 
     gen.EmitTypeDecl(alias);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(struct A {
+    EXPECT_EQ(gen.Result(), R"(struct A {
   a : f32,
   b : i32,
 }
@@ -66,7 +66,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
 
     gen.EmitTypeDecl(alias);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(alias B = A;
+    EXPECT_EQ(gen.Result(), R"(alias B = A;
 )");
 }
 

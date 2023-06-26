@@ -191,7 +191,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), "RWByteAddressBuffer g : register(u0);\n");
+    EXPECT_EQ(gen.Result(), "RWByteAddressBuffer g : register(u0);\n");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
@@ -221,7 +221,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(R"(struct S {
+    EXPECT_THAT(gen.Result(), HasSubstr(R"(struct S {
   int tint_symbol;
   float tint_symbol_1;
 };
@@ -337,7 +337,7 @@ TEST_P(HlslDepthTexturesTest, Emit) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(params.result));
+    EXPECT_THAT(gen.Result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
@@ -368,7 +368,7 @@ TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr("Texture2DMS<float4> tex : register(t1, space2);"));
+    EXPECT_THAT(gen.Result(), HasSubstr("Texture2DMS<float4> tex : register(t1, space2);"));
 }
 
 enum class TextureDataType { F32, U32, I32 };
@@ -414,7 +414,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(params.result));
+    EXPECT_THAT(gen.Result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Type,
                          HlslSampledTexturesTest,
@@ -557,7 +557,7 @@ TEST_P(HlslStorageTexturesTest, Emit) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_THAT(gen.result(), HasSubstr(params.result));
+    EXPECT_THAT(gen.Result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,

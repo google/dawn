@@ -31,10 +31,10 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(s)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    EXPECT_EQ(gen.Result(), R"(  switch(cond) {
     case 5: {
       break;
     }
@@ -54,10 +54,10 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(s)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    EXPECT_EQ(gen.Result(), R"(  switch(cond) {
     case 5:
     default: {
       break;
@@ -85,10 +85,10 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_OnlyDefaultCase_NoSideEffectsCo
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(s)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  do {
+    EXPECT_EQ(gen.Result(), R"(  do {
     a = 42;
   } while (false);
 )");
@@ -123,10 +123,10 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_OnlyDefaultCase_SideEffectsCond
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(s)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  bar();
+    EXPECT_EQ(gen.Result(), R"(  bar();
   do {
     a = 42;
   } while (false);

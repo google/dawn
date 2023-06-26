@@ -28,10 +28,10 @@ TEST_F(GlslGeneratorImplTest_Return, Emit_Return) {
     WrapInFunction(r);
 
     GeneratorImpl& gen = Build();
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(r);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  return;\n");
+    EXPECT_EQ(gen.Result(), "  return;\n");
 }
 
 TEST_F(GlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
@@ -39,10 +39,10 @@ TEST_F(GlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
     Func("f", utils::Empty, ty.i32(), utils::Vector{r});
 
     GeneratorImpl& gen = Build();
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(r);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  return 123;\n");
+    EXPECT_EQ(gen.Result(), "  return 123;\n");
 }
 
 }  // namespace

@@ -410,7 +410,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(tint_tmp)");
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }
@@ -435,7 +435,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(tint_tmp)");
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = a;
 if (tint_tmp_1) {
   tint_tmp_1 = b;
 }
@@ -462,7 +462,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
     utils::StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(tint_tmp)");
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
 if (!tint_tmp) {
   tint_tmp = b;
 }
@@ -492,7 +492,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(expr)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }
@@ -528,7 +528,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(expr)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = a;
 if (tint_tmp_1) {
   tint_tmp_1 = b;
 }
@@ -559,7 +559,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(expr)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = b;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = b;
 if (!tint_tmp_1) {
   tint_tmp_1 = c;
 }
@@ -591,7 +591,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(decl)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = b;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = b;
 if (tint_tmp_1) {
   tint_tmp_1 = c;
 }
@@ -633,7 +633,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(expr)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }

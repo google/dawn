@@ -35,10 +35,10 @@ TEST_F(MslGeneratorImplTest, Emit_Switch) {
     WrapInFunction(cond, s);
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(s)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    EXPECT_EQ(gen.Result(), R"(  switch(cond) {
     case 5: {
       break;
     }
@@ -59,10 +59,10 @@ TEST_F(MslGeneratorImplTest, Emit_Switch_MixedDefault) {
     WrapInFunction(cond, s);
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(s)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    EXPECT_EQ(gen.Result(), R"(  switch(cond) {
     case 5:
     default: {
       break;

@@ -544,7 +544,7 @@ TEST_F(GlslGeneratorImplTest_Binary, ModMixedVec3ScalarF32) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 vec3 tint_float_modulo(vec3 lhs, vec3 rhs) {
   return (lhs - rhs * trunc(lhs / rhs));
@@ -589,7 +589,7 @@ TEST_F(GlslGeneratorImplTest_Binary, ModMixedVec3ScalarF16) {
 
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 f16vec3 tint_float_modulo(f16vec3 lhs, f16vec3 rhs) {
@@ -630,7 +630,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Logical_And) {
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(tint_tmp)");
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }
@@ -656,7 +656,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Logical_Multi) {
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(tint_tmp)");
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = a;
 if (tint_tmp_1) {
   tint_tmp_1 = b;
 }
@@ -684,7 +684,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Logical_Or) {
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(tint_tmp)");
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
 if (!tint_tmp) {
   tint_tmp = b;
 }
@@ -715,7 +715,7 @@ TEST_F(GlslGeneratorImplTest_Binary, If_WithLogical) {
 
     gen.EmitStatement(expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }
@@ -752,7 +752,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Return_WithLogical) {
 
     gen.EmitStatement(expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = a;
 if (tint_tmp_1) {
   tint_tmp_1 = b;
 }
@@ -784,7 +784,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Assign_WithLogical) {
 
     gen.EmitStatement(expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = b;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = b;
 if (!tint_tmp_1) {
   tint_tmp_1 = c;
 }
@@ -817,7 +817,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Decl_WithLogical) {
 
     gen.EmitStatement(decl);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = b;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = b;
 if (tint_tmp_1) {
   tint_tmp_1 = c;
 }
@@ -860,7 +860,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Call_WithLogical) {
 
     gen.EmitStatement(expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
+    EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }

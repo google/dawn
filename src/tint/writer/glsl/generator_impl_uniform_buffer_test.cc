@@ -32,7 +32,7 @@ TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 struct Simple {
   float member;
@@ -52,7 +52,7 @@ TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple_Desktop) {
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 440
+    EXPECT_EQ(gen.Result(), R"(#version 440
 
 struct Simple {
   float member;

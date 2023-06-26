@@ -32,7 +32,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void fn() {
   int lhs = 0;
   int rhs = 0;
@@ -53,7 +53,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_LetIndex) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void set_float3(inout float3 vec, int idx, float val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
@@ -79,7 +79,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_ConstIndex) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void fn() {
   float3 lhs = float3(0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
@@ -100,7 +100,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_DynamicIndex) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void set_float3(inout float3 vec, int idx, float val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
@@ -126,7 +126,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_LetIndex) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void set_vector_float4x2(inout float4x2 mat, int col, float2 val) {
   switch (col) {
     case 0: mat[0] = val; break;
@@ -157,7 +157,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_ConstIndex) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float2 rhs = float2(0.0f, 0.0f);
@@ -178,7 +178,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_DynamicIndex) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void set_vector_float4x2(inout float4x2 mat, int col, float2 val) {
   switch (col) {
     case 0: mat[0] = val; break;
@@ -212,7 +212,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_LetIndices) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void set_scalar_float4x2(inout float4x2 mat, int col, int row, float val) {
   switch (col) {
     case 0:
@@ -255,7 +255,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndices) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
@@ -279,7 +279,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_DynamicIndices) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate());
-    EXPECT_EQ(gen.result(),
+    EXPECT_EQ(gen.Result(),
               R"(void set_scalar_float4x2(inout float4x2 mat, int col, int row, float val) {
   switch (col) {
     case 0:

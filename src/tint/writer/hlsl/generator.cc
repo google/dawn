@@ -46,7 +46,7 @@ Result Generate(const Program* program, const Options& options) {
     auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program);
     result.success = impl->Generate();
     result.error = impl->Diagnostics().str();
-    result.hlsl = impl->result();
+    result.hlsl = impl->Result();
 
     // Collect the list of entry points in the sanitized program.
     for (auto* func : sanitized_result.program.AST().Functions()) {

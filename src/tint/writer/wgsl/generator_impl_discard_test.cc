@@ -29,11 +29,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Discard) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(stmt);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  discard;\n");
+    EXPECT_EQ(gen.Result(), "  discard;\n");
 }
 
 }  // namespace

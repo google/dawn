@@ -51,7 +51,7 @@ TEST_F(MslGeneratorImplTest, Generate) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 kernel void my_func() {
@@ -114,7 +114,7 @@ TEST_F(MslGeneratorImplTest, HasInvariantAttribute_True) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_TRUE(gen.HasInvariant());
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -151,7 +151,7 @@ TEST_F(MslGeneratorImplTest, HasInvariantAttribute_False) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
     EXPECT_FALSE(gen.HasInvariant());
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct Out {
@@ -176,7 +176,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrix) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct tint_symbol_3 {
@@ -216,7 +216,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInArray) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -277,7 +277,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInStruct) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct S1 {
@@ -365,7 +365,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrix_Multiples) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct tint_symbol_7 {

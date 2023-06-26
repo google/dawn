@@ -27,7 +27,7 @@ class Text : public Writer {
     ~Text() override;
 
     /// @returns the result data
-    virtual std::string result() const = 0;
+    virtual std::string Result() const = 0;
 };
 
 }  // namespace tint::writer

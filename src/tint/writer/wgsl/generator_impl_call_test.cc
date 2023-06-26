@@ -82,10 +82,10 @@ TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(stmt);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
+    EXPECT_EQ(gen.Result(), "  my_func(param1, param2);\n");
 }
 
 }  // namespace

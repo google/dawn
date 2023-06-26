@@ -55,7 +55,7 @@ Result Generate(const Program* program, const Options& options) {
         auto impl = std::make_unique<GeneratorImplIr>(&ir);
         result.success = impl->Generate();
         result.error = impl->Diagnostics().str();
-        result.msl = impl->result();
+        result.msl = impl->Result();
     } else  // NOLINT(readability/braces)
 #endif
     {
@@ -74,7 +74,7 @@ Result Generate(const Program* program, const Options& options) {
         auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program);
         result.success = impl->Generate();
         result.error = impl->Diagnostics().str();
-        result.msl = impl->result();
+        result.msl = impl->Result();
         result.has_invariant_attribute = impl->HasInvariant();
         result.workgroup_allocations = impl->DynamicWorkgroupAllocations();
     }

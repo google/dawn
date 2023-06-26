@@ -25,10 +25,10 @@ TEST_F(MslGeneratorImplTest, Emit_Block) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitStatement(b)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  {
+    EXPECT_EQ(gen.Result(), R"(  {
     return;
   }
 )");
@@ -40,10 +40,10 @@ TEST_F(MslGeneratorImplTest, Emit_Block_WithoutNewline) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     ASSERT_TRUE(gen.EmitBlock(b)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(  {
+    EXPECT_EQ(gen.Result(), R"(  {
     return;
   }
 )");

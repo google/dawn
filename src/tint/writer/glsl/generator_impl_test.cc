@@ -36,7 +36,7 @@ TEST_F(GlslGeneratorImplTest, Generate) {
     GeneratorImpl& gen = Build();
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 
 void my_func() {
 }
@@ -50,7 +50,7 @@ TEST_F(GlslGeneratorImplTest, GenerateDesktop) {
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 440
+    EXPECT_EQ(gen.Result(), R"(#version 440
 
 void my_func() {
 }
@@ -73,7 +73,7 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexES) {
     GeneratorImpl& gen = Build(Version(Version::Standard::kES, 3, 1));
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 310 es
+    EXPECT_EQ(gen.Result(), R"(#version 310 es
 #extension GL_OES_sample_variables : require
 
 int my_func() {
@@ -98,7 +98,7 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexDesktop) {
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(#version 440
+    EXPECT_EQ(gen.Result(), R"(#version 440
 
 int my_func() {
   return gl_SampleID;

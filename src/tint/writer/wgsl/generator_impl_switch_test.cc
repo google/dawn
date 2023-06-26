@@ -43,11 +43,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Switch) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitStatement(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    EXPECT_EQ(gen.Result(), R"(  switch(cond) {
     case 5i: {
       break;
     }
@@ -70,10 +70,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Switch_MixedDefault) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitStatement(s);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    EXPECT_EQ(gen.Result(), R"(  switch(cond) {
     case 5i, default: {
       break;
     }

@@ -30,9 +30,9 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitCase(s->body[0]);
-    EXPECT_EQ(gen.result(), R"(  case 5: {
+    EXPECT_EQ(gen.Result(), R"(  case 5: {
     break;
   }
 )");
@@ -44,10 +44,10 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitCase(s->body[0]);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  case 5: {
+    EXPECT_EQ(gen.Result(), R"(  case 5: {
     break;
   }
 )");
@@ -66,10 +66,10 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitCase(s->body[0]);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  case 5:
+    EXPECT_EQ(gen.Result(), R"(  case 5:
   case 6: {
     break;
   }
@@ -82,10 +82,10 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_Default) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     gen.EmitCase(s->body[0]);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  default: {
+    EXPECT_EQ(gen.Result(), R"(  default: {
     break;
   }
 )");

@@ -63,14 +63,14 @@ std::string DumpModule(Module& module) {
     BinaryWriter writer;
     writer.WriteHeader(module.IdBound());
     writer.WriteModule(&module);
-    return Disassemble(writer.result());
+    return Disassemble(writer.Result());
 }
 
 std::string DumpInstruction(const Instruction& inst) {
     BinaryWriter writer;
     writer.WriteHeader(kDefaultMaxIdBound);
     writer.WriteInstruction(inst);
-    return Disassemble(writer.result());
+    return Disassemble(writer.Result());
 }
 
 std::string DumpInstructions(const InstructionList& insts) {
@@ -79,7 +79,7 @@ std::string DumpInstructions(const InstructionList& insts) {
     for (const auto& inst : insts) {
         writer.WriteInstruction(inst);
     }
-    return Disassemble(writer.result());
+    return Disassemble(writer.Result());
 }
 
 }  // namespace tint::writer::spirv

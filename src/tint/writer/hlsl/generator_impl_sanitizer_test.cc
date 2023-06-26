@@ -42,7 +42,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
@@ -76,7 +76,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
@@ -113,7 +113,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
@@ -152,7 +152,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(cbuffer cbuffer_tint_symbol_1 : register(b4, space3) {
   uint4 tint_symbol_1[2];
 };
@@ -186,7 +186,7 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(void main() {
   int idx = 3;
   const int tint_symbol[4] = {1, 2, 3, 4};
@@ -221,7 +221,7 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(struct S {
   int a;
   float3 b;
@@ -260,7 +260,7 @@ TEST_F(HlslSanitizerTest, SimplifyPointersBasic) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(void main() {
   int v = 0;
   int x = v;
@@ -298,7 +298,7 @@ TEST_F(HlslSanitizerTest, SimplifyPointersComplexChain) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(void main() {
   float4x4 a[4] = (float4x4[4])0;
   float4 v = a[3][2];

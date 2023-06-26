@@ -96,7 +96,7 @@ class TestHelperBase : public ProgramBuilder, public BASE {
         BinaryWriter writer;
         writer.WriteHeader(b.Module().IdBound());
         writer.WriteModule(&b.Module());
-        auto binary = writer.result();
+        auto binary = writer.Result();
 
         std::string spv_errors;
         auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,

@@ -418,7 +418,7 @@ TEST_F(MslGeneratorImplTest, Runtime_Modf_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -450,7 +450,7 @@ TEST_F(MslGeneratorImplTest, Runtime_Modf_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -480,7 +480,7 @@ TEST_F(MslGeneratorImplTest, Runtime_Modf_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -512,7 +512,7 @@ TEST_F(MslGeneratorImplTest, Runtime_Modf_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -541,7 +541,7 @@ TEST_F(MslGeneratorImplTest, Const_Modf_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -565,7 +565,7 @@ TEST_F(MslGeneratorImplTest, Const_Modf_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -587,7 +587,7 @@ TEST_F(MslGeneratorImplTest, Const_Modf_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -611,7 +611,7 @@ TEST_F(MslGeneratorImplTest, Const_Modf_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -634,7 +634,7 @@ TEST_F(MslGeneratorImplTest, Runtime_Frexp_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -666,7 +666,7 @@ TEST_F(MslGeneratorImplTest, Runtime_Frexp_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -696,7 +696,7 @@ TEST_F(MslGeneratorImplTest, Runtime_Frexp_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -728,7 +728,7 @@ TEST_F(MslGeneratorImplTest, Runtime_Frexp_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -757,7 +757,7 @@ TEST_F(MslGeneratorImplTest, Const_Frexp_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -781,7 +781,7 @@ TEST_F(MslGeneratorImplTest, Const_Frexp_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -803,7 +803,7 @@ TEST_F(MslGeneratorImplTest, Const_Frexp_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -827,7 +827,7 @@ TEST_F(MslGeneratorImplTest, Const_Frexp_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -851,7 +851,7 @@ TEST_F(MslGeneratorImplTest, Degrees_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -876,7 +876,7 @@ TEST_F(MslGeneratorImplTest, Degrees_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -903,7 +903,7 @@ TEST_F(MslGeneratorImplTest, Degrees_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -930,7 +930,7 @@ TEST_F(MslGeneratorImplTest, Degrees_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -955,7 +955,7 @@ TEST_F(MslGeneratorImplTest, Radians_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -980,7 +980,7 @@ TEST_F(MslGeneratorImplTest, Radians_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -1007,7 +1007,7 @@ TEST_F(MslGeneratorImplTest, Radians_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -1034,7 +1034,7 @@ TEST_F(MslGeneratorImplTest, Radians_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -1082,7 +1082,7 @@ TEST_F(MslGeneratorImplTest, DotI32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -1116,7 +1116,7 @@ TEST_F(MslGeneratorImplTest, Ignore) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 int f(int a, int b, int c) {

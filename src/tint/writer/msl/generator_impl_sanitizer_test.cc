@@ -46,7 +46,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -103,7 +103,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -164,7 +164,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#include <metal_stdlib>
 
 using namespace metal;
@@ -224,7 +224,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#include <metal_stdlib>
 
 using namespace metal;

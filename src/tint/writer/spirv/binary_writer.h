@@ -42,10 +42,10 @@ class BinaryWriter {
     void WriteInstruction(const Instruction& inst);
 
     /// @returns the assembled SPIR-V
-    const std::vector<uint32_t>& result() const { return out_; }
+    const std::vector<uint32_t>& Result() const { return out_; }
 
     /// @returns the assembled SPIR-V
-    std::vector<uint32_t>& result() { return out_; }
+    std::vector<uint32_t>& Result() { return out_; }
 
   private:
     void process_instruction(const Instruction& inst);

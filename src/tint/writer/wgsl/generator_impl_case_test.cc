@@ -30,11 +30,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Case) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitCase(s->body[0]);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  case 5i: {
+    EXPECT_EQ(gen.Result(), R"(  case 5i: {
     break;
   }
 )");
@@ -53,11 +53,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitCase(s->body[0]);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  case 5i, 6i: {
+    EXPECT_EQ(gen.Result(), R"(  case 5i, 6i: {
     break;
   }
 )");
@@ -69,11 +69,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_Default) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
 
     gen.EmitCase(s->body[0]);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(gen.result(), R"(  default: {
+    EXPECT_EQ(gen.Result(), R"(  default: {
     break;
   }
 )");

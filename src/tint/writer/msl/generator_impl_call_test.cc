@@ -75,9 +75,9 @@ TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
 
     GeneratorImpl& gen = Build();
 
-    gen.increment_indent();
+    gen.IncrementIndent();
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.Diagnostics();
-    EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
+    EXPECT_EQ(gen.Result(), "  my_func(param1, param2);\n");
 }
 
 }  // namespace

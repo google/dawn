@@ -44,7 +44,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength) {
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
 
@@ -84,7 +84,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
 
@@ -128,7 +128,7 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_ViaLets) {
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
 
@@ -165,7 +165,7 @@ TEST_F(GlslSanitizerTest, PromoteArrayInitializerToConstVar) {
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
 
@@ -207,7 +207,7 @@ TEST_F(GlslSanitizerTest, PromoteStructInitializerToConstVar) {
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
 
@@ -253,7 +253,7 @@ TEST_F(GlslSanitizerTest, SimplifyPointersBasic) {
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
 
@@ -298,7 +298,7 @@ TEST_F(GlslSanitizerTest, SimplifyPointersComplexChain) {
     gen.Generate();
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 
-    auto got = gen.result();
+    auto got = gen.Result();
     auto* expect = R"(#version 310 es
 precision highp float;
 
