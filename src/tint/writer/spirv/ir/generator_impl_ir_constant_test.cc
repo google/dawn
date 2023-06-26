@@ -245,6 +245,29 @@ TEST_F(SpvGeneratorImplTest, Constant_Array_Array_I32) {
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                              {mod.symbols.New("c"), ty.f32()},
+                                                          });
+    auto* str = mod.constant_values.Composite(str_ty, utils::Vector{
+                                                          mod.constant_values.Get(1_i),
+                                                          mod.constant_values.Get(2_u),
+                                                          mod.constant_values.Get(3_f),
+                                                      });
+    generator_.Constant(b.Constant(str));
+    EXPECT_EQ(DumpTypes(), R"(%3 = OpTypeInt 32 1
+%4 = OpTypeInt 32 0
+%5 = OpTypeFloat 32
+%2 = OpTypeStruct %3 %4 %5
+%6 = OpConstant %3 1
+%7 = OpConstant %4 2
+%8 = OpConstant %5 3
+%1 = OpConstantComposite %2 %6 %7 %8
+)");
+}
+
 // Test that we do not emit the same constant more than once.
 TEST_F(SpvGeneratorImplTest, Constant_Deduplicate) {
     generator_.Constant(b.Constant(i32(42)));
