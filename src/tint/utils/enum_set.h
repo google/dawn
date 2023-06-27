@@ -81,6 +81,12 @@ struct EnumSet {
     /// @return this set so calls can be chained
     inline EnumSet& Remove(EnumSet s) { return (*this = *this - s); }
 
+    /// Adds or removes @p e to the set
+    /// @param e the enum value
+    /// @param add if true the enum value is added, otherwise removed
+    /// @return this set so calls can be chained
+    inline EnumSet& Set(Enum e, bool add = true) { return add ? Add(e) : Remove(e); }
+
     /// @param e the enum value
     /// @returns a copy of this set with e added
     inline EnumSet operator+(Enum e) const {

@@ -126,6 +126,19 @@ TEST(EnumSetTest, RemoveEnumSet) {
     EXPECT_FALSE(set.Contains(E::C));
 }
 
+TEST(EnumSetTest, Set) {
+    EnumSet<E> set;
+    set.Set(E::B);
+    EXPECT_FALSE(set.Contains(E::A));
+    EXPECT_TRUE(set.Contains(E::B));
+    EXPECT_FALSE(set.Contains(E::C));
+
+    set.Set(E::B, false);
+    EXPECT_FALSE(set.Contains(E::A));
+    EXPECT_FALSE(set.Contains(E::B));
+    EXPECT_FALSE(set.Contains(E::C));
+}
+
 TEST(EnumSetTest, OperatorPlusEnum) {
     EnumSet<E> set = EnumSet<E>{E::B} + E::C;
     EXPECT_FALSE(set.Contains(E::A));
