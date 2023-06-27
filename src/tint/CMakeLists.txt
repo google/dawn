@@ -694,6 +694,8 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator.h
     writer/msl/generator_impl.cc
     writer/msl/generator_impl.h
+    writer/msl/generator_support.cc
+    writer/msl/generator_support.h
   )
 
   if(${TINT_BUILD_IR})
@@ -1449,6 +1451,7 @@ if(TINT_BUILD_TESTS)
       writer/msl/generator_impl_type_test.cc
       writer/msl/generator_impl_unary_op_test.cc
       writer/msl/generator_impl_variable_decl_statement_test.cc
+      writer/msl/generator_support_test.cc
       writer/msl/test_helper.h
     )
 

@@ -360,25 +360,7 @@ class GeneratorImpl : public ASTTextGenerator {
     /// @returns the name or "" if not valid
     std::string generate_builtin_name(const sem::Builtin* builtin);
 
-    /// Converts a builtin to an attribute name
-    /// @param builtin the builtin to convert
-    /// @returns the string name of the builtin or blank on error
-    std::string builtin_to_attribute(builtin::BuiltinValue builtin) const;
-
-    /// Converts interpolation attributes to an MSL attribute
-    /// @param type the interpolation type
-    /// @param sampling the interpolation sampling
-    /// @returns the string name of the attribute or blank on error
-    std::string interpolation_to_attribute(builtin::InterpolationType type,
-                                           builtin::InterpolationSampling sampling) const;
-
   private:
-    // A pair of byte size and alignment `uint32_t`s.
-    struct SizeAndAlign {
-        uint32_t size;
-        uint32_t align;
-    };
-
     /// CallBuiltinHelper will call the builtin helper function, creating it
     /// if it hasn't been built already. If the builtin needs to be built then
     /// CallBuiltinHelper will generate the function signature and will call
@@ -403,10 +385,6 @@ class GeneratorImpl : public ASTTextGenerator {
     const std::string& ArrayType();
 
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
-
-    /// @returns the MSL packed type size and alignment in bytes for the given
-    /// type.
-    SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty);
 
     std::function<bool()> emit_continuing_;
 

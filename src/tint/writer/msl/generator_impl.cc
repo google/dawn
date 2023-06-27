@@ -86,6 +86,7 @@
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/check_supported_extensions.h"
 #include "src/tint/writer/float_to_string.h"
+#include "src/tint/writer/msl/generator_support.h"
 
 namespace tint::writer::msl {
 namespace {
@@ -1910,73 +1911,6 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     return true;
 }
 
-std::string GeneratorImpl::builtin_to_attribute(builtin::BuiltinValue builtin) const {
-    switch (builtin) {
-        case builtin::BuiltinValue::kPosition:
-            return "position";
-        case builtin::BuiltinValue::kVertexIndex:
-            return "vertex_id";
-        case builtin::BuiltinValue::kInstanceIndex:
-            return "instance_id";
-        case builtin::BuiltinValue::kFrontFacing:
-            return "front_facing";
-        case builtin::BuiltinValue::kFragDepth:
-            return "depth(any)";
-        case builtin::BuiltinValue::kLocalInvocationId:
-            return "thread_position_in_threadgroup";
-        case builtin::BuiltinValue::kLocalInvocationIndex:
-            return "thread_index_in_threadgroup";
-        case builtin::BuiltinValue::kGlobalInvocationId:
-            return "thread_position_in_grid";
-        case builtin::BuiltinValue::kWorkgroupId:
-            return "threadgroup_position_in_grid";
-        case builtin::BuiltinValue::kNumWorkgroups:
-            return "threadgroups_per_grid";
-        case builtin::BuiltinValue::kSampleIndex:
-            return "sample_id";
-        case builtin::BuiltinValue::kSampleMask:
-            return "sample_mask";
-        case builtin::BuiltinValue::kPointSize:
-            return "point_size";
-        default:
-            break;
-    }
-    return "";
-}
-
-std::string GeneratorImpl::interpolation_to_attribute(
-    builtin::InterpolationType type,
-    builtin::InterpolationSampling sampling) const {
-    std::string attr;
-    switch (sampling) {
-        case builtin::InterpolationSampling::kCenter:
-            attr = "center_";
-            break;
-        case builtin::InterpolationSampling::kCentroid:
-            attr = "centroid_";
-            break;
-        case builtin::InterpolationSampling::kSample:
-            attr = "sample_";
-            break;
-        case builtin::InterpolationSampling::kUndefined:
-            break;
-    }
-    switch (type) {
-        case builtin::InterpolationType::kPerspective:
-            attr += "perspective";
-            break;
-        case builtin::InterpolationType::kLinear:
-            attr += "no_perspective";
-            break;
-        case builtin::InterpolationType::kFlat:
-            attr += "flat";
-            break;
-        case builtin::InterpolationType::kUndefined:
-            break;
-    }
-    return attr;
-}
-
 bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     auto* func_sem = builder_.Sem().Get(func);
 
@@ -2086,7 +2020,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 
                         builtin_found = true;
 
-                        auto name = builtin_to_attribute(builtin);
+                        auto name = BuiltinToAttribute(builtin);
                         if (name.empty()) {
                             diagnostics_.add_error(diag::System::Writer, "unknown builtin");
                             return false;
@@ -2835,7 +2769,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
         auto& attributes = mem->Attributes();
 
         if (auto builtin = attributes.builtin) {
-            auto name = builtin_to_attribute(builtin.value());
+            auto name = BuiltinToAttribute(builtin.value());
             if (name.empty()) {
                 diagnostics_.add_error(diag::System::Writer, "unknown builtin");
                 return false;
@@ -2866,7 +2800,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
         }
 
         if (auto interpolation = attributes.interpolation) {
-            auto name = interpolation_to_attribute(interpolation->type, interpolation->sampling);
+            auto name = InterpolationToAttribute(interpolation->type, interpolation->sampling);
             if (name.empty()) {
                 diagnostics_.add_error(diag::System::Writer, "unknown interpolation attribute");
                 return false;
@@ -2883,7 +2817,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
 
         if (is_host_shareable) {
             // Calculate new MSL offset
-            auto size_align = MslPackedTypeSizeAndAlign(ty);
+            auto size_align = MslPackedTypeSizeAndAlign(diagnostics_, ty);
             if (TINT_UNLIKELY(msl_offset % size_align.align)) {
                 TINT_ICE(Writer, diagnostics_)
                     << "Misaligned MSL structure member " << ty->FriendlyName() << " " << mem_name;
@@ -3054,122 +2988,6 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
     out << ";";
 
     return true;
-}
-
-GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const type::Type* ty) {
-    return Switch(
-        ty,
-
-        // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
-        // 2.1 Scalar Data Types
-        [&](const type::U32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const type::I32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const type::F32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const type::F16*) {
-            return SizeAndAlign{2, 2};
-        },
-
-        [&](const type::Vector* vec) {
-            auto num_els = vec->Width();
-            auto* el_ty = vec->type();
-            SizeAndAlign el_size_align = MslPackedTypeSizeAndAlign(el_ty);
-            if (el_ty->IsAnyOf<type::U32, type::I32, type::F32, type::F16>()) {
-                // Use a packed_vec type for 3-element vectors only.
-                if (num_els == 3) {
-                    // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
-                    // 2.2.3 Packed Vector Types
-                    return SizeAndAlign{num_els * el_size_align.size, el_size_align.align};
-                } else {
-                    // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
-                    // 2.2 Vector Data Types
-                    // Vector data types are aligned to their size.
-                    return SizeAndAlign{num_els * el_size_align.size, num_els * el_size_align.size};
-                }
-            }
-            TINT_UNREACHABLE(Writer, diagnostics_)
-                << "Unhandled vector element type " << el_ty->TypeInfo().name;
-            return SizeAndAlign{};
-        },
-
-        [&](const type::Matrix* mat) {
-            // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
-            // 2.3 Matrix Data Types
-            auto cols = mat->columns();
-            auto rows = mat->rows();
-            auto* el_ty = mat->type();
-            // Metal only support half and float matrix.
-            if (el_ty->IsAnyOf<type::F32, type::F16>()) {
-                static constexpr SizeAndAlign table_f32[] = {
-                    /* float2x2 */ {16, 8},
-                    /* float2x3 */ {32, 16},
-                    /* float2x4 */ {32, 16},
-                    /* float3x2 */ {24, 8},
-                    /* float3x3 */ {48, 16},
-                    /* float3x4 */ {48, 16},
-                    /* float4x2 */ {32, 8},
-                    /* float4x3 */ {64, 16},
-                    /* float4x4 */ {64, 16},
-                };
-                static constexpr SizeAndAlign table_f16[] = {
-                    /* half2x2 */ {8, 4},
-                    /* half2x3 */ {16, 8},
-                    /* half2x4 */ {16, 8},
-                    /* half3x2 */ {12, 4},
-                    /* half3x3 */ {24, 8},
-                    /* half3x4 */ {24, 8},
-                    /* half4x2 */ {16, 4},
-                    /* half4x3 */ {32, 8},
-                    /* half4x4 */ {32, 8},
-                };
-                if (cols >= 2 && cols <= 4 && rows >= 2 && rows <= 4) {
-                    if (el_ty->Is<type::F32>()) {
-                        return table_f32[(3 * (cols - 2)) + (rows - 2)];
-                    } else {
-                        return table_f16[(3 * (cols - 2)) + (rows - 2)];
-                    }
-                }
-            }
-
-            TINT_UNREACHABLE(Writer, diagnostics_)
-                << "Unhandled matrix element type " << el_ty->TypeInfo().name;
-            return SizeAndAlign{};
-        },
-
-        [&](const type::Array* arr) {
-            if (TINT_UNLIKELY(!arr->IsStrideImplicit())) {
-                TINT_ICE(Writer, diagnostics_)
-                    << "arrays with explicit strides should not exist past the SPIR-V reader";
-                return SizeAndAlign{};
-            }
-            if (arr->Count()->Is<type::RuntimeArrayCount>()) {
-                return SizeAndAlign{arr->Stride(), arr->Align()};
-            }
-            if (auto count = arr->ConstantCount()) {
-                return SizeAndAlign{arr->Stride() * count.value(), arr->Align()};
-            }
-            diagnostics_.add_error(diag::System::Writer, type::Array::kErrExpectedConstantCount);
-            return SizeAndAlign{};
-        },
-
-        [&](const type::Struct* str) {
-            // TODO(crbug.com/tint/650): There's an assumption here that MSL's
-            // default structure size and alignment matches WGSL's. We need to
-            // confirm this.
-            return SizeAndAlign{str->Size(), str->Align()};
-        },
-
-        [&](const type::Atomic* atomic) { return MslPackedTypeSizeAndAlign(atomic->Type()); },
-
-        [&](Default) {
-            TINT_UNREACHABLE(Writer, diagnostics_) << "Unhandled type " << ty->TypeInfo().name;
-            return SizeAndAlign{};
-        });
 }
 
 template <typename F>

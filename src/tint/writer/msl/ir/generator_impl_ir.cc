@@ -36,6 +36,7 @@
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
 #include "src/tint/utils/scoped_assignment.h"
+#include "src/tint/writer/msl/generator_support.h"
 
 namespace tint::writer::msl {
 namespace {
@@ -283,7 +284,149 @@ void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
                     diagnostics_.add_error(diag::System::Writer, "invalid texture type");
                 });
         },
+        [&](const type::Struct* str) {
+            out << StructName(str);
+
+            TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+            EmitStructType(str);
+        },
         [&](Default) { UNHANDLED_CASE(ty); });
+}
+
+void GeneratorImplIr::EmitStructType(const type::Struct* str) {
+    auto it = emitted_structs_.emplace(str);
+    if (!it.second) {
+        return;
+    }
+
+    // This does not append directly to the preamble because a struct may require other structs, or
+    // the array template, to get emitted before it. So, the struct emits into a temporary text
+    // buffer, then anything it depends on will emit to the preamble first, and then it copies the
+    // text buffer into the preamble.
+    TextBuffer str_buf;
+    Line(&str_buf) << "struct " << StructName(str) << " {";
+
+    bool is_host_shareable = str->IsHostShareable();
+
+    // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
+    auto add_byte_offset_comment = [&](utils::StringStream& out, uint32_t offset) {
+        std::ios_base::fmtflags saved_flag_state(out.flags());
+        out << "/* 0x" << std::hex << std::setfill('0') << std::setw(4) << offset << " */ ";
+        out.flags(saved_flag_state);
+    };
+
+    auto add_padding = [&](uint32_t size, uint32_t msl_offset) {
+        std::string name;
+        do {
+            name = UniqueIdentifier("tint_pad");
+        } while (str->FindMember(ir_->symbols.Get(name)));
+
+        auto out = Line(&str_buf);
+        add_byte_offset_comment(out, msl_offset);
+        out << ArrayTemplateName() << "<int8_t, " << size << "> " << name << ";";
+    };
+
+    str_buf.IncrementIndent();
+
+    uint32_t msl_offset = 0;
+    for (auto* mem : str->Members()) {
+        auto out = Line(&str_buf);
+        auto mem_name = mem->Name().Name();
+        auto ir_offset = mem->Offset();
+
+        if (is_host_shareable) {
+            if (TINT_UNLIKELY(ir_offset < msl_offset)) {
+                // Unimplementable layout
+                TINT_ICE(Writer, diagnostics_) << "Structure member offset (" << ir_offset
+                                               << ") is behind MSL offset (" << msl_offset << ")";
+                return;
+            }
+
+            // Generate padding if required
+            if (auto padding = ir_offset - msl_offset) {
+                add_padding(padding, msl_offset);
+                msl_offset += padding;
+            }
+
+            add_byte_offset_comment(out, msl_offset);
+        }
+
+        auto* ty = mem->Type();
+
+        EmitType(out, ty);
+        out << " " << mem_name;
+
+        // Emit attributes
+        auto& attributes = mem->Attributes();
+
+        if (auto builtin = attributes.builtin) {
+            auto name = BuiltinToAttribute(builtin.value());
+            if (name.empty()) {
+                diagnostics_.add_error(diag::System::Writer, "unknown builtin");
+                return;
+            }
+            out << " [[" << name << "]]";
+        }
+
+        if (auto location = attributes.location) {
+            auto& pipeline_stage_uses = str->PipelineStageUses();
+            if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
+                TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
+                return;
+            }
+
+            if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexInput)) {
+                out << " [[attribute(" + std::to_string(location.value()) + ")]]";
+            } else if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexOutput)) {
+                out << " [[user(locn" + std::to_string(location.value()) + ")]]";
+            } else if (pipeline_stage_uses.count(type::PipelineStageUsage::kFragmentInput)) {
+                out << " [[user(locn" + std::to_string(location.value()) + ")]]";
+            } else if (TINT_LIKELY(
+                           pipeline_stage_uses.count(type::PipelineStageUsage::kFragmentOutput))) {
+                out << " [[color(" + std::to_string(location.value()) + ")]]";
+            } else {
+                TINT_ICE(Writer, diagnostics_) << "invalid use of location decoration";
+                return;
+            }
+        }
+
+        if (auto interpolation = attributes.interpolation) {
+            auto name = InterpolationToAttribute(interpolation->type, interpolation->sampling);
+            if (name.empty()) {
+                diagnostics_.add_error(diag::System::Writer, "unknown interpolation attribute");
+                return;
+            }
+            out << " [[" << name << "]]";
+        }
+
+        if (attributes.invariant) {
+            invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
+            out << " " << invariant_define_name_;
+        }
+
+        out << ";";
+
+        if (is_host_shareable) {
+            // Calculate new MSL offset
+            auto size_align = MslPackedTypeSizeAndAlign(diagnostics_, ty);
+            if (TINT_UNLIKELY(msl_offset % size_align.align)) {
+                TINT_ICE(Writer, diagnostics_)
+                    << "Misaligned MSL structure member " << mem_name << " : " << ty->FriendlyName()
+                    << " offset: " << msl_offset << " align: " << size_align.align;
+                return;
+            }
+            msl_offset += size_align.size;
+        }
+    }
+
+    if (is_host_shareable && str->Size() != msl_offset) {
+        add_padding(str->Size() - msl_offset, msl_offset);
+    }
+
+    str_buf.DecrementIndent();
+    Line(&str_buf) << "};";
+
+    preamble_buffer_.Append(str_buf);
 }
 
 }  // namespace tint::writer::msl

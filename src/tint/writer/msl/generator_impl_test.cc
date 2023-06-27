@@ -61,42 +61,6 @@ kernel void my_func() {
 )");
 }
 
-struct MslBuiltinData {
-    builtin::BuiltinValue builtin;
-    const char* attribute_name;
-};
-inline std::ostream& operator<<(std::ostream& out, MslBuiltinData data) {
-    utils::StringStream str;
-    str << data.builtin;
-    out << str.str();
-    return out;
-}
-using MslBuiltinConversionTest = TestParamHelper<MslBuiltinData>;
-TEST_P(MslBuiltinConversionTest, Emit) {
-    auto params = GetParam();
-
-    GeneratorImpl& gen = Build();
-
-    EXPECT_EQ(gen.builtin_to_attribute(params.builtin), std::string(params.attribute_name));
-}
-INSTANTIATE_TEST_SUITE_P(
-    MslGeneratorImplTest,
-    MslBuiltinConversionTest,
-    testing::Values(
-        MslBuiltinData{builtin::BuiltinValue::kPosition, "position"},
-        MslBuiltinData{builtin::BuiltinValue::kVertexIndex, "vertex_id"},
-        MslBuiltinData{builtin::BuiltinValue::kInstanceIndex, "instance_id"},
-        MslBuiltinData{builtin::BuiltinValue::kFrontFacing, "front_facing"},
-        MslBuiltinData{builtin::BuiltinValue::kFragDepth, "depth(any)"},
-        MslBuiltinData{builtin::BuiltinValue::kLocalInvocationId, "thread_position_in_threadgroup"},
-        MslBuiltinData{builtin::BuiltinValue::kLocalInvocationIndex, "thread_index_in_threadgroup"},
-        MslBuiltinData{builtin::BuiltinValue::kGlobalInvocationId, "thread_position_in_grid"},
-        MslBuiltinData{builtin::BuiltinValue::kWorkgroupId, "threadgroup_position_in_grid"},
-        MslBuiltinData{builtin::BuiltinValue::kNumWorkgroups, "threadgroups_per_grid"},
-        MslBuiltinData{builtin::BuiltinValue::kSampleIndex, "sample_id"},
-        MslBuiltinData{builtin::BuiltinValue::kSampleMask, "sample_mask"},
-        MslBuiltinData{builtin::BuiltinValue::kPointSize, "point_size"}));
-
 TEST_F(MslGeneratorImplTest, HasInvariantAttribute_True) {
     auto* out = Structure("Out", utils::Vector{
                                      Member("pos", ty.vec4<f32>(),

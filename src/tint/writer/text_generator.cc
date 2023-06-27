@@ -18,12 +18,22 @@
 #include <limits>
 
 #include "src/tint/debug.h"
+#include "src/tint/utils/map.h"
 
 namespace tint::writer {
 
 TextGenerator::TextGenerator() = default;
 
 TextGenerator::~TextGenerator() = default;
+
+std::string TextGenerator::StructName(const type::Struct* s) {
+    auto name = s->Name().Name();
+    if (name.size() > 1 && name[0] == '_' && name[1] == '_') {
+        name = utils::GetOrCreate(builtin_struct_names_, s,
+                                  [&] { return UniqueIdentifier(name.substr(2)); });
+    }
+    return name;
+}
 
 TextGenerator::LineWriter::LineWriter(TextBuffer* buf) : buffer(buf) {}
 

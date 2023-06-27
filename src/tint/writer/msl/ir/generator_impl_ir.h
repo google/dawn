@@ -16,6 +16,7 @@
 #define SRC_TINT_WRITER_MSL_IR_GENERATOR_IMPL_IR_H_
 
 #include <string>
+#include <unordered_set>
 
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/module.h"
@@ -44,6 +45,11 @@ class GeneratorImplIr : public IRTextGenerator {
     /// @param ty the type to emit
     void EmitType(utils::StringStream& out, const type::Type* ty);
 
+    /// Handles generating a struct declaration. If the structure has already been emitted, then
+    /// this function will simply return without emitting anything.
+    /// @param str the struct to generate
+    void EmitStructType(const type::Struct* str);
+
     /// Handles generating a address space
     /// @param out the output of the type stream
     /// @param sc the address space to generate
@@ -55,6 +61,13 @@ class GeneratorImplIr : public IRTextGenerator {
     /// Unique name of the tint_array<T, N> template.
     /// Non-empty only if the template has been generated.
     std::string array_template_name_;
+
+  private:
+    /// Unique name of the 'TINT_INVARIANT' preprocessor define.
+    /// Non-empty only if an invariant attribute has been generated.
+    std::string invariant_define_name_;
+
+    std::unordered_set<const type::Struct*> emitted_structs_;
 };
 
 }  // namespace tint::writer::msl

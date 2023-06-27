@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/ir_text_generator.h"
 
+#include "src/tint/utils/map.h"
+
 namespace tint::writer {
 
 IRTextGenerator::IRTextGenerator(ir::Module* mod) : ir_(mod) {}
