@@ -58,8 +58,11 @@ MaybeError CommandRecordingContext::Intialize(Device* device) {
     descriptor.label = "builtin uniform buffer";
 
     Ref<BufferBase> uniformBuffer;
-    DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&descriptor));
-
+    {
+        // Lock the device to protect the clearing of the built-in uniform buffer.
+        auto deviceLock(device->GetScopedLock());
+        DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&descriptor));
+    }
     mUniformBuffer = ToBackend(std::move(uniformBuffer));
 
     // Always bind the uniform buffer to the reserved slot for all pipelines.
@@ -84,14 +87,17 @@ ID3D11Device* CommandRecordingContext::GetD3D11Device() const {
 }
 
 ID3D11DeviceContext* CommandRecordingContext::GetD3D11DeviceContext() const {
+    ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     return mD3D11DeviceContext4.Get();
 }
 
 ID3D11DeviceContext1* CommandRecordingContext::GetD3D11DeviceContext1() const {
+    ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     return mD3D11DeviceContext4.Get();
 }
 
 ID3D11DeviceContext4* CommandRecordingContext::GetD3D11DeviceContext4() const {
+    ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     return mD3D11DeviceContext4.Get();
 }
 
@@ -110,6 +116,7 @@ Device* CommandRecordingContext::GetDevice() const {
 
 void CommandRecordingContext::Release() {
     if (mIsOpen) {
+        ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
         mIsOpen = false;
         mNeedsSubmit = false;
         mUniformBuffer = nullptr;
