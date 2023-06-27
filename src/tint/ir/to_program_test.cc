@@ -12,65 +12,60 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <sstream>
 #include <string>
 
 #include "src/tint/ir/disassembler.h"
-#include "src/tint/ir/ir_test_helper.h"
 #include "src/tint/ir/to_program.h"
+#include "src/tint/ir/to_program_test.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/wgsl/generator.h"
 
-#if !TINT_BUILD_WGSL_WRITER
-#error "to_program_test.cc requires both the WGSL writer to be enabled"
-#endif
-
-namespace tint::ir {
-namespace {
+namespace tint::ir::test {
 
 using namespace tint::number_suffixes;        // NOLINT
 using namespace tint::builtin::fluent_types;  // NOLINT
 
-class IRToProgramTest : public IRTestHelper {
-  public:
-    void Test(std::string_view expected_wgsl) {
-        tint::ir::Disassembler d{mod};
-        auto disassembly = d.Disassemble();
+IRToProgramTest::Result IRToProgramTest::Run() {
+    Result result;
 
-        auto output_program = ToProgram(mod);
-        if (!output_program.IsValid()) {
-            FAIL() << output_program.Diagnostics().str() << std::endl  //
-                   << "IR:" << std::endl                               //
-                   << disassembly << std::endl                         //
-                   << "AST:" << std::endl                              //
-                   << Program::printer(&output_program) << std::endl;
-        }
+    tint::ir::Disassembler d{mod};
+    result.ir = d.Disassemble();
 
-        ASSERT_TRUE(output_program.IsValid()) << output_program.Diagnostics().str();
-
-        auto output = writer::wgsl::Generate(&output_program, {});
-        ASSERT_TRUE(output.success) << output.error;
-
-        auto expected = std::string(utils::TrimSpace(expected_wgsl));
-        if (!expected.empty()) {
-            expected = "\n" + expected + "\n";
-        }
-        auto got = std::string(utils::TrimSpace(output.wgsl));
-        if (!got.empty()) {
-            got = "\n" + got + "\n";
-        }
-        EXPECT_EQ(expected, got) << "IR:" << std::endl << disassembly;
+    auto output_program = ToProgram(mod);
+    if (!output_program.IsValid()) {
+        result.err = output_program.Diagnostics().str();
+        result.ast = Program::printer(&output_program);
+        return result;
     }
-};
+
+    auto output = writer::wgsl::Generate(&output_program, {});
+    if (!output.success) {
+        std::stringstream ss;
+        ss << "wgsl::Generate() errored: " << output.error;
+        result.err = ss.str();
+        return result;
+    }
+
+    result.wgsl = std::string(utils::TrimSpace(output.wgsl));
+    if (!result.wgsl.empty()) {
+        result.wgsl = "\n" + result.wgsl + "\n";
+    }
+
+    return result;
+}
+
+namespace {
 
 TEST_F(IRToProgramTest, EmptyModule) {
-    Test("");
+    EXPECT_WGSL("");
 }
 
 TEST_F(IRToProgramTest, SingleFunction_Empty) {
     auto* fn = b.Function("f", ty.void_());
     mod.functions.Push(fn);
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
 }
 )");
@@ -82,7 +77,7 @@ TEST_F(IRToProgramTest, SingleFunction_Return) {
 
     fn->Block()->Append(b.Return(fn));
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
 }
 )");
@@ -94,7 +89,7 @@ TEST_F(IRToProgramTest, SingleFunction_Return_i32) {
 
     fn->Block()->Append(b.Return(fn, 42_i));
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() -> i32 {
   return 42i;
 }
@@ -112,7 +107,7 @@ TEST_F(IRToProgramTest, SingleFunction_Parameters) {
 
     fn->Block()->Append(b.Return(fn, i));
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(i : i32, u : u32) -> i32 {
   return i;
 }
@@ -131,7 +126,7 @@ TEST_F(IRToProgramTest, UnaryOp_Negate) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Negation(ty.i32(), i)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(i : i32) -> i32 {
   return -(i);
 }
@@ -147,7 +142,7 @@ TEST_F(IRToProgramTest, UnaryOp_Complement) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Complement(ty.u32(), i)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(i : u32) -> u32 {
   return ~(i);
 }
@@ -163,7 +158,7 @@ TEST_F(IRToProgramTest, UnaryOp_Not) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Not(ty.bool_(), i)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(b : bool) -> bool {
   return !(b);
 }
@@ -184,7 +179,7 @@ TEST_F(IRToProgramTest, BinaryOp_Add) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Add(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
   return (a + b);
 }
@@ -202,7 +197,7 @@ TEST_F(IRToProgramTest, BinaryOp_Subtract) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Subtract(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
   return (a - b);
 }
@@ -220,7 +215,7 @@ TEST_F(IRToProgramTest, BinaryOp_Multiply) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Multiply(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
   return (a * b);
 }
@@ -238,7 +233,7 @@ TEST_F(IRToProgramTest, BinaryOp_Divide) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Divide(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
   return (a / b);
 }
@@ -256,7 +251,7 @@ TEST_F(IRToProgramTest, BinaryOp_Modulo) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Modulo(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
   return (a % b);
 }
@@ -274,7 +269,7 @@ TEST_F(IRToProgramTest, BinaryOp_And) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.And(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
   return (a & b);
 }
@@ -292,7 +287,7 @@ TEST_F(IRToProgramTest, BinaryOp_Or) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Or(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
   return (a | b);
 }
@@ -310,7 +305,7 @@ TEST_F(IRToProgramTest, BinaryOp_Xor) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Xor(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> i32 {
   return (a ^ b);
 }
@@ -328,7 +323,7 @@ TEST_F(IRToProgramTest, BinaryOp_Equal) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.Equal(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
   return (a == b);
 }
@@ -346,7 +341,7 @@ TEST_F(IRToProgramTest, BinaryOp_NotEqual) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.NotEqual(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
   return (a != b);
 }
@@ -364,7 +359,7 @@ TEST_F(IRToProgramTest, BinaryOp_LessThan) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.LessThan(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
   return (a < b);
 }
@@ -382,7 +377,7 @@ TEST_F(IRToProgramTest, BinaryOp_GreaterThan) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.GreaterThan(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
   return (a > b);
 }
@@ -400,7 +395,7 @@ TEST_F(IRToProgramTest, BinaryOp_LessThanEqual) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.LessThanEqual(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
   return (a <= b);
 }
@@ -418,7 +413,7 @@ TEST_F(IRToProgramTest, BinaryOp_GreaterThanEqual) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.GreaterThanEqual(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
   return (a >= b);
 }
@@ -436,7 +431,7 @@ TEST_F(IRToProgramTest, BinaryOp_ShiftLeft) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.ShiftLeft(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : u32) -> i32 {
   return (a << b);
 }
@@ -454,7 +449,7 @@ TEST_F(IRToProgramTest, BinaryOp_ShiftRight) {
 
     b.With(fn->Block(), [&] { b.Return(fn, b.ShiftRight(ty.i32(), pa, pb)); });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : i32, b : u32) -> i32 {
   return (a >> b);
 }
@@ -482,7 +477,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_2) {
         b.Return(fn, if_->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool) -> bool {
   return (a && b);
 }
@@ -514,7 +509,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_ab_c) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   return ((a && b) && c);
 }
@@ -545,7 +540,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_a_bc) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   return (a && (b && c));
 }
@@ -571,7 +566,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_2) {
         b.Return(fn, if_->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool) -> bool {
   let l = (a && b);
   return l;
@@ -605,7 +600,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_ab_c) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   let l = ((a && b) && c);
   return l;
@@ -639,7 +634,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_a_bc) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   let l = (a && (b && c));
   return l;
@@ -668,7 +663,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_2) {
         b.Return(fn, if_->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() -> bool {
   return true;
 }
@@ -713,7 +708,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_3_ab_c) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() -> bool {
   return true;
 }
@@ -762,7 +757,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_3_a_bc) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() -> bool {
   return true;
 }
@@ -799,7 +794,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_2) {
         b.Return(fn, if_->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool) -> bool {
   return (a || b);
 }
@@ -831,7 +826,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_ab_c) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   return ((a || b) || c);
 }
@@ -863,7 +858,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_a_bc) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   return (a || (b || c));
 }
@@ -889,7 +884,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_2) {
         b.Return(fn, if_->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool) -> bool {
   let l = (a || b);
   return l;
@@ -923,7 +918,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_ab_c) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   let l = ((a || b) || c);
   return l;
@@ -957,7 +952,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_a_bc) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   let l = (a || (b || c));
   return l;
@@ -986,7 +981,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_2) {
         b.Return(fn, if_->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() -> bool {
   return true;
 }
@@ -1031,7 +1026,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_3_ab_c) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() -> bool {
   return true;
 }
@@ -1080,7 +1075,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_3_a_bc) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() -> bool {
   return true;
 }
@@ -1138,7 +1133,7 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalMixed) {
         b.Return(fn, if2->Result(0));
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn b() -> bool {
   return true;
 }
@@ -1167,7 +1162,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Increment) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var v : i32;
   v = (v + 1i);
@@ -1185,7 +1180,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Decrement) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var v : i32;
   v = (v - 1i);
@@ -1203,7 +1198,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Add) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var v : i32;
   v = (v + 8i);
@@ -1221,7 +1216,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Subtract) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var v : i32;
   v = (v - 8i);
@@ -1239,7 +1234,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Multiply) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var v : i32;
   v = (v * 8i);
@@ -1257,7 +1252,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Divide) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var v : i32;
   v = (v / 8i);
@@ -1275,7 +1270,7 @@ TEST_F(IRToProgramTest, CompoundAssign_Xor) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var v : i32;
   v = (v ^ 8i);
@@ -1299,7 +1294,7 @@ TEST_F(IRToProgramTest, LetUsedOnce) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(i : u32) -> u32 {
   let v = ~(i);
   return v;
@@ -1320,7 +1315,7 @@ TEST_F(IRToProgramTest, LetUsedTwice) {
         mod.SetName(v, "v");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(i : i32) -> i32 {
   let v = (i * 2i);
   return (v + v);
@@ -1340,7 +1335,7 @@ TEST_F(IRToProgramTest, FunctionScopeVar_i32) {
         mod.SetName(i, "i");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var i : i32;
 }
@@ -1357,7 +1352,7 @@ TEST_F(IRToProgramTest, FunctionScopeVar_i32_InitLiteral) {
         mod.SetName(i, "i");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var i : i32 = 42i;
 }
@@ -1385,7 +1380,7 @@ TEST_F(IRToProgramTest, FunctionScopeVar_Chained) {
         mod.SetName(vc, "c");
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var a : i32 = 42i;
   var b : i32 = a;
@@ -1415,7 +1410,7 @@ TEST_F(IRToProgramTest, If_CallFn) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() {
 }
 
@@ -1439,7 +1434,7 @@ TEST_F(IRToProgramTest, If_Return) {
         b.With(if_->True(), [&] { b.Return(fn); });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(cond : bool) {
   if (cond) {
     return;
@@ -1461,7 +1456,7 @@ TEST_F(IRToProgramTest, If_Return_i32) {
         b.Return(fn, 10_i);
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() -> i32 {
   var cond : bool = true;
   if (cond) {
@@ -1497,7 +1492,7 @@ TEST_F(IRToProgramTest, If_CallFn_Else_CallFn) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() {
 }
 
@@ -1527,7 +1522,7 @@ TEST_F(IRToProgramTest, If_Return_f32_Else_Return_f32) {
         b.With(if_->False(), [&] { b.Return(fn, 2.0_f); });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() -> f32 {
   var cond : bool = true;
   if (cond) {
@@ -1563,7 +1558,7 @@ TEST_F(IRToProgramTest, If_Return_u32_Else_CallFn) {
         b.Return(fn, 2_u);
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() {
 }
 
@@ -1616,7 +1611,7 @@ TEST_F(IRToProgramTest, If_CallFn_ElseIf_CallFn) {
         b.Call(ty.void_(), fn_c);
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() {
 }
 
@@ -1683,7 +1678,7 @@ TEST_F(IRToProgramTest, If_Else_Chain) {
             });
         });
     });
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn x(i : i32) -> bool {
   return true;
 }
@@ -1724,7 +1719,7 @@ TEST_F(IRToProgramTest, Switch_Default) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() {
 }
 
@@ -1777,7 +1772,7 @@ TEST_F(IRToProgramTest, Switch_3_Cases) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() {
 }
 
@@ -1830,7 +1825,7 @@ TEST_F(IRToProgramTest, Switch_3_Cases_AllReturn) {
         b.Return(fn);
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() {
 }
 
@@ -1900,7 +1895,7 @@ TEST_F(IRToProgramTest, Switch_Nested) {
             b.ExitSwitch(s1);
         });
     });
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a() {
 }
 
@@ -1959,7 +1954,7 @@ TEST_F(IRToProgramTest, For_Empty) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   for(var i : i32 = 0i; (i < 5i); i = (i + 1i)) {
   }
@@ -1987,7 +1982,7 @@ TEST_F(IRToProgramTest, For_Empty_NoInit) {
         b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var i : i32 = 0i;
   for(; (i < 5i); i = (i + 1i)) {
@@ -2016,7 +2011,7 @@ TEST_F(IRToProgramTest, For_Empty_NoCont) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   for(var i : i32 = 0i; (i < 5i); ) {
   }
@@ -2059,7 +2054,7 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
         b.Return(fn, 3_i);
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a(v : i32) -> bool {
   return (v == 1i);
 }
@@ -2110,7 +2105,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoInit) {
         b.Return(fn, 3_i);
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a(v : i32) -> bool {
   return (v == 1i);
 }
@@ -2161,7 +2156,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
         b.Return(fn, 3_i);
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn a(v : i32) -> bool {
   return (v == 1i);
 }
@@ -2209,7 +2204,7 @@ TEST_F(IRToProgramTest, For_CallInInitCondCont) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn n(v : i32) -> i32 {
   return (v + 1i);
 }
@@ -2238,7 +2233,7 @@ TEST_F(IRToProgramTest, While_Empty) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   while(true) {
   }
@@ -2263,7 +2258,7 @@ TEST_F(IRToProgramTest, While_Cond) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(cond : bool) {
   while(cond) {
   }
@@ -2286,7 +2281,7 @@ TEST_F(IRToProgramTest, While_Break) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   while(true) {
     break;
@@ -2315,7 +2310,7 @@ TEST_F(IRToProgramTest, While_IfBreak) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(cond : bool) {
   while(true) {
     if (cond) {
@@ -2346,7 +2341,7 @@ TEST_F(IRToProgramTest, While_IfReturn) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(cond : bool) {
   while(true) {
     if (cond) {
@@ -2370,7 +2365,7 @@ TEST_F(IRToProgramTest, Loop_Break) {
         b.With(loop->Body(), [&] { b.ExitLoop(loop); });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   loop {
     break;
@@ -2394,7 +2389,7 @@ TEST_F(IRToProgramTest, Loop_IfBreak) {
             b.With(if_->True(), [&] { b.ExitLoop(loop); });
         });
     });
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(cond : bool) {
   loop {
     if (cond) {
@@ -2421,7 +2416,7 @@ TEST_F(IRToProgramTest, Loop_IfReturn) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f(cond : bool) {
   loop {
     if (cond) {
@@ -2451,7 +2446,7 @@ TEST_F(IRToProgramTest, Loop_IfContinuing) {
         b.With(loop->Continuing(), [&] { b.Store(cond, true); });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var cond : bool = false;
   loop {
@@ -2492,7 +2487,7 @@ TEST_F(IRToProgramTest, Loop_VarsDeclaredOutsideAndInside) {
         });
     });
 
-    Test(R"(
+    EXPECT_WGSL(R"(
 fn f() {
   var b : i32 = 1i;
   loop {
@@ -2510,4 +2505,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::ir::test
