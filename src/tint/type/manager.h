@@ -23,6 +23,7 @@
 #include "src/tint/builtin/number.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/atomic.h"
+#include "src/tint/type/sampler.h"
 #include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/unique_node.h"
@@ -404,6 +405,14 @@ class Manager final {
     template <builtin::AddressSpace SPACE, builtin::Access ACCESS = builtin::Access::kReadWrite>
     const type::Pointer* ptr(const type::Type* subtype) {
         return ptr(SPACE, subtype, ACCESS);
+    }
+
+    /// @returns the sampler type
+    const type::Sampler* sampler() { return Get<type::Sampler>(type::SamplerKind::kSampler); }
+
+    /// @returns the comparison sampler type
+    const type::Sampler* comparison_sampler() {
+        return Get<type::Sampler>(type::SamplerKind::kComparisonSampler);
     }
 
     /// A structure member descriptor.

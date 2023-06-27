@@ -20,11 +20,18 @@
 #include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/bool.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
+#include "src/tint/type/external_texture.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/matrix.h"
+#include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/pointer.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
+#include "src/tint/type/texture.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
@@ -201,6 +208,80 @@ void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
             out << " ";
             EmitType(out, ptr->StoreType());
             out << "*";
+        },
+        [&](const type::Sampler*) { out << "sampler"; },  //
+        [&](const type::Texture* tex) {
+            if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
+                TINT_ICE(Writer, diagnostics_)
+                    << "Multiplanar external texture transform was not run.";
+                return;
+            }
+
+            if (tex->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
+                out << "depth";
+            } else {
+                out << "texture";
+            }
+
+            switch (tex->dim()) {
+                case type::TextureDimension::k1d:
+                    out << "1d";
+                    break;
+                case type::TextureDimension::k2d:
+                    out << "2d";
+                    break;
+                case type::TextureDimension::k2dArray:
+                    out << "2d_array";
+                    break;
+                case type::TextureDimension::k3d:
+                    out << "3d";
+                    break;
+                case type::TextureDimension::kCube:
+                    out << "cube";
+                    break;
+                case type::TextureDimension::kCubeArray:
+                    out << "cube_array";
+                    break;
+                default:
+                    diagnostics_.add_error(diag::System::Writer, "Invalid texture dimensions");
+                    return;
+            }
+            if (tex->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
+                out << "_ms";
+            }
+            out << "<";
+            TINT_DEFER(out << ">");
+
+            tint::Switch(
+                tex,  //
+                [&](const type::DepthTexture*) { out << "float, access::sample"; },
+                [&](const type::DepthMultisampledTexture*) { out << "float, access::read"; },
+                [&](const type::StorageTexture* storage) {
+                    EmitType(out, storage->type());
+                    out << ", ";
+
+                    std::string access_str;
+                    if (storage->access() == builtin::Access::kRead) {
+                        out << "access::read";
+                    } else if (storage->access() == builtin::Access::kWrite) {
+                        out << "access::write";
+                    } else {
+                        diagnostics_.add_error(diag::System::Writer,
+                                               "Invalid access control for storage texture");
+                        return;
+                    }
+                },
+                [&](const type::MultisampledTexture* ms) {
+                    EmitType(out, ms->type());
+                    out << ", access::read";
+                },
+                [&](const type::SampledTexture* sampled) {
+                    EmitType(out, sampled->type());
+                    out << ", access::sample";
+                },
+                [&](Default) {
+                    diagnostics_.add_error(diag::System::Writer, "invalid texture type");
+                });
         },
         [&](Default) { UNHANDLED_CASE(ty); });
 }

@@ -15,7 +15,12 @@
 #include "gmock/gmock.h"
 
 #include "src/tint/type/array.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
 #include "src/tint/type/matrix.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/msl/ir/test_helper_ir.h"
 
@@ -751,151 +756,122 @@ INSTANTIATE_TEST_SUITE_P(
 // )");
 // }
 
-// TEST_F(MslGeneratorImplTest, EmitType_Sampler) {
-//     auto* sampler = create<type::Sampler>(type::SamplerKind::kSampler);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, sampler, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "sampler");
-// }
-//
-// TEST_F(MslGeneratorImplTest, EmitType_SamplerComparison) {
-//     auto* sampler = create<type::Sampler>(type::SamplerKind::kComparisonSampler);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, sampler, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "sampler");
-// }
-//
-// struct MslDepthTextureData {
-//     type::TextureDimension dim;
-//     std::string result;
-// };
-// inline std::ostream& operator<<(std::ostream& out, MslDepthTextureData data) {
-//     utils::StringStream str;
-//     str << data.dim;
-//     out << str.str();
-//     return out;
-// }
-// using MslDepthTexturesTest = TestParamHelper<MslDepthTextureData>;
-// TEST_P(MslDepthTexturesTest, Emit) {
-//     auto params = GetParam();
-//
-//     type::DepthTexture s(params.dim);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), params.result);
-// }
-// INSTANTIATE_TEST_SUITE_P(
-//     MslGeneratorImplTest,
-//     MslDepthTexturesTest,
-//     testing::Values(
-//         MslDepthTextureData{type::TextureDimension::k2d, "depth2d<float, access::sample>"},
-//         MslDepthTextureData{type::TextureDimension::k2dArray,
-//                             "depth2d_array<float, access::sample>"},
-//         MslDepthTextureData{type::TextureDimension::kCube, "depthcube<float,
-//         access::sample>"}, MslDepthTextureData{type::TextureDimension::kCubeArray,
-//                             "depthcube_array<float, access::sample>"}));
-//
-// using MslDepthMultisampledTexturesTest = TestHelper;
-// TEST_F(MslDepthMultisampledTexturesTest, Emit) {
-//     type::DepthMultisampledTexture s(type::TextureDimension::k2d);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "depth2d_ms<float, access::read>");
-// }
-//
-// struct MslTextureData {
-//     type::TextureDimension dim;
-//     std::string result;
-// };
-// inline std::ostream& operator<<(std::ostream& out, MslTextureData data) {
-//     utils::StringStream str;
-//     str << data.dim;
-//     out << str.str();
-//     return out;
-// }
-// using MslSampledtexturesTest = TestParamHelper<MslTextureData>;
-// TEST_P(MslSampledtexturesTest, Emit) {
-//     auto params = GetParam();
-//
-//     auto* f32 = create<type::F32>();
-//     auto* s = create<type::SampledTexture>(params.dim, f32);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, s, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), params.result);
-// }
-// INSTANTIATE_TEST_SUITE_P(
-//     MslGeneratorImplTest,
-//     MslSampledtexturesTest,
-//     testing::Values(
-//         MslTextureData{type::TextureDimension::k1d, "texture1d<float, access::sample>"},
-//         MslTextureData{type::TextureDimension::k2d, "texture2d<float, access::sample>"},
-//         MslTextureData{type::TextureDimension::k2dArray, "texture2d_array<float,
-//         access::sample>"}, MslTextureData{type::TextureDimension::k3d, "texture3d<float,
-//         access::sample>"}, MslTextureData{type::TextureDimension::kCube, "texturecube<float,
-//         access::sample>"}, MslTextureData{type::TextureDimension::kCubeArray,
-//                        "texturecube_array<float, access::sample>"}));
-//
-// TEST_F(MslGeneratorImplTest, Emit_TypeMultisampledTexture) {
-//     auto* u32 = create<type::U32>();
-//     auto* ms = create<type::MultisampledTexture>(type::TextureDimension::k2d, u32);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, ms, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "texture2d_ms<uint, access::read>");
-// }
-//
-// struct MslStorageTextureData {
-//     type::TextureDimension dim;
-//     std::string result;
-// };
-// inline std::ostream& operator<<(std::ostream& out, MslStorageTextureData data) {
-//     utils::StringStream str;
-//     str << data.dim;
-//     return out << str.str();
-// }
-// using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
-// TEST_P(MslStorageTexturesTest, Emit) {
-//     auto params = GetParam();
-//
-//     auto s =
-//         ty.storage_texture(params.dim, builtin::TexelFormat::kR32Float,
-//         builtin::Access::kWrite);
-//     ast::Type type = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type), "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), params.result);
-// }
-// INSTANTIATE_TEST_SUITE_P(
-//     MslGeneratorImplTest,
-//     MslStorageTexturesTest,
-//     testing::Values(
-//         MslStorageTextureData{type::TextureDimension::k1d, "texture1d<float,
-//         access::write>"}, MslStorageTextureData{type::TextureDimension::k2d,
-//         "texture2d<float, access::write>"},
-//         MslStorageTextureData{type::TextureDimension::k2dArray,
-//                               "texture2d_array<float, access::write>"},
-//         MslStorageTextureData{type::TextureDimension::k3d, "texture3d<float,
-//         access::write>"}));
+TEST_F(MslGeneratorImplIrTest, EmitType_Sampler) {
+    generator_.EmitType(generator_.Line(), ty.sampler());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "sampler");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_SamplerComparison) {
+    generator_.EmitType(generator_.Line(), ty.comparison_sampler());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "sampler");
+}
+
+struct MslDepthTextureData {
+    type::TextureDimension dim;
+    std::string result;
+};
+inline std::ostream& operator<<(std::ostream& out, MslDepthTextureData data) {
+    utils::StringStream str;
+    str << data.dim;
+    out << str.str();
+    return out;
+}
+using MslIrDepthTexturesTest = MslGeneratorImplIrTestWithParam<MslDepthTextureData>;
+TEST_P(MslIrDepthTexturesTest, Emit) {
+    auto params = GetParam();
+
+    auto* t = ty.Get<type::DepthTexture>(params.dim);
+    generator_.EmitType(generator_.Line(), t);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), params.result);
+}
+INSTANTIATE_TEST_SUITE_P(
+    MslGeneratorImplIrTest,
+    MslIrDepthTexturesTest,
+    testing::Values(
+        MslDepthTextureData{type::TextureDimension::k2d, "depth2d<float, access::sample>"},
+        MslDepthTextureData{type::TextureDimension::k2dArray,
+                            "depth2d_array<float, access::sample>"},
+        MslDepthTextureData{type::TextureDimension::kCube, "depthcube<float, access::sample>"},
+        MslDepthTextureData{type::TextureDimension::kCubeArray,
+                            "depthcube_array<float, access::sample>"}));
+
+TEST_F(MslGeneratorImplIrTest, EmiType_DepthMultisampledTexture) {
+    auto* t = ty.Get<type::DepthMultisampledTexture>(type::TextureDimension::k2d);
+    generator_.EmitType(generator_.Line(), t);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "depth2d_ms<float, access::read>");
+}
+
+struct MslTextureData {
+    type::TextureDimension dim;
+    std::string result;
+};
+inline std::ostream& operator<<(std::ostream& out, MslTextureData data) {
+    utils::StringStream str;
+    str << data.dim;
+    out << str.str();
+    return out;
+}
+using MslIrSampledtexturesTest = MslGeneratorImplIrTestWithParam<MslTextureData>;
+TEST_P(MslIrSampledtexturesTest, Emit) {
+    auto params = GetParam();
+
+    auto* t = ty.Get<type::SampledTexture>(params.dim, ty.f32());
+    generator_.EmitType(generator_.Line(), t);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), params.result);
+}
+INSTANTIATE_TEST_SUITE_P(
+    MslGeneratorImplIrTest,
+    MslIrSampledtexturesTest,
+    testing::Values(
+        MslTextureData{type::TextureDimension::k1d, "texture1d<float, access::sample>"},
+        MslTextureData{type::TextureDimension::k2d, "texture2d<float, access::sample>"},
+        MslTextureData{type::TextureDimension::k2dArray, "texture2d_array<float, access::sample>"},
+        MslTextureData{type::TextureDimension::k3d, "texture3d<float, access::sample>"},
+        MslTextureData{type::TextureDimension::kCube, "texturecube<float, access::sample>"},
+        MslTextureData{type::TextureDimension::kCubeArray,
+                       "texturecube_array<float, access::sample>"}));
+
+TEST_F(MslGeneratorImplIrTest, Emit_TypeMultisampledTexture) {
+    auto* ms = ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.u32());
+    generator_.EmitType(generator_.Line(), ms);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "texture2d_ms<uint, access::read>");
+}
+
+struct MslStorageTextureData {
+    type::TextureDimension dim;
+    std::string result;
+};
+inline std::ostream& operator<<(std::ostream& out, MslStorageTextureData data) {
+    utils::StringStream str;
+    str << data.dim;
+    return out << str.str();
+}
+using MslIrStorageTexturesTest = MslGeneratorImplIrTestWithParam<MslStorageTextureData>;
+TEST_P(MslIrStorageTexturesTest, Emit) {
+    auto params = GetParam();
+
+    auto* f32 = const_cast<type::F32*>(ty.f32());
+    auto s = ty.Get<type::StorageTexture>(params.dim, builtin::TexelFormat::kR32Float,
+                                          builtin::Access::kWrite, f32);
+    generator_.EmitType(generator_.Line(), s);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), params.result);
+}
+INSTANTIATE_TEST_SUITE_P(
+    MslGeneratorImplIrTest,
+    MslIrStorageTexturesTest,
+    testing::Values(
+        MslStorageTextureData{type::TextureDimension::k1d, "texture1d<float, access::write>"},
+        MslStorageTextureData{type::TextureDimension::k2d, "texture2d<float, access::write>"},
+        MslStorageTextureData{type::TextureDimension::k2dArray,
+                              "texture2d_array<float, access::write>"},
+        MslStorageTextureData{type::TextureDimension::k3d, "texture3d<float, access::write>"}));
 
 }  // namespace
 }  // namespace tint::writer::msl
