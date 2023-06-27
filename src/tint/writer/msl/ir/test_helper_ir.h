@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_WRITER_MSL_IR_TEST_HELPER_IR_H_
 #define SRC_TINT_WRITER_MSL_IR_TEST_HELPER_IR_H_
 
+#include <iostream>
 #include <string>
 
 #include "gtest/gtest.h"

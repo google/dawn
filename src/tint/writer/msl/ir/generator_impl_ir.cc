@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/msl/ir/generator_impl_ir.h"
 
+#include "src/tint/constant/composite.h"
+#include "src/tint/constant/splat.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/validate.h"
 #include "src/tint/switch.h"
@@ -433,11 +435,37 @@ void GeneratorImplIr::EmitStructType(const type::Struct* str) {
 void GeneratorImplIr::EmitConstant(utils::StringStream& out, ir::Constant* c) {
     return tint::Switch(
         c->Type(),  //
-        [&](const type::Bool*) { out << (c->Value()->ValueAs<bool>() ? "true" : "false"); },
-        [&](const type::I32*) { PrintI32(out, c->Value()->ValueAs<i32>()); },
-        [&](const type::U32*) { out << c->Value()->ValueAs<u32>() << "u"; },
-        [&](const type::F32*) { PrintF32(out, c->Value()->ValueAs<f32>()); },
-        [&](const type::F16*) { PrintF16(out, c->Value()->ValueAs<f16>()); },
+        [&](const type::Bool*) { EmitConstant(out, c->Value()); },
+        [&](const type::I32*) { EmitConstant(out, c->Value()); },
+        [&](const type::U32*) { EmitConstant(out, c->Value()); },
+        [&](const type::F32*) { EmitConstant(out, c->Value()); },
+        [&](const type::F16*) { EmitConstant(out, c->Value()); },
+        [&](const type::Vector* v) {
+            EmitType(out, v);
+
+            ScopedParen sp(out);
+            if (auto* splat = c->Value()->As<constant::Splat>()) {
+                EmitConstant(out, splat->el);
+                return;
+            }
+            for (size_t i = 0; i < v->Width(); i++) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                EmitConstant(out, c->Value()->Index(i));
+            }
+        },
+        [&](Default) { UNHANDLED_CASE(c); });
+}
+
+void GeneratorImplIr::EmitConstant(utils::StringStream& out, const constant::Value* c) {
+    return tint::Switch(
+        c->Type(),  //
+        [&](const type::Bool*) { out << (c->ValueAs<bool>() ? "true" : "false"); },
+        [&](const type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
+        [&](const type::U32*) { out << c->ValueAs<u32>() << "u"; },
+        [&](const type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
+        [&](const type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
         [&](Default) { UNHANDLED_CASE(c); });
 }
 

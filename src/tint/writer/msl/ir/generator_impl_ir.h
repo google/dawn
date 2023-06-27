@@ -59,6 +59,10 @@ class GeneratorImplIr : public IRTextGenerator {
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
     void EmitConstant(utils::StringStream& out, ir::Constant* c);
+    /// Handles constant::Value values
+    /// @param out the stream to write the constant too
+    /// @param c the constant to emit
+    void EmitConstant(utils::StringStream& out, const constant::Value* c);
 
     /// @returns the name of the templated `tint_array` helper type, generating it if needed
     const std::string& ArrayTemplateName();

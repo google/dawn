@@ -62,5 +62,39 @@ TEST_F(MslGeneratorImplIrTest, Constant_F16) {
     EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string("32752.0h"));
 }
 
+TEST_F(MslGeneratorImplIrTest, Constant_Vector_Splat) {
+    auto* c = b.Constant(mod.constant_values.Splat(ty.vec3<f32>(), b.Constant(1.5_f)->Value(), 3));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string("float3(1.5f)"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Vector_Composite) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.vec3<f32>(), utils::Vector{b.Constant(1.5_f)->Value(), b.Constant(1.0_f)->Value(),
+                                      b.Constant(1.5_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string("float3(1.5f, 1.0f, 1.5f)"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Vector_Composite_AnyZero) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.vec3<f32>(), utils::Vector{b.Constant(1.0_f)->Value(), b.Constant(0.0_f)->Value(),
+                                      b.Constant(1.5_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string("float3(1.0f, 0.0f, 1.5f)"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Vector_Composite_AllZero) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.vec3<f32>(), utils::Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value(),
+                                      b.Constant(0.0_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string("float3(0.0f)"));
+}
+
 }  // namespace
 }  // namespace tint::writer::msl

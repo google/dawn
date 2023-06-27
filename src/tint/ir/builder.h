@@ -17,7 +17,9 @@
 
 #include <utility>
 
+#include "src/tint/constant/composite.h"
 #include "src/tint/constant/scalar.h"
+#include "src/tint/constant/splat.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
