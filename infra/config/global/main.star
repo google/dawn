@@ -472,6 +472,12 @@ luci.cq_tryjob_verifier(
 )
 _add_branch_verifiers("dawn-win10-x86-deps-rel", "win", includable_only = True)
 
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
+    builder = "chromium:try/dawn-try-mac-arm64-rel",
+    includable_only = True,
+)
+
 # Views
 
 luci.milo(
