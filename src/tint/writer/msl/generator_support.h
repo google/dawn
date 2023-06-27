@@ -50,6 +50,21 @@ std::string BuiltinToAttribute(builtin::BuiltinValue builtin);
 std::string InterpolationToAttribute(builtin::InterpolationType type,
                                      builtin::InterpolationSampling sampling);
 
+/// Prints a float32 to the output stream
+/// @param out the stream to write too
+/// @param value the float32 value
+void PrintF32(utils::StringStream& out, float value);
+
+/// Prints a float16 to the output stream
+/// @param out the stream to write too
+/// @param value the float16 value
+void PrintF16(utils::StringStream& out, float value);
+
+/// Prints an int32 to the output stream
+/// @param out the stream to write too
+/// @param value the int32 value
+void PrintI32(utils::StringStream& out, int32_t value);
+
 }  // namespace tint::writer::msl
 
 #endif  // SRC_TINT_WRITER_MSL_GENERATOR_SUPPORT_H_

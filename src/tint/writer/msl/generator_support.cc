@@ -14,6 +14,9 @@
 
 #include "src/tint/writer/msl/generator_support.h"
 
+#include <cmath>
+#include <limits>
+
 #include "src/tint/debug.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/array.h"
@@ -25,6 +28,7 @@
 #include "src/tint/type/struct.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
+#include "src/tint/writer/float_to_string.h"
 
 namespace tint::writer::msl {
 
@@ -211,4 +215,44 @@ SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type*
             return SizeAndAlign{};
         });
 }
+
+void PrintF32(utils::StringStream& out, float value) {
+    // Note: Currently inf and nan should not be constructable, but this is implemented for the day
+    // we support them.
+    if (std::isinf(value)) {
+        out << (value >= 0 ? "INFINITY" : "-INFINITY");
+    } else if (std::isnan(value)) {
+        out << "NAN";
+    } else {
+        out << FloatToString(value) << "f";
+    }
+}
+
+void PrintF16(utils::StringStream& out, float value) {
+    // Note: Currently inf and nan should not be constructable, but this is implemented for the day
+    // we support them.
+    if (std::isinf(value)) {
+        // HUGE_VALH evaluates to +infinity.
+        out << (value >= 0 ? "HUGE_VALH" : "-HUGE_VALH");
+    } else if (std::isnan(value)) {
+        // There is no NaN expr for half in MSL, "NAN" is of float type.
+        out << "NAN";
+    } else {
+        out << FloatToString(value) << "h";
+    }
+}
+
+void PrintI32(utils::StringStream& out, int32_t value) {
+    // MSL (and C++) parse `-2147483648` as a `long` because it parses unary minus and `2147483648`
+    // as separate tokens, and the latter doesn't fit into an (32-bit) `int`.
+    // WGSL, on the other hand, parses this as an `i32`.
+    // To avoid issues with `long` to `int` casts, emit `(-2147483647 - 1)` instead, which ensures
+    // the expression type is `int`.
+    if (auto int_min = std::numeric_limits<int32_t>::min(); value == int_min) {
+        out << "(" << int_min + 1 << " - 1)";
+    } else {
+        out << value;
+    }
+}
+
 }  // namespace tint::writer::msl

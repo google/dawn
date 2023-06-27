@@ -1457,6 +1457,7 @@ if(TINT_BUILD_TESTS)
 
     if(${TINT_BUILD_IR})
       list(APPEND TINT_TEST_SRCS
+        writer/msl/ir/generator_impl_ir_constant_test.cc
         writer/msl/ir/generator_impl_ir_function_test.cc
         writer/msl/ir/generator_impl_ir_type_test.cc
         writer/msl/ir/test_helper_ir.h

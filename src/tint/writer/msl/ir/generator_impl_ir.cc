@@ -14,6 +14,7 @@
 
 #include "src/tint/writer/msl/ir/generator_impl_ir.h"
 
+#include "src/tint/ir/constant.h"
 #include "src/tint/ir/validate.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
@@ -427,6 +428,17 @@ void GeneratorImplIr::EmitStructType(const type::Struct* str) {
     Line(&str_buf) << "};";
 
     preamble_buffer_.Append(str_buf);
+}
+
+void GeneratorImplIr::EmitConstant(utils::StringStream& out, ir::Constant* c) {
+    return tint::Switch(
+        c->Type(),  //
+        [&](const type::Bool*) { out << (c->Value()->ValueAs<bool>() ? "true" : "false"); },
+        [&](const type::I32*) { PrintI32(out, c->Value()->ValueAs<i32>()); },
+        [&](const type::U32*) { out << c->Value()->ValueAs<u32>() << "u"; },
+        [&](const type::F32*) { PrintF32(out, c->Value()->ValueAs<f32>()); },
+        [&](const type::F16*) { PrintF16(out, c->Value()->ValueAs<f16>()); },
+        [&](Default) { UNHANDLED_CASE(c); });
 }
 
 }  // namespace tint::writer::msl
