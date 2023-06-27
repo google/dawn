@@ -503,6 +503,10 @@ float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
 }
 
+bool Device::IsResolveTextureBlitWithDrawSupported() const {
+    return true;
+}
+
 void Device::ForceEventualFlushOfCommands() {}
 
 Texture::Texture(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state)

@@ -503,6 +503,10 @@ float Device::GetTimestampPeriodInNS() const {
     return mTimestampPeriod;
 }
 
+bool Device::IsResolveTextureBlitWithDrawSupported() const {
+    return true;
+}
+
 bool Device::UseCounterSamplingAtCommandBoundary() const {
     return mCounterSamplingAtCommandBoundary;
 }

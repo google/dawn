@@ -60,6 +60,23 @@ TEST_P(InternalBindingTypeTests, InternalStorageBufferBindingType) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&bglDesc));
 }
 
+// Verify it is an error to create a bind group layout with a texture sample type that should only
+// be used internally.
+TEST_P(InternalBindingTypeTests, ErrorUseInternalResolveAttachmentSampleTypeExternally) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    wgpu::BindGroupLayoutEntry bglEntry;
+    bglEntry.binding = 0;
+    bglEntry.texture.sampleType = native::kInternalResolveAttachmentSampleType;
+    bglEntry.visibility = wgpu::ShaderStage::Fragment;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &bglEntry;
+    ASSERT_DEVICE_ERROR_MSG(device.CreateBindGroupLayout(&bglDesc),
+                            testing::HasSubstr("invalid for WGPUTextureSampleType"));
+}
+
 DAWN_INSTANTIATE_TEST(InternalBindingTypeTests, NullBackend());
 
 }  // anonymous namespace

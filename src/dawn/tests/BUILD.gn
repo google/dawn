@@ -671,6 +671,7 @@ source_set("white_box_tests_sources") {
 
   sources += [
     "white_box/BufferAllocatedSizeTests.cpp",
+    "white_box/InternalResolveAttachmentSampleTypeTests.cpp",
     "white_box/InternalResourceUsageTests.cpp",
     "white_box/InternalStorageBufferBindingTests.cpp",
     "white_box/QueryInternalShaderTests.cpp",

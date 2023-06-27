@@ -15,6 +15,7 @@
 #include "dawn/native/AttachmentState.h"
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/Texture.h"
@@ -33,10 +34,18 @@ AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderBundleEncoderDesc
         }
     }
     mDepthStencilFormat = descriptor->depthStencilFormat;
+
+    // TODO(dawn:1710): support MSAA render to single sampled in render bundle.
 }
 
 AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor)
     : mSampleCount(descriptor->multisample.count) {
+    const DawnMultisampleStateRenderToSingleSampled* msaaRenderToSingleSampledDesc = nullptr;
+    FindInChain(descriptor->multisample.nextInChain, &msaaRenderToSingleSampledDesc);
+    if (msaaRenderToSingleSampledDesc != nullptr) {
+        mIsMSAARenderToSingleSampledEnabled = msaaRenderToSingleSampledDesc->enabled;
+    }
+
     if (descriptor->fragment != nullptr) {
         ASSERT(descriptor->fragment->targetCount <= kMaxColorAttachments);
         for (ColorAttachmentIndex i(uint8_t(0));
@@ -58,16 +67,31 @@ AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescripto
 AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor) {
     for (ColorAttachmentIndex i(uint8_t(0));
          i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorAttachmentCount)); ++i) {
-        TextureViewBase* attachment = descriptor->colorAttachments[static_cast<uint8_t>(i)].view;
+        const RenderPassColorAttachment& colorAttachment =
+            descriptor->colorAttachments[static_cast<uint8_t>(i)];
+        TextureViewBase* attachment = colorAttachment.view;
         if (attachment == nullptr) {
             continue;
         }
         mColorAttachmentsSet.set(i);
         mColorFormats[i] = attachment->GetFormat().format;
-        if (mSampleCount == 0) {
-            mSampleCount = attachment->GetTexture()->GetSampleCount();
+
+        const DawnRenderPassColorAttachmentRenderToSingleSampled* msaaRenderToSingleSampledDesc =
+            nullptr;
+        FindInChain(colorAttachment.nextInChain, &msaaRenderToSingleSampledDesc);
+        uint32_t attachmentSampleCount;
+        if (msaaRenderToSingleSampledDesc != nullptr &&
+            msaaRenderToSingleSampledDesc->implicitSampleCount > 1) {
+            attachmentSampleCount = msaaRenderToSingleSampledDesc->implicitSampleCount;
+            mIsMSAARenderToSingleSampledEnabled = true;
         } else {
-            ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
+            attachmentSampleCount = attachment->GetTexture()->GetSampleCount();
+        }
+
+        if (mSampleCount == 0) {
+            mSampleCount = attachmentSampleCount;
+        } else {
+            ASSERT(mSampleCount == attachmentSampleCount);
         }
     }
     if (descriptor->depthStencilAttachment != nullptr) {
@@ -100,6 +124,9 @@ size_t AttachmentStateBlueprint::HashFunc::operator()(
     // Hash sample count
     HashCombine(&hash, attachmentState->mSampleCount);
 
+    // Hash MSAA render to single sampled flag
+    HashCombine(&hash, attachmentState->mIsMSAARenderToSingleSampledEnabled);
+
     return hash;
 }
 
@@ -124,6 +151,11 @@ bool AttachmentStateBlueprint::EqualityFunc::operator()(const AttachmentStateBlu
 
     // Check sample count
     if (a->mSampleCount != b->mSampleCount) {
+        return false;
+    }
+
+    // Both attachment state must either enable MSSA render to single sampled or disable it.
+    if (a->mIsMSAARenderToSingleSampledEnabled != b->mIsMSAARenderToSingleSampledEnabled) {
         return false;
     }
 
@@ -163,6 +195,10 @@ wgpu::TextureFormat AttachmentState::GetDepthStencilFormat() const {
 
 uint32_t AttachmentState::GetSampleCount() const {
     return mSampleCount;
+}
+
+bool AttachmentState::IsMSAARenderToSingleSampledEnabled() const {
+    return mIsMSAARenderToSingleSampledEnabled;
 }
 
 }  // namespace dawn::native

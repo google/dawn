@@ -49,6 +49,8 @@ target_sources(dawn_native PRIVATE
     "BindingInfo.h"
     "BlitBufferToDepthStencil.cpp"
     "BlitBufferToDepthStencil.h"
+    "BlitColorToColorWithDraw.cpp"
+    "BlitColorToColorWithDraw.h"
     "BlitDepthToDepth.cpp"
     "BlitDepthToDepth.h"
     "BlitTextureToBuffer.cpp"

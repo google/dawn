@@ -926,6 +926,31 @@ void DeviceBase::UncacheComputePipeline(ComputePipelineBase* obj) {
     mCaches->computePipelines.Erase(obj);
 }
 
+ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateImplicitMSAARenderTextureViewFor(
+    const TextureBase* singleSampledTexture,
+    uint32_t sampleCount) {
+    ASSERT(IsLockedByCurrentThreadIfNeeded());
+
+    TextureDescriptor desc = {};
+    desc.dimension = wgpu::TextureDimension::e2D;
+    desc.format = singleSampledTexture->GetFormat().format;
+    desc.size = {singleSampledTexture->GetWidth(), singleSampledTexture->GetHeight(), 1};
+    desc.sampleCount = sampleCount;
+    desc.usage = wgpu::TextureUsage::RenderAttachment;
+    if (HasFeature(Feature::TransientAttachments)) {
+        desc.usage = desc.usage | wgpu::TextureUsage::TransientAttachment;
+    }
+
+    Ref<TextureBase> msaaTexture;
+    Ref<TextureViewBase> msaaTextureView;
+
+    DAWN_TRY_ASSIGN(msaaTexture, CreateTexture(&desc));
+
+    DAWN_TRY_ASSIGN(msaaTextureView, msaaTexture->CreateView());
+
+    return std::move(msaaTextureView);
+}
+
 ResultOrError<Ref<TextureViewBase>>
 DeviceBase::GetOrCreatePlaceholderTextureViewForExternalTexture() {
     if (!mExternalTexturePlaceholderView.Get()) {
@@ -1988,6 +2013,10 @@ bool DeviceBase::MayRequireDuplicationOfIndirectParameters() const {
 
 bool DeviceBase::ShouldDuplicateParametersForDrawIndirect(
     const RenderPipelineBase* renderPipelineBase) const {
+    return false;
+}
+
+bool DeviceBase::IsResolveTextureBlitWithDrawSupported() const {
     return false;
 }
 

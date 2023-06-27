@@ -122,6 +122,8 @@ class Device final : public DeviceBase {
 
     float GetTimestampPeriodInNS() const override;
 
+    bool IsResolveTextureBlitWithDrawSupported() const override;
+
     void ForceEventualFlushOfCommands() override;
 
   private:

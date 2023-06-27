@@ -362,7 +362,8 @@ MaybeError ValidateTextureDescriptor(const DeviceBase* device,
 
     DAWN_INVALID_IF(
         internalUsageDesc != nullptr && !device->HasFeature(Feature::DawnInternalUsages),
-        "The internalUsageDesc is not empty while the dawn-internal-usages feature is not enabled");
+        "The internalUsageDesc is not empty while the dawn-internal-usages feature is not "
+        "enabled");
 
     const Format* format;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
@@ -577,8 +578,9 @@ TextureBase::TextureBase(DeviceBase* device,
     }
     GetObjectTrackingList()->Track(this);
 
-    // dawn:1569: If a texture with multiple array layers or mip levels is specified as a texture
-    // attachment when this toggle is active, it needs to be given CopyDst usage internally.
+    // dawn:1569: If a texture with multiple array layers or mip levels is specified as a
+    // texture attachment when this toggle is active, it needs to be given CopyDst usage
+    // internally.
     bool applyAlwaysResolveIntoZeroLevelAndLayerToggle =
         device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer) &&
         (GetArrayLayers() > 1 || GetNumMipLevels() > 1) &&
@@ -862,6 +864,10 @@ TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descrip
         return TextureViewBase::MakeError(device, descriptor ? descriptor->label : nullptr);
     }
     return result.Detach();
+}
+
+bool TextureBase::IsImplicitMSAARenderTextureViewSupported() const {
+    return (GetUsage() & wgpu::TextureUsage::TextureBinding) != 0;
 }
 
 void TextureBase::APIDestroy() {

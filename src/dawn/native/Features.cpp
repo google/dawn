@@ -117,6 +117,10 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
       "Support transient attachments that allow render pass operations to stay in tile memory, "
       "avoiding VRAM traffic and potentially avoiding VRAM allocation for the textures.",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1695", FeatureInfo::FeatureState::Stable}},
+    {Feature::MSAARenderToSingleSampled,
+     {"msaa-render-to-single-sampled",
+      "Support multisampled rendering on single-sampled attachments efficiently.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1710", FeatureInfo::FeatureState::Stable}},
 }};
 
 Feature FromAPIFeature(wgpu::FeatureName feature) {
@@ -167,6 +171,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::TransientAttachments;
         case wgpu::FeatureName::Float32Filterable:
             return Feature::Float32Filterable;
+        case wgpu::FeatureName::MSAARenderToSingleSampled:
+            return Feature::MSAARenderToSingleSampled;
     }
     return Feature::InvalidEnum;
 }
@@ -213,6 +219,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::TransientAttachments;
         case Feature::Float32Filterable:
             return wgpu::FeatureName::Float32Filterable;
+        case Feature::MSAARenderToSingleSampled:
+            return wgpu::FeatureName::MSAARenderToSingleSampled;
 
         case Feature::EnumCount:
             break;

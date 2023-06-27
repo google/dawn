@@ -49,6 +49,7 @@ enum class Feature {
     ImplicitDeviceSynchronization,
     SurfaceCapabilities,
     TransientAttachments,
+    MSAARenderToSingleSampled,
 
     EnumCount,
     InvalidEnum = EnumCount,

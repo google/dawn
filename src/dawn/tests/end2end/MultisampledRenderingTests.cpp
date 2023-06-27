@@ -48,7 +48,8 @@ class MultisampledRenderingTest : public DawnTest {
         bool testDepth,
         uint32_t sampleMask = 0xFFFFFFFF,
         bool alphaToCoverageEnabled = false,
-        bool flipTriangle = false) {
+        bool flipTriangle = false,
+        bool enableMSAARenderToSingleSampled = false) {
         const char* kFsOneOutputWithDepth = R"(
             struct U {
                 color : vec4f,
@@ -81,12 +82,13 @@ class MultisampledRenderingTest : public DawnTest {
         const char* fs = testDepth ? kFsOneOutputWithDepth : kFsOneOutputWithoutDepth;
 
         return CreateRenderPipelineForTest(fs, 1, testDepth, sampleMask, alphaToCoverageEnabled,
-                                           flipTriangle);
+                                           flipTriangle, enableMSAARenderToSingleSampled);
     }
 
     wgpu::RenderPipeline CreateRenderPipelineWithTwoOutputsForTest(
         uint32_t sampleMask = 0xFFFFFFFF,
-        bool alphaToCoverageEnabled = false) {
+        bool alphaToCoverageEnabled = false,
+        bool enableMSAARenderToSingleSampled = false) {
         const char* kFsTwoOutputs = R"(
             struct U {
                 color0 : vec4f,
@@ -107,14 +109,16 @@ class MultisampledRenderingTest : public DawnTest {
             })";
 
         return CreateRenderPipelineForTest(kFsTwoOutputs, 2, false, sampleMask,
-                                           alphaToCoverageEnabled);
+                                           alphaToCoverageEnabled, /*flipTriangle=*/false,
+                                           enableMSAARenderToSingleSampled);
     }
 
     wgpu::Texture CreateTextureForRenderAttachment(wgpu::TextureFormat format,
                                                    uint32_t sampleCount,
                                                    uint32_t mipLevelCount = 1,
                                                    uint32_t arrayLayerCount = 1,
-                                                   bool transientAttachment = false) {
+                                                   bool transientAttachment = false,
+                                                   bool supportMSAARenderToSingleSampled = false) {
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kWidth << (mipLevelCount - 1);
@@ -129,6 +133,11 @@ class MultisampledRenderingTest : public DawnTest {
         } else {
             descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         }
+
+        if (supportMSAARenderToSingleSampled) {
+            descriptor.usage |= wgpu::TextureUsage::TextureBinding;
+        }
+
         return device.CreateTexture(&descriptor);
     }
 
@@ -229,7 +238,8 @@ class MultisampledRenderingTest : public DawnTest {
                                                      bool hasDepthStencilAttachment,
                                                      uint32_t sampleMask = 0xFFFFFFFF,
                                                      bool alphaToCoverageEnabled = false,
-                                                     bool flipTriangle = false) {
+                                                     bool flipTriangle = false,
+                                                     bool enableMSAARenderToSingleSampled = false) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         // Draw a bottom-right triangle. In standard 4xMSAA pattern, for the pixels on diagonal,
@@ -275,6 +285,12 @@ class MultisampledRenderingTest : public DawnTest {
         pipelineDescriptor.multisample.count = kSampleCount;
         pipelineDescriptor.multisample.mask = sampleMask;
         pipelineDescriptor.multisample.alphaToCoverageEnabled = alphaToCoverageEnabled;
+
+        wgpu::DawnMultisampleStateRenderToSingleSampled mssaRenderToSingleSampledDesc;
+        if (enableMSAARenderToSingleSampled) {
+            mssaRenderToSingleSampledDesc.enabled = true;
+            pipelineDescriptor.multisample.nextInChain = &mssaRenderToSingleSampledDesc;
+        }
 
         pipelineDescriptor.cFragment.targetCount = numColorAttachments;
         for (uint32_t i = 0; i < numColorAttachments; ++i) {
@@ -1197,6 +1213,179 @@ TEST_P(MultisampledRenderingWithTransientAttachmentTest, ResolveTransientAttachm
     VerifyResolveTarget(kGreen, mResolveTexture);
 }
 
+class MultisampledRenderToSingleSampledTest : public MultisampledRenderingTest {
+    void SetUp() override {
+        MultisampledRenderingTest::SetUp();
+
+        // Skip all tests if the MSAARenderToSingleSampled feature is not supported.
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::MSAARenderToSingleSampled}));
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::MSAARenderToSingleSampled})) {
+            requiredFeatures.push_back(wgpu::FeatureName::MSAARenderToSingleSampled);
+        }
+        return requiredFeatures;
+    }
+};
+
+// Test rendering into a color attachment and start another render pass with LoadOp::Load
+// will have the content preserved.
+TEST_P(MultisampledRenderToSingleSampledTest, DrawThenLoad) {
+    auto singleSampledTexture =
+        CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
+                                         /*supportMSAARenderToSingleSampled=*/true);
+
+    auto singleSampledTextureView = singleSampledTexture.CreateView();
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+        /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
+        /*flipTriangle=*/false, /*enableMSAARenderToSingleSampled=*/true);
+
+    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+
+    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled mssaRenderToSingleSampledDesc;
+    mssaRenderToSingleSampledDesc.implicitSampleCount = kSampleCount;
+
+    // In first render pass we draw a green triangle.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {singleSampledTextureView}, {nullptr}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
+            /*testDepth=*/false);
+        renderPass.cColorAttachments[0].nextInChain = &mssaRenderToSingleSampledDesc;
+
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
+    }
+
+    // In second render pass we only use LoadOp::Load with no draw call.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {singleSampledTextureView}, {nullptr}, wgpu::LoadOp::Load, wgpu::LoadOp::Load,
+            /*testDepth=*/false);
+        renderPass.cColorAttachments[0].nextInChain = &mssaRenderToSingleSampledDesc;
+
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.End();
+    }
+
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    VerifyResolveTarget(kGreen, singleSampledTexture);
+}
+
+// Test clear a color attachment (without implicit sample count) and start another render pass (with
+// implicit sample count) with LoadOp::Load plus additional drawing works correctly. The final
+// result should contain the combination of the loaded content from 1st pass and the 2nd pass.
+TEST_P(MultisampledRenderToSingleSampledTest, ClearThenLoadThenDraw) {
+    auto singleSampledTexture =
+        CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
+                                         /*supportMSAARenderToSingleSampled=*/true);
+
+    auto singleSampledTextureView = singleSampledTexture.CreateView();
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+        /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
+        /*flipTriangle=*/false, /*enableMSAARenderToSingleSampled=*/true);
+
+    constexpr wgpu::Color kRed = {1.0f, 0.0f, 0.0f, 1.0f};
+    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+
+    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled mssaRenderToSingleSampledDesc;
+    mssaRenderToSingleSampledDesc.implicitSampleCount = kSampleCount;
+
+    // In first render pass we clear to red without using implicit sample count.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {singleSampledTextureView}, {nullptr}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
+            /*testDepth=*/false);
+        renderPass.cColorAttachments[0].clearValue = kRed;
+
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.End();
+    }
+
+    // In second render pass (with implicit sample count) we use LoadOp::Load then draw a green
+    // triangle.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {singleSampledTextureView}, {nullptr}, wgpu::LoadOp::Load, wgpu::LoadOp::Load,
+            /*testDepth=*/false);
+        renderPass.cColorAttachments[0].nextInChain = &mssaRenderToSingleSampledDesc;
+
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
+    }
+
+    auto commandBuffer = commandEncoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    constexpr wgpu::Color kHalfGreenHalfRed = {(kGreen.r + kRed.r) / 2.0, (kGreen.g + kRed.g) / 2.0,
+                                               (kGreen.b + kRed.b) / 2.0,
+                                               (kGreen.a + kRed.a) / 2.0};
+    utils::RGBA8 expectedColor = ExpectedMSAAColor(kHalfGreenHalfRed, 1.0f);
+
+    EXPECT_TEXTURE_EQ(&expectedColor, singleSampledTexture, {1, 1}, {1, 1},
+                      /* level */ 0, wgpu::TextureAspect::All, /* bytesPerRow */ 0,
+                      /* tolerance */ utils::RGBA8(1, 1, 1, 1));
+}
+
+// Test multisampled rendering with depth test works correctly.
+TEST_P(MultisampledRenderToSingleSampledTest, DrawWithDepthTest) {
+    auto singleSampledTexture =
+        CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
+                                         /*supportMSAARenderToSingleSampled=*/true);
+
+    auto singleSampledTextureView = singleSampledTexture.CreateView();
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+        /*testDepth=*/true, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
+        /*flipTriangle=*/false, /*enableMSAARenderToSingleSampled=*/true);
+
+    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+    constexpr wgpu::Color kRed = {0.8f, 0.0f, 0.0f, 0.8f};
+    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled mssaRenderToSingleSampledDesc;
+    mssaRenderToSingleSampledDesc.implicitSampleCount = kSampleCount;
+
+    // In first render pass we draw a green triangle with depth value == 0.2f.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {singleSampledTextureView}, {nullptr}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
+            /*testDepth=*/true);
+        renderPass.cColorAttachments[0].nextInChain = &mssaRenderToSingleSampledDesc;
+
+        std::array<float, 8> kUniformData = {kGreen.r, kGreen.g, kGreen.b, kGreen.a,  // Color
+                                             0.2f};                                   // depth
+        constexpr uint32_t kSize = sizeof(kUniformData);
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
+    }
+
+    // In second render pass we draw a red triangle with depth value == 0.5f.
+    // This red triangle should not be displayed because it is behind the green one that is drawn in
+    // the last render pass.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {singleSampledTextureView}, {nullptr}, wgpu::LoadOp::Load, wgpu::LoadOp::Load,
+            /*testDepth=*/true);
+        renderPass.cColorAttachments[0].nextInChain = &mssaRenderToSingleSampledDesc;
+
+        std::array<float, 8> kUniformData = {kRed.r, kRed.g, kRed.b, kRed.a,  // color
+                                             0.5f};                           // depth
+        constexpr uint32_t kSize = sizeof(kUniformData);
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
+    }
+
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    // The color of the pixel in the middle of mResolveTexture should be green if MSAA resolve runs
+    // correctly with depth test.
+    VerifyResolveTarget(kGreen, singleSampledTexture);
+}
+
 DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
                       D3D11Backend(),
                       D3D12Backend(),
@@ -1214,6 +1403,20 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
 
 DAWN_INSTANTIATE_TEST(MultisampledRenderingWithTransientAttachmentTest,
                       D3D11Backend(),
+                      D3D12Backend(),
+                      D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
+                      D3D12Backend({}, {"use_d3d12_render_pass"}),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend(),
+                      VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
+                      MetalBackend({"emulate_store_and_msaa_resolve"}),
+                      MetalBackend({"always_resolve_into_zero_level_and_layer"}),
+                      MetalBackend({"always_resolve_into_zero_level_and_layer",
+                                    "emulate_store_and_msaa_resolve"}));
+
+DAWN_INSTANTIATE_TEST(MultisampledRenderToSingleSampledTest,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),

@@ -248,8 +248,19 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateMultisampleState(const MultisampleState* descriptor) {
-    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
+MaybeError ValidateMultisampleState(const DeviceBase* device, const MultisampleState* descriptor) {
+    const DawnMultisampleStateRenderToSingleSampled* msaaRenderToSingleSampledDesc = nullptr;
+    FindInChain(descriptor->nextInChain, &msaaRenderToSingleSampledDesc);
+    if (msaaRenderToSingleSampledDesc != nullptr) {
+        DAWN_INVALID_IF(!device->HasFeature(Feature::MSAARenderToSingleSampled),
+                        "The msaaRenderToSingleSampledDesc is not empty while the "
+                        "msaa-render-to-single-sampled feature is not enabled.");
+
+        DAWN_INVALID_IF(descriptor->count <= 1,
+                        "The msaaRenderToSingleSampledDesc is not empty while multisample count "
+                        "(%u) is not > 1.",
+                        descriptor->count);
+    }
 
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->count),
                     "Multisample count (%u) is not supported.", descriptor->count);
@@ -601,7 +612,7 @@ MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                          "validating depthStencil state.");
     }
 
-    DAWN_TRY_CONTEXT(ValidateMultisampleState(&descriptor->multisample),
+    DAWN_TRY_CONTEXT(ValidateMultisampleState(device, &descriptor->multisample),
                      "validating multisample state.");
 
     DAWN_INVALID_IF(

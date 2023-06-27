@@ -20,6 +20,7 @@
 
 #include "dawn/common/HashUtils.h"
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
+#include "dawn/native/BlitColorToColorWithDraw.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ScratchBuffer.h"
 #include "dawn/native/dawn_platform.h"
@@ -84,6 +85,8 @@ struct InternalPipelineStore {
     std::unordered_map<wgpu::TextureFormat, BlitR8ToStencilPipelines> blitR8ToStencilPipelines;
 
     std::unordered_map<wgpu::TextureFormat, Ref<RenderPipelineBase>> depthBlitPipelines;
+
+    BlitColorToColorWithDrawPipelinesCache msaaRenderToSingleSampledColorBlitPipelines;
 };
 
 }  // namespace dawn::native

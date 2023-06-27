@@ -115,7 +115,14 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
 
             case BindingInfoType::Texture: {
                 TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
-                TextureViewUsedAs(view, wgpu::TextureUsage::TextureBinding);
+                switch (bindingInfo.texture.sampleType) {
+                    case kInternalResolveAttachmentSampleType:
+                        TextureViewUsedAs(view, kResolveAttachmentLoadingUsage);
+                        break;
+                    default:
+                        TextureViewUsedAs(view, wgpu::TextureUsage::TextureBinding);
+                        break;
+                }
                 break;
             }
 

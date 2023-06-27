@@ -23,6 +23,7 @@
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BlitBufferToDepthStencil.h"
+#include "dawn/native/BlitColorToColorWithDraw.h"
 #include "dawn/native/BlitDepthToDepth.h"
 #include "dawn/native/BlitTextureToBuffer.h"
 #include "dawn/native/Buffer.h"
@@ -153,16 +154,32 @@ MaybeError ValidateOrSetAttachmentSize(const TextureViewBase* attachment,
 }
 
 MaybeError ValidateOrSetColorAttachmentSampleCount(const TextureViewBase* colorAttachment,
+                                                   uint32_t implicitSampleCount,
                                                    uint32_t* sampleCount) {
+    uint32_t attachmentSampleCount = 0;
+    std::string implicitPrefixStr;
+    if (implicitSampleCount > 1) {
+        DAWN_INVALID_IF(colorAttachment->GetTexture()->GetSampleCount() != 1,
+                        "Color attachment %s sample count (%u) is not 1 when it has implicit "
+                        "sample count (%u).",
+                        colorAttachment, colorAttachment->GetTexture()->GetSampleCount(),
+                        implicitSampleCount);
+
+        attachmentSampleCount = implicitSampleCount;
+        implicitPrefixStr = "implicit ";
+    } else {
+        attachmentSampleCount = colorAttachment->GetTexture()->GetSampleCount();
+    }
+
     if (*sampleCount == 0) {
-        *sampleCount = colorAttachment->GetTexture()->GetSampleCount();
+        *sampleCount = attachmentSampleCount;
         DAWN_ASSERT(*sampleCount != 0);
     } else {
         DAWN_INVALID_IF(
-            *sampleCount != colorAttachment->GetTexture()->GetSampleCount(),
-            "Color attachment %s sample count (%u) does not match the sample count of the "
+            *sampleCount != attachmentSampleCount,
+            "Color attachment %s %ssample count (%u) does not match the sample count of the "
             "other attachments (%u).",
-            colorAttachment, colorAttachment->GetTexture()->GetSampleCount(), *sampleCount);
+            colorAttachment, implicitPrefixStr, attachmentSampleCount, *sampleCount);
     }
 
     return {};
@@ -225,16 +242,70 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
     return {};
 }
 
+MaybeError ValidateColorAttachmentRenderToSingleSampled(
+    const DeviceBase* device,
+    const RenderPassColorAttachment& colorAttachment,
+    const DawnRenderPassColorAttachmentRenderToSingleSampled* msaaRenderToSingleSampledDesc) {
+    ASSERT(msaaRenderToSingleSampledDesc != nullptr);
+
+    DAWN_INVALID_IF(
+        !device->HasFeature(Feature::MSAARenderToSingleSampled),
+        "The color attachment %s has implicit sample count while the %s feature is not enabled.",
+        colorAttachment.view, FeatureEnumToAPIFeature(Feature::MSAARenderToSingleSampled));
+
+    DAWN_INVALID_IF(!IsValidSampleCount(msaaRenderToSingleSampledDesc->implicitSampleCount) ||
+                        msaaRenderToSingleSampledDesc->implicitSampleCount <= 1,
+                    "The color attachment %s's implicit sample count (%u) is not supported.",
+                    colorAttachment.view, msaaRenderToSingleSampledDesc->implicitSampleCount);
+
+    DAWN_INVALID_IF(!colorAttachment.view->GetTexture()->IsImplicitMSAARenderTextureViewSupported(),
+                    "Color attachment %s was not created with %s usage, which is required for "
+                    "having implicit sample count (%u).",
+                    colorAttachment.view, wgpu::TextureUsage::TextureBinding,
+                    msaaRenderToSingleSampledDesc->implicitSampleCount);
+
+    DAWN_INVALID_IF(!colorAttachment.view->GetFormat().supportsResolveTarget,
+                    "The color attachment %s format (%s) does not support being used with "
+                    "implicit sample count (%u). The format does not support resolve.",
+                    colorAttachment.view, colorAttachment.view->GetFormat().format,
+                    msaaRenderToSingleSampledDesc->implicitSampleCount);
+
+    DAWN_INVALID_IF(colorAttachment.resolveTarget != nullptr,
+                    "Cannot set %s as a resolve target. No resolve target should be specified "
+                    "for the color attachment %s with implicit sample count (%u).",
+                    colorAttachment.resolveTarget, colorAttachment.view,
+                    msaaRenderToSingleSampledDesc->implicitSampleCount);
+
+    return {};
+}
+
 MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
                                              const RenderPassColorAttachment& colorAttachment,
                                              uint32_t* width,
                                              uint32_t* height,
                                              uint32_t* sampleCount,
+                                             uint32_t* implicitSampleCount,
                                              UsageValidationMode usageValidationMode) {
     TextureViewBase* attachment = colorAttachment.view;
     if (attachment == nullptr) {
         return {};
     }
+
+    DAWN_TRY(ValidateSingleSType(colorAttachment.nextInChain,
+                                 wgpu::SType::DawnRenderPassColorAttachmentRenderToSingleSampled));
+
+    const DawnRenderPassColorAttachmentRenderToSingleSampled* msaaRenderToSingleSampledDesc =
+        nullptr;
+    FindInChain(colorAttachment.nextInChain, &msaaRenderToSingleSampledDesc);
+    if (msaaRenderToSingleSampledDesc) {
+        DAWN_TRY(ValidateColorAttachmentRenderToSingleSampled(device, colorAttachment,
+                                                              msaaRenderToSingleSampledDesc));
+        *implicitSampleCount = msaaRenderToSingleSampledDesc->implicitSampleCount;
+        // Note: we don't need to check whether the implicit sample count of different attachments
+        // are the same. That already is done by indirectly comparing the sample count in
+        // ValidateOrSetColorAttachmentSampleCount.
+    }
+
     DAWN_TRY(device->ValidateObject(attachment));
     DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment,
                               usageValidationMode));
@@ -266,9 +337,14 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
                         "Color clear value (%s) contain a NaN.", &clearValue);
     }
 
-    DAWN_TRY(ValidateOrSetColorAttachmentSampleCount(attachment, sampleCount));
+    DAWN_TRY(
+        ValidateOrSetColorAttachmentSampleCount(attachment, *implicitSampleCount, sampleCount));
 
-    DAWN_TRY(ValidateResolveTarget(device, colorAttachment, usageValidationMode));
+    if (*implicitSampleCount <= 1) {
+        // This step is skipped if implicitSampleCount > 1, because in that case, there shoudn't be
+        // any explicit resolveTarget specified.
+        DAWN_TRY(ValidateResolveTarget(device, colorAttachment, usageValidationMode));
+    }
 
     DAWN_TRY(ValidateAttachmentArrayLayersAndLevelCount(attachment));
     DAWN_TRY(ValidateOrSetAttachmentSize(attachment, width, height));
@@ -419,6 +495,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                         uint32_t* width,
                                         uint32_t* height,
                                         uint32_t* sampleCount,
+                                        uint32_t* implicitSampleCount,
                                         UsageValidationMode usageValidationMode) {
     DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
                                  wgpu::SType::RenderPassDescriptorMaxDrawCount));
@@ -432,10 +509,10 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
     bool isAllColorAttachmentNull = true;
     ColorAttachmentFormats colorAttachmentFormats;
     for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-        DAWN_TRY_CONTEXT(
-            ValidateRenderPassColorAttachment(device, descriptor->colorAttachments[i], width,
-                                              height, sampleCount, usageValidationMode),
-            "validating colorAttachments[%u].", i);
+        DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(
+                             device, descriptor->colorAttachments[i], width, height, sampleCount,
+                             implicitSampleCount, usageValidationMode),
+                         "validating colorAttachments[%u].", i);
         if (descriptor->colorAttachments[i].view) {
             isAllColorAttachmentNull = false;
             colorAttachmentFormats->push_back(&descriptor->colorAttachments[i].view->GetFormat());
@@ -505,6 +582,15 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
     DAWN_INVALID_IF(
         descriptor->colorAttachmentCount == 0 && descriptor->depthStencilAttachment == nullptr,
         "Render pass has no attachments.");
+
+    if (*implicitSampleCount > 1) {
+        // TODO(dawn:1710): support multiple attachments.
+        DAWN_INVALID_IF(
+            descriptor->colorAttachmentCount != 1,
+            "colorAttachmentCount (%u) is not supported when the render pass has implicit sample "
+            "count (%u). (Currently) colorAttachmentCount = 1 is supported.",
+            descriptor->colorAttachmentCount, *implicitSampleCount);
+    }
 
     return {};
 }
@@ -642,6 +728,25 @@ bool IsReadOnlyDepthStencilAttachment(
     return true;
 }
 
+// Load resolve texture to MSAA attachment if needed.
+MaybeError ApplyMSAARenderToSingleSampledLoadOp(DeviceBase* device,
+                                                RenderPassEncoder* renderPassEncoder,
+                                                const RenderPassDescriptor* renderPassDescriptor,
+                                                uint32_t implicitSampleCount) {
+    // TODO(dawn:1710): support multiple attachments.
+    ASSERT(renderPassDescriptor->colorAttachmentCount == 1);
+    if (renderPassDescriptor->colorAttachments[0].loadOp != wgpu::LoadOp::Load) {
+        return {};
+    }
+
+    // TODO(dawn:1710): support loading resolve texture on platforms that don't support reading
+    // it in fragment shader such as vulkan.
+    ASSERT(device->IsResolveTextureBlitWithDrawSupported());
+
+    // Read implicit resolve texture in fragment shader and copy to the implicit MSAA attachment.
+    return BlitMSAARenderToSingleSampledColorWithDraw(device, renderPassEncoder,
+                                                      renderPassDescriptor, implicitSampleCount);
+}
 // Tracks the temporary resolve attachments used when the AlwaysResolveIntoZeroLevelAndLayer toggle
 // is active so that the results can be copied from the temporary resolve attachment into the
 // intended target after the render pass is complete.
@@ -847,6 +952,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t sampleCount = 0;
+    // The implicit multisample count used by MSAA render to single sampled.
+    uint32_t implicitSampleCount = 0;
     bool depthReadOnly = false;
     bool stencilReadOnly = false;
     Ref<AttachmentState> attachmentState;
@@ -857,9 +964,10 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(ValidateRenderPassDescriptor(device, descriptor, &width, &height, &sampleCount,
-                                                  mUsageValidationMode));
+                                                  &implicitSampleCount, mUsageValidationMode));
 
-            ASSERT(width > 0 && height > 0 && sampleCount > 0);
+            ASSERT(width > 0 && height > 0 && sampleCount > 0 &&
+                   (implicitSampleCount == 0 || implicitSampleCount == sampleCount));
 
             mEncodingContext.WillBeginRenderPass();
             BeginRenderPassCmd* cmd =
@@ -872,19 +980,38 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             for (ColorAttachmentIndex index :
                  IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
                 uint8_t i = static_cast<uint8_t>(index);
-                TextureViewBase* view = descriptor->colorAttachments[i].view;
-                TextureViewBase* resolveTarget = descriptor->colorAttachments[i].resolveTarget;
+                TextureViewBase* colorTarget;
+                TextureViewBase* resolveTarget;
 
-                cmd->colorAttachments[index].view = view;
+                if (implicitSampleCount <= 1) {
+                    colorTarget = descriptor->colorAttachments[i].view;
+                    resolveTarget = descriptor->colorAttachments[i].resolveTarget;
+
+                    cmd->colorAttachments[index].view = colorTarget;
+                    cmd->colorAttachments[index].loadOp = descriptor->colorAttachments[i].loadOp;
+                    cmd->colorAttachments[index].storeOp = descriptor->colorAttachments[i].storeOp;
+                } else {
+                    // We use an implicit MSAA texture and resolve to the client supplied
+                    // attachment.
+                    resolveTarget = descriptor->colorAttachments[i].view;
+                    Ref<TextureViewBase> implicitMSAATargetRef;
+                    DAWN_TRY_ASSIGN(implicitMSAATargetRef,
+                                    device->CreateImplicitMSAARenderTextureViewFor(
+                                        resolveTarget->GetTexture(), implicitSampleCount));
+                    colorTarget = implicitMSAATargetRef.Get();
+
+                    cmd->colorAttachments[index].view = std::move(implicitMSAATargetRef);
+                    cmd->colorAttachments[index].loadOp = wgpu::LoadOp::Clear;
+                    cmd->colorAttachments[index].storeOp = wgpu::StoreOp::Discard;
+                }
+
                 cmd->colorAttachments[index].resolveTarget = resolveTarget;
-                cmd->colorAttachments[index].loadOp = descriptor->colorAttachments[i].loadOp;
-                cmd->colorAttachments[index].storeOp = descriptor->colorAttachments[i].storeOp;
 
                 Color color = descriptor->colorAttachments[i].clearValue;
                 cmd->colorAttachments[index].clearColor =
-                    ClampClearColorValueToLegalRange(color, view->GetFormat());
+                    ClampClearColorValueToLegalRange(color, colorTarget->GetFormat());
 
-                usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::RenderAttachment);
+                usageTracker.TextureViewUsedAs(colorTarget, wgpu::TextureUsage::RenderAttachment);
 
                 if (resolveTarget != nullptr) {
                     usageTracker.TextureViewUsedAs(resolveTarget,
@@ -1006,13 +1133,20 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
         mEncodingContext.EnterPass(passEncoder.Get());
 
-        if (ShouldApplyClearBigIntegerColorValueWithDraw(device, descriptor)) {
-            MaybeError error =
-                ApplyClearBigIntegerColorValueWithDraw(passEncoder.Get(), descriptor);
-            if (error.IsError()) {
-                return RenderPassEncoder::MakeError(device, this, &mEncodingContext,
-                                                    descriptor ? descriptor->label : nullptr);
-            }
+        MaybeError error;
+
+        if (implicitSampleCount > 1) {
+            error = ApplyMSAARenderToSingleSampledLoadOp(device, passEncoder.Get(), descriptor,
+                                                         implicitSampleCount);
+        } else if (ShouldApplyClearBigIntegerColorValueWithDraw(device, descriptor)) {
+            // This is skipped if implicitSampleCount > 1. Because implicitSampleCount > 1 is only
+            // supported for non-integer textures.
+            error = ApplyClearBigIntegerColorValueWithDraw(passEncoder.Get(), descriptor);
+        }
+
+        if (device->ConsumedError(std::move(error))) {
+            return RenderPassEncoder::MakeError(device, this, &mEncodingContext,
+                                                descriptor ? descriptor->label : nullptr);
         }
 
         return passEncoder;

@@ -101,7 +101,19 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         bindingMemberCount++;
         bindingType = BindingInfoType::Texture;
         const TextureBindingLayout& texture = entry.texture;
-        DAWN_TRY(ValidateTextureSampleType(texture.sampleType));
+        // The kInternalResolveAttachmentSampleType is used internally and not a value
+        // in wgpu::TextureSampleType.
+        switch (texture.sampleType) {
+            case kInternalResolveAttachmentSampleType:
+                if (allowInternalBinding) {
+                    break;
+                }
+                // should return validation error.
+                [[fallthrough]];
+            default:
+                DAWN_TRY(ValidateTextureSampleType(texture.sampleType));
+                break;
+        }
 
         // viewDimension defaults to 2D if left undefined, needs validation otherwise.
         wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D;

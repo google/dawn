@@ -1462,7 +1462,8 @@
             {"value": 1006, "name": "timestamp query inside passes", "tags": ["dawn"]},
             {"value": 1007, "name": "implicit device synchronization", "tags": ["dawn", "native"]},
             {"value": 1008, "name": "surface capabilities", "tags": ["dawn"]},
-            {"value": 1009, "name": "transient attachments", "tags": ["dawn"]}
+            {"value": 1009, "name": "transient attachments", "tags": ["dawn"]},
+            {"value": 1010, "name": "MSAA render to single sampled", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -1973,6 +1974,7 @@
 
     "render pass color attachment": {
         "category": "structure",
+        "extensible": "in",
         "members": [
             {"name": "view", "type": "texture view", "optional": true},
             {"name": "resolve target", "type": "texture view", "optional": true},
@@ -1981,7 +1983,15 @@
             {"name": "clear value", "type": "color"}
         ]
     },
-
+    "dawn render pass color attachment render to single sampled": {
+        "tags": ["dawn"],
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["render pass color attachment"],
+        "members": [
+            {"name": "implicit sample count", "type": "uint32_t", "default": 1}
+        ]
+    },
     "render pass depth stencil attachment": {
         "category": "structure",
         "members": [
@@ -2297,6 +2307,16 @@
             {"name": "count", "type": "uint32_t", "default": "1"},
             {"name": "mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
             {"name": "alpha to coverage enabled", "type": "bool", "default": "false"}
+        ]
+    },
+
+    "dawn multisample state render to single sampled": {
+        "tags": ["dawn"],
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["multisample state"],
+        "members": [
+            {"name": "enabled", "type": "bool", "default": "false"}
         ]
     },
 
@@ -2622,7 +2642,9 @@
             {"value": 1008, "name": "dawn toggles descriptor", "tags": ["dawn", "native"]},
             {"value": 1009, "name": "dawn shader module SPIRV options descriptor", "tags": ["dawn"]},
             {"value": 1010, "name": "request adapter options LUID", "tags": ["dawn", "native"]},
-            {"value": 1011, "name": "request adapter options get GL proc", "tags": ["dawn", "native"]}
+            {"value": 1011, "name": "request adapter options get GL proc", "tags": ["dawn", "native"]},
+            {"value": 1012, "name": "dawn multisample state render to single sampled", "tags": ["dawn"]},
+            {"value": 1013, "name": "dawn render pass color attachment render to single sampled", "tags": ["dawn"]}
         ]
     },
     "texture": {

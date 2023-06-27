@@ -57,6 +57,8 @@ class AttachmentStateBlueprint {
     // Default (texture format Undefined) indicates there is no depth stencil attachment.
     wgpu::TextureFormat mDepthStencilFormat = wgpu::TextureFormat::Undefined;
     uint32_t mSampleCount = 0;
+
+    bool mIsMSAARenderToSingleSampledEnabled = false;
 };
 
 class AttachmentState final : public AttachmentStateBlueprint,
@@ -70,6 +72,7 @@ class AttachmentState final : public AttachmentStateBlueprint,
     bool HasDepthStencilAttachment() const;
     wgpu::TextureFormat GetDepthStencilFormat() const;
     uint32_t GetSampleCount() const;
+    bool IsMSAARenderToSingleSampledEnabled() const;
 
     size_t ComputeContentHash() override;
 
