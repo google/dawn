@@ -68,7 +68,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-06-21 03:31:14PM
+# Last rolled: 2023-06-23 11:41:57PM
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -471,6 +471,12 @@ crbug.com/dawn/0000 [ qualcomm ] webgpu:api,operation,render_pipeline,sample_mas
 crbug.com/tint/1947 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
 
 ################################################################################
+# CTS Async destroy tests
+################################################################################
+crbug.com/1457970 webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:* [ Failure ]
+crbug.com/1457970 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:* [ Failure ]
+
+################################################################################
 # untriaged Android failures
 ################################################################################
 crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r16float";dimension="1d" [ Failure ]
@@ -721,8 +727,8 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b ventura webgpu-ada
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura webgpu-adapter-default ] webgpu:api,validation,render_pipeline,vertex_state:vertex_attribute_offset_alignment:format="float32x3";arrayStride=256;offset=240 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x3e9b ventura webgpu-adapter-default ] webgpu:api,validation,render_pipeline,vertex_state:vertex_attribute_offset_alignment:format="float32x3";arrayStride=256;offset=240 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b ventura webgpu-adapter-default ] webgpu:api,validation,render_pipeline,vertex_state:vertex_attribute_offset_alignment:format="float32x3";arrayStride=256;offset=240 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format="bc6h-rgb-ufloat" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="bgra8unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,compressed_format:format="bc6h-rgb-ufloat";* [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:api,validation,state,device_lost,destroy:createView,2d,uncompressed_format:format="bgra8unorm-srgb";* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,binary,f32_matrix_subtraction:matrix:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,binary,f32_matrix_subtraction:matrix_compound:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="storage_rw";vectorize=3 [ RetryOnFailure ]
@@ -1004,3 +1010,5 @@ crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,copyToTexture,canvas:copy_co
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm-srgb";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm-srgb";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:* [ Failure ]
+crbug.com/dawn/0000 [ win nvidia ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="rg16sint" [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
