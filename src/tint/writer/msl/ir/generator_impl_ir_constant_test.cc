@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/type/array.h"
 #include "src/tint/type/matrix.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/msl/ir/test_helper_ir.h"
@@ -154,6 +155,92 @@ TEST_F(MslGeneratorImplIrTest, Constant_Matrix_Composite_AllZero) {
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(utils::TrimSpace(generator_.Result()),
               std::string("float3x2(float2(0.0f), float2(0.0f), float2(0.0f))"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Array_Splat) {
+    auto* c =
+        b.Constant(mod.constant_values.Splat(ty.array<f32, 3>(), b.Constant(1.5_f)->Value(), 3));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+tint_array<float, 3>{1.5f, 1.5f, 1.5f})");
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Array_Composite) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.array<f32, 3>(), utils::Vector{b.Constant(1.5_f)->Value(), b.Constant(1.0_f)->Value(),
+                                          b.Constant(2.0_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string(R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+tint_array<float, 3>{1.5f, 1.0f, 2.0f})"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Array_Composite_AnyZero) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.array<f32, 2>(), utils::Vector{b.Constant(1.0_f)->Value(), b.Constant(0.0_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+tint_array<float, 2>{1.0f, 0.0f})");
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Array_Composite_AllZero) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.array<f32, 3>(), utils::Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value(),
+                                          b.Constant(0.0_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+tint_array<float, 3>{})");
 }
 
 }  // namespace

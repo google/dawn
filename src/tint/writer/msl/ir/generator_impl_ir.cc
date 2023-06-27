@@ -470,6 +470,30 @@ void GeneratorImplIr::EmitConstant(utils::StringStream& out, const constant::Val
                 EmitConstant(out, c->Index(i));
             }
         },
+        [&](const type::Array* a) {
+            EmitType(out, a);
+
+            out << "{";
+            TINT_DEFER(out << "}");
+
+            if (c->AllZero()) {
+                return;
+            }
+
+            auto count = a->ConstantCount();
+            if (!count) {
+                diagnostics_.add_error(diag::System::Writer,
+                                       type::Array::kErrExpectedConstantCount);
+                return;
+            }
+
+            for (size_t i = 0; i < count; i++) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                EmitConstant(out, c->Index(i));
+            }
+        },
         [&](Default) { UNHANDLED_CASE(c); });
 }
 
