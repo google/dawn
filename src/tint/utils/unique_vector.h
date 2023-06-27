@@ -45,7 +45,7 @@ struct UniqueVector {
         }
     }
 
-    /// add appends the item to the end of the vector, if the vector does not
+    /// Add appends the item to the end of the vector, if the vector does not
     /// already contain the given item.
     /// @param item the item to append to the end of the vector
     /// @returns true if the item was added, otherwise false.
@@ -55,6 +55,16 @@ struct UniqueVector {
             return true;
         }
         return false;
+    }
+
+    /// Removes @p count elements from the vector
+    /// @param start the index of the first element to remove
+    /// @param count the number of elements to remove
+    void Erase(size_t start, size_t count = 1) {
+        for (size_t i = 0; i < count; i++) {
+            set.Remove(vector[start + i]);
+        }
+        vector.Erase(start, count);
     }
 
     /// @returns true if the vector contains `item`
@@ -71,6 +81,12 @@ struct UniqueVector {
 
     /// @returns true if the vector is empty
     bool IsEmpty() const { return vector.IsEmpty(); }
+
+    /// Removes all elements from the vector
+    void Clear() {
+        vector.Clear();
+        set.Clear();
+    }
 
     /// @returns the number of items in the vector
     size_t Length() const { return vector.Length(); }
@@ -109,6 +125,18 @@ struct UniqueVector {
     T Pop() {
         set.Remove(vector.Back());
         return vector.Pop();
+    }
+
+    /// Removes the last element from the vector if it is equal to @p value
+    /// @param value the value to pop if it is at the back of the vector
+    /// @returns true if the value was popped, otherwise false
+    bool TryPop(T value) {
+        if (!vector.IsEmpty() && vector.Back() == value) {
+            set.Remove(vector.Back());
+            vector.Pop();
+            return true;
+        }
+        return false;
     }
 
   private:
