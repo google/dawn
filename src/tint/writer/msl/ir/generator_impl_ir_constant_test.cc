@@ -243,5 +243,72 @@ struct tint_array {
 tint_array<float, 3>{})");
 }
 
+TEST_F(MslGeneratorImplIrTest, Constant_Struct_Splat) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.f32()},
+                                                  {mod.symbols.Register("b"), ty.f32()},
+                                              });
+    auto* c = b.Constant(mod.constant_values.Splat(s, b.Constant(1.5_f)->Value(), 2));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string(R"(struct S {
+  float a;
+  float b;
+};
+
+S{.a=1.5f, .b=1.5f})"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Struct_Composite) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.f32()},
+                                                  {mod.symbols.Register("b"), ty.f32()},
+                                              });
+    auto* c = b.Constant(mod.constant_values.Composite(
+        s, utils::Vector{b.Constant(1.5_f)->Value(), b.Constant(1.0_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string(R"(struct S {
+  float a;
+  float b;
+};
+
+S{.a=1.5f, .b=1.0f})"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Struct_Composite_AnyZero) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.f32()},
+                                                  {mod.symbols.Register("b"), ty.f32()},
+                                              });
+    auto* c = b.Constant(mod.constant_values.Composite(
+        s, utils::Vector{b.Constant(1.0_f)->Value(), b.Constant(0.0_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string(R"(struct S {
+  float a;
+  float b;
+};
+
+S{.a=1.0f, .b=0.0f})"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Struct_Composite_AllZero) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.f32()},
+                                                  {mod.symbols.Register("b"), ty.f32()},
+                                              });
+    auto* c = b.Constant(mod.constant_values.Composite(
+        s, utils::Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value()}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string(R"(struct S {
+  float a;
+  float b;
+};
+
+S{})"));
+}
+
 }  // namespace
 }  // namespace tint::writer::msl

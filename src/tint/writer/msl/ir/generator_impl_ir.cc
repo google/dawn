@@ -485,7 +485,25 @@ void GeneratorImplIr::EmitConstant(utils::StringStream& out, const constant::Val
             }
             emit_values(*count);
         },
-        [&](Default) { UNHANDLED_CASE(c); });
+        [&](const type::Struct* s) {
+            EmitStructType(s);
+            out << StructName(s) << "{";
+            TINT_DEFER(out << "}");
+
+            if (c->AllZero()) {
+                return;
+            }
+
+            auto members = s->Members();
+            for (size_t i = 0; i < members.Length(); i++) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                out << "." << members[i]->Name().Name() << "=";
+                EmitConstant(out, c->Index(i));
+            }
+        },
+        [&](Default) { UNHANDLED_CASE(c->Type()); });
 }
 
 }  // namespace tint::writer::msl
