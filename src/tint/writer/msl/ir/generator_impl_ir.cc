@@ -437,7 +437,16 @@ void GeneratorImplIr::EmitConstant(utils::StringStream& out, ir::Constant* c) {
 }
 
 void GeneratorImplIr::EmitConstant(utils::StringStream& out, const constant::Value* c) {
-    return tint::Switch(
+    auto emit_values = [&](uint32_t count) {
+        for (size_t i = 0; i < count; i++) {
+            if (i > 0) {
+                out << ", ";
+            }
+            EmitConstant(out, c->Index(i));
+        }
+    };
+
+    tint::Switch(
         c->Type(),  //
         [&](const type::Bool*) { out << (c->ValueAs<bool>() ? "true" : "false"); },
         [&](const type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
@@ -452,27 +461,15 @@ void GeneratorImplIr::EmitConstant(utils::StringStream& out, const constant::Val
                 EmitConstant(out, splat->el);
                 return;
             }
-            for (size_t i = 0; i < v->Width(); i++) {
-                if (i > 0) {
-                    out << ", ";
-                }
-                EmitConstant(out, c->Index(i));
-            }
+            emit_values(v->Width());
         },
         [&](const type::Matrix* m) {
             EmitType(out, m);
-
             ScopedParen sp(out);
-            for (size_t i = 0; i < m->columns(); i++) {
-                if (i > 0) {
-                    out << ", ";
-                }
-                EmitConstant(out, c->Index(i));
-            }
+            emit_values(m->columns());
         },
         [&](const type::Array* a) {
             EmitType(out, a);
-
             out << "{";
             TINT_DEFER(out << "}");
 
@@ -486,13 +483,7 @@ void GeneratorImplIr::EmitConstant(utils::StringStream& out, const constant::Val
                                        type::Array::kErrExpectedConstantCount);
                 return;
             }
-
-            for (size_t i = 0; i < count; i++) {
-                if (i > 0) {
-                    out << ", ";
-                }
-                EmitConstant(out, c->Index(i));
-            }
+            emit_values(*count);
         },
         [&](Default) { UNHANDLED_CASE(c); });
 }
