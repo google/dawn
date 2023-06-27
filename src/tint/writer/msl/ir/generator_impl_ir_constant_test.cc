@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/type/matrix.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/msl/ir/test_helper_ir.h"
 
@@ -94,6 +95,65 @@ TEST_F(MslGeneratorImplIrTest, Constant_Vector_Composite_AllZero) {
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string("float3(0.0f)"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Matrix_Splat) {
+    auto* c =
+        b.Constant(mod.constant_values.Splat(ty.mat3x2<f32>(), b.Constant(1.5_f)->Value(), 3));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), std::string("float3x2(1.5f, 1.5f, 1.5f)"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Matrix_Composite) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.mat3x2<f32>(),
+        utils::Vector{mod.constant_values.Composite(
+                          ty.vec2<f32>(),
+                          utils::Vector{b.Constant(1.5_f)->Value(), b.Constant(1.0_f)->Value()}),
+                      mod.constant_values.Composite(
+                          ty.vec2<f32>(),
+                          utils::Vector{b.Constant(1.5_f)->Value(), b.Constant(2.0_f)->Value()}),
+                      mod.constant_values.Composite(
+                          ty.vec2<f32>(),
+                          utils::Vector{b.Constant(2.5_f)->Value(), b.Constant(3.5_f)->Value()})}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()),
+              std::string("float3x2(float2(1.5f, 1.0f), float2(1.5f, 2.0f), float2(2.5f, 3.5f))"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Matrix_Composite_AnyZero) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.mat2x2<f32>(),
+        utils::Vector{mod.constant_values.Composite(
+                          ty.vec2<f32>(),
+                          utils::Vector{b.Constant(1.0_f)->Value(), b.Constant(0.0_f)->Value()}),
+                      mod.constant_values.Composite(
+                          ty.vec2<f32>(),
+                          utils::Vector{b.Constant(1.5_f)->Value(), b.Constant(2.5_f)->Value()})}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()),
+              std::string("float2x2(float2(1.0f, 0.0f), float2(1.5f, 2.5f))"));
+}
+
+TEST_F(MslGeneratorImplIrTest, Constant_Matrix_Composite_AllZero) {
+    auto* c = b.Constant(mod.constant_values.Composite(
+        ty.mat3x2<f32>(),
+        utils::Vector{mod.constant_values.Composite(
+                          ty.vec2<f32>(),
+                          utils::Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value()}),
+                      mod.constant_values.Composite(
+                          ty.vec2<f32>(),
+                          utils::Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value()}),
+                      mod.constant_values.Composite(
+                          ty.vec2<f32>(),
+                          utils::Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value()})}));
+    generator_.EmitConstant(generator_.Line(), c);
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()),
+              std::string("float3x2(float2(0.0f), float2(0.0f), float2(0.0f))"));
 }
 
 }  // namespace
