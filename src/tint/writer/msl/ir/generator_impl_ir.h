@@ -44,6 +44,11 @@ class GeneratorImplIr : public IRTextGenerator {
     /// @param ty the type to emit
     void EmitType(utils::StringStream& out, const type::Type* ty);
 
+    /// Handles generating a address space
+    /// @param out the output of the type stream
+    /// @param sc the address space to generate
+    void EmitAddressSpace(utils::StringStream& out, builtin::AddressSpace sc);
+
     /// @returns the name of the templated `tint_array` helper type, generating it if needed
     const std::string& ArrayTemplateName();
 

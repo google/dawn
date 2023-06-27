@@ -227,19 +227,40 @@ TEST_F(MslGeneratorImplIrTest, EmitType_Void) {
     EXPECT_EQ(utils::TrimSpace(generator_.Result()), "void");
 }
 
-// TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
-//     auto* f32 = create<type::F32>();
-//     auto* p =
-//         create<type::Pointer>(builtin::AddressSpace::kWorkgroup, f32,
-//         builtin::Access::kReadWrite);
-//
-//     GeneratorImpl& gen = Build();
-//
-//     utils::StringStream out;
-//     ASSERT_TRUE(gen.EmitType(out, p, "")) << gen.Diagnostics();
-//     EXPECT_EQ(out.str(), "threadgroup float* ");
-// }
-//
+TEST_F(MslGeneratorImplIrTest, EmitType_Pointer_Workgroup) {
+    generator_.EmitType(generator_.Line(), ty.ptr<workgroup, f32, read_write>());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "threadgroup float*");
+}
+
+TEST_F(MslGeneratorImplIrTest, EmitType_Pointer_Const) {
+    generator_.EmitType(generator_.Line(), ty.ptr<function, f32, read>());
+    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
+    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "const thread float*");
+}
+
+struct MslAddressSpaceData {
+    builtin::AddressSpace space;
+    std::string result;
+};
+inline std::ostream& operator<<(std::ostream& out, MslAddressSpaceData data) {
+    utils::StringStream str;
+    str << data.space;
+    out << str.str();
+    return out;
+}
+using MslAddressSpaceTest = MslGeneratorImplIrTestWithParam<MslAddressSpaceData>;
+TEST_P(MslAddressSpaceTest, Emit) {}
+INSTANTIATE_TEST_SUITE_P(
+    MslGeneratorImplIrTest,
+    MslAddressSpaceTest,
+    testing::Values(MslAddressSpaceData{builtin::AddressSpace::kWorkgroup, "threadgroup"},
+                    MslAddressSpaceData{builtin::AddressSpace::kFunction, "thread"},
+                    MslAddressSpaceData{builtin::AddressSpace::kPrivate, "thread"},
+                    MslAddressSpaceData{builtin::AddressSpace::kHandle, "thread"},
+                    MslAddressSpaceData{builtin::AddressSpace::kStorage, "device"},
+                    MslAddressSpaceData{builtin::AddressSpace::kUniform, "constant"}));
+
 // TEST_F(MslGeneratorImplTest, EmitType_Struct) {
 //     auto* s = Structure("S", utils::Vector{
 //                                  Member("a", ty.i32()),

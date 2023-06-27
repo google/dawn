@@ -24,6 +24,7 @@
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/matrix.h"
+#include "src/tint/type/pointer.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
@@ -121,6 +122,28 @@ const std::string& GeneratorImplIr::ArrayTemplateName() {
     return array_template_name_;
 }
 
+void GeneratorImplIr::EmitAddressSpace(utils::StringStream& out, builtin::AddressSpace sc) {
+    switch (sc) {
+        case builtin::AddressSpace::kFunction:
+        case builtin::AddressSpace::kPrivate:
+        case builtin::AddressSpace::kHandle:
+            out << "thread";
+            break;
+        case builtin::AddressSpace::kWorkgroup:
+            out << "threadgroup";
+            break;
+        case builtin::AddressSpace::kStorage:
+            out << "device";
+            break;
+        case builtin::AddressSpace::kUniform:
+            out << "constant";
+            break;
+        default:
+            TINT_ICE(Writer, diagnostics_) << "unhandled address space: " << sc;
+            break;
+    }
+}
+
 void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
     tint::Switch(
         ty,                                         //
@@ -169,6 +192,15 @@ void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
             }
             TINT_ICE(Writer, diagnostics_)
                 << "unhandled atomic type " << atomic->Type()->FriendlyName();
+        },
+        [&](const type::Pointer* ptr) {
+            if (ptr->Access() == builtin::Access::kRead) {
+                out << "const ";
+            }
+            EmitAddressSpace(out, ptr->AddressSpace());
+            out << " ";
+            EmitType(out, ptr->StoreType());
+            out << "*";
         },
         [&](Default) { UNHANDLED_CASE(ty); });
 }
