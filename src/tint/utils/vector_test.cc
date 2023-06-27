@@ -151,6 +151,70 @@ TEST(TintVectorTest, Push_NoSmallArray) {
     EXPECT_TRUE(AllExternallyHeld(vec));
 }
 
+TEST(TintVectorTest, Erase_Front) {
+    Vector<std::string, 3> vec;
+    vec.Push("one");
+    vec.Push("two");
+    vec.Push("three");
+    vec.Push("four");
+    EXPECT_EQ(vec.Length(), 4u);
+
+    vec.Erase(0);
+    EXPECT_EQ(vec.Length(), 3u);
+    EXPECT_EQ(vec[0], "two");
+    EXPECT_EQ(vec[1], "three");
+    EXPECT_EQ(vec[2], "four");
+
+    vec.Erase(0, 1);
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec[0], "three");
+    EXPECT_EQ(vec[1], "four");
+
+    vec.Erase(0, 2);
+    EXPECT_EQ(vec.Length(), 0u);
+}
+
+TEST(TintVectorTest, Erase_Mid) {
+    Vector<std::string, 5> vec;
+    vec.Push("one");
+    vec.Push("two");
+    vec.Push("three");
+    vec.Push("four");
+    vec.Push("five");
+    EXPECT_EQ(vec.Length(), 5u);
+
+    vec.Erase(1);
+    EXPECT_EQ(vec.Length(), 4u);
+    EXPECT_EQ(vec[0], "one");
+    EXPECT_EQ(vec[1], "three");
+    EXPECT_EQ(vec[2], "four");
+    EXPECT_EQ(vec[3], "five");
+
+    vec.Erase(1, 2);
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec[0], "one");
+    EXPECT_EQ(vec[1], "five");
+}
+
+TEST(TintVectorTest, Erase_Back) {
+    Vector<std::string, 3> vec;
+    vec.Push("one");
+    vec.Push("two");
+    vec.Push("three");
+    vec.Push("four");
+    EXPECT_EQ(vec.Length(), 4u);
+
+    vec.Erase(3);
+    EXPECT_EQ(vec.Length(), 3u);
+    EXPECT_EQ(vec[0], "one");
+    EXPECT_EQ(vec[1], "two");
+    EXPECT_EQ(vec[2], "three");
+
+    vec.Erase(1, 2);
+    EXPECT_EQ(vec.Length(), 1u);
+    EXPECT_EQ(vec[0], "one");
+}
+
 TEST(TintVectorTest, InferTN_1CString) {
     auto vec = Vector{"one"};
     static_assert(std::is_same_v<decltype(vec)::value_type, const char*>);
