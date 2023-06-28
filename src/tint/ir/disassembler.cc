@@ -769,7 +769,7 @@ void Disassembler::EmitUnary(Unary* u) {
             break;
     }
     out_ << " ";
-    EmitValue(u->Val());
+    EmitOperand(u, u->Val(), Unary::kValueOperandOffset);
 
     sm.Store(u);
     EmitLine();

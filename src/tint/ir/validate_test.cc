@@ -881,5 +881,91 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidateTest, Unary_Value_Nullptr) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.With(f->Block());
+    sb.Negation(ty.i32(), nullptr);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:23 error: unary: value operand is undefined
+    %2:i32 = negation undef
+                      ^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:i32 = negation undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Unary_Result_Nullptr) {
+    auto* bin =
+        mod.instructions.Create<ir::Unary>(nullptr, ir::Unary::Kind::kNegation, b.Constant(2_i));
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.With(f->Block());
+    sb.Append(bin);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: instruction result is undefined
+    undef = negation 2i
+    ^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    undef = negation 2i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Unary_ResultTypeNotMatchValueType) {
+    auto* bin = b.Complement(ty.f32(), 2_i);
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.With(f->Block());
+    sb.Append(bin);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: unary: result type must match value type
+    %2:f32 = complement 2i
+    ^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:f32 = complement 2i
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir
