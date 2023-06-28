@@ -25,7 +25,7 @@ size_t Distance(std::string_view str_a, std::string_view str_b) {
     const auto len_b = str_b.size();
 
     Vector<size_t, 64> mat;
-    mat.Reserve((len_a + 1) * (len_b + 1));
+    mat.Resize((len_a + 1) * (len_b + 1));
 
     auto at = [&](size_t a, size_t b) -> size_t& { return mat[a + b * (len_a + 1)]; };
 

@@ -1444,7 +1444,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
     const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
     auto const buffer = intrinsic->Buffer()->identifier->symbol.Name();
     auto* const offset = expr->args[0];
-    auto* const value = expr->args[1];
+    auto* const value = expr->args.Length() > 1 ? expr->args[1] : nullptr;
 
     using Op = ast::transform::DecomposeMemoryAccess::Intrinsic::Op;
     using DataType = ast::transform::DecomposeMemoryAccess::Intrinsic::DataType;

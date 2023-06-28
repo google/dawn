@@ -222,6 +222,7 @@ class Validator {
     void CheckInstruction(Instruction* inst) {
         if (!inst->Alive()) {
             AddError(inst, "destroyed instruction found in instruction list");
+            return;
         }
         if (inst->HasResults()) {
             auto results = inst->Results();

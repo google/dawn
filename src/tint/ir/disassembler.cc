@@ -373,6 +373,13 @@ void Disassembler::EmitInstructionName(std::string_view name, Instruction* inst)
 }
 
 void Disassembler::EmitInstruction(Instruction* inst) {
+    if (!inst->Alive()) {
+        SourceMarker sm(this);
+        out_ << "<destroyed " << inst->TypeInfo().name << " " << utils::ToString(inst) << ">";
+        sm.Store(inst);
+        EmitLine();
+        return;
+    }
     tint::Switch(
         inst,                               //
         [&](Switch* s) { EmitSwitch(s); },  //

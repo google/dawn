@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <iterator>
 
+#include "src/tint/debug.h"
 #include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/castable.h"
 #include "src/tint/utils/traits.h"
@@ -186,24 +187,42 @@ struct Slice {
     /// Index operator
     /// @param i the element index. Must be less than `len`.
     /// @returns a reference to the i'th element.
-    T& operator[](size_t i) { return data[i]; }
+    T& operator[](size_t i) {
+        TINT_ASSERT(Utils, i < Length());
+        return data[i];
+    }
 
     /// Index operator
     /// @param i the element index. Must be less than `len`.
     /// @returns a reference to the i'th element.
-    const T& operator[](size_t i) const { return data[i]; }
+    const T& operator[](size_t i) const {
+        TINT_ASSERT(Utils, i < Length());
+        return data[i];
+    }
 
     /// @returns a reference to the first element in the vector
-    T& Front() { return data[0]; }
+    T& Front() {
+        TINT_ASSERT(Utils, !IsEmpty());
+        return data[0];
+    }
 
     /// @returns a reference to the first element in the vector
-    const T& Front() const { return data[0]; }
+    const T& Front() const {
+        TINT_ASSERT(Utils, !IsEmpty());
+        return data[0];
+    }
 
     /// @returns a reference to the last element in the vector
-    T& Back() { return data[len - 1]; }
+    T& Back() {
+        TINT_ASSERT(Utils, !IsEmpty());
+        return data[len - 1];
+    }
 
     /// @returns a reference to the last element in the vector
-    const T& Back() const { return data[len - 1]; }
+    const T& Back() const {
+        TINT_ASSERT(Utils, !IsEmpty());
+        return data[len - 1];
+    }
 
     /// @returns a pointer to the first element in the vector
     T* begin() { return data; }
