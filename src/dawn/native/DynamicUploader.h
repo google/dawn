@@ -18,7 +18,7 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/Ref.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"

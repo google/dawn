@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "dawn/common/NonCopyable.h"
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/Ref.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandBufferStateTracker.h"
 #include "dawn/native/Commands.h"

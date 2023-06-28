@@ -61,6 +61,7 @@ target_sources(dawn_common PRIVATE
     "PlacementAllocated.h"
     "Platform.h"
     "Preprocessor.h"
+    "Ref.h"
     "RefBase.h"
     "RefCounted.cpp"
     "RefCounted.h"

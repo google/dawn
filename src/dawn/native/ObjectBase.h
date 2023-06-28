@@ -19,6 +19,7 @@
 #include <string>
 
 #include "dawn/common/LinkedList.h"
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/Forward.h"
 

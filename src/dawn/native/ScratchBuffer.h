@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/Ref.h"
 #include "dawn/native/Buffer.h"
 
 namespace dawn::native {

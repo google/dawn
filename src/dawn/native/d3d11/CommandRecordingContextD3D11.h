@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D11_COMMANDRECORDINGCONTEXT_D3D11_H_
 #define SRC_DAWN_NATIVE_D3D11_COMMANDRECORDINGCONTEXT_D3D11_H_
 
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/Ref.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/d3d/d3d_platform.h"
 

@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/PhysicalDevice.h"

@@ -18,6 +18,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/d3d12/CPUDescriptorHeapAllocationD3D12.h"

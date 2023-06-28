@@ -21,6 +21,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 
 namespace dawn {

@@ -18,7 +18,7 @@
 #include <memory>
 #include <string>
 
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/Ref.h"
 #include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/Error.h"
 #include "dawn/webgpu.h"

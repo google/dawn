@@ -17,7 +17,7 @@
 
 #include "dawn/native/PhysicalDevice.h"
 
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/Ref.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/vulkan/VulkanInfo.h"
 

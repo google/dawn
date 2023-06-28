@@ -15,6 +15,7 @@
 #include <thread>
 #include <utility>
 
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "gtest/gtest.h"
 

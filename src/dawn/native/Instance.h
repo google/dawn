@@ -24,7 +24,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/Ref.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Adapter.h"

@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <vector>
 
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/StackContainer.h"
 #include "gtest/gtest.h"

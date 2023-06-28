@@ -23,6 +23,7 @@
 #include "dawn/native/BackendConnection.h"
 
 #include "dawn/common/DynamicLib.h"
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/vulkan/VulkanFunctions.h"

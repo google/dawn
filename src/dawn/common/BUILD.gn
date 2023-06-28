@@ -254,6 +254,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "PlacementAllocated.h",
       "Platform.h",
       "Preprocessor.h",
+      "Ref.h",
       "RefBase.h",
       "RefCounted.cpp",
       "RefCounted.h",

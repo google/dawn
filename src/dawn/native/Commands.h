@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "dawn/common/Constants.h"
+#include "dawn/common/Ref.h"
 
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindingInfo.h"

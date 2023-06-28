@@ -19,7 +19,7 @@
 #include <initializer_list>
 #include <vector>
 
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/Ref.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/UsageValidationMode.h"
 #include "dawn/native/dawn_platform.h"

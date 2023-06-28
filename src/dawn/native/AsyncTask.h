@@ -20,6 +20,7 @@
 #include <mutex>
 #include <unordered_map>
 
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 
 namespace dawn::platform {

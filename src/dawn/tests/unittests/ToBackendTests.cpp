@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 
+#include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/ToBackend.h"
 

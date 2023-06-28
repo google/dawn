@@ -19,8 +19,6 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "dawn/common/RefBase.h"
-
 namespace dawn {
 
 class RefCount {
@@ -44,8 +42,18 @@ class RefCount {
     std::atomic<uint64_t> mRefCount;
 };
 
+// Forward declaration for Ref needed until TryGetRef can be removed with WeakRefs.
+// TODO(dawn:1769) Remove once WeakRef implementation is complete with cache.
 template <typename T>
 class Ref;
+
+// TODO(dawn:1769) Move to Ref.h once TryGetRef can be removed.
+template <typename T>
+Ref<T> AcquireRef(T* pointee) {
+    Ref<T> ref;
+    ref.Acquire(pointee);
+    return ref;
+}
 
 class RefCounted {
   public:
@@ -61,6 +69,7 @@ class RefCounted {
 
     // Tries to return a valid Ref to `object` if it's internal refcount is not already 0. If the
     // internal refcount has already reached 0, returns nullptr instead.
+    // TODO(dawn:1769) Remove this once ContentLessObjectCache is converted to use WeakRefs.
     template <typename T, typename = typename std::is_convertible<T, RefCounted>>
     friend Ref<T> TryGetRef(T* object) {
         // Since this is called on the RefCounted class directly, and can race with destruction, we
@@ -89,26 +98,6 @@ class RefCounted {
 
     RefCount mRefCount;
 };
-
-template <typename T>
-struct RefCountedTraits {
-    static constexpr T* kNullValue = nullptr;
-    static void Reference(T* value) { value->Reference(); }
-    static void Release(T* value) { value->Release(); }
-};
-
-template <typename T>
-class Ref : public RefBase<T*, RefCountedTraits<T>> {
-  public:
-    using RefBase<T*, RefCountedTraits<T>>::RefBase;
-};
-
-template <typename T>
-Ref<T> AcquireRef(T* pointee) {
-    Ref<T> ref;
-    ref.Acquire(pointee);
-    return ref;
-}
 
 }  // namespace dawn
 
