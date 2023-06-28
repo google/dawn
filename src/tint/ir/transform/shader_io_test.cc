@@ -56,20 +56,16 @@ TEST_F(IR_ShaderIOTest, NoInputsOrOutputs) {
 
 TEST_F(IR_ShaderIOTest, Parameters_NonStruct_Spirv) {
     auto* ep = b.Function("foo", ty.void_());
-    auto* front_facing = b.FunctionParam(ty.bool_());
+    auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
     front_facing->SetBuiltin(FunctionParam::Builtin::kFrontFacing);
-    mod.SetName(front_facing, "front_facing");
-    auto* position = b.FunctionParam(ty.vec4<f32>());
+    auto* position = b.FunctionParam("position", ty.vec4<f32>());
     position->SetBuiltin(FunctionParam::Builtin::kPosition);
     position->SetInvariant(true);
-    mod.SetName(position, "position");
-    auto* color1 = b.FunctionParam(ty.f32());
+    auto* color1 = b.FunctionParam("color1", ty.f32());
     color1->SetLocation(0, {});
-    mod.SetName(color1, "color1");
-    auto* color2 = b.FunctionParam(ty.f32());
+    auto* color2 = b.FunctionParam("color2", ty.f32());
     color2->SetLocation(1, builtin::Interpolation{builtin::InterpolationType::kLinear,
                                                   builtin::InterpolationSampling::kSample});
-    mod.SetName(color2, "color2");
 
     ep->SetParams({front_facing, position, color1, color2});
     ep->SetStage(Function::PipelineStage::kFragment);
@@ -183,8 +179,7 @@ TEST_F(IR_ShaderIOTest, Parameters_Struct_Spirv) {
                   });
 
     auto* ep = b.Function("foo", ty.void_());
-    auto* str_param = b.FunctionParam(str_ty);
-    mod.SetName(str_param, "inputs");
+    auto* str_param = b.FunctionParam("inputs", str_ty);
     ep->SetParams({str_param});
     ep->SetStage(Function::PipelineStage::kFragment);
     mod.functions.Push(ep);
@@ -307,15 +302,12 @@ TEST_F(IR_ShaderIOTest, Parameters_Mixed_Spirv) {
                              });
 
     auto* ep = b.Function("foo", ty.void_());
-    auto* front_facing = b.FunctionParam(ty.bool_());
+    auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
     front_facing->SetBuiltin(FunctionParam::Builtin::kFrontFacing);
-    mod.SetName(front_facing, "front_facing");
-    auto* str_param = b.FunctionParam(str_ty);
-    mod.SetName(str_param, "inputs");
-    auto* color2 = b.FunctionParam(ty.f32());
+    auto* str_param = b.FunctionParam("inputs", str_ty);
+    auto* color2 = b.FunctionParam("color2", ty.f32());
     color2->SetLocation(1, builtin::Interpolation{builtin::InterpolationType::kLinear,
                                                   builtin::InterpolationSampling::kSample});
-    mod.SetName(color2, "color2");
 
     ep->SetParams({front_facing, str_param, color2});
     ep->SetStage(Function::PipelineStage::kFragment);
@@ -654,10 +646,9 @@ TEST_F(IR_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
     // Fragment shader.
     {
         auto* ep = b.Function("frag", vec4f);
-        auto* inputs = b.FunctionParam(str_ty);
+        auto* inputs = b.FunctionParam("inputs", str_ty);
         ep->SetStage(Function::PipelineStage::kFragment);
         ep->SetParams({inputs});
-        mod.SetName(inputs, "inputs");
         mod.functions.Push(ep);
 
         b.With(ep->Block(), [&] {  //
@@ -884,9 +875,8 @@ TEST_F(IR_ShaderIOTest, SampleMask_Spirv) {
                                  },
                              });
 
-    auto* mask_in = b.FunctionParam(ty.u32());
+    auto* mask_in = b.FunctionParam("mask_in", ty.u32());
     mask_in->SetBuiltin(FunctionParam::Builtin::kSampleMask);
-    mod.SetName(mask_in, "mask_in");
 
     auto* ep = b.Function("foo", str_ty);
     ep->SetStage(Function::PipelineStage::kFragment);

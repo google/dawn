@@ -656,12 +656,9 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested) {
     b.RootBlock()->Append(global);
 
     auto* func = b.Function("foo", ty.i32());
-    auto* condA = b.FunctionParam(ty.bool_());
-    auto* condB = b.FunctionParam(ty.bool_());
-    auto* condC = b.FunctionParam(ty.bool_());
-    mod.SetName(condA, "condA");
-    mod.SetName(condB, "condB");
-    mod.SetName(condC, "condC");
+    auto* condA = b.FunctionParam("condA", ty.bool_());
+    auto* condB = b.FunctionParam("condB", ty.bool_());
+    auto* condC = b.FunctionParam("condC", ty.bool_());
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 
@@ -806,12 +803,9 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_TrivialMerge) {
     b.RootBlock()->Append(global);
 
     auto* func = b.Function("foo", ty.i32());
-    auto* condA = b.FunctionParam(ty.bool_());
-    auto* condB = b.FunctionParam(ty.bool_());
-    auto* condC = b.FunctionParam(ty.bool_());
-    mod.SetName(condA, "condA");
-    mod.SetName(condB, "condB");
-    mod.SetName(condC, "condC");
+    auto* condA = b.FunctionParam("condA", ty.bool_());
+    auto* condB = b.FunctionParam("condB", ty.bool_());
+    auto* condC = b.FunctionParam("condC", ty.bool_());
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 
@@ -931,12 +925,9 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
     b.RootBlock()->Append(global);
 
     auto* func = b.Function("foo", ty.i32());
-    auto* condA = b.FunctionParam(ty.bool_());
-    auto* condB = b.FunctionParam(ty.bool_());
-    auto* condC = b.FunctionParam(ty.bool_());
-    mod.SetName(condA, "condA");
-    mod.SetName(condB, "condB");
-    mod.SetName(condC, "condC");
+    auto* condA = b.FunctionParam("condA", ty.bool_());
+    auto* condB = b.FunctionParam("condB", ty.bool_());
+    auto* condC = b.FunctionParam("condC", ty.bool_());
     func->SetParams({condA, condB, condC});
     mod.functions.Push(func);
 

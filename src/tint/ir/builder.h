@@ -665,6 +665,12 @@ class Builder {
     /// @returns the value
     ir::FunctionParam* FunctionParam(const type::Type* type);
 
+    /// Creates a new `FunctionParam` with a name.
+    /// @param name the parameter name
+    /// @param type the parameter type
+    /// @returns the value
+    ir::FunctionParam* FunctionParam(std::string_view name, const type::Type* type);
+
     /// Creates a new `Access`
     /// @param type the return type
     /// @param object the object being accessed

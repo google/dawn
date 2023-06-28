@@ -98,10 +98,8 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramTest, SingleFunction_Parameters) {
     auto* fn = b.Function("f", ty.i32());
-    auto* i = b.FunctionParam(ty.i32());
-    auto* u = b.FunctionParam(ty.u32());
-    mod.SetName(i, "i");
-    mod.SetName(u, "u");
+    auto* i = b.FunctionParam("i", ty.i32());
+    auto* u = b.FunctionParam("u", ty.u32());
     fn->SetParams({i, u});
     mod.functions.Push(fn);
 
@@ -119,8 +117,7 @@ fn f(i : i32, u : u32) -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, UnaryOp_Negate) {
     auto* fn = b.Function("f", ty.i32());
-    auto* i = b.FunctionParam(ty.i32());
-    mod.SetName(i, "i");
+    auto* i = b.FunctionParam("i", ty.i32());
     fn->SetParams({i});
     mod.functions.Push(fn);
 
@@ -135,8 +132,7 @@ fn f(i : i32) -> i32 {
 
 TEST_F(IRToProgramTest, UnaryOp_Complement) {
     auto* fn = b.Function("f", ty.u32());
-    auto* i = b.FunctionParam(ty.u32());
-    mod.SetName(i, "i");
+    auto* i = b.FunctionParam("i", ty.u32());
     fn->SetParams({i});
     mod.functions.Push(fn);
 
@@ -151,8 +147,7 @@ fn f(i : u32) -> u32 {
 
 TEST_F(IRToProgramTest, UnaryOp_Not) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* i = b.FunctionParam(ty.bool_());
-    mod.SetName(i, "b");
+    auto* i = b.FunctionParam("b", ty.bool_());
     fn->SetParams({i});
     mod.functions.Push(fn);
 
@@ -170,10 +165,8 @@ fn f(b : bool) -> bool {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, BinaryOp_Add) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -188,10 +181,8 @@ fn f(a : i32, b : i32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_Subtract) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -206,10 +197,8 @@ fn f(a : i32, b : i32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_Multiply) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -224,10 +213,8 @@ fn f(a : i32, b : i32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_Divide) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -242,10 +229,8 @@ fn f(a : i32, b : i32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_Modulo) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -260,10 +245,8 @@ fn f(a : i32, b : i32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_And) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -278,10 +261,8 @@ fn f(a : i32, b : i32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_Or) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -296,10 +277,8 @@ fn f(a : i32, b : i32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_Xor) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -314,10 +293,8 @@ fn f(a : i32, b : i32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_Equal) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -332,10 +309,8 @@ fn f(a : i32, b : i32) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_NotEqual) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -350,10 +325,8 @@ fn f(a : i32, b : i32) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LessThan) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -368,10 +341,8 @@ fn f(a : i32, b : i32) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_GreaterThan) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -386,10 +357,8 @@ fn f(a : i32, b : i32) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LessThanEqual) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -404,10 +373,8 @@ fn f(a : i32, b : i32) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_GreaterThanEqual) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.i32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -422,10 +389,8 @@ fn f(a : i32, b : i32) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_ShiftLeft) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.u32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.u32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -440,10 +405,8 @@ fn f(a : i32, b : u32) -> i32 {
 
 TEST_F(IRToProgramTest, BinaryOp_ShiftRight) {
     auto* fn = b.Function("f", ty.i32());
-    auto* pa = b.FunctionParam(ty.i32());
-    auto* pb = b.FunctionParam(ty.u32());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.i32());
+    auto* pb = b.FunctionParam("b", ty.u32());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -461,10 +424,8 @@ fn f(a : i32, b : u32) -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_2) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -486,12 +447,9 @@ fn f(a : bool, b : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_ab_c) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
@@ -518,12 +476,9 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
@@ -549,10 +504,8 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_2) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -576,12 +529,9 @@ fn f(a : bool, b : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_ab_c) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
@@ -610,12 +560,9 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
@@ -778,10 +725,8 @@ fn f() -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_2) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -803,12 +748,9 @@ fn f(a : bool, b : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_ab_c) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
@@ -835,12 +777,9 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
@@ -867,10 +806,8 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_2) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
     fn->SetParams({pa, pb});
     mod.functions.Push(fn);
 
@@ -894,12 +831,9 @@ fn f(a : bool, b : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_ab_c) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
@@ -928,12 +862,9 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 
 TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pb, pc});
     mod.functions.Push(fn);
 
@@ -1104,10 +1035,8 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalMixed) {
     b.With(fn_d->Block(), [&] { b.Return(fn_d, true); });
 
     auto* fn = b.Function("f", ty.bool_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pc, "c");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
     fn->SetParams({pa, pc});
     mod.functions.Push(fn);
 
@@ -1283,8 +1212,7 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramTest, LetUsedOnce) {
     auto* fn = b.Function("f", ty.u32());
-    auto* i = b.FunctionParam(ty.u32());
-    mod.SetName(i, "i");
+    auto* i = b.FunctionParam("i", ty.u32());
     fn->SetParams({i});
     mod.functions.Push(fn);
 
@@ -1304,8 +1232,7 @@ fn f(i : u32) -> u32 {
 
 TEST_F(IRToProgramTest, LetUsedTwice) {
     auto* fn = b.Function("f", ty.i32());
-    auto* i = b.FunctionParam(ty.i32());
-    mod.SetName(i, "i");
+    auto* i = b.FunctionParam("i", ty.i32());
     fn->SetParams({i});
     mod.functions.Push(fn);
 
@@ -1397,8 +1324,7 @@ TEST_F(IRToProgramTest, If_CallFn) {
     mod.functions.Push(a);
 
     auto* fn = b.Function("f", ty.void_());
-    auto* cond = b.FunctionParam(ty.bool_());
-    mod.SetName(cond, "cond");
+    auto* cond = b.FunctionParam("cond", ty.bool_());
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
@@ -1424,8 +1350,7 @@ fn f(cond : bool) {
 
 TEST_F(IRToProgramTest, If_Return) {
     auto* fn = b.Function("f", ty.void_());
-    auto* cond = b.FunctionParam(ty.bool_());
-    mod.SetName(cond, "cond");
+    auto* cond = b.FunctionParam("cond", ty.bool_());
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
@@ -1475,8 +1400,7 @@ TEST_F(IRToProgramTest, If_CallFn_Else_CallFn) {
     mod.functions.Push(fn_b);
 
     auto* fn = b.Function("f", ty.void_());
-    auto* cond = b.FunctionParam(ty.bool_());
-    mod.SetName(cond, "cond");
+    auto* cond = b.FunctionParam("cond", ty.bool_());
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
@@ -1635,21 +1559,16 @@ fn f() {
 
 TEST_F(IRToProgramTest, If_Else_Chain) {
     auto* x = b.Function("x", ty.bool_());
-    auto* i = b.FunctionParam(ty.i32());
-    mod.SetName(i, "i");
+    auto* i = b.FunctionParam("i", ty.i32());
     x->SetParams({i});
     mod.functions.Push(x);
     b.With(x->Block(), [&] { b.Return(x, true); });
 
     auto* fn = b.Function("f", ty.void_());
-    auto* pa = b.FunctionParam(ty.bool_());
-    auto* pb = b.FunctionParam(ty.bool_());
-    auto* pc = b.FunctionParam(ty.bool_());
-    auto* pd = b.FunctionParam(ty.bool_());
-    mod.SetName(pa, "a");
-    mod.SetName(pb, "b");
-    mod.SetName(pc, "c");
-    mod.SetName(pd, "d");
+    auto* pa = b.FunctionParam("a", ty.bool_());
+    auto* pb = b.FunctionParam("b", ty.bool_());
+    auto* pc = b.FunctionParam("c", ty.bool_());
+    auto* pd = b.FunctionParam("d", ty.bool_());
     fn->SetParams({pa, pb, pc, pd});
     mod.functions.Push(fn);
 
@@ -2021,8 +1940,7 @@ fn f() {
 
 TEST_F(IRToProgramTest, For_ComplexBody) {
     auto* a = b.Function("a", ty.bool_());
-    auto* v = b.FunctionParam(ty.i32());
-    mod.SetName(v, "v");
+    auto* v = b.FunctionParam("v", ty.i32());
     a->SetParams({v});
     b.With(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
     mod.functions.Push(a);
@@ -2074,8 +1992,7 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramTest, For_ComplexBody_NoInit) {
     auto* a = b.Function("a", ty.bool_());
-    auto* v = b.FunctionParam(ty.i32());
-    mod.SetName(v, "v");
+    auto* v = b.FunctionParam("v", ty.i32());
     a->SetParams({v});
     b.With(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
     mod.functions.Push(a);
@@ -2126,8 +2043,7 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
     auto* a = b.Function("a", ty.bool_());
-    auto* v = b.FunctionParam(ty.i32());
-    mod.SetName(v, "v");
+    auto* v = b.FunctionParam("v", ty.i32());
     a->SetParams({v});
     b.With(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
     mod.functions.Push(a);
@@ -2176,8 +2092,7 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramTest, For_CallInInitCondCont) {
     auto* fn_n = b.Function("n", ty.i32());
-    auto* v = b.FunctionParam(ty.i32());
-    mod.SetName(v, "v");
+    auto* v = b.FunctionParam("v", ty.i32());
     fn_n->SetParams({v});
     b.With(fn_n->Block(), [&] { b.Return(fn_n, b.Add(ty.i32(), v, 1_i)); });
     mod.functions.Push(fn_n);
@@ -2243,8 +2158,7 @@ fn f() {
 
 TEST_F(IRToProgramTest, While_Cond) {
     auto* fn = b.Function("f", ty.void_());
-    auto* cond = b.FunctionParam(ty.bool_());
-    mod.SetName(cond, "cond");
+    auto* cond = b.FunctionParam("cond", ty.bool_());
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
@@ -2292,8 +2206,7 @@ fn f() {
 
 TEST_F(IRToProgramTest, While_IfBreak) {
     auto* fn = b.Function("f", ty.void_());
-    auto* cond = b.FunctionParam(ty.bool_());
-    mod.SetName(cond, "cond");
+    auto* cond = b.FunctionParam("cond", ty.bool_());
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
@@ -2323,8 +2236,7 @@ fn f(cond : bool) {
 
 TEST_F(IRToProgramTest, While_IfReturn) {
     auto* fn = b.Function("f", ty.void_());
-    auto* cond = b.FunctionParam(ty.bool_());
-    mod.SetName(cond, "cond");
+    auto* cond = b.FunctionParam("cond", ty.bool_());
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
@@ -2376,8 +2288,7 @@ fn f() {
 
 TEST_F(IRToProgramTest, Loop_IfBreak) {
     auto* fn = b.Function("f", ty.void_());
-    auto* cond = b.FunctionParam(ty.bool_());
-    mod.SetName(cond, "cond");
+    auto* cond = b.FunctionParam("cond", ty.bool_());
     fn->SetParams({cond});
     mod.functions.Push(fn);
 
@@ -2402,8 +2313,7 @@ fn f(cond : bool) {
 
 TEST_F(IRToProgramTest, Loop_IfReturn) {
     auto* fn = b.Function("f", ty.void_());
-    auto* cond = b.FunctionParam(ty.bool_());
-    mod.SetName(cond, "cond");
+    auto* cond = b.FunctionParam("cond", ty.bool_());
     fn->SetParams({cond});
     mod.functions.Push(fn);
 

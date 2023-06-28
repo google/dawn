@@ -84,6 +84,12 @@ ir::FunctionParam* Builder::FunctionParam(const type::Type* type) {
     return ir.values.Create<ir::FunctionParam>(type);
 }
 
+ir::FunctionParam* Builder::FunctionParam(std::string_view name, const type::Type* type) {
+    auto* param = ir.values.Create<ir::FunctionParam>(type);
+    ir.SetName(param, name);
+    return param;
+}
+
 ir::Unreachable* Builder::Unreachable() {
     return Append(ir.instructions.Create<ir::Unreachable>());
 }
