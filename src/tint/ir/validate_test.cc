@@ -562,7 +562,7 @@ TEST_F(IR_ValidateTest, If_ConditionIsNullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:8 error: if: condition is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:8 error: if: condition operand is undefined
     if undef [t: %b2, f: %b3] {  # if_1
        ^^^^^
 
@@ -748,9 +748,9 @@ TEST_F(IR_ValidateTest, Instruction_DeadOperand) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:41 error: instruction has undefined operand
+    EXPECT_EQ(res.Failure().str(), R"(:3:46 error: instruction has operand which is not alive
     %2:ptr<function, f32, read_write> = var, %3
-                                        ^^^
+                                             ^^
 
 :2:3 note: In block
   %b1 = block {
