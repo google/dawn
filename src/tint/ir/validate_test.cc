@@ -76,6 +76,31 @@ TEST_F(IR_ValidateTest, Function) {
     EXPECT_TRUE(res) << res.Failure().str();
 }
 
+TEST_F(IR_ValidateTest, Function_Duplicate) {
+    auto* f = b.Function("my_func", ty.void_());
+    // Function would auto-push by the builder, so this adds a duplicate
+    mod.functions.Push(f);
+
+    f->SetParams({b.FunctionParam(ty.i32()), b.FunctionParam(ty.f32())});
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(error: function 'my_func' added to module multiple times
+note: # Disassembly
+%my_func = func(%2:i32, %3:f32):void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+%my_func = func(%2:i32, %3:f32):void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidateTest, Block_NoTerminator) {
     b.Function("my_func", ty.void_());
 

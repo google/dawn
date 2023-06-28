@@ -66,12 +66,9 @@ class Validator {
         }
 
         if (diagnostics_.contains_errors()) {
-            // If a diassembly file was generated then one of the diagnostics referenced the
-            // disasembly. Emit the entire disassembly file at the end of the messages.
-            if (mod_.disassembly_file) {
-                diagnostics_.add_note(tint::diag::System::IR,
-                                      "# Disassembly\n" + mod_.disassembly_file->content.data, {});
-            }
+            DisassembleIfNeeded();
+            diagnostics_.add_note(tint::diag::System::IR,
+                                  "# Disassembly\n" + mod_.disassembly_file->content.data, {});
             return std::move(diagnostics_);
         }
         return Success{};
@@ -83,6 +80,7 @@ class Validator {
     Disassembler dis_{mod_};
 
     Block* current_block_ = nullptr;
+    utils::Hashset<Function*, 4> seen_functions_;
 
     void DisassembleIfNeeded() {
         if (mod_.disassembly_file) {
@@ -153,7 +151,7 @@ class Validator {
         diagnostics_.add_note(tint::diag::System::IR, std::move(note), src);
     }
 
-    // std::string Name(Value* v) { return mod_.NameOf(v).Name(); }
+    std::string Name(Value* v) { return mod_.NameOf(v).Name(); }
 
     void CheckRootBlock(Block* blk) {
         if (!blk) {
@@ -173,7 +171,13 @@ class Validator {
         }
     }
 
-    void CheckFunction(Function* func) { CheckBlock(func->Block()); }
+    void CheckFunction(Function* func) {
+        if (!seen_functions_.Add(func)) {
+            AddError("function '" + Name(func) + "' added to module multiple times");
+        }
+
+        CheckBlock(func->Block());
+    }
 
     void CheckBlock(Block* blk) {
         TINT_SCOPED_ASSIGNMENT(current_block_, blk);
