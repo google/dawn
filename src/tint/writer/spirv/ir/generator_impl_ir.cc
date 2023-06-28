@@ -43,6 +43,7 @@
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/transform/block_decorated_structs.h"
 #include "src/tint/ir/transform/merge_return.h"
+#include "src/tint/ir/transform/shader_io_spirv.h"
 #include "src/tint/ir/transform/var_for_dynamic_index.h"
 #include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
@@ -77,7 +78,10 @@ void Sanitize(ir::Module* module) {
     manager.Add<ir::transform::AddEmptyEntryPoint>();
     manager.Add<ir::transform::BlockDecoratedStructs>();
     manager.Add<ir::transform::MergeReturn>();
+    manager.Add<ir::transform::ShaderIOSpirv>();
     manager.Add<ir::transform::VarForDynamicIndex>();
+
+    data.Add<ir::transform::ShaderIO::Config>(ir::transform::ShaderIO::Config());
 
     transform::DataMap outputs;
     manager.Run(module, data, outputs);
@@ -87,8 +91,12 @@ SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
     switch (addrspace) {
         case builtin::AddressSpace::kFunction:
             return SpvStorageClassFunction;
+        case builtin::AddressSpace::kIn:
+            return SpvStorageClassInput;
         case builtin::AddressSpace::kPrivate:
             return SpvStorageClassPrivate;
+        case builtin::AddressSpace::kOut:
+            return SpvStorageClassOutput;
         case builtin::AddressSpace::kStorage:
             return SpvStorageClassStorageBuffer;
         case builtin::AddressSpace::kUniform:
@@ -142,6 +150,47 @@ bool GeneratorImplIr::Generate() {
     writer_.WriteModule(&module_);
 
     return true;
+}
+
+uint32_t GeneratorImplIr::Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace) {
+    switch (builtin) {
+        case builtin::BuiltinValue::kPointSize:
+            return SpvBuiltInPointSize;
+        case builtin::BuiltinValue::kFragDepth:
+            return SpvBuiltInFragDepth;
+        case builtin::BuiltinValue::kFrontFacing:
+            return SpvBuiltInFrontFacing;
+        case builtin::BuiltinValue::kGlobalInvocationId:
+            return SpvBuiltInGlobalInvocationId;
+        case builtin::BuiltinValue::kInstanceIndex:
+            return SpvBuiltInInstanceIndex;
+        case builtin::BuiltinValue::kLocalInvocationId:
+            return SpvBuiltInLocalInvocationId;
+        case builtin::BuiltinValue::kLocalInvocationIndex:
+            return SpvBuiltInLocalInvocationIndex;
+        case builtin::BuiltinValue::kNumWorkgroups:
+            return SpvBuiltInNumWorkgroups;
+        case builtin::BuiltinValue::kPosition:
+            if (addrspace == builtin::AddressSpace::kOut) {
+                // Vertex output.
+                return SpvBuiltInPosition;
+            } else {
+                // Fragment input.
+                return SpvBuiltInFragCoord;
+            }
+        case builtin::BuiltinValue::kSampleIndex:
+            module_.PushCapability(SpvCapabilitySampleRateShading);
+            return SpvBuiltInSampleId;
+        case builtin::BuiltinValue::kSampleMask:
+            return SpvBuiltInSampleMask;
+        case builtin::BuiltinValue::kVertexIndex:
+            return SpvBuiltInVertexIndex;
+        case builtin::BuiltinValue::kWorkgroupId:
+            return SpvBuiltInWorkgroupId;
+        case builtin::BuiltinValue::kUndefined:
+            return SpvBuiltInMax;
+    }
+    return SpvBuiltInMax;
 }
 
 uint32_t GeneratorImplIr::Constant(ir::Constant* constant) {
@@ -218,7 +267,8 @@ uint32_t GeneratorImplIr::ConstantNull(const type::Type* type) {
     });
 }
 
-uint32_t GeneratorImplIr::Type(const type::Type* ty) {
+uint32_t GeneratorImplIr::Type(const type::Type* ty,
+                               builtin::AddressSpace addrspace /* = kUndefined */) {
     return types_.GetOrCreate(ty, [&] {
         auto id = module_.NextId();
         Switch(
@@ -261,11 +311,11 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty) {
                                   {id, U32Operand(SpvDecorationArrayStride), arr->Stride()});
             },
             [&](const type::Pointer* ptr) {
-                module_.PushType(
-                    spv::Op::OpTypePointer,
-                    {id, U32Operand(StorageClass(ptr->AddressSpace())), Type(ptr->StoreType())});
+                module_.PushType(spv::Op::OpTypePointer,
+                                 {id, U32Operand(StorageClass(ptr->AddressSpace())),
+                                  Type(ptr->StoreType(), ptr->AddressSpace())});
             },
-            [&](const type::Struct* str) { EmitStructType(id, str); },
+            [&](const type::Struct* str) { EmitStructType(id, str, addrspace); },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled type: " << ty->FriendlyName();
             });
@@ -288,7 +338,9 @@ uint32_t GeneratorImplIr::Label(ir::Block* block) {
     return block_labels_.GetOrCreate(block, [&] { return module_.NextId(); });
 }
 
-void GeneratorImplIr::EmitStructType(uint32_t id, const type::Struct* str) {
+void GeneratorImplIr::EmitStructType(uint32_t id,
+                                     const type::Struct* str,
+                                     builtin::AddressSpace addrspace /* = kUndefined */) {
     // Helper to return `type` or a potentially nested array element type within `type` as a matrix
     // type, or nullptr if no such matrix type is present.
     auto get_nested_matrix_type = [&](const type::Type* type) {
@@ -306,6 +358,56 @@ void GeneratorImplIr::EmitStructType(uint32_t id, const type::Struct* str) {
         module_.PushAnnot(
             spv::Op::OpMemberDecorate,
             {operands[0], member->Index(), U32Operand(SpvDecorationOffset), member->Offset()});
+
+        // Generate shader IO decorations.
+        const auto& attrs = member->Attributes();
+        if (attrs.location) {
+            module_.PushAnnot(
+                spv::Op::OpMemberDecorate,
+                {operands[0], member->Index(), U32Operand(SpvDecorationLocation), *attrs.location});
+            if (attrs.interpolation) {
+                switch (attrs.interpolation->type) {
+                    case builtin::InterpolationType::kLinear:
+                        module_.PushAnnot(
+                            spv::Op::OpMemberDecorate,
+                            {operands[0], member->Index(), U32Operand(SpvDecorationNoPerspective)});
+                        break;
+                    case builtin::InterpolationType::kFlat:
+                        module_.PushAnnot(
+                            spv::Op::OpMemberDecorate,
+                            {operands[0], member->Index(), U32Operand(SpvDecorationFlat)});
+                        break;
+                    case builtin::InterpolationType::kPerspective:
+                    case builtin::InterpolationType::kUndefined:
+                        break;
+                }
+                switch (attrs.interpolation->sampling) {
+                    case builtin::InterpolationSampling::kCentroid:
+                        module_.PushAnnot(
+                            spv::Op::OpMemberDecorate,
+                            {operands[0], member->Index(), U32Operand(SpvDecorationCentroid)});
+                        break;
+                    case builtin::InterpolationSampling::kSample:
+                        module_.PushCapability(SpvCapabilitySampleRateShading);
+                        module_.PushAnnot(
+                            spv::Op::OpMemberDecorate,
+                            {operands[0], member->Index(), U32Operand(SpvDecorationSample)});
+                        break;
+                    case builtin::InterpolationSampling::kCenter:
+                    case builtin::InterpolationSampling::kUndefined:
+                        break;
+                }
+            }
+        }
+        if (attrs.builtin) {
+            module_.PushAnnot(spv::Op::OpMemberDecorate,
+                              {operands[0], member->Index(), U32Operand(SpvDecorationBuiltIn),
+                               Builtin(*attrs.builtin, addrspace)});
+        }
+        if (attrs.invariant) {
+            module_.PushAnnot(spv::Op::OpMemberDecorate,
+                              {operands[0], member->Index(), U32Operand(SpvDecorationInvariant)});
+        }
 
         // Emit matrix layout decorations if necessary.
         if (auto* matrix_type = get_nested_matrix_type(member->Type())) {
@@ -404,7 +506,6 @@ void GeneratorImplIr::EmitEntryPoint(ir::Function* func, uint32_t id) {
             stage = SpvExecutionModelFragment;
             module_.PushExecutionMode(spv::Op::OpExecutionMode,
                                       {id, U32Operand(SpvExecutionModeOriginUpperLeft)});
-            // TODO(jrprice): Add DepthReplacing execution mode if FragDepth is used.
             break;
         }
         case ir::Function::PipelineStage::kVertex: {
@@ -416,9 +517,52 @@ void GeneratorImplIr::EmitEntryPoint(ir::Function* func, uint32_t id) {
             return;
     }
 
-    // TODO(jrprice): Add the interface list of all referenced global variables.
-    module_.PushEntryPoint(spv::Op::OpEntryPoint,
-                           {U32Operand(stage), id, ir_->NameOf(func).Name()});
+    OperandList operands = {U32Operand(stage), id, ir_->NameOf(func).Name()};
+
+    // Add the list of all referenced shader IO variables.
+    if (ir_->root_block) {
+        for (auto* global : *ir_->root_block) {
+            auto* var = global->As<ir::Var>();
+            if (!var) {
+                continue;
+            }
+
+            auto* ptr = var->Result()->Type()->As<type::Pointer>();
+            if (!(ptr->AddressSpace() == builtin::AddressSpace::kIn ||
+                  ptr->AddressSpace() == builtin::AddressSpace::kOut)) {
+                continue;
+            }
+
+            // Determine if this IO variable is used by the entry point.
+            bool used = false;
+            for (const auto& use : var->Result()->Usages()) {
+                auto* block = use.instruction->Block();
+                while (block->Parent()) {
+                    block = block->Parent()->Block();
+                }
+                if (block == func->Block()) {
+                    used = true;
+                    break;
+                }
+            }
+            if (!used) {
+                continue;
+            }
+            operands.push_back(Value(var));
+
+            // Add the `DepthReplacing` execution mode if `frag_depth` is used.
+            if (auto* str = ptr->StoreType()->As<type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (member->Attributes().builtin == builtin::BuiltinValue::kFragDepth) {
+                        module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                                  {id, U32Operand(SpvExecutionModeDepthReplacing)});
+                    }
+                }
+            }
+        }
+    }
+
+    module_.PushEntryPoint(spv::Op::OpEntryPoint, operands);
 }
 
 void GeneratorImplIr::EmitRootBlock(ir::Block* root_block) {
@@ -932,6 +1076,11 @@ void GeneratorImplIr::EmitVar(ir::Var* var) {
             }
             break;
         }
+        case builtin::AddressSpace::kIn: {
+            TINT_ASSERT(Writer, !current_function_);
+            module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassInput)});
+            break;
+        }
         case builtin::AddressSpace::kPrivate: {
             TINT_ASSERT(Writer, !current_function_);
             OperandList operands = {ty, id, U32Operand(SpvStorageClassPrivate)};
@@ -940,6 +1089,11 @@ void GeneratorImplIr::EmitVar(ir::Var* var) {
                 operands.push_back(Value(var->Initializer()));
             }
             module_.PushType(spv::Op::OpVariable, operands);
+            break;
+        }
+        case builtin::AddressSpace::kOut: {
+            TINT_ASSERT(Writer, !current_function_);
+            module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassOutput)});
             break;
         }
         case builtin::AddressSpace::kStorage:

@@ -79,6 +79,9 @@ class Function : public utils::Castable<Function, Value> {
     /// @param z the z size
     void SetWorkgroupSize(uint32_t x, uint32_t y, uint32_t z) { workgroup_size_ = {x, y, z}; }
 
+    /// Clears the workgroup size.
+    void ClearWorkgroupSize() { workgroup_size_ = {}; }
+
     /// @returns the workgroup size information
     std::optional<std::array<uint32_t, 3>> WorkgroupSize() { return workgroup_size_; }
 
@@ -93,6 +96,8 @@ class Function : public utils::Castable<Function, Value> {
     }
     /// @returns the return builtin attribute
     std::optional<enum ReturnBuiltin> ReturnBuiltin() { return return_.builtin; }
+    /// Clears the return builtin attribute.
+    void ClearReturnBuiltin() { return_.builtin = {}; }
 
     /// Sets the return location
     /// @param loc the location to set
@@ -102,6 +107,8 @@ class Function : public utils::Castable<Function, Value> {
     }
     /// @returns the return location
     std::optional<Location> ReturnLocation() { return return_.location; }
+    /// Clears the return location attribute.
+    void ClearReturnLocation() { return_.location = {}; }
 
     /// Sets the return as invariant
     /// @param val the invariant value to set

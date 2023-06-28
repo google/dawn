@@ -70,6 +70,8 @@ class FunctionParam : public utils::Castable<FunctionParam, Value> {
     }
     /// @returns the builtin set for the parameter
     std::optional<FunctionParam::Builtin> Builtin() { return builtin_; }
+    /// Clears the builtin attribute.
+    void ClearBuiltin() { builtin_ = {}; }
 
     /// Sets the parameter as invariant
     /// @param val the value to set for invariant
@@ -85,13 +87,15 @@ class FunctionParam : public utils::Castable<FunctionParam, Value> {
     }
     /// @returns the location if `Attributes` contains `kLocation`
     std::optional<struct Location> Location() { return location_; }
+    /// Clears the location attribute.
+    void ClearLocation() { location_ = {}; }
 
     /// Sets the binding point
     /// @param group the group
     /// @param binding the binding
     void SetBindingPoint(uint32_t group, uint32_t binding) { binding_point_ = {group, binding}; }
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
-    std::optional<struct BindingPoint> BindingPoint() { return binding_point_; }
+    std::optional<struct BindingPoint>& BindingPoint() { return binding_point_; }
 
   private:
     const type::Type* type_ = nullptr;

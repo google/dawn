@@ -429,13 +429,13 @@ class Manager final {
     /// @param name the name of the structure
     /// @param members the list of structure member descriptors
     /// @returns the structure type
-    const type::Struct* Struct(Symbol name, utils::VectorRef<StructMemberDesc> members);
+    type::Struct* Struct(Symbol name, utils::VectorRef<StructMemberDesc> members);
 
     /// Create a new structure declaration.
     /// @param name the name of the structure
     /// @param members the list of structure member descriptors
     /// @returns the structure type
-    const type::Struct* Struct(Symbol name, std::initializer_list<StructMemberDesc> members) {
+    type::Struct* Struct(Symbol name, std::initializer_list<StructMemberDesc> members) {
         return Struct(name, utils::Vector<StructMemberDesc, 4>(members));
     }
 

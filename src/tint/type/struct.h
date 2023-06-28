@@ -15,11 +15,11 @@
 #ifndef SRC_TINT_TYPE_STRUCT_H_
 #define SRC_TINT_TYPE_STRUCT_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <unordered_set>
+#include <utility>
 
 #include "src/tint/builtin/address_space.h"
 #include "src/tint/builtin/interpolation.h"
@@ -245,6 +245,10 @@ class StructMember : public utils::Castable<StructMember, Node> {
     /// @returns the optional attributes
     const StructMemberAttributes& Attributes() const { return attributes_; }
 
+    /// Set the attributes of the struct member.
+    /// @param attributes the new attributes
+    void SetAttributes(StructMemberAttributes&& attributes) { attributes_ = std::move(attributes); }
+
     /// @param ctx the clone context
     /// @returns a clone of this struct member
     StructMember* Clone(CloneContext& ctx) const;
@@ -257,7 +261,7 @@ class StructMember : public utils::Castable<StructMember, Node> {
     const uint32_t offset_;
     const uint32_t align_;
     const uint32_t size_;
-    const StructMemberAttributes attributes_;
+    StructMemberAttributes attributes_;
 };
 
 }  // namespace tint::type

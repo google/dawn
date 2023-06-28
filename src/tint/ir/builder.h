@@ -574,6 +574,11 @@ class Builder {
     /// @returns the instruction
     template <typename ARG>
     ir::Return* Return(ir::Function* func, ARG&& value) {
+        if constexpr (std::is_same_v<std::decay_t<ARG>, ir::Value*>) {
+            if (value == nullptr) {
+                return Append(ir.instructions.Create<ir::Return>(func));
+            }
+        }
         return Append(ir.instructions.Create<ir::Return>(func, Value(std::forward<ARG>(value))));
     }
 

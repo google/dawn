@@ -92,8 +92,10 @@ class GeneratorImplIr {
 
     /// Get the result ID of the type `ty`, emitting a type declaration instruction if necessary.
     /// @param ty the type to get the ID for
+    /// @param addrspace the optional address space that this type is being used for
     /// @returns the result ID of the type
-    uint32_t Type(const type::Type* ty);
+    uint32_t Type(const type::Type* ty,
+                  builtin::AddressSpace addrspace = builtin::AddressSpace::kUndefined);
 
     /// Get the result ID of the value `value`, emitting its instruction if necessary.
     /// @param value the value to get the ID for
@@ -112,8 +114,11 @@ class GeneratorImplIr {
 
     /// Emit a struct type.
     /// @param id the result ID to use
+    /// @param addrspace the optional address space that this type is being used for
     /// @param str the struct type to emit
-    void EmitStructType(uint32_t id, const type::Struct* str);
+    void EmitStructType(uint32_t id,
+                        const type::Struct* str,
+                        builtin::AddressSpace addrspace = builtin::AddressSpace::kUndefined);
 
     /// Emit a function.
     /// @param func the function to emit
@@ -193,6 +198,13 @@ class GeneratorImplIr {
     void EmitExitPhis(ir::ControlInstruction* inst);
 
   private:
+    /// Convert a builtin to the corresponding SPIR-V enum value, taking into account the target
+    /// address space. Adds any capabilities needed for the builtin.
+    /// @param builtin the builtin to convert
+    /// @param addrspace the address space the builtin is being used in
+    /// @returns the enum value of the corresponding SPIR-V builtin
+    uint32_t Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace);
+
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
     /// @returns the result ID of the constant
