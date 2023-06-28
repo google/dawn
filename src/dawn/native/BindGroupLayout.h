@@ -21,7 +21,6 @@
 #include <string>
 
 #include "dawn/common/Constants.h"
-#include "dawn/common/Math.h"
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/common/ityp_vector.h"
