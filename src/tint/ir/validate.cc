@@ -314,10 +314,10 @@ class Validator {
 
     void CheckBinary(ir::Binary* b) {
         if (b->LHS() == nullptr) {
-            AddError(b, "binary: left operand is undefined");
+            AddError(b, Binary::kLhsOperandOffset, "binary: left operand is undefined");
         }
         if (b->RHS() == nullptr) {
-            AddError(b, "binary: right operand is undefined");
+            AddError(b, Binary::kRhsOperandOffset, "binary: right operand is undefined");
         }
         if (b->Result() == nullptr) {
             AddError(b, "binary: result is undefined");

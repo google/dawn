@@ -767,9 +767,9 @@ TEST_F(IR_ValidateTest, Binary_LHS_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: binary: left operand is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:18 error: binary: left operand is undefined
     %2:i32 = add undef, 2i
-    ^^^^^^^^^^^^^^^^^^^^^^
+                 ^^^^^
 
 :2:3 note: In block
   %b1 = block {
@@ -795,9 +795,9 @@ TEST_F(IR_ValidateTest, Binary_RHS_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: binary: right operand is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:22 error: binary: right operand is undefined
     %2:i32 = add 2i, undef
-    ^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^
 
 :2:3 note: In block
   %b1 = block {

@@ -738,9 +738,9 @@ void Disassembler::EmitBinary(Binary* b) {
             break;
     }
     out_ << " ";
-    EmitValue(b->LHS());
+    EmitOperand(b, b->LHS(), Binary::kLhsOperandOffset);
     out_ << ", ";
-    EmitValue(b->RHS());
+    EmitOperand(b, b->RHS(), Binary::kRhsOperandOffset);
 
     sm.Store(b);
     EmitLine();
