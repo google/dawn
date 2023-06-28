@@ -27,6 +27,10 @@
 
 namespace tint::writer::spirv {
 
+// Helper macro to check whether the SPIR-V output contains an instruction, dumping the full output
+// if the instruction was not present.
+#define EXPECT_INST(inst) ASSERT_THAT(output_, testing::HasSubstr(inst)) << output_
+
 /// The element type of a test.
 enum TestElementType {
     kBool,
@@ -83,7 +87,9 @@ class SpvGeneratorTestHelperBase : public BASE {
             return false;
         }
 
-        output_ = Disassemble(generator_.Result(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
+        output_ = Disassemble(generator_.Result(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
+                                                       SPV_BINARY_TO_TEXT_OPTION_INDENT |
+                                                       SPV_BINARY_TO_TEXT_OPTION_COMMENT);
         return true;
     }
 

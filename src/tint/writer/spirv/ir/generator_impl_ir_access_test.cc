@@ -32,7 +32,7 @@ TEST_F(SpvGeneratorImplTest, Access_Array_Value_ConstantIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_, testing::HasSubstr(R"(%result = OpCompositeExtract %int %arr 1)"));
+    EXPECT_INST("%result = OpCompositeExtract %int %arr 1");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Array_Pointer_ConstantIndex) {
@@ -45,8 +45,7 @@ TEST_F(SpvGeneratorImplTest, Access_Array_Pointer_ConstantIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_,
-                testing::HasSubstr(R"(%result = OpAccessChain %_ptr_Function_int %arr %uint_1)"));
+    EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %arr %uint_1");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Array_Pointer_DynamicIndex) {
@@ -61,8 +60,7 @@ TEST_F(SpvGeneratorImplTest, Access_Array_Pointer_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_,
-                testing::HasSubstr(R"(%result = OpAccessChain %_ptr_Function_int %arr %idx)"));
+    EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %arr %idx");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Matrix_Value_ConstantIndex) {
@@ -78,10 +76,8 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Value_ConstantIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_,
-                testing::HasSubstr(R"(%result_vector = OpCompositeExtract %v2float %mat 1)"));
-    EXPECT_THAT(output_,
-                testing::HasSubstr(R"(%result_scalar = OpCompositeExtract %float %mat 1 0)"));
+    EXPECT_INST("%result_vector = OpCompositeExtract %v2float %mat 1");
+    EXPECT_INST("%result_scalar = OpCompositeExtract %float %mat 1 0");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_ConstantIndex) {
@@ -96,12 +92,8 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_ConstantIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_,
-                testing::HasSubstr(
-                    R"(%result_vector = OpAccessChain %_ptr_Function_v2float %mat %uint_1)"));
-    EXPECT_THAT(output_,
-                testing::HasSubstr(
-                    R"(%result_scalar = OpAccessChain %_ptr_Function_float %mat %uint_1 %uint_0)"));
+    EXPECT_INST("%result_vector = OpAccessChain %_ptr_Function_v2float %mat %uint_1");
+    EXPECT_INST("%result_scalar = OpAccessChain %_ptr_Function_float %mat %uint_1 %uint_0");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_DynamicIndex) {
@@ -118,11 +110,8 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_, testing::HasSubstr(
-                             R"(%result_vector = OpAccessChain %_ptr_Function_v2float %mat %idx)"));
-    EXPECT_THAT(output_,
-                testing::HasSubstr(
-                    R"(%result_scalar = OpAccessChain %_ptr_Function_float %mat %idx %idx)"));
+    EXPECT_INST("%result_vector = OpAccessChain %_ptr_Function_v2float %mat %idx");
+    EXPECT_INST("%result_scalar = OpAccessChain %_ptr_Function_float %mat %idx %idx");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Vector_Value_ConstantIndex) {
@@ -136,7 +125,7 @@ TEST_F(SpvGeneratorImplTest, Access_Vector_Value_ConstantIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_, testing::HasSubstr(R"(%result = OpCompositeExtract %int %vec 1)"));
+    EXPECT_INST("%result = OpCompositeExtract %int %vec 1");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Vector_Value_DynamicIndex) {
@@ -151,7 +140,7 @@ TEST_F(SpvGeneratorImplTest, Access_Vector_Value_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_, testing::HasSubstr(R"(%result = OpVectorExtractDynamic %int %vec %idx)"));
+    EXPECT_INST("%result = OpVectorExtractDynamic %int %vec %idx");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Vector_Pointer_ConstantIndex) {
@@ -164,8 +153,7 @@ TEST_F(SpvGeneratorImplTest, Access_Vector_Pointer_ConstantIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_,
-                testing::HasSubstr(R"(%result = OpAccessChain %_ptr_Function_int %vec %uint_1)"));
+    EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %vec %uint_1");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Vector_Pointer_DynamicIndex) {
@@ -180,8 +168,7 @@ TEST_F(SpvGeneratorImplTest, Access_Vector_Pointer_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_,
-                testing::HasSubstr(R"(%result = OpAccessChain %_ptr_Function_int %vec %idx)"));
+    EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %vec %idx");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_NestedVector_Value_DynamicIndex) {
@@ -196,8 +183,8 @@ TEST_F(SpvGeneratorImplTest, Access_NestedVector_Value_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_, testing::HasSubstr(R"(%14 = OpCompositeExtract %v4int %arr 1 2)"));
-    EXPECT_THAT(output_, testing::HasSubstr(R"(%result = OpVectorExtractDynamic %int %14 %idx)"));
+    EXPECT_INST("%14 = OpCompositeExtract %v4int %arr 1 2");
+    EXPECT_INST("%result = OpVectorExtractDynamic %int %14 %idx");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Struct_Value_ConstantIndex) {
@@ -218,8 +205,8 @@ TEST_F(SpvGeneratorImplTest, Access_Struct_Value_ConstantIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_, testing::HasSubstr(R"(%result_a = OpCompositeExtract %float %str 0)"));
-    EXPECT_THAT(output_, testing::HasSubstr(R"(%result_b = OpCompositeExtract %int %str 1 2)"));
+    EXPECT_INST("%result_a = OpCompositeExtract %float %str 0");
+    EXPECT_INST("%result_b = OpCompositeExtract %int %str 1 2");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Struct_Pointer_ConstantIndex) {
@@ -239,11 +226,8 @@ TEST_F(SpvGeneratorImplTest, Access_Struct_Pointer_ConstantIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error();
-    EXPECT_THAT(output_, testing::HasSubstr(
-                             R"(%result_a = OpAccessChain %_ptr_Function_float %str %uint_0)"));
-    EXPECT_THAT(
-        output_,
-        testing::HasSubstr(R"(%result_b = OpAccessChain %_ptr_Function_int %str %uint_1 %uint_2)"));
+    EXPECT_INST("%result_a = OpAccessChain %_ptr_Function_float %str %uint_0");
+    EXPECT_INST("%result_b = OpAccessChain %_ptr_Function_int %str %uint_1 %uint_2");
 }
 
 }  // namespace
