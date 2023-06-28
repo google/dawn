@@ -32,7 +32,6 @@ using IR_BlockDecoratedStructsTest = TransformTest;
 TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
     auto* func = b.Function("foo", ty.void_());
     func->Block()->Append(b.Return(func));
-    mod.functions.Push(func);
 
     auto* expect = R"(
 %foo = func():void -> %b1 {
@@ -57,7 +56,6 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
     auto* block = func->Block();
     auto* load = block->Append(b.Load(buffer));
     block->Append(b.Return(func, load));
-    mod.functions.Push(func);
 
     auto* expect = R"(
 tint_symbol_1 = struct @align(4), @block {
@@ -90,7 +88,6 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Storage) {
     auto* func = b.Function("foo", ty.void_());
     func->Block()->Append(b.Store(buffer, 42_i));
     func->Block()->Append(b.Return(func));
-    mod.functions.Push(func);
 
     auto* expect = R"(
 tint_symbol_1 = struct @align(4), @block {
@@ -127,8 +124,6 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
         b.Store(access, 42_i);
         b.Return(func);
     });
-
-    mod.functions.Push(func);
 
     auto* expect = R"(
 tint_symbol_1 = struct @align(4), @block {
@@ -177,8 +172,6 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
         b.Return(func);
     });
 
-    mod.functions.Push(func);
-
     auto* expect = R"(
 MyStruct = struct @align(4) {
   i:i32 @offset(0)
@@ -226,7 +219,6 @@ TEST_F(IR_BlockDecoratedStructsTest, StructUsedElsewhere) {
     auto* func = b.Function("foo", ty.void_());
     func->Block()->Append(b.Store(buffer, private_var));
     func->Block()->Append(b.Return(func));
-    mod.functions.Push(func);
 
     auto* expect = R"(
 MyStruct = struct @align(4) {
@@ -275,7 +267,6 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     auto* load_c = block->Append(b.Load(buffer_c));
     block->Append(b.Store(buffer_a, b.Add(ty.i32(), load_b, load_c)));
     block->Append(b.Return(func));
-    mod.functions.Push(func);
 
     auto* expect = R"(
 tint_symbol_1 = struct @align(4), @block {

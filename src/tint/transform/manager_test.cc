@@ -52,7 +52,6 @@ class IR_AddFunction final : public ir::transform::Transform {
         ir::Builder builder(*mod);
         auto* func = builder.Function("ir_func", mod->Types().Get<type::Void>());
         func->Block()->Append(builder.Return(func));
-        mod->functions.Push(func);
     }
 };
 #endif  // TINT_BUILD_IR
@@ -69,7 +68,6 @@ ir::Module MakeIR() {
     ir::Builder builder(mod);
     auto* func = builder.Function("main", mod.Types().Get<type::Void>());
     func->Block()->Append(builder.Return(func));
-    builder.ir.functions.Push(func);
     return mod;
 }
 #endif  // TINT_BUILD_IR

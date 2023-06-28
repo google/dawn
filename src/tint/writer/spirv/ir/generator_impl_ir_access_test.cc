@@ -393,7 +393,7 @@ TEST_F(SpvGeneratorImplTest_Access, Struct_Value_ConstantIndex) {
     func->SetParams({str_val});
 
     b.With(func->Block(), [&] {
-        b.Access(ty.i32(), str_val, 1_u);
+        b.Access(ty.f32(), str_val, 0_u);
         b.Access(ty.i32(), str_val, 1_u, 2_u);
         b.Return(func);
     });
@@ -416,7 +416,7 @@ OpMemberDecorate %3 1 Offset 16
 %1 = OpFunction %2 None %8
 %7 = OpFunctionParameter %3
 %9 = OpLabel
-%10 = OpCompositeExtract %6 %7 1
+%10 = OpCompositeExtract %4 %7 0
 %11 = OpCompositeExtract %6 %7 1 2
 OpReturn
 OpFunctionEnd
@@ -433,7 +433,7 @@ TEST_F(SpvGeneratorImplTest_Access, Struct_Pointer_ConstantIndex) {
 
     b.With(func->Block(), [&] {
         auto* str_var = b.Var(ty.ptr(function, str, read_write));
-        b.Access(ty.ptr<function, i32>(), str_var, 1_u);
+        b.Access(ty.ptr<function, f32>(), str_var, 0_u);
         b.Access(ty.ptr<function, i32>(), str_var, 1_u, 2_u);
         b.Return(func);
     });
@@ -454,15 +454,17 @@ OpMemberDecorate %7 1 Offset 16
 %9 = OpTypeVector %10 4
 %7 = OpTypeStruct %8 %9
 %6 = OpTypePointer Function %7
-%12 = OpTypePointer Function %10
+%12 = OpTypePointer Function %8
 %14 = OpTypeInt 32 0
-%13 = OpConstant %14 1
-%16 = OpConstant %14 2
+%13 = OpConstant %14 0
+%16 = OpTypePointer Function %10
+%17 = OpConstant %14 1
+%18 = OpConstant %14 2
 %1 = OpFunction %2 None %3
 %4 = OpLabel
 %5 = OpVariable %6 Function
 %11 = OpAccessChain %12 %5 %13
-%15 = OpAccessChain %12 %5 %13 %16
+%15 = OpAccessChain %16 %5 %17 %18
 OpReturn
 OpFunctionEnd
 )");

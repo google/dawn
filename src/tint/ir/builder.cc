@@ -50,6 +50,7 @@ Function* Builder::Function(std::string_view name,
     auto* ir_func = ir.values.Create<ir::Function>(return_type, stage, wg_size);
     ir_func->SetBlock(Block());
     ir.SetName(ir_func, name);
+    ir.functions.Push(ir_func);
     return ir_func;
 }
 

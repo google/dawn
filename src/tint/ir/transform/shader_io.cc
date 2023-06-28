@@ -130,7 +130,6 @@ struct ShaderIO::State {
         if (wgsize) {
             ep->SetWorkgroupSize((*wgsize)[0], (*wgsize)[1], (*wgsize)[2]);
         }
-        ir->functions.Push(ep);
         auto wrapper = b.With(ep->Block());
 
         // Call the original function, passing it the inputs and capturing its return value.

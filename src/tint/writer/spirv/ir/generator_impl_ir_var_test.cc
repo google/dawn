@@ -269,7 +269,6 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, PrivateVar_LoadAndStore) {
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kFragment);
-    mod.functions.Push(func);
 
     auto* store_ty = ty.i32();
     auto* v = b.Var(ty.ptr(private_, store_ty));
@@ -353,7 +352,6 @@ OpFunctionEnd
 TEST_F(SpvGeneratorImplTest, WorkgroupVar_LoadAndStore) {
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
-    mod.functions.Push(func);
 
     auto* store_ty = ty.i32();
     auto* v = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, store_ty)));
@@ -479,7 +477,6 @@ TEST_F(SpvGeneratorImplTest, StorageVar_LoadAndStore) {
 
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
-    mod.functions.Push(func);
 
     b.With(func->Block(), [&] {
         b.Load(v);
@@ -591,7 +588,6 @@ TEST_F(SpvGeneratorImplTest, UniformVar_Load) {
 
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
-    mod.functions.Push(func);
 
     b.With(func->Block(), [&] {
         b.Load(v);

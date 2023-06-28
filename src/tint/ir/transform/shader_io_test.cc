@@ -30,7 +30,6 @@ using IR_ShaderIOTest = TransformTest;
 TEST_F(IR_ShaderIOTest, NoInputsOrOutputs) {
     auto* ep = b.Function("foo", ty.void_());
     ep->SetStage(Function::PipelineStage::kCompute);
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {  //
         b.Return(ep);
@@ -69,7 +68,6 @@ TEST_F(IR_ShaderIOTest, Parameters_NonStruct_Spirv) {
 
     ep->SetParams({front_facing, position, color1, color2});
     ep->SetStage(Function::PipelineStage::kFragment);
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -182,7 +180,6 @@ TEST_F(IR_ShaderIOTest, Parameters_Struct_Spirv) {
     auto* str_param = b.FunctionParam("inputs", str_ty);
     ep->SetParams({str_param});
     ep->SetStage(Function::PipelineStage::kFragment);
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {
         auto* ifelse = b.If(b.Access(ty.bool_(), str_param, 0_i));
@@ -311,7 +308,6 @@ TEST_F(IR_ShaderIOTest, Parameters_Mixed_Spirv) {
 
     ep->SetParams({front_facing, str_param, color2});
     ep->SetStage(Function::PipelineStage::kFragment);
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -411,7 +407,6 @@ TEST_F(IR_ShaderIOTest, ReturnValue_NonStructBuiltin_Spirv) {
     ep->SetReturnBuiltin(Function::ReturnBuiltin::kPosition);
     ep->SetReturnInvariant(true);
     ep->SetStage(Function::PipelineStage::kVertex);
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {  //
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
@@ -463,7 +458,6 @@ TEST_F(IR_ShaderIOTest, ReturnValue_NonStructLocation_Spirv) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
     ep->SetReturnLocation(1u, {});
     ep->SetStage(Function::PipelineStage::kFragment);
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {  //
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
@@ -539,7 +533,6 @@ TEST_F(IR_ShaderIOTest, ReturnValue_Struct_Spirv) {
 
     auto* ep = b.Function("foo", str_ty);
     ep->SetStage(Function::PipelineStage::kVertex);
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {  //
         b.Return(ep, b.Construct(str_ty, b.Construct(ty.vec4<f32>(), 0_f), 0.25_f, 0.75_f));
@@ -634,7 +627,6 @@ TEST_F(IR_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
     {
         auto* ep = b.Function("vert", str_ty);
         ep->SetStage(Function::PipelineStage::kVertex);
-        mod.functions.Push(ep);
 
         b.With(ep->Block(), [&] {  //
             auto* position = b.Construct(vec4f, 0_f);
@@ -649,7 +641,6 @@ TEST_F(IR_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
         auto* inputs = b.FunctionParam("inputs", str_ty);
         ep->SetStage(Function::PipelineStage::kFragment);
         ep->SetParams({inputs});
-        mod.functions.Push(ep);
 
         b.With(ep->Block(), [&] {  //
             auto* position = b.Access(vec4f, inputs, 0_u);
@@ -787,7 +778,6 @@ TEST_F(IR_ShaderIOTest, Struct_SharedWithBuffer_Spirv) {
 
     auto* ep = b.Function("vert", str_ty);
     ep->SetStage(Function::PipelineStage::kVertex);
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {  //
         b.Return(ep, b.Load(buffer));
@@ -881,7 +871,6 @@ TEST_F(IR_ShaderIOTest, SampleMask_Spirv) {
     auto* ep = b.Function("foo", str_ty);
     ep->SetStage(Function::PipelineStage::kFragment);
     ep->SetParams({mask_in});
-    mod.functions.Push(ep);
 
     b.With(ep->Block(), [&] {  //
         b.Return(ep, b.Construct(str_ty, 0.5_f, mask_in));

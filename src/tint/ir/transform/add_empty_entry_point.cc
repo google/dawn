@@ -38,7 +38,6 @@ void AddEmptyEntryPoint::Run(ir::Module* ir, const DataMap&, DataMap&) const {
     auto* ep = builder.Function("unused_entry_point", ir->Types().void_(),
                                 Function::PipelineStage::kCompute, std::array{1u, 1u, 1u});
     ep->Block()->Append(builder.Return(ep));
-    ir->functions.Push(ep);
 }
 
 }  // namespace tint::ir::transform

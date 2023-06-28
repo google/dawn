@@ -68,7 +68,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Function) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     f->SetParams({b.FunctionParam(ty.i32()), b.FunctionParam(ty.f32())});
     f->Block()->Append(b.Return(f));
@@ -78,8 +77,7 @@ TEST_F(IR_ValidateTest, Function) {
 }
 
 TEST_F(IR_ValidateTest, Block_NoTerminator) {
-    auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
+    b.Function("my_func", ty.void_());
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
@@ -99,7 +97,6 @@ TEST_F(IR_ValidateTest, Valid_Access_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.mat3x2<f32>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.f32(), obj, 1_u, 0_u);
@@ -114,7 +111,6 @@ TEST_F(IR_ValidateTest, Valid_Access_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, mat3x2<f32>>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.ptr<private_, f32>(), obj, 1_u, 0_u);
@@ -129,7 +125,6 @@ TEST_F(IR_ValidateTest, Access_NegativeIndex) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.vec3<f32>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.f32(), obj, -1_i);
@@ -160,7 +155,6 @@ TEST_F(IR_ValidateTest, Access_OOB_Index_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.mat3x2<f32>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.f32(), obj, 1_u, 3_u);
@@ -195,7 +189,6 @@ TEST_F(IR_ValidateTest, Access_OOB_Index_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, mat3x2<f32>>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.ptr<private_, f32>(), obj, 1_u, 3_u);
@@ -231,7 +224,6 @@ TEST_F(IR_ValidateTest, Access_StaticallyUnindexableType_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.f32());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.f32(), obj, 1_u);
@@ -262,7 +254,6 @@ TEST_F(IR_ValidateTest, Access_StaticallyUnindexableType_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, f32>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.ptr<private_, f32>(), obj, 1_u);
@@ -299,7 +290,6 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Value) {
     auto* obj = b.FunctionParam(str_ty);
     auto* idx = b.FunctionParam(ty.i32());
     f->SetParams({obj, idx});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.i32(), obj, idx);
@@ -342,7 +332,6 @@ TEST_F(IR_ValidateTest, Access_DynamicallyUnindexableType_Ptr) {
     auto* obj = b.FunctionParam(ty.ptr<private_, read_write>(str_ty));
     auto* idx = b.FunctionParam(ty.i32());
     f->SetParams({obj, idx});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.i32(), obj, idx);
@@ -379,7 +368,6 @@ TEST_F(IR_ValidateTest, Access_Incorrect_Type_Value_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.mat3x2<f32>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.i32(), obj, 1_u, 1_u);
@@ -411,7 +399,6 @@ TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Ptr) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, mat3x2<f32>>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.ptr<private_, i32>(), obj, 1_u, 1_u);
@@ -444,7 +431,6 @@ TEST_F(IR_ValidateTest, Access_Incorrect_Type_Ptr_Value) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.ptr<private_, mat3x2<f32>>());
     f->SetParams({obj});
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Access(ty.f32(), obj, 1_u, 1_u);
@@ -475,7 +461,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Block_TerminatorInMiddle) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     b.With(f->Block(), [&] {
         b.Return(f);
@@ -505,7 +490,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, If_ConditionIsBool) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto* if_ = b.If(1_i);
     if_->True()->Append(b.Return(f));
@@ -567,7 +551,6 @@ TEST_F(IR_ValidateTest, Var_Function_NullResult) {
     auto* v = mod.instructions.Create<ir::Var>(nullptr);
 
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     sb.Append(v);
@@ -595,7 +578,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Var_Init_WrongType) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
@@ -626,7 +608,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Instruction_AppendedDead) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
@@ -665,7 +646,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Instruction_NullSource) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
@@ -695,7 +675,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Instruction_DeadOperand) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
@@ -727,7 +706,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Instruction_OperandUsageRemoved) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     auto* v = sb.Var(ty.ptr<function, f32>());
@@ -759,7 +737,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Binary_LHS_Nullptr) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     sb.Add(ty.i32(), nullptr, sb.Constant(2_i));
@@ -787,7 +764,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidateTest, Binary_RHS_Nullptr) {
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     sb.Add(ty.i32(), sb.Constant(2_i), nullptr);
@@ -818,7 +794,6 @@ TEST_F(IR_ValidateTest, Binary_Result_Nullptr) {
                                                     b.Constant(3_i), b.Constant(2_i));
 
     auto* f = b.Function("my_func", ty.void_());
-    mod.functions.Push(f);
 
     auto sb = b.With(f->Block());
     sb.Append(bin);

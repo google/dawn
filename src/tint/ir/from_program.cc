@@ -263,7 +263,6 @@ class Impl {
         auto* ir_func = builder_.Function(ast_func->name->symbol.NameView(),
                                           sem->ReturnType()->Clone(clone_ctx_.type_ctx));
         current_function_ = ir_func;
-        builder_.ir.functions.Push(ir_func);
 
         scopes_.Set(ast_func->name->symbol, ir_func);
 
