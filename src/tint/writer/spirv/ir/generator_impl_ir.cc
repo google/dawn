@@ -636,6 +636,13 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
                 TINT_ICE(Writer, diagnostics_)
                     << "unimplemented instruction: " << inst->TypeInfo().name;
             });
+
+        // Set the name for the SPIR-V result ID if provided in the module.
+        if (inst->Result() && !inst->Is<ir::Var>()) {
+            if (auto name = ir_->NameOf(inst)) {
+                module_.PushDebug(spv::Op::OpName, {Value(inst), Operand(name.Name())});
+            }
+        }
     }
 
     if (block->IsEmpty()) {

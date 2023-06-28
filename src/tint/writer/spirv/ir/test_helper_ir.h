@@ -16,8 +16,10 @@
 #define SRC_TINT_WRITER_SPIRV_IR_TEST_HELPER_IR_H_
 
 #include <string>
+#include <utility>
 
 #include "gtest/gtest.h"
+#include "spirv-tools/libspirv.hpp"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/validate.h"
 #include "src/tint/writer/spirv/ir/generator_impl_ir.h"
@@ -54,6 +56,9 @@ class SpvGeneratorTestHelperBase : public BASE {
     /// Validation errors
     std::string err_;
 
+    /// SPIR-V output.
+    std::string output_;
+
     /// @returns the error string from the validation
     std::string Error() const { return err_; }
 
@@ -65,6 +70,57 @@ class SpvGeneratorTestHelperBase : public BASE {
             return false;
         }
         return true;
+    }
+
+    /// Run the generator on the IR module and validate the result.
+    /// @returns true if generation and validation succeeded
+    bool Generate() {
+        if (!generator_.Generate()) {
+            err_ = generator_.Diagnostics().str();
+            return false;
+        }
+        if (!Validate()) {
+            return false;
+        }
+
+        output_ = Disassemble(generator_.Result(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
+        return true;
+    }
+
+    /// Validate the generated SPIR-V using the SPIR-V Tools Validator.
+    /// @returns true if validation succeeded, false otherwise
+    bool Validate() {
+        auto binary = generator_.Result();
+
+        std::string spv_errors;
+        auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
+                                          const spv_position_t& position, const char* message) {
+            switch (level) {
+                case SPV_MSG_FATAL:
+                case SPV_MSG_INTERNAL_ERROR:
+                case SPV_MSG_ERROR:
+                    spv_errors +=
+                        "error: line " + std::to_string(position.index) + ": " + message + "\n";
+                    break;
+                case SPV_MSG_WARNING:
+                    spv_errors +=
+                        "warning: line " + std::to_string(position.index) + ": " + message + "\n";
+                    break;
+                case SPV_MSG_INFO:
+                    spv_errors +=
+                        "info: line " + std::to_string(position.index) + ": " + message + "\n";
+                    break;
+                case SPV_MSG_DEBUG:
+                    break;
+            }
+        };
+
+        spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_2);
+        tools.SetMessageConsumer(msg_consumer);
+
+        auto result = tools.Validate(binary);
+        err_ = std::move(spv_errors);
+        return result;
     }
 
     /// @returns the disassembled types from the generated module.
