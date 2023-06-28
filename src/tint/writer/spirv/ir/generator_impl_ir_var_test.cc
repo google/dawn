@@ -77,10 +77,8 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_Name) {
     auto* func = b.Function("foo", ty.void_());
 
     b.With(func->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
+        b.Var("myvar", ty.ptr<function, i32>());
         b.Return(func);
-
-        mod.SetName(v, "myvar");
     });
 
     ASSERT_TRUE(IRIsValid()) << Error();
@@ -241,11 +239,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, PrivateVar_Name) {
-    auto* v = b.Var(ty.ptr<private_, i32>());
+    auto* v = b.Var("myvar", ty.ptr<private_, i32>());
     v->SetInitializer(b.Constant(42_i));
     b.RootBlock()->Append(v);
-
-    mod.SetName(v, "myvar");
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
@@ -327,8 +323,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, WorkgroupVar_Name) {
-    auto* v = b.RootBlock()->Append(b.Var(ty.ptr<workgroup, i32>()));
-    mod.SetName(v, "myvar");
+    b.RootBlock()->Append(b.Var("myvar", ty.ptr<workgroup, i32>()));
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
@@ -440,10 +435,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, StorageVar_Name) {
-    auto* v = b.Var(ty.ptr<storage, i32>());
+    auto* v = b.Var("myvar", ty.ptr<storage, i32>());
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
-    mod.SetName(v, "myvar");
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader
@@ -551,10 +545,9 @@ OpFunctionEnd
 }
 
 TEST_F(SpvGeneratorImplTest, UniformVar_Name) {
-    auto* v = b.Var(ty.ptr<uniform, i32>());
+    auto* v = b.Var("myvar", ty.ptr<uniform, i32>());
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
-    mod.SetName(v, "myvar");
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     EXPECT_EQ(DumpModule(generator_.Module()), R"(OpCapability Shader

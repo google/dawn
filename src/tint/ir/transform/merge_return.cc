@@ -78,16 +78,14 @@ struct MergeReturn::State {
         }
 
         // Create a boolean variable that can be used to check whether the function is returning.
-        continue_execution = b.Var(ty.ptr<function, bool>());
+        continue_execution = b.Var("continue_execution", ty.ptr<function, bool>());
         continue_execution->SetInitializer(b.Constant(true));
         fn->Block()->Prepend(continue_execution);
-        ir->SetName(continue_execution, "continue_execution");
 
         // Create a variable to hold the return value if needed.
         if (!fn->ReturnType()->Is<type::Void>()) {
-            return_val = b.Var(ty.ptr(function, fn->ReturnType()));
+            return_val = b.Var("return_value", ty.ptr(function, fn->ReturnType()));
             fn->Block()->Prepend(return_val);
-            ir->SetName(return_val, "return_value");
         }
 
         // Look to see if the function ends with a return

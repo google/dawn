@@ -77,6 +77,12 @@ ir::Var* Builder::Var(const type::Pointer* type) {
     return Append(ir.instructions.Create<ir::Var>(InstructionResult(type)));
 }
 
+ir::Var* Builder::Var(std::string_view name, const type::Pointer* type) {
+    auto* var = Var(type);
+    ir.SetName(var, name);
+    return var;
+}
+
 ir::BlockParam* Builder::BlockParam(const type::Type* type) {
     return ir.values.Create<ir::BlockParam>(type);
 }

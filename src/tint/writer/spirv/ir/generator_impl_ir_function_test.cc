@@ -167,12 +167,10 @@ OpFunctionEnd
 
 TEST_F(SpvGeneratorImplTest, Function_Parameters) {
     auto* i32 = ty.i32();
-    auto* x = b.FunctionParam(i32);
-    auto* y = b.FunctionParam(i32);
+    auto* x = b.FunctionParam("x", i32);
+    auto* y = b.FunctionParam("y", i32);
     auto* func = b.Function("foo", i32);
     func->SetParams({x, y});
-    mod.SetName(x, "x");
-    mod.SetName(y, "y");
 
     b.With(func->Block(), [&] {
         auto* result = b.Add(i32, x, y);

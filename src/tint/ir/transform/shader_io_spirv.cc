@@ -97,12 +97,11 @@ struct StateImpl : ShaderIO::BackendState {
 
         // Declare the structs and variables if needed.
         auto make_struct = [&](auto& members, const char* iotype) {
-            auto name = ir->NameOf(func).Name() + iotype + name_suffix + "Struct";
-            auto* str = ty.Struct(ir->symbols.New(name), std::move(members));
-            auto* var = b.Var(ty.ptr(addrspace, str, access));
+            auto name = ir->NameOf(func).Name() + iotype + name_suffix;
+            auto* str = ty.Struct(ir->symbols.New(name + "Struct"), std::move(members));
+            auto* var = b.Var(name, ty.ptr(addrspace, str, access));
             str->SetStructFlag(type::kBlock);
             b.RootBlock()->Append(var);
-            ir->SetName(var, ir->NameOf(func).Name() + iotype + name_suffix);
             return var;
         };
         if (!builtin_members.IsEmpty()) {

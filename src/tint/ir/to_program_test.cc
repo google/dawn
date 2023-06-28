@@ -1025,9 +1025,8 @@ TEST_F(IRToProgramTest, CompoundAssign_Increment) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         b.Store(v, b.Add(ty.i32(), b.Load(v), 1_i));
-        mod.SetName(v, "v");
     });
 
     EXPECT_WGSL(R"(
@@ -1042,9 +1041,8 @@ TEST_F(IRToProgramTest, CompoundAssign_Decrement) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         b.Store(v, b.Subtract(ty.i32(), b.Load(v), 1_i));
-        mod.SetName(v, "v");
     });
 
     EXPECT_WGSL(R"(
@@ -1059,9 +1057,8 @@ TEST_F(IRToProgramTest, CompoundAssign_Add) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         b.Store(v, b.Add(ty.i32(), b.Load(v), 8_i));
-        mod.SetName(v, "v");
     });
 
     EXPECT_WGSL(R"(
@@ -1076,9 +1073,8 @@ TEST_F(IRToProgramTest, CompoundAssign_Subtract) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         b.Store(v, b.Subtract(ty.i32(), b.Load(v), 8_i));
-        mod.SetName(v, "v");
     });
 
     EXPECT_WGSL(R"(
@@ -1093,9 +1089,8 @@ TEST_F(IRToProgramTest, CompoundAssign_Multiply) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         b.Store(v, b.Multiply(ty.i32(), b.Load(v), 8_i));
-        mod.SetName(v, "v");
     });
 
     EXPECT_WGSL(R"(
@@ -1110,9 +1105,8 @@ TEST_F(IRToProgramTest, CompoundAssign_Divide) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         b.Store(v, b.Divide(ty.i32(), b.Load(v), 8_i));
-        mod.SetName(v, "v");
     });
 
     EXPECT_WGSL(R"(
@@ -1127,9 +1121,8 @@ TEST_F(IRToProgramTest, CompoundAssign_Xor) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         b.Store(v, b.Xor(ty.i32(), b.Load(v), 8_i));
-        mod.SetName(v, "v");
     });
 
     EXPECT_WGSL(R"(
@@ -1187,9 +1180,8 @@ fn f(i : i32) -> i32 {
 TEST_F(IRToProgramTest, FunctionScopeVar_i32) {
     auto* fn = b.Function("f", ty.void_());
 
-    b.With(fn->Block(), [&] {
-        auto* i = b.Var(ty.ptr<function, i32>());
-        mod.SetName(i, "i");
+    b.With(fn->Block(), [&] {  //
+        b.Var("i", ty.ptr<function, i32>());
     });
 
     EXPECT_WGSL(R"(
@@ -1203,9 +1195,8 @@ TEST_F(IRToProgramTest, FunctionScopeVar_i32_InitLiteral) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* i = b.Var(ty.ptr<function, i32>());
+        auto* i = b.Var("i", ty.ptr<function, i32>());
         i->SetInitializer(b.Constant(42_i));
-        mod.SetName(i, "i");
     });
 
     EXPECT_WGSL(R"(
@@ -1219,20 +1210,16 @@ TEST_F(IRToProgramTest, FunctionScopeVar_Chained) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* va = b.Var(ty.ptr<function, i32>());
+        auto* va = b.Var("a", ty.ptr<function, i32>());
         va->SetInitializer(b.Constant(42_i));
 
         auto* la = b.Load(va)->Result();
-        auto* vb = b.Var(ty.ptr<function, i32>());
+        auto* vb = b.Var("b", ty.ptr<function, i32>());
         vb->SetInitializer(la);
 
         auto* lb = b.Load(vb)->Result();
-        auto* vc = b.Var(ty.ptr<function, i32>());
+        auto* vc = b.Var("c", ty.ptr<function, i32>());
         vc->SetInitializer(lb);
-
-        mod.SetName(va, "a");
-        mod.SetName(vb, "b");
-        mod.SetName(vc, "c");
     });
 
     EXPECT_WGSL(R"(
@@ -1297,8 +1284,7 @@ TEST_F(IRToProgramTest, If_Return_i32) {
     auto* fn = b.Function("f", ty.i32());
 
     b.With(fn->Block(), [&] {
-        auto* cond = b.Var(ty.ptr<function, bool>());
-        mod.SetName(cond, "cond");
+        auto* cond = b.Var("cond", ty.ptr<function, bool>());
         cond->SetInitializer(b.Constant(true));
         auto if_ = b.If(b.Load(cond));
         b.With(if_->True(), [&] { b.Return(fn, 42_i); });
@@ -1358,8 +1344,7 @@ TEST_F(IRToProgramTest, If_Return_f32_Else_Return_f32) {
     auto* fn = b.Function("f", ty.f32());
 
     b.With(fn->Block(), [&] {
-        auto* cond = b.Var(ty.ptr<function, bool>());
-        mod.SetName(cond, "cond");
+        auto* cond = b.Var("cond", ty.ptr<function, bool>());
         cond->SetInitializer(b.Constant(true));
         auto if_ = b.If(b.Load(cond));
         b.With(if_->True(), [&] { b.Return(fn, 1.0_f); });
@@ -1386,8 +1371,7 @@ TEST_F(IRToProgramTest, If_Return_u32_Else_CallFn) {
     auto* fn = b.Function("f", ty.u32());
 
     b.With(fn->Block(), [&] {
-        auto* cond = b.Var(ty.ptr<function, bool>());
-        mod.SetName(cond, "cond");
+        auto* cond = b.Var("cond", ty.ptr<function, bool>());
         cond->SetInitializer(b.Constant(true));
         auto if_ = b.If(b.Load(cond));
         b.With(if_->True(), [&] { b.Return(fn, 1_u); });
@@ -1429,8 +1413,7 @@ TEST_F(IRToProgramTest, If_CallFn_ElseIf_CallFn) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* cond = b.Var(ty.ptr<function, bool>());
-        mod.SetName(cond, "cond");
+        auto* cond = b.Var("cond", ty.ptr<function, bool>());
         cond->SetInitializer(b.Constant(true));
         auto if1 = b.If(b.Load(cond));
         b.With(if1->True(), [&] {
@@ -1536,8 +1519,7 @@ TEST_F(IRToProgramTest, Switch_Default) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
-        mod.SetName(v, "v");
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         v->SetInitializer(b.Constant(42_i));
 
         auto s = b.Switch(b.Load(v));
@@ -1572,8 +1554,7 @@ TEST_F(IRToProgramTest, Switch_3_Cases) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
-        mod.SetName(v, "v");
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         v->SetInitializer(b.Constant(42_i));
 
         auto s = b.Switch(b.Load(v));
@@ -1629,8 +1610,7 @@ TEST_F(IRToProgramTest, Switch_3_Cases_AllReturn) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v = b.Var(ty.ptr<function, i32>());
-        mod.SetName(v, "v");
+        auto* v = b.Var("v", ty.ptr<function, i32>());
         v->SetInitializer(b.Constant(42_i));
 
         auto s = b.Switch(b.Load(v));
@@ -1679,12 +1659,10 @@ TEST_F(IRToProgramTest, Switch_Nested) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* v1 = b.Var(ty.ptr<function, i32>());
-        mod.SetName(v1, "v1");
+        auto* v1 = b.Var("v1", ty.ptr<function, i32>());
         v1->SetInitializer(b.Constant(42_i));
 
-        auto* v2 = b.Var(ty.ptr<function, i32>());
-        mod.SetName(v2, "v2");
+        auto* v2 = b.Var("v2", ty.ptr<function, i32>());
         v2->SetInitializer(b.Constant(24_i));
 
         auto s1 = b.Switch(b.Load(v1));
@@ -1757,8 +1735,7 @@ TEST_F(IRToProgramTest, For_Empty) {
         auto* loop = b.Loop();
 
         b.With(loop->Initializer(), [&] {
-            auto* i = b.Var(ty.ptr<function, i32>());
-            mod.SetName(i, "i");
+            auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(b.Constant(0_i));
 
             b.With(loop->Body(), [&] {
@@ -1783,8 +1760,7 @@ TEST_F(IRToProgramTest, For_Empty_NoInit) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* i = b.Var(ty.ptr<function, i32>());
-        mod.SetName(i, "i");
+        auto* i = b.Var("i", ty.ptr<function, i32>());
         i->SetInitializer(b.Constant(0_i));
 
         auto* loop = b.Loop();
@@ -1814,8 +1790,7 @@ TEST_F(IRToProgramTest, For_Empty_NoCont) {
         auto* loop = b.Loop();
 
         b.With(loop->Initializer(), [&] {
-            auto* i = b.Var(ty.ptr<function, i32>());
-            mod.SetName(i, "i");
+            auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(b.Constant(0_i));
 
             b.With(loop->Body(), [&] {
@@ -1846,8 +1821,7 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
         auto* loop = b.Loop();
 
         b.With(loop->Initializer(), [&] {
-            auto* i = b.Var(ty.ptr<function, i32>());
-            mod.SetName(i, "i");
+            auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(b.Constant(0_i));
 
             b.With(loop->Body(), [&] {
@@ -1893,8 +1867,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoInit) {
     auto* fn = b.Function("f", ty.i32());
 
     b.With(fn->Block(), [&] {
-        auto* i = b.Var(ty.ptr<function, i32>());
-        mod.SetName(i, "i");
+        auto* i = b.Var("i", ty.ptr<function, i32>());
         i->SetInitializer(b.Constant(0_i));
 
         auto* loop = b.Loop();
@@ -1945,8 +1918,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
         auto* loop = b.Loop();
 
         b.With(loop->Initializer(), [&] {
-            auto* i = b.Var(ty.ptr<function, i32>());
-            mod.SetName(i, "i");
+            auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(b.Constant(0_i));
 
             b.With(loop->Body(), [&] {
@@ -1993,8 +1965,7 @@ TEST_F(IRToProgramTest, For_CallInInitCondCont) {
 
         b.With(loop->Initializer(), [&] {
             auto* n_0 = b.Call(ty.i32(), fn_n, 0_i)->Result();
-            auto* i = b.Var(ty.ptr<function, i32>());
-            mod.SetName(i, "i");
+            auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(n_0);
 
             b.With(loop->Body(), [&] {
@@ -2221,9 +2192,8 @@ TEST_F(IRToProgramTest, Loop_IfContinuing) {
     auto* fn = b.Function("f", ty.void_());
 
     b.With(fn->Block(), [&] {
-        auto* cond = b.Var(ty.ptr<function, bool>());
+        auto* cond = b.Var("cond", ty.ptr<function, bool>());
         cond->SetInitializer(b.Constant(false));
-        mod.SetName(cond, "cond");
 
         auto* loop = b.Loop();
 
@@ -2255,16 +2225,14 @@ TEST_F(IRToProgramTest, Loop_VarsDeclaredOutsideAndInside) {
     auto* f = b.Function("f", ty.void_());
 
     b.With(f->Block(), [&] {
-        auto* var_b = b.Var(ty.ptr<function, i32>());
+        auto* var_b = b.Var("b", ty.ptr<function, i32>());
         var_b->SetInitializer(b.Constant(1_i));
-        mod.SetName(var_b, "b");
 
         auto* loop = b.Loop();
 
         b.With(loop->Body(), [&] {
-            auto* var_a = b.Var(ty.ptr<function, i32>());
+            auto* var_a = b.Var("a", ty.ptr<function, i32>());
             var_a->SetInitializer(b.Constant(2_i));
-            mod.SetName(var_a, "a");
 
             auto* if_ = b.If(b.Equal(ty.bool_(), b.Load(var_a), b.Load(var_b)));
             b.With(if_->True(), [&] { b.Return(f); });

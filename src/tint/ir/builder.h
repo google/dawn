@@ -561,6 +561,12 @@ class Builder {
     /// @returns the instruction
     ir::Var* Var(const type::Pointer* type);
 
+    /// Creates a new `var` declaration with a name
+    /// @param name the var name
+    /// @param type the var type
+    /// @returns the instruction
+    ir::Var* Var(std::string_view name, const type::Pointer* type);
+
     /// Creates a return instruction
     /// @param func the function being returned
     /// @returns the instruction
