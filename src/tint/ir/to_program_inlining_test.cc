@@ -967,7 +967,7 @@ TEST_F(IRToProgramInliningTest, UnsequencedOutsideLoopContinuing) {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* loop = b.Loop();
         b.With(loop->Body(), [&] { b.Continue(loop); });
-        b.With(loop->Continuing(), [&] { b.BreakIf(b.Equal(ty.bool_(), v, 3_i), loop); });
+        b.With(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(ty.bool_(), v, 3_i)); });
         b.Return(fn, 0_i);
     });
 
@@ -992,7 +992,7 @@ TEST_F(IRToProgramInliningTest, SequencedOutsideLoopContinuing) {
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* loop = b.Loop();
         b.With(loop->Body(), [&] { b.Continue(loop); });
-        b.With(loop->Continuing(), [&] { b.BreakIf(b.Equal(ty.bool_(), v_2, 3_i), loop); });
+        b.With(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(ty.bool_(), v_2, 3_i)); });
         b.Return(fn, 0_i);
     });
 
@@ -1091,7 +1091,7 @@ TEST_F(IRToProgramInliningTest, LoadVarInLoopInitializer_ThenReadAndWriteToVarIn
             b.With(loop->Body(), [&] { b.Continue(loop); });
             b.With(loop->Continuing(), [&] {
                 b.Store(var, b.Add(ty.i32(), load, 1_i));
-                b.BreakIf(true, loop);
+                b.BreakIf(loop, true);
             });
         });
         b.Return(fn, 3_i);
@@ -1128,7 +1128,7 @@ TEST_F(IRToProgramInliningTest, LoadVarInLoopBody_ThenReadAndWriteToVarInLoopCon
 
             b.With(loop->Continuing(), [&] {
                 b.Store(var, b.Add(ty.i32(), load, 1_i));
-                b.BreakIf(true, loop);
+                b.BreakIf(loop, true);
             });
         });
         b.Return(fn, 3_i);

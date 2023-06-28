@@ -853,7 +853,7 @@ class Impl {
         if (!cond) {
             return;
         }
-        SetTerminator(builder_.BreakIf(cond.Get(), current_control->As<ir::Loop>()));
+        SetTerminator(builder_.BreakIf(current_control->As<ir::Loop>(), cond.Get()));
     }
 
     struct AccessorInfo {

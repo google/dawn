@@ -604,7 +604,7 @@ class Builder {
     /// @param args the arguments for the target MultiInBlock
     /// @returns the instruction
     template <typename CONDITION, typename... ARGS>
-    ir::BreakIf* BreakIf(CONDITION&& condition, ir::Loop* loop, ARGS&&... args) {
+    ir::BreakIf* BreakIf(ir::Loop* loop, CONDITION&& condition, ARGS&&... args) {
         return Append(ir.instructions.Create<ir::BreakIf>(
             Value(std::forward<CONDITION>(condition)), loop, Values(std::forward<ARGS>(args)...)));
     }

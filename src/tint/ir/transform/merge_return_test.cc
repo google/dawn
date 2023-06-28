@@ -1120,7 +1120,7 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody) {
 
         b.With(loop->Continuing(), [&] {
             b.Store(global, 1_i);
-            b.BreakIf(true, loop);
+            b.BreakIf(loop, true);
         });
 
         b.Store(global, 3_i);
@@ -1340,7 +1340,7 @@ TEST_F(IR_MergeReturnTest, Loop_WithBasicBlockArgumentsOnMerge) {
 
         b.With(loop->Continuing(), [&] {
             b.Store(global, 1_i);
-            b.BreakIf(true, loop, 4_i);
+            b.BreakIf(loop, true, 4_i);
         });
 
         b.Store(global, 3_i);

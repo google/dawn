@@ -36,7 +36,7 @@ TEST_F(IR_BlockTest, HasTerminator_None) {
 TEST_F(IR_BlockTest, HasTerminator_BreakIf) {
     auto* blk = b.Block();
     auto* loop = b.Loop();
-    blk->Append(b.BreakIf(true, loop));
+    blk->Append(b.BreakIf(loop, true));
     EXPECT_TRUE(blk->HasTerminator());
 }
 

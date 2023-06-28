@@ -30,7 +30,7 @@ TEST_F(IR_BreakIfTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
 
-    auto* brk = b.BreakIf(cond, loop, arg1, arg2);
+    auto* brk = b.BreakIf(loop, cond, arg1, arg2);
 
     EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{brk, 0u}));
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{brk, 1u}));
@@ -43,7 +43,7 @@ TEST_F(IR_BreakIfTest, Results) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
 
-    auto* brk = b.BreakIf(cond, loop, arg1, arg2);
+    auto* brk = b.BreakIf(loop, cond, arg1, arg2);
     EXPECT_FALSE(brk->HasResults());
     EXPECT_FALSE(brk->HasMultiResults());
 }
@@ -53,7 +53,7 @@ TEST_F(IR_BreakIfTest, Fail_NullLoop) {
         {
             Module mod;
             Builder b{mod};
-            b.BreakIf(true, nullptr);
+            b.BreakIf(nullptr, true);
         },
         "");
 }
