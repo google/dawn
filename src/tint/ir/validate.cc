@@ -113,6 +113,17 @@ class Validator {
         }
     }
 
+    void AddResultError(Instruction* inst, size_t idx, std::string err) {
+        DisassembleIfNeeded();
+        auto src = dis_.ResultSource(Usage{inst, static_cast<uint32_t>(idx)});
+        src.file = mod_.disassembly_file.get();
+        AddError(std::move(err), src);
+
+        if (current_block_) {
+            AddNote(current_block_, "In block");
+        }
+    }
+
     void AddError(Block* blk, std::string err) {
         DisassembleIfNeeded();
         auto src = dis_.BlockSource(blk);
@@ -158,7 +169,7 @@ class Validator {
                          std::string("root block: invalid instruction: ") + inst->TypeInfo().name);
                 continue;
             }
-            CheckVar(var);
+            CheckInstruction(var);
         }
     }
 
@@ -185,11 +196,20 @@ class Validator {
         if (!inst->Alive()) {
             AddError(inst, "destroyed instruction found in instruction list");
         }
-        if (inst->Result()) {
-            if (inst->Result()->Source() == nullptr) {
-                AddError(inst, "instruction result source is undefined");
-            } else if (inst->Result()->Source() != inst) {
-                AddError(inst, "instruction result source has wrong instruction");
+        if (inst->HasResults()) {
+            auto results = inst->Results();
+            for (size_t i = 0; i < results.Length(); ++i) {
+                auto* res = results[i];
+                if (!res) {
+                    AddResultError(inst, i, "instruction result is undefined");
+                    continue;
+                }
+
+                if (res->Source() == nullptr) {
+                    AddResultError(inst, i, "instruction result source is undefined");
+                } else if (res->Source() != inst) {
+                    AddResultError(inst, i, "instruction result source has wrong instruction");
+                }
             }
         }
 
@@ -319,9 +339,6 @@ class Validator {
         if (b->RHS() == nullptr) {
             AddError(b, Binary::kRhsOperandOffset, "binary: right operand is undefined");
         }
-        if (b->Result() == nullptr) {
-            AddError(b, "binary: result is undefined");
-        }
     }
 
     void CheckTerminator(ir::Terminator* b) {
@@ -346,7 +363,7 @@ class Validator {
 
     void CheckIf(If* if_) {
         if (!if_->Condition()) {
-            AddError(if_, "if: condition is undefined");
+            AddError(if_, If::kConditionOperandOffset, "if: condition is undefined");
         }
         if (if_->Condition() && !if_->Condition()->Type()->Is<type::Bool>()) {
             AddError(if_, If::kConditionOperandOffset, "if: condition must be a `bool` type");
@@ -354,10 +371,6 @@ class Validator {
     }
 
     void CheckVar(Var* var) {
-        if (var->Result() == nullptr) {
-            AddError(var, "var: result is undefined");
-        }
-
         if (var->Result() && var->Initializer()) {
             if (var->Initializer()->Type() != var->Result()->Type()->UnwrapPtr()) {
                 AddError(var, "var initializer has incorrect type");

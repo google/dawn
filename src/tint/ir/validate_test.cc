@@ -525,15 +525,52 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidateTest, If_ConditionIsNullptr) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* if_ = b.If(nullptr);
+    if_->True()->Append(b.Return(f));
+    if_->False()->Append(b.Return(f));
+
+    f->Block()->Append(if_);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:8 error: if: condition is undefined
+    if undef [t: %b2, f: %b3] {  # if_1
+       ^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    if undef [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+        ret
+      }
+      %b3 = block {  # false
+        ret
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidateTest, Var_RootBlock_NullResult) {
     auto* v = mod.instructions.Create<ir::Var>(nullptr);
     b.RootBlock()->Append(v);
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:2:11 error: var: result is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:2:3 error: instruction result is undefined
   undef = var
-          ^^^
+  ^^^^^
 
 :1:1 note: In block
 %b1 = block {  # root
@@ -558,9 +595,9 @@ TEST_F(IR_ValidateTest, Var_Function_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:13 error: var: result is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: instruction result is undefined
     undef = var
-            ^^^
+    ^^^^^
 
 :2:3 note: In block
   %b1 = block {
@@ -626,9 +663,9 @@ TEST_F(IR_ValidateTest, Instruction_AppendedDead) {
   %b1 = block {
   ^^^^^^^^^^^
 
-:3:41 error: instruction result source is undefined
+:3:5 error: instruction result source is undefined
     %2:ptr<function, f32, read_write> = var
-                                        ^^^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :2:3 note: In block
   %b1 = block {
@@ -655,9 +692,9 @@ TEST_F(IR_ValidateTest, Instruction_NullSource) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:41 error: instruction result source is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: instruction result source is undefined
     %2:ptr<function, f32, read_write> = var
-                                        ^^^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :2:3 note: In block
   %b1 = block {
@@ -801,9 +838,9 @@ TEST_F(IR_ValidateTest, Binary_Result_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: binary: result is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: instruction result is undefined
     undef = add 3i, 2i
-    ^^^^^^^^^^^^^^^^^^
+    ^^^^^
 
 :2:3 note: In block
   %b1 = block {

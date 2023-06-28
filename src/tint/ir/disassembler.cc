@@ -294,11 +294,13 @@ void Disassembler::EmitFunction(Function* func) {
 }
 
 void Disassembler::EmitValueWithType(Instruction* val) {
+    SourceMarker sm(this);
     if (val->Result()) {
         EmitValueWithType(val->Result());
     } else {
         out_ << "undef";
     }
+    sm.StoreResult(Usage{val, 0});
 }
 
 void Disassembler::EmitValueWithType(Value* val) {
@@ -512,46 +514,54 @@ void Disassembler::EmitOperandList(Instruction* inst,
     }
 }
 
-void Disassembler::EmitIf(If* i) {
+void Disassembler::EmitIf(If* if_) {
     SourceMarker sm(this);
-    if (i->Result()) {
-        EmitValueWithType(i->Result());
+    if (if_->HasResults()) {
+        auto res = if_->Results();
+        for (size_t i = 0; i < res.Length(); ++i) {
+            if (i > 0) {
+                out_ << ", ";
+            }
+            SourceMarker rs(this);
+            EmitValueWithType(res[i]);
+            rs.StoreResult(Usage{if_, i});
+        }
         out_ << " = ";
     }
     out_ << "if ";
-    EmitOperand(i, i->Condition(), If::kConditionOperandOffset);
+    EmitOperand(if_, if_->Condition(), If::kConditionOperandOffset);
 
-    bool has_true = !i->True()->IsEmpty();
-    bool has_false = !i->False()->IsEmpty();
+    bool has_true = !if_->True()->IsEmpty();
+    bool has_false = !if_->False()->IsEmpty();
 
     out_ << " [";
     if (has_true) {
-        out_ << "t: %b" << IdOf(i->True());
+        out_ << "t: %b" << IdOf(if_->True());
     }
     if (has_false) {
         if (has_true) {
             out_ << ", ";
         }
-        out_ << "f: %b" << IdOf(i->False());
+        out_ << "f: %b" << IdOf(if_->False());
     }
     out_ << "]";
-    sm.Store(i);
+    sm.Store(if_);
 
-    out_ << " {  # " << NameOf(i);
+    out_ << " {  # " << NameOf(if_);
     EmitLine();
 
     if (has_true) {
         ScopedIndent si(indent_size_);
-        EmitBlock(i->True(), "true");
+        EmitBlock(if_->True(), "true");
     }
     if (has_false) {
         ScopedIndent si(indent_size_);
-        EmitBlock(i->False(), "false");
-    } else if (i->HasResults()) {
+        EmitBlock(if_->False(), "false");
+    } else if (if_->HasResults()) {
         ScopedIndent si(indent_size_);
         Indent();
         out_ << "# implicit false block: exit_if undef";
-        for (size_t v = 1; v < i->Results().Length(); v++) {
+        for (size_t v = 1; v < if_->Results().Length(); v++) {
             out_ << ", undef";
         }
         EmitLine();

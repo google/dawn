@@ -61,6 +61,10 @@ class Disassembler {
     /// @returns the source for the operand
     Source OperandSource(Usage operand) { return operand_to_src_.Get(operand).value_or(Source{}); }
 
+    /// @param result the result to retrieve
+    /// @returns the source for the result
+    Source ResultSource(Usage result) { return result_to_src_.Get(result).value_or(Source{}); }
+
     /// @param blk teh block to retrieve
     /// @returns the source for the block
     Source BlockSource(Block* blk) { return block_to_src_.Get(blk).value_or(Source{}); }
@@ -80,6 +84,11 @@ class Disassembler {
     /// @param src the source location
     void SetSource(Usage op, Source src) { operand_to_src_.Add(op, src); }
 
+    /// Stores the given @p src location for @p result
+    /// @param result the result to store
+    /// @param src the source location
+    void SetResultSource(Usage result, Source src) { result_to_src_.Add(result, src); }
+
     /// @returns the source location for the current emission location
     Source::Location MakeCurrentLocation();
 
@@ -94,6 +103,8 @@ class Disassembler {
         void Store(Block* blk) { dis_->SetSource(blk, MakeSource()); }
 
         void Store(Usage operand) { dis_->SetSource(operand, MakeSource()); }
+
+        void StoreResult(Usage result) { dis_->SetResultSource(result, MakeSource()); }
 
         Source MakeSource() const {
             return Source(Source::Range(begin_, dis_->MakeCurrentLocation()));
@@ -151,6 +162,7 @@ class Disassembler {
     utils::Hashmap<Block*, Source, 8> block_to_src_;
     utils::Hashmap<Instruction*, Source, 8> instruction_to_src_;
     utils::Hashmap<Usage, Source, 8, Usage::Hasher> operand_to_src_;
+    utils::Hashmap<Usage, Source, 8, Usage::Hasher> result_to_src_;
     utils::Hashmap<If*, std::string, 8> if_names_;
     utils::Hashmap<Loop*, std::string, 8> loop_names_;
     utils::Hashmap<Switch*, std::string, 8> switch_names_;
