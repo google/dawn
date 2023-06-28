@@ -1282,6 +1282,7 @@
             {"name": "max texture dimension 3D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max texture array layers", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max bind groups", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max bind groups plus vertex buffers", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max bindings per bind group", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max dynamic uniform buffers per pipeline layout", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max dynamic storage buffers per pipeline layout", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},

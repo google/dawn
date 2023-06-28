@@ -66,6 +66,7 @@
     X(Maximum,                       maxTextureDimension3D,      2048,       2048) \
     X(Maximum,                       maxTextureArrayLayers,       256,        256) \
     X(Maximum,                               maxBindGroups,         4,          4) \
+    X(Maximum,              maxBindGroupsPlusVertexBuffers,        24,         24) \
     X(Maximum,                     maxBindingsPerBindGroup,      1000,       1000) \
     X(Maximum,                 maxUniformBufferBindingSize,     65536,      65536) \
     X(Alignment,           minUniformBufferOffsetAlignment,       256,        256) \
@@ -277,6 +278,8 @@ void NormalizeLimits(Limits* limits) {
     limits->maxColorAttachments =
         std::min(limits->maxColorAttachments, uint32_t(kMaxColorAttachments));
     limits->maxBindGroups = std::min(limits->maxBindGroups, kMaxBindGroups);
+    limits->maxBindGroupsPlusVertexBuffers =
+        std::min(limits->maxBindGroupsPlusVertexBuffers, kMaxBindGroupsPlusVertexBuffers);
     limits->maxVertexAttributes =
         std::min(limits->maxVertexAttributes, uint32_t(kMaxVertexAttributes));
     limits->maxVertexBuffers = std::min(limits->maxVertexBuffers, uint32_t(kMaxVertexBuffers));

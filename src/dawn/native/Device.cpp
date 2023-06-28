@@ -1734,6 +1734,10 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateUninitializedRenderPipe
     DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
         DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
+
+        // Validation for kMaxBindGroupsPlusVertexBuffers is skipped because it is not necessary so
+        // far.
+        static_assert(kMaxBindGroups + kMaxVertexBuffers <= kMaxBindGroupsPlusVertexBuffers);
     }
 
     // Ref will keep the pipeline layout alive until the end of the function where

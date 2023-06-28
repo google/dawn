@@ -495,6 +495,9 @@ MaybeError CommandBufferStateTracker::ValidateOperation(ValidationAspects requir
 
     DAWN_TRY(CheckMissingAspects(requiredAspects & ~mAspects));
 
+    // Validation for kMaxBindGroupsPlusVertexBuffers is skipped because it is not necessary so far.
+    static_assert(kMaxBindGroups + kMaxVertexBuffers <= kMaxBindGroupsPlusVertexBuffers);
+
     return {};
 }
 

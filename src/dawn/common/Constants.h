@@ -25,6 +25,7 @@ static constexpr uint32_t kMaxBindingsPerBindGroup = 1000u;
 static constexpr uint8_t kMaxVertexAttributes = 16u;
 static constexpr uint8_t kMaxVertexBuffers = 8u;
 static constexpr uint32_t kMaxVertexBufferArrayStride = 2048u;
+static constexpr uint32_t kMaxBindGroupsPlusVertexBuffers = 24u;
 static constexpr uint32_t kNumStages = 3;
 static constexpr uint8_t kMaxColorAttachments = 8u;
 static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
