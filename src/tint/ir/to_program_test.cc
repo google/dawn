@@ -399,7 +399,7 @@ fn f(a : i32, b : u32) -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 // Short-circuiting binary ops
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_2) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Param_2) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -421,7 +421,7 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_ab_c) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Param_3_ab_c) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -449,7 +449,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_a_bc) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Param_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -457,16 +457,18 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Param_3_a_bc) {
     fn->SetParams({pa, pb, pc});
 
     b.With(fn->Block(), [&] {
-        auto* if1 = b.If(pb);
+        auto* if1 = b.If(pa);
         if1->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if1->True(), [&] { b.ExitIf(if1, pc); });
-        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
+        b.With(if1->True(), [&] {
+            auto* if2 = b.If(pb);
+            if2->SetResults(b.InstructionResult(ty.bool_()));
+            b.With(if2->True(), [&] { b.ExitIf(if2, pc); });
+            b.With(if2->False(), [&] { b.ExitIf(if2, false); });
 
-        auto* if2 = b.If(pa);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
-        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
-        b.Return(fn, if2->Result(0));
+            b.ExitIf(if1, if2->Result(0));
+        });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
+        b.Return(fn, if1->Result(0));
     });
 
     EXPECT_WGSL(R"(
@@ -476,7 +478,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_2) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Let_2) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -500,7 +502,7 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_ab_c) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Let_3_ab_c) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -530,7 +532,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_a_bc) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Let_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -538,18 +540,20 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Let_3_a_bc) {
     fn->SetParams({pa, pb, pc});
 
     b.With(fn->Block(), [&] {
-        auto* if1 = b.If(pb);
+        auto* if1 = b.If(pa);
         if1->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if1->True(), [&] { b.ExitIf(if1, pc); });
+        b.With(if1->True(), [&] {
+            auto* if2 = b.If(pb);
+            if2->SetResults(b.InstructionResult(ty.bool_()));
+            b.With(if2->True(), [&] { b.ExitIf(if2, pc); });
+            b.With(if2->False(), [&] { b.ExitIf(if2, false); });
+
+            b.ExitIf(if1, if2->Result(0));
+        });
         b.With(if1->False(), [&] { b.ExitIf(if1, false); });
 
-        auto* if2 = b.If(pa);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
-        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
-
-        mod.SetName(if2->Result(0), "l");
-        b.Return(fn, if2->Result(0));
+        mod.SetName(if1->Result(0), "l");
+        b.Return(fn, if1->Result(0));
     });
 
     EXPECT_WGSL(R"(
@@ -560,7 +564,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_2) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Call_2) {
     auto* fn_a = b.Function("a", ty.bool_());
     b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
@@ -593,7 +597,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_3_ab_c) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Call_3_ab_c) {
     auto* fn_a = b.Function("a", ty.bool_());
     b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
@@ -638,7 +642,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_3_a_bc) {
+TEST_F(IRToProgramTest, ShortCircuit_And_Call_3_a_bc) {
     auto* fn_a = b.Function("a", ty.bool_());
     b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
@@ -651,17 +655,19 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalAnd_Call_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
 
     b.With(fn->Block(), [&] {
-        auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_a));
         if1->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if1->True(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_c)); });
+        b.With(if1->True(), [&] {
+            auto* if2 = b.If(b.Call(ty.bool_(), fn_b));
+            if2->SetResults(b.InstructionResult(ty.bool_()));
+            b.With(if2->True(), [&] { b.ExitIf(if2, b.Call(ty.bool_(), fn_c)); });
+            b.With(if2->False(), [&] { b.ExitIf(if2, false); });
+
+            b.ExitIf(if1, if2->Result(0));
+        });
         b.With(if1->False(), [&] { b.ExitIf(if1, false); });
 
-        auto* if2 = b.If(b.Call(ty.bool_(), fn_a));
-        if2->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
-        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
-
-        b.Return(fn, if2->Result(0));
+        b.Return(fn, if1->Result(0));
     });
 
     EXPECT_WGSL(R"(
@@ -683,7 +689,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_2) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Param_2) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -705,7 +711,7 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_ab_c) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Param_3_ab_c) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -733,7 +739,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_a_bc) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Param_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -741,17 +747,19 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Param_3_a_bc) {
     fn->SetParams({pa, pb, pc});
 
     b.With(fn->Block(), [&] {
-        auto* if1 = b.If(pb);
+        auto* if1 = b.If(pa);
         if1->SetResults(b.InstructionResult(ty.bool_()));
         b.With(if1->True(), [&] { b.ExitIf(if1, true); });
-        b.With(if1->False(), [&] { b.ExitIf(if1, pc); });
+        b.With(if1->False(), [&] {
+            auto* if2 = b.If(pb);
+            if2->SetResults(b.InstructionResult(ty.bool_()));
+            b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+            b.With(if2->False(), [&] { b.ExitIf(if2, pc); });
 
-        auto* if2 = b.If(pa);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
-        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
+            b.ExitIf(if1, if2->Result(0));
+        });
 
-        b.Return(fn, if2->Result(0));
+        b.Return(fn, if1->Result(0));
     });
 
     EXPECT_WGSL(R"(
@@ -761,7 +769,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_2) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Let_2) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -785,7 +793,7 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_ab_c) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Let_3_ab_c) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -815,7 +823,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_a_bc) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Let_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
     auto* pa = b.FunctionParam("a", ty.bool_());
     auto* pb = b.FunctionParam("b", ty.bool_());
@@ -823,18 +831,20 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Let_3_a_bc) {
     fn->SetParams({pa, pb, pc});
 
     b.With(fn->Block(), [&] {
-        auto* if1 = b.If(pb);
+        auto* if1 = b.If(pa);
         if1->SetResults(b.InstructionResult(ty.bool_()));
         b.With(if1->True(), [&] { b.ExitIf(if1, true); });
-        b.With(if1->False(), [&] { b.ExitIf(if1, pc); });
+        b.With(if1->False(), [&] {
+            auto* if2 = b.If(pb);
+            if2->SetResults(b.InstructionResult(ty.bool_()));
+            b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+            b.With(if2->False(), [&] { b.ExitIf(if2, pc); });
 
-        auto* if2 = b.If(pa);
-        if2->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
-        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
+            b.ExitIf(if1, if2->Result(0));
+        });
 
-        mod.SetName(if2->Result(0), "l");
-        b.Return(fn, if2->Result(0));
+        mod.SetName(if1->Result(0), "l");
+        b.Return(fn, if1->Result(0));
     });
 
     EXPECT_WGSL(R"(
@@ -845,7 +855,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_2) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Call_2) {
     auto* fn_a = b.Function("a", ty.bool_());
     b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
@@ -878,7 +888,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_3_ab_c) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Call_3_ab_c) {
     auto* fn_a = b.Function("a", ty.bool_());
     b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
@@ -923,7 +933,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_3_a_bc) {
+TEST_F(IRToProgramTest, ShortCircuit_Or_Call_3_a_bc) {
     auto* fn_a = b.Function("a", ty.bool_());
     b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
 
@@ -936,17 +946,19 @@ TEST_F(IRToProgramTest, BinaryOp_LogicalOr_Call_3_a_bc) {
     auto* fn = b.Function("f", ty.bool_());
 
     b.With(fn->Block(), [&] {
-        auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_a));
         if1->SetResults(b.InstructionResult(ty.bool_()));
         b.With(if1->True(), [&] { b.ExitIf(if1, true); });
-        b.With(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_c)); });
+        b.With(if1->False(), [&] {
+            auto* if2 = b.If(b.Call(ty.bool_(), fn_b));
+            if2->SetResults(b.InstructionResult(ty.bool_()));
+            b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+            b.With(if2->False(), [&] { b.ExitIf(if2, b.Call(ty.bool_(), fn_c)); });
 
-        auto* if2 = b.If(b.Call(ty.bool_(), fn_a));
-        if2->SetResults(b.InstructionResult(ty.bool_()));
-        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
-        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
+            b.ExitIf(if1, if2->Result(0));
+        });
 
-        b.Return(fn, if2->Result(0));
+        b.Return(fn, if1->Result(0));
     });
 
     EXPECT_WGSL(R"(
@@ -968,7 +980,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramTest, BinaryOp_LogicalMixed) {
+TEST_F(IRToProgramTest, ShortCircuit_Mixed) {
     auto* fn_b = b.Function("b", ty.bool_());
     b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
 
@@ -1014,6 +1026,255 @@ fn d() -> bool {
 fn f(a : bool, c : bool) -> bool {
   let l = ((a || b()) && (c || d()));
   return l;
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Non short-circuiting binary ops
+// Similar to the above, but cannot be short-circuited as the RHS is evaluated
+// outside of the if block.
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramTest, NonShortCircuit_And_ParamCallParam_a_bc) {
+    auto* fn_b = b.Function("b", ty.bool_());
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
+
+    auto* fn = b.Function("f", ty.bool_());
+    auto* pa = b.FunctionParam(ty.bool_());
+    auto* pc = b.FunctionParam(ty.bool_());
+    mod.SetName(pa, "a");
+    mod.SetName(pc, "c");
+    fn->SetParams({pa, pc});
+
+    b.With(fn->Block(), [&] {
+        // 'b() && c' is evaluated before 'a'.
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, pc); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
+
+        auto* if2 = b.If(pa);
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
+        b.Return(fn, if2->Result(0));
+    });
+
+    EXPECT_WGSL(R"(
+fn b() -> bool {
+  return true;
+}
+
+fn f(a : bool, c : bool) -> bool {
+  let v = (b() && c);
+  return (a && v);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, NonShortCircuit_And_Call_3_a_bc) {
+    auto* fn_a = b.Function("a", ty.bool_());
+
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
+
+    auto* fn_b = b.Function("b", ty.bool_());
+
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
+
+    auto* fn_c = b.Function("c", ty.bool_());
+
+    b.With(fn_c->Block(), [&] { b.Return(fn_c, true); });
+
+    auto* fn = b.Function("f", ty.bool_());
+
+    b.With(fn->Block(), [&] {
+        // 'b() && c()' is evaluated before 'a()'.
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_c)); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
+
+        auto* if2 = b.If(b.Call(ty.bool_(), fn_a));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
+
+        b.Return(fn, if2->Result(0));
+    });
+
+    EXPECT_WGSL(R"(
+fn a() -> bool {
+  return true;
+}
+
+fn b() -> bool {
+  return true;
+}
+
+fn c() -> bool {
+  return true;
+}
+
+fn f() -> bool {
+  let v = (b() && c());
+  return (a() && v);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, NonShortCircuit_And_Param_3_a_bc_EarlyEval) {
+    auto* fn = b.Function("f", ty.bool_());
+    auto* pa = b.FunctionParam(ty.bool_());
+    auto* pb = b.FunctionParam(ty.bool_());
+    auto* pc = b.FunctionParam(ty.bool_());
+    mod.SetName(pa, "a");
+    mod.SetName(pb, "b");
+    mod.SetName(pc, "c");
+    fn->SetParams({pa, pb, pc});
+
+    b.With(fn->Block(), [&] {
+        // 'b && c' is evaluated outside the true block of if2, but these can be moved to the RHS
+        // of the 'a &&' as the 'b && c' is not sequenced.
+        auto* if1 = b.If(pb);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, pc); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, false); });
+
+        auto* if2 = b.If(pa);
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, if1->Result(0)); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, false); });
+
+        b.Return(fn, if2->Result(0));
+    });
+
+    EXPECT_WGSL(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  let v = (b && c);
+  return (a && v);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, NonShortCircuit_Or_ParamCallParam_a_bc) {
+    auto* fn_b = b.Function("b", ty.bool_());
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
+
+    auto* fn = b.Function("f", ty.bool_());
+    auto* pa = b.FunctionParam(ty.bool_());
+    auto* pc = b.FunctionParam(ty.bool_());
+    mod.SetName(pa, "a");
+    mod.SetName(pc, "c");
+    fn->SetParams({pa, pc});
+
+    b.With(fn->Block(), [&] {
+        // 'b() && c' is evaluated before 'a'.
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, pc); });
+
+        auto* if2 = b.If(pa);
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
+
+        mod.SetName(if2->Result(0), "l");
+        b.Return(fn, if2->Result(0));
+    });
+
+    EXPECT_WGSL(R"(
+fn b() -> bool {
+  return true;
+}
+
+fn f(a : bool, c : bool) -> bool {
+  let v = (b() || c);
+  let l = (a || v);
+  return l;
+}
+)");
+}
+
+TEST_F(IRToProgramTest, NonShortCircuit_Or_Call_3_a_bc) {
+    auto* fn_a = b.Function("a", ty.bool_());
+
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, true); });
+
+    auto* fn_b = b.Function("b", ty.bool_());
+
+    b.With(fn_b->Block(), [&] { b.Return(fn_b, true); });
+
+    auto* fn_c = b.Function("c", ty.bool_());
+
+    b.With(fn_c->Block(), [&] { b.Return(fn_c, true); });
+
+    auto* fn = b.Function("f", ty.bool_());
+
+    b.With(fn->Block(), [&] {
+        auto* if1 = b.If(b.Call(ty.bool_(), fn_b));
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, b.Call(ty.bool_(), fn_c)); });
+
+        auto* if2 = b.If(b.Call(ty.bool_(), fn_a));
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
+
+        b.Return(fn, if2->Result(0));
+    });
+
+    EXPECT_WGSL(R"(
+fn a() -> bool {
+  return true;
+}
+
+fn b() -> bool {
+  return true;
+}
+
+fn c() -> bool {
+  return true;
+}
+
+fn f() -> bool {
+  let v = (b() || c());
+  return (a() || v);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, NonShortCircuit_Or_Param_3_a_bc_EarlyEval) {
+    auto* fn = b.Function("f", ty.bool_());
+    auto* pa = b.FunctionParam(ty.bool_());
+    auto* pb = b.FunctionParam(ty.bool_());
+    auto* pc = b.FunctionParam(ty.bool_());
+    mod.SetName(pa, "a");
+    mod.SetName(pb, "b");
+    mod.SetName(pc, "c");
+    fn->SetParams({pa, pb, pc});
+
+    b.With(fn->Block(), [&] {
+        // 'b || c' is evaluated outside the true block of if2, but these can be moved to the RHS
+        // of the 'a ||' as the 'b || c' is not sequenced.
+        auto* if1 = b.If(pb);
+        if1->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if1->True(), [&] { b.ExitIf(if1, true); });
+        b.With(if1->False(), [&] { b.ExitIf(if1, pc); });
+
+        auto* if2 = b.If(pa);
+        if2->SetResults(b.InstructionResult(ty.bool_()));
+        b.With(if2->True(), [&] { b.ExitIf(if2, true); });
+        b.With(if2->False(), [&] { b.ExitIf(if2, if1->Result(0)); });
+
+        b.Return(fn, if2->Result(0));
+    });
+
+    EXPECT_WGSL(R"(
+fn f(a : bool, b : bool, c : bool) -> bool {
+  let v = (b || c);
+  return (a || v);
 }
 )");
 }
@@ -1969,7 +2230,9 @@ TEST_F(IRToProgramTest, For_CallInInitCondCont) {
             i->SetInitializer(n_0);
 
             b.With(loop->Body(), [&] {
-                auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), b.Call(ty.i32(), fn_n, 1_i)));
+                auto* load = b.Load(i);
+                auto* call = b.Call(ty.i32(), fn_n, 1_i);
+                auto* if_ = b.If(b.LessThan(ty.bool_(), load, call));
                 b.With(if_->True(), [&] { b.ExitIf(if_); });
                 b.With(if_->False(), [&] { b.ExitLoop(loop); });
             });
@@ -2234,12 +2497,17 @@ TEST_F(IRToProgramTest, Loop_VarsDeclaredOutsideAndInside) {
             auto* var_a = b.Var("a", ty.ptr<function, i32>());
             var_a->SetInitializer(b.Constant(2_i));
 
-            auto* if_ = b.If(b.Equal(ty.bool_(), b.Load(var_a), b.Load(var_b)));
+            auto* body_load_a = b.Load(var_a);
+            auto* body_load_b = b.Load(var_b);
+            auto* if_ = b.If(b.Equal(ty.bool_(), body_load_a, body_load_b));
             b.With(if_->True(), [&] { b.Return(f); });
             b.With(if_->False(), [&] { b.ExitIf(if_); });
 
-            b.With(loop->Continuing(),
-                   [&] { b.Store(var_b, b.Add(ty.i32(), b.Load(var_a), b.Load(var_b))); });
+            b.With(loop->Continuing(), [&] {
+                auto* cont_load_a = b.Load(var_a);
+                auto* cont_load_b = b.Load(var_b);
+                b.Store(var_b, b.Add(ty.i32(), cont_load_a, cont_load_b));
+            });
         });
     });
 

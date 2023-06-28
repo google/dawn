@@ -31,6 +31,9 @@ namespace tint::ir {
 /// ControlInstruction.
 class ControlInstruction : public utils::Castable<ControlInstruction, OperandInstruction<1, 1>> {
   public:
+    /// Constructor
+    ControlInstruction();
+
     /// Destructor
     ~ControlInstruction() override;
 

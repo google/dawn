@@ -264,7 +264,7 @@ fn f(a : i32, b : u32) -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 // Short-circuiting binary ops
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Param_2) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Param_2) {
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
   return (a && b);
@@ -272,7 +272,7 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Param_3_ab_c) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Param_3_ab_c) {
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   return ((a && b) && c);
@@ -280,7 +280,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Param_3_a_bc) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Param_3_a_bc) {
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   return ((a && b) && c);
@@ -288,7 +288,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Let_2) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Let_2) {
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
   let l = (a && b);
@@ -297,7 +297,7 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Let_3_ab_c) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Let_3_ab_c) {
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   let l = ((a && b) && c);
@@ -306,7 +306,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Let_3_a_bc) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Let_3_a_bc) {
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   let l = (a && (b && c));
@@ -315,7 +315,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Call_2) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Call_2) {
     Test(R"(
 fn a() -> bool {
   return true;
@@ -331,7 +331,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Call_3_ab_c) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Call_3_ab_c) {
     Test(R"(
 fn a() -> bool {
   return true;
@@ -351,7 +351,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalAnd_Call_3_a_bc) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_And_Call_3_a_bc) {
     Test(R"(
 fn a() -> bool {
   return true;
@@ -371,7 +371,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Param_2) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Param_2) {
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
   return (a || b);
@@ -379,7 +379,7 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Param_3_ab_c) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Param_3_ab_c) {
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   return ((a || b) || c);
@@ -387,7 +387,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Param_3_a_bc) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Param_3_a_bc) {
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   return (a || (b || c));
@@ -395,7 +395,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Let_2) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Let_2) {
     Test(R"(
 fn f(a : bool, b : bool) -> bool {
   let l = (a || b);
@@ -404,7 +404,7 @@ fn f(a : bool, b : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Let_3_ab_c) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Let_3_ab_c) {
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   let l = ((a || b) || c);
@@ -413,7 +413,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Let_3_a_bc) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Let_3_a_bc) {
     Test(R"(
 fn f(a : bool, b : bool, c : bool) -> bool {
   let l = (a || (b || c));
@@ -422,7 +422,7 @@ fn f(a : bool, b : bool, c : bool) -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Call_2) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Call_2) {
     Test(R"(
 fn a() -> bool {
   return true;
@@ -438,7 +438,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Call_3_ab_c) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Call_3_ab_c) {
     Test(R"(
 fn a() -> bool {
   return true;
@@ -458,7 +458,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalOr_Call_3_a_bc) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Or_Call_3_a_bc) {
     Test(R"(
 fn a() -> bool {
   return true;
@@ -478,7 +478,7 @@ fn f() -> bool {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, BinaryOp_LogicalMixed) {
+TEST_F(IRToProgramRoundtripTest, ShortCircuit_Mixed) {
     Test(R"(
 fn b() -> bool {
   return true;
