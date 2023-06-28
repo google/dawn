@@ -18,6 +18,7 @@
 #include "src/tint/ir/instruction_result.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/utils/castable.h"
+#include "src/tint/utils/enum_set.h"
 
 // Forward declarations
 namespace tint::ir {
@@ -57,7 +58,11 @@ class Instruction : public utils::Castable<Instruction> {
     virtual void Destroy();
 
     /// @returns true if the Instruction has not been destroyed with Destroy()
-    bool Alive() const { return alive_; }
+    bool Alive() const { return !flags_.Contains(Flag::kDead); }
+
+    /// @returns true if the Instruction is sequenced. Sequenced instructions cannot be implicitly
+    /// reordered with other sequenced instructions.
+    bool Sequenced() const { return flags_.Contains(Flag::kSequenced); }
 
     /// Sets the block that owns this instruction
     /// @param block the new owner block
@@ -92,14 +97,22 @@ class Instruction : public utils::Castable<Instruction> {
     Instruction* prev = nullptr;
 
   protected:
+    /// Flags applied to an Instruction
+    enum class Flag {
+        /// The instruction has been destroyed
+        kDead,
+        /// The instruction must not be reordered with another sequenced instruction
+        kSequenced,
+    };
+
     /// Constructor
     Instruction();
 
     /// The block that owns this instruction
     ir::Block* block_ = nullptr;
 
-  private:
-    bool alive_ = true;
+    /// Bitset of instruction flags
+    utils::EnumSet<Flag> flags_;
 };
 
 }  // namespace tint::ir

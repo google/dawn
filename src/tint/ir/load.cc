@@ -22,6 +22,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Load);
 namespace tint::ir {
 
 Load::Load(InstructionResult* result, Value* from) {
+    flags_.Add(Flag::kSequenced);
+
     TINT_ASSERT(IR, from->Type()->Is<type::Pointer>());
     TINT_ASSERT(IR, from && from->Type()->UnwrapPtr() == result->Type());
 

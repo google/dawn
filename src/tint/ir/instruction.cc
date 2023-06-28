@@ -34,7 +34,7 @@ void Instruction::Destroy() {
         result->SetSource(nullptr);
         result->Destroy();
     }
-    alive_ = false;
+    flags_.Add(Flag::kDead);
 }
 
 void Instruction::InsertBefore(Instruction* before) {

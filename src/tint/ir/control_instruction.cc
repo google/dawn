@@ -18,7 +18,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::ControlInstruction);
 
 namespace tint::ir {
 
-ControlInstruction::~ControlInstruction() = default;
+ControlInstruction::~ControlInstruction() {
+    flags_.Add(Flag::kSequenced);
+}
 
 void ControlInstruction::AddExit(Exit* exit) {
     exits_.Add(exit);

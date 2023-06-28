@@ -20,7 +20,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Call);
 
 namespace tint::ir {
 
-Call::Call() = default;
+Call::Call() {
+    flags_.Add(Flag::kSequenced);
+}
 
 Call::~Call() = default;
 

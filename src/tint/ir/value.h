@@ -64,7 +64,7 @@ class Value : public utils::Castable<Value> {
     virtual void Destroy();
 
     /// @returns true if the Value has not been destroyed with Destroy()
-    bool Alive() const { return alive_; }
+    bool Alive() const { return !flags_.Contains(Flag::kDead); }
 
     /// Adds a usage of this value.
     /// @param u the usage
@@ -91,8 +91,16 @@ class Value : public utils::Castable<Value> {
     Value();
 
   private:
+    /// Flags applied to an Value
+    enum class Flag {
+        /// The value has been destroyed
+        kDead,
+    };
+
     utils::Hashset<Usage, 4, Usage::Hasher> uses_;
-    bool alive_ = true;
+
+    /// Bitset of value flags
+    utils::EnumSet<Flag> flags_;
 };
 }  // namespace tint::ir
 

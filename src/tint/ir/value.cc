@@ -28,7 +28,7 @@ Value::~Value() = default;
 void Value::Destroy() {
     TINT_ASSERT(IR, Alive());
     TINT_ASSERT(IR, Usages().Count() == 0);
-    alive_ = false;
+    flags_.Add(Flag::kDead);
 }
 
 void Value::ReplaceAllUsesWith(std::function<Value*(Usage use)> replacer) {
