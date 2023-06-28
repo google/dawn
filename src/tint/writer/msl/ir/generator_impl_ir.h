@@ -20,6 +20,7 @@
 
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/type/texture.h"
 #include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/ir_text_generator.h"
 
@@ -45,6 +46,30 @@ class GeneratorImplIr : public IRTextGenerator {
     /// @param ty the type to emit
     void EmitType(utils::StringStream& out, const type::Type* ty);
 
+    /// Handles generating an array declaration
+    /// @param out the output stream
+    /// @param arr the array to emit
+    void EmitArrayType(utils::StringStream& out, const type::Array* arr);
+    /// Handles generating an atomic declaration
+    /// @param out the output stream
+    /// @param atomic the atomic to emit
+    void EmitAtomicType(utils::StringStream& out, const type::Atomic* atomic);
+    /// Handles generating a pointer declaration
+    /// @param out the output stream
+    /// @param ptr the pointer to emit
+    void EmitPointerType(utils::StringStream& out, const type::Pointer* ptr);
+    /// Handles generating a vector declaration
+    /// @param out the output stream
+    /// @param vec the vector to emit
+    void EmitVectorType(utils::StringStream& out, const type::Vector* vec);
+    /// Handles generating a matrix declaration
+    /// @param out the output stream
+    /// @param mat the matrix to emit
+    void EmitMatrixType(utils::StringStream& out, const type::Matrix* mat);
+    /// Handles generating a texture declaration
+    /// @param out the output stream
+    /// @param tex the texture to emit
+    void EmitTextureType(utils::StringStream& out, const type::Texture* tex);
     /// Handles generating a struct declaration. If the structure has already been emitted, then
     /// this function will simply return without emitting anything.
     /// @param str the struct to generate

@@ -164,129 +164,13 @@ void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
         [&](const type::F16*) { out << "half"; },   //
         [&](const type::I32*) { out << "int"; },    //
         [&](const type::U32*) { out << "uint"; },   //
-        [&](const type::Array* arr) {
-            out << ArrayTemplateName() << "<";
-            EmitType(out, arr->ElemType());
-            out << ", ";
-            if (arr->Count()->Is<type::RuntimeArrayCount>()) {
-                out << "1";
-            } else {
-                auto count = arr->ConstantCount();
-                if (!count) {
-                    diagnostics_.add_error(diag::System::Writer,
-                                           type::Array::kErrExpectedConstantCount);
-                    return;
-                }
-                out << count.value();
-            }
-            out << ">";
-        },
-        [&](const type::Vector* vec) {
-            if (vec->Packed()) {
-                out << "packed_";
-            }
-            EmitType(out, vec->type());
-            out << vec->Width();
-        },
-        [&](const type::Matrix* mat) {
-            EmitType(out, mat->type());
-            out << mat->columns() << "x" << mat->rows();
-        },
-        [&](const type::Atomic* atomic) {
-            if (atomic->Type()->Is<type::I32>()) {
-                out << "atomic_int";
-                return;
-            }
-            if (TINT_LIKELY(atomic->Type()->Is<type::U32>())) {
-                out << "atomic_uint";
-                return;
-            }
-            TINT_ICE(Writer, diagnostics_)
-                << "unhandled atomic type " << atomic->Type()->FriendlyName();
-        },
-        [&](const type::Pointer* ptr) {
-            if (ptr->Access() == builtin::Access::kRead) {
-                out << "const ";
-            }
-            EmitAddressSpace(out, ptr->AddressSpace());
-            out << " ";
-            EmitType(out, ptr->StoreType());
-            out << "*";
-        },
+        [&](const type::Array* arr) { EmitArrayType(out, arr); },
+        [&](const type::Vector* vec) { EmitVectorType(out, vec); },
+        [&](const type::Matrix* mat) { EmitMatrixType(out, mat); },
+        [&](const type::Atomic* atomic) { EmitAtomicType(out, atomic); },
+        [&](const type::Pointer* ptr) { EmitPointerType(out, ptr); },
         [&](const type::Sampler*) { out << "sampler"; },  //
-        [&](const type::Texture* tex) {
-            if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
-                TINT_ICE(Writer, diagnostics_)
-                    << "Multiplanar external texture transform was not run.";
-                return;
-            }
-
-            if (tex->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
-                out << "depth";
-            } else {
-                out << "texture";
-            }
-
-            switch (tex->dim()) {
-                case type::TextureDimension::k1d:
-                    out << "1d";
-                    break;
-                case type::TextureDimension::k2d:
-                    out << "2d";
-                    break;
-                case type::TextureDimension::k2dArray:
-                    out << "2d_array";
-                    break;
-                case type::TextureDimension::k3d:
-                    out << "3d";
-                    break;
-                case type::TextureDimension::kCube:
-                    out << "cube";
-                    break;
-                case type::TextureDimension::kCubeArray:
-                    out << "cube_array";
-                    break;
-                default:
-                    diagnostics_.add_error(diag::System::Writer, "Invalid texture dimensions");
-                    return;
-            }
-            if (tex->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
-                out << "_ms";
-            }
-            out << "<";
-            TINT_DEFER(out << ">");
-
-            tint::Switch(
-                tex,  //
-                [&](const type::DepthTexture*) { out << "float, access::sample"; },
-                [&](const type::DepthMultisampledTexture*) { out << "float, access::read"; },
-                [&](const type::StorageTexture* storage) {
-                    EmitType(out, storage->type());
-                    out << ", ";
-
-                    std::string access_str;
-                    if (storage->access() == builtin::Access::kRead) {
-                        out << "access::read";
-                    } else if (storage->access() == builtin::Access::kWrite) {
-                        out << "access::write";
-                    } else {
-                        diagnostics_.add_error(diag::System::Writer,
-                                               "Invalid access control for storage texture");
-                        return;
-                    }
-                },
-                [&](const type::MultisampledTexture* ms) {
-                    EmitType(out, ms->type());
-                    out << ", access::read";
-                },
-                [&](const type::SampledTexture* sampled) {
-                    EmitType(out, sampled->type());
-                    out << ", access::sample";
-                },
-                [&](Default) {
-                    diagnostics_.add_error(diag::System::Writer, "invalid texture type");
-                });
-        },
+        [&](const type::Texture* tex) { EmitTextureType(out, tex); },
         [&](const type::Struct* str) {
             out << StructName(str);
 
@@ -294,6 +178,129 @@ void GeneratorImplIr::EmitType(utils::StringStream& out, const type::Type* ty) {
             EmitStructType(str);
         },
         [&](Default) { UNHANDLED_CASE(ty); });
+}
+
+void GeneratorImplIr::EmitPointerType(utils::StringStream& out, const type::Pointer* ptr) {
+    if (ptr->Access() == builtin::Access::kRead) {
+        out << "const ";
+    }
+    EmitAddressSpace(out, ptr->AddressSpace());
+    out << " ";
+    EmitType(out, ptr->StoreType());
+    out << "*";
+}
+
+void GeneratorImplIr::EmitAtomicType(utils::StringStream& out, const type::Atomic* atomic) {
+    if (atomic->Type()->Is<type::I32>()) {
+        out << "atomic_int";
+        return;
+    }
+    if (TINT_LIKELY(atomic->Type()->Is<type::U32>())) {
+        out << "atomic_uint";
+        return;
+    }
+    TINT_ICE(Writer, diagnostics_) << "unhandled atomic type " << atomic->Type()->FriendlyName();
+}
+
+void GeneratorImplIr::EmitArrayType(utils::StringStream& out, const type::Array* arr) {
+    out << ArrayTemplateName() << "<";
+    EmitType(out, arr->ElemType());
+    out << ", ";
+    if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+        out << "1";
+    } else {
+        auto count = arr->ConstantCount();
+        if (!count) {
+            diagnostics_.add_error(diag::System::Writer, type::Array::kErrExpectedConstantCount);
+            return;
+        }
+        out << count.value();
+    }
+    out << ">";
+}
+
+void GeneratorImplIr::EmitVectorType(utils::StringStream& out, const type::Vector* vec) {
+    if (vec->Packed()) {
+        out << "packed_";
+    }
+    EmitType(out, vec->type());
+    out << vec->Width();
+}
+
+void GeneratorImplIr::EmitMatrixType(utils::StringStream& out, const type::Matrix* mat) {
+    EmitType(out, mat->type());
+    out << mat->columns() << "x" << mat->rows();
+}
+
+void GeneratorImplIr::EmitTextureType(utils::StringStream& out, const type::Texture* tex) {
+    if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
+        TINT_ICE(Writer, diagnostics_) << "Multiplanar external texture transform was not run.";
+        return;
+    }
+
+    if (tex->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
+        out << "depth";
+    } else {
+        out << "texture";
+    }
+
+    switch (tex->dim()) {
+        case type::TextureDimension::k1d:
+            out << "1d";
+            break;
+        case type::TextureDimension::k2d:
+            out << "2d";
+            break;
+        case type::TextureDimension::k2dArray:
+            out << "2d_array";
+            break;
+        case type::TextureDimension::k3d:
+            out << "3d";
+            break;
+        case type::TextureDimension::kCube:
+            out << "cube";
+            break;
+        case type::TextureDimension::kCubeArray:
+            out << "cube_array";
+            break;
+        default:
+            diagnostics_.add_error(diag::System::Writer, "Invalid texture dimensions");
+            return;
+    }
+    if (tex->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
+        out << "_ms";
+    }
+    out << "<";
+    TINT_DEFER(out << ">");
+
+    tint::Switch(
+        tex,  //
+        [&](const type::DepthTexture*) { out << "float, access::sample"; },
+        [&](const type::DepthMultisampledTexture*) { out << "float, access::read"; },
+        [&](const type::StorageTexture* storage) {
+            EmitType(out, storage->type());
+            out << ", ";
+
+            std::string access_str;
+            if (storage->access() == builtin::Access::kRead) {
+                out << "access::read";
+            } else if (storage->access() == builtin::Access::kWrite) {
+                out << "access::write";
+            } else {
+                diagnostics_.add_error(diag::System::Writer,
+                                       "Invalid access control for storage texture");
+                return;
+            }
+        },
+        [&](const type::MultisampledTexture* ms) {
+            EmitType(out, ms->type());
+            out << ", access::read";
+        },
+        [&](const type::SampledTexture* sampled) {
+            EmitType(out, sampled->type());
+            out << ", access::sample";
+        },
+        [&](Default) { diagnostics_.add_error(diag::System::Writer, "invalid texture type"); });
 }
 
 void GeneratorImplIr::EmitStructType(const type::Struct* str) {
