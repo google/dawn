@@ -465,6 +465,7 @@ fn c() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenCallVoidFn_ThenUseLoad) {
     auto* fn_a = b.Function("a", ty.void_());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a); });
 
     auto* fn = b.Function("f", ty.i32());
     b.With(fn->Block(), [&] {

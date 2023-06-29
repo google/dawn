@@ -43,6 +43,7 @@
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/unary.h"
 #include "src/tint/ir/user_call.h"
+#include "src/tint/ir/validate.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
@@ -85,6 +86,12 @@ class State {
     explicit State(Module& m) : mod(m) {}
 
     Program Run() {
+        if (auto res = Validate(mod); !res) {
+            // IR module failed validation.
+            b.Diagnostics() = res.Failure();
+            return Program{std::move(b)};
+        }
+
         if (mod.root_block) {
             RootBlock(mod.root_block);
         }
