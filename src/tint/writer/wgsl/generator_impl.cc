@@ -430,6 +430,11 @@ void GeneratorImpl::EmitAttributes(utils::StringStream& out,
                 EmitExpression(out, location->expr);
                 out << ")";
             },
+            [&](const ast::IndexAttribute* index) {
+                out << "index(";
+                EmitExpression(out, index->expr);
+                out << ")";
+            },
             [&](const ast::BuiltinAttribute* builtin) {
                 out << "builtin(";
                 EmitExpression(out, builtin->builtin);
