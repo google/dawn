@@ -547,15 +547,19 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
         }
     }
 
-    // This workaround is needed on Intel Gen12LP GPUs with driver >= 30.0.101.4091.
-    // See http://crbug.com/dawn/1083 for more information.
-    if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
-        const gpu_info::DriverVersion kDriverVersion = {30, 0, 101, 4091};
-        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(), kDriverVersion) !=
-            -1) {
-            deviceToggles->Default(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource,
-                                   true);
-        }
+    // This workaround is needed on Intel Gen9 GPUs with driver >= 31.0.101.2121 and Gen12LP GPUs
+    // with driver >= 31.0.101.4091. See http://crbug.com/dawn/1083 for more information.
+    bool useBlitForT2T = false;
+    if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
+        useBlitForT2T = gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
+                                                              {31, 0, 101, 2121}) != -1;
+    } else if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
+        useBlitForT2T = gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
+                                                              {31, 0, 101, 4091}) != -1;
+    }
+    if (useBlitForT2T) {
+        deviceToggles->Default(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource,
+                               true);
     }
 
     // D3D driver has a bug resolving overlapping queries to a same buffer on Intel Gen12 GPUs. This
