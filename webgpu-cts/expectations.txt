@@ -68,7 +68,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-06-23 11:41:57PM
+# Last rolled: 2023-06-28 09:02:36PM
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -1010,5 +1010,5 @@ crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,copyToTexture,canvas:copy_co
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm-srgb";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm-srgb";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:* [ Failure ]
-crbug.com/dawn/0000 [ win nvidia ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="rg16sint" [ Failure ]
+crbug.com/dawn/0000 [ nvidia win ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="rg16sint" [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
