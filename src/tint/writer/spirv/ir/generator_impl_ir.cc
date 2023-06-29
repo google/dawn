@@ -670,7 +670,7 @@ void GeneratorImplIr::EmitTerminator(ir::Terminator* t) {
                                         {
                                             Value(breakif->Condition()),
                                             loop_merge_label_,
-                                            Label(breakif->Loop()->Body()),
+                                            loop_header_label_,
                                         });
         },
         [&](ir::Continue* cont) {
@@ -681,8 +681,8 @@ void GeneratorImplIr::EmitTerminator(ir::Terminator* t) {
         [&](ir::ExitSwitch*) {
             current_function_.push_inst(spv::Op::OpBranch, {switch_merge_label_});
         },
-        [&](ir::NextIteration* loop) {
-            current_function_.push_inst(spv::Op::OpBranch, {Label(loop->Loop()->Body())});
+        [&](ir::NextIteration*) {
+            current_function_.push_inst(spv::Op::OpBranch, {loop_header_label_});
         },
         [&](ir::Unreachable*) { current_function_.push_inst(spv::Op::OpUnreachable, {}); },
 
@@ -967,11 +967,13 @@ void GeneratorImplIr::EmitLoad(ir::Load* load) {
 
 void GeneratorImplIr::EmitLoop(ir::Loop* loop) {
     auto init_label = loop->HasInitializer() ? Label(loop->Initializer()) : 0;
-    auto header_label = Label(loop->Body());  // Back-edge needs to branch to the loop header
-    auto body_label = module_.NextId();
+    auto body_label = Label(loop->Body());
     auto continuing_label = Label(loop->Continuing());
 
-    uint32_t merge_label = module_.NextId();
+    auto header_label = module_.NextId();
+    TINT_SCOPED_ASSIGNMENT(loop_header_label_, header_label);
+
+    auto merge_label = module_.NextId();
     TINT_SCOPED_ASSIGNMENT(loop_merge_label_, merge_label);
 
     if (init_label != 0) {

@@ -267,6 +267,9 @@ class GeneratorImplIr {
     /// The merge block for the current if statement
     uint32_t if_merge_label_ = 0;
 
+    /// The header block for the current loop statement
+    uint32_t loop_header_label_ = 0;
+
     /// The merge block for the current loop statement
     uint32_t loop_merge_label_ = 0;
 

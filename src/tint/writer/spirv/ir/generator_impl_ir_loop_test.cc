@@ -40,14 +40,14 @@ TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
 %9 = OpConstantTrue %10
 %1 = OpFunction %2 None %3
 %4 = OpLabel
-OpBranch %5
-%5 = OpLabel
-OpLoopMerge %8 %7 None
-OpBranch %6
-%6 = OpLabel
 OpBranch %7
 %7 = OpLabel
-OpBranchConditional %9 %8 %5
+OpLoopMerge %8 %6 None
+OpBranch %5
+%5 = OpLabel
+OpBranch %6
+%6 = OpLabel
+OpBranchConditional %9 %8 %7
 %8 = OpLabel
 OpReturn
 OpFunctionEnd
@@ -73,14 +73,14 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
 %3 = OpTypeFunction %2
 %1 = OpFunction %2 None %3
 %4 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpLoopMerge %8 %6 None
 OpBranch %5
 %5 = OpLabel
-OpLoopMerge %8 %7 None
-OpBranch %6
-%6 = OpLabel
 OpBranch %8
-%7 = OpLabel
-OpBranch %5
+%6 = OpLabel
+OpBranch %7
 %8 = OpLabel
 OpReturn
 OpFunctionEnd
@@ -113,19 +113,19 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
 %11 = OpConstantTrue %12
 %1 = OpFunction %2 None %3
 %4 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpLoopMerge %8 %6 None
 OpBranch %5
 %5 = OpLabel
-OpLoopMerge %8 %7 None
-OpBranch %6
-%6 = OpLabel
 OpSelectionMerge %9 None
 OpBranchConditional %11 %10 %9
 %10 = OpLabel
 OpBranch %8
 %9 = OpLabel
+OpBranch %6
+%6 = OpLabel
 OpBranch %7
-%7 = OpLabel
-OpBranch %5
 %8 = OpLabel
 OpReturn
 OpFunctionEnd
@@ -158,19 +158,19 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
 %11 = OpConstantTrue %12
 %1 = OpFunction %2 None %3
 %4 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpLoopMerge %8 %6 None
 OpBranch %5
 %5 = OpLabel
-OpLoopMerge %8 %7 None
-OpBranch %6
-%6 = OpLabel
 OpSelectionMerge %9 None
 OpBranchConditional %11 %10 %9
 %10 = OpLabel
-OpBranch %7
+OpBranch %6
 %9 = OpLabel
 OpBranch %8
-%7 = OpLabel
-OpBranch %5
+%6 = OpLabel
+OpBranch %7
 %8 = OpLabel
 OpReturn
 OpFunctionEnd
@@ -196,14 +196,14 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
 %3 = OpTypeFunction %2
 %1 = OpFunction %2 None %3
 %4 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpLoopMerge %8 %6 None
 OpBranch %5
 %5 = OpLabel
-OpLoopMerge %8 %7 None
-OpBranch %6
-%6 = OpLabel
 OpReturn
-%7 = OpLabel
-OpBranch %5
+%6 = OpLabel
+OpBranch %7
 %8 = OpLabel
 OpUnreachable
 OpFunctionEnd
@@ -234,15 +234,15 @@ TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
 %12 = OpConstant %10 2
 %1 = OpFunction %2 None %3
 %4 = OpLabel
-OpBranch %5
-%5 = OpLabel
-OpLoopMerge %8 %7 None
-OpBranch %6
-%6 = OpLabel
-%9 = OpIEqual %10 %11 %12
 OpBranch %7
 %7 = OpLabel
-OpBranchConditional %9 %8 %5
+OpLoopMerge %8 %6 None
+OpBranch %5
+%5 = OpLabel
+%9 = OpIEqual %10 %11 %12
+OpBranch %6
+%6 = OpLabel
+OpBranchConditional %9 %8 %7
 %8 = OpLabel
 OpReturn
 OpFunctionEnd
@@ -275,23 +275,23 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
 %13 = OpConstantTrue %14
 %1 = OpFunction %2 None %3
 %4 = OpLabel
-OpBranch %5
-%5 = OpLabel
-OpLoopMerge %8 %7 None
-OpBranch %6
-%6 = OpLabel
-OpBranch %9
-%9 = OpLabel
-OpLoopMerge %12 %11 None
-OpBranch %10
-%10 = OpLabel
-OpBranch %12
-%11 = OpLabel
-OpBranch %9
-%12 = OpLabel
 OpBranch %7
 %7 = OpLabel
-OpBranchConditional %13 %8 %5
+OpLoopMerge %8 %6 None
+OpBranch %5
+%5 = OpLabel
+OpBranch %11
+%11 = OpLabel
+OpLoopMerge %12 %10 None
+OpBranch %9
+%9 = OpLabel
+OpBranch %12
+%10 = OpLabel
+OpBranch %11
+%12 = OpLabel
+OpBranch %6
+%6 = OpLabel
+OpBranchConditional %13 %8 %7
 %8 = OpLabel
 OpReturn
 OpFunctionEnd
@@ -324,23 +324,23 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
 %13 = OpConstantTrue %14
 %1 = OpFunction %2 None %3
 %4 = OpLabel
-OpBranch %5
-%5 = OpLabel
-OpLoopMerge %8 %7 None
-OpBranch %6
-%6 = OpLabel
 OpBranch %7
 %7 = OpLabel
-OpBranch %9
-%9 = OpLabel
-OpLoopMerge %12 %11 None
-OpBranch %10
-%10 = OpLabel
+OpLoopMerge %8 %6 None
+OpBranch %5
+%5 = OpLabel
+OpBranch %6
+%6 = OpLabel
 OpBranch %11
 %11 = OpLabel
-OpBranchConditional %13 %12 %9
+OpLoopMerge %12 %10 None
+OpBranch %9
+%9 = OpLabel
+OpBranch %10
+%10 = OpLabel
+OpBranchConditional %13 %12 %11
 %12 = OpLabel
-OpBranchConditional %13 %8 %5
+OpBranchConditional %13 %8 %7
 %8 = OpLabel
 OpReturn
 OpFunctionEnd
@@ -387,18 +387,18 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
 %4 = OpLabel
 OpBranch %5
 %5 = OpLabel
-OpBranch %6
-%6 = OpLabel
-%11 = OpPhi %10 %12 %5 %13 %8
-OpLoopMerge %9 %8 None
-OpBranch %7
-%7 = OpLabel
-%14 = OpIAdd %10 %11 %12
 OpBranch %8
 %8 = OpLabel
+%11 = OpPhi %10 %12 %5 %13 %7
+OpLoopMerge %9 %7 None
+OpBranch %6
+%6 = OpLabel
+%14 = OpIAdd %10 %11 %12
+OpBranch %7
+%7 = OpLabel
 %13 = OpPhi %10 %14 %6
 %15 = OpSGreaterThan %16 %13 %17
-OpBranchConditional %15 %9 %6
+OpBranchConditional %15 %9 %8
 %9 = OpLabel
 OpReturn
 OpFunctionEnd
@@ -449,21 +449,21 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
 %4 = OpLabel
 OpBranch %5
 %5 = OpLabel
-OpBranch %6
-%6 = OpLabel
-%11 = OpPhi %10 %12 %5 %13 %8
-%15 = OpPhi %14 %16 %5 %17 %8
-OpLoopMerge %9 %8 None
-OpBranch %7
-%7 = OpLabel
-%18 = OpIAdd %10 %11 %12
 OpBranch %8
 %8 = OpLabel
+%11 = OpPhi %10 %12 %5 %13 %7
+%15 = OpPhi %14 %16 %5 %17 %7
+OpLoopMerge %9 %7 None
+OpBranch %6
+%6 = OpLabel
+%18 = OpIAdd %10 %11 %12
+OpBranch %7
+%7 = OpLabel
 %13 = OpPhi %10 %18 %6
 %19 = OpPhi %14 %15 %6
 %20 = OpSGreaterThan %14 %13 %21
 %17 = OpLogicalEqual %14 %19 %16
-OpBranchConditional %20 %9 %6
+OpBranchConditional %20 %9 %8
 %9 = OpLabel
 OpReturn
 OpFunctionEnd
