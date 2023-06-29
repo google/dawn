@@ -156,6 +156,7 @@ class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
     /// @param constant_value the constant value for the variable. May be null
     /// @param binding_point the optional resource binding point of the variable
     /// @param location the location value if provided
+    /// @param index the index value if provided
     ///
     /// Note, a GlobalVariable generally doesn't have a `location` in WGSL, as it isn't allowed by
     /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
@@ -166,7 +167,8 @@ class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
                    builtin::Access access,
                    const constant::Value* constant_value,
                    std::optional<sem::BindingPoint> binding_point = std::nullopt,
-                   std::optional<uint32_t> location = std::nullopt);
+                   std::optional<uint32_t> location = std::nullopt,
+                   std::optional<uint32_t> index = std::nullopt);
 
     /// Destructor
     ~GlobalVariable() override;
@@ -188,6 +190,7 @@ class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
 
     tint::OverrideId override_id_;
     std::optional<uint32_t> location_;
+    std::optional<uint32_t> index_;
 };
 
 /// Parameter is a function parameter

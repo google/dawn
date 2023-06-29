@@ -62,10 +62,12 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration,
                                builtin::Access access,
                                const constant::Value* constant_value,
                                std::optional<sem::BindingPoint> binding_point,
-                               std::optional<uint32_t> location)
+                               std::optional<uint32_t> location,
+                               std::optional<uint32_t> index)
     : Base(declaration, type, stage, address_space, access, constant_value),
       binding_point_(binding_point),
-      location_(location) {}
+      location_(location),
+      index_(index) {}
 
 GlobalVariable::~GlobalVariable() = default;
 

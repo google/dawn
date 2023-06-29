@@ -120,5 +120,17 @@ TEST_F(DualSourceBlendingExtensionTests, StructMemberIndexAttribute) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+// Using an index attribute on a global variable should pass. This is needed internally when using
+// @index with the canonicalize_entry_point transform. This test uses an internal attribute to
+// ignore address space, which is how it is used with the canonicalize_entry_point transform.
+TEST_F(DualSourceBlendingExtensionTests, GlobalVariableIndexAttribute) {
+    GlobalVar("var", ty.vec4<f32>(),
+              utils::Vector{Location(0_a), Index(0_a),
+                            Disable(ast::DisabledValidation::kIgnoreAddressSpace)},
+              builtin::AddressSpace::kOut);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 }  // namespace
 }  // namespace tint::resolver

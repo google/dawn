@@ -572,7 +572,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         bool has_io_address_space = address_space == builtin::AddressSpace::kIn ||
                                     address_space == builtin::AddressSpace::kOut;
 
-        std::optional<uint32_t> group, binding, location;
+        std::optional<uint32_t> group, binding, location, index;
         for (auto* attribute : var->attributes) {
             Mark(attribute);
             enum Status { kSuccess, kErrored, kInvalid };
@@ -603,6 +603,17 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                         return kErrored;
                     }
                     location = value.Get();
+                    return kSuccess;
+                },
+                [&](const ast::IndexAttribute* attr) {
+                    if (!has_io_address_space) {
+                        return kInvalid;
+                    }
+                    auto value = IndexAttribute(attr);
+                    if (!value) {
+                        return kErrored;
+                    }
+                    index = value.Get();
                     return kSuccess;
                 },
                 [&](const ast::BuiltinAttribute* attr) {
@@ -645,7 +656,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         }
         sem = builder_->create<sem::GlobalVariable>(
             var, var_ty, sem::EvaluationStage::kRuntime, address_space, access,
-            /* constant_value */ nullptr, binding_point, location);
+            /* constant_value */ nullptr, binding_point, location, index);
 
     } else {
         for (auto* attribute : var->attributes) {
