@@ -242,6 +242,67 @@ fn f(i : f32) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Type Convert
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, TypeConvert_i32_to_u32) {
+    Test(R"(
+fn f(i : i32) {
+  var v : u32 = u32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConvert_u32_to_f32) {
+    Test(R"(
+fn f(i : u32) {
+  var v : f32 = f32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConvert_f32_to_i32) {
+    Test(R"(
+fn f(i : f32) {
+  var v : i32 = i32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConvert_bool_to_u32) {
+    Test(R"(
+fn f(i : bool) {
+  var v : u32 = u32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConvert_vec3i_to_vec3u) {
+    Test(R"(
+fn f(i : vec3<i32>) {
+  var v : vec3<u32> = vec3<u32>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConvert_vec3u_to_vec3f) {
+    Test(R"(
+fn f(i : vec3<u32>) {
+  var v : vec3<f32> = vec3<f32>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConvert_mat2x3f_to_mat2x3h) {
+    Test(R"(
+enable f16;
+
+fn f(i : mat2x3<f32>) {
+  var v : mat2x3<f16> = mat2x3<f16>(i);
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Access
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, Access_Value_vec3f_1) {
