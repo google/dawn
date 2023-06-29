@@ -530,9 +530,8 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
     // data to mD3d11ConstantBuffer, since UpdateSubresource() has many restrictions. For example,
     // the size of the data has to be a multiple of 16, etc
     BufferDescriptor descriptor;
-    descriptor.size = size;
-    DAWN_ASSERT(IsAligned(descriptor.size, 4));
     descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    descriptor.size = Align(size, D3D11BufferSizeAlignment(descriptor.usage));
     descriptor.mappedAtCreation = false;
     descriptor.label = "DawnWriteStagingBuffer";
     Ref<BufferBase> stagingBuffer;
