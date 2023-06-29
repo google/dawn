@@ -107,6 +107,11 @@ class GeneratorImplIr {
     /// @returns the result ID of the instruction
     uint32_t Value(ir::Instruction* inst);
 
+    /// Get the result ID of the OpUndef instruction with type `ty`, emitting it if necessary.
+    /// @param ty the type of the undef value
+    /// @returns the result ID of the instruction
+    uint32_t Undef(const type::Type* ty);
+
     /// Get the ID of the label for `block`.
     /// @param block the block to get the label ID for
     /// @returns the ID of the block's label
@@ -251,6 +256,9 @@ class GeneratorImplIr {
 
     /// The map of types to the result IDs of their OpConstantNull instructions.
     utils::Hashmap<const type::Type*, uint32_t, 4> constant_nulls_;
+
+    /// The map of types to the result IDs of their OpUndef instructions.
+    utils::Hashmap<const type::Type*, uint32_t, 4> undef_values_;
 
     /// The map of non-constant values to their result IDs.
     utils::Hashmap<ir::Value*, uint32_t, 8> values_;

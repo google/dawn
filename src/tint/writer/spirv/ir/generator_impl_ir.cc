@@ -267,6 +267,14 @@ uint32_t GeneratorImplIr::ConstantNull(const type::Type* type) {
     });
 }
 
+uint32_t GeneratorImplIr::Undef(const type::Type* type) {
+    return undef_values_.GetOrCreate(type, [&] {
+        auto id = module_.NextId();
+        module_.PushType(spv::Op::OpUndef, {Type(type), id});
+        return id;
+    });
+}
+
 uint32_t GeneratorImplIr::Type(const type::Type* ty,
                                builtin::AddressSpace addrspace /* = kUndefined */) {
     return types_.GetOrCreate(ty, [&] {
@@ -1161,7 +1169,11 @@ void GeneratorImplIr::EmitExitPhis(ir::ControlInstruction* inst) {
 
         OperandList ops{Type(ty), Value(result)};
         for (auto& branch : branches) {
-            ops.push_back(Value(branch.value));
+            if (branch.value == nullptr) {
+                ops.push_back(Undef(ty));
+            } else {
+                ops.push_back(Value(branch.value));
+            }
             ops.push_back(branch.label);
         }
         current_function_.push_inst(spv::Op::OpPhi, std::move(ops));
