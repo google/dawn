@@ -179,9 +179,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxSamplersPerShaderStage = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
     limits->v1.maxColorAttachments = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
-    // TODO(dawn:1721): support dynamic uniform buffers and storage buffers?
-    limits->v1.maxDynamicUniformBuffersPerPipelineLayout = 0;
-    limits->v1.maxDynamicStorageBuffersPerPipelineLayout = 0;
+    limits->v1.maxDynamicUniformBuffersPerPipelineLayout =
+        limits->v1.maxUniformBuffersPerShaderStage;
+    limits->v1.maxDynamicStorageBuffersPerPipelineLayout =
+        limits->v1.maxStorageBuffersPerShaderStage;
 
     // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-attributes-numthreads
     limits->v1.maxComputeWorkgroupSizeX = D3D11_CS_THREAD_GROUP_MAX_X;
