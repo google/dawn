@@ -29,10 +29,12 @@ namespace dawn::native {
 
 AdapterBase::AdapterBase(Ref<PhysicalDeviceBase> physicalDevice,
                          FeatureLevel featureLevel,
-                         const TogglesState& requiredAdapterToggles)
+                         const TogglesState& requiredAdapterToggles,
+                         wgpu::PowerPreference powerPreference)
     : mPhysicalDevice(std::move(physicalDevice)),
       mFeatureLevel(featureLevel),
-      mTogglesState(requiredAdapterToggles) {
+      mTogglesState(requiredAdapterToggles),
+      mPowerPreference(powerPreference) {
     ASSERT(mPhysicalDevice->SupportsFeatureLevel(featureLevel));
     ASSERT(mTogglesState.GetStage() == ToggleStage::Adapter);
     // Cache the supported features of this adapter. Note that with device toggles overriding, a
@@ -88,7 +90,7 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     FindInChain(properties->nextInChain, &powerPreferenceDesc);
 
     if (powerPreferenceDesc != nullptr) {
-        powerPreferenceDesc->powerPreference = wgpu::PowerPreference::Undefined;
+        powerPreferenceDesc->powerPreference = mPowerPreference;
     }
     properties->vendorID = mPhysicalDevice->GetVendorId();
     properties->vendorName = mPhysicalDevice->GetVendorName().c_str();

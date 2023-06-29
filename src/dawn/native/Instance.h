@@ -172,7 +172,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // toggles descriptor.
     Ref<AdapterBase> CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
                                    FeatureLevel featureLevel,
-                                   const DawnTogglesDescriptor* requiredAdapterToggles) const;
+                                   const DawnTogglesDescriptor* requiredAdapterToggles,
+                                   wgpu::PowerPreference powerPreference) const;
 
     void ConsumeError(std::unique_ptr<ErrorData> error);
 

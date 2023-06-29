@@ -312,10 +312,10 @@ void InstanceBase::DeprecatedDiscoverPhysicalDevices(const RequestAdapterOptions
     }
 }
 
-Ref<AdapterBase> InstanceBase::CreateAdapter(
-    Ref<PhysicalDeviceBase> physicalDevice,
-    FeatureLevel featureLevel,
-    const DawnTogglesDescriptor* requiredAdapterToggles) const {
+Ref<AdapterBase> InstanceBase::CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
+                                             FeatureLevel featureLevel,
+                                             const DawnTogglesDescriptor* requiredAdapterToggles,
+                                             wgpu::PowerPreference powerPreference) const {
     // Set up toggles state for default adapter from given toggles descriptor and inherit from
     // instance toggles.
     TogglesState adapterToggles =
@@ -324,7 +324,8 @@ Ref<AdapterBase> InstanceBase::CreateAdapter(
     // Set up forced and default adapter toggles for selected physical device.
     physicalDevice->SetupBackendAdapterToggles(&adapterToggles);
 
-    return AcquireRef(new AdapterBase(std::move(physicalDevice), featureLevel, adapterToggles));
+    return AcquireRef(
+        new AdapterBase(std::move(physicalDevice), featureLevel, adapterToggles, powerPreference));
 }
 
 std::vector<Ref<AdapterBase>> InstanceBase::GetAdapters() const {
@@ -334,7 +335,8 @@ std::vector<Ref<AdapterBase>> InstanceBase::GetAdapters() const {
             if (physicalDevice->SupportsFeatureLevel(featureLevel)) {
                 // GetAdapters is deprecated, just set up default toggles state. Use
                 // EnumerateAdapters instead.
-                adapters.push_back(CreateAdapter(physicalDevice, featureLevel, nullptr));
+                adapters.push_back(CreateAdapter(physicalDevice, featureLevel, nullptr,
+                                                 wgpu::PowerPreference::Undefined));
             }
         }
     }
@@ -373,7 +375,8 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(options)) {
         ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));
-        adapters.push_back(CreateAdapter(physicalDevice, featureLevel, togglesDesc));
+        adapters.push_back(
+            CreateAdapter(physicalDevice, featureLevel, togglesDesc, options->powerPreference));
     }
     return SortAdapters(std::move(adapters), options);
 }

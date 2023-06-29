@@ -153,8 +153,11 @@ TEST_F(AdapterCreationTest, PreferHighPerformance) {
     EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
     if (discreteGPUAvailable) {
         wgpu::AdapterProperties properties;
+        wgpu::DawnAdapterPropertiesPowerPreference powerPreferenceProperties;
+        properties.nextInChain = &powerPreferenceProperties;
         adapter.GetProperties(&properties);
         EXPECT_EQ(properties.adapterType, wgpu::AdapterType::DiscreteGPU);
+        EXPECT_EQ(powerPreferenceProperties.powerPreference, options.powerPreference);
     }
 }
 
@@ -179,8 +182,11 @@ TEST_F(AdapterCreationTest, PreferLowPower) {
     EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
     if (integratedGPUAvailable) {
         wgpu::AdapterProperties properties;
+        wgpu::DawnAdapterPropertiesPowerPreference powerPreferenceProperties;
+        properties.nextInChain = &powerPreferenceProperties;
         adapter.GetProperties(&properties);
         EXPECT_EQ(properties.adapterType, wgpu::AdapterType::IntegratedGPU);
+        EXPECT_EQ(powerPreferenceProperties.powerPreference, options.powerPreference);
     }
 }
 

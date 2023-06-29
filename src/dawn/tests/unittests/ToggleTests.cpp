@@ -430,7 +430,8 @@ TEST_F(DeviceToggleTest, DeviceOverridingInstanceToggle) {
 
         Ref<native::AdapterBase> resultAdapter;
         resultAdapter = AcquireRef<native::AdapterBase>(
-            new native::AdapterBase(nullPhysicalDevice, featureLevel, adapterTogglesState));
+            new native::AdapterBase(nullPhysicalDevice, featureLevel, adapterTogglesState,
+                                    wgpu::PowerPreference::Undefined));
 
         // AllowUnsafeAPIs should be set as expected.
         EXPECT_TRUE(resultAdapter->GetTogglesState().IsSet(native::Toggle::AllowUnsafeAPIs));
@@ -551,7 +552,8 @@ TEST_F(DeviceToggleTest, DeviceOverridingAdapterToggle) {
 
         Ref<native::AdapterBase> resultAdapter;
         resultAdapter = AcquireRef<native::AdapterBase>(
-            new native::AdapterBase(nullPhysicalDevice, featureLevel, adapterTogglesState));
+            new native::AdapterBase(nullPhysicalDevice, featureLevel, adapterTogglesState,
+                                    wgpu::PowerPreference::Undefined));
 
         // AllowUnsafeAPIs should be inherited disabled by default.
         EXPECT_TRUE(resultAdapter->GetTogglesState().IsSet(native::Toggle::AllowUnsafeAPIs));

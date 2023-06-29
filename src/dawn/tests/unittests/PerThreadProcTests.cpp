@@ -32,7 +32,8 @@ class PerThreadProcTests : public testing::Test {
         : mNativeInstance(native::InstanceBase::Create()),
           mAdapterBase(AcquireRef(new native::null::PhysicalDevice(mNativeInstance.Get())),
                        native::FeatureLevel::Core,
-                       native::TogglesState(native::ToggleStage::Adapter)) {}
+                       native::TogglesState(native::ToggleStage::Adapter),
+                       wgpu::PowerPreference::Undefined) {}
     ~PerThreadProcTests() override = default;
 
   protected:
