@@ -25,6 +25,7 @@
 #include "src/tint/ir/break_if.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/constant.h"
+#include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/exit_loop.h"
@@ -437,7 +438,7 @@ class State {
     }
 
     void Call(ir::Call* call) {
-        auto args = utils::Transform<2>(call->Args(), [&](ir::Value* arg) { return Expr(arg); });
+        auto args = utils::Transform<4>(call->Args(), [&](ir::Value* arg) { return Expr(arg); });
         tint::Switch(
             call,  //
             [&](ir::UserCall* c) {
@@ -447,6 +448,10 @@ class State {
                     return;
                 }
                 Bind(c->Result(), expr);
+            },
+            [&](ir::Construct* c) {
+                auto ty = Type(c->Result()->Type());
+                Bind(c->Result(), b.Call(ty, std::move(args)));
             },
             [&](Default) { UNHANDLED_CASE(call); });
     }

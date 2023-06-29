@@ -104,6 +104,144 @@ fn f(i : i32, u : u32) -> i32 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Function Call
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, FnCall_NoArgs_NoRet) {
+    Test(R"(
+fn a() {
+}
+
+fn b() {
+  a();
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, FnCall_NoArgs_Ret_i32) {
+    Test(R"(
+fn a() -> i32 {
+  return 1i;
+}
+
+fn b() {
+  var i : i32 = a();
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, FnCall_3Args_NoRet) {
+    Test(R"(
+fn a(x : i32, y : u32, z : f32) {
+}
+
+fn b() {
+  a(1i, 2u, 3.0f);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, FnCall_3Args_Ret_f32) {
+    Test(R"(
+fn a(x : i32, y : u32, z : f32) -> f32 {
+  return z;
+}
+
+fn b() {
+  var v : f32 = a(1i, 2u, 3.0f);
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Type Construct
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_i32) {
+    Test(R"(
+fn f(i : i32) {
+  var v : i32 = i32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_u32) {
+    Test(R"(
+fn f(i : u32) {
+  var v : u32 = u32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_f32) {
+    Test(R"(
+fn f(i : f32) {
+  var v : f32 = f32(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_bool) {
+    Test(R"(
+fn f(i : bool) {
+  var v : bool = bool(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_struct) {
+    Test(R"(
+struct S {
+  a : i32,
+  b : u32,
+  c : f32,
+}
+
+fn f(a : i32, b : u32, c : f32) {
+  var v : S = S(a, b, c);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_array) {
+    Test(R"(
+fn f(i : i32) {
+  var v : array<i32, 3u> = array<i32, 3u>(i, i, i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_vec3i_Splat) {
+    Test(R"(
+fn f(i : i32) {
+  var v : vec3<i32> = vec3<i32>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_vec3i_Scalars) {
+    Test(R"(
+fn f(i : i32) {
+  var v : vec3<i32> = vec3<i32>(i, i, i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_mat2x3f_Scalars) {
+    Test(R"(
+fn f(i : f32) {
+  var v : mat2x3<f32> = mat2x3<f32>(i, i, i, i, i, i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, TypeConstruct_mat2x3f_Columns) {
+    Test(R"(
+fn f(i : f32) {
+  var v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(i, i, i), vec3<f32>(i, i, i));
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Unary ops
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, UnaryOp_Negate) {
