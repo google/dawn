@@ -35,6 +35,7 @@
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
+#include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
@@ -266,9 +267,9 @@ class Validator {
             [&](Call* c) { CheckCall(c); },              //
             [&](If* if_) { CheckIf(if_); },              //
             [&](Load*) {},                               //
-            [&](Loop*) {},                               //
+            [&](Loop* l) { CheckLoop(l); },              //
             [&](Store*) {},                              //
-            [&](Switch*) {},                             //
+            [&](Switch* s) { CheckSwitch(s); },          //
             [&](Swizzle*) {},                            //
             [&](Terminator* b) { CheckTerminator(b); },  //
             [&](Unary* u) { CheckUnary(u); },            //
@@ -404,6 +405,28 @@ class Validator {
 
         if (if_->Condition() && !if_->Condition()->Type()->Is<type::Bool>()) {
             AddError(if_, If::kConditionOperandOffset, "if: condition must be a `bool` type");
+        }
+
+        CheckBlock(if_->True());
+        if (!if_->False()->IsEmpty()) {
+            CheckBlock(if_->False());
+        }
+    }
+
+    void CheckLoop(Loop* l) {
+        if (!l->Initializer()->IsEmpty()) {
+            CheckBlock(l->Initializer());
+        }
+        CheckBlock(l->Body());
+
+        if (!l->Continuing()->IsEmpty()) {
+            CheckBlock(l->Continuing());
+        }
+    }
+
+    void CheckSwitch(Switch* s) {
+        for (auto& cse : s->Cases()) {
+            CheckBlock(cse.block);
         }
     }
 

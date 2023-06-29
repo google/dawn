@@ -515,6 +515,50 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidateTest, If_EmptyFalse) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* if_ = b.If(true);
+    if_->True()->Append(b.Return(f));
+
+    f->Block()->Append(if_);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    EXPECT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidateTest, If_EmptyTrue) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* if_ = b.If(true);
+    if_->False()->Append(b.Return(f));
+
+    f->Block()->Append(if_);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:4:7 error: block: does not end in a terminator instruction
+      %b2 = block {  # true
+      ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    if true [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+      }
+      %b3 = block {  # false
+        ret
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidateTest, If_ConditionIsBool) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -581,6 +625,46 @@ note: # Disassembly
       }
       %b3 = block {  # false
         ret
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Loop_OnlyBody) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* l = b.Loop();
+    l->Body()->Append(b.ExitLoop(l));
+
+    auto sb = b.With(f->Block());
+    sb.Append(l);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    EXPECT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidateTest, Loop_EmptyBody) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.With(f->Block());
+    sb.Append(b.Loop());
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:4:7 error: block: does not end in a terminator instruction
+      %b2 = block {  # body
+      ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block {  # body
       }
     }
     ret

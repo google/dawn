@@ -538,18 +538,11 @@ void Disassembler::EmitIf(If* if_) {
     out_ << "if ";
     EmitOperand(if_, if_->Condition(), If::kConditionOperandOffset);
 
-    bool has_true = !if_->True()->IsEmpty();
     bool has_false = !if_->False()->IsEmpty();
 
-    out_ << " [";
-    if (has_true) {
-        out_ << "t: %b" << IdOf(if_->True());
-    }
+    out_ << " [t: %b" << IdOf(if_->True());
     if (has_false) {
-        if (has_true) {
-            out_ << ", ";
-        }
-        out_ << "f: %b" << IdOf(if_->False());
+        out_ << ", f: %b" << IdOf(if_->False());
     }
     out_ << "]";
     sm.Store(if_);
@@ -557,10 +550,12 @@ void Disassembler::EmitIf(If* if_) {
     out_ << " {  # " << NameOf(if_);
     EmitLine();
 
-    if (has_true) {
+    // True block is assumed to have instructions
+    {
         ScopedIndent si(indent_size_);
         EmitBlock(if_->True(), "true");
     }
+
     if (has_false) {
         ScopedIndent si(indent_size_);
         EmitBlock(if_->False(), "false");
@@ -584,9 +579,7 @@ void Disassembler::EmitLoop(Loop* l) {
     if (!l->Initializer()->IsEmpty()) {
         parts.Push("i: %b" + std::to_string(IdOf(l->Initializer())));
     }
-    if (!l->Body()->IsEmpty()) {
-        parts.Push("b: %b" + std::to_string(IdOf(l->Body())));
-    }
+    parts.Push("b: %b" + std::to_string(IdOf(l->Body())));
 
     if (!l->Continuing()->IsEmpty()) {
         parts.Push("c: %b" + std::to_string(IdOf(l->Continuing())));
@@ -603,7 +596,8 @@ void Disassembler::EmitLoop(Loop* l) {
         EmitBlock(l->Initializer(), "initializer");
     }
 
-    if (!l->Body()->IsEmpty()) {
+    // Loop is assumed to always have a body
+    {
         ScopedIndent si(indent_size_);
         EmitBlock(l->Body(), "body");
     }
