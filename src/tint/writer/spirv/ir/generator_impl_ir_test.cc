@@ -30,36 +30,48 @@ OpMemoryModel Logical GLSL450
 }
 
 TEST_F(SpvGeneratorImplTest, Unreachable) {
-    auto* func = b.Function("foo", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {
+            auto* ifelse = b.If(true);
+            b.With(ifelse->True(), [&] {  //
+                b.Continue(loop);
+            });
+            b.With(ifelse->False(), [&] {  //
+                b.Continue(loop);
+            });
+            b.Unreachable();
 
-    auto* i = b.If(true);
-    i->True()->Append(b.Return(func, 10_i));
-    i->False()->Append(b.Return(func, 20_i));
+            b.With(loop->Continuing(), [&] {  //
+                b.NextIteration(loop);
+            });
+        });
+        b.Return(func);
+    });
 
-    func->Block()->Append(i);
-    func->Block()->Append(b.Unreachable());
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeInt 32 1
-%3 = OpTypeFunction %2
-%9 = OpTypeBool
-%8 = OpConstantTrue %9
-%10 = OpConstant %2 10
-%11 = OpConstant %2 20
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpSelectionMerge %5 None
-OpBranchConditional %8 %6 %7
-%6 = OpLabel
-OpReturnValue %10
-%7 = OpLabel
-OpReturnValue %11
-%5 = OpLabel
-OpUnreachable
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+        %foo = OpFunction %void None %3
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpSelectionMerge %9 None
+               OpBranchConditional %true %10 %11
+         %10 = OpLabel
+               OpBranch %6
+         %11 = OpLabel
+               OpBranch %6
+          %9 = OpLabel
+               OpUnreachable
+          %6 = OpLabel
+               OpBranch %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 

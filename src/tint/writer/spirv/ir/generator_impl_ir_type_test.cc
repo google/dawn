@@ -25,164 +25,140 @@ namespace tint::writer::spirv {
 namespace {
 
 TEST_F(SpvGeneratorImplTest, Type_Void) {
-    auto id = generator_.Type(ty.void_());
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(), "%1 = OpTypeVoid\n");
+    generator_.Type(ty.void_());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%void = OpTypeVoid");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Bool) {
-    auto id = generator_.Type(ty.bool_());
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(), "%1 = OpTypeBool\n");
+    generator_.Type(ty.bool_());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%bool = OpTypeBool");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_I32) {
-    auto id = generator_.Type(ty.i32());
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(), "%1 = OpTypeInt 32 1\n");
+    generator_.Type(ty.i32());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%int = OpTypeInt 32 1");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_U32) {
-    auto id = generator_.Type(ty.u32());
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(), "%1 = OpTypeInt 32 0\n");
+    generator_.Type(ty.u32());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%uint = OpTypeInt 32 0");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_F32) {
-    auto id = generator_.Type(ty.f32());
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(), "%1 = OpTypeFloat 32\n");
+    generator_.Type(ty.f32());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%float = OpTypeFloat 32");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_F16) {
-    auto id = generator_.Type(ty.f16());
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(), "%1 = OpTypeFloat 16\n");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Capabilities()),
-              "OpCapability Float16\n"
-              "OpCapability UniformAndStorageBuffer16BitAccess\n"
-              "OpCapability StorageBuffer16BitAccess\n"
-              "OpCapability StorageInputOutput16\n");
+    generator_.Type(ty.f16());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpCapability Float16");
+    EXPECT_INST("OpCapability UniformAndStorageBuffer16BitAccess");
+    EXPECT_INST("OpCapability StorageBuffer16BitAccess");
+    EXPECT_INST("OpCapability StorageInputOutput16");
+    EXPECT_INST("%half = OpTypeFloat 16");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec2i) {
-    auto id = generator_.Type(ty.vec2(ty.i32()));
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeInt 32 1\n"
-              "%1 = OpTypeVector %2 2\n");
+    generator_.Type(ty.vec2<i32>());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%v2int = OpTypeVector %int 2");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec3u) {
-    auto id = generator_.Type(ty.vec3(ty.u32()));
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeInt 32 0\n"
-              "%1 = OpTypeVector %2 3\n");
+    generator_.Type(ty.vec3<u32>());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%v3uint = OpTypeVector %uint 3");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec4f) {
-    auto id = generator_.Type(ty.vec4(ty.f32()));
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeFloat 32\n"
-              "%1 = OpTypeVector %2 4\n");
+    generator_.Type(ty.vec4<f32>());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%v4float = OpTypeVector %float 4");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec2h) {
-    auto id = generator_.Type(ty.vec2(ty.f16()));
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeFloat 16\n"
-              "%1 = OpTypeVector %2 2\n");
+    generator_.Type(ty.vec2<f16>());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%v2half = OpTypeVector %half 2");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Vec4Bool) {
-    auto id = generator_.Type(ty.vec4(ty.bool_()));
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeBool\n"
-              "%1 = OpTypeVector %2 4\n");
+    generator_.Type(ty.vec4<bool>());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%v4bool = OpTypeVector %bool 4");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Mat2x3f) {
-    auto* vec = ty.mat2x3(ty.f32());
-    auto id = generator_.Type(vec);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%3 = OpTypeFloat 32\n"
-              "%2 = OpTypeVector %3 3\n"
-              "%1 = OpTypeMatrix %2 2\n");
+    generator_.Type(ty.mat2x3(ty.f32()));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%mat2v3float = OpTypeMatrix %v3float 2");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Mat4x2h) {
-    auto* vec = ty.mat4x2(ty.f16());
-    auto id = generator_.Type(vec);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%3 = OpTypeFloat 16\n"
-              "%2 = OpTypeVector %3 2\n"
-              "%1 = OpTypeMatrix %2 4\n");
+    generator_.Type(ty.mat4x2(ty.f16()));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%mat4v2half = OpTypeMatrix %v2half 4");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Array_DefaultStride) {
-    auto* arr = ty.array(ty.f32(), 4u);
-    auto id = generator_.Type(arr);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeFloat 32\n"
-              "%4 = OpTypeInt 32 0\n"
-              "%3 = OpConstant %4 4\n"
-              "%1 = OpTypeArray %2 %3\n");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 4\n");
+    generator_.Type(ty.array<f32, 4>());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpDecorate %_arr_float_uint_4 ArrayStride 4");
+    EXPECT_INST("%_arr_float_uint_4 = OpTypeArray %float %uint_4");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Array_ExplicitStride) {
-    auto* arr = ty.array(ty.f32(), 4u, 16);
-    auto id = generator_.Type(arr);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeFloat 32\n"
-              "%4 = OpTypeInt 32 0\n"
-              "%3 = OpConstant %4 4\n"
-              "%1 = OpTypeArray %2 %3\n");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 16\n");
+    generator_.Type(ty.array<f32, 4>(16));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpDecorate %_arr_float_uint_4 ArrayStride 16");
+    EXPECT_INST("%_arr_float_uint_4 = OpTypeArray %float %uint_4");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Array_NestedArray) {
-    auto* arr = ty.array(ty.array(ty.f32(), 64u), 4u);
-    auto id = generator_.Type(arr);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%3 = OpTypeFloat 32\n"
-              "%5 = OpTypeInt 32 0\n"
-              "%4 = OpConstant %5 64\n"
-              "%2 = OpTypeArray %3 %4\n"
-              "%6 = OpConstant %5 4\n"
-              "%1 = OpTypeArray %2 %6\n");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()),
-              "OpDecorate %2 ArrayStride 4\n"
-              "OpDecorate %1 ArrayStride 256\n");
+    generator_.Type(ty.array(ty.array<f32, 64u>(), 4u));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpDecorate %_arr_float_uint_64 ArrayStride 4");
+    EXPECT_INST("OpDecorate %_arr__arr_float_uint_64_uint_4 ArrayStride 256");
+    EXPECT_INST("%_arr_float_uint_64 = OpTypeArray %float %uint_64");
+    EXPECT_INST("%_arr__arr_float_uint_64_uint_4 = OpTypeArray %_arr_float_uint_64 %uint_4");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_DefaultStride) {
-    auto* arr = ty.runtime_array(ty.f32());
-    auto id = generator_.Type(arr);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeFloat 32\n"
-              "%1 = OpTypeRuntimeArray %2\n");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 4\n");
+    generator_.Type(ty.array<f32>());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpDecorate %_runtimearr_float ArrayStride 4");
+    EXPECT_INST("%_runtimearr_float = OpTypeRuntimeArray %float");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_ExplicitStride) {
-    auto* arr = ty.runtime_array(ty.f32(), 16);
-    auto id = generator_.Type(arr);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(),
-              "%2 = OpTypeFloat 32\n"
-              "%1 = OpTypeRuntimeArray %2\n");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), "OpDecorate %1 ArrayStride 16\n");
+    generator_.Type(ty.array<f32>(16));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpDecorate %_runtimearr_float ArrayStride 16");
+    EXPECT_INST("%_runtimearr_float = OpTypeRuntimeArray %float");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Struct) {
@@ -191,20 +167,15 @@ TEST_F(SpvGeneratorImplTest, Type_Struct) {
                                                    {mod.symbols.Register("a"), ty.f32()},
                                                    {mod.symbols.Register("b"), ty.vec4<i32>()},
                                                });
-    auto id = generator_.Type(str);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeFloat 32
-%4 = OpTypeInt 32 1
-%3 = OpTypeVector %4 4
-%1 = OpTypeStruct %2 %3
-)");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), R"(OpMemberDecorate %1 0 Offset 0
-OpMemberDecorate %1 1 Offset 16
-)");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Debug()), R"(OpMemberName %1 0 "a"
-OpMemberName %1 1 "b"
-OpName %1 "MyStruct"
-)");
+    generator_.Type(str);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpMemberName %MyStruct 0 \"a\"");
+    EXPECT_INST("OpMemberName %MyStruct 1 \"b\"");
+    EXPECT_INST("OpName %MyStruct \"MyStruct\"");
+    EXPECT_INST("OpMemberDecorate %MyStruct 0 Offset 0");
+    EXPECT_INST("OpMemberDecorate %MyStruct 1 Offset 16");
+    EXPECT_INST("%MyStruct = OpTypeStruct %float %v4int");
 }
 
 TEST_F(SpvGeneratorImplTest, Type_Struct_MatrixLayout) {
@@ -215,56 +186,40 @@ TEST_F(SpvGeneratorImplTest, Type_Struct_MatrixLayout) {
             // Matrices nested inside arrays need layout decorations on the struct member too.
             {mod.symbols.Register("arr"), ty.array(ty.array(ty.mat2x4<f16>(), 4), 4)},
         });
-    auto id = generator_.Type(str);
-    EXPECT_EQ(id, 1u);
-    EXPECT_EQ(DumpTypes(), R"(%4 = OpTypeFloat 32
-%3 = OpTypeVector %4 3
-%2 = OpTypeMatrix %3 3
-%9 = OpTypeFloat 16
-%8 = OpTypeVector %9 4
-%7 = OpTypeMatrix %8 2
-%11 = OpTypeInt 32 0
-%10 = OpConstant %11 4
-%6 = OpTypeArray %7 %10
-%5 = OpTypeArray %6 %10
-%1 = OpTypeStruct %2 %5
-)");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Annots()), R"(OpMemberDecorate %1 0 Offset 0
-OpMemberDecorate %1 0 ColMajor
-OpMemberDecorate %1 0 MatrixStride 16
-OpDecorate %6 ArrayStride 16
-OpDecorate %5 ArrayStride 64
-OpMemberDecorate %1 1 Offset 48
-OpMemberDecorate %1 1 ColMajor
-OpMemberDecorate %1 1 MatrixStride 8
-)");
-    EXPECT_EQ(DumpInstructions(generator_.Module().Debug()), R"(OpMemberName %1 0 "m"
-OpMemberName %1 1 "arr"
-OpName %1 "MyStruct"
-)");
+    generator_.Type(str);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpMemberDecorate %MyStruct 0 ColMajor");
+    EXPECT_INST("OpMemberDecorate %MyStruct 0 MatrixStride 16");
+    EXPECT_INST("OpMemberDecorate %MyStruct 1 ColMajor");
+    EXPECT_INST("OpMemberDecorate %MyStruct 1 MatrixStride 8");
+    EXPECT_INST("%MyStruct = OpTypeStruct %mat3v3float %_arr__arr_mat2v4half_uint_4_uint_4");
 }
 
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
 TEST_F(SpvGeneratorImplTest, Type_Multiple) {
-    EXPECT_EQ(generator_.Type(ty.i32()), 1u);
-    EXPECT_EQ(generator_.Type(ty.u32()), 2u);
-    EXPECT_EQ(generator_.Type(ty.f32()), 3u);
-    EXPECT_EQ(generator_.Type(ty.f16()), 4u);
-    EXPECT_EQ(DumpTypes(), R"(%1 = OpTypeInt 32 1
-%2 = OpTypeInt 32 0
-%3 = OpTypeFloat 32
-%4 = OpTypeFloat 16
+    generator_.Type(ty.i32());
+    generator_.Type(ty.u32());
+    generator_.Type(ty.f32());
+    generator_.Type(ty.f16());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+      %float = OpTypeFloat 32
+       %half = OpTypeFloat 16
 )");
 }
 
 // Test that we do not emit the same type more than once.
 TEST_F(SpvGeneratorImplTest, Type_Deduplicate) {
-    auto* i32 = ty.i32();
-    EXPECT_EQ(generator_.Type(i32), 1u);
-    EXPECT_EQ(generator_.Type(i32), 1u);
-    EXPECT_EQ(generator_.Type(i32), 1u);
-    EXPECT_EQ(DumpTypes(), "%1 = OpTypeInt 32 1\n");
+    auto id = generator_.Type(ty.i32());
+    EXPECT_EQ(generator_.Type(ty.i32()), id);
+    EXPECT_EQ(generator_.Type(ty.i32()), id);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
 }
 
 }  // namespace

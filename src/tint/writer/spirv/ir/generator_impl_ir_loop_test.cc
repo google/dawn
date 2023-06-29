@@ -21,159 +21,146 @@ namespace {
 
 TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
     auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {  //
+            b.Continue(loop);
 
-    auto* loop = b.Loop();
+            b.With(loop->Continuing(), [&] {  //
+                b.BreakIf(loop, true);
+            });
+        });
+        b.Return(func);
+    });
 
-    loop->Body()->Append(b.Continue(loop));
-    loop->Continuing()->Append(b.BreakIf(loop, true));
-
-    func->Block()->Append(loop);
-    func->Block()->Append(b.Return(func));
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%10 = OpTypeBool
-%9 = OpConstantTrue %10
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %7
-%7 = OpLabel
-OpLoopMerge %8 %6 None
-OpBranch %5
-%5 = OpLabel
-OpBranch %6
-%6 = OpLabel
-OpBranchConditional %9 %8 %7
-%8 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %6
+          %6 = OpLabel
+               OpBranchConditional %true %8 %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 // Test that we still emit the continuing block with a back-edge, even when it is unreachable.
 TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
     auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {  //
+            b.ExitLoop(loop);
+        });
+        b.Return(func);
+    });
 
-    auto* loop = b.Loop();
-
-    loop->Body()->Append(b.ExitLoop(loop));
-
-    func->Block()->Append(loop);
-    func->Block()->Append(b.Return(func));
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %7
-%7 = OpLabel
-OpLoopMerge %8 %6 None
-OpBranch %5
-%5 = OpLabel
-OpBranch %8
-%6 = OpLabel
-OpBranch %7
-%8 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %8
+          %6 = OpLabel
+               OpBranch %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
     auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {
+            auto* cond_break = b.If(true);
+            b.With(cond_break->True(), [&] {  //
+                b.ExitLoop(loop);
+            });
+            b.With(cond_break->False(), [&] {  //
+                b.ExitIf(cond_break);
+            });
+            b.Continue(loop);
 
-    auto* loop = b.Loop();
+            b.With(loop->Continuing(), [&] {  //
+                b.NextIteration(loop);
+            });
+        });
+        b.Return(func);
+    });
 
-    auto* cond_break = b.If(true);
-    cond_break->True()->Append(b.ExitLoop(loop));
-    cond_break->False()->Append(b.ExitIf(cond_break));
-
-    loop->Body()->Append(cond_break);
-    loop->Body()->Append(b.Continue(loop));
-    loop->Continuing()->Append(b.NextIteration(loop));
-
-    func->Block()->Append(loop);
-    func->Block()->Append(b.Return(func));
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%12 = OpTypeBool
-%11 = OpConstantTrue %12
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %7
-%7 = OpLabel
-OpLoopMerge %8 %6 None
-OpBranch %5
-%5 = OpLabel
-OpSelectionMerge %9 None
-OpBranchConditional %11 %10 %9
-%10 = OpLabel
-OpBranch %8
-%9 = OpLabel
-OpBranch %6
-%6 = OpLabel
-OpBranch %7
-%8 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpSelectionMerge %9 None
+               OpBranchConditional %true %10 %9
+         %10 = OpLabel
+               OpBranch %8
+          %9 = OpLabel
+               OpBranch %6
+          %6 = OpLabel
+               OpBranch %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
     auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {
+            auto* cond_break = b.If(true);
+            b.With(cond_break->True(), [&] {  //
+                b.Continue(loop);
+            });
+            b.With(cond_break->False(), [&] {  //
+                b.ExitIf(cond_break);
+            });
+            b.ExitLoop(loop);
 
-    auto* loop = b.Loop();
+            b.With(loop->Continuing(), [&] {  //
+                b.NextIteration(loop);
+            });
+        });
+        b.Return(func);
+    });
 
-    auto* cond_break = b.If(true);
-    cond_break->True()->Append(b.Continue(loop));
-    cond_break->False()->Append(b.ExitIf(cond_break));
-
-    loop->Body()->Append(cond_break);
-    loop->Body()->Append(b.ExitLoop(loop));
-    loop->Continuing()->Append(b.NextIteration(loop));
-
-    func->Block()->Append(loop);
-    func->Block()->Append(b.Return(func));
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%12 = OpTypeBool
-%11 = OpConstantTrue %12
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %7
-%7 = OpLabel
-OpLoopMerge %8 %6 None
-OpBranch %5
-%5 = OpLabel
-OpSelectionMerge %9 None
-OpBranchConditional %11 %10 %9
-%10 = OpLabel
-OpBranch %6
-%9 = OpLabel
-OpBranch %8
-%6 = OpLabel
-OpBranch %7
-%8 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpSelectionMerge %9 None
+               OpBranchConditional %true %10 %9
+         %10 = OpLabel
+               OpBranch %6
+          %9 = OpLabel
+               OpBranch %8
+          %6 = OpLabel
+               OpBranch %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
@@ -181,169 +168,158 @@ OpFunctionEnd
 // they are unreachable.
 TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
     auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {  //
+            b.Return(func);
+        });
+        b.Unreachable();
+    });
 
-    auto* loop = b.Loop();
-    loop->Body()->Append(b.Return(func));
-
-    func->Block()->Append(loop);
-    func->Block()->Append(b.Unreachable());
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %7
-%7 = OpLabel
-OpLoopMerge %8 %6 None
-OpBranch %5
-%5 = OpLabel
-OpReturn
-%6 = OpLabel
-OpBranch %7
-%8 = OpLabel
-OpUnreachable
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %8
+          %6 = OpLabel
+               OpBranch %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
     auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] {
+            auto* result = b.Equal(ty.bool_(), 1_i, 2_i);
+            b.Continue(loop, result);
 
-    auto* loop = b.Loop();
+            b.With(loop->Continuing(), [&] {  //
+                b.BreakIf(loop, result);
+            });
+        });
+        b.Return(func);
+    });
 
-    auto* result = loop->Body()->Append(b.Equal(ty.i32(), 1_i, 2_i));
-    loop->Body()->Append(b.Continue(loop, result));
-
-    loop->Continuing()->Append(b.BreakIf(loop, result));
-
-    func->Block()->Append(loop);
-    func->Block()->Append(b.Return(func));
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%10 = OpTypeInt 32 1
-%11 = OpConstant %10 1
-%12 = OpConstant %10 2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %7
-%7 = OpLabel
-OpLoopMerge %8 %6 None
-OpBranch %5
-%5 = OpLabel
-%9 = OpIEqual %10 %11 %12
-OpBranch %6
-%6 = OpLabel
-OpBranchConditional %9 %8 %7
-%8 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+          %9 = OpIEqual %bool %int_1 %int_2
+               OpBranch %6
+          %6 = OpLabel
+               OpBranchConditional %9 %8 %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
     auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.With(outer_loop->Body(), [&] {
+            auto* inner_loop = b.Loop();
+            b.With(inner_loop->Body(), [&] {
+                b.ExitLoop(inner_loop);
 
-    auto* outer_loop = b.Loop();
-    auto* inner_loop = b.Loop();
+                b.With(inner_loop->Continuing(), [&] {  //
+                    b.NextIteration(inner_loop);
+                });
+            });
+            b.Continue(outer_loop);
 
-    inner_loop->Body()->Append(b.ExitLoop(inner_loop));
-    inner_loop->Continuing()->Append(b.NextIteration(inner_loop));
+            b.With(outer_loop->Continuing(),
+                   [&] {  //
+                       b.BreakIf(outer_loop, true);
+                   });
+        });
+        b.Return(func);
+    });
 
-    outer_loop->Body()->Append(inner_loop);
-    outer_loop->Body()->Append(b.Continue(outer_loop));
-    outer_loop->Continuing()->Append(b.BreakIf(outer_loop, true));
-
-    func->Block()->Append(outer_loop);
-    func->Block()->Append(b.Return(func));
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%14 = OpTypeBool
-%13 = OpConstantTrue %14
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %7
-%7 = OpLabel
-OpLoopMerge %8 %6 None
-OpBranch %5
-%5 = OpLabel
-OpBranch %11
-%11 = OpLabel
-OpLoopMerge %12 %10 None
-OpBranch %9
-%9 = OpLabel
-OpBranch %12
-%10 = OpLabel
-OpBranch %11
-%12 = OpLabel
-OpBranch %6
-%6 = OpLabel
-OpBranchConditional %13 %8 %7
-%8 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %11
+         %11 = OpLabel
+               OpLoopMerge %12 %10 None
+               OpBranch %9
+          %9 = OpLabel
+               OpBranch %12
+         %10 = OpLabel
+               OpBranch %11
+         %12 = OpLabel
+               OpBranch %6
+          %6 = OpLabel
+               OpBranchConditional %true %8 %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
     auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.With(outer_loop->Body(), [&] {
+            b.Continue(outer_loop);
 
-    auto* outer_loop = b.Loop();
-    auto* inner_loop = b.Loop();
+            b.With(outer_loop->Continuing(), [&] {
+                auto* inner_loop = b.Loop();
+                b.With(inner_loop->Body(), [&] {
+                    b.Continue(inner_loop);
 
-    inner_loop->Body()->Append(b.Continue(inner_loop));
-    inner_loop->Continuing()->Append(b.BreakIf(inner_loop, true));
+                    b.With(inner_loop->Continuing(), [&] {  //
+                        b.BreakIf(inner_loop, true);
+                    });
+                });
+                b.BreakIf(outer_loop, true);
+            });
+        });
+        b.Return(func);
+    });
 
-    outer_loop->Body()->Append(b.Continue(outer_loop));
-    outer_loop->Continuing()->Append(inner_loop);
-    outer_loop->Continuing()->Append(b.BreakIf(outer_loop, true));
-
-    func->Block()->Append(outer_loop);
-    func->Block()->Append(b.Return(func));
-
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%14 = OpTypeBool
-%13 = OpConstantTrue %14
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %7
-%7 = OpLabel
-OpLoopMerge %8 %6 None
-OpBranch %5
-%5 = OpLabel
-OpBranch %6
-%6 = OpLabel
-OpBranch %11
-%11 = OpLabel
-OpLoopMerge %12 %10 None
-OpBranch %9
-%9 = OpLabel
-OpBranch %10
-%10 = OpLabel
-OpBranchConditional %13 %12 %11
-%12 = OpLabel
-OpBranchConditional %13 %8 %7
-%8 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %6
+          %6 = OpLabel
+               OpBranch %11
+         %11 = OpLabel
+               OpLoopMerge %12 %10 None
+               OpBranch %9
+          %9 = OpLabel
+               OpBranch %10
+         %10 = OpLabel
+               OpBranchConditional %true %12 %11
+         %12 = OpLabel
+               OpBranchConditional %true %8 %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
@@ -353,7 +329,9 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();
 
-        b.With(loop->Initializer(), [&] { b.NextIteration(loop, 1_i, false); });
+        b.With(loop->Initializer(), [&] {  //
+            b.NextIteration(loop, 1_i, false);
+        });
 
         auto* loop_param = b.BlockParam(ty.i32());
         loop->Body()->SetParams({loop_param});
@@ -373,35 +351,24 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%10 = OpTypeInt 32 1
-%12 = OpConstant %10 1
-%16 = OpTypeBool
-%17 = OpConstant %10 5
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %5
-%5 = OpLabel
-OpBranch %8
-%8 = OpLabel
-%11 = OpPhi %10 %12 %5 %13 %7
-OpLoopMerge %9 %7 None
-OpBranch %6
-%6 = OpLabel
-%14 = OpIAdd %10 %11 %12
-OpBranch %7
-%7 = OpLabel
-%13 = OpPhi %10 %14 %6
-%15 = OpSGreaterThan %16 %13 %17
-OpBranchConditional %15 %9 %8
-%9 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %5 = OpLabel
+               OpBranch %8
+          %8 = OpLabel
+         %11 = OpPhi %int %int_1 %5 %13 %7
+               OpLoopMerge %9 %7 None
+               OpBranch %6
+          %6 = OpLabel
+         %14 = OpIAdd %int %11 %int_1
+               OpBranch %7
+          %7 = OpLabel
+         %13 = OpPhi %int %14 %6
+         %15 = OpSGreaterThan %bool %13 %int_5
+               OpBranchConditional %15 %9 %8
+          %9 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
@@ -411,7 +378,9 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();
 
-        b.With(loop->Initializer(), [&] { b.NextIteration(loop, 1_i, false); });
+        b.With(loop->Initializer(), [&] {  //
+            b.NextIteration(loop, 1_i, false);
+        });
 
         auto* loop_param_a = b.BlockParam(ty.i32());
         auto* loop_param_b = b.BlockParam(ty.bool_());
@@ -434,39 +403,27 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%10 = OpTypeInt 32 1
-%12 = OpConstant %10 1
-%14 = OpTypeBool
-%16 = OpConstantFalse %14
-%21 = OpConstant %10 5
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpBranch %5
-%5 = OpLabel
-OpBranch %8
-%8 = OpLabel
-%11 = OpPhi %10 %12 %5 %13 %7
-%15 = OpPhi %14 %16 %5 %17 %7
-OpLoopMerge %9 %7 None
-OpBranch %6
-%6 = OpLabel
-%18 = OpIAdd %10 %11 %12
-OpBranch %7
-%7 = OpLabel
-%13 = OpPhi %10 %18 %6
-%19 = OpPhi %14 %15 %6
-%20 = OpSGreaterThan %14 %13 %21
-%17 = OpLogicalEqual %14 %19 %16
-OpBranchConditional %20 %9 %8
-%9 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %5 = OpLabel
+               OpBranch %8
+          %8 = OpLabel
+         %11 = OpPhi %int %int_1 %5 %13 %7
+         %15 = OpPhi %bool %false %5 %17 %7
+               OpLoopMerge %9 %7 None
+               OpBranch %6
+          %6 = OpLabel
+         %18 = OpIAdd %int %11 %int_1
+               OpBranch %7
+          %7 = OpLabel
+         %13 = OpPhi %int %18 %6
+         %19 = OpPhi %bool %15 %6
+         %20 = OpSGreaterThan %bool %13 %int_5
+         %17 = OpLogicalEqual %bool %19 %false
+               OpBranchConditional %20 %9 %8
+          %9 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 

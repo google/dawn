@@ -17,151 +17,215 @@
 namespace tint::writer::spirv {
 namespace {
 
+using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
+
 TEST_F(SpvGeneratorImplTest, Function_Empty) {
     auto* func = b.Function("foo", ty.void_());
-    func->Block()->Append(b.Return(func));
+    b.With(func->Block(), [&] {  //
+        b.Return(func);
+    });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpReturn
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+        %foo = OpFunction %void None %3
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 // Test that we do not emit the same function type more than once.
 TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
-    auto* func = b.Function("foo", ty.void_());
-    func->Block()->Append(b.Return(func));
+    auto* func_a = b.Function("func_a", ty.void_());
+    b.With(func_a->Block(), [&] {  //
+        b.Return(func_a);
+    });
+    auto* func_b = b.Function("func_b", ty.void_());
+    b.With(func_b->Block(), [&] {  //
+        b.Return(func_b);
+    });
+    auto* func_c = b.Function("func_c", ty.void_());
+    b.With(func_c->Block(), [&] {  //
+        b.Return(func_c);
+    });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               ; Types, variables and constants
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
 
-    generator_.EmitFunction(func);
-    generator_.EmitFunction(func);
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpTypes(), R"(%2 = OpTypeVoid
-%3 = OpTypeFunction %2
+               ; Function func_a
+     %func_a = OpFunction %void None %3
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+               ; Function func_b
+     %func_b = OpFunction %void None %3
+          %6 = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+               ; Function func_c
+     %func_c = OpFunction %void None %3
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Compute) {
     auto* func =
         b.Function("main", ty.void_(), ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
-    func->Block()->Append(b.Return(func));
+    b.With(func->Block(), [&] {  //
+        b.Return(func);
+    });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 32 4 1
 
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint GLCompute %1 "main"
-OpExecutionMode %1 LocalSize 32 4 1
-OpName %1 "main"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpReturn
-OpFunctionEnd
+               ; Debug Information
+               OpName %main "main"  ; id %1
+
+               ; Types, variables and constants
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+
+               ; Function main
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Fragment) {
     auto* func = b.Function("main", ty.void_(), ir::Function::PipelineStage::kFragment);
-    func->Block()->Append(b.Return(func));
+    b.With(func->Block(), [&] {  //
+        b.Return(func);
+    });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
 
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint Fragment %1 "main"
-OpExecutionMode %1 OriginUpperLeft
-OpName %1 "main"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpReturn
-OpFunctionEnd
+               ; Debug Information
+               OpName %main "main"  ; id %1
+
+               ; Types, variables and constants
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+
+               ; Function main
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Vertex) {
     auto* func = b.Function("main", ty.void_(), ir::Function::PipelineStage::kVertex);
-    func->Block()->Append(b.Return(func));
+    b.With(func->Block(), [&] {  //
+        b.Return(func);
+    });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpEntryPoint Vertex %main "main"
 
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint Vertex %1 "main"
-OpName %1 "main"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpReturn
-OpFunctionEnd
+               ; Debug Information
+               OpName %main "main"  ; id %1
+
+               ; Types, variables and constants
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+
+               ; Function main
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Multiple) {
     auto* f1 = b.Function("main1", ty.void_(), ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
-    f1->Block()->Append(b.Return(f1));
+    b.With(f1->Block(), [&] {  //
+        b.Return(f1);
+    });
 
     auto* f2 = b.Function("main2", ty.void_(), ir::Function::PipelineStage::kCompute, {{8, 2, 16}});
-    f2->Block()->Append(b.Return(f2));
+    b.With(f2->Block(), [&] {  //
+        b.Return(f2);
+    });
 
     auto* f3 = b.Function("main3", ty.void_(), ir::Function::PipelineStage::kFragment);
-    f3->Block()->Append(b.Return(f3));
+    b.With(f3->Block(), [&] {  //
+        b.Return(f3);
+    });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpEntryPoint GLCompute %main1 "main1"
+               OpEntryPoint GLCompute %main2 "main2"
+               OpEntryPoint Fragment %main3 "main3"
+               OpExecutionMode %main1 LocalSize 32 4 1
+               OpExecutionMode %main2 LocalSize 8 2 16
+               OpExecutionMode %main3 OriginUpperLeft
 
-    generator_.EmitFunction(f1);
-    generator_.EmitFunction(f2);
-    generator_.EmitFunction(f3);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpEntryPoint GLCompute %1 "main1"
-OpEntryPoint GLCompute %5 "main2"
-OpEntryPoint Fragment %7 "main3"
-OpExecutionMode %1 LocalSize 32 4 1
-OpExecutionMode %5 LocalSize 8 2 16
-OpExecutionMode %7 OriginUpperLeft
-OpName %1 "main1"
-OpName %5 "main2"
-OpName %7 "main3"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpReturn
-OpFunctionEnd
-%5 = OpFunction %2 None %3
-%6 = OpLabel
-OpReturn
-OpFunctionEnd
-%7 = OpFunction %2 None %3
-%8 = OpLabel
-OpReturn
-OpFunctionEnd
+               ; Debug Information
+               OpName %main1 "main1"  ; id %1
+               OpName %main2 "main2"  ; id %5
+               OpName %main3 "main3"  ; id %7
+
+               ; Types, variables and constants
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+
+               ; Function main1
+      %main1 = OpFunction %void None %3
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+               ; Function main2
+      %main2 = OpFunction %void None %3
+          %6 = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+               ; Function main3
+      %main3 = OpFunction %void None %3
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Function_ReturnValue) {
     auto* func = b.Function("foo", ty.i32());
-    func->Block()->Append(b.Return(func, i32(42)));
+    b.With(func->Block(), [&] {  //
+        b.Return(func, 42_i);
+    });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %3 = OpTypeFunction %int
+     %int_42 = OpConstant %int 42
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
 
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeInt 32 1
-%3 = OpTypeFunction %2
-%5 = OpConstant %2 42
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpReturnValue %5
-OpFunctionEnd
+               ; Function foo
+        %foo = OpFunction %int None %3
+          %4 = OpLabel
+               OpReturnValue %int_42
+               OpFunctionEnd
 )");
 }
 
@@ -177,97 +241,61 @@ TEST_F(SpvGeneratorImplTest, Function_Parameters) {
         b.Return(func, result);
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %5 = OpTypeFunction %int %int %int
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
 
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-OpName %3 "x"
-OpName %4 "y"
-%2 = OpTypeInt 32 1
-%5 = OpTypeFunction %2 %2 %2
-%1 = OpFunction %2 None %5
-%3 = OpFunctionParameter %2
-%4 = OpFunctionParameter %2
-%6 = OpLabel
-%7 = OpIAdd %2 %3 %4
-OpReturnValue %7
-OpFunctionEnd
+               ; Function foo
+        %foo = OpFunction %int None %5
+          %x = OpFunctionParameter %int
+          %y = OpFunctionParameter %int
+          %6 = OpLabel
+          %7 = OpIAdd %int %x %y
+               OpReturnValue %7
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Function_Call) {
-    auto* i32_ty = ty.i32();
-    auto* x = b.FunctionParam(i32_ty);
-    auto* y = b.FunctionParam(i32_ty);
-    auto* foo = b.Function("foo", i32_ty);
+    auto* i32 = ty.i32();
+    auto* x = b.FunctionParam("x", i32);
+    auto* y = b.FunctionParam("y", i32);
+    auto* foo = b.Function("foo", i32);
     foo->SetParams({x, y});
 
     b.With(foo->Block(), [&] {
-        auto* result = b.Add(i32_ty, x, y);
+        auto* result = b.Add(i32, x, y);
         b.Return(foo, result);
     });
 
     auto* bar = b.Function("bar", ty.void_());
     b.With(bar->Block(), [&] {
-        b.Call(i32_ty, foo, i32(2), i32(3));
+        auto* result = b.Call(i32, foo, 2_i, 3_i);
         b.Return(bar);
+        mod.SetName(result, "result");
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(foo);
-    generator_.EmitFunction(bar);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-OpName %8 "bar"
-%2 = OpTypeInt 32 1
-%5 = OpTypeFunction %2 %2 %2
-%9 = OpTypeVoid
-%10 = OpTypeFunction %9
-%13 = OpConstant %2 2
-%14 = OpConstant %2 3
-%1 = OpFunction %2 None %5
-%3 = OpFunctionParameter %2
-%4 = OpFunctionParameter %2
-%6 = OpLabel
-%7 = OpIAdd %2 %3 %4
-OpReturnValue %7
-OpFunctionEnd
-%8 = OpFunction %9 None %10
-%11 = OpLabel
-%12 = OpFunctionCall %2 %1 %13 %14
-OpReturn
-OpFunctionEnd
-)");
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpFunctionCall %int %foo %int_2 %int_3");
 }
 
 TEST_F(SpvGeneratorImplTest, Function_Call_Void) {
     auto* foo = b.Function("foo", ty.void_());
-    foo->Block()->Append(b.Return(foo));
+    b.With(foo->Block(), [&] {  //
+        b.Return(foo);
+    });
 
     auto* bar = b.Function("bar", ty.void_());
     b.With(bar->Block(), [&] {
-        b.Call(ty.void_(), foo, utils::Empty);
+        auto* result = b.Call(ty.void_(), foo);
         b.Return(bar);
+        mod.SetName(result, "result");
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(foo);
-    generator_.EmitFunction(bar);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-OpName %5 "bar"
-%2 = OpTypeVoid
-%3 = OpTypeFunction %2
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpReturn
-OpFunctionEnd
-%5 = OpFunction %2 None %3
-%6 = OpLabel
-%7 = OpFunctionCall %2 %1
-OpReturn
-OpFunctionEnd
-)");
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpFunctionCall %void %foo");
 }
 
 }  // namespace

@@ -194,7 +194,14 @@ uint32_t GeneratorImplIr::Builtin(builtin::BuiltinValue builtin, builtin::Addres
 }
 
 uint32_t GeneratorImplIr::Constant(ir::Constant* constant) {
-    return Constant(constant->Value());
+    auto id = Constant(constant->Value());
+
+    // Set the name for the SPIR-V result ID if provided in the module.
+    if (auto name = ir_->NameOf(constant)) {
+        module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
+    }
+
+    return id;
 }
 
 uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {

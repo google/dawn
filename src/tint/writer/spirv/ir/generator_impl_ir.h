@@ -85,17 +85,35 @@ class GeneratorImplIr {
     /// @returns the result ID of the constant
     uint32_t Constant(ir::Constant* constant);
 
-    /// Get the result ID of the OpConstantNull instruction for `type`, emitting it if necessary.
-    /// @param type the type to get the ID for
-    /// @returns the result ID of the OpConstantNull instruction
-    uint32_t ConstantNull(const type::Type* type);
-
     /// Get the result ID of the type `ty`, emitting a type declaration instruction if necessary.
     /// @param ty the type to get the ID for
     /// @param addrspace the optional address space that this type is being used for
     /// @returns the result ID of the type
     uint32_t Type(const type::Type* ty,
                   builtin::AddressSpace addrspace = builtin::AddressSpace::kUndefined);
+
+  private:
+    /// Convert a builtin to the corresponding SPIR-V enum value, taking into account the target
+    /// address space. Adds any capabilities needed for the builtin.
+    /// @param builtin the builtin to convert
+    /// @param addrspace the address space the builtin is being used in
+    /// @returns the enum value of the corresponding SPIR-V builtin
+    uint32_t Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace);
+
+    /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
+    /// @param constant the constant to get the ID for
+    /// @returns the result ID of the constant
+    uint32_t Constant(const constant::Value* constant);
+
+    /// Get the result ID of the OpConstantNull instruction for `type`, emitting it if necessary.
+    /// @param type the type to get the ID for
+    /// @returns the result ID of the OpConstantNull instruction
+    uint32_t ConstantNull(const type::Type* type);
+
+    /// Get the ID of the label for `block`.
+    /// @param block the block to get the label ID for
+    /// @returns the ID of the block's label
+    uint32_t Label(ir::Block* block);
 
     /// Get the result ID of the value `value`, emitting its instruction if necessary.
     /// @param value the value to get the ID for
@@ -111,11 +129,6 @@ class GeneratorImplIr {
     /// @param ty the type of the undef value
     /// @returns the result ID of the instruction
     uint32_t Undef(const type::Type* ty);
-
-    /// Get the ID of the label for `block`.
-    /// @param block the block to get the label ID for
-    /// @returns the ID of the block's label
-    uint32_t Label(ir::Block* block);
 
     /// Emit a struct type.
     /// @param id the result ID to use
@@ -201,19 +214,6 @@ class GeneratorImplIr {
     /// Emit the OpPhis for the given flow control instruction.
     /// @param inst the flow control instruction
     void EmitExitPhis(ir::ControlInstruction* inst);
-
-  private:
-    /// Convert a builtin to the corresponding SPIR-V enum value, taking into account the target
-    /// address space. Adds any capabilities needed for the builtin.
-    /// @param builtin the builtin to convert
-    /// @param addrspace the address space the builtin is being used in
-    /// @returns the enum value of the corresponding SPIR-V builtin
-    uint32_t Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace);
-
-    /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
-    /// @param constant the constant to get the ID for
-    /// @returns the result ID of the constant
-    uint32_t Constant(const constant::Value* constant);
 
     ir::Module* ir_;
     spirv::Module module_;

@@ -14,7 +14,6 @@
 
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
-#include "gmock/gmock.h"
 #include "src/tint/builtin/function.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -43,10 +42,8 @@ TEST_P(Builtin_1arg, Scalar) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.spirv_inst);
 }
 TEST_P(Builtin_1arg, Vector) {
     auto params = GetParam();
@@ -57,10 +54,8 @@ TEST_P(Builtin_1arg, Vector) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.spirv_inst);
 }
 INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                          Builtin_1arg,
@@ -71,45 +66,36 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
 TEST_F(SpvGeneratorImplTest, Builtin_Abs_u32) {
     auto* func = b.Function("foo", MakeScalarType(kU32));
     b.With(func->Block(), [&] {
-        auto* result = b.Call(MakeScalarType(kU32), builtin::Function::kAbs, MakeScalarValue(kU32));
+        auto* arg = MakeScalarValue(kU32);
+        auto* result = b.Call(MakeScalarType(kU32), builtin::Function::kAbs, arg);
         b.Return(func, result);
+        mod.SetName(arg, "arg");
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%2 = OpTypeInt 32 0
-%3 = OpTypeFunction %2
-%5 = OpConstant %2 1
-%1 = OpFunction %2 None %3
-%4 = OpLabel
-OpReturnValue %5
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+        %foo = OpFunction %uint None %3
+          %4 = OpLabel
+               OpReturnValue %arg
+               OpFunctionEnd
 )");
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
     auto* func = b.Function("foo", MakeVectorType(kU32));
     b.With(func->Block(), [&] {
-        auto* result = b.Call(MakeVectorType(kU32), builtin::Function::kAbs, MakeVectorValue(kU32));
+        auto* arg = MakeVectorValue(kU32);
+        auto* result = b.Call(MakeVectorType(kU32), builtin::Function::kAbs, arg);
         b.Return(func, result);
+        mod.SetName(arg, "arg");
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_EQ(DumpModule(generator_.Module()), R"(OpName %1 "foo"
-%3 = OpTypeInt 32 0
-%2 = OpTypeVector %3 2
-%4 = OpTypeFunction %2
-%7 = OpConstant %3 42
-%8 = OpConstant %3 10
-%6 = OpConstantComposite %2 %7 %8
-%1 = OpFunction %2 None %4
-%5 = OpLabel
-OpReturnValue %6
-OpFunctionEnd
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+        %foo = OpFunction %v2uint None %4
+          %5 = OpLabel
+               OpReturnValue %arg
+               OpFunctionEnd
 )");
 }
 
@@ -125,10 +111,8 @@ TEST_P(Builtin_2arg, Scalar) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.spirv_inst);
 }
 TEST_P(Builtin_2arg, Vector) {
     auto params = GetParam();
@@ -140,10 +124,8 @@ TEST_P(Builtin_2arg, Vector) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-
-    generator_.EmitFunction(func);
-    EXPECT_THAT(DumpModule(generator_.Module()), ::testing::HasSubstr(params.spirv_inst));
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.spirv_inst);
 }
 INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                          Builtin_2arg,
