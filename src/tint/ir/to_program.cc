@@ -249,6 +249,7 @@ class State {
     void Instruction(ir::Instruction* inst) {
         tint::Switch(
             inst,                                       //
+            [&](ir::Access* i) { Access(i); },          //
             [&](ir::Binary* i) { Binary(i); },          //
             [&](ir::BreakIf* i) { BreakIf(i); },        //
             [&](ir::Call* i) { Call(i); },              //
@@ -469,6 +470,57 @@ class State {
                 break;
         }
         Bind(u->Result(), expr);
+    }
+
+    void Access(ir::Access* a) {
+        auto* expr = Expr(a->Object());
+        auto* obj_ty = a->Object()->Type()->UnwrapPtr();
+        for (auto* index : a->Indices()) {
+            tint::Switch(
+                obj_ty,
+                [&](const type::Vector* vec) {
+                    TINT_DEFER(obj_ty = vec->type());
+                    if (auto* c = index->As<ir::Constant>()) {
+                        switch (c->Value()->ValueAs<int>()) {
+                            case 0:
+                                expr = b.MemberAccessor(expr, "x");
+                                return;
+                            case 1:
+                                expr = b.MemberAccessor(expr, "y");
+                                return;
+                            case 2:
+                                expr = b.MemberAccessor(expr, "z");
+                                return;
+                            case 3:
+                                expr = b.MemberAccessor(expr, "w");
+                                return;
+                        }
+                    }
+                    expr = b.IndexAccessor(expr, Expr(index));
+                },
+                [&](const type::Matrix* mat) {
+                    obj_ty = mat->ColumnType();
+                    expr = b.IndexAccessor(expr, Expr(index));
+                },
+                [&](const type::Array* arr) {
+                    obj_ty = arr->ElemType();
+                    expr = b.IndexAccessor(expr, Expr(index));
+                },
+                [&](const type::Struct* s) {
+                    if (auto* c = index->As<ir::Constant>()) {
+                        auto i = c->Value()->ValueAs<uint32_t>();
+                        TINT_ASSERT_OR_RETURN(IR, i < s->Members().Length());
+                        auto* member = s->Members()[i];
+                        obj_ty = member->Type();
+                        expr = b.IndexAccessor(expr, member->Name().NameView());
+                    } else {
+                        TINT_ICE(IR, b.Diagnostics())
+                            << "invalid index for struct type: " << index->TypeInfo().name;
+                    }
+                },
+                [&](Default) { UNHANDLED_CASE(obj_ty); });
+        }
+        Bind(a->Result(), expr);
     }
 
     void Binary(ir::Binary* e) {

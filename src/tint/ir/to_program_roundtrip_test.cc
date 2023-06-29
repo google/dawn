@@ -242,6 +242,219 @@ fn f(i : f32) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Access
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, Access_Value_vec3f_1) {
+    Test(R"(
+fn f(v : vec3<f32>) -> f32 {
+  return v[1];
+}
+)",
+         R"(
+fn f(v : vec3<f32>) -> f32 {
+  return v.y;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_vec3f_1) {
+    Test(R"(
+var<private> v : vec3<f32>;
+
+fn f() -> f32 {
+  return v[1];
+}
+)",
+         R"(
+var<private> v : vec3<f32>;
+
+fn f() -> f32 {
+  return v.y;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Value_vec3f_z) {
+    Test(R"(
+fn f(v : vec3<f32>) -> f32 {
+  return v.z;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_vec3f_z) {
+    Test(R"(
+var<private> v : vec3<f32>;
+
+fn f() -> f32 {
+  return v.z;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Value_vec3f_g) {
+    Test(R"(
+fn f(v : vec3<f32>) -> f32 {
+  return v.g;
+}
+)",
+         R"(
+fn f(v : vec3<f32>) -> f32 {
+  return v.y;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_vec3f_g) {
+    Test(R"(
+var<private> v : vec3<f32>;
+
+fn f() -> f32 {
+  return v.g;
+}
+)",
+         R"(
+var<private> v : vec3<f32>;
+
+fn f() -> f32 {
+  return v.y;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Value_vec3f_i) {
+    Test(R"(
+fn f(v : vec3<f32>, i : i32) -> f32 {
+  return v[i];
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_vec3f_i) {
+    Test(R"(
+var<private> v : vec3<f32>;
+
+fn f(i : i32) -> f32 {
+  return v[i];
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Value_mat3x2f_1_0) {
+    Test(R"(
+fn f(m : mat3x2<f32>) -> f32 {
+  return m[1][0];
+}
+)",
+         R"(
+fn f(m : mat3x2<f32>) -> f32 {
+  return m[1i].x;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_mat3x2f_1_0) {
+    Test(R"(
+var<private> m : mat3x2<f32>;
+
+fn f() -> f32 {
+  return m[1][0];
+}
+)",
+         R"(
+var<private> m : mat3x2<f32>;
+
+fn f() -> f32 {
+  return m[1i].x;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Value_mat3x2f_u_0) {
+    Test(R"(
+fn f(m : mat3x2<f32>, u : u32) -> f32 {
+  return m[u][0];
+}
+)",
+         R"(
+fn f(m : mat3x2<f32>, u : u32) -> f32 {
+  return m[u].x;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_mat3x2f_u_0) {
+    Test(R"(
+var<private> m : mat3x2<f32>;
+
+fn f(u : u32) -> f32 {
+  return m[u][0];
+}
+)",
+         R"(
+var<private> m : mat3x2<f32>;
+
+fn f(u : u32) -> f32 {
+  return m[u].x;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Value_mat3x2f_u_i) {
+    Test(R"(
+fn f(m : mat3x2<f32>, u : u32, i : i32) -> f32 {
+  return m[u][i];
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_mat3x2f_u_i) {
+    Test(R"(
+var<private> m : mat3x2<f32>;
+
+fn f(u : u32, i : i32) -> f32 {
+  return m[u][i];
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Value_array_0u) {
+    Test(R"(
+fn f(a : array<i32, 4u>) -> i32 {
+  return a[0u];
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_array_0u) {
+    Test(R"(
+var<private> a : array<i32, 4u>;
+
+fn f() -> i32 {
+  return a[0u];
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Value_array_i) {
+    Test(R"(
+fn f(a : array<i32, 4u>, i : i32) -> i32 {
+  return a[i];
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Ref_array_i) {
+    Test(R"(
+var<private> a : array<i32, 4u>;
+
+fn f(i : i32) -> i32 {
+  return a[i];
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Unary ops
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, UnaryOp_Negate) {
