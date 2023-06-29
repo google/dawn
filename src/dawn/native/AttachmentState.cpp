@@ -22,8 +22,9 @@
 
 namespace dawn::native {
 
-AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderBundleEncoderDescriptor* descriptor)
-    : mSampleCount(descriptor->sampleCount) {
+AttachmentState::AttachmentState(DeviceBase* device,
+                                 const RenderBundleEncoderDescriptor* descriptor)
+    : ObjectBase(device), mSampleCount(descriptor->sampleCount) {
     ASSERT(descriptor->colorFormatsCount <= kMaxColorAttachments);
     for (ColorAttachmentIndex i(uint8_t(0));
          i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorFormatsCount)); ++i) {
@@ -36,10 +37,12 @@ AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderBundleEncoderDesc
     mDepthStencilFormat = descriptor->depthStencilFormat;
 
     // TODO(dawn:1710): support MSAA render to single sampled in render bundle.
+
+    SetContentHash(ComputeContentHash());
 }
 
-AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor)
-    : mSampleCount(descriptor->multisample.count) {
+AttachmentState::AttachmentState(DeviceBase* device, const RenderPipelineDescriptor* descriptor)
+    : ObjectBase(device), mSampleCount(descriptor->multisample.count) {
     const DawnMultisampleStateRenderToSingleSampled* msaaRenderToSingleSampledDesc = nullptr;
     FindInChain(descriptor->multisample.nextInChain, &msaaRenderToSingleSampledDesc);
     if (msaaRenderToSingleSampledDesc != nullptr) {
@@ -62,9 +65,11 @@ AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescripto
     if (descriptor->depthStencil != nullptr) {
         mDepthStencilFormat = descriptor->depthStencil->format;
     }
+    SetContentHash(ComputeContentHash());
 }
 
-AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor) {
+AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor* descriptor)
+    : ObjectBase(device) {
     for (ColorAttachmentIndex i(uint8_t(0));
          i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorAttachmentCount)); ++i) {
         const RenderPassColorAttachment& colorAttachment =
@@ -104,34 +109,27 @@ AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* d
         }
     }
     ASSERT(mSampleCount > 0);
+    SetContentHash(ComputeContentHash());
 }
 
-AttachmentStateBlueprint::AttachmentStateBlueprint(const AttachmentStateBlueprint& rhs) = default;
+AttachmentState::AttachmentState(const AttachmentState& blueprint)
+    : ObjectBase(blueprint.GetDevice()) {
+    mColorAttachmentsSet = blueprint.mColorAttachmentsSet;
+    mColorFormats = blueprint.mColorFormats;
+    mDepthStencilFormat = blueprint.mDepthStencilFormat;
+    mSampleCount = blueprint.mSampleCount;
+    mIsMSAARenderToSingleSampledEnabled = blueprint.mIsMSAARenderToSingleSampledEnabled;
+    SetContentHash(blueprint.GetContentHash());
+}
 
-size_t AttachmentStateBlueprint::HashFunc::operator()(
-    const AttachmentStateBlueprint* attachmentState) const {
-    size_t hash = 0;
-
-    // Hash color formats
-    HashCombine(&hash, attachmentState->mColorAttachmentsSet);
-    for (ColorAttachmentIndex i : IterateBitSet(attachmentState->mColorAttachmentsSet)) {
-        HashCombine(&hash, attachmentState->mColorFormats[i]);
+AttachmentState::~AttachmentState() {
+    if (IsCachedReference()) {
+        GetDevice()->UncacheAttachmentState(this);
     }
-
-    // Hash depth stencil attachment
-    HashCombine(&hash, attachmentState->mDepthStencilFormat);
-
-    // Hash sample count
-    HashCombine(&hash, attachmentState->mSampleCount);
-
-    // Hash MSAA render to single sampled flag
-    HashCombine(&hash, attachmentState->mIsMSAARenderToSingleSampledEnabled);
-
-    return hash;
 }
 
-bool AttachmentStateBlueprint::EqualityFunc::operator()(const AttachmentStateBlueprint* a,
-                                                        const AttachmentStateBlueprint* b) const {
+bool AttachmentState::EqualityFunc::operator()(const AttachmentState* a,
+                                               const AttachmentState* b) const {
     // Check set attachments
     if (a->mColorAttachmentsSet != b->mColorAttachmentsSet) {
         return false;
@@ -162,16 +160,25 @@ bool AttachmentStateBlueprint::EqualityFunc::operator()(const AttachmentStateBlu
     return true;
 }
 
-AttachmentState::AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint)
-    : AttachmentStateBlueprint(blueprint), ObjectBase(device) {}
-
-AttachmentState::~AttachmentState() {
-    GetDevice()->UncacheAttachmentState(this);
-}
-
 size_t AttachmentState::ComputeContentHash() {
-    // TODO(dawn:549): skip this traversal and reuse the blueprint.
-    return AttachmentStateBlueprint::HashFunc()(this);
+    size_t hash = 0;
+
+    // Hash color formats
+    HashCombine(&hash, mColorAttachmentsSet);
+    for (ColorAttachmentIndex i : IterateBitSet(mColorAttachmentsSet)) {
+        HashCombine(&hash, mColorFormats[i]);
+    }
+
+    // Hash depth stencil attachment
+    HashCombine(&hash, mDepthStencilFormat);
+
+    // Hash sample count
+    HashCombine(&hash, mSampleCount);
+
+    // Hash MSAA render to single sampled flag
+    HashCombine(&hash, mIsMSAARenderToSingleSampledEnabled);
+
+    return hash;
 }
 
 ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> AttachmentState::GetColorAttachmentsMask()

@@ -31,41 +31,17 @@ namespace dawn::native {
 
 class DeviceBase;
 
-// AttachmentStateBlueprint and AttachmentState are separated so the AttachmentState
-// can be constructed by copying the blueprint state instead of traversing descriptors.
-// Also, AttachmentStateBlueprint does not need a refcount like AttachmentState.
-class AttachmentStateBlueprint {
+class AttachmentState final : public ObjectBase, public CachedObject {
   public:
     // Note: Descriptors must be validated before the AttachmentState is constructed.
-    explicit AttachmentStateBlueprint(const RenderBundleEncoderDescriptor* descriptor);
-    explicit AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor);
-    explicit AttachmentStateBlueprint(const RenderPassDescriptor* descriptor);
+    explicit AttachmentState(DeviceBase* device, const RenderBundleEncoderDescriptor* descriptor);
+    explicit AttachmentState(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
+    explicit AttachmentState(DeviceBase* device, const RenderPassDescriptor* descriptor);
 
-    AttachmentStateBlueprint(const AttachmentStateBlueprint& rhs);
+    // Constructor used to avoid re-parsing descriptors when we already parsed them for cache keys.
+    AttachmentState(const AttachmentState& blueprint);
 
-    // Functors necessary for the unordered_set<AttachmentState*>-based cache.
-    struct HashFunc {
-        size_t operator()(const AttachmentStateBlueprint* attachmentState) const;
-    };
-    struct EqualityFunc {
-        bool operator()(const AttachmentStateBlueprint* a, const AttachmentStateBlueprint* b) const;
-    };
-
-  protected:
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> mColorAttachmentsSet;
-    ityp::array<ColorAttachmentIndex, wgpu::TextureFormat, kMaxColorAttachments> mColorFormats;
-    // Default (texture format Undefined) indicates there is no depth stencil attachment.
-    wgpu::TextureFormat mDepthStencilFormat = wgpu::TextureFormat::Undefined;
-    uint32_t mSampleCount = 0;
-
-    bool mIsMSAARenderToSingleSampledEnabled = false;
-};
-
-class AttachmentState final : public AttachmentStateBlueprint,
-                              public ObjectBase,
-                              public CachedObject {
-  public:
-    AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint);
+    ~AttachmentState() override;
 
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
     wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex index) const;
@@ -74,10 +50,19 @@ class AttachmentState final : public AttachmentStateBlueprint,
     uint32_t GetSampleCount() const;
     bool IsMSAARenderToSingleSampledEnabled() const;
 
+    struct EqualityFunc {
+        bool operator()(const AttachmentState* a, const AttachmentState* b) const;
+    };
     size_t ComputeContentHash() override;
 
   private:
-    ~AttachmentState() override;
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> mColorAttachmentsSet;
+    ityp::array<ColorAttachmentIndex, wgpu::TextureFormat, kMaxColorAttachments> mColorFormats;
+    // Default (texture format Undefined) indicates there is no depth stencil attachment.
+    wgpu::TextureFormat mDepthStencilFormat = wgpu::TextureFormat::Undefined;
+    uint32_t mSampleCount = 0;
+
+    bool mIsMSAARenderToSingleSampledEnabled = false;
 };
 
 }  // namespace dawn::native

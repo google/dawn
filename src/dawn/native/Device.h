@@ -223,7 +223,7 @@ class DeviceBase : public RefCountedWithExternalCount {
         OwnedCompilationMessages* compilationMessages);
     void UncacheShaderModule(ShaderModuleBase* obj);
 
-    Ref<AttachmentState> GetOrCreateAttachmentState(AttachmentStateBlueprint* blueprint);
+    Ref<AttachmentState> GetOrCreateAttachmentState(AttachmentState* blueprint);
     Ref<AttachmentState> GetOrCreateAttachmentState(
         const RenderBundleEncoderDescriptor* descriptor);
     Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor);
