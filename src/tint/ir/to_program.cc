@@ -18,6 +18,7 @@
 #include <tuple>
 #include <utility>
 
+#include "src/tint/constant/splat.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
@@ -82,7 +83,9 @@ class State {
     explicit State(Module& m) : mod(m) {}
 
     Program Run() {
-        // TODO(crbug.com/tint/1902): Emit root block
+        if (mod.root_block) {
+            RootBlock(mod.root_block);
+        }
         // TODO(crbug.com/tint/1902): Emit user-declared types
         for (auto* fn : mod.functions) {
             Fn(fn);
@@ -119,9 +122,23 @@ class State {
     /// The current switch case block
     ir::Block* current_switch_case_ = nullptr;
 
-    // Values that can be inlined.
+    /// Values that can be inlined.
     utils::Hashset<ir::Value*, 64> can_inline_;
 
+    /// Set of enable directives emitted.
+    utils::Hashset<builtin::Extension, 4> enables_;
+
+    /// Map of struct to output program name.
+    utils::Hashmap<const type::Struct*, Symbol, 8> structs_;
+
+    void RootBlock(ir::Block* root) {
+        for (auto* inst : *root) {
+            tint::Switch(
+                inst,                             //
+                [&](ir::Var* var) { Var(var); },  //
+                [&](Default) { UNHANDLED_CASE(inst); });
+        }
+    }
     const ast::Function* Fn(ir::Function* fn) {
         SCOPED_NESTING();
 
@@ -405,10 +422,10 @@ class State {
                 Append(b.Decl(b.Var(name, ty, init)));
                 return;
             case builtin::AddressSpace::kStorage:
-                Append(b.Decl(b.Var(name, ty, init, ptr->Access(), ptr->AddressSpace())));
+                b.GlobalVar(name, ty, init, ptr->Access(), ptr->AddressSpace());
                 return;
             default:
-                Append(b.Decl(b.Var(name, ty, init, ptr->AddressSpace())));
+                b.GlobalVar(name, ty, init, ptr->AddressSpace());
                 return;
         }
     }
@@ -558,18 +575,48 @@ class State {
 
     TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
 
-    const ast::Expression* Constant(ir::Constant* c) {
+    const ast::Expression* Constant(ir::Constant* c) { return Constant(c->Value()); }
+
+    const ast::Expression* Constant(const constant::Value* c) {
+        auto composite = [&](bool can_splat) {
+            auto ty = Type(c->Type());
+            if (c->AllZero()) {
+                return b.Call(ty);
+            }
+            if (can_splat && c->Is<constant::Splat>()) {
+                return b.Call(ty, Constant(c->Index(0)));
+            }
+
+            utils::Vector<const ast::Expression*, 8> els;
+            for (size_t i = 0, n = c->NumElements(); i < n; i++) {
+                els.Push(Constant(c->Index(i)));
+            }
+            return b.Call(ty, std::move(els));
+        };
         return tint::Switch(
             c->Type(),  //
-            [&](const type::I32*) { return b.Expr(c->Value()->ValueAs<i32>()); },
-            [&](const type::U32*) { return b.Expr(c->Value()->ValueAs<u32>()); },
-            [&](const type::F32*) { return b.Expr(c->Value()->ValueAs<f32>()); },
-            [&](const type::F16*) { return b.Expr(c->Value()->ValueAs<f16>()); },
-            [&](const type::Bool*) { return b.Expr(c->Value()->ValueAs<bool>()); },
+            [&](const type::I32*) { return b.Expr(c->ValueAs<i32>()); },
+            [&](const type::U32*) { return b.Expr(c->ValueAs<u32>()); },
+            [&](const type::F32*) { return b.Expr(c->ValueAs<f32>()); },
+            [&](const type::F16*) {
+                Enable(builtin::Extension::kF16);
+                return b.Expr(c->ValueAs<f16>());
+            },
+            [&](const type::Bool*) { return b.Expr(c->ValueAs<bool>()); },
+            [&](const type::Array*) { return composite(/* can_splat */ false); },
+            [&](const type::Vector*) { return composite(/* can_splat */ true); },
+            [&](const type::Matrix*) { return composite(/* can_splat */ false); },
+            [&](const type::Struct*) { return composite(/* can_splat */ false); },
             [&](Default) {
-                UNHANDLED_CASE(c);
+                UNHANDLED_CASE(c->Type());
                 return b.Expr("<error>");
             });
+    }
+
+    void Enable(builtin::Extension ext) {
+        if (enables_.Add(ext)) {
+            b.Enable(ext);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -591,8 +638,11 @@ class State {
             [&](const type::Void*) { return ast::Type{}; },  //
             [&](const type::I32*) { return b.ty.i32(); },    //
             [&](const type::U32*) { return b.ty.u32(); },    //
-            [&](const type::F16*) { return b.ty.f16(); },    //
-            [&](const type::F32*) { return b.ty.f32(); },    //
+            [&](const type::F16*) {
+                Enable(builtin::Extension::kF16);
+                return b.ty.f16();
+            },
+            [&](const type::F32*) { return b.ty.f32(); },  //
             [&](const type::Bool*) { return b.ty.bool_(); },
             [&](const type::Matrix* m) {
                 return b.ty.mat(Type(m->type()), m->columns(), m->rows());
@@ -622,7 +672,7 @@ class State {
                 }
                 return b.ty.array(el, u32(count.value()), std::move(attrs));
             },
-            [&](const type::Struct* s) { return b.ty(s->Name().NameView()); },
+            [&](const type::Struct* s) { return Struct(s); },
             [&](const type::Atomic* a) { return b.ty.atomic(Type(a->Type())); },
             [&](const type::DepthTexture* t) { return b.ty.depth_texture(t->dim()); },
             [&](const type::DepthMultisampledTexture* t) {
@@ -659,6 +709,26 @@ class State {
                 UNHANDLED_CASE(ty);
                 return b.ty.i32();
             });
+    }
+
+    ast::Type Struct(const type::Struct* s) {
+        auto n = structs_.GetOrCreate(s, [&] {
+            auto members = utils::Transform<8>(s->Members(), [&](const type::StructMember* m) {
+                auto ty = Type(m->Type());
+                // TODO(crbug.com/tint/1902): Emit structure member attributes
+                utils::Vector<const ast::Attribute*, 2> attrs;
+                return b.Member(m->Name().NameView(), ty, std::move(attrs));
+            });
+
+            // TODO(crbug.com/tint/1902): Emit structure attributes
+            utils::Vector<const ast::Attribute*, 2> attrs;
+
+            auto name = b.Symbols().New(s->Name().NameView());
+            b.Structure(name, std::move(members), std::move(attrs));
+            return name;
+        });
+
+        return b.ty(n);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -625,6 +625,152 @@ fn f(i : i32) -> i32 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Module-scope var
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_i32) {
+    Test("var<private> v : i32 = 1i;");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_u32) {
+    Test("var<private> v : u32 = 1u;");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_f32) {
+    Test("var<private> v : f32 = 1.0f;");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_f16) {
+    Test(R"(
+enable f16;
+
+var<private> v : f16 = 1.0h;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_bool) {
+    Test("var<private> v : bool = true;");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_array_NoArgs) {
+    Test("var<private> v : array<i32, 4u> = array<i32, 4u>();");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_array_Zero) {
+    Test("var<private> v : array<i32, 4u> = array<i32, 4u>(0i, 0i, 0i, 0i);",
+         "var<private> v : array<i32, 4u> = array<i32, 4u>();");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_array_SameValue) {
+    Test("var<private> v : array<i32, 4u> = array<i32, 4u>(4i, 4i, 4i, 4i);");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_array_DifferentValues) {
+    Test("var<private> v : array<i32, 4u> = array<i32, 4u>(1i, 2i, 3i, 4i);");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_struct_NoArgs) {
+    Test(R"(
+struct S {
+  i : i32,
+  u : u32,
+  f : f32,
+}
+
+var<private> s : S = S();
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_struct_Zero) {
+    Test(R"(
+struct S {
+  i : i32,
+  u : u32,
+  f : f32,
+}
+
+var<private> s : S = S(0i, 0u, 0f);
+)",
+         R"(
+struct S {
+  i : i32,
+  u : u32,
+  f : f32,
+}
+
+var<private> s : S = S();
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_struct_SameValue) {
+    Test(R"(
+struct S {
+  a : i32,
+  b : i32,
+  c : i32,
+}
+
+var<private> s : S = S(4i, 4i, 4i);
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_struct_DifferentValues) {
+    Test(R"(
+struct S {
+  a : i32,
+  b : i32,
+  c : i32,
+}
+
+var<private> s : S = S(1i, 2i, 3i);
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_vec3f_NoArgs) {
+    Test("var<private> v : vec3<f32> = vec3<f32>();");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_vec3f_Zero) {
+    Test("var<private> v : vec3<f32> = vec3<f32>(0f);",
+         "var<private> v : vec3<f32> = vec3<f32>();");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_vec3f_Splat) {
+    Test("var<private> v : vec3<f32> = vec3<f32>(1.0f);");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_vec3f_Scalars) {
+    Test("var<private> v : vec3<f32> = vec3<f32>(1.0f, 2.0f, 3.0f);");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_NoArgs) {
+    Test("var<private> v : mat2x3<f32> = mat2x3<f32>();");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_Scalars_SameValue) {
+    Test("var<private> v : mat2x3<f32> = mat2x3<f32>(4.0f, 4.0f, 4.0f, 4.0f, 4.0f, 4.0f);",
+         "var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(4.0f), vec3<f32>(4.0f));");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_Scalars) {
+    Test("var<private> v : mat2x3<f32> = mat2x3<f32>(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f);",
+         "var<private> v : mat2x3<f32> = "
+         "mat2x3<f32>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(4.0f, 5.0f, 6.0f));");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_Columns) {
+    Test(
+        "var<private> v : mat2x3<f32> = "
+        "mat2x3<f32>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(4.0f, 5.0f, 6.0f));");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_Columns_SameValue) {
+    Test(
+        "var<private> v : mat2x3<f32> = "
+        "mat2x3<f32>(vec3<f32>(4.0f, 4.0f, 4.0f), vec3<f32>(4.0f, 4.0f, 4.0f));",
+        "var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(4.0f), vec3<f32>(4.0f));");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Function-scope var
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, FunctionScopeVar_i32) {
