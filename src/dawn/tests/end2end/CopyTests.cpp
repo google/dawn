@@ -1232,6 +1232,37 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
     DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kCopyLayers});
 }
 
+// Testing a series of params for 1D texture texture-to-buffer-copy.
+TEST_P(CopyTests_T2B, Texture1D) {
+    // TODO(dawn:1705): support 1d texture.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+    struct Param {
+        uint32_t textureWidth;
+        uint32_t copyWidth;
+        uint32_t copyOrigin;
+    };
+    constexpr Param params[] = {
+        {256, 256, 0}, {256, 16, 128}, {256, 16, 0},  {8, 8, 0},
+        {8, 1, 7},     {259, 259, 0},  {259, 255, 3},
+    };
+
+    constexpr uint32_t bufferOffsets[] = {0, 16, 256};
+
+    for (const auto& p : params) {
+        for (const uint32_t offset : bufferOffsets) {
+            TextureSpec textureSpec;
+            textureSpec.copyOrigin = {p.copyOrigin, 0, 0};
+            textureSpec.textureSize = {p.textureWidth, 1, 1};
+
+            BufferSpec bufferSpec = MinimumBufferSpec(p.copyWidth, 1, 1);
+            bufferSpec.offset = offset;
+            bufferSpec.size += offset;
+
+            DoTest(textureSpec, bufferSpec, {p.copyWidth, 1, 1}, wgpu::TextureDimension::e1D);
+        }
+    }
+}
+
 // Test that copying whole 3D texture in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture3DFull) {
     constexpr uint32_t kWidth = 256;

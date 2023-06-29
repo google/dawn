@@ -60,17 +60,25 @@ struct ConcatStringViewsImpl {
 template <std::string_view const&... Strs>
 static constexpr auto ConcatStringViews = ConcatStringViewsImpl<Strs...>::value;
 
-constexpr std::string_view kSnormTexture = R"(
-fn textureLoadGeneral(src_tex: texture_2d_array<f32>, coords: vec3u, level: u32) -> vec4<f32> {
-    return textureLoad(src_tex, coords.xy, coords.z, level);
+constexpr std::string_view kSnormTexture1D = R"(
+fn textureLoadGeneral(tex: texture_1d<f32>, coords: vec3u, level: u32) -> vec4<f32> {
+    return textureLoad(tex, coords.x, level);
+}
+@group(0) @binding(0) var src_tex : texture_1d<f32>;
+@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
+)";
+
+constexpr std::string_view kSnormTexture2D = R"(
+fn textureLoadGeneral(tex: texture_2d_array<f32>, coords: vec3u, level: u32) -> vec4<f32> {
+    return textureLoad(tex, coords.xy, coords.z, level);
 }
 @group(0) @binding(0) var src_tex : texture_2d_array<f32>;
 @group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
 constexpr std::string_view kSnormTexture3D = R"(
-fn textureLoadGeneral(src_tex: texture_3d<f32>, coords: vec3u, level: u32) -> vec4<f32> {
-    return textureLoad(src_tex, coords, level);
+fn textureLoadGeneral(tex: texture_3d<f32>, coords: vec3u, level: u32) -> vec4<f32> {
+    return textureLoad(tex, coords, level);
 }
 @group(0) @binding(0) var src_tex : texture_3d<f32>;
 @group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
@@ -270,12 +278,19 @@ constexpr std::string_view kLoadDepth32Float = R"(
 }
 )";
 
-constexpr std::string_view kBlitR8Snorm =
-    ConcatStringViews<kSnormTexture, kCommon, kPackR8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRG8Snorm =
-    ConcatStringViews<kSnormTexture, kCommon, kPackRG8SnormToU32, kCommonEnd>;
-constexpr std::string_view kBlitRGBA8Snorm =
-    ConcatStringViews<kSnormTexture, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitR8Snorm1D =
+    ConcatStringViews<kSnormTexture1D, kCommon, kPackR8SnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitRG8Snorm1D =
+    ConcatStringViews<kSnormTexture1D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitRGBA8Snorm1D =
+    ConcatStringViews<kSnormTexture1D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
+
+constexpr std::string_view kBlitR8Snorm2D =
+    ConcatStringViews<kSnormTexture2D, kCommon, kPackR8SnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitRG8Snorm2D =
+    ConcatStringViews<kSnormTexture2D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitRGBA8Snorm2D =
+    ConcatStringViews<kSnormTexture2D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
 
 constexpr std::string_view kBlitR8Snorm3D =
     ConcatStringViews<kSnormTexture3D, kCommon, kPackR8SnormToU32, kCommonEnd>;
@@ -298,7 +313,6 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
 
     const Format& format = src.texture->GetFormat();
     wgpu::TextureDimension dimension = src.texture->GetDimension();
-    bool is3D = dimension == wgpu::TextureDimension::e3D;
 
     auto iter = store->blitTextureToBufferComputePipelines.find({format.format, dimension});
     if (iter != store->blitTextureToBufferComputePipelines.end()) {
@@ -312,31 +326,61 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
     wgpu::TextureSampleType textureSampleType;
     switch (format.format) {
         case wgpu::TextureFormat::R8Snorm:
-            wgslDesc.code = is3D ? kBlitR8Snorm3D.data() : kBlitR8Snorm.data();
+            switch (dimension) {
+                case wgpu::TextureDimension::e1D:
+                    wgslDesc.code = kBlitR8Snorm1D.data();
+                    break;
+                case wgpu::TextureDimension::e2D:
+                    wgslDesc.code = kBlitR8Snorm2D.data();
+                    break;
+                case wgpu::TextureDimension::e3D:
+                    wgslDesc.code = kBlitR8Snorm3D.data();
+                    break;
+            }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::RG8Snorm:
-            wgslDesc.code = is3D ? kBlitRG8Snorm3D.data() : kBlitRG8Snorm.data();
+            switch (dimension) {
+                case wgpu::TextureDimension::e1D:
+                    wgslDesc.code = kBlitRG8Snorm1D.data();
+                    break;
+                case wgpu::TextureDimension::e2D:
+                    wgslDesc.code = kBlitRG8Snorm2D.data();
+                    break;
+                case wgpu::TextureDimension::e3D:
+                    wgslDesc.code = kBlitRG8Snorm3D.data();
+                    break;
+            }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::RGBA8Snorm:
-            wgslDesc.code = is3D ? kBlitRGBA8Snorm3D.data() : kBlitRGBA8Snorm.data();
+            switch (dimension) {
+                case wgpu::TextureDimension::e1D:
+                    wgslDesc.code = kBlitRGBA8Snorm1D.data();
+                    break;
+                case wgpu::TextureDimension::e2D:
+                    wgslDesc.code = kBlitRGBA8Snorm2D.data();
+                    break;
+                case wgpu::TextureDimension::e3D:
+                    wgslDesc.code = kBlitRGBA8Snorm3D.data();
+                    break;
+            }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::Depth16Unorm:
-            DAWN_ASSERT(!is3D);
+            DAWN_ASSERT(dimension == wgpu::TextureDimension::e2D);
             wgslDesc.code = kBlitDepth16Unorm.data();
             textureSampleType = wgpu::TextureSampleType::Depth;
             break;
         case wgpu::TextureFormat::Depth32Float:
-            DAWN_ASSERT(!is3D);
+            DAWN_ASSERT(dimension == wgpu::TextureDimension::e2D);
             wgslDesc.code = kBlitDepth32Float.data();
             textureSampleType = wgpu::TextureSampleType::Depth;
             break;
         case wgpu::TextureFormat::Stencil8:
         case wgpu::TextureFormat::Depth24PlusStencil8:
             // Depth24PlusStencil8 can only copy with stencil aspect and is gated by validation.
-            DAWN_ASSERT(!is3D);
+            DAWN_ASSERT(dimension == wgpu::TextureDimension::e2D);
             wgslDesc.code = kBlitStencil8.data();
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
@@ -344,7 +388,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
             // Depth32FloatStencil8 is not supported on OpenGL/OpenGLES where the blit path is
             // enabled by default. But could be hit if the blit path toggle is manually set on other
             // backends.
-            DAWN_ASSERT(!is3D);
+            DAWN_ASSERT(dimension == wgpu::TextureDimension::e2D);
             switch (src.aspect) {
                 case Aspect::Depth:
                     wgslDesc.code = kBlitDepth32Float.data();
@@ -366,13 +410,24 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
     DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&shaderModuleDesc));
 
     Ref<BindGroupLayoutBase> bindGroupLayout;
+    wgpu::TextureViewDimension textureViewDimension;
+    switch (dimension) {
+        case wgpu::TextureDimension::e1D:
+            textureViewDimension = wgpu::TextureViewDimension::e1D;
+            break;
+        case wgpu::TextureDimension::e2D:
+            textureViewDimension = wgpu::TextureViewDimension::e2DArray;
+            break;
+        case wgpu::TextureDimension::e3D:
+            textureViewDimension = wgpu::TextureViewDimension::e3D;
+            break;
+    }
     DAWN_TRY_ASSIGN(
         bindGroupLayout,
         utils::MakeBindGroupLayout(
             device,
             {
-                {0, wgpu::ShaderStage::Compute, textureSampleType,
-                 is3D ? wgpu::TextureViewDimension::e3D : wgpu::TextureViewDimension::e2DArray},
+                {0, wgpu::ShaderStage::Compute, textureSampleType, textureViewDimension},
                 {1, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
                 {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
             },
@@ -386,9 +441,11 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
     computePipelineDescriptor.compute.module = shaderModule.Get();
     computePipelineDescriptor.compute.entryPoint = "main";
 
-    constexpr std::array<ConstantEntry, 2> constants = {{
+    const uint32_t adjustedWorkGroupSizeY =
+        (dimension == wgpu::TextureDimension::e1D) ? 1 : kWorkgroupSizeY;
+    const std::array<ConstantEntry, 2> constants = {{
         {nullptr, "workgroupSizeX", kWorkgroupSizeX},
-        {nullptr, "workgroupSizeY", kWorkgroupSizeY},
+        {nullptr, "workgroupSizeY", static_cast<double>(adjustedWorkGroupSizeY)},
     }};
     computePipelineDescriptor.compute.constantCount = constants.size();
     computePipelineDescriptor.compute.constants = constants.data();
@@ -412,14 +469,12 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
 
     const Format& format = src.texture->GetFormat();
     wgpu::TextureDimension dimension = src.texture->GetDimension();
-    // TODO(dawn:1781): Implement Snorm copy for 1D texture.
-    DAWN_INVALID_IF(dimension == wgpu::TextureDimension::e1D, "Unsupported texture dimension %s.",
-                    dimension);
-    bool is3D = dimension == wgpu::TextureDimension::e3D;
 
     uint32_t texelFormatByteSize = format.GetAspectInfo(src.aspect).block.byteSize;
     uint32_t workgroupCountX = 1;
-    uint32_t workgroupCountY = (copyExtent.height + kWorkgroupSizeY - 1) / kWorkgroupSizeY;
+    uint32_t workgroupCountY = (dimension == wgpu::TextureDimension::e1D)
+                                   ? 1
+                                   : (copyExtent.height + kWorkgroupSizeY - 1) / kWorkgroupSizeY;
     uint32_t workgroupCountZ = copyExtent.depthOrArrayLayers;
     switch (texelFormatByteSize) {
         case 1:
@@ -478,11 +533,11 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         // srcOrigin: vec3u
         params[0] = src.origin.x;
         params[1] = src.origin.y;
-        if (is3D) {
-            params[2] = src.origin.z;
-        } else {
+        if (dimension == wgpu::TextureDimension::e2D) {
             // src.origin.z is set at textureView.baseArrayLayer
             params[2] = 0;
+        } else {
+            params[2] = src.origin.z;
         }
 
         // packTexelCount: number of texel values (1, 2, or 4) one thread packs into the dst buffer
@@ -518,16 +573,25 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             UNREACHABLE();
     }
 
-    viewDesc.dimension =
-        is3D ? wgpu::TextureViewDimension::e3D : wgpu::TextureViewDimension::e2DArray;
+    switch (dimension) {
+        case wgpu::TextureDimension::e1D:
+            viewDesc.dimension = wgpu::TextureViewDimension::e1D;
+            break;
+        case wgpu::TextureDimension::e2D:
+            viewDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+            break;
+        case wgpu::TextureDimension::e3D:
+            viewDesc.dimension = wgpu::TextureViewDimension::e3D;
+            break;
+    }
     viewDesc.baseMipLevel = src.mipLevel;
     viewDesc.mipLevelCount = 1;
-    if (is3D) {
-        viewDesc.baseArrayLayer = 0;
-        viewDesc.arrayLayerCount = 1;
-    } else {
+    if (dimension == wgpu::TextureDimension::e2D) {
         viewDesc.baseArrayLayer = src.origin.z;
         viewDesc.arrayLayerCount = copyExtent.depthOrArrayLayers;
+    } else {
+        viewDesc.baseArrayLayer = 0;
+        viewDesc.arrayLayerCount = 1;
     }
 
     Ref<TextureViewBase> srcView;
