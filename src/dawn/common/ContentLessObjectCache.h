@@ -30,11 +30,8 @@ namespace dawn {
 // This means that any RefCountedT that is inserted into the cache needs to make sure that their
 // DeleteThis function erases itself from the cache. Otherwise, the cache can grow indefinitely via
 // leaked pointers to deleted Refs.
-template <typename RefCountedT, typename BlueprintT = RefCountedT>
+template <typename RefCountedT>
 class ContentLessObjectCache {
-    static_assert(std::is_convertible_v<RefCountedT*, BlueprintT*>,
-                  "RefCountedT* must be convertible to a BlueprintT*.");
-
   public:
     // The dtor asserts that the cache is empty to aid in finding pointer leaks that can be possible
     // if the RefCountedT doesn't correctly implement the DeleteThis function to erase itself from
@@ -68,7 +65,7 @@ class ContentLessObjectCache {
 
     // Returns a valid Ref<T> if the underlying RefCounted object's refcount has not reached 0.
     // Otherwise, returns nullptr.
-    Ref<RefCountedT> Find(BlueprintT* blueprint) {
+    Ref<RefCountedT> Find(RefCountedT* blueprint) {
         std::lock_guard<std::mutex> lock(mMutex);
         auto it = mCache.find(blueprint);
         if (it != mCache.end()) {
@@ -95,9 +92,10 @@ class ContentLessObjectCache {
 
   private:
     std::mutex mMutex;
-    std::
-        unordered_set<BlueprintT*, typename BlueprintT::HashFunc, typename BlueprintT::EqualityFunc>
-            mCache;
+    std::unordered_set<RefCountedT*,
+                       typename RefCountedT::HashFunc,
+                       typename RefCountedT::EqualityFunc>
+        mCache;
 };
 
 }  // namespace dawn
