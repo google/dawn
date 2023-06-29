@@ -223,5 +223,22 @@ TEST_F(ParserImplTest, Attribute_Align_ExpressionInvalid) {
     EXPECT_EQ(p->error(), "1:9: mixing '+' and '<<' requires parenthesis");
 }
 
+TEST_F(ParserImplTest, Attribute_Index) {
+    auto p = parser("index(1)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    ASSERT_FALSE(p->has_error()) << p->error();
+
+    auto* member_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(member_attr, nullptr);
+    ASSERT_TRUE(member_attr->Is<ast::IndexAttribute>());
+
+    auto* o = member_attr->As<ast::IndexAttribute>();
+    ASSERT_TRUE(o->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(o->expr->As<ast::IntLiteralExpression>()->value, 1);
+}
+
 }  // namespace
 }  // namespace tint::reader::wgsl

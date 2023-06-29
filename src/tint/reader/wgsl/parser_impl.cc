@@ -3067,6 +3067,8 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             return create<ast::GroupAttribute>(t.source(), args[0]);
         case builtin::Attribute::kId:
             return create<ast::IdAttribute>(t.source(), args[0]);
+        case builtin::Attribute::kIndex:
+            return create<ast::IndexAttribute>(t.source(), args[0]);
         case builtin::Attribute::kInterpolate:
             return create<ast::InterpolateAttribute>(t.source(), args[0],
                                                      args.Length() == 2 ? args[1] : nullptr);
