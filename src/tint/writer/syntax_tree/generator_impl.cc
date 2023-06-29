@@ -521,12 +521,12 @@ void GeneratorImpl::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs
                 Line() << "]";
             },
             [&](const ast::IndexAttribute* index) {
-                line() << "IndexAttribute [";
+                Line() << "IndexAttribute [";
                 {
                     ScopedIndent idx(this);
                     EmitExpression(index->expr);
                 }
-                line() << "]";
+                Line() << "]";
             },
             [&](const ast::BuiltinAttribute* builtin) {
                 Line() << "BuiltinAttribute [";
