@@ -30,7 +30,8 @@ class BinaryWriter {
 
     /// Writes the SPIR-V header.
     /// @param bound the bound to output
-    void WriteHeader(uint32_t bound);
+    /// @param version the generator version number
+    void WriteHeader(uint32_t bound, uint32_t version = 0);
 
     /// Writes the given module data into a binary. Note, this does not emit the SPIR-V header. You
     /// **must** call WriteHeader() before WriteModule() if you want the SPIR-V to be emitted.

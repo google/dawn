@@ -619,6 +619,9 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
 
     // TODO(jrprice): Provide a way for the user to set non-default options.
     tint::writer::msl::Options gen_options;
+#if TINT_BUILD_IR
+    gen_options.use_tint_ir = options.use_ir;
+#endif
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.external_texture_options.bindings_map =

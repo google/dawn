@@ -78,6 +78,8 @@ namespace tint::writer::spirv {
 
 namespace {
 
+constexpr uint32_t kGeneratorVersion = 1;
+
 void Sanitize(ir::Module* module) {
     transform::Manager manager;
     transform::DataMap data;
@@ -155,7 +157,7 @@ bool GeneratorImplIr::Generate() {
     }
 
     // Serialize the module into binary SPIR-V.
-    writer_.WriteHeader(module_.IdBound());
+    writer_.WriteHeader(module_.IdBound(), kGeneratorVersion);
     writer_.WriteModule(&module_);
 
     return true;

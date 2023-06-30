@@ -88,13 +88,14 @@ func run() error {
 	var formatList, filter, dxcPath, fxcPath, xcrunPath string
 	var maxFilenameColumnWidth int
 	numCPU := runtime.NumCPU()
-	verbose, generateExpected, generateSkip := false, false, false
+	verbose, useIr, generateExpected, generateSkip := false, false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, hlsl-dxc, hlsl-fxc, glsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
 	flag.StringVar(&fxcPath, "fxc", "", "path to FXC DLL for validating HLSL output")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
+	flag.BoolVar(&useIr, "use-ir", false, "generate with the IR enabled")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
@@ -258,6 +259,7 @@ func run() error {
 		dxcPath:          dxcPath,
 		fxcPath:          fxcPath,
 		xcrunPath:        xcrunPath,
+		useIr:            useIr,
 		generateExpected: generateExpected,
 		generateSkip:     generateSkip,
 		validationCache:  validationCache,
@@ -549,6 +551,7 @@ type runConfig struct {
 	dxcPath          string
 	fxcPath          string
 	xcrunPath        string
+	useIr            bool
 	generateExpected bool
 	generateSkip     bool
 	validationCache  validationCache
@@ -558,6 +561,11 @@ func (j job) run(cfg runConfig) {
 	j.result <- func() status {
 		// expectedFilePath is the path to the expected output file for the given test
 		expectedFilePath := j.file + ".expected."
+
+		if cfg.useIr {
+			expectedFilePath += "ir."
+		}
+
 		switch j.format {
 		case hlslDXC:
 			expectedFilePath += "dxc.hlsl"
@@ -594,6 +602,10 @@ func (j job) run(cfg runConfig) {
 			file,
 			"--format", strings.Split(string(j.format), "-")[0], // 'hlsl-fxc' -> 'hlsl', etc.
 			"--print-hash",
+		}
+
+		if cfg.useIr {
+			args = append(args, "--use-ir")
 		}
 
 		// Append any skip-hashes, if they're found.
