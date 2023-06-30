@@ -41,7 +41,9 @@ class CommandBuffer final : public CommandBufferBase {
     MaybeError ExecuteComputePass(CommandRecordingContext* commandContext);
     MaybeError ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                                  CommandRecordingContext* commandContext);
-    void HandleDebugCommands(CommandRecordingContext* commandContext, Command command);
+    void HandleDebugCommands(CommandRecordingContext* commandContext,
+                             CommandIterator* iter,
+                             Command command);
 
     MaybeError RecordFirstIndexOffset(RenderPipeline* renderPipeline,
                                       CommandRecordingContext* commandContext,
