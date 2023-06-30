@@ -739,6 +739,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             [&](ir::Load* l) { EmitLoad(l); },                //
             [&](ir::Loop* l) { EmitLoop(l); },                //
             [&](ir::Switch* sw) { EmitSwitch(sw); },          //
+            [&](ir::Swizzle* s) { EmitSwizzle(s); },          //
             [&](ir::Store* s) { EmitStore(s); },              //
             [&](ir::UserCall* c) { EmitUserCall(c); },        //
             [&](ir::Var* v) { EmitVar(v); },                  //
@@ -1168,6 +1169,16 @@ void GeneratorImplIr::EmitSwitch(ir::Switch* swtch) {
 
     // Emit the OpPhis for the ExitSwitches
     EmitExitPhis(swtch);
+}
+
+void GeneratorImplIr::EmitSwizzle(ir::Swizzle* swizzle) {
+    auto id = Value(swizzle);
+    auto obj = Value(swizzle->Object());
+    OperandList operands = {Type(swizzle->Result()->Type()), id, obj, obj};
+    for (auto idx : swizzle->Indices()) {
+        operands.push_back(idx);
+    }
+    current_function_.push_inst(spv::Op::OpVectorShuffle, operands);
 }
 
 void GeneratorImplIr::EmitStore(ir::Store* store) {

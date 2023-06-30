@@ -47,6 +47,7 @@ class Module;
 class MultiInBlock;
 class Store;
 class Switch;
+class Swizzle;
 class Terminator;
 class UserCall;
 class Value;
@@ -209,6 +210,10 @@ class GeneratorImplIr {
     /// Emit a switch instruction.
     /// @param swtch the switch instruction to emit
     void EmitSwitch(ir::Switch* swtch);
+
+    /// Emit a swizzle instruction.
+    /// @param swizzle the swizzle instruction to emit
+    void EmitSwizzle(ir::Swizzle* swizzle);
 
     /// Emit a user call instruction.
     /// @param call the user call instruction to emit
