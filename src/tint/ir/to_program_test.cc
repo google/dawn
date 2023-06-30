@@ -1768,18 +1768,20 @@ TEST_F(IRToProgramTest, If_Else_Chain) {
             b.With(if2->True(), [&] {
                 b.Call(ty.void_(), x, 1_i);
                 b.ExitIf(if2);
-                b.With(if2->False(), [&] {
-                    auto* if3 = b.If(pc);
-                    b.With(if3->True(), [&] {
-                        b.Call(ty.void_(), x, 2_i);
-                        b.ExitIf(if3);
-                    });
-                    b.With(if3->False(), [&] {
-                        b.Call(ty.void_(), x, 3_i);
-                        b.ExitIf(if3);
-                    });
-                });
             });
+            b.With(if2->False(), [&] {
+                auto* if3 = b.If(pc);
+                b.With(if3->True(), [&] {
+                    b.Call(ty.void_(), x, 2_i);
+                    b.ExitIf(if3);
+                });
+                b.With(if3->False(), [&] {
+                    b.Call(ty.void_(), x, 3_i);
+                    b.ExitIf(if3);
+                });
+                b.ExitIf(if2);
+            });
+            b.ExitIf(if1);
         });
 
         b.Return(fn);
@@ -2045,14 +2047,19 @@ TEST_F(IRToProgramTest, For_Empty) {
         b.With(loop->Initializer(), [&] {
             auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(b.Constant(0_i));
+            b.NextIteration(loop);
 
             b.With(loop->Body(), [&] {
                 auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
                 b.With(if_->True(), [&] { b.ExitIf(if_); });
                 b.With(if_->False(), [&] { b.ExitLoop(loop); });
+                b.Continue(loop);
             });
 
-            b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
+            b.With(loop->Continuing(), [&] {
+                b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+                b.NextIteration(loop);
+            });
         });
 
         b.Return(fn);
@@ -2079,9 +2086,13 @@ TEST_F(IRToProgramTest, For_Empty_NoInit) {
             auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
             b.With(if_->True(), [&] { b.ExitIf(if_); });
             b.With(if_->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
         });
 
-        b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
+        b.With(loop->Continuing(), [&] {
+            b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+            b.NextIteration(loop);
+        });
 
         b.Return(fn);
     });
@@ -2104,11 +2115,13 @@ TEST_F(IRToProgramTest, For_Empty_NoCont) {
         b.With(loop->Initializer(), [&] {
             auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(b.Constant(0_i));
+            b.NextIteration(loop);
 
             b.With(loop->Body(), [&] {
                 auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
                 b.With(if_->True(), [&] { b.ExitIf(if_); });
                 b.With(if_->False(), [&] { b.ExitLoop(loop); });
+                b.NextIteration(loop);
             });
         });
 
@@ -2137,6 +2150,7 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
         b.With(loop->Initializer(), [&] {
             auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(b.Constant(0_i));
+            b.NextIteration(loop);
 
             b.With(loop->Body(), [&] {
                 auto* if1 = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
@@ -2146,9 +2160,13 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
                 auto* if2 = b.If(b.Call(ty.bool_(), a, 42_i));
                 b.With(if2->True(), [&] { b.Return(fn, 1_i); });
                 b.With(if2->False(), [&] { b.Return(fn, 2_i); });
+                b.Continue(loop);
             });
 
-            b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
+            b.With(loop->Continuing(), [&] {
+                b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+                b.NextIteration(loop);
+            });
         });
 
         b.Return(fn, 3_i);
@@ -2198,7 +2216,10 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoInit) {
             b.Continue(loop);
         });
 
-        b.With(loop->Continuing(), [&] { b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i)); });
+        b.With(loop->Continuing(), [&] {
+            b.Store(i, b.Add(ty.i32(), b.Load(i), 1_i));
+            b.NextIteration(loop);
+        });
 
         b.Return(fn, 3_i);
     });
@@ -2236,6 +2257,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
         b.With(loop->Initializer(), [&] {
             auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(b.Constant(0_i));
+            b.NextIteration(loop);
 
             b.With(loop->Body(), [&] {
                 auto* if1 = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
@@ -2246,7 +2268,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
                 b.With(if2->True(), [&] { b.Return(fn, 1_i); });
                 b.With(if2->False(), [&] { b.Return(fn, 2_i); });
 
-                b.Continue(loop);
+                b.NextIteration(loop);
             });
         });
 
@@ -2286,6 +2308,7 @@ TEST_F(IRToProgramTest, For_CallInInitCondCont) {
             auto* n_0 = b.Call(ty.i32(), fn_n, 0_i)->Result();
             auto* i = b.Var("i", ty.ptr<function, i32>());
             i->SetInitializer(n_0);
+            b.NextIteration(loop);
 
             b.With(loop->Body(), [&] {
                 auto* load = b.Load(i);
@@ -2297,7 +2320,10 @@ TEST_F(IRToProgramTest, For_CallInInitCondCont) {
                 b.Continue(loop);
             });
 
-            b.With(loop->Continuing(), [&] { b.Store(i, b.Call(ty.i32(), fn_n, b.Load(i))); });
+            b.With(loop->Continuing(), [&] {
+                b.Store(i, b.Call(ty.i32(), fn_n, b.Load(i)));
+                b.NextIteration(loop);
+            });
         });
 
         b.Return(fn_f);
@@ -2496,6 +2522,7 @@ TEST_F(IRToProgramTest, Loop_IfBreak) {
         b.With(loop->Body(), [&] {
             auto* if_ = b.If(cond);
             b.With(if_->True(), [&] { b.ExitLoop(loop); });
+            b.NextIteration(loop);
         });
 
         b.Return(fn);
@@ -2522,6 +2549,7 @@ TEST_F(IRToProgramTest, Loop_IfReturn) {
         b.With(loop->Body(), [&] {
             auto* if_ = b.If(cond);
             b.With(if_->True(), [&] { b.Return(fn); });
+            b.NextIteration(loop);
         });
 
         b.Return(fn);
@@ -2548,10 +2576,14 @@ TEST_F(IRToProgramTest, Loop_IfContinuing) {
         auto* loop = b.Loop();
 
         b.With(loop->Body(), [&] {
-            auto* if_ = b.If(cond);
+            auto* if_ = b.If(b.Load(cond));
             b.With(if_->True(), [&] { b.Return(fn); });
+            b.NextIteration(loop);
         });
-        b.With(loop->Continuing(), [&] { b.Store(cond, true); });
+        b.With(loop->Continuing(), [&] {
+            b.Store(cond, true);
+            b.NextIteration(loop);
+        });
 
         b.Return(fn);
     });
