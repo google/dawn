@@ -136,5 +136,40 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                                          BuiltinTestCase{kI32, builtin::Function::kMin, "SMin"},
                                          BuiltinTestCase{kU32, builtin::Function::kMin, "UMin"}));
 
+// Tests for builtins with the signature: T = func(T, T, T)
+using Builtin_3arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
+TEST_P(Builtin_3arg, Scalar) {
+    auto params = GetParam();
+
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type),
+               MakeScalarValue(params.type), MakeScalarValue(params.type));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.spirv_inst);
+}
+TEST_P(Builtin_3arg, Vector) {
+    auto params = GetParam();
+
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type),
+               MakeVectorValue(params.type), MakeVectorValue(params.type));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.spirv_inst);
+}
+INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+                         Builtin_3arg,
+                         testing::Values(BuiltinTestCase{kF32, builtin::Function::kClamp, "NClamp"},
+                                         BuiltinTestCase{kI32, builtin::Function::kClamp, "SClamp"},
+                                         BuiltinTestCase{kU32, builtin::Function::kClamp,
+                                                         "UClamp"}));
+
 }  // namespace
 }  // namespace tint::writer::spirv

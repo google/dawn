@@ -1082,6 +1082,15 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450SAbs);
             }
             break;
+        case builtin::Function::kClamp:
+            if (result_ty->is_float_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450NClamp);
+            } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450UClamp);
+            } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450SClamp);
+            }
+            break;
         case builtin::Function::kMax:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450FMax);
