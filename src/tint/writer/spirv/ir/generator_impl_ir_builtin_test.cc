@@ -136,6 +136,36 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                                          BuiltinTestCase{kI32, builtin::Function::kMin, "SMin"},
                                          BuiltinTestCase{kU32, builtin::Function::kMin, "UMin"}));
 
+TEST_F(SpvGeneratorImplTest, Builtin_Distance_vec2f) {
+    auto* arg1 = b.FunctionParam("arg1", MakeVectorType(kF32));
+    auto* arg2 = b.FunctionParam("arg2", MakeVectorType(kF32));
+    auto* func = b.Function("foo", MakeScalarType(kF32));
+    func->SetParams({arg1, arg2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(MakeScalarType(kF32), builtin::Function::kDistance, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %float %9 Distance %arg1 %arg2");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Distance_vec3h) {
+    auto* arg1 = b.FunctionParam("arg1", MakeVectorType(kF16));
+    auto* arg2 = b.FunctionParam("arg2", MakeVectorType(kF16));
+    auto* func = b.Function("foo", MakeScalarType(kF16));
+    func->SetParams({arg1, arg2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(MakeScalarType(kF16), builtin::Function::kDistance, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %half %9 Distance %arg1 %arg2");
+}
+
 // Tests for builtins with the signature: T = func(T, T, T)
 using Builtin_3arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_3arg, Scalar) {

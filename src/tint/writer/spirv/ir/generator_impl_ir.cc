@@ -1091,6 +1091,9 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450SClamp);
             }
             break;
+        case builtin::Function::kDistance:
+            glsl_ext_inst(GLSLstd450Distance);
+            break;
         case builtin::Function::kMax:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450FMax);
