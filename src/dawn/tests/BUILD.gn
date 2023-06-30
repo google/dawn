@@ -490,6 +490,7 @@ source_set("end2end_tests_sources") {
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:headers",
+    "${dawn_root}/src/dawn/platform",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
   ]
@@ -536,6 +537,7 @@ source_set("end2end_tests_sources") {
     "end2end/FirstIndexOffsetTests.cpp",
     "end2end/FragDepthTests.cpp",
     "end2end/GpuMemorySynchronizationTests.cpp",
+    "end2end/HistogramTests.cpp",
     "end2end/IndexFormatTests.cpp",
     "end2end/MaxLimitTests.cpp",
     "end2end/MemoryAllocationStressTests.cpp",

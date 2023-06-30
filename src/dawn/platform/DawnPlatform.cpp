@@ -53,6 +53,18 @@ uint64_t Platform::AddTraceEvent(char phase,
     return 0;
 }
 
+void Platform::HistogramCustomCounts(const char* name,
+                                     int sample,
+                                     int min,
+                                     int max,
+                                     int bucketCount) {}
+
+void Platform::HistogramEnumeration(const char* name, int sample, int boundaryValue) {}
+
+void Platform::HistogramSparse(const char* name, int sample) {}
+
+void Platform::HistogramBoolean(const char* name, bool sample) {}
+
 dawn::platform::CachingInterface* Platform::GetCachingInterface() {
     return nullptr;
 }
