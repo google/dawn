@@ -2121,7 +2121,7 @@ TEST_F(IRToProgramTest, For_Empty_NoCont) {
                 auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
                 b.With(if_->True(), [&] { b.ExitIf(if_); });
                 b.With(if_->False(), [&] { b.ExitLoop(loop); });
-                b.NextIteration(loop);
+                b.Continue(loop);
             });
         });
 
@@ -2160,7 +2160,7 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
                 auto* if2 = b.If(b.Call(ty.bool_(), a, 42_i));
                 b.With(if2->True(), [&] { b.Return(fn, 1_i); });
                 b.With(if2->False(), [&] { b.Return(fn, 2_i); });
-                b.Continue(loop);
+                b.Unreachable();
             });
 
             b.With(loop->Continuing(), [&] {
@@ -2522,7 +2522,7 @@ TEST_F(IRToProgramTest, Loop_IfBreak) {
         b.With(loop->Body(), [&] {
             auto* if_ = b.If(cond);
             b.With(if_->True(), [&] { b.ExitLoop(loop); });
-            b.NextIteration(loop);
+            b.Continue(loop);
         });
 
         b.Return(fn);
@@ -2549,7 +2549,7 @@ TEST_F(IRToProgramTest, Loop_IfReturn) {
         b.With(loop->Body(), [&] {
             auto* if_ = b.If(cond);
             b.With(if_->True(), [&] { b.Return(fn); });
-            b.NextIteration(loop);
+            b.Continue(loop);
         });
 
         b.Return(fn);
@@ -2578,7 +2578,7 @@ TEST_F(IRToProgramTest, Loop_IfContinuing) {
         b.With(loop->Body(), [&] {
             auto* if_ = b.If(b.Load(cond));
             b.With(if_->True(), [&] { b.Return(fn); });
-            b.NextIteration(loop);
+            b.Continue(loop);
         });
         b.With(loop->Continuing(), [&] {
             b.Store(cond, true);

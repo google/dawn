@@ -43,6 +43,7 @@
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/unary.h"
+#include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/validate.h"
 #include "src/tint/ir/var.h"
@@ -262,19 +263,20 @@ class State {
             [&](ir::Binary* i) { Binary(i); },          //
             [&](ir::BreakIf* i) { BreakIf(i); },        //
             [&](ir::Call* i) { Call(i); },              //
+            [&](ir::Continue*) {},                      //
             [&](ir::ExitIf*) {},                        //
-            [&](ir::ExitSwitch* i) { ExitSwitch(i); },  //
             [&](ir::ExitLoop* i) { ExitLoop(i); },      //
+            [&](ir::ExitSwitch* i) { ExitSwitch(i); },  //
             [&](ir::If* i) { If(i); },                  //
             [&](ir::Load* l) { Load(l); },              //
             [&](ir::Loop* l) { Loop(l); },              //
+            [&](ir::NextIteration*) {},                 //
             [&](ir::Return* i) { Return(i); },          //
             [&](ir::Store* i) { Store(i); },            //
             [&](ir::Switch* i) { Switch(i); },          //
             [&](ir::Unary* u) { Unary(u); },            //
+            [&](ir::Unreachable*) {},                   //
             [&](ir::Var* i) { Var(i); },                //
-            [&](ir::NextIteration*) {},                 //
-            [&](ir::Continue*) {},                      //
             [&](Default) { UNHANDLED_CASE(inst); });
     }
 
