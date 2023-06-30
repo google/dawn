@@ -69,6 +69,7 @@ INSTANTIATE_TEST_SUITE_P(
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kI32, ir::Binary::Kind::kAdd, "OpIAdd", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kSubtract, "OpISub", "int"},
+                    BinaryTestCase{kI32, ir::Binary::Kind::kMultiply, "OpIMul", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kDivide, "OpSDiv", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kOr, "OpBitwiseOr", "int"},
@@ -78,6 +79,7 @@ INSTANTIATE_TEST_SUITE_P(
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kU32, ir::Binary::Kind::kAdd, "OpIAdd", "uint"},
                     BinaryTestCase{kU32, ir::Binary::Kind::kSubtract, "OpISub", "uint"},
+                    BinaryTestCase{kU32, ir::Binary::Kind::kMultiply, "OpIMul", "uint"},
                     BinaryTestCase{kU32, ir::Binary::Kind::kDivide, "OpUDiv", "uint"},
                     BinaryTestCase{kU32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "uint"},
                     BinaryTestCase{kU32, ir::Binary::Kind::kOr, "OpBitwiseOr", "uint"},
@@ -87,13 +89,120 @@ INSTANTIATE_TEST_SUITE_P(
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kF32, ir::Binary::Kind::kAdd, "OpFAdd", "float"},
                     BinaryTestCase{kF32, ir::Binary::Kind::kSubtract, "OpFSub", "float"},
+                    BinaryTestCase{kF32, ir::Binary::Kind::kMultiply, "OpFMul", "float"},
                     BinaryTestCase{kF32, ir::Binary::Kind::kDivide, "OpFDiv", "float"}));
 INSTANTIATE_TEST_SUITE_P(
     SpvGeneratorImplTest_Binary_F16,
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kF16, ir::Binary::Kind::kAdd, "OpFAdd", "half"},
                     BinaryTestCase{kF16, ir::Binary::Kind::kSubtract, "OpFSub", "half"},
+                    BinaryTestCase{kF16, ir::Binary::Kind::kMultiply, "OpFMul", "half"},
                     BinaryTestCase{kF16, ir::Binary::Kind::kDivide, "OpFDiv", "half"}));
+
+TEST_F(SpvGeneratorImplTest, Binary_ScalarTimesVector_F32) {
+    auto* scalar = b.FunctionParam("scalar", ty.f32());
+    auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({scalar, vector});
+    b.With(func->Block(), [&] {
+        auto* result = b.Multiply(ty.vec4<f32>(), scalar, vector);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpVectorTimesScalar %v4float %vector %scalar");
+}
+
+TEST_F(SpvGeneratorImplTest, Binary_VectorTimesScalar_F32) {
+    auto* scalar = b.FunctionParam("scalar", ty.f32());
+    auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({scalar, vector});
+    b.With(func->Block(), [&] {
+        auto* result = b.Multiply(ty.vec4<f32>(), vector, scalar);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpVectorTimesScalar %v4float %vector %scalar");
+}
+
+TEST_F(SpvGeneratorImplTest, Binary_ScalarTimesMatrix_F32) {
+    auto* scalar = b.FunctionParam("scalar", ty.f32());
+    auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({scalar, matrix});
+    b.With(func->Block(), [&] {
+        auto* result = b.Multiply(ty.mat3x4<f32>(), scalar, matrix);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpMatrixTimesScalar %mat3v4float %matrix %scalar");
+}
+
+TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesScalar_F32) {
+    auto* scalar = b.FunctionParam("scalar", ty.f32());
+    auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({scalar, matrix});
+    b.With(func->Block(), [&] {
+        auto* result = b.Multiply(ty.mat3x4<f32>(), matrix, scalar);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpMatrixTimesScalar %mat3v4float %matrix %scalar");
+}
+
+TEST_F(SpvGeneratorImplTest, Binary_VectorTimesMatrix_F32) {
+    auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
+    auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({vector, matrix});
+    b.With(func->Block(), [&] {
+        auto* result = b.Multiply(ty.vec3<f32>(), vector, matrix);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpVectorTimesMatrix %v3float %vector %matrix");
+}
+
+TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesVector_F32) {
+    auto* vector = b.FunctionParam("vector", ty.vec3<f32>());
+    auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({vector, matrix});
+    b.With(func->Block(), [&] {
+        auto* result = b.Multiply(ty.vec4<f32>(), matrix, vector);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpMatrixTimesVector %v4float %matrix %vector");
+}
+
+TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesMatrix_F32) {
+    auto* mat1 = b.FunctionParam("mat1", ty.mat4x3<f32>());
+    auto* mat2 = b.FunctionParam("mat2", ty.mat3x4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({mat1, mat2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Multiply(ty.mat3x3<f32>(), mat1, mat2);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpMatrixTimesMatrix %mat3v3float %mat1 %mat2");
+}
 
 using Comparison = SpvGeneratorImplTestWithParam<BinaryTestCase>;
 TEST_P(Comparison, Scalar) {

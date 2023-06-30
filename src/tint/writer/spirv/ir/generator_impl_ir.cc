@@ -897,8 +897,11 @@ void GeneratorImplIr::EmitAccess(ir::Access* access) {
 
 void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
     auto id = Value(binary);
+    auto lhs = Value(binary->LHS());
+    auto rhs = Value(binary->RHS());
     auto* ty = binary->Result()->Type();
     auto* lhs_ty = binary->LHS()->Type();
+    auto* rhs_ty = binary->RHS()->Type();
 
     // Determine the opcode.
     spv::Op op = spv::Op::Max;
@@ -914,6 +917,42 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
                 op = spv::Op::OpUDiv;
             } else if (ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFDiv;
+            }
+            break;
+        }
+        case ir::Binary::Kind::kMultiply: {
+            if (ty->is_integer_scalar_or_vector()) {
+                // If the result is an integer then we can only use OpIMul.
+                op = spv::Op::OpIMul;
+            } else if (lhs_ty->is_float_scalar() && rhs_ty->is_float_scalar()) {
+                // Two float scalars multiply with OpFMul.
+                op = spv::Op::OpFMul;
+            } else if (lhs_ty->is_float_vector() && rhs_ty->is_float_vector()) {
+                // Two float vectors multiply with OpFMul.
+                op = spv::Op::OpFMul;
+            } else if (lhs_ty->is_float_scalar() && rhs_ty->is_float_vector()) {
+                // Use OpVectorTimesScalar for scalar * vector, and swap the operand order.
+                std::swap(lhs, rhs);
+                op = spv::Op::OpVectorTimesScalar;
+            } else if (lhs_ty->is_float_vector() && rhs_ty->is_float_scalar()) {
+                // Use OpVectorTimesScalar for scalar * vector.
+                op = spv::Op::OpVectorTimesScalar;
+            } else if (lhs_ty->is_float_scalar() && rhs_ty->is_float_matrix()) {
+                // Use OpMatrixTimesScalar for scalar * matrix, and swap the operand order.
+                std::swap(lhs, rhs);
+                op = spv::Op::OpMatrixTimesScalar;
+            } else if (lhs_ty->is_float_matrix() && rhs_ty->is_float_scalar()) {
+                // Use OpMatrixTimesScalar for scalar * matrix.
+                op = spv::Op::OpMatrixTimesScalar;
+            } else if (lhs_ty->is_float_vector() && rhs_ty->is_float_matrix()) {
+                // Use OpVectorTimesMatrix for vector * matrix.
+                op = spv::Op::OpVectorTimesMatrix;
+            } else if (lhs_ty->is_float_matrix() && rhs_ty->is_float_vector()) {
+                // Use OpMatrixTimesVector for matrix * vector.
+                op = spv::Op::OpMatrixTimesVector;
+            } else if (lhs_ty->is_float_matrix() && rhs_ty->is_float_matrix()) {
+                // Use OpMatrixTimesMatrix for matrix * vector.
+                op = spv::Op::OpMatrixTimesMatrix;
             }
             break;
         }
@@ -1003,7 +1042,7 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
     }
 
     // Emit the instruction.
-    current_function_.push_inst(op, {Type(ty), id, Value(binary->LHS()), Value(binary->RHS())});
+    current_function_.push_inst(op, {Type(ty), id, lhs, rhs});
 }
 
 void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
