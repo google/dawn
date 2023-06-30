@@ -53,12 +53,19 @@
 #include "src/tint/transform/manager.h"
 #include "src/tint/type/array.h"
 #include "src/tint/type/bool.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/matrix.h"
+#include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/pointer.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/sampler.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/type/struct.h"
+#include "src/tint/type/texture.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
@@ -331,6 +338,18 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty,
                                   Type(ptr->StoreType(), ptr->AddressSpace())});
             },
             [&](const type::Struct* str) { EmitStructType(id, str, addrspace); },
+            [&](const type::Texture* tex) { EmitTextureType(id, tex); },
+            [&](const type::Sampler* s) {
+                module_.PushType(spv::Op::OpTypeSampler, {id});
+
+                // Register both of the sampler types, as they're the same in SPIR-V.
+                if (s->kind() == type::SamplerKind::kSampler) {
+                    types_.Add(
+                        ir_->Types().Get<type::Sampler>(type::SamplerKind::kComparisonSampler), id);
+                } else {
+                    types_.Add(ir_->Types().Get<type::Sampler>(type::SamplerKind::kSampler), id);
+                }
+            },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled type: " << ty->FriendlyName();
             });
@@ -449,6 +468,82 @@ void GeneratorImplIr::EmitStructType(uint32_t id,
     if (str->Name().IsValid()) {
         module_.PushDebug(spv::Op::OpName, {operands[0], Operand(str->Name().Name())});
     }
+}
+
+void GeneratorImplIr::EmitTextureType(uint32_t id, const type::Texture* texture) {
+    uint32_t sampled_type = Switch(
+        texture,  //
+        [&](const type::DepthTexture*) { return Type(ir_->Types().f32()); },
+        [&](const type::DepthMultisampledTexture*) { return Type(ir_->Types().f32()); },
+        [&](const type::SampledTexture* t) { return Type(t->type()); },
+        [&](const type::MultisampledTexture* t) { return Type(t->type()); },
+        [&](const type::StorageTexture* t) { return Type(t->type()); });
+
+    uint32_t dim = SpvDimMax;
+    uint32_t array = 0u;
+    switch (texture->dim()) {
+        case type::TextureDimension::kNone: {
+            break;
+        }
+        case type::TextureDimension::k1d: {
+            dim = SpvDim1D;
+            if (texture->Is<type::SampledTexture>()) {
+                module_.PushCapability(SpvCapabilitySampled1D);
+            } else if (texture->Is<type::StorageTexture>()) {
+                module_.PushCapability(SpvCapabilityImage1D);
+            }
+            break;
+        }
+        case type::TextureDimension::k2d: {
+            dim = SpvDim2D;
+            break;
+        }
+        case type::TextureDimension::k2dArray: {
+            dim = SpvDim2D;
+            array = 1u;
+            break;
+        }
+        case type::TextureDimension::k3d: {
+            dim = SpvDim3D;
+            break;
+        }
+        case type::TextureDimension::kCube: {
+            dim = SpvDimCube;
+            break;
+        }
+        case type::TextureDimension::kCubeArray: {
+            dim = SpvDimCube;
+            array = 1u;
+            if (texture->IsAnyOf<type::SampledTexture, type::DepthTexture>()) {
+                module_.PushCapability(SpvCapabilitySampledCubeArray);
+            }
+            break;
+        }
+    }
+
+    // The Vulkan spec says: The "Depth" operand of OpTypeImage is ignored.
+    // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
+    // Using anything other than 0 is problematic on various Vulkan drivers.
+    uint32_t depth = 0u;
+
+    uint32_t ms = 0u;
+    if (texture->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
+        ms = 1u;
+    }
+
+    uint32_t sampled = 2u;
+    if (texture->IsAnyOf<type::MultisampledTexture, type::SampledTexture, type::DepthTexture,
+                         type::DepthMultisampledTexture>()) {
+        sampled = 1u;
+    }
+
+    uint32_t format = SpvImageFormat_::SpvImageFormatUnknown;
+    if (auto* st = texture->As<type::StorageTexture>()) {
+        format = TexelFormat(st->texel_format());
+    }
+
+    module_.PushType(spv::Op::OpTypeImage,
+                     {id, sampled_type, dim, depth, array, ms, sampled, format});
 }
 
 void GeneratorImplIr::EmitFunction(ir::Function* func) {
@@ -1185,6 +1280,53 @@ void GeneratorImplIr::EmitExitPhis(ir::ControlInstruction* inst) {
         }
         current_function_.push_inst(spv::Op::OpPhi, std::move(ops));
     }
+}
+
+uint32_t GeneratorImplIr::TexelFormat(const builtin::TexelFormat format) {
+    switch (format) {
+        case builtin::TexelFormat::kBgra8Unorm:
+            TINT_ICE(Writer, diagnostics_)
+                << "bgra8unorm should have been polyfilled to rgba8unorm";
+            return SpvImageFormatUnknown;
+        case builtin::TexelFormat::kR32Uint:
+            return SpvImageFormatR32ui;
+        case builtin::TexelFormat::kR32Sint:
+            return SpvImageFormatR32i;
+        case builtin::TexelFormat::kR32Float:
+            return SpvImageFormatR32f;
+        case builtin::TexelFormat::kRgba8Unorm:
+            return SpvImageFormatRgba8;
+        case builtin::TexelFormat::kRgba8Snorm:
+            return SpvImageFormatRgba8Snorm;
+        case builtin::TexelFormat::kRgba8Uint:
+            return SpvImageFormatRgba8ui;
+        case builtin::TexelFormat::kRgba8Sint:
+            return SpvImageFormatRgba8i;
+        case builtin::TexelFormat::kRg32Uint:
+            module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+            return SpvImageFormatRg32ui;
+        case builtin::TexelFormat::kRg32Sint:
+            module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+            return SpvImageFormatRg32i;
+        case builtin::TexelFormat::kRg32Float:
+            module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
+            return SpvImageFormatRg32f;
+        case builtin::TexelFormat::kRgba16Uint:
+            return SpvImageFormatRgba16ui;
+        case builtin::TexelFormat::kRgba16Sint:
+            return SpvImageFormatRgba16i;
+        case builtin::TexelFormat::kRgba16Float:
+            return SpvImageFormatRgba16f;
+        case builtin::TexelFormat::kRgba32Uint:
+            return SpvImageFormatRgba32ui;
+        case builtin::TexelFormat::kRgba32Sint:
+            return SpvImageFormatRgba32i;
+        case builtin::TexelFormat::kRgba32Float:
+            return SpvImageFormatRgba32f;
+        case builtin::TexelFormat::kUndefined:
+            return SpvImageFormatUnknown;
+    }
+    return SpvImageFormatUnknown;
 }
 
 }  // namespace tint::writer::spirv

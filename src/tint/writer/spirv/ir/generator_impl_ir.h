@@ -54,6 +54,7 @@ class Var;
 }  // namespace tint::ir
 namespace tint::type {
 class Struct;
+class Texture;
 class Type;
 }  // namespace tint::type
 
@@ -100,6 +101,11 @@ class GeneratorImplIr {
     /// @returns the enum value of the corresponding SPIR-V builtin
     uint32_t Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace);
 
+    /// Convert a texel format to the corresponding SPIR-V enum value, adding required capabilities.
+    /// @param format the format to convert
+    /// @returns the enum value of the corresponding SPIR-V texel format
+    uint32_t TexelFormat(const builtin::TexelFormat format);
+
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
     /// @returns the result ID of the constant
@@ -137,6 +143,11 @@ class GeneratorImplIr {
     void EmitStructType(uint32_t id,
                         const type::Struct* str,
                         builtin::AddressSpace addrspace = builtin::AddressSpace::kUndefined);
+
+    /// Emit a texture type.
+    /// @param id the result ID to use
+    /// @param texture the texture type to emit
+    void EmitTextureType(uint32_t id, const type::Texture* texture);
 
     /// Emit a function.
     /// @param func the function to emit

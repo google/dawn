@@ -13,9 +13,14 @@
 // limitations under the License.
 
 #include "src/tint/type/bool.h"
+#include "src/tint/type/depth_multisampled_texture.h"
+#include "src/tint/type/depth_texture.h"
 #include "src/tint/type/f16.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
+#include "src/tint/type/multisampled_texture.h"
+#include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/u32.h"
 #include "src/tint/type/void.h"
@@ -195,6 +200,172 @@ TEST_F(SpvGeneratorImplTest, Type_Struct_MatrixLayout) {
     EXPECT_INST("OpMemberDecorate %MyStruct 1 MatrixStride 8");
     EXPECT_INST("%MyStruct = OpTypeStruct %mat3v3float %_arr__arr_mat2v4half_uint_4_uint_4");
 }
+
+TEST_F(SpvGeneratorImplTest, Type_Sampler) {
+    generator_.Type(ty.sampler());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%1 = OpTypeSampler");
+}
+
+TEST_F(SpvGeneratorImplTest, Type_SamplerComparison) {
+    generator_.Type(ty.comparison_sampler());
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%1 = OpTypeSampler");
+}
+
+TEST_F(SpvGeneratorImplTest, Type_Samplers_Dedup) {
+    auto id = generator_.Type(ty.sampler());
+    EXPECT_EQ(generator_.Type(ty.comparison_sampler()), id);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+}
+
+using Dim = type::TextureDimension;
+struct TextureCase {
+    std::string result;
+    Dim dim;
+    TestElementType format = kF32;
+};
+
+using Type_SampledTexture = SpvGeneratorImplTestWithParam<TextureCase>;
+TEST_P(Type_SampledTexture, Emit) {
+    auto params = GetParam();
+    generator_.Type(ty.Get<type::SampledTexture>(params.dim, MakeScalarType(params.format)));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.result);
+}
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest,
+    Type_SampledTexture,
+    testing::Values(
+        TextureCase{"%1 = OpTypeImage %float 1D 0 0 0 1 Unknown", Dim::k1d, kF32},
+        TextureCase{"%1 = OpTypeImage %float 2D 0 0 0 1 Unknown", Dim::k2d, kF32},
+        TextureCase{"%1 = OpTypeImage %float 2D 0 1 0 1 Unknown", Dim::k2dArray, kF32},
+        TextureCase{"%1 = OpTypeImage %float 3D 0 0 0 1 Unknown", Dim::k3d, kF32},
+        TextureCase{"%1 = OpTypeImage %float Cube 0 0 0 1 Unknown", Dim::kCube, kF32},
+        TextureCase{"%1 = OpTypeImage %float Cube 0 1 0 1 Unknown", Dim::kCubeArray, kF32},
+        TextureCase{"%1 = OpTypeImage %int 1D 0 0 0 1 Unknown", Dim::k1d, kI32},
+        TextureCase{"%1 = OpTypeImage %int 2D 0 0 0 1 Unknown", Dim::k2d, kI32},
+        TextureCase{"%1 = OpTypeImage %int 2D 0 1 0 1 Unknown", Dim::k2dArray, kI32},
+        TextureCase{"%1 = OpTypeImage %int 3D 0 0 0 1 Unknown", Dim::k3d, kI32},
+        TextureCase{"%1 = OpTypeImage %int Cube 0 0 0 1 Unknown", Dim::kCube, kI32},
+        TextureCase{"%1 = OpTypeImage %int Cube 0 1 0 1 Unknown", Dim::kCubeArray, kI32},
+        TextureCase{"%1 = OpTypeImage %uint 1D 0 0 0 1 Unknown", Dim::k1d, kU32},
+        TextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 1 Unknown", Dim::k2d, kU32},
+        TextureCase{"%1 = OpTypeImage %uint 2D 0 1 0 1 Unknown", Dim::k2dArray, kU32},
+        TextureCase{"%1 = OpTypeImage %uint 3D 0 0 0 1 Unknown", Dim::k3d, kU32},
+        TextureCase{"%1 = OpTypeImage %uint Cube 0 0 0 1 Unknown", Dim::kCube, kU32},
+        TextureCase{"%1 = OpTypeImage %uint Cube 0 1 0 1 Unknown", Dim::kCubeArray, kU32}));
+
+using Type_MultisampledTexture = SpvGeneratorImplTestWithParam<TextureCase>;
+TEST_P(Type_MultisampledTexture, Emit) {
+    auto params = GetParam();
+    generator_.Type(ty.Get<type::MultisampledTexture>(params.dim, MakeScalarType(params.format)));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.result);
+}
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest,
+    Type_MultisampledTexture,
+    testing::Values(TextureCase{"%1 = OpTypeImage %float 2D 0 0 1 1 Unknown", Dim::k2d, kF32},
+                    TextureCase{"%1 = OpTypeImage %int 2D 0 0 1 1 Unknown", Dim::k2d, kI32},
+                    TextureCase{"%1 = OpTypeImage %uint 2D 0 0 1 1 Unknown", Dim::k2d, kU32}));
+
+using Type_DepthTexture = SpvGeneratorImplTestWithParam<TextureCase>;
+TEST_P(Type_DepthTexture, Emit) {
+    auto params = GetParam();
+    generator_.Type(ty.Get<type::DepthTexture>(params.dim));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.result);
+}
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest,
+    Type_DepthTexture,
+    testing::Values(TextureCase{"%1 = OpTypeImage %float 2D 0 0 0 1 Unknown", Dim::k2d},
+                    TextureCase{"%1 = OpTypeImage %float 2D 0 1 0 1 Unknown", Dim::k2dArray},
+                    TextureCase{"%1 = OpTypeImage %float Cube 0 0 0 1 Unknown", Dim::kCube},
+                    TextureCase{"%1 = OpTypeImage %float Cube 0 1 0 1 Unknown", Dim::kCubeArray}));
+
+TEST_F(SpvGeneratorImplTest, Type_DepthMultiSampledTexture) {
+    generator_.Type(ty.Get<type::DepthMultisampledTexture>(Dim::k2d));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%1 = OpTypeImage %float 2D 0 0 1 1 Unknown");
+}
+
+using Format = builtin::TexelFormat;
+struct StorageTextureCase {
+    std::string result;
+    Dim dim;
+    Format format;
+};
+using Type_StorageTexture = SpvGeneratorImplTestWithParam<StorageTextureCase>;
+TEST_P(Type_StorageTexture, Emit) {
+    auto params = GetParam();
+    generator_.Type(
+        ty.Get<type::StorageTexture>(params.dim, params.format, builtin::Access::kWrite,
+                                     type::StorageTexture::SubtypeFor(params.format, mod.Types())));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(params.result);
+    if (params.format == builtin::TexelFormat::kRg32Uint ||
+        params.format == builtin::TexelFormat::kRg32Sint ||
+        params.format == builtin::TexelFormat::kRg32Float) {
+        EXPECT_INST("OpCapability StorageImageExtendedFormats");
+    }
+}
+INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+                         Type_StorageTexture,
+                         testing::Values(
+                             // Test all the dimensions with a single format.
+                             StorageTextureCase{"%1 = OpTypeImage %float 1D 0 0 0 2 R32f",  //
+                                                Dim::k1d, Format::kR32Float},
+                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 R32f",  //
+                                                Dim::k2d, Format::kR32Float},
+                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 1 0 2 R32f",  //
+                                                Dim::k2dArray, Format::kR32Float},
+                             StorageTextureCase{"%1 = OpTypeImage %float 3D 0 0 0 2 R32f",  //
+                                                Dim::k3d, Format::kR32Float},
+
+                             // Test all the formats with 2D.
+                             // TODO(jrprice): Enable this format when we polyfill it.
+                             // StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Bgra8Unorm",
+                             //                    Dim::k2d, Format::kBgra8Unorm},
+                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 R32i",  //
+                                                Dim::k2d, Format::kR32Sint},
+                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 R32u",  //
+                                                Dim::k2d, Format::kR32Uint},
+                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rg32f",  //
+                                                Dim::k2d, Format::kRg32Float},
+                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 Rg32i",  //
+                                                Dim::k2d, Format::kRg32Sint},
+                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 Rg32ui",  //
+                                                Dim::k2d, Format::kRg32Uint},
+                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rgba16f",  //
+                                                Dim::k2d, Format::kRgba16Float},
+                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 Rgba16i",  //
+                                                Dim::k2d, Format::kRgba16Sint},
+                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 Rgba16ui",  //
+                                                Dim::k2d, Format::kRgba16Uint},
+                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rgba32f",  //
+                                                Dim::k2d, Format::kRgba32Float},
+                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 Rgba32i",  //
+                                                Dim::k2d, Format::kRgba32Sint},
+                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 Rgba32ui",  //
+                                                Dim::k2d, Format::kRgba32Uint},
+                             StorageTextureCase{"%1 = OpTypeImage %int 2D 0 0 0 2 Rgba8i",  //
+                                                Dim::k2d, Format::kRgba8Sint},
+                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rgba8Snorm",  //
+                                                Dim::k2d, Format::kRgba8Snorm},
+                             StorageTextureCase{"%1 = OpTypeImage %uint 2D 0 0 0 2 Rgba8ui",  //
+                                                Dim::k2d, Format::kRgba8Uint},
+                             StorageTextureCase{"%1 = OpTypeImage %float 2D 0 0 0 2 Rgba8",  //
+                                                Dim::k2d, Format::kRgba8Unorm}));
 
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
