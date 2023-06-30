@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/type/pointer.h"
+#include "src/tint/type/sampled_texture.h"
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 namespace tint::writer::spirv {
@@ -254,6 +255,78 @@ TEST_F(SpvGeneratorImplTest, UniformVar_Load) {
           %9 = OpAccessChain %_ptr_Uniform_int %1 %uint_0
        %load = OpLoad %int %9
 )");
+}
+
+TEST_F(SpvGeneratorImplTest, SamplerVar) {
+    auto* v =
+        b.Var("v", ty.ptr(builtin::AddressSpace::kHandle, ty.sampler(), builtin::Access::kRead));
+    v->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(v);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpDecorate %v DescriptorSet 0
+               OpDecorate %v Binding 0
+)");
+    EXPECT_INST(R"(
+          %3 = OpTypeSampler
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, SamplerVar_Load) {
+    auto* v =
+        b.Var("v", ty.ptr(builtin::AddressSpace::kHandle, ty.sampler(), builtin::Access::kRead));
+    v->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(v);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* load = b.Load(v);
+        b.Return(func);
+        mod.SetName(load, "load");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%load = OpLoad %3 %v");
+}
+
+TEST_F(SpvGeneratorImplTest, TextureVar) {
+    auto* v = b.Var("v", ty.ptr(builtin::AddressSpace::kHandle,
+                                ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()),
+                                builtin::Access::kRead));
+    v->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(v);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpDecorate %v DescriptorSet 0
+               OpDecorate %v Binding 0
+)");
+    EXPECT_INST(R"(
+          %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, TextureVar_Load) {
+    auto* v = b.Var("v", ty.ptr(builtin::AddressSpace::kHandle,
+                                ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()),
+                                builtin::Access::kRead));
+    v->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(v);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* load = b.Load(v);
+        b.Return(func);
+        mod.SetName(load, "load");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%load = OpLoad %3 %v");
 }
 
 }  // namespace

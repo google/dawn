@@ -96,6 +96,8 @@ void Sanitize(ir::Module* module) {
 
 SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
     switch (addrspace) {
+        case builtin::AddressSpace::kHandle:
+            return SpvStorageClassUniformConstant;
         case builtin::AddressSpace::kFunction:
             return SpvStorageClassFunction;
         case builtin::AddressSpace::kIn:
@@ -1215,6 +1217,7 @@ void GeneratorImplIr::EmitVar(ir::Var* var) {
             module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassOutput)});
             break;
         }
+        case builtin::AddressSpace::kHandle:
         case builtin::AddressSpace::kStorage:
         case builtin::AddressSpace::kUniform: {
             TINT_ASSERT(Writer, !current_function_);
