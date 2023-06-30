@@ -99,6 +99,20 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, Builtin_Length_vec4f) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), builtin::Function::kLength, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %float %8 Length %arg");
+}
+
 TEST_F(SpvGeneratorImplTest, Builtin_Normalize_vec4f) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
