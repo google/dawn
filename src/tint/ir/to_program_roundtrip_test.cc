@@ -1182,6 +1182,18 @@ TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Private_mat2x3f_Columns_SameValu
         "var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(4.0f), vec3<f32>(4.0f));");
 }
 
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Uniform_vec4i) {
+    Test("@group(10) @binding(20) var<uniform> v : vec4<i32>;");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_StorageRead_u32) {
+    Test("@group(10) @binding(20) var<storage, read> v : u32;");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_StorageReadWrite_i32) {
+    Test("@group(10) @binding(20) var<storage, read_write> v : i32;");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Function-scope var
 ////////////////////////////////////////////////////////////////////////////////

@@ -423,19 +423,26 @@ class State {
         Symbol name = BindName(val);
         auto* ptr = As<type::Pointer>(val->Type());
         auto ty = Type(ptr->StoreType());
+
+        utils::Vector<const ast::Attribute*, 4> attrs;
+        if (auto bp = var->BindingPoint()) {
+            attrs.Push(b.Group(AInt(bp->group)));
+            attrs.Push(b.Binding(AInt(bp->binding)));
+        }
+
         const ast::Expression* init = nullptr;
         if (var->Initializer()) {
             init = Expr(var->Initializer());
         }
         switch (ptr->AddressSpace()) {
             case builtin::AddressSpace::kFunction:
-                Append(b.Decl(b.Var(name, ty, init)));
+                Append(b.Decl(b.Var(name, ty, init, std::move(attrs))));
                 return;
             case builtin::AddressSpace::kStorage:
-                b.GlobalVar(name, ty, init, ptr->Access(), ptr->AddressSpace());
+                b.GlobalVar(name, ty, init, ptr->Access(), ptr->AddressSpace(), std::move(attrs));
                 return;
             default:
-                b.GlobalVar(name, ty, init, ptr->AddressSpace());
+                b.GlobalVar(name, ty, init, ptr->AddressSpace(), std::move(attrs));
                 return;
         }
     }
