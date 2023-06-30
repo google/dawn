@@ -1117,6 +1117,9 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450UMin);
             }
             break;
+        case builtin::Function::kNormalize:
+            glsl_ext_inst(GLSLstd450Normalize);
+            break;
         default:
             TINT_ICE(Writer, diagnostics_) << "unimplemented builtin function: " << builtin->Func();
     }

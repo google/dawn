@@ -99,6 +99,20 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
 )");
 }
 
+TEST_F(SpvGeneratorImplTest, Builtin_Normalize_vec4f) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kNormalize, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v4float %8 Normalize %arg");
+}
+
 // Tests for builtins with the signature: T = func(T, T)
 using Builtin_2arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_2arg, Scalar) {
