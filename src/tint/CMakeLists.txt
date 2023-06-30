@@ -1316,6 +1316,7 @@ if(TINT_BUILD_TESTS)
         writer/spirv/ir/generator_impl_ir_builtin_test.cc
         writer/spirv/ir/generator_impl_ir_constant_test.cc
         writer/spirv/ir/generator_impl_ir_construct_test.cc
+        writer/spirv/ir/generator_impl_ir_convert_test.cc
         writer/spirv/ir/generator_impl_ir_function_test.cc
         writer/spirv/ir/generator_impl_ir_if_test.cc
         writer/spirv/ir/generator_impl_ir_loop_test.cc

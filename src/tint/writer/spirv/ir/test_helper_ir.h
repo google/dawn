@@ -41,6 +41,26 @@ enum TestElementType {
     kF32,
     kF16,
 };
+inline utils::StringStream& operator<<(utils::StringStream& out, TestElementType type) {
+    switch (type) {
+        case kBool:
+            out << "bool";
+            break;
+        case kI32:
+            out << "i32";
+            break;
+        case kU32:
+            out << "u32";
+            break;
+        case kF32:
+            out << "f32";
+            break;
+        case kF16:
+            out << "f16";
+            break;
+    }
+    return out;
+}
 
 /// Base helper class for testing the SPIR-V generator implementation.
 template <typename BASE>

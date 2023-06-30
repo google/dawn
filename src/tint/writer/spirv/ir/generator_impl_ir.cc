@@ -78,6 +78,8 @@ namespace tint::writer::spirv {
 
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
+
 constexpr uint32_t kGeneratorVersion = 1;
 
 void Sanitize(ir::Module* module) {
@@ -738,6 +740,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             [&](ir::Binary* b) { EmitBinary(b); },            //
             [&](ir::BuiltinCall* b) { EmitBuiltinCall(b); },  //
             [&](ir::Construct* c) { EmitConstruct(c); },      //
+            [&](ir::Convert* c) { EmitConvert(c); },          //
             [&](ir::Load* l) { EmitLoad(l); },                //
             [&](ir::Loop* l) { EmitLoop(l); },                //
             [&](ir::Switch* sw) { EmitSwitch(sw); },          //
@@ -1134,6 +1137,88 @@ void GeneratorImplIr::EmitConstruct(ir::Construct* construct) {
         operands.push_back(Value(arg));
     }
     current_function_.push_inst(spv::Op::OpCompositeConstruct, std::move(operands));
+}
+
+void GeneratorImplIr::EmitConvert(ir::Convert* convert) {
+    auto* res_ty = convert->Result()->Type();
+    auto* arg_ty = convert->Args()[0]->Type();
+
+    OperandList operands = {Type(convert->Result()->Type()), Value(convert)};
+    for (auto* arg : convert->Args()) {
+        operands.push_back(Value(arg));
+    }
+
+    spv::Op op = spv::Op::Max;
+    if (res_ty->is_signed_integer_scalar_or_vector() && arg_ty->is_float_scalar_or_vector()) {
+        // float to signed int.
+        op = spv::Op::OpConvertFToS;
+    } else if (res_ty->is_unsigned_integer_scalar_or_vector() &&
+               arg_ty->is_float_scalar_or_vector()) {
+        // float to unsigned int.
+        op = spv::Op::OpConvertFToU;
+    } else if (res_ty->is_float_scalar_or_vector() &&
+               arg_ty->is_signed_integer_scalar_or_vector()) {
+        // signed int to float.
+        op = spv::Op::OpConvertSToF;
+    } else if (res_ty->is_float_scalar_or_vector() &&
+               arg_ty->is_unsigned_integer_scalar_or_vector()) {
+        // unsigned int to float.
+        op = spv::Op::OpConvertUToF;
+    } else if (res_ty->is_float_scalar_or_vector() && arg_ty->is_float_scalar_or_vector() &&
+               res_ty->Size() != arg_ty->Size()) {
+        // float to float (different bitwidth).
+        op = spv::Op::OpFConvert;
+    } else if (res_ty->is_integer_scalar_or_vector() && arg_ty->is_integer_scalar_or_vector() &&
+               res_ty->Size() == arg_ty->Size()) {
+        // int to int (same bitwidth, different signedness).
+        op = spv::Op::OpBitcast;
+    } else if (res_ty->is_bool_scalar_or_vector()) {
+        if (arg_ty->is_integer_scalar_or_vector()) {
+            // int to bool.
+            op = spv::Op::OpINotEqual;
+        } else {
+            // float to bool.
+            op = spv::Op::OpFUnordNotEqual;
+        }
+        operands.push_back(ConstantNull(arg_ty));
+    } else if (arg_ty->is_bool_scalar_or_vector()) {
+        // Select between constant one and zero, splatting them to vectors if necessary.
+        const constant::Value* one = nullptr;
+        const constant::Value* zero = nullptr;
+        Switch(
+            res_ty->DeepestElement(),  //
+            [&](const type::F32*) {
+                one = ir_->constant_values.Get(1_f);
+                zero = ir_->constant_values.Get(0_f);
+            },
+            [&](const type::F16*) {
+                one = ir_->constant_values.Get(1_h);
+                zero = ir_->constant_values.Get(0_h);
+            },
+            [&](const type::I32*) {
+                one = ir_->constant_values.Get(1_i);
+                zero = ir_->constant_values.Get(0_i);
+            },
+            [&](const type::U32*) {
+                one = ir_->constant_values.Get(1_u);
+                zero = ir_->constant_values.Get(0_u);
+            });
+        TINT_ASSERT_OR_RETURN(Writer, one && zero);
+
+        if (auto* vec = res_ty->As<type::Vector>()) {
+            // Splat the scalars into vectors.
+            one = ir_->constant_values.Splat(vec, one, vec->Width());
+            zero = ir_->constant_values.Splat(vec, zero, vec->Width());
+        }
+
+        op = spv::Op::OpSelect;
+        operands.push_back(Constant(one));
+        operands.push_back(Constant(zero));
+    } else {
+        TINT_ICE(Writer, diagnostics_) << "unhandled convert instruction";
+    }
+
+    current_function_.push_inst(op, std::move(operands));
 }
 
 void GeneratorImplIr::EmitLoad(ir::Load* load) {

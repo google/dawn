@@ -36,6 +36,7 @@ class BlockParam;
 class BuiltinCall;
 class Construct;
 class ControlInstruction;
+class Convert;
 class ExitIf;
 class ExitLoop;
 class ExitSwitch;
@@ -194,6 +195,10 @@ class GeneratorImplIr {
     /// Emit a construct instruction.
     /// @param construct the construct instruction to emit
     void EmitConstruct(ir::Construct* construct);
+
+    /// Emit a convert instruction.
+    /// @param convert the convert instruction to emit
+    void EmitConvert(ir::Convert* convert);
 
     /// Emit a load instruction.
     /// @param load the load instruction to emit
