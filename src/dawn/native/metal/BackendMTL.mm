@@ -816,7 +816,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
 #endif
 
         // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
-#if defined(DAWN_PLATFORM_IOS)
+#if DAWN_PLATFORM_IS(IOS)
         Ref<PhysicalDevice> physicalDevice = AcquireRef(
             new PhysicalDevice(GetInstance(), AcquireNSPRef(MTLCreateSystemDefaultDevice())));
         if (!GetInstance()->ConsumedErrorAndWarnOnce(physicalDevice->Initialize())) {

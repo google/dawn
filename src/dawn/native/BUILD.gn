@@ -572,11 +572,15 @@ source_set("sources") {
 
   if (dawn_enable_metal) {
     frameworks = [
-      "Cocoa.framework",
       "IOKit.framework",
       "IOSurface.framework",
-      "QuartzCore.framework",
     ]
+    if (is_mac) {
+      frameworks += [
+        "QuartzCore.framework",
+        "Cocoa.framework",
+      ]
+    }
     sources += [
       "Surface_metal.mm",
       "metal/BackendMTL.h",
