@@ -867,6 +867,9 @@ class Impl {
         std::vector<const ast::Expression*> accessors;
         const ast::Expression* object = expr;
         while (true) {
+            if (program_->Sem().GetVal(object)->ConstantValue()) {
+                break;  // Reached a constant expression. Stop traversal.
+            }
             if (auto* array = object->As<ast::IndexAccessorExpression>()) {
                 accessors.push_back(object);
                 object = array->object;
@@ -944,7 +947,7 @@ class Impl {
     }
 
     bool GenerateMemberAccessor(const ast::MemberAccessorExpression* expr, AccessorInfo& info) {
-        auto* expr_sem = program_->Sem().Get(expr)->UnwrapLoad();
+        auto* expr_sem = program_->Sem().Get(expr)->Unwrap();
 
         return tint::Switch(
             expr_sem,  //
@@ -966,7 +969,7 @@ class Impl {
                 // intermediate steps need different result types.
                 auto* result_type = info.result_type;
 
-                // Emit any preceeding member/index accessors
+                // Emit any preceding member/index accessors
                 if (!info.indices.IsEmpty()) {
                     // The access chain is being split, the initial part of than will have a
                     // resulting type that matches the object being swizzled.

@@ -35,7 +35,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleIndex) {
 
     auto* a = Var("a", ty.vec3<u32>(), builtin::AddressSpace::kFunction);
     auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -58,7 +58,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiIndex) {
 
     auto* a = Var("a", ty.mat3x4<f32>(), builtin::AddressSpace::kFunction);
     auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -85,7 +85,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleMember) {
                                     });
     auto* a = Var("a", ty.Of(s), builtin::AddressSpace::kFunction);
     auto* expr = Decl(Let("b", MemberAccessor(a, "foo")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -121,7 +121,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiMember) {
                                      });
     auto* a = Var("a", ty.Of(outer), builtin::AddressSpace::kFunction);
     auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "foo"), "bar")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -166,7 +166,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_Mixed) {
     auto* expr = Decl(Let(
         "b",
         MemberAccessor(IndexAccessor(MemberAccessor(IndexAccessor(a, 0_u), "foo"), 1_u), "bar")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -200,7 +200,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_AssignmentLHS) {
 
     auto* a = Var("a", ty.array<u32, 4>(), builtin::AddressSpace::kFunction);
     auto* assign = Assign(IndexAccessor(a, 2_u), 0_u);
-    WrapInFunction(Block(utils::Vector{Decl(a), assign}));
+    WrapInFunction(Decl(a), assign);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -223,7 +223,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleElementSwizzle) {
 
     auto* a = Var("a", ty.vec2<f32>(), builtin::AddressSpace::kFunction);
     auto* expr = Decl(Let("b", MemberAccessor(a, "y")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -246,7 +246,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle) {
 
     auto* a = Var("a", ty.vec3<f32>(), builtin::AddressSpace::kFunction);
     auto* expr = Decl(Let("b", MemberAccessor(a, "zyxz")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -269,7 +269,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
 
     auto* a = Var("a", ty.vec3<f32>(), builtin::AddressSpace::kFunction);
     auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "zyx"), "yy")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -300,7 +300,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChai
     auto* expr = Decl(Let(
         "b",
         IndexAccessor(MemberAccessor(MemberAccessor(MemberAccessor(a, "foo"), "zyx"), "yx"), 0_u)));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -330,7 +330,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleIndex) {
     // let b = a[2]
     auto* a = Let("a", ty.vec3<u32>(), vec(ty.u32(), 3));
     auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -351,7 +351,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiIndex) {
 
     auto* a = Let("a", ty.mat3x4<f32>(), Call<mat3x4<f32>>());
     auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -376,7 +376,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleMember) {
                                     });
     auto* a = Let("a", ty.Of(s), Call("MyStruct"));
     auto* expr = Decl(Let("b", MemberAccessor(a, "foo")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -410,7 +410,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiMember) {
                                      });
     auto* a = Let("a", ty.Of(outer), Call("Outer"));
     auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "foo"), "bar")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -453,7 +453,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_Mixed) {
     auto* expr = Decl(Let(
         "b",
         MemberAccessor(IndexAccessor(MemberAccessor(IndexAccessor(a, 0_u), "foo"), 1_u), "bar")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -485,7 +485,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleElement) {
 
     auto* a = Let("a", ty.vec2<f32>(), vec(ty.f32(), 2));
     auto* expr = Decl(Let("b", MemberAccessor(a, "y")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -506,7 +506,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle) {
 
     auto* a = Let("a", ty.vec3<f32>(), vec(ty.f32(), 3));
     auto* expr = Decl(Let("b", MemberAccessor(a, "zyxz")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -527,7 +527,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
 
     auto* a = Let("a", ty.vec3<f32>(), vec(ty.f32(), 3));
     auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "zyx"), "yy")));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -556,7 +556,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChai
     auto* expr = Decl(Let(
         "b",
         IndexAccessor(MemberAccessor(MemberAccessor(MemberAccessor(a, "foo"), "zyx"), "yx"), 0_u)));
-    WrapInFunction(Block(utils::Vector{Decl(a), expr}));
+    WrapInFunction(Decl(a), expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -573,6 +573,54 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChai
     %3:vec3<f32> = swizzle %2, zyx
     %4:vec2<f32> = swizzle %3, yx
     %b:f32 = access %4, 0u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
+    // const v = vec3(1, 2, 3);
+    // let i = 1;
+    // var b = v[i];
+
+    auto* v = Const("v", Call<vec3<Infer>>(1_a, 2_a, 3_a));
+    auto* i = Let("i", Expr(1_i));
+    auto* b = Var("b", IndexAccessor("v", "i"));
+    WrapInFunction(v, i, b);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    %2:i32 = access vec3<i32>(1i, 2i, 3i), 1i
+    %b:ptr<function, i32, read_write> = var, %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIndex) {
+    // const v = vec3(1, 2, 3);
+    // let i = 1;
+    // var b = v.rg[i];
+
+    auto* v = Const("v", Call<vec3<Infer>>(1_a, 2_a, 3_a));
+    auto* i = Let("i", Expr(1_i));
+    auto* b = Var("b", IndexAccessor(MemberAccessor("v", "rg"), "i"));
+    WrapInFunction(v, i, b);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    %2:i32 = access vec2<i32>(1i, 2i), 1i
+    %b:ptr<function, i32, read_write> = var, %2
     ret
   }
 }
