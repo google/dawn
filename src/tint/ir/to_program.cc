@@ -23,6 +23,7 @@
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/break_if.h"
+#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/construct.h"
@@ -459,6 +460,14 @@ class State {
             call,  //
             [&](ir::UserCall* c) {
                 auto* expr = b.Call(BindName(c->Func()), std::move(args));
+                if (!call->HasResults() || call->Result()->Usages().IsEmpty()) {
+                    Append(b.CallStmt(expr));
+                    return;
+                }
+                Bind(c->Result(), expr);
+            },
+            [&](ir::BuiltinCall* c) {
+                auto* expr = b.Call(c->Func(), std::move(args));
                 if (!call->HasResults() || call->Result()->Usages().IsEmpty()) {
                     Append(b.CallStmt(expr));
                     return;
