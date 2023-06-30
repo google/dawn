@@ -907,6 +907,16 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
             op = ty->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
             break;
         }
+        case ir::Binary::Kind::kDivide: {
+            if (ty->is_signed_integer_scalar_or_vector()) {
+                op = spv::Op::OpSDiv;
+            } else if (ty->is_unsigned_integer_scalar_or_vector()) {
+                op = spv::Op::OpUDiv;
+            } else if (ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFDiv;
+            }
+            break;
+        }
         case ir::Binary::Kind::kSubtract: {
             op = ty->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
             break;

@@ -69,6 +69,7 @@ INSTANTIATE_TEST_SUITE_P(
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kI32, ir::Binary::Kind::kAdd, "OpIAdd", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kSubtract, "OpISub", "int"},
+                    BinaryTestCase{kI32, ir::Binary::Kind::kDivide, "OpSDiv", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kOr, "OpBitwiseOr", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kXor, "OpBitwiseXor", "int"}));
@@ -77,6 +78,7 @@ INSTANTIATE_TEST_SUITE_P(
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kU32, ir::Binary::Kind::kAdd, "OpIAdd", "uint"},
                     BinaryTestCase{kU32, ir::Binary::Kind::kSubtract, "OpISub", "uint"},
+                    BinaryTestCase{kU32, ir::Binary::Kind::kDivide, "OpUDiv", "uint"},
                     BinaryTestCase{kU32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "uint"},
                     BinaryTestCase{kU32, ir::Binary::Kind::kOr, "OpBitwiseOr", "uint"},
                     BinaryTestCase{kU32, ir::Binary::Kind::kXor, "OpBitwiseXor", "uint"}));
@@ -84,12 +86,14 @@ INSTANTIATE_TEST_SUITE_P(
     SpvGeneratorImplTest_Binary_F32,
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kF32, ir::Binary::Kind::kAdd, "OpFAdd", "float"},
-                    BinaryTestCase{kF32, ir::Binary::Kind::kSubtract, "OpFSub", "float"}));
+                    BinaryTestCase{kF32, ir::Binary::Kind::kSubtract, "OpFSub", "float"},
+                    BinaryTestCase{kF32, ir::Binary::Kind::kDivide, "OpFDiv", "float"}));
 INSTANTIATE_TEST_SUITE_P(
     SpvGeneratorImplTest_Binary_F16,
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kF16, ir::Binary::Kind::kAdd, "OpFAdd", "half"},
-                    BinaryTestCase{kF16, ir::Binary::Kind::kSubtract, "OpFSub", "half"}));
+                    BinaryTestCase{kF16, ir::Binary::Kind::kSubtract, "OpFSub", "half"},
+                    BinaryTestCase{kF16, ir::Binary::Kind::kDivide, "OpFDiv", "half"}));
 
 using Comparison = SpvGeneratorImplTestWithParam<BinaryTestCase>;
 TEST_P(Comparison, Scalar) {
