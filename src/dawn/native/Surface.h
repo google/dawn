@@ -112,13 +112,13 @@ class Surface final : public ErrorMonad {
     void* mHInstance = nullptr;
     void* mHWND = nullptr;
 
-#if DAWN_PLATFORM_IS(WINDOWS)
+#if defined(DAWN_USE_WINDOWS_UI)
     // WindowsCoreWindow
     ComPtr<IUnknown> mCoreWindow;
 
     // WindowsSwapChainPanel
     ComPtr<IUnknown> mSwapChainPanel;
-#endif  // DAWN_PLATFORM_IS(WINDOWS)
+#endif  // defined(DAWN_USE_WINDOWS_UI)
 
     // Xlib
     void* mXDisplay = nullptr;

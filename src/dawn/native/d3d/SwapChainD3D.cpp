@@ -14,7 +14,9 @@
 
 #include "dawn/native/d3d/SwapChainD3D.h"
 
+#if defined(DAWN_USE_WINDOWS_UI)
 #include <windows.ui.xaml.media.dxinterop.h>
+#endif  // defined(DAWN_USE_WINDOWS_UI)
 
 #include <utility>
 
@@ -198,6 +200,7 @@ MaybeError SwapChain::InitializeSwapChainFromScratch() {
                 "Creating the IDXGISwapChain1"));
             break;
         }
+#if defined(DAWN_USE_WINDOWS_UI)
         case Surface::Type::WindowsSwapChainPanel: {
             DAWN_TRY(CheckHRESULT(
                 factory2->CreateSwapChainForComposition(GetD3DDeviceForCreatingSwapChain(),
@@ -211,6 +214,7 @@ MaybeError SwapChain::InitializeSwapChainFromScratch() {
                                   "Setting SwapChain"));
             break;
         }
+#endif  // defined(DAWN_USE_WINDOWS_UI)
         default:
             UNREACHABLE();
     }

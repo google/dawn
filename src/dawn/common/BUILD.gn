@@ -97,6 +97,9 @@ config("internal_config") {
   if (dawn_use_x11) {
     defines += [ "DAWN_USE_X11" ]
   }
+  if (dawn_use_windows_ui) {
+    defines += [ "DAWN_USE_WINDOWS_UI" ]
+  }
 
   if (dawn_enable_error_injection) {
     defines += [ "DAWN_ENABLE_ERROR_INJECTION" ]

@@ -14,7 +14,9 @@
 
 #include "dawn/native/d3d11/SwapChainD3D11.h"
 
+#if defined(DAWN_USE_WINDOWS_UI)
 #include <windows.ui.xaml.media.dxinterop.h>
+#endif  // defined(DAWN_USE_WINDOWS_UI)
 
 #include <utility>
 

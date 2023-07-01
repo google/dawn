@@ -30,6 +30,7 @@ if (build_with_chromium) {
 
 # Enable the compilation for UWP
 dawn_is_winuwp = is_win && target_os == "winuwp"
+dawn_use_windows_ui = is_win
 
 declare_args() {
   # TODO(dawn:1545): Re-enable dawn_use_angle on Android. In non-component
