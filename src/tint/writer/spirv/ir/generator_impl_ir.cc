@@ -1159,6 +1159,30 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
         case builtin::Function::kDistance:
             glsl_ext_inst(GLSLstd450Distance);
             break;
+        case builtin::Function::kDpdx:
+            module_.PushCapability(SpvCapabilityDerivativeControl);
+            op = spv::Op::OpDPdx;
+            break;
+        case builtin::Function::kDpdxCoarse:
+            module_.PushCapability(SpvCapabilityDerivativeControl);
+            op = spv::Op::OpDPdxCoarse;
+            break;
+        case builtin::Function::kDpdxFine:
+            module_.PushCapability(SpvCapabilityDerivativeControl);
+            op = spv::Op::OpDPdxFine;
+            break;
+        case builtin::Function::kDpdy:
+            module_.PushCapability(SpvCapabilityDerivativeControl);
+            op = spv::Op::OpDPdy;
+            break;
+        case builtin::Function::kDpdyCoarse:
+            module_.PushCapability(SpvCapabilityDerivativeControl);
+            op = spv::Op::OpDPdyCoarse;
+            break;
+        case builtin::Function::kDpdyFine:
+            module_.PushCapability(SpvCapabilityDerivativeControl);
+            op = spv::Op::OpDPdyFine;
+            break;
         case builtin::Function::kLength:
             glsl_ext_inst(GLSLstd450Length);
             break;
