@@ -80,3 +80,8 @@ crbug.com/1406064 [ intel-gen-9 win10 ] webgpu:api,validation,error_scope:curren
 # especially code-coverage builders.
 ################################################################################
 crbug.com/dawn/1783 webgpu:shader,execution,expression,binary,* [ Slow ]
+
+################################################################################
+# Frequently times out on Android Arm (Pixel 6), but the backend validation variants, with longer timeouts don't.
+################################################################################
+crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:* [ Slow ]

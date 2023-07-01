@@ -477,71 +477,166 @@ crbug.com/1457970 webgpu:api,validation,state,device_lost,destroy:createComputeP
 crbug.com/1457970 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:* [ Failure ]
 
 ################################################################################
-# untriaged Android failures
+# Precision-related on Android Qualcomm (Pixel 4)
+# See github.com/gpuweb/cts/issues/2793
 ################################################################################
 crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r16float";dimension="1d" [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r16float";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="r16float";dimension="3d" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth32float-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth32float-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth32float-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth32float-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
-crbug.com/dawn/0000 [ intel-0x3e9b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
-crbug.com/dawn/0000 [ qualcomm ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"attachment-resolve","in":"command-encoder"};read={"op":"sample","in":"compute-pass-encoder"} [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"attachment-store","in":"command-encoder"};read={"op":"sample","in":"compute-pass-encoder"} [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"attachment-resolve","in":"command-encoder"};second={"op":"storage","in":"compute-pass-encoder"} [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"attachment-store","in":"command-encoder"};second={"op":"storage","in":"compute-pass-encoder"} [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=1 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=10 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=11 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=12 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=13 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=14 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=15 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=2 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=3 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=4 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=5 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=6 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=7 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=8 [ Failure ]
-crbug.com/dawn/0000 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=9 [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth="_undef_";writeDepth=false;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=false;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=false;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=true;writeDepth=false;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=true;writeDepth=false;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=true;writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=true;writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth="_undef_";writeDepth=false;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth="_undef_";writeDepth=false;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=false;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=true;writeDepth=false;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=true;writeDepth=false;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=true;writeDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=true;writeDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=false;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=false;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth32float-stencil8";unclippedDepth=false;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth32float-stencil8";unclippedDepth=false;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth32float-stencil8";unclippedDepth=true;multisampled=false [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth32float-stencil8";unclippedDepth=true;multisampled=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,resource_init,buffer:indirect_buffer_for_dispatch_indirect: [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:api,operation,resource_init,buffer:indirect_buffer_for_draw_indirect:* [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="line-list" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="point-list" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="triangle-list" [ Failure ]
-crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:* [ Failure ]
-crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Failure ]
-crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Failure ]
+
+################################################################################
+# Copies using combined depth-stencil formats failing on Android Qualcomm (Pixel 4)
+################################################################################
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth32float-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth32float-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth32float-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth32float-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth="_undef_";writeDepth=false;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=false;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=false;writeDepth=false;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=true;writeDepth=false;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=true;writeDepth=false;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=true;writeDepth=true;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus-stencil8";unclippedDepth=true;writeDepth=true;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth="_undef_";writeDepth=false;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth="_undef_";writeDepth=false;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=false;writeDepth=false;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=true;writeDepth=false;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=true;writeDepth=false;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=true;writeDepth=true;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth32float-stencil8";unclippedDepth=true;writeDepth=true;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=false;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=false;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=true;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth24plus-stencil8";unclippedDepth=true;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth32float-stencil8";unclippedDepth=false;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth32float-stencil8";unclippedDepth=false;multisampled=true [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth32float-stencil8";unclippedDepth=true;multisampled=false [ Failure ]
+crbug.com/dawn/1890 [ android-r ] webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:format="depth32float-stencil8";unclippedDepth=true;multisampled=true [ Failure ]
+
+################################################################################
+# Interpolated fragment_output_mask failing on Android Arm (Pixel 6)
+################################################################################
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=1 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=10 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=11 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=12 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=13 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=14 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=15 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=2 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=3 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=4 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=5 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=6 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=7 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=8 [ Failure ]
+crbug.com/dawn/1550 [ arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;rasterizationMask=9 [ Failure ]
+
+################################################################################
+# Compute pass attachment store/resolve then sample/storage causes device lost on Android Qualcomm (Pixel 4)
+################################################################################
+crbug.com/dawn/1896 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"attachment-resolve","in":"command-encoder"};read={"op":"sample","in":"compute-pass-encoder"} [ Failure ]
+crbug.com/dawn/1896 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"attachment-store","in":"command-encoder"};read={"op":"sample","in":"compute-pass-encoder"} [ Failure ]
+crbug.com/dawn/1896 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"attachment-resolve","in":"command-encoder"};second={"op":"storage","in":"compute-pass-encoder"} [ Failure ]
+crbug.com/dawn/1896 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"attachment-store","in":"command-encoder"};second={"op":"storage","in":"compute-pass-encoder"} [ Failure ]
+
+################################################################################
+# Dispatch/draw indirect causes device lost on Android Qualcomm (Pixel 4)
+################################################################################
+crbug.com/dawn/1897 [ android-r ] webgpu:api,operation,resource_init,buffer:indirect_buffer_for_dispatch_indirect: [ Failure ]
+crbug.com/dawn/1897 [ android-r ] webgpu:api,operation,resource_init,buffer:indirect_buffer_for_draw_indirect:* [ Failure ]
+
+################################################################################
+# Primitive restart with indexFormat=uint32 causes device lost on Android Arm (Pixel 6)
+################################################################################
+crbug.com/dawn/1898 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="line-list" [ Failure ]
+crbug.com/dawn/1898 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="point-list" [ Failure ]
+crbug.com/dawn/1898 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="triangle-list" [ Failure ]
+
+################################################################################
+# Occlusion query with alpha to coverage failing on Android Qualcomm (Pixel 4)
+################################################################################
+crbug.com/dawn/1899 [ qualcomm ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
+
+################################################################################
+# Atomics tests fail with workgroupSize=2 on Android Arm (Pixel 6)
+################################################################################
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=16;mapId="remap";scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=16;mapId="remap";scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=1;mapId="remap";scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=1;mapId="remap";scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=16;mapId="remap";scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=16;mapId="remap";scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=1;mapId="remap";scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=1;mapId="remap";scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarKind="u32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarKind="i32" [ Failure ]
+crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarKind="u32" [ Failure ]
+
+################################################################################
+# matCx3 and array_of_matCx3...use_struct=2 causes device lost on Android Qualcomm (Pixel 4)
+################################################################################
+crbug.com/tint/1975 [ android-r ] webgpu:shader,execution,padding:array_of_matCx3:columns=2;use_struct=true [ Failure ]
+crbug.com/tint/1975 [ android-r ] webgpu:shader,execution,padding:array_of_matCx3:columns=3;use_struct=true [ Failure ]
+crbug.com/tint/1975 [ android-r ] webgpu:shader,execution,padding:array_of_matCx3:columns=4;use_struct=true [ Failure ]
+crbug.com/tint/1975 [ android-r ] webgpu:shader,execution,padding:matCx3:columns=2;use_struct=true [ Failure ]
+crbug.com/tint/1975 [ android-r ] webgpu:shader,execution,padding:matCx3:columns=3;use_struct=true [ Failure ]
+crbug.com/tint/1975 [ android-r ] webgpu:shader,execution,padding:matCx3:columns=4;use_struct=true [ Failure ]
+
+################################################################################
+# Zero init tests failing on Android Qualcomm (Pixel 4)
+################################################################################
+crbug.com/dawn/1900 [ android-r dawn-backend-validation ] webgpu:shader,execution,zero_init:* [ Failure ]
+crbug.com/dawn/1900 [ android-r dawn-no-backend-validation ] webgpu:shader,execution,zero_init:* [ Failure ]
+
+################################################################################
+# Workgroup zero init tests timing out on Android Arm (Pixel 6)
+################################################################################
+crbug.com/dawn/1901 [ android-t ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";* [ Failure ]
+
+################################################################################
+# maxInterStageShaderComponents limit tests fail with CreateGraphicsPipelines fail with <Unknown VkResult> on Android Qualcomm (Pixel 4)
+################################################################################
+crbug.com/dawn/1903 [ android-r dawn-backend-validation qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Failure ]
+crbug.com/dawn/1903 [ android-r dawn-no-backend-validation qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Failure ]
+
+################################################################################
+# Limit tests which create many devices, frequently timeout on Android Arm (Pixel 6)
+################################################################################
 crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:createRenderPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=false;pointList=true;frontFacing=false;sampleIndex=true;sampleMaskIn=true;sampleMaskOut=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:createRenderPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=true;pointList=true;frontFacing=true;sampleIndex=false;sampleMaskIn=true;sampleMaskOut=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:createRenderPipeline,at_over:limitTest="atDefault";testValueName="overLimit";async=false;pointList=true;frontFacing=true;sampleIndex=true;sampleMaskIn=true;sampleMaskOut=true [ RetryOnFailure ]
@@ -560,6 +655,18 @@ crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,vali
 crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:createRenderPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;pointList=true;frontFacing=false;sampleIndex=false;sampleMaskIn=true;sampleMaskOut=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:createRenderPipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=false;pointList=true;frontFacing=false;sampleIndex=true;sampleMaskIn=true;sampleMaskOut=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:createRenderPipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=true;pointList=true;frontFacing=true;sampleIndex=false;sampleMaskIn=true;sampleMaskOut=true [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupsPerDimension:dispatchWorkgroups,at_over:limitTest="atDefault";testValueName="atLimit";pipelineType="createComputePipelineAsync";axis=0 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupsPerDimension:dispatchWorkgroups,at_over:limitTest="overMaximum";testValueName="atLimit";pipelineType="createComputePipelineAsync";axis=0 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxDynamicStorageBuffersPerPipelineLayout:createBindGroupLayout,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";visibility=2 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxDynamicUniformBuffersPerPipelineLayout:createBindGroupLayout,at_over:limitTest="atMaximum";testValueName="overLimit";visibility=1 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxDynamicUniformBuffersPerPipelineLayout:createBindGroupLayout,at_over:limitTest="underDefault";testValueName="atLimit";visibility=2 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createBindGroupLayout,at_over:limitTest="atDefault";testValueName="atLimit";visibility=4;order="shiftByHalf" [ RetryOnFailure ]
+
+################################################################################
+# untriaged Android failures
+################################################################################
+crbug.com/dawn/0000 [ intel-0x3e9b ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:* [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="depth32float" [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_ranges:dimension="1d";copyBoxOffsets={"x":0,"y":0,"z":0,"width":0,"height":0,"depthOrArrayLayers":0};srcCopyLevel=0;dstCopyLevel=0 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_ranges:dimension="2d";copyBoxOffsets={"x":0,"y":0,"z":0,"width":0,"height":1,"depthOrArrayLayers":-2};srcCopyLevel=1;dstCopyLevel=3 [ Failure ]
@@ -578,46 +685,6 @@ crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:shader,executi
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,abs:i32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,abs:u32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,atan:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:max_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=16;mapId="remap";scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=16;mapId="remap";scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=1;mapId="remap";scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=1;mapId="remap";scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=16;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=1;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=4;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicSub:sub_workgroup:workgroupSize=2;dispatchSize=8;scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=16;mapId="remap";scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=16;mapId="remap";scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=1;mapId="remap";scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=1;mapId="remap";scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarKind="u32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarKind="i32" [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarKind="u32" [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,ceil:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="const" [ Failure ]
@@ -638,15 +705,7 @@ crbug.com/dawn/0000 [ amd-0x67ef ] webgpu:shader,execution,expression,call,built
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=4 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef ] webgpu:shader,execution,expression,call,builtin,unpack2x16snorm:unpack:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,padding:array_of_matCx3:columns=2;use_struct=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,padding:array_of_matCx3:columns=3;use_struct=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,padding:array_of_matCx3:columns=4;use_struct=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,padding:matCx3:columns=2;use_struct=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,padding:matCx3:columns=3;use_struct=true [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,padding:matCx3:columns=4;use_struct=true [ Failure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation ] webgpu:shader,execution,robust_access:linear_memory:storageClass="private";access="read";containerType="vector";shadowingMode="function-scope";isAtomic=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-backend-validation ] webgpu:shader,execution,zero_init:* [ Failure ]
-crbug.com/dawn/0000 [ android-r dawn-no-backend-validation ] webgpu:shader,execution,zero_init:* [ Failure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=true [ Failure ]
@@ -654,7 +713,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] web
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="rg8unorm";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
 crbug.com/dawn/0000 [ android-t ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
-crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";* [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,robust_access:linear_memory:storageClass="private";access="read";containerType="vector";shadowingMode="none";isAtomic=false [ Failure ]
 
 # New flakes. Please triage:
@@ -685,12 +743,6 @@ crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura webgpu-adapter-
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura webgpu-adapter-default ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=4;indexed=false;indirect=false;vertex_buffer_offset=32;index_buffer_offset="_undef_";base_vertex="_undef_" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura webgpu-adapter-default ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=2;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura webgpu-adapter-default ] webgpu:api,operation,rendering,draw:arguments:first=3;count=0;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation webgpu-adapter-default ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupsPerDimension:dispatchWorkgroups,at_over:limitTest="atDefault";testValueName="atLimit";pipelineType="createComputePipelineAsync";axis=0 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation webgpu-adapter-default ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupsPerDimension:dispatchWorkgroups,at_over:limitTest="overMaximum";testValueName="atLimit";pipelineType="createComputePipelineAsync";axis=0 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation webgpu-adapter-default ] webgpu:api,validation,capability_checks,limits,maxDynamicStorageBuffersPerPipelineLayout:createBindGroupLayout,at_over:limitTest="betweenDefaultAndMaximum";testValueName="overLimit";visibility=2 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation webgpu-adapter-default ] webgpu:api,validation,capability_checks,limits,maxDynamicUniformBuffersPerPipelineLayout:createBindGroupLayout,at_over:limitTest="atMaximum";testValueName="overLimit";visibility=1 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation webgpu-adapter-default ] webgpu:api,validation,capability_checks,limits,maxDynamicUniformBuffersPerPipelineLayout:createBindGroupLayout,at_over:limitTest="underDefault";testValueName="atLimit";visibility=2 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation webgpu-adapter-default ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createBindGroupLayout,at_over:limitTest="atDefault";testValueName="atLimit";visibility=4;order="shiftByHalf" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createBindGroupLayout,at_over:limitTest="underDefault";testValueName="overLimit";visibility=5;order="forward" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=false;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow";order="forward";bindGroupTest="differentGroups" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=true;bindingCombination="compute";order="shiftByHalf";bindGroupTest="differentGroups" [ RetryOnFailure ]
