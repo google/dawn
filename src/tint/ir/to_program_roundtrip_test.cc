@@ -152,6 +152,21 @@ fn b() {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, FnCall_PtrArgs) {
+    Test(R"(
+var<private> y : i32 = 2i;
+
+fn a(px : ptr<function, i32>, py : ptr<private, i32>) -> i32 {
+  return (*(px) + *(py));
+}
+
+fn b() -> i32 {
+  var x : i32 = 1i;
+  return a(&(x), &(y));
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Call
 ////////////////////////////////////////////////////////////////////////////////
@@ -167,6 +182,16 @@ TEST_F(IRToProgramRoundtripTest, BuiltinCall_Expr) {
     Test(R"(
 fn f(a : i32, b : i32) {
   var i : i32 = max(a, b);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BuiltinCall_PtrArg) {
+    Test(R"(
+var<workgroup> v : bool;
+
+fn foo() -> bool {
+  return workgroupUniformLoad(&(v));
 }
 )");
 }
@@ -1238,6 +1263,31 @@ fn f() {
   var a : i32 = 42i;
   var b : i32 = a;
   var c : i32 = b;
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Function-scope let
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, FunctionScopeLet_i32) {
+    Test(R"(
+fn f(i : i32) -> i32 {
+  let a = (42i + i);
+  let b = (24i + i);
+  let c = (a + b);
+  return c;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, FunctionScopeLet_ptr) {
+    Test(R"(
+fn f() -> i32 {
+  var a : array<i32, 3u>;
+  let b = &(a[1i]);
+  let c = *(b);
+  return c;
 }
 )");
 }
