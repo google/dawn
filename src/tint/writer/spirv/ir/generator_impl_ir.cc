@@ -738,6 +738,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             inst,                                             //
             [&](ir::Access* a) { EmitAccess(a); },            //
             [&](ir::Binary* b) { EmitBinary(b); },            //
+            [&](ir::Bitcast* b) { EmitBitcast(b); },          //
             [&](ir::BuiltinCall* b) { EmitBuiltinCall(b); },  //
             [&](ir::Construct* c) { EmitConstruct(c); },      //
             [&](ir::Convert* c) { EmitConvert(c); },          //
@@ -1062,6 +1063,16 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
 
     // Emit the instruction.
     current_function_.push_inst(op, {Type(ty), id, lhs, rhs});
+}
+
+void GeneratorImplIr::EmitBitcast(ir::Bitcast* bitcast) {
+    auto* ty = bitcast->Result()->Type();
+    if (ty == bitcast->Val()->Type()) {
+        values_.Add(bitcast->Result(), Value(bitcast->Val()));
+        return;
+    }
+    current_function_.push_inst(spv::Op::OpBitcast,
+                                {Type(ty), Value(bitcast), Value(bitcast->Val())});
 }
 
 void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {

@@ -31,6 +31,9 @@ class Bitcast : public utils::Castable<Bitcast, Call> {
     /// @param val the value being bitcast
     Bitcast(InstructionResult* result, Value* val);
     ~Bitcast() override;
+
+    /// @returns the operand value
+    Value* Val() { return operands_[kValueOperandOffset]; }
 };
 
 }  // namespace tint::ir

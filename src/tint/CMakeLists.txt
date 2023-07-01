@@ -1313,6 +1313,7 @@ if(TINT_BUILD_TESTS)
       list(APPEND TINT_TEST_SRCS
         writer/spirv/ir/generator_impl_ir_access_test.cc
         writer/spirv/ir/generator_impl_ir_binary_test.cc
+        writer/spirv/ir/generator_impl_ir_bitcast_test.cc
         writer/spirv/ir/generator_impl_ir_builtin_test.cc
         writer/spirv/ir/generator_impl_ir_constant_test.cc
         writer/spirv/ir/generator_impl_ir_construct_test.cc

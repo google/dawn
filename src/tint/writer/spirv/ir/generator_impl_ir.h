@@ -31,6 +31,7 @@
 namespace tint::ir {
 class Access;
 class Binary;
+class Bitcast;
 class Block;
 class BlockParam;
 class BuiltinCall;
@@ -188,6 +189,10 @@ class GeneratorImplIr {
     /// Emit a binary instruction.
     /// @param binary the binary instruction to emit
     void EmitBinary(ir::Binary* binary);
+
+    /// Emit a bitcast instruction.
+    /// @param bitcast the bitcast instruction to emit
+    void EmitBitcast(ir::Bitcast* bitcast);
 
     /// Emit a builtin function call instruction.
     /// @param call the builtin call instruction to emit
