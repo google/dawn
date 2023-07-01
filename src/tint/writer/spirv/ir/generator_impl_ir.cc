@@ -1089,6 +1089,12 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
         values_.Add(builtin->Result(), Value(builtin->Args()[0]));
         return;
     }
+    if (builtin->Func() == builtin::Function::kAny &&
+        builtin->Args()[0]->Type()->Is<type::Bool>()) {
+        // any() is a passthrough for a scalar argument.
+        values_.Add(builtin->Result(), Value(builtin->Args()[0]));
+        return;
+    }
 
     auto id = Value(builtin);
 
@@ -1116,6 +1122,9 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
             } else if (result_ty->is_signed_integer_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450SAbs);
             }
+            break;
+        case builtin::Function::kAny:
+            op = spv::Op::OpAny;
             break;
         case builtin::Function::kAcos:
             glsl_ext_inst(GLSLstd450Acos);

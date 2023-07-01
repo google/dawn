@@ -131,6 +131,34 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
 )");
 }
 
+// Test that any of an scalar just folds away.
+TEST_F(SpvGeneratorImplTest, Builtin_Any_Scalar) {
+    auto* arg = b.FunctionParam("arg", ty.bool_());
+    auto* func = b.Function("foo", ty.bool_());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.bool_(), builtin::Function::kAny, arg);
+        b.Return(func, result);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpReturnValue %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Any_Vector) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<bool>());
+    auto* func = b.Function("foo", ty.bool_());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.bool_(), builtin::Function::kAny, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpAny %bool %arg");
+}
+
 TEST_F(SpvGeneratorImplTest, Builtin_Length_vec4f) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.f32());
