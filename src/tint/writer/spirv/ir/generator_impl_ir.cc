@@ -967,6 +967,16 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
             op = ty->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
             break;
         }
+        case ir::Binary::Kind::kModulo: {
+            if (ty->is_signed_integer_scalar_or_vector()) {
+                op = spv::Op::OpSRem;
+            } else if (ty->is_unsigned_integer_scalar_or_vector()) {
+                op = spv::Op::OpUMod;
+            } else if (ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFRem;
+            }
+            break;
+        }
 
         case ir::Binary::Kind::kAnd: {
             op = spv::Op::OpBitwiseAnd;
@@ -1053,11 +1063,6 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
                 op = spv::Op::OpULessThanEqual;
             }
             break;
-        }
-
-        default: {
-            TINT_ICE(Writer, diagnostics_)
-                << "unimplemented binary instruction: " << static_cast<uint32_t>(binary->Kind());
         }
     }
 
