@@ -1087,6 +1087,27 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450SAbs);
             }
             break;
+        case builtin::Function::kAcos:
+            glsl_ext_inst(GLSLstd450Acos);
+            break;
+        case builtin::Function::kAcosh:
+            glsl_ext_inst(GLSLstd450Acosh);
+            break;
+        case builtin::Function::kAsin:
+            glsl_ext_inst(GLSLstd450Asin);
+            break;
+        case builtin::Function::kAsinh:
+            glsl_ext_inst(GLSLstd450Asinh);
+            break;
+        case builtin::Function::kAtan:
+            glsl_ext_inst(GLSLstd450Atan);
+            break;
+        case builtin::Function::kAtan2:
+            glsl_ext_inst(GLSLstd450Atan2);
+            break;
+        case builtin::Function::kAtanh:
+            glsl_ext_inst(GLSLstd450Atanh);
+            break;
         case builtin::Function::kClamp:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450NClamp);
@@ -1095,6 +1116,12 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
             } else if (result_ty->is_signed_integer_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450SClamp);
             }
+            break;
+        case builtin::Function::kCos:
+            glsl_ext_inst(GLSLstd450Cos);
+            break;
+        case builtin::Function::kCosh:
+            glsl_ext_inst(GLSLstd450Cosh);
             break;
         case builtin::Function::kDistance:
             glsl_ext_inst(GLSLstd450Distance);
@@ -1122,6 +1149,18 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
             break;
         case builtin::Function::kNormalize:
             glsl_ext_inst(GLSLstd450Normalize);
+            break;
+        case builtin::Function::kSin:
+            glsl_ext_inst(GLSLstd450Sin);
+            break;
+        case builtin::Function::kSinh:
+            glsl_ext_inst(GLSLstd450Sinh);
+            break;
+        case builtin::Function::kTan:
+            glsl_ext_inst(GLSLstd450Tan);
+            break;
+        case builtin::Function::kTanh:
+            glsl_ext_inst(GLSLstd450Tanh);
             break;
         default:
             TINT_ICE(Writer, diagnostics_) << "unimplemented builtin function: " << builtin->Func();

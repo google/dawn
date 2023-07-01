@@ -60,7 +60,32 @@ TEST_P(Builtin_1arg, Vector) {
 INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                          Builtin_1arg,
                          testing::Values(BuiltinTestCase{kI32, builtin::Function::kAbs, "SAbs"},
-                                         BuiltinTestCase{kF32, builtin::Function::kAbs, "FAbs"}));
+                                         BuiltinTestCase{kF32, builtin::Function::kAbs, "FAbs"},
+                                         BuiltinTestCase{kF16, builtin::Function::kAbs, "FAbs"},
+                                         BuiltinTestCase{kF32, builtin::Function::kAcos, "Acos"},
+                                         BuiltinTestCase{kF16, builtin::Function::kAcos, "Acos"},
+                                         BuiltinTestCase{kF32, builtin::Function::kAsinh, "Asinh"},
+                                         BuiltinTestCase{kF16, builtin::Function::kAsinh, "Asinh"},
+                                         BuiltinTestCase{kF32, builtin::Function::kAcos, "Acos"},
+                                         BuiltinTestCase{kF16, builtin::Function::kAcos, "Acos"},
+                                         BuiltinTestCase{kF32, builtin::Function::kAsinh, "Asinh"},
+                                         BuiltinTestCase{kF16, builtin::Function::kAsinh, "Asinh"},
+                                         BuiltinTestCase{kF32, builtin::Function::kAtan, "Atan"},
+                                         BuiltinTestCase{kF16, builtin::Function::kAtan, "Atan"},
+                                         BuiltinTestCase{kF32, builtin::Function::kAtanh, "Atanh"},
+                                         BuiltinTestCase{kF16, builtin::Function::kAtanh, "Atanh"},
+                                         BuiltinTestCase{kF32, builtin::Function::kCos, "Cos"},
+                                         BuiltinTestCase{kF16, builtin::Function::kCos, "Cos"},
+                                         BuiltinTestCase{kF32, builtin::Function::kSin, "Sin"},
+                                         BuiltinTestCase{kF16, builtin::Function::kSin, "Sin"},
+                                         BuiltinTestCase{kF32, builtin::Function::kTan, "Tan"},
+                                         BuiltinTestCase{kF16, builtin::Function::kTan, "Tan"},
+                                         BuiltinTestCase{kF32, builtin::Function::kCosh, "Cosh"},
+                                         BuiltinTestCase{kF16, builtin::Function::kCosh, "Cosh"},
+                                         BuiltinTestCase{kF32, builtin::Function::kSinh, "Sinh"},
+                                         BuiltinTestCase{kF16, builtin::Function::kSinh, "Sinh"},
+                                         BuiltinTestCase{kF32, builtin::Function::kTanh, "Tanh"},
+                                         BuiltinTestCase{kF16, builtin::Function::kTanh, "Tanh"}));
 
 // Test that abs of an unsigned value just folds away.
 TEST_F(SpvGeneratorImplTest, Builtin_Abs_u32) {
@@ -157,7 +182,8 @@ TEST_P(Builtin_2arg, Vector) {
 }
 INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                          Builtin_2arg,
-                         testing::Values(BuiltinTestCase{kF32, builtin::Function::kMax, "FMax"},
+                         testing::Values(BuiltinTestCase{kF32, builtin::Function::kAtan2, "Atan2"},
+                                         BuiltinTestCase{kF32, builtin::Function::kMax, "FMax"},
                                          BuiltinTestCase{kI32, builtin::Function::kMax, "SMax"},
                                          BuiltinTestCase{kU32, builtin::Function::kMax, "UMax"},
                                          BuiltinTestCase{kF32, builtin::Function::kMin, "FMin"},
