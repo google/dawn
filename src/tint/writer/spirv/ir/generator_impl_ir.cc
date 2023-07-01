@@ -747,6 +747,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             [&](ir::Swizzle* s) { EmitSwizzle(s); },          //
             [&](ir::Store* s) { EmitStore(s); },              //
             [&](ir::UserCall* c) { EmitUserCall(c); },        //
+            [&](ir::Unary* u) { EmitUnary(u); },              //
             [&](ir::Var* v) { EmitVar(v); },                  //
             [&](ir::If* i) { EmitIf(i); },                    //
             [&](ir::Terminator* t) { EmitTerminator(t); },    //
@@ -1376,6 +1377,25 @@ void GeneratorImplIr::EmitSwizzle(ir::Swizzle* swizzle) {
 
 void GeneratorImplIr::EmitStore(ir::Store* store) {
     current_function_.push_inst(spv::Op::OpStore, {Value(store->To()), Value(store->From())});
+}
+
+void GeneratorImplIr::EmitUnary(ir::Unary* unary) {
+    auto id = Value(unary);
+    auto* ty = unary->Result()->Type();
+    spv::Op op = spv::Op::Max;
+    switch (unary->Kind()) {
+        case ir::Unary::Kind::kComplement:
+            op = spv::Op::OpNot;
+            break;
+        case ir::Unary::Kind::kNegation:
+            if (ty->is_float_scalar_or_vector()) {
+                op = spv::Op::OpFNegate;
+            } else if (ty->is_signed_integer_scalar_or_vector()) {
+                op = spv::Op::OpSNegate;
+            }
+            break;
+    }
+    current_function_.push_inst(op, {Type(ty), id, Value(unary->Val())});
 }
 
 void GeneratorImplIr::EmitUserCall(ir::UserCall* call) {

@@ -50,6 +50,7 @@ class Store;
 class Switch;
 class Swizzle;
 class Terminator;
+class Unary;
 class UserCall;
 class Value;
 class Var;
@@ -219,6 +220,10 @@ class GeneratorImplIr {
     /// Emit a swizzle instruction.
     /// @param swizzle the swizzle instruction to emit
     void EmitSwizzle(ir::Swizzle* swizzle);
+
+    /// Emit a unary instruction.
+    /// @param unary the unary instruction to emit
+    void EmitUnary(ir::Unary* unary);
 
     /// Emit a user call instruction.
     /// @param call the user call instruction to emit
