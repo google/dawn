@@ -19,6 +19,7 @@
 #include "src/tint/ir/from_program.h"
 #include "src/tint/ir/to_program.h"
 #include "src/tint/reader/wgsl/parser_impl.h"
+#include "src/tint/writer/wgsl/generator.h"
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
     auto printer = tint::diag::Printer::create(stderr, true);
@@ -52,6 +53,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
     auto dst = tint::ir::ToProgram(ir.Get());
     if (!dst.IsValid()) {
+#if TINT_BUILD_WGSL_WRITER
+        if (auto result = tint::writer::wgsl::Generate(&dst, {}); result.success) {
+            std::cerr << result.wgsl << std::endl << std::endl;
+        }
+#endif
+
         std::cerr << dst.Diagnostics() << std::endl;
         __builtin_trap();
     }
