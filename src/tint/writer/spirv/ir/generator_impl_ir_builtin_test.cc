@@ -190,6 +190,21 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                                          BuiltinTestCase{kI32, builtin::Function::kMin, "SMin"},
                                          BuiltinTestCase{kU32, builtin::Function::kMin, "UMin"}));
 
+TEST_F(SpvGeneratorImplTest, Builtin_Cross_vec3f) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec3<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec3<f32>());
+    auto* func = b.Function("foo", ty.vec3<f32>());
+    func->SetParams({arg1, arg2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kCross, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v3float %9 Cross %arg1 %arg2");
+}
+
 TEST_F(SpvGeneratorImplTest, Builtin_Distance_vec2f) {
     auto* arg1 = b.FunctionParam("arg1", MakeVectorType(kF32));
     auto* arg2 = b.FunctionParam("arg2", MakeVectorType(kF32));

@@ -1124,6 +1124,9 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
         case builtin::Function::kCosh:
             glsl_ext_inst(GLSLstd450Cosh);
             break;
+        case builtin::Function::kCross:
+            glsl_ext_inst(GLSLstd450Cross);
+            break;
         case builtin::Function::kDistance:
             glsl_ext_inst(GLSLstd450Distance);
             break;
