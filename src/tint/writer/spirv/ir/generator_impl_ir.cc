@@ -980,6 +980,19 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
             break;
         }
 
+        case ir::Binary::Kind::kShiftLeft: {
+            op = spv::Op::OpShiftLeftLogical;
+            break;
+        }
+        case ir::Binary::Kind::kShiftRight: {
+            if (ty->is_signed_integer_scalar_or_vector()) {
+                op = spv::Op::OpShiftRightArithmetic;
+            } else if (ty->is_unsigned_integer_scalar_or_vector()) {
+                op = spv::Op::OpShiftRightLogical;
+            }
+            break;
+        }
+
         case ir::Binary::Kind::kEqual: {
             if (lhs_ty->is_bool_scalar_or_vector()) {
                 op = spv::Op::OpLogicalEqual;

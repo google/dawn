@@ -73,17 +73,23 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryTestCase{kI32, ir::Binary::Kind::kDivide, "OpSDiv", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kOr, "OpBitwiseOr", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kXor, "OpBitwiseXor", "int"}));
+                    BinaryTestCase{kI32, ir::Binary::Kind::kXor, "OpBitwiseXor", "int"},
+                    BinaryTestCase{kI32, ir::Binary::Kind::kShiftLeft, "OpShiftLeftLogical", "int"},
+                    BinaryTestCase{kI32, ir::Binary::Kind::kShiftRight, "OpShiftRightArithmetic",
+                                   "int"}));
 INSTANTIATE_TEST_SUITE_P(
     SpvGeneratorImplTest_Binary_U32,
     Arithmetic_Bitwise,
-    testing::Values(BinaryTestCase{kU32, ir::Binary::Kind::kAdd, "OpIAdd", "uint"},
-                    BinaryTestCase{kU32, ir::Binary::Kind::kSubtract, "OpISub", "uint"},
-                    BinaryTestCase{kU32, ir::Binary::Kind::kMultiply, "OpIMul", "uint"},
-                    BinaryTestCase{kU32, ir::Binary::Kind::kDivide, "OpUDiv", "uint"},
-                    BinaryTestCase{kU32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "uint"},
-                    BinaryTestCase{kU32, ir::Binary::Kind::kOr, "OpBitwiseOr", "uint"},
-                    BinaryTestCase{kU32, ir::Binary::Kind::kXor, "OpBitwiseXor", "uint"}));
+    testing::Values(
+        BinaryTestCase{kU32, ir::Binary::Kind::kAdd, "OpIAdd", "uint"},
+        BinaryTestCase{kU32, ir::Binary::Kind::kSubtract, "OpISub", "uint"},
+        BinaryTestCase{kU32, ir::Binary::Kind::kMultiply, "OpIMul", "uint"},
+        BinaryTestCase{kU32, ir::Binary::Kind::kDivide, "OpUDiv", "uint"},
+        BinaryTestCase{kU32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "uint"},
+        BinaryTestCase{kU32, ir::Binary::Kind::kOr, "OpBitwiseOr", "uint"},
+        BinaryTestCase{kU32, ir::Binary::Kind::kXor, "OpBitwiseXor", "uint"},
+        BinaryTestCase{kU32, ir::Binary::Kind::kShiftLeft, "OpShiftLeftLogical", "uint"},
+        BinaryTestCase{kU32, ir::Binary::Kind::kShiftRight, "OpShiftRightLogical", "uint"}));
 INSTANTIATE_TEST_SUITE_P(
     SpvGeneratorImplTest_Binary_F32,
     Arithmetic_Bitwise,
