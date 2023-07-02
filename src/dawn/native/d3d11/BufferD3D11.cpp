@@ -146,6 +146,11 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     uint64_t size = std::max(GetSize(), uint64_t(4u));
+    // The validation layer requires:
+    // ByteWidth must be 12 or larger to be used with D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS.
+    if (GetUsage() & wgpu::BufferUsage::Indirect) {
+        size = std::max(size, uint64_t(12u));
+    }
     size_t alignment = D3D11BufferSizeAlignment(GetUsage());
     // Check for overflow, bufferDescriptor.ByteWidth is a UINT.
     if (size > std::numeric_limits<UINT>::max() - alignment) {
