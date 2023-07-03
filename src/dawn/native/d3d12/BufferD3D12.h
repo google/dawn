@@ -75,7 +75,7 @@ class Buffer final : public BufferBase {
 
     ResourceHeapAllocation mResourceAllocation;
     bool mFixedResourceState = false;
-    wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
+    D3D12_RESOURCE_STATES mLastState = D3D12_RESOURCE_STATE_COMMON;
     ExecutionSerial mLastUsedSerial = std::numeric_limits<ExecutionSerial>::max();
 
     D3D12_RANGE mWrittenMappedRange = {0, 0};
