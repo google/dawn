@@ -65,12 +65,6 @@ config("internal") {
   ]
 }
 
-config("weak_framework") {
-  if (is_mac && dawn_enable_metal) {
-    weak_frameworks = [ "Metal.framework" ]
-  }
-}
-
 # Config that adds the @executable_path rpath if needed so that Swiftshader or the Vulkan loader are found.
 config("vulkan_rpath") {
   if (is_mac && dawn_enable_vulkan &&
@@ -574,6 +568,7 @@ source_set("sources") {
     frameworks = [
       "IOKit.framework",
       "IOSurface.framework",
+      "Metal.framework",
     ]
     if (is_mac) {
       frameworks += [
@@ -855,10 +850,7 @@ dawn_component("native") {
   ]
   sources = [ "DawnNative.cpp" ]
   configs = [ ":internal" ]
-  public_configs = [
-    ":weak_framework",
-    ":vulkan_rpath",
-  ]
+  public_configs = [ ":vulkan_rpath" ]
 
   if (dawn_enable_d3d11 || dawn_enable_d3d12) {
     sources += [ "d3d/D3DBackend.cpp" ]
