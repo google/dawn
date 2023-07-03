@@ -119,7 +119,7 @@ ComboRenderPassDescriptor::ComboRenderPassDescriptor(
     cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
     cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
 
-    colorAttachmentCount = static_cast<uint32_t>(colorAttachmentInfo.size());
+    colorAttachmentCount = colorAttachmentInfo.size();
     uint32_t colorAttachmentIndex = 0;
     for (const wgpu::TextureView& colorAttachment : colorAttachmentInfo) {
         if (colorAttachment.Get() != nullptr) {
@@ -279,7 +279,7 @@ wgpu::BindGroupLayout MakeBindGroupLayout(
     }
 
     wgpu::BindGroupLayoutDescriptor descriptor;
-    descriptor.entryCount = static_cast<uint32_t>(entries.size());
+    descriptor.entryCount = entries.size();
     descriptor.entries = entries.data();
     return device.CreateBindGroupLayout(&descriptor);
 }

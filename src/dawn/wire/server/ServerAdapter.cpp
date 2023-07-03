@@ -79,7 +79,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
         }
     }
 
-    cmd.featuresCount = static_cast<uint32_t>(features.size());
+    cmd.featuresCount = features.size();
     cmd.features = features.data();
 
     WGPUSupportedLimits limits = {};

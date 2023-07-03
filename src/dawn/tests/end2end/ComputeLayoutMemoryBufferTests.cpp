@@ -459,7 +459,7 @@ void RunComputeShaderWithBuffers(const wgpu::Device& device,
 
     wgpu::BindGroupDescriptor descriptor;
     descriptor.layout = pipeline.GetBindGroupLayout(0);
-    descriptor.entryCount = static_cast<uint32_t>(entries.size());
+    descriptor.entryCount = entries.size();
     descriptor.entries = entries.data();
 
     wgpu::BindGroup bindGroup = device.CreateBindGroup(&descriptor);

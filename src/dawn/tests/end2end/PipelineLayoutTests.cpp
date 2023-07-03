@@ -44,7 +44,7 @@ TEST_P(PipelineLayoutTests, DynamicBuffersOverflow) {
         }
 
         wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.entryCount = static_cast<uint32_t>(entries.size());
+        descriptor.entryCount = entries.size();
         descriptor.entries = entries.data();
         bglA = device.CreateBindGroupLayout(&descriptor);
     }

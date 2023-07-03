@@ -186,7 +186,7 @@ class VertexStateTest : public DawnTest {
                 totalNumAttributes++;
             }
             vertexState->cVertexBuffers[vertexBufferCount].attributeCount =
-                static_cast<uint32_t>(buffer.attributes.size());
+                buffer.attributes.size();
 
             vertexBufferCount++;
         }

@@ -2420,15 +2420,14 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
 
             // Create the bind group layout.
             wgpu::BindGroupLayoutDescriptor bglDescriptor;
-            bglDescriptor.entryCount = static_cast<uint32_t>(bindings.size());
+            bglDescriptor.entryCount = bindings.size();
             bglDescriptor.entries = bindings.data();
             bindGroupLayouts[l] = device.CreateBindGroupLayout(&bglDescriptor);
         }
 
         // Create a pipeline layout from the list of bind group layouts.
         wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
-        pipelineLayoutDescriptor.bindGroupLayoutCount =
-            static_cast<uint32_t>(bindGroupLayouts.size());
+        pipelineLayoutDescriptor.bindGroupLayoutCount = bindGroupLayouts.size();
         pipelineLayoutDescriptor.bindGroupLayouts = bindGroupLayouts.data();
 
         wgpu::PipelineLayout pipelineLayout =

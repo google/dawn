@@ -231,7 +231,7 @@ class MinBufferSizeTestsBase : public ValidationTest {
         }
 
         wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.entryCount = static_cast<uint32_t>(entries.size());
+        descriptor.entryCount = entries.size();
         descriptor.entries = entries.data();
         return device.CreateBindGroupLayout(&descriptor);
     }

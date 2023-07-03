@@ -132,7 +132,7 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
     textureDescriptor.mipLevelCount = mMipLevelCount;
     textureDescriptor.sampleCount = mSampleCount;
     textureDescriptor.viewFormats = mViewFormats.data();
-    textureDescriptor.viewFormatCount = static_cast<uint32_t>(mViewFormats.size());
+    textureDescriptor.viewFormatCount = mViewFormats.size();
 
     DawnTextureInternalUsageDescriptor internalDesc = {};
     if (mUsageInternal != wgpu::TextureUsage::None) {

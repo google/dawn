@@ -173,7 +173,7 @@ class WritableTextureBindingAliasingValidationTests : public ValidationTest {
         }
 
         wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.entryCount = static_cast<uint32_t>(entries.size());
+        descriptor.entryCount = entries.size();
         descriptor.entries = entries.data();
         return device.CreateBindGroupLayout(&descriptor);
     }
@@ -194,7 +194,7 @@ class WritableTextureBindingAliasingValidationTests : public ValidationTest {
 
             wgpu::BindGroupDescriptor descriptor;
             descriptor.layout = layouts[groupIdx];
-            descriptor.entryCount = static_cast<uint32_t>(entries.size());
+            descriptor.entryCount = entries.size();
             descriptor.entries = entries.data();
 
             bindGroups.push_back(device.CreateBindGroup(&descriptor));

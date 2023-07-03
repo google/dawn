@@ -148,9 +148,9 @@ wgpu::Device CreateCppDawnDevice() {
     toggles.chain.sType = WGPUSType_DawnTogglesDescriptor;
     toggles.chain.next = nullptr;
     toggles.enabledToggles = enableToggleNames.data();
-    toggles.enabledTogglesCount = static_cast<uint32_t>(enableToggleNames.size());
+    toggles.enabledTogglesCount = enableToggleNames.size();
     toggles.disabledToggles = disabledToggleNames.data();
-    toggles.disabledTogglesCount = static_cast<uint32_t>(disabledToggleNames.size());
+    toggles.disabledTogglesCount = disabledToggleNames.size();
 
     WGPUDeviceDescriptor deviceDesc = {};
     deviceDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(&toggles);

@@ -316,14 +316,14 @@ TEST_P(MaxLimitTests, MaxDynamicBuffers) {
 
     // Create the bind group layout.
     wgpu::BindGroupLayoutDescriptor bglDesc;
-    bglDesc.entryCount = static_cast<uint32_t>(bglEntries.size());
+    bglDesc.entryCount = bglEntries.size();
     bglDesc.entries = bglEntries.data();
     wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
 
     // Create the bind group.
     wgpu::BindGroupDescriptor bgDesc;
     bgDesc.layout = bgl;
-    bgDesc.entryCount = static_cast<uint32_t>(bgEntries.size());
+    bgDesc.entryCount = bgEntries.size();
     bgDesc.entries = bgEntries.data();
     wgpu::BindGroup bindGroup = device.CreateBindGroup(&bgDesc);
 
@@ -534,7 +534,7 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
 
     wgpu::BindGroupDescriptor bgDesc = {};
     bgDesc.layout = cp.GetBindGroupLayout(0);
-    bgDesc.entryCount = static_cast<uint32_t>(bgEntries.size());
+    bgDesc.entryCount = bgEntries.size();
     bgDesc.entries = bgEntries.data();
 
     wgpu::BindGroup bg = device.CreateBindGroup(&bgDesc);
