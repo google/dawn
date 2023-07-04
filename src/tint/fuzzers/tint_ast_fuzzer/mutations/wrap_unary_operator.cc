@@ -18,6 +18,8 @@
 #include <vector>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/sem/call.h"
+#include "src/tint/sem/statement.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 
@@ -94,6 +96,16 @@ protobufs::Mutation MutationWrapUnaryOperator::ToMessage() const {
 
 std::vector<ast::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
     const sem::ValueExpression& expr) {
+    if (auto* call_expr = expr.As<sem::Call>()) {
+        if (auto* stmt = call_expr->Stmt()) {
+            if (auto* call_stmt = stmt->Declaration()->As<ast::CallStatement>()) {
+                if (call_stmt->expr == expr.Declaration()) {
+                    return {};  // A call statement must only wrap a call expression.
+                }
+            }
+        }
+    }
+
     const auto* expr_type = expr.Type();
     if (expr_type->is_bool_scalar_or_vector()) {
         return {ast::UnaryOp::kNot};

@@ -519,5 +519,34 @@ TEST(WrapUnaryOperatorTest, NotApplicable6) {
         node_id_map, &program, &node_id_map, nullptr));
 }
 
+TEST(WrapUnaryOperatorTest, NotApplicable_CallStmt) {
+    std::string content = R"(
+    fn main() {
+      f();
+    }
+    fn f() -> bool {
+      return false;
+    }
+  )";
+    Source::File file("test.wgsl", content);
+    auto program = reader::wgsl::Parse(&file);
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+
+    NodeIdMap node_id_map(program);
+
+    const auto& main_fn_statements = program.AST().Functions()[0]->body->statements;
+
+    const auto* call_stmt = main_fn_statements[0]->As<ast::CallStatement>();
+    ASSERT_NE(call_stmt, nullptr);
+
+    const auto expr_id = node_id_map.GetId(call_stmt->expr);
+    ASSERT_NE(expr_id, 0);
+
+    // The id provided for the expression is not a valid expression type.
+    ASSERT_FALSE(MaybeApplyMutation(
+        program, MutationWrapUnaryOperator(expr_id, node_id_map.TakeFreshId(), ast::UnaryOp::kNot),
+        node_id_map, &program, &node_id_map, nullptr));
+}
+
 }  // namespace
 }  // namespace tint::fuzzers::ast_fuzzer
