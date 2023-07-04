@@ -45,6 +45,9 @@ PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(
 ExternalImageDescriptorDXGISharedHandle::ExternalImageDescriptorDXGISharedHandle()
     : ExternalImageDescriptor(ExternalImageType::DXGISharedHandle) {}
 
+ExternalImageDescriptorD3D11Texture::ExternalImageDescriptorD3D11Texture()
+    : ExternalImageDescriptor(ExternalImageType::D3D11Texture) {}
+
 ExternalImageDXGI::ExternalImageDXGI(std::unique_ptr<ExternalImageDXGIImpl> impl)
     : mImpl(std::move(impl)) {
     ASSERT(mImpl != nullptr);
@@ -69,7 +72,7 @@ void ExternalImageDXGI::EndAccess(WGPUTexture texture,
 // static
 std::unique_ptr<ExternalImageDXGI> ExternalImageDXGI::Create(
     WGPUDevice device,
-    const ExternalImageDescriptorDXGISharedHandle* descriptor) {
+    const ExternalImageDescriptor* descriptor) {
     Device* backendDevice = ToBackend(FromAPI(device));
     auto deviceLock(backendDevice->GetScopedLock());
     std::unique_ptr<ExternalImageDXGIImpl> impl =

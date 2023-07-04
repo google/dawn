@@ -540,18 +540,25 @@ ResultOrError<Ref<d3d::Fence>> Device::CreateFence(
 }
 
 ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExternalImageDXGIImplImpl(
-    const d3d::ExternalImageDescriptorDXGISharedHandle* descriptor) {
+    const ExternalImageDescriptor* descriptor) {
     // ExternalImageDXGIImpl holds a weak reference to the device. If the device is destroyed before
     // the image is created, the image will have a dangling reference to the device which can cause
     // a use-after-free.
     DAWN_TRY(ValidateIsAlive());
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource;
-    DAWN_TRY(CheckHRESULT(
-        GetD3D12Device()->OpenSharedHandle(descriptor->sharedHandle, IID_PPV_ARGS(&d3d12Resource)),
-        "D3D12 opening shared handle"));
+    DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::DXGISharedHandle,
+                    "descriptor is not an ExternalImageDescriptorDXGISharedHandle");
 
-    const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
+    const d3d::ExternalImageDescriptorDXGISharedHandle* sharedHandleDescriptor =
+        static_cast<const d3d::ExternalImageDescriptorDXGISharedHandle*>(descriptor);
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource;
+    DAWN_TRY(CheckHRESULT(GetD3D12Device()->OpenSharedHandle(sharedHandleDescriptor->sharedHandle,
+                                                             IID_PPV_ARGS(&d3d12Resource)),
+                          "D3D12 opening shared handle"));
+
+    const TextureDescriptor* textureDescriptor =
+        FromAPI(sharedHandleDescriptor->cTextureDescriptor);
 
     DAWN_TRY(
         ValidateTextureDescriptor(this, textureDescriptor, AllowMultiPlanarTextureFormat::Yes));

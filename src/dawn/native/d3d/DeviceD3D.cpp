@@ -79,7 +79,7 @@ HANDLE Device::GetFenceHandle() const {
 }
 
 std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(
-    const ExternalImageDescriptorDXGISharedHandle* descriptor) {
+    const ExternalImageDescriptor* descriptor) {
     std::unique_ptr<ExternalImageDXGIImpl> externalImage;
     if (!ConsumedError(CreateExternalImageDXGIImplImpl(descriptor), &externalImage)) {
         mExternalImageList.Append(externalImage.get());

@@ -52,7 +52,7 @@ class Device : public DeviceBase {
     HANDLE GetFenceHandle() const;
 
     std::unique_ptr<ExternalImageDXGIImpl> CreateExternalImageDXGIImpl(
-        const ExternalImageDescriptorDXGISharedHandle* descriptor);
+        const ExternalImageDescriptor* descriptor);
 
     virtual ResultOrError<Ref<Fence>> CreateFence(
         const ExternalImageDXGIFenceDescriptor* descriptor) = 0;
@@ -66,7 +66,7 @@ class Device : public DeviceBase {
     void DestroyImpl() override;
 
     virtual ResultOrError<std::unique_ptr<ExternalImageDXGIImpl>> CreateExternalImageDXGIImplImpl(
-        const ExternalImageDescriptorDXGISharedHandle* descriptor) = 0;
+        const ExternalImageDescriptor* descriptor) = 0;
 
     HANDLE mFenceHandle = nullptr;
 

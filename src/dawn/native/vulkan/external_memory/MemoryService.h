@@ -72,8 +72,11 @@ class Service {
   private:
     ServiceImplementation* GetServiceImplementation(ExternalImageType externalImageType);
 
-    // ExternalImageType has 6 types. Vulkan backend uses 3 of them.
-    ityp::array<ExternalImageType, std::unique_ptr<ServiceImplementation>, 6> mServiceImpls = {};
+    // ExternalImageType has 7 types. Vulkan backend uses 3 of them.
+    ityp::array<ExternalImageType,
+                std::unique_ptr<ServiceImplementation>,
+                ExternalImageType::Last + 1>
+        mServiceImpls = {};
 };
 
 }  // namespace dawn::native::vulkan::external_memory

@@ -56,6 +56,15 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImag
     HANDLE sharedHandle = nullptr;
 };
 
+struct DAWN_NATIVE_EXPORT ExternalImageDescriptorD3D11Texture : ExternalImageDescriptor {
+  public:
+    ExternalImageDescriptorD3D11Texture();
+
+    // Texture is used for creating ExternalImageDXGI with d3d11 backend. It must be an
+    // ID3D11Texture2D object and created from the same ID3D11Device used in the WGPUDevice.
+    Microsoft::WRL::ComPtr<IUnknown> texture;
+};
+
 struct DAWN_NATIVE_EXPORT ExternalImageDXGIFenceDescriptor {
     // Shared handle for the fence. This never passes ownership to the callee (when used as an input
     // parameter) or to the caller (when used as a return value or output parameter).
@@ -80,9 +89,8 @@ class DAWN_NATIVE_EXPORT ExternalImageDXGI {
   public:
     ~ExternalImageDXGI();
 
-    static std::unique_ptr<ExternalImageDXGI> Create(
-        WGPUDevice device,
-        const ExternalImageDescriptorDXGISharedHandle* descriptor);
+    static std::unique_ptr<ExternalImageDXGI> Create(WGPUDevice device,
+                                                     const ExternalImageDescriptor* descriptor);
 
     // Returns true if the external image resources are still valid, otherwise BeginAccess() is
     // guaranteed to fail e.g. after device destruction.
