@@ -16,7 +16,9 @@
 #define SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTEST_H_
 
 #include <memory>
+#include <optional>
 #include <string>
+#include <vector>
 
 #include "dawn/tests/DawnTest.h"
 
@@ -90,6 +92,7 @@ class DawnPerfTestBase {
                      unsigned int value,
                      const std::string& units,
                      bool important) const;
+    void SetGPUTime(double GPUTime);
 
   private:
     void DoRunLoop(double maxRunTime);
@@ -110,6 +113,7 @@ class DawnPerfTestBase {
     unsigned int mNumStepsPerformed = 0;
     double mCpuTime;
     std::unique_ptr<utils::Timer> mTimer;
+    std::optional<double> mGPUTime;
 };
 
 template <typename Params = AdapterTestParam>
@@ -126,6 +130,19 @@ class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPer
         DAWN_TEST_UNSUPPORTED_IF(properties.adapterType == wgpu::AdapterType::CPU);
     }
     ~DawnPerfTestWithParams() override = default;
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {wgpu::FeatureName::TimestampQuery};
+        mSupportsTimestampQuery = DawnTestWithParams<Params>::SupportsFeatures(requiredFeatures);
+        if (mSupportsTimestampQuery) {
+            return requiredFeatures;
+        }
+        return {};
+    }
+    bool SupportsTimestampQuery() const { return mSupportsTimestampQuery; }
+
+  private:
+    bool mSupportsTimestampQuery = false;
 };
 
 using DawnPerfTest = DawnPerfTestWithParams<>;

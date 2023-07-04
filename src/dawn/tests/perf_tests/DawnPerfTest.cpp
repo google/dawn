@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <fstream>
 #include <limits>
-#include <vector>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
@@ -350,6 +349,9 @@ void DawnPerfTestBase::OutputResults() {
 
     PrintPerIterationResultFromSeconds("wall_time", mTimer->GetElapsedTime(), true);
     PrintPerIterationResultFromSeconds("cpu_time", mCpuTime, true);
+    if (mGPUTime.has_value()) {
+        PrintPerIterationResultFromSeconds("gpu_time", *mGPUTime, true);
+    }
     PrintPerIterationResultFromSeconds("validation_time", totalValidationTime, true);
     PrintPerIterationResultFromSeconds("recording_time", totalRecordingTime, true);
 
@@ -357,6 +359,10 @@ void DawnPerfTestBase::OutputResults() {
     if (traceFile != nullptr) {
         DumpTraceEventsToJSONFile(traceEventBuffer, traceFile);
     }
+}
+
+void DawnPerfTestBase::SetGPUTime(double GPUTime) {
+    mGPUTime = GPUTime;
 }
 
 void DawnPerfTestBase::PrintPerIterationResultFromSeconds(const std::string& trace,
