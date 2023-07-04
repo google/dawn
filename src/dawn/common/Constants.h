@@ -29,6 +29,7 @@ static constexpr uint32_t kMaxBindGroupsPlusVertexBuffers = 24u;
 static constexpr uint32_t kNumStages = 3;
 static constexpr uint8_t kMaxColorAttachments = 8u;
 static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
+static constexpr uint32_t kQueryResolveAlignment = 256u;
 static constexpr uint32_t kMaxInterStageShaderComponents = 60u;
 static constexpr uint32_t kMaxInterStageShaderVariables = 16u;
 static constexpr uint64_t kAssumedMaxBufferSize =

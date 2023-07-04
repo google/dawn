@@ -139,7 +139,7 @@ class QueryInternalShaderTests : public DawnTest {
                  uint32_t queryCount,
                  uint32_t destinationOffset,
                  float period) {
-        ASSERT(destinationOffset % 256 == 0);
+        ASSERT(destinationOffset % kQueryResolveAlignment == 0);
 
         uint64_t size = queryCount * sizeof(uint64_t) + destinationOffset;
 
@@ -221,11 +221,11 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
 
         // Convert timestamps in timestamps buffer with offset 256
         // Test for ResolveQuerySet(querySet, 1, kQueryCount - 1, timestampsBuffer, 256)
-        RunTest(1, kQueryCount - 1, 256, period);
+        RunTest(1, kQueryCount - 1, kQueryResolveAlignment, period);
 
         // Convert partial timestamps in timestamps buffer with offset 256
         // Test for ResolveQuerySet(querySet, 1, 4, timestampsBuffer, 256)
-        RunTest(1, 4, 256, period);
+        RunTest(1, 4, kQueryResolveAlignment, period);
     }
 }
 

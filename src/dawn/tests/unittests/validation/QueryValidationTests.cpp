@@ -843,7 +843,7 @@ TEST_F(ResolveQuerySetValidationTest, ResolveInvalidQuerySetAndIndexCount) {
 TEST_F(ResolveQuerySetValidationTest, ResolveToInvalidBufferAndOffset) {
     constexpr uint32_t kQueryCount = 4;
     constexpr uint64_t kBufferSize =
-        (kQueryCount - 1) * sizeof(uint64_t) + 256 /*destinationOffset*/;
+        (kQueryCount - 1) * sizeof(uint64_t) + kQueryResolveAlignment /*destinationOffset*/;
 
     wgpu::QuerySet querySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, kQueryCount);
     wgpu::Buffer destination = CreateBuffer(device, kBufferSize, wgpu::BufferUsage::QueryResolve);
@@ -851,7 +851,7 @@ TEST_F(ResolveQuerySetValidationTest, ResolveToInvalidBufferAndOffset) {
     // Success
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.ResolveQuerySet(querySet, 1, kQueryCount - 1, destination, 256);
+        encoder.ResolveQuerySet(querySet, 1, kQueryCount - 1, destination, kQueryResolveAlignment);
         wgpu::CommandBuffer commands = encoder.Finish();
 
         wgpu::Queue queue = device.GetQueue();
@@ -871,14 +871,14 @@ TEST_F(ResolveQuerySetValidationTest, ResolveToInvalidBufferAndOffset) {
     //  Fail to resolve query set to a buffer if offset is not a multiple of 256 bytes
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 128);
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, kQueryResolveAlignment / 2);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     //  Fail to resolve query set to a buffer if the data size overflow the buffer
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 256);
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, kQueryResolveAlignment);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 

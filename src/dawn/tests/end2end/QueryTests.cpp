@@ -25,7 +25,7 @@ namespace {
 constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
 constexpr static uint64_t kZero = 0u;
 constexpr static unsigned int kRTSize = 4;
-constexpr uint64_t kMinDestinationOffset = 256;
+constexpr uint64_t kMinDestinationOffset = kQueryResolveAlignment;
 constexpr uint64_t kMinCount = kMinDestinationOffset / sizeof(uint64_t);
 constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
 constexpr wgpu::TextureFormat kDepthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;

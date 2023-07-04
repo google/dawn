@@ -654,9 +654,9 @@ MaybeError ValidateQuerySetResolve(const QuerySetBase* querySet,
         "(%u) in %s.",
         firstQuery, queryCount, querySet->GetQueryCount(), querySet);
 
-    DAWN_INVALID_IF(destinationOffset % 256 != 0,
-                    "The destination buffer %s offset (%u) is not a multiple of 256.", destination,
-                    destinationOffset);
+    DAWN_INVALID_IF(destinationOffset % kQueryResolveAlignment != 0,
+                    "The destination buffer %s offset (%u) is not a multiple of %u.", destination,
+                    destinationOffset, kQueryResolveAlignment);
 
     uint64_t bufferSize = destination->GetSize();
     // The destination buffer must have enough storage, from destination offset, to contain
