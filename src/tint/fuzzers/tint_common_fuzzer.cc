@@ -236,7 +236,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     {
         // Run SubstituteOverride if required
         auto out = ApplySubstituteOverrides(std::move(program));
-        if (!validate_program(out)) {
+        if (!out.IsValid()) {
             return 0;
         }
     }

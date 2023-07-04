@@ -49,6 +49,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     }
 
     program = tint::fuzzers::ApplySubstituteOverrides(std::move(program));
+    if (!program.IsValid()) {
+        return 0;
+    }
 
     tint::inspector::Inspector inspector(&program);
     auto entry_points = inspector.GetEntryPoints();
