@@ -578,11 +578,7 @@ MaybeError CommandBuffer::Execute() {
                 const GLFormat& format = texture->GetGLFormat();
                 GLenum target = texture->GetGLTarget();
 
-                // For SNORM texture formats, Dawn translates CopyTextureToBuffer command to a
-                // compute shader pass.
-                if (formatInfo.isCompressed ||
-                    (formatInfo.IsSnorm() &&
-                     GetDevice()->IsToggleEnabled(Toggle::DisableSnormRead))) {
+                if (formatInfo.isCompressed) {
                     UNREACHABLE();
                 }
 

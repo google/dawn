@@ -176,7 +176,8 @@ BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
         if (device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy) ||
-            device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy)) {
+            device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy)) {
             mUsage |= kInternalStorageBuffer;
         }
     }

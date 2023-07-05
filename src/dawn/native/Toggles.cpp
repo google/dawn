@@ -132,10 +132,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"disable_indexed_draw_buffers",
       "Disables the use of indexed draw buffer state which is unsupported on some platforms.",
       "https://crbug.com/dawn/582", ToggleStage::Device}},
-    {Toggle::DisableSnormRead,
-     {"disable_snorm_read",
-      "Disables reading from Snorm textures which is unsupported on some platforms.",
-      "https://crbug.com/dawn/667", ToggleStage::Device}},
     {Toggle::DisableDepthRead,
      {"disable_depth_read",
       "Disables reading from depth textures which is unsupported on some platforms.",
@@ -148,10 +144,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"disable_depth_stencil_read",
       "Disables reading from depth/stencil textures which is unsupported on some platforms.",
       "https://crbug.com/dawn/667", ToggleStage::Device}},
-    {Toggle::DisableBGRARead,
-     {"disable_bgra_read",
-      "Disables reading from BGRA textures which is unsupported on some platforms.",
-      "https://crbug.com/dawn/1393", ToggleStage::Device}},
     {Toggle::DisableSampleVariables,
      {"disable_sample_variables",
       "Disables gl_SampleMask and related functionality which is unsupported on some platforms.",
@@ -406,6 +398,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a blit instead of a copy command to copy snorm texture to a buffer."
       "Workaround for OpenGLES.",
       "https://crbug.com/dawn/1781", ToggleStage::Device}},
+    {Toggle::UseBlitForBGRA8UnormTextureToBufferCopy,
+     {"use_blit_for_snorm_texture_to_buffer_copy",
+      "Use a blit instead of a copy command to copy bgra8unorm texture to a buffer."
+      "Workaround for OpenGLES.",
+      "https://crbug.com/dawn/1393", ToggleStage::Device}},
     {Toggle::D3D12ReplaceAddWithMinusWhenDstFactorIsZeroAndSrcFactorIsDstAlpha,
      {"d3d12_replace_add_with_minus_when_dst_factor_is_zero_and_src_factor_is_dst_alpha",
       "Replace the blending operation 'Add' with 'Minus' when dstBlendFactor is 'Zero' and "

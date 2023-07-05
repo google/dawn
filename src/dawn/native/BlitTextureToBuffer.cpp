@@ -60,7 +60,7 @@ struct ConcatStringViewsImpl {
 template <std::string_view const&... Strs>
 static constexpr auto ConcatStringViews = ConcatStringViewsImpl<Strs...>::value;
 
-constexpr std::string_view kSnormTexture1D = R"(
+constexpr std::string_view kFloatTexture1D = R"(
 fn textureLoadGeneral(tex: texture_1d<f32>, coords: vec3u, level: u32) -> vec4<f32> {
     return textureLoad(tex, coords.x, level);
 }
@@ -68,7 +68,7 @@ fn textureLoadGeneral(tex: texture_1d<f32>, coords: vec3u, level: u32) -> vec4<f
 @group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
-constexpr std::string_view kSnormTexture2D = R"(
+constexpr std::string_view kFloatTexture2D = R"(
 fn textureLoadGeneral(tex: texture_2d_array<f32>, coords: vec3u, level: u32) -> vec4<f32> {
     return textureLoad(tex, coords.xy, coords.z, level);
 }
@@ -76,7 +76,7 @@ fn textureLoadGeneral(tex: texture_2d_array<f32>, coords: vec3u, level: u32) -> 
 @group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
-constexpr std::string_view kSnormTexture3D = R"(
+constexpr std::string_view kFloatTexture3D = R"(
 fn textureLoadGeneral(tex: texture_3d<f32>, coords: vec3u, level: u32) -> vec4<f32> {
     return textureLoad(tex, coords, level);
 }
@@ -273,31 +273,49 @@ constexpr std::string_view kPackRGBA8SnormToU32 = R"(
     let result: u32 = pack4x8snorm(v);
 )";
 
+constexpr std::string_view kPackBGRA8UnormToU32 = R"(
+    // Storing and swizzling bgra8unorm texel values
+    // later called by pack4x8unorm to convert to u32.
+    var v: vec4<f32>;
+
+    let texel0 = textureLoadGeneral(src_tex, coord0, 0);
+    v = texel0.bgra;
+
+    let result: u32 = pack4x8unorm(v);
+)";
+
 constexpr std::string_view kLoadDepth32Float = R"(
     dst_buf[dstOffset] = textureLoad(src_tex, coord0.xy, coord0.z, 0);
 }
 )";
 
 constexpr std::string_view kBlitR8Snorm1D =
-    ConcatStringViews<kSnormTexture1D, kCommon, kPackR8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture1D, kCommon, kPackR8SnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitRG8Snorm1D =
-    ConcatStringViews<kSnormTexture1D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture1D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitRGBA8Snorm1D =
-    ConcatStringViews<kSnormTexture1D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture1D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
 
 constexpr std::string_view kBlitR8Snorm2D =
-    ConcatStringViews<kSnormTexture2D, kCommon, kPackR8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture2D, kCommon, kPackR8SnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitRG8Snorm2D =
-    ConcatStringViews<kSnormTexture2D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture2D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitRGBA8Snorm2D =
-    ConcatStringViews<kSnormTexture2D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture2D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
 
 constexpr std::string_view kBlitR8Snorm3D =
-    ConcatStringViews<kSnormTexture3D, kCommon, kPackR8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture3D, kCommon, kPackR8SnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitRG8Snorm3D =
-    ConcatStringViews<kSnormTexture3D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture3D, kCommon, kPackRG8SnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitRGBA8Snorm3D =
-    ConcatStringViews<kSnormTexture3D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
+    ConcatStringViews<kFloatTexture3D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
+
+constexpr std::string_view kBlitBGRA8Unorm1D =
+    ConcatStringViews<kFloatTexture1D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitBGRA8Unorm2D =
+    ConcatStringViews<kFloatTexture2D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitBGRA8Unorm3D =
+    ConcatStringViews<kFloatTexture3D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
 
 constexpr std::string_view kBlitStencil8 =
     ConcatStringViews<kStencilTexture, kCommon, kPackStencil8ToU32, kCommonEnd>;
@@ -363,6 +381,20 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
                     break;
                 case wgpu::TextureDimension::e3D:
                     wgslDesc.code = kBlitRGBA8Snorm3D.data();
+                    break;
+            }
+            textureSampleType = wgpu::TextureSampleType::Float;
+            break;
+        case wgpu::TextureFormat::BGRA8Unorm:
+            switch (dimension) {
+                case wgpu::TextureDimension::e1D:
+                    wgslDesc.code = kBlitBGRA8Unorm1D.data();
+                    break;
+                case wgpu::TextureDimension::e2D:
+                    wgslDesc.code = kBlitBGRA8Unorm2D.data();
+                    break;
+                case wgpu::TextureDimension::e3D:
+                    wgslDesc.code = kBlitBGRA8Unorm3D.data();
                     break;
             }
             textureSampleType = wgpu::TextureSampleType::Float;

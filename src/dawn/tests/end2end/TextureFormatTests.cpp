@@ -557,8 +557,6 @@ TEST_P(TextureFormatTest, RGBA8Unorm) {
 
 // Test the BGRA8Unorm format
 TEST_P(TextureFormatTest, BGRA8Unorm) {
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_bgra_read"));
-
     // Intel's implementation of BGRA on ES is broken: it claims to support
     // GL_EXT_texture_format_BGRA8888, but won't accept GL_BGRA or GL_BGRA8_EXT as internalFormat.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGLES() && IsLinux());

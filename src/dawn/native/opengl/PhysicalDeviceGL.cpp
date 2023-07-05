@@ -279,11 +279,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(Toggle::DisableBaseVertex, !supportsBaseVertex);
     deviceToggles->Default(Toggle::DisableBaseInstance, !supportsBaseInstance);
     deviceToggles->Default(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
-    deviceToggles->Default(Toggle::DisableSnormRead, !supportsSnormRead);
     deviceToggles->Default(Toggle::DisableDepthRead, !supportsDepthRead);
     deviceToggles->Default(Toggle::DisableStencilRead, !supportsStencilRead);
     deviceToggles->Default(Toggle::DisableDepthStencilRead, !supportsDepthStencilRead);
-    deviceToggles->Default(Toggle::DisableBGRARead, !supportsBGRARead);
     deviceToggles->Default(Toggle::DisableSampleVariables, !supportsSampleVariables);
     deviceToggles->Default(Toggle::FlushBeforeClientWaitSync, gl.GetVersion().IsES());
     // For OpenGL ES, we must use a placeholder fragment shader for vertex-only render pipeline.
@@ -303,6 +301,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     // For OpenGL ES, use compute shader blit to emulate snorm texture to buffer copies.
     deviceToggles->Default(Toggle::UseBlitForSnormTextureToBufferCopy,
                            gl.GetVersion().IsES() || !supportsSnormRead);
+
+    // For OpenGL ES, use compute shader blit to emulate bgra8unorm texture to buffer copies.
+    deviceToggles->Default(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy, !supportsBGRARead);
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,
