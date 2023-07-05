@@ -56,9 +56,9 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
     // or without locking.
     void DestroyInternal();
 
-  protected:
     [[nodiscard]] Mutex::AutoLock GetScopedDeviceLock() const;
 
+  protected:
     Ref<DeviceBase> mBackendDevice;
     ComPtr<IUnknown> mD3DResource;
     wgpu::TextureUsage mUsage;

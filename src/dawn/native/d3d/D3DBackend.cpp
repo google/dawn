@@ -53,19 +53,25 @@ ExternalImageDXGI::ExternalImageDXGI(std::unique_ptr<ExternalImageDXGIImpl> impl
     ASSERT(mImpl != nullptr);
 }
 
-ExternalImageDXGI::~ExternalImageDXGI() = default;
+ExternalImageDXGI::~ExternalImageDXGI() {
+    auto deviceLock = mImpl->GetScopedDeviceLock();
+    mImpl = nullptr;
+}
 
 bool ExternalImageDXGI::IsValid() const {
+    auto deviceLock = mImpl->GetScopedDeviceLock();
     return mImpl->IsValid();
 }
 
 WGPUTexture ExternalImageDXGI::BeginAccess(
     const ExternalImageDXGIBeginAccessDescriptor* descriptor) {
+    auto deviceLock = mImpl->GetScopedDeviceLock();
     return mImpl->BeginAccess(descriptor);
 }
 
 void ExternalImageDXGI::EndAccess(WGPUTexture texture,
                                   ExternalImageDXGIFenceDescriptor* signalFence) {
+    auto deviceLock = mImpl->GetScopedDeviceLock();
     mImpl->EndAccess(texture, signalFence);
 }
 
@@ -74,7 +80,8 @@ std::unique_ptr<ExternalImageDXGI> ExternalImageDXGI::Create(
     WGPUDevice device,
     const ExternalImageDescriptor* descriptor) {
     Device* backendDevice = ToBackend(FromAPI(device));
-    auto deviceLock(backendDevice->GetScopedLock());
+    auto deviceLock = backendDevice->GetScopedLock();
+
     std::unique_ptr<ExternalImageDXGIImpl> impl =
         backendDevice->CreateExternalImageDXGIImpl(descriptor);
     if (!impl) {

@@ -57,6 +57,7 @@ ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
       mSampleCount(textureDescriptor->sampleCount),
       mViewFormats(textureDescriptor->viewFormats,
                    textureDescriptor->viewFormats + textureDescriptor->viewFormatCount) {
+    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     ASSERT(mBackendDevice != nullptr);
     ASSERT(!textureDescriptor->nextInChain || textureDescriptor->nextInChain->sType ==
                                                   wgpu::SType::DawnTextureInternalUsageDescriptor);
@@ -68,31 +69,25 @@ ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
 }
 
 ExternalImageDXGIImpl::~ExternalImageDXGIImpl() {
-    auto deviceLock(GetScopedDeviceLock());
+    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     DestroyInternal();
 }
 
 Mutex::AutoLock ExternalImageDXGIImpl::GetScopedDeviceLock() const {
-    if (mBackendDevice != nullptr) {
-        return mBackendDevice->GetScopedLock();
-    }
-    return Mutex::AutoLock();
+    return mBackendDevice->GetScopedLock();
 }
 
 bool ExternalImageDXGIImpl::IsValid() const {
-    auto deviceLock(GetScopedDeviceLock());
-
+    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     return IsInList();
 }
 
 void ExternalImageDXGIImpl::DestroyInternal() {
+    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     if (IsInList()) {
         mD3DResource = nullptr;
     }
 
-    // Linked list is not thread safe. A mutex must already be locked before
-    // endtering this method. Either via Device::DestroyImpl() or ~ExternalImageDXGIImpl.
-    ASSERT(mBackendDevice == nullptr || mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     if (IsInList()) {
         RemoveFromList();
     }
@@ -100,9 +95,8 @@ void ExternalImageDXGIImpl::DestroyInternal() {
 
 WGPUTexture ExternalImageDXGIImpl::BeginAccess(
     const d3d::ExternalImageDXGIBeginAccessDescriptor* descriptor) {
+    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     ASSERT(descriptor != nullptr);
-
-    auto deviceLock(GetScopedDeviceLock());
 
     if (!IsInList()) {
         dawn::ErrorLog() << "Cannot use external image after device destruction";
@@ -161,7 +155,7 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
 
 void ExternalImageDXGIImpl::EndAccess(WGPUTexture texture,
                                       d3d::ExternalImageDXGIFenceDescriptor* signalFence) {
-    auto deviceLock(GetScopedDeviceLock());
+    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
 
     if (!IsInList()) {
         dawn::ErrorLog() << "Cannot use external image after device destruction";
