@@ -51,15 +51,15 @@ class RandomGeneratorTest : public testing::Test {
 
 #ifndef NDEBUG
 TEST_F(RandomGeneratorTest, GetUInt32ReversedBoundsCrashes) {
-    EXPECT_DEATH(rng_->GetUInt32(10, 5), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetUInt32(10, 5), ".*");
 }
 
 TEST_F(RandomGeneratorTest, GetUInt32EmptyBoundsCrashes) {
-    EXPECT_DEATH(rng_->GetUInt32(5, 5), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetUInt32(5, 5), ".*");
 }
 
 TEST_F(RandomGeneratorTest, GetUInt32ZeroBoundCrashes) {
-    EXPECT_DEATH(rng_->GetUInt32(0u), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetUInt32(0u), ".*");
 }
 #endif  // NDEBUG
 
@@ -89,15 +89,15 @@ TEST_F(RandomGeneratorTest, GetUInt32StaysInBounds) {
 
 #ifndef NDEBUG
 TEST_F(RandomGeneratorTest, GetUInt64ReversedBoundsCrashes) {
-    EXPECT_DEATH(rng_->GetUInt64(10, 5), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetUInt64(10, 5), ".*");
 }
 
 TEST_F(RandomGeneratorTest, GetUInt64EmptyBoundsCrashes) {
-    EXPECT_DEATH(rng_->GetUInt64(5, 5), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetUInt64(5, 5), ".*");
 }
 
 TEST_F(RandomGeneratorTest, GetUInt64ZeroBoundCrashes) {
-    EXPECT_DEATH(rng_->GetUInt64(0u), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetUInt64(0u), ".*");
 }
 #endif  // NDEBUG
 
@@ -131,7 +131,7 @@ TEST_F(RandomGeneratorTest, GetByte) {
 
 #ifndef NDEBUG
 TEST_F(RandomGeneratorTest, GetNBytesNullDataBufferCrashes) {
-    EXPECT_DEATH(rng_->GetNBytes(nullptr, 5), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetNBytes(nullptr, 5), ".*");
 }
 #endif  // NDEBUG
 
@@ -157,8 +157,8 @@ TEST_F(RandomGeneratorTest, GetWeightedBoolHundredAlwaysTrue) {
 
 #ifndef NDEBUG
 TEST_F(RandomGeneratorTest, GetWeightedBoolAboveHundredCrashes) {
-    EXPECT_DEATH(rng_->GetWeightedBool(101), ".*");
-    EXPECT_DEATH(rng_->GetWeightedBool(500), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetWeightedBool(101), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetWeightedBool(500), ".*");
 }
 #endif  // NDEBUG
 
@@ -178,7 +178,7 @@ TEST_F(RandomGeneratorTest, GetWeightedBool) {
 #ifndef NDEBUG
 TEST_F(RandomGeneratorTest, GetRandomElementEmptyVectorCrashes) {
     std::vector<uint8_t> v;
-    EXPECT_DEATH(rng_->GetRandomElement(v), ".*");
+    EXPECT_DEATH_IF_SUPPORTED(rng_->GetRandomElement(v), ".*");
 }
 #endif  // NDEBUG
 

@@ -67,7 +67,7 @@ config("internal") {
 
 # Config that adds the @executable_path rpath if needed so that Swiftshader or the Vulkan loader are found.
 config("vulkan_rpath") {
-  if (is_mac && dawn_enable_vulkan &&
+  if (is_apple && dawn_enable_vulkan &&
       (use_swiftshader || enable_vulkan_loader)) {
     ldflags = [
       "-rpath",
@@ -569,12 +569,10 @@ source_set("sources") {
       "IOKit.framework",
       "IOSurface.framework",
       "Metal.framework",
+      "QuartzCore.framework",
     ]
     if (is_mac) {
-      frameworks += [
-        "QuartzCore.framework",
-        "Cocoa.framework",
-      ]
+      frameworks += [ "Cocoa.framework" ]
     }
     sources += [
       "Surface_metal.mm",

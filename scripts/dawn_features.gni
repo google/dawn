@@ -80,9 +80,8 @@ declare_args() {
 
   # Enables the compilation of Dawn's Vulkan backend
   # Disables vulkan when compiling for UWP, since UWP only supports d3d
-  dawn_enable_vulkan =
-      (is_linux || is_chromeos || (is_win && !dawn_is_winuwp) || is_fuchsia ||
-       is_android || dawn_use_swiftshader) && !is_ios
+  dawn_enable_vulkan = is_linux || is_chromeos || (is_win && !dawn_is_winuwp) ||
+                       is_fuchsia || is_android || dawn_use_swiftshader
 
   # Enables error injection for faking failures to native API calls
   dawn_enable_error_injection =

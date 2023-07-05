@@ -816,7 +816,7 @@ static void ToMockBufferMapCallbackWithAssertErrorRequest(WGPUBufferMapAsyncStat
     WGPUBuffer* buffer = reinterpret_cast<WGPUBuffer*>(userdata);
 
     mockBufferMapCallback->Call(status, buffer);
-    ASSERT_DEATH(
+    ASSERT_DEATH_IF_SUPPORTED(
         {
             // This map async should cause assertion error because of
             // refcount == 0.

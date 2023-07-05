@@ -71,14 +71,14 @@ using MutexDeathTest = MutexTest;
 
 // Test that Unlock() call on unlocked mutex will cause assertion failure.
 TEST_F(MutexDeathTest, UnlockWhenNotLocked) {
-    ASSERT_DEATH({ mMutex.Unlock(); }, "");
+    ASSERT_DEATH_IF_SUPPORTED({ mMutex.Unlock(); }, "");
 }
 
 // Double Lock() calls should be cause assertion failure
 TEST_F(MutexDeathTest, DoubleLockCalls) {
     mMutex.Lock();
     EXPECT_TRUE(mMutex.IsLockedByCurrentThread());
-    ASSERT_DEATH({ mMutex.Lock(); }, "");
+    ASSERT_DEATH_IF_SUPPORTED({ mMutex.Lock(); }, "");
     mMutex.Unlock();
 }
 
@@ -86,7 +86,7 @@ TEST_F(MutexDeathTest, DoubleLockCalls) {
 TEST_F(MutexDeathTest, LockThenAutoLock) {
     mMutex.Lock();
     EXPECT_TRUE(mMutex.IsLockedByCurrentThread());
-    ASSERT_DEATH({ Mutex::AutoLock autoLock(&mMutex); }, "");
+    ASSERT_DEATH_IF_SUPPORTED({ Mutex::AutoLock autoLock(&mMutex); }, "");
     mMutex.Unlock();
 }
 
@@ -94,7 +94,7 @@ TEST_F(MutexDeathTest, LockThenAutoLock) {
 TEST_F(MutexDeathTest, AutoLockThenLock) {
     Mutex::AutoLock autoLock(&mMutex);
     EXPECT_TRUE(mMutex.IsLockedByCurrentThread());
-    ASSERT_DEATH({ mMutex.Lock(); }, "");
+    ASSERT_DEATH_IF_SUPPORTED({ mMutex.Lock(); }, "");
 }
 
 }  // anonymous namespace
