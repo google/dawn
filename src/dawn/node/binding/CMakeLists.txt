@@ -69,6 +69,8 @@ add_library(dawn_node_binding STATIC
     "GPUTexture.h"
     "GPUTextureView.cpp"
     "GPUTextureView.h"
+    "Split.cpp"
+    "Split.h"
 )
 common_compile_options(dawn_node_binding)
 

@@ -25,37 +25,7 @@
 #include "src/dawn/node/binding/GPUDevice.h"
 #include "src/dawn/node/binding/GPUSupportedFeatures.h"
 #include "src/dawn/node/binding/GPUSupportedLimits.h"
-
-namespace {
-// TODO(amaiorano): Move to utility header
-std::vector<std::string> Split(const std::string& s, char delim) {
-    if (s.empty()) {
-        return {};
-    }
-
-    std::vector<std::string> result;
-    const size_t lastIndex = s.length() - 1;
-    size_t startIndex = 0;
-    size_t i = startIndex;
-
-    while (i <= lastIndex) {
-        if (s[i] == delim) {
-            auto token = s.substr(startIndex, i - startIndex);
-            if (!token.empty()) {  // Discard empty tokens
-                result.push_back(token);
-            }
-            startIndex = i + 1;
-        } else if (i == lastIndex) {
-            auto token = s.substr(startIndex, i - startIndex + 1);
-            if (!token.empty()) {  // Discard empty tokens
-                result.push_back(token);
-            }
-        }
-        ++i;
-    }
-    return result;
-}
-}  // namespace
+#include "src/dawn/node/binding/Split.h"
 
 #define FOR_EACH_LIMIT(X)                        \
     X(maxTextureDimension1D)                     \
