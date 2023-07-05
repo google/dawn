@@ -144,7 +144,7 @@ void PlatformFunctions::LoadDXCLibraries() {
 void PlatformFunctions::LoadDXIL(const std::string& baseWindowsSDKPath) {
     constexpr char kDxilDLLName[] = "dxil.dll";
     const std::array kDxilDLLPaths{
-#ifdef DAWN_BUILD_DXC
+#ifdef DAWN_USE_BUILT_DXC
         std::string{kDxilDLLName},
 #else
         std::string{kDxilDLLName},
@@ -168,7 +168,7 @@ void PlatformFunctions::LoadDXCompiler(const std::string& baseWindowsSDKPath) {
 
     constexpr char kDxCompilerDLLName[] = "dxcompiler.dll";
     const std::array kDxCompilerDLLPaths{
-#ifdef DAWN_BUILD_DXC
+#ifdef DAWN_USE_BUILT_DXC
         std::string{kDxCompilerDLLName},
 #else
         std::string{kDxCompilerDLLName}, baseWindowsSDKPath + kDxCompilerDLLName

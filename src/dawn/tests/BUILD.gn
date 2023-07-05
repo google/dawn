@@ -123,7 +123,7 @@ if (build_with_chromium) {
 # Windows SDK into build folder, in order to ensure a DXC of verison 1.6 is
 # avaliable when running end-to-end tests in Chromium. Note that currently DXC
 # only provided for x86 and x64 in Windows SDK 20348.
-if (!dawn_build_dxc && build_with_chromium && is_win &&
+if (!dawn_use_built_dxc && build_with_chromium && is_win &&
     (target_cpu == "x64" || target_cpu == "x86")) {
   # The windows_sdk_path is acquired in visual_studio_version.gni.
   import("//build/config/win/visual_studio_version.gni")
@@ -165,7 +165,7 @@ template("dawn_test") {
     # binary from Windows SDK.
     if (build_with_chromium && is_win &&
         (target_cpu == "x64" || target_cpu == "x86")) {
-      if (dawn_build_dxc) {
+      if (dawn_use_built_dxc) {
         if (!defined(deps)) {
           deps = []
         }

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
+import("dawn_overrides_with_defaults.gni")
 
 if (build_with_chromium) {
   import("//build/config/ozone.gni")
@@ -44,6 +45,13 @@ declare_args() {
   # to be set to take effect.
   # TODO(dawn:1536): Enable SwiftShader for Android.
   dawn_use_swiftshader = !is_android && !is_ios
+
+  # Whether we allow building DXC.
+  # Only use DXC in standalone builds until it is stable. It will be
+  # explicitly enabled in Chromium builds.
+  # DXC requires SM6.0+ which is blocklisted on x86.
+  # See crbug.com/tint/1753.
+  dawn_use_built_dxc = dawn_standalone && is_win && target_cpu != "x86"
 }
 
 declare_args() {

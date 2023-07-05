@@ -28,10 +28,6 @@ if (!defined(dawn_has_build)) {
   dawn_has_build = true
 }
 
-if (!defined(dawn_build_dxc)) {
-  dawn_build_dxc = false
-}
-
 if (!defined(dawn_root)) {
   dawn_root = get_path_info("..", "abspath")
 }

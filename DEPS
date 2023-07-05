@@ -21,7 +21,6 @@ vars = {
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:2@1.11.1.chromium.6',
   'dawn_go_version': 'version:2@1.18.4',
-  'dawn_build_dxc': True,
 
   'node_darwin_arm64_sha': '31859fc1fa0994a95f44f09c367d6ff63607cfde',
   'node_darwin_x64_sha': '16dfd094763b71988933a31735f9dea966f9abd6',
@@ -163,12 +162,11 @@ deps = {
 
   'third_party/dxc': {
     'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@5e080a772910f147cc447fc34e8eb489f0761144',
-    'condition': 'dawn_build_dxc',
   },
   'third_party/dxheaders': {
     # The non-Windows build of DXC depends on DirectX-Headers, and at a specific commit (not ToT)
     'url': '{chromium_git}/external/github.com/microsoft/DirectX-Headers@980971e835876dc0cde415e8f9bc646e64667bf7',
-    'condition': 'dawn_build_dxc and host_os != "win"',
+    'condition': 'host_os != "win"',
   },
 
   # WebGPU CTS - not used directly by Dawn, only transitively by Chromium.

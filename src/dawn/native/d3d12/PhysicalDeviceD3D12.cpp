@@ -459,7 +459,7 @@ void PhysicalDevice::CleanUpDebugLayerFilters() {
 
 void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adapterToggles) const {
     // Check for use_dxc toggle
-#ifdef DAWN_BUILD_DXC
+#ifdef DAWN_USE_BUILT_DXC
     // Default to using DXC. If shader model < 6.0, though, we must use FXC.
     if (GetDeviceInfo().shaderModel <= 60) {
         adapterToggles->ForceSet(Toggle::UseDXC, false);
