@@ -8,20 +8,14 @@ cbuffer cbuffer_x_46 : register(b3) {
 
 float binaryOperation_f1_f1_(inout float a, inout float b) {
   float x_26 = 0.0f;
-  const float x_13 = b;
-  if ((x_13 == 0.0f)) {
+  if ((b == 0.0f)) {
     return 1.0f;
   }
   const float x_21 = b;
   if (!((round((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
-    const float x_29 = a;
-    const float x_31 = b;
-    x_26 = pow(abs(x_29), x_31);
+    x_26 = pow(abs(a), b);
   } else {
-    const float x_34 = a;
-    const float x_36 = a;
-    const float x_38 = b;
-    x_26 = (float(sign(x_34)) * pow(abs(x_36), x_38));
+    x_26 = (float(sign(a)) * pow(abs(a), b));
   }
   const float x_41 = x_26;
   return x_41;
@@ -32,8 +26,7 @@ void main_1() {
   int a_1 = 0;
   float param = 0.0f;
   float param_1 = 0.0f;
-  const uint x_54 = gl_GlobalInvocationID.x;
-  index = asint(x_54);
+  index = asint(gl_GlobalInvocationID.x);
   a_1 = -10;
   const int x_63 = index;
   param = -4.0f;

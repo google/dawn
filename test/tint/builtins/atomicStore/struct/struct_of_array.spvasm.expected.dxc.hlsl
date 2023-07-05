@@ -13,16 +13,14 @@ void compute_main_inner(uint local_invocation_index_2) {
   wg.y = 0u;
   idx = local_invocation_index_2;
   while (true) {
-    const uint x_30 = idx;
-    if (!((x_30 < 10u))) {
+    if (!((idx < 10u))) {
       break;
     }
     const uint x_35 = idx;
     uint atomic_result = 0u;
     InterlockedExchange(wg.a[x_35], 0u, atomic_result);
     {
-      const uint x_41 = idx;
-      idx = (x_41 + 1u);
+      idx = (idx + 1u);
     }
   }
   GroupMemoryBarrierWithGroupSync();

@@ -5,8 +5,7 @@ struct S {
 fn main_1() {
   var i : i32;
   var V : S;
-  let x_14 = V.i;
-  i = x_14;
+  i = V.i;
   return;
 }
 

@@ -7,14 +7,8 @@ void main_1() {
   float f = 0.0f;
   float4 v = float4(0.0f, 0.0f, 0.0f, 0.0f);
   f = 1.0f;
-  const float x_33 = f;
-  const float x_35 = f;
-  const float x_37 = f;
-  const float x_39 = f;
-  v = float4(sin(x_33), cos(x_35), exp2(x_37), log(x_39));
-  const float4 x_42 = v;
-  const float4 x_44 = asfloat(x_7[0]);
-  if ((distance(x_42, x_44) < 0.10000000149011611938f)) {
+  v = float4(sin(f), cos(f), exp2(f), log(f));
+  if ((distance(v, asfloat(x_7[0])) < 0.10000000149011611938f)) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = (0.0f).xxxx;

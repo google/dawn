@@ -13,8 +13,7 @@ void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
   idx = local_invocation_index_2;
   while (true) {
-    const uint x_25 = idx;
-    if (!((x_25 < 6u))) {
+    if (!((idx < 6u))) {
       break;
     }
     const uint x_31 = idx;
@@ -23,8 +22,7 @@ void compute_main_inner(uint local_invocation_index_2) {
     uint atomic_result = 0u;
     InterlockedExchange(wg[tint_div(x_31, 2u)][tint_mod(x_33, 2u)][tint_mod(x_35, 1u)], 0u, atomic_result);
     {
-      const uint x_42 = idx;
-      idx = (x_42 + 1u);
+      idx = (idx + 1u);
     }
   }
   GroupMemoryBarrierWithGroupSync();

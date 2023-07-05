@@ -1,8 +1,7 @@
 #version 310 es
 
 void main_1() {
-  vec2 distance_1 = vec2(2.0f);
-  float x_10 = distance(distance_1, vec2(2.0f));
+  float x_10 = 0.0f;
   return;
 }
 

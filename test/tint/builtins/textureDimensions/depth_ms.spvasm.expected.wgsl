@@ -4,8 +4,7 @@ var<private> tint_symbol_1 = vec4f();
 
 fn textureDimensions_f60bdb() {
   var res = vec2i();
-  let x_16 = vec2i(textureDimensions(arg_0));
-  res = x_16;
+  res = vec2i(textureDimensions(arg_0));
   return;
 }
 

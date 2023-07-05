@@ -43,10 +43,10 @@
          %16 = OpImageFetch %v4uint %17 %20 Lod %21
                OpStore %srcValue %16
          %24 = OpAccessChain %_ptr_Function_uint %srcValue %uint_0
-         %25 = OpLoad %uint %24
-         %26 = OpAccessChain %_ptr_Function_uint %srcValue %uint_0
-         %28 = OpIAdd %uint %25 %uint_1
-               OpStore %26 %28
+         %25 = OpAccessChain %_ptr_Function_uint %srcValue %uint_0
+         %26 = OpLoad %uint %25
+         %28 = OpIAdd %uint %26 %uint_1
+               OpStore %24 %28
          %29 = OpLoad %v4uint %srcValue
          %31 = OpLoad %7 %Dst
                OpImageWrite %31 %20 %29

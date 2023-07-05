@@ -33,25 +33,13 @@ vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   vec4 q = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   vec3 p = vec3(0.0f, 0.0f, 0.0f);
-  vec3 x_13 = position_1;
-  q = vec4(x_13.x, x_13.y, x_13.z, 1.0f);
-  vec4 x_21 = q;
-  p = x_21.xyz;
-  float x_27 = p.x;
-  float x_41 = x_14.inner.test[0].el;
-  float x_45 = position_1.y;
-  float x_49 = x_14.inner.time;
-  p.x = (x_27 + sin(((x_41 * x_45) + x_49)));
-  float x_55 = p.y;
-  float x_57 = x_14.inner.time;
-  p.y = (x_55 + sin((x_57 + 4.0f)));
-  mat4 x_69 = x_14.inner.worldViewProjection;
-  vec3 x_70 = p;
-  tint_symbol = (x_69 * vec4(x_70.x, x_70.y, x_70.z, 1.0f));
-  vec2 x_83 = uv;
-  vUV = x_83;
-  float x_87 = tint_symbol.y;
-  tint_symbol.y = (x_87 * -1.0f);
+  q = vec4(position_1.x, position_1.y, position_1.z, 1.0f);
+  p = q.xyz;
+  p.x = (p.x + sin(((x_14.inner.test[0].el * position_1.y) + x_14.inner.time)));
+  p.y = (p.y + sin((x_14.inner.time + 4.0f)));
+  tint_symbol = (x_14.inner.worldViewProjection * vec4(p.x, p.y, p.z, 1.0f));
+  vUV = uv;
+  tint_symbol.y = (tint_symbol.y * -1.0f);
   return;
 }
 

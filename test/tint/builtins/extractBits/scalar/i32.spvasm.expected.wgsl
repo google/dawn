@@ -2,10 +2,7 @@ fn f_1() {
   var v = 0i;
   var offset_1 = 0u;
   var count = 0u;
-  let x_16 = v;
-  let x_17 = offset_1;
-  let x_18 = count;
-  let x_14 = extractBits(x_16, x_17, x_18);
+  let x_14 = extractBits(v, offset_1, count);
   return;
 }
 

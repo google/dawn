@@ -6,8 +6,7 @@ var<private> V : S;
 
 fn main_1() {
   var i : i32;
-  let x_15 = V.i;
-  i = x_15;
+  i = V.i;
   return;
 }
 

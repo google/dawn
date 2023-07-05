@@ -11,11 +11,7 @@ void f_1() {
   uvec3 n = uvec3(0u);
   uint offset_1 = 0u;
   uint count = 0u;
-  uvec3 x_17 = v;
-  uvec3 x_18 = n;
-  uint x_19 = offset_1;
-  uint x_20 = count;
-  uvec3 x_15 = tint_insert_bits(x_17, x_18, x_19, x_20);
+  uvec3 x_15 = tint_insert_bits(v, n, offset_1, count);
   return;
 }
 

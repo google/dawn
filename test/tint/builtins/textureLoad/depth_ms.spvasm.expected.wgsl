@@ -4,8 +4,7 @@ var<private> tint_symbol_1 = vec4f();
 
 fn textureLoad_6273b1() {
   var res = 0.0f;
-  let x_17 = vec4f(textureLoad(arg_0, vec2i(), 1i), 0.0f, 0.0f, 0.0f);
-  res = x_17.x;
+  res = vec4f(textureLoad(arg_0, vec2i(), 1i), 0.0f, 0.0f, 0.0f).x;
   return;
 }
 

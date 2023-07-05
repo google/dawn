@@ -47,10 +47,10 @@
                OpStore %v_0 %20
                OpStore %offset_1 %23
                OpStore %count_0 %23
-         %27 = OpLoad %v3uint %v_0
-         %28 = OpLoad %uint %offset_1
-         %29 = OpLoad %uint %count_0
-         %30 = OpFunctionCall %v3uint %tint_extract_bits %27 %28 %29
+         %28 = OpLoad %v3uint %v_0
+         %29 = OpLoad %uint %offset_1
+         %30 = OpLoad %uint %count_0
+         %27 = OpFunctionCall %v3uint %tint_extract_bits %28 %29 %30
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %16

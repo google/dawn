@@ -4,7 +4,7 @@
 ; Bound: 57
 ; Schema: 0
                OpCapability Shader
-         %27 = OpExtInstImport "GLSL.std.450"
+         %23 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main" %x_GLF_color_1_1
                OpExecutionMode %main OriginUpperLeft
@@ -60,21 +60,21 @@
           %f = OpVariable %_ptr_Function_float Function %18
           %v = OpVariable %_ptr_Function_v4float Function %5
                OpStore %f %float_1
-         %22 = OpLoad %float %f
-         %23 = OpLoad %float %f
          %24 = OpLoad %float %f
-         %25 = OpLoad %float %f
-         %26 = OpExtInst %float %27 Sin %22
-         %28 = OpExtInst %float %27 Cos %23
-         %29 = OpExtInst %float %27 Exp2 %24
-         %30 = OpExtInst %float %27 Log %25
-         %31 = OpCompositeConstruct %v4float %26 %28 %29 %30
+         %22 = OpExtInst %float %23 Sin %24
+         %26 = OpLoad %float %f
+         %25 = OpExtInst %float %23 Cos %26
+         %28 = OpLoad %float %f
+         %27 = OpExtInst %float %23 Exp2 %28
+         %30 = OpLoad %float %f
+         %29 = OpExtInst %float %23 Log %30
+         %31 = OpCompositeConstruct %v4float %22 %25 %27 %29
                OpStore %v %31
-         %32 = OpLoad %v4float %v
-         %36 = OpAccessChain %_ptr_Uniform_v4float %x_7 %uint_0 %uint_0
-         %37 = OpLoad %v4float %36
-         %38 = OpExtInst %float %27 Distance %32 %37
-         %40 = OpFOrdLessThan %bool %38 %float_0_100000001
+         %33 = OpLoad %v4float %v
+         %37 = OpAccessChain %_ptr_Uniform_v4float %x_7 %uint_0 %uint_0
+         %38 = OpLoad %v4float %37
+         %32 = OpExtInst %float %23 Distance %33 %38
+         %40 = OpFOrdLessThan %bool %32 %float_0_100000001
                OpSelectionMerge %42 None
                OpBranchConditional %40 %43 %44
          %43 = OpLabel

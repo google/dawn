@@ -5,8 +5,7 @@ void textureDimensions_f60bdb() {
   int2 res = (0).xx;
   uint3 tint_tmp;
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
-  const int2 x_16 = int2(tint_tmp.xy);
-  res = x_16;
+  res = int2(tint_tmp.xy);
   return;
 }
 

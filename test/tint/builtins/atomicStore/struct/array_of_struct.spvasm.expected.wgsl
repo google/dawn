@@ -26,8 +26,7 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
   var idx = 0u;
   idx = local_invocation_index_2;
   loop {
-    let x_23 = idx;
-    if (!((x_23 < 10u))) {
+    if (!((idx < 10u))) {
       break;
     }
     let x_28 = idx;
@@ -36,8 +35,7 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
     wg[x_28].y = 0u;
 
     continuing {
-      let x_41 = idx;
-      idx = (x_41 + 1u);
+      idx = (idx + 1u);
     }
   }
   workgroupBarrier();

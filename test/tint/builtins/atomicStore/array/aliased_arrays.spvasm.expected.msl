@@ -30,8 +30,7 @@ void compute_main_inner(uint local_invocation_index_2, threadgroup tint_array<ti
   uint idx = 0u;
   idx = local_invocation_index_2;
   while (true) {
-    uint const x_25 = idx;
-    if (!((x_25 < 6u))) {
+    if (!((idx < 6u))) {
       break;
     }
     uint const x_31 = idx;
@@ -39,8 +38,7 @@ void compute_main_inner(uint local_invocation_index_2, threadgroup tint_array<ti
     uint const x_35 = idx;
     atomic_store_explicit(&((*(tint_symbol))[tint_div(x_31, 2u)][tint_mod(x_33, 2u)][tint_mod(x_35, 1u)]), 0u, memory_order_relaxed);
     {
-      uint const x_42 = idx;
-      idx = (x_42 + 1u);
+      idx = (idx + 1u);
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

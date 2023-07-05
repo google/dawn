@@ -23,8 +23,7 @@ bool test_int_S1_c0_b() {
   bool x_55 = false;
   bool x_65 = false;
   bool x_66 = false;
-  const float x_26 = asfloat(x_4[1].x);
-  const int x_27 = tint_ftoi(x_26);
+  const int x_27 = tint_ftoi(asfloat(x_4[1].x));
   unknown = x_27;
   ok = true;
   x_41 = false;
@@ -81,8 +80,7 @@ void main_1() {
   bool x_111 = false;
   bool x_114 = false;
   bool x_115 = false;
-  const float4 x_72 = vcolor_S0;
-  outputColor_S0 = x_72;
+  outputColor_S0 = vcolor_S0;
   const float x_77 = asfloat(x_4[1].x);
   x_8_unknown = x_77;
   x_9_ok = true;
@@ -128,14 +126,12 @@ void main_1() {
     x_115 = x_114;
   }
   if (x_115) {
-    const float4 x_122 = asfloat(x_4[3]);
-    x_116 = x_122;
+    x_116 = asfloat(x_4[3]);
   } else {
-    const float4 x_124 = asfloat(x_4[2]);
-    x_116 = x_124;
+    x_116 = asfloat(x_4[2]);
   }
   const float4 x_125 = x_116;
-  output_S1 = x_125;
+  output_S1 = x_116;
   sk_FragColor = x_125;
   return;
 }

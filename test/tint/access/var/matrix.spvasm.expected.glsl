@@ -2,8 +2,7 @@
 
 void main_1() {
   mat3 m = mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f));
-  vec3 x_15 = m[1];
-  float x_16 = x_15.y;
+  float x_16 = m[1].y;
   return;
 }
 

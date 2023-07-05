@@ -7,8 +7,7 @@ struct tint_private_vars_struct {
 
 void textureDimensions_f60bdb(depth2d_ms<float, access::read> tint_symbol_5) {
   int2 res = int2(0);
-  int2 const x_16 = int2(uint2(tint_symbol_5.get_width(), tint_symbol_5.get_height()));
-  res = x_16;
+  res = int2(uint2(tint_symbol_5.get_width(), tint_symbol_5.get_height()));
   return;
 }
 

@@ -59,8 +59,7 @@ bool test_int_S1_c0_b(const constant UniformBuffer_tint_packed_vec3* const tint_
   bool x_55 = false;
   bool x_65 = false;
   bool x_66 = false;
-  float const x_26 = (*(tint_symbol_5)).unknownInput_S1_c0;
-  int const x_27 = tint_ftoi(x_26);
+  int const x_27 = tint_ftoi((*(tint_symbol_5)).unknownInput_S1_c0);
   unknown = x_27;
   ok = true;
   x_41 = false;
@@ -117,8 +116,7 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, const cons
   bool x_111 = false;
   bool x_114 = false;
   bool x_115 = false;
-  float4 const x_72 = (*(tint_private_vars)).vcolor_S0;
-  outputColor_S0 = x_72;
+  outputColor_S0 = (*(tint_private_vars)).vcolor_S0;
   float const x_77 = (*(tint_symbol_6)).unknownInput_S1_c0;
   x_8_unknown = x_77;
   x_9_ok = true;
@@ -164,14 +162,12 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, const cons
     x_115 = x_114;
   }
   if (x_115) {
-    float4 const x_122 = (*(tint_symbol_6)).ucolorGreen_S1_c0;
-    x_116 = x_122;
+    x_116 = (*(tint_symbol_6)).ucolorGreen_S1_c0;
   } else {
-    float4 const x_124 = (*(tint_symbol_6)).ucolorRed_S1_c0;
-    x_116 = x_124;
+    x_116 = (*(tint_symbol_6)).ucolorRed_S1_c0;
   }
   float4 const x_125 = x_116;
-  output_S1 = x_125;
+  output_S1 = x_116;
   (*(tint_private_vars)).sk_FragColor = x_125;
   return;
 }

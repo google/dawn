@@ -38,25 +38,13 @@ struct LeftOver {
 void main_1(thread tint_private_vars_struct* const tint_private_vars, const constant LeftOver* const tint_symbol_5) {
   float4 q = 0.0f;
   float3 p = 0.0f;
-  float3 const x_13 = (*(tint_private_vars)).position_1;
-  q = float4(x_13[0], x_13[1], x_13[2], 1.0f);
-  float4 const x_21 = q;
-  p = x_21.xyz;
-  float const x_27 = p[0];
-  float const x_41 = (*(tint_symbol_5)).test[0].el;
-  float const x_45 = (*(tint_private_vars)).position_1[1];
-  float const x_49 = (*(tint_symbol_5)).time;
-  p[0] = (x_27 + sin(((x_41 * x_45) + x_49)));
-  float const x_55 = p[1];
-  float const x_57 = (*(tint_symbol_5)).time;
-  p[1] = (x_55 + sin((x_57 + 4.0f)));
-  float4x4 const x_69 = (*(tint_symbol_5)).worldViewProjection;
-  float3 const x_70 = p;
-  (*(tint_private_vars)).gl_Position = (x_69 * float4(x_70[0], x_70[1], x_70[2], 1.0f));
-  float2 const x_83 = (*(tint_private_vars)).uv;
-  (*(tint_private_vars)).vUV = x_83;
-  float const x_87 = (*(tint_private_vars)).gl_Position[1];
-  (*(tint_private_vars)).gl_Position[1] = (x_87 * -1.0f);
+  q = float4((*(tint_private_vars)).position_1[0], (*(tint_private_vars)).position_1[1], (*(tint_private_vars)).position_1[2], 1.0f);
+  p = q.xyz;
+  p[0] = (p[0] + sin((((*(tint_symbol_5)).test[0].el * (*(tint_private_vars)).position_1[1]) + (*(tint_symbol_5)).time)));
+  p[1] = (p[1] + sin(((*(tint_symbol_5)).time + 4.0f)));
+  (*(tint_private_vars)).gl_Position = ((*(tint_symbol_5)).worldViewProjection * float4(p[0], p[1], p[2], 1.0f));
+  (*(tint_private_vars)).vUV = (*(tint_private_vars)).uv;
+  (*(tint_private_vars)).gl_Position[1] = ((*(tint_private_vars)).gl_Position[1] * -1.0f);
   return;
 }
 

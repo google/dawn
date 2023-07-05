@@ -4,8 +4,7 @@ var<private> tint_symbol_1 = vec4f();
 
 fn textureNumSamples_a3c8a0() {
   var res = 0i;
-  let x_16 = i32(textureNumSamples(arg_0));
-  res = x_16;
+  res = i32(textureNumSamples(arg_0));
   return;
 }
 

@@ -18,6 +18,7 @@
 
 #include "src/tint/ast/transform/decompose_strided_array.h"
 #include "src/tint/ast/transform/decompose_strided_matrix.h"
+#include "src/tint/ast/transform/fold_trivial_lets.h"
 #include "src/tint/ast/transform/remove_unreachable_statements.h"
 #include "src/tint/ast/transform/simplify_pointers.h"
 #include "src/tint/ast/transform/spirv_atomic.h"
@@ -60,6 +61,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     transform::DataMap outputs;
     manager.Add<ast::transform::Unshadow>();
     manager.Add<ast::transform::SimplifyPointers>();
+    manager.Add<ast::transform::FoldTrivialLets>();
     manager.Add<ast::transform::DecomposeStridedMatrix>();
     manager.Add<ast::transform::DecomposeStridedArray>();
     manager.Add<ast::transform::RemoveUnreachableStatements>();

@@ -7,8 +7,7 @@ struct S {
 void main_1() {
   int i = 0;
   S V = S(0);
-  int x_14 = V.i;
-  i = x_14;
+  i = V.i;
   return;
 }
 

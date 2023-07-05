@@ -1,7 +1,6 @@
 fn main_1() {
   var m = mat3x3f();
-  let x_15 = m[1i];
-  let x_16 = x_15.y;
+  let x_16 = m[1i].y;
   return;
 }
 

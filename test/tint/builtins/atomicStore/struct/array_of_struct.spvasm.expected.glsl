@@ -18,8 +18,7 @@ void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
   idx = local_invocation_index_2;
   while (true) {
-    uint x_23 = idx;
-    if (!((x_23 < 10u))) {
+    if (!((idx < 10u))) {
       break;
     }
     uint x_28 = idx;
@@ -27,8 +26,7 @@ void compute_main_inner(uint local_invocation_index_2) {
     atomicExchange(wg[x_28].a, 0u);
     wg[x_28].y = 0u;
     {
-      uint x_41 = idx;
-      idx = (x_41 + 1u);
+      idx = (idx + 1u);
     }
   }
   barrier();

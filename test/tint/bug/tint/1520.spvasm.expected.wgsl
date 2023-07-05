@@ -33,8 +33,7 @@ fn test_int_S1_c0_b() -> bool {
   var x_55 : bool;
   var x_65 : bool;
   var x_66 : bool;
-  let x_26 = x_4.unknownInput_S1_c0;
-  let x_27 = i32(x_26);
+  let x_27 = i32(x_4.unknownInput_S1_c0);
   unknown = x_27;
   ok = true;
   x_41 = false;
@@ -95,8 +94,7 @@ fn main_1() {
   var x_111 : bool;
   var x_114 : bool;
   var x_115 : bool;
-  let x_72 = vcolor_S0;
-  outputColor_S0 = x_72;
+  outputColor_S0 = vcolor_S0;
   let x_77 = x_4.unknownInput_S1_c0;
   x_8_unknown = x_77;
   x_9_ok = true;
@@ -142,14 +140,12 @@ fn main_1() {
     x_115 = x_114;
   }
   if (x_115) {
-    let x_122 = x_4.ucolorGreen_S1_c0;
-    x_116 = x_122;
+    x_116 = x_4.ucolorGreen_S1_c0;
   } else {
-    let x_124 = x_4.ucolorRed_S1_c0;
-    x_116 = x_124;
+    x_116 = x_4.ucolorRed_S1_c0;
   }
   let x_125 = x_116;
-  output_S1 = x_125;
+  output_S1 = x_116;
   sk_FragColor = x_125;
   return;
 }

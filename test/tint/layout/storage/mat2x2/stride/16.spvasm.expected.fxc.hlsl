@@ -4,21 +4,21 @@ struct strided_arr {
 
 RWByteAddressBuffer ssbo : register(u0);
 
+typedef strided_arr mat2x2_stride_16_to_arr_ret[2];
+mat2x2_stride_16_to_arr_ret mat2x2_stride_16_to_arr(float2x2 m) {
+  const strided_arr tint_symbol_1 = {m[0u]};
+  const strided_arr tint_symbol_2 = {m[1u]};
+  const strided_arr tint_symbol_3[2] = {tint_symbol_1, tint_symbol_2};
+  return tint_symbol_3;
+}
+
 float2x2 arr_to_mat2x2_stride_16(strided_arr arr[2]) {
   return float2x2(arr[0u].el, arr[1u].el);
 }
 
-typedef strided_arr mat2x2_stride_16_to_arr_ret[2];
-mat2x2_stride_16_to_arr_ret mat2x2_stride_16_to_arr(float2x2 m) {
-  const strided_arr tint_symbol = {m[0u]};
-  const strided_arr tint_symbol_1 = {m[1u]};
-  const strided_arr tint_symbol_2[2] = {tint_symbol, tint_symbol_1};
-  return tint_symbol_2;
-}
-
 strided_arr ssbo_load_1(uint offset) {
-  const strided_arr tint_symbol_3 = {asfloat(ssbo.Load2((offset + 0u)))};
-  return tint_symbol_3;
+  const strided_arr tint_symbol_4 = {asfloat(ssbo.Load2((offset + 0u)))};
+  return tint_symbol_4;
 }
 
 typedef strided_arr ssbo_load_ret[2];
@@ -46,8 +46,8 @@ void ssbo_store(uint offset, strided_arr value[2]) {
 }
 
 void f_1() {
-  const float2x2 x_15 = arr_to_mat2x2_stride_16(ssbo_load(0u));
-  ssbo_store(0u, mat2x2_stride_16_to_arr(x_15));
+  const float2x2 tint_symbol = arr_to_mat2x2_stride_16(ssbo_load(0u));
+  ssbo_store(0u, mat2x2_stride_16_to_arr(tint_symbol));
   return;
 }
 

@@ -4,8 +4,7 @@ vec4 tint_symbol_1 = vec4(0.0f);
 uniform highp sampler2DMS arg_0_1;
 void textureDimensions_f60bdb() {
   ivec2 res = ivec2(0);
-  ivec2 x_16 = ivec2(uvec2(textureSize(arg_0_1)));
-  res = x_16;
+  res = ivec2(uvec2(textureSize(arg_0_1)));
   return;
 }
 
@@ -44,8 +43,7 @@ precision highp float;
 uniform highp sampler2DMS arg_0_1;
 void textureDimensions_f60bdb() {
   ivec2 res = ivec2(0);
-  ivec2 x_16 = ivec2(uvec2(textureSize(arg_0_1)));
-  res = x_16;
+  res = ivec2(uvec2(textureSize(arg_0_1)));
   return;
 }
 
@@ -71,8 +69,7 @@ void main() {
 uniform highp sampler2DMS arg_0_1;
 void textureDimensions_f60bdb() {
   ivec2 res = ivec2(0);
-  ivec2 x_16 = ivec2(uvec2(textureSize(arg_0_1)));
-  res = x_16;
+  res = ivec2(uvec2(textureSize(arg_0_1)));
   return;
 }
 

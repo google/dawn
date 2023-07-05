@@ -2,8 +2,7 @@
 
 int I = 0;
 void main_1() {
-  int x_9 = I;
-  int x_11 = (x_9 + 1);
+  int x_11 = (I + 1);
   return;
 }
 

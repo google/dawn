@@ -49,11 +49,11 @@
                OpStore %n_0 %20
                OpStore %offset_1 %20
                OpStore %count_0 %20
-         %26 = OpLoad %uint %v_0
-         %27 = OpLoad %uint %n_0
-         %28 = OpLoad %uint %offset_1
-         %29 = OpLoad %uint %count_0
-         %30 = OpFunctionCall %uint %tint_insert_bits %26 %27 %28 %29
+         %27 = OpLoad %uint %v_0
+         %28 = OpLoad %uint %n_0
+         %29 = OpLoad %uint %offset_1
+         %30 = OpLoad %uint %count_0
+         %26 = OpFunctionCall %uint %tint_insert_bits %27 %28 %29 %30
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %16

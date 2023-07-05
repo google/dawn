@@ -36,15 +36,13 @@ void compute_main_inner(uint local_invocation_index_2, threadgroup S_atomic* con
   (*(tint_symbol)).y = 0u;
   idx = local_invocation_index_2;
   while (true) {
-    uint const x_30 = idx;
-    if (!((x_30 < 10u))) {
+    if (!((idx < 10u))) {
       break;
     }
     uint const x_35 = idx;
     atomic_store_explicit(&((*(tint_symbol)).a[x_35]), 0u, memory_order_relaxed);
     {
-      uint const x_41 = idx;
-      idx = (x_41 + 1u);
+      idx = (idx + 1u);
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

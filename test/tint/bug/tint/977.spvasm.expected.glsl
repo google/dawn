@@ -13,20 +13,14 @@ layout(binding = 2, std430) buffer ResultMatrix_ssbo {
 
 float binaryOperation_f1_f1_(inout float a, inout float b) {
   float x_26 = 0.0f;
-  float x_13 = b;
-  if ((x_13 == 0.0f)) {
+  if ((b == 0.0f)) {
     return 1.0f;
   }
   float x_21 = b;
   if (!((round((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
-    float x_29 = a;
-    float x_31 = b;
-    x_26 = pow(abs(x_29), x_31);
+    x_26 = pow(abs(a), b);
   } else {
-    float x_34 = a;
-    float x_36 = a;
-    float x_38 = b;
-    x_26 = (sign(x_34) * pow(abs(x_36), x_38));
+    x_26 = (sign(a) * pow(abs(a), b));
   }
   float x_41 = x_26;
   return x_41;
@@ -37,8 +31,7 @@ void main_1() {
   int a_1 = 0;
   float param = 0.0f;
   float param_1 = 0.0f;
-  uint x_54 = tint_symbol.x;
-  index = int(x_54);
+  index = int(tint_symbol.x);
   a_1 = -10;
   int x_63 = index;
   param = -4.0f;

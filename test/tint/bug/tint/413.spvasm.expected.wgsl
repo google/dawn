@@ -4,10 +4,8 @@
 
 fn main_1() {
   var srcValue : vec4u;
-  let x_18 = textureLoad(Src, vec2i(), 0i);
-  srcValue = x_18;
-  let x_22 = srcValue.x;
-  srcValue.x = (x_22 + bitcast<u32>(1i));
+  srcValue = textureLoad(Src, vec2i(), 0i);
+  srcValue.x = (srcValue.x + bitcast<u32>(1i));
   let x_27 = srcValue;
   textureStore(Dst, vec2i(), x_27);
   return;

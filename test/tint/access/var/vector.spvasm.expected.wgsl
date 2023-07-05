@@ -1,10 +1,8 @@
 fn main_1() {
   var v = vec3f();
   let x_14 = v.y;
-  let x_16 = v;
-  let x_17 = x_16.xz;
-  let x_18 = v;
-  let x_19 = x_18.xzy;
+  let x_17 = v.xz;
+  let x_19 = v.xzy;
   return;
 }
 

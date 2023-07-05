@@ -4,8 +4,7 @@ vec4 tint_symbol_1 = vec4(0.0f);
 uniform highp sampler2DMS arg_0_1;
 void textureLoad_6273b1() {
   float res = 0.0f;
-  vec4 x_17 = vec4(texelFetch(arg_0_1, ivec2(0), 1).x, 0.0f, 0.0f, 0.0f);
-  res = x_17.x;
+  res = vec4(texelFetch(arg_0_1, ivec2(0), 1).x, 0.0f, 0.0f, 0.0f).x;
   return;
 }
 
@@ -44,8 +43,7 @@ precision highp float;
 uniform highp sampler2DMS arg_0_1;
 void textureLoad_6273b1() {
   float res = 0.0f;
-  vec4 x_17 = vec4(texelFetch(arg_0_1, ivec2(0), 1).x, 0.0f, 0.0f, 0.0f);
-  res = x_17.x;
+  res = vec4(texelFetch(arg_0_1, ivec2(0), 1).x, 0.0f, 0.0f, 0.0f).x;
   return;
 }
 
@@ -71,8 +69,7 @@ void main() {
 uniform highp sampler2DMS arg_0_1;
 void textureLoad_6273b1() {
   float res = 0.0f;
-  vec4 x_17 = vec4(texelFetch(arg_0_1, ivec2(0), 1).x, 0.0f, 0.0f, 0.0f);
-  res = x_17.x;
+  res = vec4(texelFetch(arg_0_1, ivec2(0), 1).x, 0.0f, 0.0f, 0.0f).x;
   return;
 }
 

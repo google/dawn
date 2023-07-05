@@ -2,8 +2,7 @@
 
 using namespace metal;
 void main_1() {
-  float2 const distance_1 = float2(2.0f);
-  float const x_10 = distance(distance_1, float2(2.0f));
+  float const x_10 = 0.0f;
   return;
 }
 

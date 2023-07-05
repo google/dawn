@@ -6,8 +6,7 @@ void main_1() {
   float a = 0.0f;
   float b = 0.0f;
   a = 42.0f;
-  const float x_11 = a;
-  b = tint_radians(x_11);
+  b = tint_radians(a);
   return;
 }
 

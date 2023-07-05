@@ -12,8 +12,7 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
   var idx = 0u;
   idx = local_invocation_index_2;
   loop {
-    let x_25 = idx;
-    if (!((x_25 < 6u))) {
+    if (!((idx < 6u))) {
       break;
     }
     let x_31 = idx;
@@ -22,8 +21,7 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
     atomicStore(&(wg[(x_31 / 2u)][(x_33 % 2u)][(x_35 % 1u)]), 0u);
 
     continuing {
-      let x_42 = idx;
-      idx = (x_42 + 1u);
+      idx = (idx + 1u);
     }
   }
   workgroupBarrier();

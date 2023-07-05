@@ -139,20 +139,20 @@
                OpSelectionMerge %59 None
                OpBranchConditional %50 %60 %61
          %60 = OpLabel
-         %63 = OpLoad %float %a
-         %65 = OpLoad %float %b
-         %67 = OpExtInst %float %52 FAbs %63
-         %66 = OpExtInst %float %52 Pow %67 %65
-               OpStore %x_26 %66
+         %65 = OpLoad %float %a
+         %63 = OpExtInst %float %52 FAbs %65
+         %67 = OpLoad %float %b
+         %62 = OpExtInst %float %52 Pow %63 %67
+               OpStore %x_26 %62
                OpBranch %59
          %61 = OpLabel
-         %69 = OpLoad %float %a
-         %71 = OpLoad %float %a
-         %73 = OpLoad %float %b
-         %74 = OpExtInst %float %52 FSign %69
-         %76 = OpExtInst %float %52 FAbs %71
-         %75 = OpExtInst %float %52 Pow %76 %73
-         %77 = OpFMul %float %74 %75
+         %70 = OpLoad %float %a
+         %68 = OpExtInst %float %52 FSign %70
+         %74 = OpLoad %float %a
+         %72 = OpExtInst %float %52 FAbs %74
+         %76 = OpLoad %float %b
+         %71 = OpExtInst %float %52 Pow %72 %76
+         %77 = OpFMul %float %68 %71
                OpStore %x_26 %77
                OpBranch %59
          %59 = OpLabel
@@ -170,10 +170,10 @@
         %a_1 = OpVariable %_ptr_Function_int Function %86
       %param = OpVariable %_ptr_Function_float Function %35
     %param_1 = OpVariable %_ptr_Function_float Function %35
-         %92 = OpAccessChain %_ptr_Private_uint %gl_GlobalInvocationID %uint_0
-         %93 = OpLoad %uint %92
-         %94 = OpBitcast %int %93
-               OpStore %index %94
+         %93 = OpAccessChain %_ptr_Private_uint %gl_GlobalInvocationID %uint_0
+         %94 = OpLoad %uint %93
+         %90 = OpBitcast %int %94
+               OpStore %index %90
                OpStore %a_1 %int_n10
          %96 = OpLoad %int %index
                OpStore %param %float_n4

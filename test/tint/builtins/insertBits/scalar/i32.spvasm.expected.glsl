@@ -11,11 +11,7 @@ void f_1() {
   int n = 0;
   uint offset_1 = 0u;
   uint count = 0u;
-  int x_17 = v;
-  int x_18 = n;
-  uint x_19 = offset_1;
-  uint x_20 = count;
-  int x_15 = tint_insert_bits(x_17, x_18, x_19, x_20);
+  int x_15 = tint_insert_bits(v, n, offset_1, count);
   return;
 }
 

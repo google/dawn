@@ -85,11 +85,11 @@
                OpLoopMerge %39 %40 None
                OpBranch %41
          %41 = OpLabel
-         %42 = OpLoad %uint %idx
-         %45 = OpULessThan %bool %42 %uint_6
-         %43 = OpLogicalNot %bool %45
+         %43 = OpLoad %uint %idx
+         %45 = OpULessThan %bool %43 %uint_6
+         %42 = OpLogicalNot %bool %45
                OpSelectionMerge %46 None
-               OpBranchConditional %43 %47 %46
+               OpBranchConditional %42 %47 %46
          %47 = OpLabel
                OpBranch %39
          %46 = OpLabel

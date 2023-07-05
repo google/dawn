@@ -47,8 +47,7 @@ bool test_int_S1_c0_b() {
   bool x_55 = false;
   bool x_65 = false;
   bool x_66 = false;
-  float x_26 = x_4.inner.unknownInput_S1_c0;
-  int x_27 = tint_ftoi(x_26);
+  int x_27 = tint_ftoi(x_4.inner.unknownInput_S1_c0);
   unknown = x_27;
   ok = true;
   x_41 = false;
@@ -105,8 +104,7 @@ void main_1() {
   bool x_111 = false;
   bool x_114 = false;
   bool x_115 = false;
-  vec4 x_72 = vcolor_S0;
-  outputColor_S0 = x_72;
+  outputColor_S0 = vcolor_S0;
   float x_77 = x_4.inner.unknownInput_S1_c0;
   x_8_unknown = x_77;
   x_9_ok = true;
@@ -152,14 +150,12 @@ void main_1() {
     x_115 = x_114;
   }
   if (x_115) {
-    vec4 x_122 = x_4.inner.ucolorGreen_S1_c0;
-    x_116 = x_122;
+    x_116 = x_4.inner.ucolorGreen_S1_c0;
   } else {
-    vec4 x_124 = x_4.inner.ucolorRed_S1_c0;
-    x_116 = x_124;
+    x_116 = x_4.inner.ucolorRed_S1_c0;
   }
   vec4 x_125 = x_116;
-  output_S1 = x_125;
+  output_S1 = x_116;
   sk_FragColor = x_125;
   return;
 }

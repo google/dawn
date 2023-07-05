@@ -40,20 +40,14 @@ var<private> gl_GlobalInvocationID : vec3u;
 
 fn binaryOperation_f1_f1_(a : ptr<function, f32>, b : ptr<function, f32>) -> f32 {
   var x_26 : f32;
-  let x_13 = *(b);
-  if ((x_13 == 0.0f)) {
+  if ((*(b) == 0.0f)) {
     return 1.0f;
   }
   let x_21 = *(b);
   if (!((round((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
-    let x_29 = *(a);
-    let x_31 = *(b);
-    x_26 = pow(abs(x_29), x_31);
+    x_26 = pow(abs(*(a)), *(b));
   } else {
-    let x_34 = *(a);
-    let x_36 = *(a);
-    let x_38 = *(b);
-    x_26 = (sign(x_34) * pow(abs(x_36), x_38));
+    x_26 = (sign(*(a)) * pow(abs(*(a)), *(b)));
   }
   let x_41 = x_26;
   return x_41;
@@ -64,8 +58,7 @@ fn main_1() {
   var a_1 : i32;
   var param : f32;
   var param_1 : f32;
-  let x_54 = gl_GlobalInvocationID.x;
-  index = bitcast<i32>(x_54);
+  index = bitcast<i32>(gl_GlobalInvocationID.x);
   a_1 = -10i;
   let x_63 = index;
   param = -4.0f;

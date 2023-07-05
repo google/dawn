@@ -1,6 +1,5 @@
 void main_1() {
-  const float2 distance_1 = (2.0f).xx;
-  const float x_10 = distance(distance_1, (2.0f).xx);
+  const float x_10 = 0.0f;
   return;
 }
 

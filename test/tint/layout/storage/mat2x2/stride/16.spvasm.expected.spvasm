@@ -14,10 +14,10 @@
                OpName %strided_arr "strided_arr"
                OpMemberName %strided_arr 0 "el"
                OpName %ssbo "ssbo"
-               OpName %arr_to_mat2x2_stride_16 "arr_to_mat2x2_stride_16"
-               OpName %arr "arr"
                OpName %mat2x2_stride_16_to_arr "mat2x2_stride_16_to_arr"
                OpName %m "m"
+               OpName %arr_to_mat2x2_stride_16 "arr_to_mat2x2_stride_16"
+               OpName %arr "arr"
                OpName %assign_and_preserve_padding_1_ssbo_m_X "assign_and_preserve_padding_1_ssbo_m_X"
                OpName %dest "dest"
                OpName %value "value"
@@ -46,10 +46,10 @@
 %_ptr_StorageBuffer_ssbo_block = OpTypePointer StorageBuffer %ssbo_block
        %ssbo = OpVariable %_ptr_StorageBuffer_ssbo_block StorageBuffer
 %mat2v2float = OpTypeMatrix %v2float 2
-         %11 = OpTypeFunction %mat2v2float %_arr_strided_arr_uint_2
+         %11 = OpTypeFunction %_arr_strided_arr_uint_2 %mat2v2float
          %16 = OpConstantNull %uint
      %uint_1 = OpConstant %uint 1
-         %23 = OpTypeFunction %_arr_strided_arr_uint_2 %mat2v2float
+         %23 = OpTypeFunction %mat2v2float %_arr_strided_arr_uint_2
        %void = OpTypeVoid
 %_arr_uint_uint_1 = OpTypeArray %uint %uint_1
          %32 = OpTypeFunction %void %_arr_uint_uint_1 %strided_arr
@@ -65,24 +65,24 @@
 %_ptr_Function_strided_arr = OpTypePointer Function %strided_arr
          %74 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_strided_arr_uint_2 = OpTypePointer StorageBuffer %_arr_strided_arr_uint_2
-%arr_to_mat2x2_stride_16 = OpFunction %mat2v2float None %11
-        %arr = OpFunctionParameter %_arr_strided_arr_uint_2
+%mat2x2_stride_16_to_arr = OpFunction %_arr_strided_arr_uint_2 None %11
+          %m = OpFunctionParameter %mat2v2float
          %15 = OpLabel
-         %17 = OpCompositeExtract %strided_arr %arr 0
-         %18 = OpCompositeExtract %v2float %17 0
-         %20 = OpCompositeExtract %strided_arr %arr 1
-         %21 = OpCompositeExtract %v2float %20 0
-         %22 = OpCompositeConstruct %mat2v2float %18 %21
+         %17 = OpCompositeExtract %v2float %m 0
+         %18 = OpCompositeConstruct %strided_arr %17
+         %20 = OpCompositeExtract %v2float %m 1
+         %21 = OpCompositeConstruct %strided_arr %20
+         %22 = OpCompositeConstruct %_arr_strided_arr_uint_2 %18 %21
                OpReturnValue %22
                OpFunctionEnd
-%mat2x2_stride_16_to_arr = OpFunction %_arr_strided_arr_uint_2 None %23
-          %m = OpFunctionParameter %mat2v2float
+%arr_to_mat2x2_stride_16 = OpFunction %mat2v2float None %23
+        %arr = OpFunctionParameter %_arr_strided_arr_uint_2
          %26 = OpLabel
-         %27 = OpCompositeExtract %v2float %m 0
-         %28 = OpCompositeConstruct %strided_arr %27
-         %29 = OpCompositeExtract %v2float %m 1
-         %30 = OpCompositeConstruct %strided_arr %29
-         %31 = OpCompositeConstruct %_arr_strided_arr_uint_2 %28 %30
+         %27 = OpCompositeExtract %strided_arr %arr 0
+         %28 = OpCompositeExtract %v2float %27 0
+         %29 = OpCompositeExtract %strided_arr %arr 1
+         %30 = OpCompositeExtract %v2float %29 0
+         %31 = OpCompositeConstruct %mat2v2float %28 %30
                OpReturnValue %31
                OpFunctionEnd
 %assign_and_preserve_padding_1_ssbo_m_X = OpFunction %void None %32

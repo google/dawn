@@ -8,16 +8,14 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
   var idx = 0u;
   idx = local_invocation_index_2;
   loop {
-    let x_21 = idx;
-    if (!((x_21 < 4u))) {
+    if (!((idx < 4u))) {
       break;
     }
     let x_26 = idx;
     atomicStore(&(wg[x_26]), 0u);
 
     continuing {
-      let x_33 = idx;
-      idx = (x_33 + 1u);
+      idx = (idx + 1u);
     }
   }
   workgroupBarrier();

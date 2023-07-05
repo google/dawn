@@ -12,11 +12,7 @@ void f_1() {
   uint3 n = uint3(0u);
   uint offset_1 = 0u;
   uint count = 0u;
-  uint3 const x_17 = v;
-  uint3 const x_18 = n;
-  uint const x_19 = offset_1;
-  uint const x_20 = count;
-  uint3 const x_15 = tint_insert_bits(x_17, x_18, x_19, x_20);
+  uint3 const x_15 = tint_insert_bits(v, n, offset_1, count);
   return;
 }
 

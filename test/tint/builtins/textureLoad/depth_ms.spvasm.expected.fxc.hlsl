@@ -3,8 +3,7 @@ static float4 tint_symbol_1 = (0.0f).xxxx;
 
 void textureLoad_6273b1() {
   float res = 0.0f;
-  const float4 x_17 = float4(arg_0.Load(int3(0, 0, 0), 1).x, 0.0f, 0.0f, 0.0f);
-  res = x_17.x;
+  res = float4(arg_0.Load(int3(0, 0, 0), 1).x, 0.0f, 0.0f, 0.0f).x;
   return;
 }
 

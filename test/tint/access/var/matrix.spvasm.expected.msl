@@ -3,8 +3,7 @@
 using namespace metal;
 void main_1() {
   float3x3 m = float3x3(float3(0.0f), float3(0.0f), float3(0.0f));
-  float3 const x_15 = m[1];
-  float const x_16 = x_15[1];
+  float const x_16 = m[1][1];
   return;
 }
 

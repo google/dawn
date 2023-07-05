@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 205
+; Bound: 206
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -133,7 +133,7 @@
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
      %uint_1 = OpConstant %uint 1
    %main_out = OpTypeStruct %v4float
-        %190 = OpTypeFunction %main_out %bool %v4float
+        %191 = OpTypeFunction %main_out %bool %v4float
   %tint_ftoi = OpFunction %int None %23
           %v = OpFunctionParameter %float
          %27 = OpLabel
@@ -168,16 +168,16 @@
        %x_55 = OpVariable %_ptr_Function_bool Function %21
        %x_65 = OpVariable %_ptr_Function_bool Function %21
        %x_66 = OpVariable %_ptr_Function_bool Function %21
-         %76 = OpAccessChain %_ptr_Uniform_float %x_4 %uint_0 %uint_0
-         %77 = OpLoad %float %76
-         %78 = OpFunctionCall %int %tint_ftoi %77
-               OpStore %unknown %78
+         %77 = OpAccessChain %_ptr_Uniform_float %x_4 %uint_0 %uint_0
+         %78 = OpLoad %float %77
+         %73 = OpFunctionCall %int %tint_ftoi %78
+               OpStore %unknown %73
                OpStore %ok %true
                OpStore %x_41 %21
                OpSelectionMerge %80 None
                OpBranchConditional %true %81 %80
          %81 = OpLabel
-         %84 = OpCompositeConstruct %v4int %78 %78 %78 %78
+         %84 = OpCompositeConstruct %v4int %73 %73 %73 %73
          %83 = OpFunctionCall %v4int %tint_div %44 %84
          %85 = OpIEqual %v4bool %83 %44
          %82 = OpAll %bool %85
@@ -188,7 +188,7 @@
          %80 = OpLabel
          %87 = OpLoad %bool %x_41
                OpStore %ok %87
-         %88 = OpCompositeConstruct %v4int %78 %78 %78 %78
+         %88 = OpCompositeConstruct %v4int %73 %73 %73 %73
                OpStore %val %88
          %89 = OpIAdd %v4int %88 %55
                OpStore %val %89
@@ -346,27 +346,28 @@
                OpBranch %179
         %179 = OpLabel
         %189 = OpLoad %v4float %x_116
-               OpStore %output_S1 %189
+        %190 = OpLoad %v4float %x_116
+               OpStore %output_S1 %190
                OpStore %sk_FragColor %189
                OpReturn
                OpFunctionEnd
- %main_inner = OpFunction %main_out None %190
+ %main_inner = OpFunction %main_out None %191
 %sk_Clockwise_param = OpFunctionParameter %bool
 %vcolor_S0_param = OpFunctionParameter %v4float
-        %195 = OpLabel
+        %196 = OpLabel
                OpStore %sk_Clockwise %sk_Clockwise_param
                OpStore %vcolor_S0 %vcolor_S0_param
-        %196 = OpFunctionCall %void %main_1
-        %197 = OpLoad %v4float %sk_FragColor
-        %198 = OpCompositeConstruct %main_out %197
-               OpReturnValue %198
+        %197 = OpFunctionCall %void %main_1
+        %198 = OpLoad %v4float %sk_FragColor
+        %199 = OpCompositeConstruct %main_out %198
+               OpReturnValue %199
                OpFunctionEnd
        %main = OpFunction %void None %114
-        %200 = OpLabel
-        %202 = OpLoad %bool %sk_Clockwise_param_1
-        %203 = OpLoad %v4float %vcolor_S0_param_1
-        %201 = OpFunctionCall %main_out %main_inner %202 %203
-        %204 = OpCompositeExtract %v4float %201 0
-               OpStore %sk_FragColor_1_1 %204
+        %201 = OpLabel
+        %203 = OpLoad %bool %sk_Clockwise_param_1
+        %204 = OpLoad %v4float %vcolor_S0_param_1
+        %202 = OpFunctionCall %main_out %main_inner %203 %204
+        %205 = OpCompositeExtract %v4float %202 0
+               OpStore %sk_FragColor_1_1 %205
                OpReturn
                OpFunctionEnd

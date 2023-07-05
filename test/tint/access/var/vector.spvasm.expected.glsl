@@ -3,10 +3,8 @@
 void main_1() {
   vec3 v = vec3(0.0f);
   float x_14 = v.y;
-  vec3 x_16 = v;
-  vec2 x_17 = x_16.xz;
-  vec3 x_18 = v;
-  vec3 x_19 = x_18.xzy;
+  vec2 x_17 = v.xz;
+  vec3 x_19 = v.xzy;
   return;
 }
 

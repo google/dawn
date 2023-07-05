@@ -33,25 +33,13 @@ var<private> gl_Position : vec4f;
 fn main_1() {
   var q : vec4f;
   var p : vec3f;
-  let x_13 = position_1;
-  q = vec4f(x_13.x, x_13.y, x_13.z, 1.0f);
-  let x_21 = q;
-  p = x_21.xyz;
-  let x_27 = p.x;
-  let x_41 = x_14.test[0i].el;
-  let x_45 = position_1.y;
-  let x_49 = x_14.time;
-  p.x = (x_27 + sin(((x_41 * x_45) + x_49)));
-  let x_55 = p.y;
-  let x_57 = x_14.time;
-  p.y = (x_55 + sin((x_57 + 4.0f)));
-  let x_69 = x_14.worldViewProjection;
-  let x_70 = p;
-  gl_Position = (x_69 * vec4f(x_70.x, x_70.y, x_70.z, 1.0f));
-  let x_83 = uv;
-  vUV = x_83;
-  let x_87 = gl_Position.y;
-  gl_Position.y = (x_87 * -1.0f);
+  q = vec4f(position_1.x, position_1.y, position_1.z, 1.0f);
+  p = q.xyz;
+  p.x = (p.x + sin(((x_14.test[0i].el * position_1.y) + x_14.time)));
+  p.y = (p.y + sin((x_14.time + 4.0f)));
+  gl_Position = (x_14.worldViewProjection * vec4f(p.x, p.y, p.z, 1.0f));
+  vUV = uv;
+  gl_Position.y = (gl_Position.y * -1.0f);
   return;
 }
 
