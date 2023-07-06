@@ -746,7 +746,8 @@ MaybeError Texture::Copy(CommandRecordingContext* commandContext, CopyTextureToT
                                              D3D11Aspect(dstSubresources.aspects));
         commandContext->GetD3D11DeviceContext1()->CopySubresourceRegion(
             ToBackend(dst.texture)->GetD3D11Resource(), dstSubresource, dst.origin.x, dst.origin.y,
-            0, ToBackend(src.texture)->GetD3D11Resource(), srcSubresource,
+            dst.texture->GetDimension() == wgpu::TextureDimension::e3D ? dst.origin.z : 0,
+            ToBackend(src.texture)->GetD3D11Resource(), srcSubresource,
             isWholeSubresource ? nullptr : &srcBox);
     }
 
