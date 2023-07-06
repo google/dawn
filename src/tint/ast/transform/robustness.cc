@@ -66,6 +66,14 @@ struct Robustness::State {
                     if (IsIgnoredResourceBinding(expr->Object()->RootIdentifier())) {
                         return;
                     }
+                    if (cfg.disable_runtime_sized_array_index_clamping &&
+                        IsIndexAccessingRuntimeSizedArray(expr)) {
+                        // Ensure the index is always u32 as using a negative index is an undefined
+                        // behavior in SPIRV.
+                        auto* idx = CastToU32(expr->Index());
+                        ctx.Replace(expr->Declaration()->index, idx);
+                        return;
+                    }
                     switch (ActionFor(expr)) {
                         case Action::kPredicate:
                             PredicateIndexAccessor(expr);
@@ -342,11 +350,7 @@ struct Robustness::State {
         }
 
         auto* expr_sem = expr->Unwrap()->As<sem::IndexAccessorExpression>();
-
-        auto idx = ctx.Clone(expr->Declaration()->index);
-        if (expr_sem->Index()->Type()->is_signed_integer_scalar()) {
-            idx = b.Call<u32>(idx);  // u32(idx)
-        }
+        auto idx = CastToU32(expr_sem->Index());
         auto* clamped_idx = b.Call(builtin::Function::kMin, idx, max);
         ctx.Replace(expr->Declaration()->index, clamped_idx);
     }
@@ -692,6 +696,22 @@ struct Robustness::State {
         }
         sem::BindingPoint bindingPoint = *globalVariable->BindingPoint();
         return cfg.bindings_ignored.find(bindingPoint) != cfg.bindings_ignored.cend();
+    }
+
+    /// @returns true if expr is an IndexAccessorExpression whose object is a runtime-sized array.
+    bool IsIndexAccessingRuntimeSizedArray(const sem::IndexAccessorExpression* expr) {
+        auto* array_type = expr->Object()->Type()->UnwrapRef()->As<type::Array>();
+        return array_type != nullptr && array_type->Count()->Is<type::RuntimeArrayCount>();
+    }
+
+    /// @returns a clone of expr->Declaration() if it is an unsigned integer scalar, or
+    /// expr->Declaration() cast to u32.
+    const ast::Expression* CastToU32(const sem::ValueExpression* expr) {
+        auto* idx = ctx.Clone(expr->Declaration());
+        if (expr->Type()->is_unsigned_integer_scalar()) {
+            return idx;
+        }
+        return b.Call<u32>(idx);  // u32(idx)
     }
 };
 

@@ -524,9 +524,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         ASSERT(usedKnobs.HasExt(DeviceExt::Robustness2));
 
         usedKnobs.robustness2Features = mDeviceInfo.robustness2Features;
-        // TODO(tint:1890): investigate how we can safely disable buffer access in Tint when
-        // robustBufferAccess2 == TRUE
-        usedKnobs.robustness2Features.robustBufferAccess2 = VK_FALSE;
         featuresChain.Add(&usedKnobs.robustness2Features);
     }
 

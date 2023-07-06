@@ -177,6 +177,7 @@ ShaderModule::~ShaderModule() = default;
     X(bool, useZeroInitializeWorkgroupMemoryExtension)                                           \
     X(bool, clampFragDepth)                                                                      \
     X(bool, disableImageRobustness)                                                              \
+    X(bool, disableRuntimeSizedArrayIndexClamping)                                               \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
@@ -264,6 +265,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
     req.clampFragDepth = clampFragDepth;
     req.disableImageRobustness = GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
+    // Currently we can disable index clamping on all runtime-sized arrays in Tint robustness
+    // transform as unsized arrays can only be declared on storage address space.
+    req.disableRuntimeSizedArrayIndexClamping =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
     req.tracePlatform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
 
@@ -336,6 +341,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             options.binding_remapper_options = r.bindingRemapper;
             options.external_texture_options = r.externalTextureOptions;
             options.disable_image_robustness = r.disableImageRobustness;
+            options.disable_runtime_sized_array_index_clamping =
+                r.disableRuntimeSizedArrayIndexClamping;
 
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General,
                          "tint::writer::spirv::Generate()");

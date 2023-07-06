@@ -32,7 +32,8 @@ static std::ostream& operator<<(std::ostream& out, Robustness::Action action) {
 
 namespace {
 
-Transform::DataMap Config(Robustness::Action action) {
+Transform::DataMap Config(Robustness::Action action,
+                          bool disable_runtime_sized_array_index_clamping = false) {
     Robustness::Config cfg;
     cfg.value_action = action;
     cfg.texture_action = action;
@@ -42,6 +43,7 @@ Transform::DataMap Config(Robustness::Action action) {
     cfg.storage_action = action;
     cfg.uniform_action = action;
     cfg.workgroup_action = action;
+    cfg.disable_runtime_sized_array_index_clamping = disable_runtime_sized_array_index_clamping;
     Transform::DataMap data;
     data.Add<Robustness::Config>(cfg);
     return data;
@@ -5486,6 +5488,136 @@ fn z() {
 )");
 
     auto got = Run<Robustness>(src, Config(GetParam()));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// disable_runtime_sized_array_index_clamping == true
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_P(RobustnessTest, Read_disable_unsized_array_index_clamping_i32) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read> s : array<f32>;
+
+fn f() {
+  let i = 25i;
+  var d : f32 = s[i];
+}
+)";
+
+    auto* expect = R"(
+@group(0) @binding(0) var<storage, read> s : array<f32>;
+
+fn f() {
+  let i = 25i;
+  var d : f32 = s[u32(i)];
+}
+)";
+
+    auto got = Run<Robustness>(src, Config(GetParam(), true));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(RobustnessTest, Read_disable_unsized_array_index_clamping_u32) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read> s : array<f32>;
+
+fn f() {
+  let i = 25u;
+  var d : f32 = s[i];
+}
+)";
+
+    auto* expect = src;
+
+    auto got = Run<Robustness>(src, Config(GetParam(), true));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(RobustnessTest, Read_disable_unsized_array_index_clamping_abstract_int) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read> s : array<f32>;
+
+fn f() {
+  var d : f32 = s[25];
+}
+)";
+
+    auto* expect = R"(
+@group(0) @binding(0) var<storage, read> s : array<f32>;
+
+fn f() {
+  var d : f32 = s[u32(25)];
+}
+)";
+
+    auto got = Run<Robustness>(src, Config(GetParam(), true));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(RobustnessTest, Assign_disable_unsized_array_index_clamping_i32) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> s : array<f32>;
+
+fn f() {
+  let i = 25i;
+  s[i] = 0.5f;
+}
+)";
+
+    auto* expect = R"(
+@group(0) @binding(0) var<storage, read_write> s : array<f32>;
+
+fn f() {
+  let i = 25i;
+  s[u32(i)] = 0.5f;
+}
+)";
+
+    auto got = Run<Robustness>(src, Config(GetParam(), true));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(RobustnessTest, Assign_disable_unsized_array_index_clamping_u32) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> s : array<f32>;
+
+fn f() {
+  let i = 25u;
+  s[i] = 0.5f;
+}
+)";
+
+    auto* expect = src;
+
+    auto got = Run<Robustness>(src, Config(GetParam(), true));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(RobustnessTest, Assign_disable_unsized_array_index_clamping_abstract_int) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> s : array<f32>;
+
+fn f() {
+  s[25] = 0.5f;
+}
+)";
+
+    auto* expect = R"(
+@group(0) @binding(0) var<storage, read_write> s : array<f32>;
+
+fn f() {
+  s[u32(25)] = 0.5f;
+}
+)";
+
+    auto got = Run<Robustness>(src, Config(GetParam(), true));
 
     EXPECT_EQ(expect, str(got));
 }

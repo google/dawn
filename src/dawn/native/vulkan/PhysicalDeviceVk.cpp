@@ -565,6 +565,15 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     // By default try to skip robustness transform on textures according to the Vulkan extension
     // VK_EXT_robustness2.
     deviceToggles->Default(Toggle::VulkanUseImageRobustAccess2, true);
+    // The environment can only request to use VK_EXT_robustness2 when the extension is available.
+    // Override the decision if it is not applicable or robustBufferAccess2 is false.
+    if (!GetDeviceInfo().HasExt(DeviceExt::Robustness2) ||
+        GetDeviceInfo().robustness2Features.robustBufferAccess2 == VK_FALSE) {
+        deviceToggles->ForceSet(Toggle::VulkanUseBufferRobustAccess2, false);
+    }
+    // By default try to disable index clamping on the runtime-sized arrays on storage buffers in
+    // Tint robustness transform according to the Vulkan extension VK_EXT_robustness2.
+    deviceToggles->Default(Toggle::VulkanUseBufferRobustAccess2, true);
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* adapter,

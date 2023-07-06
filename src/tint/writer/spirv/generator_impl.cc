@@ -87,6 +87,8 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         if (options.disable_image_robustness) {
             config.texture_action = ast::transform::Robustness::Action::kIgnore;
         }
+        config.disable_runtime_sized_array_index_clamping =
+            options.disable_runtime_sized_array_index_clamping;
         data.Add<ast::transform::Robustness::Config>(config);
     }
 
