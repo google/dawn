@@ -27,6 +27,8 @@ static_library("utils") {
   ]
 
   sources = [
+    "BinarySemaphore.cpp",
+    "BinarySemaphore.h",
     "ComboRenderBundleEncoderDescriptor.cpp",
     "ComboRenderBundleEncoderDescriptor.h",
     "ComboRenderPipelineDescriptor.cpp",

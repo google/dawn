@@ -15,6 +15,8 @@
 add_library(dawn_utils STATIC ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(dawn_utils)
 target_sources(dawn_utils PRIVATE
+    "BinarySemaphore.cpp"
+    "BinarySemaphore.h"
     "ComboRenderBundleEncoderDescriptor.cpp"
     "ComboRenderBundleEncoderDescriptor.h"
     "ComboRenderPipelineDescriptor.cpp"

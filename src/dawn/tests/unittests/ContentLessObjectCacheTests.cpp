@@ -20,10 +20,13 @@
 #include <vector>
 
 #include "dawn/common/ContentLessObjectCache.h"
+#include "dawn/utils/BinarySemaphore.h"
 #include "gtest/gtest.h"
 
 namespace dawn {
 namespace {
+
+using utils::BinarySemaphore;
 
 class RefCountedT : public RefCounted {
   public:
@@ -114,26 +117,6 @@ TEST(ContentLessObjectCacheTest, EraseDuplicate) {
     EXPECT_FALSE(cache.Empty());
 }
 
-// Helper struct that basically acts as a semaphore to allow for flow control in multiple threads.
-struct Signal {
-    std::mutex mutex;
-    std::condition_variable cv;
-    bool signaled = false;
-
-    void Fire() {
-        std::lock_guard<std::mutex> lock(mutex);
-        signaled = true;
-        cv.notify_one();
-    }
-    void Wait() {
-        std::unique_lock<std::mutex> lock(mutex);
-        while (!signaled) {
-            cv.wait(lock);
-        }
-        signaled = false;
-    }
-};
-
 // Inserting and finding elements should respect the results from the insert call.
 TEST(ContentLessObjectCacheTest, InsertingAndFinding) {
     constexpr size_t kNumObjects = 100;
@@ -169,12 +152,12 @@ TEST(ContentLessObjectCacheTest, InsertingAndFinding) {
 
 // Finding an element that is in the process of deletion should return nullptr.
 TEST(ContentLessObjectCacheTest, FindDeleting) {
-    Signal signalA, signalB;
+    BinarySemaphore semA, semB;
 
     ContentLessObjectCache<RefCountedT> cache;
     Ref<RefCountedT> object = AcquireRef(new RefCountedT(1, [&](RefCountedT* x) {
-        signalA.Fire();
-        signalB.Wait();
+        semA.Release();
+        semB.Acquire();
         cache.Erase(x);
     }));
     EXPECT_TRUE(cache.Insert(object.Get()).second);
@@ -183,10 +166,10 @@ TEST(ContentLessObjectCacheTest, FindDeleting) {
     auto threadA = [&] { object = nullptr; };
     // Thread B will try to Find the entry before it is completely destroyed.
     auto threadB = [&] {
-        signalA.Wait();
+        semA.Acquire();
         RefCountedT blueprint(1);
         EXPECT_TRUE(cache.Find(&blueprint) == nullptr);
-        signalB.Fire();
+        semB.Release();
     };
 
     std::thread tA(threadA);
@@ -198,12 +181,12 @@ TEST(ContentLessObjectCacheTest, FindDeleting) {
 // Inserting an element that has an entry which is in process of deletion should insert the new
 // object.
 TEST(ContentLessObjectCacheTest, InsertDeleting) {
-    Signal signalA, signalB;
+    BinarySemaphore semA, semB;
 
     ContentLessObjectCache<RefCountedT> cache;
     Ref<RefCountedT> object1 = AcquireRef(new RefCountedT(1, [&](RefCountedT* x) {
-        signalA.Fire();
-        signalB.Wait();
+        semA.Release();
+        semB.Acquire();
         cache.Erase(x);
     }));
     EXPECT_TRUE(cache.Insert(object1.Get()).second);
@@ -216,9 +199,9 @@ TEST(ContentLessObjectCacheTest, InsertDeleting) {
     // Thread B will try to Insert a hash equivalent entry before the original is completely
     // destroyed.
     auto threadB = [&] {
-        signalA.Wait();
+        semA.Acquire();
         EXPECT_TRUE(cache.Insert(object2.Get()).second);
-        signalB.Fire();
+        semB.Release();
     };
 
     std::thread tA(threadA);
