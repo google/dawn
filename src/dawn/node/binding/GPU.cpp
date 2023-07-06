@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/dawn/node/binding/GPUAdapter.h"
+#include "src/dawn/node/binding/TogglesLoader.h"
 
 #if defined(_WIN32)
 #include <Windows.h>
@@ -119,7 +120,17 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
         return promise;
     }
 
-    auto adapters = instance_.EnumerateAdapters();
+    RequestAdapterOptions nativeOptions;
+    if (options.powerPreference.has_value()) {
+        // TODO(dneto): Assign power preference
+    }
+
+    // Propagate toggles.
+    TogglesLoader togglesLoader(flags_);
+    DawnTogglesDescriptor togglesDescriptor = togglesLoader.GetDescriptor();
+    nativeOptions.nextInChain = &togglesDescriptor;
+
+    auto adapters = instance_.EnumerateAdapters(&nativeOptions);
     if (adapters.empty()) {
         promise.Resolve({});
         return promise;
