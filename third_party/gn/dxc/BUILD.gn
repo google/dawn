@@ -623,7 +623,10 @@ static_library("Support") {
 
 # Common code for both llvm-tblgen and clang-tblgen
 source_set("TableGen") {
-  public_deps = [ ":Support" ]
+  public_deps = [
+    ":DataTypes-header",
+    ":Support",
+  ]
 
   sources = [
     "$dawn_dxc_dir/lib/TableGen/Error.cpp",
