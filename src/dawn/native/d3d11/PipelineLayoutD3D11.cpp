@@ -82,6 +82,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
         }
     }
     mUnusedUAVBindingCount = unorderedAccessViewIndex;
+    ASSERT(constantBufferIndex <= kReservedConstantBufferSlot);
 
     return {};
 }

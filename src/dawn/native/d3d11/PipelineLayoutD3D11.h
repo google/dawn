@@ -41,6 +41,11 @@ class PipelineLayout final : public PipelineLayoutBase {
     static constexpr uint32_t kFirstIndexOffsetConstantBufferSlot = kReservedConstantBufferSlot;
     static constexpr uint32_t kNumWorkgroupsConstantBufferSlot = kReservedConstantBufferSlot;
 
+    // The reserved groups and bindings are for internal use only. They must not conflict with
+    // external clients.
+    static constexpr uint32_t kReservedConstantsBindGroupIndex = kMaxBindGroups;
+    static constexpr uint32_t kFirstIndexOffsetBindingNumber = 0u;
+
     static ResultOrError<Ref<PipelineLayout>> Create(Device* device,
                                                      const PipelineLayoutDescriptor* descriptor);
 
