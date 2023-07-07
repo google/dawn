@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "GLFW/glfw3.h"
+#include "dawn/common/Log.h"
 #include "dawn/common/Platform.h"
 #include "webgpu/webgpu_glfw.h"
 
@@ -48,6 +49,11 @@ wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow*
 std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorCocoa(GLFWwindow* window);
 
 std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
+    if (glfwGetWindowAttrib(window, GLFW_CLIENT_API) != GLFW_NO_API) {
+        dawn::ErrorLog() << "GL context was created on the window. Disable context creation by "
+                            "setting the GLFW_CLIENT_API hint to GLFW_NO_API.";
+        return nullptr;
+    }
 #if DAWN_PLATFORM_IS(WINDOWS)
     std::unique_ptr<wgpu::SurfaceDescriptorFromWindowsHWND> desc =
         std::make_unique<wgpu::SurfaceDescriptorFromWindowsHWND>();
