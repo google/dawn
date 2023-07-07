@@ -18,10 +18,13 @@
 #include <wrl/client.h>
 
 #include <memory>
+#include <optional>
+#include <utility>
 #include <vector>
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/Mutex.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
@@ -61,6 +64,7 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
   protected:
     Ref<DeviceBase> mBackendDevice;
     ComPtr<IUnknown> mD3DResource;
+    ComPtr<IDXGIKeyedMutex> mDXGIKeyedMutex;
     wgpu::TextureUsage mUsage;
     wgpu::TextureUsage mUsageInternal = wgpu::TextureUsage::None;
     wgpu::TextureDimension mDimension;
@@ -69,6 +73,20 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
     uint32_t mMipLevelCount;
     uint32_t mSampleCount;
     std::vector<wgpu::TextureFormat> mViewFormats;
+    uint32_t mAccessCount = 0;
+
+    // Chrome uses 0 as acquire key.
+    static constexpr UINT64 kDXGIKeyedMutexAcquireKey = 0;
+    class KeyedMutexReleaser : public NonCopyable {
+      public:
+        explicit KeyedMutexReleaser(ComPtr<IDXGIKeyedMutex> keyedMutex)
+            : mDXGIKeyedMutex(std::move(keyedMutex)) {}
+        ~KeyedMutexReleaser() { mDXGIKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireKey); }
+
+      private:
+        const ComPtr<IDXGIKeyedMutex> mDXGIKeyedMutex;
+    };
+    std::optional<KeyedMutexReleaser> mDXGIKeyedMutexReleaser;
 };
 
 }  // namespace dawn::native::d3d
