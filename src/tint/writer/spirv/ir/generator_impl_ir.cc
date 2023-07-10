@@ -1204,6 +1204,12 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
         case builtin::Function::kLength:
             glsl_ext_inst(GLSLstd450Length);
             break;
+        case builtin::Function::kLog:
+            glsl_ext_inst(GLSLstd450Log);
+            break;
+        case builtin::Function::kLog2:
+            glsl_ext_inst(GLSLstd450Log2);
+            break;
         case builtin::Function::kMax:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450FMax);
