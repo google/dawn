@@ -1156,6 +1156,9 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450SClamp);
             }
             break;
+        case builtin::Function::kCeil:
+            glsl_ext_inst(GLSLstd450Ceil);
+            break;
         case builtin::Function::kCos:
             glsl_ext_inst(GLSLstd450Cos);
             break;
@@ -1197,6 +1200,9 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
             break;
         case builtin::Function::kExp2:
             glsl_ext_inst(GLSLstd450Exp2);
+            break;
+        case builtin::Function::kFloor:
+            glsl_ext_inst(GLSLstd450Floor);
             break;
         case builtin::Function::kInverseSqrt:
             glsl_ext_inst(GLSLstd450InverseSqrt);
@@ -1245,6 +1251,9 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
             break;
         case builtin::Function::kTanh:
             glsl_ext_inst(GLSLstd450Tanh);
+            break;
+        case builtin::Function::kTrunc:
+            glsl_ext_inst(GLSLstd450Trunc);
             break;
         default:
             TINT_ICE(Writer, diagnostics_) << "unimplemented builtin function: " << builtin->Func();
