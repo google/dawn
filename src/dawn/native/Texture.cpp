@@ -349,6 +349,53 @@ MaybeError ValidateTextureUsage(const DeviceBase* device,
     return {};
 }
 
+// We need to add an internal RenderAttachment usage to some textures that has CopyDst usage as we
+// apply a workaround that writes to them with a render pipeline.
+bool CopyDstNeedsInternalRenderAttachmentUsage(const DeviceBase* device, const Format& format) {
+    // Depth
+    if (format.HasDepth() &&
+        (device->IsToggleEnabled(Toggle::UseBlitForBufferToDepthTextureCopy) ||
+         device->IsToggleEnabled(
+             Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource))) {
+        return true;
+    }
+    // Stencil
+    if (format.HasStencil() &&
+        device->IsToggleEnabled(Toggle::UseBlitForBufferToStencilTextureCopy)) {
+        return true;
+    }
+    return false;
+}
+
+// We need to add an internal TextureBinding usage to some textures that has CopySrc usage as we
+// apply a workaround that binds them to a compute pipeline for their copy operation.
+bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const Format& format) {
+    // Snorm
+    if (format.IsSnorm() && device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy)) {
+        return true;
+    }
+    // BGRA8Unorm
+    if (format.format == wgpu::TextureFormat::BGRA8Unorm &&
+        device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy)) {
+        return true;
+    }
+    // Depth
+    if (format.HasDepth() &&
+        (device->IsToggleEnabled(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource) ||
+         (format.format == wgpu::TextureFormat::Depth16Unorm &&
+          device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy)) ||
+         (format.format == wgpu::TextureFormat::Depth32Float &&
+          device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy)))) {
+        return true;
+    }
+    // Stencil
+    if (format.HasStencil() &&
+        device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy)) {
+        return true;
+    }
+    return false;
+}
+
 }  // anonymous namespace
 
 MaybeError ValidateTextureDescriptor(const DeviceBase* device,
@@ -589,48 +636,13 @@ TextureBase::TextureBase(DeviceBase* device,
         AddInternalUsage(wgpu::TextureUsage::CopyDst);
     }
 
-    if (mFormat.HasStencil() && (mInternalUsage & wgpu::TextureUsage::CopyDst) &&
-        device->IsToggleEnabled(Toggle::UseBlitForBufferToStencilTextureCopy)) {
-        // Add render attachment usage so we can blit to the stencil texture
-        // in a render pass.
-        AddInternalUsage(wgpu::TextureUsage::RenderAttachment);
-    }
-    if (mFormat.HasDepth() && (mInternalUsage & wgpu::TextureUsage::CopyDst) &&
-        device->IsToggleEnabled(Toggle::UseBlitForBufferToDepthTextureCopy)) {
-        // Add render attachment usage so we can blit to the depth texture
-        // in a render pass.
-        AddInternalUsage(wgpu::TextureUsage::RenderAttachment);
-    }
-    if (mFormat.HasDepth() &&
-        device->IsToggleEnabled(Toggle::UseBlitForDepthTextureToTextureCopyToNonzeroSubresource)) {
-        if (mInternalUsage & wgpu::TextureUsage::CopySrc) {
-            AddInternalUsage(wgpu::TextureUsage::TextureBinding);
-        }
-        if (mInternalUsage & wgpu::TextureUsage::CopyDst) {
+    if (mInternalUsage & wgpu::TextureUsage::CopyDst) {
+        if (CopyDstNeedsInternalRenderAttachmentUsage(device, mFormat)) {
             AddInternalUsage(wgpu::TextureUsage::RenderAttachment);
         }
     }
-    if (mFormat.HasDepth() &&
-        (device->IsToggleEnabled(Toggle::UseBlitForDepth16UnormTextureToBufferCopy) ||
-         device->IsToggleEnabled(Toggle::UseBlitForDepth32FloatTextureToBufferCopy))) {
-        if (mInternalUsage & wgpu::TextureUsage::CopySrc) {
-            AddInternalUsage(wgpu::TextureUsage::TextureBinding);
-        }
-    }
-    if (mFormat.HasStencil() &&
-        device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy)) {
-        if (mInternalUsage & wgpu::TextureUsage::CopySrc) {
-            AddInternalUsage(wgpu::TextureUsage::TextureBinding);
-        }
-    }
-    if (mFormat.IsSnorm() && device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy)) {
-        if (mInternalUsage & wgpu::TextureUsage::CopySrc) {
-            AddInternalUsage(wgpu::TextureUsage::TextureBinding);
-        }
-    }
-    if (mFormat.format == wgpu::TextureFormat::BGRA8Unorm &&
-        device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy)) {
-        if (mInternalUsage & wgpu::TextureUsage::CopySrc) {
+    if (mInternalUsage & wgpu::TextureUsage::CopySrc) {
+        if (CopySrcNeedsInternalTextureBindingUsage(device, mFormat)) {
             AddInternalUsage(wgpu::TextureUsage::TextureBinding);
         }
     }

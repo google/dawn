@@ -69,6 +69,8 @@ fn textureLoadGeneral(tex: texture_1d<f32>, coords: vec3u, level: u32) -> vec4<f
 )";
 
 constexpr std::string_view kFloatTexture2D = R"(
+// Use texture_2d_array instead of texture_2d for all 2D textures for less redundant code.
+// As texture_2d can be always represented as texture_2d_array with 1 layer.
 fn textureLoadGeneral(tex: texture_2d_array<f32>, coords: vec3u, level: u32) -> vec4<f32> {
     return textureLoad(tex, coords.xy, coords.z, level);
 }
