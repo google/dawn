@@ -1192,6 +1192,12 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
             module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpDPdyFine;
             break;
+        case builtin::Function::kExp:
+            glsl_ext_inst(GLSLstd450Exp);
+            break;
+        case builtin::Function::kExp2:
+            glsl_ext_inst(GLSLstd450Exp2);
+            break;
         case builtin::Function::kInverseSqrt:
             glsl_ext_inst(GLSLstd450InverseSqrt);
             break;
