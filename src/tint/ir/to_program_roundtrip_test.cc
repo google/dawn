@@ -347,6 +347,33 @@ fn f(i : mat2x3<f32>) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Bitcast
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, Bitcast_i32_to_u32) {
+    Test(R"(
+fn f(i : i32) {
+  var v : u32 = bitcast<u32>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Bitcast_u32_to_f32) {
+    Test(R"(
+fn f(i : u32) {
+  var v : f32 = bitcast<f32>(i);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Bitcast_f32_to_i32) {
+    Test(R"(
+fn f(i : f32) {
+  var v : i32 = bitcast<i32>(i);
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Access
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, Access_Value_vec3f_1) {

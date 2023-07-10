@@ -21,6 +21,7 @@
 #include "src/tint/constant/splat.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
+#include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/break_if.h"
 #include "src/tint/ir/builtin_call.h"
@@ -506,6 +507,10 @@ class State {
             [&](ir::Convert* c) {
                 auto ty = Type(c->Result()->Type());
                 Bind(c->Result(), b.Call(ty, std::move(args)), PtrKind::kPtr);
+            },
+            [&](ir::Bitcast* c) {
+                auto ty = Type(c->Result()->Type());
+                Bind(c->Result(), b.Bitcast(ty, args[0]), PtrKind::kPtr);
             },
             [&](Default) { UNHANDLED_CASE(call); });
     }
