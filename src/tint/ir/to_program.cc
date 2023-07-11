@@ -578,7 +578,7 @@ class State {
                         TINT_ASSERT_OR_RETURN(IR, i < s->Members().Length());
                         auto* member = s->Members()[i];
                         obj_ty = member->Type();
-                        expr = b.IndexAccessor(expr, member->Name().NameView());
+                        expr = b.MemberAccessor(expr, member->Name().NameView());
                     } else {
                         TINT_ICE(IR, b.Diagnostics())
                             << "invalid index for struct type: " << index->TypeInfo().name;

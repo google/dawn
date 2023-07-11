@@ -586,6 +586,47 @@ fn f(i : i32) -> i32 {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, Access_ValueStruct) {
+    Test(R"(
+struct Y {
+  a : i32,
+  b : i32,
+  c : i32,
+}
+
+struct X {
+  a : i32,
+  b : Y,
+  c : i32,
+}
+
+fn f(x : X) -> i32 {
+  return x.b.c;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_ReferenceStruct) {
+    Test(R"(
+struct Y {
+  a : i32,
+  b : i32,
+  c : i32,
+}
+
+struct X {
+  a : i32,
+  b : Y,
+  c : i32,
+}
+
+fn f() -> i32 {
+  var x : X;
+  return x.b.c;
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Unary ops
 ////////////////////////////////////////////////////////////////////////////////
