@@ -17,6 +17,8 @@
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/to_program.h"
 #include "src/tint/ir/to_program_test.h"
+#include "src/tint/type/array.h"
+#include "src/tint/type/matrix.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/wgsl/generator.h"
 
@@ -567,6 +569,232 @@ fn f() -> i32 {
   v = 1i;
   let v_1 = v;
   return (a() + v_1);
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Access
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramInliningTest, Access_ArrayOfArrayOfArray_XYZ) {
+    auto* fn_a = b.Function("a", ty.i32());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    fn_a->SetParams({b.FunctionParam(ty.i32())});
+
+    auto* fn = b.Function("f", ty.i32());
+    b.With(fn->Block(), [&] {
+        auto* arr = b.Var(ty.ptr<function, array<array<array<i32, 3>, 4>, 5>>());
+        auto* x = b.Call(ty.i32(), fn_a, 1_i);
+        auto* y = b.Call(ty.i32(), fn_a, 2_i);
+        auto* z = b.Call(ty.i32(), fn_a, 3_i);
+        auto* access = b.Access(ty.ptr<function, i32>(), arr, x, y, z);
+        b.Return(fn, b.Load(access));
+    });
+
+    EXPECT_WGSL(R"(
+fn a(v : i32) -> i32 {
+  return 1i;
+}
+
+fn f() -> i32 {
+  var v_1 : array<array<array<i32, 3u>, 4u>, 5u>;
+  return v_1[a(1i)][a(2i)][a(3i)];
+}
+)");
+}
+
+TEST_F(IRToProgramInliningTest, Access_ArrayOfArrayOfArray_YXZ) {
+    auto* fn_a = b.Function("a", ty.i32());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    fn_a->SetParams({b.FunctionParam(ty.i32())});
+
+    auto* fn = b.Function("f", ty.i32());
+    b.With(fn->Block(), [&] {
+        auto* arr = b.Var(ty.ptr<function, array<array<array<i32, 3>, 4>, 5>>());
+        auto* y = b.Call(ty.i32(), fn_a, 2_i);
+        auto* x = b.Call(ty.i32(), fn_a, 1_i);
+        auto* z = b.Call(ty.i32(), fn_a, 3_i);
+        auto* access = b.Access(ty.ptr<function, i32>(), arr, x, y, z);
+        b.Return(fn, b.Load(access));
+    });
+
+    EXPECT_WGSL(R"(
+fn a(v : i32) -> i32 {
+  return 1i;
+}
+
+fn f() -> i32 {
+  var v_1 : array<array<array<i32, 3u>, 4u>, 5u>;
+  let v_2 = a(2i);
+  return v_1[a(1i)][v_2][a(3i)];
+}
+)");
+}
+
+TEST_F(IRToProgramInliningTest, Access_ArrayOfArrayOfArray_ZXY) {
+    auto* fn_a = b.Function("a", ty.i32());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    fn_a->SetParams({b.FunctionParam(ty.i32())});
+
+    auto* fn = b.Function("f", ty.i32());
+    b.With(fn->Block(), [&] {
+        auto* arr = b.Var(ty.ptr<function, array<array<array<i32, 3>, 4>, 5>>());
+        auto* z = b.Call(ty.i32(), fn_a, 3_i);
+        auto* x = b.Call(ty.i32(), fn_a, 1_i);
+        auto* y = b.Call(ty.i32(), fn_a, 2_i);
+        auto* access = b.Access(ty.ptr<function, i32>(), arr, x, y, z);
+        b.Return(fn, b.Load(access));
+    });
+
+    EXPECT_WGSL(R"(
+fn a(v : i32) -> i32 {
+  return 1i;
+}
+
+fn f() -> i32 {
+  var v_1 : array<array<array<i32, 3u>, 4u>, 5u>;
+  let v_2 = a(3i);
+  return v_1[a(1i)][a(2i)][v_2];
+}
+)");
+}
+
+TEST_F(IRToProgramInliningTest, Access_ArrayOfArrayOfArray_ZYX) {
+    auto* fn_a = b.Function("a", ty.i32());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    fn_a->SetParams({b.FunctionParam(ty.i32())});
+
+    auto* fn = b.Function("f", ty.i32());
+    b.With(fn->Block(), [&] {
+        auto* arr = b.Var(ty.ptr<function, array<array<array<i32, 3>, 4>, 5>>());
+        auto* z = b.Call(ty.i32(), fn_a, 3_i);
+        auto* y = b.Call(ty.i32(), fn_a, 2_i);
+        auto* x = b.Call(ty.i32(), fn_a, 1_i);
+        auto* access = b.Access(ty.ptr<function, i32>(), arr, x, y, z);
+        b.Return(fn, b.Load(access));
+    });
+
+    EXPECT_WGSL(R"(
+fn a(v : i32) -> i32 {
+  return 1i;
+}
+
+fn f() -> i32 {
+  var v_1 : array<array<array<i32, 3u>, 4u>, 5u>;
+  let v_2 = a(3i);
+  let v_3 = a(2i);
+  return v_1[a(1i)][v_3][v_2];
+}
+)");
+}
+
+TEST_F(IRToProgramInliningTest, Access_ArrayOfMat3x4f_XYZ) {
+    auto* fn_a = b.Function("a", ty.i32());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    fn_a->SetParams({b.FunctionParam(ty.i32())});
+
+    auto* fn = b.Function("f", ty.f32());
+    b.With(fn->Block(), [&] {
+        auto* arr = b.Construct(ty.array<mat3x4<f32>, 5>());
+        auto* x = b.Call(ty.i32(), fn_a, 1_i);
+        auto* y = b.Call(ty.i32(), fn_a, 2_i);
+        auto* z = b.Call(ty.i32(), fn_a, 3_i);
+        auto* access = b.Access(ty.f32(), arr, x, y, z);
+        b.Return(fn, access);
+    });
+
+    EXPECT_WGSL(R"(
+fn a(v : i32) -> i32 {
+  return 1i;
+}
+
+fn f() -> f32 {
+  return array<mat3x4<f32>, 5u>()[a(1i)][a(2i)][a(3i)];
+}
+)");
+}
+
+TEST_F(IRToProgramInliningTest, Access_ArrayOfMat3x4f_YXZ) {
+    auto* fn_a = b.Function("a", ty.i32());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    fn_a->SetParams({b.FunctionParam(ty.i32())});
+
+    auto* fn = b.Function("f", ty.f32());
+    b.With(fn->Block(), [&] {
+        auto* arr = b.Construct(ty.array<mat3x4<f32>, 5>());
+        auto* y = b.Call(ty.i32(), fn_a, 2_i);
+        auto* x = b.Call(ty.i32(), fn_a, 1_i);
+        auto* z = b.Call(ty.i32(), fn_a, 3_i);
+        auto* access = b.Access(ty.f32(), arr, x, y, z);
+        b.Return(fn, access);
+    });
+
+    EXPECT_WGSL(R"(
+fn a(v : i32) -> i32 {
+  return 1i;
+}
+
+fn f() -> f32 {
+  let v_1 = array<mat3x4<f32>, 5u>();
+  let v_2 = a(2i);
+  return v_1[a(1i)][v_2][a(3i)];
+}
+)");
+}
+
+TEST_F(IRToProgramInliningTest, Access_ArrayOfMat3x4f_ZXY) {
+    auto* fn_a = b.Function("a", ty.i32());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    fn_a->SetParams({b.FunctionParam(ty.i32())});
+
+    auto* fn = b.Function("f", ty.f32());
+    b.With(fn->Block(), [&] {
+        auto* arr = b.Construct(ty.array<mat3x4<f32>, 5>());
+        auto* z = b.Call(ty.i32(), fn_a, 3_i);
+        auto* x = b.Call(ty.i32(), fn_a, 1_i);
+        auto* y = b.Call(ty.i32(), fn_a, 2_i);
+        auto* access = b.Access(ty.f32(), arr, x, y, z);
+        b.Return(fn, access);
+    });
+
+    EXPECT_WGSL(R"(
+fn a(v : i32) -> i32 {
+  return 1i;
+}
+
+fn f() -> f32 {
+  let v_1 = array<mat3x4<f32>, 5u>();
+  let v_2 = a(3i);
+  return v_1[a(1i)][a(2i)][v_2];
+}
+)");
+}
+
+TEST_F(IRToProgramInliningTest, Access_ArrayOfMat3x4f_ZYX) {
+    auto* fn_a = b.Function("a", ty.i32());
+    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    fn_a->SetParams({b.FunctionParam(ty.i32())});
+
+    auto* fn = b.Function("f", ty.f32());
+    b.With(fn->Block(), [&] {
+        auto* arr = b.Construct(ty.array<mat3x4<f32>, 5>());
+        auto* z = b.Call(ty.i32(), fn_a, 3_i);
+        auto* y = b.Call(ty.i32(), fn_a, 2_i);
+        auto* x = b.Call(ty.i32(), fn_a, 1_i);
+        auto* access = b.Access(ty.f32(), arr, x, y, z);
+        b.Return(fn, access);
+    });
+
+    EXPECT_WGSL(R"(
+fn a(v : i32) -> i32 {
+  return 1i;
+}
+
+fn f() -> f32 {
+  let v_1 = array<mat3x4<f32>, 5u>();
+  let v_2 = a(3i);
+  let v_3 = a(2i);
+  return v_1[a(1i)][v_3][v_2];
 }
 )");
 }

@@ -29,7 +29,30 @@ using namespace tint::number_suffixes;        // NOLINT
 
 using IR_FromProgramAccessorTest = ProgramTestHelper;
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleIndex) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_ArraySingleIndex) {
+    // var a: array<u32, 3>
+    // let b = a[2]
+
+    auto* a = Var("a", ty.array<u32, 3>(), builtin::AddressSpace::kFunction);
+    auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
+    WrapInFunction(Decl(a), expr);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    %a:ptr<function, array<u32, 3>, read_write> = var
+    %3:ptr<function, u32, read_write> = access %a, 2u
+    %b:u32 = load %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorSingleIndex) {
     // var a: vec3<u32>
     // let b = a[2]
 
@@ -52,7 +75,30 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleIndex) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiIndex) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_ArraysMultiIndex) {
+    // var a: array<array<f32, 4>, 3>
+    // let b = a[2][3]
+
+    auto* a = Var("a", ty.array<array<f32, 4>, 3>(), builtin::AddressSpace::kFunction);
+    auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
+    WrapInFunction(Decl(a), expr);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    %a:ptr<function, array<array<f32, 4>, 3>, read_write> = var
+    %3:ptr<function, f32, read_write> = access %a, 2u, 3u
+    %b:f32 = load %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MatrixMultiIndex) {
     // var a: mat3x4<f32>
     // let b = a[2][3]
 
@@ -217,7 +263,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_AssignmentLHS) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleElementSwizzle) {
+TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorElementSwizzle) {
     // var a: vec2<f32>
     // let b = a.y
 
