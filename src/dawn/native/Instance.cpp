@@ -87,33 +87,6 @@ BackendConnection* Connect(InstanceBase* instance);
 
 namespace {
 
-BackendsBitset GetEnabledBackends() {
-    BackendsBitset enabledBackends;
-#if defined(DAWN_ENABLE_BACKEND_NULL)
-    enabledBackends.set(wgpu::BackendType::Null);
-#endif  // defined(DAWN_ENABLE_BACKEND_NULL)
-#if defined(DAWN_ENABLE_BACKEND_D3D11)
-    enabledBackends.set(wgpu::BackendType::D3D11);
-#endif  // defined(DAWN_ENABLE_BACKEND_D3D11)
-#if defined(DAWN_ENABLE_BACKEND_D3D12)
-    enabledBackends.set(wgpu::BackendType::D3D12);
-#endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
-#if defined(DAWN_ENABLE_BACKEND_METAL)
-    enabledBackends.set(wgpu::BackendType::Metal);
-#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
-#if defined(DAWN_ENABLE_BACKEND_VULKAN)
-    enabledBackends.set(wgpu::BackendType::Vulkan);
-#endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
-#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
-    enabledBackends.set(wgpu::BackendType::OpenGL);
-#endif  // defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
-#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
-    enabledBackends.set(wgpu::BackendType::OpenGLES);
-#endif  // defined(DAWN_ENABLE_BACKEND_OPENGLES)
-
-    return enabledBackends;
-}
-
 dawn::platform::CachingInterface* GetCachingInterface(dawn::platform::Platform* platform) {
     if (platform != nullptr) {
         return platform->GetCachingInterface();
@@ -166,11 +139,10 @@ void InstanceBase::WillDropLastExternalRef() {
     // ref and WillDropLastExternalRef is called, the instance clears out any member refs to
     // physical devices that hold back-refs to the instance - thus breaking any reference cycles.
     mDeprecatedPhysicalDevices.clear();
-    for (wgpu::BackendType b : IterateBitSet(GetEnabledBackends())) {
-        if (!mBackendsConnected[b]) {
-            continue;
+    for (auto& backend : mBackends) {
+        if (backend != nullptr) {
+            backend->ClearPhysicalDevices();
         }
-        mBackends[b]->ClearPhysicalDevices();
     }
 }
 
@@ -383,18 +355,17 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
 
 size_t InstanceBase::GetPhysicalDeviceCountForTesting() const {
     size_t count = mDeprecatedPhysicalDevices.size();
-    for (wgpu::BackendType b : IterateBitSet(GetEnabledBackends())) {
-        if (!mBackendsConnected[b]) {
-            continue;
+    for (auto& backend : mBackends) {
+        if (backend != nullptr) {
+            count += backend->GetPhysicalDeviceCountForTesting();
         }
-        count += mBackends[b]->GetPhysicalDeviceCountForTesting();
     }
     return count;
 }
 
-void InstanceBase::EnsureBackendConnection(wgpu::BackendType backendType) {
-    if (mBackendsConnected[backendType]) {
-        return;
+BackendConnection* InstanceBase::GetBackendConnection(wgpu::BackendType backendType) {
+    if (mBackendsTried[backendType]) {
+        return mBackends[backendType].get();
     }
 
     auto Register = [this](BackendConnection* connection, wgpu::BackendType expectedType) {
@@ -450,35 +421,37 @@ void InstanceBase::EnsureBackendConnection(wgpu::BackendType backendType) {
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGLES)
 
         default:
-            UNREACHABLE();
+            break;
     }
 
-    mBackendsConnected.set(backendType);
+    mBackendsTried.set(backendType);
+    return mBackends[backendType].get();
 }
 
 std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     const RequestAdapterOptions* options) {
     ASSERT(options);
 
-    BackendsBitset enabledBackends = GetEnabledBackends();
     BackendsBitset backendsToFind;
     if (options->backendType != wgpu::BackendType::Undefined) {
         backendsToFind = {};
         if (!ConsumedErrorAndWarnOnce(ValidateBackendType(options->backendType))) {
-            backendsToFind.set(options->backendType, enabledBackends[options->backendType]);
+            backendsToFind.set(options->backendType);
         }
     } else {
-        backendsToFind = enabledBackends;
+        backendsToFind.set();
     }
 
     std::vector<Ref<PhysicalDeviceBase>> discoveredPhysicalDevices;
     for (wgpu::BackendType b : IterateBitSet(backendsToFind)) {
-        EnsureBackendConnection(b);
+        BackendConnection* backend = GetBackendConnection(b);
 
-        std::vector<Ref<PhysicalDeviceBase>> physicalDevices =
-            mBackends[b]->DiscoverPhysicalDevices(options);
-        discoveredPhysicalDevices.insert(discoveredPhysicalDevices.end(), physicalDevices.begin(),
-                                         physicalDevices.end());
+        if (backend != nullptr) {
+            std::vector<Ref<PhysicalDeviceBase>> physicalDevices =
+                mBackends[b]->DiscoverPhysicalDevices(options);
+            discoveredPhysicalDevices.insert(discoveredPhysicalDevices.end(),
+                                             physicalDevices.begin(), physicalDevices.end());
+        }
     }
     return discoveredPhysicalDevices;
 }
