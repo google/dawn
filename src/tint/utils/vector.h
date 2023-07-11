@@ -360,6 +360,16 @@ class Vector {
         Sort([](auto& a, auto& b) { return a < b; });
     }
 
+    /// Reverse reversed the vector in-place
+    void Reverse() {
+        size_t n = Length();
+        size_t mid = n / 2;
+        auto& self = *this;
+        for (size_t i = 0; i < mid; i++) {
+            std::swap(self[i], self[n - i - 1]);
+        }
+    }
+
     /// @returns true if the predicate function returns true for any of the elements of the vector
     /// @param pred a function-like with the signature `bool(T)`
     template <typename PREDICATE>

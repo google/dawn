@@ -1911,6 +1911,18 @@ TEST(TintVectorTest, Sort) {
     EXPECT_THAT(vec, testing::ElementsAre(1, 2, 3, 4, 5));
 }
 
+TEST(TintVectorTest, ReverseOdd) {
+    Vector vec{1, 5, 3, 4, 2};
+    vec.Reverse();
+    EXPECT_THAT(vec, testing::ElementsAre(2, 4, 3, 5, 1));
+}
+
+TEST(TintVectorTest, ReverseEven) {
+    Vector vec{1, 5, 3, 4, 2, 9};
+    vec.Reverse();
+    EXPECT_THAT(vec, testing::ElementsAre(9, 2, 4, 3, 5, 1));
+}
+
 TEST(TintVectorTest, Any) {
     Vector vec{1, 7, 5, 9};
     EXPECT_TRUE(vec.Any(Eq(1)));
