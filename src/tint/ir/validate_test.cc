@@ -608,7 +608,7 @@ TEST_F(IR_ValidateTest, If_ConditionIsNullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:8 error: if: condition operand is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:8 error: if: operand is undefined
     if undef [t: %b2, f: %b3] {  # if_1
        ^^^^^
 
@@ -892,7 +892,7 @@ TEST_F(IR_ValidateTest, Binary_LHS_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:18 error: binary: left operand is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:18 error: binary: operand is undefined
     %2:i32 = add undef, 2i
                  ^^^^^
 
@@ -919,7 +919,7 @@ TEST_F(IR_ValidateTest, Binary_RHS_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:22 error: binary: right operand is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:22 error: binary: operand is undefined
     %2:i32 = add 2i, undef
                      ^^^^^
 
@@ -976,7 +976,7 @@ TEST_F(IR_ValidateTest, Unary_Value_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:23 error: unary: value operand is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:23 error: unary: operand is undefined
     %2:i32 = negation undef
                       ^^^^^
 

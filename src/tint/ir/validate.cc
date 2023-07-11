@@ -154,26 +154,22 @@ class Validator {
 
     std::string Name(Value* v) { return mod_.NameOf(v).Name(); }
 
-    template <typename FUNC>
     void CheckOperandNotNull(ir::Instruction* inst,
                              ir::Value* operand,
                              size_t idx,
-                             std::string_view name,
-                             FUNC&& cb) {
+                             std::string_view name) {
         if (operand == nullptr) {
-            AddError(inst, idx, std::string(name) + ": " + cb(idx) + " operand is undefined");
+            AddError(inst, idx, std::string(name) + ": operand is undefined");
         }
     }
 
-    template <typename FUNC>
     void CheckOperandsNotNull(ir::Instruction* inst,
                               size_t start_operand,
                               size_t end_operand,
-                              std::string_view name,
-                              FUNC&& cb) {
+                              std::string_view name) {
         auto operands = inst->Operands();
         for (size_t i = start_operand; i <= end_operand; i++) {
-            CheckOperandNotNull(inst, operands[i], i, name, cb);
+            CheckOperandNotNull(inst, operands[i], i, name);
         }
     }
 
@@ -362,15 +358,11 @@ class Validator {
     }
 
     void CheckBinary(ir::Binary* b) {
-        CheckOperandsNotNull(b, Binary::kLhsOperandOffset, Binary::kRhsOperandOffset, "binary",
-                             [](size_t err_idx) {
-                                 return (err_idx == Binary::kLhsOperandOffset) ? "left" : "right";
-                             });
+        CheckOperandsNotNull(b, Binary::kLhsOperandOffset, Binary::kRhsOperandOffset, "binary");
     }
 
     void CheckUnary(ir::Unary* u) {
-        CheckOperandNotNull(u, u->Val(), Unary::kValueOperandOffset, "unary",
-                            [](size_t) { return "value"; });
+        CheckOperandNotNull(u, u->Val(), Unary::kValueOperandOffset, "unary");
 
         if (u->Result() && u->Val()) {
             if (u->Result()->Type() != u->Val()->Type()) {
@@ -400,8 +392,7 @@ class Validator {
     }
 
     void CheckIf(If* if_) {
-        CheckOperandNotNull(if_, if_->Condition(), If::kConditionOperandOffset, "if",
-                            [](size_t) { return "condition"; });
+        CheckOperandNotNull(if_, if_->Condition(), If::kConditionOperandOffset, "if");
 
         if (if_->Condition() && !if_->Condition()->Type()->Is<type::Bool>()) {
             AddError(if_, If::kConditionOperandOffset, "if: condition must be a `bool` type");
