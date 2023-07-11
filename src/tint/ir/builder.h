@@ -218,7 +218,10 @@ class Builder {
     /// Creates a ir::Constant for a bool Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(bool v) { return Constant(ir.constant_values.Get(v)); }
+    template <typename BOOL, typename = std::enable_if_t<std::is_same_v<BOOL, bool>>>
+    ir::Constant* Constant(BOOL v) {
+        return Constant(ir.constant_values.Get(v));
+    }
 
     /// @param in the input value. One of: nullptr, ir::Value*, ir::Instruction* or a numeric value.
     /// @returns an ir::Value* from the given argument.
