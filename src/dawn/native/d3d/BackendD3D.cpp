@@ -281,6 +281,9 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return {};
     }
 
+    FeatureLevel featureLevel =
+        options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
+
     const RequestAdapterOptionsLUID* luidOptions = nullptr;
     FindInChain(options->nextInChain, &luidOptions);
 
@@ -288,7 +291,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     if (luidOptions != nullptr) {
         Ref<PhysicalDeviceBase> physicalDevice;
         if (GetInstance()->ConsumedErrorAndWarnOnce(
-                GetOrCreatePhysicalDeviceFromLUID(luidOptions->adapterLUID), &physicalDevice)) {
+                GetOrCreatePhysicalDeviceFromLUID(luidOptions->adapterLUID), &physicalDevice) ||
+            !physicalDevice->SupportsFeatureLevel(featureLevel)) {
             return {};
         }
         return {std::move(physicalDevice)};
@@ -305,7 +309,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         Ref<PhysicalDeviceBase> physicalDevice;
         if (GetInstance()->ConsumedErrorAndWarnOnce(
                 GetOrCreatePhysicalDeviceFromIDXGIAdapter(std::move(dxgiAdapter)),
-                &physicalDevice)) {
+                &physicalDevice) ||
+            !physicalDevice->SupportsFeatureLevel(featureLevel)) {
             continue;
         }
         physicalDevices.push_back(std::move(physicalDevice));
