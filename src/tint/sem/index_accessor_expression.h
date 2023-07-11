@@ -18,13 +18,13 @@
 #include <vector>
 
 #include "src/tint/ast/index_accessor_expression.h"
-#include "src/tint/sem/value_expression.h"
+#include "src/tint/sem/accessor_expression.h"
 
 namespace tint::sem {
 
 /// IndexAccessorExpression holds the semantic information for a ast::IndexAccessorExpression node.
 class IndexAccessorExpression final
-    : public utils::Castable<IndexAccessorExpression, ValueExpression> {
+    : public utils::Castable<IndexAccessorExpression, AccessorExpression> {
   public:
     /// Constructor
     /// @param declaration the AST node
@@ -54,14 +54,10 @@ class IndexAccessorExpression final
         return static_cast<const ast::IndexAccessorExpression*>(declaration_);
     }
 
-    /// @returns the object expression that is being indexed
-    ValueExpression const* Object() const { return object_; }
-
     /// @returns the index expression
     ValueExpression const* Index() const { return index_; }
 
   private:
-    ValueExpression const* const object_;
     ValueExpression const* const index_;
 };
 

@@ -31,8 +31,7 @@ MemberAccessorExpression::MemberAccessorExpression(const ast::MemberAccessorExpr
                                                    const ValueExpression* object,
                                                    bool has_side_effects,
                                                    const Variable* root_ident /* = nullptr */)
-    : Base(declaration, type, stage, statement, constant, has_side_effects, root_ident),
-      object_(object) {}
+    : Base(declaration, type, stage, object, statement, constant, has_side_effects, root_ident) {}
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 

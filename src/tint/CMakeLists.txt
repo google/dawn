@@ -288,6 +288,8 @@ list(APPEND TINT_LIB_SRCS
   resolver/validator.h
   scope_stack.h
   switch.h
+  sem/accessor_expression.cc
+  sem/accessor_expression.h
   sem/array_count.cc
   sem/array_count.h
   sem/behavior.cc

@@ -31,8 +31,7 @@ IndexAccessorExpression::IndexAccessorExpression(const ast::IndexAccessorExpress
                                                  const constant::Value* constant,
                                                  bool has_side_effects,
                                                  const Variable* root_ident /* = nullptr */)
-    : Base(declaration, type, stage, statement, constant, has_side_effects, root_ident),
-      object_(object),
+    : Base(declaration, type, stage, object, statement, constant, has_side_effects, root_ident),
       index_(index) {}
 
 IndexAccessorExpression::~IndexAccessorExpression() = default;

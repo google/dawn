@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_SEM_MEMBER_ACCESSOR_EXPRESSION_H_
 #define SRC_TINT_SEM_MEMBER_ACCESSOR_EXPRESSION_H_
 
-#include "src/tint/sem/value_expression.h"
+#include "src/tint/sem/accessor_expression.h"
 #include "src/tint/utils/vector.h"
 
 // Forward declarations
@@ -28,15 +28,13 @@ class StructMember;
 
 namespace tint::sem {
 
-/// MemberAccessorExpression holds the semantic information for a
+/// MemberAccessorExpression is the base class for all semantic information for a
 /// ast::MemberAccessorExpression node.
-class MemberAccessorExpression : public utils::Castable<MemberAccessorExpression, ValueExpression> {
+class MemberAccessorExpression
+    : public utils::Castable<MemberAccessorExpression, AccessorExpression> {
   public:
     /// Destructor
     ~MemberAccessorExpression() override;
-
-    /// @returns the object that holds the member being accessed
-    const ValueExpression* Object() const { return object_; }
 
   protected:
     /// Constructor
@@ -56,9 +54,6 @@ class MemberAccessorExpression : public utils::Castable<MemberAccessorExpression
                              const ValueExpression* object,
                              bool has_side_effects,
                              const Variable* root_ident = nullptr);
-
-  private:
-    ValueExpression const* const object_;
 };
 
 /// StructMemberAccess holds the semantic information for a
