@@ -1319,6 +1319,20 @@ fn f() -> i32 {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, FunctionScopeLet_NoConstEvalError) {
+    // Tests that 'a' and 'b' are preserved as a let.
+    // If their constant values were inlined, then the initializer for 'c' would be treated as a
+    // constant expression instead of the authored runtime expression. Evaluating '1 / 0' as a
+    // constant expression is a WGSL validation error.
+    Test(R"(
+fn f() {
+  let a = 1i;
+  let b = 0i;
+  let c = (a / b);
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // If
 ////////////////////////////////////////////////////////////////////////////////

@@ -31,6 +31,7 @@
 #include "src/tint/ir/exit_loop.h"
 #include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
@@ -750,6 +751,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             [&](ir::UserCall* c) { EmitUserCall(c); },        //
             [&](ir::Unary* u) { EmitUnary(u); },              //
             [&](ir::Var* v) { EmitVar(v); },                  //
+            [&](ir::Let* l) { EmitLet(l); },                  //
             [&](ir::If* i) { EmitIf(i); },                    //
             [&](ir::Terminator* t) { EmitTerminator(t); },    //
             [&](Default) {
@@ -1567,6 +1569,15 @@ void GeneratorImplIr::EmitVar(ir::Var* var) {
     if (auto name = ir_->NameOf(var)) {
         module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
     }
+}
+
+void GeneratorImplIr::EmitLet(ir::Let* let) {
+    auto id = Value(let->Value());
+    values_.Add(let->Result(), id);
+    // Set the name if present, and the source value isn't named
+    // if (auto name = ir_->NameOf(let->Result()); name && !ir_->NameOf(let->Value())) {
+    //     module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
+    // }
 }
 
 void GeneratorImplIr::EmitExitPhis(ir::ControlInstruction* inst) {

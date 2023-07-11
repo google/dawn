@@ -33,6 +33,7 @@
 #include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
+#include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/multi_in_block.h"
@@ -270,6 +271,7 @@ class Validator {
             [&](Terminator* b) { CheckTerminator(b); },  //
             [&](Unary* u) { CheckUnary(u); },            //
             [&](Var* var) { CheckVar(var); },            //
+            [&](Let* let) { CheckLet(let); },            //
             [&](Default) {
                 AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
             });
@@ -425,6 +427,17 @@ class Validator {
         if (var->Result() && var->Initializer()) {
             if (var->Initializer()->Type() != var->Result()->Type()->UnwrapPtr()) {
                 AddError(var, "var initializer has incorrect type");
+            }
+        }
+    }
+
+    void CheckLet(Let* let) {
+        CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset, "let",
+                            [](size_t) { return "value"; });
+
+        if (let->Result() && let->Value()) {
+            if (let->Result()->Type() != let->Value()->Type()) {
+                AddError(let, "let result type does not match value type");
             }
         }
     }

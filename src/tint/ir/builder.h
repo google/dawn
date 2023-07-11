@@ -38,6 +38,7 @@
 #include "src/tint/ir/function_param.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction_result.h"
+#include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
@@ -587,6 +588,23 @@ class Builder {
     /// @param type the var type
     /// @returns the instruction
     ir::Var* Var(std::string_view name, const type::Pointer* type);
+
+    /// Creates a new `let` declaration
+    /// @param name the let name
+    /// @param value the let value
+    /// @returns the instruction
+    template <typename VALUE>
+    ir::Let* Let(std::string_view name, VALUE&& value) {
+        auto* val = Value(std::forward<VALUE>(value));
+        if (TINT_UNLIKELY(!val)) {
+            TINT_ASSERT(IR, val);
+            return nullptr;
+        }
+        auto* let = Append(ir.instructions.Create<ir::Let>(InstructionResult(val->Type()), val));
+        ir.SetName(let, name);
+        ir.SetName(let->Result(), name);
+        return let;
+    }
 
     /// Creates a return instruction
     /// @param func the function being returned

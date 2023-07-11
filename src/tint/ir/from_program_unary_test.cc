@@ -104,11 +104,12 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_AddressOf) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
-  %v2:ptr<private, i32, read_write> = var
+  %v1:ptr<private, i32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
+    %v2:ptr<private, i32, read_write> = let %v1
     ret
   }
 }
@@ -127,11 +128,12 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Indirection) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
-  %v3:ptr<private, i32, read_write> = var
+  %v1:ptr<private, i32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
+    %v3:ptr<private, i32, read_write> = let %v1
     store %v3, 42i
     ret
   }

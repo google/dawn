@@ -34,6 +34,7 @@
 #include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction_result.h"
+#include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/multi_in_block.h"
@@ -462,6 +463,14 @@ void Disassembler::EmitInstruction(Instruction* inst) {
                 out_ << " ";
                 EmitBindingPoint(v->BindingPoint().value());
             }
+            EmitLine();
+        },
+        [&](Let* l) {
+            EmitValueWithType(l);
+            out_ << " = ";
+            EmitInstructionName("let", l);
+            out_ << " ";
+            EmitOperand(l, l->Value(), Let::kValueOperandOffset);
             EmitLine();
         },
         [&](Access* a) {

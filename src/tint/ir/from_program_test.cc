@@ -386,10 +386,11 @@ TEST_F(IR_FromProgramTest, Loop_Continuing_Body_Scope) {
   %b1 = block {
     loop [b: %b2, c: %b3] {  # loop_1
       %b2 = block {  # body
+        %a:bool = let true
         continue %b3
       }
       %b3 = block {  # continuing
-        break_if true %b2
+        break_if %a %b2
       }
     }
     ret

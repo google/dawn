@@ -754,6 +754,93 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidateTest, Let_NullResult) {
+    auto* v = mod.instructions.Create<ir::Let>(nullptr, b.Constant(1_i));
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.With(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: instruction result is undefined
+    undef = let 1i
+    ^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    undef = let 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Let_NullValue) {
+    auto* v = mod.instructions.Create<ir::Let>(b.InstructionResult(ty.f32()), nullptr);
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.With(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:18 error: let: value operand is undefined
+    %2:f32 = let undef
+                 ^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:f32 = let undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, Let_WrongType) {
+    auto* v = mod.instructions.Create<ir::Let>(b.InstructionResult(ty.f32()), b.Constant(1_i));
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.With(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:14 error: let result type does not match value type
+    %2:f32 = let 1i
+             ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:f32 = let 1i
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidateTest, Instruction_AppendedDead) {
     auto* f = b.Function("my_func", ty.void_());
 

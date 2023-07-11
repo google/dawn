@@ -43,6 +43,7 @@ class ExitLoop;
 class ExitSwitch;
 class Function;
 class If;
+class Let;
 class Load;
 class Loop;
 class Module;
@@ -237,6 +238,10 @@ class GeneratorImplIr {
     /// Emit a var instruction.
     /// @param var the var instruction to emit
     void EmitVar(ir::Var* var);
+
+    /// Emit a let instruction.
+    /// @param let the let instruction to emit
+    void EmitLet(ir::Let* let);
 
     /// Emit a terminator instruction.
     /// @param term the terminator instruction to emit

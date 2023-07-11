@@ -35,6 +35,7 @@
 #include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction.h"
+#include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
@@ -297,6 +298,7 @@ class State {
             [&](ir::Unary* u) { Unary(u); },            //
             [&](ir::Unreachable*) {},                   //
             [&](ir::Var* i) { Var(i); },                //
+            [&](ir::Let* i) { Let(i); },                //
             [&](Default) { UNHANDLED_CASE(inst); });
     }
 
@@ -469,6 +471,12 @@ class State {
                 b.GlobalVar(name, ty, init, ptr->AddressSpace(), std::move(attrs));
                 return;
         }
+    }
+
+    void Let(ir::Let* let) {
+        Symbol name = NameFor(let->Result());
+        Append(b.Decl(b.Let(name, Expr(let->Value(), PtrKind::kPtr))));
+        Bind(let->Result(), name, PtrKind::kPtr);
     }
 
     void Store(ir::Store* store) {

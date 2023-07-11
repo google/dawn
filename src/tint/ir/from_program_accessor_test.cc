@@ -338,7 +338,8 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleIndex) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %b:u32 = access vec3<u32>(0u), 2u
+    %a:vec3<u32> = let vec3<u32>(0u)
+    %b:u32 = access %a, 2u
     ret
   }
 }
@@ -359,7 +360,8 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiIndex) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %b:f32 = access mat3x4<f32>(vec4<f32>(0.0f)), 2u, 3u
+    %a:mat3x4<f32> = let mat3x4<f32>(vec4<f32>(0.0f))
+    %b:f32 = access %a, 2u, 3u
     ret
   }
 }
@@ -388,7 +390,8 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleMember) {
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %b:i32 = access MyStruct(0i), 0u
+    %a:MyStruct = let MyStruct(0i)
+    %b:i32 = access %a, 0u
     ret
   }
 }
@@ -427,7 +430,8 @@ Outer = struct @align(4) {
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %b:f32 = access Outer(0i, Inner(0.0f)), 1u, 0u
+    %a:Outer = let Outer(0i, Inner(0.0f))
+    %b:f32 = access %a, 1u, 0u
     ret
   }
 }
@@ -472,7 +476,8 @@ Outer = struct @align(16) {
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %b:vec4<f32> = access array<Outer, 4>(Outer(0i, array<Inner, 4>(Inner(0i, 0.0f, vec4<f32>(0.0f))))), 0u, 1u, 1u, 2u
+    %a:array<Outer, 4> = let array<Outer, 4>(Outer(0i, array<Inner, 4>(Inner(0i, 0.0f, vec4<f32>(0.0f)))))
+    %b:vec4<f32> = access %a, 0u, 1u, 1u, 2u
     ret
   }
 }
@@ -493,7 +498,8 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleElement) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %b:f32 = access vec2<f32>(0.0f), 1u
+    %a:vec2<f32> = let vec2<f32>(0.0f)
+    %b:f32 = access %a, 1u
     ret
   }
 }
@@ -514,7 +520,8 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %b:vec4<f32> = swizzle vec3<f32>(0.0f), zyxz
+    %a:vec3<f32> = let vec3<f32>(0.0f)
+    %b:vec4<f32> = swizzle %a, zyxz
     ret
   }
 }
@@ -535,8 +542,9 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %2:vec3<f32> = swizzle vec3<f32>(0.0f), zyx
-    %b:vec2<f32> = swizzle %2, yy
+    %a:vec3<f32> = let vec3<f32>(0.0f)
+    %3:vec3<f32> = swizzle %a, zyx
+    %b:vec2<f32> = swizzle %3, yy
     ret
   }
 }
@@ -569,10 +577,11 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChai
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %2:vec4<f32> = access MyStruct(0i, vec4<f32>(0.0f)), 1u
-    %3:vec3<f32> = swizzle %2, zyx
-    %4:vec2<f32> = swizzle %3, yx
-    %b:f32 = access %4, 0u
+    %a:MyStruct = let MyStruct(0i, vec4<f32>(0.0f))
+    %3:vec4<f32> = access %a, 1u
+    %4:vec3<f32> = swizzle %3, zyx
+    %5:vec2<f32> = swizzle %4, yx
+    %b:f32 = access %5, 0u
     ret
   }
 }
@@ -595,8 +604,9 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %2:i32 = access vec3<i32>(1i, 2i, 3i), 1i
-    %b:ptr<function, i32, read_write> = var, %2
+    %i:i32 = let 1i
+    %3:i32 = access vec3<i32>(1i, 2i, 3i), %i
+    %b:ptr<function, i32, read_write> = var, %3
     ret
   }
 }
@@ -619,8 +629,9 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIn
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
-    %2:i32 = access vec2<i32>(1i, 2i), 1i
-    %b:ptr<function, i32, read_write> = var, %2
+    %i:i32 = let 1i
+    %3:i32 = access vec2<i32>(1i, 2i), %i
+    %b:ptr<function, i32, read_write> = var, %3
     ret
   }
 }
