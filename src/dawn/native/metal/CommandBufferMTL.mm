@@ -1083,7 +1083,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         destinationOffset:NSUInteger(cmd->destinationOffset)
                                      size:NSUInteger(cmd->queryCount * sizeof(uint64_t))];
                 } else {
-                    if (@available(macos 10.15, iOS 14.0, *)) {
+                    if (@available(macOS 10.15, iOS 14.0, *)) {
                         destination->TrackUsage();
                         [commandContext->EnsureBlit()
                               resolveCounters:querySet->GetCounterSampleBuffer()
@@ -1110,7 +1110,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         UNREACHABLE();
                     }
                 } else {
-                    if (@available(macos 10.15, iOS 14.0, *)) {
+                    if (@available(macOS 10.15, iOS 14.0, *)) {
                         ASSERT(ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary());
                         [commandContext->EnsureBlit()
                             sampleCountersInBuffer:ToBackend(cmd->querySet.Get())
@@ -1133,23 +1133,16 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 
             case Command::PopDebugGroup: {
                 mCommands.NextCommand<PopDebugGroupCmd>();
-
-                if (@available(macos 10.13, *)) {
-                    [commandContext->GetCommands() popDebugGroup];
-                }
+                [commandContext->GetCommands() popDebugGroup];
                 break;
             }
 
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
                 char* label = mCommands.NextData<char>(cmd->length + 1);
-
-                if (@available(macos 10.13, *)) {
-                    NSRef<NSString> mtlLabel =
-                        AcquireNSRef([[NSString alloc] initWithUTF8String:label]);
-                    [commandContext->GetCommands() pushDebugGroup:mtlLabel.Get()];
-                }
-
+                NSRef<NSString> mtlLabel =
+                    AcquireNSRef([[NSString alloc] initWithUTF8String:label]);
+                [commandContext->GetCommands() pushDebugGroup:mtlLabel.Get()];
                 break;
             }
 
@@ -1215,7 +1208,7 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
     } else {
         encoder = commandContext->BeginCompute();
 
-        if (@available(macos 10.15, iOS 14.0, *)) {
+        if (@available(macOS 10.15, iOS 14.0, *)) {
             if (computePassCmd->beginTimestamp.querySet.Get() != nullptr) {
                 ASSERT(ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary());
 
@@ -1235,7 +1228,7 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
             case Command::EndComputePass: {
                 mCommands.NextCommand<EndComputePassCmd>();
 
-                if (@available(macos 10.15, iOS 14.0, *)) {
+                if (@available(macOS 10.15, iOS 14.0, *)) {
                     // Simulate timestamp write at the end of render pass if it does not support
                     // counter sampling at stage boundary.
                     if (ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary() &&
@@ -1339,7 +1332,7 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
                 QuerySet* querySet = ToBackend(cmd->querySet.Get());
 
-                if (@available(macos 10.15, iOS 14.0, *)) {
+                if (@available(macOS 10.15, iOS 14.0, *)) {
                     [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
                                       atSampleIndex:NSUInteger(cmd->queryIndex)
                                         withBarrier:YES];
@@ -1376,7 +1369,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
     VertexBufferTracker vertexBuffers(&storageBufferLengths);
     BindGroupTracker bindGroups(&storageBufferLengths);
 
-    if (@available(macos 10.15, iOS 14.0, *)) {
+    if (@available(macOS 10.15, iOS 14.0, *)) {
         // Simulate timestamp write at the beginning of render pass by
         // sampleCountersInBuffer if it does not support counter sampling at stage boundary.
         if (ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary() &&
@@ -1593,7 +1586,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
             case Command::EndRenderPass: {
                 mCommands.NextCommand<EndRenderPassCmd>();
 
-                if (@available(macos 10.15, iOS 14.0, *)) {
+                if (@available(macOS 10.15, iOS 14.0, *)) {
                     // Simulate timestamp write at the end of render pass if it does not support
                     // counter sampling at stage boundary.
                     if (ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary() &&
@@ -1703,7 +1696,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
                 QuerySet* querySet = ToBackend(cmd->querySet.Get());
 
-                if (@available(macos 10.15, iOS 14.0, *)) {
+                if (@available(macOS 10.15, iOS 14.0, *)) {
                     [encoder sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
                                       atSampleIndex:NSUInteger(cmd->queryIndex)
                                         withBarrier:YES];

@@ -40,16 +40,6 @@ uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
     if (@available(iOS 12, tvOS 12, macOS 10.14, *)) {
         return [mtlDevice maxBufferLength];
     }
-
-    // Earlier versions of Metal had maximums defined in the Metal feature set tables
-    // https://metalbyexample.com/wp-content/uploads/Metal-Feature-Set-Tables-2018.pdf
-#if DAWN_PLATFORM_IS(MACOS)
-    // 10.12 and 10.13 have a 1Gb limit.
-    if (@available(macOS 10.12, *)) {
-        return 1024 * 1024 * 1024;
-    }
-#endif
-
     // 256Mb limit in versions without based on the data in the feature set tables.
     return 256 * 1024 * 1024;
 }

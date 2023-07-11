@@ -69,9 +69,7 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     [*mLayer setPixelFormat:MetalPixelFormat(GetDevice(), GetFormat())];
 
 #if DAWN_PLATFORM_IS(MACOS)
-    if (@available(macos 10.13, *)) {
-        [*mLayer setDisplaySyncEnabled:(GetPresentMode() != wgpu::PresentMode::Immediate)];
-    }
+    [*mLayer setDisplaySyncEnabled:(GetPresentMode() != wgpu::PresentMode::Immediate)];
 #endif  // DAWN_PLATFORM_IS(MACOS)
 
     // There is no way to control Fifo vs. Mailbox in Metal.
