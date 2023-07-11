@@ -72,7 +72,7 @@
         "category": "function pointer",
         "args": [
             {"name": "status", "type": "request adapter status"},
-            {"name": "adapter", "type": "adapter"},
+            {"name": "adapter", "type": "adapter", "optional": true},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "userdata", "type": "void *"}
         ]
@@ -945,8 +945,8 @@
         "category": "function pointer",
         "args": [
             {"name": "status", "type": "create pipeline async status"},
-            {"name": "pipeline", "type": "compute pipeline"},
-            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "pipeline", "type": "compute pipeline", "optional": true},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "userdata", "type": "void *"}
         ]
     },
@@ -966,8 +966,8 @@
         "category": "function pointer",
         "args": [
             {"name": "status", "type": "create pipeline async status"},
-            {"name": "pipeline", "type": "render pipeline"},
-            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "pipeline", "type": "render pipeline", "optional": true},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "userdata", "type": "void *"}
         ]
     },
@@ -1251,7 +1251,7 @@
         "category": "function pointer",
         "args": [
             {"name": "reason", "type": "device lost reason"},
-            {"name": "message", "type": "char", "annotation": "const*"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "userdata", "type": "void *"}
         ]
     },
@@ -1270,7 +1270,7 @@
         "category": "function pointer",
         "args": [
             {"name": "type", "type": "error type"},
-            {"name": "message", "type": "char", "annotation": "const*"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "userdata", "type": "void *"}
         ]
     },
@@ -1330,7 +1330,7 @@
         "tags": ["dawn"],
         "args": [
             {"name": "type", "type": "logging type"},
-            {"name": "message", "type": "char", "annotation": "const*"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "userdata", "type": "void *"}
         ]
     },
@@ -2233,9 +2233,10 @@
 
     "request device callback": {
         "category": "function pointer",
+        "_TODO": "crbug.com/1234617: Revisit optional status of device once requestDevice can return lost devices",
         "args": [
             {"name": "status", "type": "request device status"},
-            {"name": "device", "type": "device"},
+            {"name": "device", "type": "device", "optional": true},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "userdata", "type": "void *"}
         ]
