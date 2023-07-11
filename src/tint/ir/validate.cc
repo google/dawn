@@ -432,8 +432,7 @@ class Validator {
     }
 
     void CheckLet(Let* let) {
-        CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset, "let",
-                            [](size_t) { return "value"; });
+        CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset, "let");
 
         if (let->Result() && let->Value()) {
             if (let->Result()->Type() != let->Value()->Type()) {

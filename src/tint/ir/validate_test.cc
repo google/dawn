@@ -794,7 +794,7 @@ TEST_F(IR_ValidateTest, Let_NullValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:18 error: let: value operand is undefined
+    EXPECT_EQ(res.Failure().str(), R"(:3:18 error: let: operand is undefined
     %2:f32 = let undef
                  ^^^^^
 
