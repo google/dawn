@@ -821,25 +821,25 @@ bool match_atomic_compare_exchange_result(MatchState&, const type::Type* ty, con
 }
 
 const type::Struct* build_modf_result(MatchState& state, const type::Type* el) {
-    return CreateModfResult(state.builder, el);
+    return CreateModfResult(state.builder.Types(), state.builder.Symbols(), el);
 }
 
 const type::Struct* build_modf_result_vec(MatchState& state, Number& n, const type::Type* el) {
     auto* vec = state.builder.create<type::Vector>(el, n.Value());
-    return CreateModfResult(state.builder, vec);
+    return CreateModfResult(state.builder.Types(), state.builder.Symbols(), vec);
 }
 
 const type::Struct* build_frexp_result(MatchState& state, const type::Type* el) {
-    return CreateFrexpResult(state.builder, el);
+    return CreateFrexpResult(state.builder.Types(), state.builder.Symbols(), el);
 }
 
 const type::Struct* build_frexp_result_vec(MatchState& state, Number& n, const type::Type* el) {
     auto* vec = state.builder.create<type::Vector>(el, n.Value());
-    return CreateFrexpResult(state.builder, vec);
+    return CreateFrexpResult(state.builder.Types(), state.builder.Symbols(), vec);
 }
 
 const type::Struct* build_atomic_compare_exchange_result(MatchState& state, const type::Type* ty) {
-    return CreateAtomicCompareExchangeResult(state.builder, ty);
+    return CreateAtomicCompareExchangeResult(state.builder.Types(), state.builder.Symbols(), ty);
 }
 
 /// ParameterInfo describes a parameter

@@ -18,52 +18,20 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
+#include "src/tint/symbol_table.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
+#include "src/tint/type/bool.h"
+#include "src/tint/type/f16.h"
+#include "src/tint/type/f32.h"
+#include "src/tint/type/i32.h"
+#include "src/tint/type/manager.h"
+#include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
+#include "src/tint/utils/string.h"
 
 namespace tint::resolver {
-
-namespace {
-
-struct NameAndType {
-    std::string_view name;
-    const type::Type* type;
-};
-
-type::Struct* BuildStruct(ProgramBuilder& b,
-                          builtin::Builtin name,
-                          std::initializer_list<NameAndType> member_names_and_types) {
-    uint32_t offset = 0;
-    uint32_t max_align = 0;
-    utils::Vector<const type::StructMember*, 4> members;
-    for (auto& m : member_names_and_types) {
-        uint32_t align = std::max<uint32_t>(m.type->Align(), 1);
-        uint32_t size = m.type->Size();
-        offset = utils::RoundUp(align, offset);
-        max_align = std::max(max_align, align);
-        members.Push(b.create<type::StructMember>(
-            /* name */ b.Sym(m.name),
-            /* type */ m.type,
-            /* index */ static_cast<uint32_t>(members.Length()),
-            /* offset */ offset,
-            /* align */ align,
-            /* size */ size,
-            /* attributes */ type::StructMemberAttributes{}));
-        offset += size;
-    }
-    uint32_t size_without_padding = offset;
-    uint32_t size_with_padding = utils::RoundUp(max_align, offset);
-    return b.create<type::Struct>(
-        /* name */ b.Sym(name),
-        /* members */ std::move(members),
-        /* align */ max_align,
-        /* size */ size_with_padding,
-        /* size_no_padding */ size_without_padding);
-}
-}  // namespace
 
 constexpr std::array kModfVecF32Names{
     builtin::Builtin::kModfResultVec2F32,
@@ -80,24 +48,20 @@ constexpr std::array kModfVecAbstractNames{
     builtin::Builtin::kModfResultVec3Abstract,
     builtin::Builtin::kModfResultVec4Abstract,
 };
-
-type::Struct* CreateModfResult(ProgramBuilder& b, const type::Type* ty) {
+type::Struct* CreateModfResult(type::Manager& types, SymbolTable& symbols, const type::Type* ty) {
+    auto build = [&](builtin::Builtin name, const type::Type* t) {
+        return types.Struct(symbols.Register(utils::ToString(name)),
+                            {{symbols.Register("fract"), t}, {symbols.Register("whole"), t}});
+    };
     return Switch(
-        ty,
-        [&](const type::F32*) {
-            return BuildStruct(b, builtin::Builtin::kModfResultF32, {{"fract", ty}, {"whole", ty}});
-        },  //
-        [&](const type::F16*) {
-            return BuildStruct(b, builtin::Builtin::kModfResultF16, {{"fract", ty}, {"whole", ty}});
-        },
+        ty,  //
+        [&](const type::F32*) { return build(builtin::Builtin::kModfResultF32, ty); },
+        [&](const type::F16*) { return build(builtin::Builtin::kModfResultF16, ty); },
         [&](const type::AbstractFloat*) {
-            auto* abstract = BuildStruct(b, builtin::Builtin::kModfResultAbstract,
-                                         {{"fract", ty}, {"whole", ty}});
-            auto* f32 = b.create<type::F32>();
-            auto* f16 = b.create<type::F16>();
+            auto* abstract = build(builtin::Builtin::kModfResultAbstract, ty);
             abstract->SetConcreteTypes(utils::Vector{
-                BuildStruct(b, builtin::Builtin::kModfResultF32, {{"fract", f32}, {"whole", f32}}),
-                BuildStruct(b, builtin::Builtin::kModfResultF16, {{"fract", f16}, {"whole", f16}}),
+                build(builtin::Builtin::kModfResultF32, types.f32()),
+                build(builtin::Builtin::kModfResultF16, types.f16()),
             });
             return abstract;
         },
@@ -105,35 +69,23 @@ type::Struct* CreateModfResult(ProgramBuilder& b, const type::Type* ty) {
             auto width = vec->Width();
             return Switch(
                 vec->type(),  //
-                [&](const type::F32*) {
-                    return BuildStruct(b, kModfVecF32Names[width - 2],
-                                       {{"fract", vec}, {"whole", vec}});
-                },
-                [&](const type::F16*) {
-                    return BuildStruct(b, kModfVecF16Names[width - 2],
-                                       {{"fract", vec}, {"whole", vec}});
-                },
+                [&](const type::F32*) { return build(kModfVecF32Names[width - 2], vec); },
+                [&](const type::F16*) { return build(kModfVecF16Names[width - 2], vec); },
                 [&](const type::AbstractFloat*) {
-                    auto* vec_f32 = b.create<type::Vector>(b.create<type::F32>(), width);
-                    auto* vec_f16 = b.create<type::Vector>(b.create<type::F16>(), width);
-                    auto* abstract = BuildStruct(b, kModfVecAbstractNames[width - 2],
-                                                 {{"fract", vec}, {"whole", vec}});
+                    auto* abstract = build(kModfVecAbstractNames[width - 2], vec);
                     abstract->SetConcreteTypes(utils::Vector{
-                        BuildStruct(b, kModfVecF32Names[width - 2],
-                                    {{"fract", vec_f32}, {"whole", vec_f32}}),
-                        BuildStruct(b, kModfVecF16Names[width - 2],
-                                    {{"fract", vec_f16}, {"whole", vec_f16}}),
+                        build(kModfVecF32Names[width - 2], types.vec(types.f32(), width)),
+                        build(kModfVecF16Names[width - 2], types.vec(types.f16(), width)),
                     });
                     return abstract;
                 },
                 [&](Default) {
-                    TINT_ICE(Resolver, b.Diagnostics())
-                        << "unhandled modf type: " << ty->FriendlyName();
+                    TINT_ASSERT(Resolver, false && "unhandled modf type");
                     return nullptr;
                 });
         },
         [&](Default) {
-            TINT_ICE(Resolver, b.Diagnostics()) << "unhandled modf type: " << ty->FriendlyName();
+            TINT_ASSERT(Resolver, false && "unhandled modf type");
             return nullptr;
         });
 }
@@ -153,27 +105,21 @@ constexpr std::array kFrexpVecAbstractNames{
     builtin::Builtin::kFrexpResultVec3Abstract,
     builtin::Builtin::kFrexpResultVec4Abstract,
 };
-type::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* ty) {
+type::Struct* CreateFrexpResult(type::Manager& types, SymbolTable& symbols, const type::Type* ty) {
+    auto build = [&](builtin::Builtin name, const type::Type* fract_ty, const type::Type* exp_ty) {
+        return types.Struct(
+            symbols.Register(utils::ToString(name)),
+            {{symbols.Register("fract"), fract_ty}, {symbols.Register("exp"), exp_ty}});
+    };
     return Switch(
         ty,  //
-        [&](const type::F32*) {
-            auto* i32 = b.create<type::I32>();
-            return BuildStruct(b, builtin::Builtin::kFrexpResultF32, {{"fract", ty}, {"exp", i32}});
-        },
-        [&](const type::F16*) {
-            auto* i32 = b.create<type::I32>();
-            return BuildStruct(b, builtin::Builtin::kFrexpResultF16, {{"fract", ty}, {"exp", i32}});
-        },
+        [&](const type::F32*) { return build(builtin::Builtin::kFrexpResultF32, ty, types.i32()); },
+        [&](const type::F16*) { return build(builtin::Builtin::kFrexpResultF16, ty, types.i32()); },
         [&](const type::AbstractFloat*) {
-            auto* f32 = b.create<type::F32>();
-            auto* f16 = b.create<type::F16>();
-            auto* i32 = b.create<type::I32>();
-            auto* ai = b.create<type::AbstractInt>();
-            auto* abstract = BuildStruct(b, builtin::Builtin::kFrexpResultAbstract,
-                                         {{"fract", ty}, {"exp", ai}});
+            auto* abstract = build(builtin::Builtin::kFrexpResultAbstract, ty, types.AInt());
             abstract->SetConcreteTypes(utils::Vector{
-                BuildStruct(b, builtin::Builtin::kFrexpResultF32, {{"fract", f32}, {"exp", i32}}),
-                BuildStruct(b, builtin::Builtin::kFrexpResultF16, {{"fract", f16}, {"exp", i32}}),
+                build(builtin::Builtin::kFrexpResultF32, types.f32(), types.i32()),
+                build(builtin::Builtin::kFrexpResultF16, types.f16(), types.i32()),
             });
             return abstract;
         },
@@ -182,56 +128,50 @@ type::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* ty) {
             return Switch(
                 vec->type(),  //
                 [&](const type::F32*) {
-                    auto* vec_i32 = b.create<type::Vector>(b.create<type::I32>(), width);
-                    return BuildStruct(b, kFrexpVecF32Names[width - 2],
-                                       {{"fract", ty}, {"exp", vec_i32}});
+                    return build(kFrexpVecF32Names[width - 2], ty, types.vec(types.i32(), width));
                 },
                 [&](const type::F16*) {
-                    auto* vec_i32 = b.create<type::Vector>(b.create<type::I32>(), width);
-                    return BuildStruct(b, kFrexpVecF16Names[width - 2],
-                                       {{"fract", ty}, {"exp", vec_i32}});
+                    return build(kFrexpVecF16Names[width - 2], ty, types.vec(types.i32(), width));
                 },
                 [&](const type::AbstractFloat*) {
-                    auto* vec_f32 = b.create<type::Vector>(b.create<type::F32>(), width);
-                    auto* vec_f16 = b.create<type::Vector>(b.create<type::F16>(), width);
-                    auto* vec_i32 = b.create<type::Vector>(b.create<type::I32>(), width);
-                    auto* vec_ai = b.create<type::Vector>(b.create<type::AbstractInt>(), width);
-                    auto* abstract = BuildStruct(b, kFrexpVecAbstractNames[width - 2],
-                                                 {{"fract", ty}, {"exp", vec_ai}});
+                    auto* vec_f32 = types.vec(types.f32(), width);
+                    auto* vec_f16 = types.vec(types.f16(), width);
+                    auto* vec_i32 = types.vec(types.i32(), width);
+                    auto* vec_ai = types.vec(types.AInt(), width);
+                    auto* abstract = build(kFrexpVecAbstractNames[width - 2], ty, vec_ai);
                     abstract->SetConcreteTypes(utils::Vector{
-                        BuildStruct(b, kFrexpVecF32Names[width - 2],
-                                    {{"fract", vec_f32}, {"exp", vec_i32}}),
-                        BuildStruct(b, kFrexpVecF16Names[width - 2],
-                                    {{"fract", vec_f16}, {"exp", vec_i32}}),
+                        build(kFrexpVecF32Names[width - 2], vec_f32, vec_i32),
+                        build(kFrexpVecF16Names[width - 2], vec_f16, vec_i32),
                     });
                     return abstract;
                 },
                 [&](Default) {
-                    TINT_ICE(Resolver, b.Diagnostics())
-                        << "unhandled frexp type: " << ty->FriendlyName();
+                    TINT_ASSERT(Resolver, false && "unhandled frexp type");
                     return nullptr;
                 });
         },
         [&](Default) {
-            TINT_ICE(Resolver, b.Diagnostics()) << "unhandled frexp type: " << ty->FriendlyName();
+            TINT_ASSERT(Resolver, false && "unhandled frexp type");
             return nullptr;
         });
 }
 
-type::Struct* CreateAtomicCompareExchangeResult(ProgramBuilder& b, const type::Type* ty) {
+type::Struct* CreateAtomicCompareExchangeResult(type::Manager& types,
+                                                SymbolTable& symbols,
+                                                const type::Type* ty) {
+    auto build = [&](builtin::Builtin name) {
+        return types.Struct(symbols.Register(utils::ToString(name)),
+                            {
+                                {symbols.Register("old_value"), ty},
+                                {symbols.Register("exchanged"), types.bool_()},
+                            });
+    };
     return Switch(
         ty,  //
-        [&](const type::I32*) {
-            return BuildStruct(b, builtin::Builtin::kAtomicCompareExchangeResultI32,
-                               {{"old_value", ty}, {"exchanged", b.create<type::Bool>()}});
-        },
-        [&](const type::U32*) {
-            return BuildStruct(b, builtin::Builtin::kAtomicCompareExchangeResultU32,
-                               {{"old_value", ty}, {"exchanged", b.create<type::Bool>()}});
-        },
+        [&](const type::I32*) { return build(builtin::Builtin::kAtomicCompareExchangeResultI32); },
+        [&](const type::U32*) { return build(builtin::Builtin::kAtomicCompareExchangeResultU32); },
         [&](Default) {
-            TINT_ICE(Resolver, b.Diagnostics())
-                << "unhandled atomic_compare_exchange type: " << ty->FriendlyName();
+            TINT_ASSERT(Resolver, false && "unhandled atomic_compare_exchange type");
             return nullptr;
         });
 }

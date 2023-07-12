@@ -178,11 +178,12 @@ type::Struct* Manager::Struct(Symbol name, utils::VectorRef<StructMemberDesc> md
     uint32_t max_align = 0u;
     for (const auto& m : md) {
         uint32_t index = static_cast<uint32_t>(members.Length());
-        uint32_t offset = utils::RoundUp(m.type->Align(), current_size);
-        members.Push(Get<type::StructMember>(m.name, m.type, index, offset, m.type->Align(),
-                                             m.type->Size(), std::move(m.attributes)));
+        uint32_t align = std::max<uint32_t>(m.type->Align(), 1u);
+        uint32_t offset = utils::RoundUp(align, current_size);
+        members.Push(Get<type::StructMember>(m.name, m.type, index, offset, align, m.type->Size(),
+                                             std::move(m.attributes)));
         current_size = offset + m.type->Size();
-        max_align = std::max(max_align, m.type->Align());
+        max_align = std::max(max_align, align);
     }
     return Get<type::Struct>(name, members, max_align, utils::RoundUp(max_align, current_size),
                              current_size);

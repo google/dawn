@@ -2824,57 +2824,57 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
         case builtin::Builtin::kPackedVec3:
             return packed_vec3_t();
         case builtin::Builtin::kAtomicCompareExchangeResultI32:
-            return CreateAtomicCompareExchangeResult(*builder_, i32());
+            return CreateAtomicCompareExchangeResult(builder_->Types(), builder_->Symbols(), i32());
         case builtin::Builtin::kAtomicCompareExchangeResultU32:
-            return CreateAtomicCompareExchangeResult(*builder_, u32());
+            return CreateAtomicCompareExchangeResult(builder_->Types(), builder_->Symbols(), u32());
         case builtin::Builtin::kFrexpResultAbstract:
-            return CreateFrexpResult(*builder_, af());
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), af());
         case builtin::Builtin::kFrexpResultF16:
-            return CreateFrexpResult(*builder_, f16());
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), f16());
         case builtin::Builtin::kFrexpResultF32:
-            return CreateFrexpResult(*builder_, f32());
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), f32());
         case builtin::Builtin::kFrexpResultVec2Abstract:
-            return CreateFrexpResult(*builder_, vec(af(), 2));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 2));
         case builtin::Builtin::kFrexpResultVec2F16:
-            return CreateFrexpResult(*builder_, vec(f16(), 2));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 2));
         case builtin::Builtin::kFrexpResultVec2F32:
-            return CreateFrexpResult(*builder_, vec(f32(), 2));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 2));
         case builtin::Builtin::kFrexpResultVec3Abstract:
-            return CreateFrexpResult(*builder_, vec(af(), 3));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 3));
         case builtin::Builtin::kFrexpResultVec3F16:
-            return CreateFrexpResult(*builder_, vec(f16(), 3));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 3));
         case builtin::Builtin::kFrexpResultVec3F32:
-            return CreateFrexpResult(*builder_, vec(f32(), 3));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 3));
         case builtin::Builtin::kFrexpResultVec4Abstract:
-            return CreateFrexpResult(*builder_, vec(af(), 4));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 4));
         case builtin::Builtin::kFrexpResultVec4F16:
-            return CreateFrexpResult(*builder_, vec(f16(), 4));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 4));
         case builtin::Builtin::kFrexpResultVec4F32:
-            return CreateFrexpResult(*builder_, vec(f32(), 4));
+            return CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 4));
         case builtin::Builtin::kModfResultAbstract:
-            return CreateModfResult(*builder_, af());
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), af());
         case builtin::Builtin::kModfResultF16:
-            return CreateModfResult(*builder_, f16());
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), f16());
         case builtin::Builtin::kModfResultF32:
-            return CreateModfResult(*builder_, f32());
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), f32());
         case builtin::Builtin::kModfResultVec2Abstract:
-            return CreateModfResult(*builder_, vec(af(), 2));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 2));
         case builtin::Builtin::kModfResultVec2F16:
-            return CreateModfResult(*builder_, vec(f16(), 2));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 2));
         case builtin::Builtin::kModfResultVec2F32:
-            return CreateModfResult(*builder_, vec(f32(), 2));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 2));
         case builtin::Builtin::kModfResultVec3Abstract:
-            return CreateModfResult(*builder_, vec(af(), 3));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 3));
         case builtin::Builtin::kModfResultVec3F16:
-            return CreateModfResult(*builder_, vec(f16(), 3));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 3));
         case builtin::Builtin::kModfResultVec3F32:
-            return CreateModfResult(*builder_, vec(f32(), 3));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 3));
         case builtin::Builtin::kModfResultVec4Abstract:
-            return CreateModfResult(*builder_, vec(af(), 4));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 4));
         case builtin::Builtin::kModfResultVec4F16:
-            return CreateModfResult(*builder_, vec(f16(), 4));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 4));
         case builtin::Builtin::kModfResultVec4F32:
-            return CreateModfResult(*builder_, vec(f32(), 4));
+            return CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 4));
         case builtin::Builtin::kUndefined:
             break;
     }

@@ -17,9 +17,10 @@
 
 // Forward declarations
 namespace tint {
-class ProgramBuilder;
+class SymbolTable;
 }  // namespace tint
 namespace tint::type {
+class Manager;
 class Struct;
 class Type;
 }  // namespace tint::type
@@ -27,22 +28,32 @@ class Type;
 namespace tint::resolver {
 
 /**
+ * @param types the type manager
+ * @param symbols the symbol table
  * @param ty the type of the `fract` and `whole` struct members.
  * @return the builtin struct type for a modf() builtin call.
  */
-type::Struct* CreateModfResult(ProgramBuilder& b, const type::Type* ty);
+type::Struct* CreateModfResult(type::Manager& types, SymbolTable& symbols, const type::Type* ty);
 
 /**
+ * @param types the type manager
+ * @param symbols the symbol table
  * @param fract the type of the `fract` struct member.
  * @return the builtin struct type for a frexp() builtin call.
  */
-type::Struct* CreateFrexpResult(ProgramBuilder& b, const type::Type* fract);
+type::Struct* CreateFrexpResult(type::Manager& types,
+                                SymbolTable& symbols,
+                                const type::Type* fract);
 
 /**
+ * @param types the type manager
+ * @param symbols the symbol table
  * @param ty the type of the `old_value` struct member.
  * @return the builtin struct type for a atomic_compare_exchange() builtin call.
  */
-type::Struct* CreateAtomicCompareExchangeResult(ProgramBuilder& b, const type::Type* ty);
+type::Struct* CreateAtomicCompareExchangeResult(type::Manager& types,
+                                                SymbolTable& symbols,
+                                                const type::Type* ty);
 
 }  // namespace tint::resolver
 
