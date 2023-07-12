@@ -679,6 +679,12 @@ if(${TINT_BUILD_SPV_WRITER})
     list(APPEND TINT_LIB_SRCS
       ir/transform/builtin_polyfill_spirv.cc
       ir/transform/builtin_polyfill_spirv.h
+      ir/transform/merge_return.cc
+      ir/transform/merge_return.h
+      ir/transform/shader_io_spirv.cc
+      ir/transform/shader_io_spirv.h
+      ir/transform/var_for_dynamic_index.cc
+      ir/transform/var_for_dynamic_index.h
       writer/spirv/ir/generator_impl_ir.cc
       writer/spirv/ir/generator_impl_ir.h
     )
@@ -848,16 +854,10 @@ if(${TINT_BUILD_IR})
     ir/transform/block_decorated_structs.h
     ir/transform/demote_to_helper.cc
     ir/transform/demote_to_helper.h
-    ir/transform/merge_return.cc
-    ir/transform/merge_return.h
     ir/transform/shader_io.cc
     ir/transform/shader_io.h
-    ir/transform/shader_io_spirv.cc
-    ir/transform/shader_io_spirv.h
     ir/transform/transform.cc
     ir/transform/transform.h
-    ir/transform/var_for_dynamic_index.cc
-    ir/transform/var_for_dynamic_index.h
   )
 endif()
 
@@ -1330,6 +1330,9 @@ if(TINT_BUILD_TESTS)
     if(${TINT_BUILD_IR})
       list(APPEND TINT_TEST_SRCS
         ir/transform/builtin_polyfill_spirv_test.cc
+        ir/transform/merge_return_test.cc
+        ir/transform/shader_io_spirv_test.cc
+        ir/transform/var_for_dynamic_index_test.cc
         writer/spirv/ir/generator_impl_ir_access_test.cc
         writer/spirv/ir/generator_impl_ir_binary_test.cc
         writer/spirv/ir/generator_impl_ir_bitcast_test.cc
@@ -1621,9 +1624,6 @@ if(TINT_BUILD_TESTS)
       ir/transform/add_empty_entry_point_test.cc
       ir/transform/block_decorated_structs_test.cc
       ir/transform/demote_to_helper_test.cc
-      ir/transform/merge_return_test.cc
-      ir/transform/shader_io_test.cc
-      ir/transform/var_for_dynamic_index_test.cc
       ir/unary_test.cc
       ir/user_call_test.cc
       ir/validate_test.cc

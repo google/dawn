@@ -14,7 +14,6 @@
 
 #include <utility>
 
-#include "src/tint/ir/transform/shader_io.h"
 #include "src/tint/ir/transform/shader_io_spirv.h"
 #include "src/tint/ir/transform/test_helper.h"
 #include "src/tint/type/struct.h"
