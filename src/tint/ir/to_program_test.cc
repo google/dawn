@@ -2341,6 +2341,77 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramTest, For_IncInInit_Cmp) {
+    // %b1 = block {  # root
+    //   %i:ptr<storage, u32, read_write> = var @binding_point(0, 0)
+    // }
+    //
+    // %f = func():void -> %b2 {
+    //   %b2 = block {
+    //     loop [i: %b3, b: %b4] {  # loop_1
+    //       %b3 = block {  # initializer
+    //         %3:u32 = load %i
+    //         %4:u32 = add %3, 1u
+    //         store %i, %4
+    //         next_iteration %b4
+    //       }
+    //       %b4 = block {  # body
+    //         %5:u32 = load %i
+    //         %6:bool = lt %5, 10u
+    //         if %6 [t: %b5, f: %b6] {  # if_1
+    //           %b5 = block {  # true
+    //             exit_if  # if_1
+    //           }
+    //           %b6 = block {  # false
+    //             exit_loop  # loop_1
+    //           }
+    //         }
+    //         continue %b7
+    //       }
+    //     }
+    //     ret
+    //   }
+    // }
+
+    b.With(b.RootBlock(), [&] {
+        auto* i = b.Var(ty.ptr<storage, u32, read_write>());
+        i->SetBindingPoint(0, 0);
+
+        auto* fn_f = b.Function("f", ty.void_());
+
+        b.With(fn_f->Block(), [&] {
+            auto* loop = b.Loop();
+
+            b.With(loop->Initializer(), [&] {
+                auto* load_i = b.Load(i);
+                auto* inc_i = b.Add(ty.i32(), load_i, 1_u);
+                b.Store(i, inc_i);
+                b.NextIteration(loop);
+            });
+
+            b.With(loop->Body(), [&] {
+                auto* load_i = b.Load(i);
+                auto* cmp = b.LessThan(ty.bool_(), load_i, 10_u);
+                auto* if_ = b.If(cmp);
+                b.With(if_->True(), [&] { b.ExitIf(if_); });
+                b.With(if_->False(), [&] { b.ExitLoop(loop); });
+                b.Continue(loop);
+            });
+
+            b.Return(fn_f);
+        });
+    });
+
+    EXPECT_WGSL(R"(
+@group(0) @binding(0) var<storage, read_write> v : u32;
+
+fn f() {
+  for(v = (v + 1u); (v < 10u); ) {
+  }
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // While
 ////////////////////////////////////////////////////////////////////////////////

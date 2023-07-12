@@ -2165,6 +2165,101 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, For_AssignAsInit) {
+    Test(R"(
+fn n() {
+}
+
+fn f() {
+  var i : i32 = 0i;
+  for(i = 0i; (i < 10i); i = (i + 1i)) {
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, For_CompoundAssignAsInit) {
+    Test(R"(
+fn n() {
+}
+
+fn f() {
+  var i : i32 = 0i;
+  for(i += 0i; (i < 10i); i = (i + 1i)) {
+  }
+}
+)",
+         R"(
+fn n() {
+}
+
+fn f() {
+  var i : i32 = 0i;
+  for(i = (i + 0i); (i < 10i); i = (i + 1i)) {
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, For_IncrementAsInit) {
+    Test(R"(
+fn n() {
+}
+
+fn f() {
+  var i : i32 = 0i;
+  for(i++; (i < 10i); i = (i + 1i)) {
+  }
+}
+)",
+         R"(
+fn n() {
+}
+
+fn f() {
+  var i : i32 = 0i;
+  for(i = (i + 1i); (i < 10i); i = (i + 1i)) {
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, For_DecrementAsInit) {
+    Test(R"(
+fn n() {
+}
+
+fn f() {
+  var i : i32 = 0i;
+  for(i--; (i < 10i); i = (i + 1i)) {
+  }
+}
+)",
+         R"(
+fn n() {
+}
+
+fn f() {
+  var i : i32 = 0i;
+  for(i = (i - 1i); (i < 10i); i = (i + 1i)) {
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, For_CallAsInit) {
+    Test(R"(
+fn n() {
+}
+
+fn f() {
+  var i : i32 = 0i;
+  for(n(); (i < 10i); i = (i + 1i)) {
+  }
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // While
 ////////////////////////////////////////////////////////////////////////////////
@@ -2287,6 +2382,59 @@ fn f() {
     continuing {
       b = (a + b);
     }
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Loop_BreakIf_NotFalse) {
+    Test(R"(
+fn f() {
+  loop {
+    if (false) {
+    } else {
+      break;
+    }
+
+    continuing {
+       break if !false;
+    }
+  }
+}
+)",
+         R"(
+fn f() {
+  loop {
+    if (!(false)) {
+      break;
+    }
+
+    continuing {
+      break if true;
+    }
+  }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Loop_BreakIf_NotTrue) {
+    Test(R"(
+fn f() {
+  loop {
+    if (false) {
+    } else {
+      break;
+    }
+
+    continuing {
+       break if !true;
+    }
+  }
+}
+)",
+         R"(
+fn f() {
+  while(false) {
   }
 }
 )");

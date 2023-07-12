@@ -335,12 +335,27 @@ class State {
     }
 
     void Loop(ir::Loop* l) {
+        // Build all the initializer statements
         auto init_stmts = Statements(l->Initializer());
-        auto* init = init_stmts.Length() == 1 ? init_stmts.Front()->As<ast::VariableDeclStatement>()
-                                              : nullptr;
 
+        // If there's a single initializer statement and meets the WGSL 'for_init' pattern, then
+        // this can be used as the initializer for a for-loop.
+        // @see https://www.w3.org/TR/WGSL/#syntax-for_init
+        auto* init = (init_stmts.Length() == 1) &&
+                             init_stmts.Front()
+                                 ->IsAnyOf<ast::VariableDeclStatement, ast::AssignmentStatement,
+                                           ast::CompoundAssignmentStatement,
+                                           ast::IncrementDecrementStatement, ast::CallStatement>()
+                         ? init_stmts.Front()
+                         : nullptr;
+
+        // Build the loop body statements. If the loop body starts with a if with the following
+        // pattern, then treat it as the loop condition:
+        //   if cond {
+        //     block { exit_if   }
+        //     block { exit_loop }
+        //   }
         const ast::Expression* cond = nullptr;
-
         StatementList body_stmts;
         {
             MarkInlinable(l->Body());
@@ -353,31 +368,59 @@ class State {
                             if_->False()->Length() == 1 &&                 //
                             tint::Is<ir::ExitIf>(if_->True()->Front()) &&  //
                             tint::Is<ir::ExitLoop>(if_->False()->Front())) {
+                            // Matched the loop condition.
                             cond = Expr(if_->Condition());
-                            continue;
+                            continue;  // Don't emit this as an instruction in the body.
                         }
                     }
                 }
 
+                // Process the loop body instruction. Append to 'body_stmts'
                 Instruction(inst);
             }
         }
 
+        // Build any continuing statements
         auto cont_stmts = Statements(l->Continuing());
-        auto* cont = cont_stmts.Length() == 1 ? cont_stmts.Front() : nullptr;
+        // If there's a single continuing statement and meets the WGSL 'for_update' pattern then
+        // this can be used as the continuing for a for-loop.
+        // @see https://www.w3.org/TR/WGSL/#syntax-for_update
+        auto* cont =
+            (cont_stmts.Length() == 1) &&
+                    cont_stmts.Front()
+                        ->IsAnyOf<ast::AssignmentStatement, ast::CompoundAssignmentStatement,
+                                  ast::IncrementDecrementStatement, ast::CallStatement>()
+                ? cont_stmts.Front()
+                : nullptr;
 
-        auto* body = b.Block(std::move(body_stmts));
-
+        // Depending on 'init', 'cond' and 'cont', build a 'for', 'while' or 'loop'
         const ast::Statement* loop = nullptr;
-        if (cond) {
-            if (init || cont) {
-                loop = b.For(init, cond, cont, body);
-            } else {
-                loop = b.While(cond, body);
+        if ((!cont && !cont_stmts.IsEmpty())  // Non-trivial continuing
+            || !cond                          // or non-trivial or no condition
+        ) {
+            // Build a loop
+            if (cond) {
+                body_stmts.Insert(0, b.If(b.Not(cond), b.Block(b.Break())));
             }
-        } else {
+            auto* body = b.Block(std::move(body_stmts));
             loop = cont_stmts.IsEmpty() ? b.Loop(body)  //
                                         : b.Loop(body, b.Block(std::move(cont_stmts)));
+            if (!init_stmts.IsEmpty()) {
+                init_stmts.Push(loop);
+                loop = b.Block(std::move(init_stmts));
+            }
+        } else if (init || cont) {
+            // Build a for-loop
+            auto* body = b.Block(std::move(body_stmts));
+            loop = b.For(init, cond, cont, body);
+            if (!init && !init_stmts.IsEmpty()) {
+                init_stmts.Push(loop);
+                loop = b.Block(std::move(init_stmts));
+            }
+        } else {
+            // Build a while-loop
+            auto* body = b.Block(std::move(body_stmts));
+            loop = b.While(cond, body);
             if (!init_stmts.IsEmpty()) {
                 init_stmts.Push(loop);
                 loop = b.Block(std::move(init_stmts));
@@ -423,7 +466,13 @@ class State {
 
     void ExitLoop(const ir::ExitLoop*) { Append(b.Break()); }
 
-    void BreakIf(ir::BreakIf* i) { Append(b.BreakIf(Expr(i->Condition()))); }
+    void BreakIf(ir::BreakIf* i) {
+        auto* cond = i->Condition();
+        if (IsConstant(cond, false)) {
+            return;
+        }
+        Append(b.BreakIf(Expr(cond)));
+    }
 
     void Return(ir::Return* ret) {
         if (ret->Args().IsEmpty()) {
