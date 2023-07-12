@@ -49,6 +49,7 @@
 #include "src/tint/switch.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/pointer.h"
+#include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
 
 namespace tint::ir {
@@ -489,10 +490,10 @@ class Validator {
         }
 
         tint::Switch(
-            e,                                       //
-            [&](ir::ExitIf* i) { CheckExitIf(i); },  //
-            [&](ir::ExitLoop*) {},                   //
-            [&](ir::ExitSwitch*) {},                 //
+            e,                                               //
+            [&](ir::ExitIf* i) { CheckExitIf(i); },          //
+            [&](ir::ExitLoop*) {},                           //
+            [&](ir::ExitSwitch* s) { CheckExitSwitch(s); },  //
             [&](Default) {
                 AddError(std::string("missing validation of exit: ") + e->TypeInfo().name);
             });
@@ -502,6 +503,25 @@ class Validator {
         if (control_stack_.Back() != e->If()) {
             AddError(e, "exit_if: if target jumps over other control instructions");
             AddNote(control_stack_.Back(), "first control instruction jumped");
+        }
+    }
+
+    void CheckExitSwitch(ExitSwitch* s) {
+        bool found = false;
+        for (auto ctrl : utils::Reverse(control_stack_)) {
+            if (ctrl == s->ControlInstruction()) {
+                found = true;
+                break;
+            }
+            // A exit switch can step over if instructions, but no others.
+            if (!ctrl->Is<ir::If>()) {
+                AddError(s, "exit_switch: switch target jumps over other control instructions");
+                AddNote(ctrl, "first control instruction jumped");
+                return;
+            }
+        }
+        if (!found) {
+            AddError(s, "exit_switch: switch not found in parent control instructions");
         }
     }
 };

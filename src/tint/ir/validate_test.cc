@@ -1554,5 +1554,376 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidateTest, ExitSwitch) {
+    auto* switch_ = b.Switch(true);
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    def->Append(b.ExitSwitch(switch_));
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto sb = b.With(f->Block());
+    sb.Append(switch_);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    EXPECT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_NullSwitch) {
+    auto* switch_ = b.Switch(true);
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    def->Append(mod.instructions.Create<ExitSwitch>(nullptr));
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto sb = b.With(f->Block());
+    sb.Append(switch_);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:5:9 error: exit: has no parent control instruction
+        exit_switch  # undef
+        ^^^^^^^^^^^
+
+:4:7 note: In block
+      %b2 = block {  # case
+      ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    switch true [c: (default, %b2)] {  # switch_1
+      %b2 = block {  # case
+        exit_switch  # undef
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_LessOperandsThenSwitchParams) {
+    auto* switch_ = b.Switch(true);
+
+    auto* r1 = b.InstructionResult(ty.i32());
+    auto* r2 = b.InstructionResult(ty.f32());
+    switch_->SetResults(utils::Vector{r1, r2});
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    def->Append(b.ExitSwitch(switch_, 1_i));
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto sb = b.With(f->Block());
+    sb.Append(switch_);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(
+        res.Failure().str(),
+        R"(:5:9 error: exit: args count (1) does not match control instruction result count (2)
+        exit_switch 1i  # switch_1
+        ^^^^^^^^^^^^^^
+
+:4:7 note: In block
+      %b2 = block {  # case
+      ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
+      %b2 = block {  # case
+        exit_switch 1i  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_MoreOperandsThenSwitchParams) {
+    auto* switch_ = b.Switch(true);
+    auto* r1 = b.InstructionResult(ty.i32());
+    auto* r2 = b.InstructionResult(ty.f32());
+    switch_->SetResults(utils::Vector{r1, r2});
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    def->Append(b.ExitSwitch(switch_, 1_i, 2_f, 3_i));
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto sb = b.With(f->Block());
+    sb.Append(switch_);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(
+        res.Failure().str(),
+        R"(:5:9 error: exit: args count (3) does not match control instruction result count (2)
+        exit_switch 1i, 2.0f, 3i  # switch_1
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+:4:7 note: In block
+      %b2 = block {  # case
+      ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
+      %b2 = block {  # case
+        exit_switch 1i, 2.0f, 3i  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_WithResult) {
+    auto* switch_ = b.Switch(true);
+    auto* r1 = b.InstructionResult(ty.i32());
+    auto* r2 = b.InstructionResult(ty.f32());
+    switch_->SetResults(utils::Vector{r1, r2});
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    def->Append(b.ExitSwitch(switch_, 1_i, 2_f));
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto sb = b.With(f->Block());
+    sb.Append(switch_);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_IncorrectResultType) {
+    auto* switch_ = b.Switch(true);
+    auto* r1 = b.InstructionResult(ty.i32());
+    auto* r2 = b.InstructionResult(ty.f32());
+    switch_->SetResults(utils::Vector{r1, r2});
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    def->Append(b.ExitSwitch(switch_, 1_i, 2_i));
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto sb = b.With(f->Block());
+    sb.Append(switch_);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(
+        res.Failure().str(),
+        R"(:5:25 error: exit: argument type (f32) does not match control instruction type (i32)
+        exit_switch 1i, 2i  # switch_1
+                        ^^
+
+:4:7 note: In block
+      %b2 = block {  # case
+      ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
+      %b2 = block {  # case
+        exit_switch 1i, 2i  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_NotInParentSwitch) {
+    auto* switch_ = b.Switch(true);
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    def->Append(b.Return(f));
+
+    auto sb = b.With(f->Block());
+    sb.Append(switch_);
+
+    auto* if_ = sb.Append(b.If(true));
+    b.With(if_->True(), [&] { b.ExitSwitch(switch_); });
+    sb.Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(),
+              R"(:10:9 error: exit_switch: switch not found in parent control instructions
+        exit_switch  # switch_1
+        ^^^^^^^^^^^
+
+:9:7 note: In block
+      %b3 = block {  # true
+      ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    switch true [c: (default, %b2)] {  # switch_1
+      %b2 = block {  # case
+        ret
+      }
+    }
+    if true [t: %b3] {  # if_1
+      %b3 = block {  # true
+        exit_switch  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_JumpsOverIfs) {
+    // switch(true) {
+    //   default: {
+    //     if (true) {
+    //      if (false) {
+    //         break;
+    //       }
+    //     }
+    //     break;
+    //  }
+    auto* switch_ = b.Switch(true);
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    b.With(def, [&] {
+        auto* if_ = b.If(true);
+        b.With(if_->True(), [&] {
+            auto* inner_if_ = b.If(false);
+            b.With(inner_if_->True(), [&] { b.ExitSwitch(switch_); });
+            b.Return(f);
+        });
+        b.ExitSwitch(switch_);
+    });
+
+    auto sb = b.With(f->Block());
+    sb.Append(switch_);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    EXPECT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_InvalidJumpOverSwitch) {
+    auto* switch_ = b.Switch(true);
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    b.With(def, [&] {
+        auto* inner = b.Switch(false);
+        b.ExitSwitch(switch_);
+
+        auto* inner_def = b.Case(inner, {Switch::CaseSelector{}});
+        b.With(inner_def, [&] { b.ExitSwitch(switch_); });
+    });
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.With(f->Block(), [&] {
+        b.Append(switch_);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(),
+              R"(:7:13 error: exit_switch: switch target jumps over other control instructions
+            exit_switch  # switch_1
+            ^^^^^^^^^^^
+
+:6:11 note: In block
+          %b3 = block {  # case
+          ^^^^^^^^^^^
+
+:5:9 note: first control instruction jumped
+        switch false [c: (default, %b3)] {  # switch_2
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    switch true [c: (default, %b2)] {  # switch_1
+      %b2 = block {  # case
+        switch false [c: (default, %b3)] {  # switch_2
+          %b3 = block {  # case
+            exit_switch  # switch_1
+          }
+        }
+        exit_switch  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidateTest, ExitSwitch_InvalidJumpOverLoop) {
+    auto* switch_ = b.Switch(true);
+
+    auto* def = b.Case(switch_, {Switch::CaseSelector{}});
+    b.With(def, [&] {
+        auto* loop = b.Loop();
+        b.With(loop->Body(), [&] { b.ExitSwitch(switch_); });
+        b.ExitSwitch(switch_);
+    });
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.With(f->Block(), [&] {
+        b.Append(switch_);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(),
+              R"(:7:13 error: exit_switch: switch target jumps over other control instructions
+            exit_switch  # switch_1
+            ^^^^^^^^^^^
+
+:6:11 note: In block
+          %b3 = block {  # body
+          ^^^^^^^^^^^
+
+:5:9 note: first control instruction jumped
+        loop [b: %b3] {  # loop_1
+        ^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    switch true [c: (default, %b2)] {  # switch_1
+      %b2 = block {  # case
+        loop [b: %b3] {  # loop_1
+          %b3 = block {  # body
+            exit_switch  # switch_1
+          }
+        }
+        exit_switch  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir
