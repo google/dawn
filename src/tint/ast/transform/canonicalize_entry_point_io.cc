@@ -44,6 +44,8 @@ struct MemberInfo {
     const StructMember* member;
     /// The struct member location if provided
     std::optional<uint32_t> location;
+    /// The struct member index if provided
+    std::optional<uint32_t> index;
 };
 
 /// FXC is sensitive to field order in structures, this is used by StructMemberComparator to ensure
@@ -84,8 +86,8 @@ uint32_t BuiltinOrder(builtin::BuiltinValue builtin) {
 
 // Returns true if `attr` is a shader IO attribute.
 bool IsShaderIOAttribute(const Attribute* attr) {
-    return attr
-        ->IsAnyOf<BuiltinAttribute, InterpolateAttribute, InvariantAttribute, LocationAttribute>();
+    return attr->IsAnyOf<BuiltinAttribute, InterpolateAttribute, InvariantAttribute,
+                         LocationAttribute, IndexAttribute>();
 }
 
 }  // namespace
@@ -104,6 +106,8 @@ struct CanonicalizeEntryPointIO::State {
         const Expression* value;
         /// The output location.
         std::optional<uint32_t> location;
+        /// The output index.
+        std::optional<uint32_t> index;
     };
 
     /// The clone context.
@@ -279,7 +283,7 @@ struct CanonicalizeEntryPointIO::State {
             Symbol symbol = input_names.emplace(name).second ? ctx.dst->Symbols().Register(name)
                                                              : ctx.dst->Symbols().New(name);
             wrapper_struct_param_members.Push(
-                {ctx.dst->Member(symbol, ast_type, std::move(attrs)), location});
+                {ctx.dst->Member(symbol, ast_type, std::move(attrs)), location, std::nullopt});
             return ctx.dst->MemberAccessor(InputStructSymbol(), symbol);
         }
     }
@@ -288,11 +292,13 @@ struct CanonicalizeEntryPointIO::State {
     /// @param name the name of the shader output
     /// @param type the type of the shader output
     /// @param location the location if provided
+    /// @param index the index if provided
     /// @param attrs the attributes to apply to the shader output
     /// @param value the value of the shader output
     void AddOutput(std::string name,
                    const type::Type* type,
                    std::optional<uint32_t> location,
+                   std::optional<uint32_t> index,
                    utils::Vector<const Attribute*, 8> attrs,
                    const Expression* value) {
         auto builtin_attr = BuiltinOf(attrs);
@@ -324,6 +330,7 @@ struct CanonicalizeEntryPointIO::State {
         output.attributes = std::move(attrs);
         output.value = value;
         output.location = location;
+        output.index = index;
         wrapper_output_values.Push(output);
     }
 
@@ -407,7 +414,8 @@ struct CanonicalizeEntryPointIO::State {
 
                 // Extract the original structure member.
                 AddOutput(name, member->Type(), member->Attributes().location,
-                          std::move(attributes), ctx.dst->MemberAccessor(original_result, name));
+                          member->Attributes().index, std::move(attributes),
+                          ctx.dst->MemberAccessor(original_result, name));
             }
         } else if (!inner_ret_type->Is<type::Void>()) {
             auto attributes =
@@ -415,7 +423,8 @@ struct CanonicalizeEntryPointIO::State {
 
             // Propagate the non-struct return value as is.
             AddOutput("value", func_sem->ReturnType(), func_sem->ReturnLocation(),
-                      std::move(attributes), ctx.dst->Expr(original_result));
+                      func_sem->ReturnIndex(), std::move(attributes),
+                      ctx.dst->Expr(original_result));
         }
     }
 
@@ -436,8 +445,8 @@ struct CanonicalizeEntryPointIO::State {
         // sample mask.
         auto* builtin = ctx.dst->Builtin(builtin::BuiltinValue::kSampleMask);
         builtin_attrs.Add(builtin, builtin::BuiltinValue::kSampleMask);
-        AddOutput("fixed_sample_mask", ctx.dst->create<type::U32>(), std::nullopt, {builtin},
-                  ctx.dst->Expr(u32(cfg.fixed_sample_mask)));
+        AddOutput("fixed_sample_mask", ctx.dst->create<type::U32>(), std::nullopt, std::nullopt,
+                  {builtin}, ctx.dst->Expr(u32(cfg.fixed_sample_mask)));
     }
 
     /// Add a point size builtin to the wrapper function output.
@@ -445,8 +454,8 @@ struct CanonicalizeEntryPointIO::State {
         // Create a new output value and assign it a literal 1.0 value.
         auto* builtin = ctx.dst->Builtin(builtin::BuiltinValue::kPointSize);
         builtin_attrs.Add(builtin, builtin::BuiltinValue::kPointSize);
-        AddOutput("vertex_point_size", ctx.dst->create<type::F32>(), std::nullopt, {builtin},
-                  ctx.dst->Expr(1_f));
+        AddOutput("vertex_point_size", ctx.dst->create<type::F32>(), std::nullopt, std::nullopt,
+                  {builtin}, ctx.dst->Expr(1_f));
     }
 
     /// Create an expression for gl_Position.[component]
@@ -528,10 +537,9 @@ struct CanonicalizeEntryPointIO::State {
             }
             member_names.insert(name.Name());
 
-            wrapper_struct_output_members.Push({
-                ctx.dst->Member(name, outval.type, std::move(outval.attributes)),
-                outval.location,
-            });
+            wrapper_struct_output_members.Push(
+                {ctx.dst->Member(name, outval.type, std::move(outval.attributes)), outval.location,
+                 std::nullopt});
             assignments.Push(
                 ctx.dst->Assign(ctx.dst->MemberAccessor(wrapper_result, name), outval.value));
         }

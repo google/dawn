@@ -3963,5 +3963,213 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Spirv) {
+    auto* src = R"(
+enable chromium_internal_dual_source_blending;
+
+struct FragOutput {
+  @location(0) @index(0) color : vec4<f32>,
+  @location(0) @index(1) blend : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
+};
+
+@fragment
+fn frag_main() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  output.blend = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+)";
+
+    auto* expect = R"(
+enable chromium_internal_dual_source_blending;
+
+@location(0) @index(0) @internal(disable_validation__ignore_address_space) var<__out> color_1 : vec4<f32>;
+
+@location(0) @index(1) @internal(disable_validation__ignore_address_space) var<__out> blend_1 : vec4<f32>;
+
+@builtin(frag_depth) @internal(disable_validation__ignore_address_space) var<__out> depth_1 : f32;
+
+@builtin(sample_mask) @internal(disable_validation__ignore_address_space) var<__out> mask_1 : array<u32, 1u>;
+
+struct FragOutput {
+  color : vec4<f32>,
+  blend : vec4<f32>,
+  depth : f32,
+  mask : u32,
+}
+
+fn frag_main_inner() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  output.blend = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+
+@fragment
+fn frag_main() {
+  let inner_result = frag_main_inner();
+  color_1 = inner_result.color;
+  blend_1 = inner_result.blend;
+  depth_1 = inner_result.depth;
+  mask_1[0i] = inner_result.mask;
+}
+)";
+
+    Transform::DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Msl) {
+    auto* src = R"(
+enable chromium_internal_dual_source_blending;
+
+struct FragOutput {
+  @location(0) @index(0) color : vec4<f32>,
+  @location(0) @index(1) blend : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
+};
+
+@fragment
+fn frag_main() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  output.blend = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+)";
+
+    auto* expect = R"(
+enable chromium_internal_dual_source_blending;
+
+struct FragOutput {
+  color : vec4<f32>,
+  blend : vec4<f32>,
+  depth : f32,
+  mask : u32,
+}
+
+struct tint_symbol {
+  @location(0) @index(0)
+  color : vec4<f32>,
+  @location(0) @index(1)
+  blend : vec4<f32>,
+  @builtin(frag_depth)
+  depth : f32,
+  @builtin(sample_mask)
+  mask : u32,
+}
+
+fn frag_main_inner() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  output.blend = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+
+@fragment
+fn frag_main() -> tint_symbol {
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.color = inner_result.color;
+  wrapper_result.blend = inner_result.blend;
+  wrapper_result.depth = inner_result.depth;
+  wrapper_result.mask = inner_result.mask;
+  return wrapper_result;
+}
+)";
+
+    Transform::DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kMsl);
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Hlsl) {
+    auto* src = R"(
+enable chromium_internal_dual_source_blending;
+
+struct FragOutput {
+  @location(0) @index(0) color : vec4<f32>,
+  @location(0) @index(1) blend : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
+};
+
+@fragment
+fn frag_main() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  output.blend = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+)";
+
+    auto* expect = R"(
+enable chromium_internal_dual_source_blending;
+
+struct FragOutput {
+  color : vec4<f32>,
+  blend : vec4<f32>,
+  depth : f32,
+  mask : u32,
+}
+
+struct tint_symbol {
+  @location(0) @index(0)
+  color : vec4<f32>,
+  @location(0) @index(1)
+  blend : vec4<f32>,
+  @builtin(frag_depth)
+  depth : f32,
+  @builtin(sample_mask)
+  mask : u32,
+}
+
+fn frag_main_inner() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  output.blend = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+
+@fragment
+fn frag_main() -> tint_symbol {
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.color = inner_result.color;
+  wrapper_result.blend = inner_result.blend;
+  wrapper_result.depth = inner_result.depth;
+  wrapper_result.mask = inner_result.mask;
+  return wrapper_result;
+}
+)";
+
+    Transform::DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::ast::transform
