@@ -1206,6 +1206,9 @@ void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
         case builtin::Function::kFloor:
             glsl_ext_inst(GLSLstd450Floor);
             break;
+        case builtin::Function::kFract:
+            glsl_ext_inst(GLSLstd450Fract);
+            break;
         case builtin::Function::kFrexp:
             glsl_ext_inst(GLSLstd450FrexpStruct);
             break;

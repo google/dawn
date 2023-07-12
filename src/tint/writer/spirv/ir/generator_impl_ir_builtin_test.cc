@@ -92,6 +92,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kF16, builtin::Function::kExp2, "Exp2"},
                     BuiltinTestCase{kF32, builtin::Function::kFloor, "Floor"},
                     BuiltinTestCase{kF16, builtin::Function::kFloor, "Floor"},
+                    BuiltinTestCase{kF32, builtin::Function::kFract, "Fract"},
+                    BuiltinTestCase{kF16, builtin::Function::kFract, "Fract"},
                     BuiltinTestCase{kF32, builtin::Function::kInverseSqrt, "InverseSqrt"},
                     BuiltinTestCase{kF16, builtin::Function::kInverseSqrt, "InverseSqrt"},
                     BuiltinTestCase{kF32, builtin::Function::kLog, "Log"},
