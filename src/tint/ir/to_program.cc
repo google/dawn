@@ -30,6 +30,7 @@
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
+#include "src/tint/ir/discard.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/exit_loop.h"
 #include "src/tint/ir/exit_switch.h"
@@ -582,6 +583,7 @@ class State {
                 auto ty = Type(c->Result()->Type());
                 Bind(c->Result(), b.Bitcast(ty, args[0]), PtrKind::kPtr);
             },
+            [&](ir::Discard*) { Append(b.Discard()); },  //
             [&](Default) { UNHANDLED_CASE(call); });
     }
 
