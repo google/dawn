@@ -15,6 +15,7 @@
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 #include "src/tint/builtin/function.h"
+#include "src/tint/resolver/builtin_structs.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -177,6 +178,66 @@ TEST_F(SpvGeneratorImplTest, Builtin_Any_Vector) {
     EXPECT_INST("%result = OpAny %bool %arg");
 }
 
+TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F32) {
+    auto* str = resolver::CreateFrexpResult(ty, mod.symbols, ty.f32());
+    auto* arg = b.FunctionParam("arg", ty.f32());
+    auto* func = b.Function("foo", str);
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(str, builtin::Function::kFrexp, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %__frexp_result_f32 %9 FrexpStruct %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F16) {
+    auto* str = resolver::CreateFrexpResult(ty, mod.symbols, ty.f16());
+    auto* arg = b.FunctionParam("arg", ty.f16());
+    auto* func = b.Function("foo", str);
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(str, builtin::Function::kFrexp, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %__frexp_result_f16 %9 FrexpStruct %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec2f) {
+    auto* str = resolver::CreateFrexpResult(ty, mod.symbols, ty.vec2<f32>());
+    auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
+    auto* func = b.Function("foo", str);
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(str, builtin::Function::kFrexp, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %__frexp_result_vec2_f32 %11 FrexpStruct %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec3h) {
+    auto* str = resolver::CreateFrexpResult(ty, mod.symbols, ty.vec3<f16>());
+    auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
+    auto* func = b.Function("foo", str);
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(str, builtin::Function::kFrexp, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %__frexp_result_vec3_f16 %11 FrexpStruct %arg");
+}
+
 TEST_F(SpvGeneratorImplTest, Builtin_Length_vec4f) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.f32());
@@ -189,6 +250,66 @@ TEST_F(SpvGeneratorImplTest, Builtin_Length_vec4f) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %float %8 Length %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Modf_F32) {
+    auto* str = resolver::CreateModfResult(ty, mod.symbols, ty.f32());
+    auto* arg = b.FunctionParam("arg", ty.f32());
+    auto* func = b.Function("foo", str);
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(str, builtin::Function::kModf, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %__modf_result_f32 %8 ModfStruct %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Modf_F16) {
+    auto* str = resolver::CreateModfResult(ty, mod.symbols, ty.f16());
+    auto* arg = b.FunctionParam("arg", ty.f16());
+    auto* func = b.Function("foo", str);
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(str, builtin::Function::kModf, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %__modf_result_f16 %8 ModfStruct %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec2f) {
+    auto* str = resolver::CreateModfResult(ty, mod.symbols, ty.vec2<f32>());
+    auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
+    auto* func = b.Function("foo", str);
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(str, builtin::Function::kModf, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %__modf_result_vec2_f32 %9 ModfStruct %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec3h) {
+    auto* str = resolver::CreateModfResult(ty, mod.symbols, ty.vec3<f16>());
+    auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
+    auto* func = b.Function("foo", str);
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(str, builtin::Function::kModf, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %__modf_result_vec3_f16 %9 ModfStruct %arg");
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Normalize_vec4f) {
