@@ -83,6 +83,7 @@ class Validator {
 
     Block* current_block_ = nullptr;
     utils::Hashset<Function*, 4> seen_functions_;
+    utils::Vector<ControlInstruction*, 8> control_stack_;
 
     void DisassembleIfNeeded() {
         if (mod_.disassembly_file) {
@@ -129,6 +130,13 @@ class Validator {
         auto src = dis_.BlockSource(blk);
         src.file = mod_.disassembly_file.get();
         AddError(std::move(err), src);
+    }
+
+    void AddNote(Instruction* inst, std::string err) {
+        DisassembleIfNeeded();
+        auto src = dis_.InstructionSource(inst);
+        src.file = mod_.disassembly_file.get();
+        AddNote(std::move(err), src);
     }
 
     void AddNote(Instruction* inst, size_t idx, std::string err) {
@@ -277,6 +285,24 @@ class Validator {
             });
     }
 
+    void CheckVar(Var* var) {
+        if (var->Result() && var->Initializer()) {
+            if (var->Initializer()->Type() != var->Result()->Type()->UnwrapPtr()) {
+                AddError(var, "var initializer has incorrect type");
+            }
+        }
+    }
+
+    void CheckLet(Let* let) {
+        CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset, "let");
+
+        if (let->Result() && let->Value()) {
+            if (let->Result()->Type() != let->Value()->Type()) {
+                AddError(let, "let result type does not match value type");
+            }
+        }
+    }
+
     void CheckCall(Call* call) {
         tint::Switch(
             call,                  //
@@ -373,32 +399,15 @@ class Validator {
         }
     }
 
-    void CheckTerminator(ir::Terminator* b) {
-        tint::Switch(
-            b,                           //
-            [&](ir::BreakIf*) {},        //
-            [&](ir::Continue*) {},       //
-            [&](ir::ExitIf*) {},         //
-            [&](ir::ExitLoop*) {},       //
-            [&](ir::ExitSwitch*) {},     //
-            [&](ir::NextIteration*) {},  //
-            [&](ir::Return* ret) {
-                if (ret->Func() == nullptr) {
-                    AddError("return: null function");
-                }
-            },
-            [&](ir::Unreachable*) {},  //
-            [&](Default) {
-                AddError(std::string("missing validation of terminator: ") + b->TypeInfo().name);
-            });
-    }
-
     void CheckIf(If* if_) {
         CheckOperandNotNull(if_, if_->Condition(), If::kConditionOperandOffset, "if");
 
         if (if_->Condition() && !if_->Condition()->Type()->Is<type::Bool>()) {
             AddError(if_, If::kConditionOperandOffset, "if: condition must be a `bool` type");
         }
+
+        control_stack_.Push(if_);
+        TINT_DEFER(control_stack_.Pop());
 
         CheckBlock(if_->True());
         if (!if_->False()->IsEmpty()) {
@@ -407,6 +416,9 @@ class Validator {
     }
 
     void CheckLoop(Loop* l) {
+        control_stack_.Push(l);
+        TINT_DEFER(control_stack_.Pop());
+
         if (!l->Initializer()->IsEmpty()) {
             CheckBlock(l->Initializer());
         }
@@ -418,29 +430,81 @@ class Validator {
     }
 
     void CheckSwitch(Switch* s) {
+        control_stack_.Push(s);
+        TINT_DEFER(control_stack_.Pop());
+
         for (auto& cse : s->Cases()) {
             CheckBlock(cse.block);
         }
     }
 
-    void CheckVar(Var* var) {
-        if (var->Result() && var->Initializer()) {
-            if (var->Initializer()->Type() != var->Result()->Type()->UnwrapPtr()) {
-                AddError(var, "var initializer has incorrect type");
-            }
-        }
+    void CheckTerminator(ir::Terminator* b) {
+        // Note, transforms create `undef` terminator arguments (this is done in MergeReturn and
+        // DemoteToHelper) so we can't add validation.
+
+        tint::Switch(
+            b,                                   //
+            [&](ir::BreakIf*) {},                //
+            [&](ir::Continue*) {},               //
+            [&](ir::Exit* e) { CheckExit(e); },  //
+            [&](ir::NextIteration*) {},          //
+            [&](ir::Return* ret) {
+                if (ret->Func() == nullptr) {
+                    AddError("return: undefined function");
+                }
+            },
+            [&](ir::Unreachable*) {},  //
+            [&](Default) {
+                AddError(std::string("missing validation of terminator: ") + b->TypeInfo().name);
+            });
     }
 
-    void CheckLet(Let* let) {
-        CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset, "let");
+    void CheckExit(ir::Exit* e) {
+        if (e->ControlInstruction() == nullptr) {
+            AddError(e, "exit: has no parent control instruction");
+            return;
+        }
 
-        if (let->Result() && let->Value()) {
-            if (let->Result()->Type() != let->Value()->Type()) {
-                AddError(let, "let result type does not match value type");
+        auto results = e->ControlInstruction()->Results();
+        auto args = e->Args();
+        if (results.Length() != args.Length()) {
+            AddError(e, std::string("exit: args count (") + std::to_string(args.Length()) +
+                            ") does not match control instruction result count (" +
+                            std::to_string(results.Length()) + ")");
+            return;
+        }
+
+        if (control_stack_.IsEmpty()) {
+            AddError(e, "exit: found outside all control instructions");
+            return;
+        }
+
+        for (size_t i = 0; i < results.Length(); ++i) {
+            if (results[i] && args[i] && results[i]->Type() != args[i]->Type()) {
+                AddError(e, i,
+                         std::string("exit: argument type (") + results[i]->Type()->FriendlyName() +
+                             ") does not match control instruction type (" +
+                             args[i]->Type()->FriendlyName() + ")");
             }
         }
+
+        tint::Switch(
+            e,                                       //
+            [&](ir::ExitIf* i) { CheckExitIf(i); },  //
+            [&](ir::ExitLoop*) {},                   //
+            [&](ir::ExitSwitch*) {},                 //
+            [&](Default) {
+                AddError(std::string("missing validation of exit: ") + e->TypeInfo().name);
+            });
     }
-};  // namespace
+
+    void CheckExitIf(ExitIf* e) {
+        if (control_stack_.Back() != e->If()) {
+            AddError(e, "exit_if: if target jumps over other control instructions");
+            AddNote(control_stack_.Back(), "first control instruction jumped");
+        }
+    }
+};
 
 }  // namespace
 

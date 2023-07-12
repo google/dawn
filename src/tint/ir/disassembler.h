@@ -133,6 +133,7 @@ class Disassembler {
     void EmitValueWithType(Instruction* val);
     void EmitValueWithType(Value* val);
     void EmitValue(Value* val);
+    void EmitValueList(Instruction* inst, utils::Slice<Value* const> values);
     void EmitValueList(utils::Slice<ir::Value* const> values);
     void EmitArgs(Call* call);
     void EmitBinary(Binary* b);

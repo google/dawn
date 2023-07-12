@@ -45,11 +45,15 @@ class ControlInstruction : public utils::Castable<ControlInstruction, OperandIns
     /// @param values the new result values
     void SetResults(utils::VectorRef<InstructionResult*> values) {
         for (auto* value : results_) {
-            value->SetSource(nullptr);
+            if (value) {
+                value->SetSource(nullptr);
+            }
         }
         results_ = std::move(values);
         for (auto* value : results_) {
-            value->SetSource(this);
+            if (value) {
+                value->SetSource(this);
+            }
         }
     }
 
