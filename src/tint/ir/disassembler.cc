@@ -34,6 +34,7 @@
 #include "src/tint/ir/exit_switch.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction_result.h"
+#include "src/tint/ir/intrinsic_call.h"
 #include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/load_vector_element.h"
@@ -439,6 +440,14 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("convert", c);
             out_ << " ";
             EmitOperandList(c);
+            EmitLine();
+        },
+        [&](IntrinsicCall* i) {
+            EmitValueWithType(i);
+            out_ << " = ";
+            EmitInstructionName(utils::ToString(i->Kind()), i);
+            out_ << " ";
+            EmitArgs(i);
             EmitLine();
         },
         [&](Load* l) {

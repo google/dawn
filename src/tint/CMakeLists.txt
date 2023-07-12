@@ -793,6 +793,8 @@ if(${TINT_BUILD_IR})
     ir/instruction.h
     ir/instruction_result.cc
     ir/instruction_result.h
+    ir/intrinsic_call.cc
+    ir/intrinsic_call.h
     ir/let.cc
     ir/let.h
     ir/load.cc
@@ -1597,6 +1599,7 @@ if(TINT_BUILD_TESTS)
       ir/if_test.cc
       ir/instruction_result_test.cc
       ir/instruction_test.cc
+      ir/intrinsic_call_test.cc
       ir/ir_test_helper.h
       ir/let_test.cc
       ir/load_test.cc

@@ -38,6 +38,7 @@
 #include "src/tint/ir/function_param.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/instruction_result.h"
+#include "src/tint/ir/intrinsic_call.h"
 #include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
 #include "src/tint/ir/load_vector_element.h"
@@ -540,6 +541,17 @@ class Builder {
     ir::BuiltinCall* Call(const type::Type* type, builtin::Function func, ARGS&&... args) {
         return Append(ir.instructions.Create<ir::BuiltinCall>(InstructionResult(type), func,
                                                               Values(std::forward<ARGS>(args)...)));
+    }
+
+    /// Creates an intrinsic call instruction
+    /// @param type the return type of the call
+    /// @param kind the intrinsic function to call
+    /// @param args the call arguments
+    /// @returns the intrinsic call instruction
+    template <typename... ARGS>
+    ir::IntrinsicCall* Call(const type::Type* type, enum IntrinsicCall::Kind kind, ARGS&&... args) {
+        return Append(ir.instructions.Create<ir::IntrinsicCall>(
+            InstructionResult(type), kind, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a value conversion instruction
