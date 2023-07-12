@@ -16,6 +16,7 @@
 #include <string>
 #include <unordered_set>
 
+#include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/ir/from_program.h"
 #include "src/tint/ir/to_program.h"
 #include "src/tint/reader/wgsl/parser_impl.h"
@@ -41,6 +42,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         return 0;
     }
     auto src = parser.program();
+    if (!src.IsValid()) {
+        return 0;
+    }
+
+    src = tint::fuzzers::ApplySubstituteOverrides(std::move(src));
     if (!src.IsValid()) {
         return 0;
     }
