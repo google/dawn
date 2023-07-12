@@ -101,4 +101,17 @@ ir::Unreachable* Builder::Unreachable() {
     return Append(ir.instructions.Create<ir::Unreachable>());
 }
 
+const type::Type* Builder::VectorPtrElementType(const type::Type* type) {
+    auto* vec_ptr_ty = type->As<type::Pointer>();
+    TINT_ASSERT(IR, vec_ptr_ty);
+    if (TINT_LIKELY(vec_ptr_ty)) {
+        auto* vec_ty = vec_ptr_ty->StoreType()->As<type::Vector>();
+        TINT_ASSERT(IR, vec_ty);
+        if (TINT_LIKELY(vec_ty)) {
+            return vec_ty->type();
+        }
+    }
+    return ir.Types().i32();
+}
+
 }  // namespace tint::ir

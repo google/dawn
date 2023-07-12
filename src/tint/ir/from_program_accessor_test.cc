@@ -67,8 +67,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorSingleIndex) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, vec3<u32>, read_write> = var
-    %3:ptr<function, u32, read_write> = access %a, 2u
-    %b:u32 = load %3
+    %b:u32 = load_vector_element %a, 2u
     ret
   }
 }
@@ -113,8 +112,8 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MatrixMultiIndex) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, mat3x4<f32>, read_write> = var
-    %3:ptr<function, f32, read_write> = access %a, 2u, 3u
-    %b:f32 = load %3
+    %3:ptr<function, vec4<f32>, read_write> = access %a, 2u
+    %b:f32 = load_vector_element %3, 3u
     ret
   }
 }
@@ -278,8 +277,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorElementSwizzle) {
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
   %b1 = block {
     %a:ptr<function, vec2<f32>, read_write> = var
-    %3:ptr<function, f32, read_write> = access %a, 1u
-    %b:f32 = load %3
+    %b:f32 = load_vector_element %a, 1u
     ret
   }
 }

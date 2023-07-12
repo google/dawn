@@ -37,12 +37,14 @@
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
+#include "src/tint/ir/load_vector_element.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
+#include "src/tint/ir/store_vector_element.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/unary.h"
 #include "src/tint/ir/unreachable.h"
@@ -279,26 +281,28 @@ class State {
 
     void Instruction(ir::Instruction* inst) {
         tint::Switch(
-            inst,                                       //
-            [&](ir::Access* i) { Access(i); },          //
-            [&](ir::Binary* i) { Binary(i); },          //
-            [&](ir::BreakIf* i) { BreakIf(i); },        //
-            [&](ir::Call* i) { Call(i); },              //
-            [&](ir::Continue*) {},                      //
-            [&](ir::ExitIf*) {},                        //
-            [&](ir::ExitLoop* i) { ExitLoop(i); },      //
-            [&](ir::ExitSwitch* i) { ExitSwitch(i); },  //
-            [&](ir::If* i) { If(i); },                  //
-            [&](ir::Load* l) { Load(l); },              //
-            [&](ir::Loop* l) { Loop(l); },              //
-            [&](ir::NextIteration*) {},                 //
-            [&](ir::Return* i) { Return(i); },          //
-            [&](ir::Store* i) { Store(i); },            //
-            [&](ir::Switch* i) { Switch(i); },          //
-            [&](ir::Unary* u) { Unary(u); },            //
-            [&](ir::Unreachable*) {},                   //
-            [&](ir::Var* i) { Var(i); },                //
-            [&](ir::Let* i) { Let(i); },                //
+            inst,                                                       //
+            [&](ir::Access* i) { Access(i); },                          //
+            [&](ir::Binary* i) { Binary(i); },                          //
+            [&](ir::BreakIf* i) { BreakIf(i); },                        //
+            [&](ir::Call* i) { Call(i); },                              //
+            [&](ir::Continue*) {},                                      //
+            [&](ir::ExitIf*) {},                                        //
+            [&](ir::ExitLoop* i) { ExitLoop(i); },                      //
+            [&](ir::ExitSwitch* i) { ExitSwitch(i); },                  //
+            [&](ir::If* i) { If(i); },                                  //
+            [&](ir::Let* i) { Let(i); },                                //
+            [&](ir::Load* l) { Load(l); },                              //
+            [&](ir::LoadVectorElement* i) { LoadVectorElement(i); },    //
+            [&](ir::Loop* l) { Loop(l); },                              //
+            [&](ir::NextIteration*) {},                                 //
+            [&](ir::Return* i) { Return(i); },                          //
+            [&](ir::Store* i) { Store(i); },                            //
+            [&](ir::StoreVectorElement* i) { StoreVectorElement(i); },  //
+            [&](ir::Switch* i) { Switch(i); },                          //
+            [&](ir::Unary* u) { Unary(u); },                            //
+            [&](ir::Unreachable*) {},                                   //
+            [&](ir::Var* i) { Var(i); },                                //
             [&](Default) { UNHANDLED_CASE(inst); });
     }
 
@@ -485,6 +489,12 @@ class State {
         Append(b.Assign(dst, src));
     }
 
+    void StoreVectorElement(ir::StoreVectorElement* store) {
+        auto* ptr = Expr(store->To());
+        auto* val = Expr(store->Value());
+        Append(b.Assign(VectorMemberAccess(ptr, store->Index()), val));
+    }
+
     void Call(ir::Call* call) {
         auto args = utils::Transform<4>(call->Args(), [&](ir::Value* arg) {
             // Pointer-like arguments are passed by pointer, never reference.
@@ -525,6 +535,11 @@ class State {
 
     void Load(ir::Load* l) { Bind(l->Result(), Expr(l->From())); }
 
+    void LoadVectorElement(ir::LoadVectorElement* load) {
+        auto* ptr = Expr(load->From());
+        Bind(load->Result(), VectorMemberAccess(ptr, load->Index()));
+    }
+
     void Unary(ir::Unary* u) {
         const ast::Expression* expr = nullptr;
         switch (u->Kind()) {
@@ -546,23 +561,7 @@ class State {
                 obj_ty,
                 [&](const type::Vector* vec) {
                     TINT_DEFER(obj_ty = vec->type());
-                    if (auto* c = index->As<ir::Constant>()) {
-                        switch (c->Value()->ValueAs<int>()) {
-                            case 0:
-                                expr = b.MemberAccessor(expr, "x");
-                                return;
-                            case 1:
-                                expr = b.MemberAccessor(expr, "y");
-                                return;
-                            case 2:
-                                expr = b.MemberAccessor(expr, "z");
-                                return;
-                            case 3:
-                                expr = b.MemberAccessor(expr, "w");
-                                return;
-                        }
-                    }
-                    expr = b.IndexAccessor(expr, Expr(index));
+                    expr = VectorMemberAccess(expr, index);
                 },
                 [&](const type::Matrix* mat) {
                     obj_ty = mat->ColumnType();
@@ -1003,6 +1002,22 @@ class State {
             }
         }
         return false;
+    }
+
+    const ast::Expression* VectorMemberAccess(const ast::Expression* expr, ir::Value* index) {
+        if (auto* c = index->As<ir::Constant>()) {
+            switch (c->Value()->ValueAs<int>()) {
+                case 0:
+                    return b.MemberAccessor(expr, "x");
+                case 1:
+                    return b.MemberAccessor(expr, "y");
+                case 2:
+                    return b.MemberAccessor(expr, "z");
+                case 3:
+                    return b.MemberAccessor(expr, "w");
+            }
+        }
+        return b.IndexAccessor(expr, Expr(index));
     }
 };
 

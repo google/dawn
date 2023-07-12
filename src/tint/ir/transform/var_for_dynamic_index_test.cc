@@ -108,15 +108,15 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
     func->SetParams({mat, idx});
 
     auto* block = func->Block();
-    auto* access = block->Append(b.Access(ty.ptr<function, f32>(), mat, idx, idx));
-    auto* load = block->Append(b.Load(access));
+    auto* access = block->Append(b.Access(ty.ptr<function, vec2<f32>>(), mat, idx));
+    auto* load = block->Append(b.LoadVectorElement(access, idx));
     block->Append(b.Return(func, load));
 
     auto* expect = R"(
 %foo = func(%2:ptr<function, mat2x2<f32>, read_write>, %3:i32):f32 -> %b1 {
   %b1 = block {
-    %4:ptr<function, f32, read_write> = access %2, %3, %3
-    %5:f32 = load %4
+    %4:ptr<function, vec2<f32>, read_write> = access %2, %3
+    %5:f32 = load_vector_element %4, %3
     ret %5
   }
 }
@@ -193,6 +193,32 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
     %4:ptr<function, mat2x2<f32>, read_write> = var, %2
     %5:ptr<function, vec2<f32>, read_write> = access %4, %3
     %6:vec2<f32> = load %5
+    ret %6
+  }
+}
+)";
+
+    Run<VarForDynamicIndex>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_VectorValue) {
+    auto* mat = b.FunctionParam(ty.mat2x2<f32>());
+    auto* idx = b.FunctionParam(ty.i32());
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    func->SetParams({mat, idx});
+
+    auto* block = func->Block();
+    auto* access = block->Append(b.Access(ty.f32(), mat, idx, idx));
+    block->Append(b.Return(func, access));
+
+    auto* expect = R"(
+%foo = func(%2:mat2x2<f32>, %3:i32):vec2<f32> -> %b1 {
+  %b1 = block {
+    %4:ptr<function, mat2x2<f32>, read_write> = var, %2
+    %5:ptr<function, vec2<f32>, read_write> = access %4, %3
+    %6:f32 = load_vector_element %5, %3
     ret %6
   }
 }
@@ -310,8 +336,8 @@ MyStruct = struct @align(16) {
   %b1 = block {
     %4:mat4x4<f32> = access %2, 1u
     %5:ptr<function, mat4x4<f32>, read_write> = var, %4
-    %6:ptr<function, f32, read_write> = access %5, %3, 0u
-    %7:f32 = load %6
+    %6:ptr<function, vec4<f32>, read_write> = access %5, %3
+    %7:f32 = load_vector_element %6, 0u
     ret %7
   }
 }

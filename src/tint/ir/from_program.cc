@@ -82,6 +82,7 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
+#include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/load.h"
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
@@ -468,6 +469,14 @@ class Impl {
     }
 
     void EmitAssignment(const ast::AssignmentStatement* stmt) {
+        auto b = builder_.With(current_block_);
+        if (auto access = AsVectorRefElementAccess(stmt->lhs)) {
+            if (auto rhs = EmitExpression(stmt->rhs)) {
+                b.StoreVectorElement(access->vector, access->index, rhs.Get());
+            }
+            return;
+        }
+
         // If assigning to a phony, just generate the RHS and we're done. Note that, because
         // this isn't used, a subsequent transform could remove it due to it being dead code.
         // This could then change the interface for the program (i.e. a global var no longer
@@ -486,8 +495,7 @@ class Impl {
         if (!rhs) {
             return;
         }
-        auto store = builder_.Store(lhs.Get(), rhs.Get());
-        current_block_->Append(store);
+        b.Store(lhs.Get(), rhs.Get());
     }
 
     void EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
@@ -512,6 +520,19 @@ class Impl {
     void EmitCompoundAssignment(const ast::Expression* lhs_expr,
                                 EMIT_RHS&& emit_rhs,
                                 ast::BinaryOp op) {
+        auto b = builder_.With(current_block_);
+        if (auto access = AsVectorRefElementAccess(lhs_expr)) {
+            // Compound assignment of vector element needs to use LoadVectorElement() and
+            // StoreVectorElement().
+            if (auto rhs = emit_rhs()) {
+                auto* load = b.LoadVectorElement(access->vector, access->index);
+                auto* ty = load->Result()->Type();
+                auto* inst = b.Append(BinaryOp(ty, load->Result(), rhs, op));
+                b.StoreVectorElement(access->vector, access->index, inst);
+            }
+            return;
+        }
+
         auto lhs = EmitExpression(lhs_expr);
         if (!lhs) {
             return;
@@ -520,10 +541,10 @@ class Impl {
         if (!rhs) {
             return;
         }
-        auto* load = current_block_->Append(builder_.Load(lhs.Get()));
+        auto* load = b.Load(lhs.Get());
         auto* ty = load->Result()->Type();
         auto* inst = current_block_->Append(BinaryOp(ty, load->Result(), rhs, op));
-        current_block_->Append(builder_.Store(lhs.Get(), inst));
+        b.Store(lhs.Get(), inst);
     }
 
     void EmitBlock(const ast::BlockStatement* block) {
@@ -804,6 +825,13 @@ class Impl {
     };
 
     utils::Result<Value*> EmitAccess(const ast::AccessorExpression* expr) {
+        if (auto vec_access = AsVectorRefElementAccess(expr)) {
+            // Vector reference accesses need to map to LoadVectorElement()
+            auto* load = builder_.LoadVectorElement(vec_access->vector, vec_access->index);
+            current_block_->Append(load);
+            return load->Result();
+        }
+
         std::vector<const ast::Expression*> accessors;
         const ast::Expression* object = expr;
         while (true) {
@@ -979,7 +1007,7 @@ class Impl {
             });
 
         // If this expression maps to sem::Load, insert a load instruction to get the result.
-        if (result && sem->Is<sem::Load>()) {
+        if (result && result.Get()->Type()->Is<type::Pointer>() && sem->Is<sem::Load>()) {
             auto* load = builder_.Load(result.Get());
             current_block_->Append(load);
             return load->Result();
@@ -1327,6 +1355,51 @@ class Impl {
         }
         TINT_UNREACHABLE(IR, diagnostics_);
         return nullptr;
+    }
+
+    struct VectorRefElementAccess {
+        ir::Value* vector = nullptr;
+        ir::Value* index = nullptr;
+    };
+
+    std::optional<VectorRefElementAccess> AsVectorRefElementAccess(const ast::Expression* expr) {
+        return AsVectorRefElementAccess(
+            program_->Sem().Get<sem::ValueExpression>(expr)->UnwrapLoad());
+    }
+
+    std::optional<VectorRefElementAccess> AsVectorRefElementAccess(
+        const sem::ValueExpression* expr) {
+        auto* access = As<sem::AccessorExpression>(expr);
+        if (!access) {
+            return std::nullopt;
+        }
+
+        auto* ref = access->Object()->Type()->As<type::Reference>();
+        if (!ref) {
+            return std::nullopt;
+        }
+
+        if (!ref->StoreType()->Is<type::Vector>()) {
+            return std::nullopt;
+        }
+
+        return tint::Switch(
+            access,
+            [&](const sem::Swizzle* s) -> std::optional<VectorRefElementAccess> {
+                if (auto vec = EmitExpression(access->Object()->Declaration())) {
+                    return VectorRefElementAccess{vec.Get(),
+                                                  builder_.Constant(u32(s->Indices()[0]))};
+                }
+                return std::nullopt;
+            },
+            [&](const sem::IndexAccessorExpression* i) -> std::optional<VectorRefElementAccess> {
+                if (auto vec = EmitExpression(access->Object()->Declaration())) {
+                    if (auto idx = EmitExpression(i->Index()->Declaration())) {
+                        return VectorRefElementAccess{vec.Get(), idx.Get()};
+                    }
+                }
+                return std::nullopt;
+            });
     }
 };
 

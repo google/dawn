@@ -736,24 +736,26 @@ void GeneratorImplIr::EmitIncomingPhis(ir::MultiInBlock* block) {
 void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
     for (auto* inst : *block) {
         Switch(
-            inst,                                             //
-            [&](ir::Access* a) { EmitAccess(a); },            //
-            [&](ir::Binary* b) { EmitBinary(b); },            //
-            [&](ir::Bitcast* b) { EmitBitcast(b); },          //
-            [&](ir::BuiltinCall* b) { EmitBuiltinCall(b); },  //
-            [&](ir::Construct* c) { EmitConstruct(c); },      //
-            [&](ir::Convert* c) { EmitConvert(c); },          //
-            [&](ir::Load* l) { EmitLoad(l); },                //
-            [&](ir::Loop* l) { EmitLoop(l); },                //
-            [&](ir::Switch* sw) { EmitSwitch(sw); },          //
-            [&](ir::Swizzle* s) { EmitSwizzle(s); },          //
-            [&](ir::Store* s) { EmitStore(s); },              //
-            [&](ir::UserCall* c) { EmitUserCall(c); },        //
-            [&](ir::Unary* u) { EmitUnary(u); },              //
-            [&](ir::Var* v) { EmitVar(v); },                  //
-            [&](ir::Let* l) { EmitLet(l); },                  //
-            [&](ir::If* i) { EmitIf(i); },                    //
-            [&](ir::Terminator* t) { EmitTerminator(t); },    //
+            inst,                                                           //
+            [&](ir::Access* a) { EmitAccess(a); },                          //
+            [&](ir::Binary* b) { EmitBinary(b); },                          //
+            [&](ir::Bitcast* b) { EmitBitcast(b); },                        //
+            [&](ir::BuiltinCall* b) { EmitBuiltinCall(b); },                //
+            [&](ir::Construct* c) { EmitConstruct(c); },                    //
+            [&](ir::Convert* c) { EmitConvert(c); },                        //
+            [&](ir::Load* l) { EmitLoad(l); },                              //
+            [&](ir::LoadVectorElement* l) { EmitLoadVectorElement(l); },    //
+            [&](ir::Loop* l) { EmitLoop(l); },                              //
+            [&](ir::Switch* sw) { EmitSwitch(sw); },                        //
+            [&](ir::Swizzle* s) { EmitSwizzle(s); },                        //
+            [&](ir::Store* s) { EmitStore(s); },                            //
+            [&](ir::StoreVectorElement* s) { EmitStoreVectorElement(s); },  //
+            [&](ir::UserCall* c) { EmitUserCall(c); },                      //
+            [&](ir::Unary* u) { EmitUnary(u); },                            //
+            [&](ir::Var* v) { EmitVar(v); },                                //
+            [&](ir::Let* l) { EmitLet(l); },                                //
+            [&](ir::If* i) { EmitIf(i); },                                  //
+            [&](ir::Terminator* t) { EmitTerminator(t); },                  //
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "unimplemented instruction: " << inst->TypeInfo().name;
@@ -1375,6 +1377,18 @@ void GeneratorImplIr::EmitLoad(ir::Load* load) {
                                 {Type(load->Result()->Type()), Value(load), Value(load->From())});
 }
 
+void GeneratorImplIr::EmitLoadVectorElement(ir::LoadVectorElement* load) {
+    auto* vec_ptr_ty = load->From()->Type()->As<type::Pointer>();
+    auto* el_ty = load->Result()->Type();
+    auto* el_ptr_ty = ir_->Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
+    auto el_ptr_id = module_.NextId();
+    current_function_.push_inst(
+        spv::Op::OpAccessChain,
+        {Type(el_ptr_ty), el_ptr_id, Value(load->From()), Value(load->Index())});
+    current_function_.push_inst(spv::Op::OpLoad,
+                                {Type(load->Result()->Type()), Value(load), el_ptr_id});
+}
+
 void GeneratorImplIr::EmitLoop(ir::Loop* loop) {
     auto init_label = loop->HasInitializer() ? Label(loop->Initializer()) : 0;
     auto body_label = Label(loop->Body());
@@ -1482,6 +1496,17 @@ void GeneratorImplIr::EmitStore(ir::Store* store) {
     current_function_.push_inst(spv::Op::OpStore, {Value(store->To()), Value(store->From())});
 }
 
+void GeneratorImplIr::EmitStoreVectorElement(ir::StoreVectorElement* store) {
+    auto* vec_ptr_ty = store->To()->Type()->As<type::Pointer>();
+    auto* el_ty = store->Value()->Type();
+    auto* el_ptr_ty = ir_->Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
+    auto el_ptr_id = module_.NextId();
+    current_function_.push_inst(
+        spv::Op::OpAccessChain,
+        {Type(el_ptr_ty), el_ptr_id, Value(store->To()), Value(store->Index())});
+    current_function_.push_inst(spv::Op::OpStore, {el_ptr_id, Value(store->Value())});
+}
+
 void GeneratorImplIr::EmitUnary(ir::Unary* unary) {
     auto id = Value(unary);
     auto* ty = unary->Result()->Type();
@@ -1583,10 +1608,6 @@ void GeneratorImplIr::EmitVar(ir::Var* var) {
 void GeneratorImplIr::EmitLet(ir::Let* let) {
     auto id = Value(let->Value());
     values_.Add(let->Result(), id);
-    // Set the name if present, and the source value isn't named
-    // if (auto name = ir_->NameOf(let->Result()); name && !ir_->NameOf(let->Value())) {
-    //     module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
-    // }
 }
 
 void GeneratorImplIr::EmitExitPhis(ir::ControlInstruction* inst) {

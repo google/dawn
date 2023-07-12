@@ -84,7 +84,7 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_ConstantIndex) {
     b.With(func->Block(), [&] {
         auto* mat_var = b.Var("mat", ty.ptr<function, mat2x2<f32>>());
         auto* result_vector = b.Access(ty.ptr<function, vec2<f32>>(), mat_var, 1_u);
-        auto* result_scalar = b.Access(ty.ptr<function, f32>(), mat_var, 1_u, 0_u);
+        auto* result_scalar = b.LoadVectorElement(result_vector, 0_u);
         b.Return(func);
         mod.SetName(result_vector, "result_vector");
         mod.SetName(result_scalar, "result_scalar");
@@ -92,7 +92,8 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_ConstantIndex) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result_vector = OpAccessChain %_ptr_Function_v2float %mat %uint_1");
-    EXPECT_INST("%result_scalar = OpAccessChain %_ptr_Function_float %mat %uint_1 %uint_0");
+    EXPECT_INST("%14 = OpAccessChain %_ptr_Function_float %result_vector %uint_0");
+    EXPECT_INST("%result_scalar = OpLoad %float %14");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_DynamicIndex) {
@@ -102,7 +103,7 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_DynamicIndex) {
     b.With(func->Block(), [&] {
         auto* mat_var = b.Var("mat", ty.ptr<function, mat2x2<f32>>());
         auto* result_vector = b.Access(ty.ptr<function, vec2<f32>>(), mat_var, idx);
-        auto* result_scalar = b.Access(ty.ptr<function, f32>(), mat_var, idx, idx);
+        auto* result_scalar = b.LoadVectorElement(result_vector, idx);
         b.Return(func);
         mod.SetName(result_vector, "result_vector");
         mod.SetName(result_scalar, "result_scalar");
@@ -110,7 +111,8 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_DynamicIndex) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result_vector = OpAccessChain %_ptr_Function_v2float %mat %idx");
-    EXPECT_INST("%result_scalar = OpAccessChain %_ptr_Function_float %mat %idx %idx");
+    EXPECT_INST("%14 = OpAccessChain %_ptr_Function_float %result_vector %idx");
+    EXPECT_INST("%result_scalar = OpLoad %float %14");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_Vector_Value_ConstantIndex) {
@@ -140,34 +142,6 @@ TEST_F(SpvGeneratorImplTest, Access_Vector_Value_DynamicIndex) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpVectorExtractDynamic %int %vec %idx");
-}
-
-TEST_F(SpvGeneratorImplTest, Access_Vector_Pointer_ConstantIndex) {
-    auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
-        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
-        auto* result = b.Access(ty.ptr<function, i32>(), vec_var, 1_u);
-        b.Return(func);
-        mod.SetName(result, "result");
-    });
-
-    ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %vec %uint_1");
-}
-
-TEST_F(SpvGeneratorImplTest, Access_Vector_Pointer_DynamicIndex) {
-    auto* idx = b.FunctionParam("idx", ty.i32());
-    auto* func = b.Function("foo", ty.void_());
-    func->SetParams({idx});
-    b.With(func->Block(), [&] {
-        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
-        auto* result = b.Access(ty.ptr<function, i32>(), vec_var, idx);
-        b.Return(func);
-        mod.SetName(result, "result");
-    });
-
-    ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %vec %idx");
 }
 
 TEST_F(SpvGeneratorImplTest, Access_NestedVector_Value_DynamicIndex) {
@@ -218,7 +192,7 @@ TEST_F(SpvGeneratorImplTest, Access_Struct_Pointer_ConstantIndex) {
     b.With(func->Block(), [&] {
         auto* str_var = b.Var("str", ty.ptr(function, str, read_write));
         auto* result_a = b.Access(ty.ptr<function, f32>(), str_var, 0_u);
-        auto* result_b = b.Access(ty.ptr<function, i32>(), str_var, 1_u, 2_u);
+        auto* result_b = b.Access(ty.ptr<function, vec4<i32>>(), str_var, 1_u);
         b.Return(func);
         mod.SetName(result_a, "result_a");
         mod.SetName(result_b, "result_b");
@@ -226,7 +200,65 @@ TEST_F(SpvGeneratorImplTest, Access_Struct_Pointer_ConstantIndex) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result_a = OpAccessChain %_ptr_Function_float %str %uint_0");
-    EXPECT_INST("%result_b = OpAccessChain %_ptr_Function_int %str %uint_1 %uint_2");
+    EXPECT_INST("%result_b = OpAccessChain %_ptr_Function_v4int %str %uint_1");
+}
+
+TEST_F(SpvGeneratorImplTest, LoadVectorElement_ConstantIndex) {
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
+        auto* result = b.LoadVectorElement(vec_var, 1_u);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%9 = OpAccessChain %_ptr_Function_int %vec %uint_1");
+    EXPECT_INST("%result = OpLoad %int %9");
+}
+
+TEST_F(SpvGeneratorImplTest, LoadVectorElement_DynamicIndex) {
+    auto* idx = b.FunctionParam("idx", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({idx});
+    b.With(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
+        auto* result = b.LoadVectorElement(vec_var, idx);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%10 = OpAccessChain %_ptr_Function_int %vec %idx");
+    EXPECT_INST("%result = OpLoad %int %10");
+}
+
+TEST_F(SpvGeneratorImplTest, StoreVectorElement_ConstantIndex) {
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
+        b.StoreVectorElement(vec_var, 1_u, b.Constant(42_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%9 = OpAccessChain %_ptr_Function_int %vec %uint_1");
+    EXPECT_INST("OpStore %9 %int_42");
+}
+
+TEST_F(SpvGeneratorImplTest, StoreVectorElement_DynamicIndex) {
+    auto* idx = b.FunctionParam("idx", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({idx});
+    b.With(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
+        b.StoreVectorElement(vec_var, idx, b.Constant(42_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%10 = OpAccessChain %_ptr_Function_int %vec %idx");
+    EXPECT_INST("OpStore %10 %int_42");
 }
 
 }  // namespace

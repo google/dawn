@@ -133,9 +133,7 @@ class Disassembler {
     void EmitValueWithType(Instruction* val);
     void EmitValueWithType(Value* val);
     void EmitValue(Value* val);
-    void EmitValueList(Instruction* inst, utils::Slice<Value* const> values);
     void EmitValueList(utils::Slice<ir::Value* const> values);
-    void EmitArgs(Call* call);
     void EmitBinary(Binary* b);
     void EmitUnary(Unary* b);
     void EmitTerminator(Terminator* b);
@@ -144,10 +142,8 @@ class Disassembler {
     void EmitIf(If* i);
     void EmitStructDecl(const type::Struct* str);
     void EmitLine();
-    void EmitOperand(Instruction* inst, Value* val, size_t index);
-    void EmitOperandList(Instruction* inst,
-                         utils::Slice<Value* const> operands,
-                         size_t start_index);
+    void EmitOperand(Instruction* inst, size_t index);
+    void EmitOperandList(Instruction* inst, size_t start_index = 0);
     void EmitInstructionName(std::string_view name, Instruction* inst);
 
     Module& mod_;

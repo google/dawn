@@ -36,9 +36,11 @@ struct AccessToReplace {
     // The access instruction.
     Access* access = nullptr;
     // The index of the first dynamic index.
-    uint32_t first_dynamic_index = 0;
+    size_t first_dynamic_index = 0;
     // The object type that corresponds to the source of the first dynamic index.
     const type::Type* dynamic_index_source_type = nullptr;
+    // If the access indexes a vector, then the type of that vector
+    const type::Vector* vector_access_type = nullptr;
 };
 
 // A partial access chain that uses constant indices to get to an object that will be
@@ -62,32 +64,50 @@ struct PartialAccess {
     }
 };
 
+enum class Action { kStop, kContinue };
+
+template <typename CALLBACK>
+void WalkAccessChain(ir::Access* access, CALLBACK&& callback) {
+    auto indices = access->Indices();
+    auto* ty = access->Object()->Type();
+    for (size_t i = 0; i < indices.Length(); i++) {
+        if (callback(i, indices[i], ty) == Action::kStop) {
+            break;
+        }
+        auto* const_idx = indices[i]->As<Constant>();
+        ty = const_idx ? ty->Element(const_idx->Value()->ValueAs<u32>()) : ty->Elements().type;
+    }
+}
+
 std::optional<AccessToReplace> ShouldReplace(Access* access) {
     if (access->Result()->Type()->Is<type::Pointer>()) {
         // No need to modify accesses into pointer types.
         return {};
     }
 
-    // Find the first dynamic index, if any.
-    const auto& indices = access->Indices();
-    auto* source_type = access->Object()->Type();
-    for (uint32_t i = 0; i < indices.Length(); i++) {
-        if (source_type->Is<type::Vector>()) {
-            // Stop if we hit a vector, as they can support dynamic accesses.
-            return {};
+    std::optional<AccessToReplace> result;
+    WalkAccessChain(access, [&](size_t i, ir::Value* index, const type::Type* ty) {
+        if (auto* vec = ty->As<type::Vector>()) {
+            // If we haven't found a dynamic index before the vector, then the transform doesn't
+            // need to hoist the access into a var as a vector value can be dynamically indexed.
+            // If we have found a dynamic index before the vector, then make a note that we're
+            // indexing a vector as we can't obtain a pointer to a vector element, so this needs to
+            // be handled specially.
+            if (result) {
+                result->vector_access_type = vec;
+            }
+            return Action::kStop;
         }
 
-        // Check if the index is dynamic.
-        auto* const_idx = indices[i]->As<Constant>();
-        if (!const_idx) {
-            return AccessToReplace{access, i, source_type};
+        // Check if this is the first dynamic index.
+        if (!result && !index->Is<Constant>()) {
+            result = AccessToReplace{access, i, ty};
         }
 
-        // Update the current source object type.
-        source_type = source_type->Element(const_idx->Value()->ValueAs<u32>());
-    }
-    // No dynamic indices were found.
-    return {};
+        return Action::kContinue;
+    });
+
+    return result;
 }
 
 }  // namespace
@@ -141,18 +161,35 @@ void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
 
         // Create a new access instruction using the local variable as the source.
         utils::Vector<Value*, 4> indices{access->Indices().Offset(to_replace.first_dynamic_index)};
-        auto* new_access =
-            builder.Access(ir->Types().ptr(builtin::AddressSpace::kFunction,
-                                           access->Result()->Type(), builtin::Access::kReadWrite),
-                           local, indices);
-        access->ReplaceWith(new_access);
+        const type::Type* access_type = access->Result()->Type();
+        Value* vector_index = nullptr;
+        if (to_replace.vector_access_type) {
+            // The old access indexed the element of a vector.
+            // Its not valid to obtain the address of an element of a vector, so we need to access
+            // up to the vector, then use LoadVectorElement to load the element.
+            // As a vector element is always a scalar, we know the last index of the access is the
+            // index on the vector. Pop that index to obtain the index to pass to
+            // LoadVectorElement(), and perform the rest of the access chain.
+            access_type = to_replace.vector_access_type;
+            vector_index = indices.Pop();
+        }
 
-        // Load from the access to get the final result value.
-        auto* load = builder.Load(new_access);
-        load->InsertAfter(new_access);
+        ir::Instruction* new_access =
+            builder.Access(ir->Types().ptr(builtin::AddressSpace::kFunction, access_type,
+                                           builtin::Access::kReadWrite),
+                           local, indices);
+        new_access->InsertBefore(access);
+
+        ir::Instruction* load = nullptr;
+        if (to_replace.vector_access_type) {
+            load = builder.LoadVectorElement(new_access->Result(), vector_index);
+        } else {
+            load = builder.Load(new_access);
+        }
 
         // Replace all uses of the old access instruction with the loaded result.
-        access->Result()->ReplaceAllUsesWith([&](Usage) { return load->Result(); });
+        access->Result()->ReplaceAllUsesWith(load->Result());
+        access->ReplaceWith(load);
     }
 }
 

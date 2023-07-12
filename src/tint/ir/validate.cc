@@ -35,11 +35,13 @@
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/let.h"
 #include "src/tint/ir/load.h"
+#include "src/tint/ir/load_vector_element.h"
 #include "src/tint/ir/loop.h"
 #include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/next_iteration.h"
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
+#include "src/tint/ir/store_vector_element.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/swizzle.h"
 #include "src/tint/ir/unary.h"
@@ -49,6 +51,7 @@
 #include "src/tint/switch.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/pointer.h"
+#include "src/tint/type/vector.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
 
@@ -267,20 +270,22 @@ class Validator {
         }
 
         tint::Switch(
-            inst,                                        //
-            [&](Access* a) { CheckAccess(a); },          //
-            [&](Binary* b) { CheckBinary(b); },          //
-            [&](Call* c) { CheckCall(c); },              //
-            [&](If* if_) { CheckIf(if_); },              //
-            [&](Load*) {},                               //
-            [&](Loop* l) { CheckLoop(l); },              //
-            [&](Store*) {},                              //
-            [&](Switch* s) { CheckSwitch(s); },          //
-            [&](Swizzle*) {},                            //
-            [&](Terminator* b) { CheckTerminator(b); },  //
-            [&](Unary* u) { CheckUnary(u); },            //
-            [&](Var* var) { CheckVar(var); },            //
-            [&](Let* let) { CheckLet(let); },            //
+            inst,                                                        //
+            [&](Access* a) { CheckAccess(a); },                          //
+            [&](Binary* b) { CheckBinary(b); },                          //
+            [&](Call* c) { CheckCall(c); },                              //
+            [&](If* if_) { CheckIf(if_); },                              //
+            [&](Let* let) { CheckLet(let); },                            //
+            [&](Load*) {},                                               //
+            [&](LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
+            [&](Loop* l) { CheckLoop(l); },                              //
+            [&](Store*) {},                                              //
+            [&](StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
+            [&](Switch* s) { CheckSwitch(s); },                          //
+            [&](Swizzle*) {},                                            //
+            [&](Terminator* b) { CheckTerminator(b); },                  //
+            [&](Unary* u) { CheckUnary(u); },                            //
+            [&](Var* var) { CheckVar(var); },                            //
             [&](Default) {
                 AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
             });
@@ -328,15 +333,20 @@ class Validator {
 
         for (size_t i = 0; i < a->Indices().Length(); i++) {
             auto err = [&](std::string msg) {
-                AddError(a, i + Access::kIndicesOperandOffset, std::move(msg));
+                AddError(a, i + Access::kIndicesOperandOffset, "access: " + msg);
             };
             auto note = [&](std::string msg) {
-                AddNote(a, i + Access::kIndicesOperandOffset, std::move(msg));
+                AddNote(a, i + Access::kIndicesOperandOffset, msg);
             };
 
             auto* index = a->Indices()[i];
             if (TINT_UNLIKELY(!index->Type()->is_integer_scalar())) {
-                err("access: index must be integer, got " + index->Type()->FriendlyName());
+                err("index must be integer, got " + index->Type()->FriendlyName());
+                return;
+            }
+
+            if (is_ptr && ty->Is<type::Vector>()) {
+                err("cannot obtain address of vector element");
                 return;
             }
 
@@ -347,7 +357,7 @@ class Validator {
                     // If the index is unsigned, we can skip this.
                     auto idx = value->ValueAs<AInt>();
                     if (TINT_UNLIKELY(idx < 0)) {
-                        err("access: constant index must be positive, got " + std::to_string(idx));
+                        err("constant index must be positive, got " + std::to_string(idx));
                         return;
                     }
                 }
@@ -357,18 +367,18 @@ class Validator {
                 if (TINT_UNLIKELY(!el)) {
                     // Is index in bounds?
                     if (auto el_count = ty->Elements().count; el_count != 0 && idx >= el_count) {
-                        err("access: index out of bounds for type " + current());
+                        err("index out of bounds for type " + current());
                         note("acceptable range: [0.." + std::to_string(el_count - 1) + "]");
                         return;
                     }
-                    err("access: type " + current() + " cannot be indexed");
+                    err("type " + current() + " cannot be indexed");
                     return;
                 }
                 ty = el;
             } else {
                 auto* el = ty->Elements().type;
                 if (TINT_UNLIKELY(!el)) {
-                    err("access: type " + current() + " cannot be dynamically indexed");
+                    err("type " + current() + " cannot be dynamically indexed");
                     return;
                 }
                 ty = el;
@@ -554,6 +564,58 @@ class Validator {
             }
             inst = inst->Block()->Parent();
         }
+    }
+
+    void CheckLoadVectorElement(LoadVectorElement* l) {
+        CheckOperandsNotNull(l,  //
+                             LoadVectorElement::kFromOperandOffset,
+                             LoadVectorElement::kIndexOperandOffset, "load_vector_element");
+
+        if (auto* res = l->Result()) {
+            if (auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset)) {
+                if (res->Type() != el_ty) {
+                    AddResultError(l, 0, "result type does not match vector pointer element type");
+                }
+            }
+        }
+    }
+
+    void CheckStoreVectorElement(StoreVectorElement* s) {
+        CheckOperandsNotNull(s,  //
+                             StoreVectorElement::kToOperandOffset,
+                             StoreVectorElement::kValueOperandOffset, "store_vector_element");
+
+        if (auto* value = s->Value()) {
+            if (auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset)) {
+                if (value->Type() != el_ty) {
+                    AddError(s, StoreVectorElement::kValueOperandOffset,
+                             "value type does not match vector pointer element type");
+                }
+            }
+        }
+    }
+
+    const type::Type* GetVectorPtrElementType(Instruction* inst, size_t idx) {
+        auto* operand = inst->Operands()[idx];
+        if (TINT_UNLIKELY(!operand)) {
+            return nullptr;
+        }
+
+        auto* type = operand->Type();
+        if (TINT_UNLIKELY(!type)) {
+            return nullptr;
+        }
+
+        auto* vec_ptr_ty = type->As<type::Pointer>();
+        if (TINT_LIKELY(vec_ptr_ty)) {
+            auto* vec_ty = vec_ptr_ty->StoreType()->As<type::Vector>();
+            if (TINT_LIKELY(vec_ty)) {
+                return vec_ty->type();
+            }
+        }
+
+        AddError(inst, idx, "operand must be a pointer to vector, got " + type->FriendlyName());
+        return nullptr;
     }
 };
 

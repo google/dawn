@@ -45,10 +45,12 @@ class Function;
 class If;
 class Let;
 class Load;
+class LoadVectorElement;
 class Loop;
 class Module;
 class MultiInBlock;
 class Store;
+class StoreVectorElement;
 class Switch;
 class Swizzle;
 class Terminator;
@@ -211,6 +213,10 @@ class GeneratorImplIr {
     /// @param load the load instruction to emit
     void EmitLoad(ir::Load* load);
 
+    /// Emit a load vector element instruction.
+    /// @param load the load vector element instruction to emit
+    void EmitLoadVectorElement(ir::LoadVectorElement* load);
+
     /// Emit a loop instruction.
     /// @param loop the loop instruction to emit
     void EmitLoop(ir::Loop* loop);
@@ -218,6 +224,10 @@ class GeneratorImplIr {
     /// Emit a store instruction.
     /// @param store the store instruction to emit
     void EmitStore(ir::Store* store);
+
+    /// Emit a store vector element instruction.
+    /// @param store the store vector element instruction to emit
+    void EmitStoreVectorElement(ir::StoreVectorElement* store);
 
     /// Emit a switch instruction.
     /// @param swtch the switch instruction to emit
