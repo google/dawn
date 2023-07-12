@@ -350,8 +350,6 @@ const std::string& kMatMulVec4TwoDimensionalSharedArray =
 
 constexpr unsigned int kNumIterations = 50;
 
-constexpr uint32_t kTimestampQueryCount = 2u;
-
 enum class MatMulMethod {
     MatMulFloatOneDimSharedArray,
     MatMulFloatTwoDimSharedArray,
@@ -403,10 +401,6 @@ class ShaderRobustnessPerf : public DawnPerfTestWithParams<ShaderRobustnessParam
     uint32_t mDimAOuter;
     uint32_t mDimInner;
     uint32_t mDimBOuter;
-
-    wgpu::QuerySet mTimestampQuerySet;
-    wgpu::Buffer mResolveBuffer;
-    wgpu::Buffer mReadbackBuffer;
 };
 
 void ShaderRobustnessPerf::SetUp() {
@@ -474,24 +468,6 @@ void ShaderRobustnessPerf::SetUp() {
                                           {2, dst, 0, byteDstSize},
                                           {3, uniformBuffer, 0, sizeof(uniformData)},
                                       });
-
-    if (SupportsTimestampQuery()) {
-        wgpu::QuerySetDescriptor querySetDescriptor;
-        querySetDescriptor.count = kTimestampQueryCount;
-        querySetDescriptor.type = wgpu::QueryType::Timestamp;
-        mTimestampQuerySet = device.CreateQuerySet(&querySetDescriptor);
-
-        wgpu::BufferDescriptor resolveBufferDescriptor;
-        resolveBufferDescriptor.size = kTimestampQueryCount * sizeof(uint64_t);
-        resolveBufferDescriptor.usage = wgpu::BufferUsage::QueryResolve |
-                                        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-        mResolveBuffer = device.CreateBuffer(&resolveBufferDescriptor);
-
-        wgpu::BufferDescriptor readbackBufferDescriptor;
-        readbackBufferDescriptor.size = kTimestampQueryCount * sizeof(uint64_t);
-        readbackBufferDescriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
-        mReadbackBuffer = device.CreateBuffer(&readbackBufferDescriptor);
-    }
 }
 
 void ShaderRobustnessPerf::Step() {
@@ -499,7 +475,7 @@ void ShaderRobustnessPerf::Step() {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         if (SupportsTimestampQuery()) {
-            encoder.WriteTimestamp(mTimestampQuerySet, 0);
+            RecordBeginTimestamp(encoder);
         }
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(mPipeline);
@@ -510,10 +486,7 @@ void ShaderRobustnessPerf::Step() {
         }
         pass.End();
         if (SupportsTimestampQuery()) {
-            encoder.WriteTimestamp(mTimestampQuerySet, 1);
-            encoder.ResolveQuerySet(mTimestampQuerySet, 0, kTimestampQueryCount, mResolveBuffer, 0);
-            encoder.CopyBufferToBuffer(mResolveBuffer, 0, mReadbackBuffer, 0,
-                                       sizeof(uint64_t) * kTimestampQueryCount);
+            RecordEndTimestampAndResolveQuerySet(encoder);
         }
 
         commands = encoder.Finish();
@@ -522,23 +495,7 @@ void ShaderRobustnessPerf::Step() {
     queue.Submit(1, &commands);
 
     if (SupportsTimestampQuery()) {
-        bool done = false;
-        mReadbackBuffer.MapAsync(
-            wgpu::MapMode::Read, 0, sizeof(uint64_t) * kTimestampQueryCount,
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done);
-        while (!done) {
-            WaitABit();
-        }
-        const uint64_t* readbackValues =
-            static_cast<const uint64_t*>(mReadbackBuffer.GetConstMappedRange());
-        ASSERT_EQ(2u, kTimestampQueryCount);
-        double gpuTimeElapsed = (readbackValues[1] - readbackValues[0]) / 1e9;
-        SetGPUTime(gpuTimeElapsed);
-
-        mReadbackBuffer.Unmap();
+        ComputeGPUElapsedTime();
     }
 }
 
