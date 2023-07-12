@@ -97,6 +97,10 @@ ir::FunctionParam* Builder::FunctionParam(std::string_view name, const type::Typ
     return param;
 }
 
+ir::TerminateInvocation* Builder::TerminateInvocation() {
+    return Append(ir.instructions.Create<ir::TerminateInvocation>());
+}
+
 ir::Unreachable* Builder::Unreachable() {
     return Append(ir.instructions.Create<ir::Unreachable>());
 }

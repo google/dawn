@@ -820,6 +820,8 @@ if(${TINT_BUILD_IR})
     ir/switch.h
     ir/swizzle.cc
     ir/swizzle.h
+    ir/terminate_invocation.cc
+    ir/terminate_invocation.h
     ir/terminator.cc
     ir/terminator.h
     ir/to_program.cc
@@ -840,6 +842,8 @@ if(${TINT_BUILD_IR})
     ir/transform/add_empty_entry_point.h
     ir/transform/block_decorated_structs.cc
     ir/transform/block_decorated_structs.h
+    ir/transform/demote_to_helper.cc
+    ir/transform/demote_to_helper.h
     ir/transform/merge_return.cc
     ir/transform/merge_return.h
     ir/transform/shader_io.cc
@@ -1609,6 +1613,7 @@ if(TINT_BUILD_TESTS)
       ir/swizzle_test.cc
       ir/transform/add_empty_entry_point_test.cc
       ir/transform/block_decorated_structs_test.cc
+      ir/transform/demote_to_helper_test.cc
       ir/transform/merge_return_test.cc
       ir/transform/shader_io_test.cc
       ir/transform/var_for_dynamic_index_test.cc

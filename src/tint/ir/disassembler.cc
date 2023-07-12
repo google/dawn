@@ -45,6 +45,7 @@
 #include "src/tint/ir/store_vector_element.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/swizzle.h"
+#include "src/tint/ir/terminate_invocation.h"
 #include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
@@ -747,7 +748,7 @@ void Disassembler::EmitTerminator(Terminator* b) {
             out_ << " %b" << IdOf(bi->Loop()->Body());
             args_offset = ir::BreakIf::kArgsOperandOffset;
         },
-        [&](Unreachable*) { out_ << "unreachable"; },
+        [&](ir::TerminateInvocation*) { out_ << "terminate_invocation"; },
         [&](Default) { out_ << "unknown terminator " << b->TypeInfo().name; });
 
     if (!b->Args().IsEmpty()) {
