@@ -151,6 +151,29 @@ TEST(TintVectorTest, Push_NoSmallArray) {
     EXPECT_TRUE(AllExternallyHeld(vec));
 }
 
+TEST(TintVectorTest, Insert) {
+    Vector<std::string, 3> vec;
+    EXPECT_THAT(vec, testing::ElementsAre());
+
+    vec.Insert(0, "six");
+    EXPECT_THAT(vec, testing::ElementsAre("six"));
+
+    vec.Insert(0, "three");
+    EXPECT_THAT(vec, testing::ElementsAre("three", "six"));
+
+    vec.Insert(1, "five");
+    EXPECT_THAT(vec, testing::ElementsAre("three", "five", "six"));
+
+    vec.Insert(0, "two");
+    EXPECT_THAT(vec, testing::ElementsAre("two", "three", "five", "six"));
+
+    vec.Insert(2, "four");
+    EXPECT_THAT(vec, testing::ElementsAre("two", "three", "four", "five", "six"));
+
+    vec.Insert(0, "one");
+    EXPECT_THAT(vec, testing::ElementsAre("one", "two", "three", "four", "five", "six"));
+}
+
 TEST(TintVectorTest, Erase_Front) {
     Vector<std::string, 3> vec;
     vec.Push("one");
