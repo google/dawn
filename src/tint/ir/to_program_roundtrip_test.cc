@@ -1681,6 +1681,17 @@ TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_StorageRead_u32) {
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_StorageReadWrite_i32) {
     Test("@group(10) @binding(20) var<storage, read_write> v : i32;");
 }
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Handle_Texture2D) {
+    Test("@group(0) @binding(0) var t : texture_2d<f32>;");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Handle_Sampler) {
+    Test("@group(0) @binding(0) var s : sampler;");
+}
+
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Handle_SamplerCmp) {
+    Test("@group(0) @binding(0) var s : sampler_comparison;");
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Function-scope var

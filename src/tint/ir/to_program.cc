@@ -520,6 +520,9 @@ class State {
             case builtin::AddressSpace::kStorage:
                 b.GlobalVar(name, ty, init, ptr->Access(), ptr->AddressSpace(), std::move(attrs));
                 return;
+            case builtin::AddressSpace::kHandle:
+                b.GlobalVar(name, ty, init, std::move(attrs));
+                return;
             default:
                 b.GlobalVar(name, ty, init, ptr->AddressSpace(), std::move(attrs));
                 return;
