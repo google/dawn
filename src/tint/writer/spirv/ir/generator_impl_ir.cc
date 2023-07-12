@@ -44,6 +44,7 @@
 #include "src/tint/ir/terminator.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/transform/block_decorated_structs.h"
+#include "src/tint/ir/transform/builtin_polyfill_spirv.h"
 #include "src/tint/ir/transform/demote_to_helper.h"
 #include "src/tint/ir/transform/merge_return.h"
 #include "src/tint/ir/transform/shader_io_spirv.h"
@@ -91,6 +92,7 @@ void Sanitize(ir::Module* module) {
 
     manager.Add<ir::transform::AddEmptyEntryPoint>();
     manager.Add<ir::transform::BlockDecoratedStructs>();
+    manager.Add<ir::transform::BuiltinPolyfillSpirv>();
     manager.Add<ir::transform::DemoteToHelper>();
     manager.Add<ir::transform::MergeReturn>();
     manager.Add<ir::transform::ShaderIOSpirv>();
@@ -746,6 +748,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             [&](ir::BuiltinCall* b) { EmitBuiltinCall(b); },                //
             [&](ir::Construct* c) { EmitConstruct(c); },                    //
             [&](ir::Convert* c) { EmitConvert(c); },                        //
+            [&](ir::IntrinsicCall* i) { EmitIntrinsicCall(i); },            //
             [&](ir::Load* l) { EmitLoad(l); },                              //
             [&](ir::LoadVectorElement* l) { EmitLoadVectorElement(l); },    //
             [&](ir::Loop* l) { EmitLoop(l); },                              //
@@ -1374,6 +1377,23 @@ void GeneratorImplIr::EmitConvert(ir::Convert* convert) {
     }
 
     current_function_.push_inst(op, std::move(operands));
+}
+
+void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
+    auto id = Value(call);
+
+    spv::Op op = spv::Op::Max;
+    switch (call->Kind()) {
+        case ir::IntrinsicCall::Kind::kSpirvSelect:
+            op = spv::Op::OpSelect;
+            break;
+    }
+
+    OperandList operands = {Type(call->Result()->Type()), id};
+    for (auto* arg : call->Args()) {
+        operands.push_back(Value(arg));
+    }
+    current_function_.push_inst(op, operands);
 }
 
 void GeneratorImplIr::EmitLoad(ir::Load* load) {

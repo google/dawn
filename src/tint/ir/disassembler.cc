@@ -447,7 +447,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             out_ << " = ";
             EmitInstructionName(utils::ToString(i->Kind()), i);
             out_ << " ";
-            EmitArgs(i);
+            EmitOperandList(i);
             EmitLine();
         },
         [&](Load* l) {

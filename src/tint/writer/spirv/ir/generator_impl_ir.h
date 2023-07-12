@@ -43,6 +43,7 @@ class ExitLoop;
 class ExitSwitch;
 class Function;
 class If;
+class IntrinsicCall;
 class Let;
 class Load;
 class LoadVectorElement;
@@ -208,6 +209,10 @@ class GeneratorImplIr {
     /// Emit a convert instruction.
     /// @param convert the convert instruction to emit
     void EmitConvert(ir::Convert* convert);
+
+    /// Emit an intrinsic call instruction.
+    /// @param call the intrinsic call instruction to emit
+    void EmitIntrinsicCall(ir::IntrinsicCall* call);
 
     /// Emit a load instruction.
     /// @param load the load instruction to emit

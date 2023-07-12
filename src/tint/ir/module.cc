@@ -65,4 +65,15 @@ Symbol Module::SetName(Value* value, std::string_view name) {
     return Symbol{};
 }
 
+void Module::SetName(Value* value, Symbol name) {
+    TINT_ASSERT(IR, name.IsValid());
+
+    if (auto old = value_to_id_.Get(value)) {
+        value_to_id_.Remove(value);
+        id_to_value_.Remove(old.value());
+    }
+
+    value_to_id_.Add(value, name);
+}
+
 }  // namespace tint::ir

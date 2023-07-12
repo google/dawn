@@ -446,5 +446,57 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                                          BuiltinTestCase{kU32, builtin::Function::kClamp,
                                                          "UClamp"}));
 
+TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_ScalarOperands) {
+    auto* argf = b.FunctionParam("argf", ty.i32());
+    auto* argt = b.FunctionParam("argt", ty.i32());
+    auto* cond = b.FunctionParam("cond", ty.bool_());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({argf, argt, cond});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kSelect, argf, argt, cond);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpSelect %int %cond %argt %argf");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Select_VectorCondition_VectorOperands) {
+    auto* argf = b.FunctionParam("argf", ty.vec4<i32>());
+    auto* argt = b.FunctionParam("argt", ty.vec4<i32>());
+    auto* cond = b.FunctionParam("cond", ty.vec4<bool>());
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({argf, argt, cond});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kSelect, argf, argt, cond);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpSelect %v4int %cond %argt %argf");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_VectorOperands) {
+    auto* argf = b.FunctionParam("argf", ty.vec4<i32>());
+    auto* argt = b.FunctionParam("argt", ty.vec4<i32>());
+    auto* cond = b.FunctionParam("cond", ty.bool_());
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({argf, argt, cond});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kSelect, argf, argt, cond);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%11 = OpCompositeConstruct %v4bool %cond %cond %cond %cond");
+    EXPECT_INST("%result = OpSelect %v4int %11 %argt %argf");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv

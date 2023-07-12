@@ -541,6 +541,13 @@ if (tint_build_ir) {
       ":libtint_type_src",
       ":libtint_utils_src",
     ]
+
+    if (tint_build_spv_writer) {
+      sources += [
+        "ir/transform/builtin_polyfill_spirv.cc",
+        "ir/transform/builtin_polyfill_spirv.h",
+      ]
+    }
   }
 }
 
@@ -1898,6 +1905,10 @@ if (tint_build_unittests) {
         ":libtint_ir_transform_src",
         ":libtint_transform_manager_src",
       ]
+
+      if (tint_build_spv_writer) {
+        sources += [ "ir/transform/builtin_polyfill_spirv_test.cc" ]
+      }
     }
   }
 

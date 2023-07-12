@@ -677,6 +677,8 @@ if(${TINT_BUILD_SPV_WRITER})
 
   if(${TINT_BUILD_IR})
     list(APPEND TINT_LIB_SRCS
+      ir/transform/builtin_polyfill_spirv.cc
+      ir/transform/builtin_polyfill_spirv.h
       writer/spirv/ir/generator_impl_ir.cc
       writer/spirv/ir/generator_impl_ir.h
     )
@@ -1327,6 +1329,7 @@ if(TINT_BUILD_TESTS)
 
     if(${TINT_BUILD_IR})
       list(APPEND TINT_TEST_SRCS
+        ir/transform/builtin_polyfill_spirv_test.cc
         writer/spirv/ir/generator_impl_ir_access_test.cc
         writer/spirv/ir/generator_impl_ir_binary_test.cc
         writer/spirv/ir/generator_impl_ir_bitcast_test.cc

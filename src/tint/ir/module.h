@@ -78,6 +78,10 @@ class Module {
     /// @return the unique symbol of the given value.
     Symbol SetName(Value* value, std::string_view name);
 
+    /// @param value the value to name
+    /// @param name the desired name of the value
+    void SetName(Value* value, Symbol name);
+
     /// @return the type manager for the module
     type::Manager& Types() { return constant_values.types; }
 
