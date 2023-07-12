@@ -40,9 +40,11 @@
 #include "src/tint/ir/return.h"
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/terminate_invocation.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/ir/transform/add_empty_entry_point.h"
 #include "src/tint/ir/transform/block_decorated_structs.h"
+#include "src/tint/ir/transform/demote_to_helper.h"
 #include "src/tint/ir/transform/merge_return.h"
 #include "src/tint/ir/transform/shader_io_spirv.h"
 #include "src/tint/ir/transform/var_for_dynamic_index.h"
@@ -89,6 +91,7 @@ void Sanitize(ir::Module* module) {
 
     manager.Add<ir::transform::AddEmptyEntryPoint>();
     manager.Add<ir::transform::BlockDecoratedStructs>();
+    manager.Add<ir::transform::DemoteToHelper>();
     manager.Add<ir::transform::MergeReturn>();
     manager.Add<ir::transform::ShaderIOSpirv>();
     manager.Add<ir::transform::VarForDynamicIndex>();
@@ -808,6 +811,7 @@ void GeneratorImplIr::EmitTerminator(ir::Terminator* t) {
         [&](ir::NextIteration*) {
             current_function_.push_inst(spv::Op::OpBranch, {loop_header_label_});
         },
+        [&](ir::TerminateInvocation*) { current_function_.push_inst(spv::Op::OpKill, {}); },
         [&](ir::Unreachable*) { current_function_.push_inst(spv::Op::OpUnreachable, {}); },
 
         [&](Default) {
