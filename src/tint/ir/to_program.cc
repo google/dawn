@@ -561,8 +561,14 @@ class State {
             },
             [&](ir::BuiltinCall* c) {
                 auto* expr = b.Call(c->Func(), std::move(args));
-                if (!call->HasResults() || call->Result()->Usages().IsEmpty()) {
+                if (!call->HasResults() || call->Result()->Type()->Is<type::Void>()) {
                     Append(b.CallStmt(expr));
+                    return;
+                }
+                if (call->Result()->Usages().IsEmpty()) {
+                    // TODO(crbug.com/1718): Assignment to phony is only required if the builtin is
+                    // annotated with @must_use. We don't yet have this information.
+                    Append(b.Assign(b.Phony(), expr));
                     return;
                 }
                 Bind(c->Result(), expr, PtrKind::kPtr);

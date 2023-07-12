@@ -186,6 +186,14 @@ fn f(a : i32, b : i32) {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, BuiltinCall_PhonyAssignment) {
+    Test(R"(
+fn f(a : i32, b : i32) {
+  _ = max(a, b);
+}
+)");
+}
+
 TEST_F(IRToProgramRoundtripTest, BuiltinCall_PtrArg) {
     Test(R"(
 var<workgroup> v : bool;
