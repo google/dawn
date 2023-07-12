@@ -194,6 +194,14 @@ fn f(a : i32, b : i32) {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, BuiltinCall_UnusedLet) {
+    Test(R"(
+fn f(a : i32, b : i32) {
+  let unused = max(a, b);
+}
+)");
+}
+
 TEST_F(IRToProgramRoundtripTest, BuiltinCall_PtrArg) {
     Test(R"(
 var<workgroup> v : bool;
@@ -1501,6 +1509,85 @@ fn f() {
   let v_6 = v[e(4i)][v_2][v_5];
   (*(v_1))[v_3] = ((*(v_1))[v_3] + v_6);
 })");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Phony Assignment
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, PhonyAssign_PrivateVar) {
+    Test(R"(
+var<private> p : i32;
+
+fn f() {
+  _ = p;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, PhonyAssign_FunctionVar) {
+    Test(R"(
+fn f() {
+  var i : i32;
+  _ = i;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, PhonyAssign_FunctionLet) {
+    Test(R"(
+fn f() {
+  let i : i32 = 42i;
+  _ = i;
+}
+)",
+         R"(
+fn f() {
+  let i = 42i;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, PhonyAssign_HandleVar) {
+    Test(R"(
+@group(0) @binding(0) var t : texture_2d<f32>;
+
+fn f() {
+  _ = t;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, PhonyAssign_Constant) {
+    Test(R"(
+fn f() {
+  _ = 42i;
+}
+)",
+         R"(
+fn f() {
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, PhonyAssign_Call) {
+    Test(R"(
+fn v() -> i32 {
+  return 42;
+}
+
+fn f() {
+  _ = v();
+}
+)",
+         R"(
+fn v() -> i32 {
+  return 42i;
+}
+
+fn f() {
+  v();
+}
+)");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
