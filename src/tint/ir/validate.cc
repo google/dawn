@@ -492,7 +492,7 @@ class Validator {
         tint::Switch(
             e,                                               //
             [&](ir::ExitIf* i) { CheckExitIf(i); },          //
-            [&](ir::ExitLoop*) {},                           //
+            [&](ir::ExitLoop* l) { CheckExitLoop(l); },      //
             [&](ir::ExitSwitch* s) { CheckExitSwitch(s); },  //
             [&](Default) {
                 AddError(std::string("missing validation of exit: ") + e->TypeInfo().name);
@@ -506,22 +506,53 @@ class Validator {
         }
     }
 
-    void CheckExitSwitch(ExitSwitch* s) {
+    void CheckControlsAllowingIf(Exit* exit, Instruction* control, std::string_view name) {
         bool found = false;
         for (auto ctrl : utils::Reverse(control_stack_)) {
-            if (ctrl == s->ControlInstruction()) {
+            if (ctrl == control) {
                 found = true;
                 break;
             }
             // A exit switch can step over if instructions, but no others.
             if (!ctrl->Is<ir::If>()) {
-                AddError(s, "exit_switch: switch target jumps over other control instructions");
+                AddError(exit, "exit: " + std::string(name) +
+                                   " target jumps over other control instructions");
                 AddNote(ctrl, "first control instruction jumped");
                 return;
             }
         }
         if (!found) {
-            AddError(s, "exit_switch: switch not found in parent control instructions");
+            AddError(exit,
+                     "exit: " + std::string(name) + " not found in parent control instructions");
+        }
+    }
+
+    void CheckExitSwitch(ExitSwitch* s) {
+        CheckControlsAllowingIf(s, s->ControlInstruction(), "switch");
+    }
+
+    void CheckExitLoop(ExitLoop* l) {
+        CheckControlsAllowingIf(l, l->ControlInstruction(), "loop");
+
+        Instruction* inst = l;
+        Loop* control = l->Loop();
+        while (inst) {
+            // Found parent loop
+            if (inst->Block()->Parent() == control) {
+                if (inst->Block() == control->Continuing()) {
+                    AddError(l, "exit_loop: loop exit jumps out of continuing block");
+                    if (control->Continuing() != l->Block()) {
+                        AddNote(control->Continuing(), "in continuing block");
+                    }
+                } else if (inst->Block() == control->Initializer()) {
+                    AddError(l, "exit_loop: loop exit not permitted in loop initializer");
+                    if (control->Initializer() != l->Block()) {
+                        AddNote(control->Initializer(), "in initializer block");
+                    }
+                }
+                break;
+            }
+            inst = inst->Block()->Parent();
         }
     }
 };
