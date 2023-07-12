@@ -26,56 +26,6 @@
 
 namespace tint::sem {
 
-/// Determines if the given `i` is a coarse derivative
-/// @param i the builtin type
-/// @returns true if the given derivative is coarse.
-bool IsCoarseDerivativeBuiltin(builtin::Function i);
-
-/// Determines if the given `i` is a fine derivative
-/// @param i the builtin type
-/// @returns true if the given derivative is fine.
-bool IsFineDerivativeBuiltin(builtin::Function i);
-
-/// Determine if the given `i` is a derivative builtin
-/// @param i the builtin type
-/// @returns true if the given `i` is a derivative builtin
-bool IsDerivativeBuiltin(builtin::Function i);
-
-/// Determines if the given `i` is a texture operation builtin
-/// @param i the builtin type
-/// @returns true if the given `i` is a texture operation builtin
-bool IsTextureBuiltin(builtin::Function i);
-
-/// Determines if the given `i` is a image query builtin
-/// @param i the builtin type
-/// @returns true if the given `i` is a image query builtin
-bool IsImageQueryBuiltin(builtin::Function i);
-
-/// Determines if the given `i` is a data packing builtin
-/// @param i the builtin
-/// @returns true if the given `i` is a data packing builtin
-bool IsDataPackingBuiltin(builtin::Function i);
-
-/// Determines if the given `i` is a data unpacking builtin
-/// @param i the builtin
-/// @returns true if the given `i` is a data unpacking builtin
-bool IsDataUnpackingBuiltin(builtin::Function i);
-
-/// Determines if the given `i` is a barrier builtin
-/// @param i the builtin
-/// @returns true if the given `i` is a barrier builtin
-bool IsBarrierBuiltin(builtin::Function i);
-
-/// Determines if the given `i` is a atomic builtin
-/// @param i the builtin
-/// @returns true if the given `i` is a atomic builtin
-bool IsAtomicBuiltin(builtin::Function i);
-
-/// Determins if the given `i` is a DP4a builtin
-/// @param i the builtin
-/// @returns true if the given `i` is a DP4a builtin
-bool IsDP4aBuiltin(builtin::Function i);
-
 /// Builtin holds the semantic information for a builtin function.
 class Builtin final : public utils::Castable<Builtin, CallTarget> {
   public:

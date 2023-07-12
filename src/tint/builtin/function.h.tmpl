@@ -57,6 +57,60 @@ constexpr const char* kFunctionStrings[] = {
 {{- end }}
 };
 
+/// Determines if the given `f` is a coarse derivative.
+/// @param f the builtin type
+/// @returns true if the given derivative is coarse.
+bool IsCoarseDerivativeBuiltin(Function f);
+
+/// Determines if the given `f` is a fine derivative.
+/// @param f the builtin type
+/// @returns true if the given derivative is fine.
+bool IsFineDerivativeBuiltin(Function f);
+
+/// Determine if the given `f` is a derivative builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a derivative builtin
+bool IsDerivativeBuiltin(Function f);
+
+/// Determines if the given `f` is a texture operation builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a texture operation builtin
+bool IsTextureBuiltin(Function f);
+
+/// Determines if the given `f` is an image query builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is an image query builtin
+bool IsImageQueryBuiltin(Function f);
+
+/// Determines if the given `f` is a data packing builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a data packing builtin
+bool IsDataPackingBuiltin(Function f);
+
+/// Determines if the given `f` is a data unpacking builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a data unpacking builtin
+bool IsDataUnpackingBuiltin(Function f);
+
+/// Determines if the given `f` is a barrier builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a barrier builtin
+bool IsBarrierBuiltin(Function f);
+
+/// Determines if the given `f` is an atomic builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is an atomic builtin
+bool IsAtomicBuiltin(Function f);
+
+/// Determines if the given `f` is a DP4a builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a DP4a builtin
+bool IsDP4aBuiltin(Function f);
+
+/// Determines if the given `f` may have side-effects (i.e. writes to at least one of its inputs)
+/// @returns true if intrinsic may have side-effects
+bool HasSideEffects(Function f);
+
 }  // namespace tint::builtin
 // \endcond
 
