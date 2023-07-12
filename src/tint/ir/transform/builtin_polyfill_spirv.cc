@@ -50,6 +50,7 @@ struct BuiltinPolyfillSpirv::State {
             }
             if (auto* builtin = inst->As<BuiltinCall>()) {
                 switch (builtin->Func()) {
+                    case builtin::Function::kDot:
                     case builtin::Function::kSelect:
                         worklist.Push(builtin);
                         break;
@@ -63,6 +64,9 @@ struct BuiltinPolyfillSpirv::State {
         for (auto* builtin : worklist) {
             Value* replacement = nullptr;
             switch (builtin->Func()) {
+                case builtin::Function::kDot:
+                    replacement = Dot(builtin);
+                    break;
                 case builtin::Function::kSelect:
                     replacement = Select(builtin);
                     break;
@@ -78,6 +82,44 @@ struct BuiltinPolyfillSpirv::State {
             builtin->Result()->ReplaceAllUsesWith(replacement);
             builtin->Destroy();
         }
+    }
+
+    /// Handle a `dot()` builtin.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    Value* Dot(BuiltinCall* builtin) {
+        // OpDot only supports floating point operands, so we need to polyfill the integer case.
+        // TODO(crbug.com/tint/1267): If SPV_KHR_integer_dot_product is supported, use that instead.
+        if (builtin->Result()->Type()->is_integer_scalar()) {
+            Instruction* sum = nullptr;
+
+            auto* v1 = builtin->Args()[0];
+            auto* v2 = builtin->Args()[1];
+            auto* vec = v1->Type()->As<type::Vector>();
+            auto* elty = vec->type();
+            for (uint32_t i = 0; i < vec->Width(); i++) {
+                auto* e1 = b.Access(elty, v1, u32(i));
+                e1->InsertBefore(builtin);
+                auto* e2 = b.Access(elty, v2, u32(i));
+                e2->InsertBefore(builtin);
+                auto* mul = b.Multiply(elty, e1, e2);
+                mul->InsertBefore(builtin);
+                if (sum) {
+                    sum = b.Add(elty, sum, mul);
+                    sum->InsertBefore(builtin);
+                } else {
+                    sum = mul;
+                }
+            }
+            return sum->Result();
+        }
+
+        // Replace the builtin call with a call to the spirv.dot intrinsic.
+        auto args = utils::Vector<Value*, 4>(builtin->Args());
+        auto* call =
+            b.Call(builtin->Result()->Type(), IntrinsicCall::Kind::kSpirvDot, std::move(args));
+        call->InsertBefore(builtin);
+        return call->Result();
     }
 
     /// Handle a `select()` builtin.

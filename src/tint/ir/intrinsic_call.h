@@ -29,6 +29,7 @@ class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
     /// The kind of instruction.
     enum class Kind {
         // SPIR-V backend intrinsics.
+        kSpirvDot,
         kSpirvSelect,
     };
 

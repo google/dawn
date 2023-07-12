@@ -411,6 +411,75 @@ TEST_F(SpvGeneratorImplTest, Builtin_Distance_vec3h) {
     EXPECT_INST("%result = OpExtInst %half %9 Distance %arg1 %arg2");
 }
 
+TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec4f) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({arg1, arg2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), builtin::Function::kDot, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpDot %float %arg1 %arg2");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec2i) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec2<i32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec2<i32>());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1, arg2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kDot, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpCompositeExtract %int %arg1 0
+          %9 = OpCompositeExtract %int %arg2 0
+         %10 = OpIMul %int %8 %9
+         %11 = OpCompositeExtract %int %arg1 1
+         %12 = OpCompositeExtract %int %arg2 1
+         %13 = OpIMul %int %11 %12
+     %result = OpIAdd %int %10 %13
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec4u) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<u32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<u32>());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg1, arg2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kDot, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpCompositeExtract %uint %arg1 0
+          %9 = OpCompositeExtract %uint %arg2 0
+         %10 = OpIMul %uint %8 %9
+         %11 = OpCompositeExtract %uint %arg1 1
+         %12 = OpCompositeExtract %uint %arg2 1
+         %13 = OpIMul %uint %11 %12
+         %14 = OpIAdd %uint %10 %13
+         %15 = OpCompositeExtract %uint %arg1 2
+         %16 = OpCompositeExtract %uint %arg2 2
+         %17 = OpIMul %uint %15 %16
+         %18 = OpIAdd %uint %14 %17
+         %19 = OpCompositeExtract %uint %arg1 3
+         %20 = OpCompositeExtract %uint %arg2 3
+         %21 = OpIMul %uint %19 %20
+     %result = OpIAdd %uint %18 %21
+)");
+}
+
 // Tests for builtins with the signature: T = func(T, T, T)
 using Builtin_3arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_3arg, Scalar) {

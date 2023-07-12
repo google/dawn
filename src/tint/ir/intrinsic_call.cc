@@ -34,6 +34,9 @@ IntrinsicCall::~IntrinsicCall() = default;
 
 utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Kind kind) {
     switch (kind) {
+        case IntrinsicCall::Kind::kSpirvDot:
+            out << "spirv.dot";
+            break;
         case IntrinsicCall::Kind::kSpirvSelect:
             out << "spirv.select";
             break;

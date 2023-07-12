@@ -26,7 +26,7 @@ class Call : public utils::Castable<Call, OperandInstruction<4, 1>> {
     ~Call() override;
 
     /// @returns the call arguments
-    virtual utils::Slice<Value* const> Args() { return operands_.Slice(); }
+    virtual utils::Slice<Value*> Args() { return operands_.Slice(); }
 
   protected:
     /// Constructor
