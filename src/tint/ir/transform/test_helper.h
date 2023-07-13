@@ -24,7 +24,7 @@
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/transform/transform.h"
-#include "src/tint/ir/validate.h"
+#include "src/tint/ir/validator.h"
 #include "src/tint/transform/manager.h"
 
 namespace tint::ir::transform {

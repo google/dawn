@@ -17,7 +17,7 @@
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/splat.h"
 #include "src/tint/ir/constant.h"
-#include "src/tint/ir/validate.h"
+#include "src/tint/ir/validator.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/type/array.h"

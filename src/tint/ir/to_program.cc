@@ -51,7 +51,7 @@
 #include "src/tint/ir/unary.h"
 #include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
-#include "src/tint/ir/validate.h"
+#include "src/tint/ir/validator.h"
 #include "src/tint/ir/var.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"

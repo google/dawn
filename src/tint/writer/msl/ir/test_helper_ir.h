@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/ir/builder.h"
-#include "src/tint/ir/validate.h"
+#include "src/tint/ir/validator.h"
 #include "src/tint/writer/msl/ir/generator_impl_ir.h"
 
 namespace tint::writer::msl {

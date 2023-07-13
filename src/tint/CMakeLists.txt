@@ -842,8 +842,8 @@ if(${TINT_BUILD_IR})
     ir/unreachable.h
     ir/user_call.cc
     ir/user_call.h
-    ir/validate.cc
-    ir/validate.h
+    ir/validator.cc
+    ir/validator.h
     ir/value.cc
     ir/value.h
     ir/var.cc
@@ -1626,7 +1626,7 @@ if(TINT_BUILD_TESTS)
       ir/transform/demote_to_helper_test.cc
       ir/unary_test.cc
       ir/user_call_test.cc
-      ir/validate_test.cc
+      ir/validator_test.cc
       ir/value_test.cc
       ir/var_test.cc
     )

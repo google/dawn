@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_VALIDATE_H_
-#define SRC_TINT_IR_VALIDATE_H_
+#ifndef SRC_TINT_IR_VALIDATOR_H_
+#define SRC_TINT_IR_VALIDATOR_H_
 
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/module.h"
@@ -31,4 +31,4 @@ utils::Result<Success, diag::List> Validate(Module& mod);
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_VALIDATE_H_
+#endif  // SRC_TINT_IR_VALIDATOR_H_

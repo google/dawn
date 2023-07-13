@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/validate.h"
+#include "src/tint/ir/validator.h"
 
 #include <memory>
 #include <string>

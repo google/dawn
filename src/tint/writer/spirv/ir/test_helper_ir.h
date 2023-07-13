@@ -23,7 +23,7 @@
 #include "gtest/gtest.h"
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/ir/builder.h"
-#include "src/tint/ir/validate.h"
+#include "src/tint/ir/validator.h"
 #include "src/tint/writer/spirv/ir/generator_impl_ir.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 
