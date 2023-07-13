@@ -165,6 +165,9 @@ class State {
     /// Map of struct to output program name.
     utils::Hashmap<const type::Struct*, Symbol, 8> structs_;
 
+    /// True if 'diagnostic(off, derivative_uniformity)' has been emitted
+    bool disabled_derivative_uniformity_ = false;
+
     void RootBlock(ir::Block* root) {
         for (auto* inst : *root) {
             tint::Switch(
@@ -564,6 +567,13 @@ class State {
                 Bind(c->Result(), expr, PtrKind::kPtr);
             },
             [&](ir::BuiltinCall* c) {
+                if (!disabled_derivative_uniformity_ && RequiresDerivativeUniformity(c->Func())) {
+                    // TODO(crbug.com/tint/1985): Be smarter about disabling derivative uniformity.
+                    b.DiagnosticDirective(builtin::DiagnosticSeverity::kOff,
+                                          builtin::CoreDiagnosticRule::kDerivativeUniformity);
+                    disabled_derivative_uniformity_ = true;
+                }
+
                 auto* expr = b.Call(c->Func(), std::move(args));
                 if (!call->HasResults() || call->Result()->Type()->Is<type::Void>()) {
                     Append(b.CallStmt(expr));
@@ -1080,6 +1090,26 @@ class State {
             }
         }
         return b.IndexAccessor(expr, Expr(index));
+    }
+
+    bool RequiresDerivativeUniformity(builtin::Function fn) {
+        switch (fn) {
+            case builtin::Function::kDpdxCoarse:
+            case builtin::Function::kDpdyCoarse:
+            case builtin::Function::kFwidthCoarse:
+            case builtin::Function::kDpdxFine:
+            case builtin::Function::kDpdyFine:
+            case builtin::Function::kFwidthFine:
+            case builtin::Function::kDpdx:
+            case builtin::Function::kDpdy:
+            case builtin::Function::kFwidth:
+            case builtin::Function::kTextureSample:
+            case builtin::Function::kTextureSampleBias:
+            case builtin::Function::kTextureSampleCompare:
+                return true;
+            default:
+                return false;
+        }
     }
 };
 

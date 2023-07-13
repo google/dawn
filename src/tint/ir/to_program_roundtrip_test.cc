@@ -212,6 +212,23 @@ fn foo() -> bool {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, BuiltinCall_DisableDerivativeUniformity) {
+    Test(R"(
+fn f(in : f32) {
+  let x = dpdx(in);
+  let y = dpdy(in);
+}
+)",
+         R"(
+diagnostic(off, derivative_uniformity);
+
+fn f(in : f32) {
+  let x = dpdx(in);
+  let y = dpdy(in);
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type Construct
 ////////////////////////////////////////////////////////////////////////////////
