@@ -46,6 +46,26 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         return 0;
     }
 
+    auto is_unsupported = [](const tint::ast::Enable* enable) {
+        for (auto ext : enable->extensions) {
+            switch (ext->name) {
+                case tint::builtin::Extension::kChromiumExperimentalDp4A:
+                case tint::builtin::Extension::kChromiumExperimentalFullPtrParameters:
+                case tint::builtin::Extension::kChromiumExperimentalPushConstant:
+                case tint::builtin::Extension::kChromiumInternalDualSourceBlending:
+                case tint::builtin::Extension::kChromiumInternalRelaxedUniformLayout:
+                    return true;
+                default:
+                    break;
+            }
+        }
+        return false;
+    };
+
+    if (src.AST().Enables().Any(is_unsupported)) {
+        return 0;
+    }
+
     src = tint::fuzzers::ApplySubstituteOverrides(std::move(src));
     if (!src.IsValid()) {
         return 0;
