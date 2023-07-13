@@ -480,17 +480,18 @@ class Validator {
             return;
         }
 
+        if (control_stack_.IsEmpty()) {
+            AddError(e, "exit: found outside all control instructions");
+            return;
+        }
+
         auto results = e->ControlInstruction()->Results();
         auto args = e->Args();
         if (results.Length() != args.Length()) {
             AddError(e, std::string("exit: args count (") + std::to_string(args.Length()) +
                             ") does not match control instruction result count (" +
                             std::to_string(results.Length()) + ")");
-            return;
-        }
-
-        if (control_stack_.IsEmpty()) {
-            AddError(e, "exit: found outside all control instructions");
+            AddNote(e->ControlInstruction(), "control instruction");
             return;
         }
 
@@ -500,6 +501,7 @@ class Validator {
                          std::string("exit: argument type (") + results[i]->Type()->FriendlyName() +
                              ") does not match control instruction type (" +
                              args[i]->Type()->FriendlyName() + ")");
+                AddNote(e->ControlInstruction(), "control instruction");
             }
         }
 
