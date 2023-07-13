@@ -34,6 +34,7 @@
 #include "src/tint/ast/const.h"
 #include "src/tint/ast/const_assert.h"
 #include "src/tint/ast/continue_statement.h"
+#include "src/tint/ast/diagnostic_directive.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/enable.h"
 #include "src/tint/ast/float_literal_expression.h"
@@ -224,6 +225,9 @@ class Impl {
                 },
                 [&](const ast::ConstAssert*) {
                     // Evaluated by the resolver, drop from the IR.
+                },
+                [&](const ast::DiagnosticDirective*) {
+                    // Ignored for now.
                 },
                 [&](Default) {
                     add_error(decl->source, "unknown type: " + std::string(decl->TypeInfo().name));
