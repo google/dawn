@@ -104,6 +104,126 @@ fn f(i : i32, u : u32) -> i32 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Struct declaration
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, StructDecl_Scalars) {
+    Test(R"(
+struct S {
+  a : i32,
+  b : u32,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, StructDecl_MemberAlign) {
+    Test(R"(
+struct S {
+  a : i32,
+  @align(32u)
+  b : u32,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, StructDecl_MemberSize) {
+    Test(R"(
+struct S {
+  a : i32,
+  @size(32u)
+  b : u32,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, StructDecl_MemberLocation) {
+    Test(R"(
+struct S {
+  a : i32,
+  @location(1u)
+  b : u32,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, StructDecl_MemberIndex) {
+    Test(R"(
+enable chromium_internal_dual_source_blending;
+
+struct S {
+  a : i32,
+  @location(1u) @index(0u)
+  b : u32,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, StructDecl_MemberBuiltin) {
+    Test(R"(
+struct S {
+  a : i32,
+  @builtin(position)
+  b : vec4<f32>,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, StructDecl_MemberInterpolateType) {
+    Test(R"(
+struct S {
+  a : i32,
+  @location(1u) @interpolate(flat)
+  b : u32,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, StructDecl_MemberInterpolateTypeSampling) {
+    Test(R"(
+struct S {
+  a : i32,
+  @location(1u) @interpolate(perspective, centroid)
+  b : f32,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, StructDecl_MemberInvariant) {
+    Test(R"(
+struct S {
+  a : i32,
+  @builtin(position) @invariant
+  b : vec4<f32>,
+  c : f32,
+}
+
+var<private> v : S;
+)");
+}
+////////////////////////////////////////////////////////////////////////////////
 // Function Call
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, FnCall_NoArgs_NoRet) {

@@ -64,6 +64,7 @@
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/texture.h"
 #include "src/tint/utils/hashmap.h"
+#include "src/tint/utils/math.h"
 #include "src/tint/utils/predicates.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -932,9 +933,31 @@ class State {
         auto n = structs_.GetOrCreate(s, [&] {
             auto members = utils::Transform<8>(s->Members(), [&](const type::StructMember* m) {
                 auto ty = Type(m->Type());
-                // TODO(crbug.com/tint/1902): Emit structure member attributes
-                utils::Vector<const ast::Attribute*, 2> attrs;
-                return b.Member(m->Name().NameView(), ty, std::move(attrs));
+                const auto& ir_attrs = m->Attributes();
+                utils::Vector<const ast::Attribute*, 4> ast_attrs;
+                if (m->Type()->Align() != m->Align()) {
+                    ast_attrs.Push(b.MemberAlign(u32(m->Align())));
+                }
+                if (m->Type()->Size() != m->Size()) {
+                    ast_attrs.Push(b.MemberSize(u32(m->Size())));
+                }
+                if (auto location = ir_attrs.location) {
+                    ast_attrs.Push(b.Location(u32(*location)));
+                }
+                if (auto index = ir_attrs.index) {
+                    Enable(builtin::Extension::kChromiumInternalDualSourceBlending);
+                    ast_attrs.Push(b.Index(u32(*index)));
+                }
+                if (auto builtin = ir_attrs.builtin) {
+                    ast_attrs.Push(b.Builtin(*builtin));
+                }
+                if (auto interpolation = ir_attrs.interpolation) {
+                    ast_attrs.Push(b.Interpolate(interpolation->type, interpolation->sampling));
+                }
+                if (ir_attrs.invariant) {
+                    ast_attrs.Push(b.Invariant());
+                }
+                return b.Member(m->Name().NameView(), ty, std::move(ast_attrs));
             });
 
             // TODO(crbug.com/tint/1902): Emit structure attributes
