@@ -268,8 +268,6 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroNonrenderableTextureCreationTests, TextureCreationClears) {
-    // TODO(dawn:1802): Support clearing non-renderable textures.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
     // TODO(dawn:1872): suppress
     DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::RGBA8Snorm &&
                           (IsOpenGL() || IsOpenGLES()));

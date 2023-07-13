@@ -864,6 +864,14 @@ Extent3D TextureBase::ClampToMipLevelVirtualSize(uint32_t level,
     return {clampedCopyExtentWidth, clampedCopyExtentHeight, extent.depthOrArrayLayers};
 }
 
+Extent3D TextureBase::GetMipLevelSubresourceVirtualSize(uint32_t level) const {
+    Extent3D extent = GetMipLevelSingleSubresourceVirtualSize(level);
+    if (mDimension == wgpu::TextureDimension::e2D) {
+        extent.depthOrArrayLayers = mSize.depthOrArrayLayers;
+    }
+    return extent;
+}
+
 ResultOrError<Ref<TextureViewBase>> TextureBase::CreateView(
     const TextureViewDescriptor* descriptor) {
     return GetDevice()->CreateTextureView(this, descriptor);

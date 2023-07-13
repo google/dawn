@@ -105,6 +105,9 @@ class TextureBase : public ApiObjectBase {
     Extent3D ClampToMipLevelVirtualSize(uint32_t level,
                                         const Origin3D& origin,
                                         const Extent3D& extent) const;
+    // For 2d-array textures, this keeps the array layers in contrast to
+    // GetMipLevelSingleSubresourceVirtualSize.
+    Extent3D GetMipLevelSubresourceVirtualSize(uint32_t level) const;
 
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);

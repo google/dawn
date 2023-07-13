@@ -27,11 +27,6 @@
 namespace dawn {
 namespace {
 
-bool D3D11SupportsStorageTexture(wgpu::TextureFormat format) {
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    return format != wgpu::TextureFormat::RGBA8Snorm;
-}
-
 class StorageTextureTests : public DawnTest {
   public:
     static void FillExpectedData(void* pixelValuePtr,
@@ -670,9 +665,6 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
         if (!utils::TextureFormatSupportsStorageTexture(format, IsCompatibilityMode())) {
             continue;
         }
-        if (IsD3D11() && !D3D11SupportsStorageTexture(format)) {
-            continue;
-        }
 
         // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
         if (format == wgpu::TextureFormat::RGBA8Snorm && IsANGLESwiftShader()) {
@@ -708,9 +700,6 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format, IsCompatibilityMode())) {
-            continue;
-        }
-        if (IsD3D11() && !D3D11SupportsStorageTexture(format)) {
             continue;
         }
 

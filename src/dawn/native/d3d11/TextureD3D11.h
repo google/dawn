@@ -118,6 +118,13 @@ class Texture final : public d3d::Texture {
                            uint32_t bytesPerRow,
                            uint32_t rowsPerImage,
                            ReadCallback callback);
+    MaybeError WriteInternal(CommandRecordingContext* commandContext,
+                             const SubresourceRange& subresources,
+                             const Origin3D& origin,
+                             const Extent3D& size,
+                             const uint8_t* data,
+                             uint32_t bytesPerRow,
+                             uint32_t rowsPerImage);
 
     const bool mIsStaging = false;
     ComPtr<ID3D11Resource> mD3d11Resource;

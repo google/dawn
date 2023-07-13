@@ -1193,8 +1193,6 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
 TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
     // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1227,8 +1225,6 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
 TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
     // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1264,8 +1260,6 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
 TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
     // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 2, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1601,9 +1595,6 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
 TEST_P(TextureZeroInitTest, CopyTextureToBufferNonRenderableUnaligned) {
     // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-
-    // TODO(dawn:1802): Support clearing non-renderable textures on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureDescriptor descriptor;
     descriptor.size.width = kUnalignedSize;
