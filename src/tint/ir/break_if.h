@@ -53,6 +53,9 @@ class BreakIf : public utils::Castable<BreakIf, Terminator> {
     /// @returns the loop containing the break-if
     ir::Loop* Loop() { return loop_; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "break-if"; }
+
   private:
     ir::Loop* loop_ = nullptr;
 };

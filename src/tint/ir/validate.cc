@@ -98,6 +98,10 @@ class Validator {
         mod_.disassembly_file = std::make_unique<Source::File>("", dis_.Disassemble());
     }
 
+    std::string InstError(Instruction* inst, std::string err) {
+        return std::string(inst->FriendlyName()) + ": " + err;
+    }
+
     void AddError(Instruction* inst, std::string err) {
         DisassembleIfNeeded();
         auto src = dis_.InstructionSource(inst);
@@ -169,22 +173,16 @@ class Validator {
 
     std::string Name(Value* v) { return mod_.NameOf(v).Name(); }
 
-    void CheckOperandNotNull(ir::Instruction* inst,
-                             ir::Value* operand,
-                             size_t idx,
-                             std::string_view name) {
+    void CheckOperandNotNull(ir::Instruction* inst, ir::Value* operand, size_t idx) {
         if (operand == nullptr) {
-            AddError(inst, idx, std::string(name) + ": operand is undefined");
+            AddError(inst, idx, InstError(inst, "operand is undefined"));
         }
     }
 
-    void CheckOperandsNotNull(ir::Instruction* inst,
-                              size_t start_operand,
-                              size_t end_operand,
-                              std::string_view name) {
+    void CheckOperandsNotNull(ir::Instruction* inst, size_t start_operand, size_t end_operand) {
         auto operands = inst->Operands();
         for (size_t i = start_operand; i <= end_operand; i++) {
-            CheckOperandNotNull(inst, operands[i], i, name);
+            CheckOperandNotNull(inst, operands[i], i);
         }
     }
 
@@ -233,7 +231,7 @@ class Validator {
 
     void CheckInstruction(Instruction* inst) {
         if (!inst->Alive()) {
-            AddError(inst, "destroyed instruction found in instruction list");
+            AddError(inst, InstError(inst, "destroyed instruction found in instruction list"));
             return;
         }
         if (inst->HasResults()) {
@@ -241,14 +239,17 @@ class Validator {
             for (size_t i = 0; i < results.Length(); ++i) {
                 auto* res = results[i];
                 if (!res) {
-                    AddResultError(inst, i, "instruction result is undefined");
+                    AddResultError(inst, i, InstError(inst, "instruction result is undefined"));
                     continue;
                 }
 
                 if (res->Source() == nullptr) {
-                    AddResultError(inst, i, "instruction result source is undefined");
+                    AddResultError(inst, i,
+                                   InstError(inst, "instruction result source is undefined"));
                 } else if (res->Source() != inst) {
-                    AddResultError(inst, i, "instruction result source has wrong instruction");
+                    AddResultError(
+                        inst, i,
+                        InstError(inst, "instruction result source has wrong instruction"));
                 }
             }
         }
@@ -263,11 +264,11 @@ class Validator {
             // Note, a `nullptr` is a valid operand in some cases, like `var` so we can't just check
             // for `nullptr` here.
             if (!op->Alive()) {
-                AddError(inst, i, "instruction has operand which is not alive");
+                AddError(inst, i, InstError(inst, "instruction has operand which is not alive"));
             }
 
             if (!op->Usages().Contains({inst, i})) {
-                AddError(inst, i, "instruction operand missing usage");
+                AddError(inst, i, InstError(inst, "instruction operand missing usage"));
             }
         }
 
@@ -288,25 +289,23 @@ class Validator {
             [&](Terminator* b) { CheckTerminator(b); },                  //
             [&](Unary* u) { CheckUnary(u); },                            //
             [&](Var* var) { CheckVar(var); },                            //
-            [&](Default) {
-                AddError(std::string("missing validation of: ") + inst->TypeInfo().name);
-            });
+            [&](Default) { AddError(inst, InstError(inst, "missing validation")); });
     }
 
     void CheckVar(Var* var) {
         if (var->Result() && var->Initializer()) {
             if (var->Initializer()->Type() != var->Result()->Type()->UnwrapPtr()) {
-                AddError(var, "var initializer has incorrect type");
+                AddError(var, InstError(var, "initializer has incorrect type"));
             }
         }
     }
 
     void CheckLet(Let* let) {
-        CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset, "let");
+        CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset);
 
         if (let->Result() && let->Value()) {
             if (let->Result()->Type() != let->Value()->Type()) {
-                AddError(let, "let result type does not match value type");
+                AddError(let, InstError(let, "result type does not match value type"));
             }
         }
     }
@@ -321,9 +320,7 @@ class Validator {
             [&](Convert*) {},        //
             [&](Discard*) {},        //
             [&](UserCall*) {},       //
-            [&](Default) {
-                AddError(std::string("missing validation of call: ") + call->TypeInfo().name);
-            });
+            [&](Default) { AddError(call, InstError(call, "missing validation")); });
     }
 
     void CheckAccess(ir::Access* a) {
@@ -336,7 +333,7 @@ class Validator {
 
         for (size_t i = 0; i < a->Indices().Length(); i++) {
             auto err = [&](std::string msg) {
-                AddError(a, i + Access::kIndicesOperandOffset, "access: " + msg);
+                AddError(a, i + Access::kIndicesOperandOffset, InstError(a, msg));
             };
             auto note = [&](std::string msg) {
                 AddNote(a, i + Access::kIndicesOperandOffset, msg);
@@ -393,31 +390,32 @@ class Validator {
         if (TINT_UNLIKELY(ty != want_ty || is_ptr != want_ptr)) {
             std::string want =
                 want_ptr ? "ptr<" + want_ty->FriendlyName() + ">" : want_ty->FriendlyName();
-            AddError(a, "access: result of access chain is type " + current() +
-                            " but instruction type is " + want);
+            AddError(a, InstError(a, "result of access chain is type " + current() +
+                                         " but instruction type is " + want));
             return;
         }
     }
 
     void CheckBinary(ir::Binary* b) {
-        CheckOperandsNotNull(b, Binary::kLhsOperandOffset, Binary::kRhsOperandOffset, "binary");
+        CheckOperandsNotNull(b, Binary::kLhsOperandOffset, Binary::kRhsOperandOffset);
     }
 
     void CheckUnary(ir::Unary* u) {
-        CheckOperandNotNull(u, u->Val(), Unary::kValueOperandOffset, "unary");
+        CheckOperandNotNull(u, u->Val(), Unary::kValueOperandOffset);
 
         if (u->Result() && u->Val()) {
             if (u->Result()->Type() != u->Val()->Type()) {
-                AddError(u, "unary: result type must match value type");
+                AddError(u, InstError(u, "result type must match value type"));
             }
         }
     }
 
     void CheckIf(If* if_) {
-        CheckOperandNotNull(if_, if_->Condition(), If::kConditionOperandOffset, "if");
+        CheckOperandNotNull(if_, if_->Condition(), If::kConditionOperandOffset);
 
         if (if_->Condition() && !if_->Condition()->Type()->Is<type::Bool>()) {
-            AddError(if_, If::kConditionOperandOffset, "if: condition must be a `bool` type");
+            AddError(if_, If::kConditionOperandOffset,
+                     InstError(if_, "condition must be a `bool` type"));
         }
 
         control_stack_.Push(if_);
@@ -464,33 +462,31 @@ class Validator {
             [&](ir::NextIteration*) {},          //
             [&](ir::Return* ret) {
                 if (ret->Func() == nullptr) {
-                    AddError("return: undefined function");
+                    AddError(ret, InstError(ret, "undefined function"));
                 }
             },
             [&](ir::TerminateInvocation*) {},  //
             [&](ir::Unreachable*) {},          //
-            [&](Default) {
-                AddError(std::string("missing validation of terminator: ") + b->TypeInfo().name);
-            });
+            [&](Default) { AddError(b, InstError(b, "missing validation")); });
     }
 
     void CheckExit(ir::Exit* e) {
         if (e->ControlInstruction() == nullptr) {
-            AddError(e, "exit: has no parent control instruction");
+            AddError(e, InstError(e, "has no parent control instruction"));
             return;
         }
 
         if (control_stack_.IsEmpty()) {
-            AddError(e, "exit: found outside all control instructions");
+            AddError(e, InstError(e, "found outside all control instructions"));
             return;
         }
 
         auto results = e->ControlInstruction()->Results();
         auto args = e->Args();
         if (results.Length() != args.Length()) {
-            AddError(e, std::string("exit: args count (") + std::to_string(args.Length()) +
-                            ") does not match control instruction result count (" +
-                            std::to_string(results.Length()) + ")");
+            AddError(e, InstError(e, std::string("args count (") + std::to_string(args.Length()) +
+                                         ") does not match control instruction result count (" +
+                                         std::to_string(results.Length()) + ")"));
             AddNote(e->ControlInstruction(), "control instruction");
             return;
         }
@@ -498,9 +494,10 @@ class Validator {
         for (size_t i = 0; i < results.Length(); ++i) {
             if (results[i] && args[i] && results[i]->Type() != args[i]->Type()) {
                 AddError(e, i,
-                         std::string("exit: argument type (") + results[i]->Type()->FriendlyName() +
-                             ") does not match control instruction type (" +
-                             args[i]->Type()->FriendlyName() + ")");
+                         InstError(e, std::string("argument type (") +
+                                          results[i]->Type()->FriendlyName() +
+                                          ") does not match control instruction type (" +
+                                          args[i]->Type()->FriendlyName() + ")"));
                 AddNote(e->ControlInstruction(), "control instruction");
             }
         }
@@ -510,14 +507,12 @@ class Validator {
             [&](ir::ExitIf* i) { CheckExitIf(i); },          //
             [&](ir::ExitLoop* l) { CheckExitLoop(l); },      //
             [&](ir::ExitSwitch* s) { CheckExitSwitch(s); },  //
-            [&](Default) {
-                AddError(std::string("missing validation of exit: ") + e->TypeInfo().name);
-            });
+            [&](Default) { AddError(e, InstError(e, "missing validation")); });
     }
 
     void CheckExitIf(ExitIf* e) {
         if (control_stack_.Back() != e->If()) {
-            AddError(e, "exit_if: if target jumps over other control instructions");
+            AddError(e, InstError(e, "if target jumps over other control instructions"));
             AddNote(control_stack_.Back(), "first control instruction jumped");
         }
     }
@@ -531,15 +526,16 @@ class Validator {
             }
             // A exit switch can step over if instructions, but no others.
             if (!ctrl->Is<ir::If>()) {
-                AddError(exit, "exit: " + std::string(name) +
-                                   " target jumps over other control instructions");
+                AddError(exit,
+                         InstError(exit, std::string(name) +
+                                             " target jumps over other control instructions"));
                 AddNote(ctrl, "first control instruction jumped");
                 return;
             }
         }
         if (!found) {
-            AddError(exit,
-                     "exit: " + std::string(name) + " not found in parent control instructions");
+            AddError(exit, InstError(exit, std::string(name) +
+                                               " not found in parent control instructions"));
         }
     }
 
@@ -556,12 +552,12 @@ class Validator {
             // Found parent loop
             if (inst->Block()->Parent() == control) {
                 if (inst->Block() == control->Continuing()) {
-                    AddError(l, "exit_loop: loop exit jumps out of continuing block");
+                    AddError(l, InstError(l, "loop exit jumps out of continuing block"));
                     if (control->Continuing() != l->Block()) {
                         AddNote(control->Continuing(), "in continuing block");
                     }
                 } else if (inst->Block() == control->Initializer()) {
-                    AddError(l, "exit_loop: loop exit not permitted in loop initializer");
+                    AddError(l, InstError(l, "loop exit not permitted in loop initializer"));
                     if (control->Initializer() != l->Block()) {
                         AddNote(control->Initializer(), "in initializer block");
                     }
@@ -575,7 +571,7 @@ class Validator {
     void CheckLoadVectorElement(LoadVectorElement* l) {
         CheckOperandsNotNull(l,  //
                              LoadVectorElement::kFromOperandOffset,
-                             LoadVectorElement::kIndexOperandOffset, "load_vector_element");
+                             LoadVectorElement::kIndexOperandOffset);
 
         if (auto* res = l->Result()) {
             if (auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset)) {
@@ -589,7 +585,7 @@ class Validator {
     void CheckStoreVectorElement(StoreVectorElement* s) {
         CheckOperandsNotNull(s,  //
                              StoreVectorElement::kToOperandOffset,
-                             StoreVectorElement::kValueOperandOffset, "store_vector_element");
+                             StoreVectorElement::kValueOperandOffset);
 
         if (auto* value = s->Value()) {
             if (auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset)) {

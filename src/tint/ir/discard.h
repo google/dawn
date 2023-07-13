@@ -27,6 +27,9 @@ class Discard : public utils::Castable<Discard, Call> {
     /// Constructor
     Discard();
     ~Discard() override;
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "discard"; }
 };
 
 }  // namespace tint::ir

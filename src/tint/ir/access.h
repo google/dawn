@@ -41,6 +41,9 @@ class Access : public utils::Castable<Access, OperandInstruction<3, 1>> {
 
     /// @returns the accessor indices
     utils::Slice<Value*> Indices() { return operands_.Slice().Offset(kIndicesOperandOffset); }
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "access"; }
 };
 
 }  // namespace tint::ir

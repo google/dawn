@@ -57,6 +57,9 @@ class Instruction : public utils::Castable<Instruction> {
     /// The result values must not be in use.
     virtual void Destroy();
 
+    /// @returns the friendly name for the instruction
+    virtual std::string_view FriendlyName() = 0;
+
     /// @returns true if the Instruction has not been destroyed with Destroy()
     bool Alive() const { return !flags_.Contains(Flag::kDead); }
 

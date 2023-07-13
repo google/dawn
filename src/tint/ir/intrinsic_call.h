@@ -45,6 +45,9 @@ class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
     /// @returns the builtin function
     enum Kind Kind() { return kind_; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "intrinsic-call"; }
+
   private:
     enum Kind kind_;
 };

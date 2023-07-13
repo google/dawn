@@ -23,6 +23,9 @@ namespace tint::ir {
 class Unreachable : public utils::Castable<Unreachable, Terminator> {
   public:
     ~Unreachable() override;
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "unreachable"; }
 };
 
 }  // namespace tint::ir

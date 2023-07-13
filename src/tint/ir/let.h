@@ -33,6 +33,9 @@ class Let : public utils::Castable<Let, OperandInstruction<1, 1>> {
 
     /// @returns the value
     ir::Value* Value() { return operands_[kValueOperandOffset]; }
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "let"; }
 };
 
 }  // namespace tint::ir

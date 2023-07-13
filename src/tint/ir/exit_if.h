@@ -43,6 +43,9 @@ class ExitIf : public utils::Castable<ExitIf, Exit> {
 
     /// @returns the if being exited
     ir::If* If();
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "exit-if"; }
 };
 
 }  // namespace tint::ir

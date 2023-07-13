@@ -64,6 +64,9 @@ class If : public utils::Castable<If, ControlInstruction> {
     /// @returns the false block
     ir::Block* False() { return false_; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "if"; }
+
   private:
     ir::Block* true_ = nullptr;
     ir::Block* false_ = nullptr;

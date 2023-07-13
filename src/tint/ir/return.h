@@ -61,6 +61,9 @@ class Return : public utils::Castable<Return, Terminator> {
     utils::Slice<ir::Value* const> Args() override {
         return operands_.Slice().Offset(kArgOperandOffset);
     }
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "return"; }
 };
 
 }  // namespace tint::ir

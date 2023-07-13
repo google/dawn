@@ -23,6 +23,9 @@ namespace tint::ir {
 class TerminateInvocation : public utils::Castable<TerminateInvocation, Terminator> {
   public:
     ~TerminateInvocation() override;
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "terminate-invocation"; }
 };
 
 }  // namespace tint::ir

@@ -39,6 +39,9 @@ class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
     /// @returns the builtin function
     builtin::Function Func() { return func_; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "builtin-call"; }
+
   private:
     builtin::Function func_;
 };

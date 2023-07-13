@@ -45,6 +45,9 @@ class Unary : public utils::Castable<Unary, OperandInstruction<1, 1>> {
     /// @returns the kind of unary instruction
     enum Kind Kind() { return kind_; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "unary"; }
+
   private:
     enum Kind kind_;
 };

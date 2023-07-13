@@ -80,6 +80,9 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
     /// @returns the condition
     Value* Condition() { return operands_[kConditionOperandOffset]; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "switch"; }
+
   private:
     utils::Vector<Case, 4> cases_;
 };

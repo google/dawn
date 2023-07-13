@@ -32,6 +32,9 @@ class Convert : public utils::Castable<Convert, Call> {
     /// @param value the value to convert
     Convert(InstructionResult* result, Value* value);
     ~Convert() override;
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "convert"; }
 };
 
 }  // namespace tint::ir

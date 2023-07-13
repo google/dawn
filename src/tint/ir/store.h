@@ -40,6 +40,9 @@ class Store : public utils::Castable<Store, OperandInstruction<2, 0>> {
 
     /// @returns the value being stored
     Value* From() { return operands_[kFromOperandOffset]; }
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "store"; }
 };
 
 }  // namespace tint::ir

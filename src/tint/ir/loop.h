@@ -79,6 +79,9 @@ class Loop : public utils::Castable<Loop, ControlInstruction> {
     /// @returns the switch continuing block
     ir::MultiInBlock* Continuing() { return continuing_; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "loop"; }
+
   private:
     ir::Block* initializer_ = nullptr;
     ir::MultiInBlock* body_ = nullptr;

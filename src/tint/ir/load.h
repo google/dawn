@@ -35,6 +35,9 @@ class Load : public utils::Castable<Load, OperandInstruction<1, 1>> {
 
     /// @returns the value being loaded from
     Value* From() { return operands_[kFromOperandOffset]; }
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "load"; }
 };
 
 }  // namespace tint::ir

@@ -31,6 +31,9 @@ class Construct : public utils::Castable<Construct, Call> {
     /// @param args the constructor arguments
     explicit Construct(InstructionResult* result, utils::VectorRef<Value*> args = utils::Empty);
     ~Construct() override;
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "construct"; }
 };
 
 }  // namespace tint::ir

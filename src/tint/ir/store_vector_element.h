@@ -47,6 +47,9 @@ class StoreVectorElement : public utils::Castable<StoreVectorElement, OperandIns
 
     /// @returns the new vector element value
     ir::Value* Value() { return operands_[kValueOperandOffset]; }
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "store-vector-element"; }
 };
 
 }  // namespace tint::ir

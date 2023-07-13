@@ -40,6 +40,9 @@ class Continue : public utils::Castable<Continue, Terminator> {
     /// @returns the loop owning the continue block
     ir::Loop* Loop() { return loop_; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "continue"; }
+
   private:
     ir::Loop* loop_ = nullptr;
 };

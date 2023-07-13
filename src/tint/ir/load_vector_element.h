@@ -41,6 +41,9 @@ class LoadVectorElement : public utils::Castable<LoadVectorElement, OperandInstr
 
     /// @returns the new vector element index
     ir::Value* Index() { return operands_[kIndexOperandOffset]; }
+
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "load-vector-element"; }
 };
 
 }  // namespace tint::ir

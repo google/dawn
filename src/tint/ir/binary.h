@@ -69,6 +69,9 @@ class Binary : public utils::Castable<Binary, OperandInstruction<2, 1>> {
     /// @returns the right-hand-side value for the instruction
     Value* RHS() { return operands_[kRhsOperandOffset]; }
 
+    /// @returns the friendly name for the instruction
+    std::string_view FriendlyName() override { return "binary"; }
+
   private:
     enum Kind kind_;
 };
