@@ -682,5 +682,32 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIn
 )");
 }
 
+TEST_F(IR_FromProgramAccessorTest, Accessor_Const_ExpressionIndex) {
+    // const v = vec3(1, 2, 3);
+    // let i = 1;
+    // var b = v.rg[i + 2 - 3];
+
+    auto* v = Const("v", Call<vec3<Infer>>(1_a, 2_a, 3_a));
+    auto* i = Let("i", Expr(1_i));
+    auto* b = Var("b", IndexAccessor(MemberAccessor("v", "rg"), Sub(Add("i", 2_i), 3_i)));
+    WrapInFunction(v, i, b);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    %i:i32 = let 1i
+    %3:i32 = add %i, 2i
+    %4:i32 = sub %3, 3i
+    %5:i32 = access vec2<i32>(1i, 2i), %4
+    %b:ptr<function, i32, read_write> = var, %5
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir
