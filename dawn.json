@@ -1157,7 +1157,7 @@
             {
                 "name": "get adapter",
                 "returns": "adapter",
-                "tags": ["dawn"]
+                "tags": ["dawn", "native"]
             },
             {
                 "name": "get queue",
@@ -1239,7 +1239,7 @@
             },
             {
                 "name": "get supported surface usage",
-                "tags": ["dawn"],
+                "tags": ["dawn", "native"],
                 "returns": "texture usage",
                 "args": [
                     {"name": "surface", "type": "surface"}

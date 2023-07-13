@@ -211,18 +211,6 @@ WGPUBuffer Device::CreateBuffer(const WGPUBufferDescriptor* descriptor) {
     return Buffer::Create(this, descriptor);
 }
 
-WGPUAdapter Device::GetAdapter() {
-    // Not implemented in the wire.
-    UNREACHABLE();
-    return nullptr;
-}
-
-WGPUTextureUsage Device::GetSupportedSurfaceUsage(WGPUSurface) {
-    // Not implemented in the wire.
-    UNREACHABLE();
-    return WGPUTextureUsage_RenderAttachment;
-}
-
 WGPUQueue Device::GetQueue() {
     // The queue is lazily created because if a Device is created by
     // Reserve/Inject, we cannot send the GetQueue message until

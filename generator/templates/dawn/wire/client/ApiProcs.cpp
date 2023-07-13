@@ -176,16 +176,27 @@ namespace dawn::wire::client {
     }
 
     {% set Prefix = metadata.proc_table_prefix %}
-    static {{Prefix}}ProcTable gProcTable = {
+
+    template <typename... MemberPtrPairs>
+    constexpr {{Prefix}}ProcTable MakeProcTable(int, MemberPtrPairs... pairs) {
+        {{Prefix}}ProcTable procs = {};
+        ([&](auto& pair){
+            procs.*(pair.first) = pair.second;
+        }(pairs), ...);
+        return procs;
+    }
+
+    static {{Prefix}}ProcTable gProcTable = MakeProcTable(
+        /* unused */ 0
         {% for function in by_category["function"] %}
-            Client{{as_cppType(function.name)}},
+            , std::make_pair(&{{Prefix}}ProcTable::{{as_varName(function.name)}}, Client{{as_cppType(function.name)}})
         {% endfor %}
         {% for type in by_category["object"] %}
             {% for method in c_methods(type) %}
-                Client{{as_MethodSuffix(type.name, method.name)}},
+                , std::make_pair(&{{Prefix}}ProcTable::{{as_varName(type.name, method.name)}}, Client{{as_MethodSuffix(type.name, method.name)}})
             {% endfor %}
         {% endfor %}
-    };
+    );
 
     const {{Prefix}}ProcTable& GetProcs() {
         return gProcTable;
