@@ -228,17 +228,15 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     if (transform_manager_) {
         transform::DataMap outputs;
         auto out = transform_manager_->Run(&program, *transform_inputs_, outputs);
-        if (!validate_program(out)) {
+        if (!validate_program(out)) {  // Will move: program <- out on success
             return 0;
         }
     }
 
-    {
-        // Run SubstituteOverride if required
-        auto out = ApplySubstituteOverrides(std::move(program));
-        if (!out.IsValid()) {
-            return 0;
-        }
+    // Run SubstituteOverride if required
+    program = ApplySubstituteOverrides(std::move(program));
+    if (!program.IsValid()) {
+        return 0;
     }
 
     // For the generates which use MultiPlanar, make sure the configuration options are provided so
