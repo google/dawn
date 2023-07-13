@@ -783,6 +783,73 @@ fn f() -> f32 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Swizzle
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, Access_Vec3_Value_xy) {
+    Test(R"(
+fn f(v : vec3<f32>) -> vec2<f32> {
+  return v.xy;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Vec3_Value_yz) {
+    Test(R"(
+fn f(v : vec3<f32>) -> vec2<f32> {
+  return v.yz;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Vec3_Value_yzx) {
+    Test(R"(
+fn f(v : vec3<f32>) -> vec3<f32> {
+  return v.yzx;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Vec3_Value_yzxy) {
+    Test(R"(
+fn f(v : vec3<f32>) -> vec4<f32> {
+  return v.yzxy;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Vec3_Pointer_xy) {
+    Test(R"(
+fn f(v : ptr<function, vec3<f32>>) -> vec2<f32> {
+  return (*(v)).xy;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Vec3_Pointer_yz) {
+    Test(R"(
+fn f(v : ptr<function, vec3<f32>>) -> vec2<f32> {
+  return (*(v)).yz;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Vec3_Pointer_yzx) {
+    Test(R"(
+fn f(v : ptr<function, vec3<f32>>) -> vec3<f32> {
+  return (*(v)).yzx;
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Access_Vec3_Pointer_yzxy) {
+    Test(R"(
+fn f(v : ptr<function, vec3<f32>>) -> vec4<f32> {
+  return (*(v)).yzxy;
+}
+)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Unary ops
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramRoundtripTest, UnaryOp_Negate) {

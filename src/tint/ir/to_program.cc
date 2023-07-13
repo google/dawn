@@ -47,6 +47,7 @@
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/store_vector_element.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/ir/swizzle.h"
 #include "src/tint/ir/unary.h"
 #include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
@@ -304,7 +305,8 @@ class State {
             [&](ir::Store* i) { Store(i); },                            //
             [&](ir::StoreVectorElement* i) { StoreVectorElement(i); },  //
             [&](ir::Switch* i) { Switch(i); },                          //
-            [&](ir::Unary* u) { Unary(u); },                            //
+            [&](ir::Swizzle* i) { Swizzle(i); },                        //
+            [&](ir::Unary* i) { Unary(i); },                            //
             [&](ir::Unreachable*) {},                                   //
             [&](ir::Var* i) { Var(i); },                                //
             [&](Default) { UNHANDLED_CASE(inst); });
@@ -650,6 +652,21 @@ class State {
                 [&](Default) { UNHANDLED_CASE(obj_ty); });
         }
         Bind(a->Result(), expr);
+    }
+
+    void Swizzle(ir::Swizzle* s) {
+        auto* vec = Expr(s->Object());
+        utils::Vector<char, 4> components;
+        for (uint32_t i : s->Indices()) {
+            if (TINT_UNLIKELY(i >= 4)) {
+                TINT_ICE(IR, b.Diagnostics()) << "invalid swizzle index: " << i;
+                return;
+            }
+            components.Push("xyzw"[i]);
+        }
+        auto* swizzle =
+            b.MemberAccessor(vec, std::string_view(components.begin(), components.Length()));
+        Bind(s->Result(), swizzle);
     }
 
     void Binary(ir::Binary* e) {
