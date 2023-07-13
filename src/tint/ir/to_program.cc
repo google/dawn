@@ -342,6 +342,8 @@ class State {
     }
 
     void Loop(ir::Loop* l) {
+        SCOPED_NESTING();
+
         // Build all the initializer statements
         auto init_stmts = Statements(l->Initializer());
 

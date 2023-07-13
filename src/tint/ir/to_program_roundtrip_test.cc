@@ -2761,5 +2761,16 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, Loop_WithReturn) {
+    Test(R"(
+fn f() {
+  loop {
+    let i = 42i;
+    return;
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::ir
