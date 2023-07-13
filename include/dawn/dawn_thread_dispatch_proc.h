@@ -24,6 +24,7 @@ extern "C" {
 // Call dawnProcSetProcs(&dawnThreadDispatchProcTable) and then use dawnProcSetPerThreadProcs
 // to set per-thread procs.
 WGPU_EXPORT extern DawnProcTable dawnThreadDispatchProcTable;
+WGPU_EXPORT void dawnProcSetDefaultThreadProcs(const DawnProcTable* procs);
 WGPU_EXPORT void dawnProcSetPerThreadProcs(const DawnProcTable* procs);
 
 #ifdef __cplusplus
