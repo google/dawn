@@ -475,13 +475,7 @@ class State {
 
     void ExitLoop(const ir::ExitLoop*) { Append(b.Break()); }
 
-    void BreakIf(ir::BreakIf* i) {
-        auto* cond = i->Condition();
-        if (IsConstant(cond, false)) {
-            return;
-        }
-        Append(b.BreakIf(Expr(cond)));
-    }
+    void BreakIf(ir::BreakIf* i) { Append(b.BreakIf(Expr(i->Condition()))); }
 
     void Return(ir::Return* ret) {
         if (ret->Args().IsEmpty()) {
