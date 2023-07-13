@@ -24,9 +24,9 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/break_if.h"
-#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
+#include "src/tint/ir/core_builtin_call.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/exit_loop.h"
 #include "src/tint/ir/exit_switch.h"
@@ -745,7 +745,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
             [&](ir::Access* a) { EmitAccess(a); },                          //
             [&](ir::Binary* b) { EmitBinary(b); },                          //
             [&](ir::Bitcast* b) { EmitBitcast(b); },                        //
-            [&](ir::BuiltinCall* b) { EmitBuiltinCall(b); },                //
+            [&](ir::CoreBuiltinCall* b) { EmitCoreBuiltinCall(b); },        //
             [&](ir::Construct* c) { EmitConstruct(c); },                    //
             [&](ir::Convert* c) { EmitConvert(c); },                        //
             [&](ir::IntrinsicCall* i) { EmitIntrinsicCall(i); },            //
@@ -1091,7 +1091,7 @@ void GeneratorImplIr::EmitBitcast(ir::Bitcast* bitcast) {
                                 {Type(ty), Value(bitcast), Value(bitcast->Val())});
 }
 
-void GeneratorImplIr::EmitBuiltinCall(ir::BuiltinCall* builtin) {
+void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
     auto* result_ty = builtin->Result()->Type();
 
     if (builtin->Func() == builtin::Function::kAbs &&

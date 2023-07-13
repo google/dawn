@@ -24,12 +24,12 @@
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/break_if.h"
-#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
+#include "src/tint/ir/core_builtin_call.h"
 #include "src/tint/ir/discard.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/exit_loop.h"
@@ -565,7 +565,7 @@ class State {
                 }
                 Bind(c->Result(), expr, PtrKind::kPtr);
             },
-            [&](ir::BuiltinCall* c) {
+            [&](ir::CoreBuiltinCall* c) {
                 if (!disabled_derivative_uniformity_ && RequiresDerivativeUniformity(c->Func())) {
                     // TODO(crbug.com/tint/1985): Be smarter about disabling derivative uniformity.
                     b.DiagnosticDirective(builtin::DiagnosticSeverity::kOff,

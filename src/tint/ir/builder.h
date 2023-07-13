@@ -25,11 +25,11 @@
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/break_if.h"
-#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
+#include "src/tint/ir/core_builtin_call.h"
 #include "src/tint/ir/discard.h"
 #include "src/tint/ir/exit_if.h"
 #include "src/tint/ir/exit_loop.h"
@@ -532,15 +532,15 @@ class Builder {
                                                            Values(std::forward<ARGS>(args)...)));
     }
 
-    /// Creates a builtin call instruction
+    /// Creates a core builtin call instruction
     /// @param type the return type of the call
     /// @param func the builtin function to call
     /// @param args the call arguments
     /// @returns the instruction
     template <typename... ARGS>
-    ir::BuiltinCall* Call(const type::Type* type, builtin::Function func, ARGS&&... args) {
-        return Append(ir.instructions.Create<ir::BuiltinCall>(InstructionResult(type), func,
-                                                              Values(std::forward<ARGS>(args)...)));
+    ir::CoreBuiltinCall* Call(const type::Type* type, builtin::Function func, ARGS&&... args) {
+        return Append(ir.instructions.Create<ir::CoreBuiltinCall>(
+            InstructionResult(type), func, Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates an intrinsic call instruction

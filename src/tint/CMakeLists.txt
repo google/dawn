@@ -763,8 +763,6 @@ if(${TINT_BUILD_IR})
     ir/break_if.h
     ir/builder.cc
     ir/builder.h
-    ir/builtin_call.cc
-    ir/builtin_call.h
     ir/call.cc
     ir/call.h
     ir/constant.cc
@@ -777,6 +775,8 @@ if(${TINT_BUILD_IR})
     ir/control_instruction.h
     ir/convert.cc
     ir/convert.h
+    ir/core_builtin_call.cc
+    ir/core_builtin_call.h
     ir/disassembler.cc
     ir/disassembler.h
     ir/discard.cc
@@ -1579,11 +1579,11 @@ if(TINT_BUILD_TESTS)
       ir/block_param_test.cc
       ir/block_test.cc
       ir/break_if_test.cc
-      ir/builtin_call_test.cc
       ir/constant_test.cc
       ir/construct_test.cc
       ir/continue_test.cc
       ir/convert_test.cc
+      ir/core_builtin_call_test.cc
       ir/discard_test.cc
       ir/exit_if_test.cc
       ir/exit_loop_test.cc

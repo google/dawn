@@ -21,9 +21,9 @@ namespace tint::ir {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
-using IR_BuiltinCallTest = IRTestHelper;
+using IR_CoreBuiltinCallTest = IRTestHelper;
 
-TEST_F(IR_BuiltinCallTest, Usage) {
+TEST_F(IR_CoreBuiltinCallTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
     auto* builtin = b.Call(mod.Types().f32(), builtin::Function::kAbs, arg1, arg2);
@@ -32,7 +32,7 @@ TEST_F(IR_BuiltinCallTest, Usage) {
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
 }
 
-TEST_F(IR_BuiltinCallTest, Result) {
+TEST_F(IR_CoreBuiltinCallTest, Result) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
     auto* builtin = b.Call(mod.Types().f32(), builtin::Function::kAbs, arg1, arg2);
@@ -43,7 +43,7 @@ TEST_F(IR_BuiltinCallTest, Result) {
     EXPECT_EQ(builtin->Result()->Source(), builtin);
 }
 
-TEST_F(IR_BuiltinCallTest, Fail_NullType) {
+TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
@@ -53,7 +53,7 @@ TEST_F(IR_BuiltinCallTest, Fail_NullType) {
         "");
 }
 
-TEST_F(IR_BuiltinCallTest, Fail_NoneFunction) {
+TEST_F(IR_CoreBuiltinCallTest, Fail_NoneFunction) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;
@@ -63,7 +63,7 @@ TEST_F(IR_BuiltinCallTest, Fail_NoneFunction) {
         "");
 }
 
-TEST_F(IR_BuiltinCallTest, Fail_TintMaterializeFunction) {
+TEST_F(IR_CoreBuiltinCallTest, Fail_TintMaterializeFunction) {
     EXPECT_FATAL_FAILURE(
         {
             Module mod;

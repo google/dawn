@@ -34,10 +34,10 @@ class Binary;
 class Bitcast;
 class Block;
 class BlockParam;
-class BuiltinCall;
 class Construct;
 class ControlInstruction;
 class Convert;
+class CoreBuiltinCall;
 class ExitIf;
 class ExitLoop;
 class ExitSwitch;
@@ -200,7 +200,7 @@ class GeneratorImplIr {
 
     /// Emit a builtin function call instruction.
     /// @param call the builtin call instruction to emit
-    void EmitBuiltinCall(ir::BuiltinCall* call);
+    void EmitCoreBuiltinCall(ir::CoreBuiltinCall* call);
 
     /// Emit a construct instruction.
     /// @param construct the construct instruction to emit

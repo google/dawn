@@ -12,27 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/builtin_call.h"
+#include "src/tint/ir/core_builtin_call.h"
 
 #include <utility>
 
 #include "src/tint/debug.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::BuiltinCall);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::CoreBuiltinCall);
 
 namespace tint::ir {
 
-BuiltinCall::BuiltinCall(InstructionResult* result,
-                         builtin::Function func,
-                         utils::VectorRef<Value*> arguments)
+CoreBuiltinCall::CoreBuiltinCall(InstructionResult* result,
+                                 builtin::Function func,
+                                 utils::VectorRef<Value*> arguments)
     : func_(func) {
     TINT_ASSERT(IR, func != builtin::Function::kNone);
     TINT_ASSERT(IR, func != builtin::Function::kTintMaterialize);
 
-    AddOperands(BuiltinCall::kArgsOperandOffset, std::move(arguments));
+    AddOperands(CoreBuiltinCall::kArgsOperandOffset, std::move(arguments));
     AddResult(result);
 }
 
-BuiltinCall::~BuiltinCall() = default;
+CoreBuiltinCall::~CoreBuiltinCall() = default;
 
 }  // namespace tint::ir

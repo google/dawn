@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_IR_BUILTIN_CALL_H_
-#define SRC_TINT_IR_BUILTIN_CALL_H_
+#ifndef SRC_TINT_IR_CORE_BUILTIN_CALL_H_
+#define SRC_TINT_IR_CORE_BUILTIN_CALL_H_
 
 #include "src/tint/builtin/function.h"
 #include "src/tint/ir/call.h"
@@ -21,8 +21,8 @@
 
 namespace tint::ir {
 
-/// A builtin call instruction in the IR.
-class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
+/// A core builtin call instruction in the IR.
+class CoreBuiltinCall : public utils::Castable<CoreBuiltinCall, Call> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -31,16 +31,16 @@ class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
     /// @param result the result value
     /// @param func the builtin function
     /// @param args the conversion arguments
-    BuiltinCall(InstructionResult* result,
-                builtin::Function func,
-                utils::VectorRef<Value*> args = utils::Empty);
-    ~BuiltinCall() override;
+    CoreBuiltinCall(InstructionResult* result,
+                    builtin::Function func,
+                    utils::VectorRef<Value*> args = utils::Empty);
+    ~CoreBuiltinCall() override;
 
     /// @returns the builtin function
     builtin::Function Func() { return func_; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "builtin-call"; }
+    std::string_view FriendlyName() override { return "core-builtin-call"; }
 
   private:
     builtin::Function func_;
@@ -48,4 +48,4 @@ class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_IR_BUILTIN_CALL_H_
+#endif  // SRC_TINT_IR_CORE_BUILTIN_CALL_H_

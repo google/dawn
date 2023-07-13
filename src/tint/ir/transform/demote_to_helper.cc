@@ -176,7 +176,7 @@ struct DemoteToHelper::State {
                         conditionalize(store);
                     }
                 },
-                [&](BuiltinCall* builtin) {
+                [&](CoreBuiltinCall* builtin) {
                     // Conditionalize calls to builtins that have side effects.
                     if (builtin::HasSideEffects(builtin->Func())) {
                         conditionalize(builtin);

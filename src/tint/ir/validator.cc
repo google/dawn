@@ -22,10 +22,10 @@
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
 #include "src/tint/ir/break_if.h"
-#include "src/tint/ir/builtin_call.h"
 #include "src/tint/ir/construct.h"
 #include "src/tint/ir/continue.h"
 #include "src/tint/ir/convert.h"
+#include "src/tint/ir/core_builtin_call.h"
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/discard.h"
 #include "src/tint/ir/exit_if.h"
@@ -312,14 +312,14 @@ class Validator {
 
     void CheckCall(Call* call) {
         tint::Switch(
-            call,                    //
-            [&](Bitcast*) {},        //
-            [&](BuiltinCall*) {},    //
-            [&](IntrinsicCall*) {},  //
-            [&](Construct*) {},      //
-            [&](Convert*) {},        //
-            [&](Discard*) {},        //
-            [&](UserCall*) {},       //
+            call,                      //
+            [&](Bitcast*) {},          //
+            [&](CoreBuiltinCall*) {},  //
+            [&](IntrinsicCall*) {},    //
+            [&](Construct*) {},        //
+            [&](Convert*) {},          //
+            [&](Discard*) {},          //
+            [&](UserCall*) {},         //
             [&](Default) { AddError(call, InstError(call, "missing validation")); });
     }
 

@@ -43,12 +43,12 @@ struct BuiltinPolyfillSpirv::State {
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
-        utils::Vector<BuiltinCall*, 4> worklist;
+        utils::Vector<CoreBuiltinCall*, 4> worklist;
         for (auto* inst : ir->instructions.Objects()) {
             if (!inst->Alive()) {
                 continue;
             }
-            if (auto* builtin = inst->As<BuiltinCall>()) {
+            if (auto* builtin = inst->As<CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
                     case builtin::Function::kDot:
                     case builtin::Function::kSelect:
@@ -87,7 +87,7 @@ struct BuiltinPolyfillSpirv::State {
     /// Handle a `dot()` builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* Dot(BuiltinCall* builtin) {
+    Value* Dot(CoreBuiltinCall* builtin) {
         // OpDot only supports floating point operands, so we need to polyfill the integer case.
         // TODO(crbug.com/tint/1267): If SPV_KHR_integer_dot_product is supported, use that instead.
         if (builtin->Result()->Type()->is_integer_scalar()) {
@@ -125,7 +125,7 @@ struct BuiltinPolyfillSpirv::State {
     /// Handle a `select()` builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* Select(BuiltinCall* builtin) {
+    Value* Select(CoreBuiltinCall* builtin) {
         // Argument order is different in SPIR-V: (condition, true_operand, false_operand).
         utils::Vector<Value*, 4> args = {
             builtin->Args()[2],
