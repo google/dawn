@@ -147,6 +147,15 @@ const type::Type* DedupType(const type::Type* ty, type::Manager& types) {
             return s;
         },
 
+        // Dedup a SampledImage if its underlying image will be deduped.
+        [&](const ir::transform::BuiltinPolyfillSpirv::SampledImage* si) -> const type::Type* {
+            auto* img = DedupType(si->Image(), types);
+            if (img != si->Image()) {
+                return types.Get<ir::transform::BuiltinPolyfillSpirv::SampledImage>(img);
+            }
+            return si;
+        },
+
         [&](Default) { return ty; });
 }
 
@@ -236,6 +245,11 @@ uint32_t GeneratorImplIr::Builtin(builtin::BuiltinValue builtin, builtin::Addres
 }
 
 uint32_t GeneratorImplIr::Constant(ir::Constant* constant) {
+    // If it is a literal operand, just return the value.
+    if (auto* literal = constant->As<ir::transform::BuiltinPolyfillSpirv::LiteralOperand>()) {
+        return literal->Value()->ValueAs<uint32_t>();
+    }
+
     auto id = Constant(constant->Value());
 
     // Set the name for the SPIR-V result ID if provided in the module.
@@ -375,6 +389,9 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty,
             [&](const type::Struct* str) { EmitStructType(id, str, addrspace); },
             [&](const type::Texture* tex) { EmitTextureType(id, tex); },
             [&](const type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
+            [&](const ir::transform::BuiltinPolyfillSpirv::SampledImage* s) {
+                module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
+            },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled type: " << ty->FriendlyName();
             });
@@ -1402,6 +1419,21 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
             break;
         case ir::IntrinsicCall::Kind::kSpirvSelect:
             op = spv::Op::OpSelect;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvSampledImage:
+            op = spv::Op::OpSampledImage;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
+            op = spv::Op::OpImageSampleImplicitLod;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvImageSampleExplicitLod:
+            op = spv::Op::OpImageSampleExplicitLod;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvImageSampleDrefImplicitLod:
+            op = spv::Op::OpImageSampleDrefImplicitLod;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
+            op = spv::Op::OpImageSampleDrefExplicitLod;
             break;
     }
 

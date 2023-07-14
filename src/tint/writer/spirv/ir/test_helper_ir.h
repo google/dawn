@@ -176,19 +176,20 @@ class SpvGeneratorTestHelperBase : public BASE {
 
     /// Helper to make a scalar value with the scalar type `type`.
     /// @param type the element type
+    /// @param value the optional value to use
     /// @returns the scalar value
-    ir::Value* MakeScalarValue(TestElementType type) {
+    ir::Constant* MakeScalarValue(TestElementType type, uint32_t value = 1) {
         switch (type) {
             case kBool:
                 return b.Constant(true);
             case kI32:
-                return b.Constant(i32(1));
+                return b.Constant(i32(value));
             case kU32:
-                return b.Constant(u32(1));
+                return b.Constant(u32(value));
             case kF32:
-                return b.Constant(f32(1));
+                return b.Constant(f32(value));
             case kF16:
-                return b.Constant(f16(1));
+                return b.Constant(f16(value));
         }
         return nullptr;
     }
@@ -196,7 +197,7 @@ class SpvGeneratorTestHelperBase : public BASE {
     /// Helper to make a vector value with an element type of `type`.
     /// @param type the element type
     /// @returns the vector value
-    ir::Value* MakeVectorValue(TestElementType type) {
+    ir::Constant* MakeVectorValue(TestElementType type) {
         switch (type) {
             case kBool:
                 return b.Constant(mod.constant_values.Composite(

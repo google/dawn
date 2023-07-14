@@ -1350,6 +1350,7 @@ if(TINT_BUILD_TESTS)
         writer/spirv/ir/generator_impl_ir_switch_test.cc
         writer/spirv/ir/generator_impl_ir_swizzle_test.cc
         writer/spirv/ir/generator_impl_ir_test.cc
+        writer/spirv/ir/generator_impl_ir_texture_builtin_test.cc
         writer/spirv/ir/generator_impl_ir_type_test.cc
         writer/spirv/ir/generator_impl_ir_unary_test.cc
         writer/spirv/ir/generator_impl_ir_var_test.cc

@@ -31,6 +31,11 @@ class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
         // SPIR-V backend intrinsics.
         kSpirvDot,
         kSpirvSelect,
+        kSpirvSampledImage,
+        kSpirvImageSampleImplicitLod,
+        kSpirvImageSampleExplicitLod,
+        kSpirvImageSampleDrefImplicitLod,
+        kSpirvImageSampleDrefExplicitLod,
     };
 
     /// Constructor

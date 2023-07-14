@@ -15,7 +15,16 @@
 #ifndef SRC_TINT_IR_TRANSFORM_BUILTIN_POLYFILL_SPIRV_H_
 #define SRC_TINT_IR_TRANSFORM_BUILTIN_POLYFILL_SPIRV_H_
 
+#include <string>
+
+#include "src/tint/ir/constant.h"
 #include "src/tint/ir/transform/transform.h"
+#include "src/tint/type/type.h"
+
+// Forward declarations
+namespace tint::type {
+class Texture;
+}  // namespace tint::type
 
 namespace tint::ir::transform {
 
@@ -30,6 +39,44 @@ class BuiltinPolyfillSpirv final : public utils::Castable<BuiltinPolyfillSpirv, 
 
     /// @copydoc Transform::Run
     void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const override;
+
+    /// LiteralOperand is a type of constant value that is intended to be emitted as a literal in
+    /// the SPIR-V instruction stream.
+    class LiteralOperand final : public utils::Castable<LiteralOperand, ir::Constant> {
+      public:
+        /// Constructor
+        /// @param value the operand value
+        explicit LiteralOperand(const constant::Value* value);
+        /// Destructor
+        ~LiteralOperand() override;
+    };
+
+    /// SampledImage represents an OpTypeSampledImage in SPIR-V.
+    class SampledImage final : public utils::Castable<SampledImage, type::Type> {
+      public:
+        /// Constructor
+        /// @param image the image type
+        explicit SampledImage(const type::Type* image);
+
+        /// @param other the other node to compare against
+        /// @returns true if the this type is equal to @p other
+        bool Equals(const UniqueNode& other) const override {
+            return &other.TypeInfo() == &TypeInfo();
+        }
+
+        /// @returns the friendly name for this type
+        std::string FriendlyName() const override { return "spirv.sampled_image"; }
+
+        /// @param ctx the clone context
+        /// @returns a clone of this type
+        SampledImage* Clone(type::CloneContext& ctx) const override;
+
+        /// @returns the image type
+        const type::Type* Image() const { return image_; }
+
+      private:
+        const type::Type* image_;
+    };
 
   private:
     struct State;
