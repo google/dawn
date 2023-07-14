@@ -12,24 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ir/core_builtin_call.h"
+#ifndef SRC_TINT_IR_BUILTIN_CALL_H_
+#define SRC_TINT_IR_BUILTIN_CALL_H_
 
-#include <utility>
-
-#include "src/tint/debug.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::CoreBuiltinCall);
+#include "src/tint/ir/call.h"
+#include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 
-CoreBuiltinCall::CoreBuiltinCall(InstructionResult* result,
-                                 builtin::Function func,
-                                 utils::VectorRef<Value*> arguments)
-    : Base(result, arguments), func_(func) {
-    TINT_ASSERT(IR, func != builtin::Function::kNone);
-    TINT_ASSERT(IR, func != builtin::Function::kTintMaterialize);
-}
+/// A builtin call instruction in the IR.
+class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
+  public:
+    /// The base offset in Operands() for the args
+    static constexpr size_t kArgsOperandOffset = 0;
 
-CoreBuiltinCall::~CoreBuiltinCall() = default;
+    /// Constructor
+    /// @param result the result value
+    /// @param args the conversion arguments
+    explicit BuiltinCall(InstructionResult* result, utils::VectorRef<Value*> args = utils::Empty);
+    ~BuiltinCall() override;
+};
 
 }  // namespace tint::ir
+
+#endif  // SRC_TINT_IR_BUILTIN_CALL_H_

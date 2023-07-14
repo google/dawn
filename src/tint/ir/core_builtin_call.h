@@ -16,17 +16,14 @@
 #define SRC_TINT_IR_CORE_BUILTIN_CALL_H_
 
 #include "src/tint/builtin/function.h"
-#include "src/tint/ir/call.h"
+#include "src/tint/ir/builtin_call.h"
 #include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 
 /// A core builtin call instruction in the IR.
-class CoreBuiltinCall : public utils::Castable<CoreBuiltinCall, Call> {
+class CoreBuiltinCall : public utils::Castable<CoreBuiltinCall, BuiltinCall> {
   public:
-    /// The base offset in Operands() for the args
-    static constexpr size_t kArgsOperandOffset = 0;
-
     /// Constructor
     /// @param result the result value
     /// @param func the builtin function
