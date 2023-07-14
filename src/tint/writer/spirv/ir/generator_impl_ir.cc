@@ -127,6 +127,29 @@ SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
     }
 }
 
+const type::Type* DedupType(const type::Type* ty, type::Manager& types) {
+    return Switch(
+        ty,
+
+        // Depth textures are always declared as sampled textures.
+        [&](const type::DepthTexture* depth) {
+            return types.Get<type::SampledTexture>(depth->dim(), types.f32());
+        },
+        [&](const type::DepthMultisampledTexture* depth) {
+            return types.Get<type::MultisampledTexture>(depth->dim(), types.f32());
+        },
+
+        // Both sampler types are the same in SPIR-V.
+        [&](const type::Sampler* s) -> const type::Type* {
+            if (s->IsComparison()) {
+                return types.Get<type::Sampler>(type::SamplerKind::kSampler);
+            }
+            return s;
+        },
+
+        [&](Default) { return ty; });
+}
+
 }  // namespace
 
 GeneratorImplIr::GeneratorImplIr(ir::Module* module, bool zero_init_workgroup_mem)
@@ -303,7 +326,7 @@ uint32_t GeneratorImplIr::Undef(const type::Type* type) {
 
 uint32_t GeneratorImplIr::Type(const type::Type* ty,
                                builtin::AddressSpace addrspace /* = kUndefined */) {
-    return types_.GetOrCreate(ty, [&] {
+    return types_.GetOrCreate(DedupType(ty, ir_->Types()), [&] {
         auto id = module_.NextId();
         Switch(
             ty,  //
@@ -351,17 +374,7 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty,
             },
             [&](const type::Struct* str) { EmitStructType(id, str, addrspace); },
             [&](const type::Texture* tex) { EmitTextureType(id, tex); },
-            [&](const type::Sampler* s) {
-                module_.PushType(spv::Op::OpTypeSampler, {id});
-
-                // Register both of the sampler types, as they're the same in SPIR-V.
-                if (s->kind() == type::SamplerKind::kSampler) {
-                    types_.Add(
-                        ir_->Types().Get<type::Sampler>(type::SamplerKind::kComparisonSampler), id);
-                } else {
-                    types_.Add(ir_->Types().Get<type::Sampler>(type::SamplerKind::kSampler), id);
-                }
-            },
+            [&](const type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_) << "unhandled type: " << ty->FriendlyName();
             });
