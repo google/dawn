@@ -504,7 +504,13 @@ class Builder {
     /// @returns the operation
     template <typename VAL>
     ir::Binary* Not(const type::Type* type, VAL&& val) {
-        return Equal(type, std::forward<VAL>(val), Constant(false));
+        if (auto* vec = type->As<type::Vector>()) {
+            return Equal(type, std::forward<VAL>(val),
+                         Constant(ir.constant_values.Splat(vec, ir.constant_values.Get(false),
+                                                           vec->Width())));
+        } else {
+            return Equal(type, std::forward<VAL>(val), Constant(false));
+        }
     }
 
     /// Creates a bitcast instruction

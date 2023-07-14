@@ -48,6 +48,30 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Not) {
 )");
 }
 
+TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Not_Vector) {
+    Func("my_func", utils::Empty, ty.vec4<bool>(),
+         utils::Vector{Return(vec(ty.bool_(), 4, false))});
+    auto* expr = Not(Call("my_func"));
+    WrapInFunction(expr);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():vec4<bool> -> %b1 {
+  %b1 = block {
+    ret vec4<bool>(false)
+  }
+}
+%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+  %b2 = block {
+    %3:vec4<bool> = call %my_func
+    %tint_symbol:vec4<bool> = eq %3, vec4<bool>(false)
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Complement) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(1_u)});
     auto* expr = Complement(Call("my_func"));
