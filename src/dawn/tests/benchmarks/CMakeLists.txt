@@ -14,9 +14,9 @@
 
 if (${DAWN_BUILD_BENCHMARKS})
   add_executable(dawn_benchmarks
-    "BGLCreation.cpp"
     "NullDeviceSetup.cpp"
     "NullDeviceSetup.h"
+    "ObjectCreation.cpp"
   )
   set_target_properties(dawn_benchmarks PROPERTIES FOLDER "Benchmarks")
 

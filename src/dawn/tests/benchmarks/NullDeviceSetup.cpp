@@ -23,58 +23,63 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 
-namespace {
-std::unique_ptr<dawn::native::Instance> nativeInstance = nullptr;
-wgpu::Adapter nullBackendAdapter = nullptr;
-}  // namespace
+namespace dawn {
 
-void SetupNullBackend(const benchmark::State& state) {
-    dawnProcSetProcs(&dawn::native::GetProcs());
+void NullDeviceBenchmarkFixture::SetUp(const benchmark::State& state) {
+    // Static initialization that only happens on the first time that a fixture is created.
+    static std::unique_ptr<dawn::native::Instance> nativeInstance = []() {
+        dawnProcSetProcs(&dawn::native::GetProcs());
+        return std::make_unique<dawn::native::Instance>();
+    }();
 
-    if (!nativeInstance) {
-        nativeInstance = std::make_unique<dawn::native::Instance>();
-    }
+    if (state.thread_index() == 0) {
+        // Only thread 0 is responsible for initializing the device on each iteration.
+        {
+            std::lock_guard lock(mMutex);
 
-    if (!nullBackendAdapter) {
-        wgpu::RequestAdapterOptions options = {};
-        options.backendType = wgpu::BackendType::Null;
+            // Get an adapter to create the device with.
+            wgpu::RequestAdapterOptions options = {};
+            options.backendType = wgpu::BackendType::Null;
+            auto nativeAdapter = nativeInstance->EnumerateAdapters(&options)[0];
+            adapter = wgpu::Adapter(nativeAdapter.Get());
+            ASSERT(adapter != nullptr);
 
-        auto nativeAdapter = nativeInstance->EnumerateAdapters(&options)[0];
-        nullBackendAdapter = wgpu::Adapter(nativeAdapter.Get());
-    }
-    ASSERT(nullBackendAdapter != nullptr);
-}
-
-wgpu::Device CreateNullDevice(const wgpu::DeviceDescriptor& desc) {
-    wgpu::Device device;
-
-    nullBackendAdapter.RequestDevice(
-        &desc,
-        [](WGPURequestDeviceStatus status, WGPUDevice cDevice, char const* message,
-           void* userdata) {
-            ASSERT(status == WGPURequestDeviceStatus_Success);
-            *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
-        },
-        &device);
-    while (!device) {
-        wgpuInstanceProcessEvents(nativeInstance->Get());
-    }
-
-    device.SetUncapturedErrorCallback(
-        [](WGPUErrorType, char const* message, void* userdata) {
-            dawn::ErrorLog() << message;
-            UNREACHABLE();
-        },
-        nullptr);
-
-    device.SetDeviceLostCallback(
-        [](WGPUDeviceLostReason reason, char const* message, void* userdata) {
-            if (reason == WGPUDeviceLostReason_Undefined) {
-                dawn::ErrorLog() << message;
-                UNREACHABLE();
+            // Create the device.
+            wgpu::DeviceDescriptor desc = GetDeviceDescriptor();
+            adapter.RequestDevice(
+                &desc,
+                [](WGPURequestDeviceStatus status, WGPUDevice cDevice, char const* message,
+                   void* userdata) {
+                    ASSERT(status == WGPURequestDeviceStatus_Success);
+                    *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
+                },
+                &device);
+            while (!device) {
+                wgpuInstanceProcessEvents(nativeInstance->Get());
             }
-        },
-        nullptr);
 
-    return device;
+            device.SetUncapturedErrorCallback(
+                [](WGPUErrorType, char const* message, void* userdata) {
+                    dawn::ErrorLog() << message;
+                    UNREACHABLE();
+                },
+                nullptr);
+
+            device.SetDeviceLostCallback(
+                [](WGPUDeviceLostReason reason, char const* message, void* userdata) {
+                    if (reason == WGPUDeviceLostReason_Undefined) {
+                        dawn::ErrorLog() << message;
+                        UNREACHABLE();
+                    }
+                },
+                nullptr);
+        }
+        mCv.notify_all();
+    } else {
+        // All other threads should wait to proceed once the device is ready.
+        std::unique_lock lock(mMutex);
+        mCv.wait(lock, [this] { return device != nullptr; });
+    }
 }
+
+}  // namespace dawn

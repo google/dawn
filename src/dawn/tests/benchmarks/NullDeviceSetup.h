@@ -15,17 +15,33 @@
 #ifndef DAWN_TESTS_BENCHMARKS_NULLDEVICESETUP
 #define DAWN_TESTS_BENCHMARKS_NULLDEVICESETUP
 
+#include <benchmark/benchmark.h>
 #include <dawn/webgpu_cpp.h>
-
-namespace benchmark {
-class State;
-}
+#include <condition_variable>
+#include <mutex>
 
 namespace wgpu {
 struct DeviceDescriptor;
-}
+}  // namespace wgpu
 
-void SetupNullBackend(const benchmark::State& state);
-wgpu::Device CreateNullDevice(const wgpu::DeviceDescriptor& desc);
+namespace dawn {
+
+class NullDeviceBenchmarkFixture : public benchmark::Fixture {
+  public:
+    void SetUp(const benchmark::State& state) override;
+
+  protected:
+    wgpu::Adapter adapter = nullptr;
+    wgpu::Device device = nullptr;
+
+  private:
+    virtual wgpu::DeviceDescriptor GetDeviceDescriptor() const = 0;
+
+    // Lock and conditional variable used to synchronize the benchmark global adapter/device.
+    std::mutex mMutex;
+    std::condition_variable mCv;
+};
+
+}  // namespace dawn
 
 #endif  // DAWN_TESTS_BENCHMARKS_NULLDEVICESETUP

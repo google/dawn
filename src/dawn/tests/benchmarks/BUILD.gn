@@ -27,9 +27,9 @@ test("dawn_benchmarks") {
     "//third_party/google_benchmark:benchmark_main",
   ]
   sources = [
-    "BGLCreation.cpp",
     "NullDeviceSetup.cpp",
     "NullDeviceSetup.h",
+    "ObjectCreation.cpp",
   ]
   configs += [ "${dawn_root}/include/dawn:public" ]
 }
