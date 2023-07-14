@@ -36,6 +36,11 @@ class DawnHistogramMockPlatform : public dawn::platform::Platform {
                 (override));
 
     MOCK_METHOD(void,
+                HistogramCustomCountsHPC,
+                (const char* name, int sample, int min, int max, int bucketCount),
+                (override));
+
+    MOCK_METHOD(void,
                 HistogramEnumeration,
                 (const char* name, int sample, int boundaryValue),
                 (override));
@@ -68,12 +73,16 @@ TEST_P(HistogramTests, Times) {
     EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("long_times", 3, _, _, _));
     EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("long_times_100", 4, _, _, _));
     EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("custom_times", 5, 0, 10, 42));
+    EXPECT_CALL(*mMockPlatform,
+                HistogramCustomCountsHPC("custom_microsecond_times", 6, 0, 100, 420));
 
     DAWN_HISTOGRAM_TIMES(mMockPlatform, "times", 1);
     DAWN_HISTOGRAM_MEDIUM_TIMES(mMockPlatform, "medium_times", 2);
     DAWN_HISTOGRAM_LONG_TIMES(mMockPlatform, "long_times", 3);
     DAWN_HISTOGRAM_LONG_TIMES_100(mMockPlatform, "long_times_100", 4);
     DAWN_HISTOGRAM_CUSTOM_TIMES(mMockPlatform, "custom_times", 5, 0, 10, 42);
+    DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES(mMockPlatform, "custom_microsecond_times", 6, 0, 100,
+                                            420);
 }
 
 TEST_P(HistogramTests, Percentage) {
@@ -129,10 +138,11 @@ TEST_P(HistogramTests, Sparse) {
 
 TEST_P(HistogramTests, ScopedTimer) {
     InSequence seq;
-    EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("timer0", 2500, _, _, _));
-    EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("timer1", 15500, _, _, _));
-    EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("timer4", 2500, _, _, _));
-    EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("timer3", 6000, _, _, _));
+    EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("timer0", 2'500, _, _, _));
+    EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("timer1", 15'500, _, _, _));
+    EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("timer4", 2'500, _, _, _));
+    EXPECT_CALL(*mMockPlatform, HistogramCustomCounts("timer3", 6'000, _, _, _));
+    EXPECT_CALL(*mMockPlatform, HistogramCustomCountsHPC("timer5", 1'500'000, _, _, _));
 
     {
         mMockPlatform->SetTime(1.0);
@@ -150,6 +160,11 @@ TEST_P(HistogramTests, ScopedTimer) {
         mMockPlatform->SetTime(4.5);
         SCOPED_DAWN_HISTOGRAM_LONG_TIMER(mMockPlatform, "timer4");
         mMockPlatform->SetTime(7.0);
+    }
+    {
+        mMockPlatform->SetTime(1.0);
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(mMockPlatform, "timer5");
+        mMockPlatform->SetTime(2.5);
     }
 }
 

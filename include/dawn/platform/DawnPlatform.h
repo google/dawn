@@ -100,6 +100,14 @@ class DAWN_PLATFORM_EXPORT Platform {
                                        int max,
                                        int bucketCount);
 
+    // Invoked to add a UMA histogram count-based sample that requires high-performance
+    // counter (HPC) support.
+    virtual void HistogramCustomCountsHPC(const char* name,
+                                          int sample,
+                                          int min,
+                                          int max,
+                                          int bucketCount);
+
     // Invoked to add a UMA histogram enumeration sample
     virtual void HistogramEnumeration(const char* name, int sample, int boundaryValue);
 

@@ -44,6 +44,11 @@
 #define DAWN_HISTOGRAM_CUSTOM_TIMES(platform, name, sample_ms, min, max, bucket_count) \
     DAWN_HISTOGRAM_CUSTOM_COUNTS(platform, name, sample_ms, min, max, bucket_count)
 
+// Same as DAWN_HISTOGRAM_CUSTOM_TIMES but reports |sample| in microseconds,
+// dropping the report if this client doesn't have a high-resolution clock.
+#define DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES(platform, name, sample_us, min, max, bucket_count) \
+    DAWN_HISTOGRAM_CUSTOM_COUNTS_HPC(platform, name, sample_us, min, max, bucket_count)
+
 //------------------------------------------------------------------------------
 // Count histograms. These are used for collecting numeric data. Note that we
 // have macros for more specialized use cases below (memory, time, percentages).
@@ -79,6 +84,12 @@
 // into the underflow bucket.
 #define DAWN_HISTOGRAM_CUSTOM_COUNTS(platformObj, name, sample, min, max, bucket_count) \
     platformObj->HistogramCustomCounts(name, sample, min, max, bucket_count)
+
+// Same as DAWN_HISTOGRAM_CUSTOM_COUNTS, but the stat will be dropped if the
+// client does not support high-performance counters (HPC). Ueful for logging
+// microsecond-resolution timings.
+#define DAWN_HISTOGRAM_CUSTOM_COUNTS_HPC(platformObj, name, sample, min, max, bucket_count) \
+    platformObj->HistogramCustomCountsHPC(name, sample, min, max, bucket_count)
 
 // Used for capturing basic percentages. This will be 100 buckets of size 1.
 #define DAWN_HISTOGRAM_PERCENTAGE(platform, name, percent_as_int) \
@@ -121,24 +132,37 @@
 #define DAWN_HISTOGRAM_SPARSE(platformObj, name, sparse_sample) \
     platformObj->HistogramSparse(name, sparse_sample)
 
+namespace dawn::detail {
+enum class ScopedHistogramTiming { kMicrosecondTimes, kMediumTimes, kLongTimes };
+}
+
 // Scoped class which logs its time on this earth as a UMA statistic. This is
 // recommended for when you want a histogram which measures the time it takes
 // for a method to execute. This measures up to 10 seconds.
 #define SCOPED_DAWN_HISTOGRAM_TIMER(platform, name) \
-    SCOPED_DAWN_HISTOGRAM_TIMER_EXPANDER(platform, name, false, __COUNTER__)
+    SCOPED_DAWN_HISTOGRAM_TIMER_EXPANDER(           \
+        platform, name, dawn::detail::ScopedHistogramTiming::kMediumTimes, __COUNTER__)
 
 // Similar scoped histogram timer, but this uses DAWN_HISTOGRAM_LONG_TIMES_100,
 // which measures up to an hour, and uses 100 buckets. This is more expensive
 // to store, so only use if this often takes >10 seconds.
 #define SCOPED_DAWN_HISTOGRAM_LONG_TIMER(platform, name) \
-    SCOPED_DAWN_HISTOGRAM_TIMER_EXPANDER(platform, name, true, __COUNTER__)
+    SCOPED_DAWN_HISTOGRAM_TIMER_EXPANDER(                \
+        platform, name, dawn::detail::ScopedHistogramTiming::kLongTimes, __COUNTER__)
+
+// Similar scoped histogram timer, but this uses
+// DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES, measuring from 1 microseconds to 1 second,
+// with 50 buckets.
+#define SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(platform, name) \
+    SCOPED_DAWN_HISTOGRAM_TIMER_EXPANDER(                  \
+        platform, name, dawn::detail::ScopedHistogramTiming::kMicrosecondTimes, __COUNTER__)
 
 // This nested macro is necessary to expand __COUNTER__ to an actual value.
-#define SCOPED_DAWN_HISTOGRAM_TIMER_EXPANDER(platform, name, is_long, key) \
-    SCOPED_DAWN_HISTOGRAM_TIMER_UNIQUE(platform, name, is_long, key)
+#define SCOPED_DAWN_HISTOGRAM_TIMER_EXPANDER(platform, name, timing, key) \
+    SCOPED_DAWN_HISTOGRAM_TIMER_UNIQUE(platform, name, timing, key)
 
 // This is a helper macro used by other macros and shouldn't be used directly.
-#define SCOPED_DAWN_HISTOGRAM_TIMER_UNIQUE(platform, name, is_long, key)                    \
+#define SCOPED_DAWN_HISTOGRAM_TIMER_UNIQUE(platform, name, timing, key)                     \
     using PlatformType##key = std::decay_t<std::remove_pointer_t<decltype(platform)>>;      \
     class [[nodiscard]] ScopedHistogramTimer##key {                                         \
       public:                                                                               \
@@ -149,11 +173,20 @@
             if (constructed_ == 0)                                                          \
                 return;                                                                     \
             double elapsed = this->platform_->MonotonicallyIncreasingTime() - constructed_; \
-            int elapsedMS = static_cast<int>(elapsed * 1000.0);                             \
-            if (is_long) {                                                                  \
-                DAWN_HISTOGRAM_LONG_TIMES_100(platform_, name, elapsedMS);                  \
-            } else {                                                                        \
-                DAWN_HISTOGRAM_TIMES(platform_, name, elapsedMS);                           \
+            switch (timing) {                                                               \
+                case dawn::detail::ScopedHistogramTiming::kMicrosecondTimes: {              \
+                    int elapsedUS = static_cast<int>(elapsed * 1'000'000.0);                \
+                    DAWN_HISTOGRAM_CUSTOM_MICROSECOND_TIMES(platform_, name, elapsedUS, 1,  \
+                                                            1'000'000, 50);                 \
+                } break;                                                                    \
+                case dawn::detail::ScopedHistogramTiming::kMediumTimes: {                   \
+                    int elapsedMS = static_cast<int>(elapsed * 1'000.0);                    \
+                    DAWN_HISTOGRAM_TIMES(platform_, name, elapsedMS);                       \
+                } break;                                                                    \
+                case dawn::detail::ScopedHistogramTiming::kLongTimes: {                     \
+                    int elapsedMS = static_cast<int>(elapsed * 1'000.0);                    \
+                    DAWN_HISTOGRAM_LONG_TIMES_100(platform_, name, elapsedMS);              \
+                }                                                                           \
             }                                                                               \
         }                                                                                   \
                                                                                             \

@@ -59,6 +59,12 @@ void Platform::HistogramCustomCounts(const char* name,
                                      int max,
                                      int bucketCount) {}
 
+void Platform::HistogramCustomCountsHPC(const char* name,
+                                        int sample,
+                                        int min,
+                                        int max,
+                                        int bucketCount) {}
+
 void Platform::HistogramEnumeration(const char* name, int sample, int boundaryValue) {}
 
 void Platform::HistogramSparse(const char* name, int sample) {}
