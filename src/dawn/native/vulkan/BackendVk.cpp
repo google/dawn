@@ -153,6 +153,15 @@ bool ShouldReportDebugMessage(const char* messageId, const char* message) {
         return true;
     }
 
+    // Some Vulkan drivers send "error" messages of "VK_SUCCESS" when zero devices are
+    // available; seen in crbug.com/1464122. This is not a real error that we care about.
+    // The messageId is ignored because drivers may report
+    // __FILE__: __LINE__ info here.
+    // https://github.com/Mesa3D/mesa/blob/22.2/src/amd/vulkan/radv_device.c#L1201
+    if (strcmp(message, "VK_SUCCESS") == 0) {
+        return false;
+    }
+
     for (const SkippedMessage& msg : kSkippedMessages) {
         if (strstr(messageId, msg.messageId) != nullptr &&
             strstr(message, msg.messageContents) != nullptr) {
