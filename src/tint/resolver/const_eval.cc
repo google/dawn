@@ -73,17 +73,6 @@ auto Dispatch_iu32(F&& f, CONSTANTS&&... cs) {
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Calls `f` with all constants cast to the type of the first `cs` argument.
 template <typename F, typename... CONSTANTS>
-auto Dispatch_fiu32(F&& f, CONSTANTS&&... cs) {
-    return Switch(
-        First(cs...)->Type(),  //
-        [&](const type::F32*) { return f(cs->template ValueAs<f32>()...); },
-        [&](const type::I32*) { return f(cs->template ValueAs<i32>()...); },
-        [&](const type::U32*) { return f(cs->template ValueAs<u32>()...); });
-}
-
-/// Helper that calls `f` passing in the value of all `cs`.
-/// Calls `f` with all constants cast to the type of the first `cs` argument.
-template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
@@ -1462,27 +1451,122 @@ ConstEval::Result ConstEval::Swizzle(const type::Type* ty,
 ConstEval::Result ConstEval::Bitcast(const type::Type* ty,
                                      const constant::Value* value,
                                      const Source& source) {
-    auto* el_ty = ty->DeepestElement();
-    auto transform = [&](const constant::Value* c0) {
-        auto create = [&](auto e) {
-            return Switch(
-                el_ty,
-                [&](const type::U32*) {  //
-                    auto r = utils::Bitcast<u32>(e);
-                    return CreateScalar(source, el_ty, r);
-                },
-                [&](const type::I32*) {  //
-                    auto r = utils::Bitcast<i32>(e);
-                    return CreateScalar(source, el_ty, r);
-                },
-                [&](const type::F32*) {  //
-                    auto r = utils::Bitcast<f32>(e);
-                    return CreateScalar(source, el_ty, r);
-                });
+    // Target type
+    auto dst_elements = ty->Elements(ty->DeepestElement(), 1u);
+    auto dst_el_ty = dst_elements.type;
+    auto dst_count = dst_elements.count;
+    // Source type
+    auto src_elements = value->Type()->Elements(value->Type()->DeepestElement(), 1u);
+    auto src_el_ty = src_elements.type;
+    auto src_count = src_elements.count;
+
+    TINT_ASSERT(Resolver, dst_count * dst_el_ty->Size() == src_count * src_el_ty->Size());
+    uint32_t total_bitwidth = dst_count * dst_el_ty->Size();
+    // Buffer holding the bits from source value, result value reinterpreted from it.
+    utils::Vector<std::byte, 16> buffer;
+    buffer.Reserve(total_bitwidth);
+
+    // Ensure elements are of 32-bit or 16-bit numerical scalar type.
+    TINT_ASSERT(Resolver, (src_el_ty->IsAnyOf<type::F32, type::I32, type::U32, type::F16>()));
+    // Pushes bits from source value into the buffer.
+    auto push_src_element_bits = [&](const constant::Value* element) {
+        auto push_32_bits = [&](uint32_t v) {
+            buffer.Push(std::byte(v & 0xffu));
+            buffer.Push(std::byte((v >> 8) & 0xffu));
+            buffer.Push(std::byte((v >> 16) & 0xffu));
+            buffer.Push(std::byte((v >> 24) & 0xffu));
         };
-        return Dispatch_fiu32(create, c0);
+        auto push_16_bits = [&](uint16_t v) {
+            buffer.Push(std::byte(v & 0xffu));
+            buffer.Push(std::byte((v >> 8) & 0xffu));
+        };
+        Switch(
+            src_el_ty,
+            [&](const type::U32*) {  //
+                uint32_t r = element->ValueAs<u32>();
+                push_32_bits(r);
+            },
+            [&](const type::I32*) {  //
+                uint32_t r = utils::Bitcast<u32>(element->ValueAs<i32>());
+                push_32_bits(r);
+            },
+            [&](const type::F32*) {  //
+                uint32_t r = utils::Bitcast<u32>(element->ValueAs<f32>());
+                push_32_bits(r);
+            },
+            [&](const type::F16*) {  //
+                uint16_t r = element->ValueAs<f16>().BitsRepresentation();
+                push_16_bits(r);
+            });
     };
-    return TransformElements(builder, ty, transform, value);
+    if (src_count == 1) {
+        push_src_element_bits(value);
+    } else {
+        for (size_t i = 0; i < src_count; i++) {
+            push_src_element_bits(value->Index(i));
+        }
+    }
+
+    // Vector holding elements of return value
+    utils::Vector<const constant::Value*, 4> els;
+
+    // Reinterprets the buffer bits as destination element and push the result into the vector.
+    // Return false if an error occured, otherwise return true.
+    auto push_dst_element = [&](size_t offset) -> bool {
+        uint32_t v;
+        if (dst_el_ty->Size() == 4) {
+            v = (std::to_integer<uint32_t>(buffer[offset])) |
+                (std::to_integer<uint32_t>(buffer[offset + 1]) << 8) |
+                (std::to_integer<uint32_t>(buffer[offset + 2]) << 16) |
+                (std::to_integer<uint32_t>(buffer[offset + 3]) << 24);
+        } else {
+            v = (std::to_integer<uint32_t>(buffer[offset])) |
+                (std::to_integer<uint32_t>(buffer[offset + 1]) << 8);
+        }
+
+        return Switch(
+            dst_el_ty,
+            [&](const type::U32*) {  //
+                auto r = CreateScalar(source, dst_el_ty, u32(v));
+                if (r) {
+                    els.Push(r.Get());
+                }
+                return r;
+            },
+            [&](const type::I32*) {  //
+                auto r = CreateScalar(source, dst_el_ty, utils::Bitcast<i32>(v));
+                if (r) {
+                    els.Push(r.Get());
+                }
+                return r;
+            },
+            [&](const type::F32*) {  //
+                auto r = CreateScalar(source, dst_el_ty, utils::Bitcast<f32>(v));
+                if (r) {
+                    els.Push(r.Get());
+                }
+                return r;
+            },
+            [&](const type::F16*) {  //
+                auto r = CreateScalar(source, dst_el_ty, f16::FromBits(static_cast<uint16_t>(v)));
+                if (r) {
+                    els.Push(r.Get());
+                }
+                return r;
+            });
+    };
+
+    TINT_ASSERT(Resolver, (buffer.Length() == total_bitwidth));
+    for (size_t i = 0; i < dst_count; i++) {
+        if (!push_dst_element(i * dst_el_ty->Size())) {
+            return utils::Failure;
+        }
+    }
+
+    if (dst_count == 1) {
+        return std::move(els[0]);
+    }
+    return builder.constants.Composite(ty, std::move(els));
 }
 
 ConstEval::Result ConstEval::OpComplement(const type::Type* ty,

@@ -16,6 +16,7 @@
 #define SRC_TINT_WRITER_HLSL_GENERATOR_IMPL_H_
 
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -542,6 +543,9 @@ class GeneratorImpl : public ASTTextGenerator {
         };
     };
 
+    /// The map key for two semantic types.
+    using BinaryType = utils::UnorderedKeyWrapper<std::tuple<const type::Type*, const type::Type*>>;
+
     /// CallBuiltinHelper will call the builtin helper function, creating it
     /// if it hasn't been built already. If the builtin needs to be built then
     /// CallBuiltinHelper will generate the function signature and will call
@@ -565,6 +569,9 @@ class GeneratorImpl : public ASTTextGenerator {
     std::function<bool()> emit_continuing_;
     std::unordered_map<const type::Matrix*, std::string> matrix_scalar_inits_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
+    // Polyfill functions for bitcast expression, BinaryType indicates the source type and the
+    // destination type.
+    std::unordered_map<BinaryType, std::string> bitcast_funcs_;
     std::unordered_map<const type::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const type::Matrix*, std::string> dynamic_matrix_vector_write_;
     std::unordered_map<const type::Matrix*, std::string> dynamic_matrix_scalar_write_;

@@ -364,26 +364,154 @@ void GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpr
         return;
     }
 
+    // Handle identity bitcast.
     if (src_type == dst_type) {
         return EmitExpression(out, expr->expr);
     }
 
-    if (src_type->is_float_scalar_or_vector() && dst_type->is_signed_integer_scalar_or_vector()) {
-        out << "floatBitsToInt";
-    } else if (src_type->is_float_scalar_or_vector() &&
-               dst_type->is_unsigned_integer_scalar_or_vector()) {
-        out << "floatBitsToUint";
-    } else if (src_type->is_signed_integer_scalar_or_vector() &&
-               dst_type->is_float_scalar_or_vector()) {
-        out << "intBitsToFloat";
-    } else if (src_type->is_unsigned_integer_scalar_or_vector() &&
-               dst_type->is_float_scalar_or_vector()) {
-        out << "uintBitsToFloat";
+    // Use packFloat2x16 and unpackFloat2x16 for f16 types.
+    if (src_type->DeepestElement()->Is<type::F16>()) {
+        // Source type must be vec2<f16> or vec4<f16>, since type f16 and vec3<f16> can only have
+        // identity bitcast.
+        auto* src_vec = src_type->As<type::Vector>();
+        TINT_ASSERT(Writer, src_vec);
+        TINT_ASSERT(Writer, ((src_vec->Width() == 2u) || (src_vec->Width() == 4u)));
+        std::string fn = utils::GetOrCreate(
+            bitcast_funcs_, BinaryOperandType{{src_type, dst_type}}, [&]() -> std::string {
+                TextBuffer b;
+                TINT_DEFER(helpers_.Append(b));
+
+                auto fn_name = UniqueIdentifier("tint_bitcast_from_f16");
+                {
+                    auto decl = Line(&b);
+                    EmitTypeAndName(decl, dst_type, builtin::AddressSpace::kUndefined,
+                                    builtin::Access::kUndefined, fn_name);
+                    {
+                        ScopedParen sp(decl);
+                        EmitTypeAndName(decl, src_type, builtin::AddressSpace::kUndefined,
+                                        builtin::Access::kUndefined, "src");
+                    }
+                    decl << " {";
+                }
+                {
+                    ScopedIndent si(&b);
+                    switch (src_vec->Width()) {
+                        case 2: {
+                            Line(&b) << "uint r = packFloat2x16(src);";
+                            break;
+                        }
+                        case 4: {
+                            Line(&b)
+                                << "uvec2 r = uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw));";
+                            break;
+                        }
+                    }
+                    auto s = Line(&b);
+                    s << "return ";
+                    if (dst_type->is_float_scalar_or_vector()) {
+                        s << "uintBitsToFloat";
+                    } else {
+                        EmitType(s, dst_type, builtin::AddressSpace::kUndefined,
+                                 builtin::Access::kReadWrite, "");
+                    }
+                    s << "(r);";
+                }
+                Line(&b) << "}";
+                return fn_name;
+            });
+        // Call the helper
+        out << fn;
+        {
+            ScopedParen sp(out);
+            EmitExpression(out, expr->expr);
+        }
+    } else if (dst_type->DeepestElement()->Is<type::F16>()) {
+        // Destination type must be vec2<f16> or vec4<f16>.
+        auto* dst_vec = dst_type->As<type::Vector>();
+        TINT_ASSERT(Writer, dst_vec);
+        TINT_ASSERT(Writer, ((dst_vec->Width() == 2u) || (dst_vec->Width() == 4u)));
+        std::string fn = utils::GetOrCreate(
+            bitcast_funcs_, BinaryOperandType{{src_type, dst_type}}, [&]() -> std::string {
+                TextBuffer b;
+                TINT_DEFER(helpers_.Append(b));
+
+                auto fn_name = UniqueIdentifier("tint_bitcast_to_f16");
+                {
+                    auto decl = Line(&b);
+                    EmitTypeAndName(decl, dst_type, builtin::AddressSpace::kUndefined,
+                                    builtin::Access::kUndefined, fn_name);
+                    {
+                        ScopedParen sp(decl);
+                        EmitTypeAndName(decl, src_type, builtin::AddressSpace::kUndefined,
+                                        builtin::Access::kUndefined, "src");
+                    }
+                    decl << " {";
+                }
+                {
+                    ScopedIndent si(&b);
+                    if (auto src_vec = src_type->As<type::Vector>()) {
+                        // Source vector type must be vec2<f32/i32/u32>, destination type vec4<f16>.
+                        TINT_ASSERT(Writer, (src_vec->DeepestElement()
+                                                 ->IsAnyOf<type::I32, type::U32, type::F32>()));
+                        TINT_ASSERT(Writer, (src_vec->Width() == 2u));
+                        {
+                            auto s = Line(&b);
+                            s << "uvec2 r = ";
+                            if (src_type->is_float_scalar_or_vector()) {
+                                s << "floatBitsToUint";
+                            } else {
+                                s << "uvec2";
+                            }
+                            s << "(src);";
+                        }
+                        Line(&b) << "f16vec2 v_xy = unpackFloat2x16(r.x);";
+                        Line(&b) << "f16vec2 v_zw = unpackFloat2x16(r.y);";
+                        Line(&b) << "return f16vec4(v_xy.x, v_xy.y, v_zw.x, v_zw.y);";
+                    } else {
+                        // Source scalar type must be f32/i32/u32, destination type vec2<f16>.
+                        TINT_ASSERT(Writer, (src_type->IsAnyOf<type::I32, type::U32, type::F32>()));
+                        {
+                            auto s = Line(&b);
+                            s << "uint r = ";
+                            if (src_type->is_float_scalar_or_vector()) {
+                                s << "floatBitsToUint";
+                            } else {
+                                s << "uint";
+                            }
+                            s << "(src);";
+                        }
+                        Line(&b) << "return unpackFloat2x16(r);";
+                    }
+                }
+                Line(&b) << "}";
+                return fn_name;
+            });
+        // Call the helper
+        out << fn;
+        {
+            ScopedParen sp(out);
+            EmitExpression(out, expr->expr);
+        }
     } else {
-        EmitType(out, dst_type, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+        if (src_type->is_float_scalar_or_vector() &&
+            dst_type->is_signed_integer_scalar_or_vector()) {
+            out << "floatBitsToInt";
+        } else if (src_type->is_float_scalar_or_vector() &&
+                   dst_type->is_unsigned_integer_scalar_or_vector()) {
+            out << "floatBitsToUint";
+        } else if (src_type->is_signed_integer_scalar_or_vector() &&
+                   dst_type->is_float_scalar_or_vector()) {
+            out << "intBitsToFloat";
+        } else if (src_type->is_unsigned_integer_scalar_or_vector() &&
+                   dst_type->is_float_scalar_or_vector()) {
+            out << "uintBitsToFloat";
+        } else {
+            EmitType(out, dst_type, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite,
+                     "");
+        }
+        ScopedParen sp(out);
+        EmitExpression(out, expr->expr);
     }
-    ScopedParen sp(out);
-    EmitExpression(out, expr->expr);
 }
 
 void GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {

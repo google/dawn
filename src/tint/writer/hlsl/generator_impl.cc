@@ -669,19 +669,194 @@ bool GeneratorImpl::EmitIndexAccessor(utils::StringStream& out,
 }
 
 bool GeneratorImpl::EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr) {
-    auto* type = TypeOf(expr);
-    if (auto* vec = type->UnwrapRef()->As<type::Vector>()) {
-        type = vec->type();
-    }
+    auto* dst_type = TypeOf(expr)->UnwrapRef();
+    auto* src_type = TypeOf(expr->expr)->UnwrapRef();
 
-    if (!type->is_integer_scalar() && !type->is_float_scalar()) {
+    auto* src_el_type = src_type->DeepestElement();
+    auto* dst_el_type = dst_type->DeepestElement();
+
+    if (!dst_el_type->is_integer_scalar() && !dst_el_type->is_float_scalar()) {
         diagnostics_.add_error(diag::System::Writer,
-                               "Unable to do bitcast to type " + type->FriendlyName());
+                               "Unable to do bitcast to type " + dst_el_type->FriendlyName());
         return false;
     }
 
+    // Handle identity bitcast.
+    if (src_type == dst_type) {
+        return EmitExpression(out, expr->expr);
+    }
+
+    // Handle the f16 types using polyfill functions
+    if (src_el_type->Is<type::F16>() || dst_el_type->Is<type::F16>()) {
+        auto f16_bitcast_polyfill = [&]() {
+            if (src_el_type->Is<type::F16>()) {
+                // Source type must be vec2<f16> or vec4<f16>, since type f16 and vec3<f16> can only
+                // have identity bitcast.
+                auto* src_vec = src_type->As<type::Vector>();
+                TINT_ASSERT(Writer, src_vec);
+                TINT_ASSERT(Writer, ((src_vec->Width() == 2u) || (src_vec->Width() == 4u)));
+
+                // Bitcast f16 types to others by converting the given f16 value to f32 and call
+                // f32tof16 to get the bits. This should be safe, because the convertion is precise
+                // for finite and infinite f16 value as they are exactly representable by f32, and
+                // WGSL spec allow any result if f16 value is NaN.
+                return utils::GetOrCreate(
+                    bitcast_funcs_, BinaryType{{src_type, dst_type}}, [&]() -> std::string {
+                        TextBuffer b;
+                        TINT_DEFER(helpers_.Append(b));
+
+                        auto fn_name = UniqueIdentifier(std::string("tint_bitcast_from_f16"));
+                        {
+                            auto decl = Line(&b);
+                            if (!EmitTypeAndName(decl, dst_type, builtin::AddressSpace::kUndefined,
+                                                 builtin::Access::kUndefined, fn_name)) {
+                                return "";
+                            }
+                            {
+                                ScopedParen sp(decl);
+                                if (!EmitTypeAndName(decl, src_type,
+                                                     builtin::AddressSpace::kUndefined,
+                                                     builtin::Access::kUndefined, "src")) {
+                                    return "";
+                                }
+                            }
+                            decl << " {";
+                        }
+                        {
+                            ScopedIndent si(&b);
+                            {
+                                Line(&b) << "uint" << src_vec->Width() << " r = f32tof16(float"
+                                         << src_vec->Width() << "(src));";
+
+                                {
+                                    auto s = Line(&b);
+                                    s << "return as";
+                                    if (!EmitType(s, dst_el_type, builtin::AddressSpace::kUndefined,
+                                                  builtin::Access::kReadWrite, "")) {
+                                        return "";
+                                    }
+                                    s << "(";
+                                    switch (src_vec->Width()) {
+                                        case 2: {
+                                            s << "uint((r.x & 0xffff) | ((r.y & 0xffff) << 16))";
+                                            break;
+                                        }
+                                        case 4: {
+                                            s << "uint2((r.x & 0xffff) | ((r.y & 0xffff) << 16), "
+                                                 "(r.z & 0xffff) | ((r.w & 0xffff) << 16))";
+                                            break;
+                                        }
+                                    }
+                                    s << ");";
+                                }
+                            }
+                        }
+                        Line(&b) << "}";
+                        Line(&b);
+                        return fn_name;
+                    });
+            } else {
+                // Destination type must be vec2<f16> or vec4<f16>.
+                auto* dst_vec = dst_type->As<type::Vector>();
+                TINT_ASSERT(Writer,
+                            (dst_vec && ((dst_vec->Width() == 2u) || (dst_vec->Width() == 4u)) &&
+                             dst_el_type->Is<type::F16>()));
+                // Source type must be f32/i32/u32 or vec2<f32/i32/u32>.
+                auto* src_vec = src_type->As<type::Vector>();
+                TINT_ASSERT(Writer, (src_type->IsAnyOf<type::I32, type::U32, type::F32>() ||
+                                     (src_vec && src_vec->Width() == 2u &&
+                                      src_el_type->IsAnyOf<type::I32, type::U32, type::F32>())));
+                std::string src_type_suffix = (src_vec ? "2" : "");
+
+                // Bitcast other types to f16 types by reinterpreting their bits as f16 using
+                // f16tof32, and convert the result f32 to f16. This should be safe, because the
+                // convertion is precise for finite and infinite f16 result value as they are
+                // exactly representable by f32, and WGSL spec allow any result if f16 result value
+                // would be NaN.
+                return utils::GetOrCreate(
+                    bitcast_funcs_, BinaryType{{src_type, dst_type}}, [&]() -> std::string {
+                        TextBuffer b;
+                        TINT_DEFER(helpers_.Append(b));
+
+                        auto fn_name = UniqueIdentifier(std::string("tint_bitcast_to_f16"));
+                        {
+                            auto decl = Line(&b);
+                            if (!EmitTypeAndName(decl, dst_type, builtin::AddressSpace::kUndefined,
+                                                 builtin::Access::kUndefined, fn_name)) {
+                                return "";
+                            }
+                            {
+                                ScopedParen sp(decl);
+                                if (!EmitTypeAndName(decl, src_type,
+                                                     builtin::AddressSpace::kUndefined,
+                                                     builtin::Access::kUndefined, "src")) {
+                                    return "";
+                                }
+                            }
+                            decl << " {";
+                        }
+                        {
+                            ScopedIndent si(&b);
+                            {
+                                // Convert the source to uint for f16tof32.
+                                Line(&b) << "uint" << src_type_suffix << " v = asuint(src);";
+                                // Reinterprete the low 16 bits and high 16 bits
+                                Line(&b) << "float" << src_type_suffix
+                                         << " t_low = f16tof32(v & 0xffff);";
+                                Line(&b) << "float" << src_type_suffix
+                                         << " t_high = f16tof32((v >> 16) & 0xffff);";
+                                // Construct the result f16 vector
+                                {
+                                    auto s = Line(&b);
+                                    s << "return ";
+                                    if (!EmitType(s, dst_type, builtin::AddressSpace::kUndefined,
+                                                  builtin::Access::kReadWrite, "")) {
+                                        return "";
+                                    }
+                                    s << "(";
+                                    switch (dst_vec->Width()) {
+                                        case 2: {
+                                            s << "t_low.x, t_high.x";
+                                            break;
+                                        }
+                                        case 4: {
+                                            s << "t_low.x, t_high.x, t_low.y, t_high.y";
+                                            break;
+                                        }
+                                    }
+                                    s << ");";
+                                }
+                            }
+                        }
+                        Line(&b) << "}";
+                        Line(&b);
+                        return fn_name;
+                    });
+            }
+        };
+
+        // Get or create the polyfill
+        auto fn = f16_bitcast_polyfill();
+        if (fn.empty()) {
+            return false;
+        }
+        // Call the polyfill
+        out << fn;
+        {
+            ScopedParen sp(out);
+            if (!EmitExpression(out, expr->expr)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Otherwise, bitcasting between non-f16 types.
+    TINT_ASSERT(Writer, (!src_el_type->Is<type::F16>() && !dst_el_type->Is<type::F16>()));
     out << "as";
-    if (!EmitType(out, type, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "")) {
+    if (!EmitType(out, dst_el_type, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite,
+                  "")) {
         return false;
     }
     out << "(";

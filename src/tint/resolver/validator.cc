@@ -1411,14 +1411,8 @@ bool Validator::Bitcast(const ast::BitcastExpression* cast, const type::Type* to
         return false;
     }
 
-    auto width = [&](const type::Type* ty) {
-        if (auto* vec = ty->As<type::Vector>()) {
-            return vec->Width();
-        }
-        return 1u;
-    };
-
-    if (width(from) != width(to)) {
+    // Only bitcasts between scalar/vector types of the same bit width are allowed.
+    if (from->Size() != to->Size()) {
         AddError(
             "cannot bitcast from '" + sem_.TypeNameOf(from) + "' to '" + sem_.TypeNameOf(to) + "'",
             cast->source);

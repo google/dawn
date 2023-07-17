@@ -460,6 +460,9 @@ class GeneratorImpl : public ASTTextGenerator {
     std::unordered_map<const type::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const type::Vector*, std::string> int_dot_funcs_;
     std::unordered_map<BinaryOperandType, std::string> float_modulo_funcs_;
+    // Polyfill functions for bitcast expression, BinaryOperandType indicates the source type and
+    // the destination type
+    std::unordered_map<BinaryOperandType, std::string> bitcast_funcs_;
     std::unordered_set<const type::Struct*> emitted_structs_;
     bool requires_oes_sample_variables_ = false;
     bool requires_default_precision_qualifier_ = false;
