@@ -567,5 +567,27 @@ TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_VectorOperands) {
     EXPECT_INST("%result = OpSelect %v4int %11 %argt %argf");
 }
 
+TEST_F(SpvGeneratorImplTest, Builtin_StorageBarrier) {
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        b.Call(ty.void_(), builtin::Function::kStorageBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_72");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_WorkgroupBarrier) {
+    auto* func = b.Function("foo", ty.void_());
+    b.With(func->Block(), [&] {
+        b.Call(ty.void_(), builtin::Function::kWorkgroupBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_264");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv

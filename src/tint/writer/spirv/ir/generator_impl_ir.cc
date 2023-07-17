@@ -1296,6 +1296,15 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kSqrt:
             glsl_ext_inst(GLSLstd450Sqrt);
             break;
+        case builtin::Function::kStorageBarrier:
+            op = spv::Op::OpControlBarrier;
+            operands.clear();
+            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Workgroup))));
+            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Workgroup))));
+            operands.push_back(
+                Constant(ir_->constant_values.Get(u32(spv::MemorySemanticsMask::UniformMemory |
+                                                      spv::MemorySemanticsMask::AcquireRelease))));
+            break;
         case builtin::Function::kTan:
             glsl_ext_inst(GLSLstd450Tan);
             break;
@@ -1304,6 +1313,15 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             break;
         case builtin::Function::kTrunc:
             glsl_ext_inst(GLSLstd450Trunc);
+            break;
+        case builtin::Function::kWorkgroupBarrier:
+            op = spv::Op::OpControlBarrier;
+            operands.clear();
+            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Workgroup))));
+            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Workgroup))));
+            operands.push_back(
+                Constant(ir_->constant_values.Get(u32(spv::MemorySemanticsMask::WorkgroupMemory |
+                                                      spv::MemorySemanticsMask::AcquireRelease))));
             break;
         default:
             TINT_ICE(Writer, diagnostics_) << "unimplemented builtin function: " << builtin->Func();
