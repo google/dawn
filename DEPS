@@ -32,6 +32,23 @@ vars = {
 
   # Fetch clang-tidy into the same bin/ directory as our clang binary.
   'checkout_clang_tidy': False,
+
+  # Fetch configuration files required for the 'use_remoteexec' gn arg
+  'download_remoteexec_cfg': False,
+  # RBE instance to use for running remote builds
+  'rbe_instance': Str('projects/rbe-chrome-untrusted/instances/default_instance'),
+  # RBE project to download rewrapper config files for. Only needed if
+  # different from the project used in 'rbe_instance'
+  'rewrapper_cfg_project': Str(''),
+  # reclient CIPD package
+  'reclient_package': 'infra/rbe/client/',
+  # reclient CIPD package version
+  'reclient_version': 're_client_version:0.108.0.7cdbbe9-gomaip',
+
+  # Fetch siso CIPD package
+  'checkout_siso': False,
+  # siso CIPD package version.
+  'siso_version': 'git_revision:06bae0e9d7265e972358b23f77d9867930061db0',
 }
 
 deps = {
@@ -41,7 +58,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@2ff42d2008f09f65de12e70c6ff0ad58ddb090ad',
+    'url': '{chromium_git}/chromium/src/buildtools@f841f2b2fdde3c8dbe069abf83fa78ab430b34a2',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -74,12 +91,12 @@ deps = {
   },
 
   'buildtools/third_party/libc++/trunk': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@c1341b9a1a7de7c193a23bf003d5479c48957f7d',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@0e4617cf8c09a8e2b6704a51a8a0a9560715cf70',
     'condition': 'dawn_standalone',
   },
 
   'buildtools/third_party/libc++abi/trunk': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@f7460fc60ab56553f0b3b0853f1ea60aa51b9478',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@307bd163607c315d46103ebe1d68aab44bf93986',
     'condition': 'dawn_standalone',
   },
 
@@ -214,6 +231,28 @@ deps = {
       }
     ],
     'dep_type': 'cipd',
+  },
+
+  # RBE dependencies
+  'buildtools/reclient': {
+    'packages': [
+      {
+        'package': Var('reclient_package') + '${{platform}}',
+        'version': Var('reclient_version'),
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'dawn_standalone',
+  },
+  'third_party/siso': {
+    'packages': [
+      {
+        'package': 'infra/build/siso/${{platform}}',
+        'version': Var('siso_version'),
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'checkout_siso and dawn_standalone',
   },
 
   # Misc dependencies inherited from Tint
@@ -437,7 +476,34 @@ hooks = [
                 '-o', 'third_party/node/node.exe',
     ],
   },
-
+#  {
+#    # Download remote exec cfg files
+#    'name': 'fetch_reclient_cfgs',
+#    'pattern': '.',
+#    'condition': 'download_remoteexec_cfg',
+#    'action': ['python3',
+#               'buildtools/reclient_cfgs/fetch_reclient_cfgs.py',
+#               '--rbe_instance',
+#               Var('rbe_instance'),
+#               '--reproxy_cfg_template',
+#               'reproxy.cfg.template',
+#               '--rewrapper_cfg_project',
+#               Var('rewrapper_cfg_project'),
+#               '--quiet',
+#               '--hook',
+#               ],
+#  },
+  # Configure Siso
+  {
+    'name': 'configure_siso',
+    'pattern': '.',
+    'condition': 'checkout_siso',
+    'action': ['python3',
+               'build/config/siso/configure_siso.py',
+               '--rbe_instance',
+               Var('rbe_instance'),
+               ],
+  },
 ]
 
 recursedeps = [
