@@ -108,6 +108,11 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryTestCase{kF16, ir::Binary::Kind::kMultiply, "OpFMul", "half"},
                     BinaryTestCase{kF16, ir::Binary::Kind::kDivide, "OpFDiv", "half"},
                     BinaryTestCase{kF16, ir::Binary::Kind::kModulo, "OpFRem", "half"}));
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest_Binary_Bool,
+    Arithmetic_Bitwise,
+    testing::Values(BinaryTestCase{kBool, ir::Binary::Kind::kAnd, "OpLogicalAnd", "bool"},
+                    BinaryTestCase{kBool, ir::Binary::Kind::kOr, "OpLogicalOr", "bool"}));
 
 TEST_F(SpvGeneratorImplTest, Binary_ScalarTimesVector_F32) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
