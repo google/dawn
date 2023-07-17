@@ -46,6 +46,7 @@
 #include "src/tint/ir/transform/block_decorated_structs.h"
 #include "src/tint/ir/transform/builtin_polyfill_spirv.h"
 #include "src/tint/ir/transform/demote_to_helper.h"
+#include "src/tint/ir/transform/expand_implicit_splats.h"
 #include "src/tint/ir/transform/merge_return.h"
 #include "src/tint/ir/transform/shader_io_spirv.h"
 #include "src/tint/ir/transform/var_for_dynamic_index.h"
@@ -94,6 +95,7 @@ void Sanitize(ir::Module* module) {
     manager.Add<ir::transform::BlockDecoratedStructs>();
     manager.Add<ir::transform::BuiltinPolyfillSpirv>();
     manager.Add<ir::transform::DemoteToHelper>();
+    manager.Add<ir::transform::ExpandImplicitSplats>();
     manager.Add<ir::transform::MergeReturn>();
     manager.Add<ir::transform::ShaderIOSpirv>();
     manager.Add<ir::transform::VarForDynamicIndex>();
@@ -978,13 +980,6 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
             } else if (lhs_ty->is_float_vector() && rhs_ty->is_float_vector()) {
                 // Two float vectors multiply with OpFMul.
                 op = spv::Op::OpFMul;
-            } else if (lhs_ty->is_float_scalar() && rhs_ty->is_float_vector()) {
-                // Use OpVectorTimesScalar for scalar * vector, and swap the operand order.
-                std::swap(lhs, rhs);
-                op = spv::Op::OpVectorTimesScalar;
-            } else if (lhs_ty->is_float_vector() && rhs_ty->is_float_scalar()) {
-                // Use OpVectorTimesScalar for scalar * vector.
-                op = spv::Op::OpVectorTimesScalar;
             } else if (lhs_ty->is_float_scalar() && rhs_ty->is_float_matrix()) {
                 // Use OpMatrixTimesScalar for scalar * matrix, and swap the operand order.
                 std::swap(lhs, rhs);
@@ -1446,12 +1441,6 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
         case ir::IntrinsicCall::Kind::kSpirvDot:
             op = spv::Op::OpDot;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvSelect:
-            op = spv::Op::OpSelect;
-            break;
-        case ir::IntrinsicCall::Kind::kSpirvSampledImage:
-            op = spv::Op::OpSampledImage;
-            break;
         case ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
             op = spv::Op::OpImageSampleImplicitLod;
             break;
@@ -1463,6 +1452,15 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
             break;
         case ir::IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
             op = spv::Op::OpImageSampleDrefExplicitLod;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvSampledImage:
+            op = spv::Op::OpSampledImage;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvSelect:
+            op = spv::Op::OpSelect;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvVectorTimesScalar:
+            op = spv::Op::OpVectorTimesScalar;
             break;
     }
 

@@ -28,6 +28,10 @@ class Call : public utils::Castable<Call, OperandInstruction<4, 1>> {
     /// @returns the call arguments
     virtual utils::Slice<Value*> Args() { return operands_.Slice(); }
 
+    /// Append a new argument to the argument list for this call instruction.
+    /// @param arg the argument value to append
+    void AppendArg(ir::Value* arg) { AddOperand(operands_.Length(), arg); }
+
   protected:
     /// Constructor
     Call();

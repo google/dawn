@@ -540,6 +540,8 @@ if (tint_build_ir) {
       sources += [
         "ir/transform/builtin_polyfill_spirv.cc",
         "ir/transform/builtin_polyfill_spirv.h",
+        "ir/transform/expand_implicit_splats.cc",
+        "ir/transform/expand_implicit_splats.h",
         "ir/transform/merge_return.cc",
         "ir/transform/merge_return.h",
         "ir/transform/shader_io_spirv.cc",
@@ -1908,6 +1910,7 @@ if (tint_build_unittests) {
       if (tint_build_spv_writer) {
         sources += [
           "ir/transform/builtin_polyfill_spirv_test.cc",
+          "ir/transform/expand_implicit_splats_test.cc",
           "ir/transform/merge_return_test.cc",
           "ir/transform/shader_io_spirv_test.cc",
           "ir/transform/var_for_dynamic_index_test.cc",
