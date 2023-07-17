@@ -512,8 +512,9 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                          Builtin_3arg,
                          testing::Values(BuiltinTestCase{kF32, builtin::Function::kClamp, "NClamp"},
                                          BuiltinTestCase{kI32, builtin::Function::kClamp, "SClamp"},
-                                         BuiltinTestCase{kU32, builtin::Function::kClamp,
-                                                         "UClamp"}));
+                                         BuiltinTestCase{kU32, builtin::Function::kClamp, "UClamp"},
+                                         BuiltinTestCase{kF32, builtin::Function::kFma, "Fma"},
+                                         BuiltinTestCase{kF16, builtin::Function::kFma, "Fma"}));
 
 TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_ScalarOperands) {
     auto* argf = b.FunctionParam("argf", ty.i32());
