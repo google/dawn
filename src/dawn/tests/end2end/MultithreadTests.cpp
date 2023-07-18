@@ -107,6 +107,9 @@ TEST_P(MultithreadTests, Device_DroppedOnAnotherThread) {
     // NVIDIA.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 
+    // TODO(crbug.com/dawn/1922): Flaky on Linux TSAN Release
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsTsan());
+
     std::vector<wgpu::Device> devices(5);
 
     // Create devices.
