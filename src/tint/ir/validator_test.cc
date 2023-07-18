@@ -2716,9 +2716,9 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:3:32 error: store-vector-element: operand is undefined
-    store_vector_element undef undef, 1i, 2i
-                               ^^^^^
+    EXPECT_EQ(res.Failure().str(), R"(:3:26 error: store-vector-element: operand is undefined
+    store_vector_element undef, 1i, 2i
+                         ^^^^^
 
 :2:3 note: In block
   %b1 = block {
@@ -2727,7 +2727,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
 note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
-    store_vector_element undef undef, 1i, 2i
+    store_vector_element undef, 1i, 2i
     ret
   }
 }
@@ -2746,17 +2746,17 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:4:33 error: store-vector-element: operand is undefined
-    store_vector_element %2 %2, undef, 2i
-                                ^^^^^
+    EXPECT_EQ(res.Failure().str(), R"(:4:30 error: store-vector-element: operand is undefined
+    store_vector_element %2, undef, 2i
+                             ^^^^^
 
 :2:3 note: In block
   %b1 = block {
   ^^^^^^^^^^^
 
-:4:40 error: value type does not match vector pointer element type
-    store_vector_element %2 %2, undef, 2i
-                                       ^^
+:4:37 error: value type does not match vector pointer element type
+    store_vector_element %2, undef, 2i
+                                    ^^
 
 :2:3 note: In block
   %b1 = block {
@@ -2766,7 +2766,7 @@ note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
     %2:ptr<function, vec3<f32>, read_write> = var
-    store_vector_element %2 %2, undef, 2i
+    store_vector_element %2, undef, 2i
     ret
   }
 }
@@ -2785,9 +2785,9 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:4:37 error: store-vector-element: operand is undefined
-    store_vector_element %2 %2, 1i, undef
-                                    ^^^^^
+    EXPECT_EQ(res.Failure().str(), R"(:4:34 error: store-vector-element: operand is undefined
+    store_vector_element %2, 1i, undef
+                                 ^^^^^
 
 :2:3 note: In block
   %b1 = block {
@@ -2797,7 +2797,7 @@ note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
     %2:ptr<function, vec3<f32>, read_write> = var
-    store_vector_element %2 %2, 1i, undef
+    store_vector_element %2, 1i, undef
     ret
   }
 }

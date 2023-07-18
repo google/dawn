@@ -477,8 +477,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
         [&](StoreVectorElement* s) {
             EmitInstructionName("store_vector_element", s);
             out_ << " ";
-            EmitValue(s->To());
-            out_ << " ";
             EmitOperandList(s);
             EmitLine();
         },

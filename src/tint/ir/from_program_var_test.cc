@@ -235,7 +235,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
     %11:ptr<function, vec4<f32>, read_write> = access %a, %9, %10
     %12:i32 = call %f, 6i
     %13:f32 = load_vector_element %11, %12
-    store_vector_element %7 %7, %8, %13
+    store_vector_element %7, %8, %13
     ret
   }
 }
@@ -360,7 +360,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
     %13:f32 = load_vector_element %11, %12
     %14:f32 = load_vector_element %7, %8
     %15:f32 = add %14, %13
-    store_vector_element %7 %7, %8, %15
+    store_vector_element %7, %8, %15
     ret
   }
 }
