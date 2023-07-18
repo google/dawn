@@ -497,7 +497,7 @@ hooks = [
   {
     'name': 'configure_siso',
     'pattern': '.',
-    'condition': 'checkout_siso',
+    'condition': 'checkout_siso and dawn_standalone',
     'action': ['python3',
                'build/config/siso/configure_siso.py',
                '--rbe_instance',
