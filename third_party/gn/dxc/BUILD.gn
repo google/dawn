@@ -75,7 +75,6 @@ cmake_configure_file("config-header") {
   values = [
     # TODO(amaiorano): Many of the flags set here are duplicated for the "llvm-config-header" target below.
     # Factor this out somehow (template?).
-    "LLVM_ENABLE_ABI_BREAKING_CHECKS=1",
     "LLVM_ENABLE_THREADS=1",
     "LLVM_HAS_ATOMICS=1",
     "HAVE_INTTYPES_H=1",
@@ -280,7 +279,6 @@ cmake_configure_file("llvm-config-header") {
     "LLVM_DATADIR=",
     "LLVM_DEFAULT_TARGET_TRIPLE=$llvm_target_triple",
     "LLVM_DOCSDIR=",
-    "LLVM_ENABLE_ABI_BREAKING_CHECKS=1",
     "LLVM_ETCDIR=",
     "LLVM_HAS_ATOMICS=1",
     "LLVM_HOST_TRIPLE=$llvm_current_triple",
@@ -315,6 +313,12 @@ cmake_configure_file("llvm-config-header") {
       "LLVM_ON_WIN32=",
     ]
   }
+}
+
+cmake_configure_file("abi-breaking-header") {
+  input = "$dawn_dxc_dir/include/llvm/Config/abi-breaking.h.cmake"
+  output = "$target_gen_dir/include/llvm/Config/abi-breaking.h"
+  values = [ "LLVM_ENABLE_ABI_BREAKING_CHECKS=" ]
 }
 
 cmake_configure_file("DataTypes-header") {
@@ -396,6 +400,12 @@ cmake_configure_file("clang-config-h") {
     "BACKEND_PACKAGE_STRING=",
     "HOST_LINK_VERSION=",
   ]
+}
+
+cmake_configure_file("dxc-config-h") {
+  input = "$dawn_dxc_dir/include/dxc/config.h.cmake"
+  output = "$target_gen_dir/include/dxc/config.h"
+  values = [ "DXC_DISABLE_ALLOCATOR_OVERRIDES=1" ]
 }
 
 #######################################################################
@@ -515,7 +525,9 @@ static_library("Support") {
     ":AsmPrinters-def",
     ":Disassemblers-def",
     ":Targets-def",
+    ":abi-breaking-header",
     ":config-header",
+    ":dxc-config-h",
     ":llvm-config-header",
   ]
 
@@ -1122,6 +1134,7 @@ static_library("dxclib") {
     "$dawn_dxc_dir/lib/DxcSupport/Unicode.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/WinAdapter.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/WinFunctions.cpp",
+    "$dawn_dxc_dir/lib/DxcSupport/WinIncludes.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/dxcapi.use.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/dxcmem.cpp",
     "$dawn_dxc_dir/lib/DxilContainer/DxcContainerBuilder.cpp",
@@ -1359,6 +1372,7 @@ dxcompiler_sourceset("lib_dxilpixpasses") {
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilForceEarlyZ.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilOutputColorBecomesConstant.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilPIXAddTidToAmplificationShaderPayload.cpp",
+    "$dawn_dxc_dir/lib/DxilPIXPasses/DxilPIXDXRInvocationsLog.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilPIXMeshShaderOutputInstrumentation.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilPIXPasses.cpp",
     "$dawn_dxc_dir/lib/DxilPIXPasses/DxilPIXVirtualRegisters.cpp",
