@@ -1267,6 +1267,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450UMin);
             }
             break;
+        case builtin::Function::kMix:
+            glsl_ext_inst(GLSLstd450FMix);
+            break;
         case builtin::Function::kModf:
             glsl_ext_inst(GLSLstd450ModfStruct);
             break;

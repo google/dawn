@@ -631,5 +631,42 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4i) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_ExpandImplicitSplatsTest, Mix_VectorOperands_ScalarFactor) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
+    auto* factor = b.FunctionParam("factor", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arg1, arg2, factor});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kMix, arg1, arg2, factor);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg1:vec4<f32>, %arg2:vec4<f32>, %factor:f32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %5:vec4<f32> = mix %arg1, %arg2, %factor
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg1:vec4<f32>, %arg2:vec4<f32>, %factor:f32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %5:vec4<f32> = construct %factor, %factor, %factor, %factor
+    %6:vec4<f32> = mix %arg1, %arg2, %5
+    ret %6
+  }
+}
+)";
+
+    Run<ExpandImplicitSplats>();
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::ir::transform

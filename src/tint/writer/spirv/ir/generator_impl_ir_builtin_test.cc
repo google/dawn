@@ -520,8 +520,45 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kU32, builtin::Function::kClamp, "UClamp"},
                     BuiltinTestCase{kF32, builtin::Function::kFma, "Fma"},
                     BuiltinTestCase{kF16, builtin::Function::kFma, "Fma"},
+                    BuiltinTestCase{kF32, builtin::Function::kMix, "Mix"},
+                    BuiltinTestCase{kF16, builtin::Function::kMix, "Mix"},
                     BuiltinTestCase{kF32, builtin::Function::kSmoothstep, "SmoothStep"},
                     BuiltinTestCase{kF16, builtin::Function::kSmoothstep, "SmoothStep"}));
+
+TEST_F(SpvGeneratorImplTest, Builtin_Mix_VectorOperands_ScalarFactor) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
+    auto* factor = b.FunctionParam("factor", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arg1, arg2, factor});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kMix, arg1, arg2, factor);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%9 = OpCompositeConstruct %v4float %factor %factor %factor %factor");
+    EXPECT_INST("%result = OpExtInst %v4float %11 FMix %arg1 %arg2 %9");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Mix_VectorOperands_VectorFactor) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
+    auto* factor = b.FunctionParam("factor", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arg1, arg2, factor});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kMix, arg1, arg2, factor);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v4float %10 FMix %arg1 %arg2 %factor");
+}
 
 TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_ScalarOperands) {
     auto* argf = b.FunctionParam("argf", ty.i32());
