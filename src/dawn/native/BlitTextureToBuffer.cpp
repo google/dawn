@@ -25,6 +25,7 @@
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/InternalPipelineStore.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 
@@ -69,8 +70,14 @@ fn textureLoadGeneral(tex: texture_1d<f32>, coords: vec3u, level: u32) -> vec4<f
 )";
 
 constexpr std::string_view kFloatTexture2D = R"(
-// Use texture_2d_array instead of texture_2d for all 2D textures for less redundant code.
-// As texture_2d can be always represented as texture_2d_array with 1 layer.
+fn textureLoadGeneral(tex: texture_2d<f32>, coords: vec3u, level: u32) -> vec4<f32> {
+    return textureLoad(tex, coords.xy, level);
+}
+@group(0) @binding(0) var src_tex : texture_2d<f32>;
+@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
+)";
+
+constexpr std::string_view kFloatTexture2DArray = R"(
 fn textureLoadGeneral(tex: texture_2d_array<f32>, coords: vec3u, level: u32) -> vec4<f32> {
     return textureLoad(tex, coords.xy, coords.z, level);
 }
@@ -87,16 +94,50 @@ fn textureLoadGeneral(tex: texture_3d<f32>, coords: vec3u, level: u32) -> vec4<f
 )";
 
 constexpr std::string_view kStencilTexture = R"(
+fn textureLoadGeneral(tex: texture_2d<u32>, coords: vec3u, level: u32) -> vec4<u32> {
+    return textureLoad(tex, coords.xy, level);
+}
+@group(0) @binding(0) var src_tex : texture_2d<u32>;
+@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
+)";
+
+constexpr std::string_view kStencilTextureArray = R"(
+fn textureLoadGeneral(tex: texture_2d_array<u32>, coords: vec3u, level: u32) -> vec4<u32> {
+    return textureLoad(tex, coords.xy, coords.z, level);
+}
 @group(0) @binding(0) var src_tex : texture_2d_array<u32>;
 @group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
 constexpr std::string_view kDepthTexture = R"(
+fn textureLoadGeneral(tex: texture_depth_2d, coords: vec3u, level: u32) -> f32 {
+    return textureLoad(tex, coords.xy, level);
+}
+@group(0) @binding(0) var src_tex : texture_depth_2d;
+@group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
+)";
+
+constexpr std::string_view kDepthTextureArray = R"(
+fn textureLoadGeneral(tex: texture_depth_2d_array, coords: vec3u, level: u32) -> f32 {
+    return textureLoad(tex, coords.xy, coords.z, level);
+}
 @group(0) @binding(0) var src_tex : texture_depth_2d_array;
 @group(0) @binding(1) var<storage, read_write> dst_buf : array<u32>;
 )";
 
 constexpr std::string_view kDepth32FloatTexture = R"(
+fn textureLoadGeneral(tex: texture_depth_2d, coords: vec3u, level: u32) -> f32 {
+    return textureLoad(tex, coords.xy, level);
+}
+@group(0) @binding(0) var src_tex : texture_depth_2d;
+// Can directly use f32 for the buffer array data type
+@group(0) @binding(1) var<storage, read_write> dst_buf : array<f32>;
+)";
+
+constexpr std::string_view kDepth32FloatTextureArray = R"(
+fn textureLoadGeneral(tex: texture_depth_2d_array, coords: vec3u, level: u32) -> f32 {
+    return textureLoad(tex, coords.xy, coords.z, level);
+}
 @group(0) @binding(0) var src_tex : texture_depth_2d_array;
 // Can directly use f32 for the buffer array data type
 @group(0) @binding(1) var<storage, read_write> dst_buf : array<f32>;
@@ -145,13 +186,13 @@ constexpr std::string_view kCommonEnd = R"(
 
 constexpr std::string_view kPackStencil8ToU32 = R"(
     // Storing stencil8 texel values
-    var result: u32 = 0xff & textureLoad(src_tex, coord0.xy, coord0.z, 0).r;
+    var result: u32 = 0xff & textureLoadGeneral(src_tex, coord0, 0).r;
 
     if (coord0.x + 4u <= srcBoundary.x) {
         // All 4 texels for this thread are within texture bounds.
         for (var i = 1u; i < 4u; i += 1u) {
             let coordi = coord0 + vec3u(i, 0, 0);
-            let ri = 0xff & textureLoad(src_tex, coordi.xy, coordi.z, 0).r;
+            let ri = 0xff & textureLoadGeneral(src_tex, coordi, 0).r;
             result |= ri << (i * 8u);
         }
     } else {
@@ -165,7 +206,7 @@ constexpr std::string_view kPackStencil8ToU32 = R"(
             if (coordi.x >= srcBoundary.x) {
                 break;
             }
-            let ri = 0xff & textureLoad(src_tex, coordi.xy, coordi.z, 0).r;
+            let ri = 0xff & textureLoadGeneral(src_tex, coordi, 0).r;
             result |= ri << (i * 8u);
         }
     }
@@ -243,12 +284,12 @@ constexpr std::string_view kPackDepth16UnormToU32 = R"(
     // Storing depth16unorm texel values
     // later called by pack2x16unorm to convert to u32.
     var v: vec2<f32>;
-    v[0] = textureLoad(src_tex, coord0.xy, coord0.z, 0);
+    v[0] = textureLoadGeneral(src_tex, coord0, 0);
 
     let coord1 = coord0 + vec3u(1, 0, 0);
     if (coord1.x < srcBoundary.x) {
         // Make sure coord1 is still within the copy boundary.
-        v[1] = textureLoad(src_tex, coord1.xy, coord1.z, 0);
+        v[1] = textureLoadGeneral(src_tex, coord1, 0);
         result = pack2x16unorm(v);
     } else {
         // Otherwise, srcExtent.x is not a multiple of 2 and this thread is at right edge of the texture
@@ -287,7 +328,7 @@ constexpr std::string_view kPackBGRA8UnormToU32 = R"(
 )";
 
 constexpr std::string_view kLoadDepth32Float = R"(
-    dst_buf[dstOffset] = textureLoad(src_tex, coord0.xy, coord0.z, 0);
+    dst_buf[dstOffset] = textureLoadGeneral(src_tex, coord0, 0);
 }
 )";
 
@@ -305,6 +346,13 @@ constexpr std::string_view kBlitRG8Snorm2D =
 constexpr std::string_view kBlitRGBA8Snorm2D =
     ConcatStringViews<kFloatTexture2D, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
 
+constexpr std::string_view kBlitR8Snorm2DArray =
+    ConcatStringViews<kFloatTexture2DArray, kCommon, kPackR8SnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitRG8Snorm2DArray =
+    ConcatStringViews<kFloatTexture2DArray, kCommon, kPackRG8SnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitRGBA8Snorm2DArray =
+    ConcatStringViews<kFloatTexture2DArray, kCommon, kPackRGBA8SnormToU32, kCommonEnd>;
+
 constexpr std::string_view kBlitR8Snorm3D =
     ConcatStringViews<kFloatTexture3D, kCommon, kPackR8SnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitRG8Snorm3D =
@@ -316,25 +364,34 @@ constexpr std::string_view kBlitBGRA8Unorm1D =
     ConcatStringViews<kFloatTexture1D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitBGRA8Unorm2D =
     ConcatStringViews<kFloatTexture2D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitBGRA8Unorm2DArray =
+    ConcatStringViews<kFloatTexture2DArray, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitBGRA8Unorm3D =
     ConcatStringViews<kFloatTexture3D, kCommon, kPackBGRA8UnormToU32, kCommonEnd>;
 
 constexpr std::string_view kBlitStencil8 =
     ConcatStringViews<kStencilTexture, kCommon, kPackStencil8ToU32, kCommonEnd>;
+constexpr std::string_view kBlitStencil8Array =
+    ConcatStringViews<kStencilTextureArray, kCommon, kPackStencil8ToU32, kCommonEnd>;
 
 constexpr std::string_view kBlitDepth16Unorm =
     ConcatStringViews<kDepthTexture, kCommon, kPackDepth16UnormToU32, kCommonEnd>;
+constexpr std::string_view kBlitDepth16UnormArray =
+    ConcatStringViews<kDepthTextureArray, kCommon, kPackDepth16UnormToU32, kCommonEnd>;
 constexpr std::string_view kBlitDepth32Float =
     ConcatStringViews<kDepth32FloatTexture, kCommon, kLoadDepth32Float>;
+constexpr std::string_view kBlitDepth32FloatArray =
+    ConcatStringViews<kDepth32FloatTextureArray, kCommon, kLoadDepth32Float>;
 
-ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(DeviceBase* device,
-                                                                           const TextureCopy& src) {
+ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
+    DeviceBase* device,
+    const TextureCopy& src,
+    wgpu::TextureViewDimension viewDimension) {
     InternalPipelineStore* store = device->GetInternalPipelineStore();
 
     const Format& format = src.texture->GetFormat();
-    wgpu::TextureDimension dimension = src.texture->GetDimension();
 
-    auto iter = store->blitTextureToBufferComputePipelines.find({format.format, dimension});
+    auto iter = store->blitTextureToBufferComputePipelines.find({format.format, viewDimension});
     if (iter != store->blitTextureToBufferComputePipelines.end()) {
         return iter->second;
     }
@@ -346,96 +403,143 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
     wgpu::TextureSampleType textureSampleType;
     switch (format.format) {
         case wgpu::TextureFormat::R8Snorm:
-            switch (dimension) {
-                case wgpu::TextureDimension::e1D:
+            switch (viewDimension) {
+                case wgpu::TextureViewDimension::e1D:
                     wgslDesc.code = kBlitR8Snorm1D.data();
                     break;
-                case wgpu::TextureDimension::e2D:
+                case wgpu::TextureViewDimension::e2D:
                     wgslDesc.code = kBlitR8Snorm2D.data();
                     break;
-                case wgpu::TextureDimension::e3D:
+                case wgpu::TextureViewDimension::e2DArray:
+                    wgslDesc.code = kBlitR8Snorm2DArray.data();
+                    break;
+                case wgpu::TextureViewDimension::e3D:
                     wgslDesc.code = kBlitR8Snorm3D.data();
                     break;
+                default:
+                    UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::RG8Snorm:
-            switch (dimension) {
-                case wgpu::TextureDimension::e1D:
+            switch (viewDimension) {
+                case wgpu::TextureViewDimension::e1D:
                     wgslDesc.code = kBlitRG8Snorm1D.data();
                     break;
-                case wgpu::TextureDimension::e2D:
+                case wgpu::TextureViewDimension::e2D:
                     wgslDesc.code = kBlitRG8Snorm2D.data();
                     break;
-                case wgpu::TextureDimension::e3D:
+                case wgpu::TextureViewDimension::e2DArray:
+                    wgslDesc.code = kBlitRG8Snorm2DArray.data();
+                    break;
+                case wgpu::TextureViewDimension::e3D:
                     wgslDesc.code = kBlitRG8Snorm3D.data();
                     break;
+                default:
+                    UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::RGBA8Snorm:
-            switch (dimension) {
-                case wgpu::TextureDimension::e1D:
+            switch (viewDimension) {
+                case wgpu::TextureViewDimension::e1D:
                     wgslDesc.code = kBlitRGBA8Snorm1D.data();
                     break;
-                case wgpu::TextureDimension::e2D:
+                case wgpu::TextureViewDimension::e2D:
                     wgslDesc.code = kBlitRGBA8Snorm2D.data();
                     break;
-                case wgpu::TextureDimension::e3D:
+                case wgpu::TextureViewDimension::e2DArray:
+                    wgslDesc.code = kBlitRGBA8Snorm2DArray.data();
+                    break;
+                case wgpu::TextureViewDimension::e3D:
                     wgslDesc.code = kBlitRGBA8Snorm3D.data();
                     break;
+                default:
+                    UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::BGRA8Unorm:
-            switch (dimension) {
-                case wgpu::TextureDimension::e1D:
+            switch (viewDimension) {
+                case wgpu::TextureViewDimension::e1D:
                     wgslDesc.code = kBlitBGRA8Unorm1D.data();
                     break;
-                case wgpu::TextureDimension::e2D:
+                case wgpu::TextureViewDimension::e2D:
                     wgslDesc.code = kBlitBGRA8Unorm2D.data();
                     break;
-                case wgpu::TextureDimension::e3D:
+                case wgpu::TextureViewDimension::e2DArray:
+                    wgslDesc.code = kBlitBGRA8Unorm2DArray.data();
+                    break;
+                case wgpu::TextureViewDimension::e3D:
                     wgslDesc.code = kBlitBGRA8Unorm3D.data();
                     break;
+                default:
+                    UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
         case wgpu::TextureFormat::Depth16Unorm:
-            DAWN_ASSERT(dimension == wgpu::TextureDimension::e2D);
-            wgslDesc.code = kBlitDepth16Unorm.data();
+            switch (viewDimension) {
+                case wgpu::TextureViewDimension::e2D:
+                    wgslDesc.code = kBlitDepth16Unorm.data();
+                    break;
+                case wgpu::TextureViewDimension::e2DArray:
+                    wgslDesc.code = kBlitDepth16UnormArray.data();
+                    break;
+                default:
+                    UNREACHABLE();
+            }
             textureSampleType = wgpu::TextureSampleType::Depth;
             break;
         case wgpu::TextureFormat::Depth32Float:
-            DAWN_ASSERT(dimension == wgpu::TextureDimension::e2D);
-            wgslDesc.code = kBlitDepth32Float.data();
+            switch (viewDimension) {
+                case wgpu::TextureViewDimension::e2D:
+                    wgslDesc.code = kBlitDepth32Float.data();
+                    break;
+                case wgpu::TextureViewDimension::e2DArray:
+                    wgslDesc.code = kBlitDepth32FloatArray.data();
+                    break;
+                default:
+                    UNREACHABLE();
+            }
             textureSampleType = wgpu::TextureSampleType::Depth;
             break;
         case wgpu::TextureFormat::Stencil8:
         case wgpu::TextureFormat::Depth24PlusStencil8:
             // Depth24PlusStencil8 can only copy with stencil aspect and is gated by validation.
-            DAWN_ASSERT(dimension == wgpu::TextureDimension::e2D);
-            wgslDesc.code = kBlitStencil8.data();
+            switch (viewDimension) {
+                case wgpu::TextureViewDimension::e2D:
+                    wgslDesc.code = kBlitStencil8.data();
+                    break;
+                case wgpu::TextureViewDimension::e2DArray:
+                    wgslDesc.code = kBlitStencil8Array.data();
+                    break;
+                default:
+                    UNREACHABLE();
+            }
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
-        case wgpu::TextureFormat::Depth32FloatStencil8:
+        case wgpu::TextureFormat::Depth32FloatStencil8: {
             // Depth32FloatStencil8 is not supported on OpenGL/OpenGLES where the blit path is
             // enabled by default. But could be hit if the blit path toggle is manually set on other
             // backends.
-            DAWN_ASSERT(dimension == wgpu::TextureDimension::e2D);
+            DAWN_ASSERT(viewDimension == wgpu::TextureViewDimension::e2D ||
+                        viewDimension == wgpu::TextureViewDimension::e2DArray);
+            bool is2DArray = viewDimension == wgpu::TextureViewDimension::e2DArray;
             switch (src.aspect) {
                 case Aspect::Depth:
-                    wgslDesc.code = kBlitDepth32Float.data();
+                    wgslDesc.code =
+                        is2DArray ? kBlitDepth32FloatArray.data() : kBlitDepth32Float.data();
                     textureSampleType = wgpu::TextureSampleType::Depth;
                     break;
                 case Aspect::Stencil:
-                    wgslDesc.code = kBlitStencil8.data();
+                    wgslDesc.code = is2DArray ? kBlitStencil8Array.data() : kBlitStencil8.data();
                     textureSampleType = wgpu::TextureSampleType::Uint;
                     break;
                 default:
                     UNREACHABLE();
             }
-            break;
+        } break;
         default:
             UNREACHABLE();
     }
@@ -444,28 +548,15 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
     DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&shaderModuleDesc));
 
     Ref<BindGroupLayoutBase> bindGroupLayout;
-    wgpu::TextureViewDimension textureViewDimension;
-    switch (dimension) {
-        case wgpu::TextureDimension::e1D:
-            textureViewDimension = wgpu::TextureViewDimension::e1D;
-            break;
-        case wgpu::TextureDimension::e2D:
-            textureViewDimension = wgpu::TextureViewDimension::e2DArray;
-            break;
-        case wgpu::TextureDimension::e3D:
-            textureViewDimension = wgpu::TextureViewDimension::e3D;
-            break;
-    }
-    DAWN_TRY_ASSIGN(
-        bindGroupLayout,
-        utils::MakeBindGroupLayout(
-            device,
-            {
-                {0, wgpu::ShaderStage::Compute, textureSampleType, textureViewDimension},
-                {1, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
-                {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
-            },
-            /* allowInternalBinding */ true));
+    DAWN_TRY_ASSIGN(bindGroupLayout,
+                    utils::MakeBindGroupLayout(
+                        device,
+                        {
+                            {0, wgpu::ShaderStage::Compute, textureSampleType, viewDimension},
+                            {1, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                            {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
+                        },
+                        /* allowInternalBinding */ true));
 
     Ref<PipelineLayoutBase> pipelineLayout;
     DAWN_TRY_ASSIGN(pipelineLayout, utils::MakeBasicPipelineLayout(device, bindGroupLayout));
@@ -476,7 +567,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
     computePipelineDescriptor.compute.entryPoint = "main";
 
     const uint32_t adjustedWorkGroupSizeY =
-        (dimension == wgpu::TextureDimension::e1D) ? 1 : kWorkgroupSizeY;
+        (viewDimension == wgpu::TextureViewDimension::e1D) ? 1 : kWorkgroupSizeY;
     const std::array<ConstantEntry, 2> constants = {{
         {nullptr, "workgroupSizeX", kWorkgroupSizeX},
         {nullptr, "workgroupSizeY", static_cast<double>(adjustedWorkGroupSizeY)},
@@ -487,7 +578,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(Devic
     Ref<ComputePipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline, device->CreateComputePipeline(&computePipelineDescriptor));
     store->blitTextureToBufferComputePipelines.insert(
-        {std::make_pair(format.format, dimension), pipeline});
+        {std::make_pair(format.format, viewDimension), pipeline});
     return pipeline;
 }
 
@@ -498,15 +589,35 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                                const TextureCopy& src,
                                const BufferCopy& dst,
                                const Extent3D& copyExtent) {
+    wgpu::TextureViewDimension textureViewDimension;
+    {
+        wgpu::TextureDimension dimension = src.texture->GetDimension();
+        switch (dimension) {
+            case wgpu::TextureDimension::e1D:
+                textureViewDimension = wgpu::TextureViewDimension::e1D;
+                break;
+            case wgpu::TextureDimension::e2D:
+                if (src.texture->GetArrayLayers() > 1) {
+                    textureViewDimension = wgpu::TextureViewDimension::e2DArray;
+                } else {
+                    textureViewDimension = wgpu::TextureViewDimension::e2D;
+                }
+                break;
+            case wgpu::TextureDimension::e3D:
+                textureViewDimension = wgpu::TextureViewDimension::e3D;
+                break;
+        }
+    }
+
     Ref<ComputePipelineBase> pipeline;
-    DAWN_TRY_ASSIGN(pipeline, GetOrCreateTextureToBufferPipeline(device, src));
+    DAWN_TRY_ASSIGN(pipeline,
+                    GetOrCreateTextureToBufferPipeline(device, src, textureViewDimension));
 
     const Format& format = src.texture->GetFormat();
-    wgpu::TextureDimension dimension = src.texture->GetDimension();
 
     uint32_t texelFormatByteSize = format.GetAspectInfo(src.aspect).block.byteSize;
     uint32_t workgroupCountX = 1;
-    uint32_t workgroupCountY = (dimension == wgpu::TextureDimension::e1D)
+    uint32_t workgroupCountY = (textureViewDimension == wgpu::TextureViewDimension::e1D)
                                    ? 1
                                    : (copyExtent.height + kWorkgroupSizeY - 1) / kWorkgroupSizeY;
     uint32_t workgroupCountZ = copyExtent.depthOrArrayLayers;
@@ -567,7 +678,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         // srcOrigin: vec3u
         params[0] = src.origin.x;
         params[1] = src.origin.y;
-        if (dimension == wgpu::TextureDimension::e2D) {
+        if (textureViewDimension == wgpu::TextureViewDimension::e2DArray) {
             // src.origin.z is set at textureView.baseArrayLayer
             params[2] = 0;
         } else {
@@ -607,20 +718,10 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             UNREACHABLE();
     }
 
-    switch (dimension) {
-        case wgpu::TextureDimension::e1D:
-            viewDesc.dimension = wgpu::TextureViewDimension::e1D;
-            break;
-        case wgpu::TextureDimension::e2D:
-            viewDesc.dimension = wgpu::TextureViewDimension::e2DArray;
-            break;
-        case wgpu::TextureDimension::e3D:
-            viewDesc.dimension = wgpu::TextureViewDimension::e3D;
-            break;
-    }
+    viewDesc.dimension = textureViewDimension;
     viewDesc.baseMipLevel = src.mipLevel;
     viewDesc.mipLevelCount = 1;
-    if (dimension == wgpu::TextureDimension::e2D) {
+    if (viewDesc.dimension == wgpu::TextureViewDimension::e2DArray) {
         viewDesc.baseArrayLayer = src.origin.z;
         viewDesc.arrayLayerCount = copyExtent.depthOrArrayLayers;
     } else {

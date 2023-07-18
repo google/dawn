@@ -64,7 +64,7 @@ struct InternalPipelineStore {
     Ref<RenderPipelineBase> blitRG8ToDepth16UnormPipeline;
 
     using BlitTextureToBufferComputePipelineKeyType =
-        std::pair<wgpu::TextureFormat, wgpu::TextureDimension>;
+        std::pair<wgpu::TextureFormat, wgpu::TextureViewDimension>;
     struct BlitTextureToBufferComputePipelineHash {
         std::size_t operator()(const BlitTextureToBufferComputePipelineKeyType& k) const {
             size_t hash = 0;

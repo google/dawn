@@ -694,10 +694,6 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 
 // Test that write-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
-    // TODO(crbug.com/dawn/672): Investigate why this test fails on Linux
-    // NVidia OpenGLES drivers.
-    DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsLinux() && IsOpenGLES());
-
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format, IsCompatibilityMode())) {
             continue;
@@ -705,6 +701,12 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 
         // TODO(dawn:1877): Snorm copy failing ANGLE Swiftshader, need further investigation.
         if (format == wgpu::TextureFormat::RGBA8Snorm && IsANGLESwiftShader()) {
+            continue;
+        }
+
+        // TODO(dawn:1503): ANGLE OpenGL fails blit emulation path when texture is not copied
+        // explicitly via the mUseCopy = true workaround path.
+        if (format == wgpu::TextureFormat::RGBA8Snorm && IsANGLE() && IsWindows()) {
             continue;
         }
 
