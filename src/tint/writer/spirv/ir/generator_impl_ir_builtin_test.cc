@@ -364,7 +364,9 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                                          BuiltinTestCase{kU32, builtin::Function::kMax, "UMax"},
                                          BuiltinTestCase{kF32, builtin::Function::kMin, "FMin"},
                                          BuiltinTestCase{kI32, builtin::Function::kMin, "SMin"},
-                                         BuiltinTestCase{kU32, builtin::Function::kMin, "UMin"}));
+                                         BuiltinTestCase{kU32, builtin::Function::kMin, "UMin"},
+                                         BuiltinTestCase{kF32, builtin::Function::kStep, "Step"},
+                                         BuiltinTestCase{kF16, builtin::Function::kStep, "Step"}));
 
 TEST_F(SpvGeneratorImplTest, Builtin_Cross_vec3f) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec3<f32>());
@@ -508,13 +510,16 @@ TEST_P(Builtin_3arg, Vector) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.spirv_inst);
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
-                         Builtin_3arg,
-                         testing::Values(BuiltinTestCase{kF32, builtin::Function::kClamp, "NClamp"},
-                                         BuiltinTestCase{kI32, builtin::Function::kClamp, "SClamp"},
-                                         BuiltinTestCase{kU32, builtin::Function::kClamp, "UClamp"},
-                                         BuiltinTestCase{kF32, builtin::Function::kFma, "Fma"},
-                                         BuiltinTestCase{kF16, builtin::Function::kFma, "Fma"}));
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest,
+    Builtin_3arg,
+    testing::Values(BuiltinTestCase{kF32, builtin::Function::kClamp, "NClamp"},
+                    BuiltinTestCase{kI32, builtin::Function::kClamp, "SClamp"},
+                    BuiltinTestCase{kU32, builtin::Function::kClamp, "UClamp"},
+                    BuiltinTestCase{kF32, builtin::Function::kFma, "Fma"},
+                    BuiltinTestCase{kF16, builtin::Function::kFma, "Fma"},
+                    BuiltinTestCase{kF32, builtin::Function::kSmoothstep, "SmoothStep"},
+                    BuiltinTestCase{kF16, builtin::Function::kSmoothstep, "SmoothStep"}));
 
 TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_ScalarOperands) {
     auto* argf = b.FunctionParam("argf", ty.i32());

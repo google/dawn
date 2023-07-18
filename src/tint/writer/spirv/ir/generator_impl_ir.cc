@@ -1279,8 +1279,14 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kSinh:
             glsl_ext_inst(GLSLstd450Sinh);
             break;
+        case builtin::Function::kSmoothstep:
+            glsl_ext_inst(GLSLstd450SmoothStep);
+            break;
         case builtin::Function::kSqrt:
             glsl_ext_inst(GLSLstd450Sqrt);
+            break;
+        case builtin::Function::kStep:
+            glsl_ext_inst(GLSLstd450Step);
             break;
         case builtin::Function::kStorageBarrier:
             op = spv::Op::OpControlBarrier;
