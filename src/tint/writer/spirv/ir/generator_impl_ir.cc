@@ -1273,6 +1273,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kNormalize:
             glsl_ext_inst(GLSLstd450Normalize);
             break;
+        case builtin::Function::kPow:
+            glsl_ext_inst(GLSLstd450Pow);
+            break;
         case builtin::Function::kSin:
             glsl_ext_inst(GLSLstd450Sin);
             break;

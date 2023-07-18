@@ -365,6 +365,8 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                                          BuiltinTestCase{kF32, builtin::Function::kMin, "FMin"},
                                          BuiltinTestCase{kI32, builtin::Function::kMin, "SMin"},
                                          BuiltinTestCase{kU32, builtin::Function::kMin, "UMin"},
+                                         BuiltinTestCase{kF32, builtin::Function::kPow, "Pow"},
+                                         BuiltinTestCase{kF16, builtin::Function::kPow, "Pow"},
                                          BuiltinTestCase{kF32, builtin::Function::kStep, "Step"},
                                          BuiltinTestCase{kF16, builtin::Function::kStep, "Step"}));
 
