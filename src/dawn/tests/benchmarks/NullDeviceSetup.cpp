@@ -74,11 +74,30 @@ void NullDeviceBenchmarkFixture::SetUp(const benchmark::State& state) {
                 },
                 nullptr);
         }
+        mNumDoneThreads = 0;
         mCv.notify_all();
     } else {
         // All other threads should wait to proceed once the device is ready.
         std::unique_lock lock(mMutex);
         mCv.wait(lock, [this] { return device != nullptr; });
+    }
+}
+
+void NullDeviceBenchmarkFixture::TearDown(const benchmark::State& state) {
+    if (state.thread_index() == 0) {
+        std::unique_lock lock(mMutex);
+        mCv.wait(lock, [this, state] { return mNumDoneThreads == state.threads() - 1; });
+        device = nullptr;
+    } else {
+        bool isDone = false;
+        {
+            std::lock_guard lock(mMutex);
+            mNumDoneThreads += 1;
+            isDone = mNumDoneThreads == state.threads() - 1;
+        }
+        if (isDone) {
+            mCv.notify_one();
+        }
     }
 }
 

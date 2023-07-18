@@ -19,6 +19,8 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/tests/benchmarks/NullDeviceSetup.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {
@@ -110,6 +112,131 @@ BENCHMARK_REGISTER_F(ObjectCreation, UniqueBindGroupLayout)
     ->Threads(1)
     ->Threads(4)
     ->Threads(16);
+
+BENCHMARK_DEFINE_F(ObjectCreation, SameSampler)
+(benchmark::State& state) {
+    std::vector<wgpu::Sampler> samplers;
+    samplers.reserve(400000);
+    samplers.push_back(device.CreateSampler());
+    for (auto _ : state) {
+        samplers.push_back(device.CreateSampler());
+    }
+}
+BENCHMARK_REGISTER_F(ObjectCreation, SameSampler)->Threads(1)->Threads(4)->Threads(16);
+
+BENCHMARK_DEFINE_F(ObjectCreation, UniqueSampler)
+(benchmark::State& state) {
+    static constexpr float kLodStep = 1.0 / 400000.0;
+    float kLodOffset = kLodStep * state.thread_index() / state.threads();
+
+    wgpu::SamplerDescriptor samplerDesc = {};
+    samplerDesc.lodMaxClamp = kLodOffset;
+
+    std::vector<wgpu::Sampler> samplers;
+    samplers.reserve(400000);
+    for (auto _ : state) {
+        samplerDesc.lodMaxClamp += kLodStep;
+        samplers.push_back(device.CreateSampler(&samplerDesc));
+    }
+}
+BENCHMARK_REGISTER_F(ObjectCreation, UniqueSampler)->Threads(1)->Threads(4)->Threads(16);
+
+BENCHMARK_DEFINE_F(ObjectCreation, SameComputePipeline)
+(benchmark::State& state) {
+    wgpu::ComputePipelineDescriptor computeDesc = {};
+    computeDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1) fn main() { _ = 0u; }
+    )");
+    computeDesc.compute.entryPoint = "main";
+    computeDesc.layout = utils::MakePipelineLayout(device, {});
+
+    std::vector<wgpu::ComputePipeline> computePipelines;
+    computePipelines.reserve(50000);
+    computePipelines.push_back(device.CreateComputePipeline(&computeDesc));
+    for (auto _ : state) {
+        computePipelines.push_back(device.CreateComputePipeline(&computeDesc));
+    }
+}
+BENCHMARK_REGISTER_F(ObjectCreation, SameComputePipeline)->Threads(1)->Threads(4)->Threads(16);
+
+BENCHMARK_DEFINE_F(ObjectCreation, UniqueComputePipeline)
+(benchmark::State& state) {
+    wgpu::ConstantEntry constant = {};
+    constant.key = "x";
+    constant.value = state.thread_index();
+
+    wgpu::ComputePipelineDescriptor computeDesc = {};
+    computeDesc.compute.module = utils::CreateShaderModule(device, R"(
+        override x: u32 = 0u;
+        @compute @workgroup_size(1) fn main() { _ = x; }
+    )");
+    computeDesc.compute.entryPoint = "main";
+    computeDesc.compute.constantCount = 1;
+    computeDesc.compute.constants = &constant;
+    computeDesc.layout = utils::MakePipelineLayout(device, {});
+
+    std::vector<wgpu::ComputePipeline> computePipelines;
+    computePipelines.reserve(40000);
+    for (auto _ : state) {
+        constant.value += state.threads();
+        computePipelines.push_back(device.CreateComputePipeline(&computeDesc));
+    }
+}
+BENCHMARK_REGISTER_F(ObjectCreation, UniqueComputePipeline)->Threads(1)->Threads(4)->Threads(16);
+
+BENCHMARK_DEFINE_F(ObjectCreation, SameRenderPipeline)
+(benchmark::State& state) {
+    utils::ComboRenderPipelineDescriptor renderDesc;
+    renderDesc.layout = utils::MakePipelineLayout(device, {});
+    renderDesc.vertex.module = utils::CreateShaderModule(device, R"(
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        })");
+    renderDesc.cFragment.module = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
+        })");
+
+    std::vector<wgpu::RenderPipeline> renderPipelines;
+    renderPipelines.reserve(40000);
+    renderPipelines.push_back(device.CreateRenderPipeline(&renderDesc));
+    for (auto _ : state) {
+        renderPipelines.push_back(device.CreateRenderPipeline(&renderDesc));
+    }
+}
+BENCHMARK_REGISTER_F(ObjectCreation, SameRenderPipeline)->Threads(1)->Threads(4)->Threads(16);
+
+BENCHMARK_DEFINE_F(ObjectCreation, UniqueRenderPipeline)
+(benchmark::State& state) {
+    wgpu::ConstantEntry constant = {};
+    constant.key = "x";
+    constant.value = state.thread_index();
+
+    utils::ComboRenderPipelineDescriptor renderDesc;
+    renderDesc.layout = utils::MakePipelineLayout(device, {});
+    renderDesc.vertex.module = utils::CreateShaderModule(device, R"(
+        override x: f32 = 0.0;
+        @vertex fn main() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0 / x);
+        })");
+    renderDesc.vertex.constantCount = 1;
+    renderDesc.vertex.constants = &constant;
+    renderDesc.cFragment.module = utils::CreateShaderModule(device, R"(
+        override x: f32 = 0.0;
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0 / x);
+        })");
+    renderDesc.cFragment.constantCount = 1;
+    renderDesc.cFragment.constants = &constant;
+
+    std::vector<wgpu::RenderPipeline> renderPipelines;
+    renderPipelines.reserve(40000);
+    for (auto _ : state) {
+        constant.value += state.threads();
+        renderPipelines.push_back(device.CreateRenderPipeline(&renderDesc));
+    }
+}
+BENCHMARK_REGISTER_F(ObjectCreation, UniqueRenderPipeline)->Threads(1)->Threads(4)->Threads(16);
 
 }  // namespace
 }  // namespace dawn

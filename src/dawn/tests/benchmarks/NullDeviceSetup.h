@@ -29,6 +29,7 @@ namespace dawn {
 class NullDeviceBenchmarkFixture : public benchmark::Fixture {
   public:
     void SetUp(const benchmark::State& state) override;
+    void TearDown(const benchmark::State& state) override;
 
   protected:
     wgpu::Adapter adapter = nullptr;
@@ -40,6 +41,7 @@ class NullDeviceBenchmarkFixture : public benchmark::Fixture {
     // Lock and conditional variable used to synchronize the benchmark global adapter/device.
     std::mutex mMutex;
     std::condition_variable mCv;
+    int mNumDoneThreads = 0;
 };
 
 }  // namespace dawn

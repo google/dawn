@@ -28,6 +28,7 @@ if (${DAWN_BUILD_BENCHMARKS})
     benchmark::benchmark_main
     dawn_common
     dawn_native
+    dawn_utils
     dawncpp_headers
     dawncpp
     dawn_proc)
