@@ -54,6 +54,7 @@
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
 namespace dawn::native {
@@ -1039,7 +1040,6 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
 
     return GetOrCreate(
         mCaches->shaderModules, &blueprint, [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
-            Ref<ShaderModuleBase> result;
             if (!parseResult->HasParsedShader()) {
                 // We skip the parse on creation if validation isn't enabled which let's us quickly
                 // lookup in the cache without validating and parsing. We need the parsed module
@@ -1048,8 +1048,16 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
                 DAWN_TRY(ValidateAndParseShaderModule(this, descriptor, parseResult,
                                                       compilationMessages));
             }
-            DAWN_TRY_ASSIGN(result,
-                            CreateShaderModuleImpl(descriptor, parseResult, compilationMessages));
+
+            ResultOrError<Ref<ShaderModuleBase>> result_or_error = [&] {
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateShaderModuleUS");
+                return CreateShaderModuleImpl(descriptor, parseResult, compilationMessages);
+            }();
+            DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateShaderModuleSuccess",
+                                   result_or_error.IsSuccess());
+
+            Ref<ShaderModuleBase> result;
+            DAWN_TRY_ASSIGN(result, std::move(result_or_error));
             result->SetContentHash(blueprintHash);
             return result;
         });
@@ -1609,7 +1617,14 @@ ResultOrError<Ref<ComputePipelineBase>> DeviceBase::CreateComputePipeline(
         return cachedComputePipeline;
     }
 
-    DAWN_TRY(uninitializedComputePipeline->Initialize());
+    MaybeError maybeError;
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateComputePipelineUS");
+        maybeError = uninitializedComputePipeline->Initialize();
+    }
+    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateComputePipelineSuccess", maybeError.IsSuccess());
+
+    DAWN_TRY(std::move(maybeError));
     return AddOrGetCachedComputePipeline(std::move(uninitializedComputePipeline));
 }
 
@@ -1652,7 +1667,13 @@ ResultOrError<Ref<ComputePipelineBase>> DeviceBase::CreateUninitializedComputePi
 void DeviceBase::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
                                                     WGPUCreateComputePipelineAsyncCallback callback,
                                                     void* userdata) {
-    MaybeError maybeError = computePipeline->Initialize();
+    MaybeError maybeError;
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateComputePipelineUS");
+        maybeError = computePipeline->Initialize();
+    }
+    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateComputePipelineSuccess", maybeError.IsSuccess());
+
     if (maybeError.IsError()) {
         AddComputePipelineAsyncCallbackTask(
             maybeError.AcquireError(), computePipeline->GetLabel().c_str(), callback, userdata);
@@ -1666,7 +1687,13 @@ void DeviceBase::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> com
 void DeviceBase::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
                                                    WGPUCreateRenderPipelineAsyncCallback callback,
                                                    void* userdata) {
-    MaybeError maybeError = renderPipeline->Initialize();
+    MaybeError maybeError;
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateRenderPipelineUS");
+        maybeError = renderPipeline->Initialize();
+    }
+    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateRenderPipelineSuccess", maybeError.IsSuccess());
+
     if (maybeError.IsError()) {
         AddRenderPipelineAsyncCallbackTask(maybeError.AcquireError(),
                                            renderPipeline->GetLabel().c_str(), callback, userdata);
@@ -1724,7 +1751,14 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipeline(
         return cachedRenderPipeline;
     }
 
-    DAWN_TRY(uninitializedRenderPipeline->Initialize());
+    MaybeError maybeError;
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateRenderPipelineUS");
+        maybeError = uninitializedRenderPipeline->Initialize();
+    }
+    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateRenderPipelineSuccess", maybeError.IsSuccess());
+
+    DAWN_TRY(std::move(maybeError));
     return AddOrGetCachedRenderPipeline(std::move(uninitializedRenderPipeline));
 }
 
