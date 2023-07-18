@@ -807,10 +807,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
 RenderPipelineBase::~RenderPipelineBase() = default;
 
 void RenderPipelineBase::DestroyImpl() {
-    if (IsCachedReference()) {
-        // Do not uncache the actual cached object if we are a blueprint.
-        GetDevice()->UncacheRenderPipeline(this);
-    }
+    Uncache();
 
     // Remove reference to the attachment state so that we don't have lingering references to
     // it preventing it from being uncached in the device.

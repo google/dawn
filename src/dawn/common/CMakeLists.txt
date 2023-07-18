@@ -41,6 +41,7 @@ target_sources(dawn_common PRIVATE
     "ConcurrentCache.h"
     "Constants.h"
     "ContentLessObjectCache.h"
+    "ContentLessObjectCacheable.h"
     "CoreFoundationRef.h"
     "DynamicLib.cpp"
     "DynamicLib.h"

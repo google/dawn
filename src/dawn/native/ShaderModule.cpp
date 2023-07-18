@@ -1124,10 +1124,7 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag,
 ShaderModuleBase::~ShaderModuleBase() = default;
 
 void ShaderModuleBase::DestroyImpl() {
-    if (IsCachedReference()) {
-        // Do not uncache the actual cached object if we are a blueprint.
-        GetDevice()->UncacheShaderModule(this);
-    }
+    Uncache();
 }
 
 // static

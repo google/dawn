@@ -19,6 +19,7 @@
 #include <bitset>
 #include <vector>
 
+#include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/Forward.h"
@@ -60,7 +61,8 @@ struct VertexBufferInfo {
     uint64_t lastStride;
 };
 
-class RenderPipelineBase : public PipelineBase {
+class RenderPipelineBase : public PipelineBase,
+                           public ContentLessObjectCacheable<RenderPipelineBase> {
   public:
     RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
     ~RenderPipelineBase() override;

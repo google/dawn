@@ -122,10 +122,9 @@ AttachmentState::AttachmentState(const AttachmentState& blueprint)
     SetContentHash(blueprint.GetContentHash());
 }
 
-AttachmentState::~AttachmentState() {
-    if (IsCachedReference()) {
-        GetDevice()->UncacheAttachmentState(this);
-    }
+void AttachmentState::DeleteThis() {
+    Uncache();
+    RefCounted::DeleteThis();
 }
 
 bool AttachmentState::EqualityFunc::operator()(const AttachmentState* a,
