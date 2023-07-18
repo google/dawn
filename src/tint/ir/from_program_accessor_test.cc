@@ -52,6 +52,32 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_ArraySingleIndex) {
 )");
 }
 
+TEST_F(IR_FromProgramAccessorTest, Accessor_Multiple) {
+    // let a: vec4<u32> = vec4();
+    // let b = a[2]
+    // let c = a[1]
+
+    auto* a = Let("a", ty.vec3<u32>(), vec(ty.u32(), 3));
+    auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
+    auto* expr2 = Decl(Let("c", IndexAccessor(a, 1_u)));
+
+    WrapInFunction(Decl(a), expr, expr2);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()),
+              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+  %b1 = block {
+    %a:vec3<u32> = let vec3<u32>(0u)
+    %b:u32 = access %a, 2u
+    %c:u32 = access %a, 1u
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorSingleIndex) {
     // var a: vec3<u32>
     // let b = a[2]
