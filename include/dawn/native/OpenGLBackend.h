@@ -36,14 +36,6 @@ struct DAWN_NATIVE_EXPORT PhysicalDeviceDiscoveryOptions
     void* (*getProc)(const char*);
 };
 
-// TODO(dawn:1774): Deprecated.
-using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
-
-// TODO(crbug.com/dawn/810): This struct can be removed once Chrome is no longer using it.
-struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptionsES : public PhysicalDeviceDiscoveryOptions {
-    AdapterDiscoveryOptionsES();
-};
-
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptorEGLImage : ExternalImageDescriptor {
   public:
     ExternalImageDescriptorEGLImage();
