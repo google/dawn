@@ -49,6 +49,15 @@ utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Ki
         case IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
             out << "spirv.image_sample_dref_implicit_lod";
             break;
+        case IntrinsicCall::Kind::kSpirvMatrixTimesMatrix:
+            out << "spirv.matrix_times_matrix";
+            break;
+        case IntrinsicCall::Kind::kSpirvMatrixTimesScalar:
+            out << "spirv.matrix_times_scalar";
+            break;
+        case IntrinsicCall::Kind::kSpirvMatrixTimesVector:
+            out << "spirv.matrix_times_vector";
+            break;
         case IntrinsicCall::Kind::kSpirvSampledImage:
             out << "spirv.sampled_image";
             break;
@@ -57,6 +66,9 @@ utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Ki
             break;
         case IntrinsicCall::Kind::kSpirvVectorTimesScalar:
             out << "spirv.vector_times_scalar";
+            break;
+        case IntrinsicCall::Kind::kSpirvVectorTimesMatrix:
+            out << "spirv.vector_times_matrix";
             break;
     }
     return out;
