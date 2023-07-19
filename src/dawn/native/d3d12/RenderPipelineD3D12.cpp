@@ -399,16 +399,24 @@ MaybeError RenderPipeline::Initialize() {
 
     // Try to see if we have anything in the blob cache.
     Blob blob = device->LoadCachedBlob(GetCacheKey());
-    const bool cacheHit = !blob.Empty();
+    bool cacheHit = !blob.Empty();
     if (cacheHit) {
         // Cache hits, attach cached blob to descriptor.
         descriptorD3D12.CachedPSO.pCachedBlob = blob.Data();
         descriptorD3D12.CachedPSO.CachedBlobSizeInBytes = blob.Size();
     }
 
-    DAWN_TRY(CheckHRESULT(device->GetD3D12Device()->CreateGraphicsPipelineState(
-                              &descriptorD3D12, IID_PPV_ARGS(&mPipelineState)),
-                          "D3D12 create graphics pipeline state"));
+    HRESULT result = device->GetD3D12Device()->CreateGraphicsPipelineState(
+        &descriptorD3D12, IID_PPV_ARGS(&mPipelineState));
+    if (cacheHit && result == D3D12_ERROR_DRIVER_VERSION_MISMATCH) {
+        // See dawn:1878 where it is possible for the PSO creation to fail with this error.
+        cacheHit = false;
+        descriptorD3D12.CachedPSO.pCachedBlob = nullptr;
+        descriptorD3D12.CachedPSO.CachedBlobSizeInBytes = 0;
+        result = device->GetD3D12Device()->CreateGraphicsPipelineState(
+            &descriptorD3D12, IID_PPV_ARGS(&mPipelineState));
+    }
+    DAWN_TRY(CheckHRESULT(result, "D3D12 create graphics pipeline state"));
 
     if (!cacheHit) {
         // Cache misses, need to get pipeline cached blob and store.
