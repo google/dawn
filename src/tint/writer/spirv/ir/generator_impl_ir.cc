@@ -344,7 +344,8 @@ uint32_t GeneratorImplIr::Undef(const type::Type* type) {
 
 uint32_t GeneratorImplIr::Type(const type::Type* ty,
                                builtin::AddressSpace addrspace /* = kUndefined */) {
-    return types_.GetOrCreate(DedupType(ty, ir_->Types()), [&] {
+    ty = DedupType(ty, ir_->Types());
+    return types_.GetOrCreate(ty, [&] {
         auto id = module_.NextId();
         Switch(
             ty,  //
@@ -519,8 +520,6 @@ void GeneratorImplIr::EmitStructType(uint32_t id,
 void GeneratorImplIr::EmitTextureType(uint32_t id, const type::Texture* texture) {
     uint32_t sampled_type = Switch(
         texture,  //
-        [&](const type::DepthTexture*) { return Type(ir_->Types().f32()); },
-        [&](const type::DepthMultisampledTexture*) { return Type(ir_->Types().f32()); },
         [&](const type::SampledTexture* t) { return Type(t->type()); },
         [&](const type::MultisampledTexture* t) { return Type(t->type()); },
         [&](const type::StorageTexture* t) { return Type(t->type()); });
@@ -560,7 +559,7 @@ void GeneratorImplIr::EmitTextureType(uint32_t id, const type::Texture* texture)
         case type::TextureDimension::kCubeArray: {
             dim = SpvDimCube;
             array = 1u;
-            if (texture->IsAnyOf<type::SampledTexture, type::DepthTexture>()) {
+            if (texture->Is<type::SampledTexture>()) {
                 module_.PushCapability(SpvCapabilitySampledCubeArray);
             }
             break;
@@ -573,13 +572,12 @@ void GeneratorImplIr::EmitTextureType(uint32_t id, const type::Texture* texture)
     uint32_t depth = 0u;
 
     uint32_t ms = 0u;
-    if (texture->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
+    if (texture->Is<type::MultisampledTexture>()) {
         ms = 1u;
     }
 
     uint32_t sampled = 2u;
-    if (texture->IsAnyOf<type::MultisampledTexture, type::SampledTexture, type::DepthTexture,
-                         type::DepthMultisampledTexture>()) {
+    if (texture->IsAnyOf<type::MultisampledTexture, type::SampledTexture>()) {
         sampled = 1u;
     }
 
