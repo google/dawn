@@ -902,6 +902,22 @@ fn f() -> f32 {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, Access_UsePartialChains) {
+    Test(R"(
+var<private> a : array<array<array<i32, 4u>, 5u>, 6u>;
+
+fn f(i : i32) -> i32 {
+  let p1 = &(a[i]);
+  let p2 = &((*(p1))[i]);
+  let p3 = &((*(p2))[i]);
+  let v1 = *(p1);
+  let v2 = *(p2);
+  let v3 = *(p3);
+  return v3;
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Swizzle
 ////////////////////////////////////////////////////////////////////////////////

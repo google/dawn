@@ -858,7 +858,7 @@ class Impl {
         SetTerminator(builder_.BreakIf(current_control->As<ir::Loop>(), cond.Get()));
     }
 
-    void EmitAccess(const ast::AccessorExpression* expr, Instruction* preceeding_inst) {
+    void EmitAccess(const ast::AccessorExpression* expr, Instruction*) {
         if (auto vec_access = AsVectorRefElementAccess(expr)) {
             expr_to_result_.Add(expr, vec_access.value());
             return;
@@ -870,20 +870,6 @@ class Impl {
             return;
         }
 
-        Access* appendable_access = nullptr;
-        // If the current block ends in an accessor, and that accesor result is the result of the
-        // object of this accessor, we can try appendeding to that previous result instead of
-        // creating a new accessor.
-        if (preceeding_inst && preceeding_inst->Is<Access>() && preceeding_inst->Result() == obj) {
-            appendable_access = preceeding_inst->As<Access>();
-            // Move the access chain to be appended too to after the index expression for this
-            // accessor.
-            if (current_block_->Back() != preceeding_inst) {
-                current_block_->Remove(preceeding_inst);
-                current_block_->Append(preceeding_inst);
-            }
-        }
-
         auto* sem = program_->Sem().Get(expr)->Unwrap();
 
         // The access result type should match the source result type. If the source is a pointer,
@@ -893,65 +879,66 @@ class Impl {
             ty = builder_.ir.Types().ptr(ptr->AddressSpace(), ty, ptr->Access());
         }
 
-        auto append_access = [&](Value* idx) {
-            TINT_ASSERT(IR, appendable_access);
-            appendable_access->AddIndex(idx);
-
-            auto* old_res = appendable_access->Result();
-
-            InstructionResult* new_res = builder_.InstructionResult(ty);
-            appendable_access->SetResult(0, new_res);
-
-            TINT_ASSERT(IR, old_res->Usages().IsEmpty());
-            old_res->SetSource(nullptr);
-            old_res->Destroy();
-
-            expr_to_result_.Remove(expr->object);
-            expr_to_result_.Add(expr, new_res);
-        };
-
-        auto create_result = [&](Value* idx) {
-            if (appendable_access) {
-                append_access(idx);
-            } else {
-                auto* a = builder_.Access(ty, obj, idx);
-                current_block_->Append(a);
-                expr_to_result_.Add(expr, a->Result());
-            }
-        };
-
-        tint::Switch(
+        auto index = tint::Switch(
             sem,
-            [&](const sem::IndexAccessorExpression* idx) {
+            [&](const sem::IndexAccessorExpression* idx) -> ir::Value* {
                 if (auto* v = idx->Index()->ConstantValue()) {
                     if (auto* cv = v->Clone(clone_ctx_)) {
-                        create_result(builder_.Constant(cv));
-                    } else {
-                        TINT_ASSERT(IR, false && "constant clone failed");
+                        return builder_.Constant(cv);
                     }
-                } else {
-                    create_result(ResultForExpression(idx->Index()->Declaration()));
+                    TINT_ASSERT(IR, false && "constant clone failed");
+                    return nullptr;
                 }
+                return ResultForExpression(idx->Index()->Declaration());
             },
-            [&](const sem::StructMemberAccess* access) {
-                create_result(builder_.Constant(u32((access->Member()->Index()))));
+            [&](const sem::StructMemberAccess* access) -> ir::Value* {
+                return builder_.Constant(u32((access->Member()->Index())));
             },
-            [&](const sem::Swizzle* swizzle) {
+            [&](const sem::Swizzle* swizzle) -> ir::Value* {
                 auto& indices = swizzle->Indices();
 
                 // A single element swizzle is just treated as an accessor.
                 if (indices.Length() == 1) {
-                    create_result(builder_.Constant(u32(indices[0])));
-                } else {
-                    auto* val = builder_.Swizzle(ty, obj, std::move(indices));
-                    current_block_->Append(val);
-                    expr_to_result_.Add(expr, val->Result());
+                    return builder_.Constant(u32(indices[0]));
                 }
+                auto* val = builder_.Swizzle(ty, obj, std::move(indices));
+                current_block_->Append(val);
+                expr_to_result_.Add(expr, val->Result());
+                return nullptr;
             },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)
                     << "invalid accessor: " + std::string(sem->TypeInfo().name);
+                return nullptr;
             });
+
+        if (!index) {
+            return;
+        }
+
+        // If the object is an unnamed value (a subexpression, not a let) and is the result of
+        // another access, then we can just append the index to that access.
+        if (!mod.NameOf(obj).IsValid()) {
+            if (auto* inst_res = obj->As<InstructionResult>()) {
+                if (auto* access = inst_res->Source()->As<Access>()) {
+                    access->AddIndex(index);
+                    access->Result()->SetType(ty);
+                    expr_to_result_.Remove(expr->object);
+                    expr_to_result_.Add(expr, access->Result());
+                    // Move the access after the index expression.
+                    if (current_block_->Back() != access) {
+                        current_block_->Remove(access);
+                        current_block_->Append(access);
+                    }
+                    return;
+                }
+            }
+        }
+
+        // Create a new access
+        auto* access = builder_.Access(ty, obj, index);
+        current_block_->Append(access);
+        expr_to_result_.Add(expr, access->Result());
     }
 
     void EmitExpression(const ast::Expression* root) {
