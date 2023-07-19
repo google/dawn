@@ -1478,6 +1478,9 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
         case ir::IntrinsicCall::Kind::kSpirvDot:
             op = spv::Op::OpDot;
             break;
+        case ir::IntrinsicCall::Kind::kSpirvImageFetch:
+            op = spv::Op::OpImageFetch;
+            break;
         case ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
             op = spv::Op::OpImageSampleImplicitLod;
             break;

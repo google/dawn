@@ -15,6 +15,7 @@
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 #include "src/tint/builtin/function.h"
+#include "src/tint/type/depth_multisampled_texture.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -23,7 +24,9 @@ namespace {
 
 enum TextureType {
     kSampledTexture,
+    kMultisampledTexture,
     kDepthTexture,
+    kDepthMultisampledTexture,
 };
 
 enum SamplerUsage {
@@ -63,8 +66,14 @@ inline utils::StringStream& operator<<(utils::StringStream& out, TextureType typ
         case kSampledTexture:
             out << "SampleTexture";
             break;
+        case kMultisampledTexture:
+            out << "MultisampleTexture";
+            break;
         case kDepthTexture:
             out << "DepthTexture";
+            break;
+        case kDepthMultisampledTexture:
+            out << "DepthMultisampledTexture";
             break;
     }
     return out;
@@ -87,8 +96,12 @@ class TextureBuiltinTest : public SpvGeneratorImplTestWithParam<TextureBuiltinTe
         switch (type) {
             case kSampledTexture:
                 return ty.Get<type::SampledTexture>(dim, MakeScalarType(texel_type));
+            case kMultisampledTexture:
+                return ty.Get<type::MultisampledTexture>(dim, MakeScalarType(texel_type));
             case kDepthTexture:
                 return ty.Get<type::DepthTexture>(dim);
+            case kDepthMultisampledTexture:
+                return ty.Get<type::DepthMultisampledTexture>(dim);
         }
         return nullptr;
     }
@@ -923,6 +936,125 @@ INSTANTIATE_TEST_SUITE_P(
             },
         }),
     PrintCase);
+
+////////////////////////////////////////////////////////////////
+//// textureLoad
+////////////////////////////////////////////////////////////////
+using TextureLoad = TextureBuiltinTest;
+TEST_P(TextureLoad, Emit) {
+    Run(builtin::Function::kTextureLoad, kNoSampler);
+}
+INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+                         TextureLoad,
+                         testing::Values(
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k1d,
+                                 /* texel type */ kF32,
+                                 {{"coord", 1, kI32}, {"lod", 1, kI32}},
+                                 {"result", 4, kF32},
+                                 {
+                                     "OpImageFetch %v4float %t %coord Lod %lod",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {{"coords", 2, kI32}, {"lod", 1, kI32}},
+                                 {"result", 4, kF32},
+                                 {
+                                     "OpImageFetch %v4float %t %coords Lod %lod",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {{"coords", 2, kI32}, {"array_idx", 1, kI32}, {"lod", 1, kI32}},
+                                 {"result", 4, kF32},
+                                 {
+                                     "%10 = OpCompositeConstruct %v3int %coords %array_idx",
+                                     "OpImageFetch %v4float %t %10 Lod %lod",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k3d,
+                                 /* texel type */ kF32,
+                                 {{"coords", 3, kI32}, {"lod", 1, kI32}},
+                                 {"result", 4, kF32},
+                                 {
+                                     "OpImageFetch %v4float %t %coords Lod %lod",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kMultisampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {{"coords", 2, kI32}, {"sample_idx", 1, kI32}},
+                                 {"result", 4, kF32},
+                                 {
+                                     "OpImageFetch %v4float %t %coords Sample %sample_idx",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {{"coords", 2, kI32}, {"lod", 1, kI32}},
+                                 {"result", 1, kF32},
+                                 {
+                                     "OpImageFetch %v4float %t %coords Lod %lod",
+                                     "%result = OpCompositeExtract %float",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {{"coords", 2, kI32}, {"array_idx", 1, kI32}, {"lod", 1, kI32}},
+                                 {"result", 1, kF32},
+                                 {
+                                     "%9 = OpCompositeConstruct %v3int %coords %array_idx",
+                                     "OpImageFetch %v4float %t %9 Lod %lod",
+                                     "%result = OpCompositeExtract %float",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthMultisampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {{"coords", 3, kI32}, {"sample_idx", 1, kI32}},
+                                 {"result", 1, kF32},
+                                 {
+                                     "OpImageFetch %v4float %t %coords Sample %sample_idx",
+                                     "%result = OpCompositeExtract %float",
+                                 },
+                             },
+
+                             // Test some textures with integer texel types.
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kI32,
+                                 {{"coords", 2, kI32}, {"lod", 1, kI32}},
+                                 {"result", 4, kI32},
+                                 {
+                                     "OpImageFetch %v4int %t %coords Lod %lod",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kU32,
+                                 {{"coords", 2, kI32}, {"lod", 1, kI32}},
+                                 {"result", 4, kU32},
+                                 {
+                                     "OpImageFetch %v4uint %t %coords Lod %lod",
+                                 },
+                             }),
+                         PrintCase);
 
 }  // namespace
 }  // namespace tint::writer::spirv

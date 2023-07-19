@@ -76,6 +76,9 @@ utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Ki
         case IntrinsicCall::Kind::kSpirvDot:
             out << "spirv.dot";
             break;
+        case IntrinsicCall::Kind::kSpirvImageFetch:
+            out << "spirv.image_fetch";
+            break;
         case IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
             out << "spirv.image_sample_implicit_lod";
             break;

@@ -43,6 +43,7 @@ class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
         kSpirvAtomicUMin,
         kSpirvAtomicXor,
         kSpirvDot,
+        kSpirvImageFetch,
         kSpirvImageSampleImplicitLod,
         kSpirvImageSampleExplicitLod,
         kSpirvImageSampleDrefImplicitLod,
