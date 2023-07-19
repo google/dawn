@@ -1113,9 +1113,10 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         values_.Add(builtin->Result(), Value(builtin->Args()[0]));
         return;
     }
-    if (builtin->Func() == builtin::Function::kAny &&
+    if ((builtin->Func() == builtin::Function::kAll ||
+         builtin->Func() == builtin::Function::kAny) &&
         builtin->Args()[0]->Type()->Is<type::Bool>()) {
-        // any() is a passthrough for a scalar argument.
+        // all() and any() are passthroughs for scalar arguments.
         values_.Add(builtin->Result(), Value(builtin->Args()[0]));
         return;
     }
@@ -1146,6 +1147,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             } else if (result_ty->is_signed_integer_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450SAbs);
             }
+            break;
+        case builtin::Function::kAll:
+            op = spv::Op::OpAll;
             break;
         case builtin::Function::kAny:
             op = spv::Op::OpAny;
