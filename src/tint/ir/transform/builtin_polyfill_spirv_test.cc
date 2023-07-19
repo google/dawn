@@ -309,14 +309,14 @@ TEST_F(IR_BuiltinPolyfillSpirvTest, TextureSample_2D) {
     func->SetParams({t, s, coords});
 
     b.With(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), builtin::Function::kTextureSample, t, s, coords);
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kTextureSample, t, s, coords);
         b.Return(func, result);
     });
 
     auto* src = R"(
 %foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> -> %b1 {
   %b1 = block {
-    %5:f32 = textureSample %t, %s, %coords
+    %5:vec4<f32> = textureSample %t, %s, %coords
     ret %5
   }
 }
@@ -431,14 +431,15 @@ TEST_F(IR_BuiltinPolyfillSpirvTest, TextureSampleBias_2D) {
     func->SetParams({t, s, coords, bias});
 
     b.With(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), builtin::Function::kTextureSampleBias, t, s, coords, bias);
+        auto* result =
+            b.Call(ty.vec4<f32>(), builtin::Function::kTextureSampleBias, t, s, coords, bias);
         b.Return(func, result);
     });
 
     auto* src = R"(
 %foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %bias:f32):vec4<f32> -> %b1 {
   %b1 = block {
-    %6:f32 = textureSampleBias %t, %s, %coords, %bias
+    %6:vec4<f32> = textureSampleBias %t, %s, %coords, %bias
     ret %6
   }
 }
@@ -801,14 +802,14 @@ TEST_F(IR_BuiltinPolyfillSpirvTest, TextureSampleGrad_2D) {
 
     b.With(func->Block(), [&] {
         auto* result =
-            b.Call(ty.f32(), builtin::Function::kTextureSampleBias, t, s, coords, ddx, ddy);
+            b.Call(ty.vec4<f32>(), builtin::Function::kTextureSampleBias, t, s, coords, ddx, ddy);
         b.Return(func, result);
     });
 
     auto* src = R"(
 %foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> -> %b1 {
   %b1 = block {
-    %7:f32 = textureSampleBias %t, %s, %coords, %ddx, %ddy
+    %7:vec4<f32> = textureSampleBias %t, %s, %coords, %ddx, %ddy
     ret %7
   }
 }
@@ -928,14 +929,15 @@ TEST_F(IR_BuiltinPolyfillSpirvTest, TextureSampleLevel_2D) {
     func->SetParams({t, s, coords, lod});
 
     b.With(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), builtin::Function::kTextureSampleLevel, t, s, coords, lod);
+        auto* result =
+            b.Call(ty.vec4<f32>(), builtin::Function::kTextureSampleLevel, t, s, coords, lod);
         b.Return(func, result);
     });
 
     auto* src = R"(
 %foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %lod:f32):vec4<f32> -> %b1 {
   %b1 = block {
-    %6:f32 = textureSampleLevel %t, %s, %coords, %lod
+    %6:vec4<f32> = textureSampleLevel %t, %s, %coords, %lod
     ret %6
   }
 }
