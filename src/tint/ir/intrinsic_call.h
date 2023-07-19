@@ -29,6 +29,19 @@ class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
     /// The kind of instruction.
     enum class Kind {
         // SPIR-V backend intrinsics.
+        kSpirvAtomicAnd,
+        kSpirvAtomicCompareExchange,
+        kSpirvAtomicExchange,
+        kSpirvAtomicIAdd,
+        kSpirvAtomicISub,
+        kSpirvAtomicLoad,
+        kSpirvAtomicOr,
+        kSpirvAtomicSMax,
+        kSpirvAtomicSMin,
+        kSpirvAtomicStore,
+        kSpirvAtomicUMax,
+        kSpirvAtomicUMin,
+        kSpirvAtomicXor,
         kSpirvDot,
         kSpirvImageSampleImplicitLod,
         kSpirvImageSampleExplicitLod,

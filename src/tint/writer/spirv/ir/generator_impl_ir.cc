@@ -58,6 +58,7 @@
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/type/array.h"
+#include "src/tint/type/atomic.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
@@ -134,6 +135,9 @@ SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
 const type::Type* DedupType(const type::Type* ty, type::Manager& types) {
     return Switch(
         ty,
+
+        // Atomics are not a distinct type in SPIR-V.
+        [&](const type::Atomic* atomic) { return atomic->Type(); },
 
         // Depth textures are always declared as sampled textures.
         [&](const type::DepthTexture* depth) {
@@ -1432,6 +1436,45 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
+        case ir::IntrinsicCall::Kind::kSpirvAtomicIAdd:
+            op = spv::Op::OpAtomicIAdd;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicISub:
+            op = spv::Op::OpAtomicISub;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicAnd:
+            op = spv::Op::OpAtomicAnd;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicCompareExchange:
+            op = spv::Op::OpAtomicCompareExchange;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicExchange:
+            op = spv::Op::OpAtomicExchange;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicLoad:
+            op = spv::Op::OpAtomicLoad;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicOr:
+            op = spv::Op::OpAtomicOr;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicSMax:
+            op = spv::Op::OpAtomicSMax;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicSMin:
+            op = spv::Op::OpAtomicSMin;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicStore:
+            op = spv::Op::OpAtomicStore;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicUMax:
+            op = spv::Op::OpAtomicUMax;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicUMin:
+            op = spv::Op::OpAtomicUMin;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvAtomicXor:
+            op = spv::Op::OpAtomicXor;
+            break;
         case ir::IntrinsicCall::Kind::kSpirvDot:
             op = spv::Op::OpDot;
             break;
@@ -1470,7 +1513,10 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
             break;
     }
 
-    OperandList operands = {Type(call->Result()->Type()), id};
+    OperandList operands;
+    if (!call->Result()->Type()->Is<type::Void>()) {
+        operands = {Type(call->Result()->Type()), id};
+    }
     for (auto* arg : call->Args()) {
         operands.push_back(Value(arg));
     }

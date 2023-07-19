@@ -17,6 +17,8 @@
 #include <utility>
 
 #include "src/tint/ir/transform/test_helper.h"
+#include "src/tint/type/atomic.h"
+#include "src/tint/type/builtin_structs.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/sampled_texture.h"
 
@@ -27,6 +29,639 @@ using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
 using IR_BuiltinPolyfillSpirvTest = TransformTest;
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicAdd_Storage) {
+    auto* var = b.Var(ty.ptr(storage, ty.atomic(ty.i32())));
+    var->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(var);
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicAdd, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicAdd %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_iadd %1, 1u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicAdd_Workgroup) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicAdd, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicAdd %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_iadd %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicAnd) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicAnd, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicAnd %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_and %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicCompareExchangeWeak) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* cmp = b.FunctionParam("cmp", ty.i32());
+    auto* val = b.FunctionParam("val", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({cmp, val});
+
+    b.With(func->Block(), [&] {
+        auto* result_ty = type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32());
+        auto* result =
+            b.Call(result_ty, builtin::Function::kAtomicCompareExchangeWeak, var, cmp, val);
+        b.Return(func, b.Access(ty.i32(), result, 0_u));
+    });
+
+    auto* src = R"(
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%cmp:i32, %val:i32):i32 -> %b2 {
+  %b2 = block {
+    %5:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %1, %cmp, %val
+    %6:i32 = access %5, 0u
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%cmp:i32, %val:i32):i32 -> %b2 {
+  %b2 = block {
+    %5:i32 = spirv.atomic_compare_exchange %1, 2u, 0u, 0u, %val, %cmp
+    %6:bool = eq %5, %cmp
+    %7:__atomic_compare_exchange_result_i32 = construct %5, %6
+    %8:i32 = access %7, 0u
+    ret %8
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicExchange) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicExchange, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicExchange %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_exchange %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicLoad) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* func = b.Function("foo", ty.i32());
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicLoad, var);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func():i32 -> %b2 {
+  %b2 = block {
+    %3:i32 = atomicLoad %1
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func():i32 -> %b2 {
+  %b2 = block {
+    %3:i32 = spirv.atomic_load %1, 2u, 0u
+    ret %3
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicMax_I32) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicMax, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicMax %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_smax %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicMax_U32) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.u32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kAtomicMax, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<u32>, read_write> = var
+}
+
+%foo = func(%arg1:u32):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = atomicMax %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<u32>, read_write> = var
+}
+
+%foo = func(%arg1:u32):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = spirv.atomic_umax %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicMin_I32) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicMin, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicMin %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_smin %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicMin_U32) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.u32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kAtomicMin, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<u32>, read_write> = var
+}
+
+%foo = func(%arg1:u32):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = atomicMin %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<u32>, read_write> = var
+}
+
+%foo = func(%arg1:u32):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = spirv.atomic_umin %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicOr) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicOr, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicOr %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_or %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicStore) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        b.Call(ty.void_(), builtin::Function::kAtomicStore, var, arg1);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):void -> %b2 {
+  %b2 = block {
+    %4:void = atomicStore %1, %arg1
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):void -> %b2 {
+  %b2 = block {
+    %4:void = spirv.atomic_store %1, 2u, 0u, %arg1
+    ret
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicSub) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicSub, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicSub %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_isub %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicXor) {
+    auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
+
+    auto* arg1 = b.FunctionParam("arg1", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg1});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kAtomicXor, var, arg1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = atomicXor %1, %arg1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
+}
+
+%foo = func(%arg1:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:i32 = spirv.atomic_xor %1, 2u, 0u, %arg1
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
 
 TEST_F(IR_BuiltinPolyfillSpirvTest, Dot_Vec4f) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());

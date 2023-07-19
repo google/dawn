@@ -19,6 +19,7 @@
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/module.h"
+#include "src/tint/type/builtin_structs.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/sampled_texture.h"
@@ -57,6 +58,17 @@ struct BuiltinPolyfillSpirv::State {
             }
             if (auto* builtin = inst->As<CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
+                    case builtin::Function::kAtomicAdd:
+                    case builtin::Function::kAtomicAnd:
+                    case builtin::Function::kAtomicCompareExchangeWeak:
+                    case builtin::Function::kAtomicExchange:
+                    case builtin::Function::kAtomicLoad:
+                    case builtin::Function::kAtomicMax:
+                    case builtin::Function::kAtomicMin:
+                    case builtin::Function::kAtomicOr:
+                    case builtin::Function::kAtomicStore:
+                    case builtin::Function::kAtomicSub:
+                    case builtin::Function::kAtomicXor:
                     case builtin::Function::kDot:
                     case builtin::Function::kSelect:
                     case builtin::Function::kTextureSample:
@@ -77,6 +89,19 @@ struct BuiltinPolyfillSpirv::State {
         for (auto* builtin : worklist) {
             Value* replacement = nullptr;
             switch (builtin->Func()) {
+                case builtin::Function::kAtomicAdd:
+                case builtin::Function::kAtomicAnd:
+                case builtin::Function::kAtomicCompareExchangeWeak:
+                case builtin::Function::kAtomicExchange:
+                case builtin::Function::kAtomicLoad:
+                case builtin::Function::kAtomicMax:
+                case builtin::Function::kAtomicMin:
+                case builtin::Function::kAtomicOr:
+                case builtin::Function::kAtomicStore:
+                case builtin::Function::kAtomicSub:
+                case builtin::Function::kAtomicXor:
+                    replacement = Atomic(builtin);
+                    break;
                 case builtin::Function::kDot:
                     replacement = Dot(builtin);
                     break;
@@ -103,6 +128,109 @@ struct BuiltinPolyfillSpirv::State {
             builtin->Result()->ReplaceAllUsesWith(replacement);
             builtin->Destroy();
         }
+    }
+
+    /// Handle an atomic*() builtin.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    Value* Atomic(CoreBuiltinCall* builtin) {
+        auto* result_ty = builtin->Result()->Type();
+
+        auto* pointer = builtin->Args()[0];
+        auto* memory = [&]() -> Value* {
+            switch (pointer->Type()->As<type::Pointer>()->AddressSpace()) {
+                case builtin::AddressSpace::kWorkgroup:
+                    return b.Constant(u32(SpvScopeWorkgroup));
+                case builtin::AddressSpace::kStorage:
+                    return b.Constant(u32(SpvScopeDevice));
+                default:
+                    TINT_ASSERT(Transform, false && "unhandled atomic address space");
+                    return nullptr;
+            }
+        }();
+        auto* memory_semantics = b.Constant(u32(SpvMemorySemanticsMaskNone));
+
+        // Helper to build the intrinsic call with the common operands.
+        auto build = [&](const type::Type* type, enum IntrinsicCall::Kind intrinsic) {
+            return b.Call(type, intrinsic, pointer, memory, memory_semantics);
+        };
+
+        // Create the replacement call instruction.
+        Call* call = nullptr;
+        switch (builtin->Func()) {
+            case builtin::Function::kAtomicAdd:
+                call = build(result_ty, IntrinsicCall::Kind::kSpirvAtomicIAdd);
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            case builtin::Function::kAtomicAnd:
+                call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicAnd);
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            case builtin::Function::kAtomicCompareExchangeWeak: {
+                auto* cmp = builtin->Args()[1];
+                auto* value = builtin->Args()[2];
+                auto* int_ty = value->Type();
+                call = build(int_ty, ir::IntrinsicCall::Kind::kSpirvAtomicCompareExchange);
+                call->AppendArg(memory_semantics);
+                call->AppendArg(value);
+                call->AppendArg(cmp);
+                call->InsertBefore(builtin);
+
+                // Compare the original value to the comparator to see if an exchange happened.
+                auto* original = call->Result();
+                auto* compare = b.Equal(ty.bool_(), original, cmp);
+                compare->InsertBefore(builtin);
+
+                // Construct the atomicCompareExchange result structure.
+                call = b.Construct(type::CreateAtomicCompareExchangeResult(ty, ir->symbols, int_ty),
+                                   utils::Vector{original, compare->Result()});
+                break;
+            }
+            case builtin::Function::kAtomicExchange:
+                call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicExchange);
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            case builtin::Function::kAtomicLoad:
+                call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicLoad);
+                break;
+            case builtin::Function::kAtomicOr:
+                call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicOr);
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            case builtin::Function::kAtomicMax:
+                if (result_ty->is_signed_integer_scalar()) {
+                    call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicSMax);
+                } else {
+                    call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicUMax);
+                }
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            case builtin::Function::kAtomicMin:
+                if (result_ty->is_signed_integer_scalar()) {
+                    call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicSMin);
+                } else {
+                    call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicUMin);
+                }
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            case builtin::Function::kAtomicStore:
+                call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicStore);
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            case builtin::Function::kAtomicSub:
+                call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicISub);
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            case builtin::Function::kAtomicXor:
+                call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicXor);
+                call->AppendArg(builtin->Args()[1]);
+                break;
+            default:
+                return nullptr;
+        }
+
+        call->InsertBefore(builtin);
+        return call->Result();
     }
 
     /// Handle a `dot()` builtin.

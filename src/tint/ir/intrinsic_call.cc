@@ -34,6 +34,45 @@ IntrinsicCall::~IntrinsicCall() = default;
 
 utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Kind kind) {
     switch (kind) {
+        case IntrinsicCall::Kind::kSpirvAtomicIAdd:
+            out << "spirv.atomic_iadd";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicISub:
+            out << "spirv.atomic_isub";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicAnd:
+            out << "spirv.atomic_and";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicCompareExchange:
+            out << "spirv.atomic_compare_exchange";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicExchange:
+            out << "spirv.atomic_exchange";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicLoad:
+            out << "spirv.atomic_load";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicOr:
+            out << "spirv.atomic_or";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicSMax:
+            out << "spirv.atomic_smax";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicSMin:
+            out << "spirv.atomic_smin";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicStore:
+            out << "spirv.atomic_store";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicUMax:
+            out << "spirv.atomic_umax";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicUMin:
+            out << "spirv.atomic_umin";
+            break;
+        case IntrinsicCall::Kind::kSpirvAtomicXor:
+            out << "spirv.atomic_xor";
+            break;
         case IntrinsicCall::Kind::kSpirvDot:
             out << "spirv.dot";
             break;

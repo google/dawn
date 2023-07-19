@@ -201,6 +201,13 @@ TEST_F(SpvGeneratorImplTest, Type_Struct_MatrixLayout) {
     EXPECT_INST("%MyStruct = OpTypeStruct %mat3v3float %_arr__arr_mat2v4half_uint_4_uint_4");
 }
 
+TEST_F(SpvGeneratorImplTest, Type_Atomic) {
+    generator_.Type(ty.atomic(ty.i32()));
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%int = OpTypeInt 32 1");
+}
+
 TEST_F(SpvGeneratorImplTest, Type_Sampler) {
     generator_.Type(ty.sampler());
 
