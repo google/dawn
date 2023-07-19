@@ -96,5 +96,29 @@ TEST_F(SpvGeneratorImplTest, Construct_Struct) {
     EXPECT_INST("%result = OpCompositeConstruct %MyStruct %a %b %c");
 }
 
+TEST_F(SpvGeneratorImplTest, Construct_Scalar_Identity) {
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({b.FunctionParam("arg", ty.i32())});
+    b.With(func->Block(), [&] {
+        auto* result = b.Construct(ty.i32(), func->Params()[0]);
+        b.Return(func, result);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpReturnValue %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Construct_Vector_Identity) {
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({b.FunctionParam("arg", ty.vec4<i32>())});
+    b.With(func->Block(), [&] {
+        auto* result = b.Construct(ty.vec4<i32>(), func->Params()[0]);
+        b.Return(func, result);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpReturnValue %arg");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv

@@ -1346,6 +1346,14 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
 }
 
 void GeneratorImplIr::EmitConstruct(ir::Construct* construct) {
+    // If there is just a single argument with the same type as the result, this is an identity
+    // constructor and we can just pass through the ID of the argument.
+    if (construct->Args().Length() == 1 &&
+        construct->Result()->Type() == construct->Args()[0]->Type()) {
+        values_.Add(construct->Result(), Value(construct->Args()[0]));
+        return;
+    }
+
     OperandList operands = {Type(construct->Result()->Type()), Value(construct)};
     for (auto* arg : construct->Args()) {
         operands.push_back(Value(arg));
