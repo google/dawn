@@ -80,6 +80,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kF16, builtin::Function::kCeil, "Ceil"},
                     BuiltinTestCase{kF32, builtin::Function::kCos, "Cos"},
                     BuiltinTestCase{kF16, builtin::Function::kCos, "Cos"},
+                    BuiltinTestCase{kI32, builtin::Function::kCountOneBits, "OpBitCount"},
+                    BuiltinTestCase{kU32, builtin::Function::kCountOneBits, "OpBitCount"},
                     BuiltinTestCase{kF32, builtin::Function::kDpdx, "OpDPdx"},
                     BuiltinTestCase{kF32, builtin::Function::kDpdxCoarse, "OpDPdxCoarse"},
                     BuiltinTestCase{kF32, builtin::Function::kDpdxFine, "OpDPdxFine"},
@@ -100,6 +102,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kF16, builtin::Function::kLog, "Log"},
                     BuiltinTestCase{kF32, builtin::Function::kLog2, "Log2"},
                     BuiltinTestCase{kF16, builtin::Function::kLog2, "Log2"},
+                    BuiltinTestCase{kI32, builtin::Function::kReverseBits, "OpBitReverse"},
+                    BuiltinTestCase{kU32, builtin::Function::kReverseBits, "OpBitReverse"},
                     BuiltinTestCase{kF32, builtin::Function::kRound, "RoundEven"},
                     BuiltinTestCase{kF16, builtin::Function::kRound, "RoundEven"},
                     BuiltinTestCase{kF32, builtin::Function::kSin, "Sin"},
@@ -554,6 +558,150 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kF16, builtin::Function::kMix, "Mix"},
                     BuiltinTestCase{kF32, builtin::Function::kSmoothstep, "SmoothStep"},
                     BuiltinTestCase{kF16, builtin::Function::kSmoothstep, "SmoothStep"}));
+
+TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Scalar_I32) {
+    auto* arg = b.FunctionParam("arg", ty.i32());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* count = b.FunctionParam("count", ty.u32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg, offset, count});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), builtin::Function::kExtractBits, arg, offset, count);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpBitFieldSExtract %int %arg %offset %count");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Scalar_U32) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* count = b.FunctionParam("count", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg, offset, count});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kExtractBits, arg, offset, count);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpBitFieldUExtract %uint %arg %offset %count");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Vector_I32) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<i32>());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* count = b.FunctionParam("count", ty.u32());
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({arg, offset, count});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kExtractBits, arg, offset, count);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpBitFieldSExtract %v4int %arg %offset %count");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Vector_U32) {
+    auto* arg = b.FunctionParam("arg", ty.vec2<u32>());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* count = b.FunctionParam("count", ty.u32());
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({arg, offset, count});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<u32>(), builtin::Function::kExtractBits, arg, offset, count);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpBitFieldUExtract %v2uint %arg %offset %count");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Scalar_I32) {
+    auto* arg = b.FunctionParam("arg", ty.i32());
+    auto* newbits = b.FunctionParam("newbits", ty.i32());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* count = b.FunctionParam("count", ty.u32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg, newbits, offset, count});
+
+    b.With(func->Block(), [&] {
+        auto* result =
+            b.Call(ty.i32(), builtin::Function::kInsertBits, arg, newbits, offset, count);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpBitFieldInsert %int %arg %newbits %offset %count");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Scalar_U32) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* newbits = b.FunctionParam("newbits", ty.u32());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* count = b.FunctionParam("count", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg, newbits, offset, count});
+
+    b.With(func->Block(), [&] {
+        auto* result =
+            b.Call(ty.u32(), builtin::Function::kInsertBits, arg, newbits, offset, count);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpBitFieldInsert %uint %arg %newbits %offset %count");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Vector_I32) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<i32>());
+    auto* newbits = b.FunctionParam("newbits", ty.vec4<i32>());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* count = b.FunctionParam("count", ty.u32());
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({arg, newbits, offset, count});
+
+    b.With(func->Block(), [&] {
+        auto* result =
+            b.Call(ty.vec4<i32>(), builtin::Function::kInsertBits, arg, newbits, offset, count);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpBitFieldInsert %v4int %arg %newbits %offset %count");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Vector_U32) {
+    auto* arg = b.FunctionParam("arg", ty.vec2<u32>());
+    auto* newbits = b.FunctionParam("newbits", ty.vec2<u32>());
+    auto* offset = b.FunctionParam("offset", ty.u32());
+    auto* count = b.FunctionParam("count", ty.u32());
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({arg, newbits, offset, count});
+
+    b.With(func->Block(), [&] {
+        auto* result =
+            b.Call(ty.vec2<u32>(), builtin::Function::kInsertBits, arg, newbits, offset, count);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpBitFieldInsert %v2uint %arg %newbits %offset %count");
+}
 
 TEST_F(SpvGeneratorImplTest, Builtin_Mix_VectorOperands_ScalarFactor) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());

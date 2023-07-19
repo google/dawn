@@ -1195,6 +1195,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kCosh:
             glsl_ext_inst(GLSLstd450Cosh);
             break;
+        case builtin::Function::kCountOneBits:
+            op = spv::Op::OpBitCount;
+            break;
         case builtin::Function::kCross:
             glsl_ext_inst(GLSLstd450Cross);
             break;
@@ -1231,6 +1234,10 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kExp2:
             glsl_ext_inst(GLSLstd450Exp2);
             break;
+        case builtin::Function::kExtractBits:
+            op = result_ty->is_signed_integer_scalar_or_vector() ? spv::Op::OpBitFieldSExtract
+                                                                 : spv::Op::OpBitFieldUExtract;
+            break;
         case builtin::Function::kFloor:
             glsl_ext_inst(GLSLstd450Floor);
             break;
@@ -1242,6 +1249,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             break;
         case builtin::Function::kFrexp:
             glsl_ext_inst(GLSLstd450FrexpStruct);
+            break;
+        case builtin::Function::kInsertBits:
+            op = spv::Op::OpBitFieldInsert;
             break;
         case builtin::Function::kInverseSqrt:
             glsl_ext_inst(GLSLstd450InverseSqrt);
@@ -1284,6 +1294,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             break;
         case builtin::Function::kPow:
             glsl_ext_inst(GLSLstd450Pow);
+            break;
+        case builtin::Function::kReverseBits:
+            op = spv::Op::OpBitReverse;
             break;
         case builtin::Function::kRound:
             glsl_ext_inst(GLSLstd450RoundEven);
