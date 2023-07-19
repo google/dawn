@@ -79,6 +79,12 @@ utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Ki
         case IntrinsicCall::Kind::kSpirvImageFetch:
             out << "spirv.image_fetch";
             break;
+        case IntrinsicCall::Kind::kSpirvImageGather:
+            out << "spirv.image_gather";
+            break;
+        case IntrinsicCall::Kind::kSpirvImageDrefGather:
+            out << "spirv.image_dref_gather";
+            break;
         case IntrinsicCall::Kind::kSpirvImageQuerySize:
             out << "spirv.image_query_size";
             break;

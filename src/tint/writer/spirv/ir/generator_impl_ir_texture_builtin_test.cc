@@ -156,12 +156,21 @@ class TextureBuiltinTest : public SpvGeneratorImplTestWithParam<TextureBuiltinTe
         func->SetParams(std::move(func_params));
 
         b.With(func->Block(), [&] {
-            utils::Vector<ir::Value*, 4> args = {t};
+            uint32_t arg_value = 1;
+
+            utils::Vector<ir::Value*, 4> args;
+            if (function == builtin::Function::kTextureGather &&
+                params.texture_type != kDepthTexture) {
+                // Special case for textureGather, which has a component argument first.
+                auto* component = MakeScalarValue(kU32, arg_value++);
+                args.Push(component);
+                mod.SetName(component, "component");
+            }
+            args.Push(t);
             if (s) {
                 args.Push(s);
             }
 
-            uint32_t arg_value = 1;
             for (const auto& arg : params.args) {
                 auto* value = MakeScalarValue(arg.type, arg_value++);
                 if (arg.width > 1) {
@@ -961,6 +970,272 @@ INSTANTIATE_TEST_SUITE_P(
                 "%11 = OpConvertSToF %float %array_idx",
                 "%15 = OpCompositeConstruct %v4float %coords %11",
                 "OpImageSampleDrefExplicitLod %float %9 %15 %depth_l0 Lod %float_0",
+            },
+        }),
+    PrintCase);
+
+////////////////////////////////////////////////////////////////
+//// textureGather
+////////////////////////////////////////////////////////////////
+using TextureGather = TextureBuiltinTest;
+TEST_P(TextureGather, Emit) {
+    Run(builtin::Function::kTextureGather, kSampler);
+}
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest,
+    TextureGather,
+    testing::Values(
+        TextureBuiltinTestCase{
+            kSampledTexture,
+            type::TextureDimension::k2d,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageGather %v4float %10 %coords %component None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kSampledTexture,
+            type::TextureDimension::k2d,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"offset", 2, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageGather %v4float %10 %coords %component ConstOffset %offset",
+            },
+        },
+        TextureBuiltinTestCase{
+            kSampledTexture,
+            type::TextureDimension::k2dArray,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"array_idx", 1, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%16 = OpCompositeConstruct %v3float %coords %12",
+                "%result = OpImageGather %v4float %10 %16 %component None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kSampledTexture,
+            type::TextureDimension::k2dArray,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"offset", 2, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%16 = OpCompositeConstruct %v3float %coords %12",
+                "%result = OpImageGather %v4float %10 %16 %component ConstOffset %offset",
+            },
+        },
+        TextureBuiltinTestCase{
+            kSampledTexture,
+            type::TextureDimension::kCube,
+            /* texel type */ kF32,
+            {{"coords", 3, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageGather %v4float %10 %coords %component None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kSampledTexture,
+            type::TextureDimension::kCubeArray,
+            /* texel type */ kF32,
+            {{"coords", 3, kF32}, {"array_idx", 1, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%15 = OpCompositeConstruct %v4float %coords %12",
+                "%result = OpImageGather %v4float %10 %15 %component None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::k2d,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageGather %v4float %10 %coords %uint_0 None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::k2d,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"offset", 2, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageGather %v4float %10 %coords %uint_0 ConstOffset %offset",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::kCube,
+            /* texel type */ kF32,
+            {{"coords", 3, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageGather %v4float %10 %coords %uint_0 None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::k2dArray,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"array_idx", 1, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%16 = OpCompositeConstruct %v3float %coords %12",
+                "%result = OpImageGather %v4float %10 %16 %uint_0 None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::k2dArray,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"offset", 2, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%16 = OpCompositeConstruct %v3float %coords %12",
+                "%result = OpImageGather %v4float %10 %16 %uint_0 ConstOffset %offset",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::kCubeArray,
+            /* texel type */ kF32,
+            {{"coords", 3, kF32}, {"array_idx", 1, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%15 = OpCompositeConstruct %v4float %coords %12",
+                "%result = OpImageGather %v4float %10 %15 %uint_0 None",
+            },
+        },
+
+        // Test some textures with integer texel types.
+        TextureBuiltinTestCase{
+            kSampledTexture,
+            type::TextureDimension::k2d,
+            /* texel type */ kI32,
+            {{"coords", 2, kF32}},
+            {"result", 4, kI32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageGather %v4int %10 %coords %component None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kSampledTexture,
+            type::TextureDimension::k2d,
+            /* texel type */ kU32,
+            {{"coords", 2, kF32}},
+            {"result", 4, kU32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageGather %v4uint %10 %coords %component None",
+            },
+        }),
+    PrintCase);
+
+////////////////////////////////////////////////////////////////
+//// textureGatherCompare
+////////////////////////////////////////////////////////////////
+using TextureGatherCompare = TextureBuiltinTest;
+TEST_P(TextureGatherCompare, Emit) {
+    Run(builtin::Function::kTextureGatherCompare, kComparisonSampler);
+}
+INSTANTIATE_TEST_SUITE_P(
+    SpvGeneratorImplTest,
+    TextureGatherCompare,
+    testing::Values(
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::k2d,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"depth", 1, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageDrefGather %v4float %10 %coords %depth None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::k2d,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"depth", 1, kF32}, {"offset", 2, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageDrefGather %v4float %10 %coords %depth ConstOffset %offset",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::k2dArray,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%16 = OpCompositeConstruct %v3float %coords %12",
+                "%result = OpImageDrefGather %v4float %10 %16 %depth None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::k2dArray,
+            /* texel type */ kF32,
+            {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}, {"offset", 2, kI32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%16 = OpCompositeConstruct %v3float %coords %12",
+                "%result = OpImageDrefGather %v4float %10 %16 %depth ConstOffset %offset",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::kCube,
+            /* texel type */ kF32,
+            {{"coords", 3, kF32}, {"depth", 1, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%result = OpImageDrefGather %v4float %10 %coords %depth None",
+            },
+        },
+        TextureBuiltinTestCase{
+            kDepthTexture,
+            type::TextureDimension::kCubeArray,
+            /* texel type */ kF32,
+            {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}},
+            {"result", 4, kF32},
+            {
+                "%10 = OpSampledImage %11 %t %s",
+                "%12 = OpConvertSToF %float %array_idx",
+                "%15 = OpCompositeConstruct %v4float %coords %12",
+                "%result = OpImageDrefGather %v4float %10 %15 %depth None",
             },
         }),
     PrintCase);

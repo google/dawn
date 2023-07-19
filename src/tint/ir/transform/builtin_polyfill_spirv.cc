@@ -74,6 +74,8 @@ struct BuiltinPolyfillSpirv::State {
                     case builtin::Function::kDot:
                     case builtin::Function::kSelect:
                     case builtin::Function::kTextureDimensions:
+                    case builtin::Function::kTextureGather:
+                    case builtin::Function::kTextureGatherCompare:
                     case builtin::Function::kTextureLoad:
                     case builtin::Function::kTextureSample:
                     case builtin::Function::kTextureSampleBias:
@@ -115,6 +117,10 @@ struct BuiltinPolyfillSpirv::State {
                     break;
                 case builtin::Function::kTextureDimensions:
                     replacement = TextureDimensions(builtin);
+                    break;
+                case builtin::Function::kTextureGather:
+                case builtin::Function::kTextureGatherCompare:
+                    replacement = TextureGather(builtin);
                     break;
                 case builtin::Function::kTextureLoad:
                     replacement = TextureLoad(builtin);
@@ -501,6 +507,80 @@ struct BuiltinPolyfillSpirv::State {
         }
 
         return result;
+    }
+
+    /// Handle a textureGather*() builtin.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    Value* TextureGather(CoreBuiltinCall* builtin) {
+        // Helper to get the next argument from the call, or nullptr if there are no more arguments.
+        uint32_t arg_idx = 0;
+        auto next_arg = [&]() {
+            return arg_idx < builtin->Args().Length() ? builtin->Args()[arg_idx++] : nullptr;
+        };
+
+        auto* component = next_arg();
+        if (!component->Type()->is_integer_scalar()) {
+            // The first argument wasn't the component, so it must be the texture instead.
+            // Use constant zero for the component.
+            component = b.Constant(0_u);
+            arg_idx--;
+        }
+        auto* texture = next_arg();
+        auto* sampler = next_arg();
+        auto* coords = next_arg();
+        auto* texture_ty = texture->Type()->As<type::Texture>();
+
+        // Use OpSampledImage to create an OpTypeSampledImage object.
+        auto* sampled_image =
+            b.Call(ty.Get<SampledImage>(texture_ty), IntrinsicCall::Kind::kSpirvSampledImage,
+                   utils::Vector{texture, sampler});
+        sampled_image->InsertBefore(builtin);
+
+        // Append the array index to the coordinates if provided.
+        auto* array_idx = IsTextureArray(texture_ty->dim()) ? next_arg() : nullptr;
+        if (array_idx) {
+            coords = AppendArrayIndex(coords, array_idx, builtin);
+        }
+
+        // Determine which SPIR-V intrinsic to use and which optional image operands are needed.
+        enum IntrinsicCall::Kind intrinsic;
+        Value* depth = nullptr;
+        ImageOperands operands;
+        switch (builtin->Func()) {
+            case builtin::Function::kTextureGather:
+                intrinsic = IntrinsicCall::Kind::kSpirvImageGather;
+                operands.offset = next_arg();
+                break;
+            case builtin::Function::kTextureGatherCompare:
+                intrinsic = IntrinsicCall::Kind::kSpirvImageDrefGather;
+                depth = next_arg();
+                operands.offset = next_arg();
+                break;
+            default:
+                return nullptr;
+        }
+
+        // Start building the argument list for the intrinsic.
+        // The first two operands are always the sampled image and then the coordinates, followed by
+        // either the depth reference or the component.
+        utils::Vector<Value*, 8> intrinsic_args;
+        intrinsic_args.Push(sampled_image->Result());
+        intrinsic_args.Push(coords);
+        if (depth) {
+            intrinsic_args.Push(depth);
+        } else {
+            intrinsic_args.Push(component);
+        }
+
+        // Add the optional image operands, if any.
+        AppendImageOperands(operands, intrinsic_args, builtin, /* requires_float_lod */ true);
+
+        // Call the intrinsic.
+        auto* result_ty = builtin->Result()->Type();
+        auto* texture_call = b.Call(result_ty, intrinsic, std::move(intrinsic_args));
+        texture_call->InsertBefore(builtin);
+        return texture_call->Result();
     }
 
     /// Handle a textureLoad() builtin.

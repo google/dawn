@@ -1874,6 +1874,289 @@ TEST_F(IR_BuiltinPolyfillSpirvTest, TextureSampleLevel_2DArray_Offset) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureGather_2D) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* component = b.FunctionParam("component", ty.i32());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({component, t, s, coords});
+
+    b.With(func->Block(), [&] {
+        auto* result =
+            b.Call(ty.vec4<f32>(), builtin::Function::kTextureGather, component, t, s, coords);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%component:i32, %t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> -> %b1 {
+  %b1 = block {
+    %6:vec4<f32> = textureGather %component, %t, %s, %coords
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%component:i32, %t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> -> %b1 {
+  %b1 = block {
+    %6:spirv.sampled_image = spirv.sampled_image %t, %s
+    %7:vec4<f32> = spirv.image_gather %6, %coords, %component, 0u
+    ret %7
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureGather_2D_Offset) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* component = b.FunctionParam("component", ty.i32());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, component, coords});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(
+            ty.vec4<f32>(), builtin::Function::kTextureGather, component, t, s, coords,
+            b.Constant(mod.constant_values.Splat(ty.vec2<i32>(), mod.constant_values.Get(1_i), 2)));
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %component:i32, %coords:vec2<f32>):vec4<f32> -> %b1 {
+  %b1 = block {
+    %6:vec4<f32> = textureGather %component, %t, %s, %coords, vec2<i32>(1i)
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %component:i32, %coords:vec2<f32>):vec4<f32> -> %b1 {
+  %b1 = block {
+    %6:spirv.sampled_image = spirv.sampled_image %t, %s
+    %7:vec4<f32> = spirv.image_gather %6, %coords, %component, 8u, vec2<i32>(1i)
+    ret %7
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureGather_2DArray_Offset) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* component = b.FunctionParam("component", ty.i32());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* array_idx = b.FunctionParam("array_idx", ty.i32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, component, coords, array_idx});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(
+            ty.vec4<f32>(), builtin::Function::kTextureGather, component, t, s, coords, array_idx,
+            b.Constant(mod.constant_values.Splat(ty.vec2<i32>(), mod.constant_values.Get(1_i), 2)));
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d_array<f32>, %s:sampler, %component:i32, %coords:vec2<f32>, %array_idx:i32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %7:vec4<f32> = textureGather %component, %t, %s, %coords, %array_idx, vec2<i32>(1i)
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d_array<f32>, %s:sampler, %component:i32, %coords:vec2<f32>, %array_idx:i32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %7:spirv.sampled_image = spirv.sampled_image %t, %s
+    %8:f32 = convert %array_idx
+    %9:vec3<f32> = construct %coords, %8
+    %10:vec4<f32> = spirv.image_gather %7, %9, %component, 8u, vec2<i32>(1i)
+    ret %10
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureGather_Depth2D) {
+    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kTextureGather, t, s, coords);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>):vec4<f32> -> %b1 {
+  %b1 = block {
+    %5:vec4<f32> = textureGather %t, %s, %coords
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>):vec4<f32> -> %b1 {
+  %b1 = block {
+    %5:spirv.sampled_image = spirv.sampled_image %t, %s
+    %6:vec4<f32> = spirv.image_gather %5, %coords, 0u, 0u
+    ret %6
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureGatherCompare_Depth2D) {
+    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, depth});
+
+    b.With(func->Block(), [&] {
+        auto* result =
+            b.Call(ty.vec4<f32>(), builtin::Function::kTextureGatherCompare, t, s, coords, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %6:vec4<f32> = textureGatherCompare %t, %s, %coords, %depth
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %6:spirv.sampled_image = spirv.sampled_image %t, %s
+    %7:vec4<f32> = spirv.image_dref_gather %6, %coords, %depth, 0u
+    ret %7
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureGatherCompare_Depth2D_Offset) {
+    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, depth});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(
+            ty.vec4<f32>(), builtin::Function::kTextureGatherCompare, t, s, coords, depth,
+            b.Constant(mod.constant_values.Splat(ty.vec2<i32>(), mod.constant_values.Get(1_i), 2)));
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %6:vec4<f32> = textureGatherCompare %t, %s, %coords, %depth, vec2<i32>(1i)
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %6:spirv.sampled_image = spirv.sampled_image %t, %s
+    %7:vec4<f32> = spirv.image_dref_gather %6, %coords, %depth, 8u, vec2<i32>(1i)
+    ret %7
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureGatherCompare_Depth2DArray) {
+    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* array_idx = b.FunctionParam("array_idx", ty.u32());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, array_idx, depth});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kTextureGatherCompare, t, s,
+                              coords, array_idx, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d_array, %s:sampler, %coords:vec2<f32>, %array_idx:u32, %depth:f32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %7:vec4<f32> = textureGatherCompare %t, %s, %coords, %array_idx, %depth
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d_array, %s:sampler, %coords:vec2<f32>, %array_idx:u32, %depth:f32):vec4<f32> -> %b1 {
+  %b1 = block {
+    %7:spirv.sampled_image = spirv.sampled_image %t, %s
+    %8:f32 = convert %array_idx
+    %9:vec3<f32> = construct %coords, %8
+    %10:vec4<f32> = spirv.image_dref_gather %7, %9, %depth, 0u
+    ret %10
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_BuiltinPolyfillSpirvTest, TextureStore_2D) {
     auto format = builtin::TexelFormat::kR32Float;
     auto* t = b.FunctionParam("t", ty.Get<type::StorageTexture>(
