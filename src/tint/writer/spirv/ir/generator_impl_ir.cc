@@ -1485,6 +1485,14 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
         case ir::IntrinsicCall::Kind::kSpirvImageFetch:
             op = spv::Op::OpImageFetch;
             break;
+        case ir::IntrinsicCall::Kind::kSpirvImageQuerySize:
+            module_.PushCapability(SpvCapabilityImageQuery);
+            op = spv::Op::OpImageQuerySize;
+            break;
+        case ir::IntrinsicCall::Kind::kSpirvImageQuerySizeLod:
+            module_.PushCapability(SpvCapabilityImageQuery);
+            op = spv::Op::OpImageQuerySizeLod;
+            break;
         case ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
             op = spv::Op::OpImageSampleImplicitLod;
             break;

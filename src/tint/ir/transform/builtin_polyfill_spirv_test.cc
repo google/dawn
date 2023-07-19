@@ -2000,5 +2000,147 @@ TEST_F(IR_BuiltinPolyfillSpirvTest, TextureStore_2DArray_IndexDifferentType) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureDimensions_2D_ImplicitLod) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<u32>(), builtin::Function::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %3:vec2<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %3:vec2<u32> = spirv.image_query_size_lod %t, 0u
+    ret %3
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureDimensions_2D_ExplicitLod) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* lod = b.FunctionParam("lod", ty.i32());
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t, lod});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<u32>(), builtin::Function::kTextureDimensions, t, lod);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>, %lod:i32):vec2<u32> -> %b1 {
+  %b1 = block {
+    %4:vec2<u32> = textureDimensions %t, %lod
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>, %lod:i32):vec2<u32> -> %b1 {
+  %b1 = block {
+    %4:vec2<u32> = spirv.image_query_size_lod %t, %lod
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureDimensions_2DArray) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<u32>(), builtin::Function::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d_array<f32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %3:vec2<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d_array<f32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %3:vec3<u32> = spirv.image_query_size_lod %t, 0u
+    %4:vec2<u32> = swizzle %3, xy
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureDimensions_Multisampled) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<u32>(), builtin::Function::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_multisampled_2d<f32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %3:vec2<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_multisampled_2d<f32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %3:vec2<u32> = spirv.image_query_size %t
+    ret %3
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::ir::transform

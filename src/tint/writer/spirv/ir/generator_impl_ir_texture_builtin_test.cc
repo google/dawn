@@ -1160,6 +1160,256 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                          PrintCase);
 
 ////////////////////////////////////////////////////////////////
+//// textureDimensions
+////////////////////////////////////////////////////////////////
+using TextureDimensions = TextureBuiltinTest;
+TEST_P(TextureDimensions, Emit) {
+    Run(builtin::Function::kTextureDimensions, kNoSampler);
+}
+INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+                         TextureDimensions,
+                         testing::Values(
+                             // 1D implicit Lod.
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k1d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {"%result = OpImageQuerySizeLod %uint %t %uint_0"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k1d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {"%result = OpImageQuerySize %uint %t"},
+                             },
+
+                             // 1D explicit Lod.
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k1d,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 1, kU32},
+                                 {"%result = OpImageQuerySizeLod %uint %t %lod"},
+                             },
+
+                             // 2D implicit Lod.
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySizeLod %v2uint %t %uint_0"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySizeLod %v3uint %t %uint_0",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::kCube,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySizeLod %v2uint %t %uint_0"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::kCubeArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySizeLod %v3uint %t %uint_0",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kMultisampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySize %v2uint %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySizeLod %v2uint %t %uint_0"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySizeLod %v3uint %t %uint_0",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::kCube,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySizeLod %v2uint %t %uint_0"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::kCubeArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySizeLod %v3uint %t %uint_0",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthMultisampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySize %v2uint %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySize %v2uint %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySize %v3uint %t",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+
+                             // 2D explicit Lod.
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySizeLod %v2uint %t %lod"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySizeLod %v3uint %t %lod",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::kCube,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySizeLod %v2uint %t %lod"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::kCubeArray,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySizeLod %v3uint %t %lod",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySizeLod %v2uint %t %lod"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySizeLod %v3uint %t %lod",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::kCube,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 2, kU32},
+                                 {"%result = OpImageQuerySizeLod %v2uint %t %lod"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::kCubeArray,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 2, kU32},
+                                 {
+                                     "%9 = OpImageQuerySizeLod %v3uint %t %lod",
+                                     "%result = OpVectorShuffle %v2uint %9 %9 0 1",
+                                 },
+                             },
+
+                             // 3D implicit lod.
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k3d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 3, kU32},
+                                 {"%result = OpImageQuerySizeLod %v3uint %t %uint_0"},
+                             },
+
+                             // 3D explicit lod.
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k3d,
+                                 /* texel type */ kF32,
+                                 {{"lod", 1, kU32}},
+                                 {"result", 3, kU32},
+                                 {"%result = OpImageQuerySizeLod %v3uint %t %lod"},
+                             }),
+                         PrintCase);
+
+////////////////////////////////////////////////////////////////
 //// textureNumLevels
 ////////////////////////////////////////////////////////////////
 using TextureNumLevels = TextureBuiltinTest;

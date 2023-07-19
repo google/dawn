@@ -24,6 +24,7 @@
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BuiltinPolyfillSpirv);
@@ -72,6 +73,7 @@ struct BuiltinPolyfillSpirv::State {
                     case builtin::Function::kAtomicXor:
                     case builtin::Function::kDot:
                     case builtin::Function::kSelect:
+                    case builtin::Function::kTextureDimensions:
                     case builtin::Function::kTextureLoad:
                     case builtin::Function::kTextureSample:
                     case builtin::Function::kTextureSampleBias:
@@ -110,6 +112,9 @@ struct BuiltinPolyfillSpirv::State {
                     break;
                 case builtin::Function::kSelect:
                     replacement = Select(builtin);
+                    break;
+                case builtin::Function::kTextureDimensions:
+                    replacement = TextureDimensions(builtin);
                     break;
                 case builtin::Function::kTextureLoad:
                     replacement = TextureLoad(builtin);
@@ -592,6 +597,60 @@ struct BuiltinPolyfillSpirv::State {
             b.Call(ty.void_(), IntrinsicCall::Kind::kSpirvImageWrite, std::move(intrinsic_args));
         texture_call->InsertBefore(builtin);
         return texture_call->Result();
+    }
+
+    /// Handle a textureDimensions() builtin.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    Value* TextureDimensions(CoreBuiltinCall* builtin) {
+        // Helper to get the next argument from the call, or nullptr if there are no more arguments.
+        uint32_t arg_idx = 0;
+        auto next_arg = [&]() {
+            return arg_idx < builtin->Args().Length() ? builtin->Args()[arg_idx++] : nullptr;
+        };
+
+        auto* texture = next_arg();
+        auto* texture_ty = texture->Type()->As<type::Texture>();
+
+        utils::Vector<Value*, 8> intrinsic_args;
+        intrinsic_args.Push(texture);
+
+        // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
+        enum IntrinsicCall::Kind intrinsic;
+        if (texture_ty->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture,
+                                type::StorageTexture>()) {
+            intrinsic = IntrinsicCall::Kind::kSpirvImageQuerySize;
+        } else {
+            intrinsic = IntrinsicCall::Kind::kSpirvImageQuerySizeLod;
+            if (auto* lod = next_arg()) {
+                intrinsic_args.Push(lod);
+            } else {
+                // Lod wasn't explicit, so assume 0.
+                intrinsic_args.Push(b.Constant(0_u));
+            }
+        }
+
+        // Add an extra component to the result vector for arrayed textures.
+        auto* result_ty = builtin->Result()->Type();
+        if (type::IsTextureArray(texture_ty->dim())) {
+            auto* vec = result_ty->As<type::Vector>();
+            result_ty = ty.vec(vec->type(), vec->Width() + 1);
+        }
+
+        // Call the intrinsic.
+        auto* texture_call = b.Call(result_ty, intrinsic, std::move(intrinsic_args));
+        texture_call->InsertBefore(builtin);
+
+        auto* result = texture_call->Result();
+
+        // Swizzle the first two components from the result for arrayed textures.
+        if (type::IsTextureArray(texture_ty->dim())) {
+            auto* swizzle = b.Swizzle(builtin->Result()->Type(), result, {0, 1});
+            swizzle->InsertBefore(builtin);
+            result = swizzle->Result();
+        }
+
+        return result;
     }
 };
 
