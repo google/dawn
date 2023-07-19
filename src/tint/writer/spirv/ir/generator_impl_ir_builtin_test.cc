@@ -362,6 +362,62 @@ TEST_F(SpvGeneratorImplTest, Builtin_Normalize_vec4f) {
     EXPECT_INST("%result = OpExtInst %v4float %8 Normalize %arg");
 }
 
+TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat2x3f) {
+    auto* arg = b.FunctionParam("arg", ty.mat2x3<f32>());
+    auto* func = b.Function("foo", ty.mat3x2<f32>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.mat3x2<f32>(), builtin::Function::kTranspose, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpTranspose %mat3v2float %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat4x4f) {
+    auto* arg = b.FunctionParam("arg", ty.mat4x4<f32>());
+    auto* func = b.Function("foo", ty.mat4x4<f32>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.mat4x4<f32>(), builtin::Function::kTranspose, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpTranspose %mat4v4float %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat4x3h) {
+    auto* arg = b.FunctionParam("arg", ty.mat4x3<f16>());
+    auto* func = b.Function("foo", ty.mat3x4<f16>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.mat3x4<f16>(), builtin::Function::kTranspose, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpTranspose %mat3v4half %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat2x2h) {
+    auto* arg = b.FunctionParam("arg", ty.mat2x2<f16>());
+    auto* func = b.Function("foo", ty.mat2x2<f16>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.mat2x2<f16>(), builtin::Function::kTranspose, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpTranspose %mat2v2half %arg");
+}
+
 // Tests for builtins with the signature: T = func(T, T)
 using Builtin_2arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_2arg, Scalar) {

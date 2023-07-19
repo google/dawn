@@ -1335,6 +1335,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQueryLevels;
             break;
+        case builtin::Function::kTranspose:
+            op = spv::Op::OpTranspose;
+            break;
         case builtin::Function::kTrunc:
             glsl_ext_inst(GLSLstd450Trunc);
             break;
