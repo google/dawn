@@ -49,25 +49,11 @@ class WeakRef {
         return *this;
     }
 
-    // Constructor from explicit WeakRefSupport<T>* is allowed.
-    // NOLINTNEXTLINE(runtime/explicit)
-    WeakRef(WeakRefSupport<T>* support) : mData(support->mData) {}
-
     // Promotes a WeakRef to a Ref. Access to the raw pointer is not allowed because a raw pointer
     // could become invalid after being retrieved.
-    Ref<T> Promote() const {
+    Ref<T> Promote() {
         if (mData != nullptr) {
             return AcquireRef(static_cast<T*>(mData->TryGetRef().Detach()));
-        }
-        return nullptr;
-    }
-
-    // Returns the raw pointer to the RefCountedT if it has not been invalidated. Note that this
-    // function is not thread-safe since the returned pointer can become invalid after being
-    // retrieved.
-    T* UnsafeGet() const {
-        if (mData != nullptr) {
-            return static_cast<T*>(mData->UnsafeGet());
         }
         return nullptr;
     }

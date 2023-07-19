@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "dawn/common/Constants.h"
-#include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/BindingInfo.h"
@@ -50,9 +49,7 @@ struct StageAndDescriptor {
     ConstantEntry const* constants = nullptr;
 };
 
-class PipelineLayoutBase : public ApiObjectBase,
-                           public CachedObject,
-                           public ContentLessObjectCacheable<PipelineLayoutBase> {
+class PipelineLayoutBase : public ApiObjectBase, public CachedObject {
   public:
     PipelineLayoutBase(DeviceBase* device,
                        const PipelineLayoutDescriptor* descriptor,

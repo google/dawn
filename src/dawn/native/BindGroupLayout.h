@@ -21,7 +21,6 @@
 #include <string>
 
 #include "dawn/common/Constants.h"
-#include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/common/ityp_vector.h"
@@ -50,9 +49,7 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
 // Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
 // These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers
 // into a packed range of |BindingIndex| integers.
-class BindGroupLayoutBase : public ApiObjectBase,
-                            public CachedObject,
-                            public ContentLessObjectCacheable<BindGroupLayoutBase> {
+class BindGroupLayoutBase : public ApiObjectBase, public CachedObject {
   public:
     BindGroupLayoutBase(DeviceBase* device,
                         const BindGroupLayoutDescriptor* descriptor,

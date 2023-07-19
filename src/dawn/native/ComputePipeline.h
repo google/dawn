@@ -15,7 +15,6 @@
 #ifndef SRC_DAWN_NATIVE_COMPUTEPIPELINE_H_
 #define SRC_DAWN_NATIVE_COMPUTEPIPELINE_H_
 
-#include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/Pipeline.h"
@@ -28,8 +27,7 @@ struct EntryPointMetadata;
 MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                              const ComputePipelineDescriptor* descriptor);
 
-class ComputePipelineBase : public PipelineBase,
-                            public ContentLessObjectCacheable<ComputePipelineBase> {
+class ComputePipelineBase : public PipelineBase {
   public:
     ComputePipelineBase(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
     ~ComputePipelineBase() override;

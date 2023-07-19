@@ -71,6 +71,20 @@ class RefCounted {
     // synchronization in place for destruction.
     void Release();
 
+    // Tries to return a valid Ref to `object` if it's internal refcount is not already 0. If the
+    // internal refcount has already reached 0, returns nullptr instead.
+    // TODO(dawn:1769) Remove this once ContentLessObjectCache is converted to use WeakRefs.
+    template <typename T, typename = typename std::is_convertible<T, RefCounted>>
+    friend Ref<T> TryGetRef(T* object) {
+        // Since this is called on the RefCounted class directly, and can race with destruction, we
+        // verify that we can safely increment the refcount first, create the Ref, then decrement
+        // the refcount in that order to ensure that the resultant Ref is a valid Ref.
+        if (!object->mRefCount.TryIncrement()) {
+            return nullptr;
+        }
+        return AcquireRef(object);
+    }
+
     void APIReference() { Reference(); }
     // APIRelease() can be called without any synchronization guarantees so we need to use a Release
     // method that will call LockAndDeleteThis() on destruction.

@@ -95,7 +95,10 @@ SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag, const cha
 SamplerBase::~SamplerBase() = default;
 
 void SamplerBase::DestroyImpl() {
-    Uncache();
+    if (IsCachedReference()) {
+        // Do not uncache the actual cached object if we are a blueprint.
+        GetDevice()->UncacheSampler(this);
+    }
 }
 
 // static

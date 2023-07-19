@@ -238,7 +238,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "ConcurrentCache.h",
       "Constants.h",
       "ContentLessObjectCache.h",
-      "ContentLessObjectCacheable.h",
       "CoreFoundationRef.h",
       "DynamicLib.cpp",
       "DynamicLib.h",

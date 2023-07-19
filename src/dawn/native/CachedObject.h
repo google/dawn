@@ -24,9 +24,13 @@
 namespace dawn::native {
 
 // Some objects are cached so that instead of creating new duplicate objects, we increase the
-// refcount of an existing object.
+// refcount of an existing object. When an object is successfully created, the device should call
+// SetIsCachedReference() and insert the object into the cache.
 class CachedObject {
   public:
+    bool IsCachedReference() const;
+    void SetIsCachedReference();
+
     // Functor necessary for the unordered_set<CachedObject*>-based cache.
     struct HashFunc {
         size_t operator()(const CachedObject* obj) const;
@@ -45,6 +49,8 @@ class CachedObject {
   private:
     // Called by ObjectContentHasher upon creation to record the object.
     virtual size_t ComputeContentHash() = 0;
+
+    bool mIsCachedReference = false;
 
     size_t mContentHash = 0;
     bool mIsContentHashInitialized = false;

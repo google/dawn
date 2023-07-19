@@ -195,9 +195,12 @@ class DeviceBase : public RefCountedWithExternalCount {
     ResultOrError<Ref<BindGroupLayoutBase>> GetOrCreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor,
         PipelineCompatibilityToken pipelineCompatibilityToken = PipelineCompatibilityToken(0));
+    void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
     BindGroupLayoutBase* GetEmptyBindGroupLayout();
     PipelineLayoutBase* GetEmptyPipelineLayout();
+
+    void UncacheComputePipeline(ComputePipelineBase* obj);
 
     ResultOrError<Ref<TextureViewBase>> CreateImplicitMSAARenderTextureViewFor(
         const TextureBase* singleSampledTexture,
@@ -207,19 +210,25 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     ResultOrError<Ref<PipelineLayoutBase>> GetOrCreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor);
+    void UncachePipelineLayout(PipelineLayoutBase* obj);
+
+    void UncacheRenderPipeline(RenderPipelineBase* obj);
 
     ResultOrError<Ref<SamplerBase>> GetOrCreateSampler(const SamplerDescriptor* descriptor);
+    void UncacheSampler(SamplerBase* obj);
 
     ResultOrError<Ref<ShaderModuleBase>> GetOrCreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages);
+    void UncacheShaderModule(ShaderModuleBase* obj);
 
     Ref<AttachmentState> GetOrCreateAttachmentState(AttachmentState* blueprint);
     Ref<AttachmentState> GetOrCreateAttachmentState(
         const RenderBundleEncoderDescriptor* descriptor);
     Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor);
     Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
+    void UncacheAttachmentState(AttachmentState* obj);
 
     Ref<PipelineCacheBase> GetOrCreatePipelineCache(const CacheKey& key);
 

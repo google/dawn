@@ -28,10 +28,6 @@ Ref<RefCounted> WeakRefData::TryGetRef() {
     return AcquireRef(mValue);
 }
 
-RefCounted* WeakRefData::UnsafeGet() const {
-    return mValue;
-}
-
 void WeakRefData::Invalidate() {
     std::lock_guard<std::mutex> lock(mMutex);
     mValue = nullptr;

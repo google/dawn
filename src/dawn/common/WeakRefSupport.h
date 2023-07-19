@@ -34,10 +34,6 @@ class WeakRefData : public RefCounted {
     // internal refcount has already reached 0, returns nullptr instead.
     Ref<RefCounted> TryGetRef();
 
-    // Returns the raw pointer to the RefCounted. In general, this is an unsafe operation because
-    // the RefCounted can become invalid after being retrieved.
-    RefCounted* UnsafeGet() const;
-
   private:
     std::mutex mMutex;
     RefCounted* mValue = nullptr;
@@ -47,7 +43,7 @@ class WeakRefData : public RefCounted {
 class WeakRefSupportBase {
   protected:
     explicit WeakRefSupportBase(Ref<detail::WeakRefData> data);
-    virtual ~WeakRefSupportBase();
+    ~WeakRefSupportBase();
 
   private:
     template <typename T>

@@ -103,6 +103,9 @@ auto GetOrCreate(ContentLessObjectCache<RefCountedT>& cache,
 
     bool inserted = false;
     std::tie(result, inserted) = cache.Insert(result.Get());
+    if (inserted) {
+        result->SetIsCachedReference();
+    }
     return ReturnType(result);
 }
 
@@ -853,6 +856,11 @@ ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
         });
 }
 
+void DeviceBase::UncacheBindGroupLayout(BindGroupLayoutBase* obj) {
+    ASSERT(obj->IsCachedReference());
+    mCaches->bindGroupLayouts.Erase(obj);
+}
+
 // Private function used at initialization
 ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateEmptyBindGroupLayout() {
     BindGroupLayoutDescriptor desc = {};
@@ -893,15 +901,30 @@ Ref<RenderPipelineBase> DeviceBase::GetCachedRenderPipeline(
 Ref<ComputePipelineBase> DeviceBase::AddOrGetCachedComputePipeline(
     Ref<ComputePipelineBase> computePipeline) {
     ASSERT(IsLockedByCurrentThreadIfNeeded());
-    auto [pipeline, _] = mCaches->computePipelines.Insert(computePipeline.Get());
-    return std::move(pipeline);
+    auto [cachedPipeline, inserted] = mCaches->computePipelines.Insert(computePipeline.Get());
+    if (inserted) {
+        computePipeline->SetIsCachedReference();
+        return computePipeline;
+    } else {
+        return std::move(cachedPipeline);
+    }
 }
 
 Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
     Ref<RenderPipelineBase> renderPipeline) {
     ASSERT(IsLockedByCurrentThreadIfNeeded());
-    auto [pipeline, _] = mCaches->renderPipelines.Insert(renderPipeline.Get());
-    return std::move(pipeline);
+    auto [cachedPipeline, inserted] = mCaches->renderPipelines.Insert(renderPipeline.Get());
+    if (inserted) {
+        renderPipeline->SetIsCachedReference();
+        return renderPipeline;
+    } else {
+        return std::move(cachedPipeline);
+    }
+}
+
+void DeviceBase::UncacheComputePipeline(ComputePipelineBase* obj) {
+    ASSERT(obj->IsCachedReference());
+    mCaches->computePipelines.Erase(obj);
 }
 
 ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateImplicitMSAARenderTextureViewFor(
@@ -974,6 +997,16 @@ ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::GetOrCreatePipelineLayout(
                        });
 }
 
+void DeviceBase::UncachePipelineLayout(PipelineLayoutBase* obj) {
+    ASSERT(obj->IsCachedReference());
+    mCaches->pipelineLayouts.Erase(obj);
+}
+
+void DeviceBase::UncacheRenderPipeline(RenderPipelineBase* obj) {
+    ASSERT(obj->IsCachedReference());
+    mCaches->renderPipelines.Erase(obj);
+}
+
 ResultOrError<Ref<SamplerBase>> DeviceBase::GetOrCreateSampler(
     const SamplerDescriptor* descriptor) {
     SamplerBase blueprint(this, descriptor, ApiObjectBase::kUntrackedByDevice);
@@ -987,6 +1020,11 @@ ResultOrError<Ref<SamplerBase>> DeviceBase::GetOrCreateSampler(
         result->SetContentHash(blueprintHash);
         return result;
     });
+}
+
+void DeviceBase::UncacheSampler(SamplerBase* obj) {
+    ASSERT(obj->IsCachedReference());
+    mCaches->samplers.Erase(obj);
 }
 
 ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
@@ -1025,9 +1063,15 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
         });
 }
 
+void DeviceBase::UncacheShaderModule(ShaderModuleBase* obj) {
+    ASSERT(obj->IsCachedReference());
+    mCaches->shaderModules.Erase(obj);
+}
+
 Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(AttachmentState* blueprint) {
     return GetOrCreate(mCaches->attachmentStates, blueprint, [&]() -> Ref<AttachmentState> {
-        return AcquireRef(new AttachmentState(*blueprint));
+        Ref<AttachmentState> attachmentState = AcquireRef(new AttachmentState(*blueprint));
+        return attachmentState;
     });
 }
 
@@ -1047,6 +1091,11 @@ Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
     const RenderPassDescriptor* descriptor) {
     AttachmentState blueprint(this, descriptor);
     return GetOrCreateAttachmentState(&blueprint);
+}
+
+void DeviceBase::UncacheAttachmentState(AttachmentState* obj) {
+    ASSERT(obj->IsCachedReference());
+    mCaches->attachmentStates.Erase(obj);
 }
 
 Ref<PipelineCacheBase> DeviceBase::GetOrCreatePipelineCache(const CacheKey& key) {

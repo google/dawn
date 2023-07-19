@@ -84,7 +84,10 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
 PipelineLayoutBase::~PipelineLayoutBase() = default;
 
 void PipelineLayoutBase::DestroyImpl() {
-    Uncache();
+    if (IsCachedReference()) {
+        // Do not uncache the actual cached object if we are a blueprint.
+        GetDevice()->UncachePipelineLayout(this);
+    }
 }
 
 // static

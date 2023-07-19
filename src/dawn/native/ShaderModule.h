@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "dawn/common/Constants.h"
-#include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/CachedObject.h"
@@ -254,9 +253,7 @@ struct EntryPointMetadata {
     bool usesSampleMaskOutput = false;
 };
 
-class ShaderModuleBase : public ApiObjectBase,
-                         public CachedObject,
-                         public ContentLessObjectCacheable<ShaderModuleBase> {
+class ShaderModuleBase : public ApiObjectBase, public CachedObject {
   public:
     ShaderModuleBase(DeviceBase* device,
                      const ShaderModuleDescriptor* descriptor,

@@ -64,7 +64,10 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
 ComputePipelineBase::~ComputePipelineBase() = default;
 
 void ComputePipelineBase::DestroyImpl() {
-    Uncache();
+    if (IsCachedReference()) {
+        // Do not uncache the actual cached object if we are a blueprint.
+        GetDevice()->UncacheComputePipeline(this);
+    }
 }
 
 // static
