@@ -100,6 +100,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kF16, builtin::Function::kLog, "Log"},
                     BuiltinTestCase{kF32, builtin::Function::kLog2, "Log2"},
                     BuiltinTestCase{kF16, builtin::Function::kLog2, "Log2"},
+                    BuiltinTestCase{kF32, builtin::Function::kRound, "RoundEven"},
+                    BuiltinTestCase{kF16, builtin::Function::kRound, "RoundEven"},
                     BuiltinTestCase{kF32, builtin::Function::kSin, "Sin"},
                     BuiltinTestCase{kF16, builtin::Function::kSin, "Sin"},
                     BuiltinTestCase{kF32, builtin::Function::kSqrt, "Sqrt"},
