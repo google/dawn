@@ -17,6 +17,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "src/tint/ast/accessor_expression.h"
@@ -62,6 +63,7 @@
 #include "src/tint/ast/struct_member_size_attribute.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/templated_identifier.h"
+#include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/var.h"
 #include "src/tint/ast/variable_decl_statement.h"
@@ -146,6 +148,15 @@ class Impl {
     /// The stack of flow control instructions.
     utils::Vector<ControlInstruction*, 8> control_stack_;
 
+    struct VectorRefElementAccess {
+        ir::Value* vector = nullptr;
+        ir::Value* index = nullptr;
+    };
+
+    /// Maps expressions to their result values
+    utils::Hashmap<const ast::Expression*, std::variant<ir::Value*, VectorRefElementAccess>, 64>
+        expr_to_result_;
+
     /// The current block for expressions.
     Block* current_block_ = nullptr;
 
@@ -196,6 +207,35 @@ class Impl {
                 return *it;
             }
         }
+        return nullptr;
+    }
+
+    Value* ResultForExpression(const ast::Expression* expr) {
+        auto val = expr_to_result_.Get(expr);
+        if (!val) {
+            return nullptr;
+        }
+
+        if (auto* v = std::get_if<ir::Value*>(&(val.value()))) {
+            // If this expression maps to sem::Load, insert a load instruction to get the result.
+            auto* sem = program_->Sem().GetVal(expr);
+            if ((*v)->Type()->Is<type::Pointer>() && sem->Is<sem::Load>()) {
+                auto* load = builder_.Load(*v);
+                current_block_->Append(load);
+                // There are cases where we get the result for an expression multiple times (binary
+                // that does a LHS load for one, so make sure we cache the load away for any
+                // subsequent calls.
+                expr_to_result_.Replace(expr, load->Result());
+                return load->Result();
+            }
+            return *v;
+        } else if (auto ref = std::get_if<VectorRefElementAccess>(&(val.value()))) {
+            // Vector reference accesses need to map to LoadVectorElement()
+            auto* load = builder_.LoadVectorElement(ref->vector, ref->index);
+            current_block_->Append(load);
+            return load->Result();
+        }
+
         return nullptr;
     }
 
@@ -472,83 +512,80 @@ class Impl {
             });
     }
 
-    void EmitAssignment(const ast::AssignmentStatement* stmt) {
-        auto b = builder_.With(current_block_);
-        if (auto access = AsVectorRefElementAccess(stmt->lhs)) {
-            if (auto rhs = EmitExpression(stmt->rhs)) {
-                b.StoreVectorElement(access->vector, access->index, rhs.Get());
-            }
+    void StoreResult(const ast::Expression* lhs, ir::Value* rhs) {
+        auto val = expr_to_result_.Get(lhs);
+        if (!val) {
             return;
         }
 
+        auto b = builder_.With(current_block_);
+        if (auto* v = std::get_if<ir::Value*>(&(val.value()))) {
+            b.Store(*v, rhs);
+        } else if (auto ref = std::get_if<VectorRefElementAccess>(&(val.value()))) {
+            b.StoreVectorElement(ref->vector, ref->index, rhs);
+        }
+    }
+
+    void EmitAssignment(const ast::AssignmentStatement* stmt) {
         // If assigning to a phony, just generate the RHS and we're done. Note that, because
         // this isn't used, a subsequent transform could remove it due to it being dead code.
         // This could then change the interface for the program (i.e. a global var no longer
         // used). If that happens we have to either fix this to store to a phony value, or make
         // sure we pull the interface before doing the dead code elimination.
         if (stmt->lhs->Is<ast::PhonyExpression>()) {
-            (void)EmitExpression(stmt->rhs);
-            return;
-        }
-        auto lhs = EmitExpression(stmt->lhs);
-        if (!lhs) {
+            (void)EmitExpressionWithResult(stmt->rhs);
             return;
         }
 
-        auto rhs = EmitExpression(stmt->rhs);
+        EmitExpression(stmt->lhs);
+
+        auto rhs = EmitExpressionWithResult(stmt->rhs);
         if (!rhs) {
             return;
         }
-        b.Store(lhs.Get(), rhs.Get());
+        StoreResult(stmt->lhs, rhs.Get());
     }
 
     void EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
+        EmitExpression(stmt->lhs);
+
         auto* one = program_->TypeOf(stmt->lhs)->UnwrapRef()->is_signed_integer_scalar()
                         ? builder_.Constant(1_i)
                         : builder_.Constant(1_u);
-        auto emit_rhs = [one] { return one; };
 
-        EmitCompoundAssignment(stmt->lhs, emit_rhs,
+        EmitCompoundAssignment(stmt->lhs, one,
                                stmt->increment ? ast::BinaryOp::kAdd : ast::BinaryOp::kSubtract);
     }
 
     void EmitCompoundAssignment(const ast::CompoundAssignmentStatement* stmt) {
-        auto emit_rhs = [this, stmt] {
-            auto rhs = EmitExpression(stmt->rhs);
-            return rhs ? rhs.Get() : nullptr;
-        };
-        EmitCompoundAssignment(stmt->lhs, emit_rhs, stmt->op);
-    }
+        EmitExpression(stmt->lhs);
 
-    template <typename EMIT_RHS>
-    void EmitCompoundAssignment(const ast::Expression* lhs_expr,
-                                EMIT_RHS&& emit_rhs,
-                                ast::BinaryOp op) {
-        auto b = builder_.With(current_block_);
-        if (auto access = AsVectorRefElementAccess(lhs_expr)) {
-            // Compound assignment of vector element needs to use LoadVectorElement() and
-            // StoreVectorElement().
-            if (auto rhs = emit_rhs()) {
-                auto* load = b.LoadVectorElement(access->vector, access->index);
-                auto* ty = load->Result()->Type();
-                auto* inst = b.Append(BinaryOp(ty, load->Result(), rhs, op));
-                b.StoreVectorElement(access->vector, access->index, inst);
-            }
-            return;
-        }
-
-        auto lhs = EmitExpression(lhs_expr);
-        if (!lhs) {
-            return;
-        }
-        auto rhs = emit_rhs();
+        auto rhs = EmitExpressionWithResult(stmt->rhs);
         if (!rhs) {
             return;
         }
-        auto* load = b.Load(lhs.Get());
-        auto* ty = load->Result()->Type();
-        auto* inst = current_block_->Append(BinaryOp(ty, load->Result(), rhs, op));
-        b.Store(lhs.Get(), inst);
+
+        EmitCompoundAssignment(stmt->lhs, rhs.Get(), stmt->op);
+    }
+
+    void EmitCompoundAssignment(const ast::Expression* lhs_expr, ir::Value* rhs, ast::BinaryOp op) {
+        auto val = expr_to_result_.Get(lhs_expr);
+        if (!val) {
+            return;
+        }
+
+        auto b = builder_.With(current_block_);
+        if (auto* v = std::get_if<ir::Value*>(&(val.value()))) {
+            auto* load = b.Load(*v);
+            auto* ty = load->Result()->Type();
+            auto* inst = current_block_->Append(BinaryOp(ty, load->Result(), rhs, op));
+            b.Store(*v, inst);
+        } else if (auto ref = std::get_if<VectorRefElementAccess>(&(val.value()))) {
+            auto* load = b.LoadVectorElement(ref->vector, ref->index);
+            auto* ty = load->Result()->Type();
+            auto* inst = b.Append(BinaryOp(ty, load->Result(), rhs, op));
+            b.StoreVectorElement(ref->vector, ref->index, inst);
+        }
     }
 
     void EmitBlock(const ast::BlockStatement* block) {
@@ -563,7 +600,7 @@ class Impl {
 
     void EmitIf(const ast::IfStatement* stmt) {
         // Emit the if condition into the end of the preceding block
-        auto reg = EmitExpression(stmt->condition);
+        auto reg = EmitExpressionWithResult(stmt->condition);
         if (!reg) {
             return;
         }
@@ -645,7 +682,7 @@ class Impl {
             TINT_SCOPED_ASSIGNMENT(current_block_, loop_inst->Body());
 
             // Emit the while condition into the Start().target of the loop
-            auto reg = EmitExpression(stmt->condition);
+            auto reg = EmitExpressionWithResult(stmt->condition);
             if (!reg) {
                 return;
             }
@@ -698,7 +735,7 @@ class Impl {
 
         if (stmt->condition) {
             // Emit the condition into the target target of the loop body
-            auto reg = EmitExpression(stmt->condition);
+            auto reg = EmitExpressionWithResult(stmt->condition);
             if (!reg) {
                 return;
             }
@@ -732,7 +769,7 @@ class Impl {
 
     void EmitSwitch(const ast::SwitchStatement* stmt) {
         // Emit the condition into the preceding block
-        auto reg = EmitExpression(stmt->condition);
+        auto reg = EmitExpressionWithResult(stmt->condition);
         if (!reg) {
             return;
         }
@@ -764,7 +801,7 @@ class Impl {
     void EmitReturn(const ast::ReturnStatement* stmt) {
         Value* ret_value = nullptr;
         if (stmt->value) {
-            auto ret = EmitExpression(stmt->value);
+            auto ret = EmitExpressionWithResult(stmt->value);
             if (!ret) {
                 return;
             }
@@ -814,209 +851,311 @@ class Impl {
         auto* current_control = FindEnclosingControl(ControlFlags::kExcludeSwitch);
 
         // Emit the break-if condition into the end of the preceding block
-        auto cond = EmitExpression(stmt->condition);
+        auto cond = EmitExpressionWithResult(stmt->condition);
         if (!cond) {
             return;
         }
         SetTerminator(builder_.BreakIf(current_control->As<ir::Loop>(), cond.Get()));
     }
 
-    struct AccessorInfo {
-        Value* object = nullptr;
-        Value* result = nullptr;
-        const type::Type* result_type = nullptr;
-        utils::Vector<Value*, 1> indices;
-    };
-
-    utils::Result<Value*> EmitAccess(const ast::AccessorExpression* expr) {
+    void EmitAccess(const ast::AccessorExpression* expr, Instruction* preceeding_inst) {
         if (auto vec_access = AsVectorRefElementAccess(expr)) {
-            // Vector reference accesses need to map to LoadVectorElement()
-            auto* load = builder_.LoadVectorElement(vec_access->vector, vec_access->index);
-            current_block_->Append(load);
-            return load->Result();
+            expr_to_result_.Add(expr, vec_access.value());
+            return;
         }
 
-        std::vector<const ast::Expression*> accessors;
-        const ast::Expression* object = expr;
-        while (true) {
-            if (program_->Sem().GetVal(object)->ConstantValue()) {
-                break;  // Reached a constant expression. Stop traversal.
-            }
-            if (auto* array = object->As<ast::IndexAccessorExpression>()) {
-                accessors.push_back(object);
-                object = array->object;
-            } else if (auto* member = object->As<ast::MemberAccessorExpression>()) {
-                accessors.push_back(object);
-                object = member->object;
-            } else {
-                break;
-            }
+        auto* obj = ResultForExpression(expr->object);
+        if (!obj) {
+            TINT_ASSERT(IR, false && "no object result");
+            return;
         }
 
-        AccessorInfo info;
-        {
-            auto res = EmitExpression(object);
-            if (!res) {
-                return utils::Failure;
-            }
-            info.object = res.Get();
-        }
-        info.result_type =
-            program_->Sem().Get(expr)->Type()->UnwrapRef()->Clone(clone_ctx_.type_ctx);
-
-        // The AST chain is `inside-out` compared to what we need, which means the list it generates
-        // is backwards. We need to operate on the list in reverse order to have the correct access
-        // chain.
-        for (auto* accessor : utils::Reverse(accessors)) {
-            bool ok = tint::Switch(
-                accessor,
-                [&](const ast::IndexAccessorExpression* idx) {
-                    return GenerateIndexAccessor(idx, info);
-                },
-                [&](const ast::MemberAccessorExpression* member) {
-                    return GenerateMemberAccessor(member, info);
-                },
-                [&](Default) {
-                    TINT_ICE(Writer, diagnostics_)
-                        << "invalid accessor in list: " + std::string(accessor->TypeInfo().name);
-                    return false;
-                });
-            if (!ok) {
-                return utils::Failure;
+        Access* appendable_access = nullptr;
+        // If the current block ends in an accessor, and that accesor result is the result of the
+        // object of this accessor, we can try appendeding to that previous result instead of
+        // creating a new accessor.
+        if (preceeding_inst && preceeding_inst->Is<Access>() && preceeding_inst->Result() == obj) {
+            appendable_access = preceeding_inst->As<Access>();
+            // Move the access chain to be appended too to after the index expression for this
+            // accessor.
+            if (current_block_->Back() != preceeding_inst) {
+                current_block_->Remove(preceeding_inst);
+                current_block_->Append(preceeding_inst);
             }
         }
 
-        if (!info.indices.IsEmpty()) {
-            info.result = GenerateAccess(info);
-        }
-        return info.result;
-    }
+        auto* sem = program_->Sem().Get(expr)->Unwrap();
 
-    Value* GenerateAccess(const AccessorInfo& info) {
         // The access result type should match the source result type. If the source is a pointer,
         // we generate a pointer.
-        const type::Type* ty = nullptr;
-        if (auto* ptr = info.object->Type()->As<type::Pointer>();
-            ptr && !info.result_type->Is<type::Pointer>()) {
-            ty = builder_.ir.Types().ptr(ptr->AddressSpace(), info.result_type, ptr->Access());
-        } else {
-            ty = info.result_type;
+        const type::Type* ty = sem->Type()->UnwrapRef()->Clone(clone_ctx_.type_ctx);
+        if (auto* ptr = obj->Type()->As<type::Pointer>(); ptr && !ty->Is<type::Pointer>()) {
+            ty = builder_.ir.Types().ptr(ptr->AddressSpace(), ty, ptr->Access());
         }
 
-        auto* a = builder_.Access(ty, info.object, info.indices);
-        current_block_->Append(a);
-        return a->Result();
-    }
+        auto append_access = [&](Value* idx) {
+            TINT_ASSERT(IR, appendable_access);
+            appendable_access->AddIndex(idx);
 
-    bool GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, AccessorInfo& info) {
-        auto res = EmitExpression(expr->index);
-        if (!res) {
-            return false;
-        }
+            auto* old_res = appendable_access->Result();
 
-        info.indices.Push(res.Get());
-        return true;
-    }
+            InstructionResult* new_res = builder_.InstructionResult(ty);
+            appendable_access->SetResult(0, new_res);
 
-    bool GenerateMemberAccessor(const ast::MemberAccessorExpression* expr, AccessorInfo& info) {
-        auto* expr_sem = program_->Sem().Get(expr)->Unwrap();
+            TINT_ASSERT(IR, old_res->Usages().IsEmpty());
+            old_res->SetSource(nullptr);
+            old_res->Destroy();
 
-        return tint::Switch(
-            expr_sem,  //
+            expr_to_result_.Remove(expr->object);
+            expr_to_result_.Add(expr, new_res);
+        };
+
+        auto create_result = [&](Value* idx) {
+            if (appendable_access) {
+                append_access(idx);
+            } else {
+                auto* a = builder_.Access(ty, obj, idx);
+                current_block_->Append(a);
+                expr_to_result_.Add(expr, a->Result());
+            }
+        };
+
+        tint::Switch(
+            sem,
+            [&](const sem::IndexAccessorExpression* idx) {
+                if (auto* v = idx->Index()->ConstantValue()) {
+                    if (auto* cv = v->Clone(clone_ctx_)) {
+                        create_result(builder_.Constant(cv));
+                    } else {
+                        TINT_ASSERT(IR, false && "constant clone failed");
+                    }
+                } else {
+                    create_result(ResultForExpression(idx->Index()->Declaration()));
+                }
+            },
             [&](const sem::StructMemberAccess* access) {
-                uint32_t idx = access->Member()->Index();
-                info.indices.Push(builder_.Constant(u32(idx)));
-                return true;
+                create_result(builder_.Constant(u32((access->Member()->Index()))));
             },
             [&](const sem::Swizzle* swizzle) {
                 auto& indices = swizzle->Indices();
 
                 // A single element swizzle is just treated as an accessor.
                 if (indices.Length() == 1) {
-                    info.indices.Push(builder_.Constant(u32(indices[0])));
-                    return true;
+                    create_result(builder_.Constant(u32(indices[0])));
+                } else {
+                    auto* val = builder_.Swizzle(ty, obj, std::move(indices));
+                    current_block_->Append(val);
+                    expr_to_result_.Add(expr, val->Result());
                 }
-
-                // Store the result type away, this will be the result of the swizzle, but the
-                // intermediate steps need different result types.
-                auto* result_type = info.result_type;
-
-                // Emit any preceding member/index accessors
-                if (!info.indices.IsEmpty()) {
-                    // The access chain is being split, the initial part of than will have a
-                    // resulting type that matches the object being swizzled.
-                    info.result_type = swizzle->Object()->Type()->Clone(clone_ctx_.type_ctx);
-                    info.object = GenerateAccess(info);
-                    info.indices.Clear();
-
-                    // If the sub-accessor generated a pointer result, make sure a load is emitted
-                    if (auto* ptr = info.object->Type()->As<type::Pointer>()) {
-                        auto* load = builder_.Load(info.object);
-                        info.result_type = ptr->StoreType();
-                        info.object = load->Result();
-                        current_block_->Append(load);
-                    }
-                }
-
-                auto* val = builder_.Swizzle(swizzle->Type()->Clone(clone_ctx_.type_ctx),
-                                             info.object, std::move(indices));
-                current_block_->Append(val);
-                info.result = val->Result();
-
-                info.object = info.result;
-                info.result_type = result_type;
-                return true;
             },
             [&](Default) {
-                TINT_ICE(IR, diagnostics_)
-                    << "unhandled member index type: " << expr_sem->TypeInfo().name;
-                return false;
+                TINT_ICE(Writer, diagnostics_)
+                    << "invalid accessor: " + std::string(sem->TypeInfo().name);
             });
     }
 
-    utils::Result<Value*> EmitExpression(const ast::Expression* expr) {
+    void EmitExpression(const ast::Expression* root) {
         // If this is a value that has been const-eval'd return the result.
-        auto* sem = program_->Sem().GetVal(expr);
+        auto* sem = program_->Sem().GetVal(root);
         if (sem) {
             if (auto* v = sem->ConstantValue()) {
                 if (auto* cv = v->Clone(clone_ctx_)) {
-                    return builder_.Constant(cv);
+                    auto* val = builder_.Constant(cv);
+                    expr_to_result_.Add(root, val);
+                    return;
                 }
             }
         }
 
-        auto result = tint::Switch(
-            expr,  //
-            [&](const ast::AccessorExpression* a) { return EmitAccess(a); },
-            [&](const ast::BinaryExpression* b) { return EmitBinary(b); },
-            [&](const ast::BitcastExpression* b) { return EmitBitcast(b); },
-            [&](const ast::CallExpression* c) { return EmitCall(c); },
-            [&](const ast::IdentifierExpression* i) -> utils::Result<Value*> {
-                auto* v = scopes_.Get(i->identifier->symbol);
-                if (TINT_UNLIKELY(!v)) {
-                    add_error(expr->source,
-                              "unable to find identifier " + i->identifier->symbol.Name());
-                    return utils::Failure;
-                }
-                return {v};
-            },
-            [&](const ast::LiteralExpression* l) { return EmitLiteral(l); },
-            [&](const ast::UnaryOpExpression* u) { return EmitUnary(u); },
-            // Note, ast::PhonyExpression is explicitly not handled here as it should never get
-            // into this method. The assignment statement should have filtered it out already.
-            [&](Default) {
-                add_error(expr->source,
-                          "unknown expression type: " + std::string(expr->TypeInfo().name));
-                return utils::Failure;
-            });
+        utils::Vector<Instruction*, 4> instruction_before_accessor;
+        utils::Vector<const ast::Expression*, 64> parent_stack;
+        utils::Vector<const ast::Expression*, 64> emit_too;
+        utils::Vector<ir::Block*, 8> block_stack;
 
-        // If this expression maps to sem::Load, insert a load instruction to get the result.
-        if (result && result.Get()->Type()->Is<type::Pointer>() && sem->Is<sem::Load>()) {
-            auto* load = builder_.Load(result.Get());
-            current_block_->Append(load);
-            return load->Result();
+        auto set_before = [&](const ast::Expression* expr, const ast::AccessorExpression* a) {
+            if (expr == a->object) {
+                if (current_block_->Back() && current_block_->Back()->HasResults()) {
+                    instruction_before_accessor.Push(current_block_->Back());
+                } else {
+                    instruction_before_accessor.Push(nullptr);
+                }
+            }
+        };
+
+        auto check_parent_stack = [&](const ast::Expression* expr) {
+            TINT_ASSERT(IR, !parent_stack.IsEmpty());
+
+            tint::Switch(
+                parent_stack.Back(),  //
+                [&](const ast::MemberAccessorExpression* m) {
+                    set_before(expr, m);
+
+                    auto* preceeding = instruction_before_accessor.Pop();
+                    parent_stack.Pop();
+                    EmitAccess(m, preceeding);
+                },
+                [&](const ast::IndexAccessorExpression* i) {
+                    set_before(expr, i);
+
+                    if (expr == i->index) {
+                        auto* preceeding = instruction_before_accessor.Pop();
+                        parent_stack.Pop();
+                        EmitAccess(i, preceeding);
+                    } else {
+                        emit_too.Push(i->index);
+                    }
+                },
+                [&](const ast::UnaryOpExpression* u) {
+                    parent_stack.Pop();
+                    EmitUnary(u);
+                },
+                [&](const ast::CallExpression* c) {
+                    parent_stack.Pop();
+                    EmitCall(c);
+                },
+                [&](const ast::BitcastExpression* b) {
+                    parent_stack.Pop();
+                    EmitBitcast(b);
+                },
+                [&](const ast::BinaryExpression* b) {
+                    switch (b->op) {
+                        case ast::BinaryOp::kLogicalAnd:
+                        case ast::BinaryOp::kLogicalOr: {
+                            if (expr == b->lhs) {
+                                // Push control block first as the short circuit will move the
+                                // current_block.
+                                block_stack.Push(current_block_);
+
+                                auto* if_inst = EmitShortCircuit(b);
+                                if (if_inst) {
+                                    control_stack_.Push(if_inst);
+                                    emit_too.Push(b->rhs);
+                                } else {
+                                    block_stack.Pop();
+                                    parent_stack.Pop();
+                                }
+
+                            } else if (expr == b->rhs) {
+                                parent_stack.Pop();
+                                control_stack_.Pop();
+
+                                EmitShortCircuitResult(b);
+                                current_block_ = block_stack.Pop();
+
+                            } else {
+                                TINT_UNREACHABLE(IR, diagnostics_);
+                                parent_stack.Pop();
+                            }
+
+                            break;
+                        }
+                        default:
+                            if (expr == b->lhs) {
+                                // Force a load of the LHS if needed so the results come out in the
+                                // correct order.
+                                (void)ResultForExpression(expr);
+                                emit_too.Push(b->rhs);
+                            } else if (expr == b->rhs) {
+                                parent_stack.Pop();
+                                EmitBinary(b);
+                            } else {
+                                TINT_UNREACHABLE(IR, diagnostics_);
+                                parent_stack.Pop();
+                            }
+                            break;
+                    }
+                },
+                [&](Default) {
+                    add_error(parent_stack.Back()->source,
+                              "unknown expression type: " +
+                                  std::string(parent_stack.Back()->TypeInfo().name));
+                });
+        };
+
+        if (!ast::TraverseExpressions(root, diagnostics_, [&](const ast::Expression* expr) {
+                bool handled = false;
+                // If this is a value that has been const-eval'd return the result.
+                if (auto* expr_sem = program_->Sem().GetVal(expr)) {
+                    if (auto* v = expr_sem->ConstantValue()) {
+                        if (auto* cv = v->Clone(clone_ctx_)) {
+                            auto* val = builder_.Constant(cv);
+                            expr_to_result_.Add(expr, val);
+                            handled = true;
+                        }
+                    }
+                }
+
+                if (!handled) {
+                    tint::Switch(
+                        expr,  //
+                        [&](const ast::BinaryExpression* b) {
+                            parent_stack.Push(b);
+                            emit_too.Push(b->lhs);
+                        },
+                        [&](const ast::AccessorExpression* a) {
+                            parent_stack.Push(a);
+                            emit_too.Push(a->object);
+                        },
+                        [&](const ast::UnaryOpExpression* u) {
+                            parent_stack.Push(u);
+                            emit_too.Push(u->expr);
+                        },
+                        [&](const ast::CallExpression* c) {
+                            if (!c->args.IsEmpty()) {
+                                parent_stack.Push(c);
+                                emit_too.Push(c->args.Back());
+                            } else {
+                                EmitCall(c);
+                            }
+                        },
+                        [&](const ast::BitcastExpression* b) {
+                            parent_stack.Push(b);
+                            emit_too.Push(b->expr);
+                        },
+                        [&](const ast::LiteralExpression* l) { EmitLiteral(l); },
+                        [&](const ast::IdentifierExpression* i) { EmitIdentifier(i); },
+                        [&](Default) {
+                            add_error(expr->source,
+                                      "Unhandled: " + std::string(expr->TypeInfo().name));
+                        });
+                }
+
+                auto* cur = expr;
+                while (true) {
+                    if (emit_too.IsEmpty() || emit_too.Back() != cur) {
+                        break;
+                    }
+                    emit_too.Pop();
+
+                    auto* next = parent_stack.Back();
+                    check_parent_stack(cur);
+                    cur = next;
+                }
+
+                // Don't descend into anything that is const-eval'd as it's already computed
+                if (auto* expr_sem = program_->Sem().GetVal(expr)) {
+                    if (expr_sem->ConstantValue()) {
+                        return ast::TraverseAction::Skip;
+                    }
+                }
+
+                return ast::TraverseAction::Descend;
+            })) {
+            return;
         }
-        return result;
+
+        while (!parent_stack.IsEmpty()) {
+            TINT_ASSERT(IR, !emit_too.IsEmpty());
+
+            emit_too.Pop();
+            check_parent_stack(parent_stack.Back());
+        }
+        TINT_ASSERT(IR, parent_stack.IsEmpty());
+    }
+
+    utils::Result<ir::Value*> EmitExpressionWithResult(const ast::Expression* root) {
+        EmitExpression(root);
+        return ResultForExpression(root);
     }
 
     void EmitVariable(const ast::Variable* var) {
@@ -1032,7 +1171,7 @@ class Impl {
 
                 auto* val = builder_.Var(ty);
                 if (v->initializer) {
-                    auto init = EmitExpression(v->initializer);
+                    auto init = EmitExpressionWithResult(v->initializer);
                     if (!init) {
                         return;
                     }
@@ -1053,8 +1192,7 @@ class Impl {
             },
             [&](const ast::Let* l) {
                 auto* last_stmt = current_block_->Back();
-
-                auto init = EmitExpression(l->initializer);
+                auto init = EmitExpressionWithResult(l->initializer);
                 if (!init) {
                     return;
                 }
@@ -1063,8 +1201,9 @@ class Impl {
                 if (current_block_->Back() == last_stmt) {
                     // Emitting the let's initializer didn't create an instruction.
                     // Create an ir::Let to give the let an instruction. This gives the let a
-                    // place of declaration and name, which preserves runtime semantics of the let,
-                    // and can be used by consumers of the IR to produce a variable or debug info.
+                    // place of declaration and name, which preserves runtime semantics of the
+                    // let, and can be used by consumers of the IR to produce a variable or
+                    // debug info.
                     auto* let = current_block_->Append(builder_.Let(l->name->symbol.Name(), value));
                     value = let->Result();
                 } else {
@@ -1094,10 +1233,71 @@ class Impl {
             });
     }
 
-    utils::Result<Value*> EmitUnary(const ast::UnaryOpExpression* expr) {
-        auto val = EmitExpression(expr->expr);
+    void EmitShortCircuitResult(const ast::BinaryExpression* b) {
+        auto res = ResultForExpression(b);
+        auto* src = res->As<InstructionResult>()->Source();
+        if (auto* if_ = src->As<ir::If>()) {
+            auto rhs = ResultForExpression(b->rhs);
+            if (!rhs) {
+                return;
+            }
+            current_block_->Append(builder_.ExitIf(if_, rhs));
+        } else {
+            TINT_ASSERT(IR, false);
+        }
+    }
+
+    ir::If* EmitShortCircuit(const ast::BinaryExpression* b) {
+        auto lhs = ResultForExpression(b->lhs);
+        if (!lhs) {
+            return nullptr;
+        }
+
+        auto* if_inst = builder_.If(lhs);
+        current_block_->Append(if_inst);
+
+        auto* result = builder_.InstructionResult(builder_.ir.Types().bool_());
+        if_inst->SetResults(result);
+
+        if (b->op == ast::BinaryOp::kLogicalAnd) {
+            if_inst->False()->Append(builder_.ExitIf(if_inst, builder_.Constant(false)));
+            current_block_ = if_inst->True();
+        } else {
+            if_inst->True()->Append(builder_.ExitIf(if_inst, builder_.Constant(true)));
+            current_block_ = if_inst->False();
+        }
+
+        expr_to_result_.Add(b, result);
+        return if_inst;
+    }
+
+    void EmitBinary(const ast::BinaryExpression* b) {
+        auto* b_sem = program_->Sem().Get(b);
+        auto* ty = b_sem->Type()->Clone(clone_ctx_.type_ctx);
+
+        auto lhs = ResultForExpression(b->lhs);
+        if (!lhs) {
+            return;
+        }
+
+        auto rhs = ResultForExpression(b->rhs);
+        if (!rhs) {
+            return;
+        }
+
+        Binary* inst = BinaryOp(ty, lhs, rhs, b->op);
+        if (!inst) {
+            return;
+        }
+
+        current_block_->Append(inst);
+        expr_to_result_.Add(b, inst->Result());
+    }
+
+    void EmitUnary(const ast::UnaryOpExpression* expr) {
+        auto val = ResultForExpression(expr->expr);
         if (!val) {
-            return utils::Failure;
+            return;
         }
 
         auto* sem = program_->Sem().Get(expr);
@@ -1108,136 +1308,40 @@ class Impl {
             case ast::UnaryOp::kAddressOf:
             case ast::UnaryOp::kIndirection:
                 // 'address-of' and 'indirection' just fold away and we propagate the pointer.
-                return val;
+                expr_to_result_.Add(expr, val);
+                return;
             case ast::UnaryOp::kComplement:
-                inst = builder_.Complement(ty, val.Get());
+                inst = builder_.Complement(ty, val);
                 break;
             case ast::UnaryOp::kNegation:
-                inst = builder_.Negation(ty, val.Get());
+                inst = builder_.Negation(ty, val);
                 break;
             case ast::UnaryOp::kNot:
-                inst = builder_.Not(ty, val.Get());
+                inst = builder_.Not(ty, val);
                 break;
         }
 
         current_block_->Append(inst);
-        return inst->Result();
+        expr_to_result_.Add(expr, inst->Result());
     }
 
-    // A short-circuit needs special treatment. The short-circuit is decomposed into the relevant
-    // if statements and declarations.
-    utils::Result<Value*> EmitShortCircuit(const ast::BinaryExpression* expr) {
-        switch (expr->op) {
-            case ast::BinaryOp::kLogicalAnd:
-            case ast::BinaryOp::kLogicalOr:
-                break;
-            default:
-                TINT_ICE(IR, diagnostics_)
-                    << "invalid operation type for short-circuit decomposition";
-                return utils::Failure;
-        }
-
-        // Evaluate the LHS of the short-circuit
-        auto lhs = EmitExpression(expr->lhs);
-        if (!lhs) {
-            return utils::Failure;
-        }
-
-        auto* if_inst = builder_.If(lhs.Get());
-        current_block_->Append(if_inst);
-
-        auto* result = builder_.InstructionResult(builder_.ir.Types().bool_());
-        if_inst->SetResults(result);
-
-        ControlStackScope scope(this, if_inst);
-
-        if (expr->op == ast::BinaryOp::kLogicalAnd) {
-            //   res = lhs && rhs;
-            //
-            // transform into:
-            //
-            //   if (lhs) {
-            //     res = rhs;
-            //   } else {
-            //     res = false;
-            //   }
-            {
-                TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
-                auto rhs = EmitExpression(expr->rhs);
-                SetTerminator(builder_.ExitIf(if_inst, rhs.Get()));
-            }
-            {
-                TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
-                SetTerminator(builder_.ExitIf(if_inst, builder_.Constant(false)));
-            }
-        } else {
-            //   res = lhs || rhs;
-            //
-            // transform into:
-            //
-            //   if (lhs) {
-            //     res = true;
-            //   } else {
-            //     res = rhs;
-            //   }
-            {
-                TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->True());
-                SetTerminator(builder_.ExitIf(if_inst, builder_.Constant(true)));
-            }
-            {
-                TINT_SCOPED_ASSIGNMENT(current_block_, if_inst->False());
-                auto rhs = EmitExpression(expr->rhs);
-                SetTerminator(builder_.ExitIf(if_inst, rhs.Get()));
-            }
-        }
-
-        return result;
-    }
-
-    utils::Result<Value*> EmitBinary(const ast::BinaryExpression* expr) {
-        if (expr->op == ast::BinaryOp::kLogicalAnd || expr->op == ast::BinaryOp::kLogicalOr) {
-            return EmitShortCircuit(expr);
-        }
-
-        auto lhs = EmitExpression(expr->lhs);
-        if (!lhs) {
-            return utils::Failure;
-        }
-
-        auto rhs = EmitExpression(expr->rhs);
-        if (!rhs) {
-            return utils::Failure;
-        }
-
-        auto* sem = program_->Sem().Get(expr);
-        auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
-
-        Binary* inst = BinaryOp(ty, lhs.Get(), rhs.Get(), expr->op);
-        if (!inst) {
-            return utils::Failure;
-        }
-
-        current_block_->Append(inst);
-        return inst->Result();
-    }
-
-    utils::Result<Value*> EmitBitcast(const ast::BitcastExpression* expr) {
-        auto val = EmitExpression(expr->expr);
+    void EmitBitcast(const ast::BitcastExpression* b) {
+        auto val = ResultForExpression(b->expr);
         if (!val) {
-            return utils::Failure;
+            return;
         }
 
-        auto* sem = program_->Sem().Get(expr);
+        auto* sem = program_->Sem().Get(b);
         auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
-        auto* inst = builder_.Bitcast(ty, val.Get());
+        auto* inst = builder_.Bitcast(ty, val);
 
         current_block_->Append(inst);
-        return inst->Result();
+        expr_to_result_.Add(b, inst->Result());
     }
 
-    void EmitCall(const ast::CallStatement* stmt) { (void)EmitCall(stmt->expr); }
+    void EmitCall(const ast::CallStatement* stmt) { (void)EmitExpressionWithResult(stmt->expr); }
 
-    utils::Result<Value*> EmitCall(const ast::CallExpression* expr) {
+    void EmitCall(const ast::CallExpression* expr) {
         // If this is a materialized semantic node, just use the constant value.
         if (auto* mat = program_->Sem().Get(expr)) {
             if (mat->ConstantValue()) {
@@ -1245,9 +1349,10 @@ class Impl {
                 if (!cv) {
                     add_error(expr->source, "failed to get constant value for call " +
                                                 std::string(expr->TypeInfo().name));
-                    return utils::Failure;
+                    return;
                 }
-                return builder_.Constant(cv);
+                expr_to_result_.Add(expr, builder_.Constant(cv));
+                return;
             }
         }
 
@@ -1256,19 +1361,19 @@ class Impl {
 
         // Emit the arguments
         for (const auto* arg : expr->args) {
-            auto value = EmitExpression(arg);
+            auto value = ResultForExpression(arg);
             if (!value) {
                 add_error(arg->source, "failed to convert arguments");
-                return utils::Failure;
+                return;
             }
-            args.Push(value.Get());
+            args.Push(value);
         }
 
         auto* sem = program_->Sem().Get<sem::Call>(expr);
         if (!sem) {
             add_error(expr->source, "failed to get semantic information for call " +
                                         std::string(expr->TypeInfo().name));
-            return utils::Failure;
+            return;
         }
 
         auto* ty = sem->Target()->ReturnType()->Clone(clone_ctx_.type_ctx);
@@ -1284,7 +1389,7 @@ class Impl {
             inst = builder_.Convert(ty, args[0]);
         } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
             TINT_UNIMPLEMENTED(IR, diagnostics_) << "missing templated ident support";
-            return utils::Failure;
+            return;
         } else {
             // Not a builtin and not a templated call, so this is a user function.
             inst =
@@ -1292,27 +1397,37 @@ class Impl {
                               std::move(args));
         }
         if (inst == nullptr) {
-            return utils::Failure;
+            return;
         }
         current_block_->Append(inst);
-        return inst->Result();
+        expr_to_result_.Add(expr, inst->Result());
     }
 
-    utils::Result<Value*> EmitLiteral(const ast::LiteralExpression* lit) {
+    void EmitIdentifier(const ast::IdentifierExpression* i) {
+        auto* v = scopes_.Get(i->identifier->symbol);
+        if (TINT_UNLIKELY(!v)) {
+            add_error(i->source, "unable to find identifier " + i->identifier->symbol.Name());
+            return;
+        }
+        expr_to_result_.Add(i, v);
+    }
+
+    void EmitLiteral(const ast::LiteralExpression* lit) {
         auto* sem = program_->Sem().Get(lit);
         if (!sem) {
             add_error(lit->source, "failed to get semantic information for node " +
                                        std::string(lit->TypeInfo().name));
-            return utils::Failure;
+            return;
         }
 
         auto* cv = sem->ConstantValue()->Clone(clone_ctx_);
         if (!cv) {
             add_error(lit->source,
                       "failed to get constant value for node " + std::string(lit->TypeInfo().name));
-            return utils::Failure;
+            return;
         }
-        return builder_.Constant(cv);
+        auto* val = builder_.Constant(cv);
+        expr_to_result_.Add(lit, val);
     }
 
     ir::Binary* BinaryOp(const type::Type* ty, ir::Value* lhs, ir::Value* rhs, ast::BinaryOp op) {
@@ -1361,11 +1476,6 @@ class Impl {
         return nullptr;
     }
 
-    struct VectorRefElementAccess {
-        ir::Value* vector = nullptr;
-        ir::Value* index = nullptr;
-    };
-
     std::optional<VectorRefElementAccess> AsVectorRefElementAccess(const ast::Expression* expr) {
         return AsVectorRefElementAccess(
             program_->Sem().Get<sem::ValueExpression>(expr)->UnwrapLoad());
@@ -1386,20 +1496,18 @@ class Impl {
         if (!ref->StoreType()->Is<type::Vector>()) {
             return std::nullopt;
         }
-
         return tint::Switch(
             access,
             [&](const sem::Swizzle* s) -> std::optional<VectorRefElementAccess> {
-                if (auto vec = EmitExpression(access->Object()->Declaration())) {
-                    return VectorRefElementAccess{vec.Get(),
-                                                  builder_.Constant(u32(s->Indices()[0]))};
+                if (auto vec = ResultForExpression(access->Object()->Declaration())) {
+                    return VectorRefElementAccess{vec, builder_.Constant(u32(s->Indices()[0]))};
                 }
                 return std::nullopt;
             },
             [&](const sem::IndexAccessorExpression* i) -> std::optional<VectorRefElementAccess> {
-                if (auto vec = EmitExpression(access->Object()->Declaration())) {
-                    if (auto idx = EmitExpression(i->Index()->Declaration())) {
-                        return VectorRefElementAccess{vec.Get(), idx.Get()};
+                if (auto vec = ResultForExpression(access->Object()->Declaration())) {
+                    if (auto idx = ResultForExpression(i->Index()->Declaration())) {
+                        return VectorRefElementAccess{vec, idx};
                     }
                 }
                 return std::nullopt;

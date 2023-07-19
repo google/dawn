@@ -91,6 +91,16 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
         return results_[0];
     }
 
+    /// Sets the result at @p idx to @p value
+    /// @param idx the index to set
+    /// @param value the value to append
+    void SetResult(size_t idx, InstructionResult* value) {
+        if (value) {
+            value->SetSource(this);
+        }
+        results_[idx] = value;
+    }
+
     using Instruction::Result;
 
     /// @returns the result values for this instruction
