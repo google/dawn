@@ -1315,6 +1315,10 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kTanh:
             glsl_ext_inst(GLSLstd450Tanh);
             break;
+        case builtin::Function::kTextureNumLevels:
+            module_.PushCapability(SpvCapabilityImageQuery);
+            op = spv::Op::OpImageQueryLevels;
+            break;
         case builtin::Function::kTrunc:
             glsl_ext_inst(GLSLstd450Trunc);
             break;

@@ -1159,5 +1159,97 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                              }),
                          PrintCase);
 
+////////////////////////////////////////////////////////////////
+//// textureNumLevels
+////////////////////////////////////////////////////////////////
+using TextureNumLevels = TextureBuiltinTest;
+TEST_P(TextureNumLevels, Emit) {
+    Run(builtin::Function::kTextureNumLevels, kNoSampler);
+}
+INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+                         TextureNumLevels,
+                         testing::Values(
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k1d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k3d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::kCube,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::kCubeArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::kCube,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::kCubeArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kI32},
+                                 {"%result = OpImageQueryLevels %int %t"},
+                             }),
+                         PrintCase);
+
 }  // namespace
 }  // namespace tint::writer::spirv
