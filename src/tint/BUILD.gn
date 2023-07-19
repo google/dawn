@@ -210,10 +210,7 @@ libtint_source_set("libtint_symbols_src") {
     "symbol_table.cc",
     "symbol_table.h",
   ]
-  deps = [
-    ":libtint_builtins_src",
-    ":libtint_utils_src",
-  ]
+  deps = [ ":libtint_utils_src" ]
 }
 
 libtint_source_set("libtint_utils_src") {
@@ -292,8 +289,6 @@ libtint_source_set("libtint_program_src") {
     "clone_context.cc",
     "program.cc",
     "program_builder.cc",
-    "resolver/builtin_structs.cc",
-    "resolver/builtin_structs.h",
     "resolver/const_eval.cc",
     "resolver/const_eval.h",
     "resolver/ctor_conv_intrinsic.cc",
@@ -853,6 +848,8 @@ libtint_source_set("libtint_builtins_src") {
 
 libtint_source_set("libtint_type_src") {
   sources = [
+    "resolver/builtin_structs.cc",
+    "resolver/builtin_structs.h",
     "type/abstract_float.cc",
     "type/abstract_float.h",
     "type/abstract_int.cc",
@@ -1257,6 +1254,7 @@ if (tint_build_ir) {
     ]
     deps = [
       ":libtint_ast_src",
+      ":libtint_builtins_src",
       ":libtint_constant_src",
       ":libtint_ir_src",
       ":libtint_program_src",

@@ -22,6 +22,7 @@
 #include <utility>
 
 #include "src/tint/builtin/address_space.h"
+#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/builtin/interpolation.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/node.h"

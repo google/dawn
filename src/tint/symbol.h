@@ -16,16 +16,7 @@
 #define SRC_TINT_SYMBOL_H_
 
 #include <string>
-#include <variant>
 
-#include "src/tint/builtin/access.h"
-#include "src/tint/builtin/address_space.h"
-#include "src/tint/builtin/builtin.h"
-#include "src/tint/builtin/builtin_value.h"
-#include "src/tint/builtin/function.h"
-#include "src/tint/builtin/interpolation_sampling.h"
-#include "src/tint/builtin/interpolation_type.h"
-#include "src/tint/builtin/texel_format.h"
 #include "src/tint/program_id.h"
 
 namespace tint {
@@ -33,28 +24,6 @@ namespace tint {
 /// A symbol representing a string in the system
 class Symbol {
   public:
-    /// The type of builtin this symbol could represent, if any.
-    enum class BuiltinType {
-        /// No builtin matched
-        kNone = 0,
-        /// Builtin function
-        kFunction,
-        /// Builtin
-        kBuiltin,
-        /// Builtin value
-        kBuiltinValue,
-        /// Address space
-        kAddressSpace,
-        /// Texel format
-        kTexelFormat,
-        /// Access
-        kAccess,
-        /// Interpolation Type
-        kInterpolationType,
-        /// Interpolation Sampling
-        kInterpolationSampling,
-    };
-
     /// Constructor
     /// An invalid symbol
     Symbol();
@@ -121,33 +90,10 @@ class Symbol {
     /// @returns the identifier of the Program that owns this symbol.
     tint::ProgramID ProgramID() const { return program_id_; }
 
-    /// @returns the builtin type
-    BuiltinType Type() const { return builtin_type_; }
-
-    /// @returns the builtin value
-    template <typename T>
-    T BuiltinValue() const {
-        return std::get<T>(builtin_value_);
-    }
-
   private:
-    void DetermineBuiltinType();
-
     uint32_t val_ = static_cast<uint32_t>(-1);
     tint::ProgramID program_id_;
     std::string_view name_;
-
-    BuiltinType builtin_type_ = BuiltinType::kNone;
-    std::variant<std::monostate,
-                 builtin::Function,
-                 builtin::Builtin,
-                 builtin::BuiltinValue,
-                 builtin::AddressSpace,
-                 builtin::TexelFormat,
-                 builtin::Access,
-                 builtin::InterpolationType,
-                 builtin::InterpolationSampling>
-        builtin_value_ = {};
 };
 
 /// @param sym the Symbol

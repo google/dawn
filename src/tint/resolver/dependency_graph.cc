@@ -16,6 +16,7 @@
 
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "src/tint/ast/alias.h"
@@ -438,46 +439,131 @@ class DependencyScanner {
         UnhandledNode(diagnostics_, attr);
     }
 
+    /// The type of builtin that a symbol could represent.
+    enum class BuiltinType {
+        /// No builtin matched
+        kNone = 0,
+        /// Builtin function
+        kFunction,
+        /// Builtin
+        kBuiltin,
+        /// Builtin value
+        kBuiltinValue,
+        /// Address space
+        kAddressSpace,
+        /// Texel format
+        kTexelFormat,
+        /// Access
+        kAccess,
+        /// Interpolation Type
+        kInterpolationType,
+        /// Interpolation Sampling
+        kInterpolationSampling,
+    };
+
+    /// BuiltinInfo stores information about the builtin that a symbol represents.
+    struct BuiltinInfo {
+        /// @returns the builtin value
+        template <typename T>
+        T Value() const {
+            return std::get<T>(value);
+        }
+
+        BuiltinType type = BuiltinType::kNone;
+        std::variant<std::monostate,
+                     builtin::Function,
+                     builtin::Builtin,
+                     builtin::BuiltinValue,
+                     builtin::AddressSpace,
+                     builtin::TexelFormat,
+                     builtin::Access,
+                     builtin::InterpolationType,
+                     builtin::InterpolationSampling>
+            value = {};
+    };
+
+    /// Get the builtin info for a given symbol.
+    /// @param symbol the symbol
+    /// @returns the builtin info
+    DependencyScanner::BuiltinInfo GetBuiltinInfo(Symbol symbol) {
+        return builtin_info_map.GetOrCreate(symbol, [&] {
+            if (auto builtin_fn = builtin::ParseFunction(symbol.NameView());
+                builtin_fn != builtin::Function::kNone) {
+                return BuiltinInfo{BuiltinType::kFunction, builtin_fn};
+            }
+            if (auto builtin_ty = builtin::ParseBuiltin(symbol.NameView());
+                builtin_ty != builtin::Builtin::kUndefined) {
+                return BuiltinInfo{BuiltinType::kBuiltin, builtin_ty};
+            }
+            if (auto builtin_val = builtin::ParseBuiltinValue(symbol.NameView());
+                builtin_val != builtin::BuiltinValue::kUndefined) {
+                return BuiltinInfo{BuiltinType::kBuiltinValue, builtin_val};
+            }
+            if (auto addr = builtin::ParseAddressSpace(symbol.NameView());
+                addr != builtin::AddressSpace::kUndefined) {
+                return BuiltinInfo{BuiltinType::kAddressSpace, addr};
+            }
+            if (auto fmt = builtin::ParseTexelFormat(symbol.NameView());
+                fmt != builtin::TexelFormat::kUndefined) {
+                return BuiltinInfo{BuiltinType::kTexelFormat, fmt};
+            }
+            if (auto access = builtin::ParseAccess(symbol.NameView());
+                access != builtin::Access::kUndefined) {
+                return BuiltinInfo{BuiltinType::kAccess, access};
+            }
+            if (auto i_type = builtin::ParseInterpolationType(symbol.NameView());
+                i_type != builtin::InterpolationType::kUndefined) {
+                return BuiltinInfo{BuiltinType::kInterpolationType, i_type};
+            }
+            if (auto i_smpl = builtin::ParseInterpolationSampling(symbol.NameView());
+                i_smpl != builtin::InterpolationSampling::kUndefined) {
+                return BuiltinInfo{BuiltinType::kInterpolationSampling, i_smpl};
+            }
+            return BuiltinInfo{};
+        });
+    }
+
     /// Adds the dependency from @p from to @p to, erroring if @p to cannot be resolved.
     void AddDependency(const ast::Identifier* from, Symbol to) {
         auto* resolved = scope_stack_.Get(to);
         if (!resolved) {
-            switch (to.Type()) {
-                case Symbol::BuiltinType::kNone:
+            auto builtin_info = GetBuiltinInfo(to);
+            switch (builtin_info.type) {
+                case BuiltinType::kNone:
                     graph_.resolved_identifiers.Add(from, UnresolvedIdentifier{to.Name()});
                     break;
-                case Symbol::BuiltinType::kFunction:
+                case BuiltinType::kFunction:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(to.BuiltinValue<builtin::Function>()));
+                        from, ResolvedIdentifier(builtin_info.Value<builtin::Function>()));
                     break;
-                case Symbol::BuiltinType::kBuiltin:
+                case BuiltinType::kBuiltin:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(to.BuiltinValue<builtin::Builtin>()));
+                        from, ResolvedIdentifier(builtin_info.Value<builtin::Builtin>()));
                     break;
-                case Symbol::BuiltinType::kBuiltinValue:
+                case BuiltinType::kBuiltinValue:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(to.BuiltinValue<builtin::BuiltinValue>()));
+                        from, ResolvedIdentifier(builtin_info.Value<builtin::BuiltinValue>()));
                     break;
-                case Symbol::BuiltinType::kAddressSpace:
+                case BuiltinType::kAddressSpace:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(to.BuiltinValue<builtin::AddressSpace>()));
+                        from, ResolvedIdentifier(builtin_info.Value<builtin::AddressSpace>()));
                     break;
-                case Symbol::BuiltinType::kTexelFormat:
+                case BuiltinType::kTexelFormat:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(to.BuiltinValue<builtin::TexelFormat>()));
+                        from, ResolvedIdentifier(builtin_info.Value<builtin::TexelFormat>()));
                     break;
-                case Symbol::BuiltinType::kAccess:
+                case BuiltinType::kAccess:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(to.BuiltinValue<builtin::Access>()));
+                        from, ResolvedIdentifier(builtin_info.Value<builtin::Access>()));
                     break;
-                case Symbol::BuiltinType::kInterpolationType:
+                case BuiltinType::kInterpolationType:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(to.BuiltinValue<builtin::InterpolationType>()));
+                        from, ResolvedIdentifier(builtin_info.Value<builtin::InterpolationType>()));
                     break;
-                case Symbol::BuiltinType::kInterpolationSampling:
+                case BuiltinType::kInterpolationSampling:
                     graph_.resolved_identifiers.Add(
                         from,
-                        ResolvedIdentifier(to.BuiltinValue<builtin::InterpolationSampling>()));
+                        ResolvedIdentifier(builtin_info.Value<builtin::InterpolationSampling>()));
                     break;
             }
             return;
@@ -501,6 +587,8 @@ class DependencyScanner {
 
     ScopeStack<Symbol, const ast::Node*> scope_stack_;
     Global* current_global_ = nullptr;
+
+    utils::Hashmap<Symbol, BuiltinInfo, 64> builtin_info_map;
 };
 
 /// The global dependency analysis system

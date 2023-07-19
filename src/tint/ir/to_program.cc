@@ -18,6 +18,7 @@
 #include <tuple>
 #include <utility>
 
+#include "src/tint/builtin/builtin.h"
 #include "src/tint/constant/splat.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"

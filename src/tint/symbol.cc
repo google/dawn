@@ -21,9 +21,7 @@ namespace tint {
 Symbol::Symbol() = default;
 
 Symbol::Symbol(uint32_t val, tint::ProgramID pid, std::string_view name)
-    : val_(val), program_id_(pid), name_(name) {
-    DetermineBuiltinType();
-}
+    : val_(val), program_id_(pid), name_(name) {}
 
 Symbol::Symbol(const Symbol& o) = default;
 
@@ -60,53 +58,6 @@ std::string_view Symbol::NameView() const {
 
 std::string Symbol::Name() const {
     return std::string(name_);
-}
-
-void Symbol::DetermineBuiltinType() {
-    if (auto builtin_fn = builtin::ParseFunction(name_); builtin_fn != builtin::Function::kNone) {
-        builtin_type_ = BuiltinType::kFunction;
-        builtin_value_ = builtin_fn;
-        return;
-    }
-    if (auto builtin_ty = builtin::ParseBuiltin(name_);
-        builtin_ty != builtin::Builtin::kUndefined) {
-        builtin_type_ = BuiltinType::kBuiltin;
-        builtin_value_ = builtin_ty;
-        return;
-    }
-    if (auto builtin_val = builtin::ParseBuiltinValue(name_);
-        builtin_val != builtin::BuiltinValue::kUndefined) {
-        builtin_type_ = BuiltinType::kBuiltinValue;
-        builtin_value_ = builtin_val;
-        return;
-    }
-    if (auto addr = builtin::ParseAddressSpace(name_); addr != builtin::AddressSpace::kUndefined) {
-        builtin_type_ = BuiltinType::kAddressSpace;
-        builtin_value_ = addr;
-        return;
-    }
-    if (auto fmt = builtin::ParseTexelFormat(name_); fmt != builtin::TexelFormat::kUndefined) {
-        builtin_type_ = BuiltinType::kTexelFormat;
-        builtin_value_ = fmt;
-        return;
-    }
-    if (auto access = builtin::ParseAccess(name_); access != builtin::Access::kUndefined) {
-        builtin_type_ = BuiltinType::kAccess;
-        builtin_value_ = access;
-        return;
-    }
-    if (auto i_type = builtin::ParseInterpolationType(name_);
-        i_type != builtin::InterpolationType::kUndefined) {
-        builtin_type_ = BuiltinType::kInterpolationType;
-        builtin_value_ = i_type;
-        return;
-    }
-    if (auto i_smpl = builtin::ParseInterpolationSampling(name_);
-        i_smpl != builtin::InterpolationSampling::kUndefined) {
-        builtin_type_ = BuiltinType::kInterpolationSampling;
-        builtin_value_ = i_smpl;
-        return;
-    }
 }
 
 }  // namespace tint

@@ -17,6 +17,9 @@
 
 #include <vector>
 
+#include "src/tint/builtin/address_space.h"
+#include "src/tint/builtin/builtin_value.h"
+#include "src/tint/builtin/texel_format.h"
 #include "src/tint/constant/value.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/constant.h"
