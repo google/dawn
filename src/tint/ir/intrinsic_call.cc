@@ -91,6 +91,9 @@ utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Ki
         case IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
             out << "spirv.image_sample_dref_implicit_lod";
             break;
+        case IntrinsicCall::Kind::kSpirvImageWrite:
+            out << "spirv.image_write";
+            break;
         case IntrinsicCall::Kind::kSpirvMatrixTimesMatrix:
             out << "spirv.matrix_times_matrix";
             break;

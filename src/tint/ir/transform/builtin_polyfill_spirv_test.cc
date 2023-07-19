@@ -22,6 +22,7 @@
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
+#include "src/tint/type/storage_texture.h"
 
 namespace tint::ir::transform {
 namespace {
@@ -1864,6 +1865,132 @@ TEST_F(IR_BuiltinPolyfillSpirvTest, TextureSampleLevel_2DArray_Offset) {
     %9:vec3<f32> = construct %coords, %8
     %10:vec4<f32> = spirv.image_sample_explicit_lod %7, %9, 10u, %lod, vec2<i32>(1i)
     ret %10
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureStore_2D) {
+    auto format = builtin::TexelFormat::kR32Float;
+    auto* t = b.FunctionParam("t", ty.Get<type::StorageTexture>(
+                                       type::TextureDimension::k2d, format, builtin::Access::kWrite,
+                                       type::StorageTexture::SubtypeFor(format, ty)));
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* texel = b.FunctionParam("texel", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, texel});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.void_(), builtin::Function::kTextureStore, t, coords, texel);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d<r32float, write>, %coords:vec2<i32>, %texel:i32):void -> %b1 {
+  %b1 = block {
+    %5:void = textureStore %t, %coords, %texel
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d<r32float, write>, %coords:vec2<i32>, %texel:i32):void -> %b1 {
+  %b1 = block {
+    %5:void = spirv.image_write %t, %coords, %texel, 0u
+    ret %5
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureStore_2DArray) {
+    auto format = builtin::TexelFormat::kR32Float;
+    auto* t =
+        b.FunctionParam("t", ty.Get<type::StorageTexture>(
+                                 type::TextureDimension::k2dArray, format, builtin::Access::kWrite,
+                                 type::StorageTexture::SubtypeFor(format, ty)));
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* array_idx = b.FunctionParam("array_idx", ty.i32());
+    auto* texel = b.FunctionParam("texel", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, array_idx, texel});
+
+    b.With(func->Block(), [&] {
+        auto* result =
+            b.Call(ty.void_(), builtin::Function::kTextureStore, t, coords, array_idx, texel);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d_array<r32float, write>, %coords:vec2<i32>, %array_idx:i32, %texel:i32):void -> %b1 {
+  %b1 = block {
+    %6:void = textureStore %t, %coords, %array_idx, %texel
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d_array<r32float, write>, %coords:vec2<i32>, %array_idx:i32, %texel:i32):void -> %b1 {
+  %b1 = block {
+    %6:vec3<i32> = construct %coords, %array_idx
+    %7:void = spirv.image_write %t, %6, %texel, 0u
+    ret %7
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, TextureStore_2DArray_IndexDifferentType) {
+    auto format = builtin::TexelFormat::kR32Float;
+    auto* t =
+        b.FunctionParam("t", ty.Get<type::StorageTexture>(
+                                 type::TextureDimension::k2dArray, format, builtin::Access::kWrite,
+                                 type::StorageTexture::SubtypeFor(format, ty)));
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* array_idx = b.FunctionParam("array_idx", ty.u32());
+    auto* texel = b.FunctionParam("texel", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, array_idx, texel});
+
+    b.With(func->Block(), [&] {
+        auto* result =
+            b.Call(ty.void_(), builtin::Function::kTextureStore, t, coords, array_idx, texel);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d_array<r32float, write>, %coords:vec2<i32>, %array_idx:u32, %texel:i32):void -> %b1 {
+  %b1 = block {
+    %6:void = textureStore %t, %coords, %array_idx, %texel
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d_array<r32float, write>, %coords:vec2<i32>, %array_idx:u32, %texel:i32):void -> %b1 {
+  %b1 = block {
+    %6:i32 = convert %array_idx
+    %7:vec3<i32> = construct %coords, %6
+    %8:void = spirv.image_write %t, %7, %texel, 0u
+    ret %8
   }
 }
 )";

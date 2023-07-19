@@ -27,6 +27,7 @@ enum TextureType {
     kMultisampledTexture,
     kDepthTexture,
     kDepthMultisampledTexture,
+    kStorageTexture,
 };
 
 enum SamplerUsage {
@@ -75,6 +76,9 @@ inline utils::StringStream& operator<<(utils::StringStream& out, TextureType typ
         case kDepthMultisampledTexture:
             out << "DepthMultisampledTexture";
             break;
+        case kStorageTexture:
+            out << "StorageTexture";
+            break;
     }
     return out;
 }
@@ -102,6 +106,23 @@ class TextureBuiltinTest : public SpvGeneratorImplTestWithParam<TextureBuiltinTe
                 return ty.Get<type::DepthTexture>(dim);
             case kDepthMultisampledTexture:
                 return ty.Get<type::DepthMultisampledTexture>(dim);
+            case kStorageTexture:
+                builtin::TexelFormat format;
+                switch (texel_type) {
+                    case kF32:
+                        format = builtin::TexelFormat::kR32Float;
+                        break;
+                    case kI32:
+                        format = builtin::TexelFormat::kR32Sint;
+                        break;
+                    case kU32:
+                        format = builtin::TexelFormat::kR32Uint;
+                        break;
+                    default:
+                        return nullptr;
+                }
+                return ty.Get<type::StorageTexture>(dim, format, builtin::Access::kWrite,
+                                                    type::StorageTexture::SubtypeFor(format, ty));
         }
         return nullptr;
     }
@@ -110,6 +131,9 @@ class TextureBuiltinTest : public SpvGeneratorImplTestWithParam<TextureBuiltinTe
         auto params = GetParam();
 
         auto* result_ty = MakeScalarType(params.result.type);
+        if (function == builtin::Function::kTextureStore) {
+            result_ty = ty.void_();
+        }
         if (params.result.width > 1) {
             result_ty = ty.vec(result_ty, params.result.width);
         }
@@ -148,8 +172,12 @@ class TextureBuiltinTest : public SpvGeneratorImplTestWithParam<TextureBuiltinTe
                 mod.SetName(value, arg.name);
             }
             auto* result = b.Call(result_ty, function, std::move(args));
-            b.Return(func, result);
-            mod.SetName(result, "result");
+            if (result_ty->Is<type::Void>()) {
+                b.Return(func);
+            } else {
+                b.Return(func, result);
+                mod.SetName(result, "result");
+            }
         });
 
         ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1052,6 +1080,81 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                                  {"result", 4, kU32},
                                  {
                                      "OpImageFetch %v4uint %t %coords Lod %lod",
+                                 },
+                             }),
+                         PrintCase);
+
+////////////////////////////////////////////////////////////////
+//// textureStore
+////////////////////////////////////////////////////////////////
+using TextureStore = TextureBuiltinTest;
+TEST_P(TextureStore, Emit) {
+    Run(builtin::Function::kTextureStore, kNoSampler);
+}
+INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+                         TextureStore,
+                         testing::Values(
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k1d,
+                                 /* texel type */ kF32,
+                                 {{"coord", 1, kI32}, {"texel", 4, kF32}},
+                                 {},
+                                 {
+                                     "OpImageWrite %t %coord %texel None",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {{"coords", 2, kI32}, {"texel", 4, kF32}},
+                                 {},
+                                 {
+                                     "OpImageWrite %t %coords %texel None",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {{"coords", 2, kI32}, {"array_idx", 1, kI32}, {"texel", 4, kF32}},
+                                 {},
+                                 {
+                                     "%10 = OpCompositeConstruct %v3int %coords %array_idx",
+                                     "OpImageWrite %t %10 %texel None",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k3d,
+                                 /* texel type */ kF32,
+                                 {{"coords", 3, kI32}, {"texel", 4, kF32}},
+                                 {},
+                                 {
+                                     "OpImageWrite %t %coords %texel None",
+                                 },
+                             },
+
+                             // Test some textures with integer texel types.
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kI32,
+                                 {{"coords", 2, kI32}, {"texel", 4, kI32}},
+                                 {},
+                                 {
+                                     "OpImageWrite %t %coords %texel None",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kU32,
+                                 {{"coords", 2, kI32}, {"texel", 4, kU32}},
+                                 {},
+                                 {
+                                     "OpImageWrite %t %coords %texel None",
                                  },
                              }),
                          PrintCase);

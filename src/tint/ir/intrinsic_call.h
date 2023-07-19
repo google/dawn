@@ -48,6 +48,7 @@ class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
         kSpirvImageSampleExplicitLod,
         kSpirvImageSampleDrefImplicitLod,
         kSpirvImageSampleDrefExplicitLod,
+        kSpirvImageWrite,
         kSpirvMatrixTimesMatrix,
         kSpirvMatrixTimesScalar,
         kSpirvMatrixTimesVector,

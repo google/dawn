@@ -79,6 +79,7 @@ struct BuiltinPolyfillSpirv::State {
                     case builtin::Function::kTextureSampleCompareLevel:
                     case builtin::Function::kTextureSampleGrad:
                     case builtin::Function::kTextureSampleLevel:
+                    case builtin::Function::kTextureStore:
                         worklist.Push(builtin);
                         break;
                     default:
@@ -120,6 +121,9 @@ struct BuiltinPolyfillSpirv::State {
                 case builtin::Function::kTextureSampleGrad:
                 case builtin::Function::kTextureSampleLevel:
                     replacement = TextureSample(builtin);
+                    break;
+                case builtin::Function::kTextureStore:
+                    replacement = TextureStore(builtin);
                     break;
                 default:
                     break;
@@ -549,6 +553,45 @@ struct BuiltinPolyfillSpirv::State {
         }
 
         return result;
+    }
+
+    /// Handle a textureStore() builtin.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    Value* TextureStore(CoreBuiltinCall* builtin) {
+        // Helper to get the next argument from the call, or nullptr if there are no more arguments.
+        uint32_t arg_idx = 0;
+        auto next_arg = [&]() {
+            return arg_idx < builtin->Args().Length() ? builtin->Args()[arg_idx++] : nullptr;
+        };
+
+        auto* texture = next_arg();
+        auto* coords = next_arg();
+        auto* texture_ty = texture->Type()->As<type::Texture>();
+
+        // Append the array index to the coordinates if provided.
+        auto* array_idx = IsTextureArray(texture_ty->dim()) ? next_arg() : nullptr;
+        if (array_idx) {
+            coords = AppendArrayIndex(coords, array_idx, builtin);
+        }
+
+        auto* texel = next_arg();
+
+        // Start building the argument list for the intrinsic.
+        // The first two operands are always the texture and then the coordinates.
+        utils::Vector<Value*, 8> intrinsic_args;
+        intrinsic_args.Push(texture);
+        intrinsic_args.Push(coords);
+        intrinsic_args.Push(texel);
+
+        ImageOperands operands;
+        AppendImageOperands(operands, intrinsic_args, builtin, /* requires_float_lod */ false);
+
+        // Call the intrinsic.
+        auto* texture_call =
+            b.Call(ty.void_(), IntrinsicCall::Kind::kSpirvImageWrite, std::move(intrinsic_args));
+        texture_call->InsertBefore(builtin);
+        return texture_call->Result();
     }
 };
 

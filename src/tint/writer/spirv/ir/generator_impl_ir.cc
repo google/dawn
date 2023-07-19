@@ -1493,6 +1493,9 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
         case ir::IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
             op = spv::Op::OpImageSampleDrefExplicitLod;
             break;
+        case ir::IntrinsicCall::Kind::kSpirvImageWrite:
+            op = spv::Op::OpImageWrite;
+            break;
         case ir::IntrinsicCall::Kind::kSpirvMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
