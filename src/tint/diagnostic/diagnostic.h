@@ -37,6 +37,7 @@ inline bool operator>=(Severity a, Severity b) {
 /// diagnostic message.
 enum class System {
     AST,
+    Builtin,
     Clone,
     Constant,
     Inspector,

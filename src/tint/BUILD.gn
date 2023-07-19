@@ -848,8 +848,6 @@ libtint_source_set("libtint_builtins_src") {
 
 libtint_source_set("libtint_type_src") {
   sources = [
-    "resolver/builtin_structs.cc",
-    "resolver/builtin_structs.h",
     "type/abstract_float.cc",
     "type/abstract_float.h",
     "type/abstract_int.cc",
@@ -864,6 +862,8 @@ libtint_source_set("libtint_type_src") {
     "type/atomic.h",
     "type/bool.cc",
     "type/bool.h",
+    "type/builtin_structs.cc",
+    "type/builtin_structs.h",
     "type/clone_context.h",
     "type/depth_multisampled_texture.cc",
     "type/depth_multisampled_texture.h",
@@ -1798,6 +1798,7 @@ if (tint_build_unittests) {
     sources = [
       "type/atomic_test.cc",
       "type/bool_test.cc",
+      "type/builtin_structs_test.cc",
       "type/depth_multisampled_texture_test.cc",
       "type/depth_texture_test.cc",
       "type/external_texture_test.cc",

@@ -269,8 +269,6 @@ list(APPEND TINT_LIB_SRCS
   reflection.h
   reader/reader.cc
   reader/reader.h
-  resolver/builtin_structs.cc
-  resolver/builtin_structs.h
   resolver/const_eval.cc
   resolver/const_eval.h
   resolver/dependency_graph.cc
@@ -477,6 +475,8 @@ list(APPEND TINT_LIB_SRCS
   type/atomic.h
   type/bool.cc
   type/bool.h
+  type/builtin_structs.cc
+  type/builtin_structs.h
   type/clone_context.h
   type/depth_multisampled_texture.cc
   type/depth_multisampled_texture.h
@@ -1102,6 +1102,7 @@ if(TINT_BUILD_TESTS)
     type/array_test.cc
     type/atomic_test.cc
     type/bool_test.cc
+    type/builtin_structs_test.cc
     type/depth_multisampled_texture_test.cc
     type/depth_texture_test.cc
     type/external_texture_test.cc

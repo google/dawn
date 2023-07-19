@@ -15,7 +15,7 @@
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 #include "src/tint/builtin/function.h"
-#include "src/tint/resolver/builtin_structs.h"
+#include "src/tint/type/builtin_structs.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -209,7 +209,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Any_Vector) {
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F32) {
-    auto* str = resolver::CreateFrexpResult(ty, mod.symbols, ty.f32());
+    auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.f32());
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -224,7 +224,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F32) {
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F16) {
-    auto* str = resolver::CreateFrexpResult(ty, mod.symbols, ty.f16());
+    auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.f16());
     auto* arg = b.FunctionParam("arg", ty.f16());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -239,7 +239,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F16) {
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec2f) {
-    auto* str = resolver::CreateFrexpResult(ty, mod.symbols, ty.vec2<f32>());
+    auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.vec2<f32>());
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -254,7 +254,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec2f) {
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec3h) {
-    auto* str = resolver::CreateFrexpResult(ty, mod.symbols, ty.vec3<f16>());
+    auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.vec3<f16>());
     auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -283,7 +283,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Length_vec4f) {
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Modf_F32) {
-    auto* str = resolver::CreateModfResult(ty, mod.symbols, ty.f32());
+    auto* str = type::CreateModfResult(ty, mod.symbols, ty.f32());
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -298,7 +298,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Modf_F32) {
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Modf_F16) {
-    auto* str = resolver::CreateModfResult(ty, mod.symbols, ty.f16());
+    auto* str = type::CreateModfResult(ty, mod.symbols, ty.f16());
     auto* arg = b.FunctionParam("arg", ty.f16());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -313,7 +313,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Modf_F16) {
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec2f) {
-    auto* str = resolver::CreateModfResult(ty, mod.symbols, ty.vec2<f32>());
+    auto* str = type::CreateModfResult(ty, mod.symbols, ty.vec2<f32>());
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -328,7 +328,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec2f) {
 }
 
 TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec3h) {
-    auto* str = resolver::CreateModfResult(ty, mod.symbols, ty.vec3<f16>());
+    auto* str = type::CreateModfResult(ty, mod.symbols, ty.vec3<f16>());
     auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});

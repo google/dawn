@@ -17,7 +17,7 @@
 #include <utility>
 
 #include "src/tint/ir/transform/test_helper.h"
-#include "src/tint/resolver/builtin_structs.h"
+#include "src/tint/type/builtin_structs.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/storage_texture.h"
 
@@ -769,9 +769,8 @@ TEST_F(IR_DemoteToHelperTest, AtomicCompareExchange) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        auto* result =
-            b.Call(resolver::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
-                   builtin::Function::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
+        auto* result = b.Call(type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
+                              builtin::Function::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
         b.Add(ty.i32(), b.Access(ty.i32(), result, 0_i), 1_i);
         b.Return(ep, 0.5_f);
     });
