@@ -239,19 +239,19 @@ list(APPEND TINT_LIB_SRCS
   lang/base/builtin/number.h
   clone_context.cc
   clone_context.h
-  constant/clone_context.h
-  constant/composite.cc
-  constant/composite.h
-  constant/manager.cc
-  constant/manager.h
-  constant/scalar.cc
-  constant/scalar.h
-  constant/splat.cc
-  constant/splat.h
-  constant/node.cc
-  constant/node.h
-  constant/value.cc
-  constant/value.h
+  lang/base/constant/clone_context.h
+  lang/base/constant/composite.cc
+  lang/base/constant/composite.h
+  lang/base/constant/manager.cc
+  lang/base/constant/manager.h
+  lang/base/constant/scalar.cc
+  lang/base/constant/scalar.h
+  lang/base/constant/splat.cc
+  lang/base/constant/splat.h
+  lang/base/constant/node.cc
+  lang/base/constant/node.h
+  lang/base/constant/value.cc
+  lang/base/constant/value.h
   inspector/entry_point.cc
   inspector/entry_point.h
   inspector/inspector.cc
@@ -1010,11 +1010,11 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/workgroup_attribute_test.cc
     lang/base/builtin/number_test.cc
     clone_context_test.cc
-    constant/composite_test.cc
-    constant/manager_test.cc
-    constant/scalar_test.cc
-    constant/splat_test.cc
-    constant/value_test.cc
+    lang/base/constant/composite_test.cc
+    lang/base/constant/manager_test.cc
+    lang/base/constant/scalar_test.cc
+    lang/base/constant/splat_test.cc
+    lang/base/constant/value_test.cc
     debug_test.cc
     core/diagnostic/diagnostic_test.cc
     core/diagnostic/formatter_test.cc

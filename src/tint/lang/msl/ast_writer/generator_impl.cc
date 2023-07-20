@@ -21,12 +21,12 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/constant/splat.h"
-#include "src/tint/constant/value.h"
 #include "src/tint/core/defer.h"
 #include "src/tint/core/map.h"
 #include "src/tint/core/scoped_assignment.h"
 #include "src/tint/core/string_stream.h"
+#include "src/tint/lang/base/constant/splat.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/msl/ast_writer/generator_support.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"

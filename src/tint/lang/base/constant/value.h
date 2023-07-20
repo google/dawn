@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CONSTANT_VALUE_H_
-#define SRC_TINT_CONSTANT_VALUE_H_
+#ifndef SRC_TINT_LANG_BASE_CONSTANT_VALUE_H_
+#define SRC_TINT_LANG_BASE_CONSTANT_VALUE_H_
 
 #include <variant>
 
-#include "src/tint/constant/clone_context.h"
-#include "src/tint/constant/node.h"
 #include "src/tint/core/castable.h"
 #include "src/tint/lang/base/builtin/number.h"
+#include "src/tint/lang/base/constant/clone_context.h"
+#include "src/tint/lang/base/constant/node.h"
 #include "src/tint/type/type.h"
 
 namespace tint::constant {
@@ -90,4 +90,4 @@ class Value : public utils::Castable<Value, Node> {
 
 }  // namespace tint::constant
 
-#endif  // SRC_TINT_CONSTANT_VALUE_H_
+#endif  // SRC_TINT_LANG_BASE_CONSTANT_VALUE_H_

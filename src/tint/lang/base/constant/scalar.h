@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CONSTANT_SCALAR_H_
-#define SRC_TINT_CONSTANT_SCALAR_H_
+#ifndef SRC_TINT_LANG_BASE_CONSTANT_SCALAR_H_
+#define SRC_TINT_LANG_BASE_CONSTANT_SCALAR_H_
 
-#include "src/tint/constant/manager.h"
-#include "src/tint/constant/value.h"
 #include "src/tint/core/castable.h"
 #include "src/tint/core/hash.h"
 #include "src/tint/lang/base/builtin/number.h"
+#include "src/tint/lang/base/constant/manager.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/type/type.h"
 
 namespace tint::constant {
@@ -108,4 +108,4 @@ class Scalar : public utils::Castable<Scalar<T>, ScalarBase> {
 
 }  // namespace tint::constant
 
-#endif  // SRC_TINT_CONSTANT_SCALAR_H_
+#endif  // SRC_TINT_LANG_BASE_CONSTANT_SCALAR_H_

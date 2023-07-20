@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CONSTANT_NODE_H_
-#define SRC_TINT_CONSTANT_NODE_H_
+#ifndef SRC_TINT_LANG_BASE_CONSTANT_NODE_H_
+#define SRC_TINT_LANG_BASE_CONSTANT_NODE_H_
 
 #include "src/tint/core/castable.h"
 
@@ -34,4 +34,4 @@ class Node : public utils::Castable<Node> {
 
 }  // namespace tint::constant
 
-#endif  // SRC_TINT_CONSTANT_NODE_H_
+#endif  // SRC_TINT_LANG_BASE_CONSTANT_NODE_H_

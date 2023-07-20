@@ -17,7 +17,6 @@
 
 #include <vector>
 
-#include "src/tint/constant/value.h"
 #include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/core/hashmap.h"
 #include "src/tint/core/vector.h"
@@ -25,6 +24,7 @@
 #include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/base/builtin/texel_format.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/symbol.h"
 #include "src/tint/writer/spirv/binary_writer.h"
 #include "src/tint/writer/spirv/function.h"

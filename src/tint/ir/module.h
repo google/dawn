@@ -18,7 +18,6 @@
 #include <memory>
 #include <string>
 
-#include "src/tint/constant/manager.h"
 #include "src/tint/core/block_allocator.h"
 #include "src/tint/core/result.h"
 #include "src/tint/core/vector.h"
@@ -27,6 +26,7 @@
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/lang/base/constant/manager.h"
 #include "src/tint/program_id.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/manager.h"

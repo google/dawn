@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/constant/splat.h"
+#include "src/tint/lang/base/constant/splat.h"
 
-#include "src/tint/constant/scalar.h"
-#include "src/tint/constant/test_helper.h"
+#include "src/tint/lang/base/constant/scalar.h"
+#include "src/tint/lang/base/constant/test_helper.h"
 
 namespace tint::constant {
 namespace {

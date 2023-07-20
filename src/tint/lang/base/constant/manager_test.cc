@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/constant/manager.h"
+#include "src/tint/lang/base/constant/manager.h"
 
 #include "gtest/gtest.h"
-#include "src/tint/constant/scalar.h"
+#include "src/tint/lang/base/constant/scalar.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/bool.h"

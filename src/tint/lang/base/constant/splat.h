@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CONSTANT_SPLAT_H_
-#define SRC_TINT_CONSTANT_SPLAT_H_
+#ifndef SRC_TINT_LANG_BASE_CONSTANT_SPLAT_H_
+#define SRC_TINT_LANG_BASE_CONSTANT_SPLAT_H_
 
-#include "src/tint/constant/composite.h"
 #include "src/tint/core/castable.h"
 #include "src/tint/core/vector.h"
+#include "src/tint/lang/base/constant/composite.h"
 #include "src/tint/type/type.h"
 
 namespace tint::constant {
@@ -73,4 +73,4 @@ class Splat : public utils::Castable<Splat, Value> {
 
 }  // namespace tint::constant
 
-#endif  // SRC_TINT_CONSTANT_SPLAT_H_
+#endif  // SRC_TINT_LANG_BASE_CONSTANT_SPLAT_H_

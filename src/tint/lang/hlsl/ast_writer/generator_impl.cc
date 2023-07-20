@@ -22,8 +22,6 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/constant/splat.h"
-#include "src/tint/constant/value.h"
 #include "src/tint/core/compiler_macros.h"
 #include "src/tint/core/defer.h"
 #include "src/tint/core/map.h"
@@ -31,6 +29,8 @@
 #include "src/tint/core/string.h"
 #include "src/tint/core/string_stream.h"
 #include "src/tint/debug.h"
+#include "src/tint/lang/base/constant/splat.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"

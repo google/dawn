@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/constant/value.h"
+#include "src/tint/lang/base/constant/value.h"
 
-#include "src/tint/constant/splat.h"
+#include "src/tint/lang/base/constant/splat.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/array.h"
 #include "src/tint/type/matrix.h"

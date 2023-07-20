@@ -18,11 +18,11 @@
 #include <utility>
 
 #include "spirv/unified1/GLSL.std.450.h"
-#include "src/tint/constant/value.h"
 #include "src/tint/core/compiler_macros.h"
 #include "src/tint/core/defer.h"
 #include "src/tint/core/map.h"
 #include "src/tint/core/string_stream.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"

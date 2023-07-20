@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/constant/node.h"
+#include "src/tint/lang/base/constant/scalar.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::constant::Node);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::ScalarBase);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::AInt>);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::AFloat>);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::i32>);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::u32>);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::f16>);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<tint::f32>);
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Scalar<bool>);
 
 namespace tint::constant {
 
-Node::Node() = default;
+ScalarBase::~ScalarBase() = default;
 
-Node::Node(const Node&) = default;
-
-Node::~Node() = default;
-
-}  // namespace tint::constant
+}

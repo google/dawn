@@ -18,7 +18,6 @@
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
-#include "src/tint/constant/scalar.h"
 #include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
@@ -56,6 +55,7 @@
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/validator.h"
 #include "src/tint/ir/var.h"
+#include "src/tint/lang/base/constant/scalar.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/type/array.h"

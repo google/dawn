@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/constant/composite.h"
+#include "src/tint/lang/base/constant/composite.h"
 
 #include <utility>
 
-#include "src/tint/constant/manager.h"
+#include "src/tint/lang/base/constant/manager.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Composite);
 

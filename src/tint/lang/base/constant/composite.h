@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CONSTANT_COMPOSITE_H_
-#define SRC_TINT_CONSTANT_COMPOSITE_H_
+#ifndef SRC_TINT_LANG_BASE_CONSTANT_COMPOSITE_H_
+#define SRC_TINT_LANG_BASE_CONSTANT_COMPOSITE_H_
 
-#include "src/tint/constant/value.h"
 #include "src/tint/core/castable.h"
 #include "src/tint/core/hash.h"
 #include "src/tint/core/vector.h"
 #include "src/tint/lang/base/builtin/number.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/type/type.h"
 
 namespace tint::constant {
@@ -90,4 +90,4 @@ class Composite : public utils::Castable<Composite, Value> {
 
 }  // namespace tint::constant
 
-#endif  // SRC_TINT_CONSTANT_COMPOSITE_H_
+#endif  // SRC_TINT_LANG_BASE_CONSTANT_COMPOSITE_H_

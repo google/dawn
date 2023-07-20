@@ -22,16 +22,16 @@
 #include <type_traits>
 #include <utility>
 
-#include "src/tint/constant/composite.h"
-#include "src/tint/constant/scalar.h"
-#include "src/tint/constant/splat.h"
-#include "src/tint/constant/value.h"
 #include "src/tint/core/bitcast.h"
 #include "src/tint/core/compiler_macros.h"
 #include "src/tint/core/map.h"
 #include "src/tint/core/string_stream.h"
 #include "src/tint/core/transform.h"
 #include "src/tint/lang/base/builtin/number.h"
+#include "src/tint/lang/base/constant/composite.h"
+#include "src/tint/lang/base/constant/scalar.h"
+#include "src/tint/lang/base/constant/splat.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/program_builder.h"

@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CONSTANT_MANAGER_H_
-#define SRC_TINT_CONSTANT_MANAGER_H_
+#ifndef SRC_TINT_LANG_BASE_CONSTANT_MANAGER_H_
+#define SRC_TINT_LANG_BASE_CONSTANT_MANAGER_H_
 
 #include <utility>
 
-#include "src/tint/constant/value.h"
 #include "src/tint/core/hash.h"
 #include "src/tint/core/unique_allocator.h"
 #include "src/tint/lang/base/builtin/number.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/type/manager.h"
 
 namespace tint::constant {
@@ -154,4 +154,4 @@ class Manager final {
 
 }  // namespace tint::constant
 
-#endif  // SRC_TINT_CONSTANT_MANAGER_H_
+#endif  // SRC_TINT_LANG_BASE_CONSTANT_MANAGER_H_

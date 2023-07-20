@@ -1,4 +1,4 @@
-// Copyright 2023 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CONSTANT_CLONE_CONTEXT_H_
-#define SRC_TINT_CONSTANT_CLONE_CONTEXT_H_
+#include "src/tint/lang/base/constant/node.h"
 
-#include "src/tint/type/clone_context.h"
-
-// Forward declarations
-namespace tint::constant {
-class Manager;
-}  // namespace tint::constant
+TINT_INSTANTIATE_TYPEINFO(tint::constant::Node);
 
 namespace tint::constant {
 
-/// Context information for cloning of constants
-struct CloneContext {
-    /// The context for cloning type information
-    type::CloneContext type_ctx;
+Node::Node() = default;
 
-    /// Destination information
-    constant::Manager& dst;
-};
+Node::Node(const Node&) = default;
+
+Node::~Node() = default;
 
 }  // namespace tint::constant
-
-#endif  // SRC_TINT_CONSTANT_CLONE_CONTEXT_H_

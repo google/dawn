@@ -17,9 +17,6 @@
 
 #include <utility>
 
-#include "src/tint/constant/composite.h"
-#include "src/tint/constant/scalar.h"
-#include "src/tint/constant/splat.h"
 #include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
@@ -58,6 +55,9 @@
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/ir/var.h"
+#include "src/tint/lang/base/constant/composite.h"
+#include "src/tint/lang/base/constant/scalar.h"
+#include "src/tint/lang/base/constant/splat.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/bool.h"
 #include "src/tint/type/f16.h"

@@ -928,19 +928,19 @@ libtint_source_set("libtint_type_src") {
 
 libtint_source_set("libtint_constant_src") {
   sources = [
-    "constant/clone_context.h",
-    "constant/composite.cc",
-    "constant/composite.h",
-    "constant/manager.cc",
-    "constant/manager.h",
-    "constant/node.cc",
-    "constant/node.h",
-    "constant/scalar.cc",
-    "constant/scalar.h",
-    "constant/splat.cc",
-    "constant/splat.h",
-    "constant/value.cc",
-    "constant/value.h",
+    "lang/base/constant/clone_context.h",
+    "lang/base/constant/composite.cc",
+    "lang/base/constant/composite.h",
+    "lang/base/constant/manager.cc",
+    "lang/base/constant/manager.h",
+    "lang/base/constant/node.cc",
+    "lang/base/constant/node.h",
+    "lang/base/constant/scalar.cc",
+    "lang/base/constant/scalar.h",
+    "lang/base/constant/splat.cc",
+    "lang/base/constant/splat.h",
+    "lang/base/constant/value.cc",
+    "lang/base/constant/value.h",
   ]
   deps = [
     ":libtint_builtins_src",
@@ -1786,11 +1786,11 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_constant_src") {
     sources = [
-      "constant/composite_test.cc",
-      "constant/manager_test.cc",
-      "constant/scalar_test.cc",
-      "constant/splat_test.cc",
-      "constant/value_test.cc",
+      "lang/base/constant/composite_test.cc",
+      "lang/base/constant/manager_test.cc",
+      "lang/base/constant/scalar_test.cc",
+      "lang/base/constant/splat_test.cc",
+      "lang/base/constant/value_test.cc",
     ]
   }
 

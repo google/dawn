@@ -23,9 +23,9 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/constant/value.h"
 #include "src/tint/core/bitset.h"
 #include "src/tint/core/unique_vector.h"
+#include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/function.h"

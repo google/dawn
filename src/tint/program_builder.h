@@ -21,13 +21,13 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/constant/manager.h"
 #include "src/tint/core/string.h"
 #include "src/tint/lang/base/builtin/extension.h"
 #include "src/tint/lang/base/builtin/fluent_types.h"
 #include "src/tint/lang/base/builtin/interpolation_sampling.h"
 #include "src/tint/lang/base/builtin/interpolation_type.h"
 #include "src/tint/lang/base/builtin/number.h"
+#include "src/tint/lang/base/constant/manager.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
