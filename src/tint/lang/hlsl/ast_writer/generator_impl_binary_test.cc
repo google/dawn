@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/call_statement.h"
-#include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/lang/hlsl/ast_writer/test_helper.h"
+#include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/utils/string_stream.h"
 
 namespace tint::writer::hlsl {

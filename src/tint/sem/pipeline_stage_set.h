@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_SEM_PIPELINE_STAGE_SET_H_
 #define SRC_TINT_SEM_PIPELINE_STAGE_SET_H_
 
-#include "src/tint/ast/pipeline_stage.h"
+#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/utils/enum_set.h"
 
 namespace tint::sem {

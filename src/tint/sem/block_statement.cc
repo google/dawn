@@ -14,8 +14,8 @@
 
 #include "src/tint/sem/block_statement.h"
 
-#include "src/tint/ast/block_statement.h"
-#include "src/tint/ast/function.h"
+#include "src/tint/lang/wgsl/ast/block_statement.h"
+#include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/sem/function.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BlockStatement);

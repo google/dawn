@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/builtin_texture_helper_test.h"
-#include "src/tint/ast/call_statement.h"
-#include "src/tint/ast/stage_attribute.h"
 #include "src/tint/lang/hlsl/ast_writer/test_helper.h"
+#include "src/tint/lang/wgsl/ast/builtin_texture_helper_test.h"
+#include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/stage_attribute.h"
 
 namespace tint::writer::hlsl {
 namespace {

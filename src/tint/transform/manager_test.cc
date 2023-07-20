@@ -17,7 +17,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "src/tint/ast/transform/transform.h"
+#include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "src/tint/program_builder.h"
 
 #if TINT_BUILD_IR

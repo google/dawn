@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/break_statement.h"
-#include "src/tint/ast/continue_statement.h"
-#include "src/tint/ast/switch_statement.h"
+#include "src/tint/lang/wgsl/ast/break_statement.h"
+#include "src/tint/lang/wgsl/ast/continue_statement.h"
+#include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT

@@ -14,9 +14,9 @@
 
 #include "src/tint/sem/function.h"
 
-#include "src/tint/ast/function.h"
-#include "src/tint/ast/identifier.h"
-#include "src/tint/ast/must_use_attribute.h"
+#include "src/tint/lang/wgsl/ast/function.h"
+#include "src/tint/lang/wgsl/ast/identifier.h"
+#include "src/tint/lang/wgsl/ast/must_use_attribute.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/external_texture.h"

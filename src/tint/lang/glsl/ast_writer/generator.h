@@ -21,9 +21,9 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/ast/pipeline_stage.h"
 #include "src/tint/builtin/access.h"
 #include "src/tint/lang/glsl/ast_writer/version.h"
+#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/sampler_texture_pair.h"
 #include "src/tint/writer/external_texture_options.h"

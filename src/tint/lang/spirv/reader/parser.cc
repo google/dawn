@@ -16,14 +16,14 @@
 
 #include <utility>
 
-#include "src/tint/ast/transform/decompose_strided_array.h"
-#include "src/tint/ast/transform/decompose_strided_matrix.h"
-#include "src/tint/ast/transform/fold_trivial_lets.h"
-#include "src/tint/ast/transform/remove_unreachable_statements.h"
-#include "src/tint/ast/transform/simplify_pointers.h"
-#include "src/tint/ast/transform/spirv_atomic.h"
-#include "src/tint/ast/transform/unshadow.h"
 #include "src/tint/lang/spirv/reader/parser_impl.h"
+#include "src/tint/lang/wgsl/ast/transform/decompose_strided_array.h"
+#include "src/tint/lang/wgsl/ast/transform/decompose_strided_matrix.h"
+#include "src/tint/lang/wgsl/ast/transform/fold_trivial_lets.h"
+#include "src/tint/lang/wgsl/ast/transform/remove_unreachable_statements.h"
+#include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
+#include "src/tint/lang/wgsl/ast/transform/spirv_atomic.h"
+#include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/transform/manager.h"
 
 namespace tint::reader::spirv {

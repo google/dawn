@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_SEM_EXPRESSION_H_
 #define SRC_TINT_SEM_EXPRESSION_H_
 
-#include "src/tint/ast/expression.h"
+#include "src/tint/lang/wgsl/ast/expression.h"
 #include "src/tint/sem/node.h"
 
 // Forward declarations

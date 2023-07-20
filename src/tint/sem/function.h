@@ -20,8 +20,8 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/ast/diagnostic_control.h"
-#include "src/tint/ast/variable.h"
+#include "src/tint/lang/wgsl/ast/diagnostic_control.h"
+#include "src/tint/lang/wgsl/ast/variable.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/utils/unique_vector.h"
 #include "src/tint/utils/vector.h"

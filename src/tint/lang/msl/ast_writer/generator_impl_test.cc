@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/stage_attribute.h"
 #include "src/tint/lang/msl/ast_writer/test_helper.h"
+#include "src/tint/lang/wgsl/ast/stage_attribute.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

@@ -17,8 +17,8 @@
 #include <memory>
 #include <vector>
 
-#include "src/tint/ast/binary_expression.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/change_binary_operator.h"
+#include "src/tint/lang/wgsl/ast/binary_expression.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

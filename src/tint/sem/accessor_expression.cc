@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/tint/ast/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::AccessorExpression);
 

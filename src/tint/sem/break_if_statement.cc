@@ -14,7 +14,7 @@
 
 #include "src/tint/sem/break_if_statement.h"
 
-#include "src/tint/ast/break_if_statement.h"
+#include "src/tint/lang/wgsl/ast/break_if_statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BreakIfStatement);
 

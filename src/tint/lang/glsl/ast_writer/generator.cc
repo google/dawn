@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/glsl/ast_writer/generator.h"
 
-#include "src/tint/ast/transform/binding_remapper.h"
-#include "src/tint/ast/transform/combine_samplers.h"
 #include "src/tint/lang/glsl/ast_writer/generator_impl.h"
+#include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
+#include "src/tint/lang/wgsl/ast/transform/combine_samplers.h"
 
 namespace tint::writer::glsl {
 

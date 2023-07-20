@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_SEM_MODULE_H_
 #define SRC_TINT_SEM_MODULE_H_
 
-#include "src/tint/ast/diagnostic_control.h"
 #include "src/tint/builtin/extension.h"
+#include "src/tint/lang/wgsl/ast/diagnostic_control.h"
 #include "src/tint/sem/node.h"
 #include "src/tint/utils/vector.h"
 

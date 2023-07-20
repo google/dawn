@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-#include "src/tint/ast/module.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 
 namespace tint::reader::wgsl {
 namespace {

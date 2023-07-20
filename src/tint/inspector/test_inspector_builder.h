@@ -20,11 +20,11 @@
 #include <tuple>
 #include <vector>
 
-#include "src/tint/ast/call_statement.h"
-#include "src/tint/ast/disable_validation_attribute.h"
-#include "src/tint/ast/id_attribute.h"
-#include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
+#include "src/tint/lang/wgsl/ast/id_attribute.h"
+#include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/type/depth_texture.h"

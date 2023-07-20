@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/ast/pipeline_stage.h"
+#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/reflection.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/utils/bitset.h"

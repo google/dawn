@@ -18,12 +18,12 @@
 #include <utility>
 
 #include "spirv/unified1/GLSL.std.450.h"
-#include "src/tint/ast/call_statement.h"
-#include "src/tint/ast/id_attribute.h"
-#include "src/tint/ast/internal_attribute.h"
-#include "src/tint/ast/transform/add_block_attribute.h"
-#include "src/tint/ast/traverse_expressions.h"
 #include "src/tint/constant/value.h"
+#include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/id_attribute.h"
+#include "src/tint/lang/wgsl/ast/internal_attribute.h"
+#include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
+#include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"

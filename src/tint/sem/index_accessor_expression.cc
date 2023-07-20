@@ -14,7 +14,7 @@
 
 #include "src/tint/sem/index_accessor_expression.h"
 
-#include "src/tint/ast/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
 
 #include <utility>
 

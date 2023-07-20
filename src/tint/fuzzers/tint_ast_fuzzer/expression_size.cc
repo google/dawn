@@ -14,7 +14,7 @@
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/expression_size.h"
 
-#include "src/tint/ast/traverse_expressions.h"
+#include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

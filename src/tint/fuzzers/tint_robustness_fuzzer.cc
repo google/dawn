@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/transform/robustness.h"
 #include "src/tint/fuzzers/fuzzer_init.h"
 #include "src/tint/fuzzers/tint_common_fuzzer.h"
 #include "src/tint/fuzzers/transform_builder.h"
+#include "src/tint/lang/wgsl/ast/transform/robustness.h"
 
 namespace tint::fuzzers {
 

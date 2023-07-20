@@ -20,9 +20,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "src/tint/ast/diagnostic_control.h"
-#include "src/tint/ast/node.h"
 #include "src/tint/debug.h"
+#include "src/tint/lang/wgsl/ast/diagnostic_control.h"
+#include "src/tint/lang/wgsl/ast/node.h"
 #include "src/tint/sem/node.h"
 #include "src/tint/sem/type_mappings.h"
 #include "src/tint/utils/unique_vector.h"

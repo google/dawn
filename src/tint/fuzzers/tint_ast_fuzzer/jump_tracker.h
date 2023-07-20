@@ -17,7 +17,7 @@
 
 #include <unordered_set>
 
-#include "src/tint/ast/statement.h"
+#include "src/tint/lang/wgsl/ast/statement.h"
 #include "src/tint/program.h"
 
 namespace tint::fuzzers::ast_fuzzer {

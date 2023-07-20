@@ -14,7 +14,7 @@
 
 #include <unordered_set>
 
-#include "src/tint/ast/builtin_texture_helper_test.h"
+#include "src/tint/lang/wgsl/ast/builtin_texture_helper_test.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/value_constructor.h"
 #include "src/tint/utils/string_stream.h"

@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_FUZZERS_TINT_AST_FUZZER_MUTATIONS_CHANGE_UNARY_OPERATOR_H_
 #define SRC_TINT_FUZZERS_TINT_AST_FUZZER_MUTATIONS_CHANGE_UNARY_OPERATOR_H_
 
-#include "src/tint/ast/unary_op.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation.h"
+#include "src/tint/lang/wgsl/ast/unary_op.h"
 #include "src/tint/sem/variable.h"
 
 namespace tint::fuzzers::ast_fuzzer {

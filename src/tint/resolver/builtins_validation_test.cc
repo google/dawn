@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/call_statement.h"
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/utils/string_stream.h"
 

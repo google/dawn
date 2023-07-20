@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/bitcast_expression.h"
+#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/reference.h"

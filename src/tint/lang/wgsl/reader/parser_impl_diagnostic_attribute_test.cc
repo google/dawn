@@ -14,8 +14,8 @@
 
 #include "src/tint/lang/wgsl/reader/parser_impl_test_helper.h"
 
-#include "src/tint/ast/diagnostic_control.h"
-#include "src/tint/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/diagnostic_control.h"
+#include "src/tint/lang/wgsl/ast/test_helper.h"
 
 namespace tint::reader::wgsl {
 namespace {

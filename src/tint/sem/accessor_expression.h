@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "src/tint/ast/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
 #include "src/tint/sem/value_expression.h"
 
 namespace tint::sem {

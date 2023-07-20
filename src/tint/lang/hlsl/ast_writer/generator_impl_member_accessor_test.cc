@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/stage_attribute.h"
 #include "src/tint/lang/hlsl/ast_writer/test_helper.h"
+#include "src/tint/lang/wgsl/ast/stage_attribute.h"
 
 using ::testing::HasSubstr;
 

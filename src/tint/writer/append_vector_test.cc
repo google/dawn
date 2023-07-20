@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/writer/append_vector.h"
-#include "src/tint/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/test_helper.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/sem/value_constructor.h"

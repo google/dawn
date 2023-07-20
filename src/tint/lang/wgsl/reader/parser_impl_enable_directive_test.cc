@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/reader/parser_impl_test_helper.h"
 
-#include "src/tint/ast/enable.h"
+#include "src/tint/lang/wgsl/ast/enable.h"
 
 namespace tint::reader::wgsl {
 namespace {

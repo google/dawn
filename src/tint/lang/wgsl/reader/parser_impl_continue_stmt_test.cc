@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/continue_statement.h"
+#include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/reader/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {

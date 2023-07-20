@@ -14,8 +14,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
-#include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 

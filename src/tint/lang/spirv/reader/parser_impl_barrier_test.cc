@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/call_statement.h"
 #include "src/tint/lang/spirv/reader/function.h"
 #include "src/tint/lang/spirv/reader/parser_impl_test_helper.h"
 #include "src/tint/lang/spirv/reader/spirv_tools_helpers_test.h"
+#include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/sem/call.h"
 
 namespace tint::reader::spirv {

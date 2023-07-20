@@ -15,7 +15,7 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
 namespace tint::resolver {

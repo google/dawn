@@ -14,9 +14,9 @@
 
 #include <string>
 
-#include "src/tint/ast/identifier.h"
-#include "src/tint/ast/module.h"
 #include "src/tint/bench/benchmark.h"
+#include "src/tint/lang/wgsl/ast/identifier.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 
 namespace tint::writer::glsl {
 namespace {

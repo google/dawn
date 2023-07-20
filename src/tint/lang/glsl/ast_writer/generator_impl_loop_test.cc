@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/lang/glsl/ast_writer/test_helper.h"
+#include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 
 #include "gmock/gmock.h"
 

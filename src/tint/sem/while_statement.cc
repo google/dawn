@@ -14,7 +14,7 @@
 
 #include "src/tint/sem/while_statement.h"
 
-#include "src/tint/ast/while_statement.h"
+#include "src/tint/lang/wgsl/ast/while_statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::WhileStatement);
 

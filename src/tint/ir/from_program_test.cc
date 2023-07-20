@@ -13,8 +13,6 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/case_selector.h"
-#include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/constant/scalar.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/if.h"
@@ -22,6 +20,8 @@
 #include "src/tint/ir/multi_in_block.h"
 #include "src/tint/ir/program_test_helper.h"
 #include "src/tint/ir/switch.h"
+#include "src/tint/lang/wgsl/ast/case_selector.h"
+#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
 namespace tint::ir {
 namespace {

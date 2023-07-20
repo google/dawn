@@ -19,7 +19,7 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/ast/pipeline_stage.h"
+#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/sem_helper.h"
 #include "src/tint/scope_stack.h"

@@ -16,8 +16,8 @@
 
 #include <string>
 
-#include "src/tint/ast/module.h"
 #include "src/tint/diagnostic/diagnostic.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/utils/hashset.h"
 #include "src/tint/utils/string.h"
 

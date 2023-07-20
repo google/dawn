@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/test_helper.h"
-#include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/reader/parser_impl_test_helper.h"
 
 namespace tint::reader::wgsl {

@@ -14,7 +14,7 @@
 
 #include "src/tint/sem/array_count.h"
 
-#include "src/tint/ast/identifier.h"
+#include "src/tint/lang/wgsl/ast/identifier.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::NamedOverrideArrayCount);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::UnnamedOverrideArrayCount);

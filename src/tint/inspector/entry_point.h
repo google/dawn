@@ -22,8 +22,8 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/ast/interpolate_attribute.h"
-#include "src/tint/ast/pipeline_stage.h"
+#include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
+#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 
 namespace tint::inspector {
 

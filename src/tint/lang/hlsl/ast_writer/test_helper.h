@@ -20,9 +20,9 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/ast/transform/renamer.h"
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
 #include "src/tint/lang/hlsl/ast_writer/generator_impl.h"
+#include "src/tint/lang/wgsl/ast/transform/renamer.h"
 #include "src/tint/transform/manager.h"
 
 namespace tint::writer::hlsl {

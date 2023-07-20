@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_SEM_STATEMENT_H_
 #define SRC_TINT_SEM_STATEMENT_H_
 
-#include "src/tint/ast/diagnostic_control.h"
+#include "src/tint/lang/wgsl/ast/diagnostic_control.h"
 #include "src/tint/sem/behavior.h"
 #include "src/tint/sem/node.h"
 #include "src/tint/symbol.h"

@@ -14,7 +14,7 @@
 
 #include "src/tint/val/val.h"
 
-#include "src/tint/ast/module.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/program.h"
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/io/tmpfile.h"

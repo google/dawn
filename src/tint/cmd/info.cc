@@ -19,8 +19,8 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER
 
-#include "src/tint/ast/module.h"
 #include "src/tint/cmd/helper.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/type/struct.h"
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/string.h"

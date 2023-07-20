@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/disable_validation_attribute.h"
-#include "src/tint/ast/transform/add_block_attribute.h"
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
+#include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/texture_dimension.h"

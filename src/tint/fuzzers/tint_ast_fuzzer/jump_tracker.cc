@@ -17,13 +17,13 @@
 #include <cassert>
 #include <unordered_set>
 
-#include "src/tint/ast/break_statement.h"
-#include "src/tint/ast/discard_statement.h"
-#include "src/tint/ast/for_loop_statement.h"
-#include "src/tint/ast/loop_statement.h"
-#include "src/tint/ast/return_statement.h"
-#include "src/tint/ast/switch_statement.h"
-#include "src/tint/ast/while_statement.h"
+#include "src/tint/lang/wgsl/ast/break_statement.h"
+#include "src/tint/lang/wgsl/ast/discard_statement.h"
+#include "src/tint/lang/wgsl/ast/for_loop_statement.h"
+#include "src/tint/lang/wgsl/ast/loop_statement.h"
+#include "src/tint/lang/wgsl/ast/return_statement.h"
+#include "src/tint/lang/wgsl/ast/switch_statement.h"
+#include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/sem/statement.h"
 
 namespace tint::fuzzers::ast_fuzzer {

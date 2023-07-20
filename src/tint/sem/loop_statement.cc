@@ -14,8 +14,8 @@
 
 #include "src/tint/sem/loop_statement.h"
 
-#include "src/tint/ast/block_statement.h"
-#include "src/tint/ast/loop_statement.h"
+#include "src/tint/lang/wgsl/ast/block_statement.h"
+#include "src/tint/lang/wgsl/ast/loop_statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopContinuingBlockStatement);

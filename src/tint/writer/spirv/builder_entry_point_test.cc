@@ -15,13 +15,13 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/tint/ast/builtin_attribute.h"
-#include "src/tint/ast/location_attribute.h"
-#include "src/tint/ast/return_statement.h"
-#include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/variable.h"
 #include "src/tint/builtin/address_space.h"
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/lang/wgsl/ast/builtin_attribute.h"
+#include "src/tint/lang/wgsl/ast/location_attribute.h"
+#include "src/tint/lang/wgsl/ast/return_statement.h"
+#include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/lang/wgsl/ast/variable.h"
 #include "src/tint/program.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/vector.h"

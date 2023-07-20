@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/tint/ast/call_statement.h"
-#include "src/tint/ast/stage_attribute.h"
 #include "src/tint/lang/hlsl/ast_writer/test_helper.h"
+#include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"

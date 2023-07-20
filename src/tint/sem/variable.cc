@@ -16,9 +16,9 @@
 
 #include <utility>
 
-#include "src/tint/ast/identifier_expression.h"
-#include "src/tint/ast/parameter.h"
-#include "src/tint/ast/variable.h"
+#include "src/tint/lang/wgsl/ast/identifier_expression.h"
+#include "src/tint/lang/wgsl/ast/parameter.h"
+#include "src/tint/lang/wgsl/ast/variable.h"
 #include "src/tint/type/pointer.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Variable);

@@ -18,7 +18,7 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/ast/binary_expression.h"
+#include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/evaluation_stage.h"
 #include "src/tint/sem/pipeline_stage_set.h"

@@ -16,8 +16,8 @@
 
 #include <utility>
 
-#include "src/tint/ast/transform/binding_remapper.h"
 #include "src/tint/inspector/inspector.h"
+#include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/writer/binding_point.h"
 

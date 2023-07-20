@@ -20,12 +20,12 @@
 #include <utility>
 
 #include "source/opt/build_module.h"
-#include "src/tint/ast/bitcast_expression.h"
-#include "src/tint/ast/disable_validation_attribute.h"
-#include "src/tint/ast/id_attribute.h"
-#include "src/tint/ast/interpolate_attribute.h"
-#include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/lang/spirv/reader/function.h"
+#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
+#include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
+#include "src/tint/lang/wgsl/ast/id_attribute.h"
+#include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
+#include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"

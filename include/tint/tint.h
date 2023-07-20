@@ -21,13 +21,13 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
-#include "src/tint/ast/transform/first_index_offset.h"
-#include "src/tint/ast/transform/renamer.h"
-#include "src/tint/ast/transform/single_entry_point.h"
-#include "src/tint/ast/transform/substitute_override.h"
-#include "src/tint/ast/transform/vertex_pulling.h"
 #include "src/tint/diagnostic/printer.h"
 #include "src/tint/inspector/inspector.h"
+#include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
+#include "src/tint/lang/wgsl/ast/transform/renamer.h"
+#include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
+#include "src/tint/lang/wgsl/ast/transform/substitute_override.h"
+#include "src/tint/lang/wgsl/ast/transform/vertex_pulling.h"
 #include "src/tint/reader/reader.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/type/manager.h"

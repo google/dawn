@@ -14,7 +14,7 @@
 
 #include "src/tint/sem/struct.h"
 
-#include "src/tint/ast/struct_member.h"
+#include "src/tint/lang/wgsl/ast/struct_member.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
