@@ -615,26 +615,26 @@ endif()
 
 if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_LIB_SRCS
-    reader/spirv/attributes.h
-    reader/spirv/construct.h
-    reader/spirv/construct.cc
-    reader/spirv/entry_point_info.h
-    reader/spirv/entry_point_info.cc
-    reader/spirv/enum_converter.h
-    reader/spirv/enum_converter.cc
-    reader/spirv/fail_stream.h
-    reader/spirv/function.cc
-    reader/spirv/function.h
-    reader/spirv/namer.cc
-    reader/spirv/namer.h
-    reader/spirv/parser_type.cc
-    reader/spirv/parser_type.h
-    reader/spirv/parser.cc
-    reader/spirv/parser.h
-    reader/spirv/parser_impl.cc
-    reader/spirv/parser_impl.h
-    reader/spirv/usage.cc
-    reader/spirv/usage.h
+    lang/spirv/reader/attributes.h
+    lang/spirv/reader/construct.h
+    lang/spirv/reader/construct.cc
+    lang/spirv/reader/entry_point_info.h
+    lang/spirv/reader/entry_point_info.cc
+    lang/spirv/reader/enum_converter.h
+    lang/spirv/reader/enum_converter.cc
+    lang/spirv/reader/fail_stream.h
+    lang/spirv/reader/function.cc
+    lang/spirv/reader/function.h
+    lang/spirv/reader/namer.cc
+    lang/spirv/reader/namer.h
+    lang/spirv/reader/parser_type.cc
+    lang/spirv/reader/parser_type.h
+    lang/spirv/reader/parser.cc
+    lang/spirv/reader/parser.h
+    lang/spirv/reader/parser_impl.cc
+    lang/spirv/reader/parser_impl.h
+    lang/spirv/reader/usage.cc
+    lang/spirv/reader/usage.h
   )
 endif()
 
@@ -1186,40 +1186,40 @@ if(TINT_BUILD_TESTS)
 
   if(${TINT_BUILD_SPV_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
-      reader/spirv/enum_converter_test.cc
-      reader/spirv/fail_stream_test.cc
-      reader/spirv/function_arithmetic_test.cc
-      reader/spirv/function_bit_test.cc
-      reader/spirv/function_cfg_test.cc
-      reader/spirv/function_call_test.cc
-      reader/spirv/function_composite_test.cc
-      reader/spirv/function_conversion_test.cc
-      reader/spirv/function_decl_test.cc
-      reader/spirv/function_glsl_std_450_test.cc
-      reader/spirv/function_logical_test.cc
-      reader/spirv/function_memory_test.cc
-      reader/spirv/function_misc_test.cc
-      reader/spirv/function_var_test.cc
-      reader/spirv/namer_test.cc
-      reader/spirv/parser_impl_barrier_test.cc
-      reader/spirv/parser_impl_constant_test.cc
-      reader/spirv/parser_impl_convert_member_decoration_test.cc
-      reader/spirv/parser_impl_convert_type_test.cc
-      reader/spirv/parser_impl_function_decl_test.cc
-      reader/spirv/parser_impl_get_decorations_test.cc
-      reader/spirv/parser_impl_handle_test.cc
-      reader/spirv/parser_impl_import_test.cc
-      reader/spirv/parser_impl_module_var_test.cc
-      reader/spirv/parser_impl_named_types_test.cc
-      reader/spirv/parser_impl_test_helper.cc
-      reader/spirv/parser_impl_test_helper.h
-      reader/spirv/parser_impl_test.cc
-      reader/spirv/parser_impl_user_name_test.cc
-      reader/spirv/parser_type_test.cc
-      reader/spirv/parser_test.cc
-      reader/spirv/spirv_tools_helpers_test.cc
-      reader/spirv/spirv_tools_helpers_test.h
-      reader/spirv/usage_test.cc
+      lang/spirv/reader/enum_converter_test.cc
+      lang/spirv/reader/fail_stream_test.cc
+      lang/spirv/reader/function_arithmetic_test.cc
+      lang/spirv/reader/function_bit_test.cc
+      lang/spirv/reader/function_cfg_test.cc
+      lang/spirv/reader/function_call_test.cc
+      lang/spirv/reader/function_composite_test.cc
+      lang/spirv/reader/function_conversion_test.cc
+      lang/spirv/reader/function_decl_test.cc
+      lang/spirv/reader/function_glsl_std_450_test.cc
+      lang/spirv/reader/function_logical_test.cc
+      lang/spirv/reader/function_memory_test.cc
+      lang/spirv/reader/function_misc_test.cc
+      lang/spirv/reader/function_var_test.cc
+      lang/spirv/reader/namer_test.cc
+      lang/spirv/reader/parser_impl_barrier_test.cc
+      lang/spirv/reader/parser_impl_constant_test.cc
+      lang/spirv/reader/parser_impl_convert_member_decoration_test.cc
+      lang/spirv/reader/parser_impl_convert_type_test.cc
+      lang/spirv/reader/parser_impl_function_decl_test.cc
+      lang/spirv/reader/parser_impl_get_decorations_test.cc
+      lang/spirv/reader/parser_impl_handle_test.cc
+      lang/spirv/reader/parser_impl_import_test.cc
+      lang/spirv/reader/parser_impl_module_var_test.cc
+      lang/spirv/reader/parser_impl_named_types_test.cc
+      lang/spirv/reader/parser_impl_test_helper.cc
+      lang/spirv/reader/parser_impl_test_helper.h
+      lang/spirv/reader/parser_impl_test.cc
+      lang/spirv/reader/parser_impl_user_name_test.cc
+      lang/spirv/reader/parser_type_test.cc
+      lang/spirv/reader/parser_test.cc
+      lang/spirv/reader/spirv_tools_helpers_test.cc
+      lang/spirv/reader/spirv_tools_helpers_test.h
+      lang/spirv/reader/usage_test.cc
     )
   endif()
 

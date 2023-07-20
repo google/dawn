@@ -40,7 +40,7 @@
 #include "src/tint/writer/writer.h"
 
 #if TINT_BUILD_SPV_READER
-#include "src/tint/reader/spirv/parser.h"
+#include "src/tint/lang/spirv/reader/parser.h"
 #endif  // TINT_BUILD_SPV_READER
 
 #if TINT_BUILD_WGSL_READER
