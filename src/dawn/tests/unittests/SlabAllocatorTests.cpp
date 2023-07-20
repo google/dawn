@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <set>
+#include <thread>
 #include <vector>
 
 #include "dawn/common/Math.h"
@@ -176,6 +177,52 @@ TEST(SlabAllocatorTests, AllocateDeallocateMany) {
     // Deallocate the rest of the objects
     for (Foo* object : objects) {
         allocator.Deallocate(object);
+    }
+}
+
+// Test many allocations and deallocations in a multithreaded environment.
+TEST(SlabAllocatorTests, AllocateDeallocateManyMultithread) {
+    static constexpr uint32_t kNumObjectsPerThread = 100;
+    static constexpr uint32_t kNumThreads = 10;
+
+    SlabAllocator<Foo> allocator(17 * sizeof(Foo));
+    auto f = [&] {
+        std::set<Foo*> objects;
+        std::set<Foo*> set2;
+
+        // Allocate many objects.
+        for (uint32_t i = 0; i < kNumObjectsPerThread; i++) {
+            Foo* object = allocator.Allocate(i);
+            EXPECT_TRUE(objects.insert(object).second);
+            if (i % 2 == 0) {
+                set2.insert(object);
+            }
+        }
+
+        // Deallocate every other object.
+        for (Foo* object : set2) {
+            allocator.Deallocate(object);
+            objects.erase(object);
+        }
+
+        // Allocate more objects.
+        for (uint32_t i = 0; i < kNumObjectsPerThread / 2; i++) {
+            Foo* object = allocator.Allocate(i);
+            EXPECT_TRUE(objects.insert(object).second);
+        }
+
+        // Deallocate the rest of the objects
+        for (Foo* object : objects) {
+            allocator.Deallocate(object);
+        }
+    };
+
+    std::vector<std::thread> threads;
+    for (uint32_t i = 0; i < kNumThreads; i++) {
+        threads.emplace_back(f);
+    }
+    for (uint32_t i = 0; i < kNumThreads; i++) {
+        threads[i].join();
     }
 }
 
