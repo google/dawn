@@ -252,14 +252,14 @@ list(APPEND TINT_LIB_SRCS
   lang/base/constant/node.h
   lang/base/constant/value.cc
   lang/base/constant/value.h
-  inspector/entry_point.cc
-  inspector/entry_point.h
-  inspector/inspector.cc
-  inspector/inspector.h
-  inspector/resource_binding.cc
-  inspector/resource_binding.h
-  inspector/scalar.cc
-  inspector/scalar.h
+  lang/wgsl/inspector/entry_point.cc
+  lang/wgsl/inspector/entry_point.h
+  lang/wgsl/inspector/inspector.cc
+  lang/wgsl/inspector/inspector.h
+  lang/wgsl/inspector/resource_binding.cc
+  lang/wgsl/inspector/resource_binding.h
+  lang/wgsl/inspector/scalar.cc
+  lang/wgsl/inspector/scalar.h
   program_builder.cc
   program_builder.h
   program_id.cc
@@ -1176,11 +1176,11 @@ if(TINT_BUILD_TESTS)
   # Inspector tests depend on WGSL reader
   if(${TINT_BUILD_WGSL_READER})
     list(APPEND TINT_TEST_SRCS
-      inspector/inspector_test.cc
-      inspector/test_inspector_builder.cc
-      inspector/test_inspector_builder.h
-      inspector/test_inspector_runner.cc
-      inspector/test_inspector_runner.h
+      lang/wgsl/inspector/inspector_test.cc
+      lang/wgsl/inspector/test_inspector_builder.cc
+      lang/wgsl/inspector/test_inspector_builder.h
+      lang/wgsl/inspector/test_inspector_runner.cc
+      lang/wgsl/inspector/test_inspector_runner.h
     )
   endif()
 

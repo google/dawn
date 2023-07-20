@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_INSPECTOR_TEST_INSPECTOR_BUILDER_H_
-#define SRC_TINT_INSPECTOR_TEST_INSPECTOR_BUILDER_H_
+#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_TEST_INSPECTOR_BUILDER_H_
+#define SRC_TINT_LANG_WGSL_INSPECTOR_TEST_INSPECTOR_BUILDER_H_
 
 #include <memory>
 #include <string>
@@ -337,4 +337,4 @@ class InspectorBuilder : public ProgramBuilder {
 
 }  // namespace tint::inspector
 
-#endif  // SRC_TINT_INSPECTOR_TEST_INSPECTOR_BUILDER_H_
+#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_TEST_INSPECTOR_BUILDER_H_

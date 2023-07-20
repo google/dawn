@@ -14,8 +14,6 @@
 
 #include "gmock/gmock.h"
 
-#include "src/tint/inspector/test_inspector_builder.h"
-#include "src/tint/inspector/test_inspector_runner.h"
 #include "src/tint/lang/base/type/depth_texture.h"
 #include "src/tint/lang/base/type/external_texture.h"
 #include "src/tint/lang/base/type/multisampled_texture.h"
@@ -26,6 +24,8 @@
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/inspector/test_inspector_builder.h"
+#include "src/tint/lang/wgsl/inspector/test_inspector_runner.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
 #include "tint/tint.h"

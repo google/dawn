@@ -334,14 +334,14 @@ libtint_source_set("libtint_initializer_src") {
 
 libtint_source_set("libtint_inspector_src") {
   sources = [
-    "inspector/entry_point.cc",
-    "inspector/entry_point.h",
-    "inspector/inspector.cc",
-    "inspector/inspector.h",
-    "inspector/resource_binding.cc",
-    "inspector/resource_binding.h",
-    "inspector/scalar.cc",
-    "inspector/scalar.h",
+    "lang/wgsl/inspector/entry_point.cc",
+    "lang/wgsl/inspector/entry_point.h",
+    "lang/wgsl/inspector/inspector.cc",
+    "lang/wgsl/inspector/inspector.h",
+    "lang/wgsl/inspector/resource_binding.cc",
+    "lang/wgsl/inspector/resource_binding.h",
+    "lang/wgsl/inspector/scalar.cc",
+    "lang/wgsl/inspector/scalar.h",
   ]
   deps = [
     ":libtint_ast_src",
@@ -1689,11 +1689,11 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_inspector_src") {
     sources = [
-      "inspector/inspector_test.cc",
-      "inspector/test_inspector_builder.cc",
-      "inspector/test_inspector_builder.h",
-      "inspector/test_inspector_runner.cc",
-      "inspector/test_inspector_runner.h",
+      "lang/wgsl/inspector/inspector_test.cc",
+      "lang/wgsl/inspector/test_inspector_builder.cc",
+      "lang/wgsl/inspector/test_inspector_builder.h",
+      "lang/wgsl/inspector/test_inspector_runner.cc",
+      "lang/wgsl/inspector/test_inspector_runner.h",
     ]
     deps = [ ":libtint_inspector_src" ]
   }

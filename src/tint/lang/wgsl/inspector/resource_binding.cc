@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/inspector/resource_binding.h"
+#include "src/tint/lang/wgsl/inspector/resource_binding.h"
 
 #include "src/tint/lang/base/type/array.h"
 #include "src/tint/lang/base/type/f32.h"

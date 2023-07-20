@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/inspector/entry_point.h"
+#include "src/tint/lang/wgsl/inspector/entry_point.h"
 
 namespace tint::inspector {
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/inspector/scalar.h"
+#include "src/tint/lang/wgsl/inspector/scalar.h"
 
 namespace tint::inspector {
 

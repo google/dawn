@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_INSPECTOR_INSPECTOR_H_
-#define SRC_TINT_INSPECTOR_INSPECTOR_H_
+#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_H_
+#define SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_H_
 
 #include <map>
 #include <memory>
@@ -26,10 +26,10 @@
 #include "tint/override_id.h"
 
 #include "src/tint/core/unique_vector.h"
-#include "src/tint/inspector/entry_point.h"
-#include "src/tint/inspector/resource_binding.h"
-#include "src/tint/inspector/scalar.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/wgsl/inspector/entry_point.h"
+#include "src/tint/lang/wgsl/inspector/resource_binding.h"
+#include "src/tint/lang/wgsl/inspector/scalar.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 #include "src/tint/program.h"
 
@@ -250,4 +250,4 @@ class Inspector {
 
 }  // namespace tint::inspector
 
-#endif  // SRC_TINT_INSPECTOR_INSPECTOR_H_
+#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_H_
