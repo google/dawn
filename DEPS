@@ -44,11 +44,6 @@ vars = {
   'reclient_package': 'infra/rbe/client/',
   # reclient CIPD package version
   'reclient_version': 're_client_version:0.108.0.7cdbbe9-gomaip',
-
-  # Fetch siso CIPD package
-  'checkout_siso': False,
-  # siso CIPD package version.
-  'siso_version': 'git_revision:06bae0e9d7265e972358b23f77d9867930061db0',
 }
 
 deps = {
@@ -243,16 +238,6 @@ deps = {
     ],
     'dep_type': 'cipd',
     'condition': 'dawn_standalone',
-  },
-  'third_party/siso': {
-    'packages': [
-      {
-        'package': 'infra/build/siso/${{platform}}',
-        'version': Var('siso_version'),
-      }
-    ],
-    'dep_type': 'cipd',
-    'condition': 'checkout_siso and dawn_standalone',
   },
 
   # Misc dependencies inherited from Tint
@@ -476,34 +461,23 @@ hooks = [
                 '-o', 'third_party/node/node.exe',
     ],
   },
-#  {
-#    # Download remote exec cfg files
-#    'name': 'fetch_reclient_cfgs',
-#    'pattern': '.',
-#    'condition': 'download_remoteexec_cfg',
-#    'action': ['python3',
-#               'buildtools/reclient_cfgs/fetch_reclient_cfgs.py',
-#               '--rbe_instance',
-#               Var('rbe_instance'),
-#               '--reproxy_cfg_template',
-#               'reproxy.cfg.template',
-#               '--rewrapper_cfg_project',
-#               Var('rewrapper_cfg_project'),
-#               '--quiet',
-#               '--hook',
-#               ],
-#  },
-  # Configure Siso
-  {
-    'name': 'configure_siso',
-    'pattern': '.',
-    'condition': 'checkout_siso and dawn_standalone',
-    'action': ['python3',
-               'build/config/siso/configure_siso.py',
-               '--rbe_instance',
-               Var('rbe_instance'),
-               ],
-  },
+ {
+   # Download remote exec cfg files
+   'name': 'fetch_reclient_cfgs',
+   'pattern': '.',
+   'condition': 'download_remoteexec_cfg',
+   'action': ['python3',
+              'buildtools/reclient_cfgs/fetch_reclient_cfgs.py',
+              '--rbe_instance',
+              Var('rbe_instance'),
+              '--reproxy_cfg_template',
+              'reproxy.cfg.template',
+              '--rewrapper_cfg_project',
+              Var('rewrapper_cfg_project'),
+              '--quiet',
+              '--hook',
+              ],
+ },
 ]
 
 recursedeps = [
