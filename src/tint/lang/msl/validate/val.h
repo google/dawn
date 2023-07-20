@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_VAL_VAL_H_
-#define SRC_TINT_VAL_VAL_H_
+#ifndef SRC_TINT_LANG_MSL_VALIDATE_VAL_H_
+#define SRC_TINT_LANG_MSL_VALIDATE_VAL_H_
 
 #include <string>
 #include <utility>
@@ -26,12 +26,9 @@ namespace tint {
 class Program;
 }  // namespace tint
 
-namespace tint::val {
+namespace tint::msl::validate {
 
 using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
-
-/// Name of the FXC compiler DLL
-static constexpr const char kFxcDLLName[] = "d3dcompiler_47.dll";
 
 /// The return structure of Validate()
 struct Result {
@@ -40,29 +37,6 @@ struct Result {
     /// Output of DXC.
     std::string output;
 };
-
-/// Hlsl attempts to compile the shader with DXC, verifying that the shader
-/// compiles successfully.
-/// @param dxc_path path to DXC
-/// @param source the generated HLSL source
-/// @param entry_points the list of entry points to validate
-/// @return the result of the compile
-Result HlslUsingDXC(const std::string& dxc_path,
-                    const std::string& source,
-                    const EntryPointList& entry_points,
-                    bool require_16bit_types);
-
-#ifdef _WIN32
-/// Hlsl attempts to compile the shader with FXC, verifying that the shader
-/// compiles successfully.
-/// @param fxc_path path to the FXC DLL
-/// @param source the generated HLSL source
-/// @param entry_points the list of entry points to validate
-/// @return the result of the compile
-Result HlslUsingFXC(const std::string& fxc_path,
-                    const std::string& source,
-                    const EntryPointList& entry_points);
-#endif  // _WIN32
 
 /// Msl attempts to compile the shader with the Metal Shader Compiler,
 /// verifying that the shader compiles successfully.
@@ -76,9 +50,9 @@ Result Msl(const std::string& xcrun_path, const std::string& source);
 /// API, verifying that the shader compiles successfully.
 /// @param source the generated MSL source
 /// @return the result of the compile
-Result MslUsingMetalAPI(const std::string& source);
+Result UsingMetalAPI(const std::string& source);
 #endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
 
-}  // namespace tint::val
+}  // namespace tint::msl::validate
 
-#endif  // SRC_TINT_VAL_VAL_H_
+#endif  // SRC_TINT_LANG_MSL_VALIDATE_VAL_H_

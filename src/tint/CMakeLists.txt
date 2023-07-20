@@ -885,9 +885,10 @@ target_link_libraries(tint_utils_io tint_diagnostic_utils)
 
 ## Tint validation utilities. Used by tests and the tint executable.
 add_library(tint_val
-  val/hlsl.cc
-  val/msl.cc
-  val/val.h
+  lang/hlsl/validate/hlsl.cc
+  lang/hlsl/validate/val.h
+  lang/msl/validate/msl.cc
+  lang/msl/validate/val.h
 )
 
 # If we're building on mac / ios and we have CoreGraphics, then we can use the
@@ -896,7 +897,7 @@ add_library(tint_val
 if(APPLE)
   find_library(LIB_CORE_GRAPHICS CoreGraphics)
   if(LIB_CORE_GRAPHICS)
-    target_sources(tint_val PRIVATE "val/msl_metal.mm")
+    target_sources(tint_val PRIVATE "lang/msl/validate/msl_metal.mm")
     target_compile_definitions(tint_val PUBLIC "-DTINT_ENABLE_MSL_VALIDATION_USING_METAL_API=1")
     target_compile_options(tint_val PRIVATE "-fmodules" "-fcxx-modules")
     target_link_options(tint_val PUBLIC "-framework" "CoreGraphics")

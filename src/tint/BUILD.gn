@@ -147,9 +147,10 @@ source_set("tint_utils_io") {
 ###############################################################################
 source_set("tint_val") {
   sources = [
-    "val/hlsl.cc",
-    "val/msl.cc",
-    "val/val.h",
+    "lang/hlsl/validate/hlsl.cc",
+    "lang/hlsl/validate/val.h",
+    "lang/msl/validate/msl.cc",
+    "lang/msl/validate/val.h",
   ]
   deps = [
     ":libtint_ast_src",

@@ -25,7 +25,6 @@
 #include "src/tint/core/transform.h"
 #include "src/tint/lang/base/type/struct.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/val/val.h"
 #include "tint/tint.h"
 
 namespace {

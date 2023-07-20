@@ -19,13 +19,13 @@
 // Disable: error: treating #include as an import of module 'std.string'
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wauto-import"
-#include "src/tint/val/val.h"
+#include "src/tint/lang/msl/validate/val.h"
 #pragma clang diagnostic pop
 
-namespace tint::val {
+namespace tint::msl::validate {
 
-Result MslUsingMetalAPI(const std::string& src) {
-    tint::val::Result result;
+Result UsingMetalAPI(const std::string& src) {
+    Result result;
 
     NSError* error = nil;
 
@@ -53,6 +53,6 @@ Result MslUsingMetalAPI(const std::string& src) {
     return result;
 }
 
-}  // namespace tint::val
+}  // namespace tint::msl::validate
 
 #endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API

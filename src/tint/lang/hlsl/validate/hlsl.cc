@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "src/tint/val/val.h"
+#include "src/tint/lang/hlsl/validate/val.h"
 
 #include "src/tint/core/io/command.h"
 #include "src/tint/core/io/tmpfile.h"
@@ -29,12 +29,12 @@
 using Microsoft::WRL::ComPtr;
 #endif  // _WIN32
 
-namespace tint::val {
+namespace tint::hlsl::validate {
 
-Result HlslUsingDXC(const std::string& dxc_path,
-                    const std::string& source,
-                    const EntryPointList& entry_points,
-                    bool require_16bit_types) {
+Result UsingDXC(const std::string& dxc_path,
+                const std::string& source,
+                const EntryPointList& entry_points,
+                bool require_16bit_types) {
     Result result;
 
     auto dxc = utils::Command(dxc_path);
@@ -107,13 +107,13 @@ Result HlslUsingDXC(const std::string& dxc_path,
 }
 
 #ifdef _WIN32
-Result HlslUsingFXC(const std::string& fxc_path,
-                    const std::string& source,
-                    const EntryPointList& entry_points) {
+Result UsingFXC(const std::string& fxc_path,
+                const std::string& source,
+                const EntryPointList& entry_points) {
     Result result;
 
     // This library leaks if an error happens in this function, but it is ok
-    // because it is loaded at most once, and the executables using HlslUsingFXC
+    // because it is loaded at most once, and the executables using UsingFXC
     // are short-lived.
     HMODULE fxcLib = LoadLibraryA(fxc_path.c_str());
     if (fxcLib == nullptr) {
@@ -202,4 +202,4 @@ Result HlslUsingFXC(const std::string& fxc_path,
 }
 #endif  // _WIN32
 
-}  // namespace tint::val
+}  // namespace tint::hlsl::validate

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/val/val.h"
+#include "src/tint/lang/msl/validate/val.h"
 
 #include "src/tint/core/io/command.h"
 #include "src/tint/core/io/tmpfile.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/program/program.h"
 
-namespace tint::val {
+namespace tint::msl::validate {
 
 Result Msl(const std::string& xcrun_path, const std::string& source) {
     Result result;
@@ -64,4 +64,4 @@ Result Msl(const std::string& xcrun_path, const std::string& source) {
     return result;
 }
 
-}  // namespace tint::val
+}  // namespace tint::msl::validate
