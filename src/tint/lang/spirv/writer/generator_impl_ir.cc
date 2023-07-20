@@ -1316,6 +1316,13 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kRound:
             glsl_ext_inst(GLSLstd450RoundEven);
             break;
+        case builtin::Function::kSign:
+            if (result_ty->is_float_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450FSign);
+            } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                glsl_ext_inst(GLSLstd450SSign);
+            }
+            break;
         case builtin::Function::kSin:
             glsl_ext_inst(GLSLstd450Sin);
             break;
