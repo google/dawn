@@ -3078,6 +3078,10 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return Switch(
             resolved_node,  //
             [&](sem::Variable* variable) -> sem::VariableUser* {
+                if (!TINT_LIKELY(CheckNotTemplated("variable", ident))) {
+                    return nullptr;
+                }
+
                 auto stage = variable->Stage();
                 const constant::Value* value = variable->ConstantValue();
                 if (skip_const_eval_.Contains(expr)) {

@@ -1281,5 +1281,111 @@ TEST_F(ResolverVariableTest, Param_ShadowsAlias) {
     EXPECT_EQ(param->Type(), alias);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Templated identifier uses
+////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST_F(ResolverVariableTest, GlobalVar_UseTemplatedIdent) {
+    // var<private> a : i32;
+    //
+    // fn F() {
+    //   let l = a<i32>;
+    // }
+
+    GlobalVar(Source{{56, 78}}, "a", ty.i32(), builtin::AddressSpace::kPrivate);
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: variable 'a' does not take template arguments
+56:78 note: var 'a' declared here)");
+}
+
+TEST_F(ResolverVariableTest, GlobalConst_UseTemplatedIdent) {
+    // const a = 1i;
+    //
+    // fn F() {
+    //   let l = a<i32>;
+    // }
+
+    GlobalConst(Source{{56, 78}}, "a", Expr(1_i));
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: variable 'a' does not take template arguments
+56:78 note: const 'a' declared here)");
+}
+
+TEST_F(ResolverVariableTest, GlobalOverride_UseTemplatedIdent) {
+    // override a = 1i;
+    //
+    // fn F() {
+    //   let l = a<i32>;
+    // }
+
+    Override(Source{{56, 78}}, "a", Expr(1_i));
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: variable 'a' does not take template arguments
+56:78 note: override 'a' declared here)");
+}
+
+TEST_F(ResolverVariableTest, Param_UseTemplatedIdent) {
+    // fn F(a : i32) {
+    //   let l = a<i32>;
+    // }
+
+    Func("F", utils::Vector{Param(Source{{56, 78}}, "a", ty.i32())}, ty.void_(),
+         utils::Vector{
+             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: variable 'a' does not take template arguments
+56:78 note: parameter 'a' declared here)");
+}
+
+TEST_F(ResolverVariableTest, LocalVar_UseTemplatedIdent) {
+    // fn F() {
+    //   var a : i32;
+    //   let l = a<i32>;
+    // }
+
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var(Source{{56, 78}}, "a", ty.i32())),
+             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: variable 'a' does not take template arguments
+56:78 note: var 'a' declared here)");
+}
+
+TEST_F(ResolverVariableTest, Let_UseTemplatedIdent) {
+    // fn F() {
+    //   let a = 1i;
+    //   let l = a<i32>;
+    // }
+
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Let(Source{{56, 78}}, "a", Expr(1_i))),
+             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: variable 'a' does not take template arguments
+56:78 note: let 'a' declared here)");
+}
+
 }  // namespace
 }  // namespace tint::resolver
