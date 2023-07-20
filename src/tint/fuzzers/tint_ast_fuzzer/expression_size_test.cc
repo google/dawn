@@ -21,8 +21,8 @@
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/int_literal_expression.h"
+#include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/program.h"
-#include "src/tint/reader/wgsl/parser.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 namespace {

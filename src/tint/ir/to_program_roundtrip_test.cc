@@ -15,7 +15,7 @@
 #include "src/tint/ir/from_program.h"
 #include "src/tint/ir/program_test_helper.h"
 #include "src/tint/ir/to_program.h"
-#include "src/tint/reader/wgsl/parser.h"
+#include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/wgsl/generator.h"
 

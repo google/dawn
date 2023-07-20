@@ -14,7 +14,7 @@
 
 #include "src/tint/resolver/const_eval_test.h"
 
-#include "src/tint/reader/wgsl/parser.h"
+#include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/utils/result.h"
 
 using namespace tint::builtin::fluent_types;  // NOLINT

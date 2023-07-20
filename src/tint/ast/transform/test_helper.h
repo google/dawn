@@ -22,7 +22,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/ast/transform/transform.h"
-#include "src/tint/reader/wgsl/parser.h"
+#include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/writer/wgsl/generator.h"
 

@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "src/tint/ast/transform/test_helper.h"
-#include "src/tint/reader/wgsl/parser_impl.h"
+#include "src/tint/lang/wgsl/reader/parser_impl.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

@@ -44,7 +44,7 @@
 #endif  // TINT_BUILD_SPV_READER
 
 #if TINT_BUILD_WGSL_READER
-#include "src/tint/reader/wgsl/parser.h"
+#include "src/tint/lang/wgsl/reader/parser.h"
 #endif  // TINT_BUILD_WGSL_READER
 
 #if TINT_BUILD_SPV_WRITER

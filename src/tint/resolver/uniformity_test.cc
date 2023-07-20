@@ -17,8 +17,8 @@
 #include <tuple>
 #include <utility>
 
+#include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/reader/wgsl/parser.h"
 #include "src/tint/resolver/uniformity.h"
 #include "src/tint/utils/string_stream.h"
 
