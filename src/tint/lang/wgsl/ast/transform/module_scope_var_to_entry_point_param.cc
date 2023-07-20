@@ -21,12 +21,12 @@
 
 #include "src/tint/core/string.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ModuleScopeVarToEntryPointParam);
 

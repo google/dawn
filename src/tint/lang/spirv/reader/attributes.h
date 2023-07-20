@@ -19,7 +19,7 @@
 #include "src/tint/core/vector.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint::reader::spirv {
 

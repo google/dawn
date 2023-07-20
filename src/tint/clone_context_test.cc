@@ -15,7 +15,7 @@
 #include <unordered_set>
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint {
 namespace {

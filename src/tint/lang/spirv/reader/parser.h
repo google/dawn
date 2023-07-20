@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "src/tint/program.h"
+#include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::reader::spirv {
 

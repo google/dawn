@@ -22,12 +22,12 @@
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/loop_statement.h"
 #include "src/tint/lang/wgsl/sem/switch_statement.h"
 #include "src/tint/lang/wgsl/sem/while_statement.h"
-#include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::RemoveContinueInSwitch);
 

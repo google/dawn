@@ -260,12 +260,12 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/inspector/resource_binding.h
   lang/wgsl/inspector/scalar.cc
   lang/wgsl/inspector/scalar.h
-  program_builder.cc
-  program_builder.h
+  lang/wgsl/program/program_builder.cc
+  lang/wgsl/program/program_builder.h
   program_id.cc
   program_id.h
-  program.cc
-  program.h
+  lang/wgsl/program/program.cc
+  lang/wgsl/program/program.h
   reflection.h
   reader/reader.cc
   reader/reader.h
@@ -1019,8 +1019,8 @@ if(TINT_BUILD_TESTS)
     core/diagnostic/diagnostic_test.cc
     core/diagnostic/formatter_test.cc
     core/diagnostic/printer_test.cc
-    program_builder_test.cc
-    program_test.cc
+    lang/wgsl/program/program_builder_test.cc
+    lang/wgsl/program/program_test.cc
     reflection_test.cc
     resolver/alias_analysis_test.cc
     resolver/array_accessor_test.cc

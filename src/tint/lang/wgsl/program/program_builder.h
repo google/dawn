@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_PROGRAM_BUILDER_H_
-#define SRC_TINT_PROGRAM_BUILDER_H_
+#ifndef SRC_TINT_LANG_WGSL_PROGRAM_PROGRAM_BUILDER_H_
+#define SRC_TINT_LANG_WGSL_PROGRAM_PROGRAM_BUILDER_H_
 
 #include <string>
 #include <unordered_set>
@@ -100,9 +100,9 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
-#include "src/tint/program.h"
 #include "src/tint/program_id.h"
 
 #ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER
@@ -3706,4 +3706,4 @@ struct CanWrapInStatement<
 
 }  // namespace tint
 
-#endif  // SRC_TINT_PROGRAM_BUILDER_H_
+#endif  // SRC_TINT_LANG_WGSL_PROGRAM_PROGRAM_BUILDER_H_

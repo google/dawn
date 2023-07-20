@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/program.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/transform/transform.h"
 
 #if TINT_BUILD_IR

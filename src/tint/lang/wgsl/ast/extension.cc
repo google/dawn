@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/extension.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 //! @cond Doxygen_Suppress
 // Doxygen gets confused with tint::ast::Extension and tint::builtin::Extension

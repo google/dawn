@@ -25,11 +25,11 @@
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/if_statement.h"
 #include "src/tint/lang/wgsl/sem/loop_statement.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
-#include "src/tint/program_builder.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

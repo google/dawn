@@ -21,11 +21,11 @@
 #include "src/tint/core/map.h"
 #include "src/tint/lang/base/type/reference.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
-#include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DemoteToHelper);

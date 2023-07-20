@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint::writer {
 namespace {

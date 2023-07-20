@@ -20,10 +20,10 @@
 
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/parameter.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
-#include "src/tint/program_builder.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

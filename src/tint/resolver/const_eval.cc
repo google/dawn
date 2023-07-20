@@ -43,9 +43,9 @@
 #include "src/tint/lang/base/type/struct.h"
 #include "src/tint/lang/base/type/u32.h"
 #include "src/tint/lang/base/type/vector.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
-#include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
 
 using namespace tint::number_suffixes;  // NOLINT

@@ -15,7 +15,7 @@
 #include "src/tint/transform/manager.h"
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 #if TINT_BUILD_IR
 #include "src/tint/ir/from_program.h"

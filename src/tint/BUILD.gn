@@ -287,8 +287,8 @@ libtint_source_set("libtint_clone_context_hdrs") {
 libtint_source_set("libtint_program_src") {
   sources = [
     "clone_context.cc",
-    "program.cc",
-    "program_builder.cc",
+    "lang/wgsl/program/program.cc",
+    "lang/wgsl/program/program_builder.cc",
     "resolver/const_eval.cc",
     "resolver/const_eval.h",
     "resolver/ctor_conv_intrinsic.cc",
@@ -307,8 +307,8 @@ libtint_source_set("libtint_program_src") {
     "resolver/validator.h",
   ]
   public = [
-    "program.h",
-    "program_builder.h",
+    "lang/wgsl/program/program.h",
+    "lang/wgsl/program/program_builder.h",
     "resolver/resolver.h",
   ]
   friend = [
@@ -2382,8 +2382,8 @@ if (tint_build_unittests) {
   tint_unittests_source_set("tint_unittests_core_src") {
     sources = [
       "clone_context_test.cc",
-      "program_builder_test.cc",
-      "program_test.cc",
+      "lang/wgsl/program/program_builder_test.cc",
+      "lang/wgsl/program/program_test.cc",
       "transform/manager_test.cc",
     ]
 

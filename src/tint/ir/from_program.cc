@@ -88,6 +88,7 @@
 #include "src/tint/lang/wgsl/ast/var.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -101,7 +102,6 @@
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/program.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/switch.h"
 

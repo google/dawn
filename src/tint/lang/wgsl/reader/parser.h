@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_WGSL_READER_PARSER_H_
 #define SRC_TINT_LANG_WGSL_READER_PARSER_H_
 
-#include "src/tint/program.h"
+#include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::reader::wgsl {
 

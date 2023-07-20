@@ -42,7 +42,7 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/spirv/reader/namer.h"
 #include "src/tint/lang/spirv/reader/parser_type.h"
 #include "src/tint/lang/spirv/reader/usage.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/reader/reader.h"
 
 /// This is the implementation of the SPIR-V parser for Tint.

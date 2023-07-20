@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/diagnostic_directive.h"
 
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticDirective);
 

@@ -22,7 +22,7 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/protobufs/tint_ast_fuzzer.h"
 
 #include "src/tint/clone_context.h"
-#include "src/tint/program.h"
+#include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

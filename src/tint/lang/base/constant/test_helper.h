@@ -16,7 +16,7 @@
 #define SRC_TINT_LANG_BASE_CONSTANT_TEST_HELPER_H_
 
 #include "gtest/gtest.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint::constant {
 

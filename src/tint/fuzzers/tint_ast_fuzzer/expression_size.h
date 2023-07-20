@@ -18,7 +18,7 @@
 #include <unordered_map>
 
 #include "src/tint/lang/wgsl/ast/expression.h"
-#include "src/tint/program.h"
+#include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

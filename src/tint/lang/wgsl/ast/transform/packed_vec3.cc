@@ -26,13 +26,13 @@
 #include "src/tint/lang/base/type/reference.h"
 #include "src/tint/lang/base/type/vector.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/load.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PackedVec3);

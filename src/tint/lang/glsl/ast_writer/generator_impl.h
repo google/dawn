@@ -38,7 +38,7 @@
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/writer/ast_text_generator.h"
 

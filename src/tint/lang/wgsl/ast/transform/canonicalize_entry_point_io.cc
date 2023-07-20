@@ -23,8 +23,8 @@
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/function.h"
-#include "src/tint/program_builder.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

@@ -69,7 +69,7 @@
 #include "src/tint/lang/base/type/reference.h"
 #include "src/tint/lang/base/type/sampler.h"
 #include "src/tint/lang/base/type/texture.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/switch.h"
 
 // Helper for calling TINT_UNIMPLEMENTED() from a Switch(object_ptr) default case.

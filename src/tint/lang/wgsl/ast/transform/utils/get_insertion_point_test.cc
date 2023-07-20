@@ -18,7 +18,7 @@
 #include "src/tint/debug.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

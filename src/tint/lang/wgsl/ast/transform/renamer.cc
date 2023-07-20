@@ -18,13 +18,13 @@
 #include <utility>
 
 #include "src/tint/core/unicode.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
-#include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer);

@@ -22,10 +22,10 @@
 #include "src/tint/lang/base/type/depth_multisampled_texture.h"
 #include "src/tint/lang/base/type/reference.h"
 #include "src/tint/lang/base/type/sampler.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Transform);
 

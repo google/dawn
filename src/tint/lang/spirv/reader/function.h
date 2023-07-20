@@ -28,7 +28,7 @@
 #include "src/tint/lang/spirv/reader/attributes.h"
 #include "src/tint/lang/spirv/reader/construct.h"
 #include "src/tint/lang/spirv/reader/parser_impl.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint::reader::spirv {
 

@@ -19,7 +19,7 @@
 
 #include "src/tint/core/compiler_macros.h"
 #include "src/tint/core/string_stream.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 #include "gtest/gtest.h"
 

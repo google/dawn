@@ -19,8 +19,8 @@
 
 #include "src/tint/core/hashmap.h"
 #include "src/tint/core/hashset.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::AddBlockAttribute);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::AddBlockAttribute::BlockAttribute);

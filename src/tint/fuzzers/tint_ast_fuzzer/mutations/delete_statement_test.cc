@@ -29,8 +29,8 @@
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast_writer/generator.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
-#include "src/tint/program_builder.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 namespace {

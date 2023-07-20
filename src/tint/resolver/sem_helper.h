@@ -22,10 +22,10 @@
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/base/builtin/interpolation_sampling.h"
 #include "src/tint/lang/base/builtin/interpolation_type.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/function_expression.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
-#include "src/tint/program_builder.h"
 #include "src/tint/resolver/dependency_graph.h"
 
 namespace tint::resolver {

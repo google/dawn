@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/cmd/generate_external_texture_bindings.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/writer/binding_point.h"
 
 namespace tint::cmd {

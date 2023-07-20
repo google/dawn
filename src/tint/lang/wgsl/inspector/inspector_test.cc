@@ -26,8 +26,8 @@
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/inspector/test_inspector_builder.h"
 #include "src/tint/lang/wgsl/inspector/test_inspector_runner.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/program_builder.h"
 #include "tint/tint.h"
 
 using namespace tint::number_suffixes;  // NOLINT

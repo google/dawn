@@ -20,7 +20,7 @@
 #include <utility>
 
 #include "src/tint/core/castable.h"
-#include "src/tint/program.h"
+#include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::ast::transform {
 

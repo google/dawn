@@ -22,8 +22,8 @@
 #include "src/tint/core/hash.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/function.h"
-#include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform::Config);

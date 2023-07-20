@@ -28,8 +28,8 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
-#include "src/tint/program.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 namespace {

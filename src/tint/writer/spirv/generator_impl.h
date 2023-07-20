@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/program.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/writer/spirv/binary_writer.h"
 #include "src/tint/writer/spirv/builder.h"
 #include "src/tint/writer/spirv/generator.h"

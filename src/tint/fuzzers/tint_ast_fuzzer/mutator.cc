@@ -26,7 +26,7 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/replace_identifiers.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/wrap_unary_operators.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/node_id_map.h"
-#include "src/tint/program_builder.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 namespace {

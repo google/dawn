@@ -34,8 +34,8 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
-#include "src/tint/program.h"
 #include "src/tint/writer/ast_text_generator.h"
 
 namespace tint::writer::syntax_tree {

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/tint/program.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "tint/tint.h"
 
 #if TINT_BUILD_SPV_READER
