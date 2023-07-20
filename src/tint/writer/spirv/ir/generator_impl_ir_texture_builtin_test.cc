@@ -1685,6 +1685,73 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                          PrintCase);
 
 ////////////////////////////////////////////////////////////////
+//// textureNumLayers
+////////////////////////////////////////////////////////////////
+using TextureNumLayers = TextureBuiltinTest;
+TEST_P(TextureNumLayers, Emit) {
+    Run(builtin::Function::kTextureNumLayers, kNoSampler);
+}
+INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+                         TextureNumLayers,
+                         testing::Values(
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {
+                                     "%8 = OpImageQuerySizeLod %v3uint %t %uint_0",
+                                     "%result = OpCompositeExtract %uint %8 2",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kSampledTexture,
+                                 type::TextureDimension::kCubeArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {
+                                     "%8 = OpImageQuerySizeLod %v3uint %t %uint_0",
+                                     "%result = OpCompositeExtract %uint %8 2",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {
+                                     "%8 = OpImageQuerySizeLod %v3uint %t %uint_0",
+                                     "%result = OpCompositeExtract %uint %8 2",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthTexture,
+                                 type::TextureDimension::kCubeArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {
+                                     "%8 = OpImageQuerySizeLod %v3uint %t %uint_0",
+                                     "%result = OpCompositeExtract %uint %8 2",
+                                 },
+                             },
+                             TextureBuiltinTestCase{
+                                 kStorageTexture,
+                                 type::TextureDimension::k2dArray,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {
+                                     "%8 = OpImageQuerySize %v3uint %t",
+                                     "%result = OpCompositeExtract %uint %8 2",
+                                 },
+                             }),
+                         PrintCase);
+
+////////////////////////////////////////////////////////////////
 //// textureNumLevels
 ////////////////////////////////////////////////////////////////
 using TextureNumLevels = TextureBuiltinTest;

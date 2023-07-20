@@ -77,6 +77,7 @@ struct BuiltinPolyfillSpirv::State {
                     case builtin::Function::kTextureGather:
                     case builtin::Function::kTextureGatherCompare:
                     case builtin::Function::kTextureLoad:
+                    case builtin::Function::kTextureNumLayers:
                     case builtin::Function::kTextureSample:
                     case builtin::Function::kTextureSampleBias:
                     case builtin::Function::kTextureSampleCompare:
@@ -124,6 +125,9 @@ struct BuiltinPolyfillSpirv::State {
                     break;
                 case builtin::Function::kTextureLoad:
                     replacement = TextureLoad(builtin);
+                    break;
+                case builtin::Function::kTextureNumLayers:
+                    replacement = TextureNumLayers(builtin);
                     break;
                 case builtin::Function::kTextureSample:
                 case builtin::Function::kTextureSampleBias:
@@ -731,6 +735,36 @@ struct BuiltinPolyfillSpirv::State {
         }
 
         return result;
+    }
+
+    /// Handle a textureNumLayers() builtin.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    Value* TextureNumLayers(CoreBuiltinCall* builtin) {
+        auto* texture = builtin->Args()[0];
+        auto* texture_ty = texture->Type()->As<type::Texture>();
+
+        utils::Vector<Value*, 2> intrinsic_args;
+        intrinsic_args.Push(texture);
+
+        // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
+        enum IntrinsicCall::Kind intrinsic;
+        if (texture_ty->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture,
+                                type::StorageTexture>()) {
+            intrinsic = IntrinsicCall::Kind::kSpirvImageQuerySize;
+        } else {
+            intrinsic = IntrinsicCall::Kind::kSpirvImageQuerySizeLod;
+            intrinsic_args.Push(b.Constant(0_u));
+        }
+
+        // Call the intrinsic.
+        auto* texture_call = b.Call(ty.vec3<u32>(), intrinsic, std::move(intrinsic_args));
+        texture_call->InsertBefore(builtin);
+
+        // Extract the third component to get the number of array layers.
+        auto* extract = b.Access(ty.u32(), texture_call->Result(), 2_u);
+        extract->InsertBefore(builtin);
+        return extract->Result();
     }
 };
 
