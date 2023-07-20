@@ -15,8 +15,8 @@
 #include "src/tint/resolver/validator.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/base/type/atomic.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/type/atomic.h"
 
 namespace tint::resolver {
 namespace {

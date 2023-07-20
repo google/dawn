@@ -19,11 +19,11 @@
 #include <unordered_set>
 
 #include "src/tint/lang/base/constant/manager.h"
+#include "src/tint/lang/base/type/manager.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/sem/info.h"
 #include "src/tint/program_id.h"
 #include "src/tint/symbol_table.h"
-#include "src/tint/type/manager.h"
 
 // Forward Declarations
 namespace tint {

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast_writer/test_helper.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/texture_dimension.h"
 
 #include "gmock/gmock.h"
 

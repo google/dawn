@@ -15,9 +15,9 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/base/type/storage_texture.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/type/storage_texture.h"
-#include "src/tint/type/texture_dimension.h"
 
 namespace tint::resolver {
 namespace {

@@ -15,15 +15,15 @@
 #include "gmock/gmock.h"
 
 #include "src/tint/core/string.h"
+#include "src/tint/lang/base/type/array.h"
+#include "src/tint/lang/base/type/depth_multisampled_texture.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/matrix.h"
+#include "src/tint/lang/base/type/multisampled_texture.h"
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/storage_texture.h"
+#include "src/tint/lang/base/type/struct.h"
 #include "src/tint/lang/msl/writer/test_helper_ir.h"
-#include "src/tint/type/array.h"
-#include "src/tint/type/depth_multisampled_texture.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/matrix.h"
-#include "src/tint/type/multisampled_texture.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/storage_texture.h"
-#include "src/tint/type/struct.h"
 
 namespace tint::writer::msl {
 namespace {

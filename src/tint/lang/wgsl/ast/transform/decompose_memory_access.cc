@@ -24,6 +24,9 @@
 #include "src/tint/core/hash.h"
 #include "src/tint/core/map.h"
 #include "src/tint/core/string_stream.h"
+#include "src/tint/lang/base/type/array.h"
+#include "src/tint/lang/base/type/atomic.h"
+#include "src/tint/lang/base/type/reference.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
@@ -35,9 +38,6 @@
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/array.h"
-#include "src/tint/type/atomic.h"
-#include "src/tint/type/reference.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

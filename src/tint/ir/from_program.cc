@@ -36,6 +36,10 @@
 #include "src/tint/ir/store.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/value.h"
+#include "src/tint/lang/base/type/pointer.h"
+#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/base/type/void.h"
 #include "src/tint/lang/wgsl/ast/accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -100,10 +104,6 @@
 #include "src/tint/program.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/pointer.h"
-#include "src/tint/type/reference.h"
-#include "src/tint/type/struct.h"
-#include "src/tint/type/void.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

@@ -20,10 +20,10 @@
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/ir_test_helper.h"
 #include "src/tint/ir/validator.h"
-#include "src/tint/type/array.h"
-#include "src/tint/type/matrix.h"
-#include "src/tint/type/pointer.h"
-#include "src/tint/type/struct.h"
+#include "src/tint/lang/base/type/array.h"
+#include "src/tint/lang/base/type/matrix.h"
+#include "src/tint/lang/base/type/pointer.h"
+#include "src/tint/lang/base/type/struct.h"
 
 namespace tint::ir {
 namespace {

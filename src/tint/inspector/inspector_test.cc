@@ -16,6 +16,11 @@
 
 #include "src/tint/inspector/test_inspector_builder.h"
 #include "src/tint/inspector/test_inspector_runner.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/external_texture.h"
+#include "src/tint/lang/base/type/multisampled_texture.h"
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
@@ -23,11 +28,6 @@
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/external_texture.h"
-#include "src/tint/type/multisampled_texture.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/texture_dimension.h"
 #include "tint/tint.h"
 
 using namespace tint::number_suffixes;  // NOLINT

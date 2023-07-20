@@ -17,12 +17,12 @@
 #include <utility>
 
 #include "src/tint/ir/transform/test_helper.h"
-#include "src/tint/type/atomic.h"
-#include "src/tint/type/builtin_structs.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/multisampled_texture.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/storage_texture.h"
+#include "src/tint/lang/base/type/atomic.h"
+#include "src/tint/lang/base/type/builtin_structs.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/multisampled_texture.h"
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/storage_texture.h"
 
 namespace tint::ir::transform {
 namespace {

@@ -21,6 +21,9 @@
 #include "src/tint/core/hashset.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/base/builtin/function.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
@@ -37,9 +40,6 @@
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/texture_dimension.h"
 
 // Terms:
 //    CFG: the control flow graph of the function, where basic blocks are the

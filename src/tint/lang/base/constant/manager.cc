@@ -18,14 +18,14 @@
 #include "src/tint/lang/base/constant/composite.h"
 #include "src/tint/lang/base/constant/scalar.h"
 #include "src/tint/lang/base/constant/splat.h"
-#include "src/tint/type/abstract_float.h"
-#include "src/tint/type/abstract_int.h"
-#include "src/tint/type/bool.h"
-#include "src/tint/type/f16.h"
-#include "src/tint/type/f32.h"
-#include "src/tint/type/i32.h"
-#include "src/tint/type/manager.h"
-#include "src/tint/type/u32.h"
+#include "src/tint/lang/base/type/abstract_float.h"
+#include "src/tint/lang/base/type/abstract_int.h"
+#include "src/tint/lang/base/type/bool.h"
+#include "src/tint/lang/base/type/f16.h"
+#include "src/tint/lang/base/type/f32.h"
+#include "src/tint/lang/base/type/i32.h"
+#include "src/tint/lang/base/type/manager.h"
+#include "src/tint/lang/base/type/u32.h"
 
 namespace tint::constant {
 

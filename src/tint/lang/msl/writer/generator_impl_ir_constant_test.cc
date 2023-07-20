@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "src/tint/core/string.h"
+#include "src/tint/lang/base/type/array.h"
+#include "src/tint/lang/base/type/matrix.h"
 #include "src/tint/lang/msl/writer/test_helper_ir.h"
-#include "src/tint/type/array.h"
-#include "src/tint/type/matrix.h"
 
 namespace tint::writer::msl {
 namespace {

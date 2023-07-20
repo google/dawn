@@ -17,12 +17,12 @@
 #include <string>
 #include <vector>
 
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/texture_dimension.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture::NewBindingPoints);

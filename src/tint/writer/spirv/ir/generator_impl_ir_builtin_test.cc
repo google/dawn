@@ -15,7 +15,7 @@
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 #include "src/tint/lang/base/builtin/function.h"
-#include "src/tint/type/builtin_structs.h"
+#include "src/tint/lang/base/type/builtin_structs.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

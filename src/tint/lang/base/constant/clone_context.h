@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_BASE_CONSTANT_CLONE_CONTEXT_H_
 #define SRC_TINT_LANG_BASE_CONSTANT_CLONE_CONTEXT_H_
 
-#include "src/tint/type/clone_context.h"
+#include "src/tint/lang/base/type/clone_context.h"
 
 // Forward declarations
 namespace tint::constant {

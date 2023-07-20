@@ -17,7 +17,7 @@
 
 #include "src/tint/core/castable.h"
 #include "src/tint/core/hashset.h"
-#include "src/tint/type/type.h"
+#include "src/tint/lang/base/type/type.h"
 
 // Forward declarations
 namespace tint::ir {

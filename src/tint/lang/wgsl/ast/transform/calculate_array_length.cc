@@ -19,6 +19,7 @@
 
 #include "src/tint/core/hash.h"
 #include "src/tint/core/map.h"
+#include "src/tint/lang/base/type/reference.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
@@ -30,7 +31,6 @@
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/reference.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength::BufferSizeIntrinsic);

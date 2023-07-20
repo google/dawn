@@ -21,6 +21,11 @@
 #include "src/tint/core/string.h"
 #include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/builtin/attribute.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/external_texture.h"
+#include "src/tint/lang/base/type/multisampled_texture.h"
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
@@ -41,11 +46,6 @@
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/reader/classify_template_args.h"
 #include "src/tint/lang/wgsl/reader/lexer.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/external_texture.h"
-#include "src/tint/type/multisampled_texture.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/texture_dimension.h"
 
 namespace tint::reader::wgsl {
 namespace {

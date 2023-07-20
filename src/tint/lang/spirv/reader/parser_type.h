@@ -24,10 +24,10 @@
 #include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/lang/base/builtin/texel_format.h"
+#include "src/tint/lang/base/type/sampler_kind.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/type.h"
 #include "src/tint/symbol.h"
-#include "src/tint/type/sampler_kind.h"
-#include "src/tint/type/texture_dimension.h"
 
 // Forward declarations
 namespace tint {

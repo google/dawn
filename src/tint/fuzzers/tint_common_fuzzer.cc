@@ -33,11 +33,11 @@
 #include "src/tint/core/diagnostic/formatter.h"
 #include "src/tint/core/hash.h"
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
+#include "src/tint/lang/base/type/external_texture.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program.h"
-#include "src/tint/type/external_texture.h"
 #include "src/tint/writer/flatten_bindings.h"
 
 namespace tint::fuzzers {

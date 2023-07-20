@@ -27,9 +27,9 @@
 #include "src/tint/ir/instruction.h"
 #include "src/tint/ir/value.h"
 #include "src/tint/lang/base/constant/manager.h"
+#include "src/tint/lang/base/type/manager.h"
 #include "src/tint/program_id.h"
 #include "src/tint/symbol_table.h"
-#include "src/tint/type/manager.h"
 
 namespace tint::ir {
 

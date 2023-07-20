@@ -16,9 +16,9 @@
 
 #include <utility>
 
+#include "src/tint/lang/base/type/bool.h"
+#include "src/tint/lang/base/type/reference.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/bool.h"
-#include "src/tint/type/reference.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

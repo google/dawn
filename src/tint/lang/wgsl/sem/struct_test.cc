@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/lang/wgsl/sem/struct.h"
+#include "src/tint/lang/base/type/texture.h"
 #include "src/tint/lang/wgsl/sem/test_helper.h"
-#include "src/tint/type/texture.h"
 
 namespace tint::sem {
 namespace {

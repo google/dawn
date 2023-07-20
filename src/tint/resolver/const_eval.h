@@ -21,7 +21,7 @@
 #include "src/tint/core/result.h"
 #include "src/tint/core/vector.h"
 #include "src/tint/lang/base/builtin/number.h"
-#include "src/tint/type/type.h"
+#include "src/tint/lang/base/type/type.h"
 
 // Forward declarations
 namespace tint {

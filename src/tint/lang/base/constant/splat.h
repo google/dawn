@@ -18,7 +18,7 @@
 #include "src/tint/core/castable.h"
 #include "src/tint/core/vector.h"
 #include "src/tint/lang/base/constant/composite.h"
-#include "src/tint/type/type.h"
+#include "src/tint/lang/base/type/type.h"
 
 namespace tint::constant {
 

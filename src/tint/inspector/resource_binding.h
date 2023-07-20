@@ -18,8 +18,8 @@
 #include <cstdint>
 
 #include "src/tint/lang/base/builtin/texel_format.h"
-#include "src/tint/type/texture_dimension.h"
-#include "src/tint/type/type.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/base/type/type.h"
 
 namespace tint::inspector {
 

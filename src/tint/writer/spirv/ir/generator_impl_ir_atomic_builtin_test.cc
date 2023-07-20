@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/type/builtin_structs.h"
+#include "src/tint/lang/base/type/builtin_structs.h"
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 #include "src/tint/lang/base/builtin/function.h"

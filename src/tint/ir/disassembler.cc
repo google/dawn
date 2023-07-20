@@ -52,9 +52,9 @@
 #include "src/tint/lang/base/constant/composite.h"
 #include "src/tint/lang/base/constant/scalar.h"
 #include "src/tint/lang/base/constant/splat.h"
+#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/base/type/type.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/struct.h"
-#include "src/tint/type/type.h"
 
 namespace tint::ir {
 namespace {

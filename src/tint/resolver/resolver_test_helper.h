@@ -26,13 +26,13 @@
 #include "gtest/gtest.h"
 #include "src/tint/core/traits.h"
 #include "src/tint/core/vector.h"
+#include "src/tint/lang/base/type/abstract_float.h"
+#include "src/tint/lang/base/type/abstract_int.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/resolver.h"
-#include "src/tint/type/abstract_float.h"
-#include "src/tint/type/abstract_int.h"
 
 namespace tint::resolver {
 

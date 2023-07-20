@@ -16,10 +16,10 @@
 
 #include <utility>
 
+#include "src/tint/lang/base/type/pointer.h"
 #include "src/tint/lang/wgsl/ast/identifier_expression.h"
 #include "src/tint/lang/wgsl/ast/parameter.h"
 #include "src/tint/lang/wgsl/ast/variable.h"
-#include "src/tint/type/pointer.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Variable);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::GlobalVariable);

@@ -15,11 +15,11 @@
 #include "src/tint/lang/base/constant/value.h"
 
 #include "src/tint/lang/base/constant/splat.h"
+#include "src/tint/lang/base/type/array.h"
+#include "src/tint/lang/base/type/matrix.h"
+#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/base/type/vector.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/array.h"
-#include "src/tint/type/matrix.h"
-#include "src/tint/type/struct.h"
-#include "src/tint/type/vector.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Value);
 

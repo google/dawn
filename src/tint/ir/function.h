@@ -22,7 +22,7 @@
 #include "src/tint/ir/function_param.h"
 #include "src/tint/ir/location.h"
 #include "src/tint/ir/value.h"
-#include "src/tint/type/type.h"
+#include "src/tint/lang/base/type/type.h"
 
 // Forward declarations
 namespace tint::ir {

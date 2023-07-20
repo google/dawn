@@ -24,9 +24,9 @@
 #include "src/tint/core/string.h"
 #include "src/tint/core/string_stream.h"
 #include "src/tint/core/unique_allocator.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/texture_dimension.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Type);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Void);

@@ -17,7 +17,7 @@
 
 #include "src/tint/core/castable.h"
 #include "src/tint/ir/call.h"
-#include "src/tint/type/type.h"
+#include "src/tint/lang/base/type/type.h"
 
 namespace tint::ir {
 

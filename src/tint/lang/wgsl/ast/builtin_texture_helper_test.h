@@ -19,9 +19,9 @@
 
 #include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/base/builtin/texel_format.h"
+#include "src/tint/lang/base/type/storage_texture.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/storage_texture.h"
-#include "src/tint/type/texture_dimension.h"
 
 namespace tint::ast::test {
 

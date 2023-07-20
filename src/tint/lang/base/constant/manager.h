@@ -21,7 +21,7 @@
 #include "src/tint/core/unique_allocator.h"
 #include "src/tint/lang/base/builtin/number.h"
 #include "src/tint/lang/base/constant/value.h"
-#include "src/tint/type/manager.h"
+#include "src/tint/lang/base/type/manager.h"
 
 namespace tint::constant {
 class Splat;

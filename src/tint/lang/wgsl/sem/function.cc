@@ -15,15 +15,15 @@
 #include "src/tint/lang/wgsl/sem/function.h"
 
 #include "src/tint/core/transform.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/external_texture.h"
+#include "src/tint/lang/base/type/multisampled_texture.h"
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/storage_texture.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/must_use_attribute.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/external_texture.h"
-#include "src/tint/type/multisampled_texture.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/storage_texture.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 

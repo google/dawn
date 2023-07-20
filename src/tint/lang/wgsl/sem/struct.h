@@ -19,10 +19,10 @@
 
 #include "src/tint/core/vector.h"
 #include "src/tint/lang/base/builtin/address_space.h"
+#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/base/type/type.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/symbol.h"
-#include "src/tint/type/struct.h"
-#include "src/tint/type/type.h"
 
 // Forward declarations
 namespace tint::ast {

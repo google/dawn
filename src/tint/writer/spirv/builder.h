@@ -23,6 +23,7 @@
 
 #include "spirv/unified1/spirv.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/base/type/storage_texture.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
@@ -38,7 +39,6 @@
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/scope_stack.h"
-#include "src/tint/type/storage_texture.h"
 #include "src/tint/writer/spirv/function.h"
 #include "src/tint/writer/spirv/module.h"
 #include "src/tint/writer/spirv/scalar_constant.h"

@@ -17,9 +17,9 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/texture_dimension.h"
 
 namespace tint::writer {
 namespace {

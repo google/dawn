@@ -52,10 +52,10 @@
 #include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/var.h"
+#include "src/tint/lang/base/type/bool.h"
+#include "src/tint/lang/base/type/pointer.h"
+#include "src/tint/lang/base/type/vector.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/bool.h"
-#include "src/tint/type/pointer.h"
-#include "src/tint/type/vector.h"
 
 namespace tint::ir {
 

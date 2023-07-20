@@ -20,11 +20,11 @@
 
 #include "src/tint/core/hash.h"
 #include "src/tint/core/map.h"
+#include "src/tint/lang/base/type/abstract_numeric.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/abstract_numeric.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VectorizeMatrixConversions);
 

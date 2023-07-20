@@ -17,7 +17,7 @@
 
 #include "src/tint/ir/transform/transform.h"
 
-#include "src/tint/type/struct.h"
+#include "src/tint/lang/base/type/struct.h"
 
 namespace tint::ir::transform {
 

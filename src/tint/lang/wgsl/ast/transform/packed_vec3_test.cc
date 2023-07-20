@@ -19,12 +19,12 @@
 #include <vector>
 
 #include "src/tint/core/string.h"
+#include "src/tint/lang/base/type/array.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/array.h"
 
 namespace tint::ast::transform {
 namespace {

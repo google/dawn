@@ -17,8 +17,8 @@
 #include <utility>
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/util.h"
+#include "src/tint/lang/base/type/reference.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/reference.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

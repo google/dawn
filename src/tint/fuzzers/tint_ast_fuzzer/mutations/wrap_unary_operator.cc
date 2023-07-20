@@ -17,11 +17,11 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/base/type/abstract_float.h"
+#include "src/tint/lang/base/type/abstract_int.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/type/abstract_float.h"
-#include "src/tint/type/abstract_int.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

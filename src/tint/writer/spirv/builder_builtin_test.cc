@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "src/tint/core/string.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/texture_dimension.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 

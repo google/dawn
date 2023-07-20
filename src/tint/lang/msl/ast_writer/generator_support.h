@@ -21,7 +21,7 @@
 #include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/base/builtin/interpolation.h"
-#include "src/tint/type/type.h"
+#include "src/tint/lang/base/type/type.h"
 
 namespace tint::writer::msl {
 

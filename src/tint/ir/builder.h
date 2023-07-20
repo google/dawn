@@ -58,15 +58,15 @@
 #include "src/tint/lang/base/constant/composite.h"
 #include "src/tint/lang/base/constant/scalar.h"
 #include "src/tint/lang/base/constant/splat.h"
+#include "src/tint/lang/base/type/bool.h"
+#include "src/tint/lang/base/type/f16.h"
+#include "src/tint/lang/base/type/f32.h"
+#include "src/tint/lang/base/type/i32.h"
+#include "src/tint/lang/base/type/pointer.h"
+#include "src/tint/lang/base/type/u32.h"
+#include "src/tint/lang/base/type/vector.h"
+#include "src/tint/lang/base/type/void.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/bool.h"
-#include "src/tint/type/f16.h"
-#include "src/tint/type/f32.h"
-#include "src/tint/type/i32.h"
-#include "src/tint/type/pointer.h"
-#include "src/tint/type/u32.h"
-#include "src/tint/type/vector.h"
-#include "src/tint/type/void.h"
 
 namespace tint::ir {
 

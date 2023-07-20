@@ -24,11 +24,11 @@
 #include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/base/builtin/address_space.h"
+#include "src/tint/lang/base/type/type.h"
 #include "src/tint/lang/wgsl/ast/parameter.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/parameter_usage.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
-#include "src/tint/type/type.h"
 
 // Forward declarations
 namespace tint::ast {

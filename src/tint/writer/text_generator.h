@@ -22,7 +22,7 @@
 
 #include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/core/string_stream.h"
-#include "src/tint/type/struct.h"
+#include "src/tint/lang/base/type/struct.h"
 
 namespace tint::writer {
 

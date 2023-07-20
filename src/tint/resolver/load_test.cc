@@ -14,11 +14,11 @@
 
 #include "src/tint/lang/wgsl/sem/load.h"
 #include "gmock/gmock.h"
+#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/sem/test_helper.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/type/reference.h"
-#include "src/tint/type/texture_dimension.h"
 
 namespace tint::resolver {
 namespace {

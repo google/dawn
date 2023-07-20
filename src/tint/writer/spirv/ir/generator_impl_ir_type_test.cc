@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/type/bool.h"
-#include "src/tint/type/depth_multisampled_texture.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/f16.h"
-#include "src/tint/type/f32.h"
-#include "src/tint/type/i32.h"
-#include "src/tint/type/multisampled_texture.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/storage_texture.h"
-#include "src/tint/type/type.h"
-#include "src/tint/type/u32.h"
-#include "src/tint/type/void.h"
+#include "src/tint/lang/base/type/bool.h"
+#include "src/tint/lang/base/type/depth_multisampled_texture.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/f16.h"
+#include "src/tint/lang/base/type/f32.h"
+#include "src/tint/lang/base/type/i32.h"
+#include "src/tint/lang/base/type/multisampled_texture.h"
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/storage_texture.h"
+#include "src/tint/lang/base/type/type.h"
+#include "src/tint/lang/base/type/u32.h"
+#include "src/tint/lang/base/type/void.h"
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
 namespace tint::writer::spirv {

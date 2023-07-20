@@ -18,8 +18,8 @@
 
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/module.h"
-#include "src/tint/type/pointer.h"
-#include "src/tint/type/struct.h"
+#include "src/tint/lang/base/type/pointer.h"
+#include "src/tint/lang/base/type/struct.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BlockDecoratedStructs);
 

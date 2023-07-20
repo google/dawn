@@ -14,11 +14,11 @@
 
 #include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/type/texture_dimension.h"
 
 #include "gmock/gmock.h"
 

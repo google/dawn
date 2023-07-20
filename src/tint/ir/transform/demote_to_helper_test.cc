@@ -17,9 +17,9 @@
 #include <utility>
 
 #include "src/tint/ir/transform/test_helper.h"
-#include "src/tint/type/builtin_structs.h"
-#include "src/tint/type/f32.h"
-#include "src/tint/type/storage_texture.h"
+#include "src/tint/lang/base/type/builtin_structs.h"
+#include "src/tint/lang/base/type/f32.h"
+#include "src/tint/lang/base/type/storage_texture.h"
 
 namespace tint::ir::transform {
 namespace {

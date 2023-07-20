@@ -15,10 +15,10 @@
 #include "src/tint/lang/wgsl/ast/builtin_texture_helper_test.h"
 
 #include "src/tint/lang/base/builtin/texel_format.h"
-#include "src/tint/type/depth_texture.h"
-#include "src/tint/type/multisampled_texture.h"
-#include "src/tint/type/sampled_texture.h"
-#include "src/tint/type/texture_dimension.h"
+#include "src/tint/lang/base/type/depth_texture.h"
+#include "src/tint/lang/base/type/multisampled_texture.h"
+#include "src/tint/lang/base/type/sampled_texture.h"
+#include "src/tint/lang/base/type/texture_dimension.h"
 
 namespace tint::ast::test {
 namespace {

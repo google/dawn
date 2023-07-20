@@ -18,16 +18,16 @@
 #include <limits>
 
 #include "src/tint/debug.h"
+#include "src/tint/lang/base/type/array.h"
+#include "src/tint/lang/base/type/atomic.h"
+#include "src/tint/lang/base/type/f16.h"
+#include "src/tint/lang/base/type/f32.h"
+#include "src/tint/lang/base/type/i32.h"
+#include "src/tint/lang/base/type/matrix.h"
+#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/base/type/u32.h"
+#include "src/tint/lang/base/type/vector.h"
 #include "src/tint/switch.h"
-#include "src/tint/type/array.h"
-#include "src/tint/type/atomic.h"
-#include "src/tint/type/f16.h"
-#include "src/tint/type/f32.h"
-#include "src/tint/type/i32.h"
-#include "src/tint/type/matrix.h"
-#include "src/tint/type/struct.h"
-#include "src/tint/type/u32.h"
-#include "src/tint/type/vector.h"
 #include "src/tint/writer/float_to_string.h"
 
 namespace tint::writer::msl {
