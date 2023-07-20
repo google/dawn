@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "src/tint/lang/spirv/reader/parser_impl_test_helper.h"
+#include "src/tint/lang/wgsl/ast_writer/generator_impl.h"
 #include "src/tint/switch.h"
 #include "src/tint/utils/string_stream.h"
-#include "src/tint/writer/wgsl/generator_impl.h"
 
 #include "gmock/gmock.h"
 

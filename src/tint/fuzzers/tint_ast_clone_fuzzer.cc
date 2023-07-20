@@ -16,8 +16,8 @@
 #include <string>
 #include <unordered_set>
 
+#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser_impl.h"
-#include "src/tint/writer/wgsl/generator.h"
 
 #define ASSERT_EQ(A, B)                                        \
     do {                                                       \

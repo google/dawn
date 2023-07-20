@@ -15,8 +15,8 @@
 #include <unordered_set>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
-#include "src/tint/writer/wgsl/generator.h"
 
 namespace tint::ast {
 namespace {

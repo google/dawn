@@ -52,7 +52,7 @@
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
-#include "src/tint/writer/wgsl/generator.h"
+#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER

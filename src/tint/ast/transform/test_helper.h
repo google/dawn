@@ -22,9 +22,9 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/ast/transform/transform.h"
+#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/transform/manager.h"
-#include "src/tint/writer/wgsl/generator.h"
 
 namespace tint::ast::transform {
 

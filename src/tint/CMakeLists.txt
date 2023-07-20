@@ -697,10 +697,10 @@ endif()
 
 if(${TINT_BUILD_WGSL_WRITER})
   list(APPEND TINT_LIB_SRCS
-    writer/wgsl/generator.cc
-    writer/wgsl/generator.h
-    writer/wgsl/generator_impl.cc
-    writer/wgsl/generator_impl.h
+    lang/wgsl/ast_writer/generator.cc
+    lang/wgsl/ast_writer/generator.h
+    lang/wgsl/ast_writer/generator_impl.cc
+    lang/wgsl/ast_writer/generator_impl.h
   )
 endif()
 
@@ -1369,37 +1369,37 @@ if(TINT_BUILD_TESTS)
 
   if(${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
-      writer/wgsl/generator_impl_test.cc
-      writer/wgsl/generator_impl_alias_type_test.cc
-      writer/wgsl/generator_impl_array_accessor_test.cc
-      writer/wgsl/generator_impl_assign_test.cc
-      writer/wgsl/generator_impl_binary_test.cc
-      writer/wgsl/generator_impl_bitcast_test.cc
-      writer/wgsl/generator_impl_block_test.cc
-      writer/wgsl/generator_impl_break_test.cc
-      writer/wgsl/generator_impl_call_test.cc
-      writer/wgsl/generator_impl_case_test.cc
-      writer/wgsl/generator_impl_cast_test.cc
-      writer/wgsl/generator_impl_const_assert_test.cc
-      writer/wgsl/generator_impl_constructor_test.cc
-      writer/wgsl/generator_impl_continue_test.cc
-      writer/wgsl/generator_impl_diagnostic_test.cc
-      writer/wgsl/generator_impl_discard_test.cc
-      writer/wgsl/generator_impl_enable_test.cc
-      writer/wgsl/generator_impl_function_test.cc
-      writer/wgsl/generator_impl_global_decl_test.cc
-      writer/wgsl/generator_impl_identifier_test.cc
-      writer/wgsl/generator_impl_if_test.cc
-      writer/wgsl/generator_impl_loop_test.cc
-      writer/wgsl/generator_impl_literal_test.cc
-      writer/wgsl/generator_impl_member_accessor_test.cc
-      writer/wgsl/generator_impl_return_test.cc
-      writer/wgsl/generator_impl_switch_test.cc
-      writer/wgsl/generator_impl_type_test.cc
-      writer/wgsl/generator_impl_unary_op_test.cc
-      writer/wgsl/generator_impl_variable_decl_statement_test.cc
-      writer/wgsl/generator_impl_variable_test.cc
-      writer/wgsl/test_helper.h
+      lang/wgsl/ast_writer/generator_impl_test.cc
+      lang/wgsl/ast_writer/generator_impl_alias_type_test.cc
+      lang/wgsl/ast_writer/generator_impl_array_accessor_test.cc
+      lang/wgsl/ast_writer/generator_impl_assign_test.cc
+      lang/wgsl/ast_writer/generator_impl_binary_test.cc
+      lang/wgsl/ast_writer/generator_impl_bitcast_test.cc
+      lang/wgsl/ast_writer/generator_impl_block_test.cc
+      lang/wgsl/ast_writer/generator_impl_break_test.cc
+      lang/wgsl/ast_writer/generator_impl_call_test.cc
+      lang/wgsl/ast_writer/generator_impl_case_test.cc
+      lang/wgsl/ast_writer/generator_impl_cast_test.cc
+      lang/wgsl/ast_writer/generator_impl_const_assert_test.cc
+      lang/wgsl/ast_writer/generator_impl_constructor_test.cc
+      lang/wgsl/ast_writer/generator_impl_continue_test.cc
+      lang/wgsl/ast_writer/generator_impl_diagnostic_test.cc
+      lang/wgsl/ast_writer/generator_impl_discard_test.cc
+      lang/wgsl/ast_writer/generator_impl_enable_test.cc
+      lang/wgsl/ast_writer/generator_impl_function_test.cc
+      lang/wgsl/ast_writer/generator_impl_global_decl_test.cc
+      lang/wgsl/ast_writer/generator_impl_identifier_test.cc
+      lang/wgsl/ast_writer/generator_impl_if_test.cc
+      lang/wgsl/ast_writer/generator_impl_loop_test.cc
+      lang/wgsl/ast_writer/generator_impl_literal_test.cc
+      lang/wgsl/ast_writer/generator_impl_member_accessor_test.cc
+      lang/wgsl/ast_writer/generator_impl_return_test.cc
+      lang/wgsl/ast_writer/generator_impl_switch_test.cc
+      lang/wgsl/ast_writer/generator_impl_type_test.cc
+      lang/wgsl/ast_writer/generator_impl_unary_op_test.cc
+      lang/wgsl/ast_writer/generator_impl_variable_decl_statement_test.cc
+      lang/wgsl/ast_writer/generator_impl_variable_test.cc
+      lang/wgsl/ast_writer/test_helper.h
     )
   endif()
 
@@ -1726,7 +1726,7 @@ if(TINT_BUILD_BENCHMARKS)
     list(APPEND TINT_BENCHMARK_SRCS writer/spirv/generator_bench.cc)
   endif()
   if (${TINT_BUILD_WGSL_WRITER})
-    list(APPEND TINT_BENCHMARK_SRCS writer/wgsl/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS lang/wgsl/ast_writer/generator_bench.cc)
   endif()
 
   add_executable(tint-benchmark ${TINT_BENCHMARK_SRCS})

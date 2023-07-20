@@ -22,8 +22,8 @@
 #include "src/tint/fuzzers/tint_regex_fuzzer/override_cli_params.h"
 #include "src/tint/fuzzers/tint_regex_fuzzer/wgsl_mutator.h"
 #include "src/tint/fuzzers/transform_builder.h"
+#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
-#include "src/tint/writer/wgsl/generator.h"
 #include "testing/libfuzzer/libfuzzer_exports.h"
 
 namespace tint::fuzzers::regex_fuzzer {

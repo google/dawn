@@ -19,8 +19,8 @@
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/ir/from_program.h"
 #include "src/tint/ir/to_program.h"
+#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser_impl.h"
-#include "src/tint/writer/wgsl/generator.h"
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
     auto printer = tint::diag::Printer::create(stderr, true);

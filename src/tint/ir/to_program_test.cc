@@ -18,8 +18,8 @@
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/to_program.h"
 #include "src/tint/ir/to_program_test.h"
+#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/utils/string.h"
-#include "src/tint/writer/wgsl/generator.h"
 
 namespace tint::ir::test {
 

@@ -15,9 +15,9 @@
 #include "src/tint/ir/from_program.h"
 #include "src/tint/ir/program_test_helper.h"
 #include "src/tint/ir/to_program.h"
+#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/utils/string.h"
-#include "src/tint/writer/wgsl/generator.h"
 
 #if !TINT_BUILD_WGSL_READER || !TINT_BUILD_WGSL_WRITER
 #error "to_program_roundtrip_test.cc requires both the WGSL reader and writer to be enabled"
