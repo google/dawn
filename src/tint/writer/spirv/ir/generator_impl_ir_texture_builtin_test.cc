@@ -1843,5 +1843,33 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                              }),
                          PrintCase);
 
+////////////////////////////////////////////////////////////////
+//// textureNumSamples
+////////////////////////////////////////////////////////////////
+using TextureNumSamples = TextureBuiltinTest;
+TEST_P(TextureNumSamples, Emit) {
+    Run(builtin::Function::kTextureNumSamples, kNoSampler);
+}
+INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+                         TextureNumSamples,
+                         testing::Values(
+                             TextureBuiltinTestCase{
+                                 kMultisampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {"%result = OpImageQuerySamples %uint %t"},
+                             },
+                             TextureBuiltinTestCase{
+                                 kDepthMultisampledTexture,
+                                 type::TextureDimension::k2d,
+                                 /* texel type */ kF32,
+                                 {},
+                                 {"result", 1, kU32},
+                                 {"%result = OpImageQuerySamples %uint %t"},
+                             }),
+                         PrintCase);
+
 }  // namespace
 }  // namespace tint::writer::spirv

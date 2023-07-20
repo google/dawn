@@ -1335,6 +1335,10 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQueryLevels;
             break;
+        case builtin::Function::kTextureNumSamples:
+            module_.PushCapability(SpvCapabilityImageQuery);
+            op = spv::Op::OpImageQuerySamples;
+            break;
         case builtin::Function::kTranspose:
             op = spv::Op::OpTranspose;
             break;
