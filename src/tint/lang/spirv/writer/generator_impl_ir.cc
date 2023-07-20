@@ -1201,6 +1201,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kCross:
             glsl_ext_inst(GLSLstd450Cross);
             break;
+        case builtin::Function::kDegrees:
+            glsl_ext_inst(GLSLstd450Degrees);
+            break;
         case builtin::Function::kDistance:
             glsl_ext_inst(GLSLstd450Distance);
             break;
@@ -1294,6 +1297,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             break;
         case builtin::Function::kPow:
             glsl_ext_inst(GLSLstd450Pow);
+            break;
+        case builtin::Function::kRadians:
+            glsl_ext_inst(GLSLstd450Radians);
             break;
         case builtin::Function::kReverseBits:
             op = spv::Op::OpBitReverse;
