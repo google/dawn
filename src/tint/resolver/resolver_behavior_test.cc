@@ -15,12 +15,12 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/wgsl/sem/for_loop_statement.h"
+#include "src/tint/lang/wgsl/sem/if_statement.h"
+#include "src/tint/lang/wgsl/sem/switch_statement.h"
+#include "src/tint/lang/wgsl/sem/value_expression.h"
+#include "src/tint/lang/wgsl/sem/while_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/for_loop_statement.h"
-#include "src/tint/sem/if_statement.h"
-#include "src/tint/sem/switch_statement.h"
-#include "src/tint/sem/value_expression.h"
-#include "src/tint/sem/while_statement.h"
 
 namespace tint::resolver {
 namespace {

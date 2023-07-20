@@ -15,8 +15,8 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/struct.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

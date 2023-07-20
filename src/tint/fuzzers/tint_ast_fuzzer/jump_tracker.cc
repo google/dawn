@@ -24,7 +24,7 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
-#include "src/tint/sem/statement.h"
+#include "src/tint/lang/wgsl/sem/statement.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

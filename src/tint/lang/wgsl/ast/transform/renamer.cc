@@ -17,13 +17,13 @@
 #include <memory>
 #include <utility>
 
+#include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
+#include "src/tint/lang/wgsl/sem/call.h"
+#include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
+#include "src/tint/lang/wgsl/sem/value_constructor.h"
+#include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/builtin_enum_expression.h"
-#include "src/tint/sem/call.h"
-#include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/type_expression.h"
-#include "src/tint/sem/value_constructor.h"
-#include "src/tint/sem/value_conversion.h"
 #include "src/tint/switch.h"
 #include "src/tint/utils/unicode.h"
 

@@ -22,10 +22,10 @@
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
+#include "src/tint/lang/wgsl/sem/function.h"
+#include "src/tint/lang/wgsl/sem/statement.h"
+#include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/function.h"
-#include "src/tint/sem/statement.h"
-#include "src/tint/sem/struct.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/vector.h"
 

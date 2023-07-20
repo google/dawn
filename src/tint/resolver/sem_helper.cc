@@ -14,11 +14,11 @@
 
 #include "src/tint/resolver/sem_helper.h"
 
-#include "src/tint/sem/builtin_enum_expression.h"
-#include "src/tint/sem/function.h"
-#include "src/tint/sem/function_expression.h"
-#include "src/tint/sem/type_expression.h"
-#include "src/tint/sem/value_expression.h"
+#include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
+#include "src/tint/lang/wgsl/sem/function.h"
+#include "src/tint/lang/wgsl/sem/function_expression.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
+#include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/switch.h"
 
 namespace tint::resolver {

@@ -18,9 +18,9 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
-#include "src/tint/sem/type_expression.h"
-#include "src/tint/sem/value_expression.h"
-#include "src/tint/sem/variable.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
+#include "src/tint/lang/wgsl/sem/value_expression.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/switch.h"
 #include "src/tint/utils/compiler_macros.h"
 

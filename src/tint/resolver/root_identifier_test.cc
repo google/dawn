@@ -14,9 +14,9 @@
 
 #include "src/tint/resolver/resolver.h"
 
+#include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/index_accessor_expression.h"
-#include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/type/texture_dimension.h"
 
 namespace tint::resolver {

@@ -24,16 +24,16 @@
 #include <vector>
 
 #include "src/tint/constant/value.h"
+#include "src/tint/lang/wgsl/sem/binding_point.h"
+#include "src/tint/lang/wgsl/sem/block_statement.h"
+#include "src/tint/lang/wgsl/sem/function.h"
+#include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/const_eval.h"
 #include "src/tint/resolver/dependency_graph.h"
 #include "src/tint/resolver/intrinsic_table.h"
 #include "src/tint/resolver/sem_helper.h"
 #include "src/tint/resolver/validator.h"
-#include "src/tint/sem/binding_point.h"
-#include "src/tint/sem/block_statement.h"
-#include "src/tint/sem/function.h"
-#include "src/tint/sem/struct.h"
 #include "src/tint/utils/bitset.h"
 #include "src/tint/utils/unique_vector.h"
 

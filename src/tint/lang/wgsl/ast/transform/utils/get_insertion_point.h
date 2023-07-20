@@ -17,8 +17,8 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/block_statement.h"
 
 namespace tint::ast::transform::utils {
 

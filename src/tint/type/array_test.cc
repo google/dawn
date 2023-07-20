@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/array_count.h"
+#include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture.h"
 

@@ -16,7 +16,7 @@
 
 #include "src/tint/bench/benchmark.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/sem/variable.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::writer::msl {
 namespace {

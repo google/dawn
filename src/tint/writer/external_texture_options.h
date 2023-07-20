@@ -17,7 +17,7 @@
 
 #include <unordered_map>
 
-#include "src/tint/sem/external_texture.h"
+#include "src/tint/lang/wgsl/sem/external_texture.h"
 
 namespace tint::writer {
 

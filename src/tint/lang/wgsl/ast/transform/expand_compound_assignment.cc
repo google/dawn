@@ -19,11 +19,11 @@
 #include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/lang/wgsl/sem/block_statement.h"
+#include "src/tint/lang/wgsl/sem/for_loop_statement.h"
+#include "src/tint/lang/wgsl/sem/statement.h"
+#include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/block_statement.h"
-#include "src/tint/sem/for_loop_statement.h"
-#include "src/tint/sem/statement.h"
-#include "src/tint/sem/value_expression.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ExpandCompoundAssignment);
 

@@ -19,12 +19,12 @@
 #include <vector>
 
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
+#include "src/tint/lang/wgsl/sem/call.h"
+#include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
+#include "src/tint/lang/wgsl/sem/value_constructor.h"
+#include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/call.h"
-#include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/type_expression.h"
-#include "src/tint/sem/value_constructor.h"
-#include "src/tint/sem/value_expression.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 

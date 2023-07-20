@@ -19,11 +19,11 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/lang/wgsl/sem/builtin.h"
+#include "src/tint/lang/wgsl/sem/call.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
+#include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/builtin.h"
-#include "src/tint/sem/call.h"
-#include "src/tint/sem/type_expression.h"
-#include "src/tint/sem/value_conversion.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"

@@ -17,8 +17,8 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/variable.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/hashset.h"
 

@@ -16,8 +16,8 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/module.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DisableUniformityAnalysis);
 

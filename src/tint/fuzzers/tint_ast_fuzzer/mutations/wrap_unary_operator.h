@@ -20,7 +20,7 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation.h"
 
 #include "src/tint/lang/wgsl/ast/unary_op.h"
-#include "src/tint/sem/variable.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

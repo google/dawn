@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
 #include "src/tint/debug.h"
 #include "src/tint/diagnostic/diagnostic.h"
-#include "src/tint/sem/for_loop_statement.h"
+#include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/switch.h"
 
 namespace tint::ast::transform::utils {

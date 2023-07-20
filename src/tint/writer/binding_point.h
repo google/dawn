@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_WRITER_BINDING_POINT_H_
 #define SRC_TINT_WRITER_BINDING_POINT_H_
 
-#include "src/tint/sem/binding_point.h"
+#include "src/tint/lang/wgsl/sem/binding_point.h"
 
 namespace tint::writer {
 

@@ -16,10 +16,10 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/sem/function.h"
+#include "src/tint/lang/wgsl/sem/statement.h"
+#include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/function.h"
-#include "src/tint/sem/statement.h"
-#include "src/tint/sem/type_expression.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/texture_dimension.h"
 

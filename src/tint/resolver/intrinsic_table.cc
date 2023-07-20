@@ -19,11 +19,11 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
+#include "src/tint/lang/wgsl/sem/evaluation_stage.h"
+#include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
+#include "src/tint/lang/wgsl/sem/value_constructor.h"
+#include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/evaluation_stage.h"
-#include "src/tint/sem/pipeline_stage_set.h"
-#include "src/tint/sem/value_constructor.h"
-#include "src/tint/sem/value_conversion.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"

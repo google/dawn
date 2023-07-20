@@ -17,10 +17,10 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/lang/wgsl/sem/if_statement.h"
+#include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/if_statement.h"
-#include "src/tint/sem/index_accessor_expression.h"
-#include "src/tint/sem/statement.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

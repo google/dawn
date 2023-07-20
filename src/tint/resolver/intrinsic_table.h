@@ -20,9 +20,9 @@
 
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/unary_op.h"
+#include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/resolver/const_eval.h"
 #include "src/tint/resolver/ctor_conv_intrinsic.h"
-#include "src/tint/sem/builtin.h"
 #include "src/tint/utils/vector.h"
 
 // Forward declarations

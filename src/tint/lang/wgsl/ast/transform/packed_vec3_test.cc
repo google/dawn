@@ -20,9 +20,9 @@
 
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/sem/struct.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/struct.h"
-#include "src/tint/sem/variable.h"
 #include "src/tint/type/array.h"
 #include "src/tint/utils/string.h"
 

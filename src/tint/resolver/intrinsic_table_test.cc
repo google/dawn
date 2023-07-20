@@ -17,10 +17,10 @@
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/wgsl/sem/value_constructor.h"
+#include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/sem/value_constructor.h"
-#include "src/tint/sem/value_conversion.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 #include "src/tint/type/depth_texture.h"

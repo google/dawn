@@ -19,7 +19,7 @@
 #include <unordered_map>
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/sem/sampler_texture_pair.h"
+#include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 
 namespace tint::ast::transform {
 

@@ -22,9 +22,9 @@
 
 #include "src/tint/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/sem/function.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/function.h"
-#include "src/tint/sem/variable.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/unique_vector.h"

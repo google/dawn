@@ -19,9 +19,9 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/wgsl/sem/function.h"
+#include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/function.h"
-#include "src/tint/sem/statement.h"
 
 #include "src/tint/utils/map.h"
 

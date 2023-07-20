@@ -16,12 +16,12 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/sem/block_statement.h"
+#include "src/tint/lang/wgsl/sem/for_loop_statement.h"
+#include "src/tint/lang/wgsl/sem/if_statement.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/lang/wgsl/sem/while_statement.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/block_statement.h"
-#include "src/tint/sem/for_loop_statement.h"
-#include "src/tint/sem/if_statement.h"
-#include "src/tint/sem/variable.h"
-#include "src/tint/sem/while_statement.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/reverse.h"

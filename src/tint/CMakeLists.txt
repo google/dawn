@@ -286,70 +286,70 @@ list(APPEND TINT_LIB_SRCS
   resolver/validator.h
   scope_stack.h
   switch.h
-  sem/accessor_expression.cc
-  sem/accessor_expression.h
-  sem/array_count.cc
-  sem/array_count.h
-  sem/behavior.cc
-  sem/behavior.h
-  sem/binding_point.h
-  sem/block_statement.cc
-  sem/block_statement.h
-  sem/break_if_statement.cc
-  sem/break_if_statement.h
-  sem/builtin.cc
-  sem/builtin.h
-  sem/builtin_enum_expression.cc
-  sem/builtin_enum_expression.h
-  sem/call_target.cc
-  sem/call_target.h
-  sem/call.cc
-  sem/call.h
-  sem/evaluation_stage.h
-  sem/expression.cc
-  sem/expression.h
-  sem/external_texture.h
-  sem/for_loop_statement.cc
-  sem/for_loop_statement.h
-  sem/function_expression.cc
-  sem/function_expression.h
-  sem/function.cc
-  sem/if_statement.cc
-  sem/if_statement.h
-  sem/index_accessor_expression.cc
-  sem/index_accessor_expression.h
-  sem/info.cc
-  sem/info.h
-  sem/load.cc
-  sem/load.h
-  sem/loop_statement.cc
-  sem/loop_statement.h
-  sem/materialize.cc
-  sem/materialize.h
-  sem/member_accessor_expression.cc
-  sem/module.cc
-  sem/module.h
-  sem/node.cc
-  sem/node.h
-  sem/pipeline_stage_set.h
-  sem/sampler_texture_pair.h
-  sem/statement.cc
-  sem/struct.cc
-  sem/struct.h
-  sem/switch_statement.cc
-  sem/switch_statement.h
-  sem/type_expression.cc
-  sem/type_expression.h
-  sem/type_mappings.h
-  sem/variable.cc
-  sem/value_constructor.cc
-  sem/value_constructor.h
-  sem/value_conversion.cc
-  sem/value_conversion.h
-  sem/value_expression.cc
-  sem/value_expression.h
-  sem/while_statement.cc
-  sem/while_statement.h
+  lang/wgsl/sem/accessor_expression.cc
+  lang/wgsl/sem/accessor_expression.h
+  lang/wgsl/sem/array_count.cc
+  lang/wgsl/sem/array_count.h
+  lang/wgsl/sem/behavior.cc
+  lang/wgsl/sem/behavior.h
+  lang/wgsl/sem/binding_point.h
+  lang/wgsl/sem/block_statement.cc
+  lang/wgsl/sem/block_statement.h
+  lang/wgsl/sem/break_if_statement.cc
+  lang/wgsl/sem/break_if_statement.h
+  lang/wgsl/sem/builtin.cc
+  lang/wgsl/sem/builtin.h
+  lang/wgsl/sem/builtin_enum_expression.cc
+  lang/wgsl/sem/builtin_enum_expression.h
+  lang/wgsl/sem/call_target.cc
+  lang/wgsl/sem/call_target.h
+  lang/wgsl/sem/call.cc
+  lang/wgsl/sem/call.h
+  lang/wgsl/sem/evaluation_stage.h
+  lang/wgsl/sem/expression.cc
+  lang/wgsl/sem/expression.h
+  lang/wgsl/sem/external_texture.h
+  lang/wgsl/sem/for_loop_statement.cc
+  lang/wgsl/sem/for_loop_statement.h
+  lang/wgsl/sem/function_expression.cc
+  lang/wgsl/sem/function_expression.h
+  lang/wgsl/sem/function.cc
+  lang/wgsl/sem/if_statement.cc
+  lang/wgsl/sem/if_statement.h
+  lang/wgsl/sem/index_accessor_expression.cc
+  lang/wgsl/sem/index_accessor_expression.h
+  lang/wgsl/sem/info.cc
+  lang/wgsl/sem/info.h
+  lang/wgsl/sem/load.cc
+  lang/wgsl/sem/load.h
+  lang/wgsl/sem/loop_statement.cc
+  lang/wgsl/sem/loop_statement.h
+  lang/wgsl/sem/materialize.cc
+  lang/wgsl/sem/materialize.h
+  lang/wgsl/sem/member_accessor_expression.cc
+  lang/wgsl/sem/module.cc
+  lang/wgsl/sem/module.h
+  lang/wgsl/sem/node.cc
+  lang/wgsl/sem/node.h
+  lang/wgsl/sem/pipeline_stage_set.h
+  lang/wgsl/sem/sampler_texture_pair.h
+  lang/wgsl/sem/statement.cc
+  lang/wgsl/sem/struct.cc
+  lang/wgsl/sem/struct.h
+  lang/wgsl/sem/switch_statement.cc
+  lang/wgsl/sem/switch_statement.h
+  lang/wgsl/sem/type_expression.cc
+  lang/wgsl/sem/type_expression.h
+  lang/wgsl/sem/type_mappings.h
+  lang/wgsl/sem/variable.cc
+  lang/wgsl/sem/value_constructor.cc
+  lang/wgsl/sem/value_constructor.h
+  lang/wgsl/sem/value_conversion.cc
+  lang/wgsl/sem/value_conversion.h
+  lang/wgsl/sem/value_expression.cc
+  lang/wgsl/sem/value_expression.h
+  lang/wgsl/sem/while_statement.cc
+  lang/wgsl/sem/while_statement.h
   symbol_table.cc
   symbol_table.h
   symbol.cc
@@ -603,7 +603,7 @@ tint_generated(builtin/interpolation_type BENCH TEST)
 tint_generated(builtin/texel_format BENCH TEST)
 
 tint_generated(resolver/ctor_conv_intrinsic)
-tint_generated(sem/parameter_usage)
+tint_generated(lang/wgsl/sem/parameter_usage)
 
 if(UNIX)
   list(APPEND TINT_LIB_SRCS diagnostic/printer_posix.cc)
@@ -1088,10 +1088,10 @@ if(TINT_BUILD_TESTS)
     resolver/variable_test.cc
     resolver/variable_validation_test.cc
     scope_stack_test.cc
-    sem/builtin_test.cc
-    sem/diagnostic_severity_test.cc
-    sem/struct_test.cc
-    sem/value_expression_test.cc
+    lang/wgsl/sem/builtin_test.cc
+    lang/wgsl/sem/diagnostic_severity_test.cc
+    lang/wgsl/sem/struct_test.cc
+    lang/wgsl/sem/value_expression_test.cc
     source_test.cc
     switch_test.cc
     symbol_table_test.cc
