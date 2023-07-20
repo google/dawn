@@ -50,10 +50,12 @@ namespace dawn::native::vulkan {
 namespace {
 
 // Destroy the semaphore when out of scope.
-class ScopedSignalSemaphore : public NonMovable {
+class ScopedSignalSemaphore : public NonCopyable {
   public:
     ScopedSignalSemaphore(Device* device, VkSemaphore semaphore)
         : mDevice(device), mSemaphore(semaphore) {}
+    ScopedSignalSemaphore(ScopedSignalSemaphore&& other)
+        : mDevice(other.mDevice), mSemaphore(std::exchange(other.mSemaphore, VK_NULL_HANDLE)) {}
     ~ScopedSignalSemaphore() {
         if (mSemaphore != VK_NULL_HANDLE) {
             mDevice->GetFencedDeleter()->DeleteWhenUnused(mSemaphore);
@@ -314,10 +316,12 @@ MaybeError Device::SubmitPendingCommands() {
             fn, &mRecordingContext, mRecordingContext.mappableBuffersForEagerTransition);
     }
 
-    ScopedSignalSemaphore externalTextureSemaphore(this, VK_NULL_HANDLE);
-    if (mRecordingContext.externalTexturesForEagerTransition.size() > 0) {
-        // Create an external semaphore for all external textures that have been used in the pending
-        // submit.
+    std::vector<ScopedSignalSemaphore> externalTextureSemaphores;
+    for (size_t i = 0; i < mRecordingContext.externalTexturesForEagerTransition.size(); ++i) {
+        // Create an external semaphore for each external textures that have been used in the
+        // pending submit.
+        auto& externalTextureSemaphore =
+            externalTextureSemaphores.emplace_back(this, VK_NULL_HANDLE);
         DAWN_TRY_ASSIGN(*externalTextureSemaphore.InitializeInto(),
                         mExternalSemaphoreService->CreateExportableSemaphore());
     }
@@ -336,7 +340,7 @@ MaybeError Device::SubmitPendingCommands() {
     std::vector<VkPipelineStageFlags> dstStageMasks(mRecordingContext.waitSemaphores.size(),
                                                     VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
-    if (externalTextureSemaphore.Get() != VK_NULL_HANDLE) {
+    for (auto& externalTextureSemaphore : externalTextureSemaphores) {
         mRecordingContext.signalSemaphores.push_back(externalTextureSemaphore.Get());
     }
 
@@ -376,23 +380,19 @@ MaybeError Device::SubmitPendingCommands() {
         mCommandsInFlight.Enqueue(submittedCommands, lastSubmittedSerial);
     }
 
-    if (mRecordingContext.externalTexturesForEagerTransition.size() > 0) {
+    auto externalTextureSemaphoreIter = externalTextureSemaphores.begin();
+    for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
         // Export the signal semaphore.
         ExternalSemaphoreHandle semaphoreHandle;
-        DAWN_TRY_ASSIGN(semaphoreHandle,
-                        mExternalSemaphoreService->ExportSemaphore(externalTextureSemaphore.Get()));
+        DAWN_TRY_ASSIGN(semaphoreHandle, mExternalSemaphoreService->ExportSemaphore(
+                                             externalTextureSemaphoreIter->Get()));
+        ++externalTextureSemaphoreIter;
 
         // Update all external textures, eagerly transitioned in the submit, with the exported
-        // handle, and the duplicated handles.
-        bool first = true;
-        for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
-            ExternalSemaphoreHandle handle =
-                (first ? semaphoreHandle
-                       : mExternalSemaphoreService->DuplicateHandle(semaphoreHandle));
-            first = false;
-            texture->UpdateExternalSemaphoreHandle(handle);
-        }
+        // handles.
+        texture->UpdateExternalSemaphoreHandle(semaphoreHandle);
     }
+    DAWN_ASSERT(externalTextureSemaphoreIter == externalTextureSemaphores.end());
 
     mRecordingContext = CommandRecordingContext();
     DAWN_TRY(PrepareRecordingContext());
