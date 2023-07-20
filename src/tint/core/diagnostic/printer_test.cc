@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/diagnostic/printer.h"
+#include "src/tint/core/diagnostic/printer.h"
 
 #include "gtest/gtest.h"
 

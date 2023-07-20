@@ -58,12 +58,12 @@ endfunction()
 add_library(tint_diagnostic_utils
   debug.cc
   debug.h
-  diagnostic/diagnostic.cc
-  diagnostic/diagnostic.h
-  diagnostic/formatter.cc
-  diagnostic/formatter.h
-  diagnostic/printer.cc
-  diagnostic/printer.h
+  core/diagnostic/diagnostic.cc
+  core/diagnostic/diagnostic.h
+  core/diagnostic/formatter.cc
+  core/diagnostic/formatter.h
+  core/diagnostic/printer.cc
+  core/diagnostic/printer.h
   source.cc
   source.h
   core/debugger.cc
@@ -606,11 +606,11 @@ tint_generated(resolver/ctor_conv_intrinsic)
 tint_generated(lang/wgsl/sem/parameter_usage)
 
 if(UNIX)
-  list(APPEND TINT_LIB_SRCS diagnostic/printer_posix.cc)
+  list(APPEND TINT_LIB_SRCS core/diagnostic/printer_posix.cc)
 elseif(WIN32)
-  list(APPEND TINT_LIB_SRCS diagnostic/printer_windows.cc)
+  list(APPEND TINT_LIB_SRCS core/diagnostic/printer_windows.cc)
 else()
-  list(APPEND TINT_LIB_SRCS diagnostic/printer_other.cc)
+  list(APPEND TINT_LIB_SRCS core/diagnostic/printer_other.cc)
 endif()
 
 if(${TINT_BUILD_SPV_READER})
@@ -1016,9 +1016,9 @@ if(TINT_BUILD_TESTS)
     constant/splat_test.cc
     constant/value_test.cc
     debug_test.cc
-    diagnostic/diagnostic_test.cc
-    diagnostic/formatter_test.cc
-    diagnostic/printer_test.cc
+    core/diagnostic/diagnostic_test.cc
+    core/diagnostic/formatter_test.cc
+    core/diagnostic/printer_test.cc
     program_builder_test.cc
     program_test.cc
     reflection_test.cc

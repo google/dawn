@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_DIAGNOSTIC_DIAGNOSTIC_H_
-#define SRC_TINT_DIAGNOSTIC_DIAGNOSTIC_H_
+#ifndef SRC_TINT_CORE_DIAGNOSTIC_DIAGNOSTIC_H_
+#define SRC_TINT_CORE_DIAGNOSTIC_DIAGNOSTIC_H_
 
 #include <memory>
 #include <ostream>
@@ -258,4 +258,4 @@ std::ostream& operator<<(std::ostream& out, const List& list);
 
 }  // namespace tint::diag
 
-#endif  // SRC_TINT_DIAGNOSTIC_DIAGNOSTIC_H_
+#endif  // SRC_TINT_CORE_DIAGNOSTIC_DIAGNOSTIC_H_

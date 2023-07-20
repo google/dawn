@@ -12,29 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/diagnostic/formatter.h"
-
-#include "gtest/gtest.h"
-#include "src/tint/diagnostic/diagnostic.h"
+#include "src/tint/core/diagnostic/printer.h"
 
 namespace tint::diag {
-namespace {
 
-TEST(DiagListTest, OwnedFilesShared) {
-    auto file = std::make_shared<Source::File>("path", "content");
+Printer::~Printer() = default;
 
-    diag::List list_a, list_b;
-    {
-        diag::Diagnostic diag{};
-        diag.source = Source{Source::Range{{0, 0}}, file.get()};
-        list_a.add(std::move(diag));
-    }
+StringPrinter::StringPrinter() = default;
+StringPrinter::~StringPrinter() = default;
 
-    list_b = list_a;
-
-    ASSERT_EQ(list_b.count(), list_a.count());
-    EXPECT_EQ(list_b.begin()->source.file, file.get());
+std::string StringPrinter::str() const {
+    return stream.str();
 }
 
-}  // namespace
+void StringPrinter::write(const std::string& str, const Style&) {
+    stream << str;
+}
+
 }  // namespace tint::diag

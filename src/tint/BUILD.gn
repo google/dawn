@@ -229,6 +229,12 @@ libtint_source_set("libtint_utils_src") {
     "core/debugger.cc",
     "core/debugger.h",
     "core/defer.h",
+    "core/diagnostic/diagnostic.cc",
+    "core/diagnostic/diagnostic.h",
+    "core/diagnostic/formatter.cc",
+    "core/diagnostic/formatter.h",
+    "core/diagnostic/printer.cc",
+    "core/diagnostic/printer.h",
     "core/enum_set.h",
     "core/foreach_macro.h",
     "core/hash.h",
@@ -254,23 +260,17 @@ libtint_source_set("libtint_utils_src") {
     "core/vector.h",
     "debug.cc",
     "debug.h",
-    "diagnostic/diagnostic.cc",
-    "diagnostic/diagnostic.h",
-    "diagnostic/formatter.cc",
-    "diagnostic/formatter.h",
-    "diagnostic/printer.cc",
-    "diagnostic/printer.h",
     "source.cc",
     "source.h",
     "switch.h",
   ]
 
   if (is_linux || is_mac) {
-    sources += [ "diagnostic/printer_posix.cc" ]
+    sources += [ "core/diagnostic/printer_posix.cc" ]
   } else if (is_win) {
-    sources += [ "diagnostic/printer_windows.cc" ]
+    sources += [ "core/diagnostic/printer_windows.cc" ]
   } else {
-    sources += [ "diagnostic/printer_other.cc" ]
+    sources += [ "core/diagnostic/printer_other.cc" ]
   }
 
   deps = [ ":abseil" ]
@@ -1681,9 +1681,9 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_diagnostic_src") {
     sources = [
-      "diagnostic/diagnostic_test.cc",
-      "diagnostic/formatter_test.cc",
-      "diagnostic/printer_test.cc",
+      "core/diagnostic/diagnostic_test.cc",
+      "core/diagnostic/formatter_test.cc",
+      "core/diagnostic/printer_test.cc",
     ]
   }
 

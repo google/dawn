@@ -14,7 +14,7 @@
 
 #include <cstring>
 
-#include "src/tint/diagnostic/printer.h"
+#include "src/tint/core/diagnostic/printer.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>

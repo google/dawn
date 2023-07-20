@@ -18,10 +18,10 @@
 #include <utility>
 
 #include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/diagnostic/diagnostic.h"
+#include "src/tint/core/diagnostic/formatter.h"
+#include "src/tint/core/diagnostic/printer.h"
 #include "src/tint/core/string_stream.h"
-#include "src/tint/diagnostic/diagnostic.h"
-#include "src/tint/diagnostic/formatter.h"
-#include "src/tint/diagnostic/printer.h"
 
 namespace tint {
 

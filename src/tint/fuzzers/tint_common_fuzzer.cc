@@ -30,8 +30,8 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
+#include "src/tint/core/diagnostic/formatter.h"
 #include "src/tint/core/hash.h"
-#include "src/tint/diagnostic/formatter.h"
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"

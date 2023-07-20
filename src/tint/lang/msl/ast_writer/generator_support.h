@@ -20,7 +20,7 @@
 
 #include "src/tint/builtin/builtin_value.h"
 #include "src/tint/builtin/interpolation.h"
-#include "src/tint/diagnostic/diagnostic.h"
+#include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/type/type.h"
 
 namespace tint::writer::msl {

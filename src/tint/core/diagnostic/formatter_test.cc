@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/diagnostic/formatter.h"
+#include "src/tint/core/diagnostic/formatter.h"
 
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/diagnostic/diagnostic.h"
+#include "src/tint/core/diagnostic/diagnostic.h"
 
 namespace tint::diag {
 namespace {

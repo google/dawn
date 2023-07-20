@@ -18,8 +18,8 @@
 #include <string>
 #include <unordered_set>
 
+#include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/core/string_stream.h"
-#include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/type/texture.h"
 #include "src/tint/writer/ir_text_generator.h"

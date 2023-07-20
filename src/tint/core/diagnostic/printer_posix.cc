@@ -16,7 +16,7 @@
 
 #include <cstring>
 
-#include "src/tint/diagnostic/printer.h"
+#include "src/tint/core/diagnostic/printer.h"
 
 namespace tint::diag {
 namespace {

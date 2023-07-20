@@ -17,8 +17,8 @@
 
 #include <string>
 
+#include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/core/result.h"
-#include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/module.h"
 

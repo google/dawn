@@ -20,8 +20,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/core/string_stream.h"
-#include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/type/struct.h"
 
 namespace tint::writer {

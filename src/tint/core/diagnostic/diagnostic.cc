@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/diagnostic/diagnostic.h"
+#include "src/tint/core/diagnostic/diagnostic.h"
 
 #include <unordered_map>
 
-#include "src/tint/diagnostic/formatter.h"
+#include "src/tint/core/diagnostic/formatter.h"
 
 namespace tint::diag {
 

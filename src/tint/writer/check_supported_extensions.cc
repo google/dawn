@@ -16,9 +16,9 @@
 
 #include <string>
 
+#include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/core/hashset.h"
 #include "src/tint/core/string.h"
-#include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 
 namespace tint::writer {

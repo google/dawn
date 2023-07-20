@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/diagnostic/formatter.h"
+#include "src/tint/core/diagnostic/formatter.h"
 
 #include <algorithm>
 #include <iterator>
 #include <utility>
 #include <vector>
 
+#include "src/tint/core/diagnostic/diagnostic.h"
+#include "src/tint/core/diagnostic/printer.h"
 #include "src/tint/core/string_stream.h"
-#include "src/tint/diagnostic/diagnostic.h"
-#include "src/tint/diagnostic/printer.h"
 
 namespace tint::diag {
 namespace {
