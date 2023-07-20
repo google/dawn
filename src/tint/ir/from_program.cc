@@ -236,6 +236,7 @@ class Impl {
             return load->Result();
         }
 
+        TINT_UNREACHABLE(IR, diagnostics_);
         return nullptr;
     }
 
@@ -858,7 +859,7 @@ class Impl {
         SetTerminator(builder_.BreakIf(current_control->As<ir::Loop>(), cond.Get()));
     }
 
-    void EmitAccess(const ast::AccessorExpression* expr, Instruction*) {
+    void EmitAccess(const ast::AccessorExpression* expr) {
         if (auto vec_access = AsVectorRefElementAccess(expr)) {
             expr_to_result_.Add(expr, vec_access.value());
             return;
@@ -941,6 +942,12 @@ class Impl {
         expr_to_result_.Add(expr, access->Result());
     }
 
+    struct WorkListData {
+        const ast::Expression* inst = nullptr;
+        const ast::Expression* emit_to = nullptr;
+        ir::Block* parent_block = nullptr;
+    };
+
     void EmitExpression(const ast::Expression* root) {
         // If this is a value that has been const-eval'd return the result.
         auto* sem = program_->Sem().GetVal(root);
@@ -954,108 +961,73 @@ class Impl {
             }
         }
 
-        utils::Vector<Instruction*, 4> instruction_before_accessor;
-        utils::Vector<const ast::Expression*, 64> parent_stack;
-        utils::Vector<const ast::Expression*, 64> emit_too;
-        utils::Vector<ir::Block*, 8> block_stack;
+        utils::Vector<WorkListData, 64> work_list;
 
-        auto set_before = [&](const ast::Expression* expr, const ast::AccessorExpression* a) {
-            if (expr == a->object) {
-                if (current_block_->Back() && current_block_->Back()->HasResults()) {
-                    instruction_before_accessor.Push(current_block_->Back());
-                } else {
-                    instruction_before_accessor.Push(nullptr);
-                }
-            }
-        };
+        auto process_work_list = [&](const ast::Expression* expr) {
+            TINT_ASSERT(IR, !work_list.IsEmpty());
 
-        auto check_parent_stack = [&](const ast::Expression* expr) {
-            TINT_ASSERT(IR, !parent_stack.IsEmpty());
-
-            tint::Switch(
-                parent_stack.Back(),  //
-                [&](const ast::MemberAccessorExpression* m) {
-                    set_before(expr, m);
-
-                    auto* preceeding = instruction_before_accessor.Pop();
-                    parent_stack.Pop();
-                    EmitAccess(m, preceeding);
-                },
-                [&](const ast::IndexAccessorExpression* i) {
-                    set_before(expr, i);
-
-                    if (expr == i->index) {
-                        auto* preceeding = instruction_before_accessor.Pop();
-                        parent_stack.Pop();
-                        EmitAccess(i, preceeding);
-                    } else {
-                        emit_too.Push(i->index);
-                    }
+            auto& cur = work_list.Back();
+            return tint::Switch(
+                cur.inst,  //
+                [&](const ast::AccessorExpression* a) {
+                    EmitAccess(a);
+                    return true;
                 },
                 [&](const ast::UnaryOpExpression* u) {
-                    parent_stack.Pop();
                     EmitUnary(u);
+                    return true;
                 },
                 [&](const ast::CallExpression* c) {
-                    parent_stack.Pop();
                     EmitCall(c);
+                    return true;
                 },
                 [&](const ast::BitcastExpression* b) {
-                    parent_stack.Pop();
                     EmitBitcast(b);
+                    return true;
                 },
                 [&](const ast::BinaryExpression* b) {
                     switch (b->op) {
                         case ast::BinaryOp::kLogicalAnd:
                         case ast::BinaryOp::kLogicalOr: {
                             if (expr == b->lhs) {
-                                // Push control block first as the short circuit will move the
-                                // current_block.
-                                block_stack.Push(current_block_);
+                                // Store current_block_ first as the short circuit will set the
+                                // current_block_ to either the true or false branch.
+                                cur.parent_block = current_block_;
 
                                 auto* if_inst = EmitShortCircuit(b);
                                 if (if_inst) {
                                     control_stack_.Push(if_inst);
-                                    emit_too.Push(b->rhs);
-                                } else {
-                                    block_stack.Pop();
-                                    parent_stack.Pop();
+                                    cur.emit_to = b->rhs;
+                                    return false;
                                 }
-
                             } else if (expr == b->rhs) {
-                                parent_stack.Pop();
                                 control_stack_.Pop();
-
                                 EmitShortCircuitResult(b);
-                                current_block_ = block_stack.Pop();
-
+                                current_block_ = cur.parent_block;
                             } else {
                                 TINT_UNREACHABLE(IR, diagnostics_);
-                                parent_stack.Pop();
                             }
-
-                            break;
+                            return true;
                         }
                         default:
                             if (expr == b->lhs) {
                                 // Force a load of the LHS if needed so the results come out in the
                                 // correct order.
                                 (void)ResultForExpression(expr);
-                                emit_too.Push(b->rhs);
+                                cur.emit_to = b->rhs;
+                                return false;
                             } else if (expr == b->rhs) {
-                                parent_stack.Pop();
                                 EmitBinary(b);
                             } else {
                                 TINT_UNREACHABLE(IR, diagnostics_);
-                                parent_stack.Pop();
                             }
-                            break;
+                            return true;
                     }
                 },
                 [&](Default) {
-                    add_error(parent_stack.Back()->source,
-                              "unknown expression type: " +
-                                  std::string(parent_stack.Back()->TypeInfo().name));
+                    add_error(cur.inst->source,
+                              "unknown expression type: " + std::string(cur.inst->TypeInfo().name));
+                    return true;
                 });
         };
 
@@ -1076,28 +1048,26 @@ class Impl {
                     tint::Switch(
                         expr,  //
                         [&](const ast::BinaryExpression* b) {
-                            parent_stack.Push(b);
-                            emit_too.Push(b->lhs);
+                            work_list.Push({b, b->lhs});
                         },
-                        [&](const ast::AccessorExpression* a) {
-                            parent_stack.Push(a);
-                            emit_too.Push(a->object);
+                        [&](const ast::MemberAccessorExpression* m) {
+                            work_list.Push({m, m->object});
+                        },
+                        [&](const ast::IndexAccessorExpression* i) {
+                            work_list.Push({i, i->index});
                         },
                         [&](const ast::UnaryOpExpression* u) {
-                            parent_stack.Push(u);
-                            emit_too.Push(u->expr);
+                            work_list.Push({u, u->expr});
                         },
                         [&](const ast::CallExpression* c) {
-                            if (!c->args.IsEmpty()) {
-                                parent_stack.Push(c);
-                                emit_too.Push(c->args.Back());
-                            } else {
+                            if (c->args.IsEmpty()) {
                                 EmitCall(c);
+                            } else {
+                                work_list.Push({c, c->args.Back()});
                             }
                         },
                         [&](const ast::BitcastExpression* b) {
-                            parent_stack.Push(b);
-                            emit_too.Push(b->expr);
+                            work_list.Push({b, b->expr});
                         },
                         [&](const ast::LiteralExpression* l) { EmitLiteral(l); },
                         [&](const ast::IdentifierExpression* i) { EmitIdentifier(i); },
@@ -1109,14 +1079,17 @@ class Impl {
 
                 auto* cur = expr;
                 while (true) {
-                    if (emit_too.IsEmpty() || emit_too.Back() != cur) {
+                    if (work_list.IsEmpty() || work_list.Back().emit_to != cur) {
                         break;
                     }
-                    emit_too.Pop();
 
-                    auto* next = parent_stack.Back();
-                    check_parent_stack(cur);
-                    cur = next;
+                    if (process_work_list(cur)) {
+                        // The processed work instruction maybe the `emit_to` instruction for the
+                        // next work item.
+                        cur = work_list.Pop().inst;
+                    } else {
+                        break;
+                    }
                 }
 
                 // Don't descend into anything that is const-eval'd as it's already computed
@@ -1131,13 +1104,10 @@ class Impl {
             return;
         }
 
-        while (!parent_stack.IsEmpty()) {
-            TINT_ASSERT(IR, !emit_too.IsEmpty());
-
-            emit_too.Pop();
-            check_parent_stack(parent_stack.Back());
+        while (!work_list.IsEmpty()) {
+            process_work_list(work_list.Back().inst);
+            work_list.Pop();
         }
-        TINT_ASSERT(IR, parent_stack.IsEmpty());
     }
 
     utils::Result<ir::Value*> EmitExpressionWithResult(const ast::Expression* root) {
