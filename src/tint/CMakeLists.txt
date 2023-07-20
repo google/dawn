@@ -734,10 +734,10 @@ endif()
 
 if(${TINT_BUILD_HLSL_WRITER})
   list(APPEND TINT_LIB_SRCS
-    writer/hlsl/generator.cc
-    writer/hlsl/generator.h
-    writer/hlsl/generator_impl.cc
-    writer/hlsl/generator_impl.h
+    lang/hlsl/ast_writer/generator.cc
+    lang/hlsl/ast_writer/generator.h
+    lang/hlsl/ast_writer/generator_impl.cc
+    lang/hlsl/ast_writer/generator_impl.h
   )
 endif()
 
@@ -1548,37 +1548,37 @@ if(TINT_BUILD_TESTS)
 
   if (${TINT_BUILD_HLSL_WRITER})
     list(APPEND TINT_TEST_SRCS
-      writer/hlsl/generator_impl_array_accessor_test.cc
-      writer/hlsl/generator_impl_assign_test.cc
-      writer/hlsl/generator_impl_binary_test.cc
-      writer/hlsl/generator_impl_bitcast_test.cc
-      writer/hlsl/generator_impl_block_test.cc
-      writer/hlsl/generator_impl_break_test.cc
-      writer/hlsl/generator_impl_builtin_test.cc
-      writer/hlsl/generator_impl_builtin_texture_test.cc
-      writer/hlsl/generator_impl_call_test.cc
-      writer/hlsl/generator_impl_case_test.cc
-      writer/hlsl/generator_impl_cast_test.cc
-      writer/hlsl/generator_impl_const_assert_test.cc
-      writer/hlsl/generator_impl_constructor_test.cc
-      writer/hlsl/generator_impl_continue_test.cc
-      writer/hlsl/generator_impl_discard_test.cc
-      writer/hlsl/generator_impl_function_test.cc
-      writer/hlsl/generator_impl_identifier_test.cc
-      writer/hlsl/generator_impl_if_test.cc
-      writer/hlsl/generator_impl_import_test.cc
-      writer/hlsl/generator_impl_loop_test.cc
-      writer/hlsl/generator_impl_member_accessor_test.cc
-      writer/hlsl/generator_impl_module_constant_test.cc
-      writer/hlsl/generator_impl_return_test.cc
-      writer/hlsl/generator_impl_sanitizer_test.cc
-      writer/hlsl/generator_impl_switch_test.cc
-      writer/hlsl/generator_impl_test.cc
-      writer/hlsl/generator_impl_type_test.cc
-      writer/hlsl/generator_impl_unary_op_test.cc
-      writer/hlsl/generator_impl_variable_decl_statement_test.cc
-      writer/hlsl/generator_impl_workgroup_var_test.cc
-      writer/hlsl/test_helper.h
+      lang/hlsl/ast_writer/generator_impl_array_accessor_test.cc
+      lang/hlsl/ast_writer/generator_impl_assign_test.cc
+      lang/hlsl/ast_writer/generator_impl_binary_test.cc
+      lang/hlsl/ast_writer/generator_impl_bitcast_test.cc
+      lang/hlsl/ast_writer/generator_impl_block_test.cc
+      lang/hlsl/ast_writer/generator_impl_break_test.cc
+      lang/hlsl/ast_writer/generator_impl_builtin_test.cc
+      lang/hlsl/ast_writer/generator_impl_builtin_texture_test.cc
+      lang/hlsl/ast_writer/generator_impl_call_test.cc
+      lang/hlsl/ast_writer/generator_impl_case_test.cc
+      lang/hlsl/ast_writer/generator_impl_cast_test.cc
+      lang/hlsl/ast_writer/generator_impl_const_assert_test.cc
+      lang/hlsl/ast_writer/generator_impl_constructor_test.cc
+      lang/hlsl/ast_writer/generator_impl_continue_test.cc
+      lang/hlsl/ast_writer/generator_impl_discard_test.cc
+      lang/hlsl/ast_writer/generator_impl_function_test.cc
+      lang/hlsl/ast_writer/generator_impl_identifier_test.cc
+      lang/hlsl/ast_writer/generator_impl_if_test.cc
+      lang/hlsl/ast_writer/generator_impl_import_test.cc
+      lang/hlsl/ast_writer/generator_impl_loop_test.cc
+      lang/hlsl/ast_writer/generator_impl_member_accessor_test.cc
+      lang/hlsl/ast_writer/generator_impl_module_constant_test.cc
+      lang/hlsl/ast_writer/generator_impl_return_test.cc
+      lang/hlsl/ast_writer/generator_impl_sanitizer_test.cc
+      lang/hlsl/ast_writer/generator_impl_switch_test.cc
+      lang/hlsl/ast_writer/generator_impl_test.cc
+      lang/hlsl/ast_writer/generator_impl_type_test.cc
+      lang/hlsl/ast_writer/generator_impl_unary_op_test.cc
+      lang/hlsl/ast_writer/generator_impl_variable_decl_statement_test.cc
+      lang/hlsl/ast_writer/generator_impl_workgroup_var_test.cc
+      lang/hlsl/ast_writer/test_helper.h
     )
   endif()
 
@@ -1717,7 +1717,7 @@ if(TINT_BUILD_BENCHMARKS)
     list(APPEND TINT_BENCHMARK_SRCS lang/glsl/ast_writer/generator_bench.cc)
   endif()
   if (${TINT_BUILD_HLSL_WRITER})
-    list(APPEND TINT_BENCHMARK_SRCS writer/hlsl/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS lang/hlsl/ast_writer/generator_bench.cc)
   endif()
   if (${TINT_BUILD_MSL_WRITER})
     list(APPEND TINT_BENCHMARK_SRCS lang/msl/ast_writer/generator_bench.cc)

@@ -60,7 +60,7 @@
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
-#include "src/tint/writer/hlsl/generator.h"
+#include "src/tint/lang/hlsl/ast_writer/generator.h"
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_GLSL_WRITER

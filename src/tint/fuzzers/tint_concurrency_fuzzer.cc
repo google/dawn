@@ -22,12 +22,12 @@
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/inspector/inspector.h"
 #include "src/tint/lang/glsl/ast_writer/generator.h"
+#include "src/tint/lang/hlsl/ast_writer/generator.h"
 #include "src/tint/lang/msl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/writer/flatten_bindings.h"
-#include "src/tint/writer/hlsl/generator.h"
 #include "src/tint/writer/spirv/generator.h"
 
 static constexpr size_t kNumThreads = 8;
