@@ -234,7 +234,6 @@ crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shad
 # copyToTexture,canvas:color_space_conversion:* fail with swiftshader
 # The other tests about canvas and image bitmap fail with swiftshader on Linux
 ################################################################################
-crbug.com/dawn/1599 [ ventura webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
 crbug.com/dawn/1599 [ webgpu-adapter-swiftshader win10 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
 
 ################################################################################
@@ -694,7 +693,6 @@ crbug.com/dawn/0000 [ android-r dawn-backend-validation ] webgpu:shader,executio
 crbug.com/dawn/0000 [ android-r dawn-backend-validation webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=true [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="rg8unorm";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
 crbug.com/dawn/0000 [ android-t ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
