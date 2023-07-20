@@ -56,7 +56,7 @@
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
-#include "src/tint/writer/msl/generator.h"
+#include "src/tint/lang/msl/ast_writer/generator.h"
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER

@@ -706,18 +706,18 @@ endif()
 
 if(${TINT_BUILD_MSL_WRITER})
   list(APPEND TINT_LIB_SRCS
-    writer/msl/generator.cc
-    writer/msl/generator.h
-    writer/msl/generator_impl.cc
-    writer/msl/generator_impl.h
-    writer/msl/generator_support.cc
-    writer/msl/generator_support.h
+    lang/msl/ast_writer/generator.cc
+    lang/msl/ast_writer/generator.h
+    lang/msl/ast_writer/generator_impl.cc
+    lang/msl/ast_writer/generator_impl.h
+    lang/msl/ast_writer/generator_support.cc
+    lang/msl/ast_writer/generator_support.h
   )
 
   if(${TINT_BUILD_IR})
     list(APPEND TINT_LIB_SRCS
-      writer/msl/ir/generator_impl_ir.cc
-      writer/msl/ir/generator_impl_ir.h
+      lang/msl/writer/generator_impl_ir.cc
+      lang/msl/writer/generator_impl_ir.h
     )
   endif()
 endif()
@@ -1466,45 +1466,45 @@ if(TINT_BUILD_TESTS)
 
   if(${TINT_BUILD_MSL_WRITER})
     list(APPEND TINT_TEST_SRCS
-      writer/msl/generator_impl_array_accessor_test.cc
-      writer/msl/generator_impl_assign_test.cc
-      writer/msl/generator_impl_binary_test.cc
-      writer/msl/generator_impl_bitcast_test.cc
-      writer/msl/generator_impl_block_test.cc
-      writer/msl/generator_impl_break_test.cc
-      writer/msl/generator_impl_builtin_test.cc
-      writer/msl/generator_impl_builtin_texture_test.cc
-      writer/msl/generator_impl_call_test.cc
-      writer/msl/generator_impl_case_test.cc
-      writer/msl/generator_impl_cast_test.cc
-      writer/msl/generator_impl_const_assert_test.cc
-      writer/msl/generator_impl_constructor_test.cc
-      writer/msl/generator_impl_continue_test.cc
-      writer/msl/generator_impl_discard_test.cc
-      writer/msl/generator_impl_function_test.cc
-      writer/msl/generator_impl_identifier_test.cc
-      writer/msl/generator_impl_if_test.cc
-      writer/msl/generator_impl_import_test.cc
-      writer/msl/generator_impl_loop_test.cc
-      writer/msl/generator_impl_member_accessor_test.cc
-      writer/msl/generator_impl_module_constant_test.cc
-      writer/msl/generator_impl_return_test.cc
-      writer/msl/generator_impl_sanitizer_test.cc
-      writer/msl/generator_impl_switch_test.cc
-      writer/msl/generator_impl_test.cc
-      writer/msl/generator_impl_type_test.cc
-      writer/msl/generator_impl_unary_op_test.cc
-      writer/msl/generator_impl_variable_decl_statement_test.cc
-      writer/msl/generator_support_test.cc
-      writer/msl/test_helper.h
+      lang/msl/ast_writer/generator_impl_array_accessor_test.cc
+      lang/msl/ast_writer/generator_impl_assign_test.cc
+      lang/msl/ast_writer/generator_impl_binary_test.cc
+      lang/msl/ast_writer/generator_impl_bitcast_test.cc
+      lang/msl/ast_writer/generator_impl_block_test.cc
+      lang/msl/ast_writer/generator_impl_break_test.cc
+      lang/msl/ast_writer/generator_impl_builtin_test.cc
+      lang/msl/ast_writer/generator_impl_builtin_texture_test.cc
+      lang/msl/ast_writer/generator_impl_call_test.cc
+      lang/msl/ast_writer/generator_impl_case_test.cc
+      lang/msl/ast_writer/generator_impl_cast_test.cc
+      lang/msl/ast_writer/generator_impl_const_assert_test.cc
+      lang/msl/ast_writer/generator_impl_constructor_test.cc
+      lang/msl/ast_writer/generator_impl_continue_test.cc
+      lang/msl/ast_writer/generator_impl_discard_test.cc
+      lang/msl/ast_writer/generator_impl_function_test.cc
+      lang/msl/ast_writer/generator_impl_identifier_test.cc
+      lang/msl/ast_writer/generator_impl_if_test.cc
+      lang/msl/ast_writer/generator_impl_import_test.cc
+      lang/msl/ast_writer/generator_impl_loop_test.cc
+      lang/msl/ast_writer/generator_impl_member_accessor_test.cc
+      lang/msl/ast_writer/generator_impl_module_constant_test.cc
+      lang/msl/ast_writer/generator_impl_return_test.cc
+      lang/msl/ast_writer/generator_impl_sanitizer_test.cc
+      lang/msl/ast_writer/generator_impl_switch_test.cc
+      lang/msl/ast_writer/generator_impl_test.cc
+      lang/msl/ast_writer/generator_impl_type_test.cc
+      lang/msl/ast_writer/generator_impl_unary_op_test.cc
+      lang/msl/ast_writer/generator_impl_variable_decl_statement_test.cc
+      lang/msl/ast_writer/generator_support_test.cc
+      lang/msl/ast_writer/test_helper.h
     )
 
     if(${TINT_BUILD_IR})
       list(APPEND TINT_TEST_SRCS
-        writer/msl/ir/generator_impl_ir_constant_test.cc
-        writer/msl/ir/generator_impl_ir_function_test.cc
-        writer/msl/ir/generator_impl_ir_type_test.cc
-        writer/msl/ir/test_helper_ir.h
+        lang/msl/writer/generator_impl_ir_constant_test.cc
+        lang/msl/writer/generator_impl_ir_function_test.cc
+        lang/msl/writer/generator_impl_ir_type_test.cc
+        lang/msl/writer/test_helper_ir.h
       )
     endif()
   endif()
@@ -1720,7 +1720,7 @@ if(TINT_BUILD_BENCHMARKS)
     list(APPEND TINT_BENCHMARK_SRCS writer/hlsl/generator_bench.cc)
   endif()
   if (${TINT_BUILD_MSL_WRITER})
-    list(APPEND TINT_BENCHMARK_SRCS writer/msl/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS lang/msl/ast_writer/generator_bench.cc)
   endif()
   if (${TINT_BUILD_SPV_WRITER})
     list(APPEND TINT_BENCHMARK_SRCS writer/spirv/generator_bench.cc)
