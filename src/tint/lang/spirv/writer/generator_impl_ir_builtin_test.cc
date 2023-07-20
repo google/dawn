@@ -429,6 +429,146 @@ TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat2x2h) {
     EXPECT_INST("%result = OpTranspose %mat2v2half %arg");
 }
 
+TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Float) {
+    auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Float, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %uint %9 PackHalf2x16 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Snorm) {
+    auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Snorm, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %uint %9 PackSnorm2x16 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Unorm) {
+    auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Unorm, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %uint %9 PackUnorm2x16 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Pack4X8Snorm) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kPack4X8Snorm, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %uint %9 PackSnorm4x8 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Pack4X8Unorm) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), builtin::Function::kPack4X8Unorm, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %uint %9 PackUnorm4x8 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Float) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Float, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v2float %9 UnpackHalf2x16 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Snorm) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Snorm, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v2float %9 UnpackSnorm2x16 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Unorm) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Unorm, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v2float %9 UnpackUnorm2x16 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Unpack4X8Snorm) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kUnpack4X8Snorm, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v4float %9 UnpackSnorm4x8 %arg");
+}
+
+TEST_F(SpvGeneratorImplTest, Builtin_Unpack4X8Unorm) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kUnpack4X8Unorm, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v4float %9 UnpackUnorm4x8 %arg");
+}
+
 // Tests for builtins with the signature: T = func(T, T)
 using Builtin_2arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_2arg, Scalar) {

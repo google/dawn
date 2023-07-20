@@ -1304,6 +1304,21 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kNormalize:
             glsl_ext_inst(GLSLstd450Normalize);
             break;
+        case builtin::Function::kPack2X16Float:
+            glsl_ext_inst(GLSLstd450PackHalf2x16);
+            break;
+        case builtin::Function::kPack2X16Snorm:
+            glsl_ext_inst(GLSLstd450PackSnorm2x16);
+            break;
+        case builtin::Function::kPack2X16Unorm:
+            glsl_ext_inst(GLSLstd450PackUnorm2x16);
+            break;
+        case builtin::Function::kPack4X8Snorm:
+            glsl_ext_inst(GLSLstd450PackSnorm4x8);
+            break;
+        case builtin::Function::kPack4X8Unorm:
+            glsl_ext_inst(GLSLstd450PackUnorm4x8);
+            break;
         case builtin::Function::kPow:
             glsl_ext_inst(GLSLstd450Pow);
             break;
@@ -1369,6 +1384,21 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             break;
         case builtin::Function::kTrunc:
             glsl_ext_inst(GLSLstd450Trunc);
+            break;
+        case builtin::Function::kUnpack2X16Float:
+            glsl_ext_inst(GLSLstd450UnpackHalf2x16);
+            break;
+        case builtin::Function::kUnpack2X16Snorm:
+            glsl_ext_inst(GLSLstd450UnpackSnorm2x16);
+            break;
+        case builtin::Function::kUnpack2X16Unorm:
+            glsl_ext_inst(GLSLstd450UnpackUnorm2x16);
+            break;
+        case builtin::Function::kUnpack4X8Snorm:
+            glsl_ext_inst(GLSLstd450UnpackSnorm4x8);
+            break;
+        case builtin::Function::kUnpack4X8Unorm:
+            glsl_ext_inst(GLSLstd450UnpackUnorm4x8);
             break;
         case builtin::Function::kWorkgroupBarrier:
             op = spv::Op::OpControlBarrier;
