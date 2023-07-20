@@ -1208,7 +1208,6 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             glsl_ext_inst(GLSLstd450Distance);
             break;
         case builtin::Function::kDpdx:
-            module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpDPdx;
             break;
         case builtin::Function::kDpdxCoarse:
@@ -1220,7 +1219,6 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             op = spv::Op::OpDPdxFine;
             break;
         case builtin::Function::kDpdy:
-            module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpDPdy;
             break;
         case builtin::Function::kDpdyCoarse:
@@ -1252,6 +1250,17 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             break;
         case builtin::Function::kFrexp:
             glsl_ext_inst(GLSLstd450FrexpStruct);
+            break;
+        case builtin::Function::kFwidth:
+            op = spv::Op::OpFwidth;
+            break;
+        case builtin::Function::kFwidthCoarse:
+            module_.PushCapability(SpvCapabilityDerivativeControl);
+            op = spv::Op::OpFwidthCoarse;
+            break;
+        case builtin::Function::kFwidthFine:
+            module_.PushCapability(SpvCapabilityDerivativeControl);
+            op = spv::Op::OpFwidthFine;
             break;
         case builtin::Function::kInsertBits:
             op = spv::Op::OpBitFieldInsert;
