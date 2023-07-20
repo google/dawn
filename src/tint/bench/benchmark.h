@@ -20,7 +20,7 @@
 #include <variant>
 
 #include "benchmark/benchmark.h"
-#include "src/tint/utils/concat.h"
+#include "src/tint/core/concat.h"
 #include "tint/tint.h"
 
 namespace tint::bench {

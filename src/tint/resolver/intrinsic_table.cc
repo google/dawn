@@ -18,6 +18,11 @@
 #include <limits>
 #include <utility>
 
+#include "src/tint/core/hash.h"
+#include "src/tint/core/hashmap.h"
+#include "src/tint/core/math.h"
+#include "src/tint/core/scoped_assignment.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/sem/evaluation_stage.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
@@ -37,11 +42,6 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/hashmap.h"
-#include "src/tint/utils/math.h"
-#include "src/tint/utils/scoped_assignment.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::resolver {
 namespace {

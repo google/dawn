@@ -21,6 +21,9 @@
 #include "src/tint/builtin/extension.h"
 #include "src/tint/builtin/interpolation_sampling.h"
 #include "src/tint/builtin/interpolation_type.h"
+#include "src/tint/core/math.h"
+#include "src/tint/core/string.h"
+#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/float_literal_expression.h"
@@ -55,9 +58,6 @@
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
-#include "src/tint/utils/math.h"
-#include "src/tint/utils/string.h"
-#include "src/tint/utils/unique_vector.h"
 
 namespace tint::inspector {
 

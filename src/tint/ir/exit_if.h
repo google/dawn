@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_IR_EXIT_IF_H_
 #define SRC_TINT_IR_EXIT_IF_H_
 
+#include "src/tint/core/castable.h"
 #include "src/tint/ir/exit.h"
-#include "src/tint/utils/castable.h"
 
 // Forward declarations
 namespace tint::ir {

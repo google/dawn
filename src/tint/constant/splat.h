@@ -16,9 +16,9 @@
 #define SRC_TINT_CONSTANT_SPLAT_H_
 
 #include "src/tint/constant/composite.h"
+#include "src/tint/core/castable.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/type/type.h"
-#include "src/tint/utils/castable.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::constant {
 

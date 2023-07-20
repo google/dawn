@@ -23,6 +23,10 @@
 
 #include "src/tint/constant/splat.h"
 #include "src/tint/constant/value.h"
+#include "src/tint/core/defer.h"
+#include "src/tint/core/map.h"
+#include "src/tint/core/scoped_assignment.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/msl/ast_writer/generator_support.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
@@ -81,10 +85,6 @@
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
-#include "src/tint/utils/defer.h"
-#include "src/tint/utils/map.h"
-#include "src/tint/utils/scoped_assignment.h"
-#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/check_supported_extensions.h"
 
 namespace tint::writer::msl {

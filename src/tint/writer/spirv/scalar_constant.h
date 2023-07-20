@@ -21,7 +21,7 @@
 #include <functional>
 
 #include "src/tint/builtin/number.h"
-#include "src/tint/utils/hash.h"
+#include "src/tint/core/hash.h"
 
 // Forward declarations
 namespace tint::sem {

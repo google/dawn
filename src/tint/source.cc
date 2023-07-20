@@ -18,7 +18,7 @@
 #include <string_view>
 #include <utility>
 
-#include "src/tint/utils/unicode.h"
+#include "src/tint/core/unicode.h"
 
 namespace tint {
 namespace {

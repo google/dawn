@@ -17,6 +17,7 @@
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/scalar.h"
 #include "src/tint/constant/splat.h"
+#include "src/tint/core/predicates.h"
 #include "src/tint/type/abstract_float.h"
 #include "src/tint/type/abstract_int.h"
 #include "src/tint/type/bool.h"
@@ -25,7 +26,6 @@
 #include "src/tint/type/i32.h"
 #include "src/tint/type/manager.h"
 #include "src/tint/type/u32.h"
-#include "src/tint/utils/predicates.h"
 
 namespace tint::constant {
 

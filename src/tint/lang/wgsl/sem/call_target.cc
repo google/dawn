@@ -16,8 +16,8 @@
 
 #include <utility>
 
+#include "src/tint/core/hash.h"
 #include "src/tint/symbol_table.h"
-#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 

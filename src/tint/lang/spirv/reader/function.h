@@ -24,11 +24,11 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/spirv/reader/attributes.h"
 #include "src/tint/lang/spirv/reader/construct.h"
 #include "src/tint/lang/spirv/reader/parser_impl.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 

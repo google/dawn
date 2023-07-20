@@ -19,9 +19,9 @@
 #include <string>
 
 #include "src/tint/builtin/number.h"
+#include "src/tint/core/result.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/type/type.h"
-#include "src/tint/utils/result.h"
-#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint {

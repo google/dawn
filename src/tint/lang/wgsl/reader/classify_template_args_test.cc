@@ -14,9 +14,9 @@
 
 #include "gmock/gmock.h"
 
+#include "src/tint/core/transform.h"
 #include "src/tint/lang/wgsl/reader/classify_template_args.h"
 #include "src/tint/lang/wgsl/reader/lexer.h"
-#include "src/tint/utils/transform.h"
 
 namespace tint::reader::wgsl {
 namespace {

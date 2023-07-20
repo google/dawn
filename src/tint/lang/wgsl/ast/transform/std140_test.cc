@@ -18,8 +18,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/core/string.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
-#include "src/tint/utils/string.h"
 
 // This file contains the should-run tests and a trival empty module test for Std140 transform.
 // For testing transform results with clear readability, please refer to std140_f32_test.cc for f32

@@ -26,7 +26,7 @@
 
 #include <string>
 
-#include "src/tint/utils/string.h"
+#include "src/tint/core/string.h"
 
 namespace tint::builtin {
 namespace {

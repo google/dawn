@@ -16,10 +16,10 @@
 
 #include <utility>
 
+#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
-#include "src/tint/utils/scoped_assignment.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MergeReturn);
 

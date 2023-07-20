@@ -14,8 +14,8 @@
 
 #include "src/tint/type/abstract_float.h"
 
+#include "src/tint/core/hash.h"
 #include "src/tint/type/manager.h"
-#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractFloat);
 

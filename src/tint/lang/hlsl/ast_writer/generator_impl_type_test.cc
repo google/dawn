@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/hlsl/ast_writer/test_helper.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
@@ -22,7 +23,6 @@
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
-#include "src/tint/utils/string_stream.h"
 
 using ::testing::HasSubstr;
 

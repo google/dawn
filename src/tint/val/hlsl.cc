@@ -16,9 +16,9 @@
 
 #include "src/tint/val/val.h"
 
-#include "src/tint/utils/io/command.h"
-#include "src/tint/utils/io/tmpfile.h"
-#include "src/tint/utils/string.h"
+#include "src/tint/core/io/command.h"
+#include "src/tint/core/io/tmpfile.h"
+#include "src/tint/core/string.h"
 
 #ifdef _WIN32
 #include <Windows.h>

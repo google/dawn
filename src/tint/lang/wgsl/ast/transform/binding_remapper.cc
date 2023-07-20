@@ -18,11 +18,11 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/core/string.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/utils/string.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BindingRemapper);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BindingRemapper::Remappings);

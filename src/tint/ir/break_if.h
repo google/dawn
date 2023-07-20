@@ -15,9 +15,9 @@
 #ifndef SRC_TINT_IR_BREAK_IF_H_
 #define SRC_TINT_IR_BREAK_IF_H_
 
+#include "src/tint/core/castable.h"
 #include "src/tint/ir/terminator.h"
 #include "src/tint/ir/value.h"
-#include "src/tint/utils/castable.h"
 
 // Forward declarations
 namespace tint::ir {

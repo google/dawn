@@ -19,6 +19,9 @@
 #include <utility>
 #include <variant>
 
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/hashmap.h"
+#include "src/tint/core/transform.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/module.h"
@@ -26,9 +29,6 @@
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/hashmap.h"
-#include "src/tint/utils/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Std140);
 

@@ -16,6 +16,8 @@
 
 #include <algorithm>
 
+#include "src/tint/core/math.h"
+#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
@@ -35,8 +37,6 @@
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/switch_statement.h"
 #include "src/tint/switch.h"
-#include "src/tint/utils/math.h"
-#include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/writer/float_to_string.h"
 
 namespace tint::writer::syntax_tree {

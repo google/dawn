@@ -18,9 +18,9 @@
 #include <cassert>
 #include <utility>
 
+#include "src/tint/core/hash.h"
 #include "src/tint/fuzzers/mersenne_twister_engine.h"
 #include "src/tint/fuzzers/random_generator_engine.h"
-#include "src/tint/utils/hash.h"
 
 namespace tint::fuzzers {
 
@@ -28,7 +28,7 @@ namespace {
 
 /// Calculate the hash for the contents of a c-style data buffer
 /// This is intentionally not implemented as a generic override of HashCombine
-/// in "src/tint/utils/hash.h", because it conflicts with the vardiac override
+/// in "src/tint/core/hash.h", because it conflicts with the vardiac override
 /// for the case where a pointer and an integer are being hashed.
 /// @param data - pointer to buffer to be hashed
 /// @param size - number of elements in buffer

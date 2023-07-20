@@ -21,6 +21,15 @@
 #include <utility>
 
 #include "src/tint/builtin/builtin.h"
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/defer.h"
+#include "src/tint/core/math.h"
+#include "src/tint/core/reverse.h"
+#include "src/tint/core/scoped_assignment.h"
+#include "src/tint/core/string.h"
+#include "src/tint/core/string_stream.h"
+#include "src/tint/core/transform.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
@@ -79,15 +88,6 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/storage_texture.h"
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/defer.h"
-#include "src/tint/utils/math.h"
-#include "src/tint/utils/reverse.h"
-#include "src/tint/utils/scoped_assignment.h"
-#include "src/tint/utils/string.h"
-#include "src/tint/utils/string_stream.h"
-#include "src/tint/utils/transform.h"
-#include "src/tint/utils/vector.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::Access>);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::AddressSpace>);

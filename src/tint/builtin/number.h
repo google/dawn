@@ -21,10 +21,10 @@
 #include <limits>
 #include <optional>
 
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/result.h"
-#include "src/tint/utils/string_stream.h"
-#include "src/tint/utils/traits.h"
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/result.h"
+#include "src/tint/core/string_stream.h"
+#include "src/tint/core/traits.h"
 
 // Forward declaration
 namespace tint {

@@ -25,9 +25,9 @@
 #include "src/tint/builtin/interpolation_sampling.h"
 #include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/builtin/texel_format.h"
+#include "src/tint/core/hashmap.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/utils/hashmap.h"
 
 namespace tint::resolver {
 

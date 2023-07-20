@@ -21,15 +21,15 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/core/castable.h"
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/hashmap.h"
+#include "src/tint/core/hashset.h"
+#include "src/tint/core/traits.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/debug.h"
 #include "src/tint/program_id.h"
 #include "src/tint/symbol.h"
-#include "src/tint/utils/castable.h"
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/hashmap.h"
-#include "src/tint/utils/hashset.h"
-#include "src/tint/utils/traits.h"
-#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint {

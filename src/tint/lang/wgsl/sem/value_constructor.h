@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_LANG_WGSL_SEM_VALUE_CONSTRUCTOR_H_
 #define SRC_TINT_LANG_WGSL_SEM_VALUE_CONSTRUCTOR_H_
 
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/sem/call_target.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::sem {
 

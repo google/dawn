@@ -15,10 +15,10 @@
 #ifndef SRC_TINT_IR_INSTRUCTION_H_
 #define SRC_TINT_IR_INSTRUCTION_H_
 
+#include "src/tint/core/castable.h"
+#include "src/tint/core/enum_set.h"
 #include "src/tint/ir/instruction_result.h"
 #include "src/tint/ir/value.h"
-#include "src/tint/utils/castable.h"
-#include "src/tint/utils/enum_set.h"
 
 // Forward declarations
 namespace tint::ir {

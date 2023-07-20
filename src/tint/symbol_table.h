@@ -17,9 +17,9 @@
 
 #include <string>
 
+#include "src/tint/core/bump_allocator.h"
+#include "src/tint/core/hashmap.h"
 #include "src/tint/symbol.h"
-#include "utils/bump_allocator.h"
-#include "utils/hashmap.h"
 
 namespace tint {
 

@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <limits>
 
-#include "src/tint/utils/map.h"
+#include "src/tint/core/map.h"
 
 namespace tint::writer {
 

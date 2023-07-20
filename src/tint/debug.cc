@@ -16,7 +16,7 @@
 
 #include <memory>
 
-#include "src/tint/utils/debugger.h"
+#include "src/tint/core/debugger.h"
 
 namespace tint {
 namespace {

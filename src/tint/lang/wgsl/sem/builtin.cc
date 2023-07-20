@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/utils/transform.h"
+#include "src/tint/core/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Builtin);
 

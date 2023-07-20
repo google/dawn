@@ -16,7 +16,7 @@
 #define SRC_TINT_WRITER_CHECK_SUPPORTED_EXTENSIONS_H_
 
 #include "src/tint/builtin/extension.h"
-#include "src/tint/utils/vector.h"
+#include "src/tint/core/vector.h"
 
 namespace tint::ast {
 class Module;

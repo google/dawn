@@ -18,8 +18,8 @@
 #include <stdint.h>
 #include <utility>
 
+#include "src/tint/core/string_stream.h"
 #include "src/tint/debug.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint {
 

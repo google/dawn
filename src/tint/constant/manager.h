@@ -19,9 +19,9 @@
 
 #include "src/tint/builtin/number.h"
 #include "src/tint/constant/value.h"
+#include "src/tint/core/hash.h"
+#include "src/tint/core/unique_allocator.h"
 #include "src/tint/type/manager.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/unique_allocator.h"
 
 namespace tint::constant {
 class Splat;

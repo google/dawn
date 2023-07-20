@@ -20,10 +20,10 @@
 #include <utility>
 
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/core/hash.h"
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform::Config);

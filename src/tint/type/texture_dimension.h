@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_TYPE_TEXTURE_DIMENSION_H_
 #define SRC_TINT_TYPE_TEXTURE_DIMENSION_H_
 
-#include "src/tint/utils/string_stream.h"
+#include "src/tint/core/string_stream.h"
 
 namespace tint::type {
 

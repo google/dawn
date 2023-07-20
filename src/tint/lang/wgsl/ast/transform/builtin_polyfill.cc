@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/core/map.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
@@ -27,7 +28,6 @@
 #include "src/tint/switch.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/texture_dimension.h"
-#include "src/tint/utils/map.h"
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT

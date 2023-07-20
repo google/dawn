@@ -21,14 +21,14 @@
 #include "src/tint/builtin/address_space.h"
 #include "src/tint/builtin/fluent_types.h"
 #include "src/tint/builtin/number.h"
+#include "src/tint/core/hash.h"
+#include "src/tint/core/unique_allocator.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
 #include "src/tint/type/unique_node.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/unique_allocator.h"
 
 // Forward declarations
 namespace tint::type {

@@ -16,9 +16,9 @@
 
 #include <utility>
 
+#include "src/tint/core/hashmap.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/symbol.h"
-#include "src/tint/utils/hashmap.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint {
 

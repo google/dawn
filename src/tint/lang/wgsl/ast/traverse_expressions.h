@@ -17,6 +17,9 @@
 
 #include <vector>
 
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/reverse.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
@@ -26,9 +29,6 @@
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/switch.h"
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/reverse.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::ast {
 

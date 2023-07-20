@@ -15,9 +15,9 @@
 #ifndef SRC_TINT_IR_USER_CALL_H_
 #define SRC_TINT_IR_USER_CALL_H_
 
+#include "src/tint/core/castable.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/ir/function.h"
-#include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 

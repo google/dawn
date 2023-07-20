@@ -16,11 +16,11 @@
 
 #include <utility>
 
+#include "src/tint/core/reverse.h"
+#include "src/tint/core/transform.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/switch.h"
-#include "src/tint/utils/reverse.h"
-#include "src/tint/utils/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::MergeReturn);
 

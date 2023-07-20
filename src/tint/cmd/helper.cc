@@ -22,7 +22,7 @@
 #include "spirv-tools/libspirv.hpp"
 #endif
 
-#include "src/tint/utils/string.h"
+#include "src/tint/core/string.h"
 
 namespace tint::cmd {
 namespace {

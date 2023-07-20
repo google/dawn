@@ -23,10 +23,10 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/core/bitset.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/reflection.h"
-#include "src/tint/utils/bitset.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/binding_remapper_options.h"
 #include "src/tint/writer/external_texture_options.h"

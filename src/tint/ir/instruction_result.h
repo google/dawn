@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_IR_INSTRUCTION_RESULT_H_
 #define SRC_TINT_IR_INSTRUCTION_RESULT_H_
 
+#include "src/tint/core/string_stream.h"
 #include "src/tint/ir/value.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::ir {
 

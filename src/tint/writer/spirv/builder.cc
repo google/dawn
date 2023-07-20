@@ -19,6 +19,10 @@
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/tint/constant/value.h"
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/defer.h"
+#include "src/tint/core/map.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
@@ -46,10 +50,6 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/texture_dimension.h"
 #include "src/tint/type/vector.h"
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/defer.h"
-#include "src/tint/utils/map.h"
-#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/append_vector.h"
 #include "src/tint/writer/check_supported_extensions.h"
 

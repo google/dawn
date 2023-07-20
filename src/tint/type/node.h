@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_TYPE_NODE_H_
 #define SRC_TINT_TYPE_NODE_H_
 
-#include "src/tint/utils/castable.h"
+#include "src/tint/core/castable.h"
 
 namespace tint::type {
 

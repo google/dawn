@@ -66,15 +66,15 @@ add_library(tint_diagnostic_utils
   diagnostic/printer.h
   source.cc
   source.h
-  utils/debugger.cc
-  utils/debugger.h
-  utils/unicode.cc
-  utils/unicode.h
+  core/debugger.cc
+  core/debugger.h
+  core/unicode.cc
+  core/unicode.h
 )
 tint_default_compile_options(tint_diagnostic_utils)
 
 if (TINT_ENABLE_BREAK_IN_DEBUGGER)
-  set_source_files_properties(utils/debugger.cc
+  set_source_files_properties(core/debugger.cc
     PROPERTIES COMPILE_DEFINITIONS "TINT_ENABLE_BREAK_IN_DEBUGGER=1" )
 endif()
 
@@ -530,38 +530,38 @@ list(APPEND TINT_LIB_SRCS
   type/vector.h
   type/void.cc
   type/void.h
-  utils/bitcast.h
-  utils/bitset.h
-  utils/block_allocator.h
-  utils/bump_allocator.h
-  utils/castable.cc
-  utils/castable.h
-  utils/cli.cc
-  utils/cli.h
-  utils/compiler_macros.h
-  utils/concat.h
-  utils/crc32.h
-  utils/enum_set.h
-  utils/foreach_macro.h
-  utils/hash.h
-  utils/hashmap_base.h
-  utils/hashmap.h
-  utils/hashset.h
-  utils/map.h
-  utils/math.h
-  utils/parse_num.cc
-  utils/parse_num.h
-  utils/predicates.h
-  utils/scoped_assignment.h
-  utils/slice.h
-  utils/string.cc
-  utils/string.h
-  utils/string_stream.cc
-  utils/string_stream.h
-  utils/traits.h
-  utils/unique_allocator.h
-  utils/unique_vector.h
-  utils/vector.h
+  core/bitcast.h
+  core/bitset.h
+  core/block_allocator.h
+  core/bump_allocator.h
+  core/castable.cc
+  core/castable.h
+  core/cli.cc
+  core/cli.h
+  core/compiler_macros.h
+  core/concat.h
+  core/crc32.h
+  core/enum_set.h
+  core/foreach_macro.h
+  core/hash.h
+  core/hashmap_base.h
+  core/hashmap.h
+  core/hashset.h
+  core/map.h
+  core/math.h
+  core/parse_num.cc
+  core/parse_num.h
+  core/predicates.h
+  core/scoped_assignment.h
+  core/slice.h
+  core/string.cc
+  core/string.h
+  core/string_stream.cc
+  core/string_stream.h
+  core/traits.h
+  core/unique_allocator.h
+  core/unique_vector.h
+  core/vector.h
   writer/append_vector.cc
   writer/append_vector.h
   writer/array_length_from_uniform_options.cc
@@ -875,10 +875,10 @@ endif()
 
 ## Tint IO utilities. Used by tint_val.
 add_library(tint_utils_io
-  utils/io/command_${TINT_OS_CC_SUFFIX}.cc
-  utils/io/command.h
-  utils/io/tmpfile_${TINT_OS_CC_SUFFIX}.cc
-  utils/io/tmpfile.h
+  core/io/command_${TINT_OS_CC_SUFFIX}.cc
+  core/io/command.h
+  core/io/tmpfile_${TINT_OS_CC_SUFFIX}.cc
+  core/io/tmpfile.h
 )
 tint_default_compile_options(tint_utils_io)
 target_link_libraries(tint_utils_io tint_diagnostic_utils)
@@ -1122,35 +1122,35 @@ if(TINT_BUILD_TESTS)
     type/type_test.cc
     type/u32_test.cc
     type/vector_test.cc
-    utils/bitcast_test.cc
-    utils/bitset_test.cc
-    utils/block_allocator_test.cc
-    utils/bump_allocator_test.cc
-    utils/cli_test.cc
-    utils/castable_test.cc
-    utils/crc32_test.cc
-    utils/defer_test.cc
-    utils/enum_set_test.cc
-    utils/hash_test.cc
-    utils/io/command_test.cc
-    utils/io/tmpfile_test.cc
-    utils/hashmap_test.cc
-    utils/hashset_test.cc
-    utils/map_test.cc
-    utils/math_test.cc
-    utils/predicates_test.cc
-    utils/result_test.cc
-    utils/reverse_test.cc
-    utils/scoped_assignment_test.cc
-    utils/slice_test.cc
-    utils/string_stream_test.cc
-    utils/string_test.cc
-    utils/traits_test.cc
-    utils/transform_test.cc
-    utils/unicode_test.cc
-    utils/unique_allocator_test.cc
-    utils/unique_vector_test.cc
-    utils/vector_test.cc
+    core/bitcast_test.cc
+    core/bitset_test.cc
+    core/block_allocator_test.cc
+    core/bump_allocator_test.cc
+    core/cli_test.cc
+    core/castable_test.cc
+    core/crc32_test.cc
+    core/defer_test.cc
+    core/enum_set_test.cc
+    core/hash_test.cc
+    core/io/command_test.cc
+    core/io/tmpfile_test.cc
+    core/hashmap_test.cc
+    core/hashset_test.cc
+    core/map_test.cc
+    core/math_test.cc
+    core/predicates_test.cc
+    core/result_test.cc
+    core/reverse_test.cc
+    core/scoped_assignment_test.cc
+    core/slice_test.cc
+    core/string_stream_test.cc
+    core/string_test.cc
+    core/traits_test.cc
+    core/transform_test.cc
+    core/unicode_test.cc
+    core/unique_allocator_test.cc
+    core/unique_vector_test.cc
+    core/vector_test.cc
     writer/append_vector_test.cc
     writer/ast_text_generator_test.cc
     writer/check_supported_extensions_test.cc

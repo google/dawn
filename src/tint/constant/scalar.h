@@ -18,9 +18,9 @@
 #include "src/tint/builtin/number.h"
 #include "src/tint/constant/manager.h"
 #include "src/tint/constant/value.h"
+#include "src/tint/core/castable.h"
+#include "src/tint/core/hash.h"
 #include "src/tint/type/type.h"
-#include "src/tint/utils/castable.h"
-#include "src/tint/utils/hash.h"
 
 namespace tint::constant {
 

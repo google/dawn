@@ -18,11 +18,11 @@
 #include <optional>
 
 #include "src/tint/builtin/address_space.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
-#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint::ast {

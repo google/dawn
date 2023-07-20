@@ -17,11 +17,11 @@
 
 #include <utility>
 
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/diagnostic/formatter.h"
 #include "src/tint/diagnostic/printer.h"
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint {
 

@@ -17,8 +17,8 @@
 
 #include <string>
 
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
-#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint::ast {

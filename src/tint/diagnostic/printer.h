@@ -18,7 +18,7 @@
 #include <memory>
 #include <string>
 
-#include "src/tint/utils/string_stream.h"
+#include "src/tint/core/string_stream.h"
 
 namespace tint::diag {
 

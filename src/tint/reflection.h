@@ -17,8 +17,8 @@
 
 #include <type_traits>
 
-#include "src/tint/utils/concat.h"
-#include "src/tint/utils/foreach_macro.h"
+#include "src/tint/core/concat.h"
+#include "src/tint/core/foreach_macro.h"
 
 namespace tint {
 

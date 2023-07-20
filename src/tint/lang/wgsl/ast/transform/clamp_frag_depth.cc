@@ -17,6 +17,8 @@
 #include <utility>
 
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/core/scoped_assignment.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/ast/builtin_attribute.h"
 #include "src/tint/lang/wgsl/ast/function.h"
@@ -26,8 +28,6 @@
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/utils/scoped_assignment.h"
-#include "src/tint/utils/vector.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ClampFragDepth);
 

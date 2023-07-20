@@ -14,6 +14,7 @@
 
 #include "gmock/gmock.h"
 
+#include "src/tint/core/string.h"
 #include "src/tint/lang/msl/writer/test_helper_ir.h"
 #include "src/tint/type/array.h"
 #include "src/tint/type/depth_multisampled_texture.h"
@@ -23,7 +24,6 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/storage_texture.h"
 #include "src/tint/type/struct.h"
-#include "src/tint/utils/string.h"
 
 namespace tint::writer::msl {
 namespace {

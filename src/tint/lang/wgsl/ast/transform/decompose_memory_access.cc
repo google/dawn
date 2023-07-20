@@ -20,6 +20,10 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/core/block_allocator.h"
+#include "src/tint/core/hash.h"
+#include "src/tint/core/map.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
@@ -34,10 +38,6 @@
 #include "src/tint/type/array.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/reference.h"
-#include "src/tint/utils/block_allocator.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/map.h"
-#include "src/tint/utils/string_stream.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

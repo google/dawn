@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_IR_INTRINSIC_CALL_H_
 #define SRC_TINT_IR_INTRINSIC_CALL_H_
 
+#include "src/tint/core/castable.h"
 #include "src/tint/ir/call.h"
-#include "src/tint/utils/castable.h"
 
 namespace tint::ir {
 

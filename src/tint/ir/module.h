@@ -19,6 +19,9 @@
 #include <string>
 
 #include "src/tint/constant/manager.h"
+#include "src/tint/core/block_allocator.h"
+#include "src/tint/core/result.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/function.h"
@@ -27,9 +30,6 @@
 #include "src/tint/program_id.h"
 #include "src/tint/symbol_table.h"
 #include "src/tint/type/manager.h"
-#include "src/tint/utils/block_allocator.h"
-#include "src/tint/utils/result.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::ir {
 

@@ -17,8 +17,8 @@
 
 #include <string>
 
+#include "src/tint/core/result.h"
 #include "src/tint/ir/module.h"
-#include "src/tint/utils/result.h"
 
 // Forward Declarations
 namespace tint {

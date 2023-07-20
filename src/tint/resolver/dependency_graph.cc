@@ -21,6 +21,14 @@
 
 #include "src/tint/builtin/builtin.h"
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/core/block_allocator.h"
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/defer.h"
+#include "src/tint/core/map.h"
+#include "src/tint/core/scoped_assignment.h"
+#include "src/tint/core/string.h"
+#include "src/tint/core/string_stream.h"
+#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/block_statement.h"
@@ -63,14 +71,6 @@
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/switch.h"
-#include "src/tint/utils/block_allocator.h"
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/defer.h"
-#include "src/tint/utils/map.h"
-#include "src/tint/utils/scoped_assignment.h"
-#include "src/tint/utils/string.h"
-#include "src/tint/utils/string_stream.h"
-#include "src/tint/utils/unique_vector.h"
 
 #define TINT_DUMP_DEPENDENCY_GRAPH 0
 

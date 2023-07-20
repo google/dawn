@@ -19,6 +19,9 @@
 #include <utility>
 
 #include "src/tint/builtin/builtin.h"
+#include "src/tint/core/hashmap.h"
+#include "src/tint/core/hashset.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
@@ -31,9 +34,6 @@
 #include "src/tint/type/array.h"
 #include "src/tint/type/reference.h"
 #include "src/tint/type/vector.h"
-#include "src/tint/utils/hashmap.h"
-#include "src/tint/utils/hashset.h"
-#include "src/tint/utils/vector.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PackedVec3);
 

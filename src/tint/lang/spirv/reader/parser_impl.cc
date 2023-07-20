@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "source/opt/build_module.h"
+#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/spirv/reader/function.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
@@ -31,7 +32,6 @@
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/texture_dimension.h"
-#include "src/tint/utils/unique_vector.h"
 
 namespace tint::reader::spirv {
 

@@ -20,7 +20,7 @@
 #include <utility>
 
 #include "src/tint/builtin/address_space.h"
-#include "src/tint/utils/castable.h"
+#include "src/tint/core/castable.h"
 
 // Forward declarations
 namespace tint::ir {

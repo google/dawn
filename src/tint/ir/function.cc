@@ -14,7 +14,7 @@
 
 #include "src/tint/ir/function.h"
 
-#include "src/tint/utils/predicates.h"
+#include "src/tint/core/predicates.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Function);
 

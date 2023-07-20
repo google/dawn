@@ -18,6 +18,8 @@
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/scalar.h"
 #include "src/tint/constant/splat.h"
+#include "src/tint/core/scoped_assignment.h"
+#include "src/tint/core/string.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
@@ -53,8 +55,6 @@
 #include "src/tint/switch.h"
 #include "src/tint/type/struct.h"
 #include "src/tint/type/type.h"
-#include "src/tint/utils/scoped_assignment.h"
-#include "src/tint/utils/string.h"
 
 namespace tint::ir {
 namespace {

@@ -13,11 +13,11 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/type/reference.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::resolver {
 namespace {

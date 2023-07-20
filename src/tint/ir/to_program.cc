@@ -20,6 +20,13 @@
 
 #include "src/tint/builtin/builtin.h"
 #include "src/tint/constant/splat.h"
+#include "src/tint/core/hashmap.h"
+#include "src/tint/core/math.h"
+#include "src/tint/core/predicates.h"
+#include "src/tint/core/reverse.h"
+#include "src/tint/core/scoped_assignment.h"
+#include "src/tint/core/transform.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
@@ -64,13 +71,6 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/type/sampler.h"
 #include "src/tint/type/texture.h"
-#include "src/tint/utils/hashmap.h"
-#include "src/tint/utils/math.h"
-#include "src/tint/utils/predicates.h"
-#include "src/tint/utils/reverse.h"
-#include "src/tint/utils/scoped_assignment.h"
-#include "src/tint/utils/transform.h"
-#include "src/tint/utils/vector.h"
 
 // Helper for calling TINT_UNIMPLEMENTED() from a Switch(object_ptr) default case.
 #define UNHANDLED_CASE(object_ptr)          \

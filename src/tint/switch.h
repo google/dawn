@@ -18,9 +18,9 @@
 #include <tuple>
 #include <utility>
 
-#include "src/tint/utils/bitcast.h"
-#include "src/tint/utils/castable.h"
-#include "src/tint/utils/defer.h"
+#include "src/tint/core/bitcast.h"
+#include "src/tint/core/castable.h"
+#include "src/tint/core/defer.h"
 
 namespace tint {
 

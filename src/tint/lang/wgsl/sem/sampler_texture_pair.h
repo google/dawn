@@ -18,8 +18,8 @@
 #include <cstdint>
 #include <functional>
 
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::sem {
 

@@ -19,14 +19,14 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/core/hash.h"
+#include "src/tint/core/map.h"
+#include "src/tint/core/string.h"
+#include "src/tint/core/string_stream.h"
+#include "src/tint/core/unique_allocator.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/texture_dimension.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/map.h"
-#include "src/tint/utils/string.h"
-#include "src/tint/utils/string_stream.h"
-#include "src/tint/utils/unique_allocator.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Type);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Void);

@@ -27,6 +27,7 @@
 #include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/builtin/number.h"
 #include "src/tint/constant/manager.h"
+#include "src/tint/core/string.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
@@ -103,7 +104,6 @@
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
-#include "src/tint/utils/string.h"
 
 #ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER
 #error "internal tint header being #included from tint.h"

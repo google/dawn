@@ -14,12 +14,12 @@
 
 #include "src/tint/type/storage_texture.h"
 
+#include "src/tint/core/hash.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/type/f32.h"
 #include "src/tint/type/i32.h"
 #include "src/tint/type/manager.h"
 #include "src/tint/type/u32.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::StorageTexture);
 

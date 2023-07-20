@@ -17,11 +17,11 @@
 
 #include <utility>
 
+#include "src/tint/core/castable.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/ir/binding_point.h"
 #include "src/tint/ir/location.h"
 #include "src/tint/ir/value.h"
-#include "src/tint/utils/castable.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::ir {
 

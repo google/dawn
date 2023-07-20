@@ -18,8 +18,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/core/string.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
-#include "src/tint/utils/string.h"
 
 namespace tint::ast::transform {
 namespace {

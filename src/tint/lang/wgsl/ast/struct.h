@@ -18,10 +18,10 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member.h"
 #include "src/tint/lang/wgsl/ast/type_decl.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::ast {
 

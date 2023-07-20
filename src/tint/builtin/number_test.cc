@@ -17,9 +17,9 @@
 #include <variant>
 #include <vector>
 
+#include "src/tint/core/compiler_macros.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/utils/compiler_macros.h"
-#include "src/tint/utils/string_stream.h"
 
 #include "gtest/gtest.h"
 

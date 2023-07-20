@@ -16,8 +16,8 @@
 
 #include <vector>
 
+#include "src/tint/core/vector.h"
 #include "src/tint/debug.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::reader::wgsl {
 

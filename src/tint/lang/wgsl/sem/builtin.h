@@ -20,9 +20,9 @@
 
 #include "src/tint/builtin/extension.h"
 #include "src/tint/builtin/function.h"
+#include "src/tint/core/hash.h"
 #include "src/tint/lang/wgsl/sem/call_target.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
-#include "src/tint/utils/hash.h"
 
 namespace tint::sem {
 

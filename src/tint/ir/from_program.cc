@@ -20,6 +20,10 @@
 #include <variant>
 #include <vector>
 
+#include "src/tint/core/defer.h"
+#include "src/tint/core/result.h"
+#include "src/tint/core/reverse.h"
+#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/exit_if.h"
@@ -100,10 +104,6 @@
 #include "src/tint/type/reference.h"
 #include "src/tint/type/struct.h"
 #include "src/tint/type/void.h"
-#include "src/tint/utils/defer.h"
-#include "src/tint/utils/result.h"
-#include "src/tint/utils/reverse.h"
-#include "src/tint/utils/scoped_assignment.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

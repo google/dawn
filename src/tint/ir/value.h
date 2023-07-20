@@ -15,9 +15,9 @@
 #ifndef SRC_TINT_IR_VALUE_H_
 #define SRC_TINT_IR_VALUE_H_
 
+#include "src/tint/core/castable.h"
+#include "src/tint/core/hashset.h"
 #include "src/tint/type/type.h"
-#include "src/tint/utils/castable.h"
-#include "src/tint/utils/hashset.h"
 
 // Forward declarations
 namespace tint::ir {

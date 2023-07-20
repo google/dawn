@@ -17,8 +17,8 @@
 #include <string>
 
 #include "gmock/gmock.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/type/texture_dimension.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::reader::spirv {
 namespace {

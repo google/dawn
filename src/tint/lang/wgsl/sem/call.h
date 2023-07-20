@@ -17,10 +17,10 @@
 
 #include <vector>
 
+#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::sem {
 

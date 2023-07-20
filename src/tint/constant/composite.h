@@ -17,10 +17,10 @@
 
 #include "src/tint/builtin/number.h"
 #include "src/tint/constant/value.h"
+#include "src/tint/core/castable.h"
+#include "src/tint/core/hash.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/type/type.h"
-#include "src/tint/utils/castable.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/vector.h"
 
 namespace tint::constant {
 

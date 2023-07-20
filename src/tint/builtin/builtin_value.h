@@ -23,7 +23,7 @@
 #ifndef SRC_TINT_BUILTIN_BUILTIN_VALUE_H_
 #define SRC_TINT_BUILTIN_BUILTIN_VALUE_H_
 
-#include "src/tint/utils/string_stream.h"
+#include "src/tint/core/string_stream.h"
 
 namespace tint::builtin {
 

@@ -17,10 +17,10 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/core/hashmap.h"
+#include "src/tint/core/hashset.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/utils/hashmap.h"
-#include "src/tint/utils/hashset.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::AddBlockAttribute);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::AddBlockAttribute::BlockAttribute);

@@ -19,8 +19,8 @@
 
 #include <utility>
 
+#include "src/tint/core/castable.h"
 #include "src/tint/program.h"
-#include "src/tint/utils/castable.h"
 
 namespace tint::ast::transform {
 

@@ -19,7 +19,7 @@
 #include <limits>
 
 #include "gtest/gtest.h"
-#include "src/tint/utils/bitcast.h"
+#include "src/tint/core/bitcast.h"
 
 namespace tint::writer {
 namespace {

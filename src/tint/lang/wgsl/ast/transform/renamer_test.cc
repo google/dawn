@@ -21,8 +21,8 @@
 #include "gmock/gmock.h"
 #include "src/tint/builtin/builtin.h"
 #include "src/tint/builtin/texel_format.h"
+#include "src/tint/core/string.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
-#include "src/tint/utils/string.h"
 
 namespace tint::ast::transform {
 namespace {

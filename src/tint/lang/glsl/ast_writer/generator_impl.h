@@ -22,6 +22,8 @@
 #include <utility>
 
 #include "src/tint/builtin/builtin_value.h"
+#include "src/tint/core/hash.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/glsl/ast_writer/generator.h"
 #include "src/tint/lang/glsl/ast_writer/version.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -38,8 +40,6 @@
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/scope_stack.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/ast_text_generator.h"
 
 // Forward declarations

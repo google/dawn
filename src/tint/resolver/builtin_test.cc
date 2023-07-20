@@ -15,6 +15,8 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/core/string.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
@@ -37,8 +39,6 @@
 #include "src/tint/type/sampled_texture.h"
 #include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture_dimension.h"
-#include "src/tint/utils/string.h"
-#include "src/tint/utils/string_stream.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;

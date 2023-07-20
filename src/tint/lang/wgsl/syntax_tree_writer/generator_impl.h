@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
@@ -35,7 +36,6 @@
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/program.h"
-#include "src/tint/utils/string_stream.h"
 #include "src/tint/writer/ast_text_generator.h"
 
 namespace tint::writer::syntax_tree {

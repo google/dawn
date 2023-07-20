@@ -23,7 +23,7 @@
 #ifndef SRC_TINT_BUILTIN_ATTRIBUTE_H_
 #define SRC_TINT_BUILTIN_ATTRIBUTE_H_
 
-#include "src/tint/utils/string_stream.h"
+#include "src/tint/core/string_stream.h"
 
 /// \cond DO_NOT_DOCUMENT
 /// There is a bug in doxygen where this enum conflicts with the ast::Attribute

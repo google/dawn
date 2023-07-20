@@ -19,6 +19,7 @@
 #include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
 #include "src/tint/constant/scalar.h"
+#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
@@ -77,7 +78,6 @@
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
-#include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/writer/spirv/generator.h"
 #include "src/tint/writer/spirv/module.h"
 

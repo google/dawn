@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "spirv-tools/libspirv.hpp"
-#include "src/tint/utils/string_stream.h"
+#include "src/tint/core/string_stream.h"
 
 namespace tint::reader::spirv::test {
 

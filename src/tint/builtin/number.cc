@@ -18,9 +18,9 @@
 #include <cmath>
 #include <cstring>
 
+#include "src/tint/core/bitcast.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/debug.h"
-#include "src/tint/utils/bitcast.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint {
 namespace {

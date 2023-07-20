@@ -16,6 +16,7 @@
 
 #include "src/tint/constant/composite.h"
 #include "src/tint/constant/splat.h"
+#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/validator.h"
 #include "src/tint/lang/msl/ast_writer/generator_support.h"
@@ -39,7 +40,6 @@
 #include "src/tint/type/u32.h"
 #include "src/tint/type/vector.h"
 #include "src/tint/type/void.h"
-#include "src/tint/utils/scoped_assignment.h"
 
 namespace tint::writer::msl {
 namespace {

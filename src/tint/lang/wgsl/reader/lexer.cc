@@ -26,9 +26,9 @@
 #include <utility>
 
 #include "src/tint/builtin/number.h"
+#include "src/tint/core/parse_num.h"
+#include "src/tint/core/unicode.h"
 #include "src/tint/debug.h"
-#include "src/tint/utils/parse_num.h"
-#include "src/tint/utils/unicode.h"
 
 namespace tint::reader::wgsl {
 namespace {

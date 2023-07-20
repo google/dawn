@@ -18,10 +18,10 @@
 #include <functional>
 #include <string>
 
+#include "src/tint/core/enum_set.h"
+#include "src/tint/core/vector.h"
 #include "src/tint/type/clone_context.h"
 #include "src/tint/type/unique_node.h"
-#include "src/tint/utils/enum_set.h"
-#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint {

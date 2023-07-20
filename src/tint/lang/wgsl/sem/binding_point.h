@@ -19,9 +19,9 @@
 
 #include <functional>
 
+#include "src/tint/core/hash.h"
+#include "src/tint/core/string_stream.h"
 #include "src/tint/reflection.h"
-#include "src/tint/utils/hash.h"
-#include "src/tint/utils/string_stream.h"
 
 namespace tint::sem {
 
