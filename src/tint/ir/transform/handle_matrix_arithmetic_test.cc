@@ -410,5 +410,165 @@ TEST_F(IR_HandleMatrixArithmeticTest, Mul_Mat3x3f_Mat3x3) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_HandleMatrixArithmeticTest, Convert_Mat2x3_F32_to_F16) {
+    auto* arg = b.FunctionParam("arg", ty.mat2x3<f32>());
+    auto* func = b.Function("foo", ty.mat2x3<f16>());
+    func->SetParams({arg});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Convert(ty.mat2x3<f16>(), arg);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg:mat2x3<f32>):mat2x3<f16> -> %b1 {
+  %b1 = block {
+    %3:mat2x3<f16> = convert %arg
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:mat2x3<f32>):mat2x3<f16> -> %b1 {
+  %b1 = block {
+    %3:vec3<f32> = access %arg, 0u
+    %4:vec3<f16> = convert %3
+    %5:vec3<f32> = access %arg, 1u
+    %6:vec3<f16> = convert %5
+    %7:mat2x3<f16> = construct %4, %6
+    ret %7
+  }
+}
+)";
+
+    Run<HandleMatrixArithmetic>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_HandleMatrixArithmeticTest, Convert_Mat4x4_F32_to_F16) {
+    auto* arg = b.FunctionParam("arg", ty.mat4x4<f32>());
+    auto* func = b.Function("foo", ty.mat4x4<f16>());
+    func->SetParams({arg});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Convert(ty.mat4x4<f16>(), arg);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg:mat4x4<f32>):mat4x4<f16> -> %b1 {
+  %b1 = block {
+    %3:mat4x4<f16> = convert %arg
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:mat4x4<f32>):mat4x4<f16> -> %b1 {
+  %b1 = block {
+    %3:vec4<f32> = access %arg, 0u
+    %4:vec4<f16> = convert %3
+    %5:vec4<f32> = access %arg, 1u
+    %6:vec4<f16> = convert %5
+    %7:vec4<f32> = access %arg, 2u
+    %8:vec4<f16> = convert %7
+    %9:vec4<f32> = access %arg, 3u
+    %10:vec4<f16> = convert %9
+    %11:mat4x4<f16> = construct %4, %6, %8, %10
+    ret %11
+  }
+}
+)";
+
+    Run<HandleMatrixArithmetic>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_HandleMatrixArithmeticTest, Convert_Mat4x3_F16_to_F32) {
+    auto* arg = b.FunctionParam("arg", ty.mat4x3<f16>());
+    auto* func = b.Function("foo", ty.mat4x3<f32>());
+    func->SetParams({arg});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Convert(ty.mat4x3<f32>(), arg);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg:mat4x3<f16>):mat4x3<f32> -> %b1 {
+  %b1 = block {
+    %3:mat4x3<f32> = convert %arg
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:mat4x3<f16>):mat4x3<f32> -> %b1 {
+  %b1 = block {
+    %3:vec3<f16> = access %arg, 0u
+    %4:vec3<f32> = convert %3
+    %5:vec3<f16> = access %arg, 1u
+    %6:vec3<f32> = convert %5
+    %7:vec3<f16> = access %arg, 2u
+    %8:vec3<f32> = convert %7
+    %9:vec3<f16> = access %arg, 3u
+    %10:vec3<f32> = convert %9
+    %11:mat4x3<f32> = construct %4, %6, %8, %10
+    ret %11
+  }
+}
+)";
+
+    Run<HandleMatrixArithmetic>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_HandleMatrixArithmeticTest, Convert_Mat2x2_F16_to_F32) {
+    auto* arg = b.FunctionParam("arg", ty.mat2x2<f32>());
+    auto* func = b.Function("foo", ty.mat2x2<f16>());
+    func->SetParams({arg});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Convert(ty.mat2x2<f16>(), arg);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg:mat2x2<f32>):mat2x2<f16> -> %b1 {
+  %b1 = block {
+    %3:mat2x2<f16> = convert %arg
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:mat2x2<f32>):mat2x2<f16> -> %b1 {
+  %b1 = block {
+    %3:vec2<f32> = access %arg, 0u
+    %4:vec2<f16> = convert %3
+    %5:vec2<f32> = access %arg, 1u
+    %6:vec2<f16> = convert %5
+    %7:mat2x2<f16> = construct %4, %6
+    ret %7
+  }
+}
+)";
+
+    Run<HandleMatrixArithmetic>();
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::ir::transform

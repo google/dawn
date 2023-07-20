@@ -33,8 +33,9 @@ HandleMatrixArithmetic::~HandleMatrixArithmetic() = default;
 void HandleMatrixArithmetic::Run(ir::Module* ir, const DataMap&, DataMap&) const {
     ir::Builder b(*ir);
 
-    // Find the instructions that needs to be modified.
-    utils::Vector<Binary*, 4> worklist;
+    // Find the instructions that need to be modified.
+    utils::Vector<Binary*, 4> binary_worklist;
+    utils::Vector<Convert*, 4> convert_worklist;
     for (auto* inst : ir->instructions.Objects()) {
         if (!inst->Alive()) {
             continue;
@@ -43,13 +44,17 @@ void HandleMatrixArithmetic::Run(ir::Module* ir, const DataMap&, DataMap&) const
             TINT_ASSERT(Transform, binary->Operands().Length() == 2);
             if (binary->LHS()->Type()->Is<type::Matrix>() ||
                 binary->RHS()->Type()->Is<type::Matrix>()) {
-                worklist.Push(binary);
+                binary_worklist.Push(binary);
+            }
+        } else if (auto* convert = inst->As<Convert>()) {
+            if (convert->Result()->Type()->Is<type::Matrix>()) {
+                convert_worklist.Push(convert);
             }
         }
     }
 
     // Replace the matrix arithmetic instructions that we found.
-    for (auto* binary : worklist) {
+    for (auto* binary : binary_worklist) {
         auto* lhs = binary->LHS();
         auto* rhs = binary->RHS();
         auto* lhs_ty = lhs->Type();
@@ -112,6 +117,32 @@ void HandleMatrixArithmetic::Run(ir::Module* ir, const DataMap&, DataMap&) const
                 TINT_ASSERT(Transform, false && "unhandled matrix arithmetic instruction");
                 break;
         }
+    }
+
+    // Replace the matrix convert instructions that we found.
+    for (auto* convert : convert_worklist) {
+        auto* arg = convert->Args()[Convert::kValueOperandOffset];
+        auto* in_mat = arg->Type()->As<type::Matrix>();
+        auto* out_mat = convert->Result()->Type()->As<type::Matrix>();
+
+        // Extract and convert each column separately.
+        utils::Vector<Value*, 4> args;
+        for (uint32_t c = 0; c < out_mat->columns(); c++) {
+            auto* col = b.Access(in_mat->ColumnType(), arg, u32(c));
+            col->InsertBefore(convert);
+            auto* new_col = b.Convert(out_mat->ColumnType(), col);
+            new_col->InsertBefore(convert);
+            args.Push(new_col->Result());
+        }
+
+        // Reconstruct the result matrix from the converted columns.
+        auto* construct = b.Construct(out_mat, std::move(args));
+        if (auto name = ir->NameOf(convert)) {
+            ir->SetName(construct->Result(), name);
+        }
+        convert->Result()->ReplaceAllUsesWith(construct->Result());
+        convert->ReplaceWith(construct);
+        convert->Destroy();
     }
 }
 

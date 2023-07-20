@@ -98,5 +98,47 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                              ConvertCase{kU32, kBool, "OpINotEqual", "bool"}),
                          PrintCase);
 
+TEST_F(SpvGeneratorImplTest, Convert_Mat2x3_F16_to_F32) {
+    auto* func = b.Function("foo", ty.mat2x3<f32>());
+    func->SetParams({b.FunctionParam("arg", ty.mat2x3<f16>())});
+    b.With(func->Block(), [&] {
+        auto* result = b.Convert(ty.mat2x3<f32>(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+         %11 = OpCompositeExtract %v3half %arg 0
+         %12 = OpFConvert %v3float %11
+         %13 = OpCompositeExtract %v3half %arg 1
+         %14 = OpFConvert %v3float %13
+     %result = OpCompositeConstruct %mat2v3float %12 %14
+)");
+}
+
+TEST_F(SpvGeneratorImplTest, Convert_Mat4x2_F32_to_F16) {
+    auto* func = b.Function("foo", ty.mat4x2<f16>());
+    func->SetParams({b.FunctionParam("arg", ty.mat4x2<f32>())});
+    b.With(func->Block(), [&] {
+        auto* result = b.Convert(ty.mat4x2<f16>(), func->Params()[0]);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+         %11 = OpCompositeExtract %v2float %arg 0
+         %12 = OpFConvert %v2half %11
+         %13 = OpCompositeExtract %v2float %arg 1
+         %14 = OpFConvert %v2half %13
+         %15 = OpCompositeExtract %v2float %arg 2
+         %16 = OpFConvert %v2half %15
+         %17 = OpCompositeExtract %v2float %arg 3
+         %18 = OpFConvert %v2half %17
+     %result = OpCompositeConstruct %mat4v2half %12 %14 %16 %18
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv
