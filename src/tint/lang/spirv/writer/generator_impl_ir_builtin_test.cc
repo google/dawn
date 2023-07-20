@@ -107,6 +107,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kF16, builtin::Function::kLog, "Log"},
                     BuiltinTestCase{kF32, builtin::Function::kLog2, "Log2"},
                     BuiltinTestCase{kF16, builtin::Function::kLog2, "Log2"},
+                    BuiltinTestCase{kF32, builtin::Function::kQuantizeToF16, "OpQuantizeToF16"},
                     BuiltinTestCase{kF32, builtin::Function::kRadians, "Radians"},
                     BuiltinTestCase{kF16, builtin::Function::kRadians, "Radians"},
                     BuiltinTestCase{kI32, builtin::Function::kReverseBits, "OpBitReverse"},

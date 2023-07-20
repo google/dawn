@@ -1307,6 +1307,9 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kPow:
             glsl_ext_inst(GLSLstd450Pow);
             break;
+        case builtin::Function::kQuantizeToF16:
+            op = spv::Op::OpQuantizeToF16;
+            break;
         case builtin::Function::kRadians:
             glsl_ext_inst(GLSLstd450Radians);
             break;
