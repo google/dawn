@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_WRITER_SYNTAX_TREE_GENERATOR_IMPL_H_
-#define SRC_TINT_WRITER_SYNTAX_TREE_GENERATOR_IMPL_H_
+#ifndef SRC_TINT_LANG_WGSL_SYNTAX_TREE_WRITER_GENERATOR_IMPL_H_
+#define SRC_TINT_LANG_WGSL_SYNTAX_TREE_WRITER_GENERATOR_IMPL_H_
 
 #include <string>
 
@@ -172,4 +172,4 @@ class GeneratorImpl : public ASTTextGenerator {
 
 }  // namespace tint::writer::syntax_tree
 
-#endif  // SRC_TINT_WRITER_SYNTAX_TREE_GENERATOR_IMPL_H_
+#endif  // SRC_TINT_LANG_WGSL_SYNTAX_TREE_WRITER_GENERATOR_IMPL_H_

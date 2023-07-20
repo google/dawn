@@ -30,7 +30,7 @@
 #endif  // TINT_BUILD_GLSL_WRITER
 
 #if TINT_BUILD_SYNTAX_TREE_WRITER
-#include "src/tint/writer/syntax_tree/generator.h"  // nogncheck
+#include "src/tint/lang/wgsl/syntax_tree_writer/generator.h"  // nogncheck
 
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 

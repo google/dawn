@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/syntax_tree/generator.h"
-#include "src/tint/writer/syntax_tree/generator_impl.h"
+#include "src/tint/lang/wgsl/syntax_tree_writer/generator.h"
+#include "src/tint/lang/wgsl/syntax_tree_writer/generator_impl.h"
 
 namespace tint::writer::syntax_tree {
 

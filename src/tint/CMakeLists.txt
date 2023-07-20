@@ -743,10 +743,10 @@ endif()
 
 if(${TINT_BUILD_SYNTAX_TREE_WRITER})
     list(APPEND TINT_LIB_SRCS
-      writer/syntax_tree/generator.cc
-      writer/syntax_tree/generator.h
-      writer/syntax_tree/generator_impl.cc
-      writer/syntax_tree/generator_impl.h
+      lang/wgsl/syntax_tree_writer/generator.cc
+      lang/wgsl/syntax_tree_writer/generator.h
+      lang/wgsl/syntax_tree_writer/generator_impl.cc
+      lang/wgsl/syntax_tree_writer/generator_impl.h
     )
 endif()
 

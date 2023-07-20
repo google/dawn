@@ -1227,10 +1227,10 @@ libtint_source_set("libtint_glsl_writer_src") {
 
 libtint_source_set("libtint_syntax_tree_writer_src") {
   sources = [
-    "writer/syntax_tree/generator.cc",
-    "writer/syntax_tree/generator.h",
-    "writer/syntax_tree/generator_impl.cc",
-    "writer/syntax_tree/generator_impl.h",
+    "lang/wgsl/syntax_tree_writer/generator.cc",
+    "lang/wgsl/syntax_tree_writer/generator.h",
+    "lang/wgsl/syntax_tree_writer/generator_impl.cc",
+    "lang/wgsl/syntax_tree_writer/generator_impl.h",
   ]
 
   deps = [
