@@ -15,7 +15,7 @@
 #include <string>
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/builtin/diagnostic_severity.h"
+#include "src/tint/lang/base/builtin/diagnostic_severity.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_control.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
 

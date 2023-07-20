@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
 #include "src/tint/lang/wgsl/reader/parser_impl_test_helper.h"
 

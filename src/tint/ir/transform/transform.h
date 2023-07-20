@@ -19,8 +19,8 @@
 
 #include <utility>
 
-#include "src/tint/builtin/address_space.h"
 #include "src/tint/core/castable.h"
+#include "src/tint/lang/base/builtin/address_space.h"
 
 // Forward declarations
 namespace tint::ir {

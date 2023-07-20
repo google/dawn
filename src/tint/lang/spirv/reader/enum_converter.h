@@ -17,8 +17,8 @@
 
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
-#include "src/tint/builtin/address_space.h"
-#include "src/tint/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/spirv/reader/fail_stream.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/type/storage_texture.h"

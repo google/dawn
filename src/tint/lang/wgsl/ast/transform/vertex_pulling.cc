@@ -17,11 +17,11 @@
 #include <algorithm>
 #include <utility>
 
-#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/core/compiler_macros.h"
 #include "src/tint/core/map.h"
 #include "src/tint/core/math.h"
 #include "src/tint/core/string_stream.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"

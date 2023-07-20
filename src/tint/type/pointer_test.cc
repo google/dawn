@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/type/test_helper.h"
 #include "src/tint/type/texture.h"
 

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/builtin/access.h"
-#include "src/tint/builtin/address_space.h"
-#include "src/tint/builtin/builtin_value.h"
-#include "src/tint/builtin/interpolation_sampling.h"
-#include "src/tint/builtin/interpolation_type.h"
-#include "src/tint/builtin/texel_format.h"
+#include "src/tint/lang/base/builtin/access.h"
+#include "src/tint/lang/base/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/interpolation_sampling.h"
+#include "src/tint/lang/base/builtin/interpolation_type.h"
+#include "src/tint/lang/base/builtin/texel_format.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 

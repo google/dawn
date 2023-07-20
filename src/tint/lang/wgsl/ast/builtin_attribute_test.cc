@@ -14,7 +14,7 @@
 
 #include "gtest/gtest-spi.h"
 
-#include "src/tint/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
 
 namespace tint::ast {

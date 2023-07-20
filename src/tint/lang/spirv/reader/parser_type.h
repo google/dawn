@@ -19,11 +19,11 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/builtin/access.h"
-#include "src/tint/builtin/address_space.h"
-#include "src/tint/builtin/texel_format.h"
 #include "src/tint/core/block_allocator.h"
 #include "src/tint/core/castable.h"
+#include "src/tint/lang/base/builtin/access.h"
+#include "src/tint/lang/base/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/texel_format.h"
 #include "src/tint/lang/wgsl/ast/type.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/sampler_kind.h"

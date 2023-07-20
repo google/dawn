@@ -18,9 +18,9 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/builtin/extension.h"
-#include "src/tint/builtin/function.h"
 #include "src/tint/core/hash.h"
+#include "src/tint/lang/base/builtin/extension.h"
+#include "src/tint/lang/base/builtin/function.h"
 #include "src/tint/lang/wgsl/sem/call_target.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
 

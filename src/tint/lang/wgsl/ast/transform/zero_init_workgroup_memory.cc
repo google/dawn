@@ -20,9 +20,9 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/core/map.h"
 #include "src/tint/core/unique_vector.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/variable.h"

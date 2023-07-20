@@ -21,10 +21,10 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/tint/builtin/address_space.h"
-#include "src/tint/builtin/builtin_value.h"
-#include "src/tint/builtin/interpolation.h"
 #include "src/tint/core/vector.h"
+#include "src/tint/lang/base/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/interpolation.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/node.h"
 #include "src/tint/type/type.h"

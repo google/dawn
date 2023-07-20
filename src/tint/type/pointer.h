@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include "src/tint/builtin/access.h"
-#include "src/tint/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/access.h"
+#include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/type/type.h"
 
 namespace tint::type {

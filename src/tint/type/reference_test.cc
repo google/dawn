@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/type/reference.h"
-#include "src/tint/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/type/test_helper.h"
 
 namespace tint::type {

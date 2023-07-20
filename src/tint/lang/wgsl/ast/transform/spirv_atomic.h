@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/builtin/function.h"
+#include "src/tint/lang/base/builtin/function.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 

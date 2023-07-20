@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include "src/tint/builtin/access.h"
-#include "src/tint/builtin/texel_format.h"
+#include "src/tint/lang/base/builtin/access.h"
+#include "src/tint/lang/base/builtin/texel_format.h"
 #include "src/tint/type/texture.h"
 #include "src/tint/type/texture_dimension.h"
 

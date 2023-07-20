@@ -17,11 +17,11 @@
 
 #include <string>
 
-#include "src/tint/builtin/builtin_value.h"
-#include "src/tint/builtin/interpolation_sampling.h"
-#include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/core/map.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/interpolation_sampling.h"
+#include "src/tint/lang/base/builtin/interpolation_type.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/function_expression.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"

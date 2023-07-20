@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/tint/builtin/number.h"
+#include "src/tint/lang/base/builtin/number.h"
 
 namespace tint::reader::wgsl {
 namespace {

@@ -21,9 +21,9 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/builtin/access.h"
-#include "src/tint/builtin/address_space.h"
 #include "src/tint/core/unique_vector.h"
+#include "src/tint/lang/base/builtin/access.h"
+#include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/lang/wgsl/ast/parameter.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/parameter_usage.h"

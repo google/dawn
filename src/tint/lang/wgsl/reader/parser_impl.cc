@@ -16,11 +16,11 @@
 
 #include <limits>
 
-#include "src/tint/builtin/attribute.h"
 #include "src/tint/core/defer.h"
 #include "src/tint/core/reverse.h"
 #include "src/tint/core/string.h"
 #include "src/tint/core/string_stream.h"
+#include "src/tint/lang/base/builtin/attribute.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"

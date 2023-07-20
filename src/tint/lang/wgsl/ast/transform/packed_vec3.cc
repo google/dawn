@@ -18,10 +18,10 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/builtin/builtin.h"
 #include "src/tint/core/hashmap.h"
 #include "src/tint/core/hashset.h"
 #include "src/tint/core/vector.h"
+#include "src/tint/lang/base/builtin/builtin.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"

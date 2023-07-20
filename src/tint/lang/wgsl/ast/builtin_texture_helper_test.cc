@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/builtin_texture_helper_test.h"
 
-#include "src/tint/builtin/texel_format.h"
+#include "src/tint/lang/base/builtin/texel_format.h"
 #include "src/tint/type/depth_texture.h"
 #include "src/tint/type/multisampled_texture.h"
 #include "src/tint/type/sampled_texture.h"

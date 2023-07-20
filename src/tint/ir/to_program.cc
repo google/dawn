@@ -18,7 +18,6 @@
 #include <tuple>
 #include <utility>
 
-#include "src/tint/builtin/builtin.h"
 #include "src/tint/constant/splat.h"
 #include "src/tint/core/hashmap.h"
 #include "src/tint/core/math.h"
@@ -61,6 +60,7 @@
 #include "src/tint/ir/user_call.h"
 #include "src/tint/ir/validator.h"
 #include "src/tint/ir/var.h"
+#include "src/tint/lang/base/builtin/builtin.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/switch.h"
 #include "src/tint/type/atomic.h"

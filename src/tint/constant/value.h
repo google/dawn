@@ -17,10 +17,10 @@
 
 #include <variant>
 
-#include "src/tint/builtin/number.h"
 #include "src/tint/constant/clone_context.h"
 #include "src/tint/constant/node.h"
 #include "src/tint/core/castable.h"
+#include "src/tint/lang/base/builtin/number.h"
 #include "src/tint/type/type.h"
 
 namespace tint::constant {

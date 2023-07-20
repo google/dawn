@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <string>
 
-#include "src/tint/builtin/builtin.h"
+#include "src/tint/lang/base/builtin/builtin.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"

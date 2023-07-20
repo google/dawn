@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/wgsl/ast/alias.h"
-#include "src/tint/builtin/access.h"
+#include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
 
 namespace tint::ast {

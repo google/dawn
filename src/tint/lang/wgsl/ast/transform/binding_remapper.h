@@ -17,7 +17,7 @@
 
 #include <unordered_map>
 
-#include "src/tint/builtin/access.h"
+#include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 

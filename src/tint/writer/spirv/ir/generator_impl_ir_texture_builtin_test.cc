@@ -14,7 +14,7 @@
 
 #include "src/tint/writer/spirv/ir/test_helper_ir.h"
 
-#include "src/tint/builtin/function.h"
+#include "src/tint/lang/base/builtin/function.h"
 #include "src/tint/type/depth_multisampled_texture.h"
 
 using namespace tint::number_suffixes;  // NOLINT

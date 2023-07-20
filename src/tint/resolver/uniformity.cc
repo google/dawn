@@ -19,12 +19,12 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/core/block_allocator.h"
 #include "src/tint/core/defer.h"
 #include "src/tint/core/map.h"
 #include "src/tint/core/string_stream.h"
 #include "src/tint/core/unique_vector.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"

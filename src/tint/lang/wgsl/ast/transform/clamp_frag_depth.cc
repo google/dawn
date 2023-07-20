@@ -16,9 +16,9 @@
 
 #include <utility>
 
-#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/core/scoped_assignment.h"
 #include "src/tint/core/vector.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/ast/builtin_attribute.h"
 #include "src/tint/lang/wgsl/ast/function.h"

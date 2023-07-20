@@ -20,7 +20,6 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/builtin/builtin.h"
 #include "src/tint/core/compiler_macros.h"
 #include "src/tint/core/defer.h"
 #include "src/tint/core/math.h"
@@ -30,6 +29,7 @@
 #include "src/tint/core/string_stream.h"
 #include "src/tint/core/transform.h"
 #include "src/tint/core/vector.h"
+#include "src/tint/lang/base/builtin/builtin.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"

@@ -21,8 +21,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/core/string_stream.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/msl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"

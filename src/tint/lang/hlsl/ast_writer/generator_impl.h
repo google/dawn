@@ -21,8 +21,8 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/tint/builtin/builtin_value.h"
 #include "src/tint/core/hash.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"

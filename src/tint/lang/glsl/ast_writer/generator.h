@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/builtin/access.h"
+#include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/glsl/ast_writer/version.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"

@@ -15,8 +15,8 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/tint/builtin/address_space.h"
-#include "src/tint/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/builtin_attribute.h"
 #include "src/tint/lang/wgsl/ast/location_attribute.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"

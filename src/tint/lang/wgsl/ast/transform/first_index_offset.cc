@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/struct.h"

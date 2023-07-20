@@ -17,13 +17,13 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/builtin/builtin_value.h"
-#include "src/tint/builtin/extension.h"
-#include "src/tint/builtin/interpolation_sampling.h"
-#include "src/tint/builtin/interpolation_type.h"
 #include "src/tint/core/math.h"
 #include "src/tint/core/string.h"
 #include "src/tint/core/unique_vector.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/extension.h"
+#include "src/tint/lang/base/builtin/interpolation_sampling.h"
+#include "src/tint/lang/base/builtin/interpolation_type.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/float_literal_expression.h"

@@ -234,9 +234,9 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/while_statement.h
   lang/wgsl/ast/workgroup_attribute.cc
   lang/wgsl/ast/workgroup_attribute.h
-  builtin/fluent_types.h
-  builtin/number.cc
-  builtin/number.h
+  lang/base/builtin/fluent_types.h
+  lang/base/builtin/number.cc
+  lang/base/builtin/number.h
   clone_context.cc
   clone_context.h
   constant/clone_context.h
@@ -589,18 +589,18 @@ list(APPEND TINT_LIB_SRCS
   writer/writer.h
 )
 
-tint_generated(builtin/access BENCH TEST)
-tint_generated(builtin/address_space BENCH TEST)
-tint_generated(builtin/attribute BENCH TEST)
-tint_generated(builtin/builtin BENCH TEST)
-tint_generated(builtin/builtin_value BENCH TEST)
-tint_generated(builtin/diagnostic_rule BENCH TEST)
-tint_generated(builtin/diagnostic_severity BENCH TEST)
-tint_generated(builtin/extension BENCH TEST)
-tint_generated(builtin/function)
-tint_generated(builtin/interpolation_sampling BENCH TEST)
-tint_generated(builtin/interpolation_type BENCH TEST)
-tint_generated(builtin/texel_format BENCH TEST)
+tint_generated(lang/base/builtin/access BENCH TEST)
+tint_generated(lang/base/builtin/address_space BENCH TEST)
+tint_generated(lang/base/builtin/attribute BENCH TEST)
+tint_generated(lang/base/builtin/builtin BENCH TEST)
+tint_generated(lang/base/builtin/builtin_value BENCH TEST)
+tint_generated(lang/base/builtin/diagnostic_rule BENCH TEST)
+tint_generated(lang/base/builtin/diagnostic_severity BENCH TEST)
+tint_generated(lang/base/builtin/extension BENCH TEST)
+tint_generated(lang/base/builtin/function)
+tint_generated(lang/base/builtin/interpolation_sampling BENCH TEST)
+tint_generated(lang/base/builtin/interpolation_type BENCH TEST)
+tint_generated(lang/base/builtin/texel_format BENCH TEST)
 
 tint_generated(resolver/ctor_conv_intrinsic)
 tint_generated(lang/wgsl/sem/parameter_usage)
@@ -1008,7 +1008,7 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/variable_test.cc
     lang/wgsl/ast/while_statement_test.cc
     lang/wgsl/ast/workgroup_attribute_test.cc
-    builtin/number_test.cc
+    lang/base/builtin/number_test.cc
     clone_context_test.cc
     constant/composite_test.cc
     constant/manager_test.cc

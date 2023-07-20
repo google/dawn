@@ -17,12 +17,12 @@
 
 #include <utility>
 
-#include "src/tint/builtin/access.h"
-#include "src/tint/builtin/address_space.h"
-#include "src/tint/builtin/fluent_types.h"
-#include "src/tint/builtin/number.h"
 #include "src/tint/core/hash.h"
 #include "src/tint/core/unique_allocator.h"
+#include "src/tint/lang/base/builtin/access.h"
+#include "src/tint/lang/base/builtin/address_space.h"
+#include "src/tint/lang/base/builtin/fluent_types.h"
+#include "src/tint/lang/base/builtin/number.h"
 #include "src/tint/symbol.h"
 #include "src/tint/type/atomic.h"
 #include "src/tint/type/sampler.h"

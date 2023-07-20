@@ -17,10 +17,10 @@
 #include <algorithm>
 #include <array>
 
-#include "src/tint/builtin/builtin_value.h"
-#include "src/tint/builtin/function.h"
 #include "src/tint/core/hashmap.h"
 #include "src/tint/core/hashset.h"
+#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/base/builtin/function.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"

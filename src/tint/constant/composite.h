@@ -15,11 +15,11 @@
 #ifndef SRC_TINT_CONSTANT_COMPOSITE_H_
 #define SRC_TINT_CONSTANT_COMPOSITE_H_
 
-#include "src/tint/builtin/number.h"
 #include "src/tint/constant/value.h"
 #include "src/tint/core/castable.h"
 #include "src/tint/core/hash.h"
 #include "src/tint/core/vector.h"
+#include "src/tint/lang/base/builtin/number.h"
 #include "src/tint/type/type.h"
 
 namespace tint::constant {
