@@ -562,8 +562,8 @@ list(APPEND TINT_LIB_SRCS
   core/unique_allocator.h
   core/unique_vector.h
   core/vector.h
-  writer/append_vector.cc
-  writer/append_vector.h
+  lang/wgsl/helpers/append_vector.cc
+  lang/wgsl/helpers/append_vector.h
   writer/array_length_from_uniform_options.cc
   writer/array_length_from_uniform_options.h
   writer/ast_text_generator.cc
@@ -571,12 +571,12 @@ list(APPEND TINT_LIB_SRCS
   writer/binding_point.h
   writer/binding_remapper_options.cc
   writer/binding_remapper_options.h
-  writer/check_supported_extensions.cc
-  writer/check_supported_extensions.h
+  lang/wgsl/helpers/check_supported_extensions.cc
+  lang/wgsl/helpers/check_supported_extensions.h
   writer/external_texture_options.cc
   writer/external_texture_options.h
-  writer/flatten_bindings.cc
-  writer/flatten_bindings.h
+  lang/wgsl/helpers/flatten_bindings.cc
+  lang/wgsl/helpers/flatten_bindings.h
   writer/float_to_string.cc
   writer/float_to_string.h
   writer/ir_text_generator.cc
@@ -1151,10 +1151,10 @@ if(TINT_BUILD_TESTS)
     core/unique_allocator_test.cc
     core/unique_vector_test.cc
     core/vector_test.cc
-    writer/append_vector_test.cc
+    lang/wgsl/helpers/append_vector_test.cc
     writer/ast_text_generator_test.cc
-    writer/check_supported_extensions_test.cc
-    writer/flatten_bindings_test.cc
+    lang/wgsl/helpers/check_supported_extensions_test.cc
+    lang/wgsl/helpers/flatten_bindings_test.cc
     writer/float_to_string_test.cc
   )
 

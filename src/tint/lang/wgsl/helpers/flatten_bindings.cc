@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/flatten_bindings.h"
+#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 
 #include <utility>
 

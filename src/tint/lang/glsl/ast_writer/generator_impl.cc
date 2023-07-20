@@ -68,6 +68,7 @@
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
+#include "src/tint/lang/wgsl/helpers/append_vector.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -81,7 +82,6 @@
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
-#include "src/tint/writer/append_vector.h"
 #include "src/tint/writer/float_to_string.h"
 
 using namespace tint::number_suffixes;  // NOLINT

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_WRITER_FLATTEN_BINDINGS_H_
-#define SRC_TINT_WRITER_FLATTEN_BINDINGS_H_
+#ifndef SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_
+#define SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_
 
 #include <optional>
 #include "src/tint/program.h"
@@ -28,4 +28,4 @@ std::optional<Program> FlattenBindings(const Program* program);
 
 }  // namespace tint::writer
 
-#endif  // SRC_TINT_WRITER_FLATTEN_BINDINGS_H_
+#endif  // SRC_TINT_LANG_WGSL_HELPERS_FLATTEN_BINDINGS_H_

@@ -29,6 +29,7 @@
 #include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
 #include "src/tint/lang/wgsl/ast/transform/substitute_override.h"
 #include "src/tint/lang/wgsl/ast/transform/vertex_pulling.h"
+#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/reader/reader.h"
 #include "src/tint/transform/manager.h"
@@ -36,7 +37,6 @@
 #include "src/tint/writer/binding_point.h"
 #include "src/tint/writer/binding_remapper_options.h"
 #include "src/tint/writer/external_texture_options.h"
-#include "src/tint/writer/flatten_bindings.h"
 #include "src/tint/writer/writer.h"
 
 #if TINT_BUILD_SPV_READER

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/check_supported_extensions.h"
+#include "src/tint/lang/wgsl/helpers/check_supported_extensions.h"
 
 #include <string>
 

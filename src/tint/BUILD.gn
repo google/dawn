@@ -1002,8 +1002,12 @@ libtint_source_set("libtint_spv_reader_src") {
 
 libtint_source_set("libtint_writer_src") {
   sources = [
-    "writer/append_vector.cc",
-    "writer/append_vector.h",
+    "lang/wgsl/helpers/append_vector.cc",
+    "lang/wgsl/helpers/append_vector.h",
+    "lang/wgsl/helpers/check_supported_extensions.cc",
+    "lang/wgsl/helpers/check_supported_extensions.h",
+    "lang/wgsl/helpers/flatten_bindings.cc",
+    "lang/wgsl/helpers/flatten_bindings.h",
     "writer/array_length_from_uniform_options.cc",
     "writer/array_length_from_uniform_options.h",
     "writer/ast_text_generator.cc",
@@ -1011,12 +1015,8 @@ libtint_source_set("libtint_writer_src") {
     "writer/binding_point.h",
     "writer/binding_remapper_options.cc",
     "writer/binding_remapper_options.h",
-    "writer/check_supported_extensions.cc",
-    "writer/check_supported_extensions.h",
     "writer/external_texture_options.cc",
     "writer/external_texture_options.h",
-    "writer/flatten_bindings.cc",
-    "writer/flatten_bindings.h",
     "writer/float_to_string.cc",
     "writer/float_to_string.h",
     "writer/text.cc",
@@ -1961,10 +1961,10 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_writer_src") {
     sources = [
-      "writer/append_vector_test.cc",
+      "lang/wgsl/helpers/append_vector_test.cc",
+      "lang/wgsl/helpers/check_supported_extensions_test.cc",
+      "lang/wgsl/helpers/flatten_bindings_test.cc",
       "writer/ast_text_generator_test.cc",
-      "writer/check_supported_extensions_test.cc",
-      "writer/flatten_bindings_test.cc",
       "writer/float_to_string_test.cc",
     ]
     deps = [

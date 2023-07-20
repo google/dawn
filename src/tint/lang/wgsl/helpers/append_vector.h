@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_WRITER_APPEND_VECTOR_H_
-#define SRC_TINT_WRITER_APPEND_VECTOR_H_
+#ifndef SRC_TINT_LANG_WGSL_HELPERS_APPEND_VECTOR_H_
+#define SRC_TINT_LANG_WGSL_HELPERS_APPEND_VECTOR_H_
 
 #include "src/tint/program_builder.h"
 
@@ -44,4 +44,4 @@ const sem::Call* AppendVector(ProgramBuilder* builder,
 
 }  // namespace tint::writer
 
-#endif  // SRC_TINT_WRITER_APPEND_VECTOR_H_
+#endif  // SRC_TINT_LANG_WGSL_HELPERS_APPEND_VECTOR_H_

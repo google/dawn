@@ -37,6 +37,8 @@
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
+#include "src/tint/lang/wgsl/helpers/append_vector.h"
+#include "src/tint/lang/wgsl/helpers/check_supported_extensions.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -50,8 +52,6 @@
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/writer/append_vector.h"
-#include "src/tint/writer/check_supported_extensions.h"
 
 namespace tint::writer::spirv {
 namespace {

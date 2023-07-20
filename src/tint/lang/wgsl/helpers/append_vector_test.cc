@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/append_vector.h"
+#include "src/tint/lang/wgsl/helpers/append_vector.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/program_builder.h"

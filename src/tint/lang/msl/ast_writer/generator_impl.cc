@@ -74,6 +74,7 @@
 #include "src/tint/lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
+#include "src/tint/lang/wgsl/helpers/check_supported_extensions.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
@@ -85,7 +86,6 @@
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
-#include "src/tint/writer/check_supported_extensions.h"
 
 namespace tint::writer::msl {
 namespace {
