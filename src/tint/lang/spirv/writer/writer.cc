@@ -87,7 +87,7 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-constexpr uint32_t kGeneratorVersion = 1;
+constexpr uint32_t kWriterVersion = 1;
 
 void Sanitize(ir::Module* module) {
     transform::Manager manager;
@@ -169,10 +169,10 @@ const type::Type* DedupType(const type::Type* ty, type::Manager& types) {
 
 }  // namespace
 
-GeneratorImplIr::GeneratorImplIr(ir::Module* module, bool zero_init_workgroup_mem)
+Writer::Writer(ir::Module* module, bool zero_init_workgroup_mem)
     : ir_(module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
-bool GeneratorImplIr::Generate() {
+bool Writer::Generate() {
     auto valid = ir::Validate(*ir_);
     if (!valid) {
         diagnostics_ = valid.Failure();
@@ -205,13 +205,13 @@ bool GeneratorImplIr::Generate() {
     }
 
     // Serialize the module into binary SPIR-V.
-    writer_.WriteHeader(module_.IdBound(), kGeneratorVersion);
+    writer_.WriteHeader(module_.IdBound(), kWriterVersion);
     writer_.WriteModule(&module_);
 
     return true;
 }
 
-uint32_t GeneratorImplIr::Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace) {
+uint32_t Writer::Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace) {
     switch (builtin) {
         case builtin::BuiltinValue::kPointSize:
             return SpvBuiltInPointSize;
@@ -252,7 +252,7 @@ uint32_t GeneratorImplIr::Builtin(builtin::BuiltinValue builtin, builtin::Addres
     return SpvBuiltInMax;
 }
 
-uint32_t GeneratorImplIr::Constant(ir::Constant* constant) {
+uint32_t Writer::Constant(ir::Constant* constant) {
     // If it is a literal operand, just return the value.
     if (auto* literal = constant->As<ir::transform::BuiltinPolyfillSpirv::LiteralOperand>()) {
         return literal->Value()->ValueAs<uint32_t>();
@@ -268,7 +268,7 @@ uint32_t GeneratorImplIr::Constant(ir::Constant* constant) {
     return id;
 }
 
-uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {
+uint32_t Writer::Constant(const constant::Value* constant) {
     return constants_.GetOrCreate(constant, [&] {
         auto id = module_.NextId();
         auto* ty = constant->Type();
@@ -330,7 +330,7 @@ uint32_t GeneratorImplIr::Constant(const constant::Value* constant) {
     });
 }
 
-uint32_t GeneratorImplIr::ConstantNull(const type::Type* type) {
+uint32_t Writer::ConstantNull(const type::Type* type) {
     return constant_nulls_.GetOrCreate(type, [&] {
         auto id = module_.NextId();
         module_.PushType(spv::Op::OpConstantNull, {Type(type), id});
@@ -338,7 +338,7 @@ uint32_t GeneratorImplIr::ConstantNull(const type::Type* type) {
     });
 }
 
-uint32_t GeneratorImplIr::Undef(const type::Type* type) {
+uint32_t Writer::Undef(const type::Type* type) {
     return undef_values_.GetOrCreate(type, [&] {
         auto id = module_.NextId();
         module_.PushType(spv::Op::OpUndef, {Type(type), id});
@@ -346,8 +346,7 @@ uint32_t GeneratorImplIr::Undef(const type::Type* type) {
     });
 }
 
-uint32_t GeneratorImplIr::Type(const type::Type* ty,
-                               builtin::AddressSpace addrspace /* = kUndefined */) {
+uint32_t Writer::Type(const type::Type* ty, builtin::AddressSpace addrspace /* = kUndefined */) {
     ty = DedupType(ty, ir_->Types());
     return types_.GetOrCreate(ty, [&] {
         auto id = module_.NextId();
@@ -408,24 +407,24 @@ uint32_t GeneratorImplIr::Type(const type::Type* ty,
     });
 }
 
-uint32_t GeneratorImplIr::Value(ir::Instruction* inst) {
+uint32_t Writer::Value(ir::Instruction* inst) {
     return Value(inst->Result());
 }
 
-uint32_t GeneratorImplIr::Value(ir::Value* value) {
+uint32_t Writer::Value(ir::Value* value) {
     return Switch(
         value,  //
         [&](ir::Constant* constant) { return Constant(constant); },
         [&](ir::Value*) { return values_.GetOrCreate(value, [&] { return module_.NextId(); }); });
 }
 
-uint32_t GeneratorImplIr::Label(ir::Block* block) {
+uint32_t Writer::Label(ir::Block* block) {
     return block_labels_.GetOrCreate(block, [&] { return module_.NextId(); });
 }
 
-void GeneratorImplIr::EmitStructType(uint32_t id,
-                                     const type::Struct* str,
-                                     builtin::AddressSpace addrspace /* = kUndefined */) {
+void Writer::EmitStructType(uint32_t id,
+                            const type::Struct* str,
+                            builtin::AddressSpace addrspace /* = kUndefined */) {
     // Helper to return `type` or a potentially nested array element type within `type` as a matrix
     // type, or nullptr if no such matrix type is present.
     auto get_nested_matrix_type = [&](const type::Type* type) {
@@ -521,7 +520,7 @@ void GeneratorImplIr::EmitStructType(uint32_t id,
     }
 }
 
-void GeneratorImplIr::EmitTextureType(uint32_t id, const type::Texture* texture) {
+void Writer::EmitTextureType(uint32_t id, const type::Texture* texture) {
     uint32_t sampled_type = Switch(
         texture,  //
         [&](const type::SampledTexture* t) { return Type(t->type()); },
@@ -594,7 +593,7 @@ void GeneratorImplIr::EmitTextureType(uint32_t id, const type::Texture* texture)
                      {id, sampled_type, dim, depth, array, ms, sampled, format});
 }
 
-void GeneratorImplIr::EmitFunction(ir::Function* func) {
+void Writer::EmitFunction(ir::Function* func) {
     auto id = Value(func);
 
     // Emit the function name.
@@ -649,7 +648,7 @@ void GeneratorImplIr::EmitFunction(ir::Function* func) {
     module_.PushFunction(current_function_);
 }
 
-void GeneratorImplIr::EmitEntryPoint(ir::Function* func, uint32_t id) {
+void Writer::EmitEntryPoint(ir::Function* func, uint32_t id) {
     SpvExecutionModel stage = SpvExecutionModelMax;
     switch (func->Stage()) {
         case ir::Function::PipelineStage::kCompute: {
@@ -723,7 +722,7 @@ void GeneratorImplIr::EmitEntryPoint(ir::Function* func, uint32_t id) {
     module_.PushEntryPoint(spv::Op::OpEntryPoint, operands);
 }
 
-void GeneratorImplIr::EmitRootBlock(ir::Block* root_block) {
+void Writer::EmitRootBlock(ir::Block* root_block) {
     for (auto* inst : *root_block) {
         Switch(
             inst,  //
@@ -735,7 +734,7 @@ void GeneratorImplIr::EmitRootBlock(ir::Block* root_block) {
     }
 }
 
-void GeneratorImplIr::EmitBlock(ir::Block* block) {
+void Writer::EmitBlock(ir::Block* block) {
     // Emit the label.
     // Skip if this is the function's entry block, as it will be emitted by the function object.
     if (!current_function_.instructions().empty()) {
@@ -758,7 +757,7 @@ void GeneratorImplIr::EmitBlock(ir::Block* block) {
     EmitBlockInstructions(block);
 }
 
-void GeneratorImplIr::EmitIncomingPhis(ir::MultiInBlock* block) {
+void Writer::EmitIncomingPhis(ir::MultiInBlock* block) {
     // Emit Phi nodes for all the incoming block parameters
     for (size_t param_idx = 0; param_idx < block->Params().Length(); param_idx++) {
         auto* param = block->Params()[param_idx];
@@ -774,7 +773,7 @@ void GeneratorImplIr::EmitIncomingPhis(ir::MultiInBlock* block) {
     }
 }
 
-void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
+void Writer::EmitBlockInstructions(ir::Block* block) {
     for (auto* inst : *block) {
         Switch(
             inst,                                                           //
@@ -817,7 +816,7 @@ void GeneratorImplIr::EmitBlockInstructions(ir::Block* block) {
     }
 }
 
-void GeneratorImplIr::EmitTerminator(ir::Terminator* t) {
+void Writer::EmitTerminator(ir::Terminator* t) {
     tint::Switch(  //
         t,         //
         [&](ir::Return*) {
@@ -858,7 +857,7 @@ void GeneratorImplIr::EmitTerminator(ir::Terminator* t) {
         });
 }
 
-void GeneratorImplIr::EmitIf(ir::If* i) {
+void Writer::EmitIf(ir::If* i) {
     auto* true_block = i->True();
     auto* false_block = i->False();
 
@@ -901,7 +900,7 @@ void GeneratorImplIr::EmitIf(ir::If* i) {
     EmitExitPhis(i);
 }
 
-void GeneratorImplIr::EmitAccess(ir::Access* access) {
+void Writer::EmitAccess(ir::Access* access) {
     auto* ty = access->Result()->Type();
 
     auto id = Value(access);
@@ -949,7 +948,7 @@ void GeneratorImplIr::EmitAccess(ir::Access* access) {
     current_function_.push_inst(spv::Op::OpCompositeExtract, std::move(operands));
 }
 
-void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
+void Writer::EmitBinary(ir::Binary* binary) {
     auto id = Value(binary);
     auto lhs = Value(binary->LHS());
     auto rhs = Value(binary->RHS());
@@ -1096,7 +1095,7 @@ void GeneratorImplIr::EmitBinary(ir::Binary* binary) {
     current_function_.push_inst(op, {Type(ty), id, lhs, rhs});
 }
 
-void GeneratorImplIr::EmitBitcast(ir::Bitcast* bitcast) {
+void Writer::EmitBitcast(ir::Bitcast* bitcast) {
     auto* ty = bitcast->Result()->Type();
     if (ty == bitcast->Val()->Type()) {
         values_.Add(bitcast->Result(), Value(bitcast->Val()));
@@ -1106,7 +1105,7 @@ void GeneratorImplIr::EmitBitcast(ir::Bitcast* bitcast) {
                                 {Type(ty), Value(bitcast), Value(bitcast->Val())});
 }
 
-void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
+void Writer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
     auto* result_ty = builtin->Result()->Type();
 
     if (builtin->Func() == builtin::Function::kAbs &&
@@ -1423,7 +1422,7 @@ void GeneratorImplIr::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
     current_function_.push_inst(op, operands);
 }
 
-void GeneratorImplIr::EmitConstruct(ir::Construct* construct) {
+void Writer::EmitConstruct(ir::Construct* construct) {
     // If there is just a single argument with the same type as the result, this is an identity
     // constructor and we can just pass through the ID of the argument.
     if (construct->Args().Length() == 1 &&
@@ -1439,7 +1438,7 @@ void GeneratorImplIr::EmitConstruct(ir::Construct* construct) {
     current_function_.push_inst(spv::Op::OpCompositeConstruct, std::move(operands));
 }
 
-void GeneratorImplIr::EmitConvert(ir::Convert* convert) {
+void Writer::EmitConvert(ir::Convert* convert) {
     auto* res_ty = convert->Result()->Type();
     auto* arg_ty = convert->Args()[0]->Type();
 
@@ -1521,7 +1520,7 @@ void GeneratorImplIr::EmitConvert(ir::Convert* convert) {
     current_function_.push_inst(op, std::move(operands));
 }
 
-void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
+void Writer::EmitIntrinsicCall(ir::IntrinsicCall* call) {
     auto id = Value(call);
 
     spv::Op op = spv::Op::Max;
@@ -1633,12 +1632,12 @@ void GeneratorImplIr::EmitIntrinsicCall(ir::IntrinsicCall* call) {
     current_function_.push_inst(op, operands);
 }
 
-void GeneratorImplIr::EmitLoad(ir::Load* load) {
+void Writer::EmitLoad(ir::Load* load) {
     current_function_.push_inst(spv::Op::OpLoad,
                                 {Type(load->Result()->Type()), Value(load), Value(load->From())});
 }
 
-void GeneratorImplIr::EmitLoadVectorElement(ir::LoadVectorElement* load) {
+void Writer::EmitLoadVectorElement(ir::LoadVectorElement* load) {
     auto* vec_ptr_ty = load->From()->Type()->As<type::Pointer>();
     auto* el_ty = load->Result()->Type();
     auto* el_ptr_ty = ir_->Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
@@ -1650,7 +1649,7 @@ void GeneratorImplIr::EmitLoadVectorElement(ir::LoadVectorElement* load) {
                                 {Type(load->Result()->Type()), Value(load), el_ptr_id});
 }
 
-void GeneratorImplIr::EmitLoop(ir::Loop* loop) {
+void Writer::EmitLoop(ir::Loop* loop) {
     auto init_label = loop->HasInitializer() ? Label(loop->Initializer()) : 0;
     auto body_label = Label(loop->Body());
     auto continuing_label = Label(loop->Continuing());
@@ -1698,7 +1697,7 @@ void GeneratorImplIr::EmitLoop(ir::Loop* loop) {
     EmitExitPhis(loop);
 }
 
-void GeneratorImplIr::EmitSwitch(ir::Switch* swtch) {
+void Writer::EmitSwitch(ir::Switch* swtch) {
     // Find the default selector. There must be exactly one.
     uint32_t default_label = 0u;
     for (auto& c : swtch->Cases()) {
@@ -1743,7 +1742,7 @@ void GeneratorImplIr::EmitSwitch(ir::Switch* swtch) {
     EmitExitPhis(swtch);
 }
 
-void GeneratorImplIr::EmitSwizzle(ir::Swizzle* swizzle) {
+void Writer::EmitSwizzle(ir::Swizzle* swizzle) {
     auto id = Value(swizzle);
     auto obj = Value(swizzle->Object());
     OperandList operands = {Type(swizzle->Result()->Type()), id, obj, obj};
@@ -1753,11 +1752,11 @@ void GeneratorImplIr::EmitSwizzle(ir::Swizzle* swizzle) {
     current_function_.push_inst(spv::Op::OpVectorShuffle, operands);
 }
 
-void GeneratorImplIr::EmitStore(ir::Store* store) {
+void Writer::EmitStore(ir::Store* store) {
     current_function_.push_inst(spv::Op::OpStore, {Value(store->To()), Value(store->From())});
 }
 
-void GeneratorImplIr::EmitStoreVectorElement(ir::StoreVectorElement* store) {
+void Writer::EmitStoreVectorElement(ir::StoreVectorElement* store) {
     auto* vec_ptr_ty = store->To()->Type()->As<type::Pointer>();
     auto* el_ty = store->Value()->Type();
     auto* el_ptr_ty = ir_->Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
@@ -1768,7 +1767,7 @@ void GeneratorImplIr::EmitStoreVectorElement(ir::StoreVectorElement* store) {
     current_function_.push_inst(spv::Op::OpStore, {el_ptr_id, Value(store->Value())});
 }
 
-void GeneratorImplIr::EmitUnary(ir::Unary* unary) {
+void Writer::EmitUnary(ir::Unary* unary) {
     auto id = Value(unary);
     auto* ty = unary->Result()->Type();
     spv::Op op = spv::Op::Max;
@@ -1787,7 +1786,7 @@ void GeneratorImplIr::EmitUnary(ir::Unary* unary) {
     current_function_.push_inst(op, {Type(ty), id, Value(unary->Val())});
 }
 
-void GeneratorImplIr::EmitUserCall(ir::UserCall* call) {
+void Writer::EmitUserCall(ir::UserCall* call) {
     auto id = Value(call);
     OperandList operands = {Type(call->Result()->Type()), id, Value(call->Func())};
     for (auto* arg : call->Args()) {
@@ -1796,7 +1795,7 @@ void GeneratorImplIr::EmitUserCall(ir::UserCall* call) {
     current_function_.push_inst(spv::Op::OpFunctionCall, operands);
 }
 
-void GeneratorImplIr::EmitVar(ir::Var* var) {
+void Writer::EmitVar(ir::Var* var) {
     auto id = Value(var);
     auto* ptr = var->Result()->Type()->As<type::Pointer>();
     auto ty = Type(ptr);
@@ -1866,12 +1865,12 @@ void GeneratorImplIr::EmitVar(ir::Var* var) {
     }
 }
 
-void GeneratorImplIr::EmitLet(ir::Let* let) {
+void Writer::EmitLet(ir::Let* let) {
     auto id = Value(let->Value());
     values_.Add(let->Result(), id);
 }
 
-void GeneratorImplIr::EmitExitPhis(ir::ControlInstruction* inst) {
+void Writer::EmitExitPhis(ir::ControlInstruction* inst) {
     struct Branch {
         uint32_t label = 0;
         ir::Value* value = nullptr;
@@ -1903,7 +1902,7 @@ void GeneratorImplIr::EmitExitPhis(ir::ControlInstruction* inst) {
     }
 }
 
-uint32_t GeneratorImplIr::TexelFormat(const builtin::TexelFormat format) {
+uint32_t Writer::TexelFormat(const builtin::TexelFormat format) {
     switch (format) {
         case builtin::TexelFormat::kBgra8Unorm:
             TINT_ICE(Writer, diagnostics_)

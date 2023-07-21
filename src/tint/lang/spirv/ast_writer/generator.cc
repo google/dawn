@@ -49,7 +49,7 @@ Result Generate(const Program* program, const Options& options) {
 
         // Generate the SPIR-V code.
         auto ir = converted.Move();
-        auto impl = std::make_unique<GeneratorImplIr>(&ir, zero_initialize_workgroup_memory);
+        auto impl = std::make_unique<Writer>(&ir, zero_initialize_workgroup_memory);
         result.success = impl->Generate();
         result.error = impl->Diagnostics().str();
         result.spirv = std::move(impl->Result());

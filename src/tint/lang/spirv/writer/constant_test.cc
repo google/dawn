@@ -20,40 +20,40 @@ namespace {
 using namespace tint::number_suffixes;  // NOLINT
 
 TEST_F(SpirvWriterTest, Constant_Bool) {
-    generator_.Constant(b.Constant(true));
-    generator_.Constant(b.Constant(false));
+    writer_.Constant(b.Constant(true));
+    writer_.Constant(b.Constant(false));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%true = OpConstantTrue %bool");
     EXPECT_INST("%false = OpConstantFalse %bool");
 }
 
 TEST_F(SpirvWriterTest, Constant_I32) {
-    generator_.Constant(b.Constant(i32(42)));
-    generator_.Constant(b.Constant(i32(-1)));
+    writer_.Constant(b.Constant(i32(42)));
+    writer_.Constant(b.Constant(i32(-1)));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%int_42 = OpConstant %int 42");
     EXPECT_INST("%int_n1 = OpConstant %int -1");
 }
 
 TEST_F(SpirvWriterTest, Constant_U32) {
-    generator_.Constant(b.Constant(u32(42)));
-    generator_.Constant(b.Constant(u32(4000000000)));
+    writer_.Constant(b.Constant(u32(42)));
+    writer_.Constant(b.Constant(u32(4000000000)));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%uint_42 = OpConstant %uint 42");
     EXPECT_INST("%uint_4000000000 = OpConstant %uint 4000000000");
 }
 
 TEST_F(SpirvWriterTest, Constant_F32) {
-    generator_.Constant(b.Constant(f32(42)));
-    generator_.Constant(b.Constant(f32(-1)));
+    writer_.Constant(b.Constant(f32(42)));
+    writer_.Constant(b.Constant(f32(-1)));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%float_42 = OpConstant %float 42");
     EXPECT_INST("%float_n1 = OpConstant %float -1");
 }
 
 TEST_F(SpirvWriterTest, Constant_F16) {
-    generator_.Constant(b.Constant(f16(42)));
-    generator_.Constant(b.Constant(f16(-1)));
+    writer_.Constant(b.Constant(f16(42)));
+    writer_.Constant(b.Constant(f16(-1)));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%half_0x1_5p_5 = OpConstant %half 0x1.5p+5");
     EXPECT_INST("%half_n0x1p_0 = OpConstant %half -0x1p+0");
@@ -65,7 +65,7 @@ TEST_F(SpirvWriterTest, Constant_Vec4Bool) {
         ty.vec4(ty.bool_()),
         utils::Vector{const_bool(true), const_bool(false), const_bool(false), const_bool(true)});
 
-    generator_.Constant(b.Constant(v));
+    writer_.Constant(b.Constant(v));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpConstantComposite %v4bool %true %false %false %true");
 }
@@ -74,7 +74,7 @@ TEST_F(SpirvWriterTest, Constant_Vec2i) {
     auto const_i32 = [&](float val) { return mod.constant_values.Get(i32(val)); };
     auto* v = mod.constant_values.Composite(ty.vec2(ty.i32()),
                                             utils::Vector{const_i32(42), const_i32(-1)});
-    generator_.Constant(b.Constant(v));
+    writer_.Constant(b.Constant(v));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpConstantComposite %v2int %int_42 %int_n1");
 }
@@ -83,7 +83,7 @@ TEST_F(SpirvWriterTest, Constant_Vec3u) {
     auto const_u32 = [&](float val) { return mod.constant_values.Get(u32(val)); };
     auto* v = mod.constant_values.Composite(
         ty.vec3(ty.u32()), utils::Vector{const_u32(42), const_u32(0), const_u32(4000000000)});
-    generator_.Constant(b.Constant(v));
+    writer_.Constant(b.Constant(v));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpConstantComposite %v3uint %uint_42 %uint_0 %uint_4000000000");
 }
@@ -93,7 +93,7 @@ TEST_F(SpirvWriterTest, Constant_Vec4f) {
     auto* v = mod.constant_values.Composite(
         ty.vec4(ty.f32()),
         utils::Vector{const_f32(42), const_f32(0), const_f32(0.25), const_f32(-1)});
-    generator_.Constant(b.Constant(v));
+    writer_.Constant(b.Constant(v));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpConstantComposite %v4float %float_42 %float_0 %float_0_25 %float_n1");
 }
@@ -102,7 +102,7 @@ TEST_F(SpirvWriterTest, Constant_Vec2h) {
     auto const_f16 = [&](float val) { return mod.constant_values.Get(f16(val)); };
     auto* v = mod.constant_values.Composite(ty.vec2(ty.f16()),
                                             utils::Vector{const_f16(42), const_f16(0.25)});
-    generator_.Constant(b.Constant(v));
+    writer_.Constant(b.Constant(v));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpConstantComposite %v2half %half_0x1_5p_5 %half_0x1pn2");
 }
@@ -118,7 +118,7 @@ TEST_F(SpirvWriterTest, Constant_Mat2x3f) {
             mod.constant_values.Composite(
                 ty.vec3(f32), utils::Vector{const_f32(-42), const_f32(0), const_f32(-0.25)}),
         });
-    generator_.Constant(b.Constant(v));
+    writer_.Constant(b.Constant(v));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
    %float_42 = OpConstant %float 42
@@ -147,7 +147,7 @@ TEST_F(SpirvWriterTest, Constant_Mat4x2h) {
                             mod.constant_values.Composite(
                                 ty.vec2(f16), utils::Vector{const_f16(0.5), const_f16(-0)}),
                         });
-    generator_.Constant(b.Constant(v));
+    writer_.Constant(b.Constant(v));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
 %half_0x1_5p_5 = OpConstant %half 0x1.5p+5
@@ -173,7 +173,7 @@ TEST_F(SpirvWriterTest, Constant_Array_I32) {
                                                                  mod.constant_values.Get(3_i),
                                                                  mod.constant_values.Get(4_i),
                                                              });
-    generator_.Constant(b.Constant(arr));
+    writer_.Constant(b.Constant(arr));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpConstantComposite %_arr_int_uint_4 %int_1 %int_2 %int_3 %int_4");
 }
@@ -192,7 +192,7 @@ TEST_F(SpirvWriterTest, Constant_Array_Array_I32) {
                                                                                       inner,
                                                                                       inner,
                                                                                   });
-    generator_.Constant(b.Constant(arr));
+    writer_.Constant(b.Constant(arr));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %7 = OpConstantComposite %_arr_int_uint_4 %int_1 %int_2 %int_3 %int_4
@@ -211,16 +211,16 @@ TEST_F(SpirvWriterTest, Constant_Struct) {
                                                           mod.constant_values.Get(2_u),
                                                           mod.constant_values.Get(3_f),
                                                       });
-    generator_.Constant(b.Constant(str));
+    writer_.Constant(b.Constant(str));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpConstantComposite %MyStruct %int_1 %uint_2 %float_3");
 }
 
 // Test that we do not emit the same constant more than once.
 TEST_F(SpirvWriterTest, Constant_Deduplicate) {
-    generator_.Constant(b.Constant(i32(42)));
-    generator_.Constant(b.Constant(i32(42)));
-    generator_.Constant(b.Constant(i32(42)));
+    writer_.Constant(b.Constant(i32(42)));
+    writer_.Constant(b.Constant(i32(42)));
+    writer_.Constant(b.Constant(i32(42)));
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%int_42 = OpConstant %int 42");
 }

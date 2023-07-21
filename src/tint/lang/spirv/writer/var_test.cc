@@ -168,8 +168,8 @@ TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
 TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
     b.RootBlock()->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
-    // Create a generator with the zero_init_workgroup_memory flag set to `true`.
-    spirv::GeneratorImplIr gen(&mod, true);
+    // Create a writer with the zero_init_workgroup_memory flag set to `true`.
+    spirv::Writer gen(&mod, true);
     ASSERT_TRUE(Generate(gen)) << Error() << output_;
     EXPECT_INST("%4 = OpConstantNull %int");
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup %4");

@@ -71,25 +71,25 @@ class Type;
 
 namespace tint::writer::spirv {
 
-/// Implementation class for SPIR-V generator
-class GeneratorImplIr {
+/// Implementation class for SPIR-V writer
+class Writer {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
     /// @param zero_init_workgroup_memory `true` to initialize all the variables in the Workgroup
     ///                                   storage class with OpConstantNull
-    GeneratorImplIr(ir::Module* module, bool zero_init_workgroup_memory);
+    Writer(ir::Module* module, bool zero_init_workgroup_memory);
 
     /// @returns true on successful generation; false otherwise
     bool Generate();
 
-    /// @returns the module that this generator has produced
+    /// @returns the module that this writer has produced
     spirv::Module& Module() { return module_; }
 
     /// @returns the generated SPIR-V binary data
     const std::vector<uint32_t>& Result() const { return writer_.Result(); }
 
-    /// @returns the list of diagnostics raised by the generator
+    /// @returns the list of diagnostics raised by the writer
     diag::List Diagnostics() const { return diagnostics_; }
 
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.

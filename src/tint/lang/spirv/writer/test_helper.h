@@ -62,11 +62,11 @@ inline utils::StringStream& operator<<(utils::StringStream& out, TestElementType
     return out;
 }
 
-/// Base helper class for testing the SPIR-V generator implementation.
+/// Base helper class for testing the SPIR-V writer implementation.
 template <typename BASE>
 class SpirvWriterTestHelperBase : public BASE {
   public:
-    SpirvWriterTestHelperBase() : generator_(&mod, false) {}
+    SpirvWriterTestHelperBase() : writer_(&mod, false) {}
 
     /// The test module.
     ir::Module mod;
@@ -76,8 +76,8 @@ class SpirvWriterTestHelperBase : public BASE {
     type::Manager& ty{mod.Types()};
 
   protected:
-    /// The SPIR-V generator.
-    GeneratorImplIr generator_;
+    /// The SPIR-V writer.
+    Writer writer_;
 
     /// Errors produced during codegen or SPIR-V validation.
     std::string err_;
@@ -88,29 +88,29 @@ class SpirvWriterTestHelperBase : public BASE {
     /// @returns the error string from the validation
     std::string Error() const { return err_; }
 
-    /// Run the specified generator on the IR module and validate the result.
-    /// @param generator the generator to use for SPIR-V generation
+    /// Run the specified writer on the IR module and validate the result.
+    /// @param writer the writer to use for SPIR-V generation
     /// @returns true if generation and validation succeeded
-    bool Generate(GeneratorImplIr& generator) {
-        if (!generator.Generate()) {
-            err_ = generator.Diagnostics().str();
+    bool Generate(Writer& writer) {
+        if (!writer.Generate()) {
+            err_ = writer.Diagnostics().str();
             return false;
         }
 
-        output_ = Disassemble(generator.Result(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
-                                                      SPV_BINARY_TO_TEXT_OPTION_INDENT |
-                                                      SPV_BINARY_TO_TEXT_OPTION_COMMENT);
+        output_ = Disassemble(writer.Result(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
+                                                   SPV_BINARY_TO_TEXT_OPTION_INDENT |
+                                                   SPV_BINARY_TO_TEXT_OPTION_COMMENT);
 
-        if (!Validate(generator.Result())) {
+        if (!Validate(writer.Result())) {
             return false;
         }
 
         return true;
     }
 
-    /// Run the generator on the IR module and validate the result.
+    /// Run the writer on the IR module and validate the result.
     /// @returns true if generation and validation succeeded
-    bool Generate() { return Generate(generator_); }
+    bool Generate() { return Generate(writer_); }
 
     /// Validate the generated SPIR-V using the SPIR-V Tools Validator.
     /// @param binary the SPIR-V binary module to validate
@@ -148,7 +148,7 @@ class SpirvWriterTestHelperBase : public BASE {
     }
 
     /// @returns the disassembled types from the generated module.
-    std::string DumpTypes() { return DumpInstructions(generator_.Module().Types()); }
+    std::string DumpTypes() { return DumpInstructions(writer_.Module().Types()); }
 
     /// Helper to make a scalar type corresponding to the element type `type`.
     /// @param type the element type
