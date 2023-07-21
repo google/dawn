@@ -80,6 +80,93 @@ endif()
 
 list(APPEND TINT_LIB_SRCS
   ../../include/tint/tint.h
+  clone_context.cc
+  clone_context.h
+  lang/core/builtin/fluent_types.h
+  lang/core/builtin/number.cc
+  lang/core/builtin/number.h
+  lang/core/constant/clone_context.h
+  lang/core/constant/composite.cc
+  lang/core/constant/composite.h
+  lang/core/constant/manager.cc
+  lang/core/constant/manager.h
+  lang/core/constant/node.cc
+  lang/core/constant/node.h
+  lang/core/constant/scalar.cc
+  lang/core/constant/scalar.h
+  lang/core/constant/splat.cc
+  lang/core/constant/splat.h
+  lang/core/constant/value.cc
+  lang/core/constant/value.h
+  lang/core/type/abstract_float.cc
+  lang/core/type/abstract_float.h
+  lang/core/type/abstract_int.cc
+  lang/core/type/abstract_int.h
+  lang/core/type/abstract_numeric.cc
+  lang/core/type/abstract_numeric.h
+  lang/core/type/array.cc
+  lang/core/type/array.h
+  lang/core/type/array_count.cc
+  lang/core/type/array_count.h
+  lang/core/type/atomic.cc
+  lang/core/type/atomic.h
+  lang/core/type/bool.cc
+  lang/core/type/bool.h
+  lang/core/type/builtin_structs.cc
+  lang/core/type/builtin_structs.h
+  lang/core/type/clone_context.h
+  lang/core/type/depth_multisampled_texture.cc
+  lang/core/type/depth_multisampled_texture.h
+  lang/core/type/depth_texture.cc
+  lang/core/type/depth_texture.h
+  lang/core/type/external_texture.cc
+  lang/core/type/external_texture.h
+  lang/core/type/f16.cc
+  lang/core/type/f16.h
+  lang/core/type/f32.cc
+  lang/core/type/f32.h
+  lang/core/type/i32.cc
+  lang/core/type/i32.h
+  lang/core/type/manager.cc
+  lang/core/type/manager.h
+  lang/core/type/matrix.cc
+  lang/core/type/matrix.h
+  lang/core/type/multisampled_texture.cc
+  lang/core/type/multisampled_texture.h
+  lang/core/type/node.cc
+  lang/core/type/node.h
+  lang/core/type/numeric_scalar.cc
+  lang/core/type/numeric_scalar.h
+  lang/core/type/pointer.cc
+  lang/core/type/pointer.h
+  lang/core/type/reference.cc
+  lang/core/type/reference.h
+  lang/core/type/sampled_texture.cc
+  lang/core/type/sampled_texture.h
+  lang/core/type/sampler.cc
+  lang/core/type/sampler.h
+  lang/core/type/sampler_kind.cc
+  lang/core/type/sampler_kind.h
+  lang/core/type/scalar.cc
+  lang/core/type/scalar.h
+  lang/core/type/storage_texture.cc
+  lang/core/type/storage_texture.h
+  lang/core/type/struct.cc
+  lang/core/type/struct.h
+  lang/core/type/texture.cc
+  lang/core/type/texture.h
+  lang/core/type/texture_dimension.cc
+  lang/core/type/texture_dimension.h
+  lang/core/type/type.cc
+  lang/core/type/type.h
+  lang/core/type/u32.cc
+  lang/core/type/u32.h
+  lang/core/type/unique_node.cc
+  lang/core/type/unique_node.h
+  lang/core/type/vector.cc
+  lang/core/type/vector.h
+  lang/core/type/void.cc
+  lang/core/type/void.h
   lang/wgsl/ast/accessor_expression.cc
   lang/wgsl/ast/accessor_expression.h
   lang/wgsl/ast/alias.cc
@@ -182,9 +269,9 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/module.h
   lang/wgsl/ast/must_use_attribute.cc
   lang/wgsl/ast/must_use_attribute.h
-  lang/wgsl/ast/node_id.h
   lang/wgsl/ast/node.cc
   lang/wgsl/ast/node.h
+  lang/wgsl/ast/node_id.h
   lang/wgsl/ast/override.cc
   lang/wgsl/ast/override.h
   lang/wgsl/ast/parameter.cc
@@ -201,164 +288,24 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/statement.h
   lang/wgsl/ast/stride_attribute.cc
   lang/wgsl/ast/stride_attribute.h
+  lang/wgsl/ast/struct.cc
+  lang/wgsl/ast/struct.h
+  lang/wgsl/ast/struct_member.cc
+  lang/wgsl/ast/struct_member.h
   lang/wgsl/ast/struct_member_align_attribute.cc
   lang/wgsl/ast/struct_member_align_attribute.h
   lang/wgsl/ast/struct_member_offset_attribute.cc
   lang/wgsl/ast/struct_member_offset_attribute.h
   lang/wgsl/ast/struct_member_size_attribute.cc
   lang/wgsl/ast/struct_member_size_attribute.h
-  lang/wgsl/ast/struct_member.cc
-  lang/wgsl/ast/struct_member.h
-  lang/wgsl/ast/struct.cc
-  lang/wgsl/ast/struct.h
   lang/wgsl/ast/switch_statement.cc
   lang/wgsl/ast/switch_statement.h
   lang/wgsl/ast/templated_identifier.cc
   lang/wgsl/ast/templated_identifier.h
-  lang/wgsl/ast/traverse_expressions.h
-  lang/wgsl/ast/type.cc
-  lang/wgsl/ast/type.h
-  lang/wgsl/ast/type_decl.cc
-  lang/wgsl/ast/type_decl.h
-  lang/wgsl/ast/unary_op_expression.cc
-  lang/wgsl/ast/unary_op_expression.h
-  lang/wgsl/ast/unary_op.cc
-  lang/wgsl/ast/unary_op.h
-  lang/wgsl/ast/var.cc
-  lang/wgsl/ast/var.h
-  lang/wgsl/ast/variable_decl_statement.cc
-  lang/wgsl/ast/variable_decl_statement.h
-  lang/wgsl/ast/variable.cc
-  lang/wgsl/ast/variable.h
-  lang/wgsl/ast/while_statement.cc
-  lang/wgsl/ast/while_statement.h
-  lang/wgsl/ast/workgroup_attribute.cc
-  lang/wgsl/ast/workgroup_attribute.h
-  lang/core/builtin/fluent_types.h
-  lang/core/builtin/number.cc
-  lang/core/builtin/number.h
-  clone_context.cc
-  clone_context.h
-  lang/core/constant/clone_context.h
-  lang/core/constant/composite.cc
-  lang/core/constant/composite.h
-  lang/core/constant/manager.cc
-  lang/core/constant/manager.h
-  lang/core/constant/scalar.cc
-  lang/core/constant/scalar.h
-  lang/core/constant/splat.cc
-  lang/core/constant/splat.h
-  lang/core/constant/node.cc
-  lang/core/constant/node.h
-  lang/core/constant/value.cc
-  lang/core/constant/value.h
-  lang/wgsl/inspector/entry_point.cc
-  lang/wgsl/inspector/entry_point.h
-  lang/wgsl/inspector/inspector.cc
-  lang/wgsl/inspector/inspector.h
-  lang/wgsl/inspector/resource_binding.cc
-  lang/wgsl/inspector/resource_binding.h
-  lang/wgsl/inspector/scalar.cc
-  lang/wgsl/inspector/scalar.h
-  lang/wgsl/program/program_builder.cc
-  lang/wgsl/program/program_builder.h
-  program_id.cc
-  program_id.h
-  lang/wgsl/program/program.cc
-  lang/wgsl/program/program.h
-  utils/reflection/reflection.h
-  reader/reader.cc
-  reader/reader.h
-  resolver/const_eval.cc
-  resolver/const_eval.h
-  resolver/dependency_graph.cc
-  resolver/dependency_graph.h
-  resolver/intrinsic_table.cc
-  resolver/intrinsic_table.h
-  resolver/intrinsic_table.inl
-  resolver/resolver.cc
-  resolver/resolver.h
-  resolver/sem_helper.cc
-  resolver/sem_helper.h
-  resolver/uniformity.cc
-  resolver/uniformity.h
-  resolver/validator.cc
-  resolver/validator.h
-  utils/containers/scope_stack.h
-  utils/rtti/switch.h
-  lang/wgsl/sem/accessor_expression.cc
-  lang/wgsl/sem/accessor_expression.h
-  lang/wgsl/sem/array_count.cc
-  lang/wgsl/sem/array_count.h
-  lang/wgsl/sem/behavior.cc
-  lang/wgsl/sem/behavior.h
-  lang/wgsl/sem/binding_point.h
-  lang/wgsl/sem/block_statement.cc
-  lang/wgsl/sem/block_statement.h
-  lang/wgsl/sem/break_if_statement.cc
-  lang/wgsl/sem/break_if_statement.h
-  lang/wgsl/sem/builtin.cc
-  lang/wgsl/sem/builtin.h
-  lang/wgsl/sem/builtin_enum_expression.cc
-  lang/wgsl/sem/builtin_enum_expression.h
-  lang/wgsl/sem/call_target.cc
-  lang/wgsl/sem/call_target.h
-  lang/wgsl/sem/call.cc
-  lang/wgsl/sem/call.h
-  lang/wgsl/sem/evaluation_stage.h
-  lang/wgsl/sem/expression.cc
-  lang/wgsl/sem/expression.h
-  lang/wgsl/sem/external_texture.h
-  lang/wgsl/sem/for_loop_statement.cc
-  lang/wgsl/sem/for_loop_statement.h
-  lang/wgsl/sem/function_expression.cc
-  lang/wgsl/sem/function_expression.h
-  lang/wgsl/sem/function.cc
-  lang/wgsl/sem/if_statement.cc
-  lang/wgsl/sem/if_statement.h
-  lang/wgsl/sem/index_accessor_expression.cc
-  lang/wgsl/sem/index_accessor_expression.h
-  lang/wgsl/sem/info.cc
-  lang/wgsl/sem/info.h
-  lang/wgsl/sem/load.cc
-  lang/wgsl/sem/load.h
-  lang/wgsl/sem/loop_statement.cc
-  lang/wgsl/sem/loop_statement.h
-  lang/wgsl/sem/materialize.cc
-  lang/wgsl/sem/materialize.h
-  lang/wgsl/sem/member_accessor_expression.cc
-  lang/wgsl/sem/module.cc
-  lang/wgsl/sem/module.h
-  lang/wgsl/sem/node.cc
-  lang/wgsl/sem/node.h
-  lang/wgsl/sem/pipeline_stage_set.h
-  lang/wgsl/sem/sampler_texture_pair.h
-  lang/wgsl/sem/statement.cc
-  lang/wgsl/sem/struct.cc
-  lang/wgsl/sem/struct.h
-  lang/wgsl/sem/switch_statement.cc
-  lang/wgsl/sem/switch_statement.h
-  lang/wgsl/sem/type_expression.cc
-  lang/wgsl/sem/type_expression.h
-  lang/wgsl/sem/type_mappings.h
-  lang/wgsl/sem/variable.cc
-  lang/wgsl/sem/value_constructor.cc
-  lang/wgsl/sem/value_constructor.h
-  lang/wgsl/sem/value_conversion.cc
-  lang/wgsl/sem/value_conversion.h
-  lang/wgsl/sem/value_expression.cc
-  lang/wgsl/sem/value_expression.h
-  lang/wgsl/sem/while_statement.cc
-  lang/wgsl/sem/while_statement.h
-  utils/text/symbol_table.cc
-  utils/text/symbol_table.h
-  utils/text/symbol.cc
-  utils/text/symbol.h
-  tint.cc
-  lang/wgsl/ast/transform/add_empty_entry_point.cc
-  lang/wgsl/ast/transform/add_empty_entry_point.h
   lang/wgsl/ast/transform/add_block_attribute.cc
   lang/wgsl/ast/transform/add_block_attribute.h
+  lang/wgsl/ast/transform/add_empty_entry_point.cc
+  lang/wgsl/ast/transform/add_empty_entry_point.h
   lang/wgsl/ast/transform/array_length_from_uniform.cc
   lang/wgsl/ast/transform/array_length_from_uniform.h
   lang/wgsl/ast/transform/binding_remapper.cc
@@ -367,10 +314,10 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/transform/builtin_polyfill.h
   lang/wgsl/ast/transform/calculate_array_length.cc
   lang/wgsl/ast/transform/calculate_array_length.h
-  lang/wgsl/ast/transform/clamp_frag_depth.cc
-  lang/wgsl/ast/transform/clamp_frag_depth.h
   lang/wgsl/ast/transform/canonicalize_entry_point_io.cc
   lang/wgsl/ast/transform/canonicalize_entry_point_io.h
+  lang/wgsl/ast/transform/clamp_frag_depth.cc
+  lang/wgsl/ast/transform/clamp_frag_depth.h
   lang/wgsl/ast/transform/combine_samplers.cc
   lang/wgsl/ast/transform/combine_samplers.h
   lang/wgsl/ast/transform/decompose_memory_access.cc
@@ -457,113 +404,174 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/transform/while_to_loop.h
   lang/wgsl/ast/transform/zero_init_workgroup_memory.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory.h
+  lang/wgsl/ast/traverse_expressions.h
+  lang/wgsl/ast/type.cc
+  lang/wgsl/ast/type.h
+  lang/wgsl/ast/type_decl.cc
+  lang/wgsl/ast/type_decl.h
+  lang/wgsl/ast/unary_op.cc
+  lang/wgsl/ast/unary_op.h
+  lang/wgsl/ast/unary_op_expression.cc
+  lang/wgsl/ast/unary_op_expression.h
+  lang/wgsl/ast/var.cc
+  lang/wgsl/ast/var.h
+  lang/wgsl/ast/variable.cc
+  lang/wgsl/ast/variable.h
+  lang/wgsl/ast/variable_decl_statement.cc
+  lang/wgsl/ast/variable_decl_statement.h
+  lang/wgsl/ast/while_statement.cc
+  lang/wgsl/ast/while_statement.h
+  lang/wgsl/ast/workgroup_attribute.cc
+  lang/wgsl/ast/workgroup_attribute.h
+  lang/wgsl/helpers/append_vector.cc
+  lang/wgsl/helpers/append_vector.h
+  lang/wgsl/helpers/check_supported_extensions.cc
+  lang/wgsl/helpers/check_supported_extensions.h
+  lang/wgsl/helpers/flatten_bindings.cc
+  lang/wgsl/helpers/flatten_bindings.h
+  lang/wgsl/inspector/entry_point.cc
+  lang/wgsl/inspector/entry_point.h
+  lang/wgsl/inspector/inspector.cc
+  lang/wgsl/inspector/inspector.h
+  lang/wgsl/inspector/resource_binding.cc
+  lang/wgsl/inspector/resource_binding.h
+  lang/wgsl/inspector/scalar.cc
+  lang/wgsl/inspector/scalar.h
+  lang/wgsl/program/program.cc
+  lang/wgsl/program/program.h
+  lang/wgsl/program/program_builder.cc
+  lang/wgsl/program/program_builder.h
+  lang/wgsl/sem/accessor_expression.cc
+  lang/wgsl/sem/accessor_expression.h
+  lang/wgsl/sem/array_count.cc
+  lang/wgsl/sem/array_count.h
+  lang/wgsl/sem/behavior.cc
+  lang/wgsl/sem/behavior.h
+  lang/wgsl/sem/binding_point.h
+  lang/wgsl/sem/block_statement.cc
+  lang/wgsl/sem/block_statement.h
+  lang/wgsl/sem/break_if_statement.cc
+  lang/wgsl/sem/break_if_statement.h
+  lang/wgsl/sem/builtin.cc
+  lang/wgsl/sem/builtin.h
+  lang/wgsl/sem/builtin_enum_expression.cc
+  lang/wgsl/sem/builtin_enum_expression.h
+  lang/wgsl/sem/call.cc
+  lang/wgsl/sem/call.h
+  lang/wgsl/sem/call_target.cc
+  lang/wgsl/sem/call_target.h
+  lang/wgsl/sem/evaluation_stage.h
+  lang/wgsl/sem/expression.cc
+  lang/wgsl/sem/expression.h
+  lang/wgsl/sem/external_texture.h
+  lang/wgsl/sem/for_loop_statement.cc
+  lang/wgsl/sem/for_loop_statement.h
+  lang/wgsl/sem/function.cc
+  lang/wgsl/sem/function_expression.cc
+  lang/wgsl/sem/function_expression.h
+  lang/wgsl/sem/if_statement.cc
+  lang/wgsl/sem/if_statement.h
+  lang/wgsl/sem/index_accessor_expression.cc
+  lang/wgsl/sem/index_accessor_expression.h
+  lang/wgsl/sem/info.cc
+  lang/wgsl/sem/info.h
+  lang/wgsl/sem/load.cc
+  lang/wgsl/sem/load.h
+  lang/wgsl/sem/loop_statement.cc
+  lang/wgsl/sem/loop_statement.h
+  lang/wgsl/sem/materialize.cc
+  lang/wgsl/sem/materialize.h
+  lang/wgsl/sem/member_accessor_expression.cc
+  lang/wgsl/sem/module.cc
+  lang/wgsl/sem/module.h
+  lang/wgsl/sem/node.cc
+  lang/wgsl/sem/node.h
+  lang/wgsl/sem/pipeline_stage_set.h
+  lang/wgsl/sem/sampler_texture_pair.h
+  lang/wgsl/sem/statement.cc
+  lang/wgsl/sem/struct.cc
+  lang/wgsl/sem/struct.h
+  lang/wgsl/sem/switch_statement.cc
+  lang/wgsl/sem/switch_statement.h
+  lang/wgsl/sem/type_expression.cc
+  lang/wgsl/sem/type_expression.h
+  lang/wgsl/sem/type_mappings.h
+  lang/wgsl/sem/value_constructor.cc
+  lang/wgsl/sem/value_constructor.h
+  lang/wgsl/sem/value_conversion.cc
+  lang/wgsl/sem/value_conversion.h
+  lang/wgsl/sem/value_expression.cc
+  lang/wgsl/sem/value_expression.h
+  lang/wgsl/sem/variable.cc
+  lang/wgsl/sem/while_statement.cc
+  lang/wgsl/sem/while_statement.h
+  program_id.cc
+  program_id.h
+  reader/reader.cc
+  reader/reader.h
+  resolver/const_eval.cc
+  resolver/const_eval.h
+  resolver/dependency_graph.cc
+  resolver/dependency_graph.h
+  resolver/intrinsic_table.cc
+  resolver/intrinsic_table.h
+  resolver/intrinsic_table.inl
+  resolver/resolver.cc
+  resolver/resolver.h
+  resolver/sem_helper.cc
+  resolver/sem_helper.h
+  resolver/uniformity.cc
+  resolver/uniformity.h
+  resolver/validator.cc
+  resolver/validator.h
+  tint.cc
   transform/manager.cc
   transform/manager.h
   transform/transform.cc
   transform/transform.h
-  lang/core/type/abstract_float.cc
-  lang/core/type/abstract_float.h
-  lang/core/type/abstract_int.cc
-  lang/core/type/abstract_int.h
-  lang/core/type/abstract_numeric.cc
-  lang/core/type/abstract_numeric.h
-  lang/core/type/array.cc
-  lang/core/type/array.h
-  lang/core/type/array_count.cc
-  lang/core/type/array_count.h
-  lang/core/type/atomic.cc
-  lang/core/type/atomic.h
-  lang/core/type/bool.cc
-  lang/core/type/bool.h
-  lang/core/type/builtin_structs.cc
-  lang/core/type/builtin_structs.h
-  lang/core/type/clone_context.h
-  lang/core/type/depth_multisampled_texture.cc
-  lang/core/type/depth_multisampled_texture.h
-  lang/core/type/depth_texture.cc
-  lang/core/type/depth_texture.h
-  lang/core/type/external_texture.cc
-  lang/core/type/external_texture.h
-  lang/core/type/f16.cc
-  lang/core/type/f16.h
-  lang/core/type/f32.cc
-  lang/core/type/f32.h
-  lang/core/type/i32.cc
-  lang/core/type/i32.h
-  lang/core/type/manager.cc
-  lang/core/type/manager.h
-  lang/core/type/matrix.cc
-  lang/core/type/matrix.h
-  lang/core/type/multisampled_texture.cc
-  lang/core/type/multisampled_texture.h
-  lang/core/type/node.cc
-  lang/core/type/node.h
-  lang/core/type/numeric_scalar.cc
-  lang/core/type/numeric_scalar.h
-  lang/core/type/pointer.cc
-  lang/core/type/pointer.h
-  lang/core/type/reference.cc
-  lang/core/type/reference.h
-  lang/core/type/sampled_texture.cc
-  lang/core/type/sampled_texture.h
-  lang/core/type/sampler.cc
-  lang/core/type/sampler.h
-  lang/core/type/sampler_kind.cc
-  lang/core/type/sampler_kind.h
-  lang/core/type/scalar.cc
-  lang/core/type/scalar.h
-  lang/core/type/storage_texture.cc
-  lang/core/type/storage_texture.h
-  lang/core/type/struct.cc
-  lang/core/type/struct.h
-  lang/core/type/texture.cc
-  lang/core/type/texture.h
-  lang/core/type/texture_dimension.cc
-  lang/core/type/texture_dimension.h
-  lang/core/type/type.cc
-  lang/core/type/type.h
-  lang/core/type/u32.cc
-  lang/core/type/u32.h
-  lang/core/type/unique_node.cc
-  lang/core/type/unique_node.h
-  lang/core/type/vector.cc
-  lang/core/type/vector.h
-  lang/core/type/void.cc
-  lang/core/type/void.h
-  utils/memory/bitcast.h
-  utils/containers/bitset.h
-  utils/memory/block_allocator.h
-  utils/memory/bump_allocator.h
-  utils/rtti/castable.cc
-  utils/rtti/castable.h
   utils/cli/cli.cc
   utils/cli/cli.h
-  utils/macros/compiler.h
-  utils/macros/concat.h
-  utils/math/crc32.h
+  utils/containers/bitset.h
   utils/containers/enum_set.h
-  utils/macros/foreach.h
-  utils/math/hash.h
-  utils/containers/hashmap_base.h
   utils/containers/hashmap.h
+  utils/containers/hashmap_base.h
   utils/containers/hashset.h
   utils/containers/map.h
+  utils/containers/predicates.h
+  utils/containers/scope_stack.h
+  utils/containers/slice.h
+  utils/containers/unique_allocator.h
+  utils/containers/unique_vector.h
+  utils/containers/vector.h
+  utils/macros/compiler.h
+  utils/macros/concat.h
+  utils/macros/foreach.h
+  utils/macros/scoped_assignment.h
+  utils/math/crc32.h
+  utils/math/hash.h
   utils/math/math.h
+  utils/memory/bitcast.h
+  utils/memory/block_allocator.h
+  utils/memory/bump_allocator.h
+  utils/reflection/reflection.h
+  utils/rtti/castable.cc
+  utils/rtti/castable.h
+  utils/rtti/switch.h
+  utils/text/float_to_string.cc
+  utils/text/float_to_string.h
   utils/text/parse_num.cc
   utils/text/parse_num.h
-  utils/containers/predicates.h
-  utils/macros/scoped_assignment.h
-  utils/containers/slice.h
   utils/text/string.cc
   utils/text/string.h
   utils/text/string_stream.cc
   utils/text/string_stream.h
+  utils/text/symbol.cc
+  utils/text/symbol.h
+  utils/text/symbol_table.cc
+  utils/text/symbol_table.h
+  utils/text/text_generator.cc
+  utils/text/text_generator.h
   utils/traits/traits.h
-  utils/containers/unique_allocator.h
-  utils/containers/unique_vector.h
-  utils/containers/vector.h
-  lang/wgsl/helpers/append_vector.cc
-  lang/wgsl/helpers/append_vector.h
   writer/array_length_from_uniform_options.cc
   writer/array_length_from_uniform_options.h
   writer/ast_text_generator.cc
@@ -571,18 +579,10 @@ list(APPEND TINT_LIB_SRCS
   writer/binding_point.h
   writer/binding_remapper_options.cc
   writer/binding_remapper_options.h
-  lang/wgsl/helpers/check_supported_extensions.cc
-  lang/wgsl/helpers/check_supported_extensions.h
   writer/external_texture_options.cc
   writer/external_texture_options.h
-  lang/wgsl/helpers/flatten_bindings.cc
-  lang/wgsl/helpers/flatten_bindings.h
-  utils/text/float_to_string.cc
-  utils/text/float_to_string.h
   writer/ir_text_generator.cc
   writer/ir_text_generator.h
-  utils/text/text_generator.cc
-  utils/text/text_generator.h
   writer/text.cc
   writer/text.h
   writer/writer.cc
@@ -948,6 +948,36 @@ endif()
 ################################################################################
 if(TINT_BUILD_TESTS)
   list(APPEND TINT_TEST_SRCS
+    clone_context_test.cc
+    lang/core/builtin/number_test.cc
+    lang/core/constant/composite_test.cc
+    lang/core/constant/manager_test.cc
+    lang/core/constant/scalar_test.cc
+    lang/core/constant/splat_test.cc
+    lang/core/constant/value_test.cc
+    lang/core/type/array_test.cc
+    lang/core/type/atomic_test.cc
+    lang/core/type/bool_test.cc
+    lang/core/type/builtin_structs_test.cc
+    lang/core/type/depth_multisampled_texture_test.cc
+    lang/core/type/depth_texture_test.cc
+    lang/core/type/external_texture_test.cc
+    lang/core/type/f16_test.cc
+    lang/core/type/f32_test.cc
+    lang/core/type/i32_test.cc
+    lang/core/type/manager_test.cc
+    lang/core/type/matrix_test.cc
+    lang/core/type/multisampled_texture_test.cc
+    lang/core/type/pointer_test.cc
+    lang/core/type/reference_test.cc
+    lang/core/type/sampled_texture_test.cc
+    lang/core/type/sampler_test.cc
+    lang/core/type/storage_texture_test.cc
+    lang/core/type/struct_test.cc
+    lang/core/type/texture_test.cc
+    lang/core/type/type_test.cc
+    lang/core/type/u32_test.cc
+    lang/core/type/vector_test.cc
     lang/wgsl/ast/alias_test.cc
     lang/wgsl/ast/assignment_statement_test.cc
     lang/wgsl/ast/binary_expression_test.cc
@@ -978,8 +1008,8 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/function_test.cc
     lang/wgsl/ast/group_attribute_test.cc
     lang/wgsl/ast/id_attribute_test.cc
-    lang/wgsl/ast/identifier_test.cc
     lang/wgsl/ast/identifier_expression_test.cc
+    lang/wgsl/ast/identifier_test.cc
     lang/wgsl/ast/if_statement_test.cc
     lang/wgsl/ast/increment_decrement_statement_test.cc
     lang/wgsl/ast/index_accessor_expression_test.cc
@@ -1003,26 +1033,24 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/templated_identifier_test.cc
     lang/wgsl/ast/test_helper.h
     lang/wgsl/ast/test_helper_test.cc
+    lang/wgsl/ast/transform/transform_test.cc
     lang/wgsl/ast/traverse_expressions_test.cc
     lang/wgsl/ast/unary_op_expression_test.cc
     lang/wgsl/ast/variable_decl_statement_test.cc
     lang/wgsl/ast/variable_test.cc
     lang/wgsl/ast/while_statement_test.cc
     lang/wgsl/ast/workgroup_attribute_test.cc
-    lang/core/builtin/number_test.cc
-    clone_context_test.cc
-    lang/core/constant/composite_test.cc
-    lang/core/constant/manager_test.cc
-    lang/core/constant/scalar_test.cc
-    lang/core/constant/splat_test.cc
-    lang/core/constant/value_test.cc
-    utils/debug/debug_test.cc
-    utils/diagnostic/diagnostic_test.cc
-    utils/diagnostic/formatter_test.cc
-    utils/diagnostic/printer_test.cc
+    lang/wgsl/helpers/append_vector_test.cc
+    lang/wgsl/helpers/check_supported_extensions_test.cc
+    lang/wgsl/helpers/flatten_bindings_test.cc
     lang/wgsl/program/program_builder_test.cc
     lang/wgsl/program/program_test.cc
-    utils/reflection/reflection_test.cc
+    lang/wgsl/sem/builtin_test.cc
+    lang/wgsl/sem/diagnostic_severity_test.cc
+    lang/wgsl/sem/struct_test.cc
+    lang/wgsl/sem/value_expression_test.cc
+    resolver/address_space_layout_validation_test.cc
+    resolver/address_space_validation_test.cc
     resolver/alias_analysis_test.cc
     resolver/array_accessor_test.cc
     resolver/assignment_validation_test.cc
@@ -1071,16 +1099,14 @@ if(TINT_BUILD_TESTS)
     resolver/ptr_ref_test.cc
     resolver/ptr_ref_validation_test.cc
     resolver/resolver_behavior_test.cc
+    resolver/resolver_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h
-    resolver/resolver_test.cc
-    resolver/side_effects_test.cc
     resolver/root_identifier_test.cc
-    resolver/address_space_layout_validation_test.cc
-    resolver/address_space_validation_test.cc
+    resolver/side_effects_test.cc
+    resolver/struct_address_space_use_test.cc
     resolver/struct_layout_test.cc
     resolver/struct_pipeline_stage_use_test.cc
-    resolver/struct_address_space_use_test.cc
     resolver/type_validation_test.cc
     resolver/unresolved_identifier_test.cc
     resolver/validation_test.cc
@@ -1088,75 +1114,49 @@ if(TINT_BUILD_TESTS)
     resolver/value_constructor_validation_test.cc
     resolver/variable_test.cc
     resolver/variable_validation_test.cc
-    utils/containers/scope_stack_test.cc
-    lang/wgsl/sem/builtin_test.cc
-    lang/wgsl/sem/diagnostic_severity_test.cc
-    lang/wgsl/sem/struct_test.cc
-    lang/wgsl/sem/value_expression_test.cc
-    utils/diagnostic/source_test.cc
-    utils/rtti/switch_test.cc
-    utils/text/symbol_table_test.cc
-    utils/text/symbol_test.cc
     test_main.cc
-    lang/wgsl/ast/transform/transform_test.cc
     transform/manager_test.cc
-    lang/core/type/array_test.cc
-    lang/core/type/atomic_test.cc
-    lang/core/type/bool_test.cc
-    lang/core/type/builtin_structs_test.cc
-    lang/core/type/depth_multisampled_texture_test.cc
-    lang/core/type/depth_texture_test.cc
-    lang/core/type/external_texture_test.cc
-    lang/core/type/f16_test.cc
-    lang/core/type/f32_test.cc
-    lang/core/type/i32_test.cc
-    lang/core/type/manager_test.cc
-    lang/core/type/matrix_test.cc
-    lang/core/type/multisampled_texture_test.cc
-    lang/core/type/pointer_test.cc
-    lang/core/type/reference_test.cc
-    lang/core/type/sampled_texture_test.cc
-    lang/core/type/sampler_test.cc
-    lang/core/type/storage_texture_test.cc
-    lang/core/type/struct_test.cc
-    lang/core/type/texture_test.cc
-    lang/core/type/type_test.cc
-    lang/core/type/u32_test.cc
-    lang/core/type/vector_test.cc
-    utils/memory/bitcast_test.cc
-    utils/containers/bitset_test.cc
-    utils/memory/block_allocator_test.cc
-    utils/memory/bump_allocator_test.cc
     utils/cli/cli_test.cc
-    utils/rtti/castable_test.cc
-    utils/math/crc32_test.cc
-    utils/macros/defer_test.cc
-    utils/containers/enum_set_test.cc
-    utils/math/hash_test.cc
     utils/command/command_test.cc
-    utils/file/tmpfile_test.cc
+    utils/containers/bitset_test.cc
+    utils/containers/enum_set_test.cc
     utils/containers/hashmap_test.cc
     utils/containers/hashset_test.cc
     utils/containers/map_test.cc
-    utils/math/math_test.cc
     utils/containers/predicates_test.cc
-    utils/result/result_test.cc
     utils/containers/reverse_test.cc
-    utils/macros/scoped_assignment_test.cc
+    utils/containers/scope_stack_test.cc
     utils/containers/slice_test.cc
-    utils/text/string_stream_test.cc
-    utils/text/string_test.cc
-    utils/traits/traits_test.cc
     utils/containers/transform_test.cc
-    utils/text/unicode_test.cc
     utils/containers/unique_allocator_test.cc
     utils/containers/unique_vector_test.cc
     utils/containers/vector_test.cc
-    lang/wgsl/helpers/append_vector_test.cc
-    writer/ast_text_generator_test.cc
-    lang/wgsl/helpers/check_supported_extensions_test.cc
-    lang/wgsl/helpers/flatten_bindings_test.cc
+    utils/debug/debug_test.cc
+    utils/diagnostic/diagnostic_test.cc
+    utils/diagnostic/formatter_test.cc
+    utils/diagnostic/printer_test.cc
+    utils/diagnostic/source_test.cc
+    utils/file/tmpfile_test.cc
+    utils/macros/defer_test.cc
+    utils/macros/scoped_assignment_test.cc
+    utils/math/crc32_test.cc
+    utils/math/hash_test.cc
+    utils/math/math_test.cc
+    utils/memory/bitcast_test.cc
+    utils/memory/block_allocator_test.cc
+    utils/memory/bump_allocator_test.cc
+    utils/reflection/reflection_test.cc
+    utils/result/result_test.cc
+    utils/rtti/castable_test.cc
+    utils/rtti/switch_test.cc
     utils/text/float_to_string_test.cc
+    utils/text/string_stream_test.cc
+    utils/text/string_test.cc
+    utils/text/symbol_table_test.cc
+    utils/text/symbol_test.cc
+    utils/text/unicode_test.cc
+    utils/traits/traits_test.cc
+    writer/ast_text_generator_test.cc
   )
 
   # Noet, the source files are included here otherwise the cmd sources would not be included in the
