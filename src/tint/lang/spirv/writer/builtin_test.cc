@@ -1000,6 +1000,38 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_U32) {
     EXPECT_INST("%result = OpBitFieldInsert %v2uint %arg %newbits %offset %count");
 }
 
+TEST_F(SpirvWriterTest, Builtin_FaceForward_F32) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec3<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec3<f32>());
+    auto* arg3 = b.FunctionParam("arg3", ty.vec3<f32>());
+    auto* func = b.Function("foo", ty.vec3<f32>());
+    func->SetParams({arg1, arg2, arg3});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kFaceForward, arg1, arg2, arg3);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v3float %10 FaceForward %arg1 %arg2 %arg3");
+}
+
+TEST_F(SpirvWriterTest, Builtin_FaceForward_F16) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<f16>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<f16>());
+    auto* arg3 = b.FunctionParam("arg3", ty.vec4<f16>());
+    auto* func = b.Function("foo", ty.vec4<f16>());
+    func->SetParams({arg1, arg2, arg3});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kFaceForward, arg1, arg2, arg3);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v4half %10 FaceForward %arg1 %arg2 %arg3");
+}
+
 TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_ScalarFactor) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());

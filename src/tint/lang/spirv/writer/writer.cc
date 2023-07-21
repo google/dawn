@@ -1238,6 +1238,9 @@ void Writer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
             op = result_ty->is_signed_integer_scalar_or_vector() ? spv::Op::OpBitFieldSExtract
                                                                  : spv::Op::OpBitFieldUExtract;
             break;
+        case builtin::Function::kFaceForward:
+            glsl_ext_inst(GLSLstd450FaceForward);
+            break;
         case builtin::Function::kFloor:
             glsl_ext_inst(GLSLstd450Floor);
             break;
