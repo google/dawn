@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/function.h"

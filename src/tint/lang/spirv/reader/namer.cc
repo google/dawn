@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <unordered_set>
 
-#include "src/tint/lang/base/builtin/function.h"
+#include "src/tint/lang/core/builtin/function.h"
 #include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/text/string_stream.h"
 

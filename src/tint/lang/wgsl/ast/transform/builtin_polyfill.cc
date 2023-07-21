@@ -19,8 +19,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/lang/base/type/storage_texture.h"
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/call.h"

@@ -17,7 +17,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"

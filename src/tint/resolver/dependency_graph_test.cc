@@ -17,8 +17,8 @@
 #include <utility>
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/base/builtin/address_space.h"
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/builtin/address_space.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/resolver/dependency_graph.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/utils/containers/transform.h"

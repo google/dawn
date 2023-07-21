@@ -14,7 +14,7 @@
 
 #include "gtest/gtest-spi.h"
 
-#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
 

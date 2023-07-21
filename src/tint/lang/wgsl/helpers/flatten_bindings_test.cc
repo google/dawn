@@ -17,7 +17,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 

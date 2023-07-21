@@ -17,8 +17,8 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/base/type/abstract_float.h"
-#include "src/tint/lang/base/type/abstract_int.h"
+#include "src/tint/lang/core/type/abstract_float.h"
+#include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/statement.h"

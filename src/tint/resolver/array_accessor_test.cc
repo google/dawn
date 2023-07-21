@@ -15,7 +15,7 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 

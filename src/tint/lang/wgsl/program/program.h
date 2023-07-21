@@ -18,8 +18,8 @@
 #include <string>
 #include <unordered_set>
 
-#include "src/tint/lang/base/constant/manager.h"
-#include "src/tint/lang/base/type/manager.h"
+#include "src/tint/lang/core/constant/manager.h"
+#include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/sem/info.h"
 #include "src/tint/program_id.h"

@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_EXTENSION_H_
 #define SRC_TINT_LANG_WGSL_AST_EXTENSION_H_
 
-#include "src/tint/lang/base/builtin/extension.h"
+#include "src/tint/lang/core/builtin/extension.h"
 #include "src/tint/lang/wgsl/ast/node.h"
 
 namespace tint::ast {

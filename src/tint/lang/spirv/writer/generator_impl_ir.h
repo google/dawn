@@ -18,10 +18,10 @@
 #include <vector>
 
 #include "src/tint/ir/constant.h"
-#include "src/tint/lang/base/builtin/address_space.h"
-#include "src/tint/lang/base/builtin/builtin_value.h"
-#include "src/tint/lang/base/builtin/texel_format.h"
-#include "src/tint/lang/base/constant/value.h"
+#include "src/tint/lang/core/builtin/address_space.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/spirv/ast_writer/binary_writer.h"
 #include "src/tint/lang/spirv/ast_writer/function.h"
 #include "src/tint/lang/spirv/ast_writer/module.h"

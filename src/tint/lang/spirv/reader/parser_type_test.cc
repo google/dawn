@@ -14,7 +14,7 @@
 
 #include "gtest/gtest.h"
 
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/spirv/reader/parser_type.h"
 
 namespace tint::reader::spirv {

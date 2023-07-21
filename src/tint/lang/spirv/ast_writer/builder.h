@@ -22,8 +22,8 @@
 #include <vector>
 
 #include "spirv/unified1/spirv.h"
-#include "src/tint/lang/base/builtin/builtin_value.h"
-#include "src/tint/lang/base/type/storage_texture.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/spirv/ast_writer/function.h"
 #include "src/tint/lang/spirv/ast_writer/module.h"
 #include "src/tint/lang/spirv/ast_writer/scalar_constant.h"

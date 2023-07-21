@@ -16,7 +16,7 @@
 #define SRC_TINT_IR_CONSTANT_H_
 
 #include "src/tint/ir/value.h"
-#include "src/tint/lang/base/constant/value.h"
+#include "src/tint/lang/core/constant/value.h"
 
 namespace tint::ir {
 

@@ -17,7 +17,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/containers/map.h"

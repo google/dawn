@@ -17,11 +17,11 @@
 #include <algorithm>
 #include <string>
 
-#include "src/tint/lang/base/builtin/builtin.h"
-#include "src/tint/lang/base/type/atomic.h"
-#include "src/tint/lang/base/type/depth_multisampled_texture.h"
-#include "src/tint/lang/base/type/reference.h"
-#include "src/tint/lang/base/type/sampler.h"
+#include "src/tint/lang/core/builtin/builtin.h"
+#include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"

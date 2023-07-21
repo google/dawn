@@ -14,14 +14,14 @@
 
 #include "src/tint/lang/wgsl/inspector/resource_binding.h"
 
-#include "src/tint/lang/base/type/array.h"
-#include "src/tint/lang/base/type/f32.h"
-#include "src/tint/lang/base/type/i32.h"
-#include "src/tint/lang/base/type/matrix.h"
-#include "src/tint/lang/base/type/texture_dimension.h"
-#include "src/tint/lang/base/type/type.h"
-#include "src/tint/lang/base/type/u32.h"
-#include "src/tint/lang/base/type/vector.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/f32.h"
+#include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/vector.h"
 
 namespace tint::inspector {
 

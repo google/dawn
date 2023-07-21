@@ -14,7 +14,7 @@
 
 #include "src/tint/resolver/const_eval_test.h"
 
-#include "src/tint/lang/base/constant/scalar.h"
+#include "src/tint/lang/core/constant/scalar.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

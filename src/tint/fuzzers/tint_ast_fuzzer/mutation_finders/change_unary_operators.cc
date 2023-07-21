@@ -18,7 +18,7 @@
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/change_unary_operator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/util.h"
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 
 namespace tint::fuzzers::ast_fuzzer {

@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/core/type/struct.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/text/string_stream.h"
 

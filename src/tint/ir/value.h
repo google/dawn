@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_VALUE_H_
 #define SRC_TINT_IR_VALUE_H_
 
-#include "src/tint/lang/base/type/type.h"
+#include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/rtti/castable.h"
 

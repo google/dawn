@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/base/constant/value.h"
+#include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"

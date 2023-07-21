@@ -17,7 +17,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"

@@ -17,10 +17,10 @@
 
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
-#include "src/tint/lang/base/builtin/address_space.h"
-#include "src/tint/lang/base/builtin/builtin_value.h"
-#include "src/tint/lang/base/type/storage_texture.h"
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/builtin/address_space.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/spirv/reader/fail_stream.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 

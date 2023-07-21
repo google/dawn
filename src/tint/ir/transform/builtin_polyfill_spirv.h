@@ -19,7 +19,7 @@
 
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/transform/transform.h"
-#include "src/tint/lang/base/type/type.h"
+#include "src/tint/lang/core/type/type.h"
 
 // Forward declarations
 namespace tint::type {

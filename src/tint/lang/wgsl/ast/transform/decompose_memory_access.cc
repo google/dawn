@@ -20,9 +20,9 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/base/type/array.h"
-#include "src/tint/lang/base/type/atomic.h"
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"

@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_WGSL_SEM_VALUE_EXPRESSION_H_
 #define SRC_TINT_LANG_WGSL_SEM_VALUE_EXPRESSION_H_
 
-#include "src/tint/lang/base/constant/value.h"
+#include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/wgsl/sem/behavior.h"
 #include "src/tint/lang/wgsl/sem/evaluation_stage.h"
 #include "src/tint/lang/wgsl/sem/expression.h"

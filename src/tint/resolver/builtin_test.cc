@@ -15,9 +15,9 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/base/type/sampled_texture.h"
-#include "src/tint/lang/base/type/test_helper.h"
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/test_helper.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"

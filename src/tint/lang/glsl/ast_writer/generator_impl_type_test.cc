@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/base/type/depth_texture.h"
-#include "src/tint/lang/base/type/multisampled_texture.h"
-#include "src/tint/lang/base/type/sampled_texture.h"
-#include "src/tint/lang/base/type/sampler.h"
-#include "src/tint/lang/base/type/storage_texture.h"
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/sampler.h"
+#include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/glsl/ast_writer/test_helper.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"

@@ -25,7 +25,7 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/lang/wgsl/inspector/resource_binding.h"
 #include "src/tint/lang/wgsl/inspector/scalar.h"

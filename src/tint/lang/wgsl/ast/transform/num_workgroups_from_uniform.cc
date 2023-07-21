@@ -19,7 +19,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/function.h"

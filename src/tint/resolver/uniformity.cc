@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"

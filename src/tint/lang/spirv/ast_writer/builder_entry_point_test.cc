@@ -15,10 +15,10 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/base/builtin/address_space.h"
-#include "src/tint/lang/base/builtin/builtin_value.h"
-#include "src/tint/lang/base/type/f32.h"
-#include "src/tint/lang/base/type/vector.h"
+#include "src/tint/lang/core/builtin/address_space.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/type/f32.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/spirv/ast_writer/builder.h"
 #include "src/tint/lang/spirv/ast_writer/spv_dump.h"
 #include "src/tint/lang/spirv/ast_writer/test_helper.h"

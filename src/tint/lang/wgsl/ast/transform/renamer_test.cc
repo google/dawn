@@ -19,8 +19,8 @@
 #include <vector>
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/base/builtin/builtin.h"
-#include "src/tint/lang/base/builtin/texel_format.h"
+#include "src/tint/lang/core/builtin/builtin.h"
+#include "src/tint/lang/core/builtin/texel_format.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/utils/text/string.h"
 

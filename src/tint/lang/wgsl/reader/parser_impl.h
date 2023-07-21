@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/base/builtin/access.h"
+#include "src/tint/lang/core/builtin/access.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/parser_impl_detail.h"
 #include "src/tint/lang/wgsl/reader/token.h"

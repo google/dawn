@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/base/type/array.h"
-#include "src/tint/lang/base/type/matrix.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/msl/writer/test_helper_ir.h"
 #include "src/tint/utils/text/string.h"
 

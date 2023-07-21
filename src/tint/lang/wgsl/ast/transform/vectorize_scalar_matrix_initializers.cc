@@ -17,7 +17,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/lang/base/type/abstract_numeric.h"
+#include "src/tint/lang/core/type/abstract_numeric.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"

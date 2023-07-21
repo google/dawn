@@ -1,0 +1,34 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate diagnostic_control.h
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
+
+#ifndef SRC_TINT_LANG_CORE_BUILTIN_DIAGNOSTIC_RULE_H_
+#define SRC_TINT_LANG_CORE_BUILTIN_DIAGNOSTIC_RULE_H_
+
+#include <string>
+#include <variant>
+
+#include "src/tint/utils/text/string_stream.h"
+
+namespace tint::builtin {
+
+/// WGSL core diagnostic rules.
+{{ Eval "DeclareEnum" (Sem.Enum "core_diagnostic_rule") }}
+
+/// Chromium-specific diagnostic rules.
+{{ Eval "DeclareEnum" (Sem.Enum "chromium_diagnostic_rule") }}
+
+/// All diagnostic rules understood by Tint.
+using DiagnosticRule = std::variant<CoreDiagnosticRule, ChromiumDiagnosticRule>;
+
+}  // namespace tint::builtin
+
+#endif  // SRC_TINT_LANG_CORE_BUILTIN_DIAGNOSTIC_RULE_H_

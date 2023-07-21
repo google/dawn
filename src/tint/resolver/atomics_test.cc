@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/base/type/atomic.h"
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 

@@ -20,7 +20,7 @@
 #endif  // TINT_BUILD_SPV_READER
 
 #include "src/tint/cmd/helper.h"
-#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"

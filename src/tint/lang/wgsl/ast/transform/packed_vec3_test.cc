@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/base/type/array.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"

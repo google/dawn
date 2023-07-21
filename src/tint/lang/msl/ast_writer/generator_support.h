@@ -18,9 +18,9 @@
 #include <cstdint>
 #include <string>
 
-#include "src/tint/lang/base/builtin/builtin_value.h"
-#include "src/tint/lang/base/builtin/interpolation.h"
-#include "src/tint/lang/base/type/type.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/interpolation.h"
+#include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::writer::msl {

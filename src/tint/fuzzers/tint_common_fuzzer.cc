@@ -31,7 +31,7 @@
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
-#include "src/tint/lang/base/type/external_texture.h"
+#include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/program/program.h"

@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "src/tint/lang/base/builtin/diagnostic_severity.h"
+#include "src/tint/lang/core/builtin/diagnostic_severity.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
 

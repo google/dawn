@@ -16,12 +16,12 @@
 
 #include <limits>
 
-#include "src/tint/lang/base/builtin/attribute.h"
-#include "src/tint/lang/base/type/depth_texture.h"
-#include "src/tint/lang/base/type/external_texture.h"
-#include "src/tint/lang/base/type/multisampled_texture.h"
-#include "src/tint/lang/base/type/sampled_texture.h"
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/builtin/attribute.h"
+#include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"

@@ -17,7 +17,7 @@
 
 #include <optional>
 
-#include "src/tint/lang/base/builtin/interpolation.h"
+#include "src/tint/lang/core/builtin/interpolation.h"
 
 namespace tint::ir {
 

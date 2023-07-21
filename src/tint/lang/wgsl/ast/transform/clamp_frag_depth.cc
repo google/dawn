@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/ast/builtin_attribute.h"
 #include "src/tint/lang/wgsl/ast/function.h"

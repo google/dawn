@@ -17,9 +17,9 @@
 #include <utility>
 
 #include "src/tint/ir/transform/test_helper.h"
-#include "src/tint/lang/base/type/array.h"
-#include "src/tint/lang/base/type/pointer.h"
-#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/struct.h"
 
 namespace tint::ir::transform {
 namespace {

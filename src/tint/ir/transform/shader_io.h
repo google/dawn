@@ -20,7 +20,7 @@
 
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/transform/transform.h"
-#include "src/tint/lang/base/type/manager.h"
+#include "src/tint/lang/core/type/manager.h"
 
 namespace tint::ir::transform {
 

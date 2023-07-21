@@ -17,7 +17,7 @@
 #include <utility>
 
 #include "src/tint/ir/transform/test_helper.h"
-#include "src/tint/lang/base/type/matrix.h"
+#include "src/tint/lang/core/type/matrix.h"
 
 namespace tint::ir::transform {
 namespace {

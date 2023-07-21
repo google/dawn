@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/lang/base/type/array_count.h"
+#include "src/tint/lang/core/type/array_count.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 

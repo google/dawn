@@ -17,9 +17,9 @@
 
 #include <optional>
 
-#include "src/tint/lang/base/builtin/address_space.h"
-#include "src/tint/lang/base/type/struct.h"
-#include "src/tint/lang/base/type/type.h"
+#include "src/tint/lang/core/builtin/address_space.h"
+#include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/text/symbol.h"

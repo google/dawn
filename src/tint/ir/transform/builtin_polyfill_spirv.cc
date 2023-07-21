@@ -19,13 +19,13 @@
 #include "spirv/unified1/spirv.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/module.h"
-#include "src/tint/lang/base/type/builtin_structs.h"
-#include "src/tint/lang/base/type/depth_multisampled_texture.h"
-#include "src/tint/lang/base/type/depth_texture.h"
-#include "src/tint/lang/base/type/multisampled_texture.h"
-#include "src/tint/lang/base/type/sampled_texture.h"
-#include "src/tint/lang/base/type/storage_texture.h"
-#include "src/tint/lang/base/type/texture.h"
+#include "src/tint/lang/core/type/builtin_structs.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/texture.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BuiltinPolyfillSpirv);
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BuiltinPolyfillSpirv::LiteralOperand);

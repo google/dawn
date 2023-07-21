@@ -18,7 +18,7 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/lang/base/type/reference.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"

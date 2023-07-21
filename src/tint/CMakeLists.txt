@@ -234,24 +234,24 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/while_statement.h
   lang/wgsl/ast/workgroup_attribute.cc
   lang/wgsl/ast/workgroup_attribute.h
-  lang/base/builtin/fluent_types.h
-  lang/base/builtin/number.cc
-  lang/base/builtin/number.h
+  lang/core/builtin/fluent_types.h
+  lang/core/builtin/number.cc
+  lang/core/builtin/number.h
   clone_context.cc
   clone_context.h
-  lang/base/constant/clone_context.h
-  lang/base/constant/composite.cc
-  lang/base/constant/composite.h
-  lang/base/constant/manager.cc
-  lang/base/constant/manager.h
-  lang/base/constant/scalar.cc
-  lang/base/constant/scalar.h
-  lang/base/constant/splat.cc
-  lang/base/constant/splat.h
-  lang/base/constant/node.cc
-  lang/base/constant/node.h
-  lang/base/constant/value.cc
-  lang/base/constant/value.h
+  lang/core/constant/clone_context.h
+  lang/core/constant/composite.cc
+  lang/core/constant/composite.h
+  lang/core/constant/manager.cc
+  lang/core/constant/manager.h
+  lang/core/constant/scalar.cc
+  lang/core/constant/scalar.h
+  lang/core/constant/splat.cc
+  lang/core/constant/splat.h
+  lang/core/constant/node.cc
+  lang/core/constant/node.h
+  lang/core/constant/value.cc
+  lang/core/constant/value.h
   lang/wgsl/inspector/entry_point.cc
   lang/wgsl/inspector/entry_point.h
   lang/wgsl/inspector/inspector.cc
@@ -461,75 +461,75 @@ list(APPEND TINT_LIB_SRCS
   transform/manager.h
   transform/transform.cc
   transform/transform.h
-  lang/base/type/abstract_float.cc
-  lang/base/type/abstract_float.h
-  lang/base/type/abstract_int.cc
-  lang/base/type/abstract_int.h
-  lang/base/type/abstract_numeric.cc
-  lang/base/type/abstract_numeric.h
-  lang/base/type/array.cc
-  lang/base/type/array.h
-  lang/base/type/array_count.cc
-  lang/base/type/array_count.h
-  lang/base/type/atomic.cc
-  lang/base/type/atomic.h
-  lang/base/type/bool.cc
-  lang/base/type/bool.h
-  lang/base/type/builtin_structs.cc
-  lang/base/type/builtin_structs.h
-  lang/base/type/clone_context.h
-  lang/base/type/depth_multisampled_texture.cc
-  lang/base/type/depth_multisampled_texture.h
-  lang/base/type/depth_texture.cc
-  lang/base/type/depth_texture.h
-  lang/base/type/external_texture.cc
-  lang/base/type/external_texture.h
-  lang/base/type/f16.cc
-  lang/base/type/f16.h
-  lang/base/type/f32.cc
-  lang/base/type/f32.h
-  lang/base/type/i32.cc
-  lang/base/type/i32.h
-  lang/base/type/manager.cc
-  lang/base/type/manager.h
-  lang/base/type/matrix.cc
-  lang/base/type/matrix.h
-  lang/base/type/multisampled_texture.cc
-  lang/base/type/multisampled_texture.h
-  lang/base/type/node.cc
-  lang/base/type/node.h
-  lang/base/type/numeric_scalar.cc
-  lang/base/type/numeric_scalar.h
-  lang/base/type/pointer.cc
-  lang/base/type/pointer.h
-  lang/base/type/reference.cc
-  lang/base/type/reference.h
-  lang/base/type/sampled_texture.cc
-  lang/base/type/sampled_texture.h
-  lang/base/type/sampler.cc
-  lang/base/type/sampler.h
-  lang/base/type/sampler_kind.cc
-  lang/base/type/sampler_kind.h
-  lang/base/type/scalar.cc
-  lang/base/type/scalar.h
-  lang/base/type/storage_texture.cc
-  lang/base/type/storage_texture.h
-  lang/base/type/struct.cc
-  lang/base/type/struct.h
-  lang/base/type/texture.cc
-  lang/base/type/texture.h
-  lang/base/type/texture_dimension.cc
-  lang/base/type/texture_dimension.h
-  lang/base/type/type.cc
-  lang/base/type/type.h
-  lang/base/type/u32.cc
-  lang/base/type/u32.h
-  lang/base/type/unique_node.cc
-  lang/base/type/unique_node.h
-  lang/base/type/vector.cc
-  lang/base/type/vector.h
-  lang/base/type/void.cc
-  lang/base/type/void.h
+  lang/core/type/abstract_float.cc
+  lang/core/type/abstract_float.h
+  lang/core/type/abstract_int.cc
+  lang/core/type/abstract_int.h
+  lang/core/type/abstract_numeric.cc
+  lang/core/type/abstract_numeric.h
+  lang/core/type/array.cc
+  lang/core/type/array.h
+  lang/core/type/array_count.cc
+  lang/core/type/array_count.h
+  lang/core/type/atomic.cc
+  lang/core/type/atomic.h
+  lang/core/type/bool.cc
+  lang/core/type/bool.h
+  lang/core/type/builtin_structs.cc
+  lang/core/type/builtin_structs.h
+  lang/core/type/clone_context.h
+  lang/core/type/depth_multisampled_texture.cc
+  lang/core/type/depth_multisampled_texture.h
+  lang/core/type/depth_texture.cc
+  lang/core/type/depth_texture.h
+  lang/core/type/external_texture.cc
+  lang/core/type/external_texture.h
+  lang/core/type/f16.cc
+  lang/core/type/f16.h
+  lang/core/type/f32.cc
+  lang/core/type/f32.h
+  lang/core/type/i32.cc
+  lang/core/type/i32.h
+  lang/core/type/manager.cc
+  lang/core/type/manager.h
+  lang/core/type/matrix.cc
+  lang/core/type/matrix.h
+  lang/core/type/multisampled_texture.cc
+  lang/core/type/multisampled_texture.h
+  lang/core/type/node.cc
+  lang/core/type/node.h
+  lang/core/type/numeric_scalar.cc
+  lang/core/type/numeric_scalar.h
+  lang/core/type/pointer.cc
+  lang/core/type/pointer.h
+  lang/core/type/reference.cc
+  lang/core/type/reference.h
+  lang/core/type/sampled_texture.cc
+  lang/core/type/sampled_texture.h
+  lang/core/type/sampler.cc
+  lang/core/type/sampler.h
+  lang/core/type/sampler_kind.cc
+  lang/core/type/sampler_kind.h
+  lang/core/type/scalar.cc
+  lang/core/type/scalar.h
+  lang/core/type/storage_texture.cc
+  lang/core/type/storage_texture.h
+  lang/core/type/struct.cc
+  lang/core/type/struct.h
+  lang/core/type/texture.cc
+  lang/core/type/texture.h
+  lang/core/type/texture_dimension.cc
+  lang/core/type/texture_dimension.h
+  lang/core/type/type.cc
+  lang/core/type/type.h
+  lang/core/type/u32.cc
+  lang/core/type/u32.h
+  lang/core/type/unique_node.cc
+  lang/core/type/unique_node.h
+  lang/core/type/vector.cc
+  lang/core/type/vector.h
+  lang/core/type/void.cc
+  lang/core/type/void.h
   utils/memory/bitcast.h
   utils/containers/bitset.h
   utils/memory/block_allocator.h
@@ -589,18 +589,18 @@ list(APPEND TINT_LIB_SRCS
   writer/writer.h
 )
 
-tint_generated(lang/base/builtin/access BENCH TEST)
-tint_generated(lang/base/builtin/address_space BENCH TEST)
-tint_generated(lang/base/builtin/attribute BENCH TEST)
-tint_generated(lang/base/builtin/builtin BENCH TEST)
-tint_generated(lang/base/builtin/builtin_value BENCH TEST)
-tint_generated(lang/base/builtin/diagnostic_rule BENCH TEST)
-tint_generated(lang/base/builtin/diagnostic_severity BENCH TEST)
-tint_generated(lang/base/builtin/extension BENCH TEST)
-tint_generated(lang/base/builtin/function)
-tint_generated(lang/base/builtin/interpolation_sampling BENCH TEST)
-tint_generated(lang/base/builtin/interpolation_type BENCH TEST)
-tint_generated(lang/base/builtin/texel_format BENCH TEST)
+tint_generated(lang/core/builtin/access BENCH TEST)
+tint_generated(lang/core/builtin/address_space BENCH TEST)
+tint_generated(lang/core/builtin/attribute BENCH TEST)
+tint_generated(lang/core/builtin/builtin BENCH TEST)
+tint_generated(lang/core/builtin/builtin_value BENCH TEST)
+tint_generated(lang/core/builtin/diagnostic_rule BENCH TEST)
+tint_generated(lang/core/builtin/diagnostic_severity BENCH TEST)
+tint_generated(lang/core/builtin/extension BENCH TEST)
+tint_generated(lang/core/builtin/function)
+tint_generated(lang/core/builtin/interpolation_sampling BENCH TEST)
+tint_generated(lang/core/builtin/interpolation_type BENCH TEST)
+tint_generated(lang/core/builtin/texel_format BENCH TEST)
 
 tint_generated(resolver/ctor_conv_intrinsic)
 tint_generated(lang/wgsl/sem/parameter_usage)
@@ -1009,13 +1009,13 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/variable_test.cc
     lang/wgsl/ast/while_statement_test.cc
     lang/wgsl/ast/workgroup_attribute_test.cc
-    lang/base/builtin/number_test.cc
+    lang/core/builtin/number_test.cc
     clone_context_test.cc
-    lang/base/constant/composite_test.cc
-    lang/base/constant/manager_test.cc
-    lang/base/constant/scalar_test.cc
-    lang/base/constant/splat_test.cc
-    lang/base/constant/value_test.cc
+    lang/core/constant/composite_test.cc
+    lang/core/constant/manager_test.cc
+    lang/core/constant/scalar_test.cc
+    lang/core/constant/splat_test.cc
+    lang/core/constant/value_test.cc
     utils/debug/debug_test.cc
     utils/diagnostic/diagnostic_test.cc
     utils/diagnostic/formatter_test.cc
@@ -1100,29 +1100,29 @@ if(TINT_BUILD_TESTS)
     test_main.cc
     lang/wgsl/ast/transform/transform_test.cc
     transform/manager_test.cc
-    lang/base/type/array_test.cc
-    lang/base/type/atomic_test.cc
-    lang/base/type/bool_test.cc
-    lang/base/type/builtin_structs_test.cc
-    lang/base/type/depth_multisampled_texture_test.cc
-    lang/base/type/depth_texture_test.cc
-    lang/base/type/external_texture_test.cc
-    lang/base/type/f16_test.cc
-    lang/base/type/f32_test.cc
-    lang/base/type/i32_test.cc
-    lang/base/type/manager_test.cc
-    lang/base/type/matrix_test.cc
-    lang/base/type/multisampled_texture_test.cc
-    lang/base/type/pointer_test.cc
-    lang/base/type/reference_test.cc
-    lang/base/type/sampled_texture_test.cc
-    lang/base/type/sampler_test.cc
-    lang/base/type/storage_texture_test.cc
-    lang/base/type/struct_test.cc
-    lang/base/type/texture_test.cc
-    lang/base/type/type_test.cc
-    lang/base/type/u32_test.cc
-    lang/base/type/vector_test.cc
+    lang/core/type/array_test.cc
+    lang/core/type/atomic_test.cc
+    lang/core/type/bool_test.cc
+    lang/core/type/builtin_structs_test.cc
+    lang/core/type/depth_multisampled_texture_test.cc
+    lang/core/type/depth_texture_test.cc
+    lang/core/type/external_texture_test.cc
+    lang/core/type/f16_test.cc
+    lang/core/type/f32_test.cc
+    lang/core/type/i32_test.cc
+    lang/core/type/manager_test.cc
+    lang/core/type/matrix_test.cc
+    lang/core/type/multisampled_texture_test.cc
+    lang/core/type/pointer_test.cc
+    lang/core/type/reference_test.cc
+    lang/core/type/sampled_texture_test.cc
+    lang/core/type/sampler_test.cc
+    lang/core/type/storage_texture_test.cc
+    lang/core/type/struct_test.cc
+    lang/core/type/texture_test.cc
+    lang/core/type/type_test.cc
+    lang/core/type/u32_test.cc
+    lang/core/type/vector_test.cc
     utils/memory/bitcast_test.cc
     utils/containers/bitset_test.cc
     utils/memory/block_allocator_test.cc

@@ -16,7 +16,7 @@
 #define SRC_TINT_IR_CORE_BUILTIN_CALL_H_
 
 #include "src/tint/ir/builtin_call.h"
-#include "src/tint/lang/base/builtin/function.h"
+#include "src/tint/lang/core/builtin/function.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::ir {

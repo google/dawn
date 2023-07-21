@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/containers/unique_allocator.h"

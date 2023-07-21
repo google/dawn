@@ -17,7 +17,7 @@
 #include <functional>
 #include <utility>
 
-#include "src/tint/lang/base/builtin/function.h"
+#include "src/tint/lang/core/builtin/function.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"

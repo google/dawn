@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/lang/base/builtin/function.h"
+#include "src/tint/lang/core/builtin/function.h"
 #include "src/tint/lang/wgsl/ast/struct_member.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"

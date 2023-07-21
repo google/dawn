@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"

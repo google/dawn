@@ -18,7 +18,7 @@
 
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/module.h"
-#include "src/tint/lang/base/type/matrix.h"
+#include "src/tint/lang/core/type/matrix.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::HandleMatrixArithmetic);
 

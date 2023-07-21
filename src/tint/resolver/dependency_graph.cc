@@ -19,8 +19,8 @@
 #include <variant>
 #include <vector>
 
-#include "src/tint/lang/base/builtin/builtin.h"
-#include "src/tint/lang/base/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin/builtin.h"
+#include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/block_statement.h"

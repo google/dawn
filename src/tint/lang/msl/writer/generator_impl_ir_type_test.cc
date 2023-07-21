@@ -14,14 +14,14 @@
 
 #include "gmock/gmock.h"
 
-#include "src/tint/lang/base/type/array.h"
-#include "src/tint/lang/base/type/depth_multisampled_texture.h"
-#include "src/tint/lang/base/type/depth_texture.h"
-#include "src/tint/lang/base/type/matrix.h"
-#include "src/tint/lang/base/type/multisampled_texture.h"
-#include "src/tint/lang/base/type/sampled_texture.h"
-#include "src/tint/lang/base/type/storage_texture.h"
-#include "src/tint/lang/base/type/struct.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/msl/writer/test_helper_ir.h"
 #include "src/tint/utils/text/string.h"
 

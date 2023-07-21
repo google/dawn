@@ -21,7 +21,7 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
-#include "src/tint/lang/base/type/manager.h"
+#include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
 #include "src/tint/lang/wgsl/ast/transform/renamer.h"
 #include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
