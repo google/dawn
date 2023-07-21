@@ -785,6 +785,36 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_Vec3_F16) {
     EXPECT_INST("%result = OpExtInst %v3half %11 Ldexp %arg1 %arg2");
 }
 
+TEST_F(SpirvWriterTest, Builtin_Reflect_F32) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec3<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec3<f32>());
+    auto* func = b.Function("foo", ty.vec3<f32>());
+    func->SetParams({arg1, arg2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kReflect, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v3float %9 Reflect %arg1 %arg2");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Reflect_F16) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<f16>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<f16>());
+    auto* func = b.Function("foo", ty.vec4<f16>());
+    func->SetParams({arg1, arg2});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kReflect, arg1, arg2);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v4half %9 Reflect %arg1 %arg2");
+}
+
 // Tests for builtins with the signature: T = func(T, T, T)
 using Builtin_3arg = SpirvWriterTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_3arg, Scalar) {
