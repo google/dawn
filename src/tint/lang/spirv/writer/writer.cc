@@ -1333,6 +1333,9 @@ void Writer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kReflect:
             glsl_ext_inst(GLSLstd450Reflect);
             break;
+        case builtin::Function::kRefract:
+            glsl_ext_inst(GLSLstd450Refract);
+            break;
         case builtin::Function::kReverseBits:
             op = spv::Op::OpBitReverse;
             break;

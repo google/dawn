@@ -1035,6 +1035,40 @@ TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_VectorFactor) {
     EXPECT_INST("%result = OpExtInst %v4float %10 FMix %arg1 %arg2 %factor");
 }
 
+TEST_F(SpirvWriterTest, Builtin_Refract_F32) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
+    auto* i = b.FunctionParam("i", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arg1, arg2, i});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kRefract, arg1, arg2, i);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v4float %10 Refract %arg1 %arg2 %i");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Refract_F16) {
+    auto* arg1 = b.FunctionParam("arg1", ty.vec4<f16>());
+    auto* arg2 = b.FunctionParam("arg2", ty.vec4<f16>());
+    auto* i = b.FunctionParam("i", ty.f16());
+    auto* func = b.Function("foo", ty.vec4<f16>());
+    func->SetParams({arg1, arg2, i});
+
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kRefract, arg1, arg2, i);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %v4half %10 Refract %arg1 %arg2 %i");
+}
+
 TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_ScalarOperands) {
     auto* argf = b.FunctionParam("argf", ty.i32());
     auto* argt = b.FunctionParam("argt", ty.i32());
