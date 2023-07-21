@@ -1267,6 +1267,9 @@ void Writer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kInverseSqrt:
             glsl_ext_inst(GLSLstd450InverseSqrt);
             break;
+        case builtin::Function::kLdexp:
+            glsl_ext_inst(GLSLstd450Ldexp);
+            break;
         case builtin::Function::kLength:
             glsl_ext_inst(GLSLstd450Length);
             break;
