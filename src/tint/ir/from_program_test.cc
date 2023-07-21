@@ -230,7 +230,7 @@ TEST_F(IR_FromProgramTest, IfStatement_BothReturn) {
         ret
       }
     }
-    ret
+    unreachable
   }
 }
 )");
@@ -431,7 +431,7 @@ TEST_F(IR_FromProgramTest, Loop_WithReturn) {
         next_iteration %b2
       }
     }
-    ret
+    unreachable
   }
 }
 )");
@@ -463,7 +463,7 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn) {
         next_iteration %b2
       }
     }
-    ret
+    unreachable
   }
 }
 )");
@@ -1025,7 +1025,7 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
         ret
       }
     }
-    ret
+    unreachable
   }
 }
 )");

@@ -753,7 +753,7 @@ fn f() -> i32 {
         ret %9
       }
     }
-    ret
+    unreachable
   }
 }
 )");
@@ -800,7 +800,7 @@ fn f() -> i32 {
         ret %7
       }
     }
-    ret
+    unreachable
   }
 }
 )");

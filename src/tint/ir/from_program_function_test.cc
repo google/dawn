@@ -89,6 +89,29 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_Return) {
 )");
 }
 
+TEST_F(IR_FromProgramFunctionTest, EmitFunction_UnreachableEnd_ReturnValue) {
+    Func("test", utils::Empty, ty.f32(),
+         utils::Vector{If(true, Block(Return(0_f)), Else(Block(Return(1_f))))}, utils::Empty);
+
+    auto m = Build();
+    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():f32 -> %b1 {
+  %b1 = block {
+    if true [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+        ret 0.0f
+      }
+      %b3 = block {  # false
+        ret 1.0f
+      }
+    }
+    unreachable
+  }
+}
+)");
+}
+
 TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPosition) {
     Func("test", utils::Empty, ty.vec4<f32>(),
          utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},

@@ -440,7 +440,11 @@ class Impl {
 
         // Add a terminator if one was not already created.
         if (NeedTerminator()) {
-            SetTerminator(builder_.Return(current_function_));
+            if (!program_->Sem().Get(ast_func->body)->Behaviors().Contains(sem::Behavior::kNext)) {
+                SetTerminator(builder_.Unreachable());
+            } else {
+                SetTerminator(builder_.Return(current_function_));
+            }
         }
 
         TINT_ASSERT(IR, control_stack_.IsEmpty());
