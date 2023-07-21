@@ -119,6 +119,8 @@ SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
             return SpvStorageClassInput;
         case builtin::AddressSpace::kPrivate:
             return SpvStorageClassPrivate;
+        case builtin::AddressSpace::kPushConstant:
+            return SpvStorageClassPushConstant;
         case builtin::AddressSpace::kOut:
             return SpvStorageClassOutput;
         case builtin::AddressSpace::kStorage:
@@ -1840,6 +1842,12 @@ void Writer::EmitVar(ir::Var* var) {
                 operands.push_back(Value(var->Initializer()));
             }
             module_.PushType(spv::Op::OpVariable, operands);
+            break;
+        }
+        case builtin::AddressSpace::kPushConstant: {
+            TINT_ASSERT(Writer, !current_function_);
+            module_.PushType(spv::Op::OpVariable,
+                             {ty, id, U32Operand(SpvStorageClassPushConstant)});
             break;
         }
         case builtin::AddressSpace::kOut: {

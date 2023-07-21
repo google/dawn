@@ -46,8 +46,7 @@ void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
             continue;
         }
         auto* ptr = var->Result()->Type()->As<type::Pointer>();
-        if (!ptr || !(ptr->AddressSpace() == builtin::AddressSpace::kStorage ||
-                      ptr->AddressSpace() == builtin::AddressSpace::kUniform)) {
+        if (!ptr || !builtin::IsHostShareable(ptr->AddressSpace())) {
             continue;
         }
         buffer_variables.Push(var);
@@ -94,7 +93,9 @@ void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
         // Replace the old variable declaration with one that uses the block-decorated struct type.
         auto* new_var =
             builder.Var(ir->Types().ptr(ptr->AddressSpace(), block_struct, ptr->Access()));
-        new_var->SetBindingPoint(var->BindingPoint()->group, var->BindingPoint()->binding);
+        if (var->BindingPoint()) {
+            new_var->SetBindingPoint(var->BindingPoint()->group, var->BindingPoint()->binding);
+        }
         var->ReplaceWith(new_var);
 
         // Replace uses of the old variable.

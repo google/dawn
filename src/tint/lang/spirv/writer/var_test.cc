@@ -257,6 +257,40 @@ TEST_F(SpirvWriterTest, UniformVar_Load) {
 )");
 }
 
+TEST_F(SpirvWriterTest, PushConstantVar) {
+    auto* v = b.Var("v", ty.ptr<push_constant, i32>());
+    b.RootBlock()->Append(v);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpDecorate %tint_symbol_1 Block
+)");
+    EXPECT_INST(R"(
+%tint_symbol_1 = OpTypeStruct %int
+%_ptr_PushConstant_tint_symbol_1 = OpTypePointer PushConstant %tint_symbol_1
+          %1 = OpVariable %_ptr_PushConstant_tint_symbol_1 PushConstant
+)");
+}
+
+TEST_F(SpirvWriterTest, PushConstantVar_Load) {
+    auto* v = b.Var("v", ty.ptr<push_constant, i32>());
+    b.RootBlock()->Append(v);
+
+    auto* func = b.Function("foo", ty.i32());
+    b.With(func->Block(), [&] {
+        auto* load = b.Load(v);
+        b.Return(func, load);
+        mod.SetName(load, "load");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpAccessChain %_ptr_PushConstant_int %1 %uint_0
+       %load = OpLoad %int %8
+               OpReturnValue %load
+)");
+}
+
 TEST_F(SpirvWriterTest, SamplerVar) {
     auto* v =
         b.Var("v", ty.ptr(builtin::AddressSpace::kHandle, ty.sampler(), builtin::Access::kRead));
