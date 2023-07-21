@@ -1,0 +1,28 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct FragOutput {
+  float4 color;
+  float4 blend;
+};
+
+struct tint_symbol {
+  float4 color [[color(0) index(0)]];
+  float4 blend [[color(0) index(1)]];
+};
+
+FragOutput frag_main_inner() {
+  FragOutput output = {};
+  output.color = float4(0.5f, 0.5f, 0.5f, 1.0f);
+  output.blend = float4(0.5f, 0.5f, 0.5f, 1.0f);
+  return output;
+}
+
+fragment tint_symbol frag_main() {
+  FragOutput const inner_result = frag_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.color = inner_result.color;
+  wrapper_result.blend = inner_result.blend;
+  return wrapper_result;
+}
+

@@ -260,6 +260,7 @@ bool Builder::Build() {
                                       builtin::Extension::kChromiumExperimentalFullPtrParameters,
                                       builtin::Extension::kChromiumExperimentalPushConstant,
                                       builtin::Extension::kF16,
+                                      builtin::Extension::kChromiumInternalDualSourceBlending,
                                   })) {
         return false;
     }
@@ -777,6 +778,12 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                 module_.PushAnnot(spv::Op::OpDecorate,
                                   {Operand(var_id), U32Operand(SpvDecorationLocation),
                                    Operand(sem->Location().value())});
+                return true;
+            },
+            [&](const ast::IndexAttribute*) {
+                module_.PushAnnot(spv::Op::OpDecorate,
+                                  {Operand(var_id), U32Operand(SpvDecorationIndex),
+                                   Operand(sem->Index().value())});
                 return true;
             },
             [&](const ast::InterpolateAttribute* interpolate) {

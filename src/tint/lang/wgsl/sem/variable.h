@@ -185,6 +185,9 @@ class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
     /// @returns the location value for the parameter, if set
     std::optional<uint32_t> Location() const { return location_; }
 
+    /// @returns the index value for the parameter, if set
+    std::optional<uint32_t> Index() const { return index_; }
+
   private:
     const std::optional<sem::BindingPoint> binding_point_;
 

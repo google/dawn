@@ -244,6 +244,7 @@ bool GeneratorImpl::Generate() {
                                       builtin::Extension::kChromiumExperimentalPushConstant,
                                       builtin::Extension::kChromiumInternalRelaxedUniformLayout,
                                       builtin::Extension::kF16,
+                                      builtin::Extension::kChromiumInternalDualSourceBlending,
                                   })) {
         return false;
     }
@@ -2752,7 +2753,12 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
                 out << " [[user(locn" + std::to_string(location.value()) + ")]]";
             } else if (TINT_LIKELY(
                            pipeline_stage_uses.count(type::PipelineStageUsage::kFragmentOutput))) {
-                out << " [[color(" + std::to_string(location.value()) + ")]]";
+                if (auto index = attributes.index) {
+                    out << " [[color(" + std::to_string(location.value()) + ") index(" +
+                               std::to_string(index.value()) + ")]]";
+                } else {
+                    out << " [[color(" + std::to_string(location.value()) + ")]]";
+                }
             } else {
                 TINT_ICE(Writer, diagnostics_) << "invalid use of location decoration";
                 return false;

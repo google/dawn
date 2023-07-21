@@ -1,0 +1,61 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 31
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %frag_main "frag_main" %color_1 %blend_1
+               OpExecutionMode %frag_main OriginUpperLeft
+               OpName %color_1 "color_1"
+               OpName %blend_1 "blend_1"
+               OpName %FragOutput "FragOutput"
+               OpMemberName %FragOutput 0 "color"
+               OpMemberName %FragOutput 1 "blend"
+               OpName %frag_main_inner "frag_main_inner"
+               OpName %output "output"
+               OpName %frag_main "frag_main"
+               OpDecorate %color_1 Location 0
+               OpDecorate %color_1 Index 0
+               OpDecorate %blend_1 Location 0
+               OpDecorate %blend_1 Index 1
+               OpMemberDecorate %FragOutput 0 Offset 0
+               OpMemberDecorate %FragOutput 1 Offset 16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+    %color_1 = OpVariable %_ptr_Output_v4float Output %5
+    %blend_1 = OpVariable %_ptr_Output_v4float Output %5
+ %FragOutput = OpTypeStruct %v4float %v4float
+          %7 = OpTypeFunction %FragOutput
+%_ptr_Function_FragOutput = OpTypePointer Function %FragOutput
+         %13 = OpConstantNull %FragOutput
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+  %float_0_5 = OpConstant %float 0.5
+    %float_1 = OpConstant %float 1
+         %20 = OpConstantComposite %v4float %float_0_5 %float_0_5 %float_0_5 %float_1
+     %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+         %24 = OpTypeFunction %void
+%frag_main_inner = OpFunction %FragOutput None %7
+         %10 = OpLabel
+     %output = OpVariable %_ptr_Function_FragOutput Function %13
+         %17 = OpAccessChain %_ptr_Function_v4float %output %uint_0
+               OpStore %17 %20
+         %22 = OpAccessChain %_ptr_Function_v4float %output %uint_1
+               OpStore %22 %20
+         %23 = OpLoad %FragOutput %output
+               OpReturnValue %23
+               OpFunctionEnd
+  %frag_main = OpFunction %void None %24
+         %27 = OpLabel
+         %28 = OpFunctionCall %FragOutput %frag_main_inner
+         %29 = OpCompositeExtract %v4float %28 0
+               OpStore %color_1 %29
+         %30 = OpCompositeExtract %v4float %28 1
+               OpStore %blend_1 %30
+               OpReturn
+               OpFunctionEnd

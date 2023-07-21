@@ -2119,6 +2119,9 @@ void GeneratorImpl::EmitAttributes(utils::StringStream& out,
             out << "location = " << std::to_string(var->Location().value());
             first = false;
         }
+        if (attr->As<ast::IndexAttribute>()) {
+            out << ", index = " << std::to_string(var->Index().value());
+        }
     }
     if (!first) {
         out << ") ";

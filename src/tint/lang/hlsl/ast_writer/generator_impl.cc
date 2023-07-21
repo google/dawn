@@ -340,6 +340,7 @@ bool GeneratorImpl::Generate() {
                                       builtin::Extension::kChromiumExperimentalFullPtrParameters,
                                       builtin::Extension::kChromiumExperimentalPushConstant,
                                       builtin::Extension::kF16,
+                                      builtin::Extension::kChromiumInternalDualSourceBlending,
                                   })) {
         return false;
     }
@@ -4424,7 +4425,12 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
                     post += " : TEXCOORD" + std::to_string(location.value());
                 } else if (TINT_LIKELY(pipeline_stage_uses.count(
                                type::PipelineStageUsage::kFragmentOutput))) {
-                    post += " : SV_Target" + std::to_string(location.value());
+                    if (auto index = attributes.index) {
+                        post += " : SV_Target" + std::to_string(location.value() + index.value());
+                    } else {
+                        post += " : SV_Target" + std::to_string(location.value());
+                    }
+
                 } else {
                     TINT_ICE(Writer, diagnostics_) << "invalid use of location attribute";
                 }
