@@ -30,6 +30,7 @@ class ExitLoop;
 class ExitSwitch;
 class Let;
 class LoadVectorElement;
+class Return;
 class StoreVectorElement;
 class Var;
 }  // namespace tint::ir
@@ -194,6 +195,10 @@ class Validator {
     /// Validates the given exit if
     /// @param e the exit if to validate
     void CheckExitIf(ExitIf* e);
+
+    /// Validates the given return
+    /// @param r the return to validate
+    void CheckReturn(Return* r);
 
     /// Validates the @p exit targets a valid @p control instruction where the instruction may jump
     /// over if control instructions.

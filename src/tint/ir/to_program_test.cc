@@ -273,7 +273,7 @@ TEST_F(IRToProgramTest, BinaryOp_Equal) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.With(fn->Block(), [&] { b.Return(fn, b.Equal(ty.i32(), pa, pb)); });
+    b.With(fn->Block(), [&] { b.Return(fn, b.Equal(ty.bool_(), pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -288,7 +288,7 @@ TEST_F(IRToProgramTest, BinaryOp_NotEqual) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.With(fn->Block(), [&] { b.Return(fn, b.NotEqual(ty.i32(), pa, pb)); });
+    b.With(fn->Block(), [&] { b.Return(fn, b.NotEqual(ty.bool_(), pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -303,7 +303,7 @@ TEST_F(IRToProgramTest, BinaryOp_LessThan) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.With(fn->Block(), [&] { b.Return(fn, b.LessThan(ty.i32(), pa, pb)); });
+    b.With(fn->Block(), [&] { b.Return(fn, b.LessThan(ty.bool_(), pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -318,7 +318,7 @@ TEST_F(IRToProgramTest, BinaryOp_GreaterThan) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.With(fn->Block(), [&] { b.Return(fn, b.GreaterThan(ty.i32(), pa, pb)); });
+    b.With(fn->Block(), [&] { b.Return(fn, b.GreaterThan(ty.bool_(), pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -333,7 +333,7 @@ TEST_F(IRToProgramTest, BinaryOp_LessThanEqual) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.With(fn->Block(), [&] { b.Return(fn, b.LessThanEqual(ty.i32(), pa, pb)); });
+    b.With(fn->Block(), [&] { b.Return(fn, b.LessThanEqual(ty.bool_(), pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -348,7 +348,7 @@ TEST_F(IRToProgramTest, BinaryOp_GreaterThanEqual) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.With(fn->Block(), [&] { b.Return(fn, b.GreaterThanEqual(ty.i32(), pa, pb)); });
+    b.With(fn->Block(), [&] { b.Return(fn, b.GreaterThanEqual(ty.bool_(), pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -1632,7 +1632,7 @@ TEST_F(IRToProgramTest, If_Return_f32_Else_Return_f32) {
         b.With(if_->True(), [&] { b.Return(fn, 1.0_f); });
         b.With(if_->False(), [&] { b.Return(fn, 2.0_f); });
 
-        b.Return(fn);
+        b.Unreachable();
     });
 
     EXPECT_WGSL(R"(

@@ -46,7 +46,7 @@ class Return : public utils::Castable<Return, Terminator> {
     ~Return() override;
 
     /// @returns the function being returned
-    Function* Func() { return operands_[kFunctionOperandOffset]->As<Function>(); }
+    Function* Func() { return tint::As<Function>(operands_[kFunctionOperandOffset]); }
 
     /// @returns the return value, or nullptr
     ir::Value* Value() const {

@@ -206,7 +206,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
 TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_VectorValue) {
     auto* mat = b.FunctionParam(ty.mat2x2<f32>());
     auto* idx = b.FunctionParam(ty.i32());
-    auto* func = b.Function("foo", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.f32());
     func->SetParams({mat, idx});
 
     auto* block = func->Block();
@@ -214,7 +214,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_VectorValue) {
     block->Append(b.Return(func, access));
 
     auto* expect = R"(
-%foo = func(%2:mat2x2<f32>, %3:i32):vec2<f32> -> %b1 {
+%foo = func(%2:mat2x2<f32>, %3:i32):f32 -> %b1 {
   %b1 = block {
     %4:ptr<function, mat2x2<f32>, read_write> = var, %2
     %5:ptr<function, vec2<f32>, read_write> = access %4, %3

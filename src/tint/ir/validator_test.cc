@@ -2613,6 +2613,127 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Return) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.With(f->Block(), [&] {  //
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidatorTest, Return_WithValue) {
+    auto* f = b.Function("my_func", ty.i32());
+    b.With(f->Block(), [&] {  //
+        b.Return(f, 42_i);
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_TRUE(res) << res.Failure().str();
+}
+
+TEST_F(IR_ValidatorTest, Return_NullFunction) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.With(f->Block(), [&] {  //
+        b.Return(nullptr);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: return: undefined function
+    ret
+    ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.With(f->Block(), [&] {  //
+        b.Return(f, 42_i);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: return: unexpected return value
+    ret 42i
+    ^^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    ret 42i
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Return_MissingValue) {
+    auto* f = b.Function("my_func", ty.i32());
+    b.With(f->Block(), [&] {  //
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:5 error: return: expected return value
+    ret
+    ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():i32 -> %b1 {
+  %b1 = block {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Return_WrongValueType) {
+    auto* f = b.Function("my_func", ty.i32());
+    b.With(f->Block(), [&] {  //
+        b.Return(f, 42_f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(),
+              R"(:3:5 error: return: return value type does not match function return type
+    ret 42.0f
+    ^^^^^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():i32 -> %b1 {
+  %b1 = block {
+    ret 42.0f
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     auto* f = b.Function("my_func", ty.void_());
 

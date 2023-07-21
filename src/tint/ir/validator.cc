@@ -53,6 +53,7 @@
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/vector.h"
+#include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -441,18 +442,14 @@ void Validator::CheckTerminator(ir::Terminator* b) {
     // DemoteToHelper) so we can't add validation.
 
     tint::Switch(
-        b,                                   //
-        [&](ir::BreakIf*) {},                //
-        [&](ir::Continue*) {},               //
-        [&](ir::Exit* e) { CheckExit(e); },  //
-        [&](ir::NextIteration*) {},          //
-        [&](ir::Return* ret) {
-            if (ret->Func() == nullptr) {
-                AddError(ret, InstError(ret, "undefined function"));
-            }
-        },
-        [&](ir::TerminateInvocation*) {},  //
-        [&](ir::Unreachable*) {},          //
+        b,                                           //
+        [&](ir::BreakIf*) {},                        //
+        [&](ir::Continue*) {},                       //
+        [&](ir::Exit* e) { CheckExit(e); },          //
+        [&](ir::NextIteration*) {},                  //
+        [&](ir::Return* ret) { CheckReturn(ret); },  //
+        [&](ir::TerminateInvocation*) {},            //
+        [&](ir::Unreachable*) {},                    //
         [&](Default) { AddError(b, InstError(b, "missing validation")); });
 }
 
@@ -500,6 +497,25 @@ void Validator::CheckExitIf(ExitIf* e) {
     if (control_stack_.Back() != e->If()) {
         AddError(e, InstError(e, "if target jumps over other control instructions"));
         AddNote(control_stack_.Back(), "first control instruction jumped");
+    }
+}
+
+void Validator::CheckReturn(Return* ret) {
+    auto* func = ret->Func();
+    if (func == nullptr) {
+        AddError(ret, InstError(ret, "undefined function"));
+        return;
+    }
+    if (func->ReturnType()->Is<type::Void>()) {
+        if (ret->Value()) {
+            AddError(ret, InstError(ret, "unexpected return value"));
+        }
+    } else {
+        if (!ret->Value()) {
+            AddError(ret, InstError(ret, "expected return value"));
+        } else if (ret->Value()->Type() != func->ReturnType()) {
+            AddError(ret, InstError(ret, "return value type does not match function return type"));
+        }
     }
 }
 
