@@ -225,6 +225,34 @@ TEST_F(SpirvWriterTest, Builtin_Any_Vector) {
     EXPECT_INST("%result = OpAny %bool %arg");
 }
 
+TEST_F(SpirvWriterTest, Builtin_Determinant_Mat4x4f) {
+    auto* arg = b.FunctionParam("arg", ty.mat4x4<f32>());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), builtin::Function::kDeterminant, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %float %9 Determinant %arg");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Determinant_Mat3x3h) {
+    auto* arg = b.FunctionParam("arg", ty.mat3x3<f16>());
+    auto* func = b.Function("foo", ty.f16());
+    func->SetParams({arg});
+    b.With(func->Block(), [&] {
+        auto* result = b.Call(ty.f16(), builtin::Function::kDeterminant, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %half %9 Determinant %arg");
+}
+
 TEST_F(SpirvWriterTest, Builtin_Frexp_F32) {
     auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.f32());
     auto* arg = b.FunctionParam("arg", ty.f32());

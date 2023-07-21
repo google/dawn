@@ -1203,6 +1203,9 @@ void Writer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kDegrees:
             glsl_ext_inst(GLSLstd450Degrees);
             break;
+        case builtin::Function::kDeterminant:
+            glsl_ext_inst(GLSLstd450Determinant);
+            break;
         case builtin::Function::kDistance:
             glsl_ext_inst(GLSLstd450Distance);
             break;
