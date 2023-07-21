@@ -163,7 +163,7 @@ enable chromium_internal_dual_source_blending;
 
 struct S {
   a : i32,
-  @location(1u) @index(0u)
+  @location(0u) @index(0u)
   b : u32,
   c : f32,
 }

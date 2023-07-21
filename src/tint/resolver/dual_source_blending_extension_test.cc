@@ -132,5 +132,16 @@ TEST_F(DualSourceBlendingExtensionTests, GlobalVariableIndexAttribute) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+// Using the index attribute with a non-zero location should fail.
+TEST_F(DualSourceBlendingExtensionTests, IndexWithNonZeroLocation) {
+    Structure("Output", utils::Vector{
+                            Member("a", ty.vec4<f32>(),
+                                   utils::Vector{Location(1_a), Index(Source{{12, 34}}, 0_a)}),
+                        });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: index attribute must only be used with @location(0)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

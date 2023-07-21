@@ -1187,6 +1187,15 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                              index_attribute->source);
                     return false;
                 }
+
+                // Because HLSL specifies dual source blending targets with SV_Target0 and 1, we
+                // should restrict targets with index attributes to location 0 for easy translation
+                // in the backend writers.
+                if (location.value() != 0) {
+                    AddError("index attribute must only be used with @location(0)",
+                             index_attribute->source);
+                    return false;
+                }
             }
 
             if (location_attribute) {
@@ -2189,9 +2198,21 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
             return false;
         }
 
-        if (index_attribute && !location_attribute) {
-            AddError("index attribute must only be used with @location", index_attribute->source);
-            return false;
+        if (index_attribute) {
+            if (!location_attribute) {
+                AddError("index attribute must only be used with @location",
+                         index_attribute->source);
+                return false;
+            }
+
+            // Because HLSL specifies dual source blending targets with SV_Target0 and 1, we should
+            // restrict targets with index attributes to location 0 for easy translation in the
+            // backend writers.
+            if (member->Attributes().location.value() != 0) {
+                AddError("index attribute must only be used with @location(0)",
+                         index_attribute->source);
+                return false;
+            }
         }
 
         if (interpolate_attribute && !location_attribute) {
