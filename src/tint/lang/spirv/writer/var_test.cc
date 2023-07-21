@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
-#include "src/tint/lang/spirv/writer/test_helper_ir.h"
+#include "src/tint/lang/spirv/writer/test_helper.h"
 
 namespace tint::writer::spirv {
 namespace {

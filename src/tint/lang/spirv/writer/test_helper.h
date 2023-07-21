@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_TEST_HELPER_IR_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_TEST_HELPER_IR_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_TEST_HELPER_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_TEST_HELPER_H_
 
 #include <string>
 #include <utility>
@@ -25,7 +25,7 @@
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/validator.h"
 #include "src/tint/lang/spirv/ast_writer/spv_dump.h"
-#include "src/tint/lang/spirv/writer/generator_impl_ir.h"
+#include "src/tint/lang/spirv/writer/writer.h"
 
 namespace tint::writer::spirv {
 
@@ -236,4 +236,4 @@ using SpvGeneratorImplTestWithParam = SpvGeneratorTestHelperBase<testing::TestWi
 
 }  // namespace tint::writer::spirv
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_TEST_HELPER_IR_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_TEST_HELPER_H_

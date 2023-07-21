@@ -689,8 +689,8 @@ if(${TINT_BUILD_SPV_WRITER})
       ir/transform/shader_io_spirv.h
       ir/transform/var_for_dynamic_index.cc
       ir/transform/var_for_dynamic_index.h
-      lang/spirv/writer/generator_impl_ir.cc
-      lang/spirv/writer/generator_impl_ir.h
+      lang/spirv/writer/writer.cc
+      lang/spirv/writer/writer.h
     )
   endif()
 endif()
@@ -1343,27 +1343,27 @@ if(TINT_BUILD_TESTS)
         ir/transform/merge_return_test.cc
         ir/transform/shader_io_spirv_test.cc
         ir/transform/var_for_dynamic_index_test.cc
-        lang/spirv/writer/generator_impl_ir_access_test.cc
-        lang/spirv/writer/generator_impl_ir_atomic_builtin_test.cc
-        lang/spirv/writer/generator_impl_ir_binary_test.cc
-        lang/spirv/writer/generator_impl_ir_bitcast_test.cc
-        lang/spirv/writer/generator_impl_ir_builtin_test.cc
-        lang/spirv/writer/generator_impl_ir_constant_test.cc
-        lang/spirv/writer/generator_impl_ir_construct_test.cc
-        lang/spirv/writer/generator_impl_ir_convert_test.cc
-        lang/spirv/writer/generator_impl_ir_discard_test.cc
-        lang/spirv/writer/generator_impl_ir_function_test.cc
-        lang/spirv/writer/generator_impl_ir_if_test.cc
-        lang/spirv/writer/generator_impl_ir_let_test.cc
-        lang/spirv/writer/generator_impl_ir_loop_test.cc
-        lang/spirv/writer/generator_impl_ir_switch_test.cc
-        lang/spirv/writer/generator_impl_ir_swizzle_test.cc
-        lang/spirv/writer/generator_impl_ir_test.cc
-        lang/spirv/writer/generator_impl_ir_texture_builtin_test.cc
-        lang/spirv/writer/generator_impl_ir_type_test.cc
-        lang/spirv/writer/generator_impl_ir_unary_test.cc
-        lang/spirv/writer/generator_impl_ir_var_test.cc
-        lang/spirv/writer/test_helper_ir.h
+        lang/spirv/writer/access_test.cc
+        lang/spirv/writer/atomic_builtin_test.cc
+        lang/spirv/writer/binary_test.cc
+        lang/spirv/writer/bitcast_test.cc
+        lang/spirv/writer/builtin_test.cc
+        lang/spirv/writer/constant_test.cc
+        lang/spirv/writer/construct_test.cc
+        lang/spirv/writer/convert_test.cc
+        lang/spirv/writer/discard_test.cc
+        lang/spirv/writer/function_test.cc
+        lang/spirv/writer/if_test.cc
+        lang/spirv/writer/let_test.cc
+        lang/spirv/writer/loop_test.cc
+        lang/spirv/writer/switch_test.cc
+        lang/spirv/writer/swizzle_test.cc
+        lang/spirv/writer/test_helper.h
+        lang/spirv/writer/texture_builtin_test.cc
+        lang/spirv/writer/type_test.cc
+        lang/spirv/writer/unary_test.cc
+        lang/spirv/writer/var_test.cc
+        lang/spirv/writer/writer_test.cc
       )
     endif()
   endif()
