@@ -23,7 +23,7 @@
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 
-#include "src/tint/core/map.h"
+#include "src/tint/utils/containers/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CombineSamplers);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CombineSamplers::BindingInfo);

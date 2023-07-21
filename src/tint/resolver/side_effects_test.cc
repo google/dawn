@@ -15,7 +15,6 @@
 #include "src/tint/resolver/resolver.h"
 
 #include "gtest/gtest.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/lang/base/builtin/extension.h"
 #include "src/tint/lang/base/builtin/texel_format.h"
@@ -24,6 +23,7 @@
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/resolver/resolver_test_helper.h"
+#include "src/tint/utils/containers/vector.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

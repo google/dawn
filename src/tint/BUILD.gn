@@ -122,19 +122,19 @@ group("abseil") {
 ###############################################################################
 source_set("tint_utils_io") {
   sources = [
-    "core/io/command.h",
-    "core/io/tmpfile.h",
+    "utils/command/command.h",
+    "utils/file/tmpfile.h",
   ]
 
   if (is_linux || is_mac) {
-    sources += [ "core/io/command_posix.cc" ]
-    sources += [ "core/io/tmpfile_posix.cc" ]
+    sources += [ "utils/command/command_posix.cc" ]
+    sources += [ "utils/file/tmpfile_posix.cc" ]
   } else if (is_win) {
-    sources += [ "core/io/command_windows.cc" ]
-    sources += [ "core/io/tmpfile_windows.cc" ]
+    sources += [ "utils/command/command_windows.cc" ]
+    sources += [ "utils/file/tmpfile_windows.cc" ]
   } else {
-    sources += [ "core/io/command_other.cc" ]
-    sources += [ "core/io/tmpfile_other.cc" ]
+    sources += [ "utils/command/command_other.cc" ]
+    sources += [ "utils/file/tmpfile_other.cc" ]
   }
 
   deps = [ ":libtint_utils_src" ]
@@ -204,74 +204,74 @@ libtint_source_set("libtint_symbols_src") {
   sources = [
     "program_id.cc",
     "program_id.h",
-    "reflection.h",
-    "scope_stack.h",
-    "symbol.cc",
-    "symbol.h",
-    "symbol_table.cc",
-    "symbol_table.h",
+    "utils/containers/scope_stack.h",
+    "utils/reflection/reflection.h",
+    "utils/text/symbol.cc",
+    "utils/text/symbol.h",
+    "utils/text/symbol_table.cc",
+    "utils/text/symbol_table.h",
   ]
   deps = [ ":libtint_utils_src" ]
 }
 
 libtint_source_set("libtint_utils_src") {
   sources = [
-    "core/bitcast.h",
-    "core/bitset.h",
-    "core/block_allocator.h",
-    "core/bump_allocator.h",
-    "core/castable.cc",
-    "core/castable.h",
-    "core/cli.cc",
-    "core/cli.h",
-    "core/compiler_macros.h",
-    "core/concat.h",
-    "core/crc32.h",
-    "core/debugger.cc",
-    "core/debugger.h",
-    "core/defer.h",
-    "core/diagnostic/diagnostic.cc",
-    "core/diagnostic/diagnostic.h",
-    "core/diagnostic/formatter.cc",
-    "core/diagnostic/formatter.h",
-    "core/diagnostic/printer.cc",
-    "core/diagnostic/printer.h",
-    "core/enum_set.h",
-    "core/foreach_macro.h",
-    "core/hash.h",
-    "core/hashmap.h",
-    "core/hashmap_base.h",
-    "core/hashset.h",
-    "core/map.h",
-    "core/math.h",
-    "core/parse_num.cc",
-    "core/parse_num.h",
-    "core/predicates.h",
-    "core/scoped_assignment.h",
-    "core/slice.h",
-    "core/string.cc",
-    "core/string.h",
-    "core/string_stream.cc",
-    "core/string_stream.h",
-    "core/traits.h",
-    "core/unicode.cc",
-    "core/unicode.h",
-    "core/unique_allocator.h",
-    "core/unique_vector.h",
-    "core/vector.h",
-    "debug.cc",
-    "debug.h",
-    "source.cc",
-    "source.h",
-    "switch.h",
+    "utils/cli/cli.cc",
+    "utils/cli/cli.h",
+    "utils/containers/bitset.h",
+    "utils/containers/enum_set.h",
+    "utils/containers/hashmap.h",
+    "utils/containers/hashmap_base.h",
+    "utils/containers/hashset.h",
+    "utils/containers/map.h",
+    "utils/containers/predicates.h",
+    "utils/containers/slice.h",
+    "utils/containers/unique_allocator.h",
+    "utils/containers/unique_vector.h",
+    "utils/containers/vector.h",
+    "utils/debug/debug.cc",
+    "utils/debug/debug.h",
+    "utils/debug/debugger.cc",
+    "utils/debug/debugger.h",
+    "utils/diagnostic/diagnostic.cc",
+    "utils/diagnostic/diagnostic.h",
+    "utils/diagnostic/formatter.cc",
+    "utils/diagnostic/formatter.h",
+    "utils/diagnostic/printer.cc",
+    "utils/diagnostic/printer.h",
+    "utils/diagnostic/source.cc",
+    "utils/diagnostic/source.h",
+    "utils/macros/compiler.h",
+    "utils/macros/concat.h",
+    "utils/macros/defer.h",
+    "utils/macros/foreach.h",
+    "utils/macros/scoped_assignment.h",
+    "utils/math/crc32.h",
+    "utils/math/hash.h",
+    "utils/math/math.h",
+    "utils/memory/bitcast.h",
+    "utils/memory/block_allocator.h",
+    "utils/memory/bump_allocator.h",
+    "utils/rtti/castable.cc",
+    "utils/rtti/castable.h",
+    "utils/rtti/switch.h",
+    "utils/text/parse_num.cc",
+    "utils/text/parse_num.h",
+    "utils/text/string.cc",
+    "utils/text/string.h",
+    "utils/text/string_stream.cc",
+    "utils/text/string_stream.h",
+    "utils/text/unicode.cc",
+    "utils/text/unicode.h",
+    "utils/traits/traits.h",
   ]
 
   if (is_linux || is_mac) {
-    sources += [ "core/diagnostic/printer_posix.cc" ]
+    sources += [ "utils/diagnostic/printer_posix.cc" ]
   } else if (is_win) {
-    sources += [ "core/diagnostic/printer_windows.cc" ]
+    sources += [ "utils/diagnostic/printer_windows.cc" ]
   } else {
-    sources += [ "core/diagnostic/printer_other.cc" ]
+    sources += [ "utils/diagnostic/printer_other.cc" ]
   }
 
   deps = [ ":abseil" ]
@@ -1009,6 +1009,10 @@ libtint_source_set("libtint_writer_src") {
     "lang/wgsl/helpers/check_supported_extensions.h",
     "lang/wgsl/helpers/flatten_bindings.cc",
     "lang/wgsl/helpers/flatten_bindings.h",
+    "utils/text/float_to_string.cc",
+    "utils/text/float_to_string.h",
+    "utils/text/text_generator.cc",
+    "utils/text/text_generator.h",
     "writer/array_length_from_uniform_options.cc",
     "writer/array_length_from_uniform_options.h",
     "writer/ast_text_generator.cc",
@@ -1018,12 +1022,8 @@ libtint_source_set("libtint_writer_src") {
     "writer/binding_remapper_options.h",
     "writer/external_texture_options.cc",
     "writer/external_texture_options.h",
-    "writer/float_to_string.cc",
-    "writer/float_to_string.h",
     "writer/text.cc",
     "writer/text.h",
-    "writer/text_generator.cc",
-    "writer/text_generator.h",
     "writer/writer.cc",
     "writer/writer.h",
   ]
@@ -1682,9 +1682,9 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_diagnostic_src") {
     sources = [
-      "core/diagnostic/diagnostic_test.cc",
-      "core/diagnostic/formatter_test.cc",
-      "core/diagnostic/printer_test.cc",
+      "utils/diagnostic/diagnostic_test.cc",
+      "utils/diagnostic/formatter_test.cc",
+      "utils/diagnostic/printer_test.cc",
     ]
   }
 
@@ -1924,38 +1924,38 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_utils_src") {
     sources = [
-      "core/bitcast_test.cc",
-      "core/bitset_test.cc",
-      "core/block_allocator_test.cc",
-      "core/bump_allocator_test.cc",
-      "core/castable_test.cc",
-      "core/cli_test.cc",
-      "core/crc32_test.cc",
-      "core/defer_test.cc",
-      "core/enum_set_test.cc",
-      "core/hash_test.cc",
-      "core/hashmap_test.cc",
-      "core/hashset_test.cc",
-      "core/io/command_test.cc",
-      "core/io/tmpfile_test.cc",
-      "core/map_test.cc",
-      "core/math_test.cc",
-      "core/predicates_test.cc",
-      "core/result_test.cc",
-      "core/reverse_test.cc",
-      "core/scoped_assignment_test.cc",
-      "core/slice_test.cc",
-      "core/string_stream_test.cc",
-      "core/string_test.cc",
-      "core/traits_test.cc",
-      "core/transform_test.cc",
-      "core/unicode_test.cc",
-      "core/unique_allocator_test.cc",
-      "core/unique_vector_test.cc",
-      "core/vector_test.cc",
-      "debug_test.cc",
-      "source_test.cc",
-      "switch_test.cc",
+      "utils/cli/cli_test.cc",
+      "utils/command/command_test.cc",
+      "utils/containers/bitset_test.cc",
+      "utils/containers/enum_set_test.cc",
+      "utils/containers/hashmap_test.cc",
+      "utils/containers/hashset_test.cc",
+      "utils/containers/map_test.cc",
+      "utils/containers/predicates_test.cc",
+      "utils/containers/reverse_test.cc",
+      "utils/containers/slice_test.cc",
+      "utils/containers/transform_test.cc",
+      "utils/containers/unique_allocator_test.cc",
+      "utils/containers/unique_vector_test.cc",
+      "utils/containers/vector_test.cc",
+      "utils/debug/debug_test.cc",
+      "utils/diagnostic/source_test.cc",
+      "utils/file/tmpfile_test.cc",
+      "utils/macros/defer_test.cc",
+      "utils/macros/scoped_assignment_test.cc",
+      "utils/math/crc32_test.cc",
+      "utils/math/hash_test.cc",
+      "utils/math/math_test.cc",
+      "utils/memory/bitcast_test.cc",
+      "utils/memory/block_allocator_test.cc",
+      "utils/memory/bump_allocator_test.cc",
+      "utils/result/result_test.cc",
+      "utils/rtti/castable_test.cc",
+      "utils/rtti/switch_test.cc",
+      "utils/text/string_stream_test.cc",
+      "utils/text/string_test.cc",
+      "utils/text/unicode_test.cc",
+      "utils/traits/traits_test.cc",
     ]
     deps = [ ":libtint_utils_src" ]
   }
@@ -1965,8 +1965,8 @@ if (tint_build_unittests) {
       "lang/wgsl/helpers/append_vector_test.cc",
       "lang/wgsl/helpers/check_supported_extensions_test.cc",
       "lang/wgsl/helpers/flatten_bindings_test.cc",
+      "utils/text/float_to_string_test.cc",
       "writer/ast_text_generator_test.cc",
-      "writer/float_to_string_test.cc",
     ]
     deps = [
       ":libtint_unittests_ast_helper",
@@ -2372,10 +2372,10 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_symbols_src") {
     sources = [
-      "reflection_test.cc",
-      "scope_stack_test.cc",
-      "symbol_table_test.cc",
-      "symbol_test.cc",
+      "utils/containers/scope_stack_test.cc",
+      "utils/reflection/reflection_test.cc",
+      "utils/text/symbol_table_test.cc",
+      "utils/text/symbol_test.cc",
     ]
     deps = [ ":libtint_symbols_src" ]
   }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/ir/store_vector_element.h"
-#include "src/tint/debug.h"
+#include "src/tint/utils/debug/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::StoreVectorElement);
 

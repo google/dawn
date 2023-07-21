@@ -20,8 +20,8 @@
 #include <cstring>
 #include <functional>
 
-#include "src/tint/core/hash.h"
 #include "src/tint/lang/base/builtin/number.h"
+#include "src/tint/utils/math/hash.h"
 
 // Forward declarations
 namespace tint::sem {

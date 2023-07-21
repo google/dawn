@@ -17,8 +17,6 @@
 #include <algorithm>
 #include <array>
 
-#include "src/tint/core/hashmap.h"
-#include "src/tint/core/hashset.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/base/builtin/function.h"
 #include "src/tint/lang/base/type/depth_texture.h"
@@ -39,7 +37,9 @@
 #include "src/tint/lang/wgsl/ast/transform/spirv_atomic.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/hashset.h"
+#include "src/tint/utils/rtti/switch.h"
 
 // Terms:
 //    CFG: the control flow graph of the function, where basic blocks are the

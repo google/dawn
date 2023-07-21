@@ -18,7 +18,7 @@
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::sem {
 

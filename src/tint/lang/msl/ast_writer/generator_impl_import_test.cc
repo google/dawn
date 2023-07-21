@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/msl/ast_writer/test_helper.h"
 #include "src/tint/lang/wgsl/sem/call.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::writer::msl {
 namespace {

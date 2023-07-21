@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/type/depth_texture.h"
 #include "src/tint/lang/base/type/multisampled_texture.h"
 #include "src/tint/lang/base/type/sampled_texture.h"
@@ -22,6 +21,7 @@
 #include "src/tint/lang/glsl/ast_writer/test_helper.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/utils/text/string_stream.h"
 
 #include "gmock/gmock.h"
 

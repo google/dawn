@@ -23,8 +23,8 @@
 #include <string>
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/core/string.h"
 #include "src/tint/lang/base/builtin/diagnostic_rule.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::builtin {
 namespace {

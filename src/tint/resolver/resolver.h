@@ -23,8 +23,6 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/core/bitset.h"
-#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
@@ -36,6 +34,8 @@
 #include "src/tint/resolver/intrinsic_table.h"
 #include "src/tint/resolver/sem_helper.h"
 #include "src/tint/resolver/validator.h"
+#include "src/tint/utils/containers/bitset.h"
+#include "src/tint/utils/containers/unique_vector.h"
 
 // Forward declarations
 namespace tint::ast {

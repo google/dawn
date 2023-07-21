@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/core/string.h"
 #include "src/tint/ir/from_program.h"
 #include "src/tint/ir/program_test_helper.h"
 #include "src/tint/ir/to_program.h"
 #include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/utils/text/string.h"
 
 #if !TINT_BUILD_WGSL_READER || !TINT_BUILD_WGSL_WRITER
 #error "to_program_roundtrip_test.cc requires both the WGSL reader and writer to be enabled"

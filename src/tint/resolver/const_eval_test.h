@@ -22,10 +22,10 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/type/test_helper.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::resolver {
 

@@ -16,9 +16,6 @@
 
 #include <utility>
 
-#include "src/tint/core/hashmap.h"
-#include "src/tint/core/reverse.h"
-#include "src/tint/core/transform.h"
 #include "src/tint/lang/base/type/reference.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
@@ -26,6 +23,9 @@
 #include "src/tint/lang/wgsl/sem/if_statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/lang/wgsl/sem/while_statement.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/reverse.h"
+#include "src/tint/utils/containers/transform.h"
 
 namespace tint::ast::transform {
 

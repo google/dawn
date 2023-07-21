@@ -18,10 +18,6 @@
 #include <utility>
 
 #include "spirv/unified1/GLSL.std.450.h"
-#include "src/tint/core/compiler_macros.h"
-#include "src/tint/core/defer.h"
-#include "src/tint/core/map.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/base/type/array.h"
 #include "src/tint/lang/base/type/atomic.h"
@@ -52,6 +48,10 @@
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/utils/containers/map.h"
+#include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::writer::spirv {
 namespace {

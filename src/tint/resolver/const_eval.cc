@@ -22,11 +22,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "src/tint/core/bitcast.h"
-#include "src/tint/core/compiler_macros.h"
-#include "src/tint/core/map.h"
-#include "src/tint/core/string_stream.h"
-#include "src/tint/core/transform.h"
 #include "src/tint/lang/base/builtin/number.h"
 #include "src/tint/lang/base/constant/composite.h"
 #include "src/tint/lang/base/constant/scalar.h"
@@ -46,7 +41,12 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/map.h"
+#include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/memory/bitcast.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string_stream.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

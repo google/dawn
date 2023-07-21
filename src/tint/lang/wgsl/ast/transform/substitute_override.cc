@@ -22,7 +22,7 @@
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SubstituteOverride);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SubstituteOverride::Config);

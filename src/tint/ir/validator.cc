@@ -18,8 +18,6 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/core/reverse.h"
-#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/bitcast.h"
@@ -55,7 +53,9 @@
 #include "src/tint/lang/base/type/bool.h"
 #include "src/tint/lang/base/type/pointer.h"
 #include "src/tint/lang/base/type/vector.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/reverse.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::ir {
 

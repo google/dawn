@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_IR_STORE_H_
 #define SRC_TINT_IR_STORE_H_
 
-#include "src/tint/core/castable.h"
 #include "src/tint/ir/operand_instruction.h"
+#include "src/tint/utils/rtti/castable.h"
 
 namespace tint::ir {
 

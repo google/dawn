@@ -18,8 +18,6 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/core/diagnostic/diagnostic.h"
-#include "src/tint/core/hashmap.h"
 #include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/base/builtin/builtin.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
@@ -28,6 +26,8 @@
 #include "src/tint/lang/base/builtin/interpolation_type.h"
 #include "src/tint/lang/base/builtin/texel_format.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::resolver {
 

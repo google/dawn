@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/core/string.h"
 #include "src/tint/lang/base/type/depth_texture.h"
 #include "src/tint/lang/base/type/texture_dimension.h"
 #include "src/tint/lang/spirv/ast_writer/spv_dump.h"
 #include "src/tint/lang/spirv/ast_writer/test_helper.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::writer::spirv {
 namespace {

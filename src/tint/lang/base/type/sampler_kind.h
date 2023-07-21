@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_BASE_TYPE_SAMPLER_KIND_H_
 #define SRC_TINT_LANG_BASE_TYPE_SAMPLER_KIND_H_
 
-#include "src/tint/core/string_stream.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::type {
 

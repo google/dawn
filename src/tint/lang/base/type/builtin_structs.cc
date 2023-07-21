@@ -18,7 +18,6 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/core/string.h"
 #include "src/tint/lang/base/builtin/builtin.h"
 #include "src/tint/lang/base/type/abstract_float.h"
 #include "src/tint/lang/base/type/abstract_int.h"
@@ -29,8 +28,9 @@
 #include "src/tint/lang/base/type/manager.h"
 #include "src/tint/lang/base/type/u32.h"
 #include "src/tint/lang/base/type/vector.h"
-#include "src/tint/switch.h"
-#include "src/tint/symbol_table.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/symbol_table.h"
 
 namespace tint::type {
 

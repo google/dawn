@@ -20,7 +20,7 @@
 
 #include "src/tint/lang/base/type/clone_context.h"
 #include "src/tint/lang/base/type/unique_node.h"
-#include "src/tint/symbol_table.h"
+#include "src/tint/utils/text/symbol_table.h"
 
 namespace tint::type {
 

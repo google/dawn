@@ -25,10 +25,10 @@
 #include <type_traits>
 #include <utility>
 
-#include "src/tint/core/parse_num.h"
-#include "src/tint/core/unicode.h"
-#include "src/tint/debug.h"
 #include "src/tint/lang/base/builtin/number.h"
+#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/text/parse_num.h"
+#include "src/tint/utils/text/unicode.h"
 
 namespace tint::reader::wgsl {
 namespace {

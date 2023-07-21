@@ -17,9 +17,6 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/core/math.h"
-#include "src/tint/core/string.h"
-#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/base/builtin/extension.h"
 #include "src/tint/lang/base/builtin/interpolation_sampling.h"
@@ -57,7 +54,10 @@
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/math/math.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::inspector {
 

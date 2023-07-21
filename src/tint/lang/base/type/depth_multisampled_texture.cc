@@ -14,12 +14,12 @@
 
 #include "src/tint/lang/base/type/depth_multisampled_texture.h"
 
-#include "src/tint/core/diagnostic/diagnostic.h"
-#include "src/tint/core/hash.h"
-#include "src/tint/core/string_stream.h"
-#include "src/tint/debug.h"
 #include "src/tint/lang/base/type/manager.h"
 #include "src/tint/lang/base/type/texture_dimension.h"
+#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/text/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::DepthMultisampledTexture);
 

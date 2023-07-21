@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/tint/debug.h"
+#include "src/tint/utils/debug/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Convert);
 

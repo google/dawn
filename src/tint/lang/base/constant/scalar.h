@@ -15,12 +15,12 @@
 #ifndef SRC_TINT_LANG_BASE_CONSTANT_SCALAR_H_
 #define SRC_TINT_LANG_BASE_CONSTANT_SCALAR_H_
 
-#include "src/tint/core/castable.h"
-#include "src/tint/core/hash.h"
 #include "src/tint/lang/base/builtin/number.h"
 #include "src/tint/lang/base/constant/manager.h"
 #include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/base/type/type.h"
+#include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/rtti/castable.h"
 
 namespace tint::constant {
 

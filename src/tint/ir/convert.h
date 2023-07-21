@@ -15,9 +15,9 @@
 #ifndef SRC_TINT_IR_CONVERT_H_
 #define SRC_TINT_IR_CONVERT_H_
 
-#include "src/tint/core/castable.h"
 #include "src/tint/ir/call.h"
 #include "src/tint/lang/base/type/type.h"
+#include "src/tint/utils/rtti/castable.h"
 
 namespace tint::ir {
 

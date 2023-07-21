@@ -20,7 +20,7 @@
 #include <variant>
 #include <vector>
 
-#include "src/tint/core/hash.h"
+#include "src/tint/utils/math/hash.h"
 
 namespace tint::writer::spirv {
 

@@ -19,15 +19,15 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/core/hash.h"
-#include "src/tint/core/hashmap.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/evaluation_stage.h"
 #include "src/tint/resolver/sem_helper.h"
-#include "src/tint/scope_stack.h"
-#include "src/tint/source.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/scope_stack.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/diagnostic/source.h"
+#include "src/tint/utils/math/hash.h"
 
 // Forward declarations
 namespace tint::ast {

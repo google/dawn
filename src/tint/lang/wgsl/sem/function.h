@@ -20,11 +20,11 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/core/unique_vector.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_control.h"
 #include "src/tint/lang/wgsl/ast/variable.h"
 #include "src/tint/lang/wgsl/sem/call.h"
+#include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/containers/vector.h"
 
 // Forward declarations
 namespace tint::ast {

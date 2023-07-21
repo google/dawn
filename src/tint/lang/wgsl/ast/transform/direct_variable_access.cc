@@ -18,9 +18,6 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/core/reverse.h"
-#include "src/tint/core/scoped_assignment.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/type/abstract_int.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
@@ -33,6 +30,9 @@
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/utils/containers/reverse.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
+#include "src/tint/utils/text/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DirectVariableAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DirectVariableAccess::Config);

@@ -14,8 +14,8 @@
 
 #include "src/tint/ir/instruction.h"
 
-#include "src/tint/debug.h"
 #include "src/tint/ir/block.h"
+#include "src/tint/utils/debug/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Instruction);
 

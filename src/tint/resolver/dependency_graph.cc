@@ -19,14 +19,6 @@
 #include <variant>
 #include <vector>
 
-#include "src/tint/core/block_allocator.h"
-#include "src/tint/core/compiler_macros.h"
-#include "src/tint/core/defer.h"
-#include "src/tint/core/map.h"
-#include "src/tint/core/scoped_assignment.h"
-#include "src/tint/core/string.h"
-#include "src/tint/core/string_stream.h"
-#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/base/builtin/builtin.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
@@ -69,8 +61,16 @@
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
-#include "src/tint/scope_stack.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/map.h"
+#include "src/tint/utils/containers/scope_stack.h"
+#include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
+#include "src/tint/utils/memory/block_allocator.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/string_stream.h"
 
 #define TINT_DUMP_DEPENDENCY_GRAPH 0
 

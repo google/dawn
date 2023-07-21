@@ -17,11 +17,11 @@
 
 #include <utility>
 
-#include "src/tint/core/hash.h"
-#include "src/tint/core/unique_allocator.h"
 #include "src/tint/lang/base/builtin/number.h"
 #include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/base/type/manager.h"
+#include "src/tint/utils/containers/unique_allocator.h"
+#include "src/tint/utils/math/hash.h"
 
 namespace tint::constant {
 class Splat;

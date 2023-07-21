@@ -41,7 +41,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
-#include "src/tint/scope_stack.h"
+#include "src/tint/utils/containers/scope_stack.h"
 
 // Forward declarations
 namespace tint::sem {

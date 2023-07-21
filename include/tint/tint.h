@@ -21,8 +21,6 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
-#include "src/tint/core/diagnostic/printer.h"
-#include "src/tint/core/unicode.h"
 #include "src/tint/lang/base/type/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
 #include "src/tint/lang/wgsl/ast/transform/renamer.h"
@@ -33,6 +31,8 @@
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/reader/reader.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/utils/diagnostic/printer.h"
+#include "src/tint/utils/text/unicode.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/binding_point.h"
 #include "src/tint/writer/binding_remapper_options.h"

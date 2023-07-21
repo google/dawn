@@ -14,7 +14,6 @@
 
 #include "src/tint/lang/msl/writer/generator_impl_ir.h"
 
-#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/ir/validator.h"
 #include "src/tint/lang/base/constant/composite.h"
@@ -38,8 +37,9 @@
 #include "src/tint/lang/base/type/vector.h"
 #include "src/tint/lang/base/type/void.h"
 #include "src/tint/lang/msl/ast_writer/generator_support.h"
-#include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::writer::msl {
 namespace {

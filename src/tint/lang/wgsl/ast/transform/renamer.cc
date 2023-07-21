@@ -17,7 +17,6 @@
 #include <memory>
 #include <utility>
 
-#include "src/tint/core/unicode.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -25,7 +24,8 @@
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/unicode.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer::Data);

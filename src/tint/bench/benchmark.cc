@@ -19,8 +19,8 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/core/string.h"
-#include "src/tint/core/string_stream.h"
+#include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::bench {
 namespace {

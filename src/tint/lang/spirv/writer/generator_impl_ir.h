@@ -17,9 +17,6 @@
 
 #include <vector>
 
-#include "src/tint/core/diagnostic/diagnostic.h"
-#include "src/tint/core/hashmap.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/ir/constant.h"
 #include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
@@ -28,7 +25,10 @@
 #include "src/tint/lang/spirv/ast_writer/binary_writer.h"
 #include "src/tint/lang/spirv/ast_writer/function.h"
 #include "src/tint/lang/spirv/ast_writer/module.h"
-#include "src/tint/symbol.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/text/symbol.h"
 
 // Forward declarations
 namespace tint::ir {

@@ -14,10 +14,10 @@
 
 #include "src/tint/lang/msl/validate/val.h"
 
-#include "src/tint/core/io/command.h"
-#include "src/tint/core/io/tmpfile.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/utils/command/command.h"
+#include "src/tint/utils/file/tmpfile.h"
 
 namespace tint::msl::validate {
 

@@ -16,7 +16,6 @@
 #include <utility>
 
 #include "gmock/gmock.h"
-#include "src/tint/core/string.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/ir_test_helper.h"
 #include "src/tint/ir/validator.h"
@@ -24,6 +23,7 @@
 #include "src/tint/lang/base/type/matrix.h"
 #include "src/tint/lang/base/type/pointer.h"
 #include "src/tint/lang/base/type/struct.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::ir {
 namespace {

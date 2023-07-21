@@ -17,8 +17,6 @@
 
 #include <utility>
 
-#include "src/tint/core/hash.h"
-#include "src/tint/core/unique_allocator.h"
 #include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/lang/base/builtin/fluent_types.h"
@@ -28,7 +26,9 @@
 #include "src/tint/lang/base/type/struct.h"
 #include "src/tint/lang/base/type/type.h"
 #include "src/tint/lang/base/type/unique_node.h"
-#include "src/tint/symbol.h"
+#include "src/tint/utils/containers/unique_allocator.h"
+#include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/text/symbol.h"
 
 // Forward declarations
 namespace tint::type {

@@ -18,8 +18,8 @@
 #include <memory>
 #include <string>
 
-#include "src/tint/core/string_stream.h"
-#include "src/tint/core/vector.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::reader::spirv {
 

@@ -56,25 +56,25 @@ endfunction()
 
 ## Tint diagnostic utilities. Used by libtint and tint_utils_io.
 add_library(tint_diagnostic_utils
-  debug.cc
-  debug.h
-  core/diagnostic/diagnostic.cc
-  core/diagnostic/diagnostic.h
-  core/diagnostic/formatter.cc
-  core/diagnostic/formatter.h
-  core/diagnostic/printer.cc
-  core/diagnostic/printer.h
-  source.cc
-  source.h
-  core/debugger.cc
-  core/debugger.h
-  core/unicode.cc
-  core/unicode.h
+  utils/debug/debug.cc
+  utils/debug/debug.h
+  utils/diagnostic/diagnostic.cc
+  utils/diagnostic/diagnostic.h
+  utils/diagnostic/formatter.cc
+  utils/diagnostic/formatter.h
+  utils/diagnostic/printer.cc
+  utils/diagnostic/printer.h
+  utils/diagnostic/source.cc
+  utils/diagnostic/source.h
+  utils/debug/debugger.cc
+  utils/debug/debugger.h
+  utils/text/unicode.cc
+  utils/text/unicode.h
 )
 tint_default_compile_options(tint_diagnostic_utils)
 
 if (TINT_ENABLE_BREAK_IN_DEBUGGER)
-  set_source_files_properties(core/debugger.cc
+  set_source_files_properties(utils/debug/debugger.cc
     PROPERTIES COMPILE_DEFINITIONS "TINT_ENABLE_BREAK_IN_DEBUGGER=1" )
 endif()
 
@@ -266,7 +266,7 @@ list(APPEND TINT_LIB_SRCS
   program_id.h
   lang/wgsl/program/program.cc
   lang/wgsl/program/program.h
-  reflection.h
+  utils/reflection/reflection.h
   reader/reader.cc
   reader/reader.h
   resolver/const_eval.cc
@@ -284,8 +284,8 @@ list(APPEND TINT_LIB_SRCS
   resolver/uniformity.h
   resolver/validator.cc
   resolver/validator.h
-  scope_stack.h
-  switch.h
+  utils/containers/scope_stack.h
+  utils/rtti/switch.h
   lang/wgsl/sem/accessor_expression.cc
   lang/wgsl/sem/accessor_expression.h
   lang/wgsl/sem/array_count.cc
@@ -350,10 +350,10 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/sem/value_expression.h
   lang/wgsl/sem/while_statement.cc
   lang/wgsl/sem/while_statement.h
-  symbol_table.cc
-  symbol_table.h
-  symbol.cc
-  symbol.h
+  utils/text/symbol_table.cc
+  utils/text/symbol_table.h
+  utils/text/symbol.cc
+  utils/text/symbol.h
   tint.cc
   lang/wgsl/ast/transform/add_empty_entry_point.cc
   lang/wgsl/ast/transform/add_empty_entry_point.h
@@ -530,38 +530,38 @@ list(APPEND TINT_LIB_SRCS
   lang/base/type/vector.h
   lang/base/type/void.cc
   lang/base/type/void.h
-  core/bitcast.h
-  core/bitset.h
-  core/block_allocator.h
-  core/bump_allocator.h
-  core/castable.cc
-  core/castable.h
-  core/cli.cc
-  core/cli.h
-  core/compiler_macros.h
-  core/concat.h
-  core/crc32.h
-  core/enum_set.h
-  core/foreach_macro.h
-  core/hash.h
-  core/hashmap_base.h
-  core/hashmap.h
-  core/hashset.h
-  core/map.h
-  core/math.h
-  core/parse_num.cc
-  core/parse_num.h
-  core/predicates.h
-  core/scoped_assignment.h
-  core/slice.h
-  core/string.cc
-  core/string.h
-  core/string_stream.cc
-  core/string_stream.h
-  core/traits.h
-  core/unique_allocator.h
-  core/unique_vector.h
-  core/vector.h
+  utils/memory/bitcast.h
+  utils/containers/bitset.h
+  utils/memory/block_allocator.h
+  utils/memory/bump_allocator.h
+  utils/rtti/castable.cc
+  utils/rtti/castable.h
+  utils/cli/cli.cc
+  utils/cli/cli.h
+  utils/macros/compiler.h
+  utils/macros/concat.h
+  utils/math/crc32.h
+  utils/containers/enum_set.h
+  utils/macros/foreach.h
+  utils/math/hash.h
+  utils/containers/hashmap_base.h
+  utils/containers/hashmap.h
+  utils/containers/hashset.h
+  utils/containers/map.h
+  utils/math/math.h
+  utils/text/parse_num.cc
+  utils/text/parse_num.h
+  utils/containers/predicates.h
+  utils/macros/scoped_assignment.h
+  utils/containers/slice.h
+  utils/text/string.cc
+  utils/text/string.h
+  utils/text/string_stream.cc
+  utils/text/string_stream.h
+  utils/traits/traits.h
+  utils/containers/unique_allocator.h
+  utils/containers/unique_vector.h
+  utils/containers/vector.h
   lang/wgsl/helpers/append_vector.cc
   lang/wgsl/helpers/append_vector.h
   writer/array_length_from_uniform_options.cc
@@ -577,12 +577,12 @@ list(APPEND TINT_LIB_SRCS
   writer/external_texture_options.h
   lang/wgsl/helpers/flatten_bindings.cc
   lang/wgsl/helpers/flatten_bindings.h
-  writer/float_to_string.cc
-  writer/float_to_string.h
+  utils/text/float_to_string.cc
+  utils/text/float_to_string.h
   writer/ir_text_generator.cc
   writer/ir_text_generator.h
-  writer/text_generator.cc
-  writer/text_generator.h
+  utils/text/text_generator.cc
+  utils/text/text_generator.h
   writer/text.cc
   writer/text.h
   writer/writer.cc
@@ -606,11 +606,11 @@ tint_generated(resolver/ctor_conv_intrinsic)
 tint_generated(lang/wgsl/sem/parameter_usage)
 
 if(UNIX)
-  list(APPEND TINT_LIB_SRCS core/diagnostic/printer_posix.cc)
+  list(APPEND TINT_LIB_SRCS utils/diagnostic/printer_posix.cc)
 elseif(WIN32)
-  list(APPEND TINT_LIB_SRCS core/diagnostic/printer_windows.cc)
+  list(APPEND TINT_LIB_SRCS utils/diagnostic/printer_windows.cc)
 else()
-  list(APPEND TINT_LIB_SRCS core/diagnostic/printer_other.cc)
+  list(APPEND TINT_LIB_SRCS utils/diagnostic/printer_other.cc)
 endif()
 
 if(${TINT_BUILD_SPV_READER})
@@ -875,10 +875,10 @@ endif()
 
 ## Tint IO utilities. Used by tint_val.
 add_library(tint_utils_io
-  core/io/command_${TINT_OS_CC_SUFFIX}.cc
-  core/io/command.h
-  core/io/tmpfile_${TINT_OS_CC_SUFFIX}.cc
-  core/io/tmpfile.h
+  utils/command/command_${TINT_OS_CC_SUFFIX}.cc
+  utils/command/command.h
+  utils/file/tmpfile_${TINT_OS_CC_SUFFIX}.cc
+  utils/file/tmpfile.h
 )
 tint_default_compile_options(tint_utils_io)
 target_link_libraries(tint_utils_io tint_diagnostic_utils)
@@ -1016,13 +1016,13 @@ if(TINT_BUILD_TESTS)
     lang/base/constant/scalar_test.cc
     lang/base/constant/splat_test.cc
     lang/base/constant/value_test.cc
-    debug_test.cc
-    core/diagnostic/diagnostic_test.cc
-    core/diagnostic/formatter_test.cc
-    core/diagnostic/printer_test.cc
+    utils/debug/debug_test.cc
+    utils/diagnostic/diagnostic_test.cc
+    utils/diagnostic/formatter_test.cc
+    utils/diagnostic/printer_test.cc
     lang/wgsl/program/program_builder_test.cc
     lang/wgsl/program/program_test.cc
-    reflection_test.cc
+    utils/reflection/reflection_test.cc
     resolver/alias_analysis_test.cc
     resolver/array_accessor_test.cc
     resolver/assignment_validation_test.cc
@@ -1088,15 +1088,15 @@ if(TINT_BUILD_TESTS)
     resolver/value_constructor_validation_test.cc
     resolver/variable_test.cc
     resolver/variable_validation_test.cc
-    scope_stack_test.cc
+    utils/containers/scope_stack_test.cc
     lang/wgsl/sem/builtin_test.cc
     lang/wgsl/sem/diagnostic_severity_test.cc
     lang/wgsl/sem/struct_test.cc
     lang/wgsl/sem/value_expression_test.cc
-    source_test.cc
-    switch_test.cc
-    symbol_table_test.cc
-    symbol_test.cc
+    utils/diagnostic/source_test.cc
+    utils/rtti/switch_test.cc
+    utils/text/symbol_table_test.cc
+    utils/text/symbol_test.cc
     test_main.cc
     lang/wgsl/ast/transform/transform_test.cc
     transform/manager_test.cc
@@ -1123,40 +1123,40 @@ if(TINT_BUILD_TESTS)
     lang/base/type/type_test.cc
     lang/base/type/u32_test.cc
     lang/base/type/vector_test.cc
-    core/bitcast_test.cc
-    core/bitset_test.cc
-    core/block_allocator_test.cc
-    core/bump_allocator_test.cc
-    core/cli_test.cc
-    core/castable_test.cc
-    core/crc32_test.cc
-    core/defer_test.cc
-    core/enum_set_test.cc
-    core/hash_test.cc
-    core/io/command_test.cc
-    core/io/tmpfile_test.cc
-    core/hashmap_test.cc
-    core/hashset_test.cc
-    core/map_test.cc
-    core/math_test.cc
-    core/predicates_test.cc
-    core/result_test.cc
-    core/reverse_test.cc
-    core/scoped_assignment_test.cc
-    core/slice_test.cc
-    core/string_stream_test.cc
-    core/string_test.cc
-    core/traits_test.cc
-    core/transform_test.cc
-    core/unicode_test.cc
-    core/unique_allocator_test.cc
-    core/unique_vector_test.cc
-    core/vector_test.cc
+    utils/memory/bitcast_test.cc
+    utils/containers/bitset_test.cc
+    utils/memory/block_allocator_test.cc
+    utils/memory/bump_allocator_test.cc
+    utils/cli/cli_test.cc
+    utils/rtti/castable_test.cc
+    utils/math/crc32_test.cc
+    utils/macros/defer_test.cc
+    utils/containers/enum_set_test.cc
+    utils/math/hash_test.cc
+    utils/command/command_test.cc
+    utils/file/tmpfile_test.cc
+    utils/containers/hashmap_test.cc
+    utils/containers/hashset_test.cc
+    utils/containers/map_test.cc
+    utils/math/math_test.cc
+    utils/containers/predicates_test.cc
+    utils/result/result_test.cc
+    utils/containers/reverse_test.cc
+    utils/macros/scoped_assignment_test.cc
+    utils/containers/slice_test.cc
+    utils/text/string_stream_test.cc
+    utils/text/string_test.cc
+    utils/traits/traits_test.cc
+    utils/containers/transform_test.cc
+    utils/text/unicode_test.cc
+    utils/containers/unique_allocator_test.cc
+    utils/containers/unique_vector_test.cc
+    utils/containers/vector_test.cc
     lang/wgsl/helpers/append_vector_test.cc
     writer/ast_text_generator_test.cc
     lang/wgsl/helpers/check_supported_extensions_test.cc
     lang/wgsl/helpers/flatten_bindings_test.cc
-    writer/float_to_string_test.cc
+    utils/text/float_to_string_test.cc
   )
 
   # Noet, the source files are included here otherwise the cmd sources would not be included in the
@@ -1709,7 +1709,7 @@ if(TINT_BUILD_BENCHMARKS)
   endif()
 
   list(APPEND TINT_BENCHMARK_SRCS
-    "switch_bench.cc"
+    "utils/rtti/switch_bench.cc"
     "bench/benchmark.cc"
     "lang/wgsl/reader/parser_bench.cc"
   )

@@ -19,7 +19,6 @@
 
 #include <thread>
 
-#include "src/tint/core/hash.h"
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/lang/glsl/ast_writer/generator.h"
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
@@ -29,6 +28,7 @@
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/utils/math/hash.h"
 
 static constexpr size_t kNumThreads = 8;
 

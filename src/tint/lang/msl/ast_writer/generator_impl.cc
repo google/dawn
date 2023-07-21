@@ -21,10 +21,6 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/core/defer.h"
-#include "src/tint/core/map.h"
-#include "src/tint/core/scoped_assignment.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/constant/splat.h"
 #include "src/tint/lang/base/constant/value.h"
 #include "src/tint/lang/base/type/array.h"
@@ -84,8 +80,12 @@
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/utils/containers/map.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::writer::msl {
 namespace {

@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_WGSL_SEM_BEHAVIOR_H_
 #define SRC_TINT_LANG_WGSL_SEM_BEHAVIOR_H_
 
-#include "src/tint/core/enum_set.h"
+#include "src/tint/utils/containers/enum_set.h"
 
 namespace tint::sem {
 

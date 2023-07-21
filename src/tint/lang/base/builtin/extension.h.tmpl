@@ -8,14 +8,14 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- Import "src/tint/core/templates/enums.tmpl.inc" -}}
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 {{- $enum := (Sem.Enum "extension") -}}
 
 #ifndef SRC_TINT_LANG_BASE_BUILTIN_EXTENSION_H_
 #define SRC_TINT_LANG_BASE_BUILTIN_EXTENSION_H_
 
-#include "src/tint/core/string_stream.h"
-#include "src/tint/core/unique_vector.h"
+#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/containers/unique_vector.h"
 
 namespace tint::builtin {
 

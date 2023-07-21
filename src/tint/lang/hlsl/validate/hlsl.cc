@@ -16,9 +16,9 @@
 
 #include "src/tint/lang/hlsl/validate/val.h"
 
-#include "src/tint/core/io/command.h"
-#include "src/tint/core/io/tmpfile.h"
-#include "src/tint/core/string.h"
+#include "src/tint/utils/command/command.h"
+#include "src/tint/utils/file/tmpfile.h"
+#include "src/tint/utils/text/string.h"
 
 #ifdef _WIN32
 #include <Windows.h>

@@ -15,10 +15,10 @@
 #ifndef SRC_TINT_LANG_BASE_CONSTANT_SPLAT_H_
 #define SRC_TINT_LANG_BASE_CONSTANT_SPLAT_H_
 
-#include "src/tint/core/castable.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/lang/base/constant/composite.h"
 #include "src/tint/lang/base/type/type.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/rtti/castable.h"
 
 namespace tint::constant {
 

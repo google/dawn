@@ -19,10 +19,10 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/core/hash.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/type/manager.h"
-#include "src/tint/symbol_table.h"
+#include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/symbol_table.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Struct);
 TINT_INSTANTIATE_TYPEINFO(tint::type::StructMember);

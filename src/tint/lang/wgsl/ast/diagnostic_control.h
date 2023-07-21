@@ -18,8 +18,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/tint/core/diagnostic/diagnostic.h"
 #include "src/tint/lang/base/builtin/diagnostic_severity.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations
 namespace tint::ast {

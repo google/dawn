@@ -25,7 +25,7 @@
 
 #include <string>
 
-#include "src/tint/core/string_stream.h"
+#include "src/tint/utils/text/string_stream.h"
 
 // \cond DO_NOT_DOCUMENT
 namespace tint::builtin {

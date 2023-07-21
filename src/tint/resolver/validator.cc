@@ -18,14 +18,6 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/core/defer.h"
-#include "src/tint/core/map.h"
-#include "src/tint/core/math.h"
-#include "src/tint/core/reverse.h"
-#include "src/tint/core/scoped_assignment.h"
-#include "src/tint/core/string.h"
-#include "src/tint/core/string_stream.h"
-#include "src/tint/core/transform.h"
 #include "src/tint/lang/base/type/abstract_numeric.h"
 #include "src/tint/lang/base/type/array.h"
 #include "src/tint/lang/base/type/atomic.h"
@@ -74,6 +66,14 @@
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/lang/wgsl/sem/while_statement.h"
+#include "src/tint/utils/containers/map.h"
+#include "src/tint/utils/containers/reverse.h"
+#include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
+#include "src/tint/utils/math/math.h"
+#include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::resolver {
 namespace {

@@ -24,8 +24,6 @@
 #include <variant>
 
 #include "gtest/gtest.h"
-#include "src/tint/core/traits.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/lang/base/type/abstract_float.h"
 #include "src/tint/lang/base/type/abstract_int.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -33,6 +31,8 @@
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/resolver/resolver.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::resolver {
 

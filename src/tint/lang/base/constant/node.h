@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_BASE_CONSTANT_NODE_H_
 #define SRC_TINT_LANG_BASE_CONSTANT_NODE_H_
 
-#include "src/tint/core/castable.h"
+#include "src/tint/utils/rtti/castable.h"
 
 namespace tint::constant {
 

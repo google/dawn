@@ -14,8 +14,8 @@
 
 #include "src/tint/ir/load.h"
 
-#include "src/tint/debug.h"
 #include "src/tint/lang/base/type/pointer.h"
+#include "src/tint/utils/debug/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Load);
 

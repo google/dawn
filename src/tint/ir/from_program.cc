@@ -20,10 +20,6 @@
 #include <variant>
 #include <vector>
 
-#include "src/tint/core/defer.h"
-#include "src/tint/core/result.h"
-#include "src/tint/core/reverse.h"
-#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/block_param.h"
 #include "src/tint/ir/builder.h"
 #include "src/tint/ir/exit_if.h"
@@ -101,8 +97,12 @@
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/scope_stack.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/reverse.h"
+#include "src/tint/utils/containers/scope_stack.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
+#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/rtti/switch.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

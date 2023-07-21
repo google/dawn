@@ -21,7 +21,6 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/core/string.h"
 #include "src/tint/lang/base/builtin/extension.h"
 #include "src/tint/lang/base/builtin/fluent_types.h"
 #include "src/tint/lang/base/builtin/interpolation_sampling.h"
@@ -104,6 +103,7 @@
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/program_id.h"
+#include "src/tint/utils/text/string.h"
 
 #ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER
 #error "internal tint header being #included from tint.h"

@@ -19,11 +19,6 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/core/block_allocator.h"
-#include "src/tint/core/defer.h"
-#include "src/tint/core/map.h"
-#include "src/tint/core/string_stream.h"
-#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
@@ -41,8 +36,13 @@
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/lang/wgsl/sem/while_statement.h"
 #include "src/tint/resolver/dependency_graph.h"
-#include "src/tint/scope_stack.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/map.h"
+#include "src/tint/utils/containers/scope_stack.h"
+#include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/memory/block_allocator.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string_stream.h"
 
 // Set to `1` to dump the uniformity graph for each function in graphviz format.
 #define TINT_DUMP_UNIFORMITY_GRAPH 0

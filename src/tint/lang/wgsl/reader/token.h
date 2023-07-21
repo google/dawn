@@ -19,7 +19,7 @@
 #include <string_view>
 #include <variant>
 
-#include "src/tint/source.h"
+#include "src/tint/utils/diagnostic/source.h"
 
 namespace tint::reader::wgsl {
 

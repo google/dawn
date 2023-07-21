@@ -14,15 +14,15 @@
 
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
-#include "src/tint/core/compiler_macros.h"
-#include "src/tint/debug.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/rtti/switch.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

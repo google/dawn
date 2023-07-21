@@ -25,7 +25,7 @@
 #include "src/tint/lang/base/type/u32.h"
 #include "src/tint/lang/base/type/vector.h"
 #include "src/tint/program_id.h"
-#include "src/tint/symbol_table.h"
+#include "src/tint/utils/text/symbol_table.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/core/string.h"
 #include "src/tint/lang/wgsl/reader/parser_impl_test_helper.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::reader::wgsl {
 namespace {

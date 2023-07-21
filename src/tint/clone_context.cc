@@ -16,8 +16,8 @@
 
 #include <string>
 
-#include "src/tint/core/map.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/utils/containers/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::Cloneable);
 

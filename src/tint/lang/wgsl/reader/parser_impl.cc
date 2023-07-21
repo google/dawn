@@ -16,10 +16,6 @@
 
 #include <limits>
 
-#include "src/tint/core/defer.h"
-#include "src/tint/core/reverse.h"
-#include "src/tint/core/string.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/builtin/attribute.h"
 #include "src/tint/lang/base/type/depth_texture.h"
 #include "src/tint/lang/base/type/external_texture.h"
@@ -46,6 +42,10 @@
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/reader/classify_template_args.h"
 #include "src/tint/lang/wgsl/reader/lexer.h"
+#include "src/tint/utils/containers/reverse.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::reader::wgsl {
 namespace {

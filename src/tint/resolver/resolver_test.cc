@@ -18,7 +18,6 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/base/type/reference.h"
 #include "src/tint/lang/base/type/sampled_texture.h"
@@ -47,6 +46,7 @@
 #include "src/tint/lang/wgsl/sem/switch_statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/resolver/resolver_test_helper.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::resolver {
 namespace {

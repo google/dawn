@@ -14,8 +14,8 @@
 
 #include "src/tint/lang/wgsl/sem/load.h"
 
-#include "src/tint/debug.h"
 #include "src/tint/lang/base/type/reference.h"
+#include "src/tint/utils/debug/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Load);
 

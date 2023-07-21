@@ -15,13 +15,13 @@
 #ifndef SRC_TINT_IR_VAR_H_
 #define SRC_TINT_IR_VAR_H_
 
-#include "src/tint/core/castable.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/ir/binding_point.h"
 #include "src/tint/ir/operand_instruction.h"
 #include "src/tint/lang/base/builtin/access.h"
 #include "src/tint/lang/base/builtin/address_space.h"
 #include "src/tint/lang/base/type/pointer.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/rtti/castable.h"
 
 namespace tint::ir {
 

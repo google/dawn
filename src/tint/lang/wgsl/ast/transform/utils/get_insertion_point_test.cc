@@ -15,10 +15,10 @@
 #include <utility>
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/debug.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/utils/debug/debug.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

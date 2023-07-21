@@ -14,7 +14,7 @@
 
 #include "src/tint/writer/ir_text_generator.h"
 
-#include "src/tint/core/map.h"
+#include "src/tint/utils/containers/map.h"
 
 namespace tint::writer {
 

@@ -20,10 +20,10 @@
 #include <string>
 #include <variant>
 
-#include "src/tint/core/compiler_macros.h"
-#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/base/type/array_count.h"
 #include "src/tint/lang/base/type/type.h"
+#include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/macros/compiler.h"
 
 namespace tint::type {
 

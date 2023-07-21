@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "source/opt/build_module.h"
-#include "src/tint/core/unique_vector.h"
 #include "src/tint/lang/base/type/depth_texture.h"
 #include "src/tint/lang/base/type/multisampled_texture.h"
 #include "src/tint/lang/base/type/sampled_texture.h"
@@ -31,7 +30,8 @@
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/unique_vector.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::reader::spirv {
 

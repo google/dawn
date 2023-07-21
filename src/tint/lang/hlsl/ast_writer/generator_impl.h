@@ -21,7 +21,6 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/tint/core/hash.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -38,7 +37,8 @@
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
-#include "src/tint/scope_stack.h"
+#include "src/tint/utils/containers/scope_stack.h"
+#include "src/tint/utils/math/hash.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/ast_text_generator.h"
 

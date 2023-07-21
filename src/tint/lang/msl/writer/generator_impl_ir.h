@@ -18,10 +18,10 @@
 #include <string>
 #include <unordered_set>
 
-#include "src/tint/core/diagnostic/diagnostic.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/ir/module.h"
 #include "src/tint/lang/base/type/texture.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/text/string_stream.h"
 #include "src/tint/writer/ir_text_generator.h"
 
 namespace tint::writer::msl {

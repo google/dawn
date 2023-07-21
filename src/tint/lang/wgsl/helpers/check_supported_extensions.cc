@@ -16,10 +16,10 @@
 
 #include <string>
 
-#include "src/tint/core/diagnostic/diagnostic.h"
-#include "src/tint/core/hashset.h"
-#include "src/tint/core/string.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/utils/containers/hashset.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::writer {
 

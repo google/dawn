@@ -22,9 +22,9 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/core/compiler_macros.h"
-#include "src/tint/core/hashmap.h"
-#include "src/tint/core/string_stream.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/text/string_stream.h"
 
 TINT_BEGIN_DISABLE_WARNING(NEWLINE_EOF);
 TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);

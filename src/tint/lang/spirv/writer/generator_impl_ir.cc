@@ -18,7 +18,6 @@
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
-#include "src/tint/core/scoped_assignment.h"
 #include "src/tint/ir/access.h"
 #include "src/tint/ir/binary.h"
 #include "src/tint/ir/block.h"
@@ -78,8 +77,9 @@
 #include "src/tint/lang/base/type/void.h"
 #include "src/tint/lang/spirv/ast_writer/generator.h"
 #include "src/tint/lang/spirv/ast_writer/module.h"
-#include "src/tint/switch.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/utils/macros/scoped_assignment.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::writer::spirv {
 

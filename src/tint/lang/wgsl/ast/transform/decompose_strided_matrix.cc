@@ -18,12 +18,12 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/core/hash.h"
-#include "src/tint/core/map.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
+#include "src/tint/utils/containers/map.h"
+#include "src/tint/utils/math/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DecomposeStridedMatrix);
 

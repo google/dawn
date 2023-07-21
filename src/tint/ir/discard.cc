@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ir/discard.h"
-#include "src/tint/debug.h"
 #include "src/tint/lang/base/type/void.h"
+#include "src/tint/utils/debug/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Discard);
 

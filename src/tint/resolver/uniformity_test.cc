@@ -17,10 +17,10 @@
 #include <tuple>
 #include <utility>
 
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
 #include "src/tint/resolver/uniformity.h"
+#include "src/tint/utils/text/string_stream.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

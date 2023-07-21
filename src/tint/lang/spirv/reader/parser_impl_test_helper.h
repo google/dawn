@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/core/compiler_macros.h"
+#include "src/tint/utils/macros/compiler.h"
 
 TINT_BEGIN_DISABLE_WARNING(NEWLINE_EOF);
 TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);

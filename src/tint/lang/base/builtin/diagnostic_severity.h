@@ -26,9 +26,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/tint/core/diagnostic/diagnostic.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/builtin/diagnostic_rule.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::builtin {
 

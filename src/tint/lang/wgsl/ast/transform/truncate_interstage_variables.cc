@@ -18,13 +18,13 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/core/unicode.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/utils/text/unicode.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TruncateInterstageVariables);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TruncateInterstageVariables::Config);

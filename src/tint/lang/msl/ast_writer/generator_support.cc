@@ -17,7 +17,6 @@
 #include <cmath>
 #include <limits>
 
-#include "src/tint/debug.h"
 #include "src/tint/lang/base/type/array.h"
 #include "src/tint/lang/base/type/atomic.h"
 #include "src/tint/lang/base/type/f16.h"
@@ -27,8 +26,9 @@
 #include "src/tint/lang/base/type/struct.h"
 #include "src/tint/lang/base/type/u32.h"
 #include "src/tint/lang/base/type/vector.h"
-#include "src/tint/switch.h"
-#include "src/tint/writer/float_to_string.h"
+#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/float_to_string.h"
 
 namespace tint::writer::msl {
 

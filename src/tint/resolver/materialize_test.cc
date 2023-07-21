@@ -17,7 +17,7 @@
 #include "src/tint/lang/base/type/test_helper.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
 
 #include "gmock/gmock.h"
 

@@ -18,9 +18,6 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/core/hashmap.h"
-#include "src/tint/core/hashset.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/lang/base/builtin/builtin.h"
 #include "src/tint/lang/base/type/array.h"
 #include "src/tint/lang/base/type/reference.h"
@@ -33,7 +30,10 @@
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/hashset.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/rtti/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PackedVec3);
 

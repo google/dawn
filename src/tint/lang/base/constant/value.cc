@@ -19,7 +19,7 @@
 #include "src/tint/lang/base/type/matrix.h"
 #include "src/tint/lang/base/type/struct.h"
 #include "src/tint/lang/base/type/vector.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::constant::Value);
 

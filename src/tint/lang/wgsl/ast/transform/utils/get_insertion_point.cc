@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
-#include "src/tint/core/diagnostic/diagnostic.h"
-#include "src/tint/debug.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::ast::transform::utils {
 

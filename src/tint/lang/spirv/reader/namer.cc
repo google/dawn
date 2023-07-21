@@ -17,9 +17,9 @@
 #include <algorithm>
 #include <unordered_set>
 
-#include "src/tint/core/string_stream.h"
-#include "src/tint/debug.h"
 #include "src/tint/lang/base/builtin/function.h"
+#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::reader::spirv {
 

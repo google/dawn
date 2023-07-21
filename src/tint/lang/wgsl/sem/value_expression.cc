@@ -18,7 +18,7 @@
 
 #include "src/tint/lang/wgsl/sem/load.h"
 #include "src/tint/lang/wgsl/sem/materialize.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::ValueExpression);
 

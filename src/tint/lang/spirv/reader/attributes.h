@@ -15,11 +15,11 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_ATTRIBUTES_H_
 #define SRC_TINT_LANG_SPIRV_READER_ATTRIBUTES_H_
 
-#include "src/tint/core/enum_set.h"
-#include "src/tint/core/vector.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/utils/containers/enum_set.h"
+#include "src/tint/utils/containers/vector.h"
 
 namespace tint::reader::spirv {
 

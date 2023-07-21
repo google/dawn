@@ -19,7 +19,7 @@
 #include "src/tint/lang/wgsl/sem/function_expression.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::resolver {
 

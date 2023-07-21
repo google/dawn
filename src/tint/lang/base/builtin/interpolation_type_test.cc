@@ -25,7 +25,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "src/tint/core/string.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::builtin {
 namespace {

@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <functional>
 
-#include "src/tint/reflection.h"
+#include "src/tint/utils/reflection/reflection.h"
 
 namespace tint {
 

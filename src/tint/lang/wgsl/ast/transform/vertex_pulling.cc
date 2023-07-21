@@ -17,17 +17,17 @@
 #include <algorithm>
 #include <utility>
 
-#include "src/tint/core/compiler_macros.h"
-#include "src/tint/core/map.h"
-#include "src/tint/core/math.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/lang/base/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/containers/map.h"
+#include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/math/math.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string_stream.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VertexPulling);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VertexPulling::Config);

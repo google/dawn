@@ -11,7 +11,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- Import "src/tint/core/templates/enums.tmpl.inc" -}}
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 {{- $enum := (Sem.Enum "address_space") -}}
 
 #include "src/tint/lang/base/builtin/address_space.h"
@@ -20,7 +20,7 @@ See:
 
 #include <string>
 
-#include "src/tint/core/string.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::builtin {
 namespace {

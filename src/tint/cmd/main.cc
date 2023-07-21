@@ -40,15 +40,15 @@
 
 #include "src/tint/cmd/generate_external_texture_bindings.h"
 #include "src/tint/cmd/helper.h"
-#include "src/tint/core/cli.h"
-#include "src/tint/core/defer.h"
-#include "src/tint/core/io/command.h"
-#include "src/tint/core/string.h"
-#include "src/tint/core/string_stream.h"
-#include "src/tint/core/transform.h"
 #include "src/tint/lang/hlsl/validate/val.h"
 #include "src/tint/lang/msl/validate/val.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/utils/cli/cli.h"
+#include "src/tint/utils/command/command.h"
+#include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/string_stream.h"
 #include "tint/tint.h"
 
 #if TINT_BUILD_IR

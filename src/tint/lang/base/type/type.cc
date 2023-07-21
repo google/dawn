@@ -29,7 +29,7 @@
 #include "src/tint/lang/base/type/texture.h"
 #include "src/tint/lang/base/type/u32.h"
 #include "src/tint/lang/base/type/vector.h"
-#include "src/tint/switch.h"
+#include "src/tint/utils/rtti/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
 

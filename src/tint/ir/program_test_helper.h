@@ -20,11 +20,11 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/core/string_stream.h"
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/from_program.h"
 #include "src/tint/lang/base/builtin/number.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::ir {
 
