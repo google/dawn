@@ -2430,6 +2430,7 @@ if (tint_build_unittests) {
         "ir/from_program_let_test.cc",
         "ir/from_program_literal_test.cc",
         "ir/from_program_materialize_test.cc",
+        "ir/from_program_shadowing_test.cc",
         "ir/from_program_store_test.cc",
         "ir/from_program_test.cc",
         "ir/from_program_unary_test.cc",

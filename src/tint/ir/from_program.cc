@@ -166,16 +166,23 @@ class Impl {
     /// The diagnostic that have been raised.
     diag::List diagnostics_;
 
-    class ControlStackScope {
+    class StackScope {
       public:
-        ControlStackScope(Impl* impl, ControlInstruction* b) : impl_(impl) {
+        explicit StackScope(Impl* impl) : impl_(impl) { impl->scopes_.Push(); }
+
+        ~StackScope() { impl_->scopes_.Pop(); }
+
+      protected:
+        Impl* impl_;
+    };
+
+    class ControlStackScope : public StackScope {
+      public:
+        ControlStackScope(Impl* impl, ControlInstruction* b) : StackScope(impl) {
             impl_->control_stack_.Push(b);
         }
 
         ~ControlStackScope() { impl_->control_stack_.Pop(); }
-
-      private:
-        Impl* impl_;
     };
 
     void add_error(const Source& s, const std::string& err) {
@@ -591,12 +598,10 @@ class Impl {
         auto* loop_inst = builder_.Loop();
         current_block_->Append(loop_inst);
 
-        ControlStackScope scope(this, loop_inst);
+        // Note: The loop doesn't use EmitBlock because it needs the scope stack to not get popped
+        // until after the continuing block.
 
-        // The loop doesn't use EmitBlock because it needs the scope stack to not get popped until
-        // after the continuing block.
-        scopes_.Push();
-        TINT_DEFER(scopes_.Pop());
+        ControlStackScope scope(this, loop_inst);
 
         {
             TINT_SCOPED_ASSIGNMENT(current_block_, loop_inst->Body());
@@ -668,10 +673,6 @@ class Impl {
     void EmitForLoop(const ast::ForLoopStatement* stmt) {
         auto* loop_inst = builder_.Loop();
         current_block_->Append(loop_inst);
-
-        // Make sure the initializer ends up in a contained scope
-        scopes_.Push();
-        TINT_DEFER(scopes_.Pop());
 
         ControlStackScope scope(this, loop_inst);
 

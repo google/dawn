@@ -185,9 +185,9 @@ class State {
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
         static constexpr size_t N = decltype(ast::Function::params)::static_length;
         auto params = utils::Transform<N>(fn->Params(), [&](FunctionParam* param) {
+            auto ty = Type(param->Type());
             auto name = NameFor(param);
             Bind(param, name, PtrKind::kPtr);
-            auto ty = Type(param->Type());
             return b.Param(name, ty);
         });
 
@@ -502,10 +502,10 @@ class State {
 
     void Var(ir::Var* var) {
         auto* val = var->Result();
-        Symbol name = NameFor(var->Result());
-        Bind(var->Result(), name, PtrKind::kRef);
         auto* ptr = As<type::Pointer>(val->Type());
         auto ty = Type(ptr->StoreType());
+        Symbol name = NameFor(var->Result());
+        Bind(var->Result(), name, PtrKind::kRef);
 
         utils::Vector<const ast::Attribute*, 4> attrs;
         if (auto bp = var->BindingPoint()) {
