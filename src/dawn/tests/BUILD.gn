@@ -653,17 +653,14 @@ source_set("white_box_tests_sources") {
   if (dawn_enable_vulkan) {
     deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
 
-    if (is_chromeos) {
+    if (is_chromeos || is_linux) {
       sources += [
         "white_box/VulkanImageWrappingTests.cpp",
         "white_box/VulkanImageWrappingTests.h",
         "white_box/VulkanImageWrappingTests_DmaBuf.cpp",
-      ]
-    } else if (is_linux) {
-      sources += [
-        "white_box/VulkanImageWrappingTests.cpp",
-        "white_box/VulkanImageWrappingTests.h",
+        "white_box/VulkanImageWrappingTests_DmaBuf.h",
         "white_box/VulkanImageWrappingTests_OpaqueFD.cpp",
+        "white_box/VulkanImageWrappingTests_OpaqueFD.h",
       ]
     }
 
@@ -742,7 +739,7 @@ dawn_test("dawn_end2end_tests") {
     sources += [ "End2EndTestsMain.cpp" ]
   }
 
-  if (is_chromeos) {
+  if (is_chromeos || is_linux) {
     libs += [ "gbm" ]
   }
 }

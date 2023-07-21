@@ -22,15 +22,10 @@
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
-#include "dawn/tests/white_box/VulkanImageWrappingTests.h"
+#include "dawn/tests/white_box/VulkanImageWrappingTests_OpaqueFD.h"
 #include "gtest/gtest.h"
 
 namespace dawn::native::vulkan {
-
-ExternalImageDescriptorVkForTesting::ExternalImageDescriptorVkForTesting()
-    : ExternalImageDescriptorVk(ExternalImageType::OpaqueFD) {}
-ExternalImageExportInfoVkForTesting::ExternalImageExportInfoVkForTesting()
-    : ExternalImageExportInfoVk(ExternalImageType::OpaqueFD) {}
 
 class ExternalSemaphoreOpaqueFD : public VulkanImageWrappingTestBackend::ExternalSemaphore {
   public:
@@ -97,8 +92,9 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
     }
 
     bool SupportsTestParams(const TestParams& params) const override {
-        return !params.useDedicatedAllocation ||
-               mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::DedicatedAllocation);
+        return mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::ExternalMemoryFD) &&
+               (!params.useDedicatedAllocation ||
+                mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::DedicatedAllocation));
     }
 
     std::unique_ptr<ExternalTexture> CreateTexture(uint32_t width,
@@ -283,9 +279,7 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
     native::vulkan::Device* mDeviceVk;
 };
 
-// static
-std::unique_ptr<VulkanImageWrappingTestBackend> VulkanImageWrappingTestBackend::Create(
-    const wgpu::Device& device) {
+std::unique_ptr<VulkanImageWrappingTestBackend> CreateOpaqueFDBackend(const wgpu::Device& device) {
     return std::make_unique<VulkanImageWrappingTestBackendOpaqueFD>(device);
 }
 
