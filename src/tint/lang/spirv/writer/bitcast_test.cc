@@ -35,7 +35,7 @@ std::string PrintCase(testing::TestParamInfo<BitcastCase> cc) {
     return ss.str();
 }
 
-using Bitcast = SpvGeneratorImplTestWithParam<BitcastCase>;
+using Bitcast = SpirvWriterTestWithParam<BitcastCase>;
 TEST_P(Bitcast, Scalar) {
     auto& params = GetParam();
     auto* func = b.Function("foo", MakeScalarType(params.out));
@@ -70,7 +70,7 @@ TEST_P(Bitcast, Vector) {
         EXPECT_INST("%result = OpBitcast %v2" + params.spirv_type_name + " %arg");
     }
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          Bitcast,
                          testing::Values(
                              // To f32.
@@ -92,7 +92,7 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                              BitcastCase{kU32, kU32, "uint"}),
                          PrintCase);
 
-TEST_F(SpvGeneratorImplTest, Bitcast_u32_to_vec2h) {
+TEST_F(SpirvWriterTest, Bitcast_u32_to_vec2h) {
     auto* func = b.Function("foo", ty.vec2<f16>());
     func->SetParams({b.FunctionParam("arg", ty.u32())});
     b.With(func->Block(), [&] {
@@ -105,7 +105,7 @@ TEST_F(SpvGeneratorImplTest, Bitcast_u32_to_vec2h) {
     EXPECT_INST("%result = OpBitcast %v2half %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Bitcast_vec2i_to_vec4h) {
+TEST_F(SpirvWriterTest, Bitcast_vec2i_to_vec4h) {
     auto* func = b.Function("foo", ty.vec4<f16>());
     func->SetParams({b.FunctionParam("arg", ty.vec2<i32>())});
     b.With(func->Block(), [&] {
@@ -118,7 +118,7 @@ TEST_F(SpvGeneratorImplTest, Bitcast_vec2i_to_vec4h) {
     EXPECT_INST("%result = OpBitcast %v4half %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Bitcast_vec2h_to_u32) {
+TEST_F(SpirvWriterTest, Bitcast_vec2h_to_u32) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({b.FunctionParam("arg", ty.vec2<f16>())});
     b.With(func->Block(), [&] {
@@ -131,7 +131,7 @@ TEST_F(SpvGeneratorImplTest, Bitcast_vec2h_to_u32) {
     EXPECT_INST("%result = OpBitcast %uint %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Bitcast_vec4h_to_vec2i) {
+TEST_F(SpirvWriterTest, Bitcast_vec4h_to_vec2i) {
     auto* func = b.Function("foo", ty.vec2<i32>());
     func->SetParams({b.FunctionParam("arg", ty.vec4<f16>())});
     b.With(func->Block(), [&] {

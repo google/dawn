@@ -21,7 +21,7 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-TEST_F(SpvGeneratorImplTest, ModuleHeader) {
+TEST_F(SpirvWriterTest, ModuleHeader) {
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
     auto got = Disassemble(generator_.Result());
     EXPECT_THAT(got, testing::StartsWith(R"(OpCapability Shader
@@ -29,7 +29,7 @@ OpMemoryModel Logical GLSL450
 )"));
 }
 
-TEST_F(SpvGeneratorImplTest, Unreachable) {
+TEST_F(SpirvWriterTest, Unreachable) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();

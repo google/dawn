@@ -20,7 +20,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-TEST_F(SpvGeneratorImplTest, Access_Array_Value_ConstantIndex) {
+TEST_F(SpirvWriterTest, Access_Array_Value_ConstantIndex) {
     auto* arr_val = b.FunctionParam("arr", ty.array(ty.i32(), 4));
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({arr_val});
@@ -34,7 +34,7 @@ TEST_F(SpvGeneratorImplTest, Access_Array_Value_ConstantIndex) {
     EXPECT_INST("%result = OpCompositeExtract %int %arr 1");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Array_Pointer_ConstantIndex) {
+TEST_F(SpirvWriterTest, Access_Array_Pointer_ConstantIndex) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* arr_var = b.Var("arr", ty.ptr<function, array<i32, 4>>());
@@ -47,7 +47,7 @@ TEST_F(SpvGeneratorImplTest, Access_Array_Pointer_ConstantIndex) {
     EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %arr %uint_1");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Array_Pointer_DynamicIndex) {
+TEST_F(SpirvWriterTest, Access_Array_Pointer_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({idx});
@@ -62,7 +62,7 @@ TEST_F(SpvGeneratorImplTest, Access_Array_Pointer_DynamicIndex) {
     EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %arr %idx");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Matrix_Value_ConstantIndex) {
+TEST_F(SpirvWriterTest, Access_Matrix_Value_ConstantIndex) {
     auto* mat_val = b.FunctionParam("mat", ty.mat2x2(ty.f32()));
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({mat_val});
@@ -79,7 +79,7 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Value_ConstantIndex) {
     EXPECT_INST("%result_scalar = OpCompositeExtract %float %mat 1 0");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_ConstantIndex) {
+TEST_F(SpirvWriterTest, Access_Matrix_Pointer_ConstantIndex) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* mat_var = b.Var("mat", ty.ptr<function, mat2x2<f32>>());
@@ -96,7 +96,7 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_ConstantIndex) {
     EXPECT_INST("%result_scalar = OpLoad %float %14");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_DynamicIndex) {
+TEST_F(SpirvWriterTest, Access_Matrix_Pointer_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({idx});
@@ -115,7 +115,7 @@ TEST_F(SpvGeneratorImplTest, Access_Matrix_Pointer_DynamicIndex) {
     EXPECT_INST("%result_scalar = OpLoad %float %14");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Vector_Value_ConstantIndex) {
+TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantIndex) {
     auto* vec_val = b.FunctionParam("vec", ty.vec4(ty.i32()));
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec_val});
@@ -129,7 +129,7 @@ TEST_F(SpvGeneratorImplTest, Access_Vector_Value_ConstantIndex) {
     EXPECT_INST("%result = OpCompositeExtract %int %vec 1");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Vector_Value_DynamicIndex) {
+TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex) {
     auto* vec_val = b.FunctionParam("vec", ty.vec4(ty.i32()));
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
@@ -144,7 +144,7 @@ TEST_F(SpvGeneratorImplTest, Access_Vector_Value_DynamicIndex) {
     EXPECT_INST("%result = OpVectorExtractDynamic %int %vec %idx");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_NestedVector_Value_DynamicIndex) {
+TEST_F(SpirvWriterTest, Access_NestedVector_Value_DynamicIndex) {
     auto* val = b.FunctionParam("arr", ty.array(ty.array(ty.vec4(ty.i32()), 4), 4));
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
@@ -160,7 +160,7 @@ TEST_F(SpvGeneratorImplTest, Access_NestedVector_Value_DynamicIndex) {
     EXPECT_INST("%result = OpVectorExtractDynamic %int %14 %idx");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Struct_Value_ConstantIndex) {
+TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex) {
     auto* str =
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.Register("a"), ty.f32()},
@@ -182,7 +182,7 @@ TEST_F(SpvGeneratorImplTest, Access_Struct_Value_ConstantIndex) {
     EXPECT_INST("%result_b = OpCompositeExtract %int %str 1 2");
 }
 
-TEST_F(SpvGeneratorImplTest, Access_Struct_Pointer_ConstantIndex) {
+TEST_F(SpirvWriterTest, Access_Struct_Pointer_ConstantIndex) {
     auto* str =
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.Register("a"), ty.f32()},
@@ -203,7 +203,7 @@ TEST_F(SpvGeneratorImplTest, Access_Struct_Pointer_ConstantIndex) {
     EXPECT_INST("%result_b = OpAccessChain %_ptr_Function_v4int %str %uint_1");
 }
 
-TEST_F(SpvGeneratorImplTest, LoadVectorElement_ConstantIndex) {
+TEST_F(SpirvWriterTest, LoadVectorElement_ConstantIndex) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
@@ -217,7 +217,7 @@ TEST_F(SpvGeneratorImplTest, LoadVectorElement_ConstantIndex) {
     EXPECT_INST("%result = OpLoad %int %9");
 }
 
-TEST_F(SpvGeneratorImplTest, LoadVectorElement_DynamicIndex) {
+TEST_F(SpirvWriterTest, LoadVectorElement_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({idx});
@@ -233,7 +233,7 @@ TEST_F(SpvGeneratorImplTest, LoadVectorElement_DynamicIndex) {
     EXPECT_INST("%result = OpLoad %int %10");
 }
 
-TEST_F(SpvGeneratorImplTest, StoreVectorElement_ConstantIndex) {
+TEST_F(SpirvWriterTest, StoreVectorElement_ConstantIndex) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
@@ -246,7 +246,7 @@ TEST_F(SpvGeneratorImplTest, StoreVectorElement_ConstantIndex) {
     EXPECT_INST("OpStore %9 %int_42");
 }
 
-TEST_F(SpvGeneratorImplTest, StoreVectorElement_DynamicIndex) {
+TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({idx});

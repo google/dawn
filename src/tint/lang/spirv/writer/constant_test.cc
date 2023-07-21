@@ -19,7 +19,7 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-TEST_F(SpvGeneratorImplTest, Constant_Bool) {
+TEST_F(SpirvWriterTest, Constant_Bool) {
     generator_.Constant(b.Constant(true));
     generator_.Constant(b.Constant(false));
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -27,7 +27,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Bool) {
     EXPECT_INST("%false = OpConstantFalse %bool");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_I32) {
+TEST_F(SpirvWriterTest, Constant_I32) {
     generator_.Constant(b.Constant(i32(42)));
     generator_.Constant(b.Constant(i32(-1)));
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -35,7 +35,7 @@ TEST_F(SpvGeneratorImplTest, Constant_I32) {
     EXPECT_INST("%int_n1 = OpConstant %int -1");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_U32) {
+TEST_F(SpirvWriterTest, Constant_U32) {
     generator_.Constant(b.Constant(u32(42)));
     generator_.Constant(b.Constant(u32(4000000000)));
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -43,7 +43,7 @@ TEST_F(SpvGeneratorImplTest, Constant_U32) {
     EXPECT_INST("%uint_4000000000 = OpConstant %uint 4000000000");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_F32) {
+TEST_F(SpirvWriterTest, Constant_F32) {
     generator_.Constant(b.Constant(f32(42)));
     generator_.Constant(b.Constant(f32(-1)));
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -51,7 +51,7 @@ TEST_F(SpvGeneratorImplTest, Constant_F32) {
     EXPECT_INST("%float_n1 = OpConstant %float -1");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_F16) {
+TEST_F(SpirvWriterTest, Constant_F16) {
     generator_.Constant(b.Constant(f16(42)));
     generator_.Constant(b.Constant(f16(-1)));
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -59,7 +59,7 @@ TEST_F(SpvGeneratorImplTest, Constant_F16) {
     EXPECT_INST("%half_n0x1p_0 = OpConstant %half -0x1p+0");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Vec4Bool) {
+TEST_F(SpirvWriterTest, Constant_Vec4Bool) {
     auto const_bool = [&](bool val) { return mod.constant_values.Get(val); };
     auto* v = mod.constant_values.Composite(
         ty.vec4(ty.bool_()),
@@ -70,7 +70,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec4Bool) {
     EXPECT_INST("%1 = OpConstantComposite %v4bool %true %false %false %true");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Vec2i) {
+TEST_F(SpirvWriterTest, Constant_Vec2i) {
     auto const_i32 = [&](float val) { return mod.constant_values.Get(i32(val)); };
     auto* v = mod.constant_values.Composite(ty.vec2(ty.i32()),
                                             utils::Vector{const_i32(42), const_i32(-1)});
@@ -79,7 +79,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec2i) {
     EXPECT_INST("%1 = OpConstantComposite %v2int %int_42 %int_n1");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Vec3u) {
+TEST_F(SpirvWriterTest, Constant_Vec3u) {
     auto const_u32 = [&](float val) { return mod.constant_values.Get(u32(val)); };
     auto* v = mod.constant_values.Composite(
         ty.vec3(ty.u32()), utils::Vector{const_u32(42), const_u32(0), const_u32(4000000000)});
@@ -88,7 +88,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec3u) {
     EXPECT_INST("%1 = OpConstantComposite %v3uint %uint_42 %uint_0 %uint_4000000000");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Vec4f) {
+TEST_F(SpirvWriterTest, Constant_Vec4f) {
     auto const_f32 = [&](float val) { return mod.constant_values.Get(f32(val)); };
     auto* v = mod.constant_values.Composite(
         ty.vec4(ty.f32()),
@@ -98,7 +98,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec4f) {
     EXPECT_INST("%1 = OpConstantComposite %v4float %float_42 %float_0 %float_0_25 %float_n1");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Vec2h) {
+TEST_F(SpirvWriterTest, Constant_Vec2h) {
     auto const_f16 = [&](float val) { return mod.constant_values.Get(f16(val)); };
     auto* v = mod.constant_values.Composite(ty.vec2(ty.f16()),
                                             utils::Vector{const_f16(42), const_f16(0.25)});
@@ -107,7 +107,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Vec2h) {
     EXPECT_INST("%1 = OpConstantComposite %v2half %half_0x1_5p_5 %half_0x1pn2");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Mat2x3f) {
+TEST_F(SpirvWriterTest, Constant_Mat2x3f) {
     auto const_f32 = [&](float val) { return mod.constant_values.Get(f32(val)); };
     auto* f32 = ty.f32();
     auto* v = mod.constant_values.Composite(
@@ -133,7 +133,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Mat2x3f) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Mat4x2h) {
+TEST_F(SpirvWriterTest, Constant_Mat4x2h) {
     auto const_f16 = [&](float val) { return mod.constant_values.Get(f16(val)); };
     auto* f16 = ty.f16();
     auto* v = mod.constant_values.Composite(
@@ -165,7 +165,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Mat4x2h) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Array_I32) {
+TEST_F(SpirvWriterTest, Constant_Array_I32) {
     auto* arr =
         mod.constant_values.Composite(ty.array(ty.i32(), 4), utils::Vector{
                                                                  mod.constant_values.Get(1_i),
@@ -178,7 +178,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Array_I32) {
     EXPECT_INST("%1 = OpConstantComposite %_arr_int_uint_4 %int_1 %int_2 %int_3 %int_4");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Array_Array_I32) {
+TEST_F(SpirvWriterTest, Constant_Array_Array_I32) {
     auto* inner =
         mod.constant_values.Composite(ty.array(ty.i32(), 4), utils::Vector{
                                                                  mod.constant_values.Get(1_i),
@@ -200,7 +200,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Array_Array_I32) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Constant_Struct) {
+TEST_F(SpirvWriterTest, Constant_Struct) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},
                                                               {mod.symbols.New("b"), ty.u32()},
@@ -217,7 +217,7 @@ TEST_F(SpvGeneratorImplTest, Constant_Struct) {
 }
 
 // Test that we do not emit the same constant more than once.
-TEST_F(SpvGeneratorImplTest, Constant_Deduplicate) {
+TEST_F(SpirvWriterTest, Constant_Deduplicate) {
     generator_.Constant(b.Constant(i32(42)));
     generator_.Constant(b.Constant(i32(42)));
     generator_.Constant(b.Constant(i32(42)));

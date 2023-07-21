@@ -33,7 +33,7 @@ struct BuiltinTestCase {
 };
 
 // Tests for builtins with the signature: T = func(T)
-using Builtin_1arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
+using Builtin_1arg = SpirvWriterTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_1arg, Scalar) {
     auto params = GetParam();
 
@@ -59,7 +59,7 @@ TEST_P(Builtin_1arg, Vector) {
     EXPECT_INST(params.spirv_inst);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     Builtin_1arg,
     testing::Values(BuiltinTestCase{kI32, builtin::Function::kAbs, "SAbs"},
                     BuiltinTestCase{kF32, builtin::Function::kAbs, "FAbs"},
@@ -133,7 +133,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kF16, builtin::Function::kTanh, "Tanh"}));
 
 // Test that abs of an unsigned value just folds away.
-TEST_F(SpvGeneratorImplTest, Builtin_Abs_u32) {
+TEST_F(SpirvWriterTest, Builtin_Abs_u32) {
     auto* func = b.Function("foo", MakeScalarType(kU32));
     b.With(func->Block(), [&] {
         auto* arg = MakeScalarValue(kU32);
@@ -151,7 +151,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_u32) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
+TEST_F(SpirvWriterTest, Builtin_Abs_vec2u) {
     auto* func = b.Function("foo", MakeVectorType(kU32));
     b.With(func->Block(), [&] {
         auto* arg = MakeVectorValue(kU32);
@@ -170,7 +170,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Abs_vec2u) {
 }
 
 // Test that all of a scalar just folds away.
-TEST_F(SpvGeneratorImplTest, Builtin_All_Scalar) {
+TEST_F(SpirvWriterTest, Builtin_All_Scalar) {
     auto* arg = b.FunctionParam("arg", ty.bool_());
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
@@ -183,7 +183,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_All_Scalar) {
     EXPECT_INST("OpReturnValue %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_All_Vector) {
+TEST_F(SpirvWriterTest, Builtin_All_Vector) {
     auto* arg = b.FunctionParam("arg", ty.vec4<bool>());
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
@@ -198,7 +198,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_All_Vector) {
 }
 
 // Test that any of a scalar just folds away.
-TEST_F(SpvGeneratorImplTest, Builtin_Any_Scalar) {
+TEST_F(SpirvWriterTest, Builtin_Any_Scalar) {
     auto* arg = b.FunctionParam("arg", ty.bool_());
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
@@ -211,7 +211,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Any_Scalar) {
     EXPECT_INST("OpReturnValue %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Any_Vector) {
+TEST_F(SpirvWriterTest, Builtin_Any_Vector) {
     auto* arg = b.FunctionParam("arg", ty.vec4<bool>());
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
@@ -225,7 +225,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Any_Vector) {
     EXPECT_INST("%result = OpAny %bool %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F32) {
+TEST_F(SpirvWriterTest, Builtin_Frexp_F32) {
     auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.f32());
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", str);
@@ -240,7 +240,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F32) {
     EXPECT_INST("%result = OpExtInst %__frexp_result_f32 %9 FrexpStruct %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F16) {
+TEST_F(SpirvWriterTest, Builtin_Frexp_F16) {
     auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.f16());
     auto* arg = b.FunctionParam("arg", ty.f16());
     auto* func = b.Function("foo", str);
@@ -255,7 +255,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Frexp_F16) {
     EXPECT_INST("%result = OpExtInst %__frexp_result_f16 %9 FrexpStruct %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec2f) {
+TEST_F(SpirvWriterTest, Builtin_Frexp_Vec2f) {
     auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.vec2<f32>());
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", str);
@@ -270,7 +270,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec2f) {
     EXPECT_INST("%result = OpExtInst %__frexp_result_vec2_f32 %11 FrexpStruct %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec3h) {
+TEST_F(SpirvWriterTest, Builtin_Frexp_Vec3h) {
     auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.vec3<f16>());
     auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
     auto* func = b.Function("foo", str);
@@ -285,7 +285,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Frexp_Vec3h) {
     EXPECT_INST("%result = OpExtInst %__frexp_result_vec3_f16 %11 FrexpStruct %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Length_vec4f) {
+TEST_F(SpirvWriterTest, Builtin_Length_vec4f) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg});
@@ -299,7 +299,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Length_vec4f) {
     EXPECT_INST("%result = OpExtInst %float %8 Length %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Modf_F32) {
+TEST_F(SpirvWriterTest, Builtin_Modf_F32) {
     auto* str = type::CreateModfResult(ty, mod.symbols, ty.f32());
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", str);
@@ -314,7 +314,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Modf_F32) {
     EXPECT_INST("%result = OpExtInst %__modf_result_f32 %8 ModfStruct %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Modf_F16) {
+TEST_F(SpirvWriterTest, Builtin_Modf_F16) {
     auto* str = type::CreateModfResult(ty, mod.symbols, ty.f16());
     auto* arg = b.FunctionParam("arg", ty.f16());
     auto* func = b.Function("foo", str);
@@ -329,7 +329,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Modf_F16) {
     EXPECT_INST("%result = OpExtInst %__modf_result_f16 %8 ModfStruct %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec2f) {
+TEST_F(SpirvWriterTest, Builtin_Modf_Vec2f) {
     auto* str = type::CreateModfResult(ty, mod.symbols, ty.vec2<f32>());
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", str);
@@ -344,7 +344,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec2f) {
     EXPECT_INST("%result = OpExtInst %__modf_result_vec2_f32 %9 ModfStruct %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec3h) {
+TEST_F(SpirvWriterTest, Builtin_Modf_Vec3h) {
     auto* str = type::CreateModfResult(ty, mod.symbols, ty.vec3<f16>());
     auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
     auto* func = b.Function("foo", str);
@@ -359,7 +359,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Modf_Vec3h) {
     EXPECT_INST("%result = OpExtInst %__modf_result_vec3_f16 %9 ModfStruct %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Normalize_vec4f) {
+TEST_F(SpirvWriterTest, Builtin_Normalize_vec4f) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
@@ -373,7 +373,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Normalize_vec4f) {
     EXPECT_INST("%result = OpExtInst %v4float %8 Normalize %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat2x3f) {
+TEST_F(SpirvWriterTest, Builtin_Transpose_Mat2x3f) {
     auto* arg = b.FunctionParam("arg", ty.mat2x3<f32>());
     auto* func = b.Function("foo", ty.mat3x2<f32>());
     func->SetParams({arg});
@@ -387,7 +387,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat2x3f) {
     EXPECT_INST("%result = OpTranspose %mat3v2float %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat4x4f) {
+TEST_F(SpirvWriterTest, Builtin_Transpose_Mat4x4f) {
     auto* arg = b.FunctionParam("arg", ty.mat4x4<f32>());
     auto* func = b.Function("foo", ty.mat4x4<f32>());
     func->SetParams({arg});
@@ -401,7 +401,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat4x4f) {
     EXPECT_INST("%result = OpTranspose %mat4v4float %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat4x3h) {
+TEST_F(SpirvWriterTest, Builtin_Transpose_Mat4x3h) {
     auto* arg = b.FunctionParam("arg", ty.mat4x3<f16>());
     auto* func = b.Function("foo", ty.mat3x4<f16>());
     func->SetParams({arg});
@@ -415,7 +415,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat4x3h) {
     EXPECT_INST("%result = OpTranspose %mat3v4half %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat2x2h) {
+TEST_F(SpirvWriterTest, Builtin_Transpose_Mat2x2h) {
     auto* arg = b.FunctionParam("arg", ty.mat2x2<f16>());
     auto* func = b.Function("foo", ty.mat2x2<f16>());
     func->SetParams({arg});
@@ -429,7 +429,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Transpose_Mat2x2h) {
     EXPECT_INST("%result = OpTranspose %mat2v2half %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Float) {
+TEST_F(SpirvWriterTest, Builtin_Pack2X16Float) {
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
@@ -443,7 +443,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Float) {
     EXPECT_INST("%result = OpExtInst %uint %9 PackHalf2x16 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Snorm) {
+TEST_F(SpirvWriterTest, Builtin_Pack2X16Snorm) {
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
@@ -457,7 +457,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Snorm) {
     EXPECT_INST("%result = OpExtInst %uint %9 PackSnorm2x16 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Unorm) {
+TEST_F(SpirvWriterTest, Builtin_Pack2X16Unorm) {
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
@@ -471,7 +471,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Pack2X16Unorm) {
     EXPECT_INST("%result = OpExtInst %uint %9 PackUnorm2x16 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Pack4X8Snorm) {
+TEST_F(SpirvWriterTest, Builtin_Pack4X8Snorm) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
@@ -485,7 +485,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Pack4X8Snorm) {
     EXPECT_INST("%result = OpExtInst %uint %9 PackSnorm4x8 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Pack4X8Unorm) {
+TEST_F(SpirvWriterTest, Builtin_Pack4X8Unorm) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
@@ -499,7 +499,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Pack4X8Unorm) {
     EXPECT_INST("%result = OpExtInst %uint %9 PackUnorm4x8 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Float) {
+TEST_F(SpirvWriterTest, Builtin_Unpack2X16Float) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
@@ -513,7 +513,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Float) {
     EXPECT_INST("%result = OpExtInst %v2float %9 UnpackHalf2x16 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Snorm) {
+TEST_F(SpirvWriterTest, Builtin_Unpack2X16Snorm) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
@@ -527,7 +527,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Snorm) {
     EXPECT_INST("%result = OpExtInst %v2float %9 UnpackSnorm2x16 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Unorm) {
+TEST_F(SpirvWriterTest, Builtin_Unpack2X16Unorm) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
@@ -541,7 +541,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Unpack2X16Unorm) {
     EXPECT_INST("%result = OpExtInst %v2float %9 UnpackUnorm2x16 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Unpack4X8Snorm) {
+TEST_F(SpirvWriterTest, Builtin_Unpack4X8Snorm) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
@@ -555,7 +555,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Unpack4X8Snorm) {
     EXPECT_INST("%result = OpExtInst %v4float %9 UnpackSnorm4x8 %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Unpack4X8Unorm) {
+TEST_F(SpirvWriterTest, Builtin_Unpack4X8Unorm) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
@@ -570,7 +570,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Unpack4X8Unorm) {
 }
 
 // Tests for builtins with the signature: T = func(T, T)
-using Builtin_2arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
+using Builtin_2arg = SpirvWriterTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_2arg, Scalar) {
     auto params = GetParam();
 
@@ -597,7 +597,7 @@ TEST_P(Builtin_2arg, Vector) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.spirv_inst);
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          Builtin_2arg,
                          testing::Values(BuiltinTestCase{kF32, builtin::Function::kAtan2, "Atan2"},
                                          BuiltinTestCase{kF32, builtin::Function::kMax, "FMax"},
@@ -611,7 +611,7 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                                          BuiltinTestCase{kF32, builtin::Function::kStep, "Step"},
                                          BuiltinTestCase{kF16, builtin::Function::kStep, "Step"}));
 
-TEST_F(SpvGeneratorImplTest, Builtin_Cross_vec3f) {
+TEST_F(SpirvWriterTest, Builtin_Cross_vec3f) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec3<f32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec3<f32>());
     auto* func = b.Function("foo", ty.vec3<f32>());
@@ -626,7 +626,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Cross_vec3f) {
     EXPECT_INST("%result = OpExtInst %v3float %9 Cross %arg1 %arg2");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Distance_vec2f) {
+TEST_F(SpirvWriterTest, Builtin_Distance_vec2f) {
     auto* arg1 = b.FunctionParam("arg1", MakeVectorType(kF32));
     auto* arg2 = b.FunctionParam("arg2", MakeVectorType(kF32));
     auto* func = b.Function("foo", MakeScalarType(kF32));
@@ -641,7 +641,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Distance_vec2f) {
     EXPECT_INST("%result = OpExtInst %float %9 Distance %arg1 %arg2");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Distance_vec3h) {
+TEST_F(SpirvWriterTest, Builtin_Distance_vec3h) {
     auto* arg1 = b.FunctionParam("arg1", MakeVectorType(kF16));
     auto* arg2 = b.FunctionParam("arg2", MakeVectorType(kF16));
     auto* func = b.Function("foo", MakeScalarType(kF16));
@@ -656,7 +656,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Distance_vec3h) {
     EXPECT_INST("%result = OpExtInst %half %9 Distance %arg1 %arg2");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec4f) {
+TEST_F(SpirvWriterTest, Builtin_Dot_vec4f) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.f32());
@@ -671,7 +671,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec4f) {
     EXPECT_INST("%result = OpDot %float %arg1 %arg2");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec2i) {
+TEST_F(SpirvWriterTest, Builtin_Dot_vec2i) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec2<i32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec2<i32>());
     auto* func = b.Function("foo", ty.i32());
@@ -694,7 +694,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec2i) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec4u) {
+TEST_F(SpirvWriterTest, Builtin_Dot_vec4u) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<u32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<u32>());
     auto* func = b.Function("foo", ty.u32());
@@ -726,7 +726,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Dot_vec4u) {
 }
 
 // Tests for builtins with the signature: T = func(T, T, T)
-using Builtin_3arg = SpvGeneratorImplTestWithParam<BuiltinTestCase>;
+using Builtin_3arg = SpirvWriterTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_3arg, Scalar) {
     auto params = GetParam();
 
@@ -754,7 +754,7 @@ TEST_P(Builtin_3arg, Vector) {
     EXPECT_INST(params.spirv_inst);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     Builtin_3arg,
     testing::Values(BuiltinTestCase{kF32, builtin::Function::kClamp, "NClamp"},
                     BuiltinTestCase{kI32, builtin::Function::kClamp, "SClamp"},
@@ -766,7 +766,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinTestCase{kF32, builtin::Function::kSmoothstep, "SmoothStep"},
                     BuiltinTestCase{kF16, builtin::Function::kSmoothstep, "SmoothStep"}));
 
-TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Scalar_I32) {
+TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
     auto* arg = b.FunctionParam("arg", ty.i32());
     auto* offset = b.FunctionParam("offset", ty.u32());
     auto* count = b.FunctionParam("count", ty.u32());
@@ -783,7 +783,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Scalar_I32) {
     EXPECT_INST("%result = OpBitFieldSExtract %int %arg %offset %count");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Scalar_U32) {
+TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_U32) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* offset = b.FunctionParam("offset", ty.u32());
     auto* count = b.FunctionParam("count", ty.u32());
@@ -800,7 +800,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Scalar_U32) {
     EXPECT_INST("%result = OpBitFieldUExtract %uint %arg %offset %count");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Vector_I32) {
+TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_I32) {
     auto* arg = b.FunctionParam("arg", ty.vec4<i32>());
     auto* offset = b.FunctionParam("offset", ty.u32());
     auto* count = b.FunctionParam("count", ty.u32());
@@ -817,7 +817,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Vector_I32) {
     EXPECT_INST("%result = OpBitFieldSExtract %v4int %arg %offset %count");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Vector_U32) {
+TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_U32) {
     auto* arg = b.FunctionParam("arg", ty.vec2<u32>());
     auto* offset = b.FunctionParam("offset", ty.u32());
     auto* count = b.FunctionParam("count", ty.u32());
@@ -834,7 +834,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_ExtractBits_Vector_U32) {
     EXPECT_INST("%result = OpBitFieldUExtract %v2uint %arg %offset %count");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Scalar_I32) {
+TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_I32) {
     auto* arg = b.FunctionParam("arg", ty.i32());
     auto* newbits = b.FunctionParam("newbits", ty.i32());
     auto* offset = b.FunctionParam("offset", ty.u32());
@@ -853,7 +853,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Scalar_I32) {
     EXPECT_INST("%result = OpBitFieldInsert %int %arg %newbits %offset %count");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Scalar_U32) {
+TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_U32) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* newbits = b.FunctionParam("newbits", ty.u32());
     auto* offset = b.FunctionParam("offset", ty.u32());
@@ -872,7 +872,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Scalar_U32) {
     EXPECT_INST("%result = OpBitFieldInsert %uint %arg %newbits %offset %count");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Vector_I32) {
+TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_I32) {
     auto* arg = b.FunctionParam("arg", ty.vec4<i32>());
     auto* newbits = b.FunctionParam("newbits", ty.vec4<i32>());
     auto* offset = b.FunctionParam("offset", ty.u32());
@@ -891,7 +891,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Vector_I32) {
     EXPECT_INST("%result = OpBitFieldInsert %v4int %arg %newbits %offset %count");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Vector_U32) {
+TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_U32) {
     auto* arg = b.FunctionParam("arg", ty.vec2<u32>());
     auto* newbits = b.FunctionParam("newbits", ty.vec2<u32>());
     auto* offset = b.FunctionParam("offset", ty.u32());
@@ -910,7 +910,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_InsertBits_Vector_U32) {
     EXPECT_INST("%result = OpBitFieldInsert %v2uint %arg %newbits %offset %count");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Mix_VectorOperands_ScalarFactor) {
+TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_ScalarFactor) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
     auto* factor = b.FunctionParam("factor", ty.f32());
@@ -928,7 +928,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Mix_VectorOperands_ScalarFactor) {
     EXPECT_INST("%result = OpExtInst %v4float %11 FMix %arg1 %arg2 %9");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Mix_VectorOperands_VectorFactor) {
+TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_VectorFactor) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
     auto* factor = b.FunctionParam("factor", ty.vec4<f32>());
@@ -945,7 +945,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Mix_VectorOperands_VectorFactor) {
     EXPECT_INST("%result = OpExtInst %v4float %10 FMix %arg1 %arg2 %factor");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_ScalarOperands) {
+TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_ScalarOperands) {
     auto* argf = b.FunctionParam("argf", ty.i32());
     auto* argt = b.FunctionParam("argt", ty.i32());
     auto* cond = b.FunctionParam("cond", ty.bool_());
@@ -962,7 +962,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_ScalarOperands) {
     EXPECT_INST("%result = OpSelect %int %cond %argt %argf");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Select_VectorCondition_VectorOperands) {
+TEST_F(SpirvWriterTest, Builtin_Select_VectorCondition_VectorOperands) {
     auto* argf = b.FunctionParam("argf", ty.vec4<i32>());
     auto* argt = b.FunctionParam("argt", ty.vec4<i32>());
     auto* cond = b.FunctionParam("cond", ty.vec4<bool>());
@@ -979,7 +979,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Select_VectorCondition_VectorOperands) {
     EXPECT_INST("%result = OpSelect %v4int %cond %argt %argf");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_VectorOperands) {
+TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_VectorOperands) {
     auto* argf = b.FunctionParam("argf", ty.vec4<i32>());
     auto* argt = b.FunctionParam("argt", ty.vec4<i32>());
     auto* cond = b.FunctionParam("cond", ty.bool_());
@@ -997,7 +997,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_Select_ScalarCondition_VectorOperands) {
     EXPECT_INST("%result = OpSelect %v4int %11 %argt %argf");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_StorageBarrier) {
+TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         b.Call(ty.void_(), builtin::Function::kStorageBarrier);
@@ -1008,7 +1008,7 @@ TEST_F(SpvGeneratorImplTest, Builtin_StorageBarrier) {
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_72");
 }
 
-TEST_F(SpvGeneratorImplTest, Builtin_WorkgroupBarrier) {
+TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         b.Call(ty.void_(), builtin::Function::kWorkgroupBarrier);

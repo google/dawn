@@ -23,7 +23,7 @@ using namespace tint::number_suffixes;        // NOLINT
 namespace tint::writer::spirv {
 namespace {
 
-TEST_F(SpvGeneratorImplTest, AtomicAdd_Storage) {
+TEST_F(SpirvWriterTest, AtomicAdd_Storage) {
     auto* var = b.Var("var", ty.ptr(storage, ty.atomic(ty.i32())));
     var->SetBindingPoint(0, 0);
     b.RootBlock()->Append(var);
@@ -43,7 +43,7 @@ TEST_F(SpvGeneratorImplTest, AtomicAdd_Storage) {
     EXPECT_INST("%result = OpAtomicIAdd %int %ptr %uint_1 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicAdd_Workgroup) {
+TEST_F(SpirvWriterTest, AtomicAdd_Workgroup) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -60,7 +60,7 @@ TEST_F(SpvGeneratorImplTest, AtomicAdd_Workgroup) {
     EXPECT_INST("%result = OpAtomicIAdd %int %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicAnd) {
+TEST_F(SpirvWriterTest, AtomicAnd) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -77,7 +77,7 @@ TEST_F(SpvGeneratorImplTest, AtomicAnd) {
     EXPECT_INST("%result = OpAtomicAnd %int %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicCompareExchangeWeak) {
+TEST_F(SpirvWriterTest, AtomicCompareExchangeWeak) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* cmp = b.FunctionParam("cmp", ty.i32());
@@ -102,7 +102,7 @@ TEST_F(SpvGeneratorImplTest, AtomicCompareExchangeWeak) {
     EXPECT_INST("%original = OpCompositeExtract %int %result 0");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicExchange) {
+TEST_F(SpirvWriterTest, AtomicExchange) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -119,7 +119,7 @@ TEST_F(SpvGeneratorImplTest, AtomicExchange) {
     EXPECT_INST("%result = OpAtomicExchange %int %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicLoad) {
+TEST_F(SpirvWriterTest, AtomicLoad) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* func = b.Function("foo", ty.i32());
@@ -134,7 +134,7 @@ TEST_F(SpvGeneratorImplTest, AtomicLoad) {
     EXPECT_INST("%result = OpAtomicLoad %int %var %uint_2 %uint_0");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicMax_I32) {
+TEST_F(SpirvWriterTest, AtomicMax_I32) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -151,7 +151,7 @@ TEST_F(SpvGeneratorImplTest, AtomicMax_I32) {
     EXPECT_INST("%result = OpAtomicSMax %int %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicMax_U32) {
+TEST_F(SpirvWriterTest, AtomicMax_U32) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.u32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.u32());
@@ -168,7 +168,7 @@ TEST_F(SpvGeneratorImplTest, AtomicMax_U32) {
     EXPECT_INST("%result = OpAtomicUMax %uint %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicMin_I32) {
+TEST_F(SpirvWriterTest, AtomicMin_I32) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -185,7 +185,7 @@ TEST_F(SpvGeneratorImplTest, AtomicMin_I32) {
     EXPECT_INST("%result = OpAtomicSMin %int %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicMin_U32) {
+TEST_F(SpirvWriterTest, AtomicMin_U32) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.u32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.u32());
@@ -202,7 +202,7 @@ TEST_F(SpvGeneratorImplTest, AtomicMin_U32) {
     EXPECT_INST("%result = OpAtomicUMin %uint %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicOr) {
+TEST_F(SpirvWriterTest, AtomicOr) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -219,7 +219,7 @@ TEST_F(SpvGeneratorImplTest, AtomicOr) {
     EXPECT_INST("%result = OpAtomicOr %int %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicStore) {
+TEST_F(SpirvWriterTest, AtomicStore) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -235,7 +235,7 @@ TEST_F(SpvGeneratorImplTest, AtomicStore) {
     EXPECT_INST("OpAtomicStore %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicSub) {
+TEST_F(SpirvWriterTest, AtomicSub) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -252,7 +252,7 @@ TEST_F(SpvGeneratorImplTest, AtomicSub) {
     EXPECT_INST("%result = OpAtomicISub %int %var %uint_2 %uint_0 %arg1");
 }
 
-TEST_F(SpvGeneratorImplTest, AtomicXor) {
+TEST_F(SpirvWriterTest, AtomicXor) {
     auto* var = b.RootBlock()->Append(b.Var("var", ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());

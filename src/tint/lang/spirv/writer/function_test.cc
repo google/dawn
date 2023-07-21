@@ -20,7 +20,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-TEST_F(SpvGeneratorImplTest, Function_Empty) {
+TEST_F(SpirvWriterTest, Function_Empty) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {  //
         b.Return(func);
@@ -36,7 +36,7 @@ TEST_F(SpvGeneratorImplTest, Function_Empty) {
 }
 
 // Test that we do not emit the same function type more than once.
-TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
+TEST_F(SpirvWriterTest, Function_DeduplicateType) {
     auto* func_a = b.Function("func_a", ty.void_());
     b.With(func_a->Block(), [&] {  //
         b.Return(func_a);
@@ -76,7 +76,7 @@ TEST_F(SpvGeneratorImplTest, Function_DeduplicateType) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Compute) {
+TEST_F(SpirvWriterTest, Function_EntryPoint_Compute) {
     auto* func =
         b.Function("main", ty.void_(), ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
     b.With(func->Block(), [&] {  //
@@ -103,7 +103,7 @@ TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Compute) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Fragment) {
+TEST_F(SpirvWriterTest, Function_EntryPoint_Fragment) {
     auto* func = b.Function("main", ty.void_(), ir::Function::PipelineStage::kFragment);
     b.With(func->Block(), [&] {  //
         b.Return(func);
@@ -129,7 +129,7 @@ TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Fragment) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Vertex) {
+TEST_F(SpirvWriterTest, Function_EntryPoint_Vertex) {
     auto* func = b.Function("main", ty.void_(), ir::Function::PipelineStage::kVertex);
     b.With(func->Block(), [&] {  //
         b.Return(func);
@@ -154,7 +154,7 @@ TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Vertex) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Multiple) {
+TEST_F(SpirvWriterTest, Function_EntryPoint_Multiple) {
     auto* f1 = b.Function("main1", ty.void_(), ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
     b.With(f1->Block(), [&] {  //
         b.Return(f1);
@@ -208,7 +208,7 @@ TEST_F(SpvGeneratorImplTest, Function_EntryPoint_Multiple) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Function_ReturnValue) {
+TEST_F(SpirvWriterTest, Function_ReturnValue) {
     auto* func = b.Function("foo", ty.i32());
     b.With(func->Block(), [&] {  //
         b.Return(func, 42_i);
@@ -229,7 +229,7 @@ TEST_F(SpvGeneratorImplTest, Function_ReturnValue) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Function_Parameters) {
+TEST_F(SpirvWriterTest, Function_Parameters) {
     auto* i32 = ty.i32();
     auto* x = b.FunctionParam("x", i32);
     auto* y = b.FunctionParam("y", i32);
@@ -258,7 +258,7 @@ TEST_F(SpvGeneratorImplTest, Function_Parameters) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Function_Call) {
+TEST_F(SpirvWriterTest, Function_Call) {
     auto* i32 = ty.i32();
     auto* x = b.FunctionParam("x", i32);
     auto* y = b.FunctionParam("y", i32);
@@ -281,7 +281,7 @@ TEST_F(SpvGeneratorImplTest, Function_Call) {
     EXPECT_INST("%result = OpFunctionCall %int %foo %int_2 %int_3");
 }
 
-TEST_F(SpvGeneratorImplTest, Function_Call_Void) {
+TEST_F(SpirvWriterTest, Function_Call_Void) {
     auto* foo = b.Function("foo", ty.void_());
     b.With(foo->Block(), [&] {  //
         b.Return(foo);

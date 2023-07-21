@@ -20,7 +20,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-TEST_F(SpvGeneratorImplTest, Let_Constant) {
+TEST_F(SpirvWriterTest, Let_Constant) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         b.Let("l", u32(42));
@@ -32,7 +32,7 @@ TEST_F(SpvGeneratorImplTest, Let_Constant) {
     EXPECT_INST("%l = OpConstant %uint 42");
 }
 
-TEST_F(SpvGeneratorImplTest, Let_SharedConstant) {
+TEST_F(SpirvWriterTest, Let_SharedConstant) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         b.Let("l1", u32(42));

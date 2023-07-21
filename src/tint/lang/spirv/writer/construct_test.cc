@@ -20,7 +20,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-TEST_F(SpvGeneratorImplTest, Construct_Vector) {
+TEST_F(SpirvWriterTest, Construct_Vector) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({
         b.FunctionParam("a", ty.i32()),
@@ -38,7 +38,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Vector) {
     EXPECT_INST("%result = OpCompositeConstruct %v4int %a %b %c %d");
 }
 
-TEST_F(SpvGeneratorImplTest, Construct_Matrix) {
+TEST_F(SpirvWriterTest, Construct_Matrix) {
     auto* func = b.Function("foo", ty.mat3x4<f32>());
     func->SetParams({
         b.FunctionParam("a", ty.vec4<f32>()),
@@ -55,7 +55,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Matrix) {
     EXPECT_INST("%result = OpCompositeConstruct %mat3v4float %a %b %c");
 }
 
-TEST_F(SpvGeneratorImplTest, Construct_Array) {
+TEST_F(SpirvWriterTest, Construct_Array) {
     auto* func = b.Function("foo", ty.array<f32, 4>());
     func->SetParams({
         b.FunctionParam("a", ty.f32()),
@@ -73,7 +73,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Array) {
     EXPECT_INST("%result = OpCompositeConstruct %_arr_float_uint_4 %a %b %c %d");
 }
 
-TEST_F(SpvGeneratorImplTest, Construct_Struct) {
+TEST_F(SpirvWriterTest, Construct_Struct) {
     auto* str =
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.Register("a"), ty.i32()},
@@ -96,7 +96,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Struct) {
     EXPECT_INST("%result = OpCompositeConstruct %MyStruct %a %b %c");
 }
 
-TEST_F(SpvGeneratorImplTest, Construct_Scalar_Identity) {
+TEST_F(SpirvWriterTest, Construct_Scalar_Identity) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({b.FunctionParam("arg", ty.i32())});
     b.With(func->Block(), [&] {
@@ -108,7 +108,7 @@ TEST_F(SpvGeneratorImplTest, Construct_Scalar_Identity) {
     EXPECT_INST("OpReturnValue %arg");
 }
 
-TEST_F(SpvGeneratorImplTest, Construct_Vector_Identity) {
+TEST_F(SpirvWriterTest, Construct_Vector_Identity) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({b.FunctionParam("arg", ty.vec4<i32>())});
     b.With(func->Block(), [&] {

@@ -33,7 +33,7 @@ struct BinaryTestCase {
     std::string spirv_type_name;
 };
 
-using Arithmetic_Bitwise = SpvGeneratorImplTestWithParam<BinaryTestCase>;
+using Arithmetic_Bitwise = SpirvWriterTestWithParam<BinaryTestCase>;
 TEST_P(Arithmetic_Bitwise, Scalar) {
     auto params = GetParam();
 
@@ -65,7 +65,7 @@ TEST_P(Arithmetic_Bitwise, Vector) {
     EXPECT_INST("%result = " + params.spirv_inst + " %v2" + params.spirv_type_name);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_I32,
+    SpirvWriterTest_Binary_I32,
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kI32, ir::Binary::Kind::kAdd, "OpIAdd", "int"},
                     BinaryTestCase{kI32, ir::Binary::Kind::kSubtract, "OpISub", "int"},
@@ -79,7 +79,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryTestCase{kI32, ir::Binary::Kind::kShiftRight, "OpShiftRightArithmetic",
                                    "int"}));
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_U32,
+    SpirvWriterTest_Binary_U32,
     Arithmetic_Bitwise,
     testing::Values(
         BinaryTestCase{kU32, ir::Binary::Kind::kAdd, "OpIAdd", "uint"},
@@ -93,7 +93,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryTestCase{kU32, ir::Binary::Kind::kShiftLeft, "OpShiftLeftLogical", "uint"},
         BinaryTestCase{kU32, ir::Binary::Kind::kShiftRight, "OpShiftRightLogical", "uint"}));
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_F32,
+    SpirvWriterTest_Binary_F32,
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kF32, ir::Binary::Kind::kAdd, "OpFAdd", "float"},
                     BinaryTestCase{kF32, ir::Binary::Kind::kSubtract, "OpFSub", "float"},
@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryTestCase{kF32, ir::Binary::Kind::kDivide, "OpFDiv", "float"},
                     BinaryTestCase{kF32, ir::Binary::Kind::kModulo, "OpFRem", "float"}));
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_F16,
+    SpirvWriterTest_Binary_F16,
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kF16, ir::Binary::Kind::kAdd, "OpFAdd", "half"},
                     BinaryTestCase{kF16, ir::Binary::Kind::kSubtract, "OpFSub", "half"},
@@ -109,12 +109,12 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryTestCase{kF16, ir::Binary::Kind::kDivide, "OpFDiv", "half"},
                     BinaryTestCase{kF16, ir::Binary::Kind::kModulo, "OpFRem", "half"}));
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_Bool,
+    SpirvWriterTest_Binary_Bool,
     Arithmetic_Bitwise,
     testing::Values(BinaryTestCase{kBool, ir::Binary::Kind::kAnd, "OpLogicalAnd", "bool"},
                     BinaryTestCase{kBool, ir::Binary::Kind::kOr, "OpLogicalOr", "bool"}));
 
-TEST_F(SpvGeneratorImplTest, Binary_ScalarTimesVector_F32) {
+TEST_F(SpirvWriterTest, Binary_ScalarTimesVector_F32) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.void_());
@@ -129,7 +129,7 @@ TEST_F(SpvGeneratorImplTest, Binary_ScalarTimesVector_F32) {
     EXPECT_INST("%result = OpVectorTimesScalar %v4float %vector %scalar");
 }
 
-TEST_F(SpvGeneratorImplTest, Binary_VectorTimesScalar_F32) {
+TEST_F(SpirvWriterTest, Binary_VectorTimesScalar_F32) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.void_());
@@ -144,7 +144,7 @@ TEST_F(SpvGeneratorImplTest, Binary_VectorTimesScalar_F32) {
     EXPECT_INST("%result = OpVectorTimesScalar %v4float %vector %scalar");
 }
 
-TEST_F(SpvGeneratorImplTest, Binary_ScalarTimesMatrix_F32) {
+TEST_F(SpirvWriterTest, Binary_ScalarTimesMatrix_F32) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
@@ -159,7 +159,7 @@ TEST_F(SpvGeneratorImplTest, Binary_ScalarTimesMatrix_F32) {
     EXPECT_INST("%result = OpMatrixTimesScalar %mat3v4float %matrix %scalar");
 }
 
-TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesScalar_F32) {
+TEST_F(SpirvWriterTest, Binary_MatrixTimesScalar_F32) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
@@ -174,7 +174,7 @@ TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesScalar_F32) {
     EXPECT_INST("%result = OpMatrixTimesScalar %mat3v4float %matrix %scalar");
 }
 
-TEST_F(SpvGeneratorImplTest, Binary_VectorTimesMatrix_F32) {
+TEST_F(SpirvWriterTest, Binary_VectorTimesMatrix_F32) {
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
@@ -189,7 +189,7 @@ TEST_F(SpvGeneratorImplTest, Binary_VectorTimesMatrix_F32) {
     EXPECT_INST("%result = OpVectorTimesMatrix %v3float %vector %matrix");
 }
 
-TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesVector_F32) {
+TEST_F(SpirvWriterTest, Binary_MatrixTimesVector_F32) {
     auto* vector = b.FunctionParam("vector", ty.vec3<f32>());
     auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
@@ -204,7 +204,7 @@ TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesVector_F32) {
     EXPECT_INST("%result = OpMatrixTimesVector %v4float %matrix %vector");
 }
 
-TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesMatrix_F32) {
+TEST_F(SpirvWriterTest, Binary_MatrixTimesMatrix_F32) {
     auto* mat1 = b.FunctionParam("mat1", ty.mat4x3<f32>());
     auto* mat2 = b.FunctionParam("mat2", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
@@ -219,7 +219,7 @@ TEST_F(SpvGeneratorImplTest, Binary_MatrixTimesMatrix_F32) {
     EXPECT_INST("%result = OpMatrixTimesMatrix %mat3v3float %mat1 %mat2");
 }
 
-using Comparison = SpvGeneratorImplTestWithParam<BinaryTestCase>;
+using Comparison = SpirvWriterTestWithParam<BinaryTestCase>;
 TEST_P(Comparison, Scalar) {
     auto params = GetParam();
 
@@ -252,7 +252,7 @@ TEST_P(Comparison, Vector) {
     EXPECT_INST("%result = " + params.spirv_inst + " %v2bool");
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_I32,
+    SpirvWriterTest_Binary_I32,
     Comparison,
     testing::Values(
         BinaryTestCase{kI32, ir::Binary::Kind::kEqual, "OpIEqual", "bool"},
@@ -262,7 +262,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryTestCase{kI32, ir::Binary::Kind::kLessThan, "OpSLessThan", "bool"},
         BinaryTestCase{kI32, ir::Binary::Kind::kLessThanEqual, "OpSLessThanEqual", "bool"}));
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_U32,
+    SpirvWriterTest_Binary_U32,
     Comparison,
     testing::Values(
         BinaryTestCase{kU32, ir::Binary::Kind::kEqual, "OpIEqual", "bool"},
@@ -272,7 +272,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryTestCase{kU32, ir::Binary::Kind::kLessThan, "OpULessThan", "bool"},
         BinaryTestCase{kU32, ir::Binary::Kind::kLessThanEqual, "OpULessThanEqual", "bool"}));
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_F32,
+    SpirvWriterTest_Binary_F32,
     Comparison,
     testing::Values(
         BinaryTestCase{kF32, ir::Binary::Kind::kEqual, "OpFOrdEqual", "bool"},
@@ -282,7 +282,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryTestCase{kF32, ir::Binary::Kind::kLessThan, "OpFOrdLessThan", "bool"},
         BinaryTestCase{kF32, ir::Binary::Kind::kLessThanEqual, "OpFOrdLessThanEqual", "bool"}));
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Binary_F16,
+    SpirvWriterTest_Binary_F16,
     Comparison,
     testing::Values(
         BinaryTestCase{kF16, ir::Binary::Kind::kEqual, "OpFOrdEqual", "bool"},
@@ -291,14 +291,14 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryTestCase{kF16, ir::Binary::Kind::kGreaterThanEqual, "OpFOrdGreaterThanEqual", "bool"},
         BinaryTestCase{kF16, ir::Binary::Kind::kLessThan, "OpFOrdLessThan", "bool"},
         BinaryTestCase{kF16, ir::Binary::Kind::kLessThanEqual, "OpFOrdLessThanEqual", "bool"}));
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest_Binary_Bool,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest_Binary_Bool,
                          Comparison,
                          testing::Values(BinaryTestCase{kBool, ir::Binary::Kind::kEqual,
                                                         "OpLogicalEqual", "bool"},
                                          BinaryTestCase{kBool, ir::Binary::Kind::kNotEqual,
                                                         "OpLogicalNotEqual", "bool"}));
 
-TEST_F(SpvGeneratorImplTest, Binary_Chain) {
+TEST_F(SpirvWriterTest, Binary_Chain) {
     auto* func = b.Function("foo", ty.void_());
 
     b.With(func->Block(), [&] {

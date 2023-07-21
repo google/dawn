@@ -19,7 +19,7 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::writer::spirv {
 namespace {
 
-TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
+TEST_F(SpirvWriterTest, Loop_BreakIf) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();
@@ -51,7 +51,7 @@ TEST_F(SpvGeneratorImplTest, Loop_BreakIf) {
 }
 
 // Test that we still emit the continuing block with a back-edge, even when it is unreachable.
-TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
+TEST_F(SpirvWriterTest, Loop_UnconditionalBreakInBody) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();
@@ -78,7 +78,7 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalBreakInBody) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
+TEST_F(SpirvWriterTest, Loop_ConditionalBreakInBody) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();
@@ -121,7 +121,7 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalBreakInBody) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
+TEST_F(SpirvWriterTest, Loop_ConditionalContinueInBody) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();
@@ -166,7 +166,7 @@ TEST_F(SpvGeneratorImplTest, Loop_ConditionalContinueInBody) {
 
 // Test that we still emit the continuing block with a back-edge, and the merge block, even when
 // they are unreachable.
-TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
+TEST_F(SpirvWriterTest, Loop_UnconditionalReturnInBody) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();
@@ -193,7 +193,7 @@ TEST_F(SpvGeneratorImplTest, Loop_UnconditionalReturnInBody) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
+TEST_F(SpirvWriterTest, Loop_UseResultFromBodyInContinuing) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* loop = b.Loop();
@@ -226,7 +226,7 @@ TEST_F(SpvGeneratorImplTest, Loop_UseResultFromBodyInContinuing) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
+TEST_F(SpirvWriterTest, Loop_NestedLoopInBody) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* outer_loop = b.Loop();
@@ -275,7 +275,7 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInBody) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
+TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* outer_loop = b.Loop();
@@ -323,7 +323,7 @@ TEST_F(SpvGeneratorImplTest, Loop_NestedLoopInContinuing) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
+TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.void_());
 
     b.With(func->Block(), [&] {
@@ -372,7 +372,7 @@ TEST_F(SpvGeneratorImplTest, Loop_Phi_SingleValue) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Loop_Phi_MultipleValue) {
+TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
     auto* func = b.Function("foo", ty.void_());
 
     b.With(func->Block(), [&] {

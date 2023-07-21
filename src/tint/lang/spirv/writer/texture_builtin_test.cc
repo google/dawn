@@ -92,7 +92,7 @@ std::string PrintCase(testing::TestParamInfo<TextureBuiltinTestCase> cc) {
     return ss.str();
 }
 
-class TextureBuiltinTest : public SpvGeneratorImplTestWithParam<TextureBuiltinTestCase> {
+class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCase> {
   protected:
     const type::Texture* MakeTextureType(TextureType type,
                                          type::TextureDimension dim,
@@ -204,7 +204,7 @@ TEST_P(TextureSample, Emit) {
     Run(builtin::Function::kTextureSample, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     TextureSample,
     testing::Values(
         TextureBuiltinTestCase{
@@ -399,7 +399,7 @@ TEST_P(TextureSampleBias, Emit) {
     Run(builtin::Function::kTextureSampleBias, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     TextureSampleBias,
     testing::Values(
         TextureBuiltinTestCase{
@@ -506,7 +506,7 @@ TEST_P(TextureSampleGrad, Emit) {
     Run(builtin::Function::kTextureSampleGrad, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     TextureSampleGrad,
     testing::Values(
         TextureBuiltinTestCase{
@@ -617,7 +617,7 @@ TEST_P(TextureSampleLevel, Emit) {
     Run(builtin::Function::kTextureSampleLevel, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     TextureSampleLevel,
     testing::Values(
         TextureBuiltinTestCase{
@@ -807,7 +807,7 @@ TEST_P(TextureSampleCompare, Emit) {
     Run(builtin::Function::kTextureSampleCompare, kComparisonSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     TextureSampleCompare,
     testing::Values(
         TextureBuiltinTestCase{
@@ -892,7 +892,7 @@ TEST_P(TextureSampleCompareLevel, Emit) {
     Run(builtin::Function::kTextureSampleCompareLevel, kComparisonSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     TextureSampleCompareLevel,
     testing::Values(
         TextureBuiltinTestCase{
@@ -982,7 +982,7 @@ TEST_P(TextureGather, Emit) {
     Run(builtin::Function::kTextureGather, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     TextureGather,
     testing::Values(
         TextureBuiltinTestCase{
@@ -1163,7 +1163,7 @@ TEST_P(TextureGatherCompare, Emit) {
     Run(builtin::Function::kTextureGatherCompare, kComparisonSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     TextureGatherCompare,
     testing::Values(
         TextureBuiltinTestCase{
@@ -1247,7 +1247,7 @@ using TextureLoad = TextureBuiltinTest;
 TEST_P(TextureLoad, Emit) {
     Run(builtin::Function::kTextureLoad, kNoSampler);
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureLoad,
                          testing::Values(
                              TextureBuiltinTestCase{
@@ -1366,7 +1366,7 @@ using TextureStore = TextureBuiltinTest;
 TEST_P(TextureStore, Emit) {
     Run(builtin::Function::kTextureStore, kNoSampler);
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureStore,
                          testing::Values(
                              TextureBuiltinTestCase{
@@ -1441,7 +1441,7 @@ using TextureDimensions = TextureBuiltinTest;
 TEST_P(TextureDimensions, Emit) {
     Run(builtin::Function::kTextureDimensions, kNoSampler);
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureDimensions,
                          testing::Values(
                              // 1D implicit Lod.
@@ -1691,7 +1691,7 @@ using TextureNumLayers = TextureBuiltinTest;
 TEST_P(TextureNumLayers, Emit) {
     Run(builtin::Function::kTextureNumLayers, kNoSampler);
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureNumLayers,
                          testing::Values(
                              TextureBuiltinTestCase{
@@ -1758,7 +1758,7 @@ using TextureNumLevels = TextureBuiltinTest;
 TEST_P(TextureNumLevels, Emit) {
     Run(builtin::Function::kTextureNumLevels, kNoSampler);
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureNumLevels,
                          testing::Values(
                              TextureBuiltinTestCase{
@@ -1850,7 +1850,7 @@ using TextureNumSamples = TextureBuiltinTest;
 TEST_P(TextureNumSamples, Emit) {
     Run(builtin::Function::kTextureNumSamples, kNoSampler);
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureNumSamples,
                          testing::Values(
                              TextureBuiltinTestCase{

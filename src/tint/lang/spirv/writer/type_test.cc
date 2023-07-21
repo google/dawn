@@ -29,42 +29,42 @@
 namespace tint::writer::spirv {
 namespace {
 
-TEST_F(SpvGeneratorImplTest, Type_Void) {
+TEST_F(SpirvWriterTest, Type_Void) {
     generator_.Type(ty.void_());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%void = OpTypeVoid");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Bool) {
+TEST_F(SpirvWriterTest, Type_Bool) {
     generator_.Type(ty.bool_());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%bool = OpTypeBool");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_I32) {
+TEST_F(SpirvWriterTest, Type_I32) {
     generator_.Type(ty.i32());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%int = OpTypeInt 32 1");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_U32) {
+TEST_F(SpirvWriterTest, Type_U32) {
     generator_.Type(ty.u32());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%uint = OpTypeInt 32 0");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_F32) {
+TEST_F(SpirvWriterTest, Type_F32) {
     generator_.Type(ty.f32());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%float = OpTypeFloat 32");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_F16) {
+TEST_F(SpirvWriterTest, Type_F16) {
     generator_.Type(ty.f16());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -75,56 +75,56 @@ TEST_F(SpvGeneratorImplTest, Type_F16) {
     EXPECT_INST("%half = OpTypeFloat 16");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Vec2i) {
+TEST_F(SpirvWriterTest, Type_Vec2i) {
     generator_.Type(ty.vec2<i32>());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v2int = OpTypeVector %int 2");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Vec3u) {
+TEST_F(SpirvWriterTest, Type_Vec3u) {
     generator_.Type(ty.vec3<u32>());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v3uint = OpTypeVector %uint 3");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Vec4f) {
+TEST_F(SpirvWriterTest, Type_Vec4f) {
     generator_.Type(ty.vec4<f32>());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v4float = OpTypeVector %float 4");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Vec2h) {
+TEST_F(SpirvWriterTest, Type_Vec2h) {
     generator_.Type(ty.vec2<f16>());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v2half = OpTypeVector %half 2");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Vec4Bool) {
+TEST_F(SpirvWriterTest, Type_Vec4Bool) {
     generator_.Type(ty.vec4<bool>());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v4bool = OpTypeVector %bool 4");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Mat2x3f) {
+TEST_F(SpirvWriterTest, Type_Mat2x3f) {
     generator_.Type(ty.mat2x3(ty.f32()));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%mat2v3float = OpTypeMatrix %v3float 2");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Mat4x2h) {
+TEST_F(SpirvWriterTest, Type_Mat4x2h) {
     generator_.Type(ty.mat4x2(ty.f16()));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%mat4v2half = OpTypeMatrix %v2half 4");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Array_DefaultStride) {
+TEST_F(SpirvWriterTest, Type_Array_DefaultStride) {
     generator_.Type(ty.array<f32, 4>());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -132,7 +132,7 @@ TEST_F(SpvGeneratorImplTest, Type_Array_DefaultStride) {
     EXPECT_INST("%_arr_float_uint_4 = OpTypeArray %float %uint_4");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Array_ExplicitStride) {
+TEST_F(SpirvWriterTest, Type_Array_ExplicitStride) {
     generator_.Type(ty.array<f32, 4>(16));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -140,7 +140,7 @@ TEST_F(SpvGeneratorImplTest, Type_Array_ExplicitStride) {
     EXPECT_INST("%_arr_float_uint_4 = OpTypeArray %float %uint_4");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Array_NestedArray) {
+TEST_F(SpirvWriterTest, Type_Array_NestedArray) {
     generator_.Type(ty.array(ty.array<f32, 64u>(), 4u));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -150,7 +150,7 @@ TEST_F(SpvGeneratorImplTest, Type_Array_NestedArray) {
     EXPECT_INST("%_arr__arr_float_uint_64_uint_4 = OpTypeArray %_arr_float_uint_64 %uint_4");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_DefaultStride) {
+TEST_F(SpirvWriterTest, Type_RuntimeArray_DefaultStride) {
     generator_.Type(ty.array<f32>());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -158,7 +158,7 @@ TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_DefaultStride) {
     EXPECT_INST("%_runtimearr_float = OpTypeRuntimeArray %float");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_ExplicitStride) {
+TEST_F(SpirvWriterTest, Type_RuntimeArray_ExplicitStride) {
     generator_.Type(ty.array<f32>(16));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -166,7 +166,7 @@ TEST_F(SpvGeneratorImplTest, Type_RuntimeArray_ExplicitStride) {
     EXPECT_INST("%_runtimearr_float = OpTypeRuntimeArray %float");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Struct) {
+TEST_F(SpirvWriterTest, Type_Struct) {
     auto* str =
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.Register("a"), ty.f32()},
@@ -183,7 +183,7 @@ TEST_F(SpvGeneratorImplTest, Type_Struct) {
     EXPECT_INST("%MyStruct = OpTypeStruct %float %v4int");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Struct_MatrixLayout) {
+TEST_F(SpirvWriterTest, Type_Struct_MatrixLayout) {
     auto* str = ty.Struct(
         mod.symbols.New("MyStruct"),
         {
@@ -201,28 +201,28 @@ TEST_F(SpvGeneratorImplTest, Type_Struct_MatrixLayout) {
     EXPECT_INST("%MyStruct = OpTypeStruct %mat3v3float %_arr__arr_mat2v4half_uint_4_uint_4");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Atomic) {
+TEST_F(SpirvWriterTest, Type_Atomic) {
     generator_.Type(ty.atomic(ty.i32()));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%int = OpTypeInt 32 1");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Sampler) {
+TEST_F(SpirvWriterTest, Type_Sampler) {
     generator_.Type(ty.sampler());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpTypeSampler");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_SamplerComparison) {
+TEST_F(SpirvWriterTest, Type_SamplerComparison) {
     generator_.Type(ty.comparison_sampler());
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpTypeSampler");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_Samplers_Dedup) {
+TEST_F(SpirvWriterTest, Type_Samplers_Dedup) {
     auto id = generator_.Type(ty.sampler());
     EXPECT_EQ(generator_.Type(ty.comparison_sampler()), id);
 
@@ -236,7 +236,7 @@ struct TextureCase {
     TestElementType format = kF32;
 };
 
-using Type_SampledTexture = SpvGeneratorImplTestWithParam<TextureCase>;
+using Type_SampledTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_SampledTexture, Emit) {
     auto params = GetParam();
     generator_.Type(ty.Get<type::SampledTexture>(params.dim, MakeScalarType(params.format)));
@@ -245,7 +245,7 @@ TEST_P(Type_SampledTexture, Emit) {
     EXPECT_INST(params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     Type_SampledTexture,
     testing::Values(
         TextureCase{"%1 = OpTypeImage %float 1D 0 0 0 1 Unknown", Dim::k1d, kF32},
@@ -267,7 +267,7 @@ INSTANTIATE_TEST_SUITE_P(
         TextureCase{"%1 = OpTypeImage %uint Cube 0 0 0 1 Unknown", Dim::kCube, kU32},
         TextureCase{"%1 = OpTypeImage %uint Cube 0 1 0 1 Unknown", Dim::kCubeArray, kU32}));
 
-using Type_MultisampledTexture = SpvGeneratorImplTestWithParam<TextureCase>;
+using Type_MultisampledTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_MultisampledTexture, Emit) {
     auto params = GetParam();
     generator_.Type(ty.Get<type::MultisampledTexture>(params.dim, MakeScalarType(params.format)));
@@ -276,13 +276,13 @@ TEST_P(Type_MultisampledTexture, Emit) {
     EXPECT_INST(params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     Type_MultisampledTexture,
     testing::Values(TextureCase{"%1 = OpTypeImage %float 2D 0 0 1 1 Unknown", Dim::k2d, kF32},
                     TextureCase{"%1 = OpTypeImage %int 2D 0 0 1 1 Unknown", Dim::k2d, kI32},
                     TextureCase{"%1 = OpTypeImage %uint 2D 0 0 1 1 Unknown", Dim::k2d, kU32}));
 
-using Type_DepthTexture = SpvGeneratorImplTestWithParam<TextureCase>;
+using Type_DepthTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_DepthTexture, Emit) {
     auto params = GetParam();
     generator_.Type(ty.Get<type::DepthTexture>(params.dim));
@@ -291,14 +291,14 @@ TEST_P(Type_DepthTexture, Emit) {
     EXPECT_INST(params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest,
+    SpirvWriterTest,
     Type_DepthTexture,
     testing::Values(TextureCase{"%1 = OpTypeImage %float 2D 0 0 0 1 Unknown", Dim::k2d},
                     TextureCase{"%1 = OpTypeImage %float 2D 0 1 0 1 Unknown", Dim::k2dArray},
                     TextureCase{"%1 = OpTypeImage %float Cube 0 0 0 1 Unknown", Dim::kCube},
                     TextureCase{"%1 = OpTypeImage %float Cube 0 1 0 1 Unknown", Dim::kCubeArray}));
 
-TEST_F(SpvGeneratorImplTest, Type_DepthTexture_DedupWithSampledTexture) {
+TEST_F(SpirvWriterTest, Type_DepthTexture_DedupWithSampledTexture) {
     generator_.Type(ty.Get<type::SampledTexture>(Dim::k2d, ty.f32()));
     generator_.Type(ty.Get<type::DepthTexture>(Dim::k2d));
 
@@ -310,14 +310,14 @@ TEST_F(SpvGeneratorImplTest, Type_DepthTexture_DedupWithSampledTexture) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_DepthMultiSampledTexture) {
+TEST_F(SpirvWriterTest, Type_DepthMultiSampledTexture) {
     generator_.Type(ty.Get<type::DepthMultisampledTexture>(Dim::k2d));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%1 = OpTypeImage %float 2D 0 0 1 1 Unknown");
 }
 
-TEST_F(SpvGeneratorImplTest, Type_DepthMultisampledTexture_DedupWithMultisampledTexture) {
+TEST_F(SpirvWriterTest, Type_DepthMultisampledTexture_DedupWithMultisampledTexture) {
     generator_.Type(ty.Get<type::MultisampledTexture>(Dim::k2d, ty.f32()));
     generator_.Type(ty.Get<type::DepthMultisampledTexture>(Dim::k2d));
 
@@ -335,7 +335,7 @@ struct StorageTextureCase {
     Dim dim;
     Format format;
 };
-using Type_StorageTexture = SpvGeneratorImplTestWithParam<StorageTextureCase>;
+using Type_StorageTexture = SpirvWriterTestWithParam<StorageTextureCase>;
 TEST_P(Type_StorageTexture, Emit) {
     auto params = GetParam();
     generator_.Type(
@@ -350,7 +350,7 @@ TEST_P(Type_StorageTexture, Emit) {
         EXPECT_INST("OpCapability StorageImageExtendedFormats");
     }
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          Type_StorageTexture,
                          testing::Values(
                              // Test all the dimensions with a single format.
@@ -400,7 +400,7 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
 
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
-TEST_F(SpvGeneratorImplTest, Type_Multiple) {
+TEST_F(SpirvWriterTest, Type_Multiple) {
     generator_.Type(ty.i32());
     generator_.Type(ty.u32());
     generator_.Type(ty.f32());
@@ -416,7 +416,7 @@ TEST_F(SpvGeneratorImplTest, Type_Multiple) {
 }
 
 // Test that we do not emit the same type more than once.
-TEST_F(SpvGeneratorImplTest, Type_Deduplicate) {
+TEST_F(SpirvWriterTest, Type_Deduplicate) {
     auto id = generator_.Type(ty.i32());
     EXPECT_EQ(generator_.Type(ty.i32()), id);
     EXPECT_EQ(generator_.Type(ty.i32()), id);

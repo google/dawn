@@ -19,7 +19,7 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::writer::spirv {
 namespace {
 
-TEST_F(SpvGeneratorImplTest, Switch_Basic) {
+TEST_F(SpirvWriterTest, Switch_Basic) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
@@ -45,7 +45,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Basic) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_MultipleCases) {
+TEST_F(SpirvWriterTest, Switch_MultipleCases) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
@@ -85,7 +85,7 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleCases) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_MultipleSelectorsPerCase) {
+TEST_F(SpirvWriterTest, Switch_MultipleSelectorsPerCase) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
@@ -128,7 +128,7 @@ TEST_F(SpvGeneratorImplTest, Switch_MultipleSelectorsPerCase) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_AllCasesReturn) {
+TEST_F(SpirvWriterTest, Switch_AllCasesReturn) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
@@ -168,7 +168,7 @@ TEST_F(SpvGeneratorImplTest, Switch_AllCasesReturn) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_ConditionalBreak) {
+TEST_F(SpirvWriterTest, Switch_ConditionalBreak) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
@@ -214,7 +214,7 @@ TEST_F(SpvGeneratorImplTest, Switch_ConditionalBreak) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
+TEST_F(SpirvWriterTest, Switch_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.i32());
     b.With(func->Block(), [&] {
         auto* s = b.Switch(42_i);
@@ -249,7 +249,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
+TEST_F(SpirvWriterTest, Switch_Phi_SingleValue_CaseReturn) {
     auto* func = b.Function("foo", ty.i32());
     b.With(func->Block(), [&] {
         auto* s = b.Switch(42_i);
@@ -297,7 +297,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_SingleValue_CaseReturn) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue_0) {
+TEST_F(SpirvWriterTest, Switch_Phi_MultipleValue_0) {
     auto* func = b.Function("foo", ty.i32());
     b.With(func->Block(), [&] {
         auto* s = b.Switch(42_i);
@@ -333,7 +333,7 @@ TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue_0) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Switch_Phi_MultipleValue_1) {
+TEST_F(SpirvWriterTest, Switch_Phi_MultipleValue_1) {
     auto* func = b.Function("foo", ty.bool_());
     b.With(func->Block(), [&] {
         auto* s = b.Switch(b.Constant(42_i));

@@ -19,7 +19,7 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::writer::spirv {
 namespace {
 
-TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
+TEST_F(SpirvWriterTest, If_TrueEmpty_FalseEmpty) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -42,7 +42,7 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty_FalseEmpty) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
+TEST_F(SpirvWriterTest, If_FalseEmpty) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -69,7 +69,7 @@ TEST_F(SpvGeneratorImplTest, If_FalseEmpty) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
+TEST_F(SpirvWriterTest, If_TrueEmpty) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -96,7 +96,7 @@ TEST_F(SpvGeneratorImplTest, If_TrueEmpty) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
+TEST_F(SpirvWriterTest, If_BothBranchesReturn) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -119,7 +119,7 @@ TEST_F(SpvGeneratorImplTest, If_BothBranchesReturn) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue) {
+TEST_F(SpirvWriterTest, If_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.i32());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -148,7 +148,7 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_TrueReturn) {
+TEST_F(SpirvWriterTest, If_Phi_SingleValue_TrueReturn) {
     auto* func = b.Function("foo", ty.i32());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -188,7 +188,7 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_TrueReturn) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_FalseReturn) {
+TEST_F(SpirvWriterTest, If_Phi_SingleValue_FalseReturn) {
     auto* func = b.Function("foo", ty.i32());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -228,7 +228,7 @@ TEST_F(SpvGeneratorImplTest, If_Phi_SingleValue_FalseReturn) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue_0) {
+TEST_F(SpirvWriterTest, If_Phi_MultipleValue_0) {
     auto* func = b.Function("foo", ty.i32());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -258,7 +258,7 @@ TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue_0) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, If_Phi_MultipleValue_1) {
+TEST_F(SpirvWriterTest, If_Phi_MultipleValue_1) {
     auto* func = b.Function("foo", ty.bool_());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);

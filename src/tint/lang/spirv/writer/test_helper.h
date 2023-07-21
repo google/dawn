@@ -64,9 +64,9 @@ inline utils::StringStream& operator<<(utils::StringStream& out, TestElementType
 
 /// Base helper class for testing the SPIR-V generator implementation.
 template <typename BASE>
-class SpvGeneratorTestHelperBase : public BASE {
+class SpirvWriterTestHelperBase : public BASE {
   public:
-    SpvGeneratorTestHelperBase() : generator_(&mod, false) {}
+    SpirvWriterTestHelperBase() : generator_(&mod, false) {}
 
     /// The test module.
     ir::Module mod;
@@ -229,10 +229,10 @@ class SpvGeneratorTestHelperBase : public BASE {
     }
 };
 
-using SpvGeneratorImplTest = SpvGeneratorTestHelperBase<testing::Test>;
+using SpirvWriterTest = SpirvWriterTestHelperBase<testing::Test>;
 
 template <typename T>
-using SpvGeneratorImplTestWithParam = SpvGeneratorTestHelperBase<testing::TestWithParam<T>>;
+using SpirvWriterTestWithParam = SpirvWriterTestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::writer::spirv
 

@@ -20,7 +20,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-TEST_F(SpvGeneratorImplTest, Swizzle_TwoElements) {
+TEST_F(SpirvWriterTest, Swizzle_TwoElements) {
     auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});
@@ -34,7 +34,7 @@ TEST_F(SpvGeneratorImplTest, Swizzle_TwoElements) {
     EXPECT_INST("%result = OpVectorShuffle %v2int %vec %vec 3 2");
 }
 
-TEST_F(SpvGeneratorImplTest, Swizzle_ThreeElements) {
+TEST_F(SpirvWriterTest, Swizzle_ThreeElements) {
     auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});
@@ -48,7 +48,7 @@ TEST_F(SpvGeneratorImplTest, Swizzle_ThreeElements) {
     EXPECT_INST("%result = OpVectorShuffle %v3int %vec %vec 3 2 1");
 }
 
-TEST_F(SpvGeneratorImplTest, Swizzle_FourElements) {
+TEST_F(SpirvWriterTest, Swizzle_FourElements) {
     auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});
@@ -62,7 +62,7 @@ TEST_F(SpvGeneratorImplTest, Swizzle_FourElements) {
     EXPECT_INST("%result = OpVectorShuffle %v4int %vec %vec 3 2 1 0");
 }
 
-TEST_F(SpvGeneratorImplTest, Swizzle_RepeatedElements) {
+TEST_F(SpirvWriterTest, Swizzle_RepeatedElements) {
     auto* vec = b.FunctionParam("vec", ty.vec2<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});

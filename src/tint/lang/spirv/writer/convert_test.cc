@@ -37,7 +37,7 @@ std::string PrintCase(testing::TestParamInfo<ConvertCase> cc) {
     return ss.str();
 }
 
-using Convert = SpvGeneratorImplTestWithParam<ConvertCase>;
+using Convert = SpirvWriterTestWithParam<ConvertCase>;
 TEST_P(Convert, Scalar) {
     auto& params = GetParam();
     auto* func = b.Function("foo", MakeScalarType(params.out));
@@ -64,7 +64,7 @@ TEST_P(Convert, Vector) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = " + params.spirv_inst + " %v2" + params.spirv_type_name + " %arg");
 }
-INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          Convert,
                          testing::Values(
                              // To f32.
@@ -98,7 +98,7 @@ INSTANTIATE_TEST_SUITE_P(SpvGeneratorImplTest,
                              ConvertCase{kU32, kBool, "OpINotEqual", "bool"}),
                          PrintCase);
 
-TEST_F(SpvGeneratorImplTest, Convert_Mat2x3_F16_to_F32) {
+TEST_F(SpirvWriterTest, Convert_Mat2x3_F16_to_F32) {
     auto* func = b.Function("foo", ty.mat2x3<f32>());
     func->SetParams({b.FunctionParam("arg", ty.mat2x3<f16>())});
     b.With(func->Block(), [&] {
@@ -117,7 +117,7 @@ TEST_F(SpvGeneratorImplTest, Convert_Mat2x3_F16_to_F32) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, Convert_Mat4x2_F32_to_F16) {
+TEST_F(SpirvWriterTest, Convert_Mat4x2_F32_to_F16) {
     auto* func = b.Function("foo", ty.mat4x2<f16>());
     func->SetParams({b.FunctionParam("arg", ty.mat4x2<f32>())});
     b.With(func->Block(), [&] {

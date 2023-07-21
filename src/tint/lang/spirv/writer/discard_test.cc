@@ -20,7 +20,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-TEST_F(SpvGeneratorImplTest, Discard) {
+TEST_F(SpirvWriterTest, Discard) {
     auto* buffer = b.Var("buffer", ty.ptr<storage, i32>());
     buffer->SetBindingPoint(0, 0);
     b.RootBlock()->Append(buffer);

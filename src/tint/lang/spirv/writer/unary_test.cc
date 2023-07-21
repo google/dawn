@@ -33,7 +33,7 @@ struct UnaryTestCase {
     std::string spirv_type_name;
 };
 
-using Arithmetic = SpvGeneratorImplTestWithParam<UnaryTestCase>;
+using Arithmetic = SpirvWriterTestWithParam<UnaryTestCase>;
 TEST_P(Arithmetic, Scalar) {
     auto params = GetParam();
 
@@ -65,7 +65,7 @@ TEST_P(Arithmetic, Vector) {
     EXPECT_INST("%result = " + params.spirv_inst + " %v2" + params.spirv_type_name + " %arg");
 }
 INSTANTIATE_TEST_SUITE_P(
-    SpvGeneratorImplTest_Unary,
+    SpirvWriterTest_Unary,
     Arithmetic,
     testing::Values(UnaryTestCase{kI32, ir::Unary::Kind::kComplement, "OpNot", "int"},
                     UnaryTestCase{kU32, ir::Unary::Kind::kComplement, "OpNot", "uint"},

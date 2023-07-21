@@ -22,7 +22,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-TEST_F(SpvGeneratorImplTest, FunctionVar_NoInit) {
+TEST_F(SpirvWriterTest, FunctionVar_NoInit) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         b.Var("v", ty.ptr<function, i32>());
@@ -33,7 +33,7 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_NoInit) {
     EXPECT_INST("%v = OpVariable %_ptr_Function_int Function");
 }
 
-TEST_F(SpvGeneratorImplTest, FunctionVar_WithInit) {
+TEST_F(SpirvWriterTest, FunctionVar_WithInit) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function, i32>());
@@ -46,7 +46,7 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_WithInit) {
     EXPECT_INST("OpStore %v %int_42");
 }
 
-TEST_F(SpvGeneratorImplTest, FunctionVar_DeclInsideBlock) {
+TEST_F(SpirvWriterTest, FunctionVar_DeclInsideBlock) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* i = b.If(true);
@@ -74,7 +74,7 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_DeclInsideBlock) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, FunctionVar_Load) {
+TEST_F(SpirvWriterTest, FunctionVar_Load) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function, i32>());
@@ -88,7 +88,7 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_Load) {
     EXPECT_INST("%result = OpLoad %int %v");
 }
 
-TEST_F(SpvGeneratorImplTest, FunctionVar_Store) {
+TEST_F(SpirvWriterTest, FunctionVar_Store) {
     auto* func = b.Function("foo", ty.void_());
     b.With(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function, i32>());
@@ -101,14 +101,14 @@ TEST_F(SpvGeneratorImplTest, FunctionVar_Store) {
     EXPECT_INST("OpStore %v %int_42");
 }
 
-TEST_F(SpvGeneratorImplTest, PrivateVar_NoInit) {
+TEST_F(SpirvWriterTest, PrivateVar_NoInit) {
     b.RootBlock()->Append(b.Var("v", ty.ptr<private_, i32>()));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Private_int Private");
 }
 
-TEST_F(SpvGeneratorImplTest, PrivateVar_WithInit) {
+TEST_F(SpirvWriterTest, PrivateVar_WithInit) {
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     v->SetInitializer(b.Constant(42_i));
     b.RootBlock()->Append(v);
@@ -117,7 +117,7 @@ TEST_F(SpvGeneratorImplTest, PrivateVar_WithInit) {
     EXPECT_INST("%v = OpVariable %_ptr_Private_int Private %int_42");
 }
 
-TEST_F(SpvGeneratorImplTest, PrivateVar_LoadAndStore) {
+TEST_F(SpirvWriterTest, PrivateVar_LoadAndStore) {
     auto* v = b.Var("v", ty.ptr<private_, i32>());
     v->SetInitializer(b.Constant(42_i));
     b.RootBlock()->Append(v);
@@ -138,14 +138,14 @@ TEST_F(SpvGeneratorImplTest, PrivateVar_LoadAndStore) {
     EXPECT_INST("OpStore %v %add");
 }
 
-TEST_F(SpvGeneratorImplTest, WorkgroupVar) {
+TEST_F(SpirvWriterTest, WorkgroupVar) {
     b.RootBlock()->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup");
 }
 
-TEST_F(SpvGeneratorImplTest, WorkgroupVar_LoadAndStore) {
+TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
     auto* v = b.RootBlock()->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kCompute,
@@ -165,7 +165,7 @@ TEST_F(SpvGeneratorImplTest, WorkgroupVar_LoadAndStore) {
     EXPECT_INST("OpStore %v %add");
 }
 
-TEST_F(SpvGeneratorImplTest, WorkgroupVar_ZeroInitializeWithExtension) {
+TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
     b.RootBlock()->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
     // Create a generator with the zero_init_workgroup_memory flag set to `true`.
@@ -175,7 +175,7 @@ TEST_F(SpvGeneratorImplTest, WorkgroupVar_ZeroInitializeWithExtension) {
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup %4");
 }
 
-TEST_F(SpvGeneratorImplTest, StorageVar) {
+TEST_F(SpirvWriterTest, StorageVar) {
     auto* v = b.Var("v", ty.ptr<storage, i32>());
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
@@ -193,7 +193,7 @@ TEST_F(SpvGeneratorImplTest, StorageVar) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, StorageVar_LoadAndStore) {
+TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
     auto* v = b.Var("v", ty.ptr<storage, i32>());
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
@@ -219,7 +219,7 @@ TEST_F(SpvGeneratorImplTest, StorageVar_LoadAndStore) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, UniformVar) {
+TEST_F(SpirvWriterTest, UniformVar) {
     auto* v = b.Var("v", ty.ptr<uniform, i32>());
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
@@ -237,7 +237,7 @@ TEST_F(SpvGeneratorImplTest, UniformVar) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, UniformVar_Load) {
+TEST_F(SpirvWriterTest, UniformVar_Load) {
     auto* v = b.Var("v", ty.ptr<uniform, i32>());
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
@@ -257,7 +257,7 @@ TEST_F(SpvGeneratorImplTest, UniformVar_Load) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, SamplerVar) {
+TEST_F(SpirvWriterTest, SamplerVar) {
     auto* v =
         b.Var("v", ty.ptr(builtin::AddressSpace::kHandle, ty.sampler(), builtin::Access::kRead));
     v->SetBindingPoint(0, 0);
@@ -275,7 +275,7 @@ TEST_F(SpvGeneratorImplTest, SamplerVar) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, SamplerVar_Load) {
+TEST_F(SpirvWriterTest, SamplerVar_Load) {
     auto* v =
         b.Var("v", ty.ptr(builtin::AddressSpace::kHandle, ty.sampler(), builtin::Access::kRead));
     v->SetBindingPoint(0, 0);
@@ -292,7 +292,7 @@ TEST_F(SpvGeneratorImplTest, SamplerVar_Load) {
     EXPECT_INST("%load = OpLoad %3 %v");
 }
 
-TEST_F(SpvGeneratorImplTest, TextureVar) {
+TEST_F(SpirvWriterTest, TextureVar) {
     auto* v = b.Var("v", ty.ptr(builtin::AddressSpace::kHandle,
                                 ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()),
                                 builtin::Access::kRead));
@@ -311,7 +311,7 @@ TEST_F(SpvGeneratorImplTest, TextureVar) {
 )");
 }
 
-TEST_F(SpvGeneratorImplTest, TextureVar_Load) {
+TEST_F(SpirvWriterTest, TextureVar_Load) {
     auto* v = b.Var("v", ty.ptr(builtin::AddressSpace::kHandle,
                                 ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()),
                                 builtin::Access::kRead));
