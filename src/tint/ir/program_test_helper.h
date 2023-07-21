@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/ir/disassembler.h"
 #include "src/tint/ir/from_program.h"
+#include "src/tint/ir/validator.h"
 #include "src/tint/lang/core/builtin/number.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
@@ -46,7 +47,14 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
             return program.Diagnostics().str();
         }
 
-        return FromProgram(&program);
+        auto result = FromProgram(&program);
+        if (result) {
+            auto validated = ir::Validate(result.Get());
+            if (!validated) {
+                return validated.Failure().str();
+            }
+        }
+        return result;
     }
 
     /// Build the module from the given WGSL.
@@ -59,7 +67,15 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
         if (!program.IsValid()) {
             return program.Diagnostics().str();
         }
-        return FromProgram(&program);
+
+        auto result = FromProgram(&program);
+        if (result) {
+            auto validated = ir::Validate(result.Get());
+            if (!validated) {
+                return validated.Failure().str();
+            }
+        }
+        return result;
 #else
         return std::string("error: Tint not built with the WGSL reader");
 #endif
