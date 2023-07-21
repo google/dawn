@@ -465,7 +465,7 @@ hooks = [
    # Download remote exec cfg files
    'name': 'fetch_reclient_cfgs',
    'pattern': '.',
-   'condition': 'download_remoteexec_cfg',
+   'condition': 'download_remoteexec_cfg and dawn_standalone',
    'action': ['python3',
               'buildtools/reclient_cfgs/fetch_reclient_cfgs.py',
               '--rbe_instance',
