@@ -17,7 +17,8 @@
 #include "src/tint/lang/core/builtin/function.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::builtin::fluent_types;  // NOLINT
 
 namespace tint::writer::spirv {
 namespace {
@@ -1201,6 +1202,48 @@ TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_264");
+}
+
+TEST_F(SpirvWriterTest, Builtin_ArrayLength) {
+    auto* var = b.Var("var", ty.ptr(storage, ty.runtime_array(ty.i32())));
+    var->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(var);
+
+    auto* func = b.Function("foo", ty.u32());
+    b.With(func->Block(), [&] {
+        auto* ptr = b.Let("ptr", var);
+        auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, ptr);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer");
+    EXPECT_INST("%result = OpArrayLength %uint %1 0");
+}
+
+TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
+    auto* arr = ty.runtime_array(ty.i32());
+    auto* str = ty.Struct(mod.symbols.New("Buffer"), {
+                                                         {mod.symbols.New("a"), ty.i32()},
+                                                         {mod.symbols.New("b"), ty.i32()},
+                                                         {mod.symbols.New("arr"), arr},
+                                                     });
+    auto* var = b.Var("var", ty.ptr(storage, str));
+    var->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(var);
+
+    auto* func = b.Function("foo", ty.u32());
+    b.With(func->Block(), [&] {
+        auto* ptr = b.Let("ptr", b.Access(ty.ptr(storage, arr), var, 2_u));
+        auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, ptr);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%1 = OpVariable %_ptr_StorageBuffer_tint_symbol StorageBuffer");
+    EXPECT_INST("%result = OpArrayLength %uint %1 2");
 }
 
 }  // namespace

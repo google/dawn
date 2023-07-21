@@ -1540,6 +1540,9 @@ void Writer::EmitIntrinsicCall(ir::IntrinsicCall* call) {
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
+        case ir::IntrinsicCall::Kind::kSpirvArrayLength:
+            op = spv::Op::OpArrayLength;
+            break;
         case ir::IntrinsicCall::Kind::kSpirvAtomicIAdd:
             op = spv::Op::OpAtomicIAdd;
             break;

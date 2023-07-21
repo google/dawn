@@ -34,6 +34,9 @@ IntrinsicCall::~IntrinsicCall() = default;
 
 utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Kind kind) {
     switch (kind) {
+        case IntrinsicCall::Kind::kSpirvArrayLength:
+            out << "spirv.array_length";
+            break;
         case IntrinsicCall::Kind::kSpirvAtomicIAdd:
             out << "spirv.atomic_iadd";
             break;

@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/tint/ir/transform/test_helper.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -31,6 +32,210 @@ using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
 using IR_BuiltinPolyfillSpirvTest = TransformTest;
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, ArrayLength) {
+    auto* arr = ty.runtime_array(ty.i32());
+    auto* str_ty = ty.Struct(mod.symbols.New("Buffer"), {
+                                                            {mod.symbols.New("a"), ty.i32()},
+                                                            {mod.symbols.New("b"), ty.i32()},
+                                                            {mod.symbols.New("arr"), arr},
+                                                        });
+    auto* var = b.Var("var", ty.ptr(storage, str_ty));
+    var->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(var);
+
+    auto* func = b.Function("foo", ty.u32());
+    b.With(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr(storage, arr), var, 2_u);
+        auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, access);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+Buffer = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  arr:array<i32> @offset(8)
+}
+
+%b1 = block {  # root
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 -> %b2 {
+  %b2 = block {
+    %3:ptr<storage, array<i32>, read_write> = access %var, 2u
+    %4:u32 = arrayLength %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Buffer = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  arr:array<i32> @offset(8)
+}
+
+%b1 = block {  # root
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 -> %b2 {
+  %b2 = block {
+    %3:ptr<storage, array<i32>, read_write> = access %var, 2u
+    %4:u32 = spirv.array_length %var, 2u
+    ret %4
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, ArrayLength_ViaLet_BeforeAccess) {
+    auto* arr = ty.runtime_array(ty.i32());
+    auto* str_ty = ty.Struct(mod.symbols.New("Buffer"), {
+                                                            {mod.symbols.New("a"), ty.i32()},
+                                                            {mod.symbols.New("b"), ty.i32()},
+                                                            {mod.symbols.New("arr"), arr},
+                                                        });
+    auto* var = b.Var("var", ty.ptr(storage, str_ty));
+    var->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(var);
+
+    auto* func = b.Function("foo", ty.u32());
+    b.With(func->Block(), [&] {
+        auto* let_a = b.Let("a", var);
+        auto* let_b = b.Let("b", let_a);
+        auto* access = b.Access(ty.ptr(storage, arr), let_b, 2_u);
+        auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, access);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+Buffer = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  arr:array<i32> @offset(8)
+}
+
+%b1 = block {  # root
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 -> %b2 {
+  %b2 = block {
+    %a:ptr<storage, Buffer, read_write> = let %var
+    %b:ptr<storage, Buffer, read_write> = let %a
+    %5:ptr<storage, array<i32>, read_write> = access %b, 2u
+    %6:u32 = arrayLength %5
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Buffer = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  arr:array<i32> @offset(8)
+}
+
+%b1 = block {  # root
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 -> %b2 {
+  %b2 = block {
+    %a:ptr<storage, Buffer, read_write> = let %var
+    %b:ptr<storage, Buffer, read_write> = let %a
+    %5:ptr<storage, array<i32>, read_write> = access %b, 2u
+    %6:u32 = spirv.array_length %b, 2u
+    ret %6
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillSpirvTest, ArrayLength_ViaLet_AfterAccess) {
+    auto* arr = ty.runtime_array(ty.i32());
+    auto* str_ty = ty.Struct(mod.symbols.New("Buffer"), {
+                                                            {mod.symbols.New("a"), ty.i32()},
+                                                            {mod.symbols.New("b"), ty.i32()},
+                                                            {mod.symbols.New("arr"), arr},
+                                                        });
+    auto* var = b.Var("var", ty.ptr(storage, str_ty));
+    var->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(var);
+
+    auto* func = b.Function("foo", ty.u32());
+    b.With(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr(storage, arr), var, 2_u);
+        auto* let_a = b.Let("a", access);
+        auto* let_b = b.Let("b", let_a);
+        auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, let_b);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+Buffer = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  arr:array<i32> @offset(8)
+}
+
+%b1 = block {  # root
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 -> %b2 {
+  %b2 = block {
+    %3:ptr<storage, array<i32>, read_write> = access %var, 2u
+    %a:ptr<storage, array<i32>, read_write> = let %3
+    %b:ptr<storage, array<i32>, read_write> = let %a
+    %6:u32 = arrayLength %b
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Buffer = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  arr:array<i32> @offset(8)
+}
+
+%b1 = block {  # root
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 -> %b2 {
+  %b2 = block {
+    %3:ptr<storage, array<i32>, read_write> = access %var, 2u
+    %a:ptr<storage, array<i32>, read_write> = let %3
+    %b:ptr<storage, array<i32>, read_write> = let %a
+    %6:u32 = spirv.array_length %var, 2u
+    ret %6
+  }
+}
+)";
+
+    Run<BuiltinPolyfillSpirv>();
+
+    EXPECT_EQ(expect, str());
+}
 
 TEST_F(IR_BuiltinPolyfillSpirvTest, AtomicAdd_Storage) {
     auto* var = b.Var(ty.ptr(storage, ty.atomic(ty.i32())));

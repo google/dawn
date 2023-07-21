@@ -60,6 +60,7 @@ struct BuiltinPolyfillSpirv::State {
             }
             if (auto* builtin = inst->As<CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
+                    case builtin::Function::kArrayLength:
                     case builtin::Function::kAtomicAdd:
                     case builtin::Function::kAtomicAnd:
                     case builtin::Function::kAtomicCompareExchangeWeak:
@@ -97,6 +98,9 @@ struct BuiltinPolyfillSpirv::State {
         for (auto* builtin : worklist) {
             Value* replacement = nullptr;
             switch (builtin->Func()) {
+                case builtin::Function::kArrayLength:
+                    replacement = ArrayLength(builtin);
+                    break;
                 case builtin::Function::kAtomicAdd:
                 case builtin::Function::kAtomicAnd:
                 case builtin::Function::kAtomicCompareExchangeWeak:
@@ -152,6 +156,39 @@ struct BuiltinPolyfillSpirv::State {
             builtin->Result()->ReplaceAllUsesWith(replacement);
             builtin->Destroy();
         }
+    }
+
+    /// Create a literal operand.
+    /// @param value the literal value
+    /// @returns the literal operand
+    LiteralOperand* Literal(u32 value) {
+        return ir->values.Create<LiteralOperand>(ir->constant_values.Get(value));
+    }
+
+    /// Handle an `arrayLength()` builtin.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    Value* ArrayLength(CoreBuiltinCall* builtin) {
+        // Strip away any let instructions to get to the original struct member access instruction.
+        auto* ptr = builtin->Args()[0]->As<InstructionResult>();
+        while (auto* let = tint::As<Let>(ptr->Source())) {
+            ptr = let->Value()->As<InstructionResult>();
+        }
+        TINT_ASSERT_OR_RETURN_VALUE(Transform, ptr, nullptr);
+
+        auto* access = ptr->Source()->As<Access>();
+        TINT_ASSERT_OR_RETURN_VALUE(Transform, access, nullptr);
+        TINT_ASSERT_OR_RETURN_VALUE(Transform, access->Indices().Length() == 1u, nullptr);
+        TINT_ASSERT_OR_RETURN_VALUE(
+            Transform, access->Object()->Type()->UnwrapPtr()->Is<type::Struct>(), nullptr);
+        auto* const_idx = access->Indices()[0]->As<Constant>();
+
+        // Replace the builtin call with a call to the spirv.array_length intrinsic.
+        auto* call = b.Call(
+            builtin->Result()->Type(), IntrinsicCall::Kind::kSpirvArrayLength,
+            utils::Vector{access->Object(), Literal(u32(const_idx->Value()->ValueAs<uint32_t>()))});
+        call->InsertBefore(builtin);
+        return call->Result();
     }
 
     /// Handle an atomic*() builtin.
@@ -386,8 +423,7 @@ struct BuiltinPolyfillSpirv::State {
         }
 
         // Replace the image operand mask with the final mask value, as a literal operand.
-        auto* literal = ir->constant_values.Get(u32(image_operand_mask));
-        args[mask_idx] = ir->values.Create<LiteralOperand>(literal);
+        args[mask_idx] = Literal(u32(image_operand_mask));
     }
 
     /// Append an array index to a coordinate vector.
