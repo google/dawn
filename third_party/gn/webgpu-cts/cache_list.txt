@@ -1,4 +1,8 @@
+data/webgpu/shader/execution/case-cache/binary/f16_addition.json
 data/webgpu/shader/execution/case-cache/binary/f16_logical.json
+data/webgpu/shader/execution/case-cache/binary/f16_division.json
+data/webgpu/shader/execution/case-cache/binary/f16_multiplication.json
+data/webgpu/shader/execution/case-cache/binary/f16_subtraction.json
 data/webgpu/shader/execution/case-cache/binary/f32_addition.json
 data/webgpu/shader/execution/case-cache/binary/f32_logical.json
 data/webgpu/shader/execution/case-cache/binary/f32_division.json
