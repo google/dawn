@@ -52,7 +52,4 @@ class DAWN_WIRE_EXPORT CommandHandler {
 
 }  // namespace dawn::wire
 
-// TODO(dawn:824): Remove once the deprecation period is passed.
-namespace dawn_wire = dawn::wire;
-
 #endif  // INCLUDE_DAWN_WIRE_WIRE_H_

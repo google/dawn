@@ -97,7 +97,7 @@ int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::na
     serverDesc.procs = &procs;
     serverDesc.serializer = &devNull;
 
-    std::unique_ptr<dawn::wire::WireServer> wireServer(new dawn_wire::WireServer(serverDesc));
+    std::unique_ptr<dawn::wire::WireServer> wireServer(new dawn::wire::WireServer(serverDesc));
     wireServer->InjectInstance(sInstance->Get(), kInstanceObjectId, 0);
 
     static dawn::utils::TerribleCommandBuffer* mCommandBuffer =
