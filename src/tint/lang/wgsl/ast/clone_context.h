@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CLONE_CONTEXT_H_
-#define SRC_TINT_CLONE_CONTEXT_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_CLONE_CONTEXT_H_
+#define SRC_TINT_LANG_WGSL_AST_CLONE_CONTEXT_H_
 
 #include <algorithm>
 #include <functional>
@@ -631,4 +631,4 @@ class CloneContext {
 
 }  // namespace tint
 
-#endif  // SRC_TINT_CLONE_CONTEXT_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_CLONE_CONTEXT_H_

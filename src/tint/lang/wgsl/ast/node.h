@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/clone_context.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 #include "src/tint/lang/wgsl/ast/node_id.h"
 
 namespace tint::ast {

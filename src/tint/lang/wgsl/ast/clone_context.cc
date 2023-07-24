@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/clone_context.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 #include <string>
 

@@ -80,8 +80,8 @@ endif()
 
 list(APPEND TINT_LIB_SRCS
   ../../include/tint/tint.h
-  clone_context.cc
-  clone_context.h
+  lang/wgsl/ast/clone_context.cc
+  lang/wgsl/ast/clone_context.h
   lang/core/builtin/fluent_types.h
   lang/core/builtin/number.cc
   lang/core/builtin/number.h
@@ -950,7 +950,7 @@ endif()
 ################################################################################
 if(TINT_BUILD_TESTS)
   list(APPEND TINT_TEST_SRCS
-    clone_context_test.cc
+    lang/wgsl/ast/clone_context_test.cc
     lang/core/builtin/number_test.cc
     lang/core/constant/composite_test.cc
     lang/core/constant/manager_test.cc

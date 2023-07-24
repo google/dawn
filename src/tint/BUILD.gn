@@ -278,7 +278,7 @@ libtint_source_set("libtint_utils_src") {
 }
 
 libtint_source_set("libtint_clone_context_hdrs") {
-  sources = [ "clone_context.h" ]
+  sources = [ "lang/wgsl/ast/clone_context.h" ]
   deps = [
     ":libtint_symbols_src",
     ":libtint_utils_src",
@@ -287,7 +287,7 @@ libtint_source_set("libtint_clone_context_hdrs") {
 
 libtint_source_set("libtint_program_src") {
   sources = [
-    "clone_context.cc",
+    "lang/wgsl/ast/clone_context.cc",
     "lang/wgsl/program/program.cc",
     "lang/wgsl/program/program_builder.cc",
     "lang/wgsl/resolver/const_eval.cc",
@@ -2388,7 +2388,7 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_core_src") {
     sources = [
-      "clone_context_test.cc",
+      "lang/wgsl/ast/clone_context_test.cc",
       "lang/wgsl/program/program_builder_test.cc",
       "lang/wgsl/program/program_test.cc",
       "transform/manager_test.cc",
