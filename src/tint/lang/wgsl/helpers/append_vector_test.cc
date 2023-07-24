@@ -15,8 +15,8 @@
 #include "src/tint/lang/wgsl/helpers/append_vector.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
-#include "src/tint/resolver/resolver.h"
 
 #include "gmock/gmock.h"
 

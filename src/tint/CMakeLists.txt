@@ -509,21 +509,21 @@ list(APPEND TINT_LIB_SRCS
   program_id.h
   reader/reader.cc
   reader/reader.h
-  resolver/const_eval.cc
-  resolver/const_eval.h
-  resolver/dependency_graph.cc
-  resolver/dependency_graph.h
-  resolver/intrinsic_table.cc
-  resolver/intrinsic_table.h
-  resolver/intrinsic_table.inl
-  resolver/resolver.cc
-  resolver/resolver.h
-  resolver/sem_helper.cc
-  resolver/sem_helper.h
-  resolver/uniformity.cc
-  resolver/uniformity.h
-  resolver/validator.cc
-  resolver/validator.h
+  lang/wgsl/resolver/const_eval.cc
+  lang/wgsl/resolver/const_eval.h
+  lang/wgsl/resolver/dependency_graph.cc
+  lang/wgsl/resolver/dependency_graph.h
+  lang/wgsl/resolver/intrinsic_table.cc
+  lang/wgsl/resolver/intrinsic_table.h
+  lang/wgsl/resolver/intrinsic_table.inl
+  lang/wgsl/resolver/resolver.cc
+  lang/wgsl/resolver/resolver.h
+  lang/wgsl/resolver/sem_helper.cc
+  lang/wgsl/resolver/sem_helper.h
+  lang/wgsl/resolver/uniformity.cc
+  lang/wgsl/resolver/uniformity.h
+  lang/wgsl/resolver/validator.cc
+  lang/wgsl/resolver/validator.h
   tint.cc
   transform/manager.cc
   transform/manager.h
@@ -602,7 +602,7 @@ tint_generated(lang/core/builtin/interpolation_sampling BENCH TEST)
 tint_generated(lang/core/builtin/interpolation_type BENCH TEST)
 tint_generated(lang/core/builtin/texel_format BENCH TEST)
 
-tint_generated(resolver/ctor_conv_intrinsic)
+tint_generated(lang/wgsl/resolver/ctor_conv_intrinsic)
 tint_generated(lang/wgsl/sem/parameter_usage)
 
 if(UNIX)
@@ -1051,71 +1051,71 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/sem/diagnostic_severity_test.cc
     lang/wgsl/sem/struct_test.cc
     lang/wgsl/sem/value_expression_test.cc
-    resolver/address_space_layout_validation_test.cc
-    resolver/address_space_validation_test.cc
-    resolver/alias_analysis_test.cc
-    resolver/array_accessor_test.cc
-    resolver/assignment_validation_test.cc
-    resolver/atomics_test.cc
-    resolver/atomics_validation_test.cc
-    resolver/attribute_validation_test.cc
-    resolver/bitcast_validation_test.cc
-    resolver/builtin_enum_test.cc
-    resolver/builtin_structs_test.cc
-    resolver/builtin_test.cc
-    resolver/builtin_validation_test.cc
-    resolver/builtins_validation_test.cc
-    resolver/call_test.cc
-    resolver/call_validation_test.cc
-    resolver/compound_assignment_validation_test.cc
-    resolver/compound_statement_test.cc
-    resolver/const_assert_test.cc
-    resolver/const_eval_binary_op_test.cc
-    resolver/const_eval_bitcast_test.cc
-    resolver/const_eval_builtin_test.cc
-    resolver/const_eval_construction_test.cc
-    resolver/const_eval_conversion_test.cc
-    resolver/const_eval_indexing_test.cc
-    resolver/const_eval_member_access_test.cc
-    resolver/const_eval_runtime_semantics_test.cc
-    resolver/const_eval_test.h
-    resolver/const_eval_unary_op_test.cc
-    resolver/control_block_validation_test.cc
-    resolver/dependency_graph_test.cc
-    resolver/diagnostic_control_test.cc
-    resolver/dual_source_blending_extension_test.cc
-    resolver/entry_point_validation_test.cc
-    resolver/evaluation_stage_test.cc
-    resolver/expression_kind_test.cc
-    resolver/f16_extension_test.cc
-    resolver/function_validation_test.cc
-    resolver/host_shareable_validation_test.cc
-    resolver/increment_decrement_validation_test.cc
-    resolver/inferred_type_test.cc
-    resolver/intrinsic_table_test.cc
-    resolver/is_host_shareable_test.cc
-    resolver/is_storeable_test.cc
-    resolver/load_test.cc
-    resolver/materialize_test.cc
-    resolver/override_test.cc
-    resolver/ptr_ref_test.cc
-    resolver/ptr_ref_validation_test.cc
-    resolver/resolver_behavior_test.cc
-    resolver/resolver_test.cc
-    resolver/resolver_test_helper.cc
-    resolver/resolver_test_helper.h
-    resolver/root_identifier_test.cc
-    resolver/side_effects_test.cc
-    resolver/struct_address_space_use_test.cc
-    resolver/struct_layout_test.cc
-    resolver/struct_pipeline_stage_use_test.cc
-    resolver/type_validation_test.cc
-    resolver/unresolved_identifier_test.cc
-    resolver/validation_test.cc
-    resolver/validator_is_storeable_test.cc
-    resolver/value_constructor_validation_test.cc
-    resolver/variable_test.cc
-    resolver/variable_validation_test.cc
+    lang/wgsl/resolver/address_space_layout_validation_test.cc
+    lang/wgsl/resolver/address_space_validation_test.cc
+    lang/wgsl/resolver/alias_analysis_test.cc
+    lang/wgsl/resolver/array_accessor_test.cc
+    lang/wgsl/resolver/assignment_validation_test.cc
+    lang/wgsl/resolver/atomics_test.cc
+    lang/wgsl/resolver/atomics_validation_test.cc
+    lang/wgsl/resolver/attribute_validation_test.cc
+    lang/wgsl/resolver/bitcast_validation_test.cc
+    lang/wgsl/resolver/builtin_enum_test.cc
+    lang/wgsl/resolver/builtin_structs_test.cc
+    lang/wgsl/resolver/builtin_test.cc
+    lang/wgsl/resolver/builtin_validation_test.cc
+    lang/wgsl/resolver/builtins_validation_test.cc
+    lang/wgsl/resolver/call_test.cc
+    lang/wgsl/resolver/call_validation_test.cc
+    lang/wgsl/resolver/compound_assignment_validation_test.cc
+    lang/wgsl/resolver/compound_statement_test.cc
+    lang/wgsl/resolver/const_assert_test.cc
+    lang/wgsl/resolver/const_eval_binary_op_test.cc
+    lang/wgsl/resolver/const_eval_bitcast_test.cc
+    lang/wgsl/resolver/const_eval_builtin_test.cc
+    lang/wgsl/resolver/const_eval_construction_test.cc
+    lang/wgsl/resolver/const_eval_conversion_test.cc
+    lang/wgsl/resolver/const_eval_indexing_test.cc
+    lang/wgsl/resolver/const_eval_member_access_test.cc
+    lang/wgsl/resolver/const_eval_runtime_semantics_test.cc
+    lang/wgsl/resolver/const_eval_test.h
+    lang/wgsl/resolver/const_eval_unary_op_test.cc
+    lang/wgsl/resolver/control_block_validation_test.cc
+    lang/wgsl/resolver/dependency_graph_test.cc
+    lang/wgsl/resolver/diagnostic_control_test.cc
+    lang/wgsl/resolver/dual_source_blending_extension_test.cc
+    lang/wgsl/resolver/entry_point_validation_test.cc
+    lang/wgsl/resolver/evaluation_stage_test.cc
+    lang/wgsl/resolver/expression_kind_test.cc
+    lang/wgsl/resolver/f16_extension_test.cc
+    lang/wgsl/resolver/function_validation_test.cc
+    lang/wgsl/resolver/host_shareable_validation_test.cc
+    lang/wgsl/resolver/increment_decrement_validation_test.cc
+    lang/wgsl/resolver/inferred_type_test.cc
+    lang/wgsl/resolver/intrinsic_table_test.cc
+    lang/wgsl/resolver/is_host_shareable_test.cc
+    lang/wgsl/resolver/is_storeable_test.cc
+    lang/wgsl/resolver/load_test.cc
+    lang/wgsl/resolver/materialize_test.cc
+    lang/wgsl/resolver/override_test.cc
+    lang/wgsl/resolver/ptr_ref_test.cc
+    lang/wgsl/resolver/ptr_ref_validation_test.cc
+    lang/wgsl/resolver/resolver_behavior_test.cc
+    lang/wgsl/resolver/resolver_test.cc
+    lang/wgsl/resolver/resolver_test_helper.cc
+    lang/wgsl/resolver/resolver_test_helper.h
+    lang/wgsl/resolver/root_identifier_test.cc
+    lang/wgsl/resolver/side_effects_test.cc
+    lang/wgsl/resolver/struct_address_space_use_test.cc
+    lang/wgsl/resolver/struct_layout_test.cc
+    lang/wgsl/resolver/struct_pipeline_stage_use_test.cc
+    lang/wgsl/resolver/type_validation_test.cc
+    lang/wgsl/resolver/unresolved_identifier_test.cc
+    lang/wgsl/resolver/validation_test.cc
+    lang/wgsl/resolver/validator_is_storeable_test.cc
+    lang/wgsl/resolver/value_constructor_validation_test.cc
+    lang/wgsl/resolver/variable_test.cc
+    lang/wgsl/resolver/variable_validation_test.cc
     test_main.cc
     transform/manager_test.cc
     utils/cli/cli_test.cc
@@ -1172,7 +1172,7 @@ if(TINT_BUILD_TESTS)
   # Uniformity analysis tests depend on WGSL reader
   if(${TINT_BUILD_WGSL_READER})
     list(APPEND TINT_TEST_SRCS
-      resolver/uniformity_test.cc
+      lang/wgsl/resolver/uniformity_test.cc
     )
   endif()
 
