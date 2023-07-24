@@ -31,27 +31,15 @@ TEST_F(IR_ModuleTest, NameOfUnnamed) {
 
 TEST_F(IR_ModuleTest, SetName) {
     auto* v = b.Var(ty.ptr<function, i32>());
-    EXPECT_EQ(mod.SetName(v, "a").Name(), "a");
+    mod.SetName(v, "a");
     EXPECT_EQ(mod.NameOf(v).Name(), "a");
 }
 
 TEST_F(IR_ModuleTest, SetNameRename) {
     auto* v = b.Var(ty.ptr<function, i32>());
-    EXPECT_EQ(mod.SetName(v, "a").Name(), "a");
-    EXPECT_EQ(mod.SetName(v, "b").Name(), "b");
+    mod.SetName(v, "a");
+    mod.SetName(v, "b");
     EXPECT_EQ(mod.NameOf(v).Name(), "b");
-}
-
-TEST_F(IR_ModuleTest, SetNameCollision) {
-    auto* v1 = b.Var(ty.ptr<function, i32>());
-    auto* v2 = b.Var(ty.ptr<function, i32>());
-    auto* v3 = b.Var(ty.ptr<function, i32>());
-    EXPECT_EQ(mod.SetName(v1, "x").Name(), "x");
-    EXPECT_EQ(mod.SetName(v2, "x_1").Name(), "x_1");
-    EXPECT_EQ(mod.SetName(v3, "x").Name(), "x_2");
-    EXPECT_EQ(mod.NameOf(v1).Name(), "x");
-    EXPECT_EQ(mod.NameOf(v2).Name(), "x_1");
-    EXPECT_EQ(mod.NameOf(v3).Name(), "x_2");
 }
 
 }  // namespace

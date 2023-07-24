@@ -860,6 +860,8 @@ if(${TINT_BUILD_IR})
     ir/transform/block_decorated_structs.h
     ir/transform/demote_to_helper.cc
     ir/transform/demote_to_helper.h
+    ir/transform/rename_conflicts_wgsl.cc
+    ir/transform/rename_conflicts_wgsl.h
     ir/transform/shader_io.cc
     ir/transform/shader_io.h
     ir/transform/transform.cc
@@ -1365,6 +1367,12 @@ if(TINT_BUILD_TESTS)
         lang/spirv/writer/var_test.cc
         lang/spirv/writer/writer_test.cc
       )
+
+      if (${TINT_BUILD_WGSL_WRITER})
+        list(APPEND TINT_TEST_SRCS
+          ir/transform/rename_conflicts_wgsl_test.cc
+        )
+      endif()
     endif()
   endif()
 

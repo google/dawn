@@ -114,7 +114,7 @@ fn f() -> i32 {
     store %i, %4
     %5:i32 = load %i
     %6:i32 = add %5, 1i
-    %i_1:ptr<function, i32, read_write> = var, %6
+    %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
     %8:i32 = load %i_1
     ret %8
   }
@@ -146,7 +146,7 @@ fn f() -> i32 {
     %4:i32 = add %3, 1i
     store %i, %4
     %5:i32 = load %i
-    %i_1:i32 = add %5, 1i
+    %i_1:i32 = add %5, 1i  # %i_1: 'i'
     ret %i_1
   }
 }
@@ -179,7 +179,7 @@ fn f() -> i32 {
         store %i, %4
         %5:i32 = load %i
         %6:i32 = add %5, 1i
-        %i_1:ptr<function, i32, read_write> = var, %6
+        %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         %9:i32 = add %8, 1i
         store %i_1, %9
@@ -218,7 +218,7 @@ fn f() -> i32 {
         %4:i32 = add %3, 1i
         store %i, %4
         %5:i32 = load %i
-        %i_1:i32 = add %5, 1i
+        %i_1:i32 = add %5, 1i  # %i_1: 'i'
         ret %i_1
       }
     }
@@ -261,7 +261,7 @@ fn f() -> i32 {
         }
         %5:i32 = load %i
         %6:i32 = add %5, 1i
-        %i_1:ptr<function, i32, read_write> = var, %6
+        %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         ret %8
       }
@@ -307,7 +307,7 @@ fn f() -> i32 {
           }
         }
         %5:i32 = load %i
-        %i_1:i32 = add %5, 1i
+        %i_1:i32 = add %5, 1i  # %i_1: 'i'
         ret %i_1
       }
       %b3 = block {  # continuing
@@ -340,7 +340,7 @@ fn f() -> i32 {
     %i:ptr<function, i32, read_write> = var
     loop [i: %b2, b: %b3] {  # loop_1
       %b2 = block {  # initializer
-        %i_1:ptr<function, f32, read_write> = var, 0.0f
+        %i_1:ptr<function, f32, read_write> = var, 0.0f  # %i_1: 'i'
         next_iteration %b3
       }
       %b3 = block {  # body
@@ -384,7 +384,7 @@ fn f() -> i32 {
     %i:ptr<function, i32, read_write> = var
     loop [i: %b2, b: %b3] {  # loop_1
       %b2 = block {  # initializer
-        %i_1:f32 = let 0.0f
+        %i_1:f32 = let 0.0f  # %i_1: 'i'
         next_iteration %b3
       }
       %b3 = block {  # body
@@ -444,7 +444,7 @@ fn f() -> i32 {
         }
         %6:i32 = load %i
         %7:i32 = add %6, 1i
-        %i_1:ptr<function, i32, read_write> = var, %7
+        %i_1:ptr<function, i32, read_write> = var, %7  # %i_1: 'i'
         %9:i32 = load %i_1
         ret %9
       }
@@ -491,7 +491,7 @@ fn f() -> i32 {
           }
         }
         %6:i32 = load %i
-        %i_1:i32 = add %6, 1i
+        %i_1:i32 = add %6, 1i  # %i_1: 'i'
         ret %i_1
       }
     }
@@ -536,7 +536,7 @@ fn f() -> i32 {
         }
         %5:i32 = load %i
         %6:i32 = add %5, 1i
-        %i_1:ptr<function, i32, read_write> = var, %6
+        %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         %9:bool = eq %8, 3i
         if %9 [t: %b5] {  # if_2
@@ -590,7 +590,7 @@ fn f() -> i32 {
           }
         }
         %5:i32 = load %i
-        %i_1:i32 = add %5, 1i
+        %i_1:i32 = add %5, 1i  # %i_1: 'i'
         %7:bool = eq %i_1, 3i
         if %7 [t: %b5] {  # if_2
           %b5 = block {  # true
@@ -648,7 +648,7 @@ fn f() -> i32 {
       %b3 = block {  # continuing
         %5:i32 = load %i
         %6:i32 = add %5, 1i
-        %i_1:ptr<function, i32, read_write> = var, %6
+        %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         %9:bool = gt %8, 2i
         break_if %9 %b2
@@ -698,7 +698,7 @@ fn f() -> i32 {
       }
       %b3 = block {  # continuing
         %5:i32 = load %i
-        %i_1:i32 = add %5, 1i
+        %i_1:i32 = add %5, 1i  # %i_1: 'i'
         %7:bool = gt %i_1, 2i
         break_if %7 %b2
       }
@@ -744,7 +744,7 @@ fn f() -> i32 {
       %b3 = block {  # case
         %5:i32 = load %i
         %6:i32 = add %5, 1i
-        %i_1:ptr<function, i32, read_write> = var, %6
+        %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         ret %8
       }
@@ -792,7 +792,7 @@ fn f() -> i32 {
       }
       %b3 = block {  # case
         %5:i32 = load %i
-        %i_1:i32 = add %5, 1i
+        %i_1:i32 = add %5, 1i  # %i_1: 'i'
         ret %i_1
       }
       %b4 = block {  # case

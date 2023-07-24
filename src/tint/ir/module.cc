@@ -32,48 +32,22 @@ Symbol Module::NameOf(Instruction* inst) {
 }
 
 Symbol Module::NameOf(Value* value) {
-    return value_to_id_.Get(value).value_or(Symbol{});
+    return value_to_name_.Get(value).value_or(Symbol{});
 }
 
-Symbol Module::SetName(Instruction* inst, std::string_view name) {
+void Module::SetName(Instruction* inst, std::string_view name) {
     TINT_ASSERT(IR, inst->HasResults() && !inst->HasMultiResults());
     return SetName(inst->Result(), name);
 }
 
-Symbol Module::SetName(Value* value, std::string_view name) {
+void Module::SetName(Value* value, std::string_view name) {
     TINT_ASSERT(IR, !name.empty());
-
-    if (auto old = value_to_id_.Get(value)) {
-        value_to_id_.Remove(value);
-        id_to_value_.Remove(old.value());
-    }
-
-    auto sym = symbols.Register(name);
-    if (id_to_value_.Add(sym, value)) {
-        value_to_id_.Add(value, sym);
-        return sym;
-    }
-    auto prefix = std::string(name) + "_";
-    for (uint64_t suffix = 1; suffix != std::numeric_limits<uint64_t>::max(); suffix++) {
-        sym = symbols.Register(prefix + std::to_string(suffix));
-        if (id_to_value_.Add(sym, value)) {
-            value_to_id_.Add(value, sym);
-            return sym;
-        }
-    }
-    TINT_ASSERT(IR, false);  // !
-    return Symbol{};
+    value_to_name_.Replace(value, symbols.Register(name));
 }
 
 void Module::SetName(Value* value, Symbol name) {
     TINT_ASSERT(IR, name.IsValid());
-
-    if (auto old = value_to_id_.Get(value)) {
-        value_to_id_.Remove(value);
-        id_to_value_.Remove(old.value());
-    }
-
-    value_to_id_.Add(value, name);
+    value_to_name_.Replace(value, name);
 }
 
 }  // namespace tint::ir

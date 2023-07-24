@@ -80,6 +80,10 @@ class Struct : public utils::Castable<Struct, Type> {
     /// @returns the name of the structure
     Symbol Name() const { return name_; }
 
+    /// Renames the structure
+    /// @param name the new name for the structure
+    void SetName(Symbol name) { name_ = name; }
+
     /// @returns the members of the structure
     utils::VectorRef<const StructMember*> Members() const { return members_; }
 
@@ -171,7 +175,7 @@ class Struct : public utils::Castable<Struct, Type> {
     Struct* Clone(CloneContext& ctx) const override;
 
   private:
-    const Symbol name_;
+    Symbol name_;
     const utils::Vector<const StructMember*, 4> members_;
     const uint32_t align_;
     const uint32_t size_;

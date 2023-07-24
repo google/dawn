@@ -38,11 +38,8 @@ class Module {
     /// Program Id required to create other components
     ProgramID prog_id_;
 
-    /// Map of value to pre-declared identifier
-    utils::Hashmap<Value*, Symbol, 32> value_to_id_;
-
-    /// Map of pre-declared identifier to value
-    utils::Hashmap<Symbol, Value*, 32> id_to_value_;
+    /// Map of value to name
+    utils::Hashmap<Value*, Symbol, 32> value_to_name_;
 
   public:
     /// Constructor
@@ -69,14 +66,12 @@ class Module {
 
     /// @param inst the instruction to set the name of
     /// @param name the desired name of the value. May be suffixed on collision.
-    /// @return the unique symbol of the given value
     /// @note requires the instruction be a single result instruction.
-    Symbol SetName(Instruction* inst, std::string_view name);
+    void SetName(Instruction* inst, std::string_view name);
 
     /// @param value the value to name.
     /// @param name the desired name of the value. May be suffixed on collision.
-    /// @return the unique symbol of the given value.
-    Symbol SetName(Value* value, std::string_view name);
+    void SetName(Value* value, std::string_view name);
 
     /// @param value the value to name
     /// @param name the desired name of the value

@@ -521,6 +521,8 @@ if (tint_build_ir) {
       "ir/transform/block_decorated_structs.h",
       "ir/transform/demote_to_helper.cc",
       "ir/transform/demote_to_helper.h",
+      "ir/transform/rename_conflicts_wgsl.cc",
+      "ir/transform/rename_conflicts_wgsl.h",
       "ir/transform/shader_io.cc",
       "ir/transform/shader_io.h",
     ]
@@ -1918,6 +1920,10 @@ if (tint_build_unittests) {
           "ir/transform/shader_io_spirv_test.cc",
           "ir/transform/var_for_dynamic_index_test.cc",
         ]
+      }
+
+      if (tint_build_wgsl_writer) {
+        sources += [ "ir/transform/rename_conflicts_test.cc" ]
       }
     }
   }

@@ -47,6 +47,7 @@
 #include "src/tint/ir/store_vector_element.h"
 #include "src/tint/ir/switch.h"
 #include "src/tint/ir/swizzle.h"
+#include "src/tint/ir/transform/rename_conflicts_wgsl.h"
 #include "src/tint/ir/unary.h"
 #include "src/tint/ir/unreachable.h"
 #include "src/tint/ir/user_call.h"
@@ -97,6 +98,9 @@ class State {
             b.Diagnostics() = res.Failure();
             return Program{std::move(b)};
         }
+
+        transform::Transform::DataMap data;
+        transform::RenameConflictsWGSL{}.Run(&mod, data, data);
 
         if (mod.root_block) {
             RootBlock(mod.root_block);
@@ -960,7 +964,7 @@ class State {
             // TODO(crbug.com/tint/1902): Emit structure attributes
             utils::Vector<const ast::Attribute*, 2> attrs;
 
-            auto name = b.Symbols().New(s->Name().NameView());
+            auto name = b.Symbols().Register(s->Name().NameView());
             b.Structure(name, std::move(members), std::move(attrs));
             return name;
         });
@@ -987,10 +991,10 @@ class State {
     Symbol NameFor(Value* value, std::string_view suggested = {}) {
         return names_.GetOrCreate(value, [&] {
             if (!suggested.empty()) {
-                return b.Symbols().New(suggested);
+                return b.Symbols().Register(suggested);
             }
             if (auto sym = mod.NameOf(value)) {
-                return b.Symbols().New(sym.NameView());
+                return b.Symbols().Register(sym.NameView());
             }
             return b.Symbols().New("v");
         });

@@ -2812,16 +2812,20 @@ fn f() {
 ////////////////////////////////////////////////////////////////////////////////
 // Shadowing tests
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(IRToProgramRoundtripTest, DISABLED_Shadow_f32_With_Fn) {
+TEST_F(IRToProgramRoundtripTest, Shadow_f32_With_Fn) {
     Test(R"(
 fn f32() {
   var v = mat4x4f();
 }
 )",
-         R"( NEEDS FIXING )");
+         R"(
+fn f32_1() {
+  var v : mat4x4<f32> = mat4x4<f32>();
+}
+)");
 }
 
-TEST_F(IRToProgramRoundtripTest, DISABLED_Shadow_f32_With_Struct) {
+TEST_F(IRToProgramRoundtripTest, Shadow_f32_With_Struct) {
     Test(R"(
 struct f32 {
   v : i32,
@@ -2831,15 +2835,37 @@ fn f(s : f32) {
   let f = vec2f(1.0f);
 }
 )",
-         R"( NEEDS FIXING )");
+         R"(
+struct f32_1 {
+  v : i32,
 }
 
-TEST_F(IRToProgramRoundtripTest, DISABLED_Shadow_f32_With_ModVar) {
+fn f(s : f32_1) {
+  let f_1 = vec2<f32>(1.0f);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Shadow_f32_With_ModVar) {
+    Test(R"(
+var<private> f32 : vec2f = vec2f(0.0f, 1.0f);
+)",
+         R"(
+var<private> f32_1 : vec2<f32> = vec2<f32>(0.0f, 1.0f);
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Shadow_f32_With_ModVar2) {
     Test(R"(
 var<private> f32 : i32 = 1i;
+
 var<private> v = vec2(1.0).x;
 )",
-         R"( NEEDS FIXING )");
+         R"(
+var<private> f32_1 : i32 = 1i;
+
+var<private> v : f32 = 1.0f;
+)");
 }
 
 TEST_F(IRToProgramRoundtripTest, Shadow_f32_With_Alias) {
@@ -2867,16 +2893,6 @@ fn f() -> i32 {
   var S : S = S();
   return S.i;
 }
-)",
-         R"(
-struct S {
-  i : i32,
-}
-
-fn f() -> i32 {
-  var S_1 : S = S();
-  return S_1.i;
-}
 )");
 }
 
@@ -2888,15 +2904,6 @@ struct S {
 
 fn f(S : S) -> i32 {
   return S.i;
-}
-)",
-         R"(
-struct S {
-  i : i32,
-}
-
-fn f(S_1 : S) -> i32 {
-  return S_1.i;
 }
 )");
 }
@@ -2910,15 +2917,6 @@ fn f() -> i32 {
   var i : i32 = (i + 1i);
   return i;
 }
-)",
-         R"(
-var<private> i : i32 = 1i;
-
-fn f() -> i32 {
-  i = (i + 1i);
-  var i_1 : i32 = (i + 1i);
-  return i_1;
-}
 )");
 }
 
@@ -2931,15 +2929,6 @@ fn f() -> i32 {
   let i = (i + 1i);
   return i;
 }
-)",
-         R"(
-var<private> i : i32 = 1i;
-
-fn f() -> i32 {
-  i = (i + 1i);
-  let i_1 = (i + 1i);
-  return i_1;
-}
 )");
 }
 
@@ -2951,17 +2940,6 @@ fn f() -> i32 {
     i = (i + 1i);
     var i : i32 = (i + 1i);
     i = (i + 1i);
-  }
-  return i;
-}
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  if (true) {
-    i = (i + 1i);
-    var i_1 : i32 = (i + 1i);
-    i_1 = (i_1 + 1i);
   }
   return i;
 }
@@ -2979,17 +2957,6 @@ fn f() -> i32 {
   }
   return i;
 }
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  if (true) {
-    i = (i + 1i);
-    let i_1 = (i + 1i);
-    return i_1;
-  }
-  return i;
-}
 )");
 }
 
@@ -3000,16 +2967,6 @@ fn f() -> i32 {
   while((i < 4i)) {
     var i : i32 = (i + 1i);
     return i;
-  }
-  return i;
-}
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  while((i < 4i)) {
-    var i_1 : i32 = (i + 1i);
-    return i_1;
   }
   return i;
 }
@@ -3026,16 +2983,6 @@ fn f() -> i32 {
   }
   return i;
 }
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  while((i < 4i)) {
-    let i_1 = (i + 1i);
-    return i_1;
-  }
-  return i;
-}
 )");
 }
 
@@ -3048,15 +2995,6 @@ fn f() -> i32 {
   }
   return i;
 }
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  for(var i_1 : f32 = 0.0f; (i_1 < 4.0f); ) {
-    let j = i_1;
-  }
-  return i;
-}
 )");
 }
 
@@ -3066,15 +3004,6 @@ fn f() -> i32 {
   var i : i32;
   for(let i = 0.0f; (i < 4.0f); ) {
     let j = i;
-  }
-  return i;
-}
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  for(let i_1 = 0.0f; (i_1 < 4.0f); ) {
-    let j = i_1;
   }
   return i;
 }
@@ -3091,16 +3020,6 @@ fn f() -> i32 {
   }
   return i;
 }
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  for(var x : i32 = 0i; (i < 4i); ) {
-    var i_1 : i32 = (i + 1i);
-    return i_1;
-  }
-  return i;
-}
 )");
 }
 
@@ -3111,16 +3030,6 @@ fn f() -> i32 {
   for(var x : i32 = 0i; (i < 4i); ) {
     let i = (i + 1i);
     return i;
-  }
-  return i;
-}
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  for(var x : i32 = 0i; (i < 4i); ) {
-    let i_1 = (i + 1i);
-    return i_1;
   }
   return i;
 }
@@ -3142,21 +3051,6 @@ fn f() -> i32 {
   }
   return i;
 }
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  loop {
-    if ((i == 2i)) {
-      break;
-    }
-    var i_1 : i32 = (i + 1i);
-    if ((i_1 == 3i)) {
-      break;
-    }
-  }
-  return i;
-}
 )");
 }
 
@@ -3170,21 +3064,6 @@ fn f() -> i32 {
     }
     let i = (i + 1i);
     if ((i == 3i)) {
-      break;
-    }
-  }
-  return i;
-}
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  loop {
-    if ((i == 2i)) {
-      break;
-    }
-    let i_1 = (i + 1i);
-    if ((i_1 == 3i)) {
       break;
     }
   }
@@ -3209,22 +3088,6 @@ fn f() -> i32 {
   }
   return i;
 }
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  loop {
-    if ((i == 2i)) {
-      break;
-    }
-
-    continuing {
-      var i_1 : i32 = (i + 1i);
-      break if (i_1 > 2i);
-    }
-  }
-  return i;
-}
 )");
 }
 
@@ -3240,22 +3103,6 @@ fn f() -> i32 {
     continuing {
       let i = (i + 1i);
       break if (i > 2i);
-    }
-  }
-  return i;
-}
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  loop {
-    if ((i == 2i)) {
-      break;
-    }
-
-    continuing {
-      let i_1 = (i + 1i);
-      break if (i_1 > 2i);
     }
   }
   return i;
@@ -3280,23 +3127,6 @@ fn f() -> i32 {
     }
   }
 }
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  switch(i) {
-    case 0i: {
-      return i;
-    }
-    case 1i: {
-      var i_1 : i32 = (i + 1i);
-      return i_1;
-    }
-    default: {
-      return i;
-    }
-  }
-}
 )");
 }
 
@@ -3311,23 +3141,6 @@ fn f() -> i32 {
     case 1i: {
       let i = (i + 1i);
       return i;
-    }
-    default: {
-      return i;
-    }
-  }
-}
-)",
-         R"(
-fn f() -> i32 {
-  var i : i32;
-  switch(i) {
-    case 0i: {
-      return i;
-    }
-    case 1i: {
-      let i_1 = (i + 1i);
-      return i_1;
     }
     default: {
       return i;

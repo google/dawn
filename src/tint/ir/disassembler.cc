@@ -93,17 +93,26 @@ size_t Disassembler::IdOf(Block* node) {
     return block_ids_.GetOrCreate(node, [&] { return block_ids_.Count(); });
 }
 
-std::string_view Disassembler::IdOf(Value* value) {
+std::string Disassembler::IdOf(Value* value) {
     TINT_ASSERT(IR, value);
     return value_ids_.GetOrCreate(value, [&] {
         if (auto sym = mod_.NameOf(value)) {
-            return sym.Name();
+            if (ids_.Add(sym.Name())) {
+                return sym.Name();
+            }
+            auto prefix = sym.Name() + "_";
+            for (size_t i = 1;; i++) {
+                auto name = prefix + std::to_string(i);
+                if (ids_.Add(name)) {
+                    return name;
+                }
+            }
         }
         return std::to_string(value_ids_.Count());
     });
 }
 
-std::string_view Disassembler::NameOf(If* inst) {
+std::string Disassembler::NameOf(If* inst) {
     if (!inst) {
         return "undef";
     }
@@ -111,7 +120,7 @@ std::string_view Disassembler::NameOf(If* inst) {
     return if_names_.GetOrCreate(inst, [&] { return "if_" + std::to_string(if_names_.Count()); });
 }
 
-std::string_view Disassembler::NameOf(Loop* inst) {
+std::string Disassembler::NameOf(Loop* inst) {
     if (!inst) {
         return "undef";
     }
@@ -120,7 +129,7 @@ std::string_view Disassembler::NameOf(Loop* inst) {
                                    [&] { return "loop_" + std::to_string(loop_names_.Count()); });
 }
 
-std::string_view Disassembler::NameOf(Switch* inst) {
+std::string Disassembler::NameOf(Switch* inst) {
     if (!inst) {
         return "undef";
     }
@@ -272,7 +281,8 @@ void Disassembler::EmitReturnAttributes(Function* func) {
 void Disassembler::EmitFunction(Function* func) {
     in_function_ = true;
 
-    Indent() << "%" << IdOf(func) << " =";
+    std::string fn_id = IdOf(func);
+    Indent() << "%" << fn_id << " =";
 
     if (func->Stage() != Function::PipelineStage::kUndefined) {
         out_ << " @" << func->Stage();
@@ -297,6 +307,27 @@ void Disassembler::EmitFunction(Function* func) {
     EmitReturnAttributes(func);
 
     out_ << " -> %b" << IdOf(func->Block()) << " {";
+
+    {  // Add a comment if the function IDs or parameter IDs doesn't match their name
+        utils::Vector<std::string, 4> names;
+        if (auto name = mod_.NameOf(func); name.IsValid()) {
+            if (name.NameView() != fn_id) {
+                names.Push("%" + std::string(fn_id) + ": '" + name.Name() + "'");
+            }
+        }
+        for (auto* p : func->Params()) {
+            if (auto name = mod_.NameOf(p); name.IsValid()) {
+                auto id = IdOf(p);
+                if (name.NameView() != id) {
+                    names.Push("%" + std::string(id) + ": '" + name.Name() + "'");
+                }
+            }
+        }
+        if (!names.IsEmpty()) {
+            out_ << "  # " << utils::Join(names, ", ");
+        }
+    }
+
     EmitLine();
 
     {
@@ -392,11 +423,12 @@ void Disassembler::EmitInstructionName(std::string_view name, Instruction* inst)
 }
 
 void Disassembler::EmitInstruction(Instruction* inst) {
+    TINT_DEFER(EmitLine());
+
     if (!inst->Alive()) {
         SourceMarker sm(this);
         out_ << "<destroyed " << inst->TypeInfo().name << " " << utils::ToString(inst) << ">";
         sm.Store(inst);
-        EmitLine();
         return;
     }
     tint::Switch(
@@ -412,27 +444,23 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("bitcast", b);
             out_ << " ";
             EmitOperandList(b);
-            EmitLine();
         },
-        [&](Discard* d) {
-            EmitInstructionName("discard", d);
-            EmitLine();
-        },
+        [&](Discard* d) { EmitInstructionName("discard", d); },
         [&](CoreBuiltinCall* b) {
             EmitValueWithType(b);
             out_ << " = ";
             EmitInstructionName(builtin::str(b->Func()), b);
             out_ << " ";
             EmitOperandList(b);
-            EmitLine();
         },
         [&](Construct* c) {
             EmitValueWithType(c);
             out_ << " = ";
             EmitInstructionName("construct", c);
-            out_ << " ";
-            EmitOperandList(c);
-            EmitLine();
+            if (!c->Operands().IsEmpty()) {
+                out_ << " ";
+                EmitOperandList(c);
+            }
         },
         [&](Convert* c) {
             EmitValueWithType(c);
@@ -440,7 +468,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("convert", c);
             out_ << " ";
             EmitOperandList(c);
-            EmitLine();
         },
         [&](IntrinsicCall* i) {
             EmitValueWithType(i);
@@ -448,7 +475,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName(utils::ToString(i->Kind()), i);
             out_ << " ";
             EmitOperandList(i);
-            EmitLine();
         },
         [&](Load* l) {
             EmitValueWithType(l);
@@ -456,7 +482,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("load", l);
             out_ << " ";
             EmitValue(l->From());
-            EmitLine();
         },
         [&](Store* s) {
             EmitInstructionName("store", s);
@@ -464,7 +489,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitValue(s->To());
             out_ << ", ";
             EmitValue(s->From());
-            EmitLine();
         },
         [&](LoadVectorElement* l) {
             EmitValueWithType(l);
@@ -472,13 +496,11 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("load_vector_element", l);
             out_ << " ";
             EmitOperandList(l);
-            EmitLine();
         },
         [&](StoreVectorElement* s) {
             EmitInstructionName("store_vector_element", s);
             out_ << " ";
             EmitOperandList(s);
-            EmitLine();
         },
         [&](UserCall* uc) {
             EmitValueWithType(uc);
@@ -489,7 +511,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
                 out_ << ", ";
             }
             EmitOperandList(uc, UserCall::kArgsOperandOffset);
-            EmitLine();
         },
         [&](Var* v) {
             EmitValueWithType(v);
@@ -503,7 +524,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
                 out_ << " ";
                 EmitBindingPoint(v->BindingPoint().value());
             }
-            EmitLine();
         },
         [&](Let* l) {
             EmitValueWithType(l);
@@ -511,7 +531,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("let", l);
             out_ << " ";
             EmitOperandList(l);
-            EmitLine();
         },
         [&](Access* a) {
             EmitValueWithType(a);
@@ -519,7 +538,6 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitInstructionName("access", a);
             out_ << " ";
             EmitOperandList(a);
-            EmitLine();
         },
         [&](Swizzle* s) {
             EmitValueWithType(s);
@@ -544,10 +562,26 @@ void Disassembler::EmitInstruction(Instruction* inst) {
                         break;
                 }
             }
-            EmitLine();
         },
         [&](Terminator* b) { EmitTerminator(b); },
         [&](Default) { out_ << "Unknown instruction: " << inst->TypeInfo().name; });
+
+    {  // Add a comment if the result IDs don't match their names
+        utils::Vector<std::string, 4> names;
+        for (auto* result : inst->Results()) {
+            if (result) {
+                if (auto name = mod_.NameOf(result); name.IsValid()) {
+                    auto id = IdOf(result);
+                    if (name.NameView() != id) {
+                        names.Push("%" + std::string(id) + ": '" + name.Name() + "'");
+                    }
+                }
+            }
+        }
+        if (!names.IsEmpty()) {
+            out_ << "  # " << utils::Join(names, ", ");
+        }
+    }
 }
 
 void Disassembler::EmitOperand(Instruction* inst, size_t index) {
@@ -615,7 +649,6 @@ void Disassembler::EmitIf(If* if_) {
 
     Indent();
     out_ << "}";
-    EmitLine();
 }
 
 void Disassembler::EmitLoop(Loop* l) {
@@ -665,7 +698,6 @@ void Disassembler::EmitLoop(Loop* l) {
 
     Indent();
     out_ << "}";
-    EmitLine();
 }
 
 void Disassembler::EmitSwitch(Switch* s) {
@@ -716,7 +748,6 @@ void Disassembler::EmitSwitch(Switch* s) {
 
     Indent();
     out_ << "}";
-    EmitLine();
 }
 
 void Disassembler::EmitTerminator(Terminator* b) {
@@ -770,8 +801,6 @@ void Disassembler::EmitTerminator(Terminator* b) {
         [&](ir::ExitSwitch* e) { out_ << "  # " << NameOf(e->Switch()); },  //
         [&](ir::ExitLoop* e) { out_ << "  # " << NameOf(e->Loop()); }       //
     );
-
-    EmitLine();
 }
 
 void Disassembler::EmitValueList(utils::Slice<Value* const> values) {
@@ -841,7 +870,6 @@ void Disassembler::EmitBinary(Binary* b) {
     EmitOperandList(b);
 
     sm.Store(b);
-    EmitLine();
 }
 
 void Disassembler::EmitUnary(Unary* u) {
@@ -860,7 +888,6 @@ void Disassembler::EmitUnary(Unary* u) {
     EmitOperandList(u);
 
     sm.Store(u);
-    EmitLine();
 }
 
 void Disassembler::EmitStructDecl(const type::Struct* str) {

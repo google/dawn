@@ -118,10 +118,10 @@ class Disassembler {
     utils::StringStream& Indent();
 
     size_t IdOf(Block* blk);
-    std::string_view IdOf(Value* node);
-    std::string_view NameOf(If* inst);
-    std::string_view NameOf(Loop* inst);
-    std::string_view NameOf(Switch* inst);
+    std::string IdOf(Value* node);
+    std::string NameOf(If* inst);
+    std::string NameOf(Loop* inst);
+    std::string NameOf(Switch* inst);
 
     void EmitBlock(Block* blk, std::string_view comment = "");
     void EmitFunction(Function* func);
@@ -150,6 +150,7 @@ class Disassembler {
     utils::StringStream out_;
     utils::Hashmap<Block*, size_t, 32> block_ids_;
     utils::Hashmap<Value*, std::string, 32> value_ids_;
+    utils::Hashset<std::string, 32> ids_;
     uint32_t indent_size_ = 0;
     bool in_function_ = false;
 
