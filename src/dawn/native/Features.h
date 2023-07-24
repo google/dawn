@@ -50,6 +50,7 @@ enum class Feature {
     SurfaceCapabilities,
     TransientAttachments,
     MSAARenderToSingleSampled,
+    DualSourceBlending,
 
     EnumCount,
     InvalidEnum = EnumCount,

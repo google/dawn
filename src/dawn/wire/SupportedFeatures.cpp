@@ -45,6 +45,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_TransientAttachments:
         case WGPUFeatureName_Float32Filterable:
         case WGPUFeatureName_MSAARenderToSingleSampled:
+        case WGPUFeatureName_DualSourceBlending:
             return true;
     }
 

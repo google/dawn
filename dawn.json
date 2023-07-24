@@ -1464,7 +1464,8 @@
             {"value": 1007, "name": "implicit device synchronization", "tags": ["dawn", "native"]},
             {"value": 1008, "name": "surface capabilities", "tags": ["dawn"]},
             {"value": 1009, "name": "transient attachments", "tags": ["dawn"]},
-            {"value": 1010, "name": "MSAA render to single sampled", "tags": ["dawn"]}
+            {"value": 1010, "name": "MSAA render to single sampled", "tags": ["dawn"]},
+            {"value": 1011, "name": "dual source blending", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
