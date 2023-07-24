@@ -52,9 +52,9 @@
 #include "tint/tint.h"
 
 #if TINT_BUILD_IR
-#include "src/tint/ir/disassembler.h"  // nogncheck
-#include "src/tint/ir/from_program.h"  // nogncheck
-#include "src/tint/ir/module.h"        // nogncheck
+#include "src/tint/lang/core/ir/disassembler.h"  // nogncheck
+#include "src/tint/lang/core/ir/from_program.h"  // nogncheck
+#include "src/tint/lang/core/ir/module.h"        // nogncheck
 #endif                                 // TINT_BUILD_IR
 
 #if TINT_BUILD_SPV_WRITER

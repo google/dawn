@@ -22,8 +22,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "spirv-tools/libspirv.hpp"
-#include "src/tint/ir/builder.h"
-#include "src/tint/ir/validator.h"
+#include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/ast_writer/spv_dump.h"
 #include "src/tint/lang/spirv/writer/writer.h"
 

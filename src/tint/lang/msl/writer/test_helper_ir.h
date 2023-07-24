@@ -19,8 +19,8 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "src/tint/ir/builder.h"
-#include "src/tint/ir/validator.h"
+#include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/writer/generator_impl_ir.h"
 
 namespace tint::writer::msl {

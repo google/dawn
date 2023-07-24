@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/ir/module.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/text/text_generator.h"
 
 namespace tint::writer {

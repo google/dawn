@@ -84,7 +84,7 @@ Similar to the AST a transform system is available for IR. The transform
 has the same setup as the AST (and inherits from the same base transform
 class.)
 
-The IR transforms live in `src/tint/ir/transform`. These transforms are
+The IR transforms live in `src/tint/lang/core/ir/transform`. These transforms are
 for use by the various IR generator backends.
 
 Unlike with the AST transforms, the IR transforms know which transforms
@@ -249,7 +249,7 @@ There are several types of values used in the SSA form.
 ##### Constant Value
 All values in IR are concrete, there are no abstract values as
 materialization has already happened. Each constant holds a lower level
-`constant::Value` from the `src/tint/ir/constant` system.
+`constant::Value` from the `src/tint/lang/core/ir/constant` system.
 
 
 ##### InstructionResult Value

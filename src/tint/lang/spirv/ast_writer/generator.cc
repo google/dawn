@@ -18,7 +18,7 @@
 
 #include "src/tint/lang/spirv/ast_writer/generator_impl.h"
 #if TINT_BUILD_IR
-#include "src/tint/ir/from_program.h"           // nogncheck
+#include "src/tint/lang/core/ir/from_program.h"  // nogncheck
 #include "src/tint/lang/spirv/writer/writer.h"  // nogncheck
 #endif                                          // TINT_BUILD_IR
 

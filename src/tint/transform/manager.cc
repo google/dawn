@@ -18,9 +18,9 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
 #if TINT_BUILD_IR
-#include "src/tint/ir/from_program.h"
-#include "src/tint/ir/to_program.h"
-#include "src/tint/ir/transform/transform.h"
+#include "src/tint/lang/core/ir/from_program.h"
+#include "src/tint/lang/core/ir/to_program.h"
+#include "src/tint/lang/core/ir/transform/transform.h"
 #else
 // Declare an ir::Module class so that the transform target variant compiles.
 namespace ir {
@@ -34,7 +34,7 @@ class Module;
 
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
 #include <iostream>
-#include "src/tint/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #define TINT_IF_PRINT_PROGRAM(x) x
 #else  // TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
 #define TINT_IF_PRINT_PROGRAM(x)

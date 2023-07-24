@@ -19,8 +19,8 @@
 #include "tint/tint.h"
 
 #if TINT_BUILD_IR
-#include "src/tint/ir/from_program.h"
-#include "src/tint/ir/module.h"
+#include "src/tint/lang/core/ir/from_program.h"
+#include "src/tint/lang/core/ir/module.h"
 #endif  // TINT_BUILD_IR
 
 namespace {

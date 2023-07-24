@@ -21,8 +21,8 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
 #if TINT_BUILD_IR
-#include "src/tint/ir/builder.h"              // nogncheck
-#include "src/tint/ir/transform/transform.h"  // nogncheck
+#include "src/tint/lang/core/ir/builder.h"              // nogncheck
+#include "src/tint/lang/core/ir/transform/transform.h"  // nogncheck
 #endif                                        // TINT_BUILD_IR
 
 namespace tint::transform {

@@ -14,10 +14,10 @@
 
 #include "src/tint/lang/msl/writer/generator_impl_ir.h"
 
-#include "src/tint/ir/constant.h"
-#include "src/tint/ir/validator.h"
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/bool.h"

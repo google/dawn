@@ -17,8 +17,8 @@
 #include <unordered_set>
 
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
-#include "src/tint/ir/from_program.h"
-#include "src/tint/ir/to_program.h"
+#include "src/tint/lang/core/ir/from_program.h"
+#include "src/tint/lang/core/ir/to_program.h"
 #include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser_impl.h"
 

@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/spirv/writer/test_helper.h"
 
-#include "src/tint/ir/binary.h"
+#include "src/tint/lang/core/ir/binary.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

@@ -19,7 +19,7 @@
 #include "src/tint/lang/msl/ast_writer/generator_impl.h"
 
 #if TINT_BUILD_IR
-#include "src/tint/ir/from_program.h"                    // nogncheck
+#include "src/tint/lang/core/ir/from_program.h"          // nogncheck
 #include "src/tint/lang/msl/writer/generator_impl_ir.h"  // nogncheck
 #endif                                                   // TINT_BUILD_IR
 
