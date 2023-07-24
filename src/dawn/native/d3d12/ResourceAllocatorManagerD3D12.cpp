@@ -132,24 +132,30 @@ ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
     }
 }
 
-uint64_t GetResourcePlacementAlignment(ResourceHeapKind resourceHeapKind,
-                                       uint32_t sampleCount,
-                                       uint64_t requestedAlignment) {
-    switch (resourceHeapKind) {
-        // Small resources can take advantage of smaller alignments. For example,
-        // if the most detailed mip can fit under 64KB, 4KB alignments can be used.
-        // Must be non-depth or without render-target to use small resource alignment.
-        // This also applies to MSAA textures (4MB => 64KB).
-        //
-        // Note: Only known to be used for small textures; however, MSDN suggests
-        // it could be extended for more cases. If so, this could default to always
-        // attempt small resource placement.
-        // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
-        case Default_OnlyNonRenderableOrDepthTextures:
-            return (sampleCount > 1) ? D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT
-                                     : D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT;
+uint64_t GetInitialResourcePlacementAlignment(
+    const D3D12_RESOURCE_DESC& requestedResourceDescriptor) {
+    switch (requestedResourceDescriptor.Dimension) {
+        case D3D12_RESOURCE_DIMENSION_BUFFER:
+            return requestedResourceDescriptor.Alignment;
+
+        // Always try using small resource placement aligment first when Alignment == 0 because if
+        // Alignment is set to 0, the runtime will use 4MB for MSAA textures and 64KB for everything
+        // else.
+        // https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
+        case D3D12_RESOURCE_DIMENSION_TEXTURE1D:
+        case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
+        case D3D12_RESOURCE_DIMENSION_TEXTURE3D: {
+            if (requestedResourceDescriptor.Alignment > 0) {
+                return requestedResourceDescriptor.Alignment;
+            } else {
+                return requestedResourceDescriptor.SampleDesc.Count > 1
+                           ? D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT
+                           : D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT;
+            }
+        }
+        case D3D12_RESOURCE_DIMENSION_UNKNOWN:
         default:
-            return requestedAlignment;
+            UNREACHABLE();
     }
 }
 
@@ -455,19 +461,20 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreatePlacedReso
                             requestedResourceDescriptor.Flags, mResourceHeapTier);
 
     D3D12_RESOURCE_DESC resourceDescriptor = requestedResourceDescriptor;
-    resourceDescriptor.Alignment = GetResourcePlacementAlignment(
-        resourceHeapKind, requestedResourceDescriptor.SampleDesc.Count,
-        requestedResourceDescriptor.Alignment);
+    resourceDescriptor.Alignment =
+        GetInitialResourcePlacementAlignment(requestedResourceDescriptor);
 
-    // TODO(bryan.bernhart): Figure out how to compute the alignment without calling this
-    // twice.
+    // When you're using CreatePlacedResource, your application must use GetResourceAllocationInfo
+    // in order to understand the size and alignment characteristics of texture resources.
     D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
         mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
 
-    // If the requested resource alignment was rejected, let D3D tell us what the
-    // required alignment is for this resource.
-    if (resourceDescriptor.Alignment != 0 &&
-        resourceDescriptor.Alignment != resourceInfo.Alignment) {
+    // If the requested resource alignment was rejected, set alignment to 0 to do allocation with
+    // default alignment in D3D12 (4MB for MSAA textures and 64KB for everything else).
+    // If an error occurs, then D3D12_RESOURCE_ALLOCATION_INFO::SizeInBytes equals UINT64_MAX.
+    if (resourceInfo.SizeInBytes == std::numeric_limits<uint64_t>::max() ||
+        (resourceDescriptor.Alignment != 0 &&
+         resourceDescriptor.Alignment != resourceInfo.Alignment)) {
         resourceDescriptor.Alignment = 0;
         resourceInfo =
             mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);

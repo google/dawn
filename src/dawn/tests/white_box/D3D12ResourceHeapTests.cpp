@@ -47,9 +47,6 @@ class D3D12ResourceHeapTests : public DawnTest {
 TEST_P(D3D12ResourceHeapTests, AlignSmallCompressedTexture) {
     DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
-    // TODO(http://crbug.com/dawn/282): Investigate GPU/driver rejections of small alignment.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() || IsNvidia() || IsWARP());
-
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = 8;
