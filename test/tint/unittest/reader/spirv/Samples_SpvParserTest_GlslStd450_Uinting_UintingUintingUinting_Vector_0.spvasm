@@ -51,8 +51,8 @@ OpName %v4f2 "v4f2"
 %v3float = OpTypeVector %float 3
 %v4float = OpTypeVector %float 4
 %44 = OpConstantComposite %v2uint %uint_10 %uint_20
-%45 = OpConstantComposite %v2uint %uint_20 %uint_10
-%46 = OpConstantComposite %v2uint %uint_15 %uint_15
+%45 = OpConstantComposite %v2uint %uint_20 %uint_15
+%46 = OpConstantComposite %v2uint %uint_10 %uint_15
 %47 = OpConstantComposite %v2int %int_30 %int_40
 %48 = OpConstantComposite %v2int %int_40 %int_30
 %49 = OpConstantComposite %v2int %int_35 %int_35
@@ -86,7 +86,7 @@ OpName %v4f2 "v4f2"
 %v3f2 = OpCopyObject %v3float %54
 %v4f1 = OpCopyObject %v4float %55
 %v4f2 = OpCopyObject %v4float %v4f1
-%1 = OpExtInst %v2uint %2 UClamp %v2u1 %v2u2 %v2u3
+%1 = OpExtInst %v2uint %2 UClamp %v2u1 %v2u3 %v2u2
 OpReturn
 OpFunctionEnd
 

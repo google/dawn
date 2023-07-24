@@ -487,26 +487,41 @@ INSTANTIATE_TEST_SUITE_P(  //
 
 template <typename T>
 std::vector<Case> ClampCases() {
+    auto error_msg = [&](T low, T high) {
+        utils::StringStream ss;
+        ss << "12:34 error: clamp called with 'low' (" << low << ") greater than 'high' (" << high
+           << ")";
+        return ss.str();
+    };
+
     return {
-        C({T(0), T(0), T(0)}, T(0)),
-        C({T(0), T(42), T::Highest()}, T(42)),
-        C({T::Lowest(), T(0), T(42)}, T(0)),
+        C({T(0), T(0), T(0)}, T(0)), C({T(0), T(42), T::Highest()}, T(42)),
+        C({T::Lowest(), T(0), T(42)}, T(0)), C({T(0), T::Lowest(), T::Highest()}, T(0)),
         C({T(0), T::Lowest(), T::Highest()}, T(0)),
-        C({T(0), T::Highest(), T::Lowest()}, T::Lowest()),
         C({T::Highest(), T::Highest(), T::Highest()}, T::Highest()),
         C({T::Lowest(), T::Lowest(), T::Lowest()}, T::Lowest()),
         C({T::Highest(), T::Lowest(), T::Highest()}, T::Highest()),
         C({T::Lowest(), T::Lowest(), T::Highest()}, T::Lowest()),
 
         // Vector tests
-        C({Vec(T(0), T(0)),                         //
-           Vec(T(0), T(42)),                        //
-           Vec(T(0), T::Highest())},                //
-          Vec(T(0), T(42))),                        //
-        C({Vec(T::Lowest(), T(0), T(0)),            //
-           Vec(T(0), T::Lowest(), T::Highest()),    //
-           Vec(T(42), T::Highest(), T::Lowest())},  //
-          Vec(T(0), T(0), T::Lowest())),
+        C({Vec(T(0), T(0)),                       //
+           Vec(T(0), T(42)),                      //
+           Vec(T(0), T::Highest())},              //
+          Vec(T(0), T(42))),                      //
+        C({Vec(T::Lowest(), T::Highest(), T(0)),  //
+           Vec(T(0), T::Lowest(), T(5)),          //
+           Vec(T(42), T::Highest(), T(6))},       //
+          Vec(T(0), T::Highest(), T(5))),
+
+        E({T(1), T(2), T(1)}, error_msg(T(2), T(1))),
+        E({Vec(T(0), T(0)),         //
+           Vec(T(1), T(2)),         //
+           Vec(T(2), T(1))},        //
+          error_msg(T(2), T(1))),   //
+        E({Vec(T(0), T(1), T(2)),   //
+           Vec(T(5), T(6), T(7)),   //
+           Vec(T(5), T(7), T(6))},  //
+          error_msg(T(7), T(6))),   //
     };
 }
 INSTANTIATE_TEST_SUITE_P(  //

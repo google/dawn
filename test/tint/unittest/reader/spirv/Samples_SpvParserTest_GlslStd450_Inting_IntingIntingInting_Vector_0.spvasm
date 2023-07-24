@@ -54,8 +54,8 @@ OpName %v4f2 "v4f2"
 %45 = OpConstantComposite %v2uint %uint_20 %uint_10
 %46 = OpConstantComposite %v2uint %uint_15 %uint_15
 %47 = OpConstantComposite %v2int %int_30 %int_40
-%48 = OpConstantComposite %v2int %int_40 %int_30
-%49 = OpConstantComposite %v2int %int_35 %int_35
+%48 = OpConstantComposite %v2int %int_35 %int_30
+%49 = OpConstantComposite %v2int %int_40 %int_35
 %50 = OpConstantComposite %v2float %float_50 %float_60
 %51 = OpConstantComposite %v2float %float_60 %float_50
 %52 = OpConstantComposite %v2float %float_70 %float_70

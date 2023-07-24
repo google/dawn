@@ -1073,7 +1073,18 @@ auto ConstEval::SqrtFunc(const Source& source, const type::Type* elem_ty) {
 }
 
 template <typename NumberT>
-utils::Result<NumberT> ConstEval::Clamp(const Source&, NumberT e, NumberT low, NumberT high) {
+utils::Result<NumberT> ConstEval::Clamp(const Source& source,
+                                        NumberT e,
+                                        NumberT low,
+                                        NumberT high) {
+    if (low > high) {
+        utils::StringStream ss;
+        ss << "clamp called with 'low' (" << low << ") greater than 'high' (" << high << ")";
+        AddError(ss.str(), source);
+        if (!use_runtime_semantics_) {
+            return utils::Failure;
+        }
+    }
     return NumberT{std::min(std::max(e, low), high)};
 }
 

@@ -495,6 +495,16 @@ TEST_F(ResolverConstEvalRuntimeSemanticsTest, Sqrt_F32_OutOfRange) {
     EXPECT_EQ(error(), R"(warning: sqrt must be called with a value >= 0)");
 }
 
+TEST_F(ResolverConstEvalRuntimeSemanticsTest, Clamp_F32_LowGreaterThanHigh) {
+    auto* e = constants.Get(f32(-1));
+    auto* low = constants.Get(f32(2));
+    auto* high = constants.Get(f32(1));
+    auto result = const_eval.clamp(e->Type(), utils::Vector{e, low, high}, {});
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.Get()->ValueAs<f32>(), 1.f);
+    EXPECT_EQ(error(), R"(warning: clamp called with 'low' (2.0) greater than 'high' (1.0))");
+}
+
 TEST_F(ResolverConstEvalRuntimeSemanticsTest, Bitcast_Infinity) {
     auto* a = constants.Get(u32(0x7F800000));
     auto result = const_eval.Bitcast(create<type::F32>(), a, {});
