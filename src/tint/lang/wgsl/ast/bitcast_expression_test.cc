@@ -63,7 +63,7 @@ TEST_F(BitcastExpressionTest, Assert_Null_Expr) {
         "internal compiler error");
 }
 
-TEST_F(BitcastExpressionTest, Assert_DifferentProgramID_Expr) {
+TEST_F(BitcastExpressionTest, Assert_DifferentGenerationID_Expr) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

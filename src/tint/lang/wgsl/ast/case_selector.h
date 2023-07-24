@@ -30,7 +30,7 @@ class CaseSelector final : public utils::Castable<CaseSelector, Node> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the selector expression, |nullptr| for a `default` selector
-    CaseSelector(ProgramID pid, NodeID nid, const Source& src, const Expression* expr = nullptr);
+    CaseSelector(GenerationID pid, NodeID nid, const Source& src, const Expression* expr = nullptr);
 
     /// Destructor
     ~CaseSelector() override;

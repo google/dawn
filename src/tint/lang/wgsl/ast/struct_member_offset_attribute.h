@@ -40,7 +40,7 @@ class StructMemberOffsetAttribute final
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the offset expression
-    StructMemberOffsetAttribute(ProgramID pid,
+    StructMemberOffsetAttribute(GenerationID pid,
                                 NodeID nid,
                                 const Source& src,
                                 const Expression* expr);

@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::LoopStatement);
 
 namespace tint::ast {
 
-LoopStatement::LoopStatement(ProgramID pid,
+LoopStatement::LoopStatement(GenerationID pid,
                              NodeID nid,
                              const Source& src,
                              const BlockStatement* b,
@@ -30,11 +30,11 @@ LoopStatement::LoopStatement(ProgramID pid,
                              utils::VectorRef<const ast::Attribute*> attrs)
     : Base(pid, nid, src), body(b), continuing(cont), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, body);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, continuing, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, body, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, continuing, generation_id);
     for (auto* attr : attributes) {
         TINT_ASSERT(AST, attr);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
     }
 }
 

@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeDecl);
 
 namespace tint::ast {
 
-TypeDecl::TypeDecl(ProgramID pid, NodeID nid, const Source& src, const Identifier* n)
+TypeDecl::TypeDecl(GenerationID pid, NodeID nid, const Source& src, const Identifier* n)
     : Base(pid, nid, src), name(n) {
     TINT_ASSERT(AST, name);
     if (name) {

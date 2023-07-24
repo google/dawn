@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticAttribute);
 
 namespace tint::ast {
 
-DiagnosticAttribute::DiagnosticAttribute(ProgramID pid,
+DiagnosticAttribute::DiagnosticAttribute(GenerationID pid,
                                          NodeID nid,
                                          const Source& src,
                                          DiagnosticControl&& dc)

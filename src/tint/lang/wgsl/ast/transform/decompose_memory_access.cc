@@ -669,7 +669,7 @@ struct DecomposeMemoryAccess::State {
     }
 };
 
-DecomposeMemoryAccess::Intrinsic::Intrinsic(ProgramID pid,
+DecomposeMemoryAccess::Intrinsic::Intrinsic(GenerationID pid,
                                             NodeID nid,
                                             Op o,
                                             DataType ty,

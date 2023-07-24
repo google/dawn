@@ -31,7 +31,7 @@ class LiteralExpression : public utils::Castable<LiteralExpression, Expression> 
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the input source
-    LiteralExpression(ProgramID pid, NodeID nid, const Source& src);
+    LiteralExpression(GenerationID pid, NodeID nid, const Source& src);
 };
 
 }  // namespace tint::ast

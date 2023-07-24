@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::LocationAttribute);
 
 namespace tint::ast {
 
-LocationAttribute::LocationAttribute(ProgramID pid,
+LocationAttribute::LocationAttribute(GenerationID pid,
                                      NodeID nid,
                                      const Source& src,
                                      const Expression* exp)

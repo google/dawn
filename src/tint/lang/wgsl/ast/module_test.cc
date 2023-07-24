@@ -56,7 +56,7 @@ TEST_F(ModuleTest, Assert_Null_TypeDecl) {
         "internal compiler error");
 }
 
-TEST_F(ModuleTest, Assert_DifferentProgramID_Function) {
+TEST_F(ModuleTest, Assert_DifferentGenerationID_Function) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -67,7 +67,7 @@ TEST_F(ModuleTest, Assert_DifferentProgramID_Function) {
         "internal compiler error");
 }
 
-TEST_F(ModuleTest, Assert_DifferentProgramID_GlobalVariable) {
+TEST_F(ModuleTest, Assert_DifferentGenerationID_GlobalVariable) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

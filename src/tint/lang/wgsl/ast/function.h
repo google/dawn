@@ -50,7 +50,7 @@ class Function final : public utils::Castable<Function, Node> {
     /// @param body the function body
     /// @param attributes the function attributes
     /// @param return_type_attributes the return type attributes
-    Function(ProgramID pid,
+    Function(GenerationID pid,
              NodeID nid,
              const Source& source,
              const Identifier* name,

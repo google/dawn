@@ -31,7 +31,7 @@ class WhileStatement final : public utils::Castable<WhileStatement, Statement> {
     /// @param condition the optional loop condition expression
     /// @param body the loop body
     /// @param attributes the while statement attributes
-    WhileStatement(ProgramID pid,
+    WhileStatement(GenerationID pid,
                    NodeID nid,
                    const Source& source,
                    const Expression* condition,

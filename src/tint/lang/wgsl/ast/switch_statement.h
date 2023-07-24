@@ -31,7 +31,7 @@ class SwitchStatement final : public utils::Castable<SwitchStatement, Statement>
     /// @param body the switch body
     /// @param stmt_attributes the switch statement attributes
     /// @param body_attributes the switch body attributes
-    SwitchStatement(ProgramID pid,
+    SwitchStatement(GenerationID pid,
                     NodeID nid,
                     const Source& src,
                     const Expression* condition,

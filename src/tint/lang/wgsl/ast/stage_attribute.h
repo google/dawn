@@ -30,7 +30,7 @@ class StageAttribute final : public utils::Castable<StageAttribute, Attribute> {
     /// @param nid the unique node identifier
     /// @param stage the pipeline stage
     /// @param source the source of this attribute
-    StageAttribute(ProgramID pid, NodeID nid, const Source& source, PipelineStage stage);
+    StageAttribute(GenerationID pid, NodeID nid, const Source& source, PipelineStage stage);
     ~StageAttribute() override;
 
     /// @returns the WGSL name for the attribute

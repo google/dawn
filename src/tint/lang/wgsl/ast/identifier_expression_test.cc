@@ -53,7 +53,7 @@ TEST_F(IdentifierExpressionTest, Assert_InvalidSymbol) {
         "internal compiler error");
 }
 
-TEST_F(IdentifierExpressionTest, Assert_DifferentProgramID_Symbol) {
+TEST_F(IdentifierExpressionTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

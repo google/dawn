@@ -44,7 +44,7 @@ TEST_F(BreakIfStatementTest, Assert_Null_Condition) {
         "internal compiler error");
 }
 
-TEST_F(BreakIfStatementTest, Assert_DifferentProgramID_Cond) {
+TEST_F(BreakIfStatementTest, Assert_DifferentGenerationID_Cond) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

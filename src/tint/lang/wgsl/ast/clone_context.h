@@ -21,11 +21,11 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/program_id.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/text/symbol.h"
@@ -45,8 +45,8 @@ struct Type;
 
 namespace tint {
 
-ProgramID ProgramIDOf(const Program*);
-ProgramID ProgramIDOf(const ProgramBuilder*);
+GenerationID GenerationIDOf(const Program*);
+GenerationID GenerationIDOf(const ProgramBuilder*);
 
 /// Cloneable is the base class for all objects that can be cloned
 class Cloneable : public utils::Castable<Cloneable> {
@@ -64,9 +64,9 @@ class Cloneable : public utils::Castable<Cloneable> {
     virtual const Cloneable* Clone(CloneContext* ctx) const = 0;
 };
 
-/// @returns an invalid ProgramID
-inline ProgramID ProgramIDOf(const Cloneable*) {
-    return ProgramID();
+/// @returns an invalid GenerationID
+inline GenerationID GenerationIDOf(const Cloneable*) {
+    return GenerationID();
 }
 
 /// CloneContext holds the state used while cloning AST nodes.
@@ -109,11 +109,11 @@ class CloneContext {
     template <typename T>
     const T* Clone(const T* object) {
         if (src) {
-            TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object);
+            TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, object);
         }
         if (auto* cloned = CloneCloneable(object)) {
             auto* out = CheckedCast<T>(cloned);
-            TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, out);
+            TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, out);
             return out;
         }
         return nullptr;
@@ -137,7 +137,7 @@ class CloneContext {
             return nullptr;
         }
         if (src) {
-            TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, a);
+            TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, a);
         }
         auto* c = a->Clone(this);
         return CheckedCast<T>(c);
@@ -360,8 +360,8 @@ class CloneContext {
               typename WITH,
               typename = utils::traits::EnableIfIsType<WITH, Cloneable>>
     CloneContext& Replace(const WHAT* what, const WITH* with) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, with);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, what);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, with);
         replacements_.Replace(what, [with]() -> const Cloneable* { return with; });
         return *this;
     }
@@ -381,7 +381,7 @@ class CloneContext {
     /// @returns this CloneContext so calls can be chained
     template <typename WHAT, typename WITH, typename = std::invoke_result_t<WITH>>
     CloneContext& Replace(const WHAT* what, WITH&& with) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, what);
         replacements_.Replace(what, with);
         return *this;
     }
@@ -393,7 +393,7 @@ class CloneContext {
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename OBJECT>
     CloneContext& Remove(const utils::Vector<T, N>& vector, OBJECT* object) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, object);
         if (TINT_UNLIKELY((std::find(vector.begin(), vector.end(), object) == vector.end()))) {
             TINT_ICE(Clone, Diagnostics())
                 << "CloneContext::Remove() vector does not contain object";
@@ -411,7 +411,7 @@ class CloneContext {
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename OBJECT>
     CloneContext& InsertFront(const utils::Vector<T, N>& vector, OBJECT* object) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, object);
         return InsertFront(vector, [object] { return object; });
     }
 
@@ -433,7 +433,7 @@ class CloneContext {
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename OBJECT>
     CloneContext& InsertBack(const utils::Vector<T, N>& vector, OBJECT* object) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, object);
         return InsertBack(vector, [object] { return object; });
     }
 
@@ -459,8 +459,8 @@ class CloneContext {
     CloneContext& InsertBefore(const utils::Vector<T, N>& vector,
                                const BEFORE* before,
                                const OBJECT* object) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, before);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, before);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, object);
         if (TINT_UNLIKELY((std::find(vector.begin(), vector.end(), before) == vector.end()))) {
             TINT_ICE(Clone, Diagnostics())
                 << "CloneContext::InsertBefore() vector does not contain before";
@@ -501,8 +501,8 @@ class CloneContext {
     CloneContext& InsertAfter(const utils::Vector<T, N>& vector,
                               const AFTER* after,
                               const OBJECT* object) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, after);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, after);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, object);
         if (TINT_UNLIKELY((std::find(vector.begin(), vector.end(), after) == vector.end()))) {
             TINT_ICE(Clone, Diagnostics())
                 << "CloneContext::InsertAfter() vector does not contain after";

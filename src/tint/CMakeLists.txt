@@ -505,8 +505,6 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/sem/variable.cc
   lang/wgsl/sem/while_statement.cc
   lang/wgsl/sem/while_statement.h
-  program_id.cc
-  program_id.h
   reader/reader.cc
   reader/reader.h
   lang/wgsl/resolver/const_eval.cc
@@ -543,6 +541,8 @@ list(APPEND TINT_LIB_SRCS
   utils/containers/unique_allocator.h
   utils/containers/unique_vector.h
   utils/containers/vector.h
+  utils/generation_id.cc
+  utils/generation_id.h
   utils/macros/compiler.h
   utils/macros/concat.h
   utils/macros/foreach.h

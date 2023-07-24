@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Var);
 
 namespace tint::ast {
 
-Var::Var(ProgramID pid,
+Var::Var(GenerationID pid,
          NodeID nid,
          const Source& src,
          const Identifier* n,

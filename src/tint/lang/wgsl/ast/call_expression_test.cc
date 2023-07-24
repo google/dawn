@@ -100,7 +100,7 @@ TEST_F(CallExpressionTest, Assert_Null_Param) {
         "internal compiler error");
 }
 
-TEST_F(CallExpressionTest, Assert_DifferentProgramID_Identifier) {
+TEST_F(CallExpressionTest, Assert_DifferentGenerationID_Identifier) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -110,7 +110,7 @@ TEST_F(CallExpressionTest, Assert_DifferentProgramID_Identifier) {
         "internal compiler error");
 }
 
-TEST_F(CallExpressionTest, Assert_DifferentProgramID_Type) {
+TEST_F(CallExpressionTest, Assert_DifferentGenerationID_Type) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -120,7 +120,7 @@ TEST_F(CallExpressionTest, Assert_DifferentProgramID_Type) {
         "internal compiler error");
 }
 
-TEST_F(CallExpressionTest, Assert_DifferentProgramID_Param) {
+TEST_F(CallExpressionTest, Assert_DifferentGenerationID_Param) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

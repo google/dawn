@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Struct);
 
 namespace tint::ast {
 
-Struct::Struct(ProgramID pid,
+Struct::Struct(GenerationID pid,
                NodeID nid,
                const Source& src,
                const Identifier* n,
@@ -31,11 +31,11 @@ Struct::Struct(ProgramID pid,
     : Base(pid, nid, src, n), members(std::move(m)), attributes(std::move(attrs)) {
     for (auto* mem : members) {
         TINT_ASSERT(AST, mem);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, mem, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, mem, generation_id);
     }
     for (auto* attr : attributes) {
         TINT_ASSERT(AST, attr);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
     }
 }
 

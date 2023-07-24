@@ -53,7 +53,7 @@ TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
         "internal compiler error");
 }
 
-TEST_F(UnaryOpExpressionTest, Assert_DifferentProgramID_Expression) {
+TEST_F(UnaryOpExpressionTest, Assert_DifferentGenerationID_Expression) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

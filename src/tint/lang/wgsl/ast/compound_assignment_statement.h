@@ -32,7 +32,7 @@ class CompoundAssignmentStatement final
     /// @param lhs the left side of the expression
     /// @param rhs the right side of the expression
     /// @param op the binary operator
-    CompoundAssignmentStatement(ProgramID pid,
+    CompoundAssignmentStatement(GenerationID pid,
                                 NodeID nid,
                                 const Source& source,
                                 const Expression* lhs,

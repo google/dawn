@@ -30,7 +30,7 @@ class BreakIfStatement final : public utils::Castable<BreakIfStatement, Statemen
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param condition the if condition
-    BreakIfStatement(ProgramID pid, NodeID nid, const Source& src, const Expression* condition);
+    BreakIfStatement(GenerationID pid, NodeID nid, const Source& src, const Expression* condition);
 
     /// Destructor
     ~BreakIfStatement() override;

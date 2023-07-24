@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Parameter);
 
 namespace tint::ast {
 
-Parameter::Parameter(ProgramID pid,
+Parameter::Parameter(GenerationID pid,
                      NodeID nid,
                      const Source& src,
                      const Identifier* n,

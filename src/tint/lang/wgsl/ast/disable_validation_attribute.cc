@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DisableValidationAttribute);
 
 namespace tint::ast {
 
-DisableValidationAttribute::DisableValidationAttribute(ProgramID pid,
+DisableValidationAttribute::DisableValidationAttribute(GenerationID pid,
                                                        NodeID nid,
                                                        DisabledValidation val)
     : Base(pid, nid, utils::Empty), validation(val) {}

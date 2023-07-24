@@ -22,25 +22,25 @@ namespace {
 using SymbolTableTest = testing::Test;
 
 TEST_F(SymbolTableTest, GeneratesSymbolForName) {
-    auto program_id = ProgramID::New();
-    SymbolTable s{program_id};
-    EXPECT_EQ(Symbol(1, program_id, "name"), s.Register("name"));
-    EXPECT_EQ(Symbol(2, program_id, "another_name"), s.Register("another_name"));
+    auto generation_id = GenerationID::New();
+    SymbolTable s{generation_id};
+    EXPECT_EQ(Symbol(1, generation_id, "name"), s.Register("name"));
+    EXPECT_EQ(Symbol(2, generation_id, "another_name"), s.Register("another_name"));
 }
 
 TEST_F(SymbolTableTest, DeduplicatesNames) {
-    auto program_id = ProgramID::New();
-    SymbolTable s{program_id};
-    EXPECT_EQ(Symbol(1, program_id, "name"), s.Register("name"));
-    EXPECT_EQ(Symbol(2, program_id, "another_name"), s.Register("another_name"));
-    EXPECT_EQ(Symbol(1, program_id, "name"), s.Register("name"));
+    auto generation_id = GenerationID::New();
+    SymbolTable s{generation_id};
+    EXPECT_EQ(Symbol(1, generation_id, "name"), s.Register("name"));
+    EXPECT_EQ(Symbol(2, generation_id, "another_name"), s.Register("another_name"));
+    EXPECT_EQ(Symbol(1, generation_id, "name"), s.Register("name"));
 }
 
 TEST_F(SymbolTableTest, AssertsForBlankString) {
     EXPECT_FATAL_FAILURE(
         {
-            auto program_id = ProgramID::New();
-            SymbolTable s{program_id};
+            auto generation_id = GenerationID::New();
+            SymbolTable s{generation_id};
             s.Register("");
         },
         "internal compiler error");

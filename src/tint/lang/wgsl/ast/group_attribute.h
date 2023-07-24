@@ -30,7 +30,7 @@ class GroupAttribute final : public utils::Castable<GroupAttribute, Attribute> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the group expression
-    GroupAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* expr);
+    GroupAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* expr);
     ~GroupAttribute() override;
 
     /// @returns the WGSL name for the attribute

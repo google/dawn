@@ -30,7 +30,7 @@ class IdAttribute final : public utils::Castable<IdAttribute, Attribute> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the numeric id expression
-    IdAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* expr);
+    IdAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* expr);
     ~IdAttribute() override;
 
     /// @returns the WGSL name for the attribute

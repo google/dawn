@@ -28,7 +28,7 @@ class ConstAssert final : public utils::Castable<ConstAssert, Statement> {
     /// @param nid the unique node identifier
     /// @param source the variable statement source
     /// @param condition the assertion condition
-    ConstAssert(ProgramID pid, NodeID nid, const Source& source, const Expression* condition);
+    ConstAssert(GenerationID pid, NodeID nid, const Source& source, const Expression* condition);
 
     /// Destructor
     ~ConstAssert() override;

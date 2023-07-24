@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Let);
 
 namespace tint::ast {
 
-Let::Let(ProgramID pid,
+Let::Let(GenerationID pid,
          NodeID nid,
          const Source& src,
          const Identifier* n,

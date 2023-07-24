@@ -73,7 +73,7 @@ TEST_F(IfStatementTest, Assert_InvalidElse) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_DifferentProgramID_Cond) {
+TEST_F(IfStatementTest, Assert_DifferentGenerationID_Cond) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -83,7 +83,7 @@ TEST_F(IfStatementTest, Assert_DifferentProgramID_Cond) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_DifferentProgramID_Body) {
+TEST_F(IfStatementTest, Assert_DifferentGenerationID_Body) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -93,7 +93,7 @@ TEST_F(IfStatementTest, Assert_DifferentProgramID_Body) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_DifferentProgramID_ElseStatement) {
+TEST_F(IfStatementTest, Assert_DifferentGenerationID_ElseStatement) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

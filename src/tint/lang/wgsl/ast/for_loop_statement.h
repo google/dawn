@@ -33,7 +33,7 @@ class ForLoopStatement final : public utils::Castable<ForLoopStatement, Statemen
     /// @param continuing the optional continuing statement
     /// @param body the loop body
     /// @param attributes the while statement attributes
-    ForLoopStatement(ProgramID pid,
+    ForLoopStatement(GenerationID pid,
                      NodeID nid,
                      const Source& source,
                      const Statement* initializer,

@@ -20,14 +20,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::MemberAccessorExpression);
 
 namespace tint::ast {
 
-MemberAccessorExpression::MemberAccessorExpression(ProgramID pid,
+MemberAccessorExpression::MemberAccessorExpression(GenerationID pid,
                                                    NodeID nid,
                                                    const Source& src,
                                                    const Expression* obj,
                                                    const Identifier* mem)
     : Base(pid, nid, src, obj), member(mem) {
     TINT_ASSERT(AST, member);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, member, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, member, generation_id);
 
     // It is currently invalid for a structure to hold a templated member
     if (member) {

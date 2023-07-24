@@ -20,13 +20,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BreakIfStatement);
 
 namespace tint::ast {
 
-BreakIfStatement::BreakIfStatement(ProgramID pid,
+BreakIfStatement::BreakIfStatement(GenerationID pid,
                                    NodeID nid,
                                    const Source& src,
                                    const Expression* cond)
     : Base(pid, nid, src), condition(cond) {
     TINT_ASSERT(AST, condition);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, condition, generation_id);
 }
 
 BreakIfStatement::~BreakIfStatement() = default;

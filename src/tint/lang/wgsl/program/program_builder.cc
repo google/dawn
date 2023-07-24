@@ -34,7 +34,7 @@ ProgramBuilder::ConstOptions::~ConstOptions() = default;
 ProgramBuilder::OverrideOptions::~OverrideOptions() = default;
 
 ProgramBuilder::ProgramBuilder()
-    : id_(ProgramID::New()),
+    : id_(GenerationID::New()),
       ast_(ast_nodes_.Create<ast::Module>(id_, AllocateNodeID(), Source{})) {}
 
 ProgramBuilder::ProgramBuilder(ProgramBuilder&& rhs)

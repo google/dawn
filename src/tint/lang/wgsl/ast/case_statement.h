@@ -31,7 +31,7 @@ class CaseStatement final : public utils::Castable<CaseStatement, Statement> {
     /// @param src the source of this node
     /// @param selectors the case selectors
     /// @param body the case body
-    CaseStatement(ProgramID pid,
+    CaseStatement(GenerationID pid,
                   NodeID nid,
                   const Source& src,
                   utils::VectorRef<const CaseSelector*> selectors,

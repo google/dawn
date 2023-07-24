@@ -41,7 +41,7 @@ class FloatLiteralExpression final
     /// @param src the source of this node
     /// @param val the literal value
     /// @param suf the literal suffix
-    FloatLiteralExpression(ProgramID pid, NodeID nid, const Source& src, double val, Suffix suf);
+    FloatLiteralExpression(GenerationID pid, NodeID nid, const Source& src, double val, Suffix suf);
     ~FloatLiteralExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

@@ -2199,7 +2199,7 @@ void GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         EmitStatements(func->body->statements);
 
         if (!Is<ast::ReturnStatement>(func->body->Last())) {
-            ast::ReturnStatement ret(ProgramID{}, ast::NodeID{}, Source{});
+            ast::ReturnStatement ret(GenerationID{}, ast::NodeID{}, Source{});
             EmitStatement(&ret);
         }
     }

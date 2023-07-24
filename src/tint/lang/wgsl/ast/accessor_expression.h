@@ -27,7 +27,10 @@ class AccessorExpression : public utils::Castable<AccessorExpression, Expression
     /// @param nid the unique node identifier
     /// @param source the member accessor expression source
     /// @param object the object
-    AccessorExpression(ProgramID pid, NodeID nid, const Source& source, const Expression* object);
+    AccessorExpression(GenerationID pid,
+                       NodeID nid,
+                       const Source& source,
+                       const Expression* object);
 
     /// Destructor
     ~AccessorExpression() override;

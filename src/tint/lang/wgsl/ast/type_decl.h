@@ -32,7 +32,7 @@ class TypeDecl : public utils::Castable<TypeDecl, Node> {
     /// @param nid the unique node identifier
     /// @param src the source of this node for the import statement
     /// @param name The name of the type
-    TypeDecl(ProgramID pid, NodeID nid, const Source& src, const Identifier* name);
+    TypeDecl(GenerationID pid, NodeID nid, const Source& src, const Identifier* name);
 
     /// Destructor
     ~TypeDecl() override;

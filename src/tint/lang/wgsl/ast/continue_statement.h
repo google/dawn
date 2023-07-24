@@ -26,7 +26,7 @@ class ContinueStatement final : public utils::Castable<ContinueStatement, Statem
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    ContinueStatement(ProgramID pid, NodeID nid, const Source& src);
+    ContinueStatement(GenerationID pid, NodeID nid, const Source& src);
 
     /// Destructor
     ~ContinueStatement() override;

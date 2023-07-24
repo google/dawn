@@ -36,7 +36,7 @@ TEST_F(BuiltinAttributeTest, Assert_Null_Builtin) {
         "internal compiler error");
 }
 
-TEST_F(BuiltinAttributeTest, Assert_DifferentProgramID_Builtin) {
+TEST_F(BuiltinAttributeTest, Assert_DifferentGenerationID_Builtin) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

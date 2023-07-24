@@ -22,7 +22,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IndexAttribute);
 
 namespace tint::ast {
 
-IndexAttribute::IndexAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* exp)
+IndexAttribute::IndexAttribute(GenerationID pid,
+                               NodeID nid,
+                               const Source& src,
+                               const Expression* exp)
     : Base(pid, nid, src), expr(exp) {}
 
 IndexAttribute::~IndexAttribute() = default;

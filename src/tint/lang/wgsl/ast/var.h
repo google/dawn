@@ -51,7 +51,7 @@ class Var final : public utils::Castable<Var, Variable> {
     /// @param declared_access the declared access control
     /// @param initializer the initializer expression
     /// @param attributes the variable attributes
-    Var(ProgramID pid,
+    Var(GenerationID pid,
         NodeID nid,
         const Source& source,
         const Identifier* name,

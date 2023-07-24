@@ -410,7 +410,7 @@ inline utils::StringStream& operator<<(utils::StringStream& o, const DefInfo& di
 class StatementBuilder : public utils::Castable<StatementBuilder, ast::Statement> {
   public:
     /// Constructor
-    StatementBuilder() : Base(ProgramID(), ast::NodeID(), Source{}) {}
+    StatementBuilder() : Base(GenerationID(), ast::NodeID(), Source{}) {}
 
     /// @param builder the program builder
     /// @returns the build AST node

@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::SwitchStatement);
 
 namespace tint::ast {
 
-SwitchStatement::SwitchStatement(ProgramID pid,
+SwitchStatement::SwitchStatement(GenerationID pid,
                                  NodeID nid,
                                  const Source& src,
                                  const Expression* cond,
@@ -35,18 +35,18 @@ SwitchStatement::SwitchStatement(ProgramID pid,
       attributes(std::move(stmt_attrs)),
       body_attributes(std::move(body_attrs)) {
     TINT_ASSERT(AST, condition);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, condition, generation_id);
     for (auto* stmt : body) {
         TINT_ASSERT(AST, stmt);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, stmt, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, stmt, generation_id);
     }
     for (auto* attr : attributes) {
         TINT_ASSERT(AST, attr);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
     }
     for (auto* attr : body_attributes) {
         TINT_ASSERT(AST, attr);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
     }
 }
 

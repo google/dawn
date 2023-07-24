@@ -29,7 +29,7 @@ class UnaryOpExpression final : public utils::Castable<UnaryOpExpression, Expres
     /// @param source the unary op expression source
     /// @param op the op
     /// @param expr the expr
-    UnaryOpExpression(ProgramID pid,
+    UnaryOpExpression(GenerationID pid,
                       NodeID nid,
                       const Source& source,
                       UnaryOp op,

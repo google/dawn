@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/program_id.h"
+#include "src/tint/utils/generation_id.h"
 
 namespace tint {
 
@@ -31,7 +31,7 @@ class Symbol {
     /// @param val the symbol value
     /// @param pid the identifier of the program that owns this Symbol
     /// @param name the name this symbol represents
-    Symbol(uint32_t val, tint::ProgramID pid, std::string_view name);
+    Symbol(uint32_t val, tint::GenerationID pid, std::string_view name);
 
     /// Copy constructor
     /// @param o the symbol to copy
@@ -88,18 +88,18 @@ class Symbol {
     std::string Name() const;
 
     /// @returns the identifier of the Program that owns this symbol.
-    tint::ProgramID ProgramID() const { return program_id_; }
+    tint::GenerationID GenerationID() const { return generation_id_; }
 
   private:
     uint32_t val_ = static_cast<uint32_t>(-1);
-    tint::ProgramID program_id_;
+    tint::GenerationID generation_id_;
     std::string_view name_;
 };
 
 /// @param sym the Symbol
-/// @returns the ProgramID that owns the given Symbol
-inline ProgramID ProgramIDOf(Symbol sym) {
-    return sym.IsValid() ? sym.ProgramID() : ProgramID();
+/// @returns the GenerationID that owns the given Symbol
+inline GenerationID GenerationIDOf(Symbol sym) {
+    return sym.IsValid() ? sym.GenerationID() : GenerationID();
 }
 
 }  // namespace tint

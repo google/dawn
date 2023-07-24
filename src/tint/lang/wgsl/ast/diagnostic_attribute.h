@@ -30,7 +30,7 @@ class DiagnosticAttribute final : public utils::Castable<DiagnosticAttribute, At
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param dc the diagnostic control
-    DiagnosticAttribute(ProgramID pid, NodeID nid, const Source& src, DiagnosticControl&& dc);
+    DiagnosticAttribute(GenerationID pid, NodeID nid, const Source& src, DiagnosticControl&& dc);
     ~DiagnosticAttribute() override;
 
     /// @returns the WGSL name for the attribute

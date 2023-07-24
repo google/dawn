@@ -20,13 +20,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IncrementDecrementStatement);
 
 namespace tint::ast {
 
-IncrementDecrementStatement::IncrementDecrementStatement(ProgramID pid,
+IncrementDecrementStatement::IncrementDecrementStatement(GenerationID pid,
                                                          NodeID nid,
                                                          const Source& src,
                                                          const Expression* l,
                                                          bool inc)
     : Base(pid, nid, src), lhs(l), increment(inc) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, lhs, generation_id);
 }
 
 IncrementDecrementStatement::~IncrementDecrementStatement() = default;

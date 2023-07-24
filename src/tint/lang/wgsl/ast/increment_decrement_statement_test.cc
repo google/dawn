@@ -53,7 +53,7 @@ TEST_F(IncrementDecrementStatementTest, Decrement) {
     EXPECT_FALSE(i->increment);
 }
 
-TEST_F(IncrementDecrementStatementTest, Assert_DifferentProgramID_Expr) {
+TEST_F(IncrementDecrementStatementTest, Assert_DifferentGenerationID_Expr) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

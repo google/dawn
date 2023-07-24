@@ -33,7 +33,7 @@ class IfStatement final : public utils::Castable<IfStatement, Statement> {
     /// @param body the if body
     /// @param else_stmt the else statement, or nullptr
     /// @param attributes the if statement attributes
-    IfStatement(ProgramID pid,
+    IfStatement(GenerationID pid,
                 NodeID nid,
                 const Source& src,
                 const Expression* condition,

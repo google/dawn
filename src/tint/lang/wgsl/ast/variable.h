@@ -50,7 +50,7 @@ class Variable : public utils::Castable<Variable, Node> {
     /// @param type the declared variable type
     /// @param initializer the initializer expression
     /// @param attributes the variable attributes
-    Variable(ProgramID pid,
+    Variable(GenerationID pid,
              NodeID nid,
              const Source& src,
              const Identifier* name,

@@ -32,7 +32,7 @@ class IdentifierExpression final : public utils::Castable<IdentifierExpression, 
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param identifier the identifier
-    IdentifierExpression(ProgramID pid,
+    IdentifierExpression(GenerationID pid,
                          NodeID nid,
                          const Source& src,
                          const Identifier* identifier);

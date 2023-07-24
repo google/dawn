@@ -32,7 +32,7 @@ class Expression : public utils::Castable<Expression, Node> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    Expression(ProgramID pid, NodeID nid, const Source& src);
+    Expression(GenerationID pid, NodeID nid, const Source& src);
 };
 
 }  // namespace tint::ast

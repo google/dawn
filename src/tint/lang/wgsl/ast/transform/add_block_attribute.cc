@@ -101,7 +101,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-AddBlockAttribute::BlockAttribute::BlockAttribute(ProgramID pid, NodeID nid)
+AddBlockAttribute::BlockAttribute::BlockAttribute(GenerationID pid, NodeID nid)
     : Base(pid, nid, utils::Empty) {}
 AddBlockAttribute::BlockAttribute::~BlockAttribute() = default;
 std::string AddBlockAttribute::BlockAttribute::InternalName() const {

@@ -27,7 +27,7 @@ class PhonyExpression final : public utils::Castable<PhonyExpression, Expression
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    PhonyExpression(ProgramID pid, NodeID nid, const Source& src);
+    PhonyExpression(GenerationID pid, NodeID nid, const Source& src);
 
     /// Destructor
     ~PhonyExpression() override;

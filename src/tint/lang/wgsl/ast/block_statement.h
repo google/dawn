@@ -35,7 +35,7 @@ class BlockStatement final : public utils::Castable<BlockStatement, Statement> {
     /// @param source the block statement source
     /// @param statements the statements
     /// @param attributes the block statement attributes
-    BlockStatement(ProgramID pid,
+    BlockStatement(GenerationID pid,
                    NodeID nid,
                    const Source& source,
                    utils::VectorRef<const Statement*> statements,

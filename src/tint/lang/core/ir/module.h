@@ -25,8 +25,8 @@
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/manager.h"
-#include "src/tint/program_id.h"
 #include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/memory/block_allocator.h"
 #include "src/tint/utils/result/result.h"
 #include "src/tint/utils/text/symbol_table.h"
@@ -36,7 +36,7 @@ namespace tint::ir {
 /// Main module class for the IR.
 class Module {
     /// Program Id required to create other components
-    ProgramID prog_id_;
+    GenerationID prog_id_;
 
     /// Map of value to name
     utils::Hashmap<Value*, Symbol, 32> value_to_name_;

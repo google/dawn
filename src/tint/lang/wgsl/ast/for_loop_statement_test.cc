@@ -69,7 +69,7 @@ TEST_F(ForLoopStatementTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementTest, Assert_DifferentProgramID_Initializer) {
+TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Initializer) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -79,7 +79,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentProgramID_Initializer) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementTest, Assert_DifferentProgramID_Condition) {
+TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Condition) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -89,7 +89,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentProgramID_Condition) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementTest, Assert_DifferentProgramID_Continuing) {
+TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Continuing) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -99,7 +99,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentProgramID_Continuing) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementTest, Assert_DifferentProgramID_Body) {
+TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Body) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

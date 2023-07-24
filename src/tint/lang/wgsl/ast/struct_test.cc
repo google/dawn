@@ -88,7 +88,7 @@ TEST_F(AstStructTest, Assert_Null_Attribute) {
         "internal compiler error");
 }
 
-TEST_F(AstStructTest, Assert_DifferentProgramID_StructMember) {
+TEST_F(AstStructTest, Assert_DifferentGenerationID_StructMember) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -98,7 +98,7 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_StructMember) {
         "internal compiler error");
 }
 
-TEST_F(AstStructTest, Assert_DifferentProgramID_Attribute) {
+TEST_F(AstStructTest, Assert_DifferentGenerationID_Attribute) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

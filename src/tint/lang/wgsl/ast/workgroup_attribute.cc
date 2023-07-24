@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::WorkgroupAttribute);
 
 namespace tint::ast {
 
-WorkgroupAttribute::WorkgroupAttribute(ProgramID pid,
+WorkgroupAttribute::WorkgroupAttribute(GenerationID pid,
                                        NodeID nid,
                                        const Source& src,
                                        const Expression* x_,

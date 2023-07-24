@@ -60,7 +60,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_Null_Member) {
         "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Struct) {
+TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Struct) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -70,7 +70,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Struct) {
         "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Member) {
+TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Member) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

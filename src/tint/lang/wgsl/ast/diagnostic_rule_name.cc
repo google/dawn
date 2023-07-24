@@ -22,33 +22,33 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticRuleName);
 
 namespace tint::ast {
 
-DiagnosticRuleName::DiagnosticRuleName(ProgramID pid,
+DiagnosticRuleName::DiagnosticRuleName(GenerationID pid,
                                        NodeID nid,
                                        const Source& src,
                                        const Identifier* n)
     : Base(pid, nid, src), name(n) {
     TINT_ASSERT(AST, name != nullptr);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, name, generation_id);
     if (name) {
         // It is invalid for a diagnostic rule name to be templated
         TINT_ASSERT(AST, !name->Is<TemplatedIdentifier>());
     }
 }
 
-DiagnosticRuleName::DiagnosticRuleName(ProgramID pid,
+DiagnosticRuleName::DiagnosticRuleName(GenerationID pid,
                                        NodeID nid,
                                        const Source& src,
                                        const Identifier* c,
                                        const Identifier* n)
     : Base(pid, nid, src), category(c), name(n) {
     TINT_ASSERT(AST, name != nullptr);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, name, generation_id);
     if (name) {
         // It is invalid for a diagnostic rule name to be templated
         TINT_ASSERT(AST, !name->Is<TemplatedIdentifier>());
     }
     if (category) {
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, category, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, category, generation_id);
         // It is invalid for a diagnostic rule category to be templated
         TINT_ASSERT(AST, !category->Is<TemplatedIdentifier>());
     }

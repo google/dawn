@@ -22,7 +22,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::GroupAttribute);
 
 namespace tint::ast {
 
-GroupAttribute::GroupAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* exp)
+GroupAttribute::GroupAttribute(GenerationID pid,
+                               NodeID nid,
+                               const Source& src,
+                               const Expression* exp)
     : Base(pid, nid, src), expr(exp) {}
 
 GroupAttribute::~GroupAttribute() = default;

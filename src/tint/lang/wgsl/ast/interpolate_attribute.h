@@ -35,7 +35,7 @@ class InterpolateAttribute final : public utils::Castable<InterpolateAttribute, 
     /// @param src the source of this node
     /// @param type the interpolation type
     /// @param sampling the interpolation sampling
-    InterpolateAttribute(ProgramID pid,
+    InterpolateAttribute(GenerationID pid,
                          NodeID nid,
                          const Source& src,
                          const Expression* type,

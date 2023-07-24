@@ -32,7 +32,10 @@ class StructMemberSizeAttribute final
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the size expression
-    StructMemberSizeAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* expr);
+    StructMemberSizeAttribute(GenerationID pid,
+                              NodeID nid,
+                              const Source& src,
+                              const Expression* expr);
     ~StructMemberSizeAttribute() override;
 
     /// @returns the WGSL name for the attribute

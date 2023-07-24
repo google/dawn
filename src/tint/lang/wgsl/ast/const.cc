@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Const);
 
 namespace tint::ast {
 
-Const::Const(ProgramID pid,
+Const::Const(GenerationID pid,
              NodeID nid,
              const Source& src,
              const Identifier* n,

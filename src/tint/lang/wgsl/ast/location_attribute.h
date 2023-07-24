@@ -30,7 +30,7 @@ class LocationAttribute final : public utils::Castable<LocationAttribute, Attrib
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the location expression
-    LocationAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* expr);
+    LocationAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* expr);
     ~LocationAttribute() override;
 
     /// @returns the WGSL name for the attribute

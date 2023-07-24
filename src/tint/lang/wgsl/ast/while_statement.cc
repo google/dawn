@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::WhileStatement);
 
 namespace tint::ast {
 
-WhileStatement::WhileStatement(ProgramID pid,
+WhileStatement::WhileStatement(GenerationID pid,
                                NodeID nid,
                                const Source& src,
                                const Expression* cond,
@@ -32,11 +32,11 @@ WhileStatement::WhileStatement(ProgramID pid,
     TINT_ASSERT(AST, cond);
     TINT_ASSERT(AST, body);
 
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, condition, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, body, generation_id);
     for (auto* attr : attributes) {
         TINT_ASSERT(AST, attr);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
     }
 }
 

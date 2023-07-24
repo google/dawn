@@ -30,7 +30,7 @@ class IncrementDecrementStatement final
     /// @param src the source of this node
     /// @param lhs the LHS expression
     /// @param inc `true` for increment, `false` for decrement
-    IncrementDecrementStatement(ProgramID pid,
+    IncrementDecrementStatement(GenerationID pid,
                                 NodeID nid,
                                 const Source& src,
                                 const Expression* lhs,

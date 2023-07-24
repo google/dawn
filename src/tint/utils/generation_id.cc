@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/program_id.h"
+#include "src/tint/utils/generation_id.h"
 
 #include <atomic>
 
@@ -20,30 +20,30 @@ namespace tint {
 
 namespace {
 
-std::atomic<uint32_t> next_program_id{1};
+std::atomic<uint32_t> next_generation_id{1};
 
 }  // namespace
 
-ProgramID::ProgramID() = default;
+GenerationID::GenerationID() = default;
 
-ProgramID::ProgramID(uint32_t id) : val(id) {}
+GenerationID::GenerationID(uint32_t id) : val(id) {}
 
-ProgramID ProgramID::New() {
-    return ProgramID(next_program_id++);
+GenerationID GenerationID::New() {
+    return GenerationID(next_generation_id++);
 }
 
 namespace detail {
 
-/// AssertProgramIDsEqual is called by TINT_ASSERT_PROGRAM_IDS_EQUAL() and
-/// TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID() to assert that the ProgramIDs
+/// AssertGenerationIDsEqual is called by TINT_ASSERT_GENERATION_IDS_EQUAL() and
+/// TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID() to assert that the GenerationIDs
 /// `a` and `b` are equal.
-void AssertProgramIDsEqual(ProgramID a,
-                           ProgramID b,
-                           bool if_valid,
-                           diag::System system,
-                           const char* msg,
-                           const char* file,
-                           size_t line) {
+void AssertGenerationIDsEqual(GenerationID a,
+                              GenerationID b,
+                              bool if_valid,
+                              diag::System system,
+                              const char* msg,
+                              const char* file,
+                              size_t line) {
     if (a == b) {
         return;  // matched
     }

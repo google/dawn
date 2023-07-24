@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::InternalAttribute);
 
 namespace tint::ast {
 
-InternalAttribute::InternalAttribute(ProgramID pid,
+InternalAttribute::InternalAttribute(GenerationID pid,
                                      NodeID nid,
                                      utils::VectorRef<const IdentifierExpression*> deps)
     : Base(pid, nid, Source{}), dependencies(std::move(deps)) {}

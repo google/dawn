@@ -180,7 +180,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @param attr the input attribute
     /// @returns the builtin value of the attribute
     builtin::BuiltinValue BuiltinOf(const BuiltinAttribute* attr) {
-        if (attr->program_id == ctx.dst->ID()) {
+        if (attr->generation_id == ctx.dst->ID()) {
             // attr belongs to the target program.
             // Obtain the builtin value from #builtin_attrs.
             if (auto b = builtin_attrs.Get(attr)) {

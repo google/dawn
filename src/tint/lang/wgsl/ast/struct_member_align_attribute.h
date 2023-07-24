@@ -32,7 +32,7 @@ class StructMemberAlignAttribute final
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param align the align expression
-    StructMemberAlignAttribute(ProgramID pid,
+    StructMemberAlignAttribute(GenerationID pid,
                                NodeID nid,
                                const Source& src,
                                const Expression* align);

@@ -40,7 +40,7 @@ class Const final : public utils::Castable<Const, Variable> {
     /// @param type the declared variable type
     /// @param initializer the initializer expression. Must not be nullptr.
     /// @param attributes the variable attributes
-    Const(ProgramID pid,
+    Const(GenerationID pid,
           NodeID nid,
           const Source& source,
           const Identifier* name,

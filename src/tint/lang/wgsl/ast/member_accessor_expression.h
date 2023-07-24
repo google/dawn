@@ -30,7 +30,7 @@ class MemberAccessorExpression final
     /// @param source the member accessor expression source
     /// @param object the object
     /// @param member the member
-    MemberAccessorExpression(ProgramID pid,
+    MemberAccessorExpression(GenerationID pid,
                              NodeID nid,
                              const Source& source,
                              const Expression* object,

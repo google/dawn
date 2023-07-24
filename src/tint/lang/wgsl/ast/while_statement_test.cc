@@ -72,7 +72,7 @@ TEST_F(WhileStatementTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(WhileStatementTest, Assert_DifferentProgramID_Condition) {
+TEST_F(WhileStatementTest, Assert_DifferentGenerationID_Condition) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -82,7 +82,7 @@ TEST_F(WhileStatementTest, Assert_DifferentProgramID_Condition) {
         "internal compiler error");
 }
 
-TEST_F(WhileStatementTest, Assert_DifferentProgramID_Body) {
+TEST_F(WhileStatementTest, Assert_DifferentGenerationID_Body) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

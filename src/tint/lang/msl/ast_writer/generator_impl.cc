@@ -2009,7 +2009,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
         }
 
         if (!Is<ast::ReturnStatement>(func->body->Last())) {
-            ast::ReturnStatement ret(ProgramID{}, ast::NodeID{}, Source{});
+            ast::ReturnStatement ret(GenerationID{}, ast::NodeID{}, Source{});
             if (!EmitStatement(&ret)) {
                 return false;
             }

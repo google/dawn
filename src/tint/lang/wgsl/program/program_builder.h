@@ -102,7 +102,7 @@
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
-#include "src/tint/program_id.h"
+#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/text/string.h"
 
 #ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER
@@ -329,7 +329,7 @@ class ProgramBuilder {
     static ProgramBuilder Wrap(const Program* program);
 
     /// @returns the unique identifier for this program
-    ProgramID ID() const { return id_; }
+    GenerationID ID() const { return id_; }
 
     /// @returns a reference to the program's types
     type::Manager& Types() {
@@ -3612,7 +3612,7 @@ class ProgramBuilder {
     void AssertNotMoved() const;
 
   private:
-    ProgramID id_;
+    GenerationID id_;
     ast::NodeID last_ast_node_id_ = ast::NodeID{static_cast<decltype(ast::NodeID::value)>(0) - 1};
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;
@@ -3688,8 +3688,8 @@ struct ProgramBuilder::TypesBuilder::CToAST<tint::builtin::fluent_types::ptr<ADD
 //! @endcond
 
 /// @param builder the ProgramBuilder
-/// @returns the ProgramID of the ProgramBuilder
-inline ProgramID ProgramIDOf(const ProgramBuilder* builder) {
+/// @returns the GenerationID of the ProgramBuilder
+inline GenerationID GenerationIDOf(const ProgramBuilder* builder) {
     return builder->ID();
 }
 

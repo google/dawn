@@ -28,7 +28,7 @@ class MustUseAttribute final : public utils::Castable<MustUseAttribute, Attribut
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    MustUseAttribute(ProgramID pid, NodeID nid, const Source& src);
+    MustUseAttribute(GenerationID pid, NodeID nid, const Source& src);
     ~MustUseAttribute() override;
 
     /// @returns the WGSL name for the attribute

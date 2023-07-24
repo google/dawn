@@ -40,7 +40,7 @@ class Parameter final : public utils::Castable<Parameter, Variable> {
     /// @param name the variable name
     /// @param type the declared variable type
     /// @param attributes the variable attributes
-    Parameter(ProgramID pid,
+    Parameter(GenerationID pid,
               NodeID nid,
               const Source& source,
               const Identifier* name,

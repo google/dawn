@@ -30,7 +30,7 @@ class IndexAttribute final : public utils::Castable<IndexAttribute, Attribute> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the numeric id expression
-    IndexAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* expr);
+    IndexAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* expr);
     ~IndexAttribute() override;
 
     /// @returns the WGSL name for the attribute

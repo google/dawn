@@ -20,15 +20,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ReturnStatement);
 
 namespace tint::ast {
 
-ReturnStatement::ReturnStatement(ProgramID pid, NodeID nid, const Source& src)
+ReturnStatement::ReturnStatement(GenerationID pid, NodeID nid, const Source& src)
     : Base(pid, nid, src), value(nullptr) {}
 
-ReturnStatement::ReturnStatement(ProgramID pid,
+ReturnStatement::ReturnStatement(GenerationID pid,
                                  NodeID nid,
                                  const Source& src,
                                  const Expression* val)
     : Base(pid, nid, src), value(val) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, value, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, value, generation_id);
 }
 
 ReturnStatement::~ReturnStatement() = default;

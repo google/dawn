@@ -37,7 +37,7 @@ class StructMember final : public utils::Castable<StructMember, Node> {
     /// @param name The struct member name
     /// @param type The struct member type
     /// @param attributes The struct member attributes
-    StructMember(ProgramID pid,
+    StructMember(GenerationID pid,
                  NodeID nid,
                  const Source& src,
                  const Identifier* name,

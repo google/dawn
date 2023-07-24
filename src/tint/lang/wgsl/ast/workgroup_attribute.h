@@ -37,7 +37,7 @@ class WorkgroupAttribute final : public utils::Castable<WorkgroupAttribute, Attr
     /// @param x the workgroup x dimension expression
     /// @param y the optional workgroup y dimension expression
     /// @param z the optional workgroup z dimension expression
-    WorkgroupAttribute(ProgramID pid,
+    WorkgroupAttribute(GenerationID pid,
                        NodeID nid,
                        const Source& src,
                        const Expression* x,

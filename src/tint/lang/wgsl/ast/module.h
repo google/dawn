@@ -35,7 +35,7 @@ class Module final : public utils::Castable<Module, Node> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    Module(ProgramID pid, NodeID nid, const Source& src);
+    Module(GenerationID pid, NodeID nid, const Source& src);
 
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -43,7 +43,7 @@ class Module final : public utils::Castable<Module, Node> {
     /// @param src the source of this node
     /// @param global_decls the list of global types, functions, and variables, in
     /// the order they were declared in the source program
-    Module(ProgramID pid,
+    Module(GenerationID pid,
            NodeID nid,
            const Source& src,
            utils::VectorRef<const Node*> global_decls);

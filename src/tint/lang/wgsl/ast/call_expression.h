@@ -37,7 +37,7 @@ class CallExpression final : public utils::Castable<CallExpression, Expression> 
     /// @param source the call expression source
     /// @param target the target of the call
     /// @param args the arguments
-    CallExpression(ProgramID pid,
+    CallExpression(GenerationID pid,
                    NodeID nid,
                    const Source& source,
                    const IdentifierExpression* target,

@@ -43,7 +43,7 @@ TEST_F(CallStatementTest, Assert_Null_Call) {
         "internal compiler error");
 }
 
-TEST_F(CallStatementTest, Assert_DifferentProgramID_Call) {
+TEST_F(CallStatementTest, Assert_DifferentGenerationID_Call) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

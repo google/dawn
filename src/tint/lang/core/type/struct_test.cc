@@ -216,7 +216,7 @@ TEST_F(TypeStructTest, Clone) {
                                            type::StructMemberAttributes{})},
         4u /* align */, 8u /* size */, 16u /* size_no_padding */);
 
-    ProgramID id;
+    GenerationID id;
     SymbolTable new_st{id};
 
     type::Manager mgr;

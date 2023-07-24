@@ -18,7 +18,7 @@
 
 namespace tint {
 
-SymbolTable::SymbolTable(tint::ProgramID program_id) : program_id_(program_id) {}
+SymbolTable::SymbolTable(tint::GenerationID generation_id) : generation_id_(generation_id) {}
 
 SymbolTable::SymbolTable(SymbolTable&&) = default;
 
@@ -45,7 +45,7 @@ Symbol SymbolTable::RegisterInternal(std::string_view name) {
     memcpy(name_mem, name.data(), name.length() + 1);
     std::string_view nv(name_mem, name.length());
 
-    Symbol sym(next_symbol_, program_id_, nv);
+    Symbol sym(next_symbol_, generation_id_, nv);
     ++next_symbol_;
     name_to_symbol_.Add(sym.NameView(), sym);
 

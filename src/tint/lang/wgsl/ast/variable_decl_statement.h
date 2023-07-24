@@ -28,7 +28,7 @@ class VariableDeclStatement final : public utils::Castable<VariableDeclStatement
     /// @param nid the unique node identifier
     /// @param source the variable statement source
     /// @param variable the variable
-    VariableDeclStatement(ProgramID pid,
+    VariableDeclStatement(GenerationID pid,
                           NodeID nid,
                           const Source& source,
                           const Variable* variable);

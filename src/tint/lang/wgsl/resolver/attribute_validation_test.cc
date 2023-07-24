@@ -2302,7 +2302,7 @@ namespace {
 
 class TestAttribute : public utils::Castable<TestAttribute, ast::InternalAttribute> {
   public:
-    TestAttribute(ProgramID pid, ast::NodeID nid, const ast::IdentifierExpression* dep)
+    TestAttribute(GenerationID pid, ast::NodeID nid, const ast::IdentifierExpression* dep)
         : Base(pid, nid, utils::Vector{dep}) {}
     std::string InternalName() const override { return "test_attribute"; }
     const Cloneable* Clone(CloneContext*) const override { return nullptr; }

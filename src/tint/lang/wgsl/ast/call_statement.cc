@@ -20,13 +20,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallStatement);
 
 namespace tint::ast {
 
-CallStatement::CallStatement(ProgramID pid,
+CallStatement::CallStatement(GenerationID pid,
                              NodeID nid,
                              const Source& src,
                              const CallExpression* call)
     : Base(pid, nid, src), expr(call) {
     TINT_ASSERT(AST, expr);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, expr, generation_id);
 }
 
 CallStatement::~CallStatement() = default;

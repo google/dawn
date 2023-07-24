@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_TYPE_H_
 #define SRC_TINT_LANG_WGSL_AST_TYPE_H_
 
-#include "src/tint/program_id.h"
+#include "src/tint/utils/generation_id.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -44,8 +44,8 @@ struct Type {
 namespace tint {
 
 /// @param type an AST type
-/// @returns the ProgramID of the given AST type.
-ProgramID ProgramIDOf(ast::Type type);
+/// @returns the GenerationID of the given AST type.
+GenerationID GenerationIDOf(ast::Type type);
 
 }  // namespace tint
 

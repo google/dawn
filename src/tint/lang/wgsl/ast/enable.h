@@ -35,7 +35,10 @@ class Enable final : public utils::Castable<Enable, Node> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param exts the extensions being enabled by this directive
-    Enable(ProgramID pid, NodeID nid, const Source& src, utils::VectorRef<const Extension*> exts);
+    Enable(GenerationID pid,
+           NodeID nid,
+           const Source& src,
+           utils::VectorRef<const Extension*> exts);
 
     /// Destructor
     ~Enable() override;

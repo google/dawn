@@ -29,7 +29,7 @@ class BitcastExpression final : public utils::Castable<BitcastExpression, Expres
     /// @param source the bitcast expression source
     /// @param type the type
     /// @param expr the expr
-    BitcastExpression(ProgramID pid,
+    BitcastExpression(GenerationID pid,
                       NodeID nid,
                       const Source& source,
                       Type type,

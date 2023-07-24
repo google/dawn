@@ -52,7 +52,7 @@ class BinaryExpression final : public utils::Castable<BinaryExpression, Expressi
     /// @param op the operation type
     /// @param lhs the left side of the expression
     /// @param rhs the right side of the expression
-    BinaryExpression(ProgramID pid,
+    BinaryExpression(GenerationID pid,
                      NodeID nid,
                      const Source& source,
                      BinaryOp op,

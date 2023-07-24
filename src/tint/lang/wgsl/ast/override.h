@@ -40,7 +40,7 @@ class Override final : public utils::Castable<Override, Variable> {
     /// @param type the declared variable type
     /// @param initializer the initializer expression
     /// @param attributes the variable attributes
-    Override(ProgramID pid,
+    Override(GenerationID pid,
              NodeID nid,
              const Source& source,
              const Identifier* name,

@@ -29,7 +29,7 @@ class IndexAccessorExpression final
     /// @param source the index accessor source
     /// @param obj the object
     /// @param idx the index expression
-    IndexAccessorExpression(ProgramID pid,
+    IndexAccessorExpression(GenerationID pid,
                             NodeID nid,
                             const Source& source,
                             const Expression* obj,

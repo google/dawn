@@ -31,7 +31,7 @@ class StrideAttribute final : public utils::Castable<StrideAttribute, Attribute>
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param stride the stride value
-    StrideAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t stride);
+    StrideAttribute(GenerationID pid, NodeID nid, const Source& src, uint32_t stride);
     ~StrideAttribute() override;
 
     /// @returns the WGSL name for the attribute

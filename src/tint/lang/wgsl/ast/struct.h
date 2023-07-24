@@ -35,7 +35,7 @@ class Struct final : public utils::Castable<Struct, TypeDecl> {
     /// @param name The name of the structure
     /// @param members The struct members
     /// @param attributes The struct attributes
-    Struct(ProgramID pid,
+    Struct(GenerationID pid,
            NodeID nid,
            const Source& src,
            const Identifier* name,

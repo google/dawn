@@ -26,7 +26,7 @@ class DiscardStatement final : public utils::Castable<DiscardStatement, Statemen
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    DiscardStatement(ProgramID pid, NodeID nid, const Source& src);
+    DiscardStatement(GenerationID pid, NodeID nid, const Source& src);
 
     /// Destructor
     ~DiscardStatement() override;

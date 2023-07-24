@@ -37,7 +37,7 @@ class Let final : public utils::Castable<Let, Variable> {
     /// @param type the declared variable type
     /// @param initializer the initializer expression
     /// @param attributes the variable attributes
-    Let(ProgramID pid,
+    Let(GenerationID pid,
         NodeID nid,
         const Source& source,
         const Identifier* name,

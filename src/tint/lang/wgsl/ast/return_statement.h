@@ -27,14 +27,14 @@ class ReturnStatement final : public utils::Castable<ReturnStatement, Statement>
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    ReturnStatement(ProgramID pid, NodeID nid, const Source& src);
+    ReturnStatement(GenerationID pid, NodeID nid, const Source& src);
 
     /// Constructor
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param value the return value
-    ReturnStatement(ProgramID pid, NodeID nid, const Source& src, const Expression* value);
+    ReturnStatement(GenerationID pid, NodeID nid, const Source& src, const Expression* value);
 
     /// Destructor
     ~ReturnStatement() override;

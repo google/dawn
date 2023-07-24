@@ -293,7 +293,7 @@ struct SpirvAtomic::State {
 SpirvAtomic::SpirvAtomic() = default;
 SpirvAtomic::~SpirvAtomic() = default;
 
-SpirvAtomic::Stub::Stub(ProgramID pid, NodeID nid, builtin::Function b)
+SpirvAtomic::Stub::Stub(GenerationID pid, NodeID nid, builtin::Function b)
     : Base(pid, nid, utils::Empty), builtin(b) {}
 SpirvAtomic::Stub::~Stub() = default;
 std::string SpirvAtomic::Stub::InternalName() const {

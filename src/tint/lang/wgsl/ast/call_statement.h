@@ -28,7 +28,7 @@ class CallStatement final : public utils::Castable<CallStatement, Statement> {
     /// @param nid the unique node identifier
     /// @param src the source of this node for the statement
     /// @param call the function
-    CallStatement(ProgramID pid, NodeID nid, const Source& src, const CallExpression* call);
+    CallStatement(GenerationID pid, NodeID nid, const Source& src, const CallExpression* call);
 
     /// Destructor
     ~CallStatement() override;

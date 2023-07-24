@@ -34,7 +34,7 @@ class DiagnosticRuleName final : public utils::Castable<DiagnosticRuleName, Node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param name the rule name
-    DiagnosticRuleName(ProgramID pid, NodeID nid, const Source& src, const Identifier* name);
+    DiagnosticRuleName(GenerationID pid, NodeID nid, const Source& src, const Identifier* name);
 
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -42,7 +42,7 @@ class DiagnosticRuleName final : public utils::Castable<DiagnosticRuleName, Node
     /// @param src the source of this node
     /// @param category the rule category.
     /// @param name the rule name
-    DiagnosticRuleName(ProgramID pid,
+    DiagnosticRuleName(GenerationID pid,
                        NodeID nid,
                        const Source& src,
                        const Identifier* category,

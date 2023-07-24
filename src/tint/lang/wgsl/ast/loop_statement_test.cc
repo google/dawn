@@ -90,7 +90,7 @@ TEST_F(LoopStatementTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(LoopStatementTest, Assert_DifferentProgramID_Body) {
+TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Body) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -100,7 +100,7 @@ TEST_F(LoopStatementTest, Assert_DifferentProgramID_Body) {
         "internal compiler error");
 }
 
-TEST_F(LoopStatementTest, Assert_DifferentProgramID_Continuing) {
+TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Continuing) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

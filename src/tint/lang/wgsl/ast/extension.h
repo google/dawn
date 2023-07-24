@@ -31,7 +31,7 @@ class Extension final : public utils::Castable<Extension, Node> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param ext the extension
-    Extension(ProgramID pid, NodeID nid, const Source& src, builtin::Extension ext);
+    Extension(GenerationID pid, NodeID nid, const Source& src, builtin::Extension ext);
 
     /// Destructor
     ~Extension() override;

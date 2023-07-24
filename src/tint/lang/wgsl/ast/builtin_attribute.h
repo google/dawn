@@ -34,7 +34,7 @@ class BuiltinAttribute final : public utils::Castable<BuiltinAttribute, Attribut
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param builtin the builtin value
-    BuiltinAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* builtin);
+    BuiltinAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* builtin);
     ~BuiltinAttribute() override;
 
     /// @returns the WGSL name for the attribute

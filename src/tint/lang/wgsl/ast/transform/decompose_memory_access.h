@@ -81,7 +81,7 @@ class DecomposeMemoryAccess final : public utils::Castable<DecomposeMemoryAccess
         /// @param type the data type of the intrinsic
         /// @param address_space the address space of the buffer
         /// @param buffer the storage or uniform buffer identifier
-        Intrinsic(ProgramID pid,
+        Intrinsic(GenerationID pid,
                   NodeID nid,
                   Op o,
                   DataType type,

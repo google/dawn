@@ -68,7 +68,7 @@ TEST_F(BlockStatementTest, Assert_Null_Statement) {
         "internal compiler error");
 }
 
-TEST_F(BlockStatementTest, Assert_DifferentProgramID_Statement) {
+TEST_F(BlockStatementTest, Assert_DifferentGenerationID_Statement) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

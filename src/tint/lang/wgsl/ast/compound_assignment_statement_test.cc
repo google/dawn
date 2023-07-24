@@ -73,7 +73,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_RHS) {
         "internal compiler error");
 }
 
-TEST_F(CompoundAssignmentStatementTest, Assert_DifferentProgramID_LHS) {
+TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -83,7 +83,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_DifferentProgramID_LHS) {
         "internal compiler error");
 }
 
-TEST_F(CompoundAssignmentStatementTest, Assert_DifferentProgramID_RHS) {
+TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_RHS) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

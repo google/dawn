@@ -33,10 +33,10 @@ namespace tint::ast {
 class InternalAttribute : public utils::Castable<InternalAttribute, Attribute> {
   public:
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param generation_id the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param deps a list of identifiers that this attribute is dependent on
-    InternalAttribute(ProgramID program_id,
+    InternalAttribute(GenerationID generation_id,
                       NodeID nid,
                       utils::VectorRef<const IdentifierExpression*> deps);
 

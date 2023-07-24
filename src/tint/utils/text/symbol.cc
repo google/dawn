@@ -20,8 +20,8 @@ namespace tint {
 
 Symbol::Symbol() = default;
 
-Symbol::Symbol(uint32_t val, tint::ProgramID pid, std::string_view name)
-    : val_(val), program_id_(pid), name_(name) {}
+Symbol::Symbol(uint32_t val, tint::GenerationID pid, std::string_view name)
+    : val_(val), generation_id_(pid), name_(name) {}
 
 Symbol::Symbol(const Symbol& o) = default;
 
@@ -34,17 +34,17 @@ Symbol& Symbol::operator=(const Symbol& o) = default;
 Symbol& Symbol::operator=(Symbol&& o) = default;
 
 bool Symbol::operator==(const Symbol& other) const {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_, other.program_id_);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Symbol, generation_id_, other.generation_id_);
     return val_ == other.val_;
 }
 
 bool Symbol::operator!=(const Symbol& other) const {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_, other.program_id_);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Symbol, generation_id_, other.generation_id_);
     return val_ != other.val_;
 }
 
 bool Symbol::operator<(const Symbol& other) const {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_, other.program_id_);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Symbol, generation_id_, other.generation_id_);
     return val_ < other.val_;
 }
 

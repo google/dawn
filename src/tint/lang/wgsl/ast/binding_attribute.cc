@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BindingAttribute);
 
 namespace tint::ast {
 
-BindingAttribute::BindingAttribute(ProgramID pid,
+BindingAttribute::BindingAttribute(GenerationID pid,
                                    NodeID nid,
                                    const Source& src,
                                    const Expression* exp)

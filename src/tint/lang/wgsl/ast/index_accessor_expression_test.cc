@@ -65,7 +65,7 @@ TEST_F(IndexAccessorExpressionTest, Assert_Null_Index) {
         "internal compiler error");
 }
 
-TEST_F(IndexAccessorExpressionTest, Assert_DifferentProgramID_Array) {
+TEST_F(IndexAccessorExpressionTest, Assert_DifferentGenerationID_Array) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -75,7 +75,7 @@ TEST_F(IndexAccessorExpressionTest, Assert_DifferentProgramID_Array) {
         "internal compiler error");
 }
 
-TEST_F(IndexAccessorExpressionTest, Assert_DifferentProgramID_Index) {
+TEST_F(IndexAccessorExpressionTest, Assert_DifferentGenerationID_Index) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticDirective);
 
 namespace tint::ast {
 
-DiagnosticDirective::DiagnosticDirective(ProgramID pid,
+DiagnosticDirective::DiagnosticDirective(GenerationID pid,
                                          NodeID nid,
                                          const Source& src,
                                          DiagnosticControl&& dc)

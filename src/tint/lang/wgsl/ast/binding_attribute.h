@@ -30,7 +30,7 @@ class BindingAttribute final : public utils::Castable<BindingAttribute, Attribut
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the binding expression
-    BindingAttribute(ProgramID pid, NodeID nid, const Source& src, const Expression* expr);
+    BindingAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* expr);
     ~BindingAttribute() override;
 
     /// @returns the WGSL name for the attribute

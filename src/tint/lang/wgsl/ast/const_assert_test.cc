@@ -52,7 +52,7 @@ TEST_F(ConstAssertTest, Assert_Null_Condition) {
         "internal compiler error");
 }
 
-TEST_F(ConstAssertTest, Assert_DifferentProgramID_Condition) {
+TEST_F(ConstAssertTest, Assert_DifferentGenerationID_Condition) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

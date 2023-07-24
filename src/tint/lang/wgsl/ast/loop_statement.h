@@ -29,7 +29,7 @@ class LoopStatement final : public utils::Castable<LoopStatement, Statement> {
     /// @param body the body statements
     /// @param continuing the continuing statements
     /// @param attributes the while statement attributes
-    LoopStatement(ProgramID pid,
+    LoopStatement(GenerationID pid,
                   NodeID nid,
                   const Source& source,
                   const BlockStatement* body,

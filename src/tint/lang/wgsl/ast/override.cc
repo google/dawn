@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Override);
 
 namespace tint::ast {
 
-Override::Override(ProgramID pid,
+Override::Override(GenerationID pid,
                    NodeID nid,
                    const Source& src,
                    const Identifier* n,

@@ -105,7 +105,7 @@ TEST_F(CaseStatementTest, Assert_Null_Selector) {
         "internal compiler error");
 }
 
-TEST_F(CaseStatementTest, Assert_DifferentProgramID_Call) {
+TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Call) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -116,7 +116,7 @@ TEST_F(CaseStatementTest, Assert_DifferentProgramID_Call) {
         "internal compiler error");
 }
 
-TEST_F(CaseStatementTest, Assert_DifferentProgramID_Selector) {
+TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Selector) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

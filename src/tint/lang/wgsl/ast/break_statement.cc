@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BreakStatement);
 
 namespace tint::ast {
 
-BreakStatement::BreakStatement(ProgramID pid, NodeID nid, const Source& src)
+BreakStatement::BreakStatement(GenerationID pid, NodeID nid, const Source& src)
     : Base(pid, nid, src) {}
 
 BreakStatement::~BreakStatement() = default;

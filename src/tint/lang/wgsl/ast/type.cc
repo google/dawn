@@ -17,8 +17,8 @@
 
 namespace tint {
 
-ProgramID ProgramIDOf(ast::Type type) {
-    return ProgramIDOf(type.expr);
+GenerationID GenerationIDOf(ast::Type type) {
+    return GenerationIDOf(type.expr);
 }
 
 }  // namespace tint

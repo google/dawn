@@ -38,7 +38,7 @@ class IntLiteralExpression final : public utils::Castable<IntLiteralExpression, 
     /// @param src the source of this node
     /// @param val the literal value
     /// @param suf the literal suffix
-    IntLiteralExpression(ProgramID pid, NodeID nid, const Source& src, int64_t val, Suffix suf);
+    IntLiteralExpression(GenerationID pid, NodeID nid, const Source& src, int64_t val, Suffix suf);
 
     ~IntLiteralExpression() override;
 

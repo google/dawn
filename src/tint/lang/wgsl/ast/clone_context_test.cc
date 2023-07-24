@@ -76,20 +76,20 @@ struct NotANode : public utils::Castable<NotANode, Cloneable> {
 };
 
 struct ProgramNode : public utils::Castable<ProgramNode, Cloneable> {
-    ProgramNode(Allocator* alloc, ProgramID id, ProgramID cloned_id)
-        : allocator(alloc), program_id(id), cloned_program_id(cloned_id) {}
+    ProgramNode(Allocator* alloc, GenerationID id, GenerationID cloned_id)
+        : allocator(alloc), generation_id(id), cloned_generation_id(cloned_id) {}
 
     Allocator* const allocator;
-    const ProgramID program_id;
-    const ProgramID cloned_program_id;
+    const GenerationID generation_id;
+    const GenerationID cloned_generation_id;
 
     ProgramNode* Clone(CloneContext*) const override {
-        return allocator->Create<ProgramNode>(cloned_program_id, cloned_program_id);
+        return allocator->Create<ProgramNode>(cloned_generation_id, cloned_generation_id);
     }
 };
 
-ProgramID ProgramIDOf(const ProgramNode* node) {
-    return node->program_id;
+GenerationID GenerationIDOf(const ProgramNode* node) {
+    return node->generation_id;
 }
 
 using CloneContextNodeTest = ::testing::Test;
@@ -1250,37 +1250,37 @@ TEST_F(CloneContextTest, CloneNewSymbols_AfterCloneSymbols) {
     EXPECT_EQ(new_c.Name(), "c");
 }
 
-TEST_F(CloneContextTest, ProgramIDs) {
+TEST_F(CloneContextTest, GenerationIDs) {
     ProgramBuilder dst;
     Program src(ProgramBuilder{});
     CloneContext ctx(&dst, &src);
     Allocator allocator;
     auto* cloned = ctx.Clone(allocator.Create<ProgramNode>(src.ID(), dst.ID()));
-    EXPECT_EQ(cloned->program_id, dst.ID());
+    EXPECT_EQ(cloned->generation_id, dst.ID());
 }
 
-TEST_F(CloneContextTest, ProgramIDs_Clone_ObjectNotOwnedBySrc) {
+TEST_F(CloneContextTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder dst;
             Program src(ProgramBuilder{});
             CloneContext ctx(&dst, &src);
             Allocator allocator;
-            ctx.Clone(allocator.Create<ProgramNode>(ProgramID::New(), dst.ID()));
+            ctx.Clone(allocator.Create<ProgramNode>(GenerationID::New(), dst.ID()));
         },
-        R"(internal compiler error: TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object))");
+        R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, object))");
 }
 
-TEST_F(CloneContextTest, ProgramIDs_Clone_ObjectNotOwnedByDst) {
+TEST_F(CloneContextTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder dst;
             Program src(ProgramBuilder{});
             CloneContext ctx(&dst, &src);
             Allocator allocator;
-            ctx.Clone(allocator.Create<ProgramNode>(src.ID(), ProgramID::New()));
+            ctx.Clone(allocator.Create<ProgramNode>(src.ID(), GenerationID::New()));
         },
-        R"(internal compiler error: TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, out))");
+        R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, out))");
 }
 
 }  // namespace

@@ -54,7 +54,7 @@ TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
         "internal compiler error");
 }
 
-TEST_F(VariableDeclStatementTest, Assert_DifferentProgramID_Variable) {
+TEST_F(VariableDeclStatementTest, Assert_DifferentGenerationID_Variable) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

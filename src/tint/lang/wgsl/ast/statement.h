@@ -34,7 +34,7 @@ class Statement : public utils::Castable<Statement, Node> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of the expression
-    Statement(ProgramID pid, NodeID nid, const Source& src);
+    Statement(GenerationID pid, NodeID nid, const Source& src);
 };
 
 }  // namespace tint::ast

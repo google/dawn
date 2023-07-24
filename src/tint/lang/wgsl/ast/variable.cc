@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Variable);
 
 namespace tint::ast {
 
-Variable::Variable(ProgramID pid,
+Variable::Variable(GenerationID pid,
                    NodeID nid,
                    const Source& src,
                    const Identifier* n,
@@ -33,7 +33,7 @@ Variable::Variable(ProgramID pid,
     if (name) {
         TINT_ASSERT(AST, !name->Is<TemplatedIdentifier>());
     }
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, initializer, program_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, initializer, generation_id);
 }
 
 Variable::~Variable() = default;

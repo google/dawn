@@ -31,7 +31,7 @@ class Alias final : public utils::Castable<Alias, TypeDecl> {
     /// @param src the source of this node
     /// @param name the symbol for the alias
     /// @param subtype the alias'd type
-    Alias(ProgramID pid, NodeID nid, const Source& src, const Identifier* name, Type subtype);
+    Alias(GenerationID pid, NodeID nid, const Source& src, const Identifier* name, Type subtype);
 
     /// Destructor
     ~Alias() override;

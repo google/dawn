@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IntLiteralExpression);
 
 namespace tint::ast {
 
-IntLiteralExpression::IntLiteralExpression(ProgramID pid,
+IntLiteralExpression::IntLiteralExpression(GenerationID pid,
                                            NodeID nid,
                                            const Source& src,
                                            int64_t val,

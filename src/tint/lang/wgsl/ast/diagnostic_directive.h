@@ -36,7 +36,7 @@ class DiagnosticDirective final : public utils::Castable<DiagnosticDirective, No
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param dc the diagnostic control
-    DiagnosticDirective(ProgramID pid, NodeID nid, const Source& src, DiagnosticControl&& dc);
+    DiagnosticDirective(GenerationID pid, NodeID nid, const Source& src, DiagnosticControl&& dc);
 
     /// Destructor
     ~DiagnosticDirective() override;

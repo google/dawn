@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Extension);
 
 namespace tint::ast {
 
-Extension::Extension(ProgramID pid, NodeID nid, const Source& src, builtin::Extension ext)
+Extension::Extension(GenerationID pid, NodeID nid, const Source& src, builtin::Extension ext)
     : Base(pid, nid, src), name(ext) {}
 
 Extension::~Extension() = default;

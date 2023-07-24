@@ -18,8 +18,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Node);
 
 namespace tint::ast {
 
-Node::Node(ProgramID pid, NodeID nid, const Source& src)
-    : program_id(pid), node_id(nid), source(src) {}
+Node::Node(GenerationID pid, NodeID nid, const Source& src)
+    : generation_id(pid), node_id(nid), source(src) {}
 
 Node::~Node() = default;
 

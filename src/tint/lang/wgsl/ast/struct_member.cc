@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMember);
 
 namespace tint::ast {
 
-StructMember::StructMember(ProgramID pid,
+StructMember::StructMember(GenerationID pid,
                            NodeID nid,
                            const Source& src,
                            const Identifier* n,
@@ -35,7 +35,7 @@ StructMember::StructMember(ProgramID pid,
     TINT_ASSERT(AST, type);
     for (auto* attr : attributes) {
         TINT_ASSERT(AST, attr);
-        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
     }
 }
 

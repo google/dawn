@@ -22,7 +22,7 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/sem/info.h"
-#include "src/tint/program_id.h"
+#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/text/symbol_table.h"
 
 // Forward Declarations
@@ -64,7 +64,7 @@ class Program {
     Program& operator=(Program&& rhs);
 
     /// @returns the unique identifier for this program
-    ProgramID ID() const { return id_; }
+    GenerationID ID() const { return id_; }
 
     /// @returns the last allocated (numerically highest) AST node identifier.
     ast::NodeID HighestASTNodeID() const { return highest_node_id_; }
@@ -166,7 +166,7 @@ class Program {
     /// Asserts that the program has not been moved.
     void AssertNotMoved() const;
 
-    ProgramID id_;
+    GenerationID id_;
     ast::NodeID highest_node_id_;
     constant::Manager constants_;
     ASTNodeAllocator ast_nodes_;
@@ -180,8 +180,8 @@ class Program {
 };
 
 /// @param program the Program
-/// @returns the ProgramID of the Program
-inline ProgramID ProgramIDOf(const Program* program) {
+/// @returns the GenerationID of the Program
+inline GenerationID GenerationIDOf(const Program* program) {
     return program->ID();
 }
 

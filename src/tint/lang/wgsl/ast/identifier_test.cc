@@ -48,7 +48,7 @@ TEST_F(IdentifierTest, Assert_InvalidSymbol) {
         "internal compiler error");
 }
 
-TEST_F(IdentifierTest, Assert_DifferentProgramID_Symbol) {
+TEST_F(IdentifierTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

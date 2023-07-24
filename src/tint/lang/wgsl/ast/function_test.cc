@@ -129,7 +129,7 @@ TEST_F(FunctionTest, Assert_NullParam) {
         "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_DifferentProgramID_Symbol) {
+TEST_F(FunctionTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -139,7 +139,7 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_Symbol) {
         "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_DifferentProgramID_Param) {
+TEST_F(FunctionTest, Assert_DifferentGenerationID_Param) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -153,7 +153,7 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_Param) {
         "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_DifferentProgramID_Attr) {
+TEST_F(FunctionTest, Assert_DifferentGenerationID_Attr) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -166,7 +166,7 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_Attr) {
         "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnType) {
+TEST_F(FunctionTest, Assert_DifferentGenerationID_ReturnType) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -176,7 +176,7 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnType) {
         "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnAttr) {
+TEST_F(FunctionTest, Assert_DifferentGenerationID_ReturnAttr) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

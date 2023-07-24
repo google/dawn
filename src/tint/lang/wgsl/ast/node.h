@@ -28,7 +28,7 @@ class Node : public utils::Castable<Node, Cloneable> {
     ~Node() override;
 
     /// The identifier of the program that owns this node
-    const ProgramID program_id;
+    const GenerationID generation_id;
 
     /// The node identifier, unique for the program.
     const NodeID node_id;
@@ -41,7 +41,7 @@ class Node : public utils::Castable<Node, Cloneable> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the input source for the node
-    Node(ProgramID pid, NodeID nid, const Source& src);
+    Node(GenerationID pid, NodeID nid, const Source& src);
 
   private:
     Node(const Node&) = delete;
@@ -53,9 +53,9 @@ class Node : public utils::Castable<Node, Cloneable> {
 namespace tint {
 
 /// @param node a pointer to an AST node
-/// @returns the ProgramID of the given AST node.
-inline ProgramID ProgramIDOf(const ast::Node* node) {
-    return node ? node->program_id : ProgramID();
+/// @returns the GenerationID of the given AST node.
+inline GenerationID GenerationIDOf(const ast::Node* node) {
+    return node ? node->generation_id : GenerationID();
 }
 
 }  // namespace tint

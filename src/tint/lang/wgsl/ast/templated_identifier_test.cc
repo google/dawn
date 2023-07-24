@@ -60,7 +60,7 @@ TEST_F(TemplatedIdentifierTest, Assert_InvalidSymbol) {
         "internal compiler error");
 }
 
-TEST_F(TemplatedIdentifierTest, Assert_DifferentProgramID_Symbol) {
+TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -70,7 +70,7 @@ TEST_F(TemplatedIdentifierTest, Assert_DifferentProgramID_Symbol) {
         "internal compiler error");
 }
 
-TEST_F(TemplatedIdentifierTest, Assert_DifferentProgramID_TemplateArg) {
+TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_TemplateArg) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

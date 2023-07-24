@@ -35,7 +35,7 @@ class TemplatedIdentifier final : public utils::Castable<TemplatedIdentifier, Id
     /// @param sym the symbol for the identifier
     /// @param args the template arguments
     /// @param attrs the identifier attributes
-    TemplatedIdentifier(ProgramID pid,
+    TemplatedIdentifier(GenerationID pid,
                         NodeID nid,
                         const Source& src,
                         const Symbol& sym,

@@ -29,7 +29,7 @@ class AssignmentStatement final : public utils::Castable<AssignmentStatement, St
     /// @param source the assignment statement source
     /// @param lhs the left side of the expression
     /// @param rhs the right side of the expression
-    AssignmentStatement(ProgramID pid,
+    AssignmentStatement(GenerationID pid,
                         NodeID nid,
                         const Source& source,
                         const Expression* lhs,

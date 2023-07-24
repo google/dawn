@@ -52,7 +52,7 @@ TEST_F(ReturnStatementTest, WithValue) {
     EXPECT_NE(r->value, nullptr);
 }
 
-TEST_F(ReturnStatementTest, Assert_DifferentProgramID_Expr) {
+TEST_F(ReturnStatementTest, Assert_DifferentGenerationID_Expr) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

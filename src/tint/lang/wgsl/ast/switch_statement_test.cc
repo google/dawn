@@ -98,7 +98,7 @@ TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
         "internal compiler error");
 }
 
-TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
+TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_Condition) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;
@@ -116,7 +116,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
         "internal compiler error");
 }
 
-TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
+TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_CaseStatement) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

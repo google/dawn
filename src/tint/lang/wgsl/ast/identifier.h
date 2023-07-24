@@ -27,7 +27,7 @@ class Identifier : public utils::Castable<Identifier, Node> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param sym the symbol for the identifier
-    Identifier(ProgramID pid, NodeID nid, const Source& src, Symbol sym);
+    Identifier(GenerationID pid, NodeID nid, const Source& src, Symbol sym);
 
     /// Destructor
     ~Identifier() override;

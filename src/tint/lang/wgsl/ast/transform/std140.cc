@@ -328,7 +328,7 @@ struct Std140::State {
                 if (fork_std140) {
                     // Clone any members that have not already been cloned.
                     for (auto& member : members) {
-                        if (member->program_id == src->ID()) {
+                        if (member->generation_id == src->ID()) {
                             member = ctx.Clone(member);
                         }
                     }
