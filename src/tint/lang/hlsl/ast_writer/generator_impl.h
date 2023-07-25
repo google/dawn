@@ -23,24 +23,13 @@
 
 #include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
-#include "src/tint/lang/wgsl/ast/assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
-#include "src/tint/lang/wgsl/ast/break_statement.h"
-#include "src/tint/lang/wgsl/ast/continue_statement.h"
-#include "src/tint/lang/wgsl/ast/discard_statement.h"
-#include "src/tint/lang/wgsl/ast/for_loop_statement.h"
-#include "src/tint/lang/wgsl/ast/if_statement.h"
-#include "src/tint/lang/wgsl/ast/loop_statement.h"
-#include "src/tint/lang/wgsl/ast/return_statement.h"
-#include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
-#include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/text/text_generator.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
-#include "src/tint/writer/ast_text_generator.h"
 
 // Forward declarations
 namespace tint::sem {
@@ -75,7 +64,7 @@ struct SanitizedResult {
 SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Implementation class for HLSL generator
-class GeneratorImpl : public ASTTextGenerator {
+class GeneratorImpl : public utils::TextGenerator {
   public:
     /// Constructor
     /// @param program the program to generate
@@ -565,6 +554,16 @@ class GeneratorImpl : public ASTTextGenerator {
                            const sem::Builtin* builtin,
                            F&& build);
 
+    /// @copydoc utils::TextWrtiter::UniqueIdentifier
+    std::string UniqueIdentifier(const std::string& prefix = "") override;
+
+    /// Alias for builder_.TypeOf(ptr)
+    template <typename T>
+    auto TypeOf(T* ptr) {
+        return builder_.TypeOf(ptr);
+    }
+
+    ProgramBuilder builder_;
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
     std::function<bool()> emit_continuing_;
     std::unordered_map<const type::Matrix*, std::string> matrix_scalar_inits_;

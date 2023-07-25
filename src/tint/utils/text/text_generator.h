@@ -24,7 +24,7 @@
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::writer {
+namespace tint::utils {
 
 /// Helper methods for generators which are creating text output
 class TextGenerator {
@@ -134,7 +134,9 @@ class TextGenerator {
     /// @return a new, unique identifier with the given prefix.
     /// @param prefix optional prefix to apply to the generated identifier. If
     /// empty "tint_symbol" will be used.
-    virtual std::string UniqueIdentifier(const std::string& prefix = "") = 0;
+    /// TODO(crbug.com/tint/1992): The printers should not be creating new symbols. This should be
+    /// done as part of the IR-raise process. Remove once all writers have been moved to IR.
+    virtual std::string UniqueIdentifier(const std::string& prefix = "");
 
     /// @param s the structure
     /// @returns the name of the structure, taking special care of builtin structures that start
@@ -201,6 +203,6 @@ class TextGenerator {
     std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
 };
 
-}  // namespace tint::writer
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_TEXT_TEXT_GENERATOR_H_

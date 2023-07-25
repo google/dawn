@@ -22,25 +22,12 @@
 #include <utility>
 
 #include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/glsl/ast_writer/generator.h"
 #include "src/tint/lang/glsl/ast_writer/version.h"
-#include "src/tint/lang/wgsl/ast/assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
-#include "src/tint/lang/wgsl/ast/break_statement.h"
-#include "src/tint/lang/wgsl/ast/continue_statement.h"
-#include "src/tint/lang/wgsl/ast/discard_statement.h"
-#include "src/tint/lang/wgsl/ast/for_loop_statement.h"
-#include "src/tint/lang/wgsl/ast/if_statement.h"
-#include "src/tint/lang/wgsl/ast/loop_statement.h"
-#include "src/tint/lang/wgsl/ast/return_statement.h"
-#include "src/tint/lang/wgsl/ast/switch_statement.h"
-#include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
-#include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/writer/ast_text_generator.h"
+#include "src/tint/utils/text/text_generator.h"
 
 // Forward declarations
 namespace tint::sem {
@@ -49,6 +36,9 @@ class Call;
 class ValueConstructor;
 class ValueConversion;
 }  // namespace tint::sem
+namespace tint::writer::glsl {
+struct Options;
+}
 
 namespace tint::writer::glsl {
 
@@ -75,7 +65,7 @@ SanitizedResult Sanitize(const Program* program,
                          const std::string& entry_point);
 
 /// Implementation class for GLSL generator
-class GeneratorImpl : public ASTTextGenerator {
+class GeneratorImpl : public utils::TextGenerator {
   public:
     /// Constructor
     /// @param program the program to generate
@@ -454,6 +444,16 @@ class GeneratorImpl : public ASTTextGenerator {
     /// @returns the corresponding uint type
     type::Type* BoolTypeToUint(const type::Type* type);
 
+    /// @copydoc utils::TextWrtiter::UniqueIdentifier
+    std::string UniqueIdentifier(const std::string& prefix = "") override;
+
+    /// Alias for builder_.TypeOf(ptr)
+    template <typename T>
+    auto TypeOf(T* ptr) {
+        return builder_.TypeOf(ptr);
+    }
+
+    ProgramBuilder builder_;
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
     std::function<void()> emit_continuing_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;

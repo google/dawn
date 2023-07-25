@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/glsl/ast_writer/options.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
@@ -65,6 +66,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/helpers/append_vector.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
+#include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
@@ -254,7 +256,7 @@ SanitizedResult Sanitize(const Program* in,
 }
 
 GeneratorImpl::GeneratorImpl(const Program* program, const Version& version)
-    : ASTTextGenerator(program), version_(version) {}
+    : builder_(ProgramBuilder::Wrap(program)), version_(version) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -2044,7 +2046,7 @@ void GeneratorImpl::EmitIOVariable(const sem::GlobalVariable* var) {
     auto* decl = var->Declaration();
 
     if (auto* attr = ast::GetAttribute<ast::BuiltinAttribute>(decl->attributes)) {
-        auto builtin = program_->Sem().Get(attr)->Value();
+        auto builtin = builder_.Sem().Get(attr)->Value();
         // Use of gl_SampleID requires the GL_OES_sample_variables extension
         if (RequiresOESSampleVariables(builtin)) {
             requires_oes_sample_variables_ = true;
@@ -2073,7 +2075,7 @@ void GeneratorImpl::EmitInterpolationQualifiers(
     utils::VectorRef<const ast::Attribute*> attributes) {
     for (auto* attr : attributes) {
         if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
-            auto& sem = program_->Sem();
+            auto& sem = builder_.Sem();
             auto i_type =
                 sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationType>>(interpolate->type)
                     ->Value();
@@ -2962,6 +2964,10 @@ type::Type* GeneratorImpl::BoolTypeToUint(const type::Type* type) {
     } else {
         return nullptr;
     }
+}
+
+std::string GeneratorImpl::UniqueIdentifier(const std::string& prefix /* = "" */) {
+    return builder_.Symbols().New(prefix).Name();
 }
 
 }  // namespace tint::writer::glsl

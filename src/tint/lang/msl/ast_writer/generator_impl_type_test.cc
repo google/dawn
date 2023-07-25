@@ -244,7 +244,7 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
@@ -291,7 +291,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
@@ -400,7 +400,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
@@ -492,7 +492,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
@@ -576,7 +576,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
@@ -638,7 +638,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
@@ -697,7 +697,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {

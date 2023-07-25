@@ -23,7 +23,7 @@
 namespace tint::writer {
 
 /// Helper methods for generators which are creating text output
-class IRTextGenerator : public TextGenerator {
+class IRTextGenerator : public utils::TextGenerator {
   public:
     /// Constructor
     /// @param mod the IR module used by the generator

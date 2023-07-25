@@ -20,7 +20,9 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/glsl/ast_writer/generator.h"
 #include "src/tint/lang/glsl/ast_writer/generator_impl.h"
+#include "src/tint/lang/glsl/ast_writer/version.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 
 namespace tint::writer::glsl {

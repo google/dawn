@@ -4185,7 +4185,7 @@ struct tint_packed_vec3_f32_array_element {
 struct S_tint_packed_vec3 {
   a : u32,
   @size(28)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(32) */
   v : __packed_vec3<f32>,
   b : u32,
@@ -4198,12 +4198,12 @@ struct S_tint_packed_vec3 {
 struct S {
   a : u32,
   @size(16)
-  padding_2 : u32,
+  padding_0 : u32,
   /* @offset(32) */
   v : vec3<f32>,
   b : u32,
   @size(80)
-  padding_3 : u32,
+  padding_1 : u32,
   /* @offset(128) */
   arr : array<vec3<f32>, 4>,
 }

@@ -90,7 +90,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
     auto* expect = R"(
 struct S {
   @size(16)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(16) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
@@ -148,7 +148,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
     auto* expect = R"(
 struct S {
   @size(16)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(16) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
@@ -201,7 +201,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
     auto* expect = R"(
 struct S {
   @size(16)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(16u) */
   @stride(8) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>,
@@ -256,7 +256,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
     auto* expect = R"(
 struct S {
   @size(8)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(8) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
@@ -315,7 +315,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
     auto* expect = R"(
 struct S {
   @size(16)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(16) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
@@ -371,7 +371,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
     auto* expect = R"(
 struct S {
   @size(8)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(8) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
@@ -430,7 +430,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
     auto* expect = R"(
 struct S {
   @size(8)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(8) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
@@ -497,7 +497,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
     auto* expect = R"(
 struct S {
   @size(8)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(8) */
   m : @stride(32) array<vec2<f32>, 2u>,
 }
@@ -562,7 +562,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
     auto* expect = R"(
 struct S {
   @size(8)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(8u) */
   @stride(32) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>,
@@ -618,7 +618,7 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
     auto* expect = R"(
 struct S {
   @size(8)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(8u) */
   @stride(32) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>,

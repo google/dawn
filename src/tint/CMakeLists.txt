@@ -572,8 +572,6 @@ list(APPEND TINT_LIB_SRCS
   utils/traits/traits.h
   writer/array_length_from_uniform_options.cc
   writer/array_length_from_uniform_options.h
-  writer/ast_text_generator.cc
-  writer/ast_text_generator.h
   writer/binding_point.h
   writer/binding_remapper_options.cc
   writer/binding_remapper_options.h
@@ -726,6 +724,7 @@ if(${TINT_BUILD_GLSL_WRITER})
     lang/glsl/ast_writer/generator.h
     lang/glsl/ast_writer/generator_impl.cc
     lang/glsl/ast_writer/generator_impl.h
+    lang/glsl/ast_writer/options.h
     lang/glsl/ast_writer/version.h
   )
 endif()
@@ -1156,7 +1155,6 @@ if(TINT_BUILD_TESTS)
     utils/text/symbol_test.cc
     utils/text/unicode_test.cc
     utils/traits/traits_test.cc
-    writer/ast_text_generator_test.cc
   )
 
   # Noet, the source files are included here otherwise the cmd sources would not be included in the

@@ -328,12 +328,12 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     return result;
 }
 
-GeneratorImpl::GeneratorImpl(const Program* program) : ASTTextGenerator(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : builder_(ProgramBuilder::Wrap(program)) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-    if (!CheckSupportedExtensions("HLSL", program_->AST(), diagnostics_,
+    if (!CheckSupportedExtensions("HLSL", builder_.AST(), diagnostics_,
                                   utils::Vector{
                                       builtin::Extension::kChromiumDisableUniformityAnalysis,
                                       builtin::Extension::kChromiumExperimentalDp4A,
@@ -4611,6 +4611,10 @@ bool GeneratorImpl::CallBuiltinHelper(utils::StringStream& out,
         }
     }
     return true;
+}
+
+std::string GeneratorImpl::UniqueIdentifier(const std::string& prefix /* = "" */) {
+    return builder_.Symbols().New(prefix).Name();
 }
 
 }  // namespace tint::writer::hlsl

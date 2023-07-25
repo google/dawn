@@ -36,12 +36,12 @@
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/writer/ast_text_generator.h"
+#include "src/tint/utils/text/text_generator.h"
 
 namespace tint::writer::syntax_tree {
 
 /// Implementation class for AST generator
-class GeneratorImpl : public ASTTextGenerator {
+class GeneratorImpl : public utils::TextGenerator {
   public:
     /// Constructor
     /// @param program the program
@@ -168,6 +168,9 @@ class GeneratorImpl : public ASTTextGenerator {
     /// Handles generating a attribute list
     /// @param attrs the attribute list
     void EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs);
+
+  private:
+    Program const* const program_;
 };
 
 }  // namespace tint::writer::syntax_tree

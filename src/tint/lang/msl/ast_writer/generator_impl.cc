@@ -232,12 +232,12 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     return result;
 }
 
-GeneratorImpl::GeneratorImpl(const Program* program) : ASTTextGenerator(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : builder_(ProgramBuilder::Wrap(program)) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-    if (!CheckSupportedExtensions("MSL", program_->AST(), diagnostics_,
+    if (!CheckSupportedExtensions("MSL", builder_.AST(), diagnostics_,
                                   utils::Vector{
                                       builtin::Extension::kChromiumDisableUniformityAnalysis,
                                       builtin::Extension::kChromiumExperimentalFullPtrParameters,
@@ -606,7 +606,7 @@ bool GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
 }
 
 bool GeneratorImpl::EmitCall(utils::StringStream& out, const ast::CallExpression* expr) {
-    auto* call = program_->Sem().Get<sem::Call>(expr);
+    auto* call = builder_.Sem().Get<sem::Call>(expr);
     auto* target = call->Target();
     return Switch(
         target, [&](const sem::Function* func) { return EmitFunctionCall(out, call, func); },
@@ -1833,7 +1833,7 @@ void GeneratorImpl::EmitStage(utils::StringStream& out, ast::PipelineStage stage
 }
 
 bool GeneratorImpl::EmitFunction(const ast::Function* func) {
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = builder_.Sem().Get(func);
 
     {
         auto out = Line();
@@ -1849,7 +1849,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             }
             first = false;
 
-            auto* type = program_->Sem().Get(v)->Type();
+            auto* type = builder_.Sem().Get(v)->Type();
 
             if (!EmitType(out, type)) {
                 return false;
@@ -1886,7 +1886,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                 << "missing binding attributes for entry point parameter";
             return kInvalidBindingIndex;
         }
-        auto* param_sem = program_->Sem().Get<sem::Parameter>(param);
+        auto* param_sem = builder_.Sem().Get<sem::Parameter>(param);
         auto bp = param_sem->BindingPoint();
         if (TINT_UNLIKELY(bp->group != 0)) {
             TINT_ICE(Writer, diagnostics_) << "encountered non-zero resource group index (use "
@@ -1914,7 +1914,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
             }
             first = false;
 
-            auto* type = program_->Sem().Get(param)->Type()->UnwrapRef();
+            auto* type = builder_.Sem().Get(param)->Type()->UnwrapRef();
 
             if (!EmitType(out, type)) {
                 return false;
@@ -1977,7 +1977,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                         if (!builtin_attr) {
                             continue;
                         }
-                        auto builtin = program_->Sem().Get(builtin_attr)->Value();
+                        auto builtin = builder_.Sem().Get(builtin_attr)->Value();
 
                         builtin_found = true;
 
@@ -2687,7 +2687,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const type::Struct* str) {
         std::string name;
         do {
             name = UniqueIdentifier("tint_pad");
-        } while (str->FindMember(program_->Symbols().Get(name)));
+        } while (str->FindMember(builder_.Symbols().Get(name)));
 
         auto out = Line(b);
         add_byte_offset_comment(out, msl_offset);
@@ -2877,7 +2877,7 @@ bool GeneratorImpl::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpr
 }
 
 bool GeneratorImpl::EmitVar(const ast::Var* var) {
-    auto* sem = program_->Sem().Get(var);
+    auto* sem = builder_.Sem().Get(var);
     auto* type = sem->Type()->UnwrapRef();
 
     auto out = Line();
@@ -2921,7 +2921,7 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
 }
 
 bool GeneratorImpl::EmitLet(const ast::Let* let) {
-    auto* sem = program_->Sem().Get(let);
+    auto* sem = builder_.Sem().Get(let);
     auto* type = sem->Type();
 
     auto out = Line();
@@ -3040,6 +3040,10 @@ const std::string& GeneratorImpl::ArrayType() {
         Line(buf);
     }
     return array_template_name_;
+}
+
+std::string GeneratorImpl::UniqueIdentifier(const std::string& prefix /* = "" */) {
+    return builder_.Symbols().New(prefix).Name();
 }
 
 }  // namespace tint::writer::msl

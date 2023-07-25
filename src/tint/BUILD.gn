@@ -982,8 +982,6 @@ libtint_source_set("libtint_writer_src") {
     "utils/text/text_generator.h",
     "writer/array_length_from_uniform_options.cc",
     "writer/array_length_from_uniform_options.h",
-    "writer/ast_text_generator.cc",
-    "writer/ast_text_generator.h",
     "writer/binding_point.h",
     "writer/binding_remapper_options.cc",
     "writer/binding_remapper_options.h",
@@ -1175,6 +1173,8 @@ libtint_source_set("libtint_glsl_writer_src") {
     "lang/glsl/ast_writer/generator.h",
     "lang/glsl/ast_writer/generator_impl.cc",
     "lang/glsl/ast_writer/generator_impl.h",
+    "lang/glsl/ast_writer/options.h",
+    "lang/glsl/ast_writer/version.h",
   ]
 
   deps = [
@@ -1934,7 +1934,6 @@ if (tint_build_unittests) {
       "lang/wgsl/helpers/check_supported_extensions_test.cc",
       "lang/wgsl/helpers/flatten_bindings_test.cc",
       "utils/text/float_to_string_test.cc",
-      "writer/ast_text_generator_test.cc",
     ]
     deps = [
       ":libtint_unittests_ast_helper",

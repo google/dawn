@@ -170,7 +170,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
@@ -237,7 +237,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {

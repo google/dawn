@@ -195,7 +195,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(struct S {
   @size(8)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(8) */
   a : i32,
   @size(4)
@@ -219,7 +219,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(gen.Result(), R"(struct S {
   @size(8)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(8) */
   tint_0_padding : i32,
   @size(4)

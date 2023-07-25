@@ -16,22 +16,57 @@
 
 #include <algorithm>
 
+#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/wgsl/ast/accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
+#include "src/tint/lang/wgsl/ast/assignment_statement.h"
+#include "src/tint/lang/wgsl/ast/binary_expression.h"
+#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
+#include "src/tint/lang/wgsl/ast/break_if_statement.h"
+#include "src/tint/lang/wgsl/ast/break_statement.h"
+#include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
+#include "src/tint/lang/wgsl/ast/const.h"
+#include "src/tint/lang/wgsl/ast/continue_statement.h"
+#include "src/tint/lang/wgsl/ast/diagnostic_attribute.h"
+#include "src/tint/lang/wgsl/ast/diagnostic_rule_name.h"
+#include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/float_literal_expression.h"
+#include "src/tint/lang/wgsl/ast/for_loop_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
+#include "src/tint/lang/wgsl/ast/identifier.h"
+#include "src/tint/lang/wgsl/ast/identifier_expression.h"
+#include "src/tint/lang/wgsl/ast/if_statement.h"
+#include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
+#include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/ast/index_attribute.h"
+#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
+#include "src/tint/lang/wgsl/ast/let.h"
+#include "src/tint/lang/wgsl/ast/loop_statement.h"
+#include "src/tint/lang/wgsl/ast/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/ast/must_use_attribute.h"
+#include "src/tint/lang/wgsl/ast/override.h"
+#include "src/tint/lang/wgsl/ast/phony_expression.h"
+#include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/stride_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_offset_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
+#include "src/tint/lang/wgsl/ast/switch_statement.h"
+#include "src/tint/lang/wgsl/ast/templated_identifier.h"
+#include "src/tint/lang/wgsl/ast/unary_op_expression.h"
+#include "src/tint/lang/wgsl/ast/var.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
+#include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/switch_statement.h"
 #include "src/tint/utils/macros/defer.h"
@@ -39,10 +74,11 @@
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/float_to_string.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::writer::wgsl {
 
-GeneratorImpl::GeneratorImpl(const Program* program) : ASTTextGenerator(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : program_(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -298,12 +334,26 @@ void GeneratorImpl::EmitStructType(const ast::Struct* str) {
     }
     Line() << "struct " << str->name->symbol.Name() << " {";
 
+    utils::Hashset<std::string_view, 8> member_names;
+    for (auto* mem : str->members) {
+        member_names.Add(mem->name->symbol.NameView());
+    }
+    size_t padding_idx = 0;
+    auto new_padding_name = [&] {
+        while (true) {
+            auto name = "padding_" + utils::ToString(padding_idx++);
+            if (member_names.Add(name)) {
+                return name;
+            }
+        }
+    };
+
     auto add_padding = [&](uint32_t size) {
         Line() << "@size(" << size << ")";
 
         // Note: u32 is the smallest primitive we currently support. When WGSL
         // supports smaller types, this will need to be updated.
-        Line() << UniqueIdentifier("padding") << " : u32,";
+        Line() << new_padding_name() << " : u32,";
     };
 
     IncrementIndent();

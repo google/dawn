@@ -23,29 +23,13 @@
 
 #include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/msl/ast_writer/generator.h"
-#include "src/tint/lang/wgsl/ast/assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
-#include "src/tint/lang/wgsl/ast/break_statement.h"
-#include "src/tint/lang/wgsl/ast/continue_statement.h"
-#include "src/tint/lang/wgsl/ast/discard_statement.h"
-#include "src/tint/lang/wgsl/ast/expression.h"
-#include "src/tint/lang/wgsl/ast/if_statement.h"
-#include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
-#include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
-#include "src/tint/lang/wgsl/ast/loop_statement.h"
-#include "src/tint/lang/wgsl/ast/member_accessor_expression.h"
-#include "src/tint/lang/wgsl/ast/return_statement.h"
-#include "src/tint/lang/wgsl/ast/switch_statement.h"
-#include "src/tint/lang/wgsl/ast/unary_op_expression.h"
-#include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/text_generator.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
-#include "src/tint/writer/ast_text_generator.h"
 
-// Forward declarations
 namespace tint::sem {
 class Builtin;
 class Call;
@@ -80,7 +64,7 @@ struct SanitizedResult {
 SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Implementation class for MSL generator
-class GeneratorImpl : public ASTTextGenerator {
+class GeneratorImpl : public utils::TextGenerator {
   public:
     /// Constructor
     /// @param program the program to generate
@@ -383,6 +367,17 @@ class GeneratorImpl : public ASTTextGenerator {
     /// @returns the name of the templated tint_array helper type, generating it if this is the
     /// first call.
     const std::string& ArrayType();
+
+    /// @copydoc utils::TextWrtiter::UniqueIdentifier
+    std::string UniqueIdentifier(const std::string& prefix = "") override;
+
+    /// Alias for builder_.TypeOf(ptr)
+    template <typename T>
+    auto TypeOf(T* ptr) {
+        return builder_.TypeOf(ptr);
+    }
+
+    ProgramBuilder builder_;
 
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
 

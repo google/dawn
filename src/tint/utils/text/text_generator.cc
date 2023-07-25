@@ -20,11 +20,16 @@
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/debug/debug.h"
 
-namespace tint::writer {
+namespace tint::utils {
 
 TextGenerator::TextGenerator() = default;
 
 TextGenerator::~TextGenerator() = default;
+
+std::string TextGenerator::UniqueIdentifier(const std::string& /* = "" */) {
+    TINT_UNIMPLEMENTED(Utils, diagnostics_) << "UniqueIdentifier() not overridden";
+    return "<error>";
+}
 
 std::string TextGenerator::StructName(const type::Struct* s) {
     auto name = s->Name().Name();
@@ -132,4 +137,4 @@ TextGenerator::ScopedIndent::~ScopedIndent() {
     buffer_->DecrementIndent();
 }
 
-}  // namespace tint::writer
+}  // namespace tint::utils

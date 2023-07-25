@@ -1,6 +1,6 @@
 struct UniformBuffer {
   @size(16)
-  padding : u32,
+  padding_0 : u32,
   /* @offset(16) */
   unknownInput_S1_c0 : f32,
   /* @offset(32) */

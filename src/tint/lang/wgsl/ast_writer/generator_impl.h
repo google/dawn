@@ -17,31 +17,59 @@
 
 #include <string>
 
-#include "src/tint/lang/wgsl/ast/assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/ast/bitcast_expression.h"
-#include "src/tint/lang/wgsl/ast/break_if_statement.h"
-#include "src/tint/lang/wgsl/ast/break_statement.h"
-#include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
-#include "src/tint/lang/wgsl/ast/continue_statement.h"
-#include "src/tint/lang/wgsl/ast/discard_statement.h"
-#include "src/tint/lang/wgsl/ast/for_loop_statement.h"
-#include "src/tint/lang/wgsl/ast/if_statement.h"
-#include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
-#include "src/tint/lang/wgsl/ast/loop_statement.h"
-#include "src/tint/lang/wgsl/ast/member_accessor_expression.h"
-#include "src/tint/lang/wgsl/ast/return_statement.h"
-#include "src/tint/lang/wgsl/ast/switch_statement.h"
-#include "src/tint/lang/wgsl/ast/unary_op_expression.h"
-#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/writer/ast_text_generator.h"
+#include "src/tint/utils/text/text_generator.h"
+
+// Forward declarations
+namespace tint::ast {
+class AssignmentStatement;
+class Attribute;
+class BinaryExpression;
+enum class BinaryOp;
+class BitcastExpression;
+class BlockStatement;
+class BlockStatement;
+class BreakIfStatement;
+class BreakStatement;
+class CallExpression;
+class CaseStatement;
+class CompoundAssignmentStatement;
+class ConstAssert;
+class ContinueStatement;
+struct DiagnosticControl;
+class DiscardStatement;
+class Enable;
+class Expression;
+class ForLoopStatement;
+class Function;
+class Identifier;
+class IdentifierExpression;
+class IfStatement;
+class IncrementDecrementStatement;
+class IndexAccessorExpression;
+class LiteralExpression;
+class LoopStatement;
+class MemberAccessorExpression;
+class ReturnStatement;
+class Statement;
+class Statement;
+class Statement;
+class Struct;
+class SwitchStatement;
+class TypeDecl;
+class UnaryOpExpression;
+class Variable;
+class WhileStatement;
+}  // namespace tint::ast
+namespace tint::builtin {
+enum class TexelFormat;
+}  // namespace tint::builtin
 
 namespace tint::writer::wgsl {
 
 /// Implementation class for WGSL generator
-class GeneratorImpl : public ASTTextGenerator {
+class GeneratorImpl : public utils::TextGenerator {
   public:
     /// Constructor
     /// @param program the program
@@ -184,6 +212,9 @@ class GeneratorImpl : public ASTTextGenerator {
     /// @param out the output stream
     /// @param attrs the attribute list
     void EmitAttributes(utils::StringStream& out, utils::VectorRef<const ast::Attribute*> attrs);
+
+  private:
+    Program const* const program_;
 };
 
 }  // namespace tint::writer::wgsl

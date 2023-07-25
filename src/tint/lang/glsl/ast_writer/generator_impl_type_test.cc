@@ -169,7 +169,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     gen.EmitStructType(&buf, str);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -223,7 +223,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
 
     GeneratorImpl& gen = Build();
 
-    TextGenerator::TextBuffer buf;
+    utils::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     gen.EmitStructType(&buf, str);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
