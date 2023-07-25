@@ -133,7 +133,8 @@ ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
 }
 
 uint64_t GetInitialResourcePlacementAlignment(
-    const D3D12_RESOURCE_DESC& requestedResourceDescriptor) {
+    const D3D12_RESOURCE_DESC& requestedResourceDescriptor,
+    Device* device) {
     switch (requestedResourceDescriptor.Dimension) {
         case D3D12_RESOURCE_DIMENSION_BUFFER:
             return requestedResourceDescriptor.Alignment;
@@ -147,10 +148,14 @@ uint64_t GetInitialResourcePlacementAlignment(
         case D3D12_RESOURCE_DIMENSION_TEXTURE3D: {
             if (requestedResourceDescriptor.Alignment > 0) {
                 return requestedResourceDescriptor.Alignment;
-            } else {
-                return requestedResourceDescriptor.SampleDesc.Count > 1
+            }
+
+            if (requestedResourceDescriptor.SampleDesc.Count > 1) {
+                return device->IsToggleEnabled(Toggle::D3D12Use64KBAlignedMSAATexture)
                            ? D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT
-                           : D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT;
+                           : D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT;
+            } else {
+                return D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT;
             }
         }
         case D3D12_RESOURCE_DIMENSION_UNKNOWN:
@@ -462,7 +467,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreatePlacedReso
 
     D3D12_RESOURCE_DESC resourceDescriptor = requestedResourceDescriptor;
     resourceDescriptor.Alignment =
-        GetInitialResourcePlacementAlignment(requestedResourceDescriptor);
+        GetInitialResourcePlacementAlignment(requestedResourceDescriptor, mDevice);
 
     // When you're using CreatePlacedResource, your application must use GetResourceAllocationInfo
     // in order to understand the size and alignment characteristics of texture resources.
@@ -565,9 +570,14 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreateCommittedR
     // Note: Heap flags are inferred by the resource descriptor and do not need to be explicitly
     // provided to CreateCommittedResource.
     ComPtr<ID3D12Resource> committedResource;
+    D3D12_RESOURCE_DESC appliedResourceDescriptor = resourceDescriptor;
+    if (resourceDescriptor.SampleDesc.Count > 1 &&
+        mDevice->IsToggleEnabled(Toggle::D3D12Use64KBAlignedMSAATexture)) {
+        appliedResourceDescriptor.Alignment = D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT;
+    }
     DAWN_TRY(CheckOutOfMemoryHRESULT(
         mDevice->GetD3D12Device()->CreateCommittedResource(
-            &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDescriptor, initialUsage,
+            &heapProperties, D3D12_HEAP_FLAG_NONE, &appliedResourceDescriptor, initialUsage,
             optimizedClearValue, IID_PPV_ARGS(&committedResource)),
         "ID3D12Device::CreateCommittedResource"));
 

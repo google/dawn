@@ -43,7 +43,7 @@ class D3D12ResourceHeapTests : public DawnTest {
     bool mIsBCFormatSupported = false;
 };
 
-// Verify that creating a small compressed textures will be 4KB aligned.
+// Verify that creating a small compressed texture will be 4KB aligned.
 TEST_P(D3D12ResourceHeapTests, AlignSmallCompressedTexture) {
     DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
@@ -101,7 +101,41 @@ TEST_P(D3D12ResourceHeapTests, AlignUBO) {
               0u);
 }
 
-DAWN_INSTANTIATE_TEST(D3D12ResourceHeapTests, D3D12Backend());
+// Verify the MSAA textures are 64KB alignment if the alignment is supported for MSAA textures on
+// the current platform. Otherwise it will be 4MB.
+TEST_P(D3D12ResourceHeapTests, MSAATexture) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size.width = 8;
+    descriptor.size.height = 8;
+    descriptor.size.depthOrArrayLayers = 1;
+    descriptor.sampleCount = 4;
+    descriptor.format = wgpu::TextureFormat::RGBA16Float;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+
+    // Create a smaller MSAA texture
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+    Texture* d3dTexture = reinterpret_cast<Texture*>(texture.Get());
+
+    uint64_t expectedAlignment = HasToggleEnabled("d3d12_use_64kb_alignment_msaa_texture")
+                                     ? D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT
+                                     : D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT;
+    EXPECT_EQ(d3dTexture->GetD3D12Resource()->GetDesc().Alignment, expectedAlignment);
+
+    // Create a larger MSAA texture. Currently it will be created as a committed resource in Dawn.
+    descriptor.size.width = 4096;
+    descriptor.size.height = 4096;
+
+    texture = device.CreateTexture(&descriptor);
+    d3dTexture = reinterpret_cast<Texture*>(texture.Get());
+
+    EXPECT_EQ(d3dTexture->GetD3D12Resource()->GetDesc().Alignment, expectedAlignment);
+}
+
+DAWN_INSTANTIATE_TEST(D3D12ResourceHeapTests,
+                      D3D12Backend(),
+                      D3D12Backend({}, {"d3d12_use_64kb_alignment_msaa_texture"}));
 
 }  // anonymous namespace
 }  // namespace dawn::native::d3d12

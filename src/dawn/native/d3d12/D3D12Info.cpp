@@ -68,6 +68,10 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
             D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1) {
             info.supportsSharedResourceCapabilityTier1 = true;
         }
+
+        // featureOptions4.MSAA64KBAlignedTextureSupported indicates whether 64KB-aligned MSAA
+        // textures are supported.
+        info.use64KBAlignedMSAATexture = featureOptions4.MSAA64KBAlignedTextureSupported;
     }
 
     // Windows builds 1809 and above can use the D3D12 render pass API. If we query
