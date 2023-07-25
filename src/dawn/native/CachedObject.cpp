@@ -19,14 +19,6 @@
 
 namespace dawn::native {
 
-bool CachedObject::IsCachedReference() const {
-    return mIsCachedReference;
-}
-
-void CachedObject::SetIsCachedReference() {
-    mIsCachedReference = true;
-}
-
 size_t CachedObject::HashFunc::operator()(const CachedObject* obj) const {
     return obj->GetContentHash();
 }

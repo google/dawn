@@ -19,6 +19,7 @@
 #include <bitset>
 
 #include "dawn/common/Constants.h"
+#include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/CachedObject.h"
@@ -31,7 +32,9 @@ namespace dawn::native {
 
 class DeviceBase;
 
-class AttachmentState final : public ObjectBase, public CachedObject {
+class AttachmentState final : public ObjectBase,
+                              public CachedObject,
+                              public ContentLessObjectCacheable<AttachmentState> {
   public:
     // Note: Descriptors must be validated before the AttachmentState is constructed.
     explicit AttachmentState(DeviceBase* device, const RenderBundleEncoderDescriptor* descriptor);
@@ -40,8 +43,6 @@ class AttachmentState final : public ObjectBase, public CachedObject {
 
     // Constructor used to avoid re-parsing descriptors when we already parsed them for cache keys.
     AttachmentState(const AttachmentState& blueprint);
-
-    ~AttachmentState() override;
 
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
     wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex index) const;
@@ -54,6 +55,9 @@ class AttachmentState final : public ObjectBase, public CachedObject {
         bool operator()(const AttachmentState* a, const AttachmentState* b) const;
     };
     size_t ComputeContentHash() override;
+
+  protected:
+    void DeleteThis() override;
 
   private:
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> mColorAttachmentsSet;

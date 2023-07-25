@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_SAMPLER_H_
 #define SRC_DAWN_NATIVE_SAMPLER_H_
 
+#include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/native/CachedObject.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
@@ -28,7 +29,9 @@ class DeviceBase;
 
 MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor);
 
-class SamplerBase : public ApiObjectBase, public CachedObject {
+class SamplerBase : public ApiObjectBase,
+                    public CachedObject,
+                    public ContentLessObjectCacheable<SamplerBase> {
   public:
     SamplerBase(DeviceBase* device,
                 const SamplerDescriptor* descriptor,

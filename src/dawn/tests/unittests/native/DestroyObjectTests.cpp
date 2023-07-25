@@ -162,7 +162,6 @@ TEST_F(DestroyObjectTests, BindGroupLayoutImplicit) {
         wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(ToCppAPI(&desc));
 
         EXPECT_TRUE(FromAPI(bindGroupLayout.Get())->IsAlive());
-        EXPECT_TRUE(FromAPI(bindGroupLayout.Get())->IsCachedReference());
     }
 }
 
@@ -343,7 +342,6 @@ TEST_F(DestroyObjectTests, ComputePipelineImplicit) {
         wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(ToCppAPI(&desc));
 
         EXPECT_TRUE(FromAPI(computePipeline.Get())->IsAlive());
-        EXPECT_TRUE(FromAPI(computePipeline.Get())->IsCachedReference());
     }
 }
 
@@ -482,7 +480,6 @@ TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
         wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(ToCppAPI(&desc));
 
         EXPECT_TRUE(FromAPI(pipelineLayout.Get())->IsAlive());
-        EXPECT_TRUE(FromAPI(pipelineLayout.Get())->IsCachedReference());
     }
 }
 
@@ -572,7 +569,6 @@ TEST_F(DestroyObjectTests, RenderPipelineImplicit) {
         wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(ToCppAPI(&desc));
 
         EXPECT_TRUE(FromAPI(renderPipeline.Get())->IsAlive());
-        EXPECT_TRUE(FromAPI(renderPipeline.Get())->IsCachedReference());
     }
 }
 
@@ -602,7 +598,6 @@ TEST_F(DestroyObjectTests, SamplerImplicit) {
         wgpu::Sampler sampler = device.CreateSampler(ToCppAPI(&desc));
 
         EXPECT_TRUE(FromAPI(sampler.Get())->IsAlive());
-        EXPECT_TRUE(FromAPI(sampler.Get())->IsCachedReference());
     }
 }
 

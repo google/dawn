@@ -64,6 +64,22 @@
 #error "Unsupported compiler"
 #endif
 
+// Attribute related macros based on Chromium's version in:
+//   base/compiler_specific.h
+#if defined(__has_attribute)
+#define DAWN_HAS_ATTRIBUTE(x) __has_attribute(x)
+#else
+#define DAWN_HAS_ATTRIBUTE(x) 0
+#endif
+
+// Sanitizers annotations.
+#if DAWN_HAS_ATTRIBUTE(no_sanitize)
+#define DAWN_NO_SANITIZE(what) __attribute__((no_sanitize(what)))
+#endif
+#if !defined(DAWN_NO_SANITIZE)
+#define DAWN_NO_SANITIZE(what)
+#endif
+
 // This section defines other compiler macros to 0 to avoid undefined macro usage error.
 #if !defined(DAWN_COMPILER_IS_CLANG)
 #define DAWN_COMPILER_IS_CLANG 0

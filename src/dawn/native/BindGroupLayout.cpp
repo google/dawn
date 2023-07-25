@@ -505,10 +505,7 @@ BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
 BindGroupLayoutBase::~BindGroupLayoutBase() = default;
 
 void BindGroupLayoutBase::DestroyImpl() {
-    if (IsCachedReference()) {
-        // Do not uncache the actual cached object if we are a blueprint.
-        GetDevice()->UncacheBindGroupLayout(this);
-    }
+    Uncache();
 }
 
 // static
