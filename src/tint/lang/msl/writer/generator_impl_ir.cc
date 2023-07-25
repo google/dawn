@@ -52,7 +52,7 @@ void Sanitize(ir::Module*) {}
     TINT_UNIMPLEMENTED(Writer, diagnostics_) \
         << "unhandled case in Switch(): " << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
 
-GeneratorImplIr::GeneratorImplIr(ir::Module* module) : IRTextGenerator(module) {}
+GeneratorImplIr::GeneratorImplIr(ir::Module* module) : ir_(module) {}
 
 GeneratorImplIr::~GeneratorImplIr() = default;
 
@@ -88,6 +88,12 @@ bool GeneratorImplIr::Generate() {
     }
 
     return true;
+}
+
+std::string GeneratorImplIr::Result() const {
+    utils::StringStream ss;
+    ss << preamble_buffer_.String() << std::endl << main_buffer_.String();
+    return ss.str();
 }
 
 void GeneratorImplIr::EmitFunction(ir::Function* func) {
@@ -504,6 +510,10 @@ void GeneratorImplIr::EmitConstant(utils::StringStream& out, const constant::Val
             }
         },
         [&](Default) { UNHANDLED_CASE(c->Type()); });
+}
+
+std::string GeneratorImplIr::UniqueIdentifier(const std::string& prefix /* = "" */) {
+    return ir_->symbols.New(prefix).Name();
 }
 
 }  // namespace tint::writer::msl

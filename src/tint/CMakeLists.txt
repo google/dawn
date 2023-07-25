@@ -577,8 +577,6 @@ list(APPEND TINT_LIB_SRCS
   writer/binding_remapper_options.h
   writer/external_texture_options.cc
   writer/external_texture_options.h
-  writer/ir_text_generator.cc
-  writer/ir_text_generator.h
 )
 
 tint_generated(lang/core/builtin/access BENCH TEST)

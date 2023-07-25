@@ -38,6 +38,51 @@
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/text_generator.h"
 
+// Forward declarations
+namespace tint::ast {
+class AssignmentStatement;
+class Attribute;
+class BinaryExpression;
+enum class BinaryOp;
+class BitcastExpression;
+class BlockStatement;
+class BlockStatement;
+class BreakIfStatement;
+class BreakStatement;
+class CallExpression;
+class CaseStatement;
+class CompoundAssignmentStatement;
+class ConstAssert;
+class ContinueStatement;
+struct DiagnosticControl;
+class DiscardStatement;
+class Enable;
+class Expression;
+class ForLoopStatement;
+class Function;
+class Identifier;
+class IdentifierExpression;
+class IfStatement;
+class IncrementDecrementStatement;
+class IndexAccessorExpression;
+class LiteralExpression;
+class LoopStatement;
+class MemberAccessorExpression;
+class ReturnStatement;
+class Statement;
+class Statement;
+class Statement;
+class Struct;
+class SwitchStatement;
+class TypeDecl;
+class UnaryOpExpression;
+class Variable;
+class WhileStatement;
+}  // namespace tint::ast
+namespace tint::builtin {
+enum class TexelFormat;
+}  // namespace tint::builtin
+
 namespace tint::writer::syntax_tree {
 
 /// Implementation class for AST generator

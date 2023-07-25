@@ -1000,15 +1000,6 @@ libtint_source_set("libtint_writer_src") {
     ":libtint_type_src",
     ":libtint_utils_src",
   ]
-
-  if (tint_build_ir) {
-    sources += [
-      "writer/ir_text_generator.cc",
-      "writer/ir_text_generator.h",
-    ]
-
-    deps += [ ":libtint_ir_src" ]
-  }
 }
 
 libtint_source_set("libtint_spv_writer_src") {

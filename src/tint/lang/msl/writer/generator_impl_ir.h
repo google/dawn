@@ -22,12 +22,12 @@
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/writer/ir_text_generator.h"
+#include "src/tint/utils/text/text_generator.h"
 
 namespace tint::writer::msl {
 
 /// Implementation class for the MSL generator
-class GeneratorImplIr : public IRTextGenerator {
+class GeneratorImplIr : public utils::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
@@ -36,6 +36,9 @@ class GeneratorImplIr : public IRTextGenerator {
 
     /// @returns true on successful generation; false otherwise
     bool Generate();
+
+    /// @copydoc utils::TextGenerator::Result
+    std::string Result() const override;
 
     /// Emit the function
     /// @param func the function to emit
@@ -97,6 +100,14 @@ class GeneratorImplIr : public IRTextGenerator {
     std::string array_template_name_;
 
   private:
+    /// @copydoc utils::TextWrtiter::UniqueIdentifier
+    std::string UniqueIdentifier(const std::string& prefix = "") override;
+
+    ir::Module* const ir_;
+
+    /// The buffer holding preamble text
+    TextBuffer preamble_buffer_;
+
     /// Unique name of the 'TINT_INVARIANT' preprocessor define.
     /// Non-empty only if an invariant attribute has been generated.
     std::string invariant_define_name_;
