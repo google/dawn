@@ -85,12 +85,24 @@ deps = {
     'condition': 'dawn_standalone and host_os == "win"',
   },
 
+  # TODO(chromium:1458042): Remove these paths, when chromium builds files
+  # have moved to third_party/libcxx/lib*/trunk paths.
   'buildtools/third_party/libc++/trunk': {
     'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@0e4617cf8c09a8e2b6704a51a8a0a9560715cf70',
     'condition': 'dawn_standalone',
   },
 
   'buildtools/third_party/libc++abi/trunk': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@307bd163607c315d46103ebe1d68aab44bf93986',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/libcxx/libc++/trunk': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@0e4617cf8c09a8e2b6704a51a8a0a9560715cf70',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/libcxx/libc++abi/trunk': {
     'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@307bd163607c315d46103ebe1d68aab44bf93986',
     'condition': 'dawn_standalone',
   },
