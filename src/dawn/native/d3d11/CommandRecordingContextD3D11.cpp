@@ -43,8 +43,14 @@ MaybeError CommandRecordingContext::Intialize(Device* device) {
                           "D3D11 querying immediate context for ID3D11DeviceContext4 interface"));
 
     DAWN_TRY(
-        CheckHRESULT(d3d11DeviceContext4.As(&mD3D11UserDefinedAnnotation),
+        CheckHRESULT(d3d11DeviceContext4.As(&mD3DUserDefinedAnnotation),
                      "D3D11 querying immediate context for ID3DUserDefinedAnnotation interface"));
+
+    if (device->HasFeature(Feature::D3D11MultithreadProtected)) {
+        DAWN_TRY(CheckHRESULT(d3d11DeviceContext.As(&mD3D11Multithread),
+                              "D3D11 querying immediate context for ID3D11Multithread interface"));
+        mD3D11Multithread->SetMultithreadProtected(TRUE);
+    }
 
     mD3D11Device = d3d11Device;
     mD3D11DeviceContext4 = std::move(d3d11DeviceContext4);
@@ -102,7 +108,7 @@ ID3D11DeviceContext4* CommandRecordingContext::GetD3D11DeviceContext4() const {
 }
 
 ID3DUserDefinedAnnotation* CommandRecordingContext::GetD3DUserDefinedAnnotation() const {
-    return mD3D11UserDefinedAnnotation.Get();
+    return mD3DUserDefinedAnnotation.Get();
 }
 
 Buffer* CommandRecordingContext::GetUniformBuffer() const {
@@ -141,6 +147,25 @@ bool CommandRecordingContext::NeedsSubmit() const {
 
 void CommandRecordingContext::SetNeedsSubmit() {
     mNeedsSubmit = true;
+}
+
+CommandRecordingContext::ScopedCriticalSection::ScopedCriticalSection(
+    ComPtr<ID3D11Multithread> d3d11Multithread)
+    : mD3D11Multithread(std::move(d3d11Multithread)) {
+    if (mD3D11Multithread) {
+        mD3D11Multithread->Enter();
+    }
+}
+
+CommandRecordingContext::ScopedCriticalSection::~ScopedCriticalSection() {
+    if (mD3D11Multithread) {
+        mD3D11Multithread->Leave();
+    }
+}
+
+CommandRecordingContext::ScopedCriticalSection
+CommandRecordingContext::EnterScopedCriticalSection() {
+    return ScopedCriticalSection(mD3D11Multithread);
 }
 
 void CommandRecordingContext::WriteUniformBuffer(uint32_t offset, uint32_t element) {

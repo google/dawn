@@ -105,6 +105,10 @@ Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
 MaybeError CommandBuffer::Execute() {
     CommandRecordingContext* commandContext = ToBackend(GetDevice())->GetPendingCommandContext();
 
+    // Mark a critical section for this entire scope to minimize the cost of mutex acquire/release
+    // when ID3D11Multithread protection is enabled.
+    auto scopedCriticalSection = commandContext->EnterScopedCriticalSection();
+
     auto LazyClearSyncScope = [commandContext](const SyncScopeResourceUsage& scope) -> MaybeError {
         for (size_t i = 0; i < scope.textures.size(); i++) {
             Texture* texture = ToBackend(scope.textures[i]);

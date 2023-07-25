@@ -128,6 +128,10 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "dual_source_blending.md",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::D3D11MultithreadProtected,
+     {"d3d11-multithread-protected",
+      "Enable ID3D11Multithread protection for interop with external users of the D3D11 device.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1927", FeatureInfo::FeatureState::Stable}},
 }};
 
 Feature FromAPIFeature(wgpu::FeatureName feature) {
@@ -182,6 +186,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::MSAARenderToSingleSampled;
         case wgpu::FeatureName::DualSourceBlending:
             return Feature::DualSourceBlending;
+        case wgpu::FeatureName::D3D11MultithreadProtected:
+            return Feature::D3D11MultithreadProtected;
     }
     return Feature::InvalidEnum;
 }
@@ -232,6 +238,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::MSAARenderToSingleSampled;
         case Feature::DualSourceBlending:
             return wgpu::FeatureName::DualSourceBlending;
+        case Feature::D3D11MultithreadProtected:
+            return wgpu::FeatureName::D3D11MultithreadProtected;
         case Feature::EnumCount:
             break;
     }

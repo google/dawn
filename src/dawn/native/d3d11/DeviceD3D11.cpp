@@ -154,11 +154,13 @@ MaybeError Device::TickImpl() {
     // Perform cleanup operations to free unused objects
     [[maybe_unused]] ExecutionSerial completedSerial = GetCompletedCommandSerial();
 
+    // Check for debug layer messages before executing the command context in case we encounter an
+    // error during execution and early out as a result.
+    DAWN_TRY(CheckDebugLayerAndGenerateErrors());
     if (mPendingCommands.IsOpen() && mPendingCommands.NeedsSubmit()) {
         DAWN_TRY(ExecutePendingCommandContext());
         DAWN_TRY(NextSerial());
     }
-
     DAWN_TRY(CheckDebugLayerAndGenerateErrors());
 
     return {};

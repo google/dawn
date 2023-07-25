@@ -51,6 +51,7 @@ enum class Feature {
     TransientAttachments,
     MSAARenderToSingleSampled,
     DualSourceBlending,
+    D3D11MultithreadProtected,
 
     EnumCount,
     InvalidEnum = EnumCount,
