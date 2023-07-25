@@ -113,6 +113,11 @@ D3D12_BLEND D3D12Blend(wgpu::BlendFactor factor) {
             return D3D12_BLEND_BLEND_FACTOR;
         case wgpu::BlendFactor::OneMinusConstant:
             return D3D12_BLEND_INV_BLEND_FACTOR;
+        case wgpu::BlendFactor::Src1:
+        case wgpu::BlendFactor::OneMinusSrc1:
+        case wgpu::BlendFactor::Src1Alpha:
+        case wgpu::BlendFactor::OneMinusSrc1Alpha:
+            UNREACHABLE();
     }
 }
 

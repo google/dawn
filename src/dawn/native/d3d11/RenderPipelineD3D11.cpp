@@ -101,6 +101,10 @@ D3D11_BLEND D3DBlendFactor(wgpu::BlendFactor blendFactor) {
             return D3D11_BLEND_BLEND_FACTOR;
         case wgpu::BlendFactor::OneMinusConstant:
             return D3D11_BLEND_INV_BLEND_FACTOR;
+        case wgpu::BlendFactor::Src1:
+        case wgpu::BlendFactor::OneMinusSrc1:
+        case wgpu::BlendFactor::Src1Alpha:
+        case wgpu::BlendFactor::OneMinusSrc1Alpha:
         default:
             UNREACHABLE();
     }

@@ -193,6 +193,11 @@ VkBlendFactor VulkanBlendFactor(wgpu::BlendFactor factor) {
             return VK_BLEND_FACTOR_CONSTANT_COLOR;
         case wgpu::BlendFactor::OneMinusConstant:
             return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+        case wgpu::BlendFactor::Src1:
+        case wgpu::BlendFactor::OneMinusSrc1:
+        case wgpu::BlendFactor::Src1Alpha:
+        case wgpu::BlendFactor::OneMinusSrc1Alpha:
+            UNREACHABLE();
     }
     UNREACHABLE();
 }

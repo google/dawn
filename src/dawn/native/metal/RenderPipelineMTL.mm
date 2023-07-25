@@ -161,6 +161,11 @@ MTLBlendFactor MetalBlendFactor(wgpu::BlendFactor factor, bool alpha) {
             return alpha ? MTLBlendFactorBlendAlpha : MTLBlendFactorBlendColor;
         case wgpu::BlendFactor::OneMinusConstant:
             return alpha ? MTLBlendFactorOneMinusBlendAlpha : MTLBlendFactorOneMinusBlendColor;
+        case wgpu::BlendFactor::Src1:
+        case wgpu::BlendFactor::OneMinusSrc1:
+        case wgpu::BlendFactor::Src1Alpha:
+        case wgpu::BlendFactor::OneMinusSrc1Alpha:
+            UNREACHABLE();
     }
 }
 

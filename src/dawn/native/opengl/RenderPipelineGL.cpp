@@ -85,6 +85,11 @@ GLenum GLBlendFactor(wgpu::BlendFactor factor, bool alpha) {
             return alpha ? GL_CONSTANT_ALPHA : GL_CONSTANT_COLOR;
         case wgpu::BlendFactor::OneMinusConstant:
             return alpha ? GL_ONE_MINUS_CONSTANT_ALPHA : GL_ONE_MINUS_CONSTANT_COLOR;
+        case wgpu::BlendFactor::Src1:
+        case wgpu::BlendFactor::OneMinusSrc1:
+        case wgpu::BlendFactor::Src1Alpha:
+        case wgpu::BlendFactor::OneMinusSrc1Alpha:
+            UNREACHABLE();
     }
     UNREACHABLE();
 }
