@@ -29,7 +29,7 @@ TEST_F(NumWorkgroupsFromUniformTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
     DataMap data;
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     EXPECT_FALSE(ShouldRun<NumWorkgroupsFromUniform>(src, data));
 }
 
@@ -41,7 +41,7 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 )";
 
     DataMap data;
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     EXPECT_TRUE(ShouldRun<NumWorkgroupsFromUniform>(src, data));
 }
 
@@ -92,7 +92,7 @@ fn main() {
 
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -136,7 +136,7 @@ fn main() {
 
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -180,7 +180,7 @@ struct Builtins {
 
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -235,7 +235,7 @@ fn main(tint_symbol : tint_symbol_1) {
 
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -291,7 +291,7 @@ struct Builtins {
 
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -390,7 +390,7 @@ fn main3() {
 
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -431,7 +431,7 @@ fn main(tint_symbol : tint_symbol_1) {
 
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
 }

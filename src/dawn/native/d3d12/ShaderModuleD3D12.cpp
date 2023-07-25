@@ -116,15 +116,15 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    using tint::writer::BindingPoint;
+    using tint::BindingPoint;
 
-    tint::writer::BindingRemapperOptions bindingRemapper;
+    tint::BindingRemapperOptions bindingRemapper;
     // D3D12 registers like `t3` and `c3` have the same bindingOffset number in
     // the remapping but should not be considered a collision because they have
     // different types.
     bindingRemapper.allow_collisions = true;
 
-    tint::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
+    tint::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = {layout->GetDynamicStorageBufferLengthsRegisterSpace(),
                                           layout->GetDynamicStorageBufferLengthsShaderRegister()};
 

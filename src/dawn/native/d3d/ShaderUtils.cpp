@@ -220,7 +220,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
 
     if (r.usesNumWorkgroups) {
         options.root_constant_binding_point =
-            tint::writer::BindingPoint{r.numWorkgroupsRegisterSpace, r.numWorkgroupsShaderRegister};
+            tint::BindingPoint{r.numWorkgroupsRegisterSpace, r.numWorkgroupsShaderRegister};
     }
     // TODO(dawn:549): HLSL generation outputs the indices into the
     // array_length_from_uniform buffer that were actually used. When the blob cache can

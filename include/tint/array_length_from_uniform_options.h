@@ -12,30 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_WRITER_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_
-#define SRC_TINT_WRITER_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_
+#ifndef INCLUDE_TINT_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_
+#define INCLUDE_TINT_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_
 
 #include <unordered_map>
 
-#include "src/tint/writer/binding_point.h"
+#include "tint/binding_point.h"
 
-namespace tint::writer {
+namespace tint {
 
 /// Options used to specify a mapping of binding points to indices into a UBO
 /// from which to load buffer sizes.
 struct ArrayLengthFromUniformOptions {
-    /// Constructor
-    ArrayLengthFromUniformOptions();
-    /// Destructor
-    ~ArrayLengthFromUniformOptions();
-    /// Copy constructor
-    ArrayLengthFromUniformOptions(const ArrayLengthFromUniformOptions&);
-    /// Copy assignment
-    /// @returns this ArrayLengthFromUniformOptions
-    ArrayLengthFromUniformOptions& operator=(const ArrayLengthFromUniformOptions&);
-    /// Move constructor
-    ArrayLengthFromUniformOptions(ArrayLengthFromUniformOptions&&);
-
     /// The binding point to use to generate a uniform buffer from which to read
     /// buffer sizes.
     BindingPoint ubo_binding;
@@ -47,6 +35,6 @@ struct ArrayLengthFromUniformOptions {
     TINT_REFLECT(ubo_binding, bindpoint_to_size_index);
 };
 
-}  // namespace tint::writer
+}  // namespace tint
 
-#endif  // SRC_TINT_WRITER_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_
+#endif  // INCLUDE_TINT_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_

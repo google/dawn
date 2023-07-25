@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_SEM_BINDING_POINT_H_
-#define SRC_TINT_LANG_WGSL_SEM_BINDING_POINT_H_
+#ifndef INCLUDE_TINT_BINDING_POINT_H_
+#define INCLUDE_TINT_BINDING_POINT_H_
 
 #include <stdint.h>
 
@@ -23,7 +23,7 @@
 #include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::sem {
+namespace tint {
 
 /// BindingPoint holds a group and binding index.
 struct BindingPoint {
@@ -46,6 +46,19 @@ struct BindingPoint {
     /// @param rhs the BindingPoint to compare against
     /// @returns true if this BindingPoint is not equal to `rhs`
     inline bool operator!=(const BindingPoint& rhs) const { return !(*this == rhs); }
+
+    /// Less-than operator
+    /// @param rhs the BindingPoint to compare against
+    /// @returns true if this BindingPoint comes before @p rhs
+    inline bool operator<(const BindingPoint& rhs) const {
+        if (group < rhs.group) {
+            return true;
+        }
+        if (group > rhs.group) {
+            return false;
+        }
+        return binding < rhs.binding;
+    }
 };
 
 /// Prints the BindingPoint @p bp to @p o
@@ -56,23 +69,22 @@ inline utils::StringStream& operator<<(utils::StringStream& o, const BindingPoin
     return o << "[group: " << bp.group << ", binding: " << bp.binding << "]";
 }
 
-}  // namespace tint::sem
+}  // namespace tint
 
 namespace std {
 
-/// Custom std::hash specialization for tint::sem::BindingPoint so
-/// BindingPoints can be used as keys for std::unordered_map and
-/// std::unordered_set.
+/// Custom std::hash specialization for tint::BindingPoint so BindingPoints can be used as keys for
+/// std::unordered_map and std::unordered_set.
 template <>
-class hash<tint::sem::BindingPoint> {
+class hash<tint::BindingPoint> {
   public:
     /// @param binding_point the binding point to create a hash for
     /// @return the hash value
-    inline std::size_t operator()(const tint::sem::BindingPoint& binding_point) const {
+    inline std::size_t operator()(const tint::BindingPoint& binding_point) const {
         return tint::utils::Hash(binding_point.group, binding_point.binding);
     }
 };
 
 }  // namespace std
 
-#endif  // SRC_TINT_LANG_WGSL_SEM_BINDING_POINT_H_
+#endif  // INCLUDE_TINT_BINDING_POINT_H_

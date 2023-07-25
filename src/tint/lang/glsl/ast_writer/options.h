@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/builtin/access.h"
 #include "src/tint/lang/glsl/ast_writer/version.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
-#include "src/tint/writer/external_texture_options.h"
+#include "tint/external_texture_options.h"
 
 namespace tint::writer::glsl {
 
@@ -43,15 +43,15 @@ struct Options {
     BindingMap binding_map;
 
     /// The binding point to use for placeholder samplers.
-    sem::BindingPoint placeholder_binding_point;
+    BindingPoint placeholder_binding_point;
 
     /// A map of old binding point to new binding point for the BindingRemapper
     /// transform
-    std::unordered_map<sem::BindingPoint, sem::BindingPoint> binding_points;
+    std::unordered_map<BindingPoint, BindingPoint> binding_points;
 
     /// A map of old binding point to new access control for the BindingRemapper
     /// transform
-    std::unordered_map<sem::BindingPoint, builtin::Access> access_controls;
+    std::unordered_map<BindingPoint, builtin::Access> access_controls;
 
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;

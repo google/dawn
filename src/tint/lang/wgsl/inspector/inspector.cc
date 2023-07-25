@@ -518,9 +518,8 @@ utils::VectorRef<SamplerTexturePair> Inspector::GetSamplerTextureUses(
     return it->second;
 }
 
-std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(
-    const std::string& entry_point,
-    const sem::BindingPoint& placeholder) {
+std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::string& entry_point,
+                                                                 const BindingPoint& placeholder) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {
         return {};

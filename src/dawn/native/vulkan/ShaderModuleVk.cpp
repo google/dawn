@@ -166,8 +166,8 @@ ShaderModule::~ShaderModule() = default;
 #define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                                     \
     X(SingleShaderStage, stage)                                                                  \
     X(const tint::Program*, inputProgram)                                                        \
-    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                     \
-    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                              \
+    X(tint::BindingRemapperOptions, bindingRemapper)                                             \
+    X(tint::ExternalTextureOptions, externalTextureOptions)                                      \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(std::string_view, entryPointName)                                                          \
@@ -206,9 +206,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     // Creation of module and spirv is deferred to this point when using tint generator
 
     // Remap BindingNumber to BindingIndex in WGSL shader
-    using BindingPoint = tint::writer::BindingPoint;
+    using BindingPoint = tint::BindingPoint;
 
-    tint::writer::BindingRemapperOptions bindingRemapper;
+    tint::BindingRemapperOptions bindingRemapper;
 
     const BindingInfoArray& moduleBindingInfo =
         GetEntryPoint(programmableStage.entryPoint.c_str()).bindings;
@@ -231,7 +231,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     // Transform external textures into the binding locations specified in the bgl
     // TODO(dawn:1082): Replace this block with BuildExternalTextureTransformBindings.
-    tint::writer::ExternalTextureOptions externalTextureOptions;
+    tint::ExternalTextureOptions externalTextureOptions;
     for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(i);
 

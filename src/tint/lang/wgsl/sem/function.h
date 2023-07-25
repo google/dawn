@@ -49,8 +49,8 @@ using WorkgroupSize = std::array<std::optional<uint32_t>, 3>;
 /// Function holds the semantic information for function nodes.
 class Function final : public utils::Castable<Function, CallTarget> {
   public:
-    /// A vector of [Variable*, sem::BindingPoint] pairs
-    using VariableBindings = std::vector<std::pair<const Variable*, sem::BindingPoint>>;
+    /// A vector of [Variable*, BindingPoint] pairs
+    using VariableBindings = std::vector<std::pair<const Variable*, BindingPoint>>;
 
     /// Constructor
     /// @param declaration the ast::Function

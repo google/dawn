@@ -142,10 +142,10 @@ void PrintF16(utils::StringStream& out, float value) {
 // Helper for writing " : register(RX, spaceY)", where R is the register, X is
 // the binding point binding value, and Y is the binding point group value.
 struct RegisterAndSpace {
-    RegisterAndSpace(char r, sem::BindingPoint bp) : reg(r), binding_point(bp) {}
+    RegisterAndSpace(char r, BindingPoint bp) : reg(r), binding_point(bp) {}
 
     const char reg;
-    sem::BindingPoint const binding_point;
+    BindingPoint const binding_point;
 };
 
 utils::StringStream& operator<<(utils::StringStream& s, const RegisterAndSpace& rs) {
@@ -195,7 +195,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
 
         ast::transform::Robustness::Config config = {};
 
-        config.bindings_ignored = std::unordered_set<sem::BindingPoint>(
+        config.bindings_ignored = std::unordered_set<BindingPoint>(
             options.binding_points_ignored_in_robustness_transform.cbegin(),
             options.binding_points_ignored_in_robustness_transform.cend());
 

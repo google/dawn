@@ -30,29 +30,29 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
     auto& program = std::get<bench::ProgramAndFile>(res).program;
 
     tint::writer::msl::Options gen_options = {};
-    gen_options.array_length_from_uniform.ubo_binding = tint::writer::BindingPoint{0, 30};
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-        tint::writer::BindingPoint{0, 0}, 0);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-        tint::writer::BindingPoint{0, 1}, 1);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-        tint::writer::BindingPoint{0, 2}, 2);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-        tint::writer::BindingPoint{0, 3}, 3);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-        tint::writer::BindingPoint{0, 4}, 4);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-        tint::writer::BindingPoint{0, 5}, 5);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-        tint::writer::BindingPoint{0, 6}, 6);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-        tint::writer::BindingPoint{0, 7}, 7);
+    gen_options.array_length_from_uniform.ubo_binding = tint::BindingPoint{0, 30};
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
+                                                                          0);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
+                                                                          1);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 2},
+                                                                          2);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 3},
+                                                                          3);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 4},
+                                                                          4);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 5},
+                                                                          5);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 6},
+                                                                          6);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 7},
+                                                                          7);
 
     uint32_t next_binding_point = 0;
     for (auto* var : program.AST().GlobalVariables()) {
         if (auto* var_sem = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
             if (auto bp = var_sem->BindingPoint()) {
-                gen_options.binding_remapper_options.binding_points[*bp] = sem::BindingPoint{
+                gen_options.binding_remapper_options.binding_points[*bp] = BindingPoint{
                     0,                     // group
                     next_binding_point++,  // binding
                 };

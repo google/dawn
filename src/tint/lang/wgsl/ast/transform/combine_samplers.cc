@@ -41,8 +41,7 @@ namespace tint::ast::transform {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-CombineSamplers::BindingInfo::BindingInfo(const BindingMap& map,
-                                          const sem::BindingPoint& placeholder)
+CombineSamplers::BindingInfo::BindingInfo(const BindingMap& map, const BindingPoint& placeholder)
     : binding_map(map), placeholder_binding_point(placeholder) {}
 CombineSamplers::BindingInfo::BindingInfo(const BindingInfo& other) = default;
 CombineSamplers::BindingInfo::~BindingInfo() = default;
@@ -62,9 +61,6 @@ struct CombineSamplers::State {
     /// Map from a texture/sampler pair to the corresponding combined sampler
     /// variable
     using CombinedTextureSamplerMap = std::unordered_map<sem::VariablePair, const Variable*>;
-
-    /// Use sem::BindingPoint without scope.
-    using BindingPoint = sem::BindingPoint;
 
     /// A map of all global texture/sampler variable pairs to the global
     /// combined sampler variable that will replace it.

@@ -147,7 +147,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
 
     Options options;
     options.array_length_from_uniform.ubo_binding = {3, 4};
-    options.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 2}, 7u);
+    options.array_length_from_uniform.bindpoint_to_size_index.emplace(BindingPoint{2, 2}, 7u);
     GeneratorImpl& gen = SanitizeAndBuild(options);
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();

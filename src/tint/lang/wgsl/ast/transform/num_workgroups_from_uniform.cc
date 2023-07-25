@@ -185,7 +185,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     return Program(std::move(b));
 }
 
-NumWorkgroupsFromUniform::Config::Config(std::optional<sem::BindingPoint> ubo_bp)
+NumWorkgroupsFromUniform::Config::Config(std::optional<BindingPoint> ubo_bp)
     : ubo_binding(ubo_bp) {}
 NumWorkgroupsFromUniform::Config::Config(const Config&) = default;
 NumWorkgroupsFromUniform::Config::~Config() = default;

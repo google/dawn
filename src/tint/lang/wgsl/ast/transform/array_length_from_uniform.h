@@ -19,7 +19,7 @@
 #include <unordered_set>
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
+#include "tint/binding_point.h"
 
 // Forward declarations
 namespace tint {
@@ -63,7 +63,7 @@ class ArrayLengthFromUniform final : public utils::Castable<ArrayLengthFromUnifo
     struct Config final : public utils::Castable<Config, Data> {
         /// Constructor
         /// @param ubo_bp the binding point to use for the generated uniform buffer.
-        explicit Config(sem::BindingPoint ubo_bp);
+        explicit Config(BindingPoint ubo_bp);
 
         /// Copy constructor
         Config(const Config&);
@@ -76,10 +76,10 @@ class ArrayLengthFromUniform final : public utils::Castable<ArrayLengthFromUnifo
         ~Config() override;
 
         /// The binding point to use for the generated uniform buffer.
-        sem::BindingPoint ubo_binding;
+        BindingPoint ubo_binding;
 
         /// The mapping from binding point to the index for the buffer size lookup.
-        std::unordered_map<sem::BindingPoint, uint32_t> bindpoint_to_size_index;
+        std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
     };
 
     /// Information produced about what the transform did.

@@ -12,36 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_WRITER_BINDING_REMAPPER_OPTIONS_H_
-#define SRC_TINT_WRITER_BINDING_REMAPPER_OPTIONS_H_
+#ifndef INCLUDE_TINT_BINDING_REMAPPER_OPTIONS_H_
+#define INCLUDE_TINT_BINDING_REMAPPER_OPTIONS_H_
 
 #include <unordered_map>
 
 #include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/writer/binding_point.h"
+#include "tint/binding_point.h"
 
-namespace tint::writer {
+namespace tint {
 
 /// Options used to specify mappings of binding points.
-class BindingRemapperOptions {
-  public:
+struct BindingRemapperOptions {
     /// BindingPoints is a map of old binding point to new binding point
     using BindingPoints = std::unordered_map<BindingPoint, BindingPoint>;
 
     /// AccessControls is a map of old binding point to new access control
     using AccessControls = std::unordered_map<BindingPoint, builtin::Access>;
-
-    /// Constructor
-    BindingRemapperOptions();
-    /// Destructor
-    ~BindingRemapperOptions();
-    /// Copy constructor
-    BindingRemapperOptions(const BindingRemapperOptions&);
-    /// Copy assignment
-    /// @returns this BindingRemapperOptions
-    BindingRemapperOptions& operator=(const BindingRemapperOptions&);
-    /// Move constructor
-    BindingRemapperOptions(BindingRemapperOptions&&);
 
     /// A map of old binding point to new binding point
     BindingPoints binding_points;
@@ -57,6 +44,6 @@ class BindingRemapperOptions {
     TINT_REFLECT(binding_points, access_controls, allow_collisions);
 };
 
-}  // namespace tint::writer
+}  // namespace tint
 
-#endif  // SRC_TINT_WRITER_BINDING_REMAPPER_OPTIONS_H_
+#endif  // INCLUDE_TINT_BINDING_REMAPPER_OPTIONS_H_

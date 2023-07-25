@@ -15,11 +15,12 @@
 #ifndef SRC_TINT_CMD_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
 #define SRC_TINT_CMD_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
 
+#include "tint/external_texture_options.h"
 #include "tint/tint.h"
 
 namespace tint::cmd {
 
-writer::ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Program* program);
+ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Program* program);
 
 }  // namespace tint::cmd
 

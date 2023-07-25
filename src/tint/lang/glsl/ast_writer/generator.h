@@ -25,9 +25,9 @@
 #include "src/tint/lang/glsl/ast_writer/options.h"
 #include "src/tint/lang/glsl/ast_writer/version.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
-#include "src/tint/writer/external_texture_options.h"
+#include "tint/binding_point.h"
+#include "tint/external_texture_options.h"
 
 // Forward declarations
 namespace tint {

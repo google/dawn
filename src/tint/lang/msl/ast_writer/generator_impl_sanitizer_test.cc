@@ -40,8 +40,8 @@ TEST_F(MslSanitizerTest, Call_ArrayLength) {
          });
 
     Options opts = DefaultOptions();
-    opts.array_length_from_uniform.ubo_binding = sem::BindingPoint{0, 30};
-    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
+    opts.array_length_from_uniform.ubo_binding = BindingPoint{0, 30};
+    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(BindingPoint{2, 1}, 1);
     GeneratorImpl& gen = SanitizeAndBuild(opts);
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
@@ -97,8 +97,8 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
          });
 
     Options opts = DefaultOptions();
-    opts.array_length_from_uniform.ubo_binding = sem::BindingPoint{0, 30};
-    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
+    opts.array_length_from_uniform.ubo_binding = BindingPoint{0, 30};
+    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(BindingPoint{2, 1}, 1);
     GeneratorImpl& gen = SanitizeAndBuild(opts);
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
@@ -158,8 +158,8 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
          });
 
     Options opts = DefaultOptions();
-    opts.array_length_from_uniform.ubo_binding = sem::BindingPoint{0, 30};
-    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{2, 1}, 1);
+    opts.array_length_from_uniform.ubo_binding = BindingPoint{0, 30};
+    opts.array_length_from_uniform.bindpoint_to_size_index.emplace(BindingPoint{2, 1}, 1);
     GeneratorImpl& gen = SanitizeAndBuild(opts);
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
@@ -218,8 +218,8 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
 
     Options options;
     options.array_length_from_uniform.ubo_binding = {0, 29};
-    options.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 1}, 7u);
-    options.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2}, 2u);
+    options.array_length_from_uniform.bindpoint_to_size_index.emplace(BindingPoint{0, 1}, 7u);
+    options.array_length_from_uniform.bindpoint_to_size_index.emplace(BindingPoint{0, 2}, 2u);
     GeneratorImpl& gen = SanitizeAndBuild(options);
 
     ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
@@ -277,7 +277,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniformMissingBinding) 
 
     Options options;
     options.array_length_from_uniform.ubo_binding = {0, 29};
-    options.array_length_from_uniform.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2}, 2u);
+    options.array_length_from_uniform.bindpoint_to_size_index.emplace(BindingPoint{0, 2}, 2u);
     GeneratorImpl& gen = SanitizeAndBuild(options);
 
     ASSERT_FALSE(gen.Generate());

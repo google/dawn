@@ -66,7 +66,7 @@ class CombineSamplers final : public utils::Castable<CombineSamplers, Transform>
         /// Constructor
         /// @param map the map of all (texture, sampler) -> (combined) pairs
         /// @param placeholder the binding point to use for placeholder samplers.
-        BindingInfo(const BindingMap& map, const sem::BindingPoint& placeholder);
+        BindingInfo(const BindingMap& map, const BindingPoint& placeholder);
 
         /// Copy constructor
         /// @param other the other BindingInfo to copy
@@ -79,7 +79,7 @@ class CombineSamplers final : public utils::Castable<CombineSamplers, Transform>
         BindingMap binding_map;
 
         /// The binding point to use for placeholder samplers.
-        sem::BindingPoint placeholder_binding_point;
+        BindingPoint placeholder_binding_point;
     };
 
     /// Constructor

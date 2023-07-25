@@ -25,11 +25,11 @@
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/text_generator.h"
-#include "src/tint/writer/array_length_from_uniform_options.h"
+#include "tint/array_length_from_uniform_options.h"
+#include "tint/binding_point.h"
 
 // Forward declarations
 namespace tint::sem {

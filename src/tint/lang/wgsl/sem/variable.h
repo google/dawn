@@ -25,10 +25,10 @@
 #include "src/tint/lang/core/builtin/address_space.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/wgsl/ast/parameter.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/parameter_usage.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/containers/unique_vector.h"
+#include "tint/binding_point.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -166,7 +166,7 @@ class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
                    builtin::AddressSpace address_space,
                    builtin::Access access,
                    const constant::Value* constant_value,
-                   std::optional<sem::BindingPoint> binding_point = std::nullopt,
+                   std::optional<tint::BindingPoint> binding_point = std::nullopt,
                    std::optional<uint32_t> location = std::nullopt,
                    std::optional<uint32_t> index = std::nullopt);
 
@@ -174,7 +174,7 @@ class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
     ~GlobalVariable() override;
 
     /// @returns the resource binding point for the variable
-    std::optional<sem::BindingPoint> BindingPoint() const { return binding_point_; }
+    std::optional<tint::BindingPoint> BindingPoint() const { return binding_point_; }
 
     /// @param id the constant identifier to assign to this variable
     void SetOverrideId(OverrideId id) { override_id_ = id; }
@@ -189,7 +189,7 @@ class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
     std::optional<uint32_t> Index() const { return index_; }
 
   private:
-    const std::optional<sem::BindingPoint> binding_point_;
+    const std::optional<tint::BindingPoint> binding_point_;
 
     tint::OverrideId override_id_;
     std::optional<uint32_t> location_;
@@ -214,7 +214,7 @@ class Parameter final : public utils::Castable<Parameter, Variable> {
               builtin::AddressSpace address_space,
               builtin::Access access,
               const ParameterUsage usage = ParameterUsage::kNone,
-              std::optional<sem::BindingPoint> binding_point = {},
+              std::optional<tint::BindingPoint> binding_point = {},
               std::optional<uint32_t> location = std::nullopt);
 
     /// Destructor
@@ -245,7 +245,7 @@ class Parameter final : public utils::Castable<Parameter, Variable> {
     void SetShadows(const utils::CastableBase* shadows) { shadows_ = shadows; }
 
     /// @returns the resource binding point for the parameter
-    std::optional<sem::BindingPoint> BindingPoint() const { return binding_point_; }
+    std::optional<tint::BindingPoint> BindingPoint() const { return binding_point_; }
 
     /// @returns the location value for the parameter, if set
     std::optional<uint32_t> Location() const { return location_; }
@@ -255,7 +255,7 @@ class Parameter final : public utils::Castable<Parameter, Variable> {
     const ParameterUsage usage_;
     CallTarget const* owner_ = nullptr;
     const utils::CastableBase* shadows_ = nullptr;
-    const std::optional<sem::BindingPoint> binding_point_;
+    const std::optional<tint::BindingPoint> binding_point_;
     const std::optional<uint32_t> location_;
 };
 

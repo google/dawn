@@ -61,9 +61,9 @@ enum class Compiler { FXC, DXC };
     X(bool, usesNumWorkgroups)                                                                   \
     X(uint32_t, numWorkgroupsShaderRegister)                                                     \
     X(uint32_t, numWorkgroupsRegisterSpace)                                                      \
-    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                              \
-    X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                       \
-    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                     \
+    X(tint::ExternalTextureOptions, externalTextureOptions)                                      \
+    X(tint::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                               \
+    X(tint::BindingRemapperOptions, bindingRemapper)                                             \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(std::bitset<kMaxInterStageShaderVariables>, interstageLocations)                           \
     X(LimitsForCompilationRequest, limits)                                                       \
@@ -72,7 +72,7 @@ enum class Compiler { FXC, DXC };
     X(bool, disableWorkgroupInit)                                                                \
     X(bool, polyfillReflectVec2F32)                                                              \
     X(bool, dumpShaders)                                                                         \
-    X(std::vector<tint::writer::BindingPoint>, bindingPointsIgnoredInRobustnessTransform)
+    X(std::vector<tint::BindingPoint>, bindingPointsIgnoredInRobustnessTransform)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \
     X(bool, hasShaderF16Feature)                    \

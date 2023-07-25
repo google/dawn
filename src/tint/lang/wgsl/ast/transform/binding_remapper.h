@@ -19,12 +19,12 @@
 
 #include "src/tint/lang/core/builtin/access.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
+#include "tint/binding_point.h"
 
 namespace tint::ast::transform {
 
-/// BindingPoint is an alias to sem::BindingPoint
-using BindingPoint = sem::BindingPoint;
+/// BindingPoint is an alias to BindingPoint
+using BindingPoint = BindingPoint;
 
 /// BindingRemapper is a transform used to remap resource binding points and
 /// access controls.

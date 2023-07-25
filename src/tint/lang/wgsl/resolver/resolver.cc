@@ -650,9 +650,9 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             }
         }
 
-        std::optional<sem::BindingPoint> binding_point;
+        std::optional<BindingPoint> binding_point;
         if (group && binding) {
-            binding_point = sem::BindingPoint{group.value(), binding.value()};
+            binding_point = BindingPoint{group.value(), binding.value()};
         }
         sem = builder_->create<sem::GlobalVariable>(
             var, var_ty, sem::EvaluationStage::kRuntime, address_space, access,
@@ -793,9 +793,9 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
         }
     }
 
-    std::optional<sem::BindingPoint> binding_point;
+    std::optional<BindingPoint> binding_point;
     if (group && binding) {
-        binding_point = sem::BindingPoint{group.value(), binding.value()};
+        binding_point = BindingPoint{group.value(), binding.value()};
     }
 
     auto* sem = builder_->create<sem::Parameter>(

@@ -258,7 +258,7 @@ Transform::ApplyResult ArrayLengthFromUniform::Apply(const Program* src,
     return State{src, inputs, outputs}.Run();
 }
 
-ArrayLengthFromUniform::Config::Config(sem::BindingPoint ubo_bp) : ubo_binding(ubo_bp) {}
+ArrayLengthFromUniform::Config::Config(BindingPoint ubo_bp) : ubo_binding(ubo_bp) {}
 ArrayLengthFromUniform::Config::Config(const Config&) = default;
 ArrayLengthFromUniform::Config& ArrayLengthFromUniform::Config::operator=(const Config&) = default;
 ArrayLengthFromUniform::Config::~Config() = default;

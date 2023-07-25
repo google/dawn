@@ -18,7 +18,7 @@
 #include <bitset>
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
+#include "tint/binding_point.h"
 
 namespace tint::ast::transform {
 

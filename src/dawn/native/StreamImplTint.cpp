@@ -44,24 +44,24 @@ void stream::Stream<tint::Program>::Write(stream::Sink* sink, const tint::Progra
 
 // static
 template <>
-void stream::Stream<tint::writer::BindingPoint>::Write(stream::Sink* sink,
-                                                       const tint::writer::BindingPoint& point) {
+void stream::Stream<tint::BindingPoint>::Write(stream::Sink* sink,
+                                               const tint::BindingPoint& point) {
     StreamInTintObject(point, sink);
 }
 
 // static
 template <>
-void stream::Stream<tint::writer::ExternalTextureOptions::BindingPoints>::Write(
+void stream::Stream<tint::ExternalTextureOptions::BindingPoints>::Write(
     stream::Sink* sink,
-    const tint::writer::ExternalTextureOptions::BindingPoints& point) {
+    const tint::ExternalTextureOptions::BindingPoints& point) {
     StreamInTintObject(point, sink);
 }
 
 // static
 template <>
-void stream::Stream<tint::writer::ExternalTextureOptions>::Write(
+void stream::Stream<tint::ExternalTextureOptions>::Write(
     stream::Sink* sink,
-    const tint::writer::ExternalTextureOptions& points) {
+    const tint::ExternalTextureOptions& points) {
     StreamInTintObject(points, sink);
 }
 
@@ -105,17 +105,17 @@ void stream::Stream<tint::ast::transform::VertexAttributeDescriptor>::Write(
 
 // static
 template <>
-void stream::Stream<tint::writer::ArrayLengthFromUniformOptions>::Write(
+void stream::Stream<tint::ArrayLengthFromUniformOptions>::Write(
     stream::Sink* sink,
-    const tint::writer::ArrayLengthFromUniformOptions& options) {
+    const tint::ArrayLengthFromUniformOptions& options) {
     StreamInTintObject(options, sink);
 }
 
 // static
 template <>
-void stream::Stream<tint::writer::BindingRemapperOptions>::Write(
+void stream::Stream<tint::BindingRemapperOptions>::Write(
     stream::Sink* sink,
-    const tint::writer::BindingRemapperOptions& options) {
+    const tint::BindingRemapperOptions& options) {
     StreamInTintObject(options, sink);
 }
 

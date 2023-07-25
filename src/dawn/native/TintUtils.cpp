@@ -147,9 +147,9 @@ ScopedTintICEHandler::~ScopedTintICEHandler() {
     tlDevice = nullptr;
 }
 
-tint::writer::ExternalTextureOptions BuildExternalTextureTransformBindings(
+tint::ExternalTextureOptions BuildExternalTextureTransformBindings(
     const PipelineLayoutBase* layout) {
-    tint::writer::ExternalTextureOptions options;
+    tint::ExternalTextureOptions options;
     for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(i);
         for (const auto& [_, expansion] : bgl->GetExternalTextureBindingExpansionMap()) {

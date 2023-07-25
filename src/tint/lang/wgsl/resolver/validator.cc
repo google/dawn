@@ -1325,7 +1325,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     }
 
     // Validate there are no resource variable binding collisions
-    utils::Hashmap<sem::BindingPoint, const ast::Variable*, 8> binding_points;
+    utils::Hashmap<BindingPoint, const ast::Variable*, 8> binding_points;
     for (auto* global : func->TransitivelyReferencedGlobals()) {
         auto* var_decl = global->Declaration()->As<ast::Var>();
         if (!var_decl) {

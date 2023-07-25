@@ -451,7 +451,6 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/sem/array_count.h
   lang/wgsl/sem/behavior.cc
   lang/wgsl/sem/behavior.h
-  lang/wgsl/sem/binding_point.h
   lang/wgsl/sem/block_statement.cc
   lang/wgsl/sem/block_statement.h
   lang/wgsl/sem/break_if_statement.cc
@@ -570,13 +569,6 @@ list(APPEND TINT_LIB_SRCS
   utils/text/text_generator.cc
   utils/text/text_generator.h
   utils/traits/traits.h
-  writer/array_length_from_uniform_options.cc
-  writer/array_length_from_uniform_options.h
-  writer/binding_point.h
-  writer/binding_remapper_options.cc
-  writer/binding_remapper_options.h
-  writer/external_texture_options.cc
-  writer/external_texture_options.h
 )
 
 tint_generated(lang/core/builtin/access BENCH TEST)

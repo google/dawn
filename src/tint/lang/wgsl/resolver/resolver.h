@@ -30,12 +30,12 @@
 #include "src/tint/lang/wgsl/resolver/intrinsic_table.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
 #include "src/tint/lang/wgsl/resolver/validator.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/containers/bitset.h"
 #include "src/tint/utils/containers/unique_vector.h"
+#include "tint/binding_point.h"
 
 // Forward declarations
 namespace tint::ast {

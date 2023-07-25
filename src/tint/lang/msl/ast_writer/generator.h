@@ -22,9 +22,9 @@
 #include <vector>
 
 #include "src/tint/utils/reflection/reflection.h"
-#include "src/tint/writer/array_length_from_uniform_options.h"
-#include "src/tint/writer/binding_remapper_options.h"
-#include "src/tint/writer/external_texture_options.h"
+#include "tint/array_length_from_uniform_options.h"
+#include "tint/binding_remapper_options.h"
+#include "tint/external_texture_options.h"
 
 // Forward declarations
 namespace tint {

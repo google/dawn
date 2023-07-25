@@ -694,7 +694,7 @@ struct Robustness::State {
         if (!globalVariable->BindingPoint().has_value()) {
             return false;
         }
-        sem::BindingPoint bindingPoint = *globalVariable->BindingPoint();
+        BindingPoint bindingPoint = *globalVariable->BindingPoint();
         return cfg.bindings_ignored.find(bindingPoint) != cfg.bindings_ignored.cend();
     }
 

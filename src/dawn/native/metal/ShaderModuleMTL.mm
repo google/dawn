@@ -40,9 +40,9 @@ using OptionalVertexPullingTransformConfig =
 #define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                       \
     X(SingleShaderStage, stage)                                                                  \
     X(const tint::Program*, inputProgram)                                                        \
-    X(tint::writer::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                       \
-    X(tint::writer::BindingRemapperOptions, bindingRemapper)                                     \
-    X(tint::writer::ExternalTextureOptions, externalTextureOptions)                              \
+    X(tint::ArrayLengthFromUniformOptions, arrayLengthFromUniform)                               \
+    X(tint::BindingRemapperOptions, bindingRemapper)                                             \
+    X(tint::ExternalTextureOptions, externalTextureOptions)                                      \
     X(OptionalVertexPullingTransformConfig, vertexPullingTransformConfig)                        \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
@@ -113,12 +113,12 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     errorStream << "Tint MSL failure:" << std::endl;
 
     // Remap BindingNumber to BindingIndex in WGSL shader
-    using BindingPoint = tint::writer::BindingPoint;
+    using BindingPoint = tint::BindingPoint;
 
-    tint::writer::BindingRemapperOptions bindingRemapper;
+    tint::BindingRemapperOptions bindingRemapper;
     bindingRemapper.allow_collisions = true;
 
-    tint::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
+    tint::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = {0, kBufferLengthBufferSlot};
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {

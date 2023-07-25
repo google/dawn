@@ -40,7 +40,7 @@ class ScopedTintICEHandler : public NonCopyable {
     ScopedTintICEHandler(ScopedTintICEHandler&&) = delete;
 };
 
-tint::writer::ExternalTextureOptions BuildExternalTextureTransformBindings(
+tint::ExternalTextureOptions BuildExternalTextureTransformBindings(
     const PipelineLayoutBase* layout);
 
 tint::ast::transform::VertexPulling::Config BuildVertexPullingTransformConfig(

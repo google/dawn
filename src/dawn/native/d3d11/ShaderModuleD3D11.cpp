@@ -103,7 +103,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             break;
     }
 
-    tint::writer::BindingRemapperOptions bindingRemapper;
+    tint::BindingRemapperOptions bindingRemapper;
     // D3D11 registers like `t3` and `c3` have the same bindingOffset number in
     // the remapping but should not be considered a collision because they have
     // different types.
@@ -118,9 +118,9 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
         for (const auto& [binding, bindingInfo] : groupBindingInfo) {
             BindingIndex bindingIndex = groupLayout->GetBindingIndex(binding);
-            tint::writer::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
-                                                       static_cast<uint32_t>(binding)};
-            tint::writer::BindingPoint dstBindingPoint{0u, indices[bindingIndex]};
+            tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
+                                               static_cast<uint32_t>(binding)};
+            tint::BindingPoint dstBindingPoint{0u, indices[bindingIndex]};
             if (srcBindingPoint != dstBindingPoint) {
                 bindingRemapper.binding_points.emplace(srcBindingPoint, dstBindingPoint);
             }
@@ -138,13 +138,13 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             uint32_t plane1Slot = indices[groupLayout->GetBindingIndex(expansion.plane1)];
             uint32_t paramsSlot = indices[groupLayout->GetBindingIndex(expansion.params)];
             bindingRemapper.binding_points.emplace(
-                tint::writer::BindingPoint{static_cast<uint32_t>(group),
-                                           static_cast<uint32_t>(expansion.plane1)},
-                tint::writer::BindingPoint{0u, plane1Slot});
+                tint::BindingPoint{static_cast<uint32_t>(group),
+                                   static_cast<uint32_t>(expansion.plane1)},
+                tint::BindingPoint{0u, plane1Slot});
             bindingRemapper.binding_points.emplace(
-                tint::writer::BindingPoint{static_cast<uint32_t>(group),
-                                           static_cast<uint32_t>(expansion.params)},
-                tint::writer::BindingPoint{0u, paramsSlot});
+                tint::BindingPoint{static_cast<uint32_t>(group),
+                                   static_cast<uint32_t>(expansion.params)},
+                tint::BindingPoint{0u, paramsSlot});
         }
     }
 
@@ -162,12 +162,11 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.firstIndexOffsetShaderRegister = PipelineLayout::kFirstIndexOffsetBindingNumber;
     // Remap to the desired space and binding, [0, kFirstIndexOffsetConstantBufferSlot].
     {
-        tint::writer::BindingPoint srcBindingPoint{req.hlsl.firstIndexOffsetRegisterSpace,
-                                                   req.hlsl.firstIndexOffsetShaderRegister};
+        tint::BindingPoint srcBindingPoint{req.hlsl.firstIndexOffsetRegisterSpace,
+                                           req.hlsl.firstIndexOffsetShaderRegister};
         // D3D11 (HLSL SM5.0) doesn't support spaces, so we have to put the firstIndex in the
         // default space(0)
-        tint::writer::BindingPoint dstBindingPoint{
-            0u, PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
+        tint::BindingPoint dstBindingPoint{0u, PipelineLayout::kFirstIndexOffsetConstantBufferSlot};
         bindingRemapper.binding_points.emplace(srcBindingPoint, dstBindingPoint);
     }
 

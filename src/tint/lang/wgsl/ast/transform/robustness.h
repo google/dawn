@@ -18,7 +18,7 @@
 #include <unordered_set>
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
+#include "tint/binding_point.h"
 
 namespace tint::ast::transform {
 
@@ -82,7 +82,7 @@ class Robustness final : public utils::Castable<Robustness, Transform> {
         Action workgroup_action = Action::kDefault;
 
         /// Bindings that should always be applied Actions::kIgnore on
-        std::unordered_set<tint::sem::BindingPoint> bindings_ignored;
+        std::unordered_set<tint::BindingPoint> bindings_ignored;
 
         /// If we should disable index clamping on runtime-sized arrays in robustness transform
         bool disable_runtime_sized_array_index_clamping = false;

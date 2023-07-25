@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_WRITER_EXTERNAL_TEXTURE_OPTIONS_H_
-#define SRC_TINT_WRITER_EXTERNAL_TEXTURE_OPTIONS_H_
+#ifndef INCLUDE_TINT_EXTERNAL_TEXTURE_OPTIONS_H_
+#define INCLUDE_TINT_EXTERNAL_TEXTURE_OPTIONS_H_
 
 #include <unordered_map>
 
 #include "src/tint/lang/wgsl/sem/external_texture.h"
 
-namespace tint::writer {
+namespace tint {
 
 /// Options used to specify mappings of binding points for external textures.
-class ExternalTextureOptions {
-  public:
+struct ExternalTextureOptions {
     /// This struct identifies the binding groups and locations for new bindings to
     /// use when transforming a texture_external instance.
     using BindingPoints = sem::external_texture::BindingPoints;
@@ -33,18 +32,6 @@ class ExternalTextureOptions {
     /// locations for new bindings expanded from the texture_external instance.
     using BindingsMap = sem::external_texture::BindingsMap;
 
-    /// Constructor
-    ExternalTextureOptions();
-    /// Destructor
-    ~ExternalTextureOptions();
-    /// Copy constructor
-    ExternalTextureOptions(const ExternalTextureOptions&);
-    /// Copy assignment
-    /// @returns this ExternalTextureOptions
-    ExternalTextureOptions& operator=(const ExternalTextureOptions&);
-    /// Move constructor
-    ExternalTextureOptions(ExternalTextureOptions&&);
-
     /// A map of new binding points to use.
     BindingsMap bindings_map;
 
@@ -52,6 +39,6 @@ class ExternalTextureOptions {
     TINT_REFLECT(bindings_map);
 };
 
-}  // namespace tint::writer
+}  // namespace tint
 
-#endif  // SRC_TINT_WRITER_EXTERNAL_TEXTURE_OPTIONS_H_
+#endif  // INCLUDE_TINT_EXTERNAL_TEXTURE_OPTIONS_H_

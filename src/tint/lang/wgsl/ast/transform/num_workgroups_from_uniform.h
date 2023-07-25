@@ -18,7 +18,7 @@
 #include <optional>
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
+#include "tint/binding_point.h"
 
 // Forward declarations
 namespace tint {
@@ -58,7 +58,7 @@ class NumWorkgroupsFromUniform final : public utils::Castable<NumWorkgroupsFromU
         /// contains no value, a free binding point will be used to ensure the generated program is
         /// valid. Specifically, binding 0 of the largest used group plus 1 is used if at least one
         /// resource is bound, otherwise group 0 binding 0 is used.
-        explicit Config(std::optional<sem::BindingPoint> ubo_bp);
+        explicit Config(std::optional<BindingPoint> ubo_bp);
 
         /// Copy constructor
         Config(const Config&);
@@ -69,7 +69,7 @@ class NumWorkgroupsFromUniform final : public utils::Castable<NumWorkgroupsFromU
         /// The binding point to use for the generated uniform buffer. If ubo_bp contains no value,
         /// a free binding point will be used. Specifically, binding 0 of the largest used group
         /// plus 1 is used if at least one resource is bound, otherwise group 0 binding 0 is used.
-        std::optional<sem::BindingPoint> ubo_binding;
+        std::optional<BindingPoint> ubo_binding;
     };
 
     /// @copydoc Transform::Apply

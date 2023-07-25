@@ -24,12 +24,12 @@
 #include <vector>
 
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
-#include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/utils/containers/bitset.h"
 #include "src/tint/utils/reflection/reflection.h"
-#include "src/tint/writer/array_length_from_uniform_options.h"
-#include "src/tint/writer/binding_remapper_options.h"
-#include "src/tint/writer/external_texture_options.h"
+#include "tint/array_length_from_uniform_options.h"
+#include "tint/binding_point.h"
+#include "tint/binding_remapper_options.h"
+#include "tint/external_texture_options.h"
 
 // Forward declarations
 namespace tint {
@@ -54,7 +54,7 @@ struct Options {
     bool disable_robustness = false;
 
     /// The binding point to use for information passed via root constants.
-    std::optional<sem::BindingPoint> root_constant_binding_point;
+    std::optional<BindingPoint> root_constant_binding_point;
 
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
@@ -80,7 +80,7 @@ struct Options {
     bool polyfill_reflect_vec2_f32 = false;
 
     /// The binding points that will be ignored in the rebustness transform.
-    std::vector<sem::BindingPoint> binding_points_ignored_in_robustness_transform;
+    std::vector<BindingPoint> binding_points_ignored_in_robustness_transform;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
